@@ -44,7 +44,7 @@ setup(
                            
 #    include_dirs=[numpy.get_include()],
                   
-    package_data={'ANSYScdb.Tests': ['HexBeam.cdb', 'file.rst']},
+    package_data={'pyansys.Tests': ['HexBeam.cdb', 'file.rst']},
 
     # Might work with earlier versions (untested)
     install_requires=['numpy>1.9.3', 'ANSYScdb>=0.12.1']

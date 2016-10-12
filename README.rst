@@ -1,4 +1,4 @@
-ANSYScdb
+pyansys
 ========
 
 Python module to extract data from ANSYS binary files and to display
