@@ -17,3 +17,6 @@
 pyansys.egg-info/
 build/
 dist/
+
+# MISC
+pyansys/Interface.py
