@@ -65,10 +65,10 @@ class ResultReader(object):
         self.filename = filename
         
         # Store result retrieval items
-        self.nnod, self.numdof, self.neqv, self.rpointers, self.pointers = GetResultInfo(filename)
+        self.nnod, self.numdof, self.neqv, self.rpointers, self.pointers, self.endian = GetResultInfo(filename)
         
         # Number of results
-        self.nsets = len(self.rpointers)        
+        self.nsets = len(self.rpointers)
         
         # Get indices to resort nodal results
         self.sidx = np.argsort(self.neqv)
@@ -96,11 +96,11 @@ class ResultReader(object):
 
         # Import cdb
         cdb = CDB_Reader.Read(filename)
-        uGrid = cdb.ParseVTK()
+        self.uGrid = cdb.ParseVTK()
         
         # Extract surface mesh
         sfilter = vtk.vtkDataSetSurfaceFilter()
-        sfilter.SetInputData(uGrid)
+        sfilter.SetInputData(self.uGrid)
         sfilter.PassThroughPointIdsOn()
         sfilter.PassThroughCellIdsOn()
         sfilter.Update()
@@ -193,11 +193,14 @@ class ResultReader(object):
         """
         # Load values if not already stored
         if not hasattr(self, 'tvalues'):
+    
+            # Format endian            
+            
             # Seek to start of time result table
             f = open(self.filename, 'rb')
     
             f.seek(self.pointers['ptrTIMl']*4 + 8)
-            self.tvalues = np.fromfile(f, dtype=np.double, count=self.nsets)
+            self.tvalues = np.fromfile(f, self.endian + 'd', self.nsets)
             
             f.close()
         
@@ -235,12 +238,12 @@ class ResultReader(object):
         
         # Seek to result table and to get pointer to DOF results of result table
         f.seek((self.rpointers[rnum] + 12)*4) # item 12
-        ptrNSLl = np.fromfile(f, dtype=np.int32, count=1)[0]
+        ptrNSLl = np.fromfile(f, self.endian + 'i', 1)[0]
         
         # Seek and read DOF results
         f.seek((self.rpointers[rnum] + ptrNSLl + 2)*4)
         nitems = self.nnod*self.numdof
-        result = np.fromfile(f, dtype=np.double, count=nitems)
+        result = np.fromfile(f, self.endian + 'd', nitems)
         
         f.close()
         
@@ -281,13 +284,31 @@ def GetResultInfo(filename):
     
     pointers = {}
     f = open(filename, 'rb')
+
+    # Check if big or small endian
+    endian = '<'
+    inttype = '<i'
+    if np.fromfile(f, dtype='<i', count=1) != 100:
+        # Check if big enos
+        f.seek(0)
+        if np.fromfile(f, dtype='>i', count=1) == 100:
+            endian = '>'
+            inttype = '>i'
+        # Otherwise, it's probably not a result file
+        else:
+            raise Exception('Unable to determine endian type.\n\n' +\
+                            'File is possibly not a result file.')
+                            
+
+    # Read standard header
+#    f.seek(0);header = np.fromfile(f, dtype='>i', count=100)
     
     #======================
     # Read .RST FILE HEADER 
     #======================
     # 100 is size of standard header, plus extras, 3 is location of pointer in table
-    f.seek((105)*4)
-    rheader = np.fromfile(f, dtype=np.int32, count=55)
+    f.seek(105*4)
+    rheader = np.fromfile(f, dtype=inttype, count=55)
     
     # Number of nodes (item 3)
     nnod = rheader[2]
@@ -309,16 +330,16 @@ def GetResultInfo(filename):
     
     # Read nodal equivalence table
     f.seek((ptrNODl + 2)*4) # Start of pointer says size, then empty, then data
-    neqv = np.fromfile(f, dtype=np.int32, count=nnod)
+    neqv = np.fromfile(f, dtype=inttype, count=nnod)
     #neqv = np.frombuffer(f, dtype=np.int32, count=nnod)
     
     # Read table of pointers to locations of results
     f.seek((ptrDSIl + 2)*4) # Start of pointer says size, then empty, then data
-    rpointers = np.fromfile(f, dtype=np.int32, count=nsets)
+    rpointers = np.fromfile(f, dtype=inttype, count=nsets)
     
     f.close()
     
-    return nnod, numdof, neqv, rpointers, pointers
+    return nnod, numdof, neqv, rpointers, pointers, endian
     
 #==============================================================================
 # Plotting (ideally in its own module)
