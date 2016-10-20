@@ -2,14 +2,14 @@ pyansys
 ========
 
 Python module to extract data from ANSYS binary files and to display
-them if vtk is installed.  Currently only supports (*.rst) files.
+them if vtk is installed.  Currently supports (*.rst) and (*.full) files.
 
 Installation
 ------------
 
-From source directory
+From PyPi directory
 
-``pip install .``
+``pip install pyansys``
 
 or
 
@@ -24,7 +24,7 @@ provided in the file named ``LICENSE``.
 Dependencies
 ------------
 
-Required: ``numpy``, ``ANSYScdb``. Optional: ``vtk``
+Required: ``numpy``, ``cython``, ``ANSYScdb``. Optional: ``vtk``
 
 Minimum requirements are numpy to extract results from a results file. To
 convert the raw data to a VTK unstructured grid, vtk 5.0 or greater must
@@ -33,7 +33,7 @@ be installed with Python bindings.
 Tests
 -----
 
-Test installation with the following from Python
+Test installation with the following
 
 .. code:: python
 
@@ -45,12 +45,15 @@ Test installation with the following from Python
     # Display first bending mode of that beam
     Tests.Reader.Display()
 
+    # Load mass and stiffness matrices from the beam
+    Tests.Reader.LoadKM()
 
-Example Code
-------------
 
-Assumes you have the example files . Otherwise, replace
-‘Beam.cdb’ with your own blocked \*.cdb file.
+Example: Reading a Result File
+------------------------------
+This example reads in binary results from a modal analysis from ANSYS.
+
+Example files can be found within the Tests folder in installation folder.
 
 .. code:: python
 
@@ -74,4 +77,36 @@ Assumes you have the example files . Otherwise, replace
     
     # Plot the displacement of Mode 41 in the x direction
     fobj.PlotDisplacement(40, 'x')
+
+
+Example: Reading a full file
+----------------------------
+This example reads in mass and stiffness matrices associated with `Beam.cdb`
+
+Example files can be found within the Tests folder in installation folder.
+
+.. code:: python
+
+    # Load the reader from pyansys
+    from pyansys import Reader
+    
+    # Create result reader object
+    fobj = Reader.FullReader('file.full')
+    
+    # Read in full file
+    fobj.LoadFullKM()
+
+    # Data from the full file can now be accessed from the object
+    # Can be used construct a sparse matrix and solve it
+
+    # from scipy.sparse import csc_matrix, linalg
+    #ndim = fobj.nref.size
+    #k = csc_matrix(fobj.kdata, (fobj.krows, fobj.kcols), shape=(ndim, ndim))
+    #m = csc_matrix(fobj.kdata, (fobj.krows, fobj.kcols), shape=(ndim, ndim))
+    # Solve
+    #w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
+    # System natural frequencies
+    #f = np.sqrt(real(w))/(2*np.pi)
+
+    
 

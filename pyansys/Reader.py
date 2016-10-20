@@ -1,6 +1,13 @@
 import numpy as np
-from ANSYScdb import CDB_Reader
 import warnings
+
+from pyansys import _parsefull
+
+# Try to load optional items
+try:
+    from ANSYScdb import CDB_Reader
+except:
+    warnings.warn('CDB_Reader uninstalled')
 
 try:
     import vtk
@@ -10,6 +17,92 @@ try:
 except:
     warnings.warn('Cannot load vtk\nWill be unable to display results or load CDB.')
     vtkloaded = False
+
+
+class FullReader(object):
+    """
+    Object to store the results of an ANSYS full file
+
+    NOTES:
+    Currently only supports symmetric and real stiffness matrices as well as
+    non-lumped mass matrices.
+    
+    """
+    
+    def __init__(self, filename):
+        """
+        Loads full header on initialization
+        
+        See ANSYS programmer's reference manual full header section for
+        definitions of each header.
+        
+        """
+        
+        self.filename = filename
+        self.header = _parsefull.ReturnHeader(filename)
+        
+        #// Check if lumped (item 11)
+        if self.header[11]:
+            raise Exception("Unable to read a lumped mass matrix.  Terminating.")
+    
+        # Check if arrays are unsymmetric (item 14)
+        if self.header[14]:
+            raise Exception ("Unable to read an unsymmetric mass/stiffness matrix.")
+
+
+    def LoadFullKM(self):
+        """
+        Load indices for constructing symmetric mass and stiffness
+        matricies
+
+        STORES TO SELF:
+        
+        nref (np.int32 array)
+            Ordered reference to original ANSYS node numbers
+        
+        dref (np.int32 array)
+            DOF reference where
+            0 - x
+            1 - y
+            2 - z
+
+        krows (np.int32 array)
+            Rows to construct the sparse stiffness matrix
+
+        kcols (np.int32 array)
+            Columns to construct the sparse stiffness matrix
+        
+        kdata (np.int32 array)
+            Data for each entry in thesparse stiffness matrix
+
+        mrows (np.int32 array)
+            Rows to construct the mass stiffness matrix
+
+        mcols (np.int32 array)
+            Columns to construct the mass stiffness matrix
+
+        mdata (np.int32 array)
+            Data to construct the mass stiffness matrix
+        
+        """
+        data = _parsefull.ReturnFull_KM(self.filename)
+        
+        # nodal reference
+        self.nref = data[0]
+        
+        # DOF reference
+        self.dref = data[1]
+
+        # stiffness rows, columns, and data
+        self.krows = data[2]
+        self.kcols = data[3]
+        self.kdata = data[4]
+        
+        # stiffness rows, columns, and data
+        self.mrows = data[5]
+        self.mcols = data[6]
+        self.mdata = data[7]
+        
     
 
 class ResultReader(object):
