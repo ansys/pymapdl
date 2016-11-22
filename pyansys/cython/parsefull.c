@@ -35,6 +35,7 @@ __inline double read_double(FILE* ptr){
     return val;
 }
 
+// returns an interger from a position along a char array
 __inline int read_int_raw(char **c, int e){
     // Assuming small endian
     int n;
@@ -42,7 +43,7 @@ __inline int read_int_raw(char **c, int e){
     return n;
 }
 
-// returns an interger from a position along a char array
+// returns a double from a position along a char array
 __inline double read_double_raw(char **c, int e){
     double val;
     memcpy(&val, (*c) + e, sizeof(double));
@@ -63,7 +64,7 @@ void make_index(int **idx, int size){
     int i;
     *idx = (int*)malloc(size * sizeof(int));
 
-    for(i=0;i<size;i++){
+    for(i=0; i<size; i++){
         (*idx)[i] = i;
     }
 }
@@ -90,7 +91,7 @@ int pop_isfree(FILE* ptr, int ptrDOF, int nNodes, int **isfree){
 
 
 //=============================================================================
-// Read an array from fotran file
+// Read an array from fortran file
 //=============================================================================
 int read_array(int **rows, int **cols, double **data, int *rref, int *cref,
                int *isfree, int nterm, int neqn, FILE* ptr, int fileloc,
@@ -321,7 +322,7 @@ int main( int argc, char **argv ){
         printf("No file selected by user.  Defaulting to file.full\n");
 
         ptr = fopen("file.full", "rb");
-		if (ptr == NULL){
+		 if (ptr == NULL){
             printf("File file.full does not exist.  Terminating\n");
             return 1;
         }
@@ -388,8 +389,6 @@ int main( int argc, char **argv ){
     isfree = (int*)malloc(nNodes*3*sizeof(int)); // change 3 to numdof
     nfree = pop_isfree(ptr, ptrDOF, nNodes, &isfree);
 
-
-
     // Populate dof nodal equivalance array and create indices to active DOF
     // and original node numbering
     nref = (int*)malloc(nNodes*3*sizeof(int));
@@ -418,8 +417,10 @@ int main( int argc, char **argv ){
 
     // Sort nodes and generate indices
     make_index(&index, nfree);
-    array = neqv_dof;
-    qsort(index, nfree, sizeof(*index), cmp);
+
+    // not sorting right now
+//    array = neqv_dof;
+//    qsort(index, nfree, sizeof(*index), cmp);
     free(neqv_dof);
 
     c = 0;
@@ -592,8 +593,11 @@ void read_full(int *numdat, int *nref, int *dref, int *krows, int *kcols,
 
     // Sort nodes and generate indices
     make_index(&index, nfree);
-    array = neqv_dof;
-    qsort(index, nfree, sizeof(*index), cmp);
+
+    // Not sorting right now
+    // array = neqv_dof;
+    // qsort(index, nfree, sizeof(*index), cmp);
+    free(neqv_dof);
 
     // column and row reference arrays
     cref = (int*)malloc(neqn * sizeof(int));
@@ -612,7 +616,7 @@ void read_full(int *numdat, int *nref, int *dref, int *krows, int *kcols,
         }
     }
 
-    // Read stiffness matrix
+    // Read stiffness matrix into memory
     kentry = read_array(&krows, &kcols, &kdata, rref, cref, isfree, ntermK, 
                             neqn, ptr, ptrSTF, skipped);
 
@@ -620,12 +624,10 @@ void read_full(int *numdat, int *nref, int *dref, int *krows, int *kcols,
     mentry = read_array(&mrows, &mcols, &mdata, rref, cref, isfree, ntermM, 
                             neqn, ptr, ptrMAS, skipped);
 
-    // Populate the array sizing array
+    // Populate the array sizes array
     numdat[0] = nfree;
     numdat[1] = kentry;
     numdat[2] = mentry;
-
-    
 
     // close full file
     fclose(ptr);

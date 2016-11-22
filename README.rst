@@ -101,8 +101,8 @@ Example files can be found within the Tests folder in installation folder.
 
     # from scipy.sparse import csc_matrix, linalg
     #ndim = fobj.nref.size
-    #k = csc_matrix(fobj.kdata, (fobj.krows, fobj.kcols), shape=(ndim, ndim))
-    #m = csc_matrix(fobj.kdata, (fobj.krows, fobj.kcols), shape=(ndim, ndim))
+    #k = csc_matrix((fobj.kdata, (fobj.krows, fobj.kcols)), shape=(ndim, ndim))
+    #m = csc_matrix((fobj.mdata, (fobj.mrows, fobj.mcols)), shape=(ndim, ndim))
     # Solve
     #w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
     # System natural frequencies

@@ -12,7 +12,7 @@ setup(
     packages = ['pyansys', 'pyansys.Tests'],
 
     # Version
-    version='0.10',
+    version='0.11',
 
     description='Pythonic interface to ANSYS binary files',
     long_description=open('README.rst').read(),
@@ -46,16 +46,15 @@ setup(
                            ['pyansys/cython/_parsefull.pyx',
                             'pyansys/cython/parsefull.c'],
                            language='c'),
-
                 ],
                            
-    keywords='vtk ANSYS cdb full rst',                           
+    keywords='vtk ANSYS cdb full rst',
                            
     include_dirs=[numpy.get_include()],
                   
     package_data={'pyansys.Tests': ['HexBeam.cdb', 'file.rst', 'file.full']},
 
-    # Might work with earlier versions (untested)
+    # Might work with earlier versions
     install_requires=['numpy>1.9.3', 'ANSYScdb>=0.12.1', 'cython>0.23.1']
 
 )
