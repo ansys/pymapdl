@@ -1,0 +1,2 @@
+include pyansys/cython/*.h
+
