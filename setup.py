@@ -12,7 +12,7 @@ setup(
     packages = ['pyansys', 'pyansys.Tests'],
 
     # Version
-    version='0.12',
+    version='0.13',
 
     description='Pythonic interface to ANSYS binary files',
     long_description=open('README.rst').read(),

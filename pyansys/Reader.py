@@ -199,6 +199,14 @@ class ResultReader(object):
         sfilter.Update()
         self.exsurf = sfilter.GetOutput()
         
+#        # Triangle filter
+#        trianglefilter = vtk.vtkTriangleFilter()
+#        trianglefilter.SetInputData(self.exsurf)
+#        trianglefilter.PassVertsOff()
+#        trianglefilter.PassLinesOff()
+#        trianglefilter.Update()
+#        self.trisurf = trianglefilter.GetOutput()
+        
         # Relate nodal equivalence indexing to plot indexing
         nnum = VN.vtk_to_numpy(self.exsurf.GetPointData().GetArray('ANSYSnodenum'))
         
@@ -215,7 +223,8 @@ class ResultReader(object):
         self.ridx = self.sidx[mask][pidx_r]
         
         
-    def PlotDisplacement(self, rnum, comp='norm', autoclose=True, as_abs=False):
+    def PlotDisplacement(self, rnum, comp='norm', autoclose=True,
+                         as_abs=False):
         """
         SUMMARY
         Plots a result.  Must have a cdb must be loaded
@@ -269,11 +278,14 @@ class ResultReader(object):
         plobj.AddMesh(self.exsurf, scalars=d, stitle=stitle, flipscalars=True)
         plobj.ren.AddActor2D(textActor)
         plobj.Plot()
+        cpos = plobj.GetCameraPosition()
+        del plobj
         
-        if autoclose:
-            del plobj
-        else:
-            return plobj
+        return cpos
+#        if autoclose:
+#            del plobj
+#        else:
+#            return plobj
 
 
     def GetTimeValues(self):
@@ -532,74 +544,6 @@ class PlotClass(object):
             scalarBar.SetNumberOfLabels(5)    
             self.ren.AddActor(scalarBar)
 
-#
-#    def AddLines(self, lines, color=[1, 1, 1], width=5):
-#        """ Adds an actor to the renderwindow """
-#                
-#        # Create mapper and add lines
-#        mapper = vtk.vtkDataSetMapper()
-#        VTK_Utilities.SetVTKInput(, lines)
-#        
-#        # Create Actor
-#        actor = vtk.vtkActor()
-#        actor.SetMapper(mapper)
-#        actor.GetProperty().SetLineWidth(width); 
-#        actor.GetProperty().EdgeVisibilityOn()
-#        actor.GetProperty().SetColor(color)
-#        actor.GetProperty().LightingOff()
-#        
-#        # Add to renderer
-#        self.ren.AddActor(actor)
-        
-
-#    def AddPoints(self, points, color=[1, 1, 1], psize=5, scalars=None, 
-#                  rng=None, name='', opacity=1):
-#        """ Adds a point actor or numpy points array to plotting object """
-#        
-#        # Convert to points actor if "points" is a numpy array
-#        if type(points) == np.ndarray:
-#            npoints = points.shape[0]
-#            
-#            # Make VTK cells array
-#            cells = np.hstack((np.ones((npoints, 1)), 
-#                               np.arange(npoints).reshape(-1, 1)))
-#            cells = np.ascontiguousarray(cells, dtype=np.int64)
-#            vtkcells = vtk.vtkCellArray()
-#            vtkcells.SetCells(npoints, VN.numpy_to_vtkIdTypeArray(cells, deep=True))
-#            
-#            # Convert points to vtk object
-#            vtkPoints = VTK_Utilities.MakevtkPoints(points)
-#            
-#            # Create polydata
-#            pdata = vtk.vtkPolyData()
-#            pdata.SetPoints(vtkPoints)
-#            pdata.SetVerts(vtkcells)
-#            
-#        # Create mapper and add lines
-#        mapper = vtk.vtkDataSetMapper()
-#        VTK_Utilities.SetVTKInput(mapper, pdata)
-#
-#        if np.any(scalars):
-#            VTK_Utilities.AddPointScalars(pdata, scalars, name)
-#            mapper.SetScalarModeToUsePointData()
-#        
-#            if not rng:
-#                rng = [np.min(scalars), np.max(scalars)]
-#                    
-#            if np.any(rng):
-#                mapper.SetScalarRange(rng[0], rng[1])       
-#                
-#        # Create Actor
-#        actor = vtk.vtkActor()
-#        actor.SetMapper(mapper)
-#        actor.GetProperty().SetPointSize(psize); 
-#        actor.GetProperty().SetColor(color)
-#        actor.GetProperty().LightingOff()
-#        actor.GetProperty().SetOpacity(opacity)
-#
-#        
-#        self.ren.AddActor(actor)
-                
         
     def GetCameraPosition(self):
         """ Returns camera position of active render window """

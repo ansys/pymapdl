@@ -44,11 +44,11 @@ def ReturnFull_KM(filename):
     #### Sanity check ####
     #// Check if lumped (item 11)
     if fheader[11]:
-        raise Exception("Unable to read a lumped mass matrix.  Terminating.")
+        raise Exception('Unable to read a lumped mass matrix.  Terminating')
 
     # Check if arrays are unsymmetric (item 14)
     if fheader[14]:
-        raise Exception ("Unable to read an unsymmetric mass/stiffness matrix.")
+        raise Exception ('Unable to read an unsymmetric mass/stiffness matrix. Terminating')
 
     # Create numpy memory views so they can be garbage collected later
     cdef int[::1] numdat = np.empty(3, np.int32)
