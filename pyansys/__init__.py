@@ -4,3 +4,5 @@
 
 __version__ = '0.12'
 
+#from pyansys import Reader
+from pyansys.Reader import ResultReader

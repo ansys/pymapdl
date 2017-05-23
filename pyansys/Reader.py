@@ -222,6 +222,21 @@ class ResultReader(object):
         # Store results index
         self.ridx = self.sidx[mask][pidx_r]
         
+        # For uGrid as well
+        nnum = VN.vtk_to_numpy(self.uGrid.GetPointData().GetArray('ANSYSnodenum'))
+
+        # Get sorted and reverse sorted indices
+        pidx = np.argsort(nnum)
+        pidx_r = np.argsort(pidx)        
+        
+        # Get locations in sorted node number results array
+        mask = np.in1d(self.nnum, nnum, assume_unique=True)
+        if mask.sum() != len(nnum):
+            raise Exception('Not all nodes from CDB are in the results file')
+            
+        self.ridx_full = self.sidx[mask][pidx_r]
+            
+            
         
     def PlotDisplacement(self, rnum, comp='norm', autoclose=True,
                          as_abs=False):

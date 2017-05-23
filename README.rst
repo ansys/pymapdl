@@ -40,10 +40,10 @@ Test installation with the following
     from pyansys import Tests
 
     # Load a hexahedral beam modal analysis result file
-    Tests.Reader.Load()
+    Tests.Reader.LoadResult()
 
     # Display first bending mode of that beam
-    Tests.Reader.Display()
+    Tests.Reader.DisplayResult()
 
     # Load mass and stiffness matrices from the beam
     Tests.Reader.LoadKM()

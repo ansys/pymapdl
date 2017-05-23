@@ -20,3 +20,6 @@ dist/
 
 # MISC
 pyansys/Interface.py
+
+# Testing
+Testing/
