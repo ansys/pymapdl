@@ -55,7 +55,7 @@ def DisplayDisplacement():
     fobj.LoadArchive(hexarchivefile)
     
     print('Displaying ANSYS Mode 1')
-    fobj.PlotDisplacement(0)
+    fobj.PlotNodalResult(0)
 
 
 def LoadKM():
