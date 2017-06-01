@@ -1,33 +1,14 @@
-pyansys
-=======
+Examples
+========
 
-This Python module allows you to to extract data from ANSYS files and to display
-them if vtk is installed.  Currently supports result (.rst), mass and stiffness (.full), and block archive (.cdb) files.
+These examples show how ANSYS binary and ASCII files can be read and displayed
+using pyansys.
 
-See the `Documentation <http://pyansys.readthedocs.io>`_ page for more details.
-
-
-Installation
-------------
-
-Installation through pip::
-
-    pip install pyansys
-
-You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
-
-Dependencies: ``numpy``, ``cython``, ``vtkInterface``. Optional: ``vtk``
-
-Minimum requirements are numpy to extract results from a results file. To
-convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must
-be installed with Python bindings.
-
-
-Quick Examples
---------------
 
 Loading and Plotting an ANSYS Archive File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
+
+.. _examples_ref:
 
 ANSYS archive files containing solid elements (both legacy and current), can
 be loaded using ReadArchive and then converted to a vtk object.
@@ -54,6 +35,9 @@ be loaded using ReadArchive and then converted to a vtk object.
     
     # write this as a vtk xml file 
     archive.SaveAsVTK('hex.vtu')
+    
+
+.. image:: hexbeam.png
 
 
 You can then load this vtk file using vtkInterface or another program that uses
@@ -68,7 +52,7 @@ VTK.
 
 
 Loading and Plotting an ANSYS Result File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------
 
 This example reads in binary results from a modal analysis of a beam from
 ANSYS.  This section of code does not rely on vtk and can be used solely with
@@ -119,6 +103,9 @@ plots a nodal result.
     # Plot the displacement of Mode 0 in the x direction
     result.PlotNodalResult(0, 'x', label='Displacement')
 
+
+.. image:: hexbeam_disp.png
+
 Reading a Full File
 -------------------
 This example reads in the mass and stiffness matrices associated with the above
@@ -154,7 +141,7 @@ Data from the full file can now be accessed from the object.  If you have
     for i in range(4):
         print '{:.3f} Hz'.format(f[i])
     
-.. code::
+.. code:: 
 
     First four natural frequencies
     1283.200 Hz
@@ -162,9 +149,38 @@ Data from the full file can now be accessed from the object.  If you have
     5781.975 Hz
     6919.399 Hz
 
-License
--------
 
-pyansys is licensed under the MIT license.
+Built-In Examples
+=================
 
+Display Cell Quality
+--------------------
 
+This built in example displays the minimum scaled jacobian of each element of a tetrahedral beam:
+
+.. code:: python
+
+    from pyansys import examples
+    examples.DisplayCellQual()
+
+.. image:: cellqual.png
+
+This is the source code for the example:
+
+.. code:: python
+
+    # load archive file and parse for subsequent FEM queries
+    if meshtype == 'hex':
+        archive = pyansys.ReadArchive(hexarchivefile)
+    else:
+        archive = pyansys.ReadArchive(tetarchivefile)
+            
+    # create vtk object
+    archive.ParseFEM()
+
+    # get cell quality
+    qual = pyansys.CellQuality(archive.uGrid)
+    
+    # plot cell quality
+    archive.uGrid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
+                       rng=[0, 1])

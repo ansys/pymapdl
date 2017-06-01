@@ -1,13 +1,13 @@
 import numpy as np
 import warnings
 
+from pyansys import archive_reader
 from pyansys import _parsefull
 
-# Try to load optional items
 try:
-    from ANSYScdb import CDB_Reader
+    from vtkInterface import plotting
 except:
-    warnings.warn('CDB_Reader uninstalled')
+    pass
 
 try:
     import vtk
@@ -173,39 +173,27 @@ class ResultReader(object):
         self.GetTimeValues()
         
         
-    def LoadCDB(self, filename):
+    def LoadArchive(self, filename):
         """
         SUMMARY
-        Loads CDB corresponding to result file
+        Loads blocked ANSYS archive file corresponding to result file.
         
         
         INPUTS
         filename (string)
-            Filename of cdb file
+            Archive filename (generally *.cdb)
         
         """
         if not vtkloaded:        
             raise ImportError('VTK not installed.  Cannot continue')
 
         # Import cdb
-        cdb = CDB_Reader.Read(filename)
-        self.uGrid = cdb.ParseVTK()
+        cdb = archive_reader.ReadArchive(filename)
+        cdb.ParseFEM()
+        self.uGrid = cdb.uGrid
         
         # Extract surface mesh
-        sfilter = vtk.vtkDataSetSurfaceFilter()
-        sfilter.SetInputData(self.uGrid)
-        sfilter.PassThroughPointIdsOn()
-        sfilter.PassThroughCellIdsOn()
-        sfilter.Update()
-        self.exsurf = sfilter.GetOutput()
-        
-#        # Triangle filter
-#        trianglefilter = vtk.vtkTriangleFilter()
-#        trianglefilter.SetInputData(self.exsurf)
-#        trianglefilter.PassVertsOff()
-#        trianglefilter.PassLinesOff()
-#        trianglefilter.Update()
-#        self.trisurf = trianglefilter.GetOutput()
+        self.exsurf = self.uGrid.ExtractSurface()
         
         # Relate nodal equivalence indexing to plot indexing
         nnum = VN.vtk_to_numpy(self.exsurf.GetPointData().GetArray('ANSYSnodenum'))
@@ -217,90 +205,94 @@ class ResultReader(object):
         # Get locations in sorted node number results array
         mask = np.in1d(self.nnum, nnum, assume_unique=True)
         if mask.sum() != len(nnum):
-            raise Exception('Not all nodes from CDB are in the results file')
+#            raise Exception('Not all nodes from the archive file are in the results file')
+            warnings.warn('Not all nodes from the archive file are in the results file')
         
         # Store results index
         self.ridx = self.sidx[mask][pidx_r]
         
         # For uGrid as well
-        nnum = VN.vtk_to_numpy(self.uGrid.GetPointData().GetArray('ANSYSnodenum'))
+#        nnum = VN.vtk_to_numpy(self.uGrid.GetPointData().GetArray('ANSYSnodenum'))
+        nnum = self.uGrid.GetPointScalars('ANSYSnodenum')
 
         # Get sorted and reverse sorted indices
         pidx = np.argsort(nnum)
-        pidx_r = np.argsort(pidx)        
+        pidx_r = np.argsort(pidx)
         
         # Get locations in sorted node number results array
         mask = np.in1d(self.nnum, nnum, assume_unique=True)
         if mask.sum() != len(nnum):
-            raise Exception('Not all nodes from CDB are in the results file')
+            warnings.warn('Not all nodes from the archive file are in the results file')
+#            raise Exception('Not all nodes from CDB are in the results file')
             
         self.ridx_full = self.sidx[mask][pidx_r]
             
-            
         
-    def PlotDisplacement(self, rnum, comp='norm', autoclose=True,
-                         as_abs=False):
+    def PlotNodalResult(self, rnum, comp='norm', as_abs=False, label=''):
         """
-        SUMMARY
-        Plots a result.  Must have a cdb must be loaded
+        Plots a nodal result.  
         
-        INPUTS
-        rnum (interger)
-            Result set requested.  Zero based indexing
-            
-        comp (string, optional) default = 'norm'
+        Archive file must be loaded and nodal results must exist.
+        
+        Parameters
+        ----------
+        rnum : interger
+            Result set requested.  Zero based indexing.
+        comp : string, optional
             Display component to display.  Options are 'x', 'y', 'z', and
-            'comp'.
-            
-        """
+            'norm', corresponding to the x directin, y direction, z direction,
+            and the combined direction (x**2 + y**2 + z**2)**0.5
+        as_abs : bool, optional
+            Displays the absolute value of the result.
+        label: string, optional
+            Annotation string to add to scalar bar in plot.
         
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+            
+        Notes
+        -----
+        
+        """   
         if not hasattr(self, 'exsurf'):
-            raise Exception('Load CDB before displaying')
+            raise Exception('Load archive file before displaying')
         
         # Load result from file
         result = self.GetResult(rnum, True)
 
+        # Process result
         if comp == 'x':
             d = result[self.ridx, 0]
-            stitle = 'X Displacement'
+            stitle = 'X {:s}'.format(label)
             
         elif comp == 'y':
             d = result[self.ridx, 1]
-            stitle = 'Y Displacement'
+            stitle = 'Y {:s}'.format(label)
             
         elif comp == 'z':
             d = result[self.ridx, 2]
-            stitle = 'Z Displacement'
+            stitle = 'Z {:s}'.format(label)
             
         else:
             # Normalize displacement
             d = result[self.ridx, :3]
             d = (d*d).sum(1)**0.5
             
-            stitle = 'Normalized\nDisplacement'
+            stitle = 'Normalized\n{:s}'.format(label)
             
         if as_abs:
             d = np.abs(d)
-
-        # Add frequency at bottom of plot
-        textActor = vtk.vtkTextActor()
-        textActor.SetInput('Mode {:d} at {:f} Hz'.format(rnum + 1, self.tvalues[rnum]))
-        textActor.SetPosition2 (80, 80)
-        textActor.GetTextProperty().SetFontSize(24)
-        textActor.GetTextProperty().SetColor (1.0, 1.0, 1.0)
-
-        plobj = PlotClass()
+        
+        # Generate plot
+        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
+        plobj = plotting.PlotClass()
         plobj.AddMesh(self.exsurf, scalars=d, stitle=stitle, flipscalars=True)
-        plobj.ren.AddActor2D(textActor)
-        plobj.Plot()
-        cpos = plobj.GetCameraPosition()
-        del plobj
+        plobj.AddText(text)
+        cpos = plobj.Plot() # store camera position
         
         return cpos
-#        if autoclose:
-#            del plobj
-#        else:
-#            return plobj
 
 
     def GetTimeValues(self):
@@ -468,181 +460,3 @@ def GetResultInfo(filename):
     
     return nnod, numdof, neqv, rpointers, pointers, endian
     
-#==============================================================================
-# Plotting (ideally in its own module)
-#==============================================================================
-class PlotClass(object):
-    """ Simple interface to VTK's underlying ploting """
-    
-    def __init__(self):
-
-        # Add FEM Actor to renderer window
-        self.ren = vtk.vtkRenderer()
-        self.ren.SetBackground(0.3, 0.3, 0.3)
-        
-        self.renWin = vtk.vtkRenderWindow()
-        self.renWin.AddRenderer(self.ren)
-        self.iren = vtk.vtkRenderWindowInteractor()
-        self.iren.SetRenderWindow(self.renWin)
-        
-        # Allow user to interact
-        istyle = vtk.vtkInteractorStyleTrackballCamera()
-        self.iren.SetInteractorStyle(istyle)
-
-
-    def AddMesh(self, mesh, color=[1, 1, 1], style='', scalars=[], name='',
-                rng=[], stitle='', showedges=True, psize=5, opacity=1,
-                linethick=[], flipscalars=False):
-        """ Adds an actor to the renderwindow """
-                
-        # Create mapper
-        mapper = vtk.vtkDataSetMapper()
-        isscalars = False
-                
-        # Add scalars if they exist
-        nscalars = len(scalars)
-        if nscalars == mesh.GetNumberOfPoints():
-            AddPointScalars(mesh, scalars, name)
-            isscalars = True
-            mapper.SetScalarModeToUsePointData()
-#            mapper.GetLookupTable().SetTableRange(-1, 0)
-
-#        elif nscalars == meshin.GetNumberOfCells():
-#            VTK_Utilities.AddCellScalars(mesh, scalars, name)
-#            isscalars = True
-#            mapper.SetScalarModeToUseCellData()
-                    
-        # Set scalar range
-        if isscalars:
-            if not rng:
-                rng = [np.min(scalars), np.max(scalars)]
-                    
-            if np.any(rng):
-                mapper.SetScalarRange(rng[0], rng[1])
-        
-            # Flip if requested
-            if flipscalars:
-                mapper.GetLookupTable().SetHueRange(0.66667, 0.0)       
-        
-        # Set Scalar
-        mapper.SetInputData(mesh)
-        
-        # Create Actor
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-        
-        if style == 'wireframe':
-            actor.GetProperty().SetRepresentationToWireframe()
-        elif style == 'points':
-            actor.GetProperty().SetRepresentationToPoints()
-            actor.GetProperty().SetPointSize(psize)
-        else:
-            actor.GetProperty().SetRepresentationToSurface()
-            
-        if showedges:
-            actor.GetProperty().EdgeVisibilityOn()
-        actor.GetProperty().SetColor(color)
-        actor.GetProperty().SetOpacity(opacity)
-        actor.GetProperty().LightingOff()
-        
-        if style == 'wireframe' and linethick:
-            actor.GetProperty().SetLineWidth(linethick) 
-
-        # Add to renderer
-        self.ren.AddActor(actor)
-        
-        # Add scalar bar
-        if stitle:
-            scalarBar = vtk.vtkScalarBarActor()
-            scalarBar.SetLookupTable(mapper.GetLookupTable())
-            scalarBar.SetTitle(stitle)
-            scalarBar.SetNumberOfLabels(5)    
-            self.ren.AddActor(scalarBar)
-
-        
-    def GetCameraPosition(self):
-        """ Returns camera position of active render window """
-        camera = self.ren.GetActiveCamera()
-        pos = camera.GetPosition()
-        fpt = camera.GetFocalPoint()
-        vup = camera.GetViewUp()
-        return [pos, fpt, vup]
-        
-
-    def SetCameraPosition(self, cameraloc):
-        """ Set camera position of active render window """
-        camera = self.ren.GetActiveCamera()
-        camera.SetPosition(cameraloc[0])
-        camera.SetFocalPoint(cameraloc[1]) 
-        camera.SetViewUp(cameraloc[2])        
-        
-
-    def SetBackground(self, bcolor):
-        """ Sets background color """
-        self.ren.SetBackground(bcolor)
-        
-        
-    def AddLegend(self, entries, bcolor=[0.5, 0.5, 0.5], border=False):
-        """
-        Adds a legend to render window.  Entries must be a list containing
-        one string and color entry for each item
-        """
-        
-        legend = vtk.vtkLegendBoxActor()
-        legend.SetNumberOfEntries(len(entries))
-        
-        c = 0
-        nulldata = vtk.vtkPolyData()
-        for entry in entries:
-            legend.SetEntry(c, nulldata, entry[0], entry[1])
-            c += 1
-        
-        legend.UseBackgroundOn()
-        legend.SetBackgroundColor(bcolor)
-        if border:
-            legend.BorderOn()
-        else:
-            legend.BorderOff()
-        
-        # Add to renderer
-        self.ren.AddActor(legend)
-        
-        
-    def Plot(self, title=''):
-        """ Renders """
-        if title:
-            self.renWin.SetWindowName(title)
-            
-        # Render
-        self.iren.Initialize()
-        self.renWin.Render()
-        self.iren.Start()
-        
-        
-    def AddActor(self, actor):
-        """ Adds actor to render window """
-        self.ren.AddActor(actor)
-        
-        
-    def AddAxes(self):
-        """ Add axes widget """
-        axes = vtk.vtkAxesActor()
-        widget = vtk.vtkOrientationMarkerWidget()
-        widget.SetOrientationMarker(axes)
-        widget.SetInteractor(self.iren)
-        widget.SetViewport(0.0, 0.0, 0.4, 0.4)
-        widget.SetEnabled(1)
-        widget.InteractiveOn()
-        
-
-def AddPointScalars(mesh, scalars, name, setactive=True):
-    """
-    Adds point scalars to a VTK object or structured/unstructured grid """
-    vtkarr = VN.numpy_to_vtk(np.ascontiguousarray(scalars), deep=True)
-    vtkarr.SetName(name)
-    mesh.GetPointData().AddArray(vtkarr)
-    if setactive:
-        mesh.GetPointData().SetActiveScalars(name)
-        
-    
-
