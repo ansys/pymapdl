@@ -28,7 +28,7 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     
     cdef int k = n[0]
     
-    # Search line at a maximum of 1000 characters
+    # Search line at a maximum of 10000 characters
     cdef int i, c
     c = n[0]
     for i in range(1000):

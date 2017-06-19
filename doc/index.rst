@@ -15,6 +15,7 @@ Contents
    :maxdepth: 2
    
    examples
+   loading_results
 
 Installation
 ------------
@@ -37,7 +38,7 @@ be installed with Python bindings.
 License
 -------
 
-pyansys is licensed under the MIT license.
+This module, pyansys is licensed under the MIT license.
 
 
 

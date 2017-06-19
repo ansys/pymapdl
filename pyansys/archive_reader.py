@@ -21,7 +21,7 @@ import numpy as np
 
 # Attempt to load VTK dependent modules
 try:
-    from vtkInterface import utilities
+    import vtkInterface
     vtk_loaded = True
 except:
     warnings.warn('Unable to load vtk dependent modules')
@@ -132,7 +132,7 @@ class ReadArchive(object):
                 
             
         # Create unstructured grid
-        uGrid = utilities.MakeuGrid(offset, cells, cell_type, nodes)
+        uGrid = vtkInterface.MakeuGrid(offset, cells, cell_type, nodes)
 
         # Store original ANSYS cell and node numbering
         uGrid.AddPointScalars(nnum, 'ANSYSnodenum')
@@ -172,9 +172,9 @@ class ReadArchive(object):
             self.data = PythonParser.ParseForFEM(self.raw)
             
         # Create unstructured grid
-        self.uGrid = utilities.MakeuGrid(self.data['offset'], self.data['cells'], 
-                                         self.data['cell_type'],
-                                         self.data['nodes'][:, :3])
+        self.uGrid = vtkInterface.MakeuGrid(self.data['offset'], self.data['cells'], 
+                                            self.data['cell_type'],
+                                            self.data['nodes'][:, :3])
 
         # Store original ANSYS cell and node numbering
         self.uGrid.AddPointScalars(self.data['orignode'], 'ANSYSnodenum')

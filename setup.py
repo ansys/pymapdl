@@ -55,7 +55,7 @@ setup(
     packages = ['pyansys', 'pyansys.examples'],
 
     # Version
-    version='0.15',
+    version='0.16',
 
     description='Pythonic interface to ANSYS binary files',
     long_description=open('README.rst').read(),
@@ -109,6 +109,12 @@ setup(
                  Extension("pyansys._cellqual", 
                            ["pyansys/cython/_cellqual.pyx"],
                            language='c'),
+                           
+                 Extension("pyansys._rstHelper", 
+                           ["pyansys/cython/_rstHelper.pyx"],
+#                           extra_compile_args=cmp_arg,
+                           language='c'),
+                           
                 ],
                            
     keywords='vtk ANSYS cdb full rst',

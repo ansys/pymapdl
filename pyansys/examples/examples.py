@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-Tests/Examples to load cdb files.
+pyansys examples
+
 """
+
 from __future__ import print_function
 import os
-#from os.path import dirname, join, realpath
 
 import pyansys
 
@@ -27,7 +27,11 @@ def DisplayHexBeam():
     
 
 def LoadResult():
-    """ Load and plot hexahedral beam """
+    """
+    Loads a result file and prints out the displacement of all the nodes from
+    a modal analysis.
+    
+    """
     
     # Load result file
     result = pyansys.ResultReader(rstfile)
@@ -35,11 +39,11 @@ def LoadResult():
     print('Contains {:d} nodes'.format(len(result.nnum)))
 
     # display result
-    disp = result.GetResult(0)
+    disp = result.GetNodalResult(0)
 
-    print('Displacements of first 10 nodes are:')
+    print('Nodal displacement is:')
    
-    for i in range(10):
+    for i in range(result.nnum.size):
         node = result.nnum[i]
         x = disp[i, 0]
         y = disp[i, 1]
@@ -52,10 +56,19 @@ def DisplayDisplacement():
     
     # get location of this file
     fobj = pyansys.ResultReader(rstfile)
-    fobj.LoadArchive(hexarchivefile)
     
     print('Displaying ANSYS Mode 1')
-    fobj.PlotNodalResult(0)
+    fobj.PlotNodalResult(0, label='Displacement')
+    
+    
+def DisplayStress():
+    """ Load and plot 1st bend of a hexahedral beam """
+    
+    # get location of this file
+    result = pyansys.ResultReader(rstfile)
+    
+    print('Displaying node averaged stress in x direction for Mode 6')
+    result.PlotNodalStress(5, 'Sx')
 
 
 def LoadKM():
@@ -108,5 +121,14 @@ def DisplayCellQual(meshtype='tet'):
                        rng=[0, 1])
     
     
+    
+def RunAll():
+    """ Runs all examples in this file """
+    DisplayCellQual()
+    DisplayCellQual('hex')
+    LoadKM()
+    DisplayHexBeam()
+    LoadResult()
+    DisplayDisplacement()
     
     

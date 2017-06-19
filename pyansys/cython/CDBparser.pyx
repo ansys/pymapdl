@@ -1,7 +1,3 @@
-""" 
-Cython module to parse raw data from an ANSYS cdb file.
-
-"""
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
@@ -13,7 +9,7 @@ cimport numpy as np
 # _always_ do that, or you will have segfaults
 np.import_array()
 
-import ctypes                   
+import ctypes               
          
 # Type defintion for an unsigned 8-bit
 ctypedef unsigned char uint8
@@ -376,7 +372,6 @@ def Parse(raw, pyforce_linear):
     # forcing all to -1 to avoid null references
     numref[:] = -1
           
-
     for n in range(nnode):
         numref[nnum[n]] = n
     
