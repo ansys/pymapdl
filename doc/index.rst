@@ -16,6 +16,7 @@ Contents
    
    examples
    loading_results
+   loading_km
 
 Installation
 ------------

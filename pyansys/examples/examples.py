@@ -4,7 +4,7 @@ pyansys examples
 """
 
 from __future__ import print_function
-import os
+import os, inspect, sys
 
 import pyansys
 
@@ -16,6 +16,17 @@ hexarchivefile = os.path.join(dir_path, 'HexBeam.cdb')
 tetarchivefile = os.path.join(dir_path, 'TetBeam.cdb')
 hexbeamfile = os.path.join(dir_path, 'hexbeam.vtk')
 fullfile = os.path.join(dir_path, 'file.full')
+
+    
+def RunAll():
+    """ Runs all the functions within this module """
+    testfunctions = []
+    for name, obj in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isfunction(obj) and name != 'RunAll':
+              testfunctions.append(obj)      
+
+    # run all the functions
+    any(f() for f in testfunctions)
 
 
 def DisplayHexBeam():
@@ -76,7 +87,7 @@ def LoadKM():
     
     # Create file reader object
     fobj = pyansys.FullReader(fullfile)
-    fobj.LoadFullKM()
+    dof_ref, k, m = fobj.LoadKM()
 
     ndim = fobj.nref.size
 
@@ -85,6 +96,23 @@ def LoadKM():
     print('\t k has {:d} entries'.format(fobj.krows.size))
     print('\t m has {:d} entries'.format(fobj.mrows.size))
 
+    # compute natural frequencies if installed
+    try:
+        from scipy.sparse import linalg
+    except:
+        return
+    
+    import numpy as np
+    # Solve
+    w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
+
+    # System natural frequencies
+    f = np.real(w)**0.5/(2*np.pi)
+    
+    print('First four natural frequencies:')
+    for i in range(4):
+        print('{:.3f} Hz'.format(f[i]))
+        
 
 def DisplayCellQual(meshtype='tet'):
     """ 
@@ -119,16 +147,4 @@ def DisplayCellQual(meshtype='tet'):
     # plot cell quality
     archive.uGrid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
                        rng=[0, 1])
-    
-    
-    
-def RunAll():
-    """ Runs all examples in this file """
-    DisplayCellQual()
-    DisplayCellQual('hex')
-    LoadKM()
-    DisplayHexBeam()
-    LoadResult()
-    DisplayDisplacement()
-    
     

@@ -129,49 +129,6 @@ Here's the same result as viewed from ANSYS.
 .. image:: ansys_stress.png
 
 
-Reading a Full File
--------------------
-This example reads in the mass and stiffness matrices associated with the above
-example.
-
-.. code:: python
-
-    # Load the reader from pyansys
-    import pyansys
-    
-    # Create result reader object and read in full file
-    fobj = pyansys.FullReader('file.full')
-    fobj.LoadFullKM()
-    
-
-Data from the full file can now be accessed from the object.  If you have 
-``scipy`` installed, you can construct a sparse matrix and solve it.
-
-.. code:: python
-
-    import numpy as np
-    from scipy.sparse import csc_matrix, linalg
-    ndim = fobj.nref.size
-    k = csc_matrix((fobj.kdata, (fobj.krows, fobj.kcols)), shape=(ndim, ndim))
-    m = csc_matrix((fobj.mdata, (fobj.mrows, fobj.mcols)), shape=(ndim, ndim))
-    
-    # Solve
-    w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
-    # System natural frequencies
-    f = (np.real(w))**0.5/(2*np.pi)
-    
-    print('First four natural frequencies')
-    for i in range(4):
-        print '{:.3f} Hz'.format(f[i])
-    
-.. code:: 
-
-    First four natural frequencies
-    1283.200 Hz
-    1283.200 Hz
-    5781.975 Hz
-    6919.399 Hz
-
 
 Built-In Examples
 -----------------

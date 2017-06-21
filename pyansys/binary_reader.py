@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import warnings
 import logging
@@ -79,6 +80,10 @@ class FullReader(object):
         
         """
         
+        # check if file exists
+        if not os.path.isfile(filename):
+            raise Exception('{:s} not found'.format(filename))
+        
         self.filename = filename
         self.header = _parsefull.ReturnHeader(filename)
         
@@ -91,39 +96,44 @@ class FullReader(object):
             raise Exception ("Unable to read an unsymmetric mass/stiffness matrix.")
 
 
-    def LoadFullKM(self):
+    def LoadKM(self, as_sparse=True, sort=True):
         """
-        Load indices for constructing symmetric mass and stiffness
-        matricies
+        Load and construct mass and stiffness matrices from an ANSYS full file.
 
-        STORES TO SELF:
+        Parameters
+        ----------
+        as_sparse : bool, optional
+            Outputs the mass and stiffness matrices as scipy csc sparse arrays
+            when True by default.
+            
+        sort : bool, optional
+            By default, this setting sorts the rows and columns such that the 
+            nodes are in order.  ANSYS stores the mass and stiffness matrices 
+            such that the bandwidth of the arrays is minimized.  Therefore, to
+            minimize the bandwidth of the arrays, make this setting False.
+            
         
-        nref (np.int32 array)
-            Ordered reference to original ANSYS node numbers
-        
-        dref (np.int32 array)
-            DOF reference where
+        Returns
+        -------
+        dof_ref : (n x 2) np.int32 array
+            This array contains the node and degree corresponding to each row 
+            and column in the mass and stiffness matrices.  When the sort 
+            parameter is set to True this array will be sorted by node number
+            first and then by the degree of freedom.  In a 3 DOF analysis the 
+            intergers will correspond to:
             0 - x
             1 - y
             2 - z
-
-        krows (np.int32 array)
-            Rows to construct the sparse stiffness matrix
-
-        kcols (np.int32 array)
-            Columns to construct the sparse stiffness matrix
+            
+        k : (n x n) np.float or scipy.csc array
+            Stiffness array
+            
+        m : (n x n) np.float or scipy.csc array
+            Mass array
         
-        kdata (np.int32 array)
-            Data for each entry in thesparse stiffness matrix
-
-        mrows (np.int32 array)
-            Rows to construct the mass stiffness matrix
-
-        mcols (np.int32 array)
-            Columns to construct the mass stiffness matrix
-
-        mdata (np.int32 array)
-            Data to construct the mass stiffness matrix
+        Notes
+        -----
+        
         
         """
         data = _parsefull.ReturnFull_KM(self.filename)
@@ -144,7 +154,54 @@ class FullReader(object):
         self.mcols = data[6]
         self.mdata = data[7]
         
-    
+        # see if 
+        if as_sparse:
+            try:
+                from scipy.sparse import csc_matrix
+            except:
+                raise Exception('Unable to load scipy, matricies will be full')
+                as_sparse = False
+        
+        # number of dimentions and degree of freedom reference
+        ndim = self.nref.size
+        dof_ref = np.vstack((self.nref, self.dref)).T
+        idx, ridx = Unique_Rows(dof_ref)
+
+        # resort K and M matries to ordered sorted node order
+        if sort:
+            # determine unique nodes and sorted indices
+            krow = ridx[self.krows]
+            kcol = ridx[self.kcols]
+            
+            # get number of degrees of freedom
+            krow = ridx[self.krows]
+            kcol = ridx[self.kcols]
+            mrow = ridx[self.mrows]         
+            mcol = ridx[self.mcols]         
+            
+            # sorted references
+            dof_ref = dof_ref[idx]
+            
+        else:
+            krow = self.krows
+            kcol = self.kcols
+            mrow = self.mrows
+            mcol = self.mcols
+            
+        # output as a sparse matrix
+        if as_sparse:
+            k = csc_matrix((self.kdata, (krow, kcol)), shape=(ndim,)*2)
+            m = csc_matrix((self.mdata, (mrow, mcol)), shape=(ndim,)*2)
+            
+        else:
+            k = np.zeros((ndim,)*2)
+            k[krow, kcol] = self.kdata
+
+            m = np.zeros((ndim,)*2)
+            m[mrow, mcol] = self.mdata
+
+        return dof_ref, k, m
+        
 
 class ResultReader(object):
     """
@@ -153,18 +210,21 @@ class ResultReader(object):
     
     def __init__(self, filename, logger=False):
         """
-        SUMMARY
-        Loads basic result information from result file.
-
+        Loads basic result information from result file and initializes result
+        object.
     
-        INPUTS
-        filename (str)
+        Parameters
+        ----------
+        filename : string
             Filename of the ANSYS binary result file.
+            
+        logger : bool
+            Enables logging if True.  Debug feature.
         
         
-        OUTPUTS
+        Returns
+        -------
         None
-        
         
         """
 
@@ -824,5 +884,14 @@ def GetResultInfo(filename):
     f.close()
     
     return resultheader
+
+
+
+def Unique_Rows(a):
+    """ Returns unique rows of a and indices of those rows """
+    b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx, ridx = np.unique(b, return_index=True, return_inverse=True)
+    
+    return idx, ridx
 
 
