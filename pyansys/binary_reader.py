@@ -2,6 +2,7 @@ import os
 import numpy as np
 import warnings
 import logging
+import ctypes
 
 from pyansys import _parsefull
 from pyansys import _rstHelper
@@ -208,7 +209,7 @@ class ResultReader(object):
     Object to control the reading of ANSYS results written to fortran file
     """
     
-    def __init__(self, filename, logger=False):
+    def __init__(self, filename, logger=False, load_geometry=True):
         """
         Loads basic result information from result file and initializes result
         object.
@@ -258,7 +259,8 @@ class ResultReader(object):
         self.GetTimeValues()
         
         # store geometry for later retrival
-        self.StoreGeometry()
+        if load_geometry:
+            self.StoreGeometry()
         
         
     def ResultsProperties(self):
@@ -511,9 +513,15 @@ class ResultReader(object):
                               'nodstr': nodstr}
         
         # get the element description table
-        #nelm = result.resultheader['nelm']
         f.seek((ptrEID + 2)*4)
-        e_disp_table = np.fromfile(f, self.resultheader['endian'] + 'l', nelm)
+        e_disp_table = np.empty(nelm, np.int32)
+        e_disp_table[:] = np.fromfile(f, self.resultheader['endian'] + 'i8', nelm)
+        
+        # get pointer to start of element table and adjust element pointers
+        ptr = ptrEID + e_disp_table[0]
+        e_disp_table -= e_disp_table[0]
+
+
         f.close()
         
         # The following is stored for each element
@@ -537,6 +545,11 @@ class ResultReader(object):
 
         elem = np.empty((nelm, 20), np.int32)
         elem[:] = -1
+        
+        # load elements
+        _rstHelper.LoadElements(self.filename, ptr, nelm, e_disp_table, elem, 
+                                etype)
+
 
     #==============================================================================
     # old python
@@ -569,12 +582,17 @@ class ResultReader(object):
 #        f.seek(32, 1)
 #        rnodes = np.fromfile(f, self.resultheader['endian'] + 'i', nread)
 #        elem[i, :nread] = rnodes
-            
+
+#        import ctypes
+#        e_disp_table = e_disp_table.astype(ctypes.c_long)
+#        _rstHelper.LoadElements(self.filename, ptrEID, nelm, e_disp_table, 
+#                                elem, etype)
         
-        _rstHelper.LoadElements(self.filename, ptrEID, nelm, e_disp_table, 
-                                elem, etype)
-        
-        
+#        for i in range(nelm):
+#            if not np.all(elem_linux[i] == elem[i]):
+#                print i
+#                break
+#        
         
         # store geometry dictionary
         self.geometry = {'nnum': nnum,
@@ -582,7 +600,7 @@ class ResultReader(object):
                          'etype': etype,
                          'elem': elem,
                          'enum': self.resultheader['eeqv'],
-                         'ekey': np.asarray(ekey, np.long)}
+                         'ekey': np.asarray(ekey, ctypes.c_long)}
         
         
         # store the reference array
@@ -663,7 +681,8 @@ class ResultReader(object):
         f.seek(element_rst_ptr*4)
         
         # element index table
-        ele_ind_table = np.fromfile(f, endian + 'l', nelm).astype(np.int32)
+#        ele_ind_table = np.fromfile(f, endian + 'l', nelm).astype(np.int32)
+        ele_ind_table = np.fromfile(f, endian + 'i8', nelm).astype(np.int32)
         ele_ind_table += element_rst_ptr
         
         # Each element header contains 25 records for the individual results

@@ -4,43 +4,114 @@
 
 from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
+from libc.string cimport memcpy
 
-def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nodes, 
-              int [::1] nnum_arr):
+
+cdef inline double GetDouble(char * array) nogil:
+    cdef double result
+    memcpy(&result, array, sizeof(result))
+    return result
+
+
+cdef inline int GetInt(char * array) nogil:
+    cdef int result
+    memcpy(&result, array, sizeof(result))
+    return result
+
+def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc, 
+              int [::1] nnum):
     """
     Function signature
-    def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nodes, 
-       int [::1] nnum_arr):
+    def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc, 
+       int [::1] nnum):
         
     """
     
     cdef int i
-    cdef int j = 0
+    cdef int j
     
-    # open file
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'r')
-
-    # Seek to start of node information
-    fseek(cfile, (ptrLOC + 2)*4, SEEK_CUR)
-
-    cdef double val
+    cdef bytes buf
+    with open(filename, "rb") as f:
+        f.seek((ptrLOC + 2)*4)
+        buf = f.read(nnod*68)
+    
+    cdef char * p = buf
+    cdef int loc
     for i in range(nnod):
-        fread(&val, sizeof(double), 1, cfile)
-        nnum_arr[i] = <int>val
         
-        fread(&nodes[i, j], sizeof(double), 6, cfile)
-        
-        # skip next 3 ints
-        fseek(cfile, 12, SEEK_CUR)
+        # get node number (stored as double, cast to int)
+        loc = i*68
+        nnum[i] = <int>GetDouble(&p[loc])
+        loc += 8
+        for j in range(6):
+            nloc[i, j] = GetDouble(&p[loc + j*8])
+    
+    
+#def LoadElements(filename, int ptrEID, int nelm, long [::1] e_disp_table,
+#                 int [:, ::1] elem, int [::1] etype):
+#    """
+#    The following is stored for each element
+#    mat     - material reference number
+#    type    - element type number
+#    real    - real constant reference number
+#    secnum  - section number
+#    esys    - element coordinate system
+#    death   - death flat (1 live, 0 dead)
+#    solidm  - solid model reference
+#    shape   - coded shape key
+#    elnum   - element number
+#    baseeid - base element number
+#    NODES   - node numbers defining the element
+#    """
+#    
+#    cdef int i
+#    cdef int j = 0
+#    
+#    cdef FILE* cfile
+#    cdef bytes py_bytes = filename.encode()
+#    cdef char* c_filename = py_bytes
+#    cfile = fopen(c_filename, 'r')
+#
+#    cdef int nread
+#    for i in range(nelm - 1):
+#        
+#        # seek to start of element information
+#        fseek(cfile, (ptrEID + e_disp_table[i] + 3)*4, SEEK_SET)
+#
+#        # Store element type
+#        fread(&etype[i], sizeof(int), 1, cfile)
+#        
+#        # Seek and store element node numbers
+#        fseek(cfile, 32, SEEK_CUR)
+#        
+#        # number of elements to read is dependent on the distance between
+#        # element entries
+#        nread = e_disp_table[i + 1] - e_disp_table[i] - 13
+#        fread(&elem[i, j], sizeof(int), nread, cfile)
+#        
+#        
+#    #==================
+#    # last entry
+#    #==================
+#    i += 1
+#    # get number to read from fortran nread entry
+#    fseek(cfile, (ptrEID + e_disp_table[i])*4, SEEK_SET)
+#    fread(&nread, sizeof(int), 1, cfile)
+#    nread -= 10
+#    
+#    # Store element type
+#    fseek(cfile, 8, SEEK_CUR)
+#    fread(&etype[i], sizeof(int), 1, cfile)
+#    
+#    # Seek and store element node numbers
+#    fseek(cfile, 32, SEEK_CUR)
+#    fread(&elem[i, j], sizeof(int), nread, cfile)
+#
+#    fclose(cfile)
 
-    fclose(cfile)
-    
-    
-def LoadElements(filename, int ptrEID, int nelm, long [::1] e_disp_table,
-                 int [:, ::1] elem, int [::1] etype):
+
+def LoadElements(filename, int ptr, int nelm, 
+                 int [::1] e_disp_table, int [:, ::1] elem, int [::1] etype):
     """
     The following is stored for each element
     mat     - material reference number
@@ -56,50 +127,32 @@ def LoadElements(filename, int ptrEID, int nelm, long [::1] e_disp_table,
     NODES   - node numbers defining the element
     """
     
-    cdef int i
-    cdef int j = 0
+    cdef int i, j
     
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'r')
-
+    cdef bytes buf
+    with open(filename, "rb") as f:
+        f.seek(ptr*4)
+        buf = f.read((e_disp_table[nelm - 1] + 32)*4)
+        
+    cdef char * p = buf
+    cdef int loc
+    
+    cdef int val
     cdef int nread
-    for i in range(nelm - 1):
-        
-        # seek to start of element information
-        fseek(cfile, (ptrEID + e_disp_table[i] + 3)*4, SEEK_SET)
+    for i in range(nelm):
+        # location in element table
+        loc = e_disp_table[i]*4
 
-        # Store element type
-        fread(&etype[i], sizeof(int), 1, cfile)
+        # determine number of nodes in element by getting entries in fortran header
+        nread = GetInt(&p[loc])
         
-        # Seek and store element node numbers
-        fseek(cfile, 32, SEEK_CUR)
+        # read in element type
+        etype[i] = GetInt(&p[loc + 12])
         
-        # number of elements to read is dependent on the distance between
-        # element entries
-        nread = e_disp_table[i + 1] - e_disp_table[i] - 13
-        fread(&elem[i, j], sizeof(int), nread, cfile)
-        
-        
-    #==================
-    # last entry
-    #==================
-    i += 1
-    # get number to read from fortran nread entry
-    fseek(cfile, (ptrEID + e_disp_table[i])*4, SEEK_SET)
-    fread(&nread, sizeof(int), 1, cfile)
-    nread -= 10
+        # read in nodes
+        for j in range(12, nread + 2):
+            elem[i, j - 12] = GetInt(&p[loc + 4*j])
     
-    # Store element type
-    fseek(cfile, 8, SEEK_CUR)
-    fread(&etype[i], sizeof(int), 1, cfile)
-    
-    # Seek and store element node numbers
-    fseek(cfile, 32, SEEK_CUR)
-    fread(&elem[i, j], sizeof(int), nread, cfile)
-
-    fclose(cfile)
     
     
 def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
