@@ -137,12 +137,10 @@ class FullReader(object):
         
         
         """
-        data = _parsefull.ReturnFull_KM(self.filename)
+        data = _parsefull.Load_KM(self.filename, sort)
         
-        # nodal reference
+        # nodal and DOF references
         self.nref = data[0]
-        
-        # DOF reference
         self.dref = data[1]
 
         # stiffness rows, columns, and data
@@ -154,45 +152,62 @@ class FullReader(object):
         self.mrows = data[5]
         self.mcols = data[6]
         self.mdata = data[7]
+#        self.sidx  = data[8]
+        
+        # stack these references
+        dof_ref = np.vstack((self.nref, self.dref)).T
         
         # see if 
         if as_sparse:
             try:
-                from scipy.sparse import csc_matrix
+                from scipy.sparse import csc_matrix, coo_matrix
             except:
                 raise Exception('Unable to load scipy, matricies will be full')
                 as_sparse = False
         
         # number of dimentions and degree of freedom reference
         ndim = self.nref.size
-        dof_ref = np.vstack((self.nref, self.dref)).T
-        idx, ridx = Unique_Rows(dof_ref)
+#        idx, ridx = Unique_Rows(dof_ref)
 
         # resort K and M matries to ordered sorted node order
-        if sort:
-            # determine unique nodes and sorted indices
-            krow = ridx[self.krows]
-            kcol = ridx[self.kcols]
-            
-            # get number of degrees of freedom
-            krow = ridx[self.krows]
-            kcol = ridx[self.kcols]
-            mrow = ridx[self.mrows]         
-            mcol = ridx[self.mcols]         
-            
-            # sorted references
-            dof_ref = dof_ref[idx]
-            
-        else:
-            krow = self.krows
-            kcol = self.kcols
-            mrow = self.mrows
-            mcol = self.mcols
+#        if sort:
+#
+#            # get number of degrees of freedom
+#            krow = ridx[self.krows]
+#            kcol = ridx[self.kcols]
+#            mrow = ridx[self.mrows]
+#            mcol = ridx[self.mcols]
+#            
+#            # sorted references
+#            dof_ref = dof_ref[idx]
+#            
+#        else:
+        krow = self.krows
+        kcol = self.kcols
+        mrow = self.mrows
+        mcol = self.mcols
             
         # output as a sparse matrix
+#        from scipy import sparse
         if as_sparse:
-            k = csc_matrix((self.kdata, (krow, kcol)), shape=(ndim,)*2)
-            m = csc_matrix((self.mdata, (mrow, mcol)), shape=(ndim,)*2)
+            
+#            k = csr_matrix((self.kdata, (krow, kcol)), shape=(ndim,)*2)
+
+            k = coo_matrix((ndim,)*2)
+            k.data = self.kdata
+            k.row = krow
+            k.col = kcol
+#            k = csr_matrix(k)
+            k = csc_matrix(k)
+            
+#            m = csr_matrix((self.mdata, (mrow, mcol)), shape=(ndim,)*2)
+
+            m = coo_matrix((ndim,)*2)
+            m.data = self.mdata
+            m.row = mrow
+            m.col = mcol
+#            m = csr_matrix(m)
+            m = csc_matrix(m)
             
         else:
             k = np.zeros((ndim,)*2)
@@ -651,7 +666,7 @@ class ResultReader(object):
         None
             
         """
-        
+        #%% debug cell
         # Get the header information from the header dictionary
         endian = self.resultheader['endian']
         rpointers = self.resultheader['rpointers']
@@ -681,7 +696,6 @@ class ResultReader(object):
         f.seek(element_rst_ptr*4)
         
         # element index table
-#        ele_ind_table = np.fromfile(f, endian + 'l', nelm).astype(np.int32)
         ele_ind_table = np.fromfile(f, endian + 'i8', nelm).astype(np.int32)
         ele_ind_table += element_rst_ptr
         
@@ -697,25 +711,25 @@ class ResultReader(object):
         nitem = np.fromfile(f, endian + 'i', 1)[0]/nnode_elem
 
 
-#        nstresses = self.edge_idx.size
-#        stresses = np.empty((nstresses, 6), np.float32)
+        nstresses = self.edge_idx.size
+        stresses = np.empty((nstresses, 6), np.float32)
         
+        #%% debug cell 2
+        c = 0
+        for i in range(len(ele_ind_table)):
+            # Element nodal stresses, ptrENS, is the third item in the table
+            f.seek((ele_ind_table[i] + table_index)*4)
+            ptrENS = np.fromfile(f, endian + 'i', 1)[0]
         
-#        c = 0
-#        for i in range(len(ele_ind_table)):
-#            # Element nodal stresses, ptrENS, is the third item in the table
-#            f.seek((ele_ind_table[i] + table_index)*4)
-#            ptrENS = np.fromfile(f, endian + 'i', 1)[0]
-#        
-#            # read the stresses evaluated at the intergration points or nodes
-#            nnode_elem = nodstr[etype[i]]
-#            
-#            f.seek((ele_ind_table[i] + ptrENS)*4)
-#            stress = np.fromfile(f, endian + 'f', nnode_elem*nitem).reshape((-1, nitem))#[:, sidx]
-#
-#            # store stresses
-#            stresses[c:c + nnode_elem] = stress[:, :6]
-#            c += nnode_elem
+            # read the stresses evaluated at the intergration points or nodes
+            nnode_elem = nodstr[etype[i]]
+            
+            f.seek((ele_ind_table[i] + ptrENS)*4)
+            stress = np.fromfile(f, endian + 'f', nnode_elem*nitem).reshape((-1, nitem))#[:, sidx]
+
+            # store stresses
+            stresses[c:c + nnode_elem] = stress[:, :6]
+            c += nnode_elem
             
         # close file
         f.close()

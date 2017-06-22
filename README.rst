@@ -78,17 +78,15 @@ numpy installed.
 
     # Load the reader from pyansys
     import pyansys
+    
+    # Sample result file
     from pyansys import examples
-    
-    # Sample result file and associated archive file
     rstfile = examples.rstfile
-    hexarchivefile = examples.hexarchivefile
-    
     
     # Create result reader object by loading the result file
     result = pyansys.ResultReader(rstfile)
     
-    # Get beam natural frequencies
+    # Get the solution time values (natural frequencies for this modal analysis)
     freqs = result.GetTimeValues()
     
     # Get the node numbers in this result file
@@ -96,6 +94,8 @@ numpy installed.
     
     # Get the 1st bending mode shape.  Nodes are ordered according to nnum.
     disp = result.GetResult(0, True) # uses 0 based indexing 
+
+    # it's just a numpy array
     print disp
     
 .. code::
@@ -108,16 +108,16 @@ numpy installed.
      [ 26.60384371 -17.14955041  -2.40527841]
      [ 31.50985156 -20.31588852  -2.4327859 ]]
 
-You can then load in the archive file associated with the result file and then 
-plots a nodal result.
+You can plot results as well directly from the file as well.
 
 .. code:: python
     
-    # Load CDB (necessary for display)
-    result.LoadArchive(hexarchivefile)
-    
-    # Plot the displacement of Mode 0 in the x direction
+    # Plot the displacement of the 1st in the x direction
     result.PlotNodalResult(0, 'x', label='Displacement')
+
+    # Plot the nodal stress in the 'x' direction for the 6th result
+    result.PlotNodalStress(5, 'Sx')
+
 
 Reading a Full File
 -------------------
@@ -129,21 +129,14 @@ example.
     # Load the reader from pyansys
     import pyansys
     
-    # Create result reader object and read in full file
+    # load the full file
     fobj = pyansys.FullReader('file.full')
-    fobj.LoadFullKM()
+    dofref, k, m = fobj.LoadKM()
     
 
-Data from the full file can now be accessed from the object.  If you have 
-``scipy`` installed, you can construct a sparse matrix and solve it.
+If you have ``scipy`` installed, you can solve the eigensystem for its natural frequencies.
 
 .. code:: python
-
-    import numpy as np
-    from scipy.sparse import csc_matrix, linalg
-    ndim = fobj.nref.size
-    k = csc_matrix((fobj.kdata, (fobj.krows, fobj.kcols)), shape=(ndim, ndim))
-    m = csc_matrix((fobj.mdata, (fobj.mrows, fobj.mcols)), shape=(ndim, ndim))
     
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
