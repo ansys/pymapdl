@@ -1,4 +1,4 @@
-__version__ = u'0.16'
+__version__ = u'0.16.1'
 
 #from pyansys import Reader
 #from pyansys.Reader import ResultReader
