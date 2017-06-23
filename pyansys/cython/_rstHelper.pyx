@@ -2,6 +2,9 @@
 # cython: wraparound=False
 # cython: cdivision=True
 
+import numpy as np
+cimport numpy as np
+
 from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
 from libc.string cimport memcpy
@@ -154,3 +157,228 @@ def LoadStress(filename, int table_index, int [::1] ele_ind_table, int [::1] nod
     fclose(cfile)
     
     
+def ReadArray(filename, int ptr, int nterm, int neqn, int [::1] index_arr):
+    """
+    
+    Reads stiffness or mass matrices from ANSYS fortran files
+    
+    Parameters
+    ----------
+    filename : string
+        Full filename
+        
+    ptr: int
+        Pointer to start of block
+        
+    nterm : int
+        Number of terms to read.
+        
+    neqn : int
+        Number of equations
+        
+    index_arr : numpy int array
+        Indexing array
+        
+    Returns
+    -------
+    rows : numpy int32 array
+        Row indices
+    
+    cols : numpy int32 array
+        Column indices
+    
+    data : numpy double array
+        Data belonging to (row, col)
+    
+    diag : numpy int32 array
+        Indices along the diag (diag[i], diag[i])
+    
+    data_diag : numpy double array
+        Data belonging to the diag entries
+    
+    
+    Notes
+    -----
+    Function signature    
+    ReadArray(filename, int ptrSTF, int nread, int nterm, int neqn,
+              int [::1] index_arr)
+    
+    """
+
+    cdef int i, j, k, ind
+    
+    cdef bytes buf
+    with open(filename, "rb") as f:
+        f.seek(ptr*4)
+        buf = f.read((neqn*6 + nterm*3)*4)
+
+    cdef char * p = buf # python to c character array pointer
+    cdef int loc = 0 # location long buffer
+    
+    # Half of the data
+    cdef int ntermadj = nterm - neqn # upper triangle (sorta)
+    cdef int [::1] krow = np.empty(ntermadj, np.int32)
+    cdef int [::1] kcol = np.empty(ntermadj, np.int32)
+    cdef double [::1] kdata = np.empty(ntermadj)
+
+    
+    cdef int [::1] kdiag = np.empty(neqn, np.int32)
+    cdef double [::1] kdata_diag = np.empty(neqn)
+    
+    cdef int c = 0 # index counter
+    cdef int d = 0 # data counter
+    cdef int row, col, nitems, intval
+    cdef double val
+    for i in range(neqn):
+        col = index_arr[i]
+        
+        # number of items to read
+        nitems = GetInt(&p[loc]); loc += 4
+        loc += 4
+        
+        # Indices: read in all but diagional term
+        for j in range(nitems - 1):
+            # get row number
+            row = GetInt(&p[loc]) - 1; loc += 4 # convert to c indexing
+            
+            # store upper triangle
+            if index_arr[row] > col:
+                krow[c] = index_arr[row]
+                kcol[c] = col
+            else:
+                krow[c] = col
+                kcol[c] = index_arr[row]
+                
+            c += 1
+            
+        # store diagional term
+        row = GetInt(&p[loc]) - 1; loc += 4
+        kdiag[i] = index_arr[row]
+        loc += 12
+        
+        # Data: read in all but diagional term
+        for j in range(nitems - 1):
+            # Store data
+            kdata[d] = GetDouble(&p[loc]); loc += 8
+            d += 1
+            
+        # store diagional data term
+        kdata_diag[i] = GetDouble(&p[loc]); loc += 8
+        
+        # seek past end of data
+        loc += 4
+                    
+    return np.asarray(krow), np.asarray(kcol), np.asarray(kdata), \
+           np.asarray(kdiag), np.asarray(kdata_diag)
+       
+    
+# consider adding a sorting flag to disable sorting
+def FullNodeInfo(filename, int ptrDOF, int nNodes, int neqn):
+    """
+    
+    Reads in full file details required for the assembly of the mass and 
+    stiffness matrices.
+    
+    The reference arrays are sorted by default, though this increases the
+    bandwidth of the mass and stiffness matrices.
+    
+    Parameters
+    ----------
+    filename : string
+        Full file filename
+    
+    ptrDOF : int
+        Location of the DOF block in the full file
+        
+    nNodes :
+        Number of nodes in full file
+
+    neqn : 
+        Number of equations in full file
+        
+    
+    Returns
+    -------
+    nref : numpy np.int32 array
+        Sorted nodal reference array
+        
+    dref: numpy np.int32 array
+        Sorted degree of freedom reference array.
+        
+    index_arr : numpy np.int32 array
+        Index array to sort rows and columns.
+        
+    const : numpy np.int32 array
+        Negative if a node's DOF is constrained
+        
+    ndof : numpy np.int32 array
+        Number of degrees of freedom for each node in nref
+    """
+
+    cdef int i, j, ind
+    cdef int [::1] neqv = np.empty(nNodes, np.int32)
+    cdef int [::1] ndof = np.empty(nNodes, np.int32)
+    cdef int [::1] const = np.empty(neqn, np.int32)
+        
+    with open(filename, "rb") as f:
+
+        # nodal equivalency
+        f.seek((212 + 2)*4)
+        neqv = np.fromfile(f, 'i', nNodes)
+        
+        # Total DOFs
+        f.seek((ptrDOF + 2)*4)
+        ndof = np.fromfile(f, 'i', nNodes)
+        
+        # Constrained DOFs
+        f.seek((ptrDOF + 5 + nNodes)*4)
+        const = np.fromfile(f, 'i', neqn)
+    
+    # create sorting array
+    cdef int [::1] cumdof = np.empty(nNodes, np.int32)
+    cdef int csum = 0
+    for i in range(nNodes):
+        cumdof[i] = csum
+        csum += ndof[i]
+        
+    cdef int [::1] s_neqv_dof = np.empty(neqn, np.int32)
+    cdef int [::1] nref = np.empty(neqn, np.int32)
+    cdef int [::1] dref = np.empty(neqn, np.int32)
+    cdef int c = 0
+    cdef int val
+    for i in range(nNodes):
+        val = neqv[i]
+        for j in range(ndof[i]):
+            nref[c] = val
+            dref[c] = j
+            c += 1
+    
+    # sort nodal equivalance array
+    cdef int [::1] sidx = np.argsort(neqv).astype(np.int32)
+    cdef int [::1] ndof_sort = np.empty(nNodes, np.int32)
+    for i in range(nNodes):
+        ndof_sort[i] = ndof[sidx[i]]
+    
+    cdef int d = 0
+    # create an index array.  this tells the array readers down the line where
+    # to place each row and col when it's sorted
+    cdef int [::1] index_arr = np.empty(neqn, np.int32)
+    for i in range(nNodes):
+        ind = sidx[i]
+        c = cumdof[ind]
+        for j in range(ndof[i]):
+            s_neqv_dof[d] = c + j
+            index_arr[c + j] = d
+            d += 1
+    
+    # sort node and dof references
+    cdef int [::1] nref_sort = np.empty(neqn, np.int32)
+    cdef int [::1] dref_sort = np.empty(neqn, np.int32)
+    cdef int [::1] const_sort = np.empty(neqn, np.int32)
+    for i in range(neqn):
+        nref_sort[i] = nref[s_neqv_dof[i]]
+        dref_sort[i] = dref[s_neqv_dof[i]]
+        const_sort[i] = const[s_neqv_dof[i]]
+        
+    return np.asarray(nref_sort), np.asarray(dref_sort), np.asarray(index_arr), \
+           np.asarray(const_sort), np.asarray(ndof)

@@ -9,12 +9,17 @@ as either a sparse or full matrix.
 Reading a Full File
 -------------------
 This example reads in the mass and stiffness matrices associated with the above
-example.  By default, ``LoadKM`` sorts degrees of freedom such that the nodes are
+example.  ``LoadKM`` sorts degrees of freedom such that the nodes are
 ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are
-sorted within each node.  This increases the bandwidth of mass and stiffness
-matrices and can be disabled by setting ``sort=False``.  The matrices ``k`` and
+sorted within each node.  The matrices ``k`` and
 ``m`` are sparse by default, but if ``scipy`` is not installed, or if the
 optional parameter ``as_sparse=False`` then they will be full numpy arrays.
+
+By default ``LoadKM`` outputs the upper triangle of both matrices, to output the
+full matrix, set ``utri=False``.  Additionally, the constrained nodes of the
+analysis can be identified by accessing ``fobj.const`` where the constrained
+ degrees of freedom are True and all others are False.  This corresponds to
+ the degrees of reference in ``dof_ref``.
 
 .. code:: python
 
@@ -22,17 +27,22 @@ optional parameter ``as_sparse=False`` then they will be full numpy arrays.
     import pyansys
     
     # Create result reader object and read in full file
-    fobj = pyansys.FullReader('file.full')
-    dof_ref, k, m = fobj.LoadKM()
-    
+    full = pyansys.FullReader(pyansys.examples.fullfile)
+    dof_ref, k, m = fobj.LoadKM(triu=False) # return the full matrix 
 
 If you have ``scipy`` installed, you can solve solve for the natural 
-frequencies of a system.
+frequencies and mode shapes of a system.  Realize that constrained degrees of 
+freedom must be removed from the ``k`` and ``m`` matrices for the correct solution.
 
 .. code:: python
 
+    # remove the constrained degrees of freedom
+    # NOTE: There are more efficient way to remove these indices
+    free = np.logical_not(full.const).nonzero()[0]
+    k = k[free][:, free]
+    m = m[free][:, free]
+
     from scipy.sparse import linalg
-    #numpy.linalg.eig
 
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
@@ -51,11 +61,54 @@ frequencies of a system.
     1283.200 Hz
     5781.975 Hz
     6919.399 Hz
-    
-This exact example can be run from pyansys's examples::
 
-    from pyansys import examples
-    examples.LoadKM()
+
+Plotting a Mode Shape
+---------------------
+
+You can also plot the mode shape of this finite element model.  Since the constrained degrees of
+freedom have been removed from the solution, you have to account for these when
+displaying the displacement.
+
+.. code::
     
+    import vtkInterface
+
+    # Get the 4th mode shape
+    mode_shape = v[:, 3] # x, y, z displacement for each node
     
+    # create the full mode shape including the constrained nodes
+    full_mode_shape = np.zeros(dofref.shape[0])
+    full_mode_shape[np.logical_not(full.const)] = mode_shape
     
+    # reshape and compute the normalized displacement
+    disp = full_mode_shape.reshape((-1, 3))
+    n = (disp*disp).sum(1)**0.5
+    n /= n.max() # normalize
+    
+    # load an archive file and create a vtk unstructured grid
+    archive = pyansys.ReadArchive(pyansys.examples.hexarchivefile)
+    grid = archive.ParseVTK()
+    
+    # plot the normalized displacement
+    # grid.Plot(scalars=n)
+    
+    # Fancy plot the displacement
+    plobj = vtkInterface.PlotClass()
+    
+    # add two meshes to the plotting class.  Meshes are copied on load
+    plobj.AddMesh(grid, style='wireframe')
+    plobj.AddMesh(grid, scalars=n, stitle='Normalized\nDisplacement',
+                  flipscalars=True)
+    
+    # Update the coordinates by adding the mode shape to the grid
+    plobj.UpdateCoordinates(grid.GetNumpyPoints() + disp/80, render=False)
+    plobj.AddText('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
+                  fontsize=30)
+    plobj.Plot(); del plobj
+    
+.. image:: solved_km.png
+
+
+This example is built into ``pyansys`` and can be run from 
+``examples.SolveKM()``.

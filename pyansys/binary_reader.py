@@ -97,7 +97,13 @@ class FullReader(object):
             raise Exception ("Unable to read an unsymmetric mass/stiffness matrix.")
 
 
-    def LoadKM(self, as_sparse=True, sort=True):
+# Dead setting
+#        sort : bool, optional
+#            By default, this setting sorts the rows and columns such that the 
+#            nodes are in order.  ANSYS stores the mass and stiffness matrices 
+#            such that the bandwidth of the arrays is minimized.  Therefore, to
+#            minimize the bandwidth of the arrays, make this setting False.
+    def LoadKM(self, as_sparse=True, utri=True):
         """
         Load and construct mass and stiffness matrices from an ANSYS full file.
 
@@ -107,12 +113,9 @@ class FullReader(object):
             Outputs the mass and stiffness matrices as scipy csc sparse arrays
             when True by default.
             
-        sort : bool, optional
-            By default, this setting sorts the rows and columns such that the 
-            nodes are in order.  ANSYS stores the mass and stiffness matrices 
-            such that the bandwidth of the arrays is minimized.  Therefore, to
-            minimize the bandwidth of the arrays, make this setting False.
-            
+        utri : bool, optional
+            Outputs only the upper triangle of both the mass and stiffness
+            arrays.
         
         Returns
         -------
@@ -137,26 +140,10 @@ class FullReader(object):
         
         
         """
-        data = _parsefull.Load_KM(self.filename, sort)
-        
-        # nodal and DOF references
-        self.nref = data[0]
-        self.dref = data[1]
-
-        # stiffness rows, columns, and data
-        self.krows = data[2]
-        self.kcols = data[3]
-        self.kdata = data[4]
-        
-        # stiffness rows, columns, and data
-        self.mrows = data[5]
-        self.mcols = data[6]
-        self.mdata = data[7]
-#        self.sidx  = data[8]
-        
-        # stack these references
-        dof_ref = np.vstack((self.nref, self.dref)).T
-        
+        # check file still exists
+        if not os.path.isfile(self.filename):
+            raise Exception('{:s} not found'.format(self.filename))
+            
         # see if 
         if as_sparse:
             try:
@@ -165,56 +152,91 @@ class FullReader(object):
                 raise Exception('Unable to load scipy, matricies will be full')
                 as_sparse = False
         
-        # number of dimentions and degree of freedom reference
-        ndim = self.nref.size
-#        idx, ridx = Unique_Rows(dof_ref)
+        # Get header details
+        neqn = self.header[2];    #  Number of equations
+        ntermK = self.header[9];  # number of terms in stiffness matrix
+        ptrSTF = self.header[19]; # Location of stiffness matrix
+        ptrMAS = self.header[27]; # Location in file to mass matrix
+        nNodes = self.header[33]; # Number of nodes considered by assembly
+        ntermM = self.header[34]; # number of terms in mass matrix
+        ptrDOF = self.header[36]; # pointer to DOF info
+        
+        # get details for reading the mass and stiffness arrays
+        node_info = _rstHelper.FullNodeInfo(self.filename, ptrDOF, nNodes, 
+                                            neqn)
+        
+        nref, dref, index_arr, const, ndof = node_info
+        dof_ref = np.vstack((nref, dref)).T # stack these references
+        
+        # Read k and m blocks (see help(ReadArray) for block description)
+        k_block = _rstHelper.ReadArray(self.filename, ptrSTF, ntermK, neqn, 
+                                       index_arr)
+        
+        m_block = _rstHelper.ReadArray(self.filename, ptrMAS, ntermM, neqn, 
+                                       index_arr)        
+        k_diag = k_block[3]
+        k_data_diag = k_block[4]
+    
+        m_diag = m_block[3]
+        m_data_diag = m_block[4]
+        
+        # assemble data
+        if utri:
+            # stiffness matrix
+            krow = np.hstack((k_block[1], k_diag)) # row and diag
+            kcol = np.hstack((k_block[0], k_diag)) # col and diag
+            kdata= np.hstack((k_block[2], k_data_diag)) # data and diag
 
-        # resort K and M matries to ordered sorted node order
-#        if sort:
-#
-#            # get number of degrees of freedom
-#            krow = ridx[self.krows]
-#            kcol = ridx[self.kcols]
-#            mrow = ridx[self.mrows]
-#            mcol = ridx[self.mcols]
-#            
-#            # sorted references
-#            dof_ref = dof_ref[idx]
-#            
-#        else:
-        krow = self.krows
-        kcol = self.kcols
-        mrow = self.mrows
-        mcol = self.mcols
-            
+            # mass matrix
+            mrow = np.hstack((m_block[1], m_diag)) # row and diag
+            mcol = np.hstack((m_block[0], m_diag)) # col and diag
+            mdata= np.hstack((m_block[2], m_data_diag)) # data and diag
+        
+        else:
+            # stiffness matrix
+            krow = np.hstack((k_block[0], k_block[1], k_diag)) # row, col and diag
+            kcol = np.hstack((k_block[1], k_block[0], k_diag)) # col and diag
+            kdata= np.hstack((k_block[2], k_block[2], k_data_diag)) # data and diag
+
+            # mass matrix
+            mrow = np.hstack((m_block[0], m_block[1], m_diag)) # row, col and diag
+            mcol = np.hstack((m_block[1], m_block[0], m_diag)) # col and diag
+            mdata= np.hstack((m_block[2], m_block[2], m_data_diag)) # data and diag
+
+                
+        # number of dimentions
+        ndim = nref.size
+
         # output as a sparse matrix
-#        from scipy import sparse
         if as_sparse:
             
-#            k = csr_matrix((self.kdata, (krow, kcol)), shape=(ndim,)*2)
-
             k = coo_matrix((ndim,)*2)
-            k.data = self.kdata
+            k.data = kdata # data has to be set first
             k.row = krow
             k.col = kcol
-#            k = csr_matrix(k)
-            k = csc_matrix(k)
             
-#            m = csr_matrix((self.mdata, (mrow, mcol)), shape=(ndim,)*2)
+            # convert to csc matrix (generally faster for sparse solvers)
+            k = csc_matrix(k)
 
             m = coo_matrix((ndim,)*2)
-            m.data = self.mdata
+            m.data = mdata
             m.row = mrow
             m.col = mcol
-#            m = csr_matrix(m)
+
+            # convert to csc matrix (generally faster for sparse solvers)
             m = csc_matrix(m)
             
         else:
             k = np.zeros((ndim,)*2)
-            k[krow, kcol] = self.kdata
+            k[krow, kcol] = kdata
 
             m = np.zeros((ndim,)*2)
-            m[mrow, mcol] = self.mdata
+            m[mrow, mcol] = mdata
+            
+        # store if constrained and number of degrees of freedom per node
+        self.const = const < 0
+        self.ndof  = ndof
+        
 
         return dof_ref, k, m
         
@@ -928,3 +950,17 @@ def Unique_Rows(a):
     return idx, ridx
 
 
+def delete_row_csc(mat, i):
+    """ remove a row from a csc matrix """
+#    if not isinstance(mat, scipy.sparse.csr_matrix):
+#        raise ValueError("works only for CSR format -- use .tocsr() first")
+    n = mat.indptr[i+1] - mat.indptr[i]
+    if n > 0:
+        mat.data[mat.indptr[i]:-n] = mat.data[mat.indptr[i+1]:]
+        mat.data = mat.data[:-n]
+        mat.indices[mat.indptr[i]:-n] = mat.indices[mat.indptr[i+1]:]
+        mat.indices = mat.indices[:-n]
+    mat.indptr[i:-1] = mat.indptr[i+1:]
+    mat.indptr[i:] -= n
+    mat.indptr = mat.indptr[:-1]
+    mat._shape = (mat._shape[0]-1, mat._shape[1])

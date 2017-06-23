@@ -26,6 +26,14 @@ be installed with Python bindings.
 Quick Examples
 --------------
 
+Many of the following examples are built in and can be run from the build-in
+examples module.  For a quick demo, run:
+
+.. code:: python
+
+    from pyansys import examples
+    examples.RunAll()
+
 Loading and Plotting an ANSYS Archive File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -131,13 +139,16 @@ example.
     
     # load the full file
     fobj = pyansys.FullReader('file.full')
-    dofref, k, m = fobj.LoadKM()
+    dofref, k, m = fobj.LoadKM(utri=False)
     
 
-If you have ``scipy`` installed, you can solve the eigensystem for its natural frequencies.
+If you have ``scipy`` installed, you can solve the eigensystem for its natural 
+frequencies and mode shapes.
 
 .. code:: python
-    
+
+    from scipy.sparse import linalg
+
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
     # System natural frequencies
