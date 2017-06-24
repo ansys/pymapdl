@@ -55,7 +55,7 @@ setup(
     packages = ['pyansys', 'pyansys.examples'],
 
     # Version
-    version='0.16.4',
+    version='0.16.5',
 
     description='Pythonic interface to ANSYS binary files',
     long_description=open('README.rst').read(),

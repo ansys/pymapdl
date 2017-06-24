@@ -20,7 +20,8 @@ np.import_array()
 
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int, int, int*, int)
-    int read_eblock(char*, int*, int*, int*, int*, int, int, int*, int);
+    int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
+                    int);
 
     
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
@@ -235,11 +236,13 @@ def Read(filename):
     cdef int [::1] etype = np.empty(nelem, dtype=np.int32)
     cdef int [::1] elemnum = np.empty(nelem, dtype=np.int32)
     cdef int [::1] e_rcon = np.empty(nelem, dtype=np.int32)
+    cdef int [::1] mtype = np.empty(nelem, dtype=np.int32)
+    cdef int [::1] sec_id = np.empty(nelem, dtype=np.int32)
 
     # Call C extention to read eblock
     if EBLOCK_found:
-        nelem = read_eblock(raw, &etype[0], &e_rcon[0], &elemnum[0], &elem[0, 0], 
-                        nelem, isz, &n, EOL)
+        nelem = read_eblock(raw, &mtype[0], &etype[0], &e_rcon[0], &sec_id[0],
+                            &elemnum[0], &elem[0, 0], nelem, isz, &n, EOL)
         
     # Get node components
     cdef int ncomp
@@ -298,7 +301,9 @@ def Read(filename):
             'elem': np.array(elem[:nelem]),
             'etype': np.asarray(etype[:nelem]),
             'e_rcon': np.asarray(e_rcon),
-            'node_comps': node_comps}
+            'node_comps': node_comps,
+            'mtype': np.asarray(mtype),
+            'sec_id': np.asarray(sec_id)}
      
     
 def GetBlockFormat(string):

@@ -1,7 +1,5 @@
-__version__ = u'0.16.4'
+__version__ = u'0.16.5'
 
-#from pyansys import Reader
-#from pyansys.Reader import ResultReader
 from pyansys.archive_reader import *
 from pyansys.binary_reader import *
 from pyansys.cellquality import *
