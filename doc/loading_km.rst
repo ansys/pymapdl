@@ -18,8 +18,8 @@ optional parameter ``as_sparse=False`` then they will be full numpy arrays.
 By default ``LoadKM`` outputs the upper triangle of both matrices, to output the
 full matrix, set ``utri=False``.  Additionally, the constrained nodes of the
 analysis can be identified by accessing ``fobj.const`` where the constrained
- degrees of freedom are True and all others are False.  This corresponds to
- the degrees of reference in ``dof_ref``.
+degrees of freedom are True and all others are False.  This corresponds to
+the degrees of reference in ``dof_ref``.
 
 .. code:: python
 
