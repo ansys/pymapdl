@@ -101,7 +101,7 @@ numpy installed.
     nnum = result.nnum
     
     # Get the 1st bending mode shape.  Nodes are ordered according to nnum.
-    disp = result.GetResult(0, True) # uses 0 based indexing 
+    disp = result.GetNodalResult(0, True) # uses 0 based indexing 
 
     # it's just a numpy array
     print disp
