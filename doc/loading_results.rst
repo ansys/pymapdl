@@ -147,11 +147,11 @@ result header dictionary keys ``'ls_table'`` and ``'hindex'``:
            4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7], dtype=int32)
 
 Where each harmonic index entry corresponds a cumulative index.  For example,
-result number 10 is the first mode for the 2nd harmonic index:
+result number 11 is the first mode for the 2nd harmonic index:
 
 .. code:: python
 
-    >>> result.resultheader['ls_table'][10]
+    >>> result.resultheader['ls_table'][10] # Result 11 (using zero based indexing)
     array([ 3,  1, 11], dtype=int32)
     
     >>> result.resultheader['hindex'][10]
