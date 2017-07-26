@@ -21,6 +21,7 @@ import numpy as np
 
 # Attempt to load VTK dependent modules
 try:
+    import vtk
     import vtkInterface
     vtk_loaded = True
 except:
@@ -76,22 +77,28 @@ class ReadArchive(object):
 
     def ParseVTK(self, use_cython=True, force_linear=False):
         """
-        DESCRPTION
         Parses raw data from cdb file to VTK format.  Creates unstructured grid
         as self.uGrid
         
-        INPUTS
-        use_cython (bool, default True)
-            Uses cython parser.  Disable for debugging.
+        Paramters
+        ---------
+        use_cython : bool, optional
+            Select between cython parser vs. python.  Default True.
             
-        force_linear (bool, default False)
+        force_linear : bool, optional
             This parser creates quadradic elements if available.  Set this to
-            true to always create linear elements
+            True to always create linear elements.  Defaults to False.
+            
+            
+        Returns
+        -------
+        uGrid : vtk.vtkUnstructuredGrid
+            VTK unstructured grid from archive file.
         
         """
+        
         if not vtk_loaded:
             raise Exception('Unable to load VTK module.  Cannot parse raw cdb data')
-            return
             
            
         if self.CheckRaw():
@@ -106,10 +113,15 @@ class ReadArchive(object):
             cells, offset, cell_type, numref = PythonParser.Parse(self.raw, 
                                                                   force_linear)
 
+        # catch bug
+        cells[cells > numref.max()] = -1
+            
         # Check for missing midside nodes
+        possible_merged = False
         if force_linear or np.all(cells != -1):
             nodes = self.raw['nodes'][:, :3].copy()
             nnum = self.raw['nnum']
+            
         else:
             mask = cells == -1
             
@@ -130,13 +142,14 @@ class ReadArchive(object):
                 _relaxmidside.ResetMidside(cells, temp_nodes)
                 nodes[nnodes:] = temp_nodes[nnodes:]
                 
-            
+                possible_merged = True
+                
         # Create unstructured grid
         uGrid = vtkInterface.MakeuGrid(offset, cells, cell_type, nodes)
-
+        
         # Store original ANSYS cell and node numbering
         uGrid.AddPointScalars(nnum, 'ANSYSnodenum')
-
+        
         # Add node components to unstructured grid
         ibool = np.empty(uGrid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.raw['node_comps']:
@@ -149,8 +162,22 @@ class ReadArchive(object):
             uGrid.AddPointScalars(ibool, comp.strip())
             
         # Add tracker for original node numbering
+#        npoints = uGrid.GetNumberOfPoints()
+#        uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
+        
+        # merge duplicate points
+        if possible_merged:
+            vtkappend = vtk.vtkAppendFilter()
+            vtkappend.AddInputData(uGrid)
+            vtkappend.MergePointsOn()
+            vtkappend.Update()
+            uGrid = vtkappend.GetOutput()
+            vtkInterface.AddFunctions(uGrid)
+        
+        # Add tracker for original node numbering
         npoints = uGrid.GetNumberOfPoints()
         uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
+        
         self.vtkuGrid = uGrid
         
         return uGrid
@@ -328,3 +355,11 @@ def ExtractThickness(raw):
         t /= a
     
     return t
+
+
+def Unique_Rows(a):
+    """ Returns unique rows of a and indices of those rows """
+    b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx = np.unique(b, return_index=True)
+    
+    return a[idx], idx

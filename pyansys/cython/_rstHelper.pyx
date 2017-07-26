@@ -2,6 +2,7 @@
 # cython: wraparound=False
 # cython: cdivision=True
 
+import ctypes
 import numpy as np
 cimport numpy as np
 
@@ -58,7 +59,7 @@ def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
     
     
 def LoadElements(filename, int ptr, int nelm, 
-                 int [::1] e_disp_table, int [:, ::1] elem, int [::1] etype):
+                 e_disp_table_py, int [:, ::1] elem, int [::1] etype):
     """
     The following is stored for each element
     mat     - material reference number
@@ -75,6 +76,8 @@ def LoadElements(filename, int ptr, int nelm,
     """
     
     cdef int i, j
+    
+    cdef int [::1] e_disp_table = e_disp_table_py.astype(ctypes.c_int)
     
     cdef bytes buf
     with open(filename, "rb") as f:

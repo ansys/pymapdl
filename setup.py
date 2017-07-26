@@ -1,8 +1,10 @@
 """
 Installation file for pyansys
 """
-
+import os
 import sys
+from io import open as io_open
+
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
@@ -49,13 +51,21 @@ else:
     cmp_arg = ['/Ox']
 
 
+# Get version from version info
+__version__ = None
+version_file = os.path.join(os.path.dirname(__file__), 'pyansys', '_version.py')
+with io_open(version_file, mode='r') as fd:
+    # execute file from raw string
+    exec(fd.read())
+    
+
 # Actual setup
 setup(
     name='pyansys',
     packages = ['pyansys', 'pyansys.examples'],
 
     # Version
-    version='0.16.5',
+    version=__version__,
 
     description='Pythonic interface to ANSYS binary files',
     long_description=open('README.rst').read(),
@@ -123,6 +133,6 @@ setup(
                                        'file.rst', 'file.full']},
 
     # Might work with earlier versions
-    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface']
+    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.1.5']
 
 )

@@ -20,6 +20,7 @@ dist/
 
 # MISC
 pyansys/Interface.py
+*.bat
 
 # Testing
 Testing/

@@ -114,5 +114,106 @@ For now, only component stresses can be displayed.
 
     # Display node averaged stress in x direction for result 6
     result.PlotNodalStress(5, 'Sx')
+
+
+Results from a Cyclic Analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``pyansys`` can load and display the results of a cyclic analysis:
+
+.. code:: python
+
+    import pyansys
+
+    # load the result file    
+    result = pyansys.ResultReader('rotor.rst')
     
-  
+You can reference the load step table and harmonic index tables by printing the
+result header dictionary keys ``'ls_table'`` and ``'hindex'``:
+
+.. code:: python
+
+    >>> print(result.resultheader['ls_table'])
+    # load step, sub step, cumulative index
+    array([[ 1,  1,  1], 
+           [ 1,  2,  2],
+           [ 1,  3,  3],
+           [ 1,  4,  4],
+           [ 1,  5,  5],
+           [ 2,  1,  6],
+
+    >>> print(result.resultheader['hindex'])
+    array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4,
+           4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7], dtype=int32)
+
+Where each harmonic index entry corresponds a cumulative index.  For example,
+result number 10 is the first mode for the 2nd harmonic index:
+
+.. code:: python
+
+    >>> result.resultheader['ls_table'][10]
+    array([ 3,  1, 11], dtype=int32)
+    
+    >>> result.resultheader['hindex'][10]
+    2
+
+Results from a cyclic analysis require additional post processing to be  displayed correctly.  Mode shapes are stored within the result file as 
+unprocessed parts of the real and imaginary parts of a modal solution.  ``pyansys`` combines these values into a single complex array and varies the 
+phase of the solution when plotting.  Running ``GetCyclicNodalResult`` returns 
+the unprocessed complex solution for a sector for a given cumulative index:
+
+.. code:: python
+
+    >>> ms = result.GetCyclicNodalResult(10) # mode shape of result 11
+    >>> print(ms[:3])
+    [[ 44.700-19.263j, 45.953+44.856j, 38.717+23.216]
+     [ 42.339-14.645j, 48.516+43.742j, 52.475+24.255]
+     [ 36.000-12.764j, 33.121+40.970j, 39.044+22.881j]]
+
+These results correspond to the nodes of the master sector, whose node numbers 
+can be found in the ``cyc_nnum`` array:
+
+.. code:: python
+
+    >>> result.cyc_nnum # sorted node numbers from the master cyclic sector
+    array([  1,   2,   4,   6,   9,  10,  12, ...
+
+
+The real displacement of the sector is always the real
+component of the mode shape ``ms``, and this can be varied by multiplying the 
+mode shape by a complex value for a given phase.  To change the phase by 
+90 degrees simply:
+
+.. code::
+    
+    >>> from math import sin, cos
+    >>> angle = 3.1415/2 # 90 degrees
+    >>> ms *= cos(angle) + 1j*sin(angle)
+
+
+The results of a single sector can be displayed as well using the
+``PlotCyclicNodalResult`` command with the ``expand=False``
+
+.. code::
+
+    # Plot the result from the 11th cumulative result
+    result.PlotCyclicNodalResult(10, label='Displacement', expand=False)
+    
+.. image:: sector.jpg
+    
+By default the phase of the sector results is changed such that the normalized
+displacement of the mode shape will be maximized at the highest responding node.
+The full rotor can be shown by running:
+    
+.. code::
+
+    >>> result.PlotCyclicNodalResult(10, label='Displacement')
+
+.. image:: rotor.jpg
+
+The phase of the result can be changed by modifying the ``phase`` option.  See
+``help(result.PlotCyclicNodalResult)``` for details on its implementation.
+        
+
+
+

@@ -13,7 +13,7 @@ from pyansys import CDBparser
 # attempt to load vtk
 try:
     import vtkInterface
-#    import vtk
+    import vtk
     vtkloaded = True
 
 except:
@@ -256,10 +256,12 @@ class ResultReader(object):
         filename : string
             Filename of the ANSYS binary result file.
             
-        logger : bool
+        logger : bool, optional
             Enables logging if True.  Debug feature.
-        
-        
+            
+        load_geometry : bool, optional
+            Loads geometry using vtk by default
+            
         Returns
         -------
         None
@@ -298,8 +300,221 @@ class ResultReader(object):
         # store geometry for later retrival
         if load_geometry:
             self.StoreGeometry()
+           
+        if self.resultheader['nSector'] and load_geometry:
+            self.iscyclic = True
+            
+            # Add cyclic properties
+            self.AddCyclicProperties()
+            
+            
+    def AddCyclicProperties(self):
+        """ Adds cyclic properties to result object """
+        # ansys's duplicate sector contains nodes from the second half of the node
+        # numbering
+        # 
+        # ansys node numbering for the duplicate sector is
+        # nnum.min() + nnum.max()
+        # where nnum is the node numbering for the master sector
+        
+#        if not vtkloaded:
+#            raise Exception('Unable to add ')
+        
+        # master sector max node number
+        num_master_max = self.nnum[int(self.nnum.size/2) - 1]
+        
+        # identify master and duplicate cyclic sectors
+        cells = np.arange(self.enum.size)
+        dup_cells = np.where(np.any(self.geometry['elem'] > num_master_max, 1))[0]
+        mas_cells = np.setdiff1d(cells, dup_cells)
+        self.sector = self.uGrid.ExtractSelectionCells(mas_cells)
+        dup_sector = self.uGrid.ExtractSelectionCells(dup_cells)
+        
+        # Store the indices of the master and duplicate nodes
+        self.mas_ind = self.sector.GetPointScalars('vtkOriginalPointIds')
+        self.dup_ind = dup_sector.GetPointScalars('vtkOriginalPointIds')
+        
+        # store cyclic node numbers
+        self.cyc_nnum = self.nnum[self.mas_ind]
+
+        # create full rotor
+        nSector = self.resultheader['nSector']
+        
+        # Copy and translate mesh
+        vtkappend = vtk.vtkAppendFilter()
+        rang = 360.0/nSector
+        for i in range(nSector):
+                
+            # Transform mesh
+            sector = self.sector.Copy()
+            sector.RotateZ(rang*i)
+        
+            vtkappend.AddInputData(sector)
+                
+        # Combine meshes and add VTK_Utilities functions
+        #vtkappend.MergePointsOn()
+        vtkappend.Update()
+        self.rotor = vtkappend.GetOutput()
+        vtkInterface.GridAddExtraFunctions(self.rotor)
         
         
+    def GetCyclicNodalResult(self, rnum):
+        """
+        Returns the nodal result given a cumulative result index.
+        
+        Parameters
+        ----------
+        rnum : interger
+            Cumulative result number.  Zero based indexing.
+            
+        
+        Returns
+        -------
+        result : numpy.complex128 array
+            Result is (nnod x numdof), nnod is the number of nodes in a sector
+            and numdof is the number of degrees of freedom.
+            
+        Notes
+        -----
+        Node numbers correspond to self.cyc_nnum, where self is this result 
+        object
+            
+        """
+        if not self.iscyclic:
+            raise Exception('Result file does not contain cyclic results.')
+
+        # get the nodal result
+        r = self.GetNodalResult(rnum)
+        
+        return r[self.mas_ind] + r[self.dup_ind]*1j
+        
+    
+    def PlotCyclicNodalResult(self, rnum, phase=0, comp='norm', as_abs=False, label='',
+                              expand=True):
+        """
+        Plots a nodal result from a cyclic analysis.
+        
+        Parameters
+        ----------
+        rnum : interger
+            Cumulative result number.  Zero based indexing.
+            
+        phase : float, optional
+            Shifts the phase of the solution.
+            
+        comp : string, optional
+            Display component to display.  Options are 'x', 'y', 'z', and
+            'norm', corresponding to the x directin, y direction, z direction,
+            and the combined direction (x**2 + y**2 + z**2)**0.5
+            
+        as_abs : bool, optional
+            Displays the absolute value of the result.
+            
+        label: string, optional
+            Annotation string to add to scalar bar in plot.
+            
+        expand : bool, optional
+            Expands the solution to a full rotor when True.  Enabled by 
+            default.  When disabled, plots the maximum response of a single
+            sector of the cyclic solution in the component of interest.
+        
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+            
+        Notes
+        -----
+        None
+        
+        """
+        
+        if 'hindex' not in self.resultheader:
+            raise Exception('Result file does not contain cyclic results')
+        
+        # harmonic index and number of sectors
+        hindex = self.resultheader['hindex'][rnum]
+        nSector = self.resultheader['nSector']
+
+        # get the nodal result
+        r = self.GetCyclicNodalResult(rnum)
+        
+        alpha = (2*np.pi/nSector)
+
+        if expand:
+            grid = self.rotor
+            d = np.empty((self.rotor.GetNumberOfPoints(), 3))
+            n = self.sector.GetNumberOfPoints()
+            for i in range(nSector):
+                # adjust the phase of the result
+                sec_sol = np.real(r)*np.cos(i*hindex*alpha + phase) -\
+                          np.imag(r)*np.sin(i*hindex*alpha + phase)
+                          
+                # adjust the "direction" of the x and y vectors as they're being
+                # rotated
+                s_x = sec_sol[:, 0]*np.cos(alpha*i + phase) -\
+                      sec_sol[:, 1]*np.sin(alpha*i + phase)
+                s_y = sec_sol[:, 0]*np.sin(alpha*i + phase) +\
+                      sec_sol[:, 1]*np.cos(alpha*i + phase)
+                sec_sol[:, 0] = s_x
+                sec_sol[:, 1] = s_y
+                
+                d[i*n:(i + 1)*n] = sec_sol
+        
+        else:
+            # plot the max response for a single sector
+            grid = self.sector
+
+            n = np.sum(r*r, 1)
+                
+            # rotate the response based on the angle to maximize the highest
+            # responding node
+            angle = np.angle(n[np.argmax(np.abs(n))])
+            d = np.real(r)*np.cos(angle + phase) -\
+                np.imag(r)*np.sin(angle + phase)   
+                
+            d = -d
+                
+        # Process result
+        if comp == 'x':
+            d = d[:, 0]
+            stitle = 'X {:s}'.format(label)
+            
+        elif comp == 'y':
+            d = d[:, 1]
+            stitle = 'Y {:s}'.format(label)
+            
+        elif comp == 'z':
+            d = d[:, 2]
+            stitle = 'Z {:s}'.format(label)
+            
+        else:
+            # Normalize displacement
+            d = d[:, :3]
+            d = (d*d).sum(1)**0.5
+            
+            stitle = 'Normalized\n{:s}'.format(label)
+            
+        if as_abs:
+            d = np.abs(d)
+        
+        # setup text
+        ls_table = self.resultheader['ls_table']
+        freq = self.GetTimeValues()[rnum]
+        text  = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
+        text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
+        text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
+        text += 'Harmonic Index:   {:3d}\n'.format(hindex)
+        text += 'Frequency:      {:10.4f} Hz'.format(freq)
+
+        # plot        
+        plobj = vtkInterface.PlotClass()
+        plobj.AddMesh(grid, scalars=d, stitle=stitle, flipscalars=True,
+                      interpolatebeforemap=True)
+        plobj.AddText(text, fontsize=20)
+        plobj.Plot(); del plobj
+
+
     def ResultsProperties(self):
         """
         Logs results available in the result file and returns a dictionary
@@ -326,6 +541,10 @@ class ResultReader(object):
         # check number of results
         self.logger.debug('There are {:d} results in this file'.format(self.nsets))
 
+        if self.resultheader['nSector'] > 1:
+            self.logger.debug('Contains results from a cyclic analysis with:')
+            self.logger.debug('\t{:d} sectors'.format(self.resultheader['nSector']))
+
         return {'Number of Results': self.nsets}
 
 
@@ -333,18 +552,19 @@ class ResultReader(object):
         """
         Plots a nodal result.  
         
-        Archive file must be loaded and nodal results must exist.
-        
         Parameters
         ----------
         rnum : interger
-            Result set requested.  Zero based indexing.
+            Cumulative result number.  Zero based indexing.
+            
         comp : string, optional
             Display component to display.  Options are 'x', 'y', 'z', and
             'norm', corresponding to the x directin, y direction, z direction,
             and the combined direction (x**2 + y**2 + z**2)**0.5
+            
         as_abs : bool, optional
             Displays the absolute value of the result.
+            
         label: string, optional
             Annotation string to add to scalar bar in plot.
         
@@ -439,7 +659,8 @@ class ResultReader(object):
         Parameters
         ----------
         rnum : interger
-            Result set requested.  Zero based indexing.
+            Cumulative result number.  Zero based indexing.
+            
         sort : bool, optional
             Resorts the results so that the results correspond to the sorted
             node numbering (self.nnum) (default).  If left unsorted, results 
@@ -480,14 +701,28 @@ class ResultReader(object):
         f.close()
         
         # Reshape to number of degrees of freedom
-        result = result.reshape((-1, numdof))
+        r = result.reshape((-1, numdof))
         
-        # Return results
+        # if using a cyclic coordinate system
+        if self.resultheader['csCord']:
+            # compute sin and cos angles
+            if not hasattr(self, 's_angle'):
+                # angle of each point
+                angle = np.arctan2(self.geometry['nodes'][:, 1], self.geometry['nodes'][:, 0])
+                angle = angle[np.argsort(self.sidx)]
+                self.s_angle = np.sin(angle)#[self.sidx]
+                self.c_angle = np.cos(angle)#[self.sidx]
+                
+            rx = r[:, 0]*self.c_angle - r[:, 1]*self.s_angle
+            ry = r[:, 0]*self.s_angle + r[:, 1]*self.c_angle
+            r[:, 0] = rx
+            r[:, 1] = ry
+        
+        # Reorder based on sorted indexing and return
         if sort:
-            # Reorder based on sorted indexing and return
-            return result.take(self.sidx, 0)
-        else:
-            return result
+            r = r.take(self.sidx, 0)
+            
+        return r
     
     
     def StoreGeometry(self):
@@ -586,68 +821,24 @@ class ResultReader(object):
         # load elements
         _rstHelper.LoadElements(self.filename, ptr, nelm, e_disp_table, elem, 
                                 etype)
-
-
-    #==============================================================================
-    # old python
-    #==============================================================================
-#        for i in range(nelm-1):
-#        
-#            # Element type
-#            f.seek((ptrEID + e_disp_table[i] + 3)*4)
-#            etype = np.fromfile(f, self.resultheader['endian'] + 'i', 1)[0]
-#            etype_arr[i] = etype
-#            
-#            nread =  e_disp_table[i + 1] -  e_disp_table[i] - 13
-#        
-#            # store element numbers
-#            f.seek(32, 1)
-#            rnodes = np.fromfile(f, self.resultheader['endian'] + 'i', nread)
-#            elem[i, :nread] = rnodes
-#            
-#            
-#        i += 1
-#        f.seek((ptrEID + e_disp_table[i])*4)
-#        nentry = np.fromfile(f, self.resultheader['endian'] + 'i', 1)[0]
-#        nread = nentry - 10
-#        f.seek(8, 1)
-#        
-#        etype = np.fromfile(f, self.resultheader['endian'] + 'i', 1)[0]
-#        etype_arr[i] = etype
-#        
-#        # store element numbers
-#        f.seek(32, 1)
-#        rnodes = np.fromfile(f, self.resultheader['endian'] + 'i', nread)
-#        elem[i, :nread] = rnodes
-
-#        import ctypes
-#        e_disp_table = e_disp_table.astype(ctypes.c_long)
-#        _rstHelper.LoadElements(self.filename, ptrEID, nelm, e_disp_table, 
-#                                elem, etype)
-        
-#        for i in range(nelm):
-#            if not np.all(elem_linux[i] == elem[i]):
-#                print i
-#                break
-#        
+        enum = self.resultheader['eeqv']
         
         # store geometry dictionary
         self.geometry = {'nnum': nnum,
                          'nodes': nloc,
                          'etype': etype,
                          'elem': elem,
-                         'enum': self.resultheader['eeqv'],
+                         'enum': enum,
                          'ekey': np.asarray(ekey, ctypes.c_long)}
         
         
         # store the reference array
         cells, offset, cell_type, self.numref = CDBparser.Parse(self.geometry, True)
-        
+
         # Create vtk object if vtk installed
         if vtkloaded:
             nodes = nloc[:, :3]
             self.uGrid = vtkInterface.MakeuGrid(offset, cells, cell_type, nodes)
-            
         
         # get edge nodes            
         nedge = nodstr[etype].sum()
@@ -658,8 +849,13 @@ class ResultReader(object):
         
         # store edge node numbers and indices to the node array
         self.edge_node_num_idx = np.unique(self.edge_idx)
-        self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
-    
+
+        # catch the disassociated node bug
+#        try:
+#            self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
+#        except:
+#            logging.warning('unable to generate edge_node_num')
+            
     
     def NodalStress(self, rnum):
         """
@@ -881,10 +1077,12 @@ def GetResultInfo(filename):
     version = f.read(4)[::-1]
 
     try:
+        resultheader['verstring'] = version
         resultheader['mainver'] = int(version[:2])
         resultheader['subver'] = int(version[-1])
     except:
         warnings.warn('Unable to parse version')
+        resultheader['verstring'] = 'unk'
         resultheader['mainver'] = 15
         resultheader['subver'] = 0
         
@@ -914,14 +1112,26 @@ def GetResultInfo(filename):
     # Pointer to the table of time values for a load step (item 12)
     resultheader['ptrTIMl'] = rheader[11]
     
+    # pointer to load step table (item 13)
+    ptrLSP = rheader[12]    
+    
     # pointer to element equivalence table (item 14)
     ptrELM = rheader[13]
     
     # pointer to nodal equivalence table (item 15)
     ptrNODl = rheader[14]
     
-    # pointer to geometry information (item 15)
+    # pointer to geometry information (item 16)
     resultheader['ptrGEO'] = rheader[15]
+    
+    # pointer to cyclic symmetry nodal-diameters for each load step
+    resultheader['ptrCYC'] = rheader[16]
+    
+    # number of sectors (item 21)
+    resultheader['nSector'] = rheader[20]
+    
+    # cyclic symmetry coordinate system
+    resultheader['csCord'] = rheader[21]
     
     # Read nodal equivalence table
     f.seek((ptrNODl + 2)*4) # Start of pointer, then empty, then data
@@ -936,10 +1146,21 @@ def GetResultInfo(filename):
     rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets'])
     resultheader['rpointers'] = rpointers
     
+    # load harmonic index of each result
+    if resultheader['ptrCYC']:
+        f.seek((resultheader['ptrCYC'] + 2)*4)
+        resultheader['hindex'] = np.fromfile(f, endian + 'i',
+                    count=resultheader['nsets'])
+
+    # load step table with columns:
+    # [loadstep, substep, and cumulative]        
+    f.seek((ptrLSP + 2)*4) # Start of pointer, then empty, then data
+    table = np.fromfile(f, endian + 'i', count=resultheader['nsets']*3)
+    resultheader['ls_table'] = table.reshape((-1, 3))
+    
     f.close()
     
     return resultheader
-
 
 
 def Unique_Rows(a):

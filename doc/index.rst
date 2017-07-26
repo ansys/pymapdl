@@ -2,11 +2,11 @@ pyansys
 =======
 
 This Python module allows you to to extract data from ANSYS files and to display
-them if VTK is installed.  Currently supports result (.rst), mass and 
-stiffness (.full), and block archive (.cdb) files.
+them if VTK is installed.  Supports result (.rst), mass and stiffness (.full), 
+and block archive (.cdb) files.
  
 
-.. image:: hexbeam_disp.png
+.. image:: rotor.jpg
 
 Contents
 ========
@@ -35,12 +35,11 @@ convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must
 be installed with Python bindings.
 
 
-
 License
 -------
 
-This module, pyansys is licensed under the MIT license.
-
+This module is licensed under the MIT license.  See the license file for more
+details.
 
 
 Indices and tables
