@@ -8,6 +8,7 @@ the analysis, these results could be anything from modal displacements to
 nodal temperatures.  At this time, only the following results are supported by
 this code
     - Nodal DOF results from a static analysis or harmonic analysis.
+    - Nodal DOF results from a cyclic static or harmonic analysis.
     - Nodal averaged component stresses (i.e. x, y, z, xy, xz, yz)
 
 We're working on adding additional plotting and retrival functions to the code 
