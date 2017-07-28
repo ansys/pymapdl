@@ -180,6 +180,9 @@ class FullReader(object):
         m_diag = m_block[3]
         m_data_diag = m_block[4]
         
+        self.m_block = m_block
+        self.k_block = k_block
+        
         # assemble data
         if utri:
             # stiffness matrix
@@ -203,6 +206,13 @@ class FullReader(object):
             mcol = np.hstack((m_block[1], m_block[0], m_diag)) # col and diag
             mdata= np.hstack((m_block[2], m_block[2], m_data_diag)) # data and diag
 
+        # store data for later reference
+        self.krow  = krow
+        self.kcol  = kcol
+        self.kdata = kdata
+        self.mrow  = mrow
+        self.mcol  = mcol
+        self.mdata = mdata
                 
         # number of dimentions
         ndim = nref.size
@@ -301,7 +311,7 @@ class ResultReader(object):
         if load_geometry:
             self.StoreGeometry()
            
-        if self.resultheader['nSector'] and load_geometry:
+        if self.resultheader['nSector'] > 1 and load_geometry:
             self.iscyclic = True
             
             # Add cyclic properties
@@ -608,11 +618,22 @@ class ResultReader(object):
             d = np.abs(d)
         
         # Generate plot
-        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
+#        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
+        
+        # setup text
+        ls_table = self.resultheader['ls_table']
+        freq = self.GetTimeValues()[rnum]
+        text  = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
+        text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
+        text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
+#        text += 'Harmonic Index:   {:3d}\n'.format(hindex)
+        text += 'Frequency:      {:10.4f} Hz'.format(freq)
+
+        
         plobj = vtkInterface.PlotClass()
         plobj.AddMesh(self.uGrid, no_copy=True, scalars=d, stitle=stitle, 
                       flipscalars=True, interpolatebeforemap=True)
-        plobj.AddText(text)
+        plobj.AddText(text, fontsize=20)
         cpos = plobj.Plot();  # store camera position
         del plobj
 

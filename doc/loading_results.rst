@@ -29,14 +29,14 @@ accesses the results through a python object `result` which you can create with
     import pyansys
     result = pyansys.ResultReader('file.rst')
     
-Upon initialization this result file contains several properties to include the
-time values from the analysis, node numbering, element numbering, etc.
+Upon initialization the ``ResultReader`` object contains several properties to 
+include the time values from the analysis, node numbering, element numbering, etc.
 
 
-Result File Properties
-~~~~~~~~~~~~~~~~~~~~~~
+ResultReader Properties
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The properties of the result file can be listed the below code.  At the moment,
+The properties of the ``ResultReader`` are listed below.  At the moment,
 the property listing is limited to only the number of results in the file.
 
 .. code:: python
@@ -63,7 +63,7 @@ Geometry
 ~~~~~~~~
     
 The geometry of the model can be accessed directly from the dictionary by 
-accessing
+accessing:
 
 .. code:: python
 
@@ -103,9 +103,9 @@ degrees of freedom.
     result.PlotNodalResult(0, label='Normalized')
 
 Stress can be obtained as well using the below code.  The nodal stress is 
-computed in the same manner that ANSYS uses by to determine the stress at each
-node by averaging the stress evaluated at that node for all attached elements.
-For now, only component stresses can be displayed.
+computed in the same manner as ANSYS by averaging the stress evaluated at
+that node for all attached elements.  For now, only component stresses can 
+be displayed.
 
 .. code:: python
     
