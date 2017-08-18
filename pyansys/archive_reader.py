@@ -250,7 +250,7 @@ class ReadArchive(object):
             grid = self.uGrid
         
         else:
-            raise Exception('Unstructred grid not generated.  Run ParseVTK or ParseFEM first.')
+            raise Exception('Unstructred grid not generated.  Run ParseFEM first.')
 
         if not grid.GetNumberOfCells():
             raise Exception('Unstructured grid contains no cells')
@@ -275,7 +275,7 @@ class ReadArchive(object):
         The file extension will select the type of writer to use.  *.vtk will
         use the legacy writer, while *.vtu will select the VTK XML writer.
         
-        Run ParseFEM or ParseVTK before running this to generate the vtk object
+        Run ParseFEM before running this to generate the vtk object
         
         Parameters
         ----------
@@ -300,7 +300,7 @@ class ReadArchive(object):
         
         # Check if the unstructured grid exists
         if not hasattr(self, 'uGrid'):
-            raise Exception('Run ParseFEM or ParseVTK first.')
+            raise Exception('Run ParseFEM first.')
             
         # Write the grid
         self.uGrid.WriteGrid(filename, binary)

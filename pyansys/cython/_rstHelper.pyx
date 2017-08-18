@@ -117,8 +117,8 @@ def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
             c += 1
     
     
-def LoadStress(filename, int table_index, int [::1] ele_ind_table, int [::1] nodstr,
-               int [::1] etype, int nitem, 
+def LoadStress(filename, int table_index, int [::1] ele_ind_table, 
+               int [::1] nodstr,int [::1] etype, int nitem, 
                float [:, ::1] ele_data_arr, int [::1] edge_idx):
     
     cdef int i, j, k, ind
@@ -126,7 +126,7 @@ def LoadStress(filename, int table_index, int [::1] ele_ind_table, int [::1] nod
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'r')
+    cfile = fopen(c_filename, 'rb')
     
     cdef int ele_table, ptr, nnode_elem
     cdef float [1000] ele_data
@@ -156,9 +156,50 @@ def LoadStress(filename, int table_index, int [::1] ele_ind_table, int [::1] nod
 
             c += 1
 
-
     fclose(cfile)
     
+    
+def LoadStressDouble(filename, int table_index, int [::1] ele_ind_table, 
+                   int [::1] nodstr,int [::1] etype, int nitem, 
+                   double [:, ::1] ele_data_arr, int [::1] edge_idx):
+    
+    cdef int i, j, k, ind
+    
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cfile = fopen(c_filename, 'rb')
+    
+    cdef int ele_table, ptr, nnode_elem
+    cdef double [1000] ele_data
+    cdef int c = 0
+    for i in range(len(ele_ind_table)):
+        
+        # get location of pointers to element data
+        ele_table = ele_ind_table[i]
+        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+        fread(&ptr, sizeof(int), 1, cfile)
+
+        # Get the nodes in the element    
+        nnode_elem = nodstr[etype[i]]
+
+        # read the stresses evaluated at the intergration points or nodes
+        fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
+        fread(&ele_data, sizeof(double), nnode_elem*nitem, cfile)
+
+        # store these values
+        for j in range(nnode_elem):
+            # corresponding edge indices for these component stressess
+            ind = edge_idx[c]
+
+            # [Sx Sy Sz Sxy Syz Sxz]
+            for k in range(6):
+                ele_data_arr[ind, k] += ele_data[k + nitem*j]
+
+            c += 1
+
+
+    fclose(cfile)
     
 def ReadArray(filename, int ptr, int nterm, int neqn, int [::1] index_arr):
     """

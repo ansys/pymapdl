@@ -216,5 +216,31 @@ The phase of the result can be changed by modifying the ``phase`` option.  See
 ``help(result.PlotCyclicNodalResult)``` for details on its implementation.
         
 
+Exporting to Paraview
+~~~~~~~~~~~~~~~~~~~~~
 
+Paraview is a visualization application that can be used for rapid generation
+of plots and graphs using VTK through a GUI.  ``pyansys`` can translate the
+ANSYS result files to Paraview compatible files containing the geometry and
+nodal results from the analysis:
 
+.. code:: python
+
+    import pyansys
+    from pyansys import examples
+    
+    # load example beam result file
+    result = pyansys.ResultReader(examples.rstfile)
+    
+    # save as a binary vtk xml file
+    result.SaveAsVTK('beam.vtu')
+
+The vtk xml file can now be loaded using paraview.  This screenshot shows the
+nodal displacement of the first result from the result file plotted within 
+`Paraview <https://www.paraview.org/>`_.  Within the vtk file are two point
+arrays (``NodalResult`` and ``NodalStress``) for each result in the result 
+file.  The nodal result values will depend on the analysis type, while
+nodal stress will always be the node average stress in the Sx, Sy Sz, Sxy, Syz,
+and Sxz directions.
+
+.. image:: paraview.jpg
