@@ -18,6 +18,7 @@ cdb.Plot()
 """
 import warnings
 import numpy as np
+import logging
 
 # Attempt to load VTK dependent modules
 try:
@@ -43,23 +44,25 @@ from pyansys import PythonParser
 
 
 class ReadArchive(object):
-    """ FEM object """
+    """
+    Initialize cdb object by reading raw cdb from file
     
-    def __init__(self, filename='', use_cython=True, raw=None):
-        """
-        Initialize cdb object by reading raw cdb from file
+    Parameters
+    ----------
+    filename : string
+        Filename of block formatted cdb file
         
-        INPUTS:
-        filename (string):
-            filename of block formatted cdb file
-            
-        use_cython (bool optional):
-            boolean flag to use cython reader defaults to True
+    use_cython : bool, optional:
+        Boolean flag to use cython reader defaults to True
 
-        raw (dictonary optional):
-            dictionary of raw data
-    
-        """
+    raw : dictonary, optional
+        Dictionary of raw data.  Used to initialize the cdb object without a
+        file.
+
+    """
+        
+    def __init__(self, filename='', use_cython=True, raw=None):
+        """ Initializes a cdb object """
         
         if raw and not filename:
             # Load raw data exterinally
@@ -80,15 +83,14 @@ class ReadArchive(object):
         Parses raw data from cdb file to VTK format.  Creates unstructured grid
         as self.uGrid
         
-        Paramters
-        ---------
+        Parameters
+        ----------
         use_cython : bool, optional
             Select between cython parser vs. python.  Default True.
             
         force_linear : bool, optional
             This parser creates quadradic elements if available.  Set this to
             True to always create linear elements.  Defaults to False.
-            
             
         Returns
         -------
@@ -183,8 +185,39 @@ class ReadArchive(object):
         return uGrid
         
         
-    def ParseFEM(self, use_cython=True, raw=None):
-        """ Parses raw data from cdb file to VTK format """
+    def ParseFEM(self, use_cython=True):
+        """
+        Parses raw data from cdb file to VTK format.  Creates unstructured grid
+        as self.uGrid.  Returns additional arrays to be used in downstream FEM
+        analysis.
+        
+
+        Parameters
+        ----------
+        use_cython : bool, optional
+            Select between cython parser and slower python parser.  
+            Default True.  Enable for debugging purposes.
+            
+            
+        Returns
+        -------
+        data : dictionary
+            Dictionary containing arrays useful for interacting with the FEM
+            without the use of the unstructured grid.
+            
+        uGrid : vtk.vtkUnstructuredGrid
+            VTK unstructured grid from archive file.
+            
+        cellarr : np.int32 numpy.ndarray
+            Each row of this array contains the points used to construct a 
+            cell.  -1 indicates that it is an unused point.
+            
+        ncellpts : np.int32 numpy.ndarray
+            Number of points per cell.  Indexing corresponds to row numbers in
+            cellarr.
+        
+        """
+        
         if not vtk_loaded:
             raise Exception('Unable to load VTK module.  Cannot parse raw cdb data')
             return
@@ -228,7 +261,17 @@ class ReadArchive(object):
         """
         Adds 'thickness' point scalars to uGrid
         
-        Assumes that thickness is stored as SURF154 elements
+        Assumes that thickness is stored as SURF154 elements in the 7th entry
+        of the RLBLOCK for each item.
+        
+        Parameters
+        ----------
+        None
+        
+        
+        Returns
+        -------
+        None
         
         """
         nnum = self.uGrid.GetPointScalars('ANSYSnodenum')        
@@ -277,6 +320,7 @@ class ReadArchive(object):
         
         Run ParseFEM before running this to generate the vtk object
         
+        
         Parameters
         ----------
         filename : str
@@ -285,7 +329,8 @@ class ReadArchive(object):
             while *.vtu will select the PVTK XML writer
         binary : bool, optional
             Writes as a binary file by default.  Set to False to write ASCII
-            
+        
+        
         Returns
         -------
         None
@@ -346,10 +391,15 @@ def ExtractThickness(raw):
             
             idx = idx[idx != -1]
                       
-            # Add thickness            
-            t[idx] += rdat[i][6]
-            a[idx] += 1
-        
+            # Attempt to add thickness
+            try:
+                t[idx] += rdat[i][6]
+                a[idx] += 1
+
+            except:
+                logging.warning('Unable to load thickness from RLBLOCK '
+                                'constant %d.  Likely an empty item.'% rnum[i])  
+                
         # normalize thickness by number of entires
         a[a == 0] = 1 # avoid divide by zero
         t /= a
