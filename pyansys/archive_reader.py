@@ -25,7 +25,7 @@ try:
     import vtk
     import vtkInterface
     vtk_loaded = True
-except:
+except BaseException:
     warnings.warn('Unable to load vtk dependent modules')
     vtk_loaded = False
 
@@ -35,10 +35,10 @@ try:
     from pyansys import _relaxmidside
     from pyansys import CDBparser
     cython_loaded = True
-except:
+except BaseException:
     warnings.warn('Unable to load Cython modules')
     cython_loaded = False
-    
+
 from pyansys import PythonReader
 from pyansys import PythonParser
 
@@ -46,12 +46,12 @@ from pyansys import PythonParser
 class ReadArchive(object):
     """
     Initialize cdb object by reading raw cdb from file
-    
+
     Parameters
     ----------
     filename : string
         Filename of block formatted cdb file
-        
+
     use_cython : bool, optional:
         Boolean flag to use cython reader defaults to True
 
@@ -60,15 +60,15 @@ class ReadArchive(object):
         file.
 
     """
-        
+
     def __init__(self, filename='', use_cython=True, raw=None):
         """ Initializes a cdb object """
-        
+
         if raw and not filename:
             # Load raw data exterinally
             self.raw = raw
             return
-        
+
         # Defaults to cython reader if user selects it
         if use_cython and cython_loaded:
             self.raw = _reader.Read(filename)
@@ -77,96 +77,98 @@ class ReadArchive(object):
         else:
             self.raw = PythonReader.Read(filename)
 
-
     def ParseVTK(self, use_cython=True, force_linear=False):
         """
         Parses raw data from cdb file to VTK format.  Creates unstructured grid
         as self.uGrid
-        
+
         Parameters
         ----------
         use_cython : bool, optional
             Select between cython parser vs. python.  Default True.
-            
+
         force_linear : bool, optional
             This parser creates quadradic elements if available.  Set this to
             True to always create linear elements.  Defaults to False.
-            
+
         Returns
         -------
         uGrid : vtk.vtkUnstructuredGrid
             VTK unstructured grid from archive file.
-        
+
         """
-        
+
         if not vtk_loaded:
-            raise Exception('Unable to load VTK module.  Cannot parse raw cdb data')
-            
-           
+            raise Exception(
+                'Unable to load VTK module.  Cannot parse raw cdb data')
+
         if self.CheckRaw():
-            raise Exception('Missing key data.  Cannot parse into unstructured grid')            
-           
+            raise Exception(
+                'Missing key data.  Cannot parse into unstructured grid')
+
         # Convert to vtk style arrays
         if use_cython and cython_loaded:
             cells, offset, cell_type, numref = CDBparser.Parse(self.raw,
                                                                force_linear)
-            
+
         else:
-            cells, offset, cell_type, numref = PythonParser.Parse(self.raw, 
+            cells, offset, cell_type, numref = PythonParser.Parse(self.raw,
                                                                   force_linear)
 
         # catch bug
         cells[cells > numref.max()] = -1
-            
+
         # Check for missing midside nodes
         possible_merged = False
         if force_linear or np.all(cells != -1):
             nodes = self.raw['nodes'][:, :3].copy()
             nnum = self.raw['nnum']
-            
+
         else:
             mask = cells == -1
-            
+
             nextra = mask.sum()
             maxnum = numref.max() + 1
             cells[mask] = np.arange(maxnum, maxnum + nextra)
-            
+
             nnodes = self.raw['nodes'].shape[0]
             nodes = np.zeros((nnodes + nextra, 3))
             nodes[:nnodes] = self.raw['nodes'][:, :3]
-            
+
             # Add extra node numbers
-            nnum = np.hstack((self.raw['nnum'], np.ones(nextra, np.int32)*-1))
-            
+            nnum = np.hstack(
+                (self.raw['nnum'], np.ones(
+                    nextra, np.int32) * -1))
+
             if cython_loaded:
                 # Set new midside nodes directly between their edge nodes
                 temp_nodes = nodes.copy()
                 _relaxmidside.ResetMidside(cells, temp_nodes)
                 nodes[nnodes:] = temp_nodes[nnodes:]
-                
+
                 possible_merged = True
-                
+
         # Create unstructured grid
         uGrid = vtkInterface.MakeuGrid(offset, cells, cell_type, nodes)
-        
+
         # Store original ANSYS cell and node numbering
         uGrid.AddPointScalars(nnum, 'ANSYSnodenum')
-        
+
         # Add node components to unstructured grid
         ibool = np.empty(uGrid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.raw['node_comps']:
-            ibool[:] = 0 # reset component array
+            ibool[:] = 0  # reset component array
 
             # Convert to new node numbering
             nodenum = numref[self.raw['node_comps'][comp]]
-            
+
             ibool[nodenum] = 1
             uGrid.AddPointScalars(ibool, comp.strip())
-            
+
         # Add tracker for original node numbering
 #        npoints = uGrid.GetNumberOfPoints()
 #        uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
-        
+
         # merge duplicate points
         if possible_merged:
             vtkappend = vtk.vtkAppendFilter()
@@ -175,64 +177,65 @@ class ReadArchive(object):
             vtkappend.Update()
             uGrid = vtkappend.GetOutput()
             vtkInterface.AddFunctions(uGrid)
-        
+
         # Add tracker for original node numbering
         npoints = uGrid.GetNumberOfPoints()
         uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
-        
+
         self.vtkuGrid = uGrid
-        
+
         return uGrid
-        
-        
+
     def ParseFEM(self, use_cython=True):
         """
         Parses raw data from cdb file to VTK format.  Creates unstructured grid
         as self.uGrid.  Returns additional arrays to be used in downstream FEM
         analysis.
-        
+
 
         Parameters
         ----------
         use_cython : bool, optional
-            Select between cython parser and slower python parser.  
+            Select between cython parser and slower python parser.
             Default True.  Enable for debugging purposes.
-            
-            
+
+
         Returns
         -------
         data : dictionary
             Dictionary containing arrays useful for interacting with the FEM
             without the use of the unstructured grid.
-            
+
         uGrid : vtk.vtkUnstructuredGrid
             VTK unstructured grid from archive file.
-            
+
         cellarr : np.int32 numpy.ndarray
-            Each row of this array contains the points used to construct a 
+            Each row of this array contains the points used to construct a
             cell.  -1 indicates that it is an unused point.
-            
+
         ncellpts : np.int32 numpy.ndarray
             Number of points per cell.  Indexing corresponds to row numbers in
             cellarr.
-        
+
         """
-        
+
         if not vtk_loaded:
-            raise Exception('Unable to load VTK module.  Cannot parse raw cdb data')
+            raise Exception(
+                'Unable to load VTK module.  Cannot parse raw cdb data')
             return
-            
+
         if self.CheckRaw():
-            raise Exception('Missing key data.  Cannot parse into unstructured grid.')            
-            
+            raise Exception(
+                'Missing key data.  Cannot parse into unstructured grid.')
+
         # Convert to vtk style arrays
         if use_cython and cython_loaded:
             self.data = CDBparser.ParseForFEM(self.raw)
         else:
             self.data = PythonParser.ParseForFEM(self.raw)
-            
+
         # Create unstructured grid
-        self.uGrid = vtkInterface.MakeuGrid(self.data['offset'], self.data['cells'], 
+        self.uGrid = vtkInterface.MakeuGrid(self.data['offset'], self.data['cells'],
                                             self.data['cell_type'],
                                             self.data['nodes'][:, :3])
 
@@ -246,40 +249,38 @@ class ReadArchive(object):
         # Add node components to unstructured grid
         ibool = np.empty(self.uGrid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.data['node_comps']:
-            ibool[:] = 0 # reset component array
+            ibool[:] = 0  # reset component array
             ibool[self.data['node_comps'][comp]] = 1
             self.uGrid.AddPointScalars(ibool, comp.strip())
-            
+
         # Add tracker for original node numbering
         npoints = self.uGrid.GetNumberOfPoints()
         self.uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
-                                  
+
         return self.data, self.uGrid, self.data['cellarr'], self.data['ncellpts']
-        
-        
+
     def AddThickness(self):
         """
         Adds 'thickness' point scalars to uGrid
-        
+
         Assumes that thickness is stored as SURF154 elements in the 7th entry
         of the RLBLOCK for each item.
-        
+
         Parameters
         ----------
         None
-        
-        
+
+
         Returns
         -------
         None
-        
+
         """
-        nnum = self.uGrid.GetPointScalars('ANSYSnodenum')        
+        nnum = self.uGrid.GetPointScalars('ANSYSnodenum')
         t = ExtractThickness(self.raw)[nnum]
-        
+
         self.uGrid.AddPointScalars(t, 'thickness', False)
         self.hasthickness = True
-        
 
     def Plot(self):
         """ Plot unstructured grid """
@@ -291,125 +292,127 @@ class ReadArchive(object):
 
         elif hasattr(self, 'uGrid'):
             grid = self.uGrid
-        
+
         else:
-            raise Exception('Unstructred grid not generated.  Run ParseFEM first.')
+            raise Exception(
+                'Unstructred grid not generated.  Run ParseFEM first.')
 
         if not grid.GetNumberOfCells():
             raise Exception('Unstructured grid contains no cells')
         grid.Plot()
-
 
     def CheckRaw(self):
         """ Check if raw data can be converted into an unstructured grid """
         try:
             self.raw['elem'][0, 0]
             self.raw['enum'][0]
-        except:
+        except BaseException:
             return 1
 
         return 0
-    
-    
+
     def SaveAsVTK(self, filename, binary=True):
         """
         Writes the ANSYS FEM as a vtk file.
-        
+
         The file extension will select the type of writer to use.  *.vtk will
         use the legacy writer, while *.vtu will select the VTK XML writer.
-        
+
         Run ParseFEM before running this to generate the vtk object
-        
-        
+
+
         Parameters
         ----------
         filename : str
-            Filename of grid to be written.  The file extension will select the 
-            type of writer to use.  *.vtk will use the legacy writer, 
+            Filename of grid to be written.  The file extension will select the
+            type of writer to use.  *.vtk will use the legacy writer,
             while *.vtu will select the PVTK XML writer
         binary : bool, optional
             Writes as a binary file by default.  Set to False to write ASCII
-        
-        
+
+
         Returns
         -------
         None
-            
+
         Notes
         -----
         Binary files write much faster than ASCII, but binary files written on
         one  system may not be readable on other systems.  Binary can only be
         selected for the legacy writer.
-        
-        """    
-        
+
+        """
+
         # Check if the unstructured grid exists
         if not hasattr(self, 'uGrid'):
             raise Exception('Run ParseFEM first.')
-            
+
         # Write the grid
         self.uGrid.WriteGrid(filename, binary)
-            
-            
+
+
 def ExtractThickness(raw):
     """
     Extract thickness from raw element data:
 
     Assumes that thickness is stored as a real constant for SURF154 elements
 
-    The "thickness" of nodes belonging to multiple SURF154 elements will is 
-    averaged   
-    
+    The "thickness" of nodes belonging to multiple SURF154 elements will is
+    averaged
+
     """
-    
+
     ekey = raw['ekey']
     etype = raw['etype']
     nnum = raw['nnum']
-    e_rcon = raw['e_rcon'] # real constants
+    e_rcon = raw['e_rcon']  # real constants
     rdat = raw['rdat']
     rnum = raw['rnum']
-    
+
     # Assemble node thickness array (nodes belonging to SURF154)
     ety = np.in1d(ekey[:, 1], 154)
     maskC = np.in1d(etype, ekey[ety, 0])
-    
+
     # Create thickness array
     maxnode = nnum.max() + 1
     t = np.zeros(maxnode)
-    a = np.zeros(maxnode, np.int32) # number of entries in thickness array
-    
+    a = np.zeros(maxnode, np.int32)  # number of entries in thickness array
+
     if np.any(maskC):
 
         # Reduce element matrix to maskC elements and first four nodes
-        elem = raw['elem'][maskC, :8] 
+        elem = raw['elem'][maskC, :8]
         e_rcon = e_rcon[maskC]
 
         # Get the nodes of the elements matching each real constant
         for i in range(len(rnum)):
             # Get all surf154 elements matching the real constant
-            idx = elem[e_rcon == rnum[i]] # get node indices
-            
+            idx = elem[e_rcon == rnum[i]]  # get node indices
+
             idx = idx[idx != -1]
-                      
+
             # Attempt to add thickness
             try:
                 t[idx] += rdat[i][6]
                 a[idx] += 1
 
-            except:
-                logging.warning('Unable to load thickness from RLBLOCK '
-                                'constant %d.  Likely an empty item.'% rnum[i])  
-                
+            except BaseException:
+                logging.warning(
+                    'Unable to load thickness from RLBLOCK '
+                    'constant %d.  Likely an empty item.' %
+                    rnum[i])
+
         # normalize thickness by number of entires
-        a[a == 0] = 1 # avoid divide by zero
+        a[a == 0] = 1  # avoid divide by zero
         t /= a
-    
+
     return t
 
 
 def Unique_Rows(a):
     """ Returns unique rows of a and indices of those rows """
-    b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    b = np.ascontiguousarray(a).view(
+        np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
     _, idx = np.unique(b, return_index=True)
-    
+
     return a[idx], idx

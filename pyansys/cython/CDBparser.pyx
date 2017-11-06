@@ -4,28 +4,27 @@
 
 import numpy as np
 cimport numpy as np
-
-# Numpy must be initialized. When using numpy from C or Cython you must
-# _always_ do that, or you will have segfaults
-np.import_array()
-
 import ctypes               
-         
+
 # Type defintion for an unsigned 8-bit
 ctypedef unsigned char uint8
-          
+
 # VTK numbering for vtk cells
+cdef uint8 VTK_TRIANGLE = 5
+cdef uint8 VTK_QUAD = 9
+cdef uint8 VTK_QUADRATIC_TRIANGLE = 22
+cdef uint8 VTK_QUADRATIC_QUAD = 23
 cdef uint8 vtkhexnum = 12
 cdef uint8 vtkpyrnum = 14
 cdef uint8 vtktetnum = 10
 cdef uint8 vtkwegnum = 13
-                   
+
 # Quadradic elements
 cdef int vtkquadtetnum = 24 # VTK_QUADRATIC_TETRA = 24
 cdef int vtkquadpyrnum = 27 # VTK_QUADRATIC_PYRAMID = 27
 cdef int vtkquadwegnum = 26 # VTK_QUADRATIC_WEDGE = 26
 cdef int vtkquadhexnum = 25 # VTK_QUADRATIC_HEXAHEDRON = 25                        
-                   
+
 # ANSYS element type definitions
 cdef int [4] typeA
 
@@ -41,10 +40,79 @@ typeA[3] = 186
 cdef int [4] typeB
 typeB[0] = 92
 typeB[1] = 187
-                   
-#==============================================================================
-# Store elements
-#==============================================================================
+
+
+cdef inline void StoreSurfTri(long [::1] offset, long *ecount, long *ccount, 
+                          long [::1] cells, uint8 [::1] cell_type,
+                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+    """
+    Stores surface triin vtk cell array.  Element may be quadradic or linear
+    """
+    # Populate offset array
+    offset[ecount[0]] = ccount[0]
+    
+    if lin:
+        cells[ccount[0]] = 3; ccount[0] += 1
+        
+        # Populate cell array while renumbering nodes
+        for j in range(3):
+            cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
+        
+        # Populate cell type array
+        cell_type[ecount[0]] = VTK_TRIANGLE
+        
+    else:
+        cells[ccount[0]] = 6; ccount[0] += 1
+        
+        # Populate cell array while renumbering nodes
+        cells[ccount[0]] = numref[elem[i, 0]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i, 1]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i, 2]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i, 4]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i, 5]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i, 7]]; ccount[0] += 1
+        
+        # Populate cell type array
+        cell_type[ecount[0]] = VTK_QUADRATIC_TRIANGLE
+        
+    # increment element counter
+    ecount[0] += 1
+
+
+
+cdef inline void StoreSurfQuad(long [::1] offset, long *ecount, long *ccount, 
+                          long [::1] cells, uint8 [::1] cell_type,
+                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+    """
+    Stores surface quad in vtk cell array.  Element may be quadradic or linear
+    """
+    # Populate offset array
+    offset[ecount[0]] = ccount[0]
+    
+    if lin:
+        cells[ccount[0]] = 4; ccount[0] += 1
+        
+        # Populate cell array while renumbering nodes
+        for j in range(4):
+            cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
+        
+        # Populate cell type array
+        cell_type[ecount[0]] = VTK_QUAD
+        
+    else:
+        cells[ccount[0]] = 8; ccount[0] += 1
+        
+        # Populate cell array while renumbering nodes
+        for j in range(8):
+            cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
+        
+        # Populate cell type array
+        cell_type[ecount[0]] = VTK_QUADRATIC_QUAD
+        
+    # increment element counter
+    ecount[0] += 1
+    
+
 cdef inline void StoreTet_TypeB(long [::1] offset, long *ecount, long *ccount, 
                           long [::1] cells, uint8 [::1] cell_type,
                           long [::1] numref, int [:, ::1] elem, int i, int lin):
@@ -414,13 +482,30 @@ def Parse(raw, pyforce_linear):
             if elem_type[etype[i]] == typeB[j]:
                 if force_linear:
                     lin = 1
-                elif elem[i, 8] != -1:
-                    lin = 0
+                else:
+                    lin = elem[i, 8] == -1
+                # elif elem[i, 8] != -1:
+                #     lin = 0
                     
                 StoreTet_TypeB(offset, &ecount, &ccount, cells, cell_type, 
                                numref, elem, i, lin)
                                
                 break # Continue to next element
+
+        # test if surface element SURF154
+        if elem_type[etype[i]] == 154:
+            if force_linear:
+                lin = 1
+            else:
+                lin = elem[i, 4] == -1
+
+            # check if this is a triangle
+            if elem[i, 2] == elem[i, 3]:
+                StoreSurfTri(offset, &ecount, &ccount, cells, cell_type, 
+                             numref, elem, i, lin)
+            else:
+                StoreSurfQuad(offset, &ecount, &ccount, cells, cell_type, 
+                              numref, elem, i, lin)
                     
                     
     # Return spliced arrays
