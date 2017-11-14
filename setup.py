@@ -47,7 +47,7 @@ def compilerName():
 
 # Assign arguments based on compiler
 compiler = compilerName()
-if compiler == 'unix' or compiler == 'msvc':
+if compiler == 'unix':
     cmp_arg = ['-O3']
 else:
     cmp_arg = ['/Ox']
