@@ -7,7 +7,6 @@ from pyansys import _cellqual
 
 def CellQuality(grid):
     """
-    DESCRIPTION
     Given a vtk unstructured grid, returns the minimum scaled jacobian cell
     quality for each cell.  Unstructured grid can only contain the following
     elements

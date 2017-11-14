@@ -8,6 +8,7 @@ from io import open as io_open
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
+
 # Create a build class that includes numpy directory
 class build_ext(_build_ext):
     def finalize_options(self):
@@ -20,28 +21,29 @@ class build_ext(_build_ext):
 
 # Check compiler and assign compile arguments accordingly
 def compilerName():
-  import re
-  import distutils.ccompiler
-  comp = distutils.ccompiler.get_default_compiler()
-  getnext = False
+    import re
+    import distutils.ccompiler
+    comp = distutils.ccompiler.get_default_compiler()
+    getnext = False
 
-  for a in sys.argv[2:]:
-    if getnext:
-      comp = a
-      getnext = False
-      continue
-    #separated by space
-    if a == '--compiler'  or  re.search('^-[a-z]*c$', a):
-      getnext = True
-      continue
-    #without space
-    m = re.search('^--compiler=(.+)', a)
-    if m == None:
-      m = re.search('^-[a-z]*c(.+)', a)
-    if m:
-      comp = m.group(1)
+    for a in sys.argv[2:]:
+        if getnext:
+            comp = a
+            getnext = False
+            continue
+        # separated by space
+        if a == '--compiler' or re.search('^-[a-z]*c$', a):
+            getnext = True
+            continue
+        # without space
+        m = re.search('^--compiler=(.+)', a)
+        if m is None:
+            m = re.search('^-[a-z]*c(.+)', a)
+            if m:
+                comp = m.group(1)
 
-  return comp
+    return comp
+
 
 # Assign arguments based on compiler
 compiler = compilerName()
@@ -53,16 +55,19 @@ else:
 
 # Get version from version info
 __version__ = None
-version_file = os.path.join(os.path.dirname(__file__), 'pyansys', '_version.py')
+version_file = os.path.join(
+    os.path.dirname(__file__),
+    'pyansys',
+    '_version.py')
 with io_open(version_file, mode='r') as fd:
     # execute file from raw string
     exec(fd.read())
-    
+
 
 # Actual setup
 setup(
     name='pyansys',
-    packages = ['pyansys', 'pyansys.examples'],
+    packages=['pyansys', 'pyansys.examples'],
 
     # Version
     version=__version__,
@@ -77,62 +82,60 @@ setup(
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
-
-        # Target audience
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Information Analysis',
-
-        # MIT License
         'License :: OSI Approved :: MIT License',
-
-        # Will work for other python 3 versions
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
 
     # Website
-    url = 'https://github.com/akaszynski/pyansys',
+    url='https://github.com/akaszynski/pyansys',
 
     # Build cython modules
     cmdclass={'build_ext': build_ext},
-    ext_modules=[Extension("pyansys._parsefull", 
+    ext_modules=[Extension("pyansys._parsefull",
                            ['pyansys/cython/_parsefull.pyx',
                             'pyansys/cython/parsefull.c'],
-                           language='c'),
-            
-                 Extension("pyansys.CDBparser", 
-                           ["pyansys/cython/CDBparser.pyx"],
+                           extra_compile_args=cmp_arg,
                            language='c'),
 
-                 Extension('pyansys._reader', 
+                 Extension("pyansys._parser",
+                           ["pyansys/cython/_parser.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension('pyansys._reader',
                            ['pyansys/cython/_reader.pyx',
                             'pyansys/cython/reader.c'],
                            extra_compile_args=cmp_arg,
                            language='c',),
 
-                 Extension("pyansys._relaxmidside", 
+                 Extension("pyansys._relaxmidside",
                            ["pyansys/cython/_relaxmidside.pyx"],
+                           extra_compile_args=cmp_arg,
                            language='c'),
-                           
+
                  # cell quality module
-                 Extension("pyansys._cellqual", 
+                 Extension("pyansys._cellqual",
                            ["pyansys/cython/_cellqual.pyx"],
+                           extra_compile_args=cmp_arg,
                            language='c'),
-                           
-                 Extension("pyansys._rstHelper", 
+
+                 Extension("pyansys._rstHelper",
                            ["pyansys/cython/_rstHelper.pyx"],
-#                           extra_compile_args=cmp_arg,
+                           extra_compile_args=cmp_arg,
                            language='c'),
-                           
-                ],
-                           
+
+                 ],
+
     keywords='vtk ANSYS cdb full rst',
-                           
-    package_data={'pyansys.examples': ['TetBeam.cdb', 'HexBeam.cdb', 
+
+    package_data={'pyansys.examples': ['TetBeam.cdb', 'HexBeam.cdb',
                                        'file.rst', 'file.full']},
 
     # Might work with earlier versions
-    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.1.5']
+    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.3.0']
 
 )

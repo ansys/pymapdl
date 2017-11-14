@@ -300,7 +300,7 @@ def Read(filename):
             'enum': np.asarray(elemnum[:nelem]),
             'elem': np.array(elem[:nelem]),
             'etype': np.asarray(etype[:nelem]),
-            'e_rcon': np.asarray(e_rcon),
+            'e_rcon': np.asarray(e_rcon[:nelem]),
             'node_comps': node_comps,
             'mtype': np.asarray(mtype),
             'sec_id': np.asarray(sec_id)}
