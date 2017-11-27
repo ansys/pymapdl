@@ -4,26 +4,21 @@ import warnings
 import logging
 import ctypes
 
+import vtkInterface
 from pyansys import _parsefull
 from pyansys import _rstHelper
+from pyansys import _parser
 
-from pyansys import CDBparser
-
-
-# attempt to load vtk
 try:
-    import vtkInterface
     import vtk
     vtkloaded = True
-
 except BaseException:
     warnings.warn('Cannot load vtk\nWill be unable to display results.')
     vtkloaded = False
 
 
-#==============================================================================
 # Pointer information from ansys interface manual
-#==============================================================================
+# =============================================================================
 # Individual element index table
 e_table = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR', 'ptrEEL',
            'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL', 'ptrEFX', 'ptrELF',
@@ -57,18 +52,20 @@ ptrEXY - pointer to integration point locations
 ptrEBA - pointer to back stresses
 ptrESV - pointer to state variables
 ptrMNL - pointer to material nonlinear record
-
-
 """
 
 
 class FullReader(object):
-    """
-    Object to store the results of an ANSYS full file
+    """Object to store the results of an ANSYS full file.
 
-    NOTES:
-    Currently only supports symmetric and real stiffness matrices as well as
-    non-lumped mass matrices.
+    Parameters
+    ----------
+    filename : str
+        Filename of the full file to read.
+
+    Examples
+    --------
+    >>> full = FullReader('file.rst')
 
     """
 
@@ -88,7 +85,7 @@ class FullReader(object):
         self.filename = filename
         self.header = _parsefull.ReturnHeader(filename)
 
-        #// Check if lumped (item 11)
+        # Check if lumped (item 11)
         if self.header[11]:
             raise Exception(
                 "Unable to read a lumped mass matrix.  Terminating.")
@@ -98,13 +95,6 @@ class FullReader(object):
             raise Exception(
                 "Unable to read an unsymmetric mass/stiffness matrix.")
 
-
-# Dead setting
-#        sort : bool, optional
-#            By default, this setting sorts the rows and columns such that the
-#            nodes are in order.  ANSYS stores the mass and stiffness matrices
-#            such that the bandwidth of the arrays is minimized.  Therefore, to
-#            minimize the bandwidth of the arrays, make this setting False.
     def LoadKM(self, as_sparse=True, utri=True):
         """
         Load and construct mass and stiffness matrices from an ANSYS full file.
@@ -136,15 +126,10 @@ class FullReader(object):
 
         m : (n x n) np.float or scipy.csc array
             Mass array
-
-        Notes
-        -----
-
-
         """
-        # check file still exists
+        # check file exists
         if not os.path.isfile(self.filename):
-            raise Exception('{:s} not found'.format(self.filename))
+            raise Exception('%s not found' % self.filename)
 
         # see if
         if as_sparse:
@@ -258,28 +243,26 @@ class FullReader(object):
 
 class ResultReader(object):
     """
-    Object to control the reading of ANSYS results written to fortran file
+    Object to control the reading of ANSYS results written to a fortran
+    formatted binary file file
+
+    Parameters
+    ----------
+    filename : string
+        Filename of the ANSYS binary result file.
+
+    logger : bool, optional
+        Enables logging if True.  Debug feature.
+
+    load_geometry : bool, optional
+        Loads geometry using vtk by default
+
     """
 
     def __init__(self, filename, logger=False, load_geometry=True):
         """
         Loads basic result information from result file and initializes result
         object.
-
-        Parameters
-        ----------
-        filename : string
-            Filename of the ANSYS binary result file.
-
-        logger : bool, optional
-            Enables logging if True.  Debug feature.
-
-        load_geometry : bool, optional
-            Loads geometry using vtk by default
-
-        Returns
-        -------
-        None
 
         """
 
@@ -344,8 +327,8 @@ class ResultReader(object):
                 self.geometry['elem'] > num_master_max,
                 1))[0]
         mas_cells = np.setdiff1d(cells, dup_cells)
-        self.sector = self.uGrid.ExtractSelectionCells(mas_cells)
-        dup_sector = self.uGrid.ExtractSelectionCells(dup_cells)
+        self.sector = self.grid.ExtractSelectionCells(mas_cells)
+        dup_sector = self.grid.ExtractSelectionCells(dup_cells)
 
         # Store the indices of the master and duplicate nodes
         self.mas_ind = self.sector.GetPointScalars('vtkOriginalPointIds')
@@ -371,8 +354,7 @@ class ResultReader(object):
         # Combine meshes and add VTK_Utilities functions
         # vtkappend.MergePointsOn()
         vtkappend.Update()
-        self.rotor = vtkappend.GetOutput()
-        vtkInterface.GridAddExtraFunctions(self.rotor)
+        self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
 
     def GetCyclicNodalResult(self, rnum):
         """
@@ -382,7 +364,6 @@ class ResultReader(object):
         ----------
         rnum : interger
             Cumulative result number.  Zero based indexing.
-
 
         Returns
         -------
@@ -415,7 +396,6 @@ class ResultReader(object):
         """
         Plots a nodal result from a cyclic analysis.
 
-
         Parameters
         ----------
         rnum : interger
@@ -445,12 +425,6 @@ class ResultReader(object):
         -------
         cpos : list
             Camera position from vtk render window.
-
-
-        Notes
-        -----
-        None
-
         """
 
         if 'hindex' not in self.resultheader:
@@ -537,7 +511,6 @@ class ResultReader(object):
                       interpolatebeforemap=True)
         plobj.AddText(text, fontsize=20)
         plobj.Plot()
-        del plobj
 
     def ResultsProperties(self):
         """
@@ -547,18 +520,10 @@ class ResultReader(object):
         Logging must be enabled for the results of the check to be shown in the
         console.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
-        result_check : dictionary
+        result_check : dict
             Dictionary indicating the availability of results.
-
-        Notes
-        -----
-        None
 
         """
 
@@ -581,10 +546,10 @@ class ResultReader(object):
 
         Parameters
         ----------
-        rnum : interger
+        rnum : int
             Cumulative result number.  Zero based indexing.
 
-        comp : string, optional
+        comp : str, optional
             Display component to display.  Options are 'x', 'y', 'z', and
             'norm', corresponding to the x directin, y direction, z direction,
             and the combined direction (x**2 + y**2 + z**2)**0.5
@@ -599,10 +564,6 @@ class ResultReader(object):
         -------
         cpos : list
             Camera position from vtk render window.
-
-        Notes
-        -----
-        None
 
         """
         if not vtkloaded:
@@ -647,24 +608,17 @@ class ResultReader(object):
         text += 'Frequency:      {:10.4f} Hz'.format(freq)
 
         plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.uGrid, no_copy=True, scalars=d, stitle=stitle,
+        plobj.AddMesh(self.grid, scalars=d, stitle=stitle,
                       flipscalars=True, interpolatebeforemap=True)
         plobj.AddText(text, fontsize=20)
-        cpos = plobj.Plot()  # store camera position
-        del plobj
 
-        return cpos
+        # return camera position
+        return plobj.Plot()
 
     def GetTimeValues(self):
         """
         Returns table of time values for results.  For a modal analysis, this
         corresponds to the frequencies of each mode.
-
-
-        Parameters
-        ----------
-        None
-
 
         Returns
         -------
@@ -673,7 +627,6 @@ class ResultReader(object):
             corresponds to the frequencies of each mode.
 
         """
-
         endian = self.resultheader['endian']
         ptrTIMl = self.resultheader['ptrTIMl']
 
@@ -694,7 +647,6 @@ class ResultReader(object):
         """
         Returns the nodal result for a result number
 
-
         Parameters
         ----------
         rnum : interger
@@ -705,16 +657,10 @@ class ResultReader(object):
             node numbering (self.nnum) (default).  If left unsorted, results
             correspond to the nodal equivalence array self.resultheader['neqv']
 
-
         Returns
         -------
         result : numpy.float array
             Result is (nnod x numdof), or number of nodes by degrees of freedom
-
-
-        Notes
-        -----
-        None
 
         """
         # Get info from result header
@@ -772,95 +718,91 @@ class ResultReader(object):
     def StoreGeometry(self):
         """ Stores the geometry from the result file """
 
-        f = open(self.filename, 'rb')
-        f.seek((self.resultheader['ptrGEO'] + 2) * 4)
-        geotable = np.fromfile(f, self.resultheader['endian'] + 'i', 80)
-        geotable.tolist()
+        # read in the geometry from the result file
+        with open(self.filename, 'rb') as f:
+            f.seek((self.resultheader['ptrGEO'] + 2) * 4)
+            geotable = np.fromfile(f, self.resultheader['endian'] + 'i', 80)
+            geotable.tolist()
 
-        ptrLOC = geotable[26]
+            ptrLOC = geotable[26]
 
-        #======================================================================
-        # Node information
-        #======================================================================
-        nnod = self.resultheader['nnod']
-        nnum = np.empty(nnod, np.int32)
-        nloc = np.empty((nnod, 6), np.float)
-        _rstHelper.LoadNodes(self.filename, ptrLOC, nnod, nloc, nnum)
+            # Node information
+            nnod = self.resultheader['nnod']
+            nnum = np.empty(nnod, np.int32)
+            nloc = np.empty((nnod, 6), np.float)
+            _rstHelper.LoadNodes(self.filename, ptrLOC, nnod, nloc, nnum)
 
-        #======================================================================
-        # Element Information
-        #======================================================================
-        nelm = geotable[4]
-        ptrEID = geotable[28]
-        maxety = geotable[1]
+            # Element Information
+            nelm = geotable[4]
+            ptrEID = geotable[28]
+            maxety = geotable[1]
 
-        # pointer to the element type index table
-        ptrETYP = geotable[20]
-        f.seek((ptrETYP + 2) * 4)
-        e_type_table = np.fromfile(
-            f, self.resultheader['endian'] + 'i', maxety)
+            # pointer to the element type index table
+            ptrETYP = geotable[20]
+            f.seek((ptrETYP + 2) * 4)
+            e_type_table = np.fromfile(
+                f, self.resultheader['endian'] + 'i', maxety)
 
-        # store information for each element type
-        # make these arrays large so you can reference a value via element type numbering
-#        etype_arr = np.empty(10000, np.int32)
-        # number of nodes for this element type
-        nodelm = np.empty(10000, np.int32)
-        # number of nodes per element having nodal forces
-        nodfor = np.empty(10000, np.int32)
-        # number of nodes per element having nodal stresses
-        nodstr = np.empty(10000, np.int32)
-        etype_ID = np.empty(maxety, np.int32)
-        ekey = []
-        for i in range(maxety):
-            f.seek((ptrETYP + e_type_table[i] + 2) * 4)
-            einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
-            etype_ref = einfo[0]
-            etype_ID[i] = einfo[1]
-            ekey.append(einfo)
+            # store information for each element type
+            # make these arrays large so you can reference a value via element
+            # type numbering
 
-            f.seek((ptrETYP + e_type_table[i] + 2 + 60) * 4)
-            nodelm[etype_ref] = np.fromfile(
-                f, self.resultheader['endian'] + 'i', 1)
+            # number of nodes for this element type
+            nodelm = np.empty(10000, np.int32)
 
-            f.seek((ptrETYP + e_type_table[i] + 2 + 62) * 4)
-            nodfor[etype_ref] = np.fromfile(
-                f, self.resultheader['endian'] + 'i', 1)
+            # number of nodes per element having nodal forces
+            nodfor = np.empty(10000, np.int32)
 
-            f.seek((ptrETYP + e_type_table[i] + 2 + 93) * 4)
-            nodstr[etype_ref] = np.fromfile(
-                f, self.resultheader['endian'] + 'i', 1)
+            # number of nodes per element having nodal stresses
+            nodstr = np.empty(10000, np.int32)
+            etype_ID = np.empty(maxety, np.int32)
+            ekey = []
+            for i in range(maxety):
+                f.seek((ptrETYP + e_type_table[i] + 2) * 4)
+                einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
+                etype_ref = einfo[0]
+                etype_ID[i] = einfo[1]
+                ekey.append(einfo)
 
-        # store element table data
-        self.element_table = {'nodelm': nodelm,
-                              'nodfor': nodfor,
-                              'nodstr': nodstr}
+                f.seek((ptrETYP + e_type_table[i] + 2 + 60) * 4)
+                nodelm[etype_ref] = np.fromfile(
+                    f, self.resultheader['endian'] + 'i', 1)
 
-        # get the element description table
-        f.seek((ptrEID + 2) * 4)
-        e_disp_table = np.empty(nelm, np.int32)
-        e_disp_table[:] = np.fromfile(
-            f, self.resultheader['endian'] + 'i8', nelm)
+                f.seek((ptrETYP + e_type_table[i] + 2 + 62) * 4)
+                nodfor[etype_ref] = np.fromfile(
+                    f, self.resultheader['endian'] + 'i', 1)
 
-        # get pointer to start of element table and adjust element pointers
-        ptr = ptrEID + e_disp_table[0]
-        e_disp_table -= e_disp_table[0]
+                f.seek((ptrETYP + e_type_table[i] + 2 + 93) * 4)
+                nodstr[etype_ref] = np.fromfile(
+                    f, self.resultheader['endian'] + 'i', 1)
 
-        f.close()
+            # store element table data
+            self.element_table = {'nodelm': nodelm,
+                                  'nodfor': nodfor,
+                                  'nodstr': nodstr}
+
+            # get the element description table
+            f.seek((ptrEID + 2) * 4)
+            e_disp_table = np.empty(nelm, np.int32)
+            e_disp_table[:] = np.fromfile(
+                f, self.resultheader['endian'] + 'i8', nelm)
+
+            # get pointer to start of element table and adjust element pointers
+            ptr = ptrEID + e_disp_table[0]
+            e_disp_table -= e_disp_table[0]
 
         # The following is stored for each element
-        """
-        mat     - material reference number
-        type    - element type number
-        real    - real constant reference number
-        secnum  - section number
-        esys    - element coordinate system
-        death   - death flat (1 live, 0 dead)
-        solidm  - solid model reference
-        shape   - coded shape key
-        elnum   - element number
-        baseeid - base element number
-        NODES   - node numbers defining the element
-        """
+        # mat     - material reference number
+        # type    - element type number
+        # real    - real constant reference number
+        # secnum  - section number
+        # esys    - element coordinate system
+        # death   - death flat (1 live, 0 dead)
+        # solidm  - solid model reference
+        # shape   - coded shape key
+        # elnum   - element number
+        # baseeid - base element number
+        # NODES   - node numbers defining the element
 
         # allocate memory for this (a maximum of 21 points per element)
         etype = np.empty(nelm, np.int32)
@@ -879,17 +821,19 @@ class ResultReader(object):
                          'etype': etype,
                          'elem': elem,
                          'enum': enum,
-                         'ekey': np.asarray(ekey, ctypes.c_long)}
+                         'ekey': np.asarray(ekey, ctypes.c_long),
+                         'e_rcon': np.ones_like(enum)}
 
         # store the reference array
-        cells, offset, cell_type, self.numref = CDBparser.Parse(
-            self.geometry, True)
+        cell_type = ['45', '95', '185', '186', '92', '187', '154']
+        result = _parser.Parse(self.geometry, True, cell_type)  # force_linear
+        cells, offset, cell_type, self.numref, _, _, _ = result
 
         # Create vtk object if vtk installed
         if vtkloaded:
             nodes = nloc[:, :3]
-            self.uGrid = vtkInterface.MakeuGrid(
-                offset, cells, cell_type, nodes)
+            self.grid = vtkInterface.UnstructuredGrid(offset, cells,
+                                                      cell_type, nodes)
 
         # get edge nodes
         nedge = nodstr[etype].sum()
@@ -928,10 +872,6 @@ class ResultReader(object):
         stress : array
             Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
             For the corresponding node numbers, see "edge_node_num"
-
-        Notes
-        -----
-        None
 
         """
 
@@ -1030,18 +970,12 @@ class ResultReader(object):
         across elements, stresses will vary based on the element they are
         evaluated from.
 
-
         Parameters
         ----------
         rnum : interger
             Result set using zero based indexing.
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
-
-
-        Returns
-        -------
-        None
 
         """
 
@@ -1061,7 +995,7 @@ class ResultReader(object):
 
         # Generate plot
         plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.uGrid, scalars=stress, stitle=stitle, no_copy=True,
+        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
                       flipscalars=True, interpolatebeforemap=True)
 
         text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
@@ -1077,31 +1011,26 @@ class ResultReader(object):
         Writes all appends all results to an unstructured grid and writes it to
         disk.
 
-        The file extension will select the type of writer to use.  *.vtk will
-        use the legacy writer, while *.vtu will select the VTK XML writer.
-
+        The file extension will select the type of writer to use.  '.vtk' will
+        use the legacy writer, while '.vtu' will select the VTK XML writer.
 
         Parameters
         ----------
         filename : str
             Filename of grid to be written.  The file extension will select the
-            type of writer to use.  *.vtk will use the legacy writer, while
-            *.vtu will select the VTK XML writer.
+            type of writer to use.  '.vtk' will use the legacy writer, while
+            '.vtu' will select the VTK XML writer.
         binary : bool, optional
             Writes as a binary file by default.  Set to False to write ASCII
-
 
         Notes
         -----
         Binary files write much faster than ASCII, but binary files written on
         one system may not be readable on other systems.  Binary can only be
         selected for the legacy writer.
-
-
         """
-
         # Copy grid as to not write results to original object
-        grid = self.uGrid.Copy()
+        grid = self.grid.Copy()
 
         for i in range(self.nsets):
             # Nodal Results
@@ -1114,9 +1043,7 @@ class ResultReader(object):
             val[self.edge_node_num_idx] = stress
             grid.AddPointScalars(val, 'NodalStress{:03d}'.format(i))
 
-        # Write to file and clean up
-        grid.WriteGrid(filename)
-        del grid
+        grid.Write(filename)
 
 
 def GetResultInfo(filename):

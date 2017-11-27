@@ -50,8 +50,7 @@ class ReadArchive(object):
 
     def ParseVTK(self, force_linear=False, allowable_types=None):
         """
-        Parses raw data from cdb file to VTK format.  Creates unstructured grid
-        as self.uGrid
+        Parses raw data from cdb file to VTK format.
 
         Parameters
         ----------
@@ -123,16 +122,16 @@ class ReadArchive(object):
             possible_merged = True
 
         # Create unstructured grid
-        uGrid = vtkInterface.MakeuGrid(offset, cells, cell_type, nodes)
+        grid = vtkInterface.UnstructuredGrid(offset, cells, cell_type, nodes)
 
         # Store original ANSYS numbering
-        uGrid.AddPointScalars(nnum, 'ANSYSnodenum')
-        uGrid.AddCellScalars(enum, 'ANSYS_elem_num')
-        uGrid.AddCellScalars(etype, 'ANSYS_elem_typenum')
-        uGrid.AddCellScalars(rcon, 'ANSYS_real_constant')
+        grid.AddPointScalars(nnum, 'ANSYSnodenum')
+        grid.AddCellScalars(enum, 'ANSYS_elem_num')
+        grid.AddCellScalars(etype, 'ANSYS_elem_typenum')
+        grid.AddCellScalars(rcon, 'ANSYS_real_constant')
 
         # Add node components to unstructured grid
-        ibool = np.empty(uGrid.GetNumberOfPoints(), dtype=np.int8)
+        ibool = np.empty(grid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.raw['node_comps']:
             ibool[:] = 0  # reset component array
 
@@ -140,24 +139,23 @@ class ReadArchive(object):
             nodenum = numref[self.raw['node_comps'][comp]]
 
             ibool[nodenum] = 1
-            uGrid.AddPointScalars(ibool, comp.strip())
+            grid.AddPointScalars(ibool, comp.strip())
 
         # merge duplicate points
         if possible_merged:
             vtkappend = vtk.vtkAppendFilter()
-            vtkappend.AddInputData(uGrid)
+            vtkappend.AddInputData(grid)
             vtkappend.MergePointsOn()
             vtkappend.Update()
-            uGrid = vtkappend.GetOutput()
-            vtkInterface.AddFunctions(uGrid)
+            grid = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
 
         # Add tracker for original node numbering
-        npoints = uGrid.GetNumberOfPoints()
-        uGrid.AddPointScalars(np.arange(npoints), 'VTKorigID')
+        npoints = grid.GetNumberOfPoints()
+        grid.AddPointScalars(np.arange(npoints), 'VTKorigID')
 
-        self.vtkuGrid = uGrid
+        self.vtkuGrid = grid
 
-        return uGrid
+        return grid
 
     def CheckRaw(self):
         """ Check if raw data can be converted into an unstructured grid """

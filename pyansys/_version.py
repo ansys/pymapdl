@@ -1,5 +1,5 @@
 # major, minor, patch
-version_info = 0, 19, 1
+version_info = 0, 20, 0
 
 
 # Nice string for the version

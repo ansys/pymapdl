@@ -1,25 +1,13 @@
 Working with a ANSYS Full File (full)
 ======================================
-
-The ANSYS full file is a fortran formatted binary file containing the mass and
-stiffness from an ANSYS analysis.  Using pyansys it can be loaded into memory
-as either a sparse or full matrix.
+The ANSYS full file is a FORTRAN formatted binary file containing the mass and stiffness from an ANSYS analysis.  Using pyansys it can be loaded into memory as either a sparse or full matrix.
 
 
 Reading a Full File
 -------------------
-This example reads in the mass and stiffness matrices associated with the above
-example.  ``LoadKM`` sorts degrees of freedom such that the nodes are
-ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are
-sorted within each node.  The matrices ``k`` and
-``m`` are sparse by default, but if ``scipy`` is not installed, or if the
-optional parameter ``as_sparse=False`` then they will be full numpy arrays.
+This example reads in the mass and stiffness matrices associated with the above example.  ``LoadKM`` sorts degrees of freedom such that the nodes are ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and ``m`` are sparse by default, but if ``scipy`` is not installed, or if the optional parameter ``as_sparse=False`` then they will be full numpy arrays.
 
-By default ``LoadKM`` outputs the upper triangle of both matrices, to output the
-full matrix, set ``utri=False``.  Additionally, the constrained nodes of the
-analysis can be identified by accessing ``fobj.const`` where the constrained
-degrees of freedom are True and all others are False.  This corresponds to
-the degrees of reference in ``dof_ref``.
+By default ``LoadKM`` outputs the upper triangle of both matrices, to output the full matrix, set ``utri=False``.  Additionally, the constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
 
 .. code:: python
 
@@ -28,14 +16,13 @@ the degrees of reference in ``dof_ref``.
     
     # Create result reader object and read in full file
     full = pyansys.FullReader(pyansys.examples.fullfile)
-    dof_ref, k, m = fobj.LoadKM(triu=False) # return the full matrix 
+    dof_ref, k, m = full.LoadKM(utri=False)  # return the full matrix
 
-If you have ``scipy`` installed, you can solve solve for the natural 
-frequencies and mode shapes of a system.  Realize that constrained degrees of 
-freedom must be removed from the ``k`` and ``m`` matrices for the correct solution.
+If you have ``scipy`` installed, you can solve solve for the natural frequencies and mode shapes of a system.  Realize that constrained degrees of freedom must be removed from the ``k`` and ``m`` matrices for the correct solution.
 
 .. code:: python
 
+    import numpy as np
     # remove the constrained degrees of freedom
     # NOTE: There are more efficient way to remove these indices
     free = np.logical_not(full.const).nonzero()[0]
@@ -48,13 +35,13 @@ freedom must be removed from the ``k`` and ``m`` matrices for the correct soluti
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
 
     # System natural frequencies
-    f = (np.real(w))**0.5/(2*np.pi)
-    
-    print('First four natural frequencies')
-    for i in range(4):
-        print '{:.3f} Hz'.format(f[i])
+    f = (np.real(w))**0.5/(2*np.pi)    
     
 .. code:: 
+
+    print('First four natural frequencies')
+    for i in range(4):
+        print('{:.3f} Hz'.format(f[i]))
 
     First four natural frequencies
     1283.200 Hz
@@ -65,12 +52,9 @@ freedom must be removed from the ``k`` and ``m`` matrices for the correct soluti
 
 Plotting a Mode Shape
 ---------------------
+You can also plot the mode shape of this finite element model.  Since the constrained degrees of freedom have been removed from the solution, you have to account for these when displaying the displacement.
 
-You can also plot the mode shape of this finite element model.  Since the constrained degrees of
-freedom have been removed from the solution, you have to account for these when
-displaying the displacement.
-
-.. code::
+.. code:: python
     
     import vtkInterface
 
@@ -78,7 +62,7 @@ displaying the displacement.
     mode_shape = v[:, 3] # x, y, z displacement for each node
     
     # create the full mode shape including the constrained nodes
-    full_mode_shape = np.zeros(dofref.shape[0])
+    full_mode_shape = np.zeros(dof_ref.shape[0])
     full_mode_shape[np.logical_not(full.const)] = mode_shape
     
     # reshape and compute the normalized displacement
@@ -96,19 +80,26 @@ displaying the displacement.
     # Fancy plot the displacement
     plobj = vtkInterface.PlotClass()
     
-    # add two meshes to the plotting class.  Meshes are copied on load
+    # add the nominal mesh
     plobj.AddMesh(grid, style='wireframe')
-    plobj.AddMesh(grid, scalars=n, stitle='Normalized\nDisplacement',
+	  
+    # copy the mesh and displace it
+    new_grid = grid.Copy()
+    new_grid.points += disp/80
+    plobj.AddMesh(new_grid, scalars=n, stitle='Normalized\nDisplacement',
                   flipscalars=True)
     
-    # Update the coordinates by adding the mode shape to the grid
-    plobj.UpdateCoordinates(grid.GetNumpyPoints() + disp/80, render=False)
     plobj.AddText('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
                   fontsize=30)
-    plobj.Plot(); del plobj
+    plobj.Plot()
     
-.. image:: solved_km.png
+.. image:: ./images/solved_km.png
 
 
-This example is built into ``pyansys`` and can be run from 
-``examples.SolveKM()``.
+This example is built into ``pyansys`` and can be run from  ``examples.SolveKM()``.
+
+
+FullReader Object Methods
+-------------------------
+.. autoclass:: pyansys.FullReader
+    :members:
