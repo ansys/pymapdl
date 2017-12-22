@@ -30,7 +30,7 @@ Dependencies:
 - ``vtkInterface``
 - ``vtk`` (optional)
 
-Minimum requirements are numpy to extract results from a results file. To convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must be installed with Python bindings.
+Minimum requirements are numpy to extract results from a results file. To convert the raw data to a VTK unstructured grid, VTK 7.0 or greater must be installed with Python bindings.
 
 See `Install VTK <http://vtkinterface.readthedocs.io/en/latest/installation.html>`_ for details instructions for installing VTK.
 

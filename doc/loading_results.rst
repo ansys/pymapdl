@@ -5,6 +5,7 @@ The ANSYS result file is a FORTRAN formatted binary file containing the results 
     - Nodal DOF results from a static analysis or modal analysis.
     - Nodal DOF results from a cyclic static or modal analysis.
     - Nodal averaged component stresses (i.e. x, y, z, xy, xz, yz)
+    - Nodal principal stresses (i.e. S1, S2, S3, SEQV, SINT)
 
 We're working on adding additional plotting and retrieval functions to the code If you would like us to add an additional result type to be loaded, please open an issue in `GitHub <https://github.com/akaszynski/pyansys>`_  and include result file for the result type you wish to load.
 
@@ -84,7 +85,7 @@ The DOF solution for an analysis for each node in the analysis can be obtained u
     # normalized displacement can be plotted by excluding the direction string
     result.PlotNodalResult(0, label='Normalized')
 
-Stress can be obtained as well using the below code.  The nodal stress is computed in the same manner as ANSYS by averaging the stress evaluated at that node for all attached elements.  For now, only component stresses can be displayed.
+Stress can be obtained as well using the below code.  The nodal stress is computed in the same manner as ANSYS by averaging the stress evaluated at that node for all attached elements.
 
 .. code:: python
     
@@ -94,6 +95,10 @@ Stress can be obtained as well using the below code.  The nodal stress is comput
 
     # Display node averaged stress in x direction for result 6
     result.PlotNodalStress(5, 'Sx')
+
+    # Compute principal nodal stresses and plot SEQV for result 1
+    pstress = result.PrincipalNodalStress(0)
+    result.PlotPrincipalNodalStress(0, 'SEQV')
 
 
 Results from a Cyclic Analysis

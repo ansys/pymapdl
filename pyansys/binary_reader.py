@@ -846,10 +846,10 @@ class ResultReader(object):
         self.edge_node_num_idx = np.unique(self.edge_idx)
 
         # catch the disassociated node bug
-#        try:
-#            self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
-#        except:
-#            logging.warning('unable to generate edge_node_num')
+        try:
+            self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
+        except:
+            logging.warning('unable to generate edge_node_num')
 
     def NodalStress(self, rnum):
         """
@@ -857,7 +857,7 @@ class ResultReader(object):
 
         The order of the results corresponds to the sorted node numbering.
 
-        This algorthim, like ANSYS, computes the nodal stress by averaging the
+        This algorithm, like ANSYS, computes the nodal stress by averaging the
         stress for each element at each node.  Due to the discontinunities
         across elements, stresses will vary based on the element they are
         evaluated from.
@@ -869,12 +869,12 @@ class ResultReader(object):
 
         Returns
         -------
-        stress : array
+        stress : numpy.ndarray
             Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
-            For the corresponding node numbers, see "edge_node_num"
+            For the corresponding node numbers, see "result.edge_node_num"
+            where result is the result object.
 
         """
-
         # Get the header information from the header dictionary
         endian = self.resultheader['endian']
         rpointers = self.resultheader['rpointers']
@@ -960,6 +960,90 @@ class ResultReader(object):
 
         return s_node
 
+    def PrincipalNodalStress(self, rnum):
+        """
+        Computes the principal component stresses for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node numbering.
+        See result.edge_node_num
+
+        Parameters
+        ----------
+        rnum : interger
+            Result set to load using zero based indexing.
+
+        Returns
+        -------
+        pstress : numpy.ndarray
+            Principal stresses, stress intensity, and equivalant stress.
+            [sigma1, sigma2, sigma3, sint, seqv]
+
+        Notes
+        -----
+        ANSYS equivalant of:
+        PRNSOL, S, PRIN
+
+        which returns:
+        S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
+        equivalent stress.
+
+        """
+        # get component stress
+        stress = self.NodalStress(rnum)
+
+        # compute principle stress
+        if stress.dtype != np.float32:
+            stress = stress.astype(np.float32)
+        return _rstHelper.ComputePrincipalStress(stress)
+
+    def PlotPrincipalNodalStress(self, rnum, stype):
+        """
+        Plot the principal stress at each node in the solution.
+
+        Parameters
+        ----------
+        rnum : interger
+            Result set using zero based indexing.
+
+        stype : string
+            Stress type to plot.  S1, S2, S3 principal stresses, SINT stress
+            intensity, and SEQV equivalent stress.
+
+            Stress type must be a string from the following list:
+
+            ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+
+        Returns
+        -------
+        cpos : list
+            VTK camera position.
+
+        """
+        stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        if stype not in stress_types:
+            raise Exception('Stress type not in \n' + str(stress_types))
+
+        sidx = stress_types.index(stype)
+
+        # create a zero array for all nodes
+        stress = np.zeros(self.resultheader['nnod'])
+
+        # Populate with nodal stress at edge nodes
+        pstress = self.PrincipalNodalStress(rnum)
+        stress[self.edge_node_num_idx] = pstress[:, sidx]
+        stitle = 'Nodal Stress\n{:s}'.format(stype)
+
+        # Generate plot
+        plobj = vtkInterface.PlotClass()
+        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
+                      flipscalars=True, interpolatebeforemap=True)
+
+        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
+        plobj.AddText(text)
+
+        return plobj.Plot()  # store camera position
+
     def PlotNodalStress(self, rnum, stype):
         """
         Plots the stresses at each node in the solution.
@@ -1002,7 +1086,6 @@ class ResultReader(object):
         plobj.AddText(text)
 
         cpos = plobj.Plot()  # store camera position
-        del plobj
 
         return cpos
 

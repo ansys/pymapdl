@@ -6,6 +6,7 @@ import ctypes
 import numpy as np
 cimport numpy as np
 
+from libc.math cimport sqrt, fabs
 from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
 from libc.string cimport memcpy
@@ -426,3 +427,87 @@ def FullNodeInfo(filename, int ptrDOF, int nNodes, int neqn):
         
     return np.asarray(nref_sort), np.asarray(dref_sort), np.asarray(index_arr), \
            np.asarray(const_sort), np.asarray(ndof)
+
+
+def ComputePrincipalStress(float [:, ::1] stress):
+    """
+    Returns the principal stresses based on component stresses.
+
+    Parameters
+    ----------
+    stress : numpy.ndarray
+        Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
+
+    Returns
+    -------
+    pstress : numpy.ndarray
+        Principal stresses, stress intensity, and equivalant stress.
+        [sigma1, sigma2, sigma3, sint, seqv]
+
+    Notes
+    -----
+    ANSYS equivalant of:
+    PRNSOL, S, PRIN
+
+    Which returns:
+    S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
+    equivalent stress.
+    """
+    # reshape the stress array into 3x3 stress tensor arrays
+    cdef int nnode = stress.shape[0]
+    cdef float [:, :, ::1] stress_tensor = np.empty((nnode, 3, 3), np.float32)
+    cdef float s_xx, x_yy, s_zz, s_xy, s_yz, s_xz
+
+    for i in range(nnode):
+        s_xx = stress[i, 0]
+        s_yy = stress[i, 1]
+        s_zz = stress[i, 2]
+        s_xy = stress[i, 3]
+        s_yz = stress[i, 4]
+        s_xz = stress[i, 5]
+
+        # populate stress tensor
+        stress_tensor[i, 0, 0] = s_xx
+        stress_tensor[i, 0, 1] = s_xy
+        stress_tensor[i, 0, 2] = s_xz
+        stress_tensor[i, 1, 0] = s_xy
+        stress_tensor[i, 1, 1] = s_yy
+        stress_tensor[i, 1, 2] = s_yz
+        stress_tensor[i, 2, 0] = s_xz
+        stress_tensor[i, 2, 1] = s_yz
+        stress_tensor[i, 2, 2] = s_zz
+
+    # compute principle stresses
+    w, v = np.linalg.eig(np.asarray(stress_tensor))
+    w[:, ::-1].sort(1)
+
+    temp = np.empty((nnode, 5), np.float32)
+    temp[:, :3] = w
+
+    cdef float [:, ::1] pstress = temp
+    cdef float p1, p2, p3, c1, c2, c3
+
+    # compute stress intensity and von mises (equivalent) stress
+    for i in range(nnode):
+        p1 = pstress[i, 0]
+        p2 = pstress[i, 1]
+        p3 = pstress[i, 2]
+
+        c1 = fabs(p1 - p2)
+        c2 = fabs(p2 - p3)
+        c3 = fabs(p3 - p1)
+
+        if c1 > c2:
+            if c1 > c3:
+                pstress[i, 3] = c1
+            else:
+                pstress[i, 3] = c3
+        else:
+            if c2 > c3:
+                pstress[i, 3] = c2
+            else:
+                pstress[i, 3] = c3
+
+        pstress[i, 4] = sqrt(0.5*(c1**2 + c2**2 + c3**2))
+
+    return np.asarray(pstress)

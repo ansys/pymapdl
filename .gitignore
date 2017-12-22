@@ -11,6 +11,7 @@
 ######################
 .fuse_hidden*
 *~
+*swp
 
 # Pip generated folders #
 #########################
@@ -24,4 +25,3 @@ pyansys/Interface.py
 
 # Testing
 Testing/
-
