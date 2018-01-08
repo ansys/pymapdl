@@ -7,8 +7,7 @@
 # cython imports
 import numpy as np
 cimport numpy as np
-from libc.math cimport sqrt, fabs
-from numpy.math cimport INFINITY
+from libc.math cimport sqrt
 import ctypes
 
 
@@ -2398,4 +2397,3 @@ def CompScJac_quad(long [::1] cellarr, double [:, ::1] pts):
         cnum += 1
             
     return np.asarray(jacs)[:cnum]
-    

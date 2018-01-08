@@ -6,11 +6,11 @@ import sys
 from io import open as io_open
 
 from setuptools import setup, Extension
-#from setuptools.command.build_ext import build_ext
-
 from setuptools.command.build_ext import build_ext as _build_ext
-# Create a build class that includes numpy directory
+
+
 class build_ext(_build_ext):
+    """ build class that includes numpy directory """
     def finalize_options(self):
         _build_ext.finalize_options(self)
         # Prevent numpy from thinking it is still in its setup process:
@@ -120,6 +120,12 @@ setup(
                  # cell quality module
                  Extension("pyansys._cellqual",
                            ["pyansys/cython/_cellqual.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 # cell quality module
+                 Extension("pyansys._cellqualfloat",
+                           ["pyansys/cython/_cellqualfloat.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
