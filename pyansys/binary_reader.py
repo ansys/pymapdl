@@ -1,3 +1,7 @@
+"""
+Used v150/ansys/customize/user/ResRd.F to help build this interface
+
+"""
 import os
 import numpy as np
 import warnings
@@ -826,7 +830,8 @@ class ResultReader(object):
 
         # store the reference array
         cell_type = ['45', '95', '185', '186', '92', '187', '154']
-        result = _parser.Parse(self.geometry, True, cell_type)  # force_linear
+        # result = _parser.Parse(self.geometry, True, cell_type)  # force_linear
+        result = _parser.Parse(self.geometry, False, cell_type)  # force_linear
         cells, offset, cell_type, self.numref, _, _, _ = result
 
         # Create vtk object if vtk installed
@@ -851,7 +856,7 @@ class ResultReader(object):
         except:
             logging.warning('unable to generate edge_node_num')
 
-    def NodalStress(self, rnum):
+    def NodalStress(self, rnum, debug=False):
         """
         Retrives the component stresses for each node in the solution.
 
@@ -893,25 +898,24 @@ class ResultReader(object):
 
         # Seek to result table and to get pointer to DOF results of result
         # table
-        f.seek((rpointers[rnum] + 13) * 4)  # item 12
+        # f.seek((rpointers[rnum] + 13) * 4)  # item 12  32-bit pointer to element solution
+        # ptrESL = np.fromfile(f, endian + 'i', 1)[0]
 
-        # 32-bit pointer to element solution
-        ptrESL = np.fromfile(f, endian + 'i', 1)[0]
+        f.seek((rpointers[rnum] + 120) * 4)  # item 122  64-bit pointer to element solutio
+        ptrESL = np.fromfile(f, endian + 'l', 1)[0]
 
         if not ptrESL:
             f.close()
-            raise Exception(
-                'No element solution in result set {:d}'.format(
-                    rnum + 1))
+            raise Exception('No element solution in result set %d' % (rnum + 1))
 
         # Seek to element result header
         element_rst_ptr = rpointers[rnum] + ptrESL + 2
         f.seek(element_rst_ptr * 4)
 
         # element index table
-        ele_ind_table = np.fromfile(f, endian + 'i8', nelm).astype(np.int32)
+        ele_ind_table = np.fromfile(f, endian + 'i8', nelm)
         ele_ind_table += element_rst_ptr
-
+        
         # Each element header contains 25 records for the individual results
         # get the location of the nodal stress
         table_index = e_table.index('ptrENS')
@@ -942,13 +946,13 @@ class ResultReader(object):
             _rstHelper.LoadStressDouble(self.filename, table_index,
                                         ele_ind_table, nodstr, etype, nitem,
                                         ele_data_arr, self.edge_idx)
-
         elif nitem == 11:  # single precision < v14.5
             ele_data_arr = np.zeros((nnod, 6), np.float32)
             _rstHelper.LoadStress(self.filename, table_index, ele_ind_table,
-                                  nodstr, etype, nitem, ele_data_arr,
-                                  self.edge_idx)
-
+                                  nodstr.astype(np.int64),
+                                  etype.astype(np.int64), nitem,
+                                  ele_data_arr,
+                                  self.edge_idx.astype(np.int64))
         else:
             raise Exception('Invalid nitem.  Unable to load nodal stresses')
 
@@ -958,7 +962,10 @@ class ResultReader(object):
         s_node = ele_data_arr[enode]
         s_node /= ntimes.reshape((-1, 1))
 
-        return s_node
+        if debug:
+            return s_node, ele_data_arr
+        else:
+            return s_node
 
     def PrincipalNodalStress(self, rnum):
         """
@@ -991,6 +998,8 @@ class ResultReader(object):
         """
         # get component stress
         stress = self.NodalStress(rnum)
+        # stress[np.isnan(stress)] = 1
+        # stress = stress[self.edge_node_num_idx]
 
         # compute principle stress
         if stress.dtype != np.float32:
@@ -1242,6 +1251,21 @@ def GetResultInfo(filename):
     # Read table of pointers to locations of results
     f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
     rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets'])
+
+    # f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
+    # rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets']*2)
+
+    # construct long from two ints
+    nsets = resultheader['nsets']
+    f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
+    raw0 = f.read(nsets*4)
+    raw1 = f.read(nsets*4)
+    subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
+    subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
+    longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
+    longraw = b''.join(longraw)
+    rpointers = np.fromstring(longraw, 'l')
+    assert np.all(rpointers > 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
 
     # load harmonic index of each result

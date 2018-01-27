@@ -118,20 +118,20 @@ def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
             c += 1
     
     
-def LoadStress(filename, int table_index, int [::1] ele_ind_table, 
-               int [::1] nodstr,int [::1] etype, int nitem, 
-               float [:, ::1] ele_data_arr, int [::1] edge_idx):
+def LoadStress(filename, long table_index, long [::1] ele_ind_table, 
+               long [::1] nodstr,long [::1] etype, long nitem, 
+               float [:, ::1] ele_data_arr, long [::1] edge_idx):
     
-    cdef int i, j, k, ind
+    cdef long i, j, k, ind
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef int ele_table, ptr, nnode_elem
+    cdef long ele_table, ptr, nnode_elem
     cdef float [1000] ele_data
-    cdef int c = 0
+    cdef long c = 0
     for i in range(len(ele_ind_table)):
         
         # get location of pointers to element data
