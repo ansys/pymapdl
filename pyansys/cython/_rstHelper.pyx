@@ -155,6 +155,40 @@ def LoadElementStress(filename, long table_index, long [::1] ele_ind_table,
     fclose(cfile)
 
 
+def LoadElementStressDouble(filename, long table_index, long [::1] ele_ind_table, 
+                            long [::1] nodstr,long [::1] etype, long nitem, 
+                            double [:, ::1] ele_data_arr, long [::1] edge_idx):
+    """ Read element results from ANSYS directly into a numpy array """
+    cdef long i, j, k, ind
+    
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cfile = fopen(c_filename, 'rb')
+    
+    cdef long ele_table, ptr, nnode_elem
+    cdef double [1000] ele_data
+    cdef long c = 0
+    for i in range(len(ele_ind_table)):
+        
+        # get location of pointers to element data
+        ele_table = ele_ind_table[i]
+        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+        fread(&ptr, sizeof(int), 1, cfile)
+
+        # Get the nodes in the element    
+        nnode_elem = nodstr[etype[i]]
+
+        # read the stresses evaluated at the intergration points or nodes
+        fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
+
+        # fread(&ele_data, sizeof(float), nnode_elem*nitem, cfile)
+        fread(&ele_data_arr[c, 0], sizeof(float), nnode_elem*nitem, cfile)
+        c += nnode_elem
+
+    fclose(cfile)
+
+
 def LoadStress(filename, long table_index, long [::1] ele_ind_table, 
                long [::1] nodstr,long [::1] etype, long nitem, 
                float [:, ::1] ele_data_arr, long [::1] edge_idx):

@@ -7,6 +7,7 @@ import numpy as np
 import warnings
 import logging
 import ctypes
+from ctypes import c_long
 
 import vtkInterface
 from pyansys import _parsefull
@@ -958,23 +959,24 @@ class ResultReader(object):
         table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
 
         # number of nodes
+        
         nnod = self.resultheader['nnod']
         if nitem == 22:  # double precision < v14.5
             nitem = 11
             ele_data_arr = np.zeros((nnod, 6), np.float64)
             _rstHelper.LoadStressDouble(self.filename, table_index,
                                         ele_ind_table,
-                                        nodstr.astype(np.int64),
-                                        etype.astype(np.int64), nitem,
+                                        nodstr.astype(c_long),
+                                        etype.astype(c_long), nitem,
                                         ele_data_arr,
-                                        self.edge_idx.astype(np.int64))
+                                        self.edge_idx.astype(c_long))
         elif nitem == 11 or nitem == 6:  # single precision < v14.5
             ele_data_arr = np.zeros((nnod, 6), np.float32)
             _rstHelper.LoadStress(self.filename, table_index, ele_ind_table,
-                                  nodstr.astype(np.int64),
-                                  etype.astype(np.int64), nitem,
+                                  nodstr.astype(c_long),
+                                  etype.astype(c_long), nitem,
                                   ele_data_arr,
-                                  self.edge_idx.astype(np.int64))
+                                  self.edge_idx.astype(c_long))
 
         else:
             raise Exception('Invalid nitem.  Unable to load nodal stresses')
@@ -990,7 +992,7 @@ class ResultReader(object):
         else:
             return s_node
 
-    def ElementStress(self, rnum, debug=False):
+    def ElementStress(self, rnum):
         """
         Retrives the component stresses for each node in the solution.
 
@@ -1008,10 +1010,15 @@ class ResultReader(object):
 
         Returns
         -------
-        stress : numpy.ndarray
-            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
-            For the corresponding node numbers, see "result.edge_node_num"
-            where result is the result object.
+        element_stress : list
+            Stresses at each element for each node for Sx Sy Sz Sxy Syz Sxz.
+
+        enum : np.ndarray
+            ANSYS element numbers corresponding to each element.
+
+        enode : list
+            Node numbers corresponding to each element's stress results.  One
+            list entry for each element
 
         """
         table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
@@ -1023,77 +1030,36 @@ class ResultReader(object):
             raise Exception
             # nitem = 11
             ele_data_arr = np.zeros((n + overflow, 6), np.float64)  # Sx Sy Sz Sxy Syz Sxz
-            # _rstHelper.LoadStressDouble(self.filename, table_index,
-            #                             ele_ind_table,
-            #                             nodstr.astype(np.int64),
-            #                             etype.astype(np.int64), nitem,
-            #                             ele_data_arr,
-            #                             self.edge_idx.astype(np.int64))
+            _rstHelper.LoadElementStressDouble(self.filename, table_index,
+                                               ele_ind_table,
+                                               nodstr.astype(c_long),
+                                               etype.astype(c_long), nitem,
+                                               ele_data_arr,
+                                               self.edge_idx.astype(c_long))
         elif nitem == 11 or nitem == 6:  # single precision < v14.5
             ele_data_arr = np.zeros((n + overflow, 6), np.float32)  # Sx Sy Sz Sxy Syz Sxz
-            _rstHelper.LoadElementStress(self.filename, table_index, ele_ind_table,
-                                         nodstr.astype(np.int64),
-                                         etype.astype(np.int64), nitem,
+            _rstHelper.LoadElementStress(self.filename, table_index,
+                                         ele_ind_table,
+                                         nodstr.astype(c_long),
+                                         etype.astype(c_long), nitem,
                                          ele_data_arr,
-                                         self.edge_idx.astype(np.int64))
+                                         self.edge_idx.astype(c_long))
 
         else:
             raise Exception('Invalid nitem.  Unable to load nodal stresses')
 
         # return result without overflow
-        return ele_data_arr[:n]
-        
+        element_stress = ele_data_arr[:n]
+        nnode = nodstr[etype]
+        element_stress = []
+        enode = []
+        count = 0
+        for i in range(etype.size):
+            element_stress.append(ele_data_arr[count:count + nnode[i]])
+            count += nnode[i]
+            enode.append(self.geometry['elem'][i, :nnode[i]])
 
-    # def ElementStress(self, rnum):
-    #     """
-    #     Retrives the component stresses for each node in the solution.
-
-    #     The order of the results corresponds to the sorted node numbering.
-
-    #     This algorithm, like ANSYS, computes the nodal stress by averaging the
-    #     stress for each element at each node.  Due to the discontinunities
-    #     across elements, stresses will vary based on the element they are
-    #     evaluated from.
-
-    #     Parameters
-    #     ----------
-    #     rnum : interger
-    #         Result set to load using zero based indexing.
-
-    #     Returns
-    #     -------
-    #     stress : numpy.ndarray
-    #         Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
-    #         For the corresponding node numbers, see "result.edge_node_num"
-    #         where result is the result object.
-
-    #     """
-    #     # number of nodes
-    #     # Solution information
-    #     table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
-
-    #     # total element table size
-    #     n = nodstr[etype].sum()  # nodes per element * elements
-    #     ele_data_arr = np.zeros((n, 6), np.float32)  # Sx Sy Sz Sxy Syz Sxz
-
-    #     if nitem == 22:  # double precision < v14.5
-    #         raise Exception('Not yet implemented')
-    #     #     nitem = 11
-    #     #     ele_data_arr = np.zeros((nnod, 6), np.float64)
-    #     #     _rstHelper.LoadStressDouble(self.filename, table_index,
-    #     #                                 ele_ind_table, nodstr, etype, nitem,
-    #     #                                 ele_data_arr, self.edge_idx)
-    #     elif nitem == 11 or nitem == 6:  # single precision > v14.5
-    #         _rstHelper.LoadElementStress2(self.filename, table_index,
-    #                                      ele_ind_table,
-    #                                      nodstr.astype(np.int64),
-    #                                      etype.astype(np.int64), nitem,
-    #                                      ele_data_arr,
-    #                                      self.edge_idx.astype(np.int64))
-    #     else:
-    #         raise Exception('Invalid nitem.  Unable to load element stress')
-
-    #     return ele_data_arr
+        return element_stress, self.geometry['enum'], enode
 
     def PrincipalNodalStress(self, rnum):
         """
@@ -1388,7 +1354,8 @@ def GetResultInfo(filename):
     subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
     longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
     longraw = b''.join(longraw)
-    rpointers = np.fromstring(longraw, 'l')
+    # rpointers = np.fromstring(longraw, 'l')
+    rpointers = np.frombuffer(longraw, 'l')
     assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
 

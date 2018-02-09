@@ -100,6 +100,60 @@ Stress can be obtained as well using the below code.  The nodal stress is comput
     pstress = result.PrincipalNodalStress(0)
     result.PlotPrincipalNodalStress(0, 'SEQV')
 
+Element stress can be obtained using the following segment of code.  Ensure that the element results are expanded within ANSYS with::
+
+    /SOLU
+    MXPAND, ALL, , , YES
+
+This block of code shows how you can access the non-averaged stresses for the first result from a modal analysis.
+
+.. code:: python
+    
+    import pyansys
+    result = pyansys.ResultReader('result.rst')
+    estress, elem, enode = result.ElementStress(0)
+
+    
+These stresses can be verified using ANSYS using:
+
+.. code:: python
+
+    >>> estress[0]
+    [[ 1.0236604e+04 -9.2875127e+03 -4.0922625e+04 -2.3697146e+03
+      -1.9239732e+04  3.0364934e+03]
+     [ 5.9612605e+04  2.6905924e+01 -3.6161423e+03  6.6281304e+03
+       3.1407712e+02  2.3195926e+04]
+     [ 3.8178301e+04  1.7534495e+03 -2.5156013e+02 -6.4841372e+03
+      -5.0892783e+03  5.2503605e+00]
+     [ 4.9787645e+04  8.7987168e+03 -2.1928742e+04 -7.3025332e+03
+       1.1294199e+04  4.3000205e+03]]
+
+    >>> elem[0]
+        32423
+
+    >>> enode[0]
+        array([ 9012,  7614,  9009, 10920], dtype=int32)
+
+.. code::
+
+  POST1:
+  ESEL, S, ELEM, , 32423
+  PRESOL, S
+
+  ***** POST1 ELEMENT NODAL STRESS LISTING *****                                
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   FREQ=    47.852      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING X,Y,Z VALUES ARE IN GLOBAL COORDINATES                         
+ 
+  ELEMENT=   32423        SOLID187
+    NODE    SX          SY          SZ          SXY         SYZ         SXZ     
+    9012   10237.     -9287.5     -40923.     -2369.7     -19240.      3036.5    
+    7614   59613.      26.906     -3616.1      6628.1      314.08      23196.    
+    9009   38178.      1753.4     -251.56     -6484.1     -5089.3      5.2504    
+   10920   49788.      8798.7     -21929.     -7302.5      11294.      4300.0    
+
 
 Results from a Cyclic Analysis
 ------------------------------
