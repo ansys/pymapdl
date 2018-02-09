@@ -1389,7 +1389,7 @@ def GetResultInfo(filename):
     longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
     longraw = b''.join(longraw)
     rpointers = np.fromstring(longraw, 'l')
-    assert np.all(rpointers > 0), 'Data set index table has negative pointers'
+    assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
 
     # load harmonic index of each result
