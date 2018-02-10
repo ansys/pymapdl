@@ -11,6 +11,8 @@ from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
 from libc.string cimport memcpy
 
+from libc.stdint cimport int32_t, int64_t
+
 
 cdef inline double GetDouble(char * array) nogil:
     cdef double result
@@ -120,21 +122,23 @@ def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
     
 
 
-def LoadElementStress(filename, long table_index, long [::1] ele_ind_table, 
-                      long [::1] nodstr,long [::1] etype, long nitem, 
-                      float [:, ::1] ele_data_arr, long [::1] edge_idx):
+def LoadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
+                      int64_t [::1] nodstr,int64_t [::1] etype, py_nitem, 
+                      float [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
     """ Read element results from ANSYS directly into a numpy array """
     
-    cdef long i, j, k, ind
+    cdef int64_t i, j, k, ind
+    cdef int64_t table_index = py_table_index
+    cdef int64_t nitem = py_nitem
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef long ele_table, ptr, nnode_elem
+    cdef int64_t ele_table, ptr, nnode_elem
     cdef float [1000] ele_data
-    cdef long c = 0
+    cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         
         # get location of pointers to element data
@@ -155,20 +159,21 @@ def LoadElementStress(filename, long table_index, long [::1] ele_ind_table,
     fclose(cfile)
 
 
-def LoadElementStressDouble(filename, long table_index, long [::1] ele_ind_table, 
-                            long [::1] nodstr,long [::1] etype, long nitem, 
-                            double [:, ::1] ele_data_arr, long [::1] edge_idx):
+def LoadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
+                            int64_t [::1] nodstr,int64_t [::1] etype, int64_t nitem, 
+                            double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
     """ Read element results from ANSYS directly into a numpy array """
-    cdef long i, j, k, ind
+    cdef int64_t i, j, k, ind
+    cdef int64_t table_index = py_table_index
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef long ele_table, ptr, nnode_elem
+    cdef int64_t ele_table, ptr, nnode_elem
     cdef double [1000] ele_data
-    cdef long c = 0
+    cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         
         # get location of pointers to element data
@@ -189,20 +194,21 @@ def LoadElementStressDouble(filename, long table_index, long [::1] ele_ind_table
     fclose(cfile)
 
 
-def LoadStress(filename, long table_index, long [::1] ele_ind_table, 
-               long [::1] nodstr,long [::1] etype, long nitem, 
-               float [:, ::1] ele_data_arr, long [::1] edge_idx):
+def LoadStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
+               int64_t [::1] nodstr,int64_t [::1] etype, int64_t nitem, 
+               float [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
     
-    cdef long i, j, k, ind
+    cdef int64_t i, j, k, ind
+    cdef int64_t table_index = py_table_index
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef long ele_table, ptr, nnode_elem
+    cdef int64_t ele_table, ptr, nnode_elem
     cdef float [1000] ele_data
-    cdef long c = 0
+    cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         
         # get location of pointers to element data
@@ -231,20 +237,21 @@ def LoadStress(filename, long table_index, long [::1] ele_ind_table,
     fclose(cfile)
     
     
-def LoadStressDouble(filename, long table_index, long [::1] ele_ind_table, 
-                   long [::1] nodstr,long [::1] etype, long nitem, 
-                   double [:, ::1] ele_data_arr, long [::1] edge_idx):
+def LoadStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
+                   int64_t [::1] nodstr,int64_t [::1] etype, int64_t nitem, 
+                   double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
     
-    cdef long i, j, k, ind
+    cdef int64_t i, j, k, ind
+    cdef int64_t table_index = py_table_index
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef long ele_table, ptr, nnode_elem
+    cdef int64_t ele_table, ptr, nnode_elem
     cdef double [1000] ele_data
-    cdef long c = 0
+    cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         
         # get location of pointers to element data

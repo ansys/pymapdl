@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as np
 import ctypes               
 
-# Type defintion for an unsigned 8-bit
+from libc.stdint cimport int32_t, int64_t
 ctypedef unsigned char uint8
 
 # VTK numbering for vtk cells
@@ -40,9 +40,9 @@ typeB[0] = 92
 typeB[1] = 187
 
 
-cdef inline void StoreSurfTri(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreSurfTri(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores surface triagle vtk cell.  Element may be quadradic or linear
     """
@@ -78,9 +78,9 @@ cdef inline void StoreSurfTri(long [::1] offset, long *ecount, long *ccount,
 
 
 
-cdef inline void StoreSurfQuad(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreSurfQuad(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores surface quad in vtk cell array.  Element may be quadradic or linear
     """
@@ -111,9 +111,9 @@ cdef inline void StoreSurfQuad(long [::1] offset, long *ecount, long *ccount,
     ecount[0] += 1
     
 
-cdef inline void StoreTet_TypeB(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreTet_TypeB(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores tetrahedral element in vtk arrays.  ANSYS elements are ordered
     the same as vtk elements.
@@ -158,9 +158,9 @@ cdef inline void StoreTet_TypeB(long [::1] offset, long *ecount, long *ccount,
     ecount[0] += 1
     
 
-cdef inline void StoreTet(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreTet(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores tetrahedral element in vtk arrays.  ANSYS elements are ordered
     the same as vtk elements.
@@ -214,9 +214,9 @@ cdef inline void StoreTet(long [::1] offset, long *ecount, long *ccount,
     ecount[0] += 1
         
 
-cdef inline void StorePyr(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StorePyr(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores pyramid element in vtk arrays.  ANSYS elements are ordered in the
     same manner as VTK.    
@@ -265,9 +265,9 @@ cdef inline void StorePyr(long [::1] offset, long *ecount, long *ccount,
     ecount[0] += 1
 
         
-cdef inline void StoreWeg(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreWeg(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores wedge element in vtk arrays.  ANSYS elements are ordered differently
     than vtk elements.  ANSYS orders counter-clockwise and VTK orders clockwise
@@ -324,9 +324,9 @@ cdef inline void StoreWeg(long [::1] offset, long *ecount, long *ccount,
     ecount[0] += 1
 
 
-cdef inline void StoreHex(long [::1] offset, long *ecount, long *ccount, 
-                          long [::1] cells, uint8 [::1] cell_type,
-                          long [::1] numref, int [:, ::1] elem, int i, int lin):
+cdef inline void StoreHex(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                          int64_t [::1] cells, uint8 [::1] cell_type,
+                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores hexahedral element in vtk arrays.  ANSYS elements are ordered in the
     same manner as VTK.    
@@ -429,12 +429,12 @@ def Parse(raw, pyforce_linear, allowable_types):
     else:
         typeC[0] = -1
     
-    cdef long [:, ::1] ekey = raw['ekey']
-    cdef int [:, ::1] elem = raw['elem']
-    cdef int [::1] etype = raw['etype']
-    cdef int [::1] nnum = raw['nnum']
-    cdef int [::1] raw_enum = raw['enum']
-    cdef int [::1] raw_rcon = raw['e_rcon']
+    cdef int [:, ::1] ekey = raw['ekey'].astype(ctypes.c_int)
+    cdef int [:, ::1] elem = raw['elem'].astype(ctypes.c_int)
+    cdef int [::1] etype = raw['etype'].astype(ctypes.c_int)
+    cdef int [::1] nnum = raw['nnum'].astype(ctypes.c_int)
+    cdef int [::1] raw_enum = raw['enum'].astype(ctypes.c_int)
+    cdef int [::1] raw_rcon = raw['e_rcon'].astype(ctypes.c_int)
     
     cdef int i, j, k, lin
     cdef int nelem = elem.shape[0]
@@ -458,11 +458,11 @@ def Parse(raw, pyforce_linear, allowable_types):
         elem_type[ekey[i, 0]] = ekey[i, 1]
     
     # Allocate memory for cell data
-    cdef long [::1] offset = np.empty(nelem, ctypes.c_long)
+    cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
     cdef uint8 [::1] cell_type = np.empty(nelem, dtype='uint8')
     
     # different array sizes depending on midside nodes
-    cdef long [::1] cells = np.empty(nelem*21, ctypes.c_long)  # max cell is 20 and header is 1
+    cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)  # max cell is 20 and header is 1
     
     # Find the highest node number
     cdef int maxnodenum = 0
@@ -471,8 +471,8 @@ def Parse(raw, pyforce_linear, allowable_types):
             maxnodenum = nnum[i]
             
     # Create reference array for node renumbering
-    cdef long n
-    cdef long [::1] numref = np.empty(maxnodenum + 2, ctypes.c_long)
+    cdef int64_t n
+    cdef int64_t [::1] numref = np.empty(maxnodenum + 2, ctypes.c_int64)
 #    numref[0]  = -1 # elements that have missing nodes written as a "0" in cdb
 #
 #    # elements that have missing nodes, but were written such that those
@@ -488,8 +488,8 @@ def Parse(raw, pyforce_linear, allowable_types):
     
     # Loop through each element and check if the element type matches one this code
     # can read
-    cdef long ccount = 0 # cell/offset counter
-    cdef long ecount = 0 # element number counter
+    cdef int64_t ccount = 0 # cell/offset counter
+    cdef int64_t ecount = 0 # element number counter
     cdef int elem_etype
     for i in range(nelem):
         elem_etype = elem_type[etype[i]]

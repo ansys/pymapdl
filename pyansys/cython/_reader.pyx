@@ -13,6 +13,7 @@ import numpy as np
 cimport numpy as np
 
 import ctypes
+from libc.stdint cimport int32_t, int64_t
 
 # Numpy must be initialized. When using numpy from C or Cython you must
 # _always_ do that, or you will have segfaults
@@ -294,7 +295,7 @@ def Read(filename):
 
     return {'rnum': np.asarray(rnum),
             'rdat': np.asarray(rdat),
-            'ekey': np.asarray(elem_type),
+            'ekey': np.asarray(elem_type, ctypes.c_int),
             'nnum': np.asarray(nnum),
             'nodes': np.asarray(nodes),
             'enum': np.asarray(elemnum[:nelem]),

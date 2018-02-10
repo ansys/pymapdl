@@ -7,7 +7,7 @@ import numpy as np
 import warnings
 import logging
 import ctypes
-from ctypes import c_long
+from ctypes import c_int64
 
 import vtkInterface
 from pyansys import _parsefull
@@ -826,7 +826,7 @@ class ResultReader(object):
                          'etype': etype,
                          'elem': elem,
                          'enum': enum,
-                         'ekey': np.asarray(ekey, ctypes.c_long),
+                         'ekey': np.asarray(ekey, ctypes.c_int64),
                          'e_rcon': np.ones_like(enum)}
 
         # store the reference array
@@ -903,7 +903,7 @@ class ResultReader(object):
                           'be incorrect')
 
         f.seek((rpointers[rnum] + 120) * 4)  # item 122  64-bit pointer to element solutio
-        ptrESL = np.fromfile(f, endian + 'l', 1)[0]
+        ptrESL = np.fromfile(f, endian + 'i8', 1)[0]
 
         if not ptrESL:
             f.close()
@@ -916,7 +916,6 @@ class ResultReader(object):
         # element index table
         ele_ind_table = np.fromfile(f, endian + 'i8', nelm)
         ele_ind_table += element_rst_ptr
-
         # Each element header contains 25 records for the individual results
         # get the location of the nodal stress
         table_index = e_table.index('ptrENS')
@@ -959,24 +958,23 @@ class ResultReader(object):
         table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
 
         # number of nodes
-        
         nnod = self.resultheader['nnod']
         if nitem == 22:  # double precision < v14.5
             nitem = 11
             ele_data_arr = np.zeros((nnod, 6), np.float64)
             _rstHelper.LoadStressDouble(self.filename, table_index,
                                         ele_ind_table,
-                                        nodstr.astype(c_long),
-                                        etype.astype(c_long), nitem,
+                                        nodstr.astype(c_int64),
+                                        etype.astype(c_int64), nitem,
                                         ele_data_arr,
-                                        self.edge_idx.astype(c_long))
+                                        self.edge_idx.astype(c_int64))
         elif nitem == 11 or nitem == 6:  # single precision < v14.5
             ele_data_arr = np.zeros((nnod, 6), np.float32)
             _rstHelper.LoadStress(self.filename, table_index, ele_ind_table,
-                                  nodstr.astype(c_long),
-                                  etype.astype(c_long), nitem,
+                                  nodstr.astype(c_int64),
+                                  etype.astype(c_int64), nitem,
                                   ele_data_arr,
-                                  self.edge_idx.astype(c_long))
+                                  self.edge_idx.astype(c_int64))
 
         else:
             raise Exception('Invalid nitem.  Unable to load nodal stresses')
@@ -1032,18 +1030,18 @@ class ResultReader(object):
             ele_data_arr = np.zeros((n + overflow, 6), np.float64)  # Sx Sy Sz Sxy Syz Sxz
             _rstHelper.LoadElementStressDouble(self.filename, table_index,
                                                ele_ind_table,
-                                               nodstr.astype(c_long),
-                                               etype.astype(c_long), nitem,
+                                               nodstr.astype(c_int64),
+                                               etype.astype(c_int64), nitem,
                                                ele_data_arr,
-                                               self.edge_idx.astype(c_long))
+                                               self.edge_idx.astype(c_int64))
         elif nitem == 11 or nitem == 6:  # single precision < v14.5
             ele_data_arr = np.zeros((n + overflow, 6), np.float32)  # Sx Sy Sz Sxy Syz Sxz
             _rstHelper.LoadElementStress(self.filename, table_index,
                                          ele_ind_table,
-                                         nodstr.astype(c_long),
-                                         etype.astype(c_long), nitem,
+                                         nodstr.astype(c_int64),
+                                         etype.astype(c_int64), nitem,
                                          ele_data_arr,
-                                         self.edge_idx.astype(c_long))
+                                         self.edge_idx.astype(c_int64))
 
         else:
             raise Exception('Invalid nitem.  Unable to load nodal stresses')
@@ -1355,7 +1353,7 @@ def GetResultInfo(filename):
     longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
     longraw = b''.join(longraw)
     # rpointers = np.fromstring(longraw, 'l')
-    rpointers = np.frombuffer(longraw, 'l')
+    rpointers = np.frombuffer(longraw, 'i8')
     assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
 
