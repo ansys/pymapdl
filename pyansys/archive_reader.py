@@ -110,16 +110,26 @@ class ReadArchive(object):
             nodes = np.zeros((nnodes + nextra, 3))
             nodes[:nnodes] = self.raw['nodes'][:, :3]
 
-            # Add extra node numbers
-            nnum = np.hstack((self.raw['nnum'],
-                              np.ones(nextra, np.int32) * -1))
-
             # Set new midside nodes directly between their edge nodes
             temp_nodes = nodes.copy()
             _relaxmidside.ResetMidside(cells, temp_nodes)
             nodes[nnodes:] = temp_nodes[nnodes:]
 
-            possible_merged = True
+            # merge nodes
+            from FEMORPH import utilities
+            new_nodes = temp_nodes[nnodes:]
+            unique_nodes, idxA, idxB = utilities.UniqueRows(new_nodes, return_index=True, return_inverse=True)
+
+            # rewrite node numbers
+            cells[mask] = idxB + maxnum
+            nextra = idxA.shape[0]
+            nodes = np.zeros((nnodes + nextra, 3))
+            nodes[:nnodes] = self.raw['nodes'][:, :3]
+            nodes[nnodes:] = unique_nodes
+
+            # Add extra node numbers
+            nnum = np.hstack((self.raw['nnum'],
+                              np.ones(nextra, np.int32) * -1))
 
         # Create unstructured grid
         grid = vtkInterface.UnstructuredGrid(offset, cells, cell_type, nodes)
@@ -141,13 +151,21 @@ class ReadArchive(object):
             ibool[nodenum] = 1
             grid.AddPointScalars(ibool, comp.strip())
 
-        # merge duplicate points
-        if possible_merged:
-            vtkappend = vtk.vtkAppendFilter()
-            vtkappend.AddInputData(grid)
-            vtkappend.MergePointsOn()
-            vtkappend.Update()
-            grid = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
+        grid.AddPointScalars(np.arange(grid.points.shape[0]), 'origid')
+        
+        # # merge duplicate points
+        # if possible_merged:
+        #     vtkappend = vtk.vtkAppendFilter()
+        #     vtkappend.AddInputData(grid)
+        #     vtkappend.MergePointsOn()
+        #     vtkappend.Update()
+        #     # grid = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
+
+        #     import pdb; pdb.set_trace()
+        #     grid2 = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
+        #     ind = grid2.GetPointScalars('origid')
+        #     # np.all(np.delete(nnum, ind) == -1)
+
 
         # Add tracker for original node numbering
         npoints = grid.GetNumberOfPoints()
