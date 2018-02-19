@@ -4,10 +4,12 @@
 # cython: cdivision=True
 # cython: nonecheck=False
 
+from libc.stdint cimport int32_t, int64_t
+
 #==============================================================================
 # Quadratic element relaxation functions
 #==============================================================================
-cdef inline void RelaxMid_Tet(long [::1] cellarr, int c, double [:, ::1] pts,
+cdef inline void RelaxMid_Tet(int64_t [::1] cellarr, int c, double [:, ::1] pts,
                               double rfac):
     """
     Resets the midside nodes of the tetrahedral starting at index c
@@ -41,7 +43,7 @@ cdef inline void RelaxMid_Tet(long [::1] cellarr, int c, double [:, ::1] pts,
         pts[ind9, j] = pts[ind9, j]*(1 - rfac) + (pts[ind2, j] + pts[ind3, j])*0.5*rfac
 
 
-cdef inline void RelaxMid_Pyr(long [::1] cellarr, int c, double [:, ::1] pts,
+cdef inline void RelaxMid_Pyr(int64_t [::1] cellarr, int c, double [:, ::1] pts,
                               double rfac):
     """
     
@@ -83,7 +85,7 @@ cdef inline void RelaxMid_Pyr(long [::1] cellarr, int c, double [:, ::1] pts,
         pts[ind12, j] = pts[ind12, j]*(1 - rfac) + (pts[ind3, j] + pts[ind4, j])*0.5*rfac
 
 
-cdef inline void RelaxMid_Weg(long [::1] cellarr, int c, double [:, ::1] pts,
+cdef inline void RelaxMid_Weg(int64_t [::1] cellarr, int c, double [:, ::1] pts,
                               double rfac):
     """
     
@@ -127,7 +129,7 @@ cdef inline void RelaxMid_Weg(long [::1] cellarr, int c, double [:, ::1] pts,
         pts[ind14, j] = pts[ind14, j]*(1 - rfac) + (pts[ind2, j] + pts[ind5, j])*0.5*rfac
 
 
-cdef inline void RelaxMid_Hex(long [::1] cellarr, int c, double [:, ::1] pts,
+cdef inline void RelaxMid_Hex(int64_t [::1] cellarr, int c, double [:, ::1] pts,
                               double rfac):
 
     """
@@ -185,10 +187,10 @@ cdef inline void RelaxMid_Hex(long [::1] cellarr, int c, double [:, ::1] pts,
         pts[ind19, j] = pts[ind19, j]*(1 - rfac) + (pts[ind3, j] + pts[ind7, j])*0.5*rfac
            
            
-def ResetMidside(long [::1] cellarr, double [:, ::1] pts):
+def ResetMidside(int64_t [::1] cellarr, double [:, ::1] pts):
     """
     SIGNATURE
-    (long [::1] cellarr, double [:, ::1] pts)
+    (int64_t [::1] cellarr, double [:, ::1] pts)
     
     
     DESCRIPTION
@@ -196,7 +198,7 @@ def ResetMidside(long [::1] cellarr, double [:, ::1] pts):
     
     
     INPUTS
-    cellarr (long [::1])
+    cellarr (int64_t [::1])
         VTK formatted cell array
         
     pts (double [:, ::1])
