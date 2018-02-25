@@ -189,24 +189,18 @@ cdef inline void RelaxMid_Hex(int64_t [::1] cellarr, int c, double [:, ::1] pts,
            
 def ResetMidside(int64_t [::1] cellarr, double [:, ::1] pts):
     """
-    SIGNATURE
     (int64_t [::1] cellarr, double [:, ::1] pts)
     
-    
-    DESCRIPTION
     Resets positions of midside nodes to directly between edge nodes.
     
     
-    INPUTS
+    Parameters
+    ----------
     cellarr (int64_t [::1])
         VTK formatted cell array
         
     pts (double [:, ::1])
         3D double point array.
-        
-        
-    OUTPUTS
-    NONE
     
     """
 

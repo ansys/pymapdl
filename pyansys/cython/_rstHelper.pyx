@@ -282,9 +282,8 @@ def LoadStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table,
     
 def ReadArray(filename, int ptr, int nterm, int neqn, int [::1] index_arr):
     """
-    
     Reads stiffness or mass matrices from ANSYS fortran files
-    
+
     Parameters
     ----------
     filename : string
@@ -301,7 +300,7 @@ def ReadArray(filename, int ptr, int nterm, int neqn, int [::1] index_arr):
         
     index_arr : numpy int array
         Indexing array
-        
+
     Returns
     -------
     rows : numpy int32 array
@@ -395,21 +394,19 @@ def ReadArray(filename, int ptr, int nterm, int neqn, int [::1] index_arr):
            np.asarray(kdiag), np.asarray(kdata_diag)
        
     
-# consider adding a sorting flag to disable sorting
 def FullNodeInfo(filename, int ptrDOF, int nNodes, int neqn):
     """
-    
     Reads in full file details required for the assembly of the mass and 
     stiffness matrices.
-    
+
     The reference arrays are sorted by default, though this increases the
     bandwidth of the mass and stiffness matrices.
-    
+
     Parameters
     ----------
     filename : string
         Full file filename
-    
+
     ptrDOF : int
         Location of the DOF block in the full file
         

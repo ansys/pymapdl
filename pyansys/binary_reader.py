@@ -165,54 +165,63 @@ class FullReader(object):
         dof_ref = np.vstack((nref, dref)).T  # stack these references
 
         # Read k and m blocks (see help(ReadArray) for block description)
-        k_block = _rstHelper.ReadArray(self.filename, ptrSTF, ntermK, neqn,
-                                       index_arr)
+        if ntermK:
+            k_block = _rstHelper.ReadArray(self.filename, ptrSTF, ntermK, neqn,
+                                           index_arr)
+            k_diag = k_block[3]
+            k_data_diag = k_block[4]
+        else:
+            warnings.warn('Missing stiffness matrix')
+            k_block = None
 
-        m_block = _rstHelper.ReadArray(self.filename, ptrMAS, ntermM, neqn,
-                                       index_arr)
-        k_diag = k_block[3]
-        k_data_diag = k_block[4]
-
-        m_diag = m_block[3]
-        m_data_diag = m_block[4]
+        if ntermM:
+            m_block = _rstHelper.ReadArray(self.filename, ptrMAS, ntermM, neqn,
+                                           index_arr)
+            m_diag = m_block[3]
+            m_data_diag = m_block[4]
+        else:
+            warnings.warn('Missing mass matrix')
+            m_block = None
 
         self.m_block = m_block
         self.k_block = k_block
 
         # assemble data
         if utri:
-            # stiffness matrix
-            krow = np.hstack((k_block[1], k_diag))  # row and diag
-            kcol = np.hstack((k_block[0], k_diag))  # col and diag
-            kdata = np.hstack((k_block[2], k_data_diag))  # data and diag
+            if k_block:
+                # stiffness matrix
+                krow = np.hstack((k_block[1], k_diag))  # row and diag
+                kcol = np.hstack((k_block[0], k_diag))  # col and diag
+                kdata = np.hstack((k_block[2], k_data_diag))  # data and diag
 
-            # mass matrix
-            mrow = np.hstack((m_block[1], m_diag))  # row and diag
-            mcol = np.hstack((m_block[0], m_diag))  # col and diag
-            mdata = np.hstack((m_block[2], m_data_diag))  # data and diag
+            if m_block:
+                # mass matrix
+                mrow = np.hstack((m_block[1], m_diag))  # row and diag
+                mcol = np.hstack((m_block[0], m_diag))  # col and diag
+                mdata = np.hstack((m_block[2], m_data_diag))  # data and diag
 
         else:
-            # stiffness matrix
-            krow = np.hstack(
-                (k_block[0], k_block[1], k_diag))  # row, col and diag
-            kcol = np.hstack((k_block[1], k_block[0], k_diag))  # col and diag
-            kdata = np.hstack(
-                (k_block[2], k_block[2], k_data_diag))  # data and diag
+            if k_block:
+                # stiffness matrix
+                krow = np.hstack((k_block[0], k_block[1], k_diag))
+                kcol = np.hstack((k_block[1], k_block[0], k_diag))
+                kdata = np.hstack((k_block[2], k_block[2], k_data_diag))
 
-            # mass matrix
-            mrow = np.hstack(
-                (m_block[0], m_block[1], m_diag))  # row, col and diag
-            mcol = np.hstack((m_block[1], m_block[0], m_diag))  # col and diag
-            mdata = np.hstack(
-                (m_block[2], m_block[2], m_data_diag))  # data and diag
+            if m_block:
+                # mass matrix
+                mrow = np.hstack((m_block[0], m_block[1], m_diag))
+                mcol = np.hstack((m_block[1], m_block[0], m_diag))
+                mdata = np.hstack((m_block[2], m_block[2], m_data_diag))
 
         # store data for later reference
-        self.krow = krow
-        self.kcol = kcol
-        self.kdata = kdata
-        self.mrow = mrow
-        self.mcol = mcol
-        self.mdata = mdata
+        if k_block:
+            self.krow = krow
+            self.kcol = kcol
+            self.kdata = kdata
+        if m_block:
+            self.mrow = mrow
+            self.mcol = mcol
+            self.mdata = mdata
 
         # number of dimentions
         ndim = nref.size
@@ -220,28 +229,40 @@ class FullReader(object):
         # output as a sparse matrix
         if as_sparse:
 
-            k = coo_matrix((ndim,) * 2)
-            k.data = kdata  # data has to be set first
-            k.row = krow
-            k.col = kcol
+            if k_block:
+                k = coo_matrix((ndim,) * 2)
+                k.data = kdata  # data has to be set first
+                k.row = krow
+                k.col = kcol
 
-            # convert to csc matrix (generally faster for sparse solvers)
-            k = csc_matrix(k)
+                # convert to csc matrix (generally faster for sparse solvers)
+                k = csc_matrix(k)
+            else:
+                k = None
 
-            m = coo_matrix((ndim,) * 2)
-            m.data = mdata
-            m.row = mrow
-            m.col = mcol
+            if m_block:
+                m = coo_matrix((ndim,) * 2)
+                m.data = mdata
+                m.row = mrow
+                m.col = mcol
 
-            # convert to csc matrix (generally faster for sparse solvers)
-            m = csc_matrix(m)
+                # convert to csc matrix (generally faster for sparse solvers)
+                m = csc_matrix(m)
+            else:
+                m = None
 
         else:
-            k = np.zeros((ndim,) * 2)
-            k[krow, kcol] = kdata
+            if k_block:
+                k = np.zeros((ndim,) * 2)
+                k[krow, kcol] = kdata
+            else:
+                k = None
 
-            m = np.zeros((ndim,) * 2)
-            m[mrow, mcol] = mdata
+            if m_block:
+                m = np.zeros((ndim,) * 2)
+                m[mrow, mcol] = mdata
+            else:
+                m = None
 
         # store if constrained and number of degrees of freedom per node
         self.const = const < 0
@@ -268,22 +289,12 @@ class ResultReader(object):
 
     """
 
-    def __init__(self, filename, logger=False, load_geometry=True):
+    def __init__(self, filename, load_geometry=True):
         """
         Loads basic result information from result file and initializes result
         object.
 
         """
-
-        # set logging level depending on settings
-        # if logger:
-        #     logging.basicConfig(level=logging.DEBUG)
-        # else:
-        #     logging.basicConfig(level=logging.CRITICAL)
-
-        # store logger pointer
-        # log = logging.getLogger(__name__)
-
         # Store filename result header items
         self.filename = filename
         self.resultheader = GetResultInfo(filename)
@@ -307,12 +318,16 @@ class ResultReader(object):
         # store geometry for later retrival
         if load_geometry:
             self.StoreGeometry()
-        # import pdb; pdb.set_trace()
+
         if self.resultheader['nSector'] > 1 and load_geometry:
             self.iscyclic = True
 
             # Add cyclic properties
             self.AddCyclicProperties()
+
+    def Plot(self):
+        """ plots result geometry """
+        self.grid.Plot()
 
     def AddCyclicProperties(self):
         """ Adds cyclic properties to result object """
@@ -831,8 +846,7 @@ class ResultReader(object):
 
         # store the reference array
         cell_type = ['45', '95', '185', '186', '92', '187', '154']
-        # result = _parser.Parse(self.geometry, True, cell_type)  # force_linear
-        result = _parser.Parse(self.geometry, False, cell_type)  # force_linear
+        result = _parser.Parse(self.geometry, False, cell_type)
         cells, offset, cell_type, self.numref, _, _, _ = result
 
         # catch -1

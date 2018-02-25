@@ -41,10 +41,10 @@ typeB[1] = 187
 
 
 cdef inline void StoreSurfTri(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
-                          int64_t [::1] cells, uint8 [::1] cell_type,
-                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
+                              int64_t [::1] cells, uint8 [::1] cell_type,
+                              int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
-    Stores surface triagle vtk cell.  Element may be quadradic or linear
+    Stores surface triangle vtk cell.  Element may be quadradic or linear
     """
     # Populate offset array
     offset[ecount[0]] = ccount[0]
@@ -79,10 +79,12 @@ cdef inline void StoreSurfTri(int64_t [::1] offset, int64_t *ecount, int64_t *cc
 
 
 cdef inline void StoreSurfQuad(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
-                          int64_t [::1] cells, uint8 [::1] cell_type,
-                          int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
+                               int64_t [::1] cells, uint8 [::1] cell_type,
+                               int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
     """
     Stores surface quad in vtk cell array.  Element may be quadradic or linear
+
+
     """
     # Populate offset array
     offset[ecount[0]] = ccount[0]

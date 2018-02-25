@@ -94,7 +94,6 @@ class ReadArchive(object):
         cells[cells > numref.max()] = -1
 
         # Check for missing midside nodes
-        possible_merged = False
         if force_linear or np.all(cells != -1):
             nodes = self.raw['nodes'][:, :3].copy()
             nnum = self.raw['nnum']
@@ -116,9 +115,10 @@ class ReadArchive(object):
             nodes[nnodes:] = temp_nodes[nnodes:]
 
             # merge nodes
-            from FEMORPH import utilities
             new_nodes = temp_nodes[nnodes:]
-            unique_nodes, idxA, idxB = utilities.UniqueRows(new_nodes, return_index=True, return_inverse=True)
+            unique_nodes, idxA, idxB = UniqueRows(new_nodes,
+                                                  return_index=True,
+                                                  return_inverse=True)
 
             # rewrite node numbers
             cells[mask] = idxB + maxnum
@@ -217,3 +217,23 @@ class ReadArchive(object):
         """
         # place holder
         print('Run grid = archive.ParseVTK() and then\ngrid.WriteGrid(filename, binary)')
+
+
+def UniqueRows(a, return_index=True, return_inverse=False):
+    """ Returns unique rows of a and indices of those rows """
+    if not a.flags.c_contiguous:
+        a = np.ascontiguousarray(a)
+
+    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx, idx2 = np.unique(b, True, True)
+
+    if return_index:
+        if return_inverse:
+            return a[idx], idx, idx2
+        else:
+            return a[idx], idx
+    else:
+        if return_inverse:
+            return a[idx], idx2
+        else:
+            return a[idx]
