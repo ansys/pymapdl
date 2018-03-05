@@ -10,6 +10,9 @@ from libc.stdint cimport int32_t, int64_t
 ctypedef unsigned char uint8
 
 # VTK numbering for vtk cells
+cdef uint8 VTK_EMPTY_CELL = 0
+cdef uint8 VTK_VERTEX = 1
+cdef uint8 VTK_LINE = 3
 cdef uint8 VTK_TRIANGLE = 5
 cdef uint8 VTK_QUAD = 9
 cdef uint8 VTK_QUADRATIC_TRIANGLE = 22
@@ -39,6 +42,27 @@ cdef int [4] typeB
 typeB[0] = 92
 typeB[1] = 187
 
+
+cdef inline void StoreLine(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
+                           int64_t [::1] cells, uint8 [::1] cell_type,
+                           int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
+    """
+    Stores surface triangle vtk cell.  Element may be quadradic or linear
+    """
+    # Populate offset array
+    offset[ecount[0]] = ccount[0]
+    
+    if lin:
+        cells[ccount[0]] = 2; ccount[0] += 1
+        
+        # Populate cell array while renumbering nodes
+        for j in range(2):
+            cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
+        
+        # Populate cell type array
+        cell_type[ecount[0]] = VTK_LINE
+
+    ecount[0] += 1
 
 cdef inline void StoreSurfTri(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
                               int64_t [::1] cells, uint8 [::1] cell_type,
@@ -387,6 +411,7 @@ def Parse(raw, pyforce_linear, allowable_types):
     Parses raw cdb data from downstream conversion to a vtk unstructured grid
     """
     cdef int force_linear = pyforce_linear
+    cdef int i, j, k, lin
 
     # ANSYS element type definitions
     cdef int [4] typeA
@@ -425,11 +450,19 @@ def Parse(raw, pyforce_linear, allowable_types):
     else:
         typeB[1] = -1
 
-    cdef int [1] typeC
-    if '154' in allowable_types:
-        typeC[0] = 154
-    else:
-        typeC[0] = -1
+    # shell types
+    cdef int [2] typeC
+    for i, atype in enumerate(['154', '181']):
+        if atype in allowable_types:
+            typeC[i] = int(atype)
+        else:
+            typeC[i] = -1
+
+    cdef int [1] linetype
+    for i, atype in enumerate(['188']):
+        if atype in allowable_types:
+            linetype[i] = int(atype)
+
     
     cdef int [:, ::1] ekey = raw['ekey'].astype(ctypes.c_int)
     cdef int [:, ::1] elem = raw['elem'].astype(ctypes.c_int)
@@ -438,7 +471,6 @@ def Parse(raw, pyforce_linear, allowable_types):
     cdef int [::1] raw_enum = raw['enum'].astype(ctypes.c_int)
     cdef int [::1] raw_rcon = raw['e_rcon'].astype(ctypes.c_int)
     
-    cdef int i, j, k, lin
     cdef int nelem = elem.shape[0]
     cdef int nnode = nnum.shape[0]
 
@@ -492,9 +524,12 @@ def Parse(raw, pyforce_linear, allowable_types):
     # can read
     cdef int64_t ccount = 0 # cell/offset counter
     cdef int64_t ecount = 0 # element number counter
+    cdef int64_t cstart
     cdef int elem_etype
     for i in range(nelem):
         elem_etype = elem_type[etype[i]]
+        cstart = ccount
+
         for j in range(4):
             if elem_etype == typeA[j]:
                 enum[ecount] = raw_enum[i]
@@ -526,7 +561,7 @@ def Parse(raw, pyforce_linear, allowable_types):
                              elem, i, lin)
 
                 break # Continue to next element
-                
+
         # Test for element type B
         for j in range(2):
             if elem_etype == typeB[j]:
@@ -542,26 +577,60 @@ def Parse(raw, pyforce_linear, allowable_types):
                 StoreTet_TypeB(offset, &ecount, &ccount, cells, cell_type, 
                                numref, elem, i, lin)
 
-                break # Continue to next element
+                break  # Continue to next element
 
-        # test if surface element SURF154
-        if elem_etype == typeC[0]:
+        # test if surface element
+        for j in range(2):
+            if elem_etype == typeC[j]:
+                enum[ecount] = raw_enum[i]
+                etype_out[ecount] = elem_etype
+                rcon[ecount] = raw_rcon[i]
+
+                # if force_linear:
+                lin = 1
+                # else:
+                    # lin = elem[i, 4] == -1
+
+                # check if this is a triangle
+                if elem[i, 2] == elem[i, 3]:
+                    StoreSurfTri(offset, &ecount, &ccount, cells, cell_type, 
+                                 numref, elem, i, lin)
+                else:
+                    StoreSurfQuad(offset, &ecount, &ccount, cells, cell_type, 
+                                  numref, elem, i, lin)
+                break  # Continue to next element
+            # continue
+
+        # test if line element
+        for j in range(1):
+            if elem_etype == linetype[j]:
+                enum[ecount] = raw_enum[i]
+                etype_out[ecount] = elem_etype
+                rcon[ecount] = raw_rcon[i]
+
+                lin = 1
+                StoreLine(offset, &ecount, &ccount, cells, cell_type, 
+                             numref, elem, i, lin)
+
+        # add null element if element isn't in the allowable types
+        if cstart == ccount:
             enum[ecount] = raw_enum[i]
             etype_out[ecount] = elem_etype
             rcon[ecount] = raw_rcon[i]
+            offset[ecount] = ccount
 
-            if force_linear:
-                lin = 1
-            else:
-                lin = elem[i, 4] == -1
+            # add null cell
+            cells[ccount] = 0; ccount += 1
+        
+            cell_type[ecount] = VTK_EMPTY_CELL
+            ecount += 1
 
-            # check if this is a triangle
-            if elem[i, 2] == elem[i, 3]:
-                StoreSurfTri(offset, &ecount, &ccount, cells, cell_type, 
-                             numref, elem, i, lin)
-            else:
-                StoreSurfQuad(offset, &ecount, &ccount, cells, cell_type, 
-                              numref, elem, i, lin)
+        # Populate cell array while renumbering nodes
+        # for j in range(2):
+            # cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
+        
+        # Populate cell type array
+
 
 
     return np.asarray(cells[:ccount]), np.asarray(offset[:ecount]), \

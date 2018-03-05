@@ -194,6 +194,73 @@ def LoadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_tabl
     fclose(cfile)
 
 
+def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
+                      int64_t [::1] nodstr,int64_t [::1] etype,
+                      float [:, ::1] ele_data_arr, int64_t [::1] edge_idx,
+                      int nitem):
+    """ Read element results from ANSYS directly into a numpy array """
+    cdef int64_t i, j, k, ind, nread
+    cdef int64_t table_index = py_table_index
+    
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cfile = fopen(c_filename, 'rb')
+    
+    cdef int64_t ele_table, ptrENS, nnode_elem
+    cdef int64_t c = 0
+    for i in range(len(ele_ind_table)):
+        # get location of pointers to element data
+        ele_table = ele_ind_table[i]
+        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+        fread(&ptrENS, sizeof(int), 1, cfile)
+
+        # Get the nodes in the element    
+        nnode_elem = nodstr[etype[i]]
+
+        # read the stresses evaluated at the intergration points or nodes
+        fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
+
+        nread = nnode_elem*nitem
+        fread(&ele_data_arr[c, 0], sizeof(float), nread, cfile)
+        c += nnode_elem
+
+    fclose(cfile)
+
+
+def ReadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
+                            int64_t [::1] nodstr,int64_t [::1] etype,
+                            double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
+    """ Read element results from ANSYS directly into a numpy array """
+    cdef int64_t i, j, k, ind, nread
+    cdef int64_t table_index = py_table_index
+    
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cfile = fopen(c_filename, 'rb')
+    
+    cdef int64_t ele_table, ptrENS, nnode_elem
+    cdef int64_t c = 0
+    for i in range(len(ele_ind_table)):
+        # get location of pointers to element data
+        ele_table = ele_ind_table[i]
+        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+        fread(&ptrENS, sizeof(int), 1, cfile)
+
+        # Get the nodes in the element    
+        nnode_elem = nodstr[etype[i]]
+
+        # read the stresses evaluated at the intergration points or nodes
+        fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
+
+        nread = nnode_elem*6
+        fread(&ele_data_arr[c, 0], sizeof(double), nread, cfile)
+        c += nread
+
+    fclose(cfile)
+
+
 def LoadStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
                int64_t [::1] nodstr,int64_t [::1] etype, int64_t nitem, 
                float [:, ::1] ele_data_arr, int64_t [::1] edge_idx):

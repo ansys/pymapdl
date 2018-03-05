@@ -8,7 +8,10 @@ import os
 import inspect
 import sys
 
+import numpy as np
+
 import pyansys
+import vtkInterface
 
 
 # get location of this folder and the example files
@@ -85,7 +88,6 @@ def DisplayStress():
 
 def LoadKM():
     """ Loads m and k matrices from a full file """
-    import numpy as np
 
     # Create file reader object
     fobj = pyansys.FullReader(fullfile)
@@ -108,7 +110,6 @@ def LoadKM():
     k = k[free][:, free]
     m = m[free][:, free]
 
-    import numpy as np
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
 
@@ -124,9 +125,7 @@ def SolveKM():
     """
     Loads and solves a mass and stiffness matrix from an ansys full file
     """
-    import numpy as np
     from scipy.sparse import linalg
-    import pyansys
 
     # load the mass and stiffness matrices
     full = pyansys.FullReader(pyansys.examples.fullfile)
@@ -143,8 +142,7 @@ def SolveKM():
     # System natural frequencies
     f = (np.real(w))**0.5 / (2 * np.pi)
 
-    #%% Plot result
-    import vtkInterface
+    # %% Plot result
 
     # Get the 4th mode shape
     mode_shape = v[:, 3]  # x, y, z displacement for each node
@@ -163,13 +161,13 @@ def SolveKM():
     grid = archive.ParseVTK()
 
     # plot the normalized displacement
-#    grid.Plot(scalars=n)
+    # grid.Plot(scalars=n)
 
     # Fancy plot the displacement
     plobj = vtkInterface.PlotClass()
 
-    # add two meshes to the plotting class.  Meshes are copied on load
-    plobj.AddMesh(grid, style='wireframe')
+    # add two meshes to the plotting class
+    plobj.AddMesh(grid.Copy(), style='wireframe')
     plobj.AddMesh(grid, scalars=n, stitle='Normalized\nDisplacement',
                   flipscalars=True)
 
@@ -192,10 +190,6 @@ def DisplayCellQual(meshtype='tet'):
     ----------
     meshtype string, optional
         Set to 'hex' to display cell quality of a hexahedral meshed beam.
-
-    Returns
-    -------
-    None
 
     """
 

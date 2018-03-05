@@ -55,7 +55,7 @@ ptrEHC - pointer to calculated heat generations
 ptrEPT - pointer to element temperatures
 ptrESF - pointer to element surface stresses
 ptrEDI - pointer to diffusion strains
-ptrETB - pointer to ETABLE items(post1 only
+ptrETB - pointer to ETABLE items(post1 only)
 ptrECT - pointer to contact data
 ptrEXY - pointer to integration point locations
 ptrEBA - pointer to back stresses
@@ -63,9 +63,13 @@ ptrESV - pointer to state variables
 ptrMNL - pointer to material nonlinear record
 """
 
+# element types with stress outputs
+validENS = [45, 92, 95, 181, 185, 186, 187]
+
 
 class FullReader(object):
-    """Object to store the results of an ANSYS full file.
+    """
+    Stores the results of an ANSYS full file.
 
     Parameters
     ----------
@@ -469,8 +473,8 @@ class ResultReader(object):
                 sec_sol = np.real(r) * np.cos(i * hindex * alpha + phase) -\
                     np.imag(r) * np.sin(i * hindex * alpha + phase)
 
-                # adjust the "direction" of the x and y vectors as they're being
-                # rotated
+                # adjust the "direction" of the x and y vectors as they're
+                # being rotated
                 s_x = sec_sol[:, 0] * np.cos(alpha * i + phase) -\
                     sec_sol[:, 1] * np.sin(alpha * i + phase)
                 s_y = sec_sol[:, 0] * np.sin(alpha * i + phase) +\
@@ -614,17 +618,13 @@ class ResultReader(object):
         if as_abs:
             d = np.abs(d)
 
-        # Generate plot
-#        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
-
         # setup text
         ls_table = self.resultheader['ls_table']
-        freq = self.GetTimeValues()[rnum]
+        timevalue = self.GetTimeValues()[rnum]
         text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
-        text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
-        text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
-#        text += 'Harmonic Index:   {:3d}\n'.format(hindex)
-        text += 'Frequency:      {:10.4f} Hz'.format(freq)
+        text += 'Loadstep:        {:3d}\n'.format(ls_table[rnum, 0])
+        text += 'Substep:         {:3d}\n'.format(ls_table[rnum, 1])
+        text += 'Time Value:      {:10.4f}'.format(timevalue)
 
         plobj = vtkInterface.PlotClass()
         plobj.AddMesh(self.grid, scalars=d, stitle=stitle,
@@ -845,8 +845,8 @@ class ResultReader(object):
                          'e_rcon': np.ones_like(enum)}
 
         # store the reference array
-        cell_type = ['45', '95', '185', '186', '92', '187', '154']
-        result = _parser.Parse(self.geometry, False, cell_type)
+        valid_types = ['45', '95', '185', '186', '92', '187', '154', '181']
+        result = _parser.Parse(self.geometry, False, valid_types)
         cells, offset, cell_type, self.numref, _, _, _ = result
 
         # catch -1
@@ -854,11 +854,20 @@ class ResultReader(object):
 
         # Create vtk object if vtk installed
         if vtkloaded:
+
+            element_type = np.zeros_like(etype)
+            for key, typekey in ekey:
+                # if str(typekey) in valid_types:
+                element_type[etype == key] = typekey
+
+            # validmask = element_type != 0
+            # element_type = element_type[validmask]
             nodes = nloc[:, :3]
             self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
                                                           cell_type, nodes)
             self.quadgrid.AddCellScalars(enum, 'ANSYS_elem_num')
             self.quadgrid.AddPointScalars(nnum, 'ANSYSnodenum')
+            self.quadgrid.AddCellScalars(element_type, 'Element Type')
             self.grid = self.quadgrid.LinearGridCopy()
 
         # get edge nodes
@@ -893,60 +902,50 @@ class ResultReader(object):
                     self.nsets))
 
         # Read a result
-        f = open(self.filename, 'rb')
+        with open(self.filename, 'rb') as f:
 
-        f.seek((rpointers[rnum] + 1) * 4)  # item 20
-        # solheader = np.fromfile(f, endian + 'i', 200)
+            f.seek((rpointers[rnum] + 1) * 4)  # item 20
+            # solheader = np.fromfile(f, endian + 'i', 200)
 
-        # Seek to result table and to get pointer to DOF results of result
-        # f.seek((rpointers[rnum] + 13) * 4)  # item 12  32-bit pointer to element solution
-        # ptrESL = np.fromfile(f, endian + 'i', 1)[0]
+            # key to extrapolate integration
+            f.seek((rpointers[rnum] + 17) * 4)  # item 16
+            rxtrap = np.fromfile(f, endian + 'i', 1)[0]
+            # point results to nodes
+            # = 0 - move
+            # = 1 - extrapolate unless active
+            # non-linear
+            # = 2 - extrapolate always
+            # print(rxtrap)
+            if rxtrap == 0:
+                warnings.warn('Strains and stresses are moved and not ' +
+                              'extrapolated nodal stress calculations will ' +
+                              'be incorrect')
 
-        # key to extrapolate integration
-        f.seek((rpointers[rnum] + 17) * 4)  # item 16
-        rxtrap = np.fromfile(f, endian + 'i', 1)[0]
-        # point results to nodes
-        # = 0 - move
-        # = 1 - extrapolate unless active
-        # non-linear
-        # = 2 - extrapolate always
-        # print(rxtrap)
-        if rxtrap == 0:
-            warnings.warn('Strains and stresses are moved and not ' +
-                          'extrapolated nodal stress calculations will ' +
-                          'be incorrect')
+            # item 122  64-bit pointer to element solution
+            f.seek((rpointers[rnum] + 120) * 4)
+            ptrESL = np.fromfile(f, endian + 'i8', 1)[0]
 
-        f.seek((rpointers[rnum] + 120) * 4)  # item 122  64-bit pointer to element solutio
-        ptrESL = np.fromfile(f, endian + 'i8', 1)[0]
+            if not ptrESL:
+                f.close()
+                raise Exception('No element solution in result set %d' % (rnum + 1))
 
-        if not ptrESL:
-            f.close()
-            raise Exception('No element solution in result set %d' % (rnum + 1))
+            # Seek to element result header
+            element_rst_ptr = rpointers[rnum] + ptrESL + 2
+            f.seek(element_rst_ptr * 4)
 
-        # Seek to element result header
-        element_rst_ptr = rpointers[rnum] + ptrESL + 2
-        f.seek(element_rst_ptr * 4)
+            # element index table
+            ele_ind_table = np.fromfile(f, endian + 'i8', nelm)
+            ele_ind_table += element_rst_ptr
+            # Each element header contains 25 records for the individual
+            # results.  Get the location of the nodal stress
+            table_index = e_table.index('ptrENS')
 
-        # element index table
-        ele_ind_table = np.fromfile(f, endian + 'i8', nelm)
-        ele_ind_table += element_rst_ptr
-        # Each element header contains 25 records for the individual results
-        # get the location of the nodal stress
-        table_index = e_table.index('ptrENS')
+        return table_index, ele_ind_table, nodstr, etype
 
-        # check number of records to read (differs with each version)
-        f.seek((ele_ind_table[0] + table_index) * 4)
-        ptrENS = np.fromfile(f, endian + 'i', 1)[0]
-
-        nnode_elem = nodstr[etype[0]]
-        f.seek((ele_ind_table[0] + ptrENS - 2) * 4)
-        nitem = np.fromfile(f, endian + 'i', 1)[0] / nnode_elem
-        f.close()
-
-        return table_index, ele_ind_table, nodstr, etype, nitem
-
-    def NodalStress(self, rnum, debug=False):
+    def NodalStress(self, rnum):
         """
+        Equivalent ANSYS command: PRNSOL, S
+
         Retrives the component stresses for each node in the solution.
 
         The order of the results corresponds to the sorted node numbering.
@@ -963,57 +962,47 @@ class ResultReader(object):
 
         Returns
         -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
         stress : numpy.ndarray
             Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
             For the corresponding node numbers, see "result.edge_node_num"
             where result is the result object.
 
         """
-        table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
+        element_stress, elemnum, enode = self.ElementStress(0)
 
-        # number of nodes
-        nnod = self.resultheader['nnod']
-        if nitem == 22:  # double precision < v14.5
-            nitem = 11
-            ele_data_arr = np.zeros((nnod, 6), np.float64)
-            _rstHelper.LoadStressDouble(self.filename, table_index,
-                                        ele_ind_table,
-                                        nodstr.astype(c_int64),
-                                        etype.astype(c_int64), nitem,
-                                        ele_data_arr,
-                                        self.edge_idx.astype(c_int64))
-        elif nitem == 11 or nitem == 6:  # single precision < v14.5
-            ele_data_arr = np.zeros((nnod, 6), np.float32)
-            _rstHelper.LoadStress(self.filename, table_index, ele_ind_table,
-                                  nodstr.astype(c_int64),
-                                  etype.astype(c_int64), nitem,
-                                  ele_data_arr,
-                                  self.edge_idx.astype(c_int64))
+        # nodes for each element
+        nnum = np.hstack(enode)
+        nodenum = np.unique(nnum)
 
-        else:
-            raise Exception('Invalid nitem.  Unable to load nodal stresses')
+        # stack the element stresses
+        arr = np.vstack(element_stress)
 
-        # Average based on the edges of elements
-        enode = self.edge_node_num_idx
-        ntimes = np.bincount(self.edge_idx)[enode]
-        s_node = ele_data_arr[enode]
-        s_node /= ntimes.reshape((-1, 1))
+        # determine the number of times each node occurs in the results
+        arr_ones = np.ones_like(arr)
+        ncount = np.bincount(nnum, weights=arr_ones[:, 0])
+        mask = ncount != 0
 
-        if debug:
-            return s_node, ele_data_arr
-        else:
-            return s_node
+        # sum and weight the stress at each node
+        stress = np.empty((nodenum.size, 6))
+        for i in range(6):
+            stress[:, i] = np.bincount(nnum, weights=arr[:, i])[mask]
+
+        stress /= ncount[mask].reshape(-1, 1)
+        return nodenum, stress
 
     def ElementStress(self, rnum):
         """
+        Equivalent ANSYS command: PRESOL, S
+
         Retrives the component stresses for each node in the solution.
 
-        The order of the results corresponds to the sorted node numbering.
-
         This algorithm, like ANSYS, computes the nodal stress by averaging the
-        stress for each element at each node.  Due to the discontinunities
-        across elements, stresses will vary based on the element they are
-        evaluated from.
+        stress for each element at each node.  Due to the discontinuities
+        across elements, stresses at nodes will vary based on the element
+        they are evaluated from.
 
         Parameters
         ----------
@@ -1032,54 +1021,73 @@ class ResultReader(object):
             Node numbers corresponding to each element's stress results.  One
             list entry for each element
 
-        """
-        table_index, ele_ind_table, nodstr, etype, nitem = self.ElementSolutionHeader(rnum)
-        nnod = self.resultheader['nnod']
+        Notes
+        -----
+        Only elements that output stress will have their stresses reported.
+        See the ANSYS element guide.
 
-        n = nodstr[etype].sum()  # nodes per element * elements
-        overflow = 100  # if nitem > 6
-        if nitem == 22:  # double precision < v14.5
-            raise Exception
-            # nitem = 11
-            ele_data_arr = np.zeros((n + overflow, 6), np.float64)  # Sx Sy Sz Sxy Syz Sxz
-            _rstHelper.LoadElementStressDouble(self.filename, table_index,
-                                               ele_ind_table,
-                                               nodstr.astype(c_int64),
-                                               etype.astype(c_int64), nitem,
-                                               ele_data_arr,
-                                               self.edge_idx.astype(c_int64))
-        elif nitem == 11 or nitem == 6:  # single precision < v14.5
-            ele_data_arr = np.zeros((n + overflow, 6), np.float32)  # Sx Sy Sz Sxy Syz Sxz
-            _rstHelper.LoadElementStress(self.filename, table_index,
+        """
+        result = self.ElementSolutionHeader(rnum)
+        table_index, ele_ind_table, nodstr, etype = result
+
+        # certain element types do not output stress
+        elemtype = self.grid.GetCellScalars('Element Type')
+        validmask = np.in1d(elemtype, validENS)
+        validmask[:] = True
+
+        ele_ind_table = ele_ind_table[validmask]
+        etype = etype[validmask].astype(c_int64)
+
+        # load in raw results
+        nnode = nodstr[etype]
+        nelemnode = nnode.sum()
+        ver = float(self.resultheader['verstring'])
+        if ver >= 14.5:
+            if self.resultheader['rstsprs'] != 0:
+                nitem = 6
+            else:
+                nitem = 11
+            ele_data_arr = np.empty((nelemnode, nitem), np.float32)
+            _rstHelper.ReadElementStress(self.filename, table_index,
                                          ele_ind_table,
                                          nodstr.astype(c_int64),
-                                         etype.astype(c_int64), nitem,
+                                         etype,
                                          ele_data_arr,
-                                         self.edge_idx.astype(c_int64))
+                                         self.edge_idx.astype(c_int64),
+                                         nitem)
+            if nitem != 6:
+                ele_data_arr = ele_data_arr[:, :6]
 
         else:
-            raise Exception('Invalid nitem.  Unable to load nodal stresses')
+            ele_data_arr = np.empty((nelemnode, 6), np.float64)
+            _rstHelper.ReadElementStressDouble(self.filename, table_index,
+                                               ele_ind_table,
+                                               nodstr.astype(c_int64),
+                                               etype,
+                                               ele_data_arr,
+                                               self.edge_idx.astype(c_int64))
 
-        # return result without overflow
-        element_stress = ele_data_arr[:n]
-        nnode = nodstr[etype]
-        element_stress = []
+        splitind = np.cumsum(nnode)
+        element_stress = np.split(ele_data_arr, splitind[:-1])
+
+        # reorder list using sorted indices
+        enum = self.grid.GetCellScalars('ANSYS_elem_num')[validmask]
+        sidx = np.argsort(enum)
+        element_stress = [element_stress[i] for i in sidx]
+
+        elem = self.geometry['elem'][validmask]
         enode = []
-        count = 0
-        for i in range(etype.size):
-            element_stress.append(ele_data_arr[count:count + nnode[i]])
-            count += nnode[i]
-            enode.append(self.geometry['elem'][i, :nnode[i]])
+        for i in sidx:
+            enode.append(elem[i, :nnode[i]])
 
-        return element_stress, self.geometry['enum'], enode
+        # Get element numbers
+        elemnum = self.geometry['enum'][self.sidx_elem]
+        return element_stress, elemnum, enode
 
     def PrincipalNodalStress(self, rnum):
         """
         Computes the principal component stresses for each node in the
         solution.
-
-        The order of the results corresponds to the sorted node numbering.
-        See result.edge_node_num
 
         Parameters
         ----------
@@ -1088,6 +1096,9 @@ class ResultReader(object):
 
         Returns
         -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
         pstress : numpy.ndarray
             Principal stresses, stress intensity, and equivalant stress.
             [sigma1, sigma2, sigma3, sint, seqv]
@@ -1103,12 +1114,12 @@ class ResultReader(object):
 
         """
         # get component stress
-        stress = self.NodalStress(rnum)
+        nodenum, stress = self.NodalStress(rnum)
 
         # compute principle stress
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
-        return _rstHelper.ComputePrincipalStress(stress)
+        return nodenum, _rstHelper.ComputePrincipalStress(stress)
 
     def PlotPrincipalNodalStress(self, rnum, stype):
         """
@@ -1133,29 +1144,46 @@ class ResultReader(object):
             VTK camera position.
 
         """
+        stress = self.PrincipleStressForPlotting(rnum, stype)
+
+        # Generate plot
+        stitle = 'Nodal Stress\n{:s}'.format(stype)
+        plobj = vtkInterface.PlotClass()
+        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
+                      flipscalars=True, interpolatebeforemap=True)
+
+        text = 'Result %d at %f' % (rnum + 1, self.tvalues[rnum])
+        plobj.AddText(text)
+
+        return plobj.Plot(), stress
+
+    def PrincipleStressForPlotting(self, rnum, stype):
+        """
+        returns stress used to plot
+
+        further documentation forthcoming
+
+        """
         stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
         if stype not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
 
         sidx = stress_types.index(stype)
 
-        # create a zero array for all nodes
-        stress = np.zeros(self.resultheader['nnod'])
+        # don't display elements that can't store stress (!)
+        # etype = self.grid.GetCellScalars('Element Type')
+        # valid = (np.in1d(etype, validENS)).nonzero()[0]
+        # grid = self.grid.ExtractSelectionCells(valid)
+        grid = self.grid  # bypassed (for now)
 
         # Populate with nodal stress at edge nodes
-        pstress = self.PrincipalNodalStress(rnum)
-        stress[self.edge_node_num_idx] = pstress[:, sidx]
-        stitle = 'Nodal Stress\n{:s}'.format(stype)
+        nodenum = grid.GetPointScalars('ANSYSnodenum')
+        stress_nnum, edge_stress = self.PrincipalNodalStress(rnum)
+        temp_arr = np.zeros((nodenum.max() + 1, 5))
+        temp_arr[stress_nnum] = edge_stress
 
-        # Generate plot
-        plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
-                      flipscalars=True, interpolatebeforemap=True)
-
-        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
-        plobj.AddText(text)
-
-        return plobj.Plot()  # store camera position
+        # find matching edge nodes
+        return temp_arr[nodenum, sidx]
 
     def PlotNodalStress(self, rnum, stype):
         """
@@ -1171,41 +1199,49 @@ class ResultReader(object):
         ----------
         rnum : interger
             Result set using zero based indexing.
+
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
 
+        Returns
+        -------
+        cpos : list
+            3 x 3 vtk camera position.
         """
 
-        stress_types = ['Sx', 'Sy', 'Sz', 'Sxy', 'Syz', 'Sxz', 'Seqv']
+        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
+        stype = stype.lower()
         if stype not in stress_types:
-            raise Exception('Stress type not in \n' +
-                            "['Sx', 'Sy', 'Sz', 'Sxy', 'Syz', 'Sxz']")
+            raise Exception('Stress type not in: \n' + str(stress_types))
+        sidx = stress_types.index(stype)
 
-        sidx = ['Sx', 'Sy', 'Sz', 'Sxy', 'Syz', 'Sxz'].index(stype)
-
-        # create a zero array for all nodes
-        stress = np.zeros(self.resultheader['nnod'])
+        # don't display elements that can't store stress
+        # etype = self.grid.GetCellScalars('Element Type')
+        # valid = (np.in1d(etype, validENS)).nonzero()[0]
+        # grid = self.grid.ExtractSelectionCells(valid)
+        grid = self.grid  # bypassed for now
 
         # Populate with nodal stress at edge nodes
-        stress[self.edge_node_num_idx] = self.NodalStress(rnum)[:, sidx]
-        stitle = 'Nodal Stress\n{:s}'.format(stype)
+        nodenum = grid.GetPointScalars('ANSYSnodenum')
+        stress_nnum, edge_stress = self.NodalStress(rnum)
+        temp_arr = np.zeros((nodenum.max() + 1, 6))
+        temp_arr[stress_nnum] = edge_stress
+        stress = temp_arr[nodenum, sidx]
+
+        # stress[mask] = edge_stress[:, sidx]
+        stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
 
         # Generate plot
         plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
+        plobj.AddMesh(grid, scalars=stress, stitle=stitle,
                       flipscalars=True, interpolatebeforemap=True)
-
-        text = 'Result {:d} at {:f}'.format(rnum + 1, self.tvalues[rnum])
+        text = 'Result %d at %f' % (rnum + 1, self.tvalues[rnum])
         plobj.AddText(text)
-
-        cpos = plobj.Plot()  # store camera position
-
-        return cpos
+        return plobj.Plot()
 
     def SaveAsVTK(self, filename, binary=True):
         """
-        Writes all appends all results to an unstructured grid and writes it to
-        disk.
+        Appends all results to an unstructured grid and writes it to disk.
 
         The file extension will select the type of writer to use.  '.vtk' will
         use the legacy writer, while '.vtu' will select the VTK XML writer.
@@ -1216,6 +1252,7 @@ class ResultReader(object):
             Filename of grid to be written.  The file extension will select the
             type of writer to use.  '.vtk' will use the legacy writer, while
             '.vtu' will select the VTK XML writer.
+
         binary : bool, optional
             Writes as a binary file by default.  Set to False to write ASCII
 
@@ -1229,15 +1266,18 @@ class ResultReader(object):
         grid = self.grid.Copy()
 
         for i in range(self.nsets):
-            # Nodal Results
+            # Nodal results
             val = self.GetNodalResult(i)
             grid.AddPointScalars(val, 'NodalResult{:03d}'.format(i))
 
-            # Nodal Stress values are only valid
-            stress = self.NodalStress(i)
-            val = np.zeros((grid.GetNumberOfPoints(), stress.shape[1]))
-            val[self.edge_node_num_idx] = stress
-            grid.AddPointScalars(val, 'NodalStress{:03d}'.format(i))
+            # Populate with nodal stress at edge nodes
+            nodenum = self.grid.GetPointScalars('ANSYSnodenum')
+            stress_nnum, edge_stress = self.NodalStress(i)
+            temp_arr = np.zeros((nodenum.max() + 1, 6))
+            temp_arr[stress_nnum] = edge_stress
+            stress = temp_arr[nodenum]
+
+            grid.AddPointScalars(stress, 'NodalStress{:03d}'.format(i))
 
         grid.Write(filename)
 
@@ -1254,9 +1294,9 @@ def GetResultInfo(filename):
     Returns
     -------
     resultheader : dictionary
+        Result header
 
     """
-
     f = open(filename, 'rb')
 
     # initialize result header dictionary
@@ -1340,6 +1380,9 @@ def GetResultInfo(filename):
     # cyclic symmetry coordinate system
     resultheader['csCord'] = rheader[21]
 
+    # bitmask for suppressed items (item 40)
+    resultheader['rstsprs'] = rheader[40 - 1]
+
     # Read nodal equivalence table
     f.seek((ptrNODl + 2) * 4)  # Start of pointer, then empty, then data
     resultheader['neqv'] = np.fromfile(
@@ -1411,38 +1454,3 @@ def delete_row_csc(mat, i):
     mat.indptr[i:] -= n
     mat.indptr = mat.indptr[:-1]
     mat._shape = (mat._shape[0] - 1, mat._shape[1])
-
-
-# =============================================================================
-# load stress debug using numpy
-# =============================================================================
-#        #%% numpy debug
-#        f = open(self.filename)
-#        nstresses = self.edge_idx.size
-#        stresses = np.empty((nstresses, 6), np.float32)
-#        c = 0
-#        for i in range(len(ele_ind_table)):
-#            # Element nodal stresses, ptrENS, is the third item in the table
-#            f.seek((ele_ind_table[i] + table_index)*4)
-#            ptrENS = np.fromfile(f, endian + 'i', 1)[0]
-#
-#            # read the stresses evaluated at the intergration points or nodes
-#            nnode_elem = nodstr[etype[i]]
-#
-#            f.seek((ele_ind_table[i] + ptrENS)*4)
-#            stress = np.fromfile(f, endian + 'f', nnode_elem*nitem).reshape((-1, nitem))#[:, sidx]
-#
-#            # store stresses
-#            stresses[c:c + nnode_elem] = stress[:, :6]
-#            c += nnode_elem
-#
-#        # close file
-#        f.close()
-#
-#        # Average the stresses for each element at each node
-#        enode = self.edge_node_num_idx
-#        s_node = np.empty((enode.size, 6), np.float32)
-#        for i in range(6):
-#            s_node[:, i] = np.bincount(self.edge_idx, weights=stresses[:, i])[enode]
-#        ntimes = np.bincount(self.edge_idx)[enode]
-#        s_node /= ntimes.reshape((-1, 1))

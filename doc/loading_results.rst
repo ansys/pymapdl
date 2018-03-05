@@ -91,16 +91,16 @@ Stress can be obtained as well using the below code.  The nodal stress is comput
     
     # obtain the component node averaged stress for the first result
     # organized with one [Sx, Sy Sz, Sxy, Syz, Sxz] entry for each node
-    stress = result.NodalStress(0) # results in a np array (nnod x 6)
+    nodenum, stress = result.NodalStress(0) # results in a np array (nnod x 6)
 
     # Display node averaged stress in x direction for result 6
     result.PlotNodalStress(5, 'Sx')
 
     # Compute principal nodal stresses and plot SEQV for result 1
-    pstress = result.PrincipalNodalStress(0)
+    nodenum, pstress = result.PrincipalNodalStress(0)
     result.PlotPrincipalNodalStress(0, 'SEQV')
 
-Element stress can be obtained using the following segment of code.  Ensure that the element results are expanded within ANSYS with::
+Element stress can be obtained using the following segment of code.  Ensure that the element results are expanded for a modal analysis within ANSYS with::
 
     /SOLU
     MXPAND, ALL, , , YES
