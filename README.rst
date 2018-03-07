@@ -139,8 +139,11 @@ example.
     
     # load the full file
     fobj = pyansys.FullReader('file.full')
-    dofref, k, m = fobj.LoadKM(utri=False)
-    
+    dofref, k, m = fobj.LoadKM()  # upper triangle only
+
+    # make k, m full
+    k += sparse.triu(k, 1).T
+    m += sparse.triu(m, 1).T
 
 If you have ``scipy`` installed, you can solve the eigensystem for its natural 
 frequencies and mode shapes.
@@ -148,6 +151,10 @@ frequencies and mode shapes.
 .. code:: python
 
     from scipy.sparse import linalg
+
+    # condition the k matrix
+    # to avoid getting the "Factor is exactly singular" error
+    k += sparse.diags(np.random.random(k.shape[0])/1E20, shape=k.shape)
 
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
