@@ -91,7 +91,7 @@ def LoadKM():
 
     # Create file reader object
     fobj = pyansys.FullReader(fullfile)
-    dofref, k, m = fobj.LoadKM(utri=False)
+    dofref, k, m = fobj.LoadKM()
 
     # print results
     ndim = k.shape[0]
@@ -102,13 +102,13 @@ def LoadKM():
     # compute natural frequencies if installed
     try:
         from scipy.sparse import linalg
+        from scipy import sparse
     except BaseException:
         return
 
-    # removing constrained nodes (this is not efficient)
-    free = np.logical_not(fobj.const).nonzero()[0]
-    k = k[free][:, free]
-    m = m[free][:, free]
+    k += sparse.triu(k, 1).T
+    m += sparse.triu(m, 1).T
+    k += sparse.diags(np.random.random(k.shape[0])/1E20, shape=k.shape)
 
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
@@ -126,18 +126,19 @@ def SolveKM():
     Loads and solves a mass and stiffness matrix from an ansys full file
     """
     from scipy.sparse import linalg
+    from scipy import sparse
 
     # load the mass and stiffness matrices
     full = pyansys.FullReader(pyansys.examples.fullfile)
-    dofref, k, m = full.LoadKM(utri=False)
+    dofref, k, m = full.LoadKM(sort=True)
 
-    # removing constrained nodes (this is not efficient)
-    free = np.logical_not(full.const).nonzero()[0]
-    k = k[free][:, free]
-    m = m[free][:, free]
+    # make symmetric
+    k += sparse.triu(k, 1).T
+    m += sparse.triu(m, 1).T
+    k += sparse.diags(np.random.random(k.shape[0])/1E20, shape=k.shape)
 
     # Solve
-    w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
+    w, v = linalg.eigsh(k, k=20, M=m, sigma=1000)
 
     # System natural frequencies
     f = (np.real(w))**0.5 / (2 * np.pi)
@@ -145,12 +146,8 @@ def SolveKM():
     # %% Plot result
 
     # Get the 4th mode shape
-    mode_shape = v[:, 3]  # x, y, z displacement for each node
-
-    # create the full mode shape including the constrained nodes
-    full_mode_shape = np.zeros(dofref.shape[0])
-    full_mode_shape[np.logical_not(full.const)] = mode_shape
-
+    full_mode_shape = v[:, 3]  # x, y, z displacement for each node
+    
     # reshape and compute the normalized displacement
     disp = full_mode_shape.reshape((-1, 3))
     n = (disp * disp).sum(1)**0.5
@@ -160,9 +157,6 @@ def SolveKM():
     archive = pyansys.ReadArchive(pyansys.examples.hexarchivefile)
     grid = archive.ParseVTK()
 
-    # plot the normalized displacement
-    # grid.Plot(scalars=n)
-
     # Fancy plot the displacement
     plobj = vtkInterface.PlotClass()
 
@@ -170,13 +164,11 @@ def SolveKM():
     plobj.AddMesh(grid.Copy(), style='wireframe')
     plobj.AddMesh(grid, scalars=n, stitle='Normalized\nDisplacement',
                   flipscalars=True)
-
     # Update the coordinates by adding the mode shape to the grid
     plobj.UpdateCoordinates(grid.GetNumpyPoints() + disp / 80, render=False)
     plobj.AddText('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
                   fontsize=30)
     plobj.Plot()
-    del plobj
 
 
 def DisplayCellQual(meshtype='tet'):

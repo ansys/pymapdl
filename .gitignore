@@ -6,6 +6,7 @@
 *.cpp
 *.so
 *.o
+*.cache
 
 # OS generated files #
 ######################

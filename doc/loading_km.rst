@@ -7,29 +7,38 @@ Reading a Full File
 -------------------
 This example reads in the mass and stiffness matrices associated with the above example.  ``LoadKM`` sorts degrees of freedom such that the nodes are ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and ``m`` are sparse by default, but if ``scipy`` is not installed, or if the optional parameter ``as_sparse=False`` then they will be full numpy arrays.
 
-By default ``LoadKM`` outputs the upper triangle of both matrices, to output the full matrix, set ``utri=False``.  Additionally, the constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
+By default ``LoadKM`` outputs the upper triangle of both matrices.  The constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
+
+By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It is enabled for this example to allow for plotting of the values later on.
 
 .. code:: python
 
     # Load pyansys
     import pyansys
+    from pyansys import examples
     
     # Create result reader object and read in full file
-    full = pyansys.FullReader(pyansys.examples.fullfile)
-    dof_ref, k, m = full.LoadKM(utri=False)  # return the full matrix
+    full = pyansys.FullReader(examples.fullfile)
+    dof_ref, k, m = full.LoadKM(sort=True)
 
-If you have ``scipy`` installed, you can solve solve for the natural frequencies and mode shapes of a system.  Realize that constrained degrees of freedom must be removed from the ``k`` and ``m`` matrices for the correct solution.
+
+ANSYS only stores the upper triangular matrix in the full file.  To make the full matrix:
+
+.. code:: python
+
+    k += sparse.triu(k, 1).T
+    m += sparse.triu(m, 1).T
+
+If you have ``scipy`` installed, you can solve solve for the natural frequencies and mode shapes of a system.  
 
 .. code:: python
 
     import numpy as np
-    # remove the constrained degrees of freedom
-    # NOTE: There are more efficient way to remove these indices
-    free = np.logical_not(full.const).nonzero()[0]
-    k = k[free][:, free]
-    m = m[free][:, free]
-
     from scipy.sparse import linalg
+
+    # condition the k matrix
+    # to avoid getting the "Factor is exactly singular" error
+    k += sparse.diags(np.random.random(k.shape[0])/1E20, shape=k.shape)
 
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
@@ -46,6 +55,7 @@ If you have ``scipy`` installed, you can solve solve for the natural frequencies
     First four natural frequencies
     1283.200 Hz
     1283.200 Hz
+
     5781.975 Hz
     6919.399 Hz
 
@@ -59,11 +69,7 @@ You can also plot the mode shape of this finite element model.  Since the constr
     import vtkInterface
 
     # Get the 4th mode shape
-    mode_shape = v[:, 3] # x, y, z displacement for each node
-    
-    # create the full mode shape including the constrained nodes
-    full_mode_shape = np.zeros(dof_ref.shape[0])
-    full_mode_shape[np.logical_not(full.const)] = mode_shape
+    full_mode_shape = v[:, 3] # x, y, z displacement for each node
     
     # reshape and compute the normalized displacement
     disp = full_mode_shape.reshape((-1, 3))

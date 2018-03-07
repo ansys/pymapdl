@@ -108,7 +108,7 @@ class FullReader(object):
             raise Exception(
                 "Unable to read an unsymmetric mass/stiffness matrix.")
 
-    def LoadKM(self, as_sparse=True, utri=True):
+    def LoadKM(self, as_sparse=True, sort=False):
         """
         Load and construct mass and stiffness matrices from an ANSYS full file.
 
@@ -118,21 +118,21 @@ class FullReader(object):
             Outputs the mass and stiffness matrices as scipy csc sparse arrays
             when True by default.
 
-        utri : bool, optional
-            Outputs only the upper triangle of both the mass and stiffness
-            arrays.
+        sort : bool, optional
+            Rearranges the k and m matrices such that the rows correspond to
+            to the sorted rows and columns in dor_ref.  Also sorts dor_ref.
 
         Returns
         -------
         dof_ref : (n x 2) np.int32 array
             This array contains the node and degree corresponding to each row
-            and column in the mass and stiffness matrices.  When the sort
-            parameter is set to True this array will be sorted by node number
-            first and then by the degree of freedom.  In a 3 DOF analysis the
-            intergers will correspond to:
+            and column in the mass and stiffness matrices.  In a 3 DOF
+            analysis the dof intergers will correspond to:
             0 - x
             1 - y
             2 - z
+            Sort these values by node number and DOF by enabling the sort
+            parameter
 
         k : (n x n) np.float or scipy.csc array
             Stiffness array
@@ -140,7 +140,6 @@ class FullReader(object):
         m : (n x n) np.float or scipy.csc array
             Mass array
         """
-        # check file exists
         if not os.path.isfile(self.filename):
             raise Exception('%s not found' % self.filename)
 
@@ -157,84 +156,89 @@ class FullReader(object):
         ntermK = self.header[9]  # number of terms in stiffness matrix
         ptrSTF = self.header[19]  # Location of stiffness matrix
         ptrMAS = self.header[27]  # Location in file to mass matrix
-        nNodes = self.header[33]  # Number of nodes considered by assembly
+        # nNodes = self.header[33]  # Number of nodes considered by assembly
         ntermM = self.header[34]  # number of terms in mass matrix
         ptrDOF = self.header[36]  # pointer to DOF info
 
-        # get details for reading the mass and stiffness arrays
-        node_info = _rstHelper.FullNodeInfo(self.filename, ptrDOF, nNodes,
-                                            neqn)
+        # DOF information
+        ptrDOF = self.header[36]  # pointer to DOF info
+        with open(self.filename, 'rb') as f:
+            ReadTable(f, skip=True)  # standard header
+            ReadTable(f, skip=True)  # full header
+            ReadTable(f, skip=True)  # number of degrees of freedom
+            neqv = ReadTable(f)  # Nodal equivalence table
 
-        nref, dref, index_arr, const, ndof = node_info
-        dof_ref = np.vstack((nref, dref)).T  # stack these references
+            f.seek(ptrDOF*4)
+            ndof = ReadTable(f)
+            const = ReadTable(f)
+
+        # dof_ref = np.vstack((ndof, neqv)).T  # stack these references
+        dof_ref = [ndof, neqv]
 
         # Read k and m blocks (see help(ReadArray) for block description)
         if ntermK:
-            k_block = _rstHelper.ReadArray(self.filename, ptrSTF, ntermK, neqn,
-                                           index_arr)
-            k_diag = k_block[3]
-            k_data_diag = k_block[4]
+            krow, kcol, kdata = _rstHelper.ReadArray(self.filename,
+                                                     ptrSTF,
+                                                     ntermK,
+                                                     neqn,
+                                                     const)
         else:
             warnings.warn('Missing stiffness matrix')
-            k_block = None
+            kdata = None
 
         if ntermM:
-            m_block = _rstHelper.ReadArray(self.filename, ptrMAS, ntermM, neqn,
-                                           index_arr)
-            m_diag = m_block[3]
-            m_data_diag = m_block[4]
+            mrow, mcol, mdata = _rstHelper.ReadArray(self.filename,
+                                                     ptrMAS,
+                                                     ntermM,
+                                                     neqn,
+                                                     const)
         else:
             warnings.warn('Missing mass matrix')
-            m_block = None
+            mdata = None
 
-        self.m_block = m_block
-        self.k_block = k_block
+        # remove constrained entries
+        if np.any(const < 0):
+            if kdata is not None:
+                remove = np.nonzero(const < 0)[0]
+                mask = ~np.logical_or(np.in1d(krow, remove), np.in1d(kcol, remove))
+                krow = krow[mask]
+                kcol = kcol[mask]
+                kdata = kdata[mask]
 
-        # assemble data
-        if utri:
-            if k_block:
-                # stiffness matrix
-                krow = np.hstack((k_block[1], k_diag))  # row and diag
-                kcol = np.hstack((k_block[0], k_diag))  # col and diag
-                kdata = np.hstack((k_block[2], k_data_diag))  # data and diag
+            if mdata is not None:
+                mask = ~np.logical_or(np.in1d(mrow, remove), np.in1d(mcol, remove))
+                mrow = mrow[mask]
+                mcol = mcol[mask]
+                mdata = mdata[mask]
 
-            if m_block:
-                # mass matrix
-                mrow = np.hstack((m_block[1], m_diag))  # row and diag
-                mcol = np.hstack((m_block[0], m_diag))  # col and diag
-                mdata = np.hstack((m_block[2], m_data_diag))  # data and diag
+        dof_ref, index, nref, dref = _rstHelper.SortNodalEqlv(neqn, neqv, ndof)
+        if sort:  # make sorting the same as ANSYS rdfull would output
+            # resort to make in upper triangle
+            krow = index[krow]
+            kcol = index[kcol]
+            krow, kcol = np.sort(np.vstack((krow, kcol)), 0)
 
+            mrow = index[mrow]
+            mcol = index[mcol]
+            mrow, mcol = np.sort(np.vstack((mrow, mcol)), 0)
         else:
-            if k_block:
-                # stiffness matrix
-                krow = np.hstack((k_block[0], k_block[1], k_diag))
-                kcol = np.hstack((k_block[1], k_block[0], k_diag))
-                kdata = np.hstack((k_block[2], k_block[2], k_data_diag))
-
-            if m_block:
-                # mass matrix
-                mrow = np.hstack((m_block[0], m_block[1], m_diag))
-                mcol = np.hstack((m_block[1], m_block[0], m_diag))
-                mdata = np.hstack((m_block[2], m_block[2], m_data_diag))
+            dof_ref = np.vstack((nref, dref)).T
 
         # store data for later reference
-        if k_block:
+        if kdata is not None:
             self.krow = krow
             self.kcol = kcol
             self.kdata = kdata
-        if m_block:
+        if mdata is not None:
             self.mrow = mrow
             self.mcol = mcol
             self.mdata = mdata
 
-        # number of dimentions
-        ndim = nref.size
-
         # output as a sparse matrix
         if as_sparse:
 
-            if k_block:
-                k = coo_matrix((ndim,) * 2)
+            if kdata is not None:
+                k = coo_matrix((neqn,) * 2)
                 k.data = kdata  # data has to be set first
                 k.row = krow
                 k.col = kcol
@@ -244,8 +248,8 @@ class FullReader(object):
             else:
                 k = None
 
-            if m_block:
-                m = coo_matrix((ndim,) * 2)
+            if mdata is not None:
+                m = coo_matrix((neqn,) * 2)
                 m.data = mdata
                 m.row = mrow
                 m.col = mcol
@@ -256,14 +260,14 @@ class FullReader(object):
                 m = None
 
         else:
-            if k_block:
-                k = np.zeros((ndim,) * 2)
+            if kdata is not None:
+                k = np.zeros((neqn,) * 2)
                 k[krow, kcol] = kdata
             else:
                 k = None
 
-            if m_block:
-                m = np.zeros((ndim,) * 2)
+            if mdata is not None:
+                m = np.zeros((neqn,) * 2)
                 m[mrow, mcol] = mdata
             else:
                 m = None
@@ -376,8 +380,7 @@ class ResultReader(object):
 
             vtkappend.AddInputData(sector)
 
-        # Combine meshes and add VTK_Utilities functions
-        # vtkappend.MergePointsOn()
+        # Combine meshes
         vtkappend.Update()
         self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
 
@@ -1454,3 +1457,18 @@ def delete_row_csc(mat, i):
     mat.indptr[i:] -= n
     mat.indptr = mat.indptr[:-1]
     mat._shape = (mat._shape[0] - 1, mat._shape[1])
+
+
+def ReadTable(f, dtype='i', skip=False):
+    """ read fortran style table """
+    tablesize = np.fromfile(f, 'i', 1)[0]
+    f.seek(4, 1)  # skip padding
+    if skip:
+        f.seek((tablesize + 1)*4, 1)
+        return
+    else:
+        if dtype == 'double':
+            tablesize //= 2
+        table = np.fromfile(f, dtype, tablesize)
+    f.seek(4, 1)  # skip padding
+    return table
