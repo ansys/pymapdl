@@ -104,7 +104,7 @@ numpy installed.
     disp = result.GetNodalResult(0, True) # uses 0 based indexing 
 
     # it's just a numpy array
-    print disp
+    print(disp)
     
 .. code::
 

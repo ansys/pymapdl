@@ -141,6 +141,6 @@ setup(
                                        'file.rst', 'file.full']},
 
     # Might work with earlier versions
-    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.4.0']
+    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.6.4']
 
 )
