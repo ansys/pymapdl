@@ -25,13 +25,13 @@ cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 cdef double d_nan = np.nan
 
 # Inline subfunctions
-cdef inline double TripleProduct(double [3] ab, double [3] bc, double [3] cd):
+cdef inline double TripleProduct(double [3] ab, double [3] bc, double [3] cd) nogil:
     return ab[0] * (bc[1] * cd[2] - bc[2] * cd[1]) -\
            bc[0] * (ab[1] * cd[2] - ab[2] * cd[1]) +\
            cd[0] * (ab[1] * bc[2] - ab[2] * bc[1])
 
 
-cdef inline double NormCalc(double [3] vec):
+cdef inline double NormCalc(double [3] vec) nogil:
     return sqrt(vec[0]**2 + vec[1]**2 + vec[2]**2)
 
 
