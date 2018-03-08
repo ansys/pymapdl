@@ -406,11 +406,12 @@ cdef inline void StoreHex(int64_t [::1] offset, int64_t *ecount, int64_t *ccount
     ecount[0] += 1
 
 
-def Parse(raw, pyforce_linear, allowable_types):
+def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     """
     Parses raw cdb data from downstream conversion to a vtk unstructured grid
     """
     cdef int force_linear = pyforce_linear
+    cdef int null_unallowed = py_null_unallowed
     cdef int i, j, k, lin
 
     # ANSYS element type definitions
@@ -458,12 +459,13 @@ def Parse(raw, pyforce_linear, allowable_types):
         else:
             typeC[i] = -1
 
+    # line elements
     cdef int [1] linetype
     for i, atype in enumerate(['188']):
         if atype in allowable_types:
             linetype[i] = int(atype)
 
-    
+    # arrays (efficiency warning astype is copying)
     cdef int [:, ::1] ekey = raw['ekey'].astype(ctypes.c_int)
     cdef int [:, ::1] elem = raw['elem'].astype(ctypes.c_int)
     cdef int [::1] etype = raw['etype'].astype(ctypes.c_int)
@@ -612,8 +614,8 @@ def Parse(raw, pyforce_linear, allowable_types):
                 StoreLine(offset, &ecount, &ccount, cells, cell_type, 
                              numref, elem, i, lin)
 
-        # add null element if element isn't in the allowable types
-        if cstart == ccount:
+        # If permitted, add null element if element isn't in the allowable types
+        if cstart == ccount and null_unallowed:
             enum[ecount] = raw_enum[i]
             etype_out[ecount] = elem_etype
             rcon[ecount] = raw_rcon[i]
@@ -624,13 +626,6 @@ def Parse(raw, pyforce_linear, allowable_types):
         
             cell_type[ecount] = VTK_EMPTY_CELL
             ecount += 1
-
-        # Populate cell array while renumbering nodes
-        # for j in range(2):
-            # cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
-        
-        # Populate cell type array
-
 
 
     return np.asarray(cells[:ccount]), np.asarray(offset[:ecount]), \

@@ -22,6 +22,7 @@ import numpy as np
 from pyansys import _reader
 from pyansys import _relaxmidside
 from pyansys import _parser
+from pyansys.elements import valid_types
 
 # Attempt to load VTK dependent modules
 try:
@@ -48,7 +49,8 @@ class ReadArchive(object):
         """ Initializes a cdb object """
         self.raw = _reader.Read(filename)
 
-    def ParseVTK(self, force_linear=False, allowable_types=None):
+    def ParseVTK(self, force_linear=False, allowable_types=None,
+                 null_unallowed=False):
         """
         Parses raw data from cdb file to VTK format.
 
@@ -62,8 +64,12 @@ class ReadArchive(object):
             Allowable element types.  Defaults to:
             ['45', '95', '185', '186', '92', '187']
 
-            Can include:
-            ['45', '95', '185', '186', '92', '187', '154']
+            See help(pyansys.elements) for available element types.
+
+        null_unallowed : bool, optional
+            Elements types not matching element types will be stored as empty
+            (null) elements.  Useful for debug or tracking element numbers.
+            Default False.
 
         Returns
         -------
@@ -86,8 +92,13 @@ class ReadArchive(object):
         else:
             assert isinstance(allowable_types, list), \
                    'allowable_types must be a list'
+            for eletype in allowable_types:
+                if eletype not in valid_types:
+                    raise Exception('Element type "%s" ' % eletype +
+                                    'cannot be parsed in pyansys')
 
-        result = _parser.Parse(self.raw, force_linear, allowable_types)
+        result = _parser.Parse(self.raw, force_linear, allowable_types,
+                               null_unallowed)
         cells, offset, cell_type, numref, enum, etype, rcon = result
 
         # catch bug

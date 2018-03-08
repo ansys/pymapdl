@@ -13,6 +13,7 @@ import vtkInterface
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
+from pyansys.elements import valid_types
 
 try:
     import vtk
@@ -848,8 +849,8 @@ class ResultReader(object):
                          'e_rcon': np.ones_like(enum)}
 
         # store the reference array
-        valid_types = ['45', '95', '185', '186', '92', '187', '154', '181']
-        result = _parser.Parse(self.geometry, False, valid_types)
+        # Allow quadradic and null unallowed
+        result = _parser.Parse(self.geometry, False, valid_types, True)
         cells, offset, cell_type, self.numref, _, _, _ = result
 
         # catch -1
@@ -860,11 +861,8 @@ class ResultReader(object):
 
             element_type = np.zeros_like(etype)
             for key, typekey in ekey:
-                # if str(typekey) in valid_types:
                 element_type[etype == key] = typekey
 
-            # validmask = element_type != 0
-            # element_type = element_type[validmask]
             nodes = nloc[:, :3]
             self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
                                                           cell_type, nodes)
@@ -920,9 +918,8 @@ class ResultReader(object):
             # = 2 - extrapolate always
             # print(rxtrap)
             if rxtrap == 0:
-                warnings.warn('Strains and stresses are moved and not ' +
-                              'extrapolated nodal stress calculations will ' +
-                              'be incorrect')
+                warnings.warn('Strains and stresses are being evaluated at ' +
+                              'gauss points and not extrapolated')
 
             # item 122  64-bit pointer to element solution
             f.seek((rpointers[rnum] + 120) * 4)
