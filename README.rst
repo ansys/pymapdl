@@ -1,15 +1,15 @@
 pyansys
 =======
-
-This Python module allows you to to extract data from ANSYS files and to display
-them if vtk is installed.  Currently supports result (.rst), mass and stiffness (.full), and block archive (.cdb) files.
+This Python module allows you to:
+ - Interactively control an instance of ANSYS using Python.  Linux only (for now)
+ - Extract data from ANSYS files and to display them if ``VTK`` is installed.
+ - Read in result ``(.rst)``, mass and stiffness ``(.full)``, and block archive ``(.cdb)`` files.
 
 See the `Documentation <http://pyansys.readthedocs.io>`_ page for more details.
 
 
 Installation
 ------------
-
 Installation through pip::
 
     pip install pyansys
@@ -18,14 +18,11 @@ You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_ to download
 
 Dependencies: ``numpy``, ``cython``, ``vtkInterface``. Optional: ``vtk``
 
-Minimum requirements are numpy to extract results from a results file. To
-convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must
-be installed with Python bindings.
+Minimum requirements are numpy to extract results from a results file. To convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must be installed with Python bindings.
 
 
 Quick Examples
 --------------
-
 Many of the following examples are built in and can be run from the build-in
 examples module.  For a quick demo, run:
 
@@ -33,6 +30,34 @@ examples module.  For a quick demo, run:
 
     from pyansys import examples
     examples.RunAll()
+
+
+Controlling ANSYS
+~~~~~~~~~~~~~~~~~
+Create an instance of ANSYS and send commands to it.
+
+.. code:: python
+
+    import os
+    import pyansys
+
+    path = os.getcwd()
+    ansys = pyansys.ANSYS(run_location=path)
+
+    # create a square area using keypoints
+    ansys.Prep7()
+    ansys.K(1, 0, 0, 0)
+    ansys.K(2, 1, 0, 0)
+    ansys.K(3, 1, 1, 0)
+    ansys.K(4, 0, 1, 0)    
+    ansys.L(1, 2)
+    ansys.L(2, 3)
+    ansys.L(3, 4)
+    ansys.L(4, 1)
+    ansys.Al(1, 2, 3, 4)
+    ansys.Save()
+    ansys.Exit()
+
 
 Loading and Plotting an ANSYS Archive File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,7 +83,7 @@ be loaded using ReadArchive and then converted to a vtk object.
     
     # Create a vtk unstructured grid from the raw data and plot it
     archive.ParseFEM()
-    archive.uGrid.Plot()
+    archive.grid.Plot()
     
     # write this as a vtk xml file 
     archive.SaveAsVTK('hex.vtu')
@@ -71,7 +96,7 @@ VTK.
 
     # Load this from vtk
     import vtkInterface
-    grid = vtkInterface.LoadGrid('hex.vtk')
+    grid = vtkInterface.UnstructuredGrid('hex.vtk')
     grid.Plot()
 
 
@@ -173,9 +198,10 @@ frequencies and mode shapes.
     5781.975 Hz
     6919.399 Hz
 
-License
--------
+License and Acknowledgments
+---------------------------
+``pyansys`` is licensed under the MIT license.
 
-pyansys is licensed under the MIT license.
+ANSYS documentation and functions build from html provided by `Sharcnet <https://www.sharcnet.ca/Software/Ansys/>`_.  Thanks!
 
-
+This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.

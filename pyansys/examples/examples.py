@@ -200,3 +200,122 @@ def DisplayCellQual(meshtype='tet'):
     # plot cell quality
     grid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
               rng=[0, 1])
+
+
+def CylinderANSYS(plot_vtk=True):
+
+    # cylinder parameters
+    # torque = 100
+    radius = 2
+    h_tip = 2
+    height = 20
+    elemsize = 0.5
+    # pi = np.arccos(-1)
+    force = 100/radius
+    pressure = force/(h_tip*2*np.pi*radius)
+
+    # start ANSYS
+    # pyansys.OpenLogger()
+    ansys = pyansys.ANSYS(override=True)
+
+    # Define higher-order SOLID186
+    # Define surface effect elements SURF154 to apply torque
+    # as a tangential pressure
+    ansys.Prep7()
+    ansys.Et(1, 186)
+    ansys.Et(2, 154)
+    ansys.R(1)
+    ansys.R(2)
+
+    # Aluminum properties (or something)
+    ansys.Mp('ex', 1, 10e6)
+    ansys.Mp('nuxy', 1, 0.3)
+    ansys.Mp('dens', 1, 0.1/386.1)
+    ansys.Mp('dens', 2, 0)
+
+    # Simple cylinder
+    for i in range(4):
+        ansys.Cylind(radius, '', '', height, 90*(i-1), 90*i)
+
+    ansys.Nummrg('kp')
+
+    # non-interactive volume plot
+    ansys.Show()
+    ansys.Menu('grph')
+    ansys.View(1, 1, 1, 1)
+    ansys.Vplot()
+    ansys.Wait(1)
+
+    # mesh cylinder
+    ansys.Lsel('s', 'loc', 'x', 0)
+    ansys.Lsel('r', 'loc', 'y', 0)
+    ansys.Lsel('r', 'loc', 'z', 0, height - h_tip)
+    ansys.Lesize('all', elemsize*2)
+    ansys.Mshape(0)
+    ansys.Mshkey(1)
+    ansys.Esize(elemsize)
+    ansys.Allsel('all')
+    ansys.Vsweep('ALL')
+    ansys.Csys(1)
+    ansys.Asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+    ansys.Asel('r', 'loc', 'x', radius)
+    ansys.Local(11, 1)
+    ansys.Csys(0)
+    ansys.Aatt(2, 2, 2, 11)
+    ansys.Amesh('all')
+    ansys.Finish()
+
+    ansys.Eplot()
+    ansys.Wait(1)
+
+    # new solution
+    ansys.Slashsolu()
+    ansys.Antype('static', 'new')
+    ansys.Eqslv('pcg', 1e-8)
+
+    # Apply tangential pressure
+    ansys.Esel('s', 'type', '', 2)
+    ansys.Sfe('all', 2, 'pres', '', pressure)
+
+    # Constrain bottom of cylinder/rod
+    ansys.Asel('s', 'loc', 'z', 0)
+    ansys.Nsla('s', 1)
+
+    ansys.D('all', 'all')
+    ansys.Allsel()
+    ansys.Psf('pres', '', 2)
+    ansys.Pbc('u', 1)
+    ansys.Solve()
+    ansys.Finish()
+    # ansys.Save()
+    ansys.Exit()
+
+    # open the result file
+    path = ansys.path
+    resultfile = os.path.join(path, 'file.rst')
+    result = pyansys.ResultReader(resultfile)
+    element_stress, elemnum, enode = result.ElementStress(0)
+    print(element_stress)
+    nodenum, stress = result.NodalStress(0)
+    print(stress)
+    
+
+    if plot_vtk:
+        # # plot interactively
+        result.PlotNodalResult(0, colormap='bwr')
+        result.PlotNodalStress(0, 'Sx', colormap='bwr')
+        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
+
+        # plot and save non-interactively
+        cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
+                (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
+                (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
+
+        result.PlotNodalResult(0, interactive=False, cpos=cpos,
+                               screenshot=os.path.join(path, 'cylinder_disp.png'))
+
+        result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+                               screenshot=os.path.join(path, 'cylinder_sx.png'))
+
+        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
+                                        screenshot=os.path.join(path, 'cylinder_vonmises.png'))

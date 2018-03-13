@@ -1,11 +1,16 @@
-ANSYS Examples
-==============
-These examples are used to demonstrate ANSYS examples and reading them in using ``pyansys``.
+ANSYS APDL Interactive Control Examples
+=======================================
+These examples are used to demonstrate how to convert an existing ANSYS APDL script to a python ``pyansys`` script.
 
 
 Torsional Load on a Bar using SURF154 Elements
 ----------------------------------------------
 This ANSYS APDL script builds a bar and applies torque to it using SURF154 elements.  This is a static analysis example.
+
+
+Script Initialization
+~~~~~~~~~~~~~~~~~~~~~
+Beginning of ANSYS script:
 
 .. code::
 
@@ -21,7 +26,40 @@ This ANSYS APDL script builds a bar and applies torque to it using SURF154 eleme
     PI = acos(-1)
     FORCE = 100/RADIUS
     PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
+
+Corresponding ``pyansys`` script including the initialization of pyansys:
+
+.. code:: python
+
+    import numpy as np
+    import os
+    import pyansys
     
+    # get this directory
+    path = os.getcwd()
+
+    # start ANSYS in the current working directory.
+    pyansys.OpenLogger()
+    ansys = pyansys.ANSYS(run_location=path)  # jobname defaults to file
+        
+    # define cylinder and mesh parameters
+    torque = 100
+    radius = 2
+    h_tip = 2
+    height = 20
+    elemsize = 0.5
+    pi = np.arccos(-1)
+    force = 100/radius
+    pressure = force/(h_tip*2*np.pi*radius)
+
+
+Model Creation
+~~~~~~~~~~~~~~
+    
+APDL Script:
+
+.. code::
+
     !----------------------------------------
     ! Define higher-order SOLID186
     ! Define surface effect elements SURF154
@@ -48,8 +86,7 @@ This ANSYS APDL script builds a bar and applies torque to it using SURF154 eleme
     *do, ICOUNT, 1, 4
     cylind,RADIUS,,HEIGHTH_TIP,HEIGHT,90*(ICOUNT-1),90*ICOUNT
     *enddo
-    
-    
+        
     nummrg,kp
     lsel,s,loc,x,0
     
@@ -69,6 +106,75 @@ This ANSYS APDL script builds a bar and applies torque to it using SURF154 eleme
     aatt,2,2,2,11
     amesh,all
     finish
+
+Corresponding ``pyansys`` script:
+
+.. code:: python
+
+    # Define higher-order SOLID186
+    # Define surface effect elements SURF154 to apply torque
+    # as a tangential pressure
+    ansys.Prep7()
+    ansys.Et(1, 186)
+    ansys.Et(2, 154)
+    ansys.R(1)
+    ansys.R(2)
+    
+    # Aluminum properties (or something)
+    ansys.Mp('ex', 1, 10e6)
+    ansys.Mp('nuxy', 1, 0.3)
+    ansys.Mp('dens', 1, 0.1/386.1)
+    ansys.Mp('dens', 2, 0)
+    
+    # Simple cylinder
+    for i in range(4):
+        ansys.Cylind(radius, '', '', height, 90*(i-1), 90*i)
+    
+    ansys.Nummrg('kp')
+    
+    # non-interactive volume plot (optional)
+    ansys.Show()
+    ansys.Menu('grph')
+    ansys.View(1, 1, 1, 1)
+    ansys.Vplot()
+    ansys.Wait(1)
+    
+    # mesh cylinder
+    ansys.Lsel('s', 'loc', 'x', 0)
+    ansys.Lsel('r', 'loc', 'y', 0)
+    ansys.Lsel('r', 'loc', 'z', 0, height - h_tip)
+    ansys.Lesize('all', elemsize*2)
+    ansys.Mshape(0)
+    ansys.Mshkey(1)
+    ansys.Esize(elemsize)
+    ansys.Allsel('all')
+    ansys.Vsweep('ALL')
+    ansys.Csys(1)
+    ansys.Asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+    ansys.Asel('r', 'loc', 'x', radius)
+    ansys.Local(11, 1)
+    ansys.Csys(0)
+    ansys.Aatt(2, 2, 2, 11)
+    ansys.Amesh('all')
+    ansys.Finish()
+
+    # plot elements and wait one second (optional)
+    ansys.Eplot()
+    ansys.Wait(1)
+
+.. figure:: ./images/cylinder_eplot.png
+    :width: 300pt
+
+    Non-interactive GUI Element plot from ANSYS and ``pyansys``
+
+
+Solution
+~~~~~~~~
+
+APDL script:
+
+.. code::
+
     /solu
     antype,static,new
     eqslv,pcg,1e-8
@@ -97,27 +203,83 @@ This ANSYS APDL script builds a bar and applies torque to it using SURF154 eleme
     esel,u,type,,2
     SAVE
 
-Read and plot the results within python using:
+
+Corresponding ``pyansys`` script:
 
 .. code:: python
 
-    import pyansys
-    result = pyansys.ResultReader('file.rst')
+    # new solution
+    ansys.Slashsolu()  # Using Slash instead of / due to duplicate SOLU command
+    ansys.Antype('static', 'new')
+    ansys.Eqslv('pcg', 1e-8)
 
-    # node numbers and nodal stress
-    nodennum, stress = result.NodalStress(0)
+    # Apply tangential pressure
+    ansys.Esel('s', 'type', '', 2)
+    ansys.Sfe('all', 2, 'pres', '', pressure)
 
-    # stress at each element
+    # Constrain bottom of cylinder/rod
+    ansys.Asel('s', 'loc', 'z', 0)
+    ansys.Nsla('s', 1)
+
+    ansys.D('all', 'all')
+    ansys.Allsel()
+    ansys.Psf('pres', '', 2)
+    ansys.Pbc('u', 1)
+    ansys.Solve()
+    ansys.Exit()  # Finishes, saves, and exits
+
+
+Access and plot the results within python using pyansys:
+
+.. code:: python
+
+    # open the result file using the path used in ANSYS
+    resultfile = os.path.join(ansys.path, 'file.rst')
+    result = pyansys.ResultReader(resultfile)
+
+    # access element results as arrays
+    nnum, stress = result.NodalStress(0)
     element_stress, elemnum, enode = result.ElementStress(0)
+    nodenum, stress = result.NodalStress(0)
 
-    # plot result
-    result.PlotNodalResult(0)
+    # plot interactively
+    result.PlotNodalResult(0, colormap='bwr')
+    result.PlotNodalStress(0, 'Sx', colormap='bwr')
+    result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
 
+    # plot and save non-interactively
+    cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
+            (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
+            (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
+
+    result.PlotNodalResult(0, interactive=False, cpos=cpos,
+                           screenshot=os.path.join(path, 'cylinder_disp.png'))
+
+    result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+                           screenshot=os.path.join(path, 'cylinder_sx.png'))
+
+    result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
+                                    screenshot=os.path.join(path, 'cylinder_vonmises.png'))
+
+.. figure:: ./images/cylinder_disp.png
+    :width: 300pt
+
+    Non-interactive Screenshot of Displacement from ``pyansys``
+
+.. figure:: ./images/cylinder_sx.png
+    :width: 300pt
+
+    Non-interactive Screenshot of X Stress from ``pyansys``
+
+.. figure:: ./images/cylinder_vonmises.png
+    :width: 300pt
+
+    Non-interactive Screenshot of von Mises Stress from ``pyansys``
 
 
 Spotweld SHELL181 Example
 -------------------------
-This ANSYS APDL example demonstrates how to model spot welding on three thin sheets of metal.
+This ANSYS APDL example demonstrates how to model spot welding on three thin sheets of metal.  This example has yet to be translated to a ``pyansys`` script.
 
 .. code::
 

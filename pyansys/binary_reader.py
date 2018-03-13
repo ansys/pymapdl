@@ -352,10 +352,7 @@ class ResultReader(object):
 
         # identify master and duplicate cyclic sectors
         cells = np.arange(self.enum.size)
-        dup_cells = np.where(
-            np.any(
-                self.geometry['elem'] > num_master_max,
-                1))[0]
+        dup_cells = np.where(np.any(self.geometry['elem'] > num_master_max, 1))[0]
         mas_cells = np.setdiff1d(cells, dup_cells)
         self.sector = self.grid.ExtractSelectionCells(mas_cells)
         dup_sector = self.grid.ExtractSelectionCells(dup_cells)
@@ -414,14 +411,9 @@ class ResultReader(object):
 
         return r[self.mas_ind] + r[self.dup_ind] * 1j
 
-    def PlotCyclicNodalResult(
-            self,
-            rnum,
-            phase=0,
-            comp='norm',
-            as_abs=False,
-            label='',
-            expand=True):
+    def PlotCyclicNodalResult(self, rnum, phase=0, comp='norm', as_abs=False,
+                              label='', expand=True, colormap=None, flipscalars=None,
+                              cpos=None, screenshot=None, interactive=True):
         """
         Plots a nodal result from a cyclic analysis.
 
@@ -449,13 +441,29 @@ class ResultReader(object):
             default.  When disabled, plots the maximum response of a single
             sector of the cyclic solution in the component of interest.
 
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
 
         Returns
         -------
         cpos : list
             Camera position from vtk render window.
         """
-
         if 'hindex' not in self.resultheader:
             raise Exception('Result file does not contain cyclic results')
 
@@ -505,41 +513,31 @@ class ResultReader(object):
         # Process result
         if comp == 'x':
             d = d[:, 0]
-            stitle = 'X {:s}'.format(label)
+            stitle = 'X {:s}\n'.format(label)
 
         elif comp == 'y':
             d = d[:, 1]
-            stitle = 'Y {:s}'.format(label)
+            stitle = 'Y {:s}\n'.format(label)
 
         elif comp == 'z':
             d = d[:, 2]
-            stitle = 'Z {:s}'.format(label)
+            stitle = 'Z {:s}\n'.format(label)
 
         else:
             # Normalize displacement
             d = d[:, :3]
             d = (d * d).sum(1)**0.5
 
-            stitle = 'Normalized\n{:s}'.format(label)
+            stitle = 'Normalized\n{:s}\n'.format(label)
 
         if as_abs:
             d = np.abs(d)
 
-        # setup text
-        ls_table = self.resultheader['ls_table']
-        freq = self.GetTimeValues()[rnum]
-        text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
-        text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
-        text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
-        text += 'Harmonic Index:   {:3d}\n'.format(hindex)
-        text += 'Frequency:      {:10.4f} Hz'.format(freq)
+        # Generate plot
+        cpos = self.PlotResult(rnum, d, stitle, colormap, flipscalars,
+                               screenshot, cpos, interactive, grid=grid)
 
-        # plot
-        plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(grid, scalars=d, stitle=stitle, flipscalars=True,
-                      interpolatebeforemap=True)
-        plobj.AddText(text, fontsize=20)
-        plobj.Plot()
+        return cpos
 
     def ResultsProperties(self):
         """
@@ -567,7 +565,9 @@ class ResultReader(object):
 
         return {'Number of Results': self.nsets}
 
-    def PlotNodalResult(self, rnum, comp='norm', as_abs=False, label=''):
+    def PlotNodalResult(self, rnum, comp='norm', as_abs=False, label='',
+                        colormap=None, flipscalars=None, cpos=None, screenshot=None,
+                        interactive=True):
         """
         Plots a nodal result.
 
@@ -584,8 +584,26 @@ class ResultReader(object):
         as_abs : bool, optional
             Displays the absolute value of the result.
 
-        label: string, optional
+        label : str, optional
             Annotation string to add to scalar bar in plot.
+
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
 
         Returns
         -------
@@ -602,41 +620,28 @@ class ResultReader(object):
         # Process result
         if comp == 'x':
             d = result[:, 0]
-            stitle = 'X {:s}'.format(label)
+            stitle = 'X {:s}\n'.format(label)
 
         elif comp == 'y':
             d = result[:, 1]
-            stitle = 'Y {:s}'.format(label)
+            stitle = 'Y {:s}\n'.format(label)
 
         elif comp == 'z':
             d = result[:, 2]
-            stitle = 'Z {:s}'.format(label)
+            stitle = 'Z {:s}\n'.format(label)
 
         else:
             # Normalize displacement
             d = result[:, :3]
             d = (d * d).sum(1)**0.5
 
-            stitle = 'Normalized\n{:s}'.format(label)
+            stitle = 'Normalized\n{:s}\n'.format(label)
 
         if as_abs:
             d = np.abs(d)
 
-        # setup text
-        ls_table = self.resultheader['ls_table']
-        timevalue = self.GetTimeValues()[rnum]
-        text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
-        text += 'Loadstep:        {:3d}\n'.format(ls_table[rnum, 0])
-        text += 'Substep:         {:3d}\n'.format(ls_table[rnum, 1])
-        text += 'Time Value:      {:10.4f}'.format(timevalue)
-
-        plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.grid, scalars=d, stitle=stitle,
-                      flipscalars=True, interpolatebeforemap=True)
-        plobj.AddText(text, fontsize=20)
-
-        # return camera position
-        return plobj.Plot()
+        return self.PlotResult(rnum, d, stitle, colormap, flipscalars,
+                               screenshot, cpos, interactive)
 
     def GetTimeValues(self):
         """
@@ -724,8 +729,8 @@ class ResultReader(object):
                 angle = np.arctan2(
                     self.geometry['nodes'][:, 1], self.geometry['nodes'][:, 0])
                 angle = angle[np.argsort(self.sidx)]
-                self.s_angle = np.sin(angle)  # [self.sidx]
-                self.c_angle = np.cos(angle)  # [self.sidx]
+                self.s_angle = np.sin(angle)
+                self.c_angle = np.cos(angle)
 
             rx = r[:, 0] * self.c_angle - r[:, 1] * self.s_angle
             ry = r[:, 0] * self.s_angle + r[:, 1] * self.c_angle
@@ -971,7 +976,7 @@ class ResultReader(object):
             where result is the result object.
 
         """
-        element_stress, elemnum, enode = self.ElementStress(0)
+        element_stress, elemnum, enode = self.ElementStress(rnum)
 
         # nodes for each element
         nnum = np.hstack(enode)
@@ -1121,7 +1126,8 @@ class ResultReader(object):
             stress = stress.astype(np.float32)
         return nodenum, _rstHelper.ComputePrincipalStress(stress)
 
-    def PlotPrincipalNodalStress(self, rnum, stype):
+    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+                                 cpos=None, screenshot=None, interactive=True):
         """
         Plot the principal stress at each node in the solution.
 
@@ -1138,34 +1144,87 @@ class ResultReader(object):
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
 
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.  Only applicable for
+           when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.  Default None.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
+
         Returns
         -------
         cpos : list
             VTK camera position.
 
+        stress : np.ndarray
+            Array used to plot stress.
+
         """
         stress = self.PrincipleStressForPlotting(rnum, stype)
 
         # Generate plot
-        stitle = 'Nodal Stress\n{:s}'.format(stype)
-        plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.grid, scalars=stress, stitle=stitle,
-                      flipscalars=True, interpolatebeforemap=True)
+        stitle = 'Nodal Stress\n{:s}\n'.format(stype)
+        cpos = self.PlotResult(rnum, stress, stitle, colormap, flipscalars,
+                               screenshot, cpos, interactive)
 
-        text = 'Result %d at %f' % (rnum + 1, self.tvalues[rnum])
-        plobj.AddText(text)
+        return cpos, stress
 
-        return plobj.Plot(), stress
+    def PlotResult(self, rnum, scalars, stitle, colormap, flipscalars,
+                   screenshot, cpos, interactive, grid=None):
+        """ Plots a result """
+        if grid is None:
+            grid = self.grid
+
+        if colormap is None and flipscalars is None:
+            flipscalars = True
+
+        # Plot off screen when not interactive
+        plobj = vtkInterface.PlotClass(off_screen=not(interactive))
+        plobj.AddMesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
+                      flipscalars=flipscalars)
+        if cpos:
+            plobj.SetCameraPosition(cpos)
+
+        plobj.AddText(self.TextResultTable(rnum), fontsize=20)
+        if screenshot:
+            cpos = plobj.Plot(autoclose=False, interactive=interactive)
+            plobj.TakeScreenShot(screenshot)
+            plobj.Close()
+        else:
+            cpos = plobj.Plot(interactive=interactive)
+
+        return cpos
+
+    def TextResultTable(self, rnum):
+        """ Returns a text result table for plotting """
+        ls_table = self.resultheader['ls_table']
+        timevalue = self.GetTimeValues()[rnum]
+        text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
+        text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
+        text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
+        text += 'Time Value:     {:10.4f}'.format(timevalue)
+
+        return text
 
     def PrincipleStressForPlotting(self, rnum, stype):
         """
         returns stress used to plot
 
-        further documentation forthcoming
-
         """
         stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
-        if stype not in stress_types:
+        if stype.upper() not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
 
         sidx = stress_types.index(stype)
@@ -1185,7 +1244,8 @@ class ResultReader(object):
         # find matching edge nodes
         return temp_arr[nodenum, sidx]
 
-    def PlotNodalStress(self, rnum, stype):
+    def PlotNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+                        cpos=None, screenshot=None, interactive=True):
         """
         Plots the stresses at each node in the solution.
 
@@ -1203,6 +1263,24 @@ class ResultReader(object):
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
 
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
+
         Returns
         -------
         cpos : list
@@ -1219,10 +1297,10 @@ class ResultReader(object):
         # etype = self.grid.GetCellScalars('Element Type')
         # valid = (np.in1d(etype, validENS)).nonzero()[0]
         # grid = self.grid.ExtractSelectionCells(valid)
-        grid = self.grid  # bypassed for now
+        # grid = self.grid  # bypassed for now
 
         # Populate with nodal stress at edge nodes
-        nodenum = grid.GetPointScalars('ANSYSnodenum')
+        nodenum = self.grid.GetPointScalars('ANSYSnodenum')
         stress_nnum, edge_stress = self.NodalStress(rnum)
         temp_arr = np.zeros((nodenum.max() + 1, 6))
         temp_arr[stress_nnum] = edge_stress
@@ -1231,13 +1309,10 @@ class ResultReader(object):
         # stress[mask] = edge_stress[:, sidx]
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
 
-        # Generate plot
-        plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(grid, scalars=stress, stitle=stitle,
-                      flipscalars=True, interpolatebeforemap=True)
-        text = 'Result %d at %f' % (rnum + 1, self.tvalues[rnum])
-        plobj.AddText(text)
-        return plobj.Plot()
+        cpos = self.PlotResult(rnum, stress, stitle, colormap, flipscalars,
+                               screenshot, cpos, interactive)
+
+        return cpos
 
     def SaveAsVTK(self, filename, binary=True):
         """

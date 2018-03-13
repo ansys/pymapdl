@@ -207,15 +207,16 @@ def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table,
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
     
-    cdef int64_t ele_table, ptrENS, nnode_elem
+    cdef int64_t ele_table, nnode_elem
+    cdef int32_t ptrENS
     cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         # get location of pointers to element data
         ele_table = ele_ind_table[i]
         fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
-        fread(&ptrENS, sizeof(int), 1, cfile)
+        fread(&ptrENS, sizeof(int32_t), 1, cfile)
 
-        # Get the nodes in the element    
+        # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
 
         # read the stresses evaluated at the intergration points or nodes
