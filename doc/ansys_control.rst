@@ -148,7 +148,62 @@ Additionally, each function with the ANSYS class has help associated within it. 
         same number will be redefined.  Keypoints may be redefined only if it
         is not yet attached to a line or is not yet meshed.  Solid modeling in
         a toroidal system is not recommended.
-    
+
+
+Translating Scripts
+-------------------
+Existing ANSYS scripts can be translated using:
+
+.. code:: python
+
+    import pyansys
+
+    inputfile = 'ansys_inputfile.inp'
+    pyscript = 'pyscript.py'
+    pyansys.ConvertFile(inputfile, pyscript)
+
+For example, verification file vm1.dat:
+
+.. code::
+   
+    /VERIFY,VM1
+    /PREP7
+    /TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS
+    C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10
+    ANTYPE,STATIC                  ! STATIC ANALYSIS
+    ET,1,LINK180
+    SECTYPE,1,LINK
+    SECDATA,1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1
+    MP,EX,1,30E6
+    N,1
+    N,2,,4
+    N,3,,7
+    N,4,,10
+    E,1,2                          ! DEFINE ELEMENTS
+
+Translates to:
+
+.. code:: python
+
+    import pyansys
+    ansys = pyansys.ANSYS(loglevel="debug")
+
+    ansys.RunCommand("/VERIFY,VM1")
+    ansys.RunCommand("/PREP7")
+    ansys.RunCommand("/TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS")
+    ansys.RunCommand("C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10")
+    ansys.Antype("STATIC                  ! STATIC ANALYSIS")
+    ansys.Et(1, "LINK180")
+    ansys.Sectype(1, "LINK")
+    ansys.Secdata("1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1")
+    ansys.Mp("EX", 1, 30E6)
+    ansys.N(1)
+    ansys.N(2, "", 4)
+    ansys.N(3, "", 7)
+    ansys.N(4, "", 10)
+    ansys.E(1, "2                          ! DEFINE ELEMENTS")
+
+Some of the commands with ``/`` are not directly translated to functions and are instead run as commands.  See the following Caveats and Notes section for more details.
     
 Caveats and Notes
 -----------------

@@ -40,14 +40,19 @@ ready_items = [b'BEGIN:',
                b'AUX3:',
                b'AUX12:',
                b'AUX15:',
+               # continue
                b'YES,NO OR CONTINUOUS\)\=',
                b'executed\?',
+               # errors
                b'SHOULD INPUT PROCESSING BE SUSPENDED\?',
+               # prompts
+               b'ENTER FORMAT for',
 ]
 
 continue_idx = ready_items.index(b'YES,NO OR CONTINUOUS\)\=')
 warning_idx = ready_items.index(b'executed\?')
 error_idx = ready_items.index(b'SHOULD INPUT PROCESSING BE SUSPENDED\?')
+prompt_idx = ready_items.index(b'ENTER FORMAT for')
 
 nitems = len(ready_items)
 expect_list = []
@@ -55,7 +60,12 @@ for item in ready_items:
     expect_list.append(re.compile(item))
 
 # idenfity ignored commands
-ignored = re.compile('\s+'.join(['This', 'command', 'will', 'be', 'ignored']))
+# ignored = re.compile('\s+'.join(['WARNING', 'command', 'ignored']))
+ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
+# re.DOTALL = True
+# ignored = re.compile('(?:.|\n)+'.join(['WARNING', 'ignored']))
+# ignored = re.compile('[\s\S]+'.join(['WARNING', 'ignored']))
+# print(ignored.search(response))
 
 
 def SetupLogger(loglevel='INFO'):
@@ -177,6 +187,7 @@ class ANSYS(object):
     # default settings
     allow_ignore = False
     auto_continue = True
+    block_override = None
 
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=None,
                  override=False, wait=True, loglevel='INFO'):
@@ -241,16 +252,26 @@ class ANSYS(object):
         self.exec_file = exec_file
         self.jobname = jobname
 
+    def SetLogLevel(self, loglevel):
+        """ Sets log level """
+        SetupLogger(loglevel=loglevel.upper())
+
     def __enter__(self):
         return self
 
     def RunCommand(self, command, return_response=False, block=True,
-                   continue_on_error=False, timeout=None):
+                   continue_on_error=False, ignore_prompt=False, timeout=None):
         """ Sends command and returns ANSYS's response """
         if not self.process.isalive():
             raise Exception('ANSYS process closed')
 
+        if self.block_override is not None:
+            block = self.block_override
+
+        # send the command
         self.log.debug('Sending command %s' % command)
+        if ignore_prompt:
+            self.log.debug('... with ignore_prompt=True')
         self.process.sendline(command)
 
         if block:
@@ -267,6 +288,7 @@ class ANSYS(object):
                     else:
                         user_input = input('Response: ')
                     self.process.sendline(user_input)
+
                 elif i >= warning_idx and i < error_idx:  # warning
                     self.log.debug('Prompt: Response index %i.  Matched %s'
                                    % (i, ready_items[i].decode('utf-8')))
@@ -277,7 +299,7 @@ class ANSYS(object):
                         user_input = input('Response: ')
                     self.process.sendline(user_input)
 
-                elif i >= error_idx:  # error
+                elif i >= error_idx and i < prompt_idx:  # error
                     self.log.debug('Error index %i.  Matched %s'
                                    % (i, ready_items[i].decode('utf-8')))
                     self.log.error(response)
@@ -286,7 +308,22 @@ class ANSYS(object):
                         self.process.sendline(user_input)
                     else:
                         raise Exception(response)
-                else:
+
+                elif i >= prompt_idx:  # prompt
+                    self.log.debug('Prompt index %i.  Matched %s'
+                                   % (i, ready_items[i].decode('utf-8')))
+                    self.log.info(response + ready_items[i].decode('utf-8'))
+                    if ignore_prompt:
+                        self.log.debug('Ignoring prompt')
+                        # time.sleep(0.1)
+                        break
+                    else:
+                        user_input = input('Response: ')
+                        self.process.sendline(user_input)
+
+                else:  # continue item
+                    self.log.debug('continue index %i.  Matched %s'
+                                   % (i, ready_items[i].decode('utf-8')))
                     break
 
             # handle response

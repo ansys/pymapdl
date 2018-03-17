@@ -117,13 +117,11 @@ setup(
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 # cell quality module
                  Extension("pyansys._cellqual",
-                           ["pyansys/cython/_cellqual.pyx"],
+                           ["pyansys/_cellqual.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 # cell quality module
                  Extension("pyansys._cellqualfloat",
                            ["pyansys/cython/_cellqualfloat.pyx"],
                            extra_compile_args=cmp_arg,

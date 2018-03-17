@@ -26,6 +26,7 @@ except BaseException:
 log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
 
+np.seterr(divide='ignore', invalid='ignore')
 
 # Pointer information from ansys interface manual
 # =============================================================================
@@ -975,30 +976,56 @@ class ResultReader(object):
             For the corresponding node numbers, see "result.edge_node_num"
             where result is the result object.
 
+        Notes
+        -----
+        Nodes without a stress value will be NAN.
+
         """
-        element_stress, elemnum, enode = self.ElementStress(rnum)
+        # element header
+        table_index, ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
 
-        # nodes for each element
-        nnum = np.hstack(enode)
-        nodenum = np.unique(nnum)
+        if self.resultheader['rstsprs'] != 0:
+            nitem = 6
+        else:
+            nitem = 11
 
-        # stack the element stresses
-        arr = np.vstack(element_stress)
+        # certain element types do not output stress
+        elemtype = self.grid.GetCellScalars('Element Type')
+        validmask = np.in1d(elemtype, validENS).astype(np.int32)
+
+        assert ele_ind_table.size == self.grid.GetNumberOfCells()
+        data, ncount = _rstHelper.ReadNodalValues(self.filename,
+                                                  table_index,
+                                                  self.grid.celltypes,
+                                                  ele_ind_table,
+                                                  self.grid.offset,
+                                                  self.grid.cells,
+                                                  nitem,
+                                                  validmask.astype(np.int32),
+                                                  self.grid.GetNumberOfPoints(),
+                                                  nodstr,
+                                                  etype)
 
         # determine the number of times each node occurs in the results
-        arr_ones = np.ones_like(arr)
-        ncount = np.bincount(nnum, weights=arr_ones[:, 0])
-        mask = ncount != 0
+        # ncount = np.bincount(nnum, weights=validmask.astype(np.int))
+        # validmask[:] = True
+        # exists = np.bincount(nnum, weights=validmask.astype(np.int)).astype(np.bool)
+        # ncount_exists = ncount[exists]
 
-        # sum and weight the stress at each node
-        stress = np.empty((nodenum.size, 6))
-        for i in range(6):
-            stress[:, i] = np.bincount(nnum, weights=arr[:, i])[mask]
+        # # sum and weight the stress at each node
+        # stress = np.empty((nodenum.size, 6))
+        # for i in range(6):
+        #     stress[:, i] = (np.bincount(nnum, weights=arr[:, i])[exists])
 
-        stress /= ncount[mask].reshape(-1, 1)
-        return nodenum, stress
+        # stress /= ncount_exists.reshape(-1, 1)
 
-    def ElementStress(self, rnum):
+        # return nodenum, stress
+
+        nnum = self.grid.GetPointScalars('ANSYSnodenum')
+        stress = data/ncount.reshape(-1, 1)
+        return nnum, stress
+
+    def ElementStress(self, rnum, return_header=False):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -1026,22 +1053,16 @@ class ResultReader(object):
             Node numbers corresponding to each element's stress results.  One
             list entry for each element
 
-        Notes
-        -----
-        Only elements that output stress will have their stresses reported.
-        See the ANSYS element guide.
-
         """
-        result = self.ElementSolutionHeader(rnum)
-        table_index, ele_ind_table, nodstr, etype = result
+        header = self.ElementSolutionHeader(rnum)
+        table_index, ele_ind_table, nodstr, etype = header
 
         # certain element types do not output stress
         elemtype = self.grid.GetCellScalars('Element Type')
-        validmask = np.in1d(elemtype, validENS)
-        validmask[:] = True
+        validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        ele_ind_table = ele_ind_table[validmask]
-        etype = etype[validmask].astype(c_int64)
+        ele_ind_table = ele_ind_table  # [validmask]
+        etype = etype.astype(c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
@@ -1053,41 +1074,47 @@ class ResultReader(object):
             else:
                 nitem = 11
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
+            ele_data_arr[:] = np.nan
             _rstHelper.ReadElementStress(self.filename, table_index,
                                          ele_ind_table,
                                          nodstr.astype(c_int64),
                                          etype,
                                          ele_data_arr,
                                          self.edge_idx.astype(c_int64),
-                                         nitem)
+                                         nitem, validmask)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
         else:
-            ele_data_arr = np.empty((nelemnode, 6), np.float64)
-            _rstHelper.ReadElementStressDouble(self.filename, table_index,
-                                               ele_ind_table,
-                                               nodstr.astype(c_int64),
-                                               etype,
-                                               ele_data_arr,
-                                               self.edge_idx.astype(c_int64))
+            raise Exception('Not implemented for this version of ANSYS')
+            # ele_data_arr = np.empty((nelemnode, 6), np.float64)
+            # _rstHelper.ReadElementStressDouble(self.filename, table_index,
+            #                                    ele_ind_table,
+            #                                    nodstr.astype(c_int64),
+            #                                    etype,
+            #                                    ele_data_arr,
+            #                                    self.edge_idx.astype(c_int64))
 
         splitind = np.cumsum(nnode)
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
         # reorder list using sorted indices
-        enum = self.grid.GetCellScalars('ANSYS_elem_num')[validmask]
+        enum = self.grid.GetCellScalars('ANSYS_elem_num')
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
-        elem = self.geometry['elem'][validmask]
+        elem = self.geometry['elem']
         enode = []
         for i in sidx:
             enode.append(elem[i, :nnode[i]])
 
         # Get element numbers
         elemnum = self.geometry['enum'][self.sidx_elem]
-        return element_stress, elemnum, enode
+
+        if return_header:
+            return element_stress, elemnum, enode, header
+        else:
+            return element_stress, elemnum, enode
 
     def PrincipalNodalStress(self, rnum):
         """
@@ -1124,7 +1151,10 @@ class ResultReader(object):
         # compute principle stress
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
-        return nodenum, _rstHelper.ComputePrincipalStress(stress)
+
+        pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+        pstress[isnan] = np.nan
+        return nodenum, pstress
 
     def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
                                  cpos=None, screenshot=None, interactive=True):
@@ -1306,7 +1336,6 @@ class ResultReader(object):
         temp_arr[stress_nnum] = edge_stress
         stress = temp_arr[nodenum, sidx]
 
-        # stress[mask] = edge_stress[:, sidx]
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
 
         cpos = self.PlotResult(rnum, stress, stitle, colormap, flipscalars,

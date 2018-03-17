@@ -1,7 +1,7 @@
 pyansys
 =======
 This Python module allows you to:
- - Interactively control an instance of ANSYS using Python.  Linux only (for now)
+ - Interactively control an instance of ANSYS using Python.  Linux only (for now).
  - Extract data from ANSYS files and to display them if ``VTK`` is installed.
  - Read in result ``(.rst)``, mass and stiffness ``(.full)``, and block archive ``(.cdb)`` files.
 

@@ -202,7 +202,7 @@ def DisplayCellQual(meshtype='tet'):
               rng=[0, 1])
 
 
-def CylinderANSYS(plot_vtk=True):
+def CylinderANSYS(plot_vtk=True, plot_ansys=True):
 
     # cylinder parameters
     # torque = 100
@@ -240,11 +240,12 @@ def CylinderANSYS(plot_vtk=True):
     ansys.Nummrg('kp')
 
     # non-interactive volume plot
-    ansys.Show()
-    ansys.Menu('grph')
-    ansys.View(1, 1, 1, 1)
-    ansys.Vplot()
-    ansys.Wait(1)
+    if plot_ansys:
+        ansys.Show()
+        ansys.Menu('grph')
+        ansys.View(1, 1, 1, 1)
+        ansys.Vplot()
+        ansys.Wait(1)
 
     # mesh cylinder
     ansys.Lsel('s', 'loc', 'x', 0)
@@ -265,8 +266,9 @@ def CylinderANSYS(plot_vtk=True):
     ansys.Amesh('all')
     ansys.Finish()
 
-    ansys.Eplot()
-    ansys.Wait(1)
+    if plot_ansys:
+        ansys.Eplot()
+        ansys.Wait(1)
 
     # new solution
     ansys.Slashsolu()

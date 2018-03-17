@@ -242,10 +242,8 @@ cdef inline double WegLinJac(int64_t [::1] cellarr, int c,
     return jac
     
     
-cdef inline double HexLinJac(int64_t [::1] cellarr, int c,
-                             double [:, ::1] pts) nogil:
+cdef inline double HexLinJac(int64_t [::1] cellarr, int c, double [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a hexahedrals cell's edge nodes  """
-        
     cdef int indS, ind0, ind1, ind2    
         
     cdef double [3] e0
@@ -268,7 +266,7 @@ cdef inline double HexLinJac(int64_t [::1] cellarr, int c,
             e2[j] = pts[ind2, j] - pts[indS, j]
 
         # normalize the determinant of the jacobian
-        tnorm = (NormCalc(e0)*NormCalc(e1)*NormCalc(e2))            
+        tnorm = NormCalc(e0)*NormCalc(e1)*NormCalc(e2)
         normjac = TripleProduct(e1, e2, e0)/tnorm
 
         # Track minimum jacobian
