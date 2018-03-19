@@ -290,6 +290,7 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
 	      pow *= 10;
 	    }
 
+	    ivalue = 0;
 	    for (j=nexp; j>0; --j){
 	      ++i;
 	      ivalue += pow*(raw[i] - '0');
