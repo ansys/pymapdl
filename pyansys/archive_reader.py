@@ -163,20 +163,6 @@ class ReadArchive(object):
             grid.AddPointScalars(ibool, comp.strip())
 
         grid.AddPointScalars(np.arange(grid.points.shape[0]), 'origid')
-        
-        # # merge duplicate points
-        # if possible_merged:
-        #     vtkappend = vtk.vtkAppendFilter()
-        #     vtkappend.AddInputData(grid)
-        #     vtkappend.MergePointsOn()
-        #     vtkappend.Update()
-        #     # grid = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
-
-        #     import pdb; pdb.set_trace()
-        #     grid2 = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
-        #     ind = grid2.GetPointScalars('origid')
-        #     # np.all(np.delete(nnum, ind) == -1)
-
 
         # Add tracker for original node numbering
         npoints = grid.GetNumberOfPoints()

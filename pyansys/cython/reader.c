@@ -70,8 +70,6 @@ __inline int verbose_fast_atoi(char * raw, int intsz, int *i){
 }
 
 
-
-
 __inline int verbose_fast_atoi2(char * raw, int intsz, int *i){
     int val;
     int c;
@@ -216,11 +214,11 @@ __inline double fast_atof(char *raw, int fltsz, int*i){
 // positioned at the start of the data of NBLOCK
 //=============================================================================
 int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
-                 int fltsz, int *n, int EOL){
+		int fltsz, int *n, int EOL, int nexp){
 
 
     char tempstr[100];
-    int i, j, k, dof, nread, t;
+    int i, j, k, nread, t;
     double dvalue, sign, pow, scale;
 
     int ivalue;
@@ -228,7 +226,8 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
     // set file position
     i = *(n);
 
-//     Read node data
+    /* Read node data */
+    nread = fltsz - 5 - nexp; // sign, first int, point, xxx, scinot (4)
     for (k=0; k<nnodes; ++k){
         // Starts assuming file is positioned on node number
 
@@ -266,13 +265,11 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
             // next is always a '.', skip it
             ++i;
 
-            nread = fltsz - 7; // sign, first int, point, xxx, scinot (4)
             pow = 0.1;
             for (j=0; j<nread; ++j){
                 ++i;
                 dvalue += (raw[i] - '0')*pow;
                 pow *= 0.1;
-
             }
 
             // apply sign
@@ -280,22 +277,26 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
 
             // Read exponent
             // Skip the E
-            ++i; 
+            ++i;
 
 
             // store sign of exponent
             ++i;
             tempstr[0] = raw[i];
-
             
             // read exponent
-            ++i;
-            ivalue = 10*(raw[i] - '0');
-            ++i;
-            ivalue += raw[i] - '0';
+	    pow = 1;
+	    for (j=1; j<nexp; ++j){
+	      pow *= 10;
+	    }
+
+	    for (j=nexp; j>0; --j){
+	      ++i;
+	      ivalue += pow*(raw[i] - '0');
+	      pow /= 10;
+	    }
 
             ++i;
-//            printf("%c", raw[i]);
             if (ivalue == 0) {
                 // Store value
                 nodes[k*6 + t] = dvalue;

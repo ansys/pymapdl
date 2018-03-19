@@ -20,7 +20,7 @@ from libc.stdint cimport int32_t, int64_t
 np.import_array()
 
 cdef extern from "reader.h":
-    int read_nblock(char*, int*, double*, int, int, int, int*, int)
+    int read_nblock(char*, int*, double*, int, int, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
                     int);
 
@@ -194,7 +194,8 @@ def Read(filename):
 
                 # Get format of NBLOCk
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                d_size, f_size, nfld = GetBlockFormat(line)
+                d_size, f_size, nfld, nexp = GetBlockFormat(line)
+                print(d_size, f_size, nfld, nexp)
                 break
             
             
@@ -205,7 +206,7 @@ def Read(filename):
     cdef double [:, ::1] nodes = np.empty((nnodes, 6))
 
     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes, d_size, f_size, &n,
-                    EOL)
+                    EOL, nexp)
                     
     ############### EBLOCK ###############
     # Seek to the start of the element data
@@ -313,9 +314,17 @@ def GetBlockFormat(string):
     # Digit Size
     d_size = int(string[string.find(b'i') + 1:string.find(b',')])
     f_size = int(string[string.find(b'e') + 1:string.find(b'.')])
+
+    # get number of possible intergers in the float scientific notation
+    if b'e' in string[string.find(b'.'):]:
+        st = string.find(b'.')
+        st += string[st:].find(b'e') + 1
+        nexp = int(string[st:].replace(b')', b''))
+    else:  # sub ANSYS v17
+        nexp = 2
     nfields = int(string[string.find(b',') + 1:string.find(b'e')])
 
-    return d_size, f_size, nfields
+    return d_size, f_size, nfields, nexp
 
             
 def ComponentInterperter(component):

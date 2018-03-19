@@ -1,4 +1,4 @@
-int read_nblock(char*, int*, double*, int, int, int, int*, int);
+int read_nblock(char*, int*, double*, int, int, int, int*, int, int);
 
 
 //int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
