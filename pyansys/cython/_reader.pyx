@@ -195,10 +195,9 @@ def Read(filename):
                 # Get format of NBLOCk
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
                 d_size, f_size, nfld, nexp = GetBlockFormat(line)
-                print(d_size, f_size, nfld, nexp)
                 break
-            
-            
+
+
     #==========================================================================
     # Read nblock
     #==========================================================================
