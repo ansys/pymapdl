@@ -709,7 +709,10 @@ class ResultReader(object):
 
         # Seek to result table and to get pointer to DOF results of result
         # table
-        f.seek((rpointers[rnum] + 12) * 4)  # item 11
+        try:
+            f.seek((rpointers[rnum] + 12) * 4)  # item 11
+        except:
+            import pdb; pdb.set_trace()
         ptrNSLl = np.fromfile(f, endian + 'i', 1)[0]
 
         # Seek and read DOF results
@@ -1448,7 +1451,10 @@ def GetResultInfo(filename):
     # Number of nodes (item 3)
     resultheader['nnod'] = rheader[2]
 
-    # Number of elements (item 6)
+    # the maximum number of data sets (item 4)
+    resultheader['resmax'] = rheader[3]
+
+    # Number of elements (item 7)
     resultheader['nelm'] = rheader[6]
 
     # Number of degrees of freedom (item 5)
@@ -1500,6 +1506,7 @@ def GetResultInfo(filename):
     # Read table of pointers to locations of results
     f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
     rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets'])
+    print(rpointers[:10])
 
     # f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
     # rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets']*2)
@@ -1507,16 +1514,22 @@ def GetResultInfo(filename):
     # construct long from two ints
     nsets = resultheader['nsets']
     f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
-    raw0 = f.read(nsets*4)
-    raw1 = f.read(nsets*4)
+
+    # Data sets index table. This record contains the record pointers
+    # for the beginning of each data set. The first resmax records are
+    # the first 32 bits of the index, the second resmax records are
+    # the second 32 bits f.seek((ptrDSIl + 0) * 4)
+    raw0 = f.read(resultheader['resmax']*4)
+    raw1 = f.read(resultheader['resmax']*4)
     subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
     subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
     longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
     longraw = b''.join(longraw)
-    # rpointers = np.fromstring(longraw, 'l')
     rpointers = np.frombuffer(longraw, 'i8')
+
     assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
+
 
     # load harmonic index of each result
     if resultheader['ptrCYC']:
