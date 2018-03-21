@@ -218,6 +218,9 @@ class ANSYS(object):
                     raise Exception('Unable to create temporary working '
                                     'directory %s\n' % run_location +
                                     'Please specify run_location')
+        else:
+            if not os.path.isdir(run_location):
+                raise Exception('%s is not a valid folder' % run_location)
 
         # initialize ANSYS process
         self.lockfile = os.path.join(run_location, jobname + '.lock')
@@ -231,6 +234,9 @@ class ANSYS(object):
         command = '%s -j %s ' % (exec_file, jobname)
         if nproc:
             command += '-np %d ' % nproc
+
+        # add run location to command
+        # command += '-dir "%s" ' % run_location
         self.log.debug('Spawning shell process with: "%s"' % command)
         self.log.debug('At "%s"' % run_location)
         if os.name == 'nt':
