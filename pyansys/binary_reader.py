@@ -2,6 +2,7 @@
 Used v150/ansys/customize/user/ResRd.F to help build this interface
 
 """
+import struct
 import os
 import numpy as np
 import warnings
@@ -341,26 +342,15 @@ class ResultReader(object):
 
     def AddCyclicProperties(self):
         """ Adds cyclic properties to result object """
-        # ansys's duplicate sector contains nodes from the second half of the
-        # node numbering
-        #
-        # ansys node numbering for the duplicate sector is
-        # nnum.min() + nnum.max()
-        # where nnum is the node numbering for the master sector
 
-        # master sector max node number
-        num_master_max = self.nnum[int(self.nnum.size / 2) - 1]
-
-        # identify master and duplicate cyclic sectors
-        cells = np.arange(self.enum.size)
-        dup_cells = np.where(np.any(self.geometry['elem'] > num_master_max, 1))[0]
-        mas_cells = np.setdiff1d(cells, dup_cells)
-        self.sector = self.grid.ExtractSelectionCells(mas_cells)
-        dup_sector = self.grid.ExtractSelectionCells(dup_cells)
+        # idenfity the sector based on number of elements in master sector
+        mask = self.grid.GetCellScalars('ANSYS_elem_num') <= self.resultheader['csEls']
+        self.sector = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
 
         # Store the indices of the master and duplicate nodes
-        self.mas_ind = self.sector.GetPointScalars('vtkOriginalPointIds')
-        self.dup_ind = dup_sector.GetPointScalars('vtkOriginalPointIds')
+        mask = self.nnum <= self.resultheader['csNds']
+        self.mas_ind = np.arange(mask.sum())
+        self.dup_ind = np.arange(mask.sum(), self.nnum.size)
 
         # store cyclic node numbers
         self.cyc_nnum = self.nnum[self.mas_ind]
@@ -864,7 +854,7 @@ class ResultReader(object):
 
         # catch -1
         cells[cells == -1] = 0
-        cells[cells > nnum.size] = 0
+        cells[cells >= nnum.size] = 0
 
         # Create vtk object if vtk installed
         if vtkloaded:
@@ -1405,145 +1395,122 @@ def GetResultInfo(filename):
         Result header
 
     """
-    f = open(filename, 'rb')
+    with open(filename, 'rb') as f:
+        # initialize result header dictionary
+        resultheader = {}
 
-    # initialize result header dictionary
-    resultheader = {}
+        # Check if big or small endian
+        endian = '<'
+        if np.fromfile(f, dtype='<i', count=1) != 100:
 
-    # Check if big or small endian
-    endian = '<'
-    if np.fromfile(f, dtype='<i', count=1) != 100:
+            # Check if big enos
+            f.seek(0)
+            if np.fromfile(f, dtype='>i', count=1) == 100:
+                endian = '>'
 
-        # Check if big enos
-        f.seek(0)
-        if np.fromfile(f, dtype='>i', count=1) == 100:
-            endian = '>'
+            # Otherwise, it's probably not a result file
+            else:
+                raise Exception('Unable to determine endian type.\n\n' +
+                                'File is possibly not a result file.')
 
-        # Otherwise, it's probably not a result file
-        else:
-            raise Exception('Unable to determine endian type.\n\n' +
-                            'File is possibly not a result file.')
+        resultheader['endian'] = endian
 
-    resultheader['endian'] = endian
+        # Read standard header
+        # f.seek(0)
 
-    # Read standard header
-    f.seek(0)
+        # Get ansys version
+        f.seek(11 * 4)
+        version = f.read(4)[::-1]
 
-    # Get ansys version
-    f.seek(11 * 4)
-    version = f.read(4)[::-1]
+        try:
+            resultheader['verstring'] = version
+            resultheader['mainver'] = int(version[:2])
+            resultheader['subver'] = int(version[-1])
+        except BaseException:
+            warnings.warn('Unable to parse version')
+            resultheader['verstring'] = 'unk'
+            resultheader['mainver'] = 15
+            resultheader['subver'] = 0
 
-    try:
-        resultheader['verstring'] = version
-        resultheader['mainver'] = int(version[:2])
-        resultheader['subver'] = int(version[-1])
-    except BaseException:
-        warnings.warn('Unable to parse version')
-        resultheader['verstring'] = 'unk'
-        resultheader['mainver'] = 15
-        resultheader['subver'] = 0
+        # Read .RST FILE HEADER
+        # 100 is size of standard header, plus extras, 3 is location of pointer in
+        # table
+        f.seek(105 * 4)
+        rheader = np.fromfile(f, endian + 'i', count=100)
 
-    # Read .RST FILE HEADER
-    # 100 is size of standard header, plus extras, 3 is location of pointer in
-    # table
-    f.seek(105 * 4)
-    rheader = np.fromfile(f, endian + 'i', count=55)
 
-    # Number of nodes (item 3)
-    resultheader['nnod'] = rheader[2]
+        keys = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
+                'maxe', 'nelm', 'kan', 'nsets', 'ptrend',
+                'ptrDSIl', 'ptrTIMl', 'ptrLSPl', 'ptrELMl', 'ptrNODl',
+                'ptrGEOl', 'ptrCYCl', 'CMSflg', 'csEls', 'units',
+                'nSector', 'csCord', 'ptrEnd8', 'ptrEnd8', 'fsiflag',
+                'pmeth', 'noffst', 'eoffst', 'nTrans', 'ptrTRANl',
+                'PrecKey', 'csNds', 'cpxrst', 'extopt', 'nlgeom',
+                'AvailData', 'mmass', 'kPerturb', 'XfemKey', 'rstsprs',
+                'ptrDSIh', 'ptrTIMh', 'ptrLSPh', 'ptrCYCh', 'ptrELMh',
+                'ptrNODh', 'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
+                'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey' ,'cycMSUPkey',
+                'XfemCrkPropTech']
 
-    # the maximum number of data sets (item 4)
-    resultheader['resmax'] = rheader[3]
+        for i, key in enumerate(keys):
+            resultheader[key] = rheader[i]
 
-    # Number of elements (item 7)
-    resultheader['nelm'] = rheader[6]
+        for key in keys:
+            if 'ptr' in key and key[-1] == 'h':
+                basekey = key[:-1]
+                intl = resultheader[basekey + 'l']
+                inth = resultheader[basekey + 'h']
+                resultheader[basekey] = TwoIntsToLong(intl, inth)
 
-    # Number of degrees of freedom (item 5)
-    resultheader['numdof'] = rheader[4]
+        # Read nodal equivalence table
+        f.seek((resultheader['ptrNOD'] + 2) * 4)  # Start of pointer, then empty, then data
+        resultheader['neqv'] = np.fromfile(
+            f, endian + 'i', count=resultheader['nnod'])
 
-    # Number of sets of results
-    resultheader['nsets'] = rheader[8]
+        # Read nodal equivalence table
+        f.seek((resultheader['ptrELM'] + 2) * 4)  # Start of pointer, then empty, then data
+        resultheader['eeqv'] = np.fromfile(
+            f, endian + 'i', count=resultheader['nelm'])
 
-    # Pointer to results table (item 11)
-    ptrDSIl = rheader[10]
+        # Read table of pointers to locations of results
+        nsets = resultheader['nsets']
+        f.seek((resultheader['ptrDSI'] + 2) * 4)  # Start of pointer, then empty, then data
 
-    # Pointer to the table of time values for a load step (item 12)
-    resultheader['ptrTIMl'] = rheader[11]
+        # Data sets index table. This record contains the record pointers
+        # for the beginning of each data set. The first resmax records are
+        # the first 32 bits of the index, the second resmax records are
+        # the second 32 bits f.seek((ptrDSIl + 0) * 4)
+        raw0 = f.read(resultheader['resmax']*4)
+        raw1 = f.read(resultheader['resmax']*4)
+        subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
+        subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
+        longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
+        longraw = b''.join(longraw)
+        rpointers = np.frombuffer(longraw, 'i8')
 
-    # pointer to load step table (item 13)
-    ptrLSP = rheader[12]
+        assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
+        resultheader['rpointers'] = rpointers
 
-    # pointer to element equivalence table (item 14)
-    ptrELM = rheader[13]
+        # load harmonic index of each result
+        if resultheader['ptrCYC']:
+            f.seek((resultheader['ptrCYC'] + 2) * 4)
+            resultheader['hindex'] = np.fromfile(f, endian + 'i',
+                                                 count=resultheader['nsets'])
 
-    # pointer to nodal equivalence table (item 15)
-    ptrNODl = rheader[14]
+        # load step table with columns:
+        # [loadstep, substep, and cumulative]
+        f.seek((resultheader['ptrLSP'] + 2) * 4)  # Start of pointer, then empty, then data
+        table = np.fromfile(f, endian + 'i', count=resultheader['nsets'] * 3)
+        resultheader['ls_table'] = table.reshape((-1, 3))
 
-    # pointer to geometry information (item 16)
-    resultheader['ptrGEO'] = rheader[15]
-
-    # pointer to cyclic symmetry nodal-diameters for each load step
-    resultheader['ptrCYC'] = rheader[16]
-
-    # number of sectors (item 21)
-    resultheader['nSector'] = rheader[20]
-
-    # cyclic symmetry coordinate system
-    resultheader['csCord'] = rheader[21]
-
-    # bitmask for suppressed items (item 40)
-    resultheader['rstsprs'] = rheader[40 - 1]
-
-    # Read nodal equivalence table
-    f.seek((ptrNODl + 2) * 4)  # Start of pointer, then empty, then data
-    resultheader['neqv'] = np.fromfile(
-        f, endian + 'i', count=resultheader['nnod'])
-
-    # Read nodal equivalence table
-    f.seek((ptrELM + 2) * 4)  # Start of pointer, then empty, then data
-    resultheader['eeqv'] = np.fromfile(
-        f, endian + 'i', count=resultheader['nelm'])
-
-    # Read table of pointers to locations of results
-    nsets = resultheader['nsets']
-    f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
-
-    # Data sets index table. This record contains the record pointers
-    # for the beginning of each data set. The first resmax records are
-    # the first 32 bits of the index, the second resmax records are
-    # the second 32 bits f.seek((ptrDSIl + 0) * 4)
-    raw0 = f.read(resultheader['resmax']*4)
-    raw1 = f.read(resultheader['resmax']*4)
-    subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
-    subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
-    longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
-    longraw = b''.join(longraw)
-    rpointers = np.frombuffer(longraw, 'i8')
-
-    assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
-    resultheader['rpointers'] = rpointers
-
-    # load harmonic index of each result
-    if resultheader['ptrCYC']:
-        f.seek((resultheader['ptrCYC'] + 2) * 4)
-        resultheader['hindex'] = np.fromfile(f, endian + 'i',
-                                             count=resultheader['nsets'])
-
-    # load step table with columns:
-    # [loadstep, substep, and cumulative]
-    f.seek((ptrLSP + 2) * 4)  # Start of pointer, then empty, then data
-    table = np.fromfile(f, endian + 'i', count=resultheader['nsets'] * 3)
-    resultheader['ls_table'] = table.reshape((-1, 3))
-
-    f.close()
+        # f.close()
 
     return resultheader
 
 
 def Unique_Rows(a):
     """ Returns unique rows of a and indices of those rows """
-    b = np.ascontiguousarray(a).view(
-        np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
     _, idx, ridx = np.unique(b, return_index=True, return_inverse=True)
 
     return idx, ridx
@@ -1578,3 +1545,9 @@ def ReadTable(f, dtype='i', skip=False):
         table = np.fromfile(f, dtype, tablesize)
     f.seek(4, 1)  # skip padding
     return table
+
+
+def TwoIntsToLong(intl, inth):
+    """ Interpert two ints as one long """
+    longint = struct.pack(">I", inth) + struct.pack(">I", intl)
+    return struct.unpack('>q', longint)[0]
