@@ -864,6 +864,7 @@ class ResultReader(object):
 
         # catch -1
         cells[cells == -1] = 0
+        cells[cells > nnum.size] = 0
 
         # Create vtk object if vtk installed
         if vtkloaded:
@@ -1504,14 +1505,6 @@ def GetResultInfo(filename):
         f, endian + 'i', count=resultheader['nelm'])
 
     # Read table of pointers to locations of results
-    f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
-    rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets'])
-    print(rpointers[:10])
-
-    # f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
-    # rpointers = np.fromfile(f, endian + 'i', count=resultheader['nsets']*2)
-
-    # construct long from two ints
     nsets = resultheader['nsets']
     f.seek((ptrDSIl + 2) * 4)  # Start of pointer, then empty, then data
 
@@ -1529,7 +1522,6 @@ def GetResultInfo(filename):
 
     assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
     resultheader['rpointers'] = rpointers
-
 
     # load harmonic index of each result
     if resultheader['ptrCYC']:

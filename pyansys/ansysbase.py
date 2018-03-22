@@ -74,6 +74,8 @@ def SetupLogger(loglevel='INFO'):
     # return existing log if this function has already been called
     if hasattr(SetupLogger, 'log'):
         SetupLogger.log.setLevel(loglevel)
+        ch = SetupLogger.log.handlers[0]
+        ch.setLevel(loglevel)
         return SetupLogger.log
 
     # create logger
@@ -85,7 +87,8 @@ def SetupLogger(loglevel='INFO'):
     ch.setLevel(loglevel)
 
     # create formatter
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    formatter = logging.Formatter(formatstr)
 
     # add formatter to ch
     ch.setFormatter(formatter)
