@@ -20,6 +20,7 @@ rstfile = os.path.join(dir_path, 'file.rst')
 hexarchivefile = os.path.join(dir_path, 'HexBeam.cdb')
 tetarchivefile = os.path.join(dir_path, 'TetBeam.cdb')
 fullfile = os.path.join(dir_path, 'file.full')
+sector_archive_file = os.path.join(dir_path, 'sector.cdb')
 
 
 def RunAll():

@@ -75,7 +75,6 @@ def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
     cdef char * p = buf
     cdef int loc
     for i in range(nnod):
-        
         # get node number (stored as double, cast to int)
         loc = i*68
         nnum[i] = <int>GetDouble(&p[loc])
@@ -130,16 +129,16 @@ def LoadElements(filename, int ptr, int nelm,
             elem[i, j - 12] = GetInt(&p[loc + 4*j])
 
 
-def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
-                  int [::1] numref, int [::1] edge_idx, int [::1] nodstr):
+# def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
+#                   int [::1] numref, int [::1] edge_idx, int [::1] nodstr):
     
-    cdef int i, j, nnod
-    cdef int c = 0
-    for i in range(nelm):
-        nnod = nodstr[etype[i]]
-        for j in range(nnod):
-            edge_idx[c] = numref[elem[i, j]]
-            c += 1
+#     cdef int i, j, nnod
+#     cdef int c = 0
+#     for i in range(nelm):
+#         nnod = nodstr[etype[i]]
+#         for j in range(nnod):
+#             edge_idx[c] = numref[elem[i, j]]
+#             c += 1
 
 
 # def LoadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
@@ -182,46 +181,45 @@ def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
 #     fclose(cfile)
 
 
-def LoadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
-                            int64_t [::1] nodstr,int64_t [::1] etype, int64_t nitem, 
-                            double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
-    """ Read element results from ANSYS directly into a numpy array """
-    cdef int64_t i, j, k, ind
-    cdef int64_t table_index = py_table_index
+# def LoadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
+#                             int64_t [::1] nodstr, int64_t [::1] etype, int64_t nitem, 
+#                             double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
+#     """ Read element results from ANSYS directly into a numpy array """
+#     cdef int64_t i, j, k, ind
+#     cdef int64_t table_index = py_table_index
     
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'rb')
+#     cdef FILE* cfile
+#     cdef bytes py_bytes = filename.encode()
+#     cdef char* c_filename = py_bytes
+#     cfile = fopen(c_filename, 'rb')
     
-    cdef int64_t ele_table, ptr, nnode_elem
-    cdef double [1000] ele_data
-    cdef int64_t c = 0
-    for i in range(len(ele_ind_table)):
+#     cdef int64_t ele_table, ptr, nnode_elem
+#     cdef double [1000] ele_data
+#     cdef int64_t c = 0
+#     for i in range(len(ele_ind_table)):
         
-        # get location of pointers to element data
-        ele_table = ele_ind_table[i]
-        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
-        fread(&ptr, sizeof(int), 1, cfile)
+#         # get location of pointers to element data
+#         ele_table = ele_ind_table[i]
+#         fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+#         fread(&ptr, sizeof(int), 1, cfile)
 
-        # Get the nodes in the element    
-        nnode_elem = nodstr[etype[i]]
+#         # Get the nodes in the element    
+#         nnode_elem = nodstr[etype[i]]
 
-        # read the stresses evaluated at the intergration points or nodes
-        fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
+#         # read the stresses evaluated at the intergration points or nodes
+#         fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
 
-        # fread(&ele_data, sizeof(float), nnode_elem*nitem, cfile)
-        fread(&ele_data_arr[c, 0], sizeof(float), nnode_elem*nitem, cfile)
-        c += nnode_elem
+#         # fread(&ele_data, sizeof(float), nnode_elem*nitem, cfile)
+#         fread(&ele_data_arr[c, 0], sizeof(float), nnode_elem*nitem, cfile)
+#         c += nnode_elem
 
-    fclose(cfile)
+#     fclose(cfile)
 
 
 
 def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
-                      int64_t [::1] nodstr,int64_t [::1] etype,
-                      float [:, ::1] ele_data_arr, int64_t [::1] edge_idx,
-                      int nitem, int32_t [::1] validmask):
+                      int64_t [::1] nodstr, int64_t [::1] etype,
+                      float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask):
     """ Read element results from ANSYS directly into a numpy array """
     cdef int64_t i, j, k, ind, nread
     cdef int64_t table_index = py_table_index
@@ -242,12 +240,16 @@ def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table,
 
         # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
-
-        # read the stresses evaluated at the intergration points or nodes
-        fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
         nread = nnode_elem*nitem
 
-        if validmask[i]:
+        if ptrENS < 0:
+            # skip this element
+            for j in range(nnode_elem):
+                for k in range(nitem):
+                    ele_data_arr[c + j, k] = 0
+        elif validmask[i]:
+            # read the stresses evaluated at the intergration points or nodes
+            fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
             fread(&ele_data_arr[c, 0], sizeof(float), nread, cfile)
 
         c += nnode_elem
@@ -272,7 +274,7 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
 
     cdef int32_t [::1] ncount = np.zeros(npoints, ctypes.c_int32)
     cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
-    cdef float [:, ::1] bufferdata = np.zeros((100, nitems), np.float32)
+    cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
 
     cdef int64_t ele_table, nnode_elem
     cdef int32_t ptrENS
@@ -289,10 +291,21 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
         fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
         fread(&ptrENS, sizeof(int32_t), 1, cfile)
 
+
         # Get the nodes in the element
         celltype = celltypes[i]
         offset = offsets[i] + 1
-        fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
+        
+        nnode_elem = nodstr[etype[i]]
+        # skip this element
+        if ptrENS < 0:  # all zeros
+            for j in range(nnode_elem):
+                for k in range(nitems):
+                    bufferdata[j, k] = 0
+        else:
+            fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
+            fread(&bufferdata[0, 0], sizeof(float), nnode_elem*nitems, cfile)        
+
         if celltype == VTK_LINE:  # untested
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
         elif celltype == VTK_TRIANGLE:  # untested
@@ -300,7 +313,6 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
         elif celltype == VTK_QUAD:  # untested
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
         elif celltype == VTK_HEXAHEDRON:
-            # ReadHexahedron(cells, offset, ncount, data, bufferdata, nitems, cfile)
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
         elif celltype == VTK_PYRAMID:
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
@@ -315,20 +327,6 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
     fclose(cfile)
 
     return np.asarray(data), np.asarray(ncount)
-
-
-# cdef inline void ReadHexahedron(int64_t [::1] cells, int64_t index, int32_t [::1] ncount,
-#                                 float [:, ::1] data, float [:, ::1] bufferdata,
-#                                 int nitems, FILE* cfile) nogil:
-#     cdef int64_t i, j, cell
-#     cdef int nread = nitems*8
-#     fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
-    
-#     for i in range(8):
-#         cell = cells[index + i]
-#         ncount[cell] += 1
-#         for j in range(nitems):
-#             data[cell, j] += bufferdata[i, j]
 
 # indices of a wedge must be reordered (see _parser.StoreWeg)
 cdef int64_t [6] wedge_ind
@@ -348,7 +346,7 @@ cdef inline void ReadWedge(int64_t [::1] cells, int64_t index, int32_t [::1] nco
     """
     cdef int64_t i, j, cell, idx
     cdef int nread = nitems*8
-    fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
+    # fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
     
     for i in range(6):
         cell = cells[index + i]
@@ -356,23 +354,6 @@ cdef inline void ReadWedge(int64_t [::1] cells, int64_t index, int32_t [::1] nco
         idx = wedge_ind[i]
         for j in range(nitems):
             data[cell, j] += bufferdata[idx, j]
-
-
-# cdef inline void ReadPyramid(int64_t [::1] cells, int64_t index, int32_t [::1] ncount,
-#                              float [:, ::1] data, float [:, ::1] bufferdata,
-#                              int nitems, FILE* cfile) nogil:
-#     """
-#     # see documentation at _parser.StorePyr
-#     """
-#     cdef int64_t i, j, cell, idx
-#     cdef int nread = nitems*5
-#     fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
-    
-#     for i in range(5):
-#         cell = cells[index + i]
-#         ncount[cell] += 1
-#         for j in range(nitems):
-#             data[cell, j] += bufferdata[i, j]
 
 
 # indices of a 186 tetrahedral must be reordered (see _parser.StoreWeg)
@@ -392,7 +373,7 @@ cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int32_t [::
     cdef int nread
 
     nread = nitems*5
-    fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
+    # fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
 
     for i in range(4):
         cell = cells[index + i]
@@ -412,7 +393,7 @@ cdef inline void ReadElement(int64_t [::1] cells, int64_t index, int32_t [::1] n
     Tetrahedral 187
     """
     cdef int64_t i, j, cell, idx
-    fread(&bufferdata[0, 0], sizeof(float), nitems*nnode, cfile)
+    # fread(&bufferdata[0, 0], sizeof(float), nitems*nnode, cfile)
 
     for i in range(nnode):
         cell = cells[index + i]

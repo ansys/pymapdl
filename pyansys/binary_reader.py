@@ -66,6 +66,49 @@ ptrESV - pointer to state variables
 ptrMNL - pointer to material nonlinear record
 """
 
+SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
+                        'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
+                        'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST', 'ptrBC',
+                        'rxtrap', 'mode', 'isym', 'kcmplx', 'numdof',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'title', 'title', 'title', 'title', 'title',
+                        'title', 'title', 'title', 'title', 'title',
+                        'title', 'title', 'title', 'title', 'title',
+                        'title', 'title', 'title', 'title', 'title',
+                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
+                        'dbmtim', 'dbmdat', 'dbfncl', 'soltim', 'soldat',
+                        'ptrOND', 'ptrOEL', 'nfldof', 'ptrEXA', 'ptrEXT',
+                        'ptrEXAl', 'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
+                        'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl', 'ptrMSTh',
+                        'ptrBCl', 'ptrBCh', 'ptrTRFl', 'ptrTRFh', 'ptrONDl',
+                        'ptrONDh', 'ptrOELl', 'ptrOELh', 'ptrESLl', 'ptrESLh',
+                        'ptrOSLl', 'ptrOSLh', '0', '0', '0',
+                        'PrinKey', 'numvdof', 'numadof', '0', '0',
+                        'ptrVSLl', 'ptrVSLh', 'ptrASLl', 'ptrASLh', '0',
+                        '0', '0', '0', 'numRotCmp', '0',
+                        'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
+                        'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
+
+GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
+                        'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC', 'ptrCSY',
+                        'ptrEID', 'maxsec', 'secsiz', 'maxmat', 'matsiz',
+                        'ptrMAS', 'csysiz', 'elmsiz', 'etysiz', 'rlsiz',
+                        'ptrETYl', 'ptrETYh', 'ptrRELl', 'ptrRELh', 'ptrCSYl',
+                        'ptrCSYh', 'ptrLOCl', 'ptrLOCh', 'ptrEIDl', 'ptrEIDh',
+                        'ptrMASl', 'ptrMASh', 'ptrSECl', 'ptrSECh', 'ptrMATl',
+                        'ptrMATh', 'ptrCNTl', 'ptrCNTh', 'ptrNODl', 'ptrNODh',
+                        'ptrELMl', 'ptrELMh', 'Glbnnod', 'ptrGNODl', 'ptrGNODh',
+                        'maxn', 'NodesUpd',  'lenbac', 'maxcomp', 'compsiz',
+                        'ptrCOMPl', 'ptrCOMPh']
+
 # element types with stress outputs
 validENS = [45, 92, 95, 181, 185, 186, 187]
 
@@ -330,205 +373,9 @@ class ResultReader(object):
         if load_geometry:
             self.StoreGeometry()
 
-        if self.resultheader['nSector'] > 1 and load_geometry:
-            self.iscyclic = True
-
-            # Add cyclic properties
-            self.AddCyclicProperties()
-
     def Plot(self):
         """ plots result geometry """
         self.grid.Plot()
-
-    def AddCyclicProperties(self):
-        """ Adds cyclic properties to result object """
-
-        # idenfity the sector based on number of elements in master sector
-        mask = self.grid.GetCellScalars('ANSYS_elem_num') <= self.resultheader['csEls']
-        self.sector = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
-
-        # Store the indices of the master and duplicate nodes
-        mask = self.nnum <= self.resultheader['csNds']
-        self.mas_ind = np.arange(mask.sum())
-        self.dup_ind = np.arange(mask.sum(), self.nnum.size)
-
-        # store cyclic node numbers
-        self.cyc_nnum = self.nnum[self.mas_ind]
-
-        # create full rotor
-        nSector = self.resultheader['nSector']
-
-        # Copy and translate mesh
-        vtkappend = vtk.vtkAppendFilter()
-        rang = 360.0 / nSector
-        for i in range(nSector):
-
-            # Transform mesh
-            sector = self.sector.Copy()
-            sector.RotateZ(rang * i)
-
-            vtkappend.AddInputData(sector)
-
-        # Combine meshes
-        vtkappend.Update()
-        self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
-
-    def GetCyclicNodalResult(self, rnum):
-        """
-        Returns the nodal result given a cumulative result index.
-
-        Parameters
-        ----------
-        rnum : interger
-            Cumulative result number.  Zero based indexing.
-
-        Returns
-        -------
-        result : numpy.complex128 array
-            Result is (nnod x numdof), nnod is the number of nodes in a sector
-            and numdof is the number of degrees of freedom.
-
-        Notes
-        -----
-        Node numbers correspond to self.cyc_nnum, where self is this result
-        object
-
-        """
-        if not self.iscyclic:
-            raise Exception('Result file does not contain cyclic results.')
-
-        # get the nodal result
-        r = self.GetNodalResult(rnum)
-
-        return r[self.mas_ind] + r[self.dup_ind] * 1j
-
-    def PlotCyclicNodalResult(self, rnum, phase=0, comp='norm', as_abs=False,
-                              label='', expand=True, colormap=None, flipscalars=None,
-                              cpos=None, screenshot=None, interactive=True):
-        """
-        Plots a nodal result from a cyclic analysis.
-
-        Parameters
-        ----------
-        rnum : interger
-            Cumulative result number.  Zero based indexing.
-
-        phase : float, optional
-            Shifts the phase of the solution.
-
-        comp : string, optional
-            Display component to display.  Options are 'x', 'y', 'z', and
-            'norm', corresponding to the x directin, y direction, z direction,
-            and the combined direction (x**2 + y**2 + z**2)**0.5
-
-        as_abs : bool, optional
-            Displays the absolute value of the result.
-
-        label: string, optional
-            Annotation string to add to scalar bar in plot.
-
-        expand : bool, optional
-            Expands the solution to a full rotor when True.  Enabled by
-            default.  When disabled, plots the maximum response of a single
-            sector of the cyclic solution in the component of interest.
-
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.
-
-        flipscalars : bool, optional
-            Flip direction of colormap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.
-
-        interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
-
-        Returns
-        -------
-        cpos : list
-            Camera position from vtk render window.
-        """
-        if 'hindex' not in self.resultheader:
-            raise Exception('Result file does not contain cyclic results')
-
-        # harmonic index and number of sectors
-        hindex = self.resultheader['hindex'][rnum]
-        nSector = self.resultheader['nSector']
-
-        # get the nodal result
-        r = self.GetCyclicNodalResult(rnum)
-
-        alpha = (2 * np.pi / nSector)
-
-        if expand:
-            grid = self.rotor
-            d = np.empty((self.rotor.GetNumberOfPoints(), 3))
-            n = self.sector.GetNumberOfPoints()
-            for i in range(nSector):
-                # adjust the phase of the result
-                sec_sol = np.real(r) * np.cos(i * hindex * alpha + phase) -\
-                    np.imag(r) * np.sin(i * hindex * alpha + phase)
-
-                # adjust the "direction" of the x and y vectors as they're
-                # being rotated
-                s_x = sec_sol[:, 0] * np.cos(alpha * i + phase) -\
-                    sec_sol[:, 1] * np.sin(alpha * i + phase)
-                s_y = sec_sol[:, 0] * np.sin(alpha * i + phase) +\
-                    sec_sol[:, 1] * np.cos(alpha * i + phase)
-                sec_sol[:, 0] = s_x
-                sec_sol[:, 1] = s_y
-
-                d[i * n:(i + 1) * n] = sec_sol
-
-        else:
-            # plot the max response for a single sector
-            grid = self.sector
-
-            n = np.sum(r * r, 1)
-
-            # rotate the response based on the angle to maximize the highest
-            # responding node
-            angle = np.angle(n[np.argmax(np.abs(n))])
-            d = np.real(r) * np.cos(angle + phase) -\
-                np.imag(r) * np.sin(angle + phase)
-
-            d = -d
-
-        # Process result
-        if comp == 'x':
-            d = d[:, 0]
-            stitle = 'X {:s}\n'.format(label)
-
-        elif comp == 'y':
-            d = d[:, 1]
-            stitle = 'Y {:s}\n'.format(label)
-
-        elif comp == 'z':
-            d = d[:, 2]
-            stitle = 'Z {:s}\n'.format(label)
-
-        else:
-            # Normalize displacement
-            d = d[:, :3]
-            d = (d * d).sum(1)**0.5
-
-            stitle = 'Normalized\n{:s}\n'.format(label)
-
-        if as_abs:
-            d = np.abs(d)
-
-        # Generate plot
-        cpos = self.PlotResult(rnum, d, stitle, colormap, flipscalars,
-                               screenshot, cpos, interactive, grid=grid)
-
-        return cpos
 
     def ResultsProperties(self):
         """
@@ -606,7 +453,7 @@ class ResultReader(object):
             raise Exception('Cannot plot without VTK')
 
         # Load result from file
-        result = self.GetNodalResult(rnum)
+        result = self.NodalResult(rnum)
 
         # Process result
         if comp == 'x':
@@ -662,9 +509,10 @@ class ResultReader(object):
 
         return self.tvalues
 
-    def GetNodalResult(self, rnum, sort=True):
+    def NodalResult(self, rnum):
         """
-        Returns the nodal result for a result number
+        Returns the DOF solution for each node in the global cartesian 
+        coordinate system.
 
         Parameters
         ----------
@@ -695,74 +543,76 @@ class ResultReader(object):
                     self.nsets))
 
         # Read a result
-        f = open(self.filename, 'rb')
+        with open(self.filename, 'rb') as f:
 
-        # Seek to result table and to get pointer to DOF results of result
-        # table
-        try:
+            # Seek to result table and to get pointer to DOF results of result table
             f.seek((rpointers[rnum] + 12) * 4)  # item 11
-        except:
-            import pdb; pdb.set_trace()
-        ptrNSLl = np.fromfile(f, endian + 'i', 1)[0]
+            ptrNSLl = np.fromfile(f, endian + 'i', 1)[0]
 
-        # Seek and read DOF results
-        f.seek((rpointers[rnum] + ptrNSLl + 2) * 4)
-        nitems = nnod * numdof
-        result = np.fromfile(f, endian + 'd', nitems)
+            # Seek and read DOF results
+            f.seek((rpointers[rnum] + ptrNSLl + 2) * 4)
+            nitems = nnod * numdof
+            result = np.fromfile(f, endian + 'd', nitems)
 
-        f.close()
+            f.close()
 
         # Reshape to number of degrees of freedom
         r = result.reshape((-1, numdof))
 
-        # if using a cyclic coordinate system
-        if self.resultheader['csCord']:
-            # compute sin and cos angles
-            if not hasattr(self, 's_angle'):
-                # angle of each point
-                angle = np.arctan2(
-                    self.geometry['nodes'][:, 1], self.geometry['nodes'][:, 0])
-                angle = angle[np.argsort(self.sidx)]
-                self.s_angle = np.sin(angle)
-                self.c_angle = np.cos(angle)
+        # Reorder based on sorted indexing
+        r = r.take(self.sidx, 0)
 
-            rx = r[:, 0] * self.c_angle - r[:, 1] * self.s_angle
-            ry = r[:, 0] * self.s_angle + r[:, 1] * self.c_angle
-            r[:, 0] = rx
-            r[:, 1] = ry
+        # ansys writes the results in the nodal coordinate system.
+        # Convert this to the global coordinate system  (in degrees)
+        theta_xy, theta_yz, theta_zx = self.geometry['nodes'][:, 3:].T
+        
+        if np.any(theta_xy):
+            vtkInterface.common.AxisRotation(r, theta_xy, inplace=True, axis='z')
 
-        # Reorder based on sorted indexing and return
-        if sort:
-            r = r.take(self.sidx, 0)
+        if np.any(theta_yz):
+            vtkInterface.common.AxisRotation(r, theta_yz, inplace=True, axis='x')
+
+        if np.any(theta_zx):
+            vtkInterface.common.AxisRotation(r, theta_zx, inplace=True, axis='y')
+
+        #  # compute sin and cos angles
+        # if not hasattr(self, 's_angle'):
+        #     # angle of each point
+        #     self.s_angle = np.sin(geo_angle)
+        #     self.c_angle = np.cos(geo_angle)
+
+        # # convert only the cyclic interface nodes
+        # rx = r[self.cyc_ind, 0] * self.c_angle - r[self.cyc_ind, 1] * self.s_angle
+        # ry = r[self.cyc_ind, 0] * self.s_angle + r[self.cyc_ind, 1] * self.c_angle
+        # r[self.cyc_ind, 0] = rx
+        # r[self.cyc_ind, 1] = ry
 
         return r
 
+    # def TransformNodalResult(self):
+
     def StoreGeometry(self):
         """ Stores the geometry from the result file """
-
         # read in the geometry from the result file
         with open(self.filename, 'rb') as f:
-            # f = open(self.filename, 'rb')
-            f.seek((self.resultheader['ptrGEO'] + 2) * 4)
-            geotable = np.fromfile(f, self.resultheader['endian'] + 'i', 80)
-            # geotable.tolist()
-
-            ptrLOC = geotable[26]
+            # read geometry header
+            f.seek(self.resultheader['ptrGEO']*4)
+            table = ReadTable(f)
+            geometry_header = ParseHeader(table, GEOMETRY_HEADER_KEYS)
+            self.geometry_header = geometry_header
 
             # Node information
             nnod = self.resultheader['nnod']
-            nnum = np.empty(nnod, np.int32)
+            nnum = np.empty(nnod, np.int32)  # overridden
             nloc = np.empty((nnod, 6), np.float)
-            _rstHelper.LoadNodes(self.filename, ptrLOC, nnod, nloc, nnum)
+            _rstHelper.LoadNodes(self.filename, geometry_header['ptrLOC'], nnod, nloc, nnum)
 
             # Element Information
-            nelm = geotable[4]
-            ptrEID = geotable[28]
-            maxety = geotable[1]
+            nelm = geometry_header['nelm']
+            maxety = geometry_header['maxety']
 
             # pointer to the element type index table
-            ptrETYP = geotable[20]
-            f.seek((ptrETYP + 2) * 4)
+            f.seek((geometry_header['ptrETY'] + 2) * 4)
             e_type_table = np.fromfile(
                 f, self.resultheader['endian'] + 'i', maxety)
 
@@ -781,21 +631,21 @@ class ResultReader(object):
             etype_ID = np.empty(maxety, np.int32)
             ekey = []
             for i in range(maxety):
-                f.seek((ptrETYP + e_type_table[i] + 2) * 4)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2) * 4)
                 einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
                 etype_ref = einfo[0]
                 etype_ID[i] = einfo[1]
                 ekey.append(einfo)
 
-                f.seek((ptrETYP + e_type_table[i] + 2 + 60) * 4)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 60) * 4)
                 nodelm[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
-                f.seek((ptrETYP + e_type_table[i] + 2 + 62) * 4)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 62) * 4)
                 nodfor[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
-                f.seek((ptrETYP + e_type_table[i] + 2 + 93) * 4)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 93) * 4)
                 nodstr[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
@@ -805,13 +655,13 @@ class ResultReader(object):
                                   'nodstr': nodstr}
 
             # get the element description table
-            f.seek((ptrEID + 2) * 4)
+            f.seek((geometry_header['ptrEID'] + 2) * 4)
             e_disp_table = np.empty(nelm, np.int32)
             e_disp_table[:] = np.fromfile(
                 f, self.resultheader['endian'] + 'i8', nelm)
 
             # get pointer to start of element table and adjust element pointers
-            ptr = ptrEID + e_disp_table[0]
+            ptr = geometry_header['ptrEID'] + e_disp_table[0]
             e_disp_table -= e_disp_table[0]
 
         # The following is stored for each element
@@ -858,7 +708,6 @@ class ResultReader(object):
 
         # Create vtk object if vtk installed
         if vtkloaded:
-
             element_type = np.zeros_like(etype)
             for key, typekey in ekey:
                 element_type[etype == key] = typekey
@@ -872,20 +721,37 @@ class ResultReader(object):
             self.grid = self.quadgrid.LinearGridCopy()
 
         # get edge nodes
-        nedge = nodstr[etype].sum()
-        self.edge_idx = np.empty(nedge, np.int32)
-        _rstHelper.AssembleEdges(
-            nelm, etype, elem, self.numref.astype(
-                np.int32), self.edge_idx, nodstr)
+        # nedge = nodstr[etype].sum()
+        # self.edge_idx = np.empty(nedge, np.int32)
+        # _rstHelper.AssembleEdges(nelm, etype, elem,
+        #                          self.numref.astype(np.int32),
+        #                          self.edge_idx, nodstr)
+
+        # self.edge_idx = self.edge_idx.astype(c_int64)
 
         # store edge node numbers and indices to the node array
-        self.edge_node_num_idx = np.unique(self.edge_idx)
+        # self.edge_node_num_idx = np.unique(self.edge_idx)
 
         # catch the disassociated node bug
-        try:
-            self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
-        except:
-            logging.warning('unable to generate edge_node_num')
+        # try:
+        #     self.edge_node_num = self.geometry['nnum'][self.edge_node_num_idx]
+        # except:
+        #     logging.warning('unable to generate edge_node_num')
+
+        # get node components from the geometry if they exist
+        # cyclic sections are stored as components
+        # with open(self.filename, 'rb') as f:
+        #     if self.geometry_header['maxcomp']:
+        #         log.debug('adding cyclic information:')
+        #         cyc_comp = []
+        #         # int_off = self.geometry_header['ptrCYCoff']//4
+        #         int_off = 9  # unsure
+        #         f.seek(self.geometry_header['ptrCYCinfo']*4)
+        #         for _ in range(self.geometry_header['ncycCOMP']):
+        #             component = ReadTable(f)[int_off:]
+        #             cyc_comp.append(ComponentInterperter(component))
+
+        #     cyc_nodes = np.hstack(cyc_comp)
 
     def ElementSolutionHeader(self, rnum):
         """ Get element solution header information """
@@ -904,41 +770,37 @@ class ResultReader(object):
 
         # Read a result
         with open(self.filename, 'rb') as f:
-
-            f.seek((rpointers[rnum] + 1) * 4)  # item 20
-            # solheader = np.fromfile(f, endian + 'i', 200)
+            f.seek((rpointers[rnum]) * 4)  # item 20
+            solution_header = ParseHeader(ReadTable(f), SOLUTION_HEADER_KEYS)
 
             # key to extrapolate integration
-            f.seek((rpointers[rnum] + 17) * 4)  # item 16
-            rxtrap = np.fromfile(f, endian + 'i', 1)[0]
-            # point results to nodes
             # = 0 - move
             # = 1 - extrapolate unless active
             # non-linear
             # = 2 - extrapolate always
             # print(rxtrap)
-            if rxtrap == 0:
+            if solution_header['rxtrap'] == 0:
                 warnings.warn('Strains and stresses are being evaluated at ' +
                               'gauss points and not extrapolated')
 
-            # item 122  64-bit pointer to element solution
-            f.seek((rpointers[rnum] + 120) * 4)
-            ptrESL = np.fromfile(f, endian + 'i8', 1)[0]
-
-            if not ptrESL:
+            # 64-bit pointer to element solution
+            if not solution_header['ptrESL']:
                 f.close()
                 raise Exception('No element solution in result set %d' % (rnum + 1))
 
             # Seek to element result header
-            element_rst_ptr = rpointers[rnum] + ptrESL + 2
+            element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
             f.seek(element_rst_ptr * 4)
+            ele_ind_table = ReadTable(f, 'i8', nelm) + element_rst_ptr
 
-            # element index table
-            ele_ind_table = np.fromfile(f, endian + 'i8', nelm)
-            ele_ind_table += element_rst_ptr
             # Each element header contains 25 records for the individual
             # results.  Get the location of the nodal stress
             table_index = e_table.index('ptrENS')
+
+            # boundary conditions
+            # ptr = rpointers[rnum] + solution_header['ptrBC']
+            # f.seek(ptr*4)
+            # table = ReadTable(f, 'i')
 
         return table_index, ele_ind_table, nodstr, etype
 
@@ -967,7 +829,7 @@ class ResultReader(object):
 
         stress : numpy.ndarray
             Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
-            For the corresponding node numbers, see "result.edge_node_num"
+            For the corresponding node numbers, see
             where result is the result object.
 
         Notes
@@ -991,7 +853,7 @@ class ResultReader(object):
         data, ncount = _rstHelper.ReadNodalValues(self.filename,
                                                   table_index,
                                                   self.grid.celltypes,
-                                                  ele_ind_table,
+                                                  ele_ind_table + 2,
                                                   self.grid.offset,
                                                   self.grid.cells,
                                                   nitem,
@@ -1000,26 +862,12 @@ class ResultReader(object):
                                                   nodstr,
                                                   etype)
 
-        # determine the number of times each node occurs in the results
-        # ncount = np.bincount(nnum, weights=validmask.astype(np.int))
-        # validmask[:] = True
-        # exists = np.bincount(nnum, weights=validmask.astype(np.int)).astype(np.bool)
-        # ncount_exists = ncount[exists]
-
-        # # sum and weight the stress at each node
-        # stress = np.empty((nodenum.size, 6))
-        # for i in range(6):
-        #     stress[:, i] = (np.bincount(nnum, weights=arr[:, i])[exists])
-
-        # stress /= ncount_exists.reshape(-1, 1)
-
-        # return nodenum, stress
-
         nnum = self.grid.GetPointScalars('ANSYSnodenum')
         stress = data/ncount.reshape(-1, 1)
+
         return nnum, stress
 
-    def ElementStress(self, rnum, return_header=False):
+    def ElementStress(self, rnum):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -1055,13 +903,18 @@ class ResultReader(object):
         elemtype = self.grid.GetCellScalars('Element Type')
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        ele_ind_table = ele_ind_table  # [validmask]
+        # ele_ind_table = ele_ind_table  # [validmask]
         etype = etype.astype(c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
         nelemnode = nnode.sum()
         ver = float(self.resultheader['verstring'])
+
+        # bitmask
+        # bitmask = bin(int(hex(self.resultheader['rstsprs']), base=16)).lstrip('0b')
+        # description maybe in resucm.inc
+
         if ver >= 14.5:
             if self.resultheader['rstsprs'] != 0:
                 nitem = 6
@@ -1070,11 +923,11 @@ class ResultReader(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
             _rstHelper.ReadElementStress(self.filename, table_index,
-                                         ele_ind_table,
+                                         ele_ind_table + 2,
                                          nodstr.astype(c_int64),
                                          etype,
                                          ele_data_arr,
-                                         self.edge_idx.astype(c_int64),
+                                         # self.edge_idx,
                                          nitem, validmask)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
@@ -1105,10 +958,7 @@ class ResultReader(object):
         # Get element numbers
         elemnum = self.geometry['enum'][self.sidx_elem]
 
-        if return_header:
-            return element_stress, elemnum, enode, header
-        else:
-            return element_stress, elemnum, enode
+        return element_stress, elemnum, enode
 
     def PrincipalNodalStress(self, rnum):
         """
@@ -1365,7 +1215,7 @@ class ResultReader(object):
 
         for i in range(self.nsets):
             # Nodal results
-            val = self.GetNodalResult(i)
+            val = self.NodalResult(i)
             grid.AddPointScalars(val, 'NodalResult{:03d}'.format(i))
 
             # Populate with nodal stress at edge nodes
@@ -1378,6 +1228,25 @@ class ResultReader(object):
             grid.AddPointScalars(stress, 'NodalStress{:03d}'.format(i))
 
         grid.Write(filename)
+
+    def GetNodalResult(self, i, sort=True):
+        warnings.warn('GetNodalResult is depreciated.  Use NodalResult instead')
+        return self.NodalResult(i, sort)
+
+    def WriteText(self, filename):
+        rawresult = open(self.filename, 'rb')
+        with open(filename, 'w') as f:
+            while True:
+                try:
+                    table = ReadTable(rawresult)
+                    f.write('*** %d ***\n' % len(table))
+                    for item in table:
+                        f.write(str(item) + '\n')
+                    # f.write(str(table[:]))
+                    f.write('\n\n')
+                except:
+                    break
+        rawresult.close()
 
 
 def GetResultInfo(filename):
@@ -1438,7 +1307,6 @@ def GetResultInfo(filename):
         f.seek(105 * 4)
         rheader = np.fromfile(f, endian + 'i', count=100)
 
-
         keys = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
                 'maxe', 'nelm', 'kan', 'nsets', 'ptrend',
                 'ptrDSIl', 'ptrTIMl', 'ptrLSPl', 'ptrELMl', 'ptrNODl',
@@ -1449,7 +1317,7 @@ def GetResultInfo(filename):
                 'AvailData', 'mmass', 'kPerturb', 'XfemKey', 'rstsprs',
                 'ptrDSIh', 'ptrTIMh', 'ptrLSPh', 'ptrCYCh', 'ptrELMh',
                 'ptrNODh', 'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
-                'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey' ,'cycMSUPkey',
+                'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey','cycMSUPkey',
                 'XfemCrkPropTech']
 
         for i, key in enumerate(keys):
@@ -1463,14 +1331,16 @@ def GetResultInfo(filename):
                 resultheader[basekey] = TwoIntsToLong(intl, inth)
 
         # Read nodal equivalence table
-        f.seek((resultheader['ptrNOD'] + 2) * 4)  # Start of pointer, then empty, then data
-        resultheader['neqv'] = np.fromfile(
-            f, endian + 'i', count=resultheader['nnod'])
+        # f.seek((resultheader['ptrNOD'] + 2) * 4)  # Start of pointer, then empty, then data
+        # resultheader['neqv'] = np.fromfile(f, endian + 'i', count=resultheader['nnod'])
+        f.seek(resultheader['ptrNOD']*4)
+        resultheader['neqv'] = ReadTable(f)
 
         # Read nodal equivalence table
-        f.seek((resultheader['ptrELM'] + 2) * 4)  # Start of pointer, then empty, then data
-        resultheader['eeqv'] = np.fromfile(
-            f, endian + 'i', count=resultheader['nelm'])
+        # f.seek((resultheader['ptrELM'] + 2) * 4)  # Start of pointer, then empty, then data
+        # resultheader['eeqv'] = np.fromfile(f, endian + 'i', count=resultheader['nelm'])
+        f.seek(resultheader['ptrELM']*4)
+        resultheader['eeqv'] = ReadTable(f)
 
         # Read table of pointers to locations of results
         nsets = resultheader['nsets']
@@ -1503,8 +1373,6 @@ def GetResultInfo(filename):
         table = np.fromfile(f, endian + 'i', count=resultheader['nsets'] * 3)
         resultheader['ls_table'] = table.reshape((-1, 3))
 
-        # f.close()
-
     return resultheader
 
 
@@ -1532,10 +1400,19 @@ def delete_row_csc(mat, i):
     mat._shape = (mat._shape[0] - 1, mat._shape[1])
 
 
-def ReadTable(f, dtype='i', skip=False):
+def ReadTable(f, dtype='i', nread=None, skip=False):
     """ read fortran style table """
-    tablesize = np.fromfile(f, 'i', 1)[0]
+    n = np.fromfile(f, 'i', 1)
+    if not n:
+        raise Exception('end of file')
+
+    tablesize = n[0]
     f.seek(4, 1)  # skip padding
+
+    # override
+    if nread:
+        tablesize = nread
+
     if skip:
         f.seek((tablesize + 1)*4, 1)
         return
@@ -1551,3 +1428,27 @@ def TwoIntsToLong(intl, inth):
     """ Interpert two ints as one long """
     longint = struct.pack(">I", inth) + struct.pack(">I", intl)
     return struct.unpack('>q', longint)[0]
+
+
+def Pol2Cart(rho, phi):
+    """ Convert cylindrical to cartesian """
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+
+    return x, y
+
+
+def ParseHeader(table, keys):
+    """ parses a header from a table """
+    header = {}
+    for i, key in enumerate(keys):
+        header[key] = table[i]
+
+    for key in keys:
+        if 'ptr' in key and key[-1] == 'h':
+            basekey = key[:-1]
+            intl = header[basekey + 'l']
+            inth = header[basekey + 'h']
+            header[basekey] = TwoIntsToLong(intl, inth)
+
+    return header

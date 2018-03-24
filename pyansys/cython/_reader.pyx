@@ -328,9 +328,10 @@ def GetBlockFormat(string):
             
 def ComponentInterperter(component):
     """
-    If a node is negative, it is describing a list from the previous node.  This is ANSYS's way of 
-    saving file size when writing components.
-    
+    If a node is negative, it is describing a list from the previous
+    node.  This is ANSYS's way of saving file size when writing
+    components.
+
     """
     
     f_new = []
