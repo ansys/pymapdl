@@ -558,6 +558,10 @@ class Result(object):
 
         return self.tvalues
 
+    # @property
+    # def time_values(self):
+    #     return self.tvalues
+
     def NodalSolution(self, rnum):
         """
         Returns the DOF solution for each node in the global Cartesian
@@ -1524,6 +1528,7 @@ class CyclicResult(Result):
             result_expanded /= (self.nsector/2)**0.5
 
         f_arr = np.zeros(self.nsector)
+        print(hindex)
         f_arr[hindex] = 1
         jang = np.fft.ifft(f_arr)[:22]*22
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
@@ -1579,28 +1584,66 @@ class CyclicResult(Result):
 
         return result_expanded
 
+    def HarmonicIndexToCumulative(self, hindex, mode):
+        """
+        Converts a harmonic index and a 0 index mode number to a cumulative result number
+        
+        Harmonic indices are stored as positive and negative pairs for modes other 
+        than 0 and N/nsectors.
 
-    def HarmonicIndexToCumulative(self, hindex, substep):
-        """ Converts a harmonic index and substep to a cumulative result number """
-        substep_table = self.resultheader['ls_table'][:, 1]
+        Parameters
+        ----------
+        hindex : int
+            Harmonic index.  Must be less than or equal to nsectors/2.  May be positive
+            or negative
+
+        mode : int
+            Mode number.  0 based indexing.  Access mode pairs by with a negative/positive
+            harmonic index.
+
+        Returns
+        -------
+        rnum : int
+            Cumulative index number.  Zero based indexing.
+
+        """
         hindex_table = self.resultheader['hindex']
-        if not np.any(hindex == hindex_table):
+        if not np.any(abs(hindex) == np.abs(hindex_table)):
             raise Exception('Invalid harmonic index.\n' +
                             'Available indices: %s' % np.unique(hindex_table))
-        elif not np.any(substep == substep_table):
-            raise Exception('Invalid substep\n' +
-                            'Available substeps: %s' % np.unique(substep_table))
 
         mask = np.logical_and(hindex == hindex_table,
-                              substep == substep_table)
+                              mode == self.mode_table)
 
-        if not np.any(mask):
-            raise Exception('Load step table does not contain ' +
-                            'harmonic index %d and substep %d' % (hindex, substep))
+        if not mask.any():
+            mode_mask = abs(hindex) == np.abs(hindex_table)
+            avail_modes = np.unique(self.mode_table[mode_mask])
+            raise Exception('Invalid mode for harmonic index %d\n' % hindex +
+                            'Available modes: %s' % avail_modes)
 
         index = mask.nonzero()[0]
         assert index.size == 1, 'Multiple cumulative index matches'
         return index[0]
+
+    @property
+    def mode_table(self):
+        hindex_table = self.resultheader['hindex']
+        c = 0
+        mode_table = [0]
+        for i in range(len(hindex_table) - 1):
+            if hindex_table[i] == hindex_table[i + 1]:
+                c += 1
+                mode_table.append(c)
+            elif abs(hindex_table[i]) != abs(hindex_table[i + 1]):
+                c = 0
+                mode_table.append(c)
+            elif hindex_table[i] > hindex_table[i + 1]:
+                mode_table.append(c)
+            else:
+                c +=1
+                mode_table.append(c)
+        return np.asarray(mode_table)
+
 
     def NodalStress(self, rnum, phase=0, as_complex=False, full_rotor=False):
         nnum, stress = super(CyclicResult, self).NodalStress(rnum)
