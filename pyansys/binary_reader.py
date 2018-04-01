@@ -2,6 +2,7 @@
 Used v150/ansys/customize/user/ResRd.F to help build this interface
 
 """
+import vtk
 import struct
 import os
 import numpy as np
@@ -16,6 +17,8 @@ from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
 AxisRotation = vtkInterface.common.AxisRotation
+
+# check if vtk is installed
 try:
     import vtk
     vtkloaded = True
@@ -443,24 +446,22 @@ class Result(object):
 
     #     return {'Number of Results': self.nsets}
 
-    def PlotNodalSolution(self, rnum, comp='norm', as_abs=False, label='',
-                          colormap=None, flipscalars=None, cpos=None, screenshot=None,
-                          interactive=True):
+    def PlotNodalSolution(self, rnum, comp='norm', label='',
+                          colormap=None, flipscalars=None, cpos=None,
+                          screenshot=None, interactive=True, **kwargs):
         """
         Plots a nodal result.
 
         Parameters
         ----------
-        rnum : int
-            Cumulative result number.  Zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         comp : str, optional
             Display component to display.  Options are 'x', 'y', 'z', and
             'norm', corresponding to the x directin, y direction, z direction,
             and the combined direction (x**2 + y**2 + z**2)**0.5
-
-        as_abs : bool, optional
-            Displays the absolute value of the result.
 
         label : str, optional
             Annotation string to add to scalar bar in plot.
@@ -493,6 +494,7 @@ class Result(object):
             raise Exception('Cannot plot without VTK')
 
         # Load result from file
+        rnum = self.ParseStepSubstep(rnum)
         nnum, result = self.NodalSolution(rnum)
 
         # Process result
@@ -511,24 +513,22 @@ class Result(object):
         else:
             # Normalize displacement
             d = result[:, :3]
-            d = (d * d).sum(1)**0.5
+            d = (d*d).sum(1)**0.5
 
             stitle = 'Normalized\n%s\n' % label
 
-        if as_abs:
-            d = np.abs(d)
-
         # sometimes there are less nodes in the result than in the geometry
-        if nnum.size != self.geometry['nnum'].size:
-            scalars = np.empty(self.geometry['nnum'].size)
+        npoints = self.grid.GetNumberOfPoints()
+        if nnum.size != npoints:
+            scalars = np.empty(npoints)
             scalars[:] = np.nan
-            mask = np.in1d(self.geometry['nnum'], nnum)
+            nnum_grid = self.grid.GetPointScalars('ANSYSnodenum')
+            mask = np.in1d(nnum_grid, nnum)
             scalars[mask] = d
             d = scalars
 
-        # for cyclic models
-        return self.PlotPointScalars(rnum, d, stitle, colormap, flipscalars,
-                                     screenshot, cpos, interactive)
+        return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, **kwargs)
 
     def GetTimeValues(self):
         """
@@ -565,8 +565,9 @@ class Result(object):
 
         Parameters
         ----------
-        rnum : interger
-            Cumulative result number.  Zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         sort : bool, optional
             Resorts the results so that the results correspond to the sorted
@@ -582,17 +583,14 @@ class Result(object):
             Result is (nnod x numdof), or number of nodes by degrees of freedom
 
         """
+        # convert to cumulative index
+        rnum = self.ParseStepSubstep(rnum)
+
         # Get info from result header
         endian = self.resultheader['endian']
         numdof = self.resultheader['numdof']
         nnod = self.resultheader['nnod']
         rpointers = self.resultheader['rpointers']
-
-        # Check if result is available
-        if rnum > self.nsets - 1:
-            raise Exception(
-                'There are only {:d} results in the result file.'.format(
-                    self.nsets))
 
         # Read a result
         with open(self.filename, 'rb') as f:
@@ -730,6 +728,10 @@ class Result(object):
                                 etype)
         enum = self.resultheader['eeqv']
 
+        element_type = np.zeros_like(etype)
+        for key, typekey in ekey:
+            element_type[etype == key] = typekey
+
         # store geometry dictionary
         self.geometry = {'nnum': nnum,
                          'nodes': nloc,
@@ -737,7 +739,8 @@ class Result(object):
                          'elem': elem,
                          'enum': enum,
                          'ekey': np.asarray(ekey, ctypes.c_int64),
-                         'e_rcon': np.ones_like(enum)}
+                         'e_rcon': np.ones_like(enum),
+                         'Element Type': element_type}
 
         # store the reference array
         # Allow quadradic and null unallowed
@@ -757,10 +760,6 @@ class Result(object):
 
         # Create vtk object if vtk installed
         if vtkloaded:
-            element_type = np.zeros_like(etype)
-            for key, typekey in ekey:
-                element_type[etype == key] = typekey
-
             nodes = nloc[:, :3]
             self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
                                                           cell_type, nodes)
@@ -779,10 +778,10 @@ class Result(object):
         etype = self.geometry['etype']
 
         # Check if result is available
-        if rnum > self.nsets - 1:
-            raise Exception(
-                'There are only {:d} results in the result file.'.format(
-                    self.nsets))
+        # if rnum > self.nsets - 1:
+        #     raise Exception(
+        #         'There are only {:d} results in the result file.'.format(
+        #             self.nsets))
 
         # Read a result
         with open(self.filename, 'rb') as f:
@@ -836,8 +835,9 @@ class Result(object):
 
         Parameters
         ----------
-        rnum : interger
-            Result set to load using zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         Returns
         -------
@@ -855,6 +855,7 @@ class Result(object):
 
         """
         # element header
+        rnum = self.ParseStepSubstep(rnum)
         table_index, ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
 
         if self.resultheader['rstsprs'] != 0:
@@ -863,10 +864,16 @@ class Result(object):
             nitem = 11
 
         # certain element types do not output stress
-        elemtype = self.grid.GetCellScalars('Element Type')
+        elemtype = self.geometry['Element Type']
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        assert ele_ind_table.size == self.grid.GetNumberOfCells()
+        # if cyclic rotor
+        if ele_ind_table.size != self.grid.GetNumberOfCells():
+            if not hasattr(self, 'nsector'):
+                raise Exception('Element table size does not match number of cells')
+            ind = self.grid.GetCellScalars('vtkOriginalCellIds')
+            ele_ind_table = ele_ind_table[ind]
+
         data, ncount = _rstHelper.ReadNodalValues(self.filename,
                                                   table_index,
                                                   self.grid.celltypes,
@@ -900,8 +907,9 @@ class Result(object):
 
         Parameters
         ----------
-        rnum : interger
-            Result set to load using zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         Returns
         -------
@@ -916,11 +924,12 @@ class Result(object):
             list entry for each element
 
         """
+        rnum = self.ParseStepSubstep(rnum)
         header = self.ElementSolutionHeader(rnum)
         table_index, ele_ind_table, nodstr, etype = header
 
         # certain element types do not output stress
-        elemtype = self.grid.GetCellScalars('Element Type')
+        elemtype = self.geometry['Element Type']
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
         # ele_ind_table = ele_ind_table  # [validmask]
@@ -987,8 +996,9 @@ class Result(object):
 
         Parameters
         ----------
-        rnum : interger
-            Result set to load using zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         Returns
         -------
@@ -1021,14 +1031,15 @@ class Result(object):
         return nodenum, pstress
 
     def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
-                                 cpos=None, screenshot=None, interactive=True):
+                                 cpos=None, screenshot=None, interactive=True, **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
         Parameters
         ----------
-        rnum : interger
-            Result set using zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         stype : string
             Stress type to plot.  S1, S2, S3 principal stresses, SINT stress
@@ -1066,17 +1077,18 @@ class Result(object):
             Array used to plot stress.
 
         """
+        rnum = self.ParseStepSubstep(rnum)
         stress = self.PrincipleStressForPlotting(rnum, stype)
 
         # Generate plot
-        stitle = 'Nodal Stress\n{:s}\n'.format(stype)
-        cpos = self.PlotPointScalars(rnum, stress, stitle, colormap, flipscalars,
-                                     screenshot, cpos, interactive)
-
+        stitle = 'Nodal Stress\n%s\n' % stype
+        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, **kwargs)
         return cpos, stress
 
-    def PlotPointScalars(self, rnum, scalars, stitle, colormap, flipscalars,
-                         screenshot, cpos, interactive):
+    def PlotPointScalars(self, scalars, rnum=None, stitle='', colormap=None,
+                         flipscalars=None, screenshot=None, cpos=None,
+                         interactive=True, grid=None, **kwargs):
         """
         Plot a result
 
@@ -1115,21 +1127,23 @@ class Result(object):
         -------
         cpos : list
             Camera position.
-        """
-        if hasattr(self, 'nsector'):
-            grid = self.sector
-            scalars = scalars[self.mas_ind]
-            stitle += '\nMaster Sector\n'
-        else:
-            grid = self.grid
 
+        """
+        if grid is None:
+            grid = self.grid
         if colormap is None and flipscalars is None:
             flipscalars = True
+
+        if 'window_size' in kwargs:
+            window_size = kwargs['window_size']
+            del kwargs['window_size']
+        else:
+            window_size = [1024, 768]
 
         # Plot off screen when not interactive
         plobj = vtkInterface.PlotClass(off_screen=not(interactive))
         plobj.AddMesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
-                      flipscalars=flipscalars)
+                      flipscalars=flipscalars, interpolatebeforemap=True, **kwargs)
 
         # NAN/missing data are white
         plobj.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
@@ -1137,13 +1151,17 @@ class Result(object):
         if cpos:
             plobj.SetCameraPosition(cpos)
 
-        plobj.AddText(self.TextResultTable(rnum), fontsize=20)
+        # add table
+        if rnum is not None:
+            plobj.AddText(self.TextResultTable(rnum), fontsize=20)
+
         if screenshot:
-            cpos = plobj.Plot(autoclose=False, interactive=interactive)
+            cpos = plobj.Plot(autoclose=False, interactive=interactive,
+                              window_size=window_size)
             plobj.TakeScreenShot(screenshot)
             plobj.Close()
         else:
-            cpos = plobj.Plot(interactive=interactive)
+            cpos = plobj.Plot(interactive=interactive, window_size=window_size)
 
         return cpos
 
@@ -1152,6 +1170,9 @@ class Result(object):
         ls_table = self.resultheader['ls_table']
         timevalue = self.GetTimeValues()[rnum]
         text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
+        if self.resultheader['nSector'] > 1:
+            hindex = self.resultheader['hindex'][rnum]
+            text += 'Harmonic Index    {:3d}\n'.format(hindex)
         text += 'Loadstep:         {:3d}\n'.format(ls_table[rnum, 0])
         text += 'Substep:          {:3d}\n'.format(ls_table[rnum, 1])
         text += 'Time Value:     {:10.4f}'.format(timevalue)
@@ -1188,7 +1209,7 @@ class Result(object):
         return stress[:, sidx]
 
     def PlotNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
-                        cpos=None, screenshot=None, interactive=True):
+                        cpos=None, screenshot=None, interactive=True, **kwargs):
         """
         Plots the stresses at each node in the solution.
 
@@ -1200,8 +1221,9 @@ class Result(object):
 
         Parameters
         ----------
-        rnum : interger
-            Result set using zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
 
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
@@ -1229,7 +1251,7 @@ class Result(object):
         cpos : list
             3 x 3 vtk camera position.
         """
-
+        rnum = self.ParseStepSubstep(rnum)
         stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
         stype = stype.lower()
         if stype not in stress_types:
@@ -1244,13 +1266,12 @@ class Result(object):
         # grid = self.grid  # bypassed for now
 
         # Populate with nodal stress at edge nodes
-        # nodenum = self.grid.GetPointScalars('ANSYSnodenum')
         nnum, stress = self.NodalStress(rnum)
         stress = stress[:, sidx]
 
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        cpos = self.PlotPointScalars(rnum, stress, stitle, colormap, flipscalars,
-                                     screenshot, cpos, interactive)
+        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, **kwargs)
 
         return cpos
 
@@ -1315,6 +1336,32 @@ class Result(object):
                     break
         rawresult.close()
 
+    def ParseStepSubstep(self, user_input):
+        """ Converts (step, substep) to a cumulative index """
+        if IsInt(user_input):
+            # check if result exists
+            if user_input > self.nsets - 1:
+                raise Exception('There are only %d results in the result file.' % self.nsets)
+            return user_input
+
+            return user_input
+        elif isinstance(user_input, list):
+            if len(list) != 2:
+                raise Exception('Input must contain (step, loadstep) using  ' +
+                                '1 based indexing (e.g. (1, 1)).')
+            ls_table = self.resultheader['ls_table']
+            step, substep = user_input
+            mask = np.logical_and(ls_table[:, 0] == step,
+                                  ls_table[:, 1] == substep)
+
+            if not np.any(mask):
+                raise Exception('Load step table does not contain ' +
+                                'step %d and substep %d' % user_input)
+
+            index = mask.nonzero()[0]
+            assert index.size == 1, 'Multiple cumulative index matches'
+            return index[0]
+
 
 class CyclicResult(Result):
     """ adds cyclic functionality to the result reader in pyansys """
@@ -1342,35 +1389,37 @@ class CyclicResult(Result):
 
         # idenfity the sector based on number of elements in master sector
         mask = self.quadgrid.GetCellScalars('ANSYS_elem_num') <= self.resultheader['csEls']
+        node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
+
         self.master_cell_mask = mask
-        self.sector = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
+        self.grid = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
 
-        # Store the indices of the master and duplicate nodes
-        mask = self.nnum <= self.resultheader['csNds']
-        self.master_node_mask = mask
-        nnod_sector = mask.sum()
-        self.mas_ind = np.arange(nnod_sector)
-        self.dup_ind = np.arange(nnod_sector, self.nnum.size)
+        # number of nodes in sector may not match number of nodes in geometry
+        self.mas_ind = np.nonzero(node_mask)[0]
 
-        # store cyclic node numbers
-        self.cyc_nnum = self.nnum[self.mas_ind]
-
-        # get cyclic nodes relative to vtk indexing
-        # self.cyc_ind = np.in1d(self.nnum, cyc_nodes).nonzero()[0]
+        # duplicate sector may not exist
+        if not np.any(self.geometry['nnum'] > self.resultheader['csNds']):
+            self.dup_ind = None
+        else:
+            shift = (self.geometry['nnum'] < self.resultheader['csNds']).sum()
+            self.dup_ind = self.mas_ind + shift
 
         # create full rotor
         self.nsector = self.resultheader['nSector']
 
         # Create rotor of sectors
+        vtkappend = vtk.vtkAppendFilter()
         if vtkloaded:
-            self.rotor = []
             rang = 360.0 / self.nsector
             for i in range(self.nsector):
 
                 # Transform mesh
-                sector = self.sector.Copy()
+                sector = self.grid.Copy()
                 sector.RotateZ(rang * i)
-                self.rotor.append(sector)
+                vtkappend.AddInputData(sector)
+
+        vtkappend.Update()
+        self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
 
     def NodalSolution(self, rnum, phase=0, full_rotor=False, as_complex=False):
         """
@@ -1409,37 +1458,424 @@ class CyclicResult(Result):
 
         """
         # get the nodal result
-        nnum, r = super(CyclicResult, self).NodalSolution(rnum)
+        nnum, result = super(CyclicResult, self).NodalSolution(rnum)
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
-        # master and duplicate sector solutions
-        u_mas = r[self.mas_ind]
-        u_dup = r[self.dup_ind]
+        # combine or expand result if not modal
+        if self.resultheader['kan'] == 2:  # modal analysis
+            # combine modal solution results
+            hindex_table = self.resultheader['hindex']
+            hindex = hindex_table[rnum]
 
-        if as_complex:
-            sector_r = u_mas + u_dup*1j
+            # if repeated mode
+            if hindex != 0 and -hindex in hindex_table:
+                if hindex < 0:
+                    rnum_r = rnum - 1
+                else:
+                    rnum_r = rnum + 1
+
+                # get repeated result and combine
+                _, result_r = super(CyclicResult, self).NodalSolution(rnum_r)
+
+            else:
+                result_r = np.zeros_like(result)
+
+            expanded_result = self.ExpandCyclicModal(result, result_r, hindex, phase,
+                                                     as_complex, full_rotor)
+
+        if self.resultheader['kan'] == 0:  # static analysis
+            expanded_result = ExpandCyclicResults(result, self.mas_ind,
+                                                  self.dup_ind,
+                                                  self.nsector, phase,
+                                                  as_complex, full_rotor)
+
+        return nnum, expanded_result
+
+    def ExpandCyclicModal(self, result, result_r, hindex, phase, as_complex, full_rotor):
+        """ Combines repeated results from ANSYS """
+        if self.dup_ind is not None:
+            result = result[self.mas_ind]
+            result_r = result_r[self.mas_ind]
+
+        if as_complex or full_rotor:
+            result_combined = result + result_r*1j
+            if phase:
+                result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
         else:  # convert to real
-            sector_r = u_mas*np.cos(phase) - u_dup*np.sin(phase)
+            result_combined = result*np.cos(phase) - result_r*np.sin(phase)
 
         # just return single sector
         if not full_rotor:
-            return nnum, sector_r
+            return result_combined
 
-        # otherwise rotate results (CYC, 1 only)
-        sectors = []
-        angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1]
+        # Generate full rotor solution
+        result_expanded = []
+        angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for angle in angles:
-            sectors.append(AxisRotation(sector_r, angle, deg=False, axis='z'))
+            # need to rotate solution and rotate direction
+            result_expanded.append(AxisRotation(result_combined, angle, deg=False, axis='z'))
 
-        return nnum, np.asarray(sectors)
+        result_expanded = np.asarray(result_expanded)
 
-    def PlotRotor(self):
-        vtkInterface.PlotGrids(self.rotor, range(len(self.rotor)))
+        # adjust phase of the full result based on the harmonic index
+        if hindex == 0 or hindex == self.nsector/2:
+            result_expanded /= self.nsector**0.5
+        else:
+            result_expanded /= (self.nsector/2)**0.5
 
-    # def PlotNodalSolution(self, **kwargs):
-        # __doc__ += .__doc__
+        f_arr = np.zeros(self.nsector)
+        f_arr[hindex] = 1
+        jang = np.fft.ifft(f_arr)[:22]*22
+        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
+
+        result_expanded *= cjang.reshape(-1, 1, 1)
+        if as_complex:
+            return result_expanded
+        else:
+            return np.real(result_expanded)
+
+    def ExpandCyclicModalStress(self, result, result_r, hindex, phase, as_complex,
+                                full_rotor):
+        """ Combines repeated results from ANSYS """
+        if self.dup_ind is not None:
+            result = result[self.mas_ind]
+            result_r = result_r[self.mas_ind]
         
+        if as_complex or full_rotor:
+            result_combined = result + result_r*1j
+            if phase:
+                result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
+        else:  # convert to real
+            result_combined = result*np.cos(phase) - result_r*np.sin(phase)
+
+        # just return single sector
+        if not full_rotor:
+            return result_combined
+
+        # Generate full rotor solution
+        result_expanded = np.empty((self.nsector, result.shape[0], result.shape[1]),
+                                   np.complex128)
+        # for i in range(self.nsector):
+            # result_expanded.append(result_combined)
+        # result_expanded = np.asarray(result_expanded)
+        result_expanded[:] = result_combined
+
+        # adjust phase of the full result based on the harmonic index
+        if hindex == 0 or hindex == self.nsector/2:
+            result_expanded /= self.nsector**0.5
+        else:
+            result_expanded /= (self.nsector/2)**0.5
+
+        f_arr = np.zeros(self.nsector)
+        f_arr[hindex] = 1
+        jang = np.fft.ifft(f_arr)[:22]*22
+        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
+        result_expanded = np.real(result_expanded*cjang.reshape(-1, 1, 1))
+
+        # rotate cyclic result inplace
+        angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
+        for i, angle in enumerate(angles):
+            _rstHelper.TensorRotateZ(result_expanded[i], angle)
+
+        return result_expanded
+
+
+    def HarmonicIndexToCumulative(self, hindex, substep):
+        """ Converts a harmonic index and substep to a cumulative result number """
+        substep_table = self.resultheader['ls_table'][:, 1]
+        hindex_table = self.resultheader['hindex']
+        if not np.any(hindex == hindex_table):
+            raise Exception('Invalid harmonic index.\n' +
+                            'Available indices: %s' % np.unique(hindex_table))
+        elif not np.any(substep == substep_table):
+            raise Exception('Invalid substep\n' +
+                            'Available substeps: %s' % np.unique(substep_table))
+
+        mask = np.logical_and(hindex == hindex_table,
+                              substep == substep_table)
+
+        if not np.any(mask):
+            raise Exception('Load step table does not contain ' +
+                            'harmonic index %d and substep %d' % (hindex, substep))
+
+        index = mask.nonzero()[0]
+        assert index.size == 1, 'Multiple cumulative index matches'
+        return index[0]
+
+    def NodalStress(self, rnum, phase=0, as_complex=False, full_rotor=False):
+        nnum, stress = super(CyclicResult, self).NodalStress(rnum)
+        nnum = nnum[self.mas_ind]
+
+        if self.resultheader['kan'] == 2:  # modal analysis
+            # combine modal solution results
+            hindex_table = self.resultheader['hindex']
+            hindex = hindex_table[rnum]
+
+            # if repeated mode
+            if hindex != 0 and -hindex in hindex_table:
+                if hindex < 0:
+                    rnum_r = rnum - 1
+                else:
+                    rnum_r = rnum + 1
+
+                # get repeated result and combine
+                _, stress_r = super(CyclicResult, self).NodalStress(rnum_r)
+
+            else:
+                stress_r = np.zeros_like(stress)
+
+            expanded_result = self.ExpandCyclicModalStress(stress, stress_r, hindex,
+                                                           phase, as_complex, full_rotor)
+
+        elif self.resultheader['kan'] == 0:  # static result
+            expanded_result = ExpandCyclicResults(stress, self.mas_ind,
+                                                  self.dup_ind,
+                                                  self.nsector, phase,
+                                                  as_complex, full_rotor)
+        else:
+            raise Exception('Unsupported analysis type')
+
+        return nnum, expanded_result
+
+    def PrincipalNodalStress(self, rnum):
+        # get component stress
+        nnum, stress = self.NodalStress(rnum)
+
+        # compute principle stress
+        if stress.dtype != np.float32:
+            stress = stress.astype(np.float32)
+
+        pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+        pstress[isnan] = np.nan
+        return nnum, pstress
+
+    def PlotNodalSolution(self, rnum, comp='norm', label='',
+                          colormap=None, flipscalars=None, cpos=None,
+                          screenshot=None, interactive=True, full_rotor=True,
+                          phase=0,
+                          **kwargs):
+        """
+        Plots a nodal result.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        comp : str, optional
+            Display component to display.  Options are 'x', 'y', 'z', and
+            'norm', corresponding to the x directin, y direction, z direction,
+            and the combined direction (x**2 + y**2 + z**2)**0.5
+
+        label : str, optional
+            Annotation string to add to scalar bar in plot.
+
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
+
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid when full_rotor
+            is True.  Default 0
+
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+
+        """
+        if not vtkloaded:
+            raise Exception('Cannot plot without VTK')
+
+        # Load result from file
+        if not full_rotor:
+            return super(CyclicResult, self).PlotNodalSolution(rnum)
+
+        rnum = self.ParseStepSubstep(rnum)
+        nnum, result = self.NodalSolution(rnum, phase, full_rotor, as_complex=False)
+
+        # Process result
+        if label == '':
+            label = 'Cyclic Rotor\nDisplacement'
+
+        if comp == 'x':
+            d = result[:, :, 0]
+            stitle = 'X {:s}\n'.format(label)
+        elif comp == 'y':
+            d = result[:, :, 1]
+            stitle = 'Y {:s}\n'.format(label)
+        elif comp == 'z':
+            d = result[:, :, 2]
+            stitle = 'Z {:s}\n'.format(label)
+        else:
+            # Normalize displacement
+            d = (result*result).sum(2)**0.5
+            stitle = 'Normalized\n%s\n' % label
+
+        # sometimes there are less nodes in the result than in the geometry
+        npoints = self.grid.GetNumberOfPoints()
+        if nnum.size != npoints:
+            scalars = np.empty_like((self.nsector, npoints))
+            scalars[:] = np.nan
+            nnum_grid = self.grid.GetPointScalars('ANSYSnodenum')
+            mask = np.in1d(nnum_grid, nnum)
+            scalars[:, mask] = d
+            d = scalars
+
+        return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, self.rotor,
+                                     **kwargs)
+
+    def PlotNodalStress(self, rnum, stype, label='',
+                        colormap=None, flipscalars=None, cpos=None,
+                        screenshot=None, interactive=True, full_rotor=True,
+                        phase=0, **kwargs):
+        """
+        Plots a nodal result.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        stype : string
+            Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
+
+        label : str, optional
+            Annotation string to add to scalar bar in plot.
+
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
+
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid when full_rotor
+            is True.  Default 0
+
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+
+        """
+        if not vtkloaded:
+            raise Exception('Cannot plot without VTK')
+
+        if not full_rotor:  # Plot sector 
+            return super(CyclicResult, self).PlotNodalStress(rnum, stype)
+
+        rnum = self.ParseStepSubstep(rnum)
+        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
+        stype = stype.lower()
+        if stype not in stress_types:
+            raise Exception('Stress type not in: \n' + str(stress_types))
+        sidx = stress_types.index(stype)
+
+        # Populate with nodal stress at edge nodes
+        nnum, stress = self.NodalStress(rnum, phase, False, full_rotor=True)
+        scalars = stress[:, :, sidx]
+
+        stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
+        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, self.rotor,
+                                     **kwargs)
+
+    def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1, show_phase=True,
+                             auto_start=True, auto_close=True, cpos=None, **kwargs):
+        """
+        Animate nodal solution
+        """
+
+        # normalize nodal solution
+        nnum, complex_disp = self.NodalSolution(rnum, as_complex=True, full_rotor=True)
+        complex_disp /= (np.abs(complex_disp).max()/max_disp)
+        complex_disp = complex_disp.reshape(-1, 3)
         
+        if comp == 'x':
+            axis = 0
+        elif comp == 'y':
+            axis = 1
+        elif comp == 'z':
+            axis = 2
+        else:
+            axis = None
+
+        if axis is not None:
+            scalars = complex_disp[:, axis]
+        else:
+            scalars = (complex_disp*complex_disp).sum(1)**0.5
+
+        orig_pt = self.rotor.points
+
+        plobj = vtkInterface.PlotClass()
+        plobj.AddMesh(self.rotor.Copy(), scalars=np.real(scalars), **kwargs)
+        plobj.UpdateCoordinates(orig_pt + np.real(complex_disp), render=False)
+        if show_phase:
+            text = plobj.AddText('Phase 0.0 Degrees')
+        if cpos:
+            plobj.SetCameraPosition(cpos)
+
+        # run until q is pressed
+        plobj.Plot(interactive=not auto_start, autoclose=False, interactive_update=True)
+        while not plobj.q_pressed:
+            for angle in np.linspace(0, np.pi*2, 180):
+                padj = 1*np.cos(angle) - 1j*np.sin(angle)
+                complex_disp_adj = np.real(complex_disp*padj)
+
+                if axis is not None:
+                    scalars = complex_disp_adj[:, axis]
+                else:
+                    scalars = (complex_disp_adj*complex_disp_adj).sum(1)**0.5
+
+                plobj.UpdateScalars(scalars, render=False)
+                plobj.UpdateCoordinates(orig_pt + complex_disp_adj, render=False)
+                if show_phase:
+                    plobj.textActor.SetInput('Phase %.1f Degrees' % (angle*180/np.pi))
+                plobj.Update(30, force_redraw=True)
+                if plobj.q_pressed:
+                    break
+
+        if auto_close:
+            return plobj.Close()
+        else:
+            return plobj.Plot()
+
 
 def GetResultInfo(filename):
     """
@@ -1649,9 +2085,9 @@ def ReadStandardHeader(filename):
         f.seek(96*4)
         header['split point'] = ReadTable(f, nread=1, get_nread=False)[0]
 
-        # Items 97-98 LONGINT of the maximum file length
-        ints = ReadTable(f, nread=2, get_nread=False)
-        header['file length'] = TwoIntsToLong(ints[0], ints[1])
+        # Items 97-98 LONGINT of the maximum file length (bug here)
+        # ints = ReadTable(f, nread=2, get_nread=False)
+        # header['file length'] = TwoIntsToLong(ints[0], ints[1])
 
     return header
 
@@ -1666,3 +2102,41 @@ def ReadStringFromBinary(f, n):
         return string.decode('utf')
     except:
         return string
+
+
+def IsInt(value):
+    """ Return true if can be parsed as an int """
+    try:
+        int(value)
+        return True
+    except:
+        return False
+
+
+def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
+                        full_rotor=False):
+    """
+    Expand cyclic results given an array of results and the master/duplicate
+    sector indices
+    """
+
+    # master and duplicate sector solutions
+    u_mas = result[mas_ind]
+    # u_dup = result[dup_ind]
+
+    # if as_complex:
+        # sector_r = u_mas + u_dup*1j
+    # else:  # convert to real
+        # sector_r = u_mas*np.cos(phase) - u_dup*np.sin(phase)
+
+    # just return single sector
+    if not full_rotor:
+        return u_mas
+
+    # otherwise rotate results (CYC, 1 only)
+    sectors = []
+    angles = np.linspace(0, 2*np.pi, nsector + 1)[:-1] + phase
+    for angle in angles:
+        sectors.append(AxisRotation(u_mas, angle, deg=False, axis='z'))
+
+    return np.asarray(sectors)

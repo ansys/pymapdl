@@ -6,7 +6,7 @@ import ctypes
 import numpy as np
 cimport numpy as np
 
-from libc.math cimport sqrt, fabs
+from libc.math cimport sqrt, fabs, sin, cos
 from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
 from libc.string cimport memcpy
@@ -583,6 +583,56 @@ def SortNodalEqlv(int neqn, int [::1] neqv, int [::1] ndof):
 
     return np.asarray(dof_ref), np.asarray(index_arr), np.asarray(nref), \
            np.asarray(dref)
+
+
+def TensorRotateZ(double [:, :] stress, float theta_z):
+    """
+    Rotates a 3D stress tensor by theta about the Z axis
+
+    Notes:
+    -----
+    Used 
+    from sympy import Matrix, symbols
+    c, s, s_xx, s_yy, s_zz, s_xy, s_yz, s_xz = symbols('c s s_xx s_yy s_zz s_xy s_yz s_xz')
+
+    R = Matrix([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+    tensor = Matrix([[s_xx, s_xy, s_xz], [s_xy, s_yy, s_yz], [s_xz, s_yz, s_zz]])
+    R*tensor*R.T
+    """
+    cdef int nnode = stress.shape[0]
+    cdef int i
+    # cdef float [:, ::1] stress_rot = np.empty_like(stress)
+    cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
+    cdef double c, s, s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
+
+    c = cos(theta_z)
+    s = sin(theta_z)
+
+    for i in range(nnode):
+        s_xx = stress[i, 0]
+        if npy_isnan(s_xx):
+            # stress_rot[i, 0] = 0
+            # stress_rot[i, 1] = 0
+            # stress_rot[i, 2] = 0
+            # stress_rot[i, 3] = 0
+            # stress_rot[i, 4] = 0
+            # stress_rot[i, 5] = 0
+            isnan[i] = 1
+        else:
+            s_yy = stress[i, 1]
+            s_zz = stress[i, 2]
+            s_xy = stress[i, 3]
+            s_yz = stress[i, 4]
+            s_xz = stress[i, 5]
+
+        stress[i, 0] = c*(c*s_xx - s*s_xy) - s*(c*s_xy - s*s_yy)
+        stress[i, 1] = c*(c*s_yy + s*s_xy) + s*(c*s_xy + s*s_xx)
+        stress[i, 2] = s_zz
+        stress[i, 3] = c*(c*s_xy - s*s_yy) + s*(c*s_xx - s*s_xy)
+        stress[i, 4] = c*s_yz + s*s_xz
+        stress[i, 5] = c*s_xz - s*s_yz
+
+    return np.asarray(isnan).astype(np.bool)
 
 
 def ComputePrincipalStress(float [:, ::1] stress):
