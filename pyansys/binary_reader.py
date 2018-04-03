@@ -1501,12 +1501,12 @@ class CyclicResult(Result):
             return np.real(result_expanded)
 
     def ExpandCyclicModalStress(self, result, result_r, hindex, phase, as_complex,
-                                full_rotor):
+                                full_rotor, scale=True):
         """ Combines repeated results from ANSYS """
         if self.dup_ind is not None:
             result = result[self.mas_ind]
             result_r = result_r[self.mas_ind]
-        
+
         if as_complex or full_rotor:
             result_combined = result + result_r*1j
             if phase:
@@ -1527,10 +1527,11 @@ class CyclicResult(Result):
         result_expanded[:] = result_combined
 
         # adjust phase of the full result based on the harmonic index
-        if hindex == 0 or hindex == self.nsector/2:
-            result_expanded /= self.nsector**0.5
-        else:
-            result_expanded /= (self.nsector/2)**0.5
+        if scale:
+            if hindex == 0 or hindex == self.nsector/2:
+                result_expanded /= self.nsector**0.5
+            else:
+                result_expanded /= (self.nsector/2)**0.5
 
         f_arr = np.zeros(self.nsector)
         f_arr[hindex] = 1
@@ -1541,22 +1542,24 @@ class CyclicResult(Result):
         # rotate cyclic result inplace
         angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for i, angle in enumerate(angles):
-            _rstHelper.TensorRotateZ(result_expanded[i], angle)
+            isnan = _rstHelper.TensorRotateZ(result_expanded[i], angle)
+            result_expanded[i, isnan] = np.nan
 
         return result_expanded
 
     def HarmonicIndexToCumulative(self, hindex, mode):
         """
-        Converts a harmonic index and a 0 index mode number to a cumulative result number
-        
-        Harmonic indices are stored as positive and negative pairs for modes other 
+        Converts a harmonic index and a 0 index mode number to a cumulative result
+        index.
+
+        Harmonic indices are stored as positive and negative pairs for modes other
         than 0 and N/nsectors.
 
         Parameters
         ----------
         hindex : int
-            Harmonic index.  Must be less than or equal to nsectors/2.  May be positive
-            or negative
+            Harmonic index.  Must be less than or equal to nsectors/2.  May be
+            positive or negative
 
         mode : int
             Mode number.  0 based indexing.  Access mode pairs by with a negative/positive
@@ -1577,7 +1580,6 @@ class CyclicResult(Result):
                               mode == self.mode_table)
 
         if not mask.any():
-            import pdb; pdb.set_trace()
             mode_mask = abs(hindex) == np.abs(hindex_table)
             avail_modes = np.unique(self.mode_table[mode_mask])
             raise Exception('Invalid mode for harmonic index %d\n' % hindex +
@@ -1606,7 +1608,6 @@ class CyclicResult(Result):
                 mode_table.append(c)
         return np.asarray(mode_table)
 
-
     def NodalStress(self, rnum, phase=0, as_complex=False, full_rotor=False):
         nnum, stress = super(CyclicResult, self).NodalStress(rnum)
         nnum = nnum[self.mas_ind]
@@ -1633,16 +1634,21 @@ class CyclicResult(Result):
                                                            phase, as_complex, full_rotor)
 
         elif self.resultheader['kan'] == 0:  # static result
-            expanded_result = ExpandCyclicResults(stress, self.mas_ind,
-                                                  self.dup_ind,
-                                                  self.nsector, phase,
-                                                  as_complex, full_rotor)
+            stress_r = np.zeros_like(stress)
+            expanded_result = self.ExpandCyclicModalStress(stress, stress_r, 0,
+                                                           phase, as_complex,
+                                                           full_rotor, scale=False)
+
+            # expanded_result = ExpandCyclicStress(stress, self.mas_ind,
+            #                                       self.dup_ind,
+            #                                       self.nsector, phase,
+            #                                       as_complex, full_rotor)
         else:
             raise Exception('Unsupported analysis type')
 
         return nnum, expanded_result
 
-    def PrincipalNodalStress(self, rnum=None):
+    def PrincipalNodalStress(self, rnum=None, as_complex=False):
         """
         Returns principal nodal stress for a cumulative result
 
@@ -1657,6 +1663,22 @@ class CyclicResult(Result):
         pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
         pstress[isnan] = np.nan
         return nnum, pstress
+
+    # def PrincipalNodalStress(self, rnum, as_complex=False):
+    #     """
+    #     Returns principal nodal stress for a cumulative result
+
+    #     """
+    #     # get component stress
+    #     nnum, stress = self.NodalStress(rnum)
+
+    #     # compute principle stress
+    #     if stress.dtype != np.float32:
+    #         stress = stress.astype(np.float32)
+
+    #     pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+    #     pstress[isnan] = np.nan
+    #     return nnum, pstress
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flipscalars=None, cpos=None,
@@ -1894,20 +1916,18 @@ class CyclicResult(Result):
         sidx = stress_types.index(stype)
         rnum = self.ParseStepSubstep(rnum)
 
-        # Populate with nodal stress at edge nodes
+        # full rotor component stress
         nnum, stress = self.NodalStress(rnum, phase, False, full_rotor=True)
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
 
-        # convert to principal nodal stress
+        # compute principle stress
         pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
         for i in range(stress.shape[0]):
-            # compute principle stress
             pstress[i], isnan = _rstHelper.ComputePrincipalStress(stress[i])
             pstress[i, isnan] = np.nan
 
-        scalars = stress[:, :, sidx]
-
+        scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
         return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
@@ -2234,12 +2254,6 @@ def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=Fal
 
     # master and duplicate sector solutions
     u_mas = result[mas_ind]
-    # u_dup = result[dup_ind]
-
-    # if as_complex:
-        # sector_r = u_mas + u_dup*1j
-    # else:  # convert to real
-        # sector_r = u_mas*np.cos(phase) - u_dup*np.sin(phase)
 
     # just return single sector
     if not full_rotor:
