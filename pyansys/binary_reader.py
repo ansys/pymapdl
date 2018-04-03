@@ -411,14 +411,14 @@ class Result(object):
         self.enum = self.resultheader['eeqv'][self.sidx_elem]
 
         # Store time values for later retrival
-        self.GetTimeValues()
+        # self.GetTimeValues()
 
         # store geometry for later retrival
         self.StoreGeometry()
 
-    def Plot(self):
+    def Plot(self, **kwargs):
         """ plots result geometry """
-        self.grid.Plot()
+        self.grid.Plot(**kwargs)
 
     # def ResultsProperties(self):
     #     """
@@ -530,37 +530,18 @@ class Result(object):
         return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
                                      screenshot, cpos, interactive, **kwargs)
 
+    # for legacy
     def GetTimeValues(self):
-        """
-        Returns table of time values for results.  For a modal analysis, this
-        corresponds to the frequencies of each mode.
+        return self.resultheader['time_values']
 
-        Returns
-        -------
-        tvalues : np.float64 array
-            Table of time values for results.  For a modal analysis, this
-            corresponds to the frequencies of each mode.
+    @property
+    def time_values(self):
+        return self.resultheader['time_values']
 
-        """
-        endian = self.resultheader['endian']
-        ptrTIMl = self.resultheader['ptrTIMl']
-
-        # Load values if not already stored
-        if not hasattr(self, 'tvalues'):
-
-            # Seek to start of time result table
-            f = open(self.filename, 'rb')
-
-            f.seek(ptrTIMl * 4 + 8)
-            self.tvalues = np.fromfile(f, endian + 'd', self.nsets)
-
-            f.close()
-
-        return self.tvalues
-
-    # @property
-    # def time_values(self):
-    #     return self.tvalues
+    # for legacy
+    @property
+    def tvalues(self):
+        return self.resultheader['time_values']
 
     def NodalSolution(self, rnum):
         """
@@ -1030,12 +1011,50 @@ class Result(object):
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
 
+        # debug
+        nnode = stress.shape[0]
+        stress_tensor = np.empty((nnode, 3, 3), np.float32)
+        for i in range(nnode):
+            s_xx = stress[i, 0]
+            if np.isnan(s_xx):
+                s_xx = 0
+                s_yy = 0
+                s_zz = 0
+                s_xy = 0
+                s_yz = 0
+                s_xz = 0
+            else:
+                s_yy = stress[i, 1]
+                s_zz = stress[i, 2]
+                s_xy = stress[i, 3]
+                s_yz = stress[i, 4]
+                s_xz = stress[i, 5]
+
+            # populate stress tensor
+            stress_tensor[i, 0, 0] = s_xx
+            # stress_tensor[i, 0, 1] = s_xy
+            # stress_tensor[i, 0, 2] = s_xz
+            stress_tensor[i, 1, 0] = s_xy
+            stress_tensor[i, 1, 1] = s_yy
+            # stress_tensor[i, 1, 2] = s_yz
+            stress_tensor[i, 2, 0] = s_xz
+            stress_tensor[i, 2, 1] = s_yz
+            stress_tensor[i, 2, 2] = s_zz
+
+        w2 =  np.linalg.eigvalsh(stress_tensor)
+
+        for i in range(w.shape[0]):
+            if not np.allclose(w[i], w2[i]):
+                break
+            
+
         pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
         pstress[isnan] = np.nan
         return nodenum, pstress
 
     def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
-                                 cpos=None, screenshot=None, interactive=True, **kwargs):
+                                 cpos=None, screenshot=None, interactive=True,
+                                 **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
@@ -1194,21 +1213,6 @@ class Result(object):
 
         sidx = stress_types.index(stype)
 
-        # don't display elements that can't store stress (!)
-        # etype = self.grid.GetCellScalars('Element Type')
-        # valid = (np.in1d(etype, validENS)).nonzero()[0]
-        # grid = self.grid.ExtractSelectionCells(valid)
-        # grid = self.grid
-
-        # Populate with nodal stress at edge nodes
-        # nodenum = grid.GetPointScalars('ANSYSnodenum')
-        # stress_nnum, edge_stress = self.PrincipalNodalStress(rnum)
-        # temp_arr = np.zeros((nodenum.max() + 1, 5))
-        # temp_arr[stress_nnum] = edge_stress
-
-        # find matching edge nodes
-        # return temp_arr[nodenum, sidx]
-
         _, stress = self.PrincipalNodalStress(rnum)
         return stress[:, sidx]
 
@@ -1262,12 +1266,6 @@ class Result(object):
             raise Exception('Stress type not in: \n' + str(stress_types))
 
         sidx = stress_types.index(stype)
-
-        # don't display elements that can't store stress
-        # etype = self.grid.GetCellScalars('Element Type')
-        # valid = (np.in1d(etype, validENS)).nonzero()[0]
-        # grid = self.grid.ExtractSelectionCells(valid)
-        # grid = self.grid  # bypassed for now
 
         # Populate with nodal stress at edge nodes
         nnum, stress = self.NodalStress(rnum)
@@ -1616,6 +1614,7 @@ class CyclicResult(Result):
                               mode == self.mode_table)
 
         if not mask.any():
+            import pdb; pdb.set_trace()
             mode_mask = abs(hindex) == np.abs(hindex_table)
             avail_modes = np.unique(self.mode_table[mode_mask])
             raise Exception('Invalid mode for harmonic index %d\n' % hindex +
@@ -1640,7 +1639,7 @@ class CyclicResult(Result):
             elif hindex_table[i] > hindex_table[i + 1]:
                 mode_table.append(c)
             else:
-                c +=1
+                c += 1
                 mode_table.append(c)
         return np.asarray(mode_table)
 
@@ -1680,7 +1679,11 @@ class CyclicResult(Result):
 
         return nnum, expanded_result
 
-    def PrincipalNodalStress(self, rnum):
+    def PrincipalNodalStress(self, rnum=None):
+        """
+        Returns principal nodal stress for a cumulative result
+
+        """
         # get component stress
         nnum, stress = self.NodalStress(rnum)
 
@@ -1840,7 +1843,7 @@ class CyclicResult(Result):
         if not vtkloaded:
             raise Exception('Cannot plot without VTK')
 
-        if not full_rotor:  # Plot sector 
+        if not full_rotor:  # Plot sector
             return super(CyclicResult, self).PlotNodalStress(rnum, stype)
 
         rnum = self.ParseStepSubstep(rnum)
@@ -1855,6 +1858,95 @@ class CyclicResult(Result):
         scalars = stress[:, :, sidx]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
+        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
+                                     screenshot, cpos, interactive, self.rotor,
+                                     **kwargs)
+
+    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+                                 cpos=None, screenshot=None, interactive=True,
+                                 full_rotor=True, phase=0,
+                                 **kwargs):
+        """
+        Plot the principal stress at each node in the solution.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        stype : string
+            Stress type to plot.  S1, S2, S3 principal stresses, SINT stress
+            intensity, and SEQV equivalent stress.
+
+            Stress type must be a string from the following list:
+
+            ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+
+        colormap : str, optional
+           Colormap string.  See available matplotlib colormaps.  Only applicable for
+           when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
+
+        flipscalars : bool, optional
+            Flip direction of colormap.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.  Plot first, then
+            output the camera position and save it.
+
+        screenshot : str, optional
+            Setting this to a filename will save a screenshot of the plot before
+            closing the figure.  Default None.
+
+        interactive : bool, optional
+            Default True.  Setting this to False makes the plot generate in the
+            background.  Useful when generating plots in a batch mode automatically.
+
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid when full_rotor
+            is True.  Default 0
+
+        Returns
+        -------
+        cpos : list
+            VTK camera position.
+
+        stress : np.ndarray
+            Array used to plot stress.
+
+        """
+        if not vtkloaded:
+            raise Exception('Cannot plot without VTK')
+
+        if not full_rotor:  # Plot sector
+            return super(CyclicResult, self).PlotPrincipalNodalStress(rnum, stype)
+
+        # check inputs
+        stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        if stype.upper() not in stress_types:
+            raise Exception('Stress type not in \n' + str(stress_types))
+        sidx = stress_types.index(stype)
+        rnum = self.ParseStepSubstep(rnum)
+
+        # Populate with nodal stress at edge nodes
+        nnum, stress = self.NodalStress(rnum, phase, False, full_rotor=True)
+        if stress.dtype != np.float32:
+            stress = stress.astype(np.float32)
+
+        # convert to principal nodal stress
+        pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
+        for i in range(stress.shape[0]):
+            # compute principle stress
+            pstress[i], isnan = _rstHelper.ComputePrincipalStress(stress[i])
+            pstress[i, isnan] = np.nan
+
+        scalars = stress[:, :, sidx]
+
+        stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
+                 '%s\n' % stype.capitalize()
         return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
@@ -1971,11 +2063,25 @@ def GetResultInfo(filename):
         assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
         resultheader['rpointers'] = rpointers
 
+        # read in time values
+        f.seek(resultheader['ptrTIMl']*4)
+        table = ReadTable(f, 'd', resultheader['nsets'])
+        resultheader['time_values'] = table
+
         # load harmonic index of each result
         if resultheader['ptrCYC']:
             f.seek((resultheader['ptrCYC'] + 2) * 4)
-            resultheader['hindex'] = np.fromfile(f, endian + 'i',
-                                                 count=resultheader['nsets'])
+            hindex = np.fromfile(f, 'i', count=resultheader['nsets'])
+
+            # ansys 15 doesn't track negative harmonic indices
+            if not np.any(hindex < -1):
+                # check if duplicate frequencies
+                tvalues = resultheader['time_values']
+                for i in range(tvalues.size - 1):
+                    if np.isclose(tvalues[i], tvalues[i + 1]):  # adjust tolarance(?)
+                        hindex[i + 1] *= -1
+
+            resultheader['hindex'] = hindex
 
         # load step table with columns:
         # [loadstep, substep, and cumulative]

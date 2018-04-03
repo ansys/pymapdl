@@ -663,6 +663,7 @@ def ComputePrincipalStress(float [:, ::1] stress):
     cdef int nnode = stress.shape[0]
     cdef float [:, :, ::1] stress_tensor = np.empty((nnode, 3, 3), np.float32)
     cdef float s_xx, x_yy, s_zz, s_xy, s_yz, s_xz
+    cdef int i
 
     cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
 
@@ -685,17 +686,19 @@ def ComputePrincipalStress(float [:, ::1] stress):
 
         # populate stress tensor
         stress_tensor[i, 0, 0] = s_xx
-        stress_tensor[i, 0, 1] = s_xy
-        stress_tensor[i, 0, 2] = s_xz
+        # stress_tensor[i, 0, 1] = s_xy
+        # stress_tensor[i, 0, 2] = s_xz
         stress_tensor[i, 1, 0] = s_xy
         stress_tensor[i, 1, 1] = s_yy
-        stress_tensor[i, 1, 2] = s_yz
+        # stress_tensor[i, 1, 2] = s_yz
         stress_tensor[i, 2, 0] = s_xz
         stress_tensor[i, 2, 1] = s_yz
         stress_tensor[i, 2, 2] = s_zz
 
     # compute principle stresses
-    w, v = np.linalg.eig(np.asarray(stress_tensor))
+    # w =  np.linalg.eigvalsh(stress_tensor)  # default uses lower triangle
+    # Access wrapped lapack libaray (slightly faster than above)
+    w =  np.linalg._umath_linalg.eigvalsh_lo(stress_tensor)
     w[:, ::-1].sort(1)
 
     temp = np.empty((nnode, 5), np.float32)
