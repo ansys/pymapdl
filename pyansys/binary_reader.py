@@ -1011,43 +1011,6 @@ class Result(object):
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
 
-        # debug
-        nnode = stress.shape[0]
-        stress_tensor = np.empty((nnode, 3, 3), np.float32)
-        for i in range(nnode):
-            s_xx = stress[i, 0]
-            if np.isnan(s_xx):
-                s_xx = 0
-                s_yy = 0
-                s_zz = 0
-                s_xy = 0
-                s_yz = 0
-                s_xz = 0
-            else:
-                s_yy = stress[i, 1]
-                s_zz = stress[i, 2]
-                s_xy = stress[i, 3]
-                s_yz = stress[i, 4]
-                s_xz = stress[i, 5]
-
-            # populate stress tensor
-            stress_tensor[i, 0, 0] = s_xx
-            # stress_tensor[i, 0, 1] = s_xy
-            # stress_tensor[i, 0, 2] = s_xz
-            stress_tensor[i, 1, 0] = s_xy
-            stress_tensor[i, 1, 1] = s_yy
-            # stress_tensor[i, 1, 2] = s_yz
-            stress_tensor[i, 2, 0] = s_xz
-            stress_tensor[i, 2, 1] = s_yz
-            stress_tensor[i, 2, 2] = s_zz
-
-        w2 =  np.linalg.eigvalsh(stress_tensor)
-
-        for i in range(w.shape[0]):
-            if not np.allclose(w[i], w2[i]):
-                break
-            
-
         pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
         pstress[isnan] = np.nan
         return nodenum, pstress

@@ -684,7 +684,7 @@ def ComputePrincipalStress(float [:, ::1] stress):
             s_yz = stress[i, 4]
             s_xz = stress[i, 5]
 
-        # populate stress tensor
+        # populate lower triangle of stress tensor
         stress_tensor[i, 0, 0] = s_xx
         # stress_tensor[i, 0, 1] = s_xy
         # stress_tensor[i, 0, 2] = s_xz
