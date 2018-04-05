@@ -1456,7 +1456,8 @@ class CyclicResult(Result):
 
         return nnum, expanded_result
 
-    def ExpandCyclicModal(self, result, result_r, hindex, phase, as_complex, full_rotor):
+    def ExpandCyclicModal(self, result, result_r, hindex, phase, as_complex,
+                          full_rotor):
         """ Combines repeated results from ANSYS """
         if self.dup_ind is not None:
             result = result[self.mas_ind]
@@ -1483,10 +1484,10 @@ class CyclicResult(Result):
         result_expanded = np.asarray(result_expanded)
 
         # adjust phase of the full result based on the harmonic index
-        if hindex == 0 or hindex == self.nsector/2:
-            result_expanded /= self.nsector**0.5
-        else:
-            result_expanded /= (self.nsector/2)**0.5
+        # if hindex == 0 or hindex == self.nsector/2:
+        #     result_expanded /= self.nsector**0.5
+        # else:
+        #     result_expanded /= (self.nsector/2)**0.5
 
         f_arr = np.zeros(self.nsector)
         print(hindex)
@@ -1527,11 +1528,11 @@ class CyclicResult(Result):
         result_expanded[:] = result_combined
 
         # adjust phase of the full result based on the harmonic index
-        if scale:
-            if hindex == 0 or hindex == self.nsector/2:
-                result_expanded /= self.nsector**0.5
-            else:
-                result_expanded /= (self.nsector/2)**0.5
+        # if scale:
+        #     if hindex == 0 or hindex == self.nsector/2:
+        #         result_expanded /= self.nsector**0.5
+        #     else:
+        #         result_expanded /= (self.nsector/2)**0.5
 
         f_arr = np.zeros(self.nsector)
         f_arr[hindex] = 1
@@ -1648,37 +1649,48 @@ class CyclicResult(Result):
 
         return nnum, expanded_result
 
-    def PrincipalNodalStress(self, rnum=None, as_complex=False):
+    def PrincipalNodalStress(self, rnum, phase=0, as_complex=False,
+                             full_rotor=False):
         """
         Returns principal nodal stress for a cumulative result
 
         """
+        if as_complex and full_rotor:
+            raise Exception('Cannot be complex and full rotor')
+        
         # get component stress
-        nnum, stress = self.NodalStress(rnum)
+        nnum, stress = self.NodalStress(rnum, phase, as_complex, full_rotor)
 
         # compute principle stress
-        if stress.dtype != np.float32:
-            stress = stress.astype(np.float32)
+        if as_complex:
+            stress_r = np.imag(stress).astype(np.float32)
+            stress = np.real(stress).astype(np.float32)
 
-        pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
-        pstress[isnan] = np.nan
-        return nnum, pstress
+            pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+            pstress[isnan] = np.nan
+            pstress_r, isnan = _rstHelper.ComputePrincipalStress(stress_r)
+            pstress_r[isnan] = np.nan
 
-    # def PrincipalNodalStress(self, rnum, as_complex=False):
-    #     """
-    #     Returns principal nodal stress for a cumulative result
+            return nnum, pstress + 1j*pstress_r
 
-    #     """
-    #     # get component stress
-    #     nnum, stress = self.NodalStress(rnum)
+        elif full_rotor:
+            if stress.dtype != np.float32:
+                stress = stress.astype(np.float32)
 
-    #     # compute principle stress
-    #     if stress.dtype != np.float32:
-    #         stress = stress.astype(np.float32)
+            # compute principle stress
+            pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
+            for i in range(stress.shape[0]):
+                pstress[i], isnan = _rstHelper.ComputePrincipalStress(stress[i])
+                pstress[i, isnan] = np.nan
+            return nnum, pstress
 
-    #     pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
-    #     pstress[isnan] = np.nan
-    #     return nnum, pstress
+        else:
+            if stress.dtype != np.float32:
+                stress = stress.astype(np.float32)
+
+            pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+            pstress[isnan] = np.nan
+            return nnum, pstress
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flipscalars=None, cpos=None,
@@ -1906,26 +1918,19 @@ class CyclicResult(Result):
         if not vtkloaded:
             raise Exception('Cannot plot without VTK')
 
+        stype = stype.upper()
         if not full_rotor:  # Plot sector
             return super(CyclicResult, self).PlotPrincipalNodalStress(rnum, stype)
 
         # check inputs
         stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
-        if stype.upper() not in stress_types:
+        if stype not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
         sidx = stress_types.index(stype)
         rnum = self.ParseStepSubstep(rnum)
 
         # full rotor component stress
-        nnum, stress = self.NodalStress(rnum, phase, False, full_rotor=True)
-        if stress.dtype != np.float32:
-            stress = stress.astype(np.float32)
-
-        # compute principle stress
-        pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
-        for i in range(stress.shape[0]):
-            pstress[i], isnan = _rstHelper.ComputePrincipalStress(stress[i])
-            pstress[i, isnan] = np.nan
+        _, pstress = self.PrincipalNodalStress(rnum, phase, full_rotor=True)
 
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
