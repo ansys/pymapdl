@@ -1492,7 +1492,7 @@ class CyclicResult(Result):
         # adjust phase of the full result based on the harmonic index
         f_arr = np.zeros(self.nsector)
         f_arr[hindex] = 1
-        jang = np.fft.ifft(f_arr)[:22]*22
+        jang = np.fft.ifft(f_arr)[:self.nsector]*self.nsector
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
 
         result_expanded *= cjang.reshape(-1, 1, 1)
@@ -1522,12 +1522,10 @@ class CyclicResult(Result):
         # Generate full rotor solution
         result_expanded = np.empty((self.nsector, result.shape[0], result.shape[1]),
                                    np.complex128)
-        # for i in range(self.nsector):
-            # result_expanded.append(result_combined)
         # result_expanded = np.asarray(result_expanded)
         result_expanded[:] = result_combined
 
-        # adjust phase of the full result based on the harmonic index
+        # scale
         # if scale:
         #     if hindex == 0 or hindex == self.nsector/2:
         #         result_expanded /= self.nsector**0.5
@@ -1536,7 +1534,7 @@ class CyclicResult(Result):
 
         f_arr = np.zeros(self.nsector)
         f_arr[hindex] = 1
-        jang = np.fft.ifft(f_arr)[:22]*22
+        jang = np.fft.ifft(f_arr)[:self.nsector]*self.nsector
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
         result_expanded = np.real(result_expanded*cjang.reshape(-1, 1, 1))
 
