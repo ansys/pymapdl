@@ -79,14 +79,14 @@ be loaded using ReadArchive and then converted to a vtk object.
     
     # Print raw data from cdb
     for key in archive.raw:
-       print "%s : %s" % (key, archive.raw[key])
+       print("%s : %s" % (key, archive.raw[key]))
     
     # Create a vtk unstructured grid from the raw data and plot it
-    archive.ParseFEM()
-    archive.grid.Plot()
+    grid = archive.ParseVTK()
+    grid.Plot()
     
     # write this as a vtk xml file 
-    archive.SaveAsVTK('hex.vtu')
+    grid.Write('hex.vtu')
 
 
 You can then load this vtk file using vtkInterface or another program that uses
@@ -96,7 +96,7 @@ VTK.
 
     # Load this from vtk
     import vtkInterface
-    grid = vtkInterface.UnstructuredGrid('hex.vtk')
+    grid = vtkInterface.UnstructuredGrid('hex.vtu')
     grid.Plot()
 
 
@@ -161,12 +161,13 @@ example.
 
     # Load the reader from pyansys
     import pyansys
+    from scipy import sparse
     
     # load the full file
     fobj = pyansys.FullReader('file.full')
-    dofref, k, m = fobj.LoadKM()  # upper triangle only
+    dofref, k, m = fobj.LoadKM()  # returns upper triangle only
 
-    # make k, m full
+    # make k, m full, symmetric matricies
     k += sparse.triu(k, 1).T
     m += sparse.triu(m, 1).T
 

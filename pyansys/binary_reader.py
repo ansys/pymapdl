@@ -1267,16 +1267,12 @@ class Result(object):
 
         for i in range(self.nsets):
             # Nodal results
-            val = self.NodalSolution(i)
+            _, val = self.NodalSolution(i)
             grid.AddPointScalars(val, 'NodalSolution{:03d}'.format(i))
 
             # Populate with nodal stress at edge nodes
             nodenum = self.grid.GetPointScalars('ANSYSnodenum')
-            stress_nnum, edge_stress = self.NodalStress(i)
-            temp_arr = np.zeros((nodenum.max() + 1, 6))
-            temp_arr[stress_nnum] = edge_stress
-            stress = temp_arr[nodenum]
-
+            _, stress = self.NodalStress(i)
             grid.AddPointScalars(stress, 'NodalStress{:03d}'.format(i))
 
         grid.Write(filename)

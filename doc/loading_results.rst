@@ -24,18 +24,17 @@ Upon initialization the ``ResultReader`` object contains several properties to i
 
 ResultReader Properties
 -----------------------
-The properties of the ``ResultReader`` are listed below.  At the moment,
-the property listing is limited to only the number of results in the file.
+The properties of the ``ResultReader`` are contained in the result header.
 
 .. code:: python
 
-    result_dic = result.ResultsProperties()
+    result.resultheader
 
 To obtain the time or frequency values of an analysis use:
     
 .. code:: python
 
-    tval = result.GetTimeValues()
+    tval = result.time_values
     
 The sorted node and element numbering of a result can be obtained with:
 
@@ -46,7 +45,8 @@ The sorted node and element numbering of a result can be obtained with:
     
     # sorted element numbering
     enum = result.enum
-    
+
+
 Geometry
 --------
 The geometry of the model can be accessed directly from the dictionary by 
@@ -72,18 +72,16 @@ The DOF solution for an analysis for each node in the analysis can be obtained u
 
 .. code:: python    
 
-    # Create an array of results (nnod x dof)
-    disp = result.GetNodalResult(0) # uses 0 based indexing 
+    # Return an array of results (nnod x dof)
+    nnum, disp = result.NodalSolution(0) # uses 0 based indexing 
     
-    # which corresponds to the sorted node numbers from
-    nnum = result.nnum
+    # where nnum is the node numbers corresponding to the displacement results
 
     # The same results can be plotted using 
-    display_string = 'Displacement' # optional string
-    result.PlotNodalResult(0, 'x', label=display_string) # x displacement
+    result.PlotNodalSolution(0, 'x', label='Displacement') # x displacement
 
     # normalized displacement can be plotted by excluding the direction string
-    result.PlotNodalResult(0, label='Normalized')
+    result.PlotNodalSolution(0, label='Normalized')
 
 Stress can be obtained as well using the below code.  The nodal stress is computed in the same manner as ANSYS by averaging the stress evaluated at that node for all attached elements.
 
@@ -91,13 +89,13 @@ Stress can be obtained as well using the below code.  The nodal stress is comput
     
     # obtain the component node averaged stress for the first result
     # organized with one [Sx, Sy Sz, Sxy, Syz, Sxz] entry for each node
-    nodenum, stress = result.NodalStress(0) # results in a np array (nnod x 6)
+    nnum, stress = result.NodalStress(0) # results in a np array (nnod x 6)
 
     # Display node averaged stress in x direction for result 6
     result.PlotNodalStress(5, 'Sx')
 
     # Compute principal nodal stresses and plot SEQV for result 1
-    nodenum, pstress = result.PrincipalNodalStress(0)
+    nnum, pstress = result.PrincipalNodalStress(0)
     result.PlotPrincipalNodalStress(0, 'SEQV')
 
 Element stress can be obtained using the following segment of code.  Ensure that the element results are expanded for a modal analysis within ANSYS with::
@@ -110,7 +108,7 @@ This block of code shows how you can access the non-averaged stresses for the fi
 .. code:: python
     
     import pyansys
-    result = pyansys.ResultReader('result.rst')
+    result = pyansys.ResultReader('file.rst')
     estress, elem, enode = result.ElementStress(0)
 
     
@@ -193,51 +191,65 @@ Where each harmonic index entry corresponds a cumulative index.  For example, re
     >>> result.resultheader['hindex'][10]
     2
 
-Results from a cyclic analysis require additional post processing to be  displayed correctly.  Mode shapes are stored within the result file as unprocessed parts of the real and imaginary parts of a modal solution.  ``pyansys`` combines these values into a single complex array and varies the phase of the solution when plotting.  Running ``GetCyclicNodalResult`` returns the unprocessed complex solution for a sector for a given cumulative index:
+Alternatively, the result number can be obtained by using:
 
 .. code:: python
 
-    >>> ms = result.GetCyclicNodalResult(10) # mode shape of result 11
+    >>> mode = 1
+    >>> harmonic_index = 2
+    >>> result.HarmonicIndexToCumulative(mode, harmonic_index)
+    24
+
+    Using this indexing method, repeated modes are indexed by the same mode index.  To access the other repeated mode, use a negative harmonic index.  Should a result not exist, pyansys will return which modes are available:
+
+.. code:: python
+
+    >>> mode = 1
+    >>> harmonic_index = 20
+    >>> result.HarmonicIndexToCumulative(mode, harmonic_index)
+    Exception: Invalid mode for harmonic index 1
+    Available modes: [0 1 2 3 4 5 6 7 8 9]
+
+Results from a cyclic analysis require additional post processing to be interperted correctly.  Mode shapes are stored within the result file as unprocessed parts of the real and imaginary parts of a modal solution.  ``pyansys`` combines these values into a single complex array and then returns the real result of that array.
+
+.. code:: python
+
+    >>> nnum, ms = result.NodalSolution(10) # mode shape of result 11
     >>> print(ms[:3])
-    [[ 44.700-19.263j, 45.953+44.856j, 38.717+23.216]
-     [ 42.339-14.645j, 48.516+43.742j, 52.475+24.255]
-     [ 36.000-12.764j, 33.121+40.970j, 39.044+22.881j]]
+    [[ 44.700, 45.953, 38.717]
+     [ 42.339, 48.516, 52.475]
+     [ 36.000, 33.121, 39.044]]
 
-These results correspond to the nodes of the master sector, whose node numbers can be found in the ``cyc_nnum`` array:
+Sometimes it is necessary to determine the maximum displacement of a mode.  To do so, return the complex solution with:
 
 .. code:: python
 
-    >>> result.cyc_nnum # sorted node numbers from the master cyclic sector
-    array([  1,   2,   4,   6,   9,  10,  12, ...
+    nnum, ms = result.NodalSolution(0, as_complex=True)
+    norm = np.abs((ms*ms).sum(1)**0.5)
+    idx = np.nanargmax(norm)
+    ang = np.angle(ms[idx, 0])
 
+    # rotate the solution by the angle of the maximum nodal response
+    ms *= np.cos(ang) - 1j*np.sin(ang)
+
+    # get only the real response
+    ms = np.real(ms)
+    
+See ``help(result.NodalSolution)`` for more details.
 
 The real displacement of the sector is always the real component of the mode shape ``ms``, and this can be varied by multiplying the mode shape by a complex value for a given phase.  To change the phase by 90 degrees simply:
 
-.. code:: python
-    
-    >>> from math import sin, cos
-    >>> angle = 3.1415/2 # 90 degrees
-    >>> ms *= cos(angle) + 1j*sin(angle)
-
-
-The results of a single sector can be displayed as well using the ``PlotCyclicNodalResult`` command with the ``expand=False``
+The results of a single sector can be displayed as well using the ``PlotNodalSolution``
 
 .. code:: python
 
-    # Plot the result from the 11th cumulative result
-    result.PlotCyclicNodalResult(10, label='Displacement', expand=False)
+    # Plot the result from the first mode of the 2nd harmonic index
+    rnum = result.HarmonicIndexToCumulative(0, 2)
+    result.PlotNodalSolution(rnum, label='Displacement', expand=False)
     
-.. image:: ./images/sector.jpg
-    
-By default the phase of the sector results is changed such that the normalized displacement of the mode shape will be maximized at the highest responding node.  The full rotor can be shown by running:
-    
-.. code:: python
-
-    >>> result.PlotCyclicNodalResult(10, label='Displacement')
-
 .. image:: ./images/rotor.jpg
 
-The phase of the result can be changed by modifying the ``phase`` option.  See ``help(result.PlotCyclicNodalResult)`` for details on its implementation.
+The phase of the result can be changed by modifying the ``phase`` option.  See ``help(result.PlotNodalSolution)`` for details on its implementation.
         
 
 Exporting to ParaView
@@ -248,7 +260,7 @@ ParaView is a visualization application that can be used for rapid generation of
 
     import pyansys
     from pyansys import examples
-    
+
     # load example beam result file
     result = pyansys.ResultReader(examples.rstfile)
     
