@@ -778,7 +778,6 @@ class Result(object):
             # = 1 - extrapolate unless active
             # non-linear
             # = 2 - extrapolate always
-            # print(rxtrap)
             if solution_header['rxtrap'] == 0:
                 warnings.warn('Strains and stresses are being evaluated at ' +
                               'gauss points and not extrapolated')
@@ -1479,18 +1478,19 @@ class CyclicResult(Result):
         angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for angle in angles:
             # need to rotate solution and rotate direction
-            result_expanded.append(AxisRotation(result_combined, angle, deg=False, axis='z'))
+            result_expanded.append(AxisRotation(result_combined, angle, deg=False,
+                                                axis='z'))
 
         result_expanded = np.asarray(result_expanded)
 
-        # adjust phase of the full result based on the harmonic index
+        # scale
         # if hindex == 0 or hindex == self.nsector/2:
         #     result_expanded /= self.nsector**0.5
         # else:
         #     result_expanded /= (self.nsector/2)**0.5
 
+        # adjust phase of the full result based on the harmonic index
         f_arr = np.zeros(self.nsector)
-        print(hindex)
         f_arr[hindex] = 1
         jang = np.fft.ifft(f_arr)[:22]*22
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
