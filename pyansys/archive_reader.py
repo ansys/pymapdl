@@ -151,6 +151,12 @@ class ReadArchive(object):
         grid.AddCellScalars(etype, 'ANSYS_elem_typenum')
         grid.AddCellScalars(rcon, 'ANSYS_real_constant')
 
+        # Add element components to unstructured grid
+        # ibool = np.empty(grid.GetNumberOfCells(), dtype=np.int8)
+        for comp in self.raw['elem_comps']:
+            mask = np.in1d(enum, self.raw['elem_comps'][comp], assume_unique=True)
+            grid.AddCellScalars(mask, comp.strip())
+
         # Add node components to unstructured grid
         ibool = np.empty(grid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.raw['node_comps']:

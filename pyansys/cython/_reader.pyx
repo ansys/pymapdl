@@ -1,4 +1,4 @@
-# cython: boundscheck=False
+# cython: boundscheck=True
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -249,17 +249,17 @@ def Read(filename):
     cdef int ncomp
     cdef int [::1] component
     cdef int nblock
-        
+
     # Store node compondents
     node_comps = {}
+    elem_comps = {}
     while True:       
-        # Early exit on end of file (or *god help us* a null character in the file)
+        # Early exit on end of file (or a null character in the file)
         if myfgets(line, raw, &n, fsize):
             break
-        
-        if 'C' == line[0]:
-            if b'CMBLOCK' in line and b'NODE' in line:
-
+        if b'C' == line[0]:  # component
+            if b'CMBLOCK' in line:  # component
+                line_comp_type = line.split(b',')[2]
                 # Get Component name
                 ind1 = line.find(b',') + 1
                 ind2 = line.find(b',', ind1)
@@ -268,28 +268,32 @@ def Read(filename):
                 # Get number of items
                 ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
                 component = np.empty(ncomp, np.int32)
-                
+
                 # Get interger size
                 myfgets(line, raw, &n, fsize)
                 isz = int(line[line.find(b'i') + 1:line.find(b')')])
                 tempstr[isz] = '\0'
-                
+
                 # Number of intergers per line
                 nblock = int(line[line.find(b'(') + 1:line.find(b'i')])
-                
+
                 # Extract nodes
                 for i in xrange(ncomp):
-                    
+
                     # Read new line if at the end of the line
                     if i%nblock == 0:
                         myfgets(line, raw, &n, fsize)
-                    
+
                     strncpy(tempstr, line + isz*(i%nblock), isz)
                     component[i] = atoi(tempstr)
 
                 # Convert component to array and store
-                node_comps[comname] = ComponentInterperter(component)
-                      
+                if b'NODE' in line_comp_type:
+                    node_comps[comname] = ComponentInterperter(component)
+
+                elif b'ELEM' in line_comp_type:
+                    elem_comps[comname] = ComponentInterperter(component)
+
     # Free memory
     free(raw)
 
@@ -303,9 +307,48 @@ def Read(filename):
             'etype': np.asarray(etype[:nelem]),
             'e_rcon': np.asarray(e_rcon[:nelem]),
             'node_comps': node_comps,
+            'elem_comps': elem_comps,
             'mtype': np.asarray(mtype),
             'sec_id': np.asarray(sec_id)}
-     
+
+
+# def ReadComponent(char *raw, int fsize, char [1000] line, int n, char [100] tempstr):
+#     """ read a component from an archive file """
+#     cdef int i, ncomp
+#     cdef int [::1] component
+#     cdef int nblock
+
+#     # Get Component name
+#     ind1 = line.find(b',') + 1
+#     ind2 = line.find(b',', ind1)
+#     comname = line[ind1:ind2]
+
+#     # Get number of items
+#     ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
+#     component = np.empty(ncomp, np.int32)
+
+#     # Get interger size
+#     myfgets(line, raw, &n, fsize)
+#     isz = int(line[line.find(b'i') + 1:line.find(b')')])
+#     tempstr[isz] = '\0'
+
+#     # Number of intergers per line
+#     nblock = int(line[line.find(b'(') + 1:line.find(b'i')])
+
+#     # Extract nodes
+#     for i in xrange(ncomp):
+
+#         # Read new line if at the end of the line
+#         if i % nblock == 0:
+#             myfgets(line, raw, &n, fsize)
+
+#         strncpy(tempstr, line[isz*(i % nblock):], isz)
+#         component[i] = atoi(tempstr)
+
+#     print(comname)
+#     print(np.asarray(ComponentInterperter(component)))
+#     return comname, None
+
     
 def GetBlockFormat(string):
     """ Get node block format """
