@@ -42,39 +42,40 @@ def merge_two_dicts(x, y):
 # Pointer information from ansys interface manual
 # =============================================================================
 # Individual element index table
-e_table = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR', 'ptrEEL',
-           'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL', 'ptrEFX', 'ptrELF',
-           'ptrEMN', 'ptrECD', 'ptrENL', 'ptrEHC', 'ptrEPT', 'ptrESF',
-           'ptrEDI', 'ptrETB', 'ptrECT', 'ptrEXY', 'ptrEBA', 'ptrESV',
-           'ptrMNL']
+ELEMENT_INDEX_TABLE_KEYS = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR',
+                            'ptrEEL', 'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL',
+                            'ptrEFX', 'ptrELF', 'ptrEMN', 'ptrECD', 'ptrENL',
+                            'ptrEHC', 'ptrEPT', 'ptrESF', 'ptrEDI', 'ptrETB',
+                            'ptrECT', 'ptrEXY', 'ptrEBA', 'ptrESV', 'ptrMNL']
 
-"""
-ptrEMS - pointer to misc. data
-ptrENF - pointer to nodal forces
-ptrENS - pointer to nodal stresses
-ptrENG - pointer to volume and energies
-ptrEGR - pointer to nodal gradients
-ptrEEL - pointer to elastic strains
-ptrEPL - pointer to plastic strains
-ptrECR - pointer to creep strains
-ptrETH - pointer to thermal strains
-ptrEUL - pointer to euler angles
-ptrEFX - pointer to nodal fluxes
-ptrELF - pointer to local forces
-ptrEMN - pointer to misc. non-sum values
-ptrECD - pointer to element current densities
-ptrENL - pointer to nodal nonlinear data
-ptrEHC - pointer to calculated heat generations
-ptrEPT - pointer to element temperatures
-ptrESF - pointer to element surface stresses
-ptrEDI - pointer to diffusion strains
-ptrETB - pointer to ETABLE items(post1 only)
-ptrECT - pointer to contact data
-ptrEXY - pointer to integration point locations
-ptrEBA - pointer to back stresses
-ptrESV - pointer to state variables
-ptrMNL - pointer to material nonlinear record
-"""
+ELEMENT_INDEX_TABLE_INFO = {
+    'EMS': 'misc. data',
+    'ENF': 'nodal forces',
+    'ENS': 'nodal stresses',
+    'ENG': 'volume and energies',
+    'EGR': 'nodal gradients',
+    'EEL': 'elastic strains',
+    'EPL': 'plastic strains',
+    'ECR': 'creep strains',
+    'ETH': 'thermal strains',
+    'EUL': 'euler angles',
+    'EFX': 'nodal fluxes',
+    'ELF': 'local forces',
+    'EMN': 'misc. non-sum values',
+    'ECD': 'element current densities',
+    'ENL': 'nodal nonlinear data',
+    'EHC': 'calculated heat generations',
+    'EPT': 'element temperatures',
+    'ESF': 'element surface stresses',
+    'EDI': 'diffusion strains',
+    'ETB': 'ETABLE items',
+    'ECT': 'contact data',
+    'EXY': 'integration point locations',
+    'EBA': 'back stresses',
+    'ESV': 'state variables',
+    'MNL': 'material nonlinear record'
+}
+
 
 SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                         'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
@@ -795,7 +796,7 @@ class Result(object):
 
             # Each element header contains 25 records for the individual
             # results.  Get the location of the nodal stress
-            table_index = e_table.index('ptrENS')
+            table_index = ELEMENT_INDEX_TABLE_KEYS.index('ptrENS')
 
             # boundary conditions
             # ptr = rpointers[rnum] + solution_header['ptrBC']
@@ -972,6 +973,44 @@ class Result(object):
         elemnum = self.geometry['enum'][self.sidx_elem]
 
         return element_stress, elemnum, enode
+
+    def ElementSolutionData(self, rnum, datatype):
+        """
+        
+        """
+
+        table_ptr = 'ptr%s' % str(datatype).upper()
+        if table_ptr not in ELEMENT_INDEX_TABLE_KEYS:
+            err_str = 'Data type %s is invalid\n' % str(datatype)
+            err_str += '\nAvailable types:\n'
+            for key in ELEMENT_INDEX_TABLE_KEYS:
+                key = key[3:]
+                err_str += '\t%s: %s\n' % (key, ELEMENT_INDEX_TABLE_INFO[key])
+
+            raise Exception(err_str)
+
+        table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
+
+        rnum = self.ParseStepSubstep(rnum)
+        header = self.ElementSolutionHeader(rnum)
+        _, ele_ind_table, nodstr, etype = header
+
+        element_data = []
+        f = open(self.filename, 'rb')
+        for ind in ele_ind_table:
+            # read element table index
+            f.seek(ind*4)
+            table = ReadTable(f)
+
+            ptr = table[table_index]
+            if ptr <= 0:
+                element_data.append(None)
+            else:
+                f.seek((ind + ptr)*4)
+                data = ReadTable(f, 'f')  # TODO: Verify datatype
+                element_data.append()
+
+        return element_data
 
     def PrincipalNodalStress(self, rnum):
         """
