@@ -203,13 +203,21 @@ class FullReader(object):
             1 - y
             2 - z
             Sort these values by node number and DOF by enabling the sort
-            parameter
+            parameter.
 
         k : (n x n) np.float or scipy.csc array
             Stiffness array
 
         m : (n x n) np.float or scipy.csc array
             Mass array
+
+        Notes
+        -----
+        Constrained entries are removed from the mass and stiffness matrices.
+
+        Constrained dof can be accessed with self.const, which returns the node
+        number and DOF constrained in ANSYS.
+
         """
         if not os.path.isfile(self.filename):
             raise Exception('%s not found' % self.filename)
@@ -227,7 +235,6 @@ class FullReader(object):
         ntermK = self.header[9]  # number of terms in stiffness matrix
         ptrSTF = self.header[19]  # Location of stiffness matrix
         ptrMAS = self.header[27]  # Location in file to mass matrix
-        # nNodes = self.header[33]  # Number of nodes considered by assembly
         ntermM = self.header[34]  # number of terms in mass matrix
         ptrDOF = self.header[36]  # pointer to DOF info
 
@@ -243,8 +250,9 @@ class FullReader(object):
             ndof = ReadTable(f)
             const = ReadTable(f)
 
-        # dof_ref = np.vstack((ndof, neqv)).T  # stack these references
+        # degree of freedom reference and number of degress of freedom per node
         dof_ref = [ndof, neqv]
+        self.ndof = ndof
 
         # Read k and m blocks (see help(ReadArray) for block description)
         if ntermK:
@@ -282,7 +290,14 @@ class FullReader(object):
                 mcol = mcol[mask]
                 mdata = mdata[mask]
 
+
+        # sort nodal equivalence
         dof_ref, index, nref, dref = _rstHelper.SortNodalEqlv(neqn, neqv, ndof)
+
+        # store constrained dof information
+        unsort_dof_ref = np.vstack((nref, dref)).T
+        self.const = unsort_dof_ref[const < 0]
+
         if sort:  # make sorting the same as ANSYS rdfull would output
             # resort to make in upper triangle
             krow = index[krow]
@@ -292,8 +307,9 @@ class FullReader(object):
             mrow = index[mrow]
             mcol = index[mcol]
             mrow, mcol = np.sort(np.vstack((mrow, mcol)), 0)
+            
         else:
-            dof_ref = np.vstack((nref, dref)).T
+            dof_ref = unsort_dof_ref
 
         # store data for later reference
         if kdata is not None:
@@ -342,10 +358,6 @@ class FullReader(object):
                 m[mrow, mcol] = mdata
             else:
                 m = None
-
-        # store if constrained and number of degrees of freedom per node
-        self.const = const < 0
-        self.ndof = ndof
 
         return dof_ref, k, m
 
