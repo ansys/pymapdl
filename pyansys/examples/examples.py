@@ -23,11 +23,13 @@ fullfile = os.path.join(dir_path, 'file.full')
 sector_archive_file = os.path.join(dir_path, 'sector.cdb')
 
 
-def RunAll():
+def RunAll(run_ansys=False):
     """ Runs all the functions within this module """
     testfunctions = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isfunction(obj) and name != 'RunAll':
+            if 'ANSYS' in name and not run_ansys:
+                continue
             testfunctions.append(obj)
 
     # run all the functions
@@ -55,7 +57,7 @@ def LoadResult():
     print('Contains {:d} nodes'.format(len(result.nnum)))
 
     # display result
-    disp = result.GetNodalResult(0)
+    nnum, disp = result.NodalSolution(0)
 
     print('Nodal displacement for nodes 30 to 40 is:')
 
@@ -74,7 +76,7 @@ def DisplayDisplacement():
     fobj = pyansys.ResultReader(rstfile)
 
     print('Displaying ANSYS Mode 1')
-    fobj.PlotNodalResult(0, label='Displacement')
+    fobj.PlotNodalSolution(0, label='Displacement')
 
 
 def DisplayStress():
@@ -104,7 +106,7 @@ def LoadKM():
     try:
         from scipy.sparse import linalg
         from scipy import sparse
-    except BaseException:
+    except ImportError:
         return
 
     k += sparse.triu(k, 1).T
@@ -126,8 +128,12 @@ def SolveKM():
     """
     Loads and solves a mass and stiffness matrix from an ansys full file
     """
-    from scipy.sparse import linalg
-    from scipy import sparse
+    try:
+        from scipy.sparse import linalg
+        from scipy import sparse
+    except ImportError:
+        print('scipy not installed, aborting')
+        return
 
     # load the mass and stiffness matrices
     full = pyansys.FullReader(pyansys.examples.fullfile)
@@ -301,11 +307,10 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
     print(element_stress)
     nodenum, stress = result.NodalStress(0)
     print(stress)
-    
 
     if plot_vtk:
         # # plot interactively
-        result.PlotNodalResult(0, colormap='bwr')
+        result.PlotNodalSolution(0, colormap='bwr')
         result.PlotNodalStress(0, 'Sx', colormap='bwr')
         result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
 
@@ -314,8 +319,8 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
                 (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
                 (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-        result.PlotNodalResult(0, interactive=False, cpos=cpos,
-                               screenshot=os.path.join(path, 'cylinder_disp.png'))
+        result.PlotNodalSolution(0, interactive=False, cpos=cpos,
+                                 screenshot=os.path.join(path, 'cylinder_disp.png'))
 
         result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
                                screenshot=os.path.join(path, 'cylinder_sx.png'))
