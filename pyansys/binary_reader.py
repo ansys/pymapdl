@@ -1400,7 +1400,8 @@ class CyclicResult(Result):
 
         # idenfity the sector based on number of elements in master sector
         mask = self.quadgrid.GetCellScalars('ANSYS_elem_num') <= self.resultheader['csEls']
-        node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
+        # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
+        node_mask = self.nnum <= self.resultheader['csNds']
 
         self.master_cell_mask = mask
         self.grid = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
