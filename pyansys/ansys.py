@@ -60,12 +60,7 @@ for item in ready_items:
     expect_list.append(re.compile(item))
 
 # idenfity ignored commands
-# ignored = re.compile('\s+'.join(['WARNING', 'command', 'ignored']))
 ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
-# re.DOTALL = True
-# ignored = re.compile('(?:.|\n)+'.join(['WARNING', 'ignored']))
-# ignored = re.compile('[\s\S]+'.join(['WARNING', 'ignored']))
-# print(ignored.search(response))
 
 
 def SetupLogger(loglevel='INFO'):

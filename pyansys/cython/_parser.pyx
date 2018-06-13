@@ -452,8 +452,9 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
         typeB[1] = -1
 
     # shell types
-    cdef int [2] typeC
-    for i, atype in enumerate(['154', '181']):
+    planetype = ['42', '82', '154', '181', '182', '183']
+    cdef int [6] typeC
+    for i, atype in enumerate(planetype):
         if atype in allowable_types:
             typeC[i] = int(atype)
         else:
@@ -582,16 +583,16 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 break  # Continue to next element
 
         # test if surface element
-        for j in range(2):
+        for j in range(6):  # length needs to be equal to typeC
             if elem_etype == typeC[j]:
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
 
-                # if force_linear:
-                lin = 1
-                # else:
-                    # lin = elem[i, 4] == -1
+                if force_linear:
+                    lin = 1
+                else:
+                    lin = elem[i, 4] == -1
 
                 # check if this is a triangle
                 if elem[i, 2] == elem[i, 3]:

@@ -821,7 +821,7 @@ class Result(object):
         """
         Equivalent ANSYS command: PRNSOL, S
 
-        Retrives the component stresses for each node in the solution.
+        Retrieves the component stresses for each node in the solution.
 
         The order of the results corresponds to the sorted node numbering.
 
@@ -891,7 +891,7 @@ class Result(object):
 
         return nnum, stress
 
-    def ElementStress(self, rnum):
+    def ElementStress(self, rnum, principal):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -968,6 +968,10 @@ class Result(object):
             #                                    ele_data_arr,
             #                                    self.edge_idx.astype(c_int64))
 
+        if principal:
+            ele_data_arr, isnan = _rstHelper.ComputePrincipalStress(ele_data_arr)
+            ele_data_arr[isnan] = np.nan
+
         splitind = np.cumsum(nnode)
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
@@ -988,7 +992,8 @@ class Result(object):
 
     def ElementSolutionData(self, rnum, datatype):
         """
-        
+        Retrives element solution data.
+
         """
 
         table_ptr = 'ptr%s' % str(datatype).upper()
@@ -1020,7 +1025,7 @@ class Result(object):
             else:
                 f.seek((ind + ptr)*4)
                 data = ReadTable(f, 'f')  # TODO: Verify datatype
-                element_data.append()
+                element_data.append(data)
 
         return element_data
 
@@ -1176,6 +1181,12 @@ class Result(object):
         else:
             window_size = [1024, 768]
 
+        if 'full_screen' in kwargs:
+            full_screen = kwargs['full_screen']
+            del kwargs['full_screen']
+        else:
+            full_screen = False
+
         # Plot off screen when not interactive
         plobj = vtkInterface.PlotClass(off_screen=not(interactive))
         plobj.AddMesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
@@ -1193,11 +1204,13 @@ class Result(object):
 
         if screenshot:
             cpos = plobj.Plot(autoclose=False, interactive=interactive,
-                              window_size=window_size)
+                              window_size=window_size,
+                              full_screen=full_screen)
             plobj.TakeScreenShot(screenshot)
             plobj.Close()
         else:
-            cpos = plobj.Plot(interactive=interactive, window_size=window_size)
+            cpos = plobj.Plot(interactive=interactive, window_size=window_size,
+                              full_screen=full_screen)
 
         return cpos
 
@@ -1741,8 +1754,7 @@ class CyclicResult(Result):
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flipscalars=None, cpos=None,
                           screenshot=None, interactive=True, full_rotor=True,
-                          phase=0,
-                          **kwargs):
+                          phase=0, **kwargs):
         """
         Plots a nodal result.
 
