@@ -891,7 +891,7 @@ class Result(object):
 
         return nnum, stress
 
-    def ElementStress(self, rnum, principal):
+    def ElementStress(self, rnum, principal=False):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -908,10 +908,14 @@ class Result(object):
             Cumulative result number with zero based indexing, or a list containing
             (step, substep) of the requested result.
 
+        principal : bool, optional
+            Returns principal stresses instead of component stresses.  Default False.
+
         Returns
         -------
         element_stress : list
             Stresses at each element for each node for Sx Sy Sz Sxy Syz Sxz.
+            or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when principal is True.
 
         enum : np.ndarray
             ANSYS element numbers corresponding to each element.
@@ -929,7 +933,6 @@ class Result(object):
         elemtype = self.geometry['Element Type']
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        # ele_ind_table = ele_ind_table  # [validmask]
         etype = etype.astype(c_int64)
 
         # load in raw results
@@ -937,7 +940,7 @@ class Result(object):
         nelemnode = nnode.sum()
         ver = float(self.resultheader['verstring'])
 
-        # bitmask
+        # bitmask (might use this at some point)
         # bitmask = bin(int(hex(self.resultheader['rstsprs']), base=16)).lstrip('0b')
         # description maybe in resucm.inc
 
@@ -992,7 +995,51 @@ class Result(object):
 
     def ElementSolutionData(self, rnum, datatype):
         """
-        Retrives element solution data.
+        Retrives element solution data.  Similar to ETABLE.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        datatype : str
+            Element data type to retreive.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        Returns
+        -------
+        element_data : list
+            List with one data item for each element.
+
+        Notes
+        -----
+        See ANSYS element documentation for available items for each element type.
 
         """
 

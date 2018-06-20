@@ -2,7 +2,6 @@
 pyansys examples
 
 """
-
 from __future__ import print_function
 import os
 import inspect
@@ -325,5 +324,6 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
         result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
                                screenshot=os.path.join(path, 'cylinder_sx.png'))
 
-        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
-                                        screenshot=os.path.join(path, 'cylinder_vonmises.png'))
+        filename = os.path.join(path, 'cylinder_vonmises.png')
+        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False,
+                                        cpos=cpos, screenshot=filename)

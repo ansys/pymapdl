@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """
 Module to control interaction with an ANSYS shell instance.
-Built using ansys documentation from
+Built using ANSYS documentation from
 https://www.sharcnet.ca/Software/Ansys/
 
-This module makes no claim to own any rights to ANSYS.  It's merely an interface to
-software owned by ANSYS.
+This module makes no claim to own any rights to ANSYS.  It's merely an 
+interface to software owned by ANSYS.
 
 """
 import re
@@ -25,8 +25,9 @@ if not os.path.isdir(settings_dir):
     try:
         os.mkdir(settings_dir)
     except:
-        warnings.warn('Unable to create settings directory.\n' +
-                      'Will be unable to cache ANSYS executable location')
+        pass
+        # warnings.warn('Unable to create settings directory.\n' +
+        #               'Will be unable to cache ANSYS executable location')
 
 config_file = os.path.join(settings_dir, 'config.txt')
 

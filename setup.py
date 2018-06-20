@@ -48,9 +48,9 @@ def compilerName():
 # Assign arguments based on compiler
 compiler = compilerName()
 if compiler == 'unix':
-    cmp_arg = ['-O3']
+    cmp_arg = ['-O3', '-w']
 else:
-    cmp_arg = ['/Ox']
+    cmp_arg = ['/Ox', '-w']
 
 
 # Get version from version info
