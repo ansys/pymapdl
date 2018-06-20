@@ -12,6 +12,9 @@ for PYBIN in /opt/python/*/bin; do
     elif [[ $PYBIN =~ .*34.* ]]
     then
 	continue
+    elif [[ $PYBIN =~ .*27mu.* ]]  # unicode error
+    then
+	continue
     fi
 
     pyver="$(cut -d'/' -f4 <<<$PYBIN)"
