@@ -4,6 +4,7 @@ Installation file for pyansys
 import os
 import sys
 from io import open as io_open
+import pip
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext

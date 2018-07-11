@@ -12,14 +12,13 @@ for PYBIN in /opt/python/*/bin; do
     elif [[ $PYBIN =~ .*34.* ]]
     then
 	continue
-    elif [[ $PYBIN =~ .*27mu.* ]]  # unicode error
-    then
-	continue
+    elif [[ $PYBIN =~ .*27mu.* ]]
+    then  # must be ucs4
+	PYBIN='/opt/_internal/cpython-2.7.15-ucs4/bin'
     fi
 
     pyver="$(cut -d'/' -f4 <<<$PYBIN)"
-    echo 'Running for' $pyver
-    
+    echo 'Running for' $pyver    
     "${PYBIN}/pip" install numpy -q --no-cache-dir  # required for setup.py
     "${PYBIN}/pip" install cython --upgrade -q --no-cache-dir
 
