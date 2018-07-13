@@ -304,10 +304,11 @@ class FullReader(object):
             kcol = index[kcol]
             krow, kcol = np.sort(np.vstack((krow, kcol)), 0)
 
-            mrow = index[mrow]
-            mcol = index[mcol]
-            mrow, mcol = np.sort(np.vstack((mrow, mcol)), 0)
-            
+            if mdata is not None:
+                mrow = index[mrow]
+                mcol = index[mcol]
+                mrow, mcol = np.sort(np.vstack((mrow, mcol)), 0)
+
         else:
             dof_ref = unsort_dof_ref
 
