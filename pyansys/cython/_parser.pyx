@@ -461,8 +461,8 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             typeC[i] = -1
 
     # line elements
-    cdef int [1] linetype
-    for i, atype in enumerate(['188']):
+    cdef int [3] linetype
+    for i, atype in enumerate(['1', '180', '188']):
         if atype in allowable_types:
             linetype[i] = int(atype)
 
@@ -605,12 +605,11 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             # continue
 
         # test if line element
-        for j in range(1):
+        for j in range(2):
             if elem_etype == linetype[j]:
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
-
                 lin = 1
                 StoreLine(offset, &ecount, &ccount, cells, cell_type, 
                              numref, elem, i, lin)

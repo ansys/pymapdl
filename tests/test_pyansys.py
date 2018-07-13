@@ -1,9 +1,12 @@
+import os
 import numpy as np
 import pyansys
 from pyansys.examples import hexarchivefile
 from pyansys.examples import rstfile
 from pyansys.examples import fullfile
 
+test_path = os.path.dirname(os.path.abspath(__file__))
+testfiles_path = os.path.join(test_path, 'testfiles')
 
 def test_readarchive():
     archive = pyansys.ReadArchive(hexarchivefile)
@@ -55,6 +58,12 @@ def test_loadresult():
     assert enode[0].size
 
 
+def test_loadbeam():
+    linkresult = os.path.join(testfiles_path, 'link1.rst')
+    result = pyansys.ResultReader(linkresult)
+    assert np.any(result.grid.cells)
+
+
 def test_fullreader():
     fobj = pyansys.FullReader(fullfile)
     dofref, k, m = fobj.LoadKM()
@@ -63,7 +72,3 @@ def test_fullreader():
     assert m.size
 
 
-if __name__ == '__main__':
-    test_readarchive()
-    test_loadresult()
-    print('PASS')
