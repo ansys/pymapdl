@@ -18,14 +18,6 @@ from pyansys import _parser
 from pyansys.elements import valid_types
 AxisRotation = vtkInterface.common.AxisRotation
 
-# check if vtk is installed
-# try:
-#     import vtk
-#     vtkloaded = True
-# except BaseException:
-#     warnings.warn('Cannot load vtk\nWill be unable to display results.')
-#     vtkloaded = False
-
 # Create logger
 log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
@@ -504,9 +496,6 @@ class Result(object):
             Camera position from vtk render window.
 
         """
-        if not vtkloaded:
-            raise Exception('Cannot plot without VTK')
-
         # Load result from file
         rnum = self.ParseStepSubstep(rnum)
         nnum, result = self.NodalSolution(rnum)
@@ -754,14 +743,13 @@ class Result(object):
         self.insolution = np.in1d(self.geometry['nnum'], self.resultheader['neqv'])
 
         # Create vtk object if vtk installed
-        if vtkloaded:
-            nodes = nloc[:, :3]
-            self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
-                                                          cell_type, nodes)
-            self.quadgrid.AddCellScalars(enum, 'ANSYS_elem_num')
-            self.quadgrid.AddPointScalars(nnum, 'ANSYSnodenum')
-            self.quadgrid.AddCellScalars(element_type, 'Element Type')
-            self.grid = self.quadgrid.LinearGridCopy()
+        nodes = nloc[:, :3]
+        self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
+                                                      cell_type, nodes)
+        self.quadgrid.AddCellScalars(enum, 'ANSYS_elem_num')
+        self.quadgrid.AddPointScalars(nnum, 'ANSYSnodenum')
+        self.quadgrid.AddCellScalars(element_type, 'Element Type')
+        self.grid = self.quadgrid.LinearGridCopy()
 
     def ElementSolutionHeader(self, rnum):
         """ Get element solution header information """
@@ -1486,14 +1474,13 @@ class CyclicResult(Result):
 
         # Create rotor of sectors
         vtkappend = vtk.vtkAppendFilter()
-        if vtkloaded:
-            rang = 360.0 / self.nsector
-            for i in range(self.nsector):
+        rang = 360.0 / self.nsector
+        for i in range(self.nsector):
 
-                # Transform mesh
-                sector = self.grid.Copy()
-                sector.RotateZ(rang * i)
-                vtkappend.AddInputData(sector)
+            # Transform mesh
+            sector = self.grid.Copy()
+            sector.RotateZ(rang * i)
+            vtkappend.AddInputData(sector)
 
         vtkappend.Update()
         self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
@@ -1855,9 +1842,6 @@ class CyclicResult(Result):
             Camera position from vtk render window.
 
         """
-        if not vtkloaded:
-            raise Exception('Cannot plot without VTK')
-
         # Load result from file
         if not full_rotor:
             return super(CyclicResult, self).PlotNodalSolution(rnum)
@@ -1947,9 +1931,6 @@ class CyclicResult(Result):
             Camera position from vtk render window.
 
         """
-        if not vtkloaded:
-            raise Exception('Cannot plot without VTK')
-
         if not full_rotor:  # Plot sector
             return super(CyclicResult, self).PlotNodalStress(rnum, stype)
 
