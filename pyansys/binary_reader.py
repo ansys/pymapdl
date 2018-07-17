@@ -748,11 +748,7 @@ class Result(object):
 
         # catch -1
         cells[cells == -1] = 0
-        cells[cells >= nnum.size] = 0
-
-        # remove nodes that are not in the solution (?)
-
-        # -- or --
+        # cells[cells >= nnum.size] = 0
 
         # identify nodes that are actually in the solution
         self.insolution = np.in1d(self.geometry['nnum'], self.resultheader['neqv'])
@@ -807,16 +803,12 @@ class Result(object):
             f.seek(element_rst_ptr * 4)
             ele_ind_table = ReadTable(f, 'i8', nelm) + element_rst_ptr
 
-            # Each element header contains 25 records for the individual
-            # results.  Get the location of the nodal stress
-            table_index = ELEMENT_INDEX_TABLE_KEYS.index('ptrENS')
-
             # boundary conditions
             # ptr = rpointers[rnum] + solution_header['ptrBC']
             # f.seek(ptr*4)
             # table = ReadTable(f, 'i')
 
-        return table_index, ele_ind_table, nodstr, etype
+        return ele_ind_table, nodstr, etype
 
     def NodalStress(self, rnum):
         """
@@ -854,7 +846,7 @@ class Result(object):
         """
         # element header
         rnum = self.ParseStepSubstep(rnum)
-        table_index, ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
+        ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
 
         if self.resultheader['rstsprs'] != 0:
             nitem = 6
@@ -862,7 +854,7 @@ class Result(object):
             nitem = 11
 
         # certain element types do not output stress
-        elemtype = self.geometry['Element Type']
+        elemtype = self.geometry['Element Type'].astype(np.int32)
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
         # if cyclic rotor
@@ -873,7 +865,6 @@ class Result(object):
             ele_ind_table = ele_ind_table[ind]
 
         data, ncount = _rstHelper.ReadNodalValues(self.filename,
-                                                  table_index,
                                                   self.grid.celltypes,
                                                   ele_ind_table + 2,
                                                   self.grid.offset,
@@ -882,7 +873,8 @@ class Result(object):
                                                   validmask.astype(np.int32),
                                                   self.grid.GetNumberOfPoints(),
                                                   nodstr,
-                                                  etype)
+                                                  etype,
+                                                  elemtype)
 
         if nitem != 6:
             data = data[:, :6]
@@ -928,11 +920,17 @@ class Result(object):
         """
         rnum = self.ParseStepSubstep(rnum)
         header = self.ElementSolutionHeader(rnum)
-        table_index, ele_ind_table, nodstr, etype = header
+        ele_ind_table, nodstr, etype = header
 
         # certain element types do not output stress
-        elemtype = self.geometry['Element Type']
+        elemtype = self.geometry['Element Type'].astype(np.int32)
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
+
+        # shell181 store their stresses in the direction of the element coordinate
+        # system.
+        # rot_mask = np.zeros(elemtype.size, np.int32)
+        # if 181 in self.geometry['ekey'][:, 1]:
+        #     rot_mask[elemtype == 181] = True
 
         etype = etype.astype(c_int64)
 
@@ -952,25 +950,26 @@ class Result(object):
                 nitem = 11
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
-            _rstHelper.ReadElementStress(self.filename, table_index,
+
+            _rstHelper.ReadElementStress(self.filename,
                                          ele_ind_table + 2,
                                          nodstr.astype(c_int64),
                                          etype,
                                          ele_data_arr,
-                                         # self.edge_idx,
-                                         nitem, validmask)
+                                         nitem, validmask, elemtype)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
+
+# filename, int64_t [::1] ele_ind_table, 
+#                       int64_t [::1] nodstr, int64_t [::1] etype,
+#                       float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask,
+#                       int32_t [::1] element_type):
+#     """ Read element results from ANSYS directly into a numpy array """
+#     cdef int64_t i, j, k, ind, nread
+
         else:
-            raise Exception('Not implemented for this version of ANSYS')
-            # ele_data_arr = np.empty((nelemnode, 6), np.float64)
-            # _rstHelper.ReadElementStressDouble(self.filename, table_index,
-            #                                    ele_ind_table,
-            #                                    nodstr.astype(c_int64),
-            #                                    etype,
-            #                                    ele_data_arr,
-            #                                    self.edge_idx.astype(c_int64))
+            raise Exception('Not implemented for ANSYS older than v14.5')
 
         if principal:
             ele_data_arr, isnan = _rstHelper.ComputePrincipalStress(ele_data_arr)
@@ -994,7 +993,7 @@ class Result(object):
 
         return element_stress, elemnum, enode
 
-    def ElementSolutionData(self, rnum, datatype):
+    def ElementSolutionData(self, rnum, datatype, sort=True):
         """
         Retrives element solution data.  Similar to ETABLE.
 
@@ -1057,8 +1056,7 @@ class Result(object):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.ParseStepSubstep(rnum)
-        header = self.ElementSolutionHeader(rnum)
-        _, ele_ind_table, nodstr, etype = header
+        ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
 
         element_data = []
         f = open(self.filename, 'rb')
@@ -1075,7 +1073,13 @@ class Result(object):
                 data = ReadTable(f, 'f')  # TODO: Verify datatype
                 element_data.append(data)
 
-        return element_data
+        enum = self.grid.GetCellScalars('ANSYS_elem_num')
+        if sort:
+            sidx = np.argsort(enum)
+            enum = enum[sidx]
+            element_data = [element_data[i] for i in sidx]        
+
+        return enum, element_data
 
     def PrincipalNodalStress(self, rnum):
         """

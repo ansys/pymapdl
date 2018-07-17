@@ -70,5 +70,3 @@ def test_fullreader():
     assert dofref.size
     assert k.size
     assert m.size
-
-
