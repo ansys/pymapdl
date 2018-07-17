@@ -45,7 +45,7 @@ env:
   global:
     - CIBW_BEFORE_BUILD="pip install numpy; pip install cython; yum install libXt -y"
     - CIBW_TEST_REQUIRES="pytest scipy"
-    - CIBW_TEST_COMMAND="pytest {project}/tests"  # fails to include libaries from vtk
+    - CIBW_TEST_COMMAND="pytest {project}/tests --ignore=tests/test_ansys.py"  # fails to include libaries from vtk
     # - CIBW_SKIP="cp27-* cp37-* cp34-* *manylinux1_i686*"
     - CIBW_SKIP="cp27-cp27m-manylinux1_x86_64 cp37-* cp34-* *manylinux1_i686*"
     - TWINE_USERNAME=akaszynski

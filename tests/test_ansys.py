@@ -16,10 +16,11 @@ TMPDIR = '/tmp/ansys/'
 
 @pytest.mark.skipif(not os.path.isfile(ANSYS_182_BIN), reason="Requires ANSYS installed")
 class TestCyclicResultReader182(object):
+
     result_file = os.path.join(data_path, 'cyclic_v182.rst')
     result = pyansys.Result(result_file)
     copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
-    
+
     ansys = pyansys.ANSYS(exec_file=ANSYS_182_BIN, override=True,
                           jobname='v182', loglevel='ERROR', run_location=TMPDIR)
 
