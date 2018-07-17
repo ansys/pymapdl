@@ -1,5 +1,12 @@
 pyansys
 =======
+
+.. image:: https://travis-ci.org/akaszynski/pyansys.svg?branch=master
+    :target: https://travis-ci.org/akaszynski/pyansys
+
+.. image:: http://readthedocs.org/projects/pyansys/badge/?version=latest
+    :target: https://pyansys.readthedocs.io/en/latest/?badge=latest
+
 This Python module allows you to:
  - Interactively control an instance of ANSYS using Python.  Linux only (for now).
  - Extract data from ANSYS files and to display them if ``VTK`` is installed.
