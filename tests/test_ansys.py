@@ -17,19 +17,23 @@ TMPDIR = '/tmp/ansys/'
 @pytest.mark.skipif(not os.path.isfile(ANSYS_182_BIN), reason="Requires ANSYS installed")
 class TestCyclicResultReader182(object):
 
-    result_file = os.path.join(data_path, 'cyclic_v182.rst')
-    result = pyansys.Result(result_file)
-    copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
+    # avoids errors in collection
+    try:
+        result_file = os.path.join(data_path, 'cyclic_v182.rst')
+        result = pyansys.Result(result_file)
+        copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
 
-    ansys = pyansys.ANSYS(exec_file=ANSYS_182_BIN, override=True,
-                          jobname='v182', loglevel='ERROR', run_location=TMPDIR)
+        ansys = pyansys.ANSYS(exec_file=ANSYS_182_BIN, override=True,
+                              jobname='v182', loglevel='ERROR', run_location=TMPDIR)
 
-    # setup ansys for output without line breaks
-    ansys.Post1()
-    ansys.Set(1, 1)
-    ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-    ansys.Format('', 'E', 80, 20)
-    ansys.Page(1E9, '', -1)
+        # setup ansys for output without line breaks
+        ansys.Post1()
+        ansys.Set(1, 1)
+        ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        ansys.Format('', 'E', 80, 20)
+        ansys.Page(1E9, '', -1)
+    except:
+        pass
 
     def test_prnsol_u(self):
         # verify cyclic displacements
@@ -117,19 +121,23 @@ class TestCyclicResultReader182(object):
 @pytest.mark.skipif(not os.path.isfile(ANSYS_150_BIN), reason="Requires ANSYS installed")
 class TestCyclicResultReader150(TestCyclicResultReader182):
     """ test if cyclic result reader works for v150 """
-    result_file = os.path.join(data_path, 'cyclic_v150.rst')
-    result = pyansys.Result(result_file)
-    copyfile(result_file, os.path.join(TMPDIR, 'v150.rst'))
+    # avoids errors in collection
+    try:
+        result_file = os.path.join(data_path, 'cyclic_v150.rst')
+        result = pyansys.Result(result_file)
+        copyfile(result_file, os.path.join(TMPDIR, 'v150.rst'))
 
-    ansys = pyansys.ANSYS(exec_file=ANSYS_150_BIN,
-                          override=True,
-                          jobname='v150',
-                          loglevel='ERROR',
-                          run_location=TMPDIR)
+        ansys = pyansys.ANSYS(exec_file=ANSYS_150_BIN,
+                              override=True,
+                              jobname='v150',
+                              loglevel='ERROR',
+                              run_location=TMPDIR)
 
-    # setup ansys for output without line breaks
-    ansys.Post1()
-    ansys.Set(1, 1)
-    ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-    ansys.Format('', 'E', 80, 20)
-    ansys.Page(1E9, '', -1)
+        # setup ansys for output without line breaks
+        ansys.Post1()
+        ansys.Set(1, 1)
+        ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        ansys.Format('', 'E', 80, 20)
+        ansys.Page(1E9, '', -1)
+    except:
+        pass
