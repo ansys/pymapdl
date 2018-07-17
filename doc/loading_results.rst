@@ -15,7 +15,7 @@ Loading the Result File
 As the ANSYS result files are binary files, the entire file does not need to be loaded into memory in order to retrieve results.  This module accesses the results through a python object `result` which you can create with:
 
 .. code:: python
-
+    
     import pyansys
     result = pyansys.ResultReader('file.rst')
     
@@ -274,6 +274,8 @@ The vtk xml file can now be loaded using ParaView.  This screenshot shows the no
 
 ResultReader Object Methods
 ---------------------------
+.. autoclass:: pyansys.Result
+    :members:
 
-.. autoclass:: pyansys.ResultReader
+.. autoclass:: pyansys.CyclicResult
     :members:
