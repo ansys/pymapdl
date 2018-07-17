@@ -1,4 +1,0 @@
-numpy>=1.9
-cython>=0.20
-vtk
-sphinx_rtd_theme==0.3.1
