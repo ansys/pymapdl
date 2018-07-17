@@ -36,6 +36,18 @@ cdef uint8 VTK_QUADRATIC_PYRAMID = 27
 cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
+# cdef float DEG2RAD = 0.0174532925
+cdef double DEG2RAD = 0.0174532925
+
+# ELEMENT_INDEX_TABLE_KEYS = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR',
+#                             'ptrEEL', 'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL',
+#                             'ptrEFX', 'ptrELF', 'ptrEMN', 'ptrECD', 'ptrENL',
+#                             'ptrEHC', 'ptrEPT', 'ptrESF', 'ptrEDI', 'ptrETB',
+#                             'ptrECT', 'ptrEXY', 'ptrEBA', 'ptrESV', 'ptrMNL']
+
+cdef int PTR_ENS_IDX = 2
+cdef int PTR_EUL_IDX = 9
+
 
 cdef inline double GetDouble(char * array) nogil:
     cdef double result
@@ -129,120 +141,36 @@ def LoadElements(filename, int ptr, int nelm,
             elem[i, j - 12] = GetInt(&p[loc + 4*j])
 
 
-# def AssembleEdges(int nelm, int [::1] etype, int [:, ::1] elem,
-#                   int [::1] numref, int [::1] edge_idx, int [::1] nodstr):
-    
-#     cdef int i, j, nnod
-#     cdef int c = 0
-#     for i in range(nelm):
-#         nnod = nodstr[etype[i]]
-#         for j in range(nnod):
-#             edge_idx[c] = numref[elem[i, j]]
-#             c += 1
-
-
-# def LoadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
-#                       int64_t [::1] nodstr,int64_t [::1] etype, py_nitem, 
-#                       float [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
-#                       # int32_t [::1] validmask):
-#     """ Read element results from ANSYS directly into a numpy array """
-    
-#     cdef int64_t i, j, k, ind
-#     cdef int64_t table_index = py_table_index
-#     cdef int64_t nitem = py_nitem
-    
-#     cdef FILE* cfile
-#     cdef bytes py_bytes = filename.encode()
-#     cdef char* c_filename = py_bytes
-#     cfile = fopen(c_filename, 'rb')
-    
-#     cdef int64_t ele_table, ptr, nnode_elem
-#     cdef float [1000] ele_data
-#     cdef int64_t c = 0
-#     for i in range(len(ele_ind_table)):
-        
-#         # get location of pointers to element data
-#         ele_table = ele_ind_table[i]
-#         fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
-#         fread(&ptr, sizeof(int), 1, cfile)
-
-#         # Get the nodes in the element    
-#         nnode_elem = nodstr[etype[i]]
-
-#         # read the stresses evaluated at the intergration points or nodes
-#         fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
-
-#         # read the values if the element has stress
-#         # if validmask[i]:
-#         fread(&ele_data_arr[c, 0], sizeof(float), nnode_elem*nitem, cfile)
-
-#         c += nnode_elem
-
-#     fclose(cfile)
-
-
-# def LoadElementStressDouble(filename, py_table_index, int64_t [::1] ele_ind_table, 
-#                             int64_t [::1] nodstr, int64_t [::1] etype, int64_t nitem, 
-#                             double [:, ::1] ele_data_arr, int64_t [::1] edge_idx):
-#     """ Read element results from ANSYS directly into a numpy array """
-#     cdef int64_t i, j, k, ind
-#     cdef int64_t table_index = py_table_index
-    
-#     cdef FILE* cfile
-#     cdef bytes py_bytes = filename.encode()
-#     cdef char* c_filename = py_bytes
-#     cfile = fopen(c_filename, 'rb')
-    
-#     cdef int64_t ele_table, ptr, nnode_elem
-#     cdef double [1000] ele_data
-#     cdef int64_t c = 0
-#     for i in range(len(ele_ind_table)):
-        
-#         # get location of pointers to element data
-#         ele_table = ele_ind_table[i]
-#         fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
-#         fread(&ptr, sizeof(int), 1, cfile)
-
-#         # Get the nodes in the element    
-#         nnode_elem = nodstr[etype[i]]
-
-#         # read the stresses evaluated at the intergration points or nodes
-#         fseek(cfile, (ele_table + ptr)*4, SEEK_SET)
-
-#         # fread(&ele_data, sizeof(float), nnode_elem*nitem, cfile)
-#         fread(&ele_data_arr[c, 0], sizeof(float), nnode_elem*nitem, cfile)
-#         c += nnode_elem
-
-#     fclose(cfile)
-
-
-
-def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table, 
+def ReadElementStress(filename, int64_t [::1] ele_ind_table, 
                       int64_t [::1] nodstr, int64_t [::1] etype,
-                      float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask):
+                      float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask,
+                      int32_t [::1] element_type):
     """ Read element results from ANSYS directly into a numpy array """
     cdef int64_t i, j, k, ind, nread
-    cdef int64_t table_index = py_table_index
     
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
+
+    cdef float [3] eulerangles
     
     cdef int64_t ele_table, nnode_elem
-    cdef int32_t ptrENS
+    cdef int32_t ptrENS, ptrEUL
     cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
-        # get location of pointers to element data
+        # get location of element result pointers
         ele_table = ele_ind_table[i]
-        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+
+        # element stress pointer
+        fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
         fread(&ptrENS, sizeof(int32_t), 1, cfile)
 
         # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
         nread = nnode_elem*nitem
 
-        if ptrENS < 0:
+        if ptrENS < 0:  # missing pointer means missing data
             # skip this element
             for j in range(nnode_elem):
                 for k in range(nitem):
@@ -252,20 +180,94 @@ def ReadElementStress(filename, py_table_index, int64_t [::1] ele_ind_table,
             fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
             fread(&ele_data_arr[c, 0], sizeof(float), nread, cfile)
 
+            # this will undoubtedly need to be generalized
+            # element euler angle pointer
+            if element_type[i] == 181:
+                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
+                fread(&ptrEUL, sizeof(int32_t), 1, cfile)
+
+                # only read the first three euler angles (thxy, thyz, thzx)
+                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
+                fread(&eulerangles, sizeof(float), 3, cfile)
+
+                # rotate the first four nodal results
+                EulerRotate(ele_data_arr, eulerangles, c)
+
         c += nnode_elem
 
     fclose(cfile)
 
 
-def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
+# this will have to be generalized at some point
+cdef inline void EulerRotate(float [:, ::1] ele_data_arr, float [3] eulerangles,
+                             int row):
+    """
+    Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
+
+    Acts on rows 0 - 3 relative to row
+
+    Specific to shell181 elements
+
+    # used sympy to generate these equations
+    tensor = np.matrix([[s_xx, s_xy, s_xz], [s_xy, s_yy, s_yz], [s_xz, s_yz, s_zz]])
+
+    # always zero for shell elements...
+    s_xz = 0
+    s_zz = 0
+    s_yz = 0
+
+    from sympy import Matrix, symbols
+
+    c1, c2, c3, s1, s2, s3, s_xx, s_yy, s_xy = symbols('c1 c2 c3 s1 s2 s3 s_xx s_yy s_xy')
+    tensor = np.matrix([[s_xx, s_xy, 0], [s_xy, s_yy, 0], [0, 0, 0]])
+    
+
+    R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
+                [-s1*c2, c1*c2, s2],
+                [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
+
+    ans = R.T*tensor*R
+    
+
+    """    
+    cdef double c1 = cos(DEG2RAD*eulerangles[0])
+    cdef double c2 = cos(DEG2RAD*eulerangles[1])
+    cdef double c3 = cos(DEG2RAD*eulerangles[2])
+
+    cdef double s1 = sin(DEG2RAD*eulerangles[0])
+    cdef double s2 = sin(DEG2RAD*eulerangles[1])
+    cdef double s3 = sin(DEG2RAD*eulerangles[2])
+
+
+    cdef double s_xx, s_xy, s_yy
+
+    cdef int i, c
+    for i in range(4):
+        c = i + row
+
+        # grab the element component stresses
+        s_xx = ele_data_arr[c, 0]
+        s_yy = ele_data_arr[c, 1]
+        s_xy = ele_data_arr[c, 3]
+
+        # the rest are zero (no out of plane stress)
+        ele_data_arr[c, 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
+        ele_data_arr[c, 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1)) + (c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1))*(c1*s2*s3 + c3*s1)
+        ele_data_arr[c, 2] = -c2*s3*(-c2*s3*s_xx + s2*s_xy) + s2*(-c2*s3*s_xy + s2*s_yy)
+        ele_data_arr[c, 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
+        ele_data_arr[c, 4] = -c2*s3*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1))
+        ele_data_arr[c, 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
+
+
+def ReadNodalValues(filename, uint8 [::1] celltypes,
                     int64_t [::1] ele_ind_table,
                     int64_t [::1] offsets, int64_t [::1] cells,
                     int nitems, int32_t [::1] validmask, int npoints,
-                    int32_t [::1] nodstr, int32_t [::1] etype):
+                    int32_t [::1] nodstr, int32_t [::1] etype,
+                    int32_t [::1] element_type):
     """ Read element results from ANSYS directly into a numpy array """
     cdef int64_t i, j, k, ind, nread, offset
     cdef int64_t ncells = ele_ind_table.size
-    cdef int64_t table_index = py_table_index
 
     cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
@@ -276,8 +278,10 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
     cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
     cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
 
+    cdef float [3] eulerangles
+
     cdef int64_t ele_table, nnode_elem
-    cdef int32_t ptrENS
+    cdef int32_t ptrENS, ptrEUL
     cdef int64_t c = 0
     cdef uint8 celltype
     for i in range(ncells):
@@ -288,7 +292,7 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
         
         # get location of element data
         ele_table = ele_ind_table[i]
-        fseek(cfile, (ele_table + table_index)*4, SEEK_SET)
+        fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
         fread(&ptrENS, sizeof(int32_t), 1, cfile)
 
 
@@ -305,6 +309,19 @@ def ReadNodalValues(filename, py_table_index, uint8 [::1] celltypes,
         else:
             fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
             fread(&bufferdata[0, 0], sizeof(float), nnode_elem*nitems, cfile)        
+
+            #### this will undoubtedly need to be generalized ####
+            # element euler angle pointer
+            if element_type[i] == 181:
+                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
+                fread(&ptrEUL, sizeof(int32_t), 1, cfile)
+
+                # only read the first three euler angles (thxy, thyz, thzx)
+                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
+                fread(&eulerangles, sizeof(float), 3, cfile)
+
+                # rotate the first four nodal results
+                EulerRotate(bufferdata, eulerangles, c)
 
         if celltype == VTK_LINE:  # untested
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
