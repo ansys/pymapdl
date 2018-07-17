@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+# :Project:   pyansys -- Configuration to build and upload Linux wheels to PyPI
+# :Author:    Alex Kaszynski <akascap@gmail.com>
+# :License:   MIT License
+
+# borrowed parts from
+# https://github.com/python-rapidjson/python-rapidjson/blob/master/.appveyor.yml
+
+# Builds wheels for Linux using cibuildwheel, inside the manylinux1 Docker image.
+# builds 64-bit Python 2.7, Python3.5, Python3.6
+
+matrix:
+  include:
+    - sudo: required
+      language: python
+      python: "3.6"
+      services:
+        - docker
+      env: PIP=pip
+
+
+# for reference, these are the python installs on
+# quay.io/pypa/manylinux1_x86_64
+# cp27-cp27m
+# cp27-cp27mu
+# cp34-cp34m
+# cp35-cp35m
+# cp36-cp36m
+# cp37-cp37m
+
+# available vtk wheels:
+# vtk-8.1.1-cp27-cp27mu-manylinux1_x86_64.whl 
+# vtk-8.1.1-cp34-cp34m-manylinux1_x86_64.whl 
+# vtk-8.1.1-cp35-cp35m-manylinux1_x86_64.whl
+# vtk-8.1.1-cp36-cp36m-manylinux1_x86_64.whl 
+
+# need to skip 32-bit development
+# quay.io/pypa/manylinux1_i686
+
+# CIBW_SKIP
+# must skip cp27-cp27m and cp37-cp37m
+# cp37-cp34m has a vtk bug that I'm not willing on fixing
+
+env:
+  global:
+    - CIBW_BEFORE_BUILD="pip install numpy; pip install cython; yum install libXt -y"
+    - CIBW_TEST_REQUIRES="pytest scipy"
+    - CIBW_TEST_COMMAND="pytest {project}/tests"  # fails to include libaries from vtk
+    # - CIBW_SKIP="cp27-* cp37-* cp34-* *manylinux1_i686*"
+    - CIBW_SKIP="cp27-cp27m-manylinux1_x86_64 cp37-* cp34-* *manylinux1_i686*"
+    - TWINE_USERNAME=akaszynski
+      # Note: TWINE_PASSWORD is set in Travis settings
+
+script:
+  - $PIP install cibuildwheel==0.9.3
+  - cibuildwheel --output-dir wheelhouse
+  - if [ "${TRAVIS_TAG:-}" != "" ]; then
+      pip3 install twine;
+      python3 -m twine upload --skip-existing wheelhouse/*;
+    fi
+
+notifications:
+  email: false
+
+
+# notes:
+# could conditionally upload to test.pypi
+# - echo $TRAVIS_BRANCH
+# - python3 -m twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing wheelhouse/*
