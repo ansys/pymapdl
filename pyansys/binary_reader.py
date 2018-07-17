@@ -19,12 +19,12 @@ from pyansys.elements import valid_types
 AxisRotation = vtkInterface.common.AxisRotation
 
 # check if vtk is installed
-try:
-    import vtk
-    vtkloaded = True
-except BaseException:
-    warnings.warn('Cannot load vtk\nWill be unable to display results.')
-    vtkloaded = False
+# try:
+#     import vtk
+#     vtkloaded = True
+# except BaseException:
+#     warnings.warn('Cannot load vtk\nWill be unable to display results.')
+#     vtkloaded = False
 
 # Create logger
 log = logging.getLogger(__name__)

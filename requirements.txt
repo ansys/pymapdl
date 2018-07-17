@@ -1,2 +1,3 @@
 numpy>=1.9
 cython>=0.20
+vtk
