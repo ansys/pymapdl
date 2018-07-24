@@ -37,6 +37,7 @@ Here's a quick example code block to show how easy it is to load and plots resul
 .. figure:: ./images/rotor.jpg
     :width: 500pt
 
+
 Contents
 ========
 .. toctree::
@@ -58,6 +59,7 @@ Installation through pip::
 You can also visit `PyPi <http://pypi.python.org/pypi/pyansys>`_ or `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
 
 Dependencies:
+
 - ``numpy``
 - ``cython``
 - ``vtkInterface``
@@ -65,10 +67,7 @@ Dependencies:
 - ``appdirs``
 - ``vtk``
 
-Minimum requirements are numpy to extract results from a results file. To convert the raw data to a VTK unstructured grid, VTK 7.0 or greater must be installed with Python bindings.
-
-See `Install VTK <http://vtkinterface.readthedocs.io/en/latest/installation.html>`_ for details instructions for installing VTK.
-
+Dependencies are installed automatically through ``pip``, except for Python 2.7 in Windows, which will require some additional work to install ``VTK``.  See `installing vtk <http://vtkinterface.readthedocs.io/en/latest/installation.html>`_ for more information.
 
 
 License
