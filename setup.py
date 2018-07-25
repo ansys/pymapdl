@@ -132,7 +132,6 @@ setup(
                            ["pyansys/cython/_rstHelper.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
-
                  ],
 
     keywords='vtk ANSYS cdb full rst',
@@ -144,5 +143,4 @@ setup(
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0']
-
 )
