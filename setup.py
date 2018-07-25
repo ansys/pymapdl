@@ -132,15 +132,15 @@ setup(
                            ["pyansys/cython/_rstHelper.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
-
                  ],
 
     keywords='vtk ANSYS cdb full rst',
     package_data={'pyansys.examples': ['TetBeam.cdb', 'HexBeam.cdb',
                                        'file.rst', 'file.full']},
 
-    # Might work with earlier versions
-    install_requires=['numpy>1.9.3', 'cython>0.23.1', 'vtkInterface>=0.7.0',
-                      'pexpect>=4.4.0', 'appdirs']
-
+    install_requires=['numpy>1.9.3',
+                      'vtkInterface>=0.9.0',
+                      'ansys_corba',
+                      'appdirs',
+                      'psutil>=5.0.0']
 )
