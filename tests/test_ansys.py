@@ -8,6 +8,7 @@ import pyansys
 ANSYS_150_BIN = '/usr/ansys_inc/v150/ansys/bin/ansys150'
 ANSYS_182_BIN = '/usr/ansys_inc/v182/ansys/bin/ansys182'
 
+__file__ = '/home/alex/python/pyansys/Source/tests/test_ansys.py'
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
@@ -18,28 +19,25 @@ TMPDIR = '/tmp/ansys/'
 class TestCyclicResultReader182(object):
 
     # avoids errors in collection
-    try:
-        result_file = os.path.join(data_path, 'cyclic_v182.rst')
+    result_file = os.path.join(data_path, 'cyclic_v182.rst')
+    if os.path.isfile(result_file):
         result = pyansys.Result(result_file)
         copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
 
         ansys = pyansys.ANSYS(exec_file=ANSYS_182_BIN, override=True,
-                              jobname='v182', loglevel='ERROR', run_location=TMPDIR)
+                              jobname='v182', loglevel='WARNING', run_location=TMPDIR)
 
         # setup ansys for output without line breaks
         ansys.Post1()
         ansys.Set(1, 1)
         ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
         ansys.Format('', 'E', 80, 20)
-        ansys.Page(1E9, '', -1)
-    except:
-        pass
+        ansys.Page(1E9, '', -1, 240)
 
     def test_prnsol_u(self):
         # verify cyclic displacements
-        self.ansys.Prnsol('u')
-        msg = self.ansys.last_message().splitlines()
-        array = np.genfromtxt(msg[10:])
+        table = self.ansys.Prnsol('u')[1].splitlines()
+        array = np.genfromtxt(table[7:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_disp = array[:, 1:-1]
 
@@ -58,10 +56,10 @@ class TestCyclicResultReader182(object):
         element_stress = np.vstack(element_stress)
         enode = np.hstack(enode)
 
-        self.ansys.Presol('S')
-        msg = self.ansys.last_message().splitlines()
+        # parse ansys result
+        table = self.ansys.Presol('S')[1].splitlines()
         ansys_element_stress = []
-        for line in msg:
+        for line in table:
             if len(line) == 201:
                 ansys_element_stress.append(line)
         ansys_element_stress = np.genfromtxt(ansys_element_stress)
@@ -73,9 +71,8 @@ class TestCyclicResultReader182(object):
 
     def test_prnsol_s(self):
         # verify cyclic displacements
-        self.ansys.Prnsol('s')
-        msg = self.ansys.last_message().splitlines()
-        array = np.genfromtxt(msg[10:])
+        table = self.ansys.Prnsol('s')[1].splitlines()
+        array = np.genfromtxt(table[7:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
@@ -91,9 +88,8 @@ class TestCyclicResultReader182(object):
 
     def test_prnsol_prin(self):
         # verify principal stress
-        self.ansys.Prnsol('prin')
-        msg = self.ansys.last_message().splitlines()
-        array = np.genfromtxt(msg[10:])
+        table = self.ansys.Prnsol('prin')[1].splitlines()
+        array = np.genfromtxt(table[7:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
@@ -118,26 +114,26 @@ class TestCyclicResultReader182(object):
         self.ansys.Exit()
 
 
-@pytest.mark.skipif(not os.path.isfile(ANSYS_150_BIN), reason="Requires ANSYS installed")
-class TestCyclicResultReader150(TestCyclicResultReader182):
-    """ test if cyclic result reader works for v150 """
-    # avoids errors in collection
-    try:
-        result_file = os.path.join(data_path, 'cyclic_v150.rst')
-        result = pyansys.Result(result_file)
-        copyfile(result_file, os.path.join(TMPDIR, 'v150.rst'))
+# @pytest.mark.skipif(not os.path.isfile(ANSYS_150_BIN), reason="Requires ANSYS installed")
+# class TestCyclicResultReader150(TestCyclicResultReader182):
+#     """ test if cyclic result reader works for v150 """
+#     # avoids errors in collection
+#     try:
+#         result_file = os.path.join(data_path, 'cyclic_v150.rst')
+#         result = pyansys.Result(result_file)
+#         copyfile(result_file, os.path.join(TMPDIR, 'v150.rst'))
 
-        ansys = pyansys.ANSYS(exec_file=ANSYS_150_BIN,
-                              override=True,
-                              jobname='v150',
-                              loglevel='ERROR',
-                              run_location=TMPDIR)
+#         ansys = pyansys.ANSYS(exec_file=ANSYS_150_BIN,
+#                               override=True,
+#                               jobname='v150',
+#                               loglevel='ERROR',
+#                               run_location=TMPDIR)
 
-        # setup ansys for output without line breaks
-        ansys.Post1()
-        ansys.Set(1, 1)
-        ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-        ansys.Format('', 'E', 80, 20)
-        ansys.Page(1E9, '', -1)
-    except:
-        pass
+#         # setup ansys for output without line breaks
+#         ansys.Post1()
+#         ansys.Set(1, 1)
+#         ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+#         ansys.Format('', 'E', 80, 20)
+#         ansys.Page(1E9, '', -1)
+#     except:
+#         pass
