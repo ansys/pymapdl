@@ -19,7 +19,7 @@ class TestCyclicResultReader182(object):
 
     # avoids errors in collection
     result_file = os.path.join(data_path, 'cyclic_v182.rst')
-    if os.path.isfile(result_file):
+    try:
         result = pyansys.Result(result_file)
         copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
 
@@ -32,6 +32,8 @@ class TestCyclicResultReader182(object):
         ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
         ansys.Format('', 'E', 80, 20)
         ansys.Page(1E9, '', -1, 240)
+    except:
+        pass
 
     def test_prnsol_u(self):
         # verify cyclic displacements
