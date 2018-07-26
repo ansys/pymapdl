@@ -365,6 +365,9 @@ def ResultReader(filename):
         Filename of the ANSYS binary result file.
 
     """
+    if not os.path.isfile(filename):
+        raise Exception('%s is not a file or cannot be found' % str(filename))
+
     # determine if file is a result file
     standard_header = ReadStandardHeader(filename)
     if standard_header['file format'] != 12:
@@ -1246,13 +1249,19 @@ class Result(object):
             cpos = plobj.Plot(autoclose=False, interactive=interactive,
                               window_size=window_size,
                               full_screen=full_screen)
-            plobj.TakeScreenShot(screenshot)
+            if screenshot is True:
+                img = plobj.TakeScreenShot()
+            else:
+                plobj.TakeScreenShot(screenshot)
             plobj.Close()
         else:
             cpos = plobj.Plot(interactive=interactive, window_size=window_size,
                               full_screen=full_screen)
 
-        return cpos
+        if screenshot is True:
+            return cpos, img
+        else:
+            return cpos
 
     def TextResultTable(self, rnum):
         """ Returns a text result table for plotting """

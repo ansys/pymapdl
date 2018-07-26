@@ -1,8 +1,8 @@
 pyansys Documentation
 =====================
 This Python module allows you to:
- - Interactively control an instance of ANSYS using Python (Linux only for now).
- - Extract data from ANSYS files and to display or animate them.
+ - Interactively control an instance of ANSYS v17.0 + using Python.
+ - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
  - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
 This python module is a community driven work in progress with additional features regularly added based on user requests.  Open an issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_ if you identity a bug or would like to request an additional method or feature.

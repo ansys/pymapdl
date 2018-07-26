@@ -4,35 +4,36 @@ import pytest
 import numpy as np
 import os
 import pyansys
-
-ANSYS_150_BIN = '/usr/ansys_inc/v150/ansys/bin/ansys150'
-ANSYS_182_BIN = '/usr/ansys_inc/v182/ansys/bin/ansys182'
+from vtkInterface.plotting import RunningXServer
 
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
-TMPDIR = '/tmp/ansys/'
+rver = 'v150'  # also have 'v182' but will not work on windows
 
-
-@pytest.mark.skipif(not os.path.isfile(ANSYS_182_BIN), reason="Requires ANSYS installed")
-class TestCyclicResultReader182(object):
+@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+class TestCyclicResultReader(object):
 
     # avoids errors in collection
-    result_file = os.path.join(data_path, 'cyclic_v182.rst')
+    result_file = os.path.join(data_path, 'cyclic_%s.rst' % rver)
     try:
         result = pyansys.Result(result_file)
-        copyfile(result_file, os.path.join(TMPDIR, 'v182.rst'))
+        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='WARNING',
+                              interactive_plotting=False)
 
-        ansys = pyansys.ANSYS(exec_file=ANSYS_182_BIN, override=True,
-                              jobname='v182', loglevel='WARNING', run_location=TMPDIR)
+        # copy result file to ansys's temporary path
+        copyfile(result_file, os.path.join(ansys.path, '%s.rst' % rver))
 
         # setup ansys for output without line breaks
+        # import pdb; pdb.set_trace()
         ansys.Post1()
         ansys.Set(1, 1)
         ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-        ansys.Format('', 'E', 80, 20)
+        nsigfig = 10
+        ansys.Format('', 'E', nsigfig + 9, nsigfig)  
         ansys.Page(1E9, '', -1, 240)
-    except:
+
+    except FileNotFoundError:  # for travis and appveyor
         pass
 
     def test_prnsol_u(self):
@@ -60,8 +61,9 @@ class TestCyclicResultReader182(object):
         # parse ansys result
         table = self.ansys.Presol('S')[1].splitlines()
         ansys_element_stress = []
+        line_length = len(table[100])
         for line in table:
-            if len(line) == 201:
+            if len(line) == line_length:
                 ansys_element_stress.append(line)
         ansys_element_stress = np.genfromtxt(ansys_element_stress)
         ansys_enode = ansys_element_stress[:, 0].astype(np.int)
@@ -104,6 +106,7 @@ class TestCyclicResultReader182(object):
         assert np.allclose(ansys_nnum, nnum)
         assert np.allclose(ansys_stress, stress, atol=1E-2)
 
+    @pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
     def test_plot(self):
         filename = '/tmp/temp.png'
         self.result.PlotNodalSolution(0, screenshot=filename, interactive=False)

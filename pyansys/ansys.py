@@ -18,11 +18,19 @@ import logging
 import time
 import pyansys
 import subprocess
-import psutil
 from threading import Thread
-import numpy as np
+import weakref
 
+import numpy as np
+import psutil
 from ansys_corba import CORBA
+
+try:    
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    matplotlib_loaded = True
+except:
+    matplotlib_loaded = False
 
 
 def FindANSYS():
@@ -32,7 +40,6 @@ def FindANSYS():
     for var in os.environ:
         if 'ANSYS' in var:
             if '_DIR' in var:
-                # import pdb; pdb.set_trace()
                 try:
                     versions.append(int(var[5:8]))
                 except:
@@ -123,25 +130,19 @@ ready_items = [b'BEGIN:',
                b'ENTER FORMAT for',
 ]
 
-continue_idx = ready_items.index(b'YES,NO OR CONTINUOUS\)\=')
-warning_idx = ready_items.index(b'executed\?')
-error_idx = ready_items.index(b'SHOULD INPUT PROCESSING BE SUSPENDED\?')
-prompt_idx = ready_items.index(b'ENTER FORMAT for')
+png_test = re.compile('WRITTEN TO FILE file\d\d\d.png')
+error_test = re.compile('')
 
-nitems = len(ready_items)
-expect_list = []
-for item in ready_items:
-    expect_list.append(re.compile(item))
 
-# idenfity ignored commands
-# ignored = re.compile('\s+'.join(['WARNING', 'command', 'ignored']))
-ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
-# ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
-# re.DOTALL = True
-# ignored = re.compile('(?:.|\n)+'.join(['WARNING', 'ignored']))
-# ignored = re.compile('[\s\S]+'.join(['WARNING', 'ignored']))
-# print(ignored.search(response))
+def CheckValidANSYS():
+    """ Checks if a valid version of ANSYS is installed and preconfigured """
+    ansys_bin = GetANSYSPath(allow_input=False)
+    if ansys_bin is not None:
+        version = int(re.findall('\d\d\d', ansys_bin)[0])
+        if version >= 170:
+            return True
 
+    return False
 
 
 def SetupLogger(loglevel='INFO'):
@@ -178,16 +179,17 @@ def SetupLogger(loglevel='INFO'):
     return log
 
 
-def GetANSYSPath():
+def GetANSYSPath(allow_input=True):
     """ Acquires ANSYS Path from a cached file or user input """
+    exe_loc = None
     if os.path.isfile(config_file):
         with open(config_file) as f:
             exe_loc = f.read()
         # verify
-        if not os.path.isfile(exe_loc):
+        if not os.path.isfile(exe_loc) and allow_input:
             print('Cached ANSYS executable %s not found' % exe_loc)
             exe_loc = SaveANSYSPath()
-    else:  # create configuration file
+    elif allow_input:  # create configuration file
         exe_loc = SaveANSYSPath()
 
     return exe_loc
@@ -266,6 +268,14 @@ class ANSYS(object):
     start_timeout : float, optional
         Time to wait before raising error that ANSYS is unable to start.
 
+    interactive_plotting : bool, optional
+        Enables interactive plotting using matplotlib.  Install matplotlib first.
+        Default False.
+
+    log_broadcast : bool, optional
+        Additional logging for ansys solution progress.  Default True and visible
+        at log level 'INFO'.
+
     Examples
     --------
     >>> import pyansys
@@ -277,10 +287,12 @@ class ANSYS(object):
     block_override = None
     process = None
     lockfile = ''
+    _interactive_plotting = False
 
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
                  override=False, loglevel='INFO', additional_switches='',
-                 start_timeout=20):
+                 start_timeout=20, interactive_plotting=False, log_broadcast=True,
+                 check_version=False):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
 
@@ -295,6 +307,12 @@ class ANSYS(object):
             if not os.path.isfile(exec_file):
                 raise Exception('Invalid ANSYS executable at %s' % exec_file +
                                 'Enter one manually using pyansys.ANSYS(exec_file="")')
+
+        # check ansys version
+        if check_version:
+            version = int(re.findall('\d\d\d', exec_file)[0])
+            if version < 170:
+                raise Exception('ANSYS MAPDL server requires version 17.0 or greater')
 
         # spawn temporary directory
         if run_location is None:
@@ -391,7 +409,26 @@ class ANSYS(object):
         self.exec_file = exec_file
         self.jobname = jobname
 
-        self.StartBroadcastLogger()
+        # setup plotting for PNG
+        if interactive_plotting:
+            self.EnableInteractivePlotting()
+
+        # separate logger for broadcast file
+        self.log_broadcast = log_broadcast
+        if self.log_broadcast:
+            self.broadcast_logger = Thread(target=ANSYS.StartBroadcastLogger,
+                                           args=(weakref.proxy(self),))
+            self.broadcast_logger.start()
+
+    def EnableInteractivePlotting(self):
+        """ Enables interactive plotting.  Requires matplotlib """
+        if matplotlib_loaded:
+            self.Show('PNG')
+            self._interactive_plotting = True
+        else:
+            raise Exception('Install matplotlib to use enable interactive plotting\n' +
+                            'or turn interactive plotting off with:\n' +
+                            'interactive_plotting=False')
 
     def SetLogLevel(self, loglevel):
         """ Sets log level """
@@ -414,31 +451,26 @@ class ANSYS(object):
         """ separate logger using broadcast_file """
 
         # listen to broadcast file
-        def Listen():
-            try:
-                old_tail = ''
-                old_size = 0
-                while self.is_alive:
-                    new_size = os.path.getsize(self.broadcast_file)
-                    if new_size != old_size:
-                        old_size = new_size
-                        new_tail = Tail(self.broadcast_file, 4)
-                        if new_tail != old_tail:
-                            lines = new_tail.split('>>')
-                            for line in lines:
-                                line = line.strip().replace('<<broadcast::', '')
-                                if line:
-                                    self.log.info(line)
-                            old_tail = new_tail
-                    time.sleep(update_rate)
-            except Exception as e:
-                self.log.error(e)
+        try:
+            old_tail = ''
+            old_size = 0
+            while self.is_alive:
+                new_size = os.path.getsize(self.broadcast_file)
+                if new_size != old_size:
+                    old_size = new_size
+                    new_tail = Tail(self.broadcast_file, 4)
+                    if new_tail != old_tail:
+                        lines = new_tail.split('>>')
+                        for line in lines:
+                            line = line.strip().replace('<<broadcast::', '')
+                            if line:
+                                self.log.info(line)
+                        old_tail = new_tail
+                time.sleep(update_rate)
+        except Exception as e:
+            pass
 
-        thread = Thread(target=Listen)
-        thread.daemon = True  # allow ansys to be collected when finished
-        thread.start()
-
-    def SendCommand(self, command, threaded=False):
+    def SendCommand(self, command):
         """ Sends a command to the mapdl server """
         if not self.is_alive:
             raise Exception('ANSYS process has been terminated')
@@ -462,7 +494,6 @@ class ANSYS(object):
             additional_text = self.mapdl.executeCommandToString('/GO')
 
         except Exception as e:
-            import pdb; pdb.set_trace()
             error = str(e)
             if 'omniORB.TRANSIENT_ConnectFailed' in error:
                 self.log.error(error)
@@ -476,99 +507,45 @@ class ANSYS(object):
                 text += '\n\nIgnore these messages by setting allow_ignore=True'
                 raise Exception(text)
 
+        return text, additional_text
+
+    def Run(self, command):
+        """ Sends command and returns ANSYS's response """
+        text, additional_text = self.SendCommand(command)
+
         if text:
             text = text.replace('\\n', '\n')
-            self.log.info(text)
+            if '*** ERROR ***' in text:
+                self.log.error(text)
+                raise Exception(text)
+            else:
+                self.log.info(text)
 
         if additional_text:
             additional_text = additional_text.replace('\\n', '\n')
-            self.log.debug(additional_text)
+            if '*** ERROR ***' in additional_text:
+                self.log.error(additional_text)
+                raise Exception(additional_text)
+            else:
+                self.log.debug(additional_text)
+
+        if self._interactive_plotting:
+            png_found = png_test.findall(text)
+            if png_found:
+                # flush graphics writer
+                self.Show('CLOSE')
+                self.Show('PNG')
+                filename = png_found[0][-11:]
+                fullfile = os.path.join(self.path, filename)
+                if os.path.isfile(fullfile):
+                    img = mpimg.imread(fullfile)
+                    imgplot = plt.imshow(img)
+                    plt.axis('off')
+                    plt.show()  # consider in-line plotting
+                else:
+                    log.error('Unable to find screenshot at %s' % fullfile)
 
         return text, additional_text
-
-    def Run(self, command, return_response=False, block=True,
-            continue_on_error=False, ignore_prompt=False, timeout=None):
-        """ Sends command and returns ANSYS's response """
-        return self.SendCommand(command)
-
-        # if ignore_prompt:
-            # self.log.debug('... with ignore_prompt=True')
-        # self.process.sendline(command)
-        
-
-        # if block:
-        #     self.log.debug('Waiting: TIMEOUT %s' % str(timeout))
-        #     while True:
-        #         i = self.process.expect_list(expect_list, timeout=timeout)
-        #         response = self.process.before.decode('utf-8')
-        #         if i >= continue_idx and i < warning_idx:  # continue
-        #             self.log.debug('Continue: Response index %i.  Matched %s'
-        #                            % (i, ready_items[i].decode('utf-8')))
-        #             self.log.info(response + ready_items[i].decode('utf-8'))
-        #             if self.auto_continue:
-        #                 user_input = 'y'
-        #             else:
-        #                 user_input = input('Response: ')
-        #             self.process.sendline(user_input)
-
-        #         elif i >= warning_idx and i < error_idx:  # warning
-        #             self.log.debug('Prompt: Response index %i.  Matched %s'
-        #                            % (i, ready_items[i].decode('utf-8')))
-        #             self.log.warning(response + ready_items[i].decode('utf-8'))
-        #             if self.auto_continue:
-        #                 user_input = 'y'
-        #             else:
-        #                 user_input = input('Response: ')
-        #             self.process.sendline(user_input)
-
-        #         elif i >= error_idx and i < prompt_idx:  # error
-        #             self.log.debug('Error index %i.  Matched %s'
-        #                            % (i, ready_items[i].decode('utf-8')))
-        #             self.log.error(response)
-        #             response += ready_items[i].decode('utf-8')
-        #             if continue_on_error:
-        #                 self.process.sendline(user_input)
-        #             else:
-        #                 raise Exception(response)
-
-        #         elif i >= prompt_idx:  # prompt
-        #             self.log.debug('Prompt index %i.  Matched %s'
-        #                            % (i, ready_items[i].decode('utf-8')))
-        #             self.log.info(response + ready_items[i].decode('utf-8'))
-        #             if ignore_prompt:
-        #                 self.log.debug('Ignoring prompt')
-        #                 # time.sleep(0.1)
-        #                 break
-        #             else:
-        #                 user_input = input('Response: ')
-        #                 self.process.sendline(user_input)
-
-        #         else:  # continue item
-        #             self.log.debug('continue index %i.  Matched %s'
-        #                            % (i, ready_items[i].decode('utf-8')))
-        #             break
-
-        #     # handle response
-        #     if '*** ERROR ***' in response:  # flag error
-        #         self.log.error(response)
-        #         if not continue_on_error:
-        #             raise Exception(response)
-        #     elif ignored.search(response):  # flag ignored command
-        #         if not self.allow_ignore:
-        #             self.log.error(response)
-        #             raise Exception(response)
-        #         else:
-        #             self.log.warning(response)
-        #     else:  # all else
-        #         self.log.info(response)
-
-        #     if return_response:
-        #         response = self.process.before.decode('utf-8')
-        #         return response
-
-    # def last_message(self):
-    #     """ Returns the last output from ANSYS """
-    #     return self.process.before.decode('utf-8')
 
     def __del__(self):
         # clean up when complete
@@ -597,9 +574,8 @@ class ANSYS(object):
             try:
                 self.Exit()
             except:
-                self.log.debug('Killing process %d' % self.process.pid)
                 KillProcess(self.process.pid)
-                self.log.debug('Killed' % self.process.pid)
+                self.log.debug('Killed process %d' % self.process.pid)
 
         if os.path.isfile(self.lockfile):
             try:

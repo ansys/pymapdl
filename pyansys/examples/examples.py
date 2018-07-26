@@ -23,7 +23,11 @@ sector_archive_file = os.path.join(dir_path, 'sector.cdb')
 
 
 def RunAll(run_ansys=False):
-    """ Runs all the functions within this module """
+    """
+    Runs all the functions within this module except for the ansys
+    tests.
+
+    """
     testfunctions = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isfunction(obj) and name != 'RunAll':
@@ -35,12 +39,12 @@ def RunAll(run_ansys=False):
     any(f() for f in testfunctions)
 
 
-def DisplayHexBeam():
+def DisplayHexBeam(as_test=False):
     """ Displays a hex beam mesh """
     # Load an archive file
     archive = pyansys.ReadArchive(hexarchivefile)
     grid = archive.ParseVTK()
-    grid.Plot()
+    grid.Plot(interactive=False)
 
 
 def LoadResult():
@@ -208,21 +212,23 @@ def DisplayCellQual(meshtype='tet'):
               rng=[0, 1])
 
 
-def CylinderANSYS(plot_vtk=True, plot_ansys=True):
-
+def CylinderANSYS(plot_vtk=True, plot_ansys=True, as_test=False):
+    
     # cylinder parameters
     # torque = 100
     radius = 2
     h_tip = 2
     height = 20
     elemsize = 0.5
-    # pi = np.arccos(-1)
     force = 100/radius
     pressure = force/(h_tip*2*np.pi*radius)
 
     # start ANSYS
-    # pyansys.OpenLogger()
-    ansys = pyansys.ANSYS(override=True)
+    if as_test:
+        loglevel = 'ERROR'
+    else:
+        loglevel = 'INFO'
+    ansys = pyansys.ANSYS(override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
@@ -246,12 +252,9 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
     ansys.Nummrg('kp')
 
     # non-interactive volume plot
-    if plot_ansys:
-        ansys.Show()
-        ansys.Menu('grph')
+    if plot_ansys and not as_test:
         ansys.View(1, 1, 1, 1)
         ansys.Vplot()
-        ansys.Wait(1)
 
     # mesh cylinder
     ansys.Lsel('s', 'loc', 'x', 0)
@@ -272,9 +275,8 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
     ansys.Amesh('all')
     ansys.Finish()
 
-    if plot_ansys:
+    if plot_ansys and not as_test:
         ansys.Eplot()
-        ansys.Wait(1)
 
     # new solution
     ansys.Slashsolu()
@@ -295,35 +297,42 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True):
     ansys.Pbc('u', 1)
     ansys.Solve()
     ansys.Finish()
-    # ansys.Save()
     ansys.Exit()
 
     # open the result file
-    path = ansys.path
-    resultfile = os.path.join(path, 'file.rst')
-    result = pyansys.ResultReader(resultfile)
+    result = ansys.result
     element_stress, elemnum, enode = result.ElementStress(0)
-    print(element_stress)
+    if as_test:
+        assert len(element_stress)
+    else:
+        print(element_stress[:10])
     nodenum, stress = result.NodalStress(0)
-    print(stress)
+    if as_test:
+        assert np.any(stress)
+    else:
+        print(stress[:10])
 
     if plot_vtk:
-        # # plot interactively
-        result.PlotNodalSolution(0, colormap='bwr')
-        result.PlotNodalStress(0, 'Sx', colormap='bwr')
-        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
+        if as_test:
+            # plot and save non-interactively
+            cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
+                    (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
+                    (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-        # plot and save non-interactively
-        cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
-                (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
-                (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
+            img = result.PlotNodalSolution(0, interactive=False, cpos=cpos, screenshot=True)
+            assert np.any(img)
 
-        result.PlotNodalSolution(0, interactive=False, cpos=cpos,
-                                 screenshot=os.path.join(path, 'cylinder_disp.png'))
+            img = result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+                                         screenshot=True)
+            assert np.any(img)
 
-        result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
-                               screenshot=os.path.join(path, 'cylinder_sx.png'))
+            result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False,
+                                            cpos=cpos, screenshot=True)
+            assert np.any(img)
+        else:
+            # plot interactively
+            result.PlotNodalSolution(0, colormap='bwr')
+            result.PlotNodalStress(0, 'Sx', colormap='bwr')
+            result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
 
-        filename = os.path.join(path, 'cylinder_vonmises.png')
-        result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False,
-                                        cpos=cpos, screenshot=filename)
+    return True

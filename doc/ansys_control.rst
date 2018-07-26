@@ -16,13 +16,17 @@ To run, ``pyansys`` needs to know the location of the ANSYS binary.  When runnin
     from pyansys import examples
     examples.CylinderANSYS()
 
-You will be prompted for the location of the ANSYS executable for the first time.  This is the prompt with my location for ANSYS.
+Python will automatically attempt to detect your ANSYS binary based on enviornmental variables.  If it is unable to find a copy of ANSYS, you will be prompted for the location of the ANSYS executable.  Here is a sample input for Linux and Windows:
 
 .. code::
 
-    Enter location of ANSYS executable: /usr/ansys_inc/v150/ansys/bin/ansys150
+    Enter location of ANSYS executable: /usr/ansys_inc/v182/ansys/bin/ansys182
 
-The settings file is stored locally and do not need to enter it again.  To find the location of the cached file run:
+.. code::
+
+    Enter location of ANSYS executable: C:\Program Files\ANSYS Inc\v170\ANSYS\bin\winx64\ansys170.exe
+
+The settings file is stored locally and do not need to enter it again.  If you need to change the file, you can find it and manually edit it with:
 
 .. code:: python
 
@@ -44,7 +48,7 @@ ANSYS can be started from python using the ``pyansys.ANSYS`` class.  This starts
     path = os.getcwd()
     ansys = pyansys.ANSYS(run_location=path)
 
-ANSYS is now active and sitting in its own process.  It's actually in an interactive mode which lets us in python send commands to it
+ANSYS is now active and you can send commands to it as if it was just a python class.
 
 
 Using ANSYS from ``pyansys``
@@ -53,22 +57,22 @@ For example, if we wanted to create a surface using keypoints we could run:
 
 .. code:: python
 
-    ansys.RunCommand('/PREP7')
-    ansys.RunCommand('K, 1, 0, 0, 0')
-    ansys.RunCommand('K, 2, 1, 0, 0')
-    ansys.RunCommand('K, 3, 1, 1, 0')
-    ansys.RunCommand('K, 4, 0, 1, 0')
-    ansys.RunCommand('L, 1, 2')
-    ansys.RunCommand('L, 2, 3')
-    ansys.RunCommand('L, 3, 4')
-    ansys.RunCommand('L, 4, 1')
-    ansys.RunCommand('AL, 1, 2, 3, 4')
+    ansys.Run('/PREP7')
+    ansys.Run('K, 1, 0, 0, 0')
+    ansys.Run('K, 2, 1, 0, 0')
+    ansys.Run('K, 3, 1, 1, 0')
+    ansys.Run('K, 4, 0, 1, 0')
+    ansys.Run('L, 1, 2')
+    ansys.Run('L, 2, 3')
+    ansys.Run('L, 3, 4')
+    ansys.Run('L, 4, 1')
+    ansys.Run('AL, 1, 2, 3, 4')
 
 ANSYS interactively returns the result of each command and it is stored to the logging module.  Errors are caught immediately.  For example:
 
 .. code:: python
 
-    >>> ansys.RunCommand('AL, 1, 2, 3')
+    >>> ansys.Run('AL, 1, 2, 3')
 
    Exception: 
    AL, 1, 2, 3
@@ -86,7 +90,7 @@ This means that exceptions will be caught immediately.  This means that you can 
 
 Calling ANSYS Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Another capability of ``pyansys`` is the ability to call ANSYS commands as python functions from the ``ANSYS`` class.  For example, instead of sending commands to ANSYS as in the area creation example, we can instead run:
+One advantage of writing scripts using ``pyansys`` is the ability to call ANSYS commands as python functions from the ``ANSYS`` class.  For example, instead of sending commands to ANSYS as in the area creation example, we can instead run:
 
 .. code:: python
 
@@ -188,10 +192,10 @@ Translates to:
     import pyansys
     ansys = pyansys.ANSYS(loglevel="debug")
 
-    ansys.RunCommand("/VERIFY,VM1")
-    ansys.RunCommand("/PREP7")
-    ansys.RunCommand("/TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS")
-    ansys.RunCommand("C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10")
+    ansys.Run("/VERIFY,VM1")
+    ansys.Run("/PREP7")
+    ansys.Run("/TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS")
+    ansys.Run("C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10")
     ansys.Antype("STATIC                  ! STATIC ANALYSIS")
     ansys.Et(1, "LINK180")
     ansys.Sectype(1, "LINK")
@@ -219,11 +223,11 @@ ANSYS commands that normally have an empty space, such as ``ESEL, S, TYPE, , 1``
 
     ansys.Esel('s', 'type', '', 1)
 
-None of these restrictions apply to commands run with ``RunCommand``, and ``RunCommand`` can be used alongside the python functions:
+None of these restrictions apply to commands run with ``Run``, and ``Run`` can be used alongside the python functions:
 
 .. code:: python
 
-    ansys.RunCommand('/SOLU')
+    ansys.Run('/SOLU')
     ansys.Solve()
 
 
@@ -238,12 +242,6 @@ Errors should be handled pythonically.  For example:
     except:
         pass  # or do something else with ansys
 
-Should you absolutely need to continue after an error in within ANSYS, use the keyword argument ``continue_on_error`` when running the command:
-
-.. code:: python
-
-    ansys.Solve(continue_on_error=True)
-
 Commands that are ignored within ANSYS are flagged as errors.  This is different than ANSYS's default behavior where commands that are ignored are treated as warnings.  For example, in ``pyansys`` running a command in the wrong session raises an error:
 
 .. code:: python
@@ -255,56 +253,34 @@ Commands that are ignored within ANSYS are flagged as errors.  This is different
 
      *** WARNING ***                         CP =       0.307   TIME= 11:05:01
      K is not a recognized BEGIN command, abbreviation, or macro.  This      
-     command will be ignored.                                                
-
+     command will be ignored.
 
 You can change this behavior so ignored commands can be logged as warnings not raised as an exception by setting:
 
 .. code:: python
 
    ansys.allow_ignore = True
-   ansys.K()
+   ansys.K()  # error ignored
    ansys.Clear()
 
 
 Prompts
 ~~~~~~~
-Prompts from ANSYS are normally handled by continuing with ``'y'`` like in ``/BATCH`` mode.  This can be disabled with:
-
-.. code:: python
-
-    ansys.auto_continue = True
-
-Prompts within ANSYS will trigger a prompt in Python.  For example
-
-.. code:: python
-
-    >>> ansys.Clear()
-
-    2018-03-13 11:12:32,701 [WARNING] pyansys.ansys:
-    /CLEAR,
-    CLEAR DATABASE AND RERUN START.ANS
-    
-     *** WARNING ***                         CP =       0.365   TIME= 11:12:32
-     /CLEAR destroys the effects of all previous input and starts a new      
-     database.                                                               
-     Should the /CLE command be executed\?
-
-    Response:
-
-The user can now respond with y or n, just like in an interactive session of ANSYS.
+Prompts from ANSYS are normally handled by continuing with ``'y'`` just as if APDL is in ``/BATCH`` mode.
 
 
 Plotting Non-Interactively
 --------------------------
+This section applies
 
-It is often useful to plot geometry and meshes as they are generated.  This can be easily done within the graphical user interface, but for debugging (or scripting) purposes it can be useful to plot within ``pyansys`` as well.  This shows how to create a non-interactive ANSYS Graphics window.  This window won't block execution and will run in the background as the script progresses.
+It is often useful to plot geometry and meshes as they are generated.  This can be easily done within the graphical user interface, but for debugging (or scripting) purposes it can be useful to plot within ``pyansys`` as well.  This example shows how to create a plot using ``matplotlib``.  This script generates is a standard ``matplotlib`` figure.
 
 .. code:: python
 
-    # clear existing geometry
-    ansys.Finish()
-    ansys.Clear()
+    import pyansys
+
+    # run ansys at a temporary location with interactive plotting enabled (default)
+    ansys = pyansys.ANSYS()
 
     # create a square area using keypoints
     ansys.Prep7()
@@ -318,33 +294,20 @@ It is often useful to plot geometry and meshes as they are generated.  This can 
     ansys.L(4, 1)
     ansys.Al(1, 2, 3, 4)
 
-    # Start a non-interactive plotting window
-    ansys.Show()
-    ansys.Menu('grph')
-    ansys.View(1, 1, 1, 1)  # sets the view to "isometric"    
-
-    # Plot geometry while waiting between plots
+    # sets the view to "isometric"
+    ansys.View(1, 1, 1, 1)
     ansys.Pnum('kp', 1)  # enable keypoint numbering
     ansys.Pnum('line', 1)  # enable line numbering
-    import time
+
+    # each of these will create a matplotlib figure and pause execution
     ansys.Aplot()
-    time.sleep(1)  # could also use ansys.Wait(1)
     ansys.Lplot()
-    time.sleep(1)
     ansys.Kplot()
 
 .. figure:: ./images/aplot.png
     :width: 300pt
 
-    Non-Interactive Area Plot from ANSYS using ``pyansys``
-
-
-The graphics window stays active until you exit from ANSYS:
-
-.. code:: python
-
-    # exit ANSYS
-    ansys.Exit()
+    Non-Interactive Area Plot from ANSYS using ``pyansys`` and ``matplotlib``
 
 
 Running a Batch
@@ -355,7 +318,6 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
 
     import numpy as np
     import pyansys
-
 
     def CylinderBatch(elemsize, plot=False):
         """ Report the maximum von Mises stress of a Cantilever supported cylinder"""
@@ -387,13 +349,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
         for i in range(4):
             ansys.Cylind(radius, '', '', height, 90*(i-1), 90*i)
 
-        ansys.Nummrg('kp')
-
-        # non-interactive volume plot
-        if plot:
-            ansys.Show()
-            ansys.Menu('grph')
-            ansys.View(1, 1, 1, 1)
+        ansys.Nummrg('kp')            
 
         # mesh cylinder
         ansys.Lsel('s', 'loc', 'x', 0)
@@ -415,6 +371,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
         ansys.Finish()
 
         if plot:
+            ansys.View(1, 1, 1, 1)
             ansys.Eplot()
 
         # new solution
@@ -437,10 +394,10 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
         ansys.Solve()
         ansys.Finish()
 
-        # access resuls using ANSYS object
-        result = ansys.results
+        # access results using ANSYS object
+        result = ansys.result
 
-        # could have run:
+        # to access the results you could have run:
         # resultfile = os.path.join(ansys.path, '%s.rst' % ansys.jobname)
         # result = pyansys.ResultReader(result file)
 
@@ -448,7 +405,8 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
         nodenum, stress = result.PrincipalNodalStress(0)  # 0 as it's zero based indexing
 
         # von Mises stress is the last column
-        maxstress = stress[:, -1].max()
+        # must be nanmax as the shell element stress is not recorded
+        maxstress = np.nanmax(stress[:, -1])
 
         # return number of nodes and max stress
         return nodenum.size, maxstress
@@ -467,6 +425,26 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, define a 
 
     # Exit ANSYS
     ansys.Exit()
+
+This is the result from the script:
+
+.. code::
+
+    Element size 0.600000:   9657 nodes and maximum vom Mises stress 142.623505
+    Element size 0.567857:  10213 nodes and maximum vom Mises stress 142.697800
+    Element size 0.535714:  10769 nodes and maximum vom Mises stress 142.766510
+    Element size 0.503571:  14177 nodes and maximum vom Mises stress 142.585388
+    Element size 0.471429:  18371 nodes and maximum vom Mises stress 142.825684
+    Element size 0.439286:  19724 nodes and maximum vom Mises stress 142.841202
+    Element size 0.407143:  21412 nodes and maximum vom Mises stress 142.945984
+    Element size 0.375000:  33502 nodes and maximum vom Mises stress 142.913437
+    Element size 0.342857:  37877 nodes and maximum vom Mises stress 143.033401
+    Element size 0.310714:  59432 nodes and maximum vom Mises stress 143.328842
+    Element size 0.278571:  69106 nodes and maximum vom Mises stress 143.176086
+    Element size 0.246429: 110547 nodes and maximum vom Mises stress 143.499329
+    Element size 0.214286: 142496 nodes and maximum vom Mises stress 143.559128
+    Element size 0.182143: 211966 nodes and maximum vom Mises stress 143.953430
+    Element size 0.150000: 412324 nodes and maximum vom Mises stress 144.275406
 
 
 ANSYS Object Methods

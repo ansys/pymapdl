@@ -210,6 +210,7 @@ Corresponding ``pyansys`` script:
 
     # new solution
     ansys.Slashsolu()  # Using Slash instead of / due to duplicate SOLU command
+    # ansys('/solu')  # could also use this line
     ansys.Antype('static', 'new')
     ansys.Eqslv('pcg', 1e-8)
 
