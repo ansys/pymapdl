@@ -33,7 +33,7 @@ class TestCyclicResultReader(object):
         ansys.Format('', 'E', nsigfig + 9, nsigfig)  
         ansys.Page(1E9, '', -1, 240)
 
-    except FileNotFoundError:  # for travis and appveyor
+    except:  # for travis and appveyor
         pass
 
     def test_prnsol_u(self):
