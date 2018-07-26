@@ -8,9 +8,9 @@ pyansys
     :target: https://pyansys.readthedocs.io/en/latest/?badge=latest
 
 This Python module allows you to:
- - Interactively control an instance of ANSYS using Python.  Linux only (for now).
- - Extract data from ANSYS files and to display them if ``VTK`` is installed.
- - Read in result ``(.rst)``, mass and stiffness ``(.full)``, and block archive ``(.cdb)`` files.
+ - Interactively control an instance of ANSYS v17.0 + using Python.
+ - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
+ - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
 See the `Documentation <http://pyansys.readthedocs.io>`_ page for more details.
 
@@ -22,10 +22,6 @@ Installation through pip::
     pip install pyansys
 
 You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
-
-Dependencies: ``numpy``, ``cython``, ``vtkInterface``. Optional: ``vtk``
-
-Minimum requirements are numpy to extract results from a results file. To convert the raw data to a VTK unstructured grid, VTK 5.0 or greater must be installed with Python bindings.
 
 
 Quick Examples
@@ -41,7 +37,7 @@ examples module.  For a quick demo, run:
 
 Controlling ANSYS
 ~~~~~~~~~~~~~~~~~
-Create an instance of ANSYS and send commands to it.
+Create an instance of ANSYS and interactively send commands to it.  This is a direct interface and does not rely on writing a temporary script file.  You can also generate plots using ``matplotlib``.
 
 .. code:: python
 
@@ -49,7 +45,7 @@ Create an instance of ANSYS and send commands to it.
     import pyansys
 
     path = os.getcwd()
-    ansys = pyansys.ANSYS(run_location=path)
+    ansys = pyansys.ANSYS(run_location=path, interactive_plotting=True)
 
     # create a square area using keypoints
     ansys.Prep7()
@@ -62,15 +58,16 @@ Create an instance of ANSYS and send commands to it.
     ansys.L(3, 4)
     ansys.L(4, 1)
     ansys.Al(1, 2, 3, 4)
+    ansys.Aplot()
     ansys.Save()
     ansys.Exit()
+
+.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/aplot.png
 
 
 Loading and Plotting an ANSYS Archive File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ANSYS archive files containing solid elements (both legacy and current), can
-be loaded using ReadArchive and then converted to a vtk object.
+ANSYS archive files containing solid elements (both legacy and current), can be loaded using ReadArchive and then converted to a vtk object.
 
 
 .. code:: python
@@ -95,9 +92,9 @@ be loaded using ReadArchive and then converted to a vtk object.
     # write this as a vtk xml file 
     grid.Write('hex.vtu')
 
+.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam.png
 
-You can then load this vtk file using vtkInterface or another program that uses
-VTK.
+You can then load this vtk file using vtkInterface or another program that uses VTK.
     
 .. code:: python
 
@@ -110,9 +107,7 @@ VTK.
 Loading and Plotting an ANSYS Result File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example reads in binary results from a modal analysis of a beam from
-ANSYS.  This section of code does not rely on vtk and can be used solely with
-numpy installed.
+This example reads in binary results from a modal analysis of a beam from ANSYS.
 
 .. code:: python
 
@@ -158,11 +153,12 @@ You can plot results as well directly from the file as well.
     # Plot the nodal stress in the 'x' direction for the 6th result
     result.PlotNodalStress(5, 'Sx')
 
+.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_stress.png
+
 
 Reading a Full File
 -------------------
-This example reads in the mass and stiffness matrices associated with the above
-example.
+This example reads in the mass and stiffness matrices associated with the above example.
 
 .. code:: python
 
@@ -178,8 +174,7 @@ example.
     k += sparse.triu(k, 1).T
     m += sparse.triu(m, 1).T
 
-If you have ``scipy`` installed, you can solve the eigensystem for its natural 
-frequencies and mode shapes.
+If you have ``scipy`` installed, you can solve the eigensystem for its natural frequencies and mode shapes.
 
 .. code:: python
 
@@ -205,6 +200,7 @@ frequencies and mode shapes.
     1283.200 Hz
     5781.975 Hz
     6919.399 Hz
+
 
 License and Acknowledgments
 ---------------------------

@@ -223,7 +223,7 @@ ANSYS commands that normally have an empty space, such as ``ESEL, S, TYPE, , 1``
 
     ansys.Esel('s', 'type', '', 1)
 
-None of these restrictions apply to commands run with ``Run``, and ``Run`` can be used alongside the python functions:
+None of these restrictions apply to commands run with ``Run`` and this command can be used alongside the python functions:
 
 .. code:: python
 
@@ -240,12 +240,13 @@ Errors should be handled pythonically.  For example:
     try:
         ansys.Solve()
     except:
-        pass  # or do something else with ansys
+        # do something else with ANSYS
 
 Commands that are ignored within ANSYS are flagged as errors.  This is different than ANSYS's default behavior where commands that are ignored are treated as warnings.  For example, in ``pyansys`` running a command in the wrong session raises an error:
 
 .. code:: python
 
+    >>> ansys.Finish()
     >>> ansys.K()
 
     Exception: 
@@ -261,26 +262,23 @@ You can change this behavior so ignored commands can be logged as warnings not r
 
    ansys.allow_ignore = True
    ansys.K()  # error ignored
-   ansys.Clear()
 
 
 Prompts
 ~~~~~~~
-Prompts from ANSYS are normally handled by continuing with ``'y'`` just as if APDL is in ``/BATCH`` mode.
+Prompts from ANSYS automatically continued as if ANSYS is in batch mode. 
 
 
 Plotting Non-Interactively
 --------------------------
-This section applies
-
-It is often useful to plot geometry and meshes as they are generated.  This can be easily done within the graphical user interface, but for debugging (or scripting) purposes it can be useful to plot within ``pyansys`` as well.  This example shows how to create a plot using ``matplotlib``.  This script generates is a standard ``matplotlib`` figure.
+It is often useful to plot geometry and meshes as they are generated and for debugging (or scripting) purposes it can be useful to plot within ``pyansys`` as well.  To enable interactive plotting, set ``interactive_plotting=True`` when starting ANSYS.  Plotting commands such as ``APLOT``, ``EPLOT``, and ``KPLOT`` will open up a ``matploblib``.
 
 .. code:: python
 
     import pyansys
 
-    # run ansys at a temporary location with interactive plotting enabled (default)
-    ansys = pyansys.ANSYS()
+    # run ansys with interactive plotting enabled
+    ansys = pyansys.ANSYS(interactive_plotting=True)
 
     # create a square area using keypoints
     ansys.Prep7()
@@ -307,12 +305,12 @@ It is often useful to plot geometry and meshes as they are generated.  This can 
 .. figure:: ./images/aplot.png
     :width: 300pt
 
-    Non-Interactive Area Plot from ANSYS using ``pyansys`` and ``matplotlib``
+    Area Plot from ANSYS using ``pyansys``
 
 
 Running a Batch
 ---------------
-Instead of running an ANSYS batch by calling ANSYS with an input file, define a function that runs ansys.  This example runs a mesh convergence study based on the maximum stress of a cylinder with torsional loading.
+Instead of running an ANSYS batch by calling ANSYS with an input file, you can instead define a function that runs ansys.  This example runs a mesh convergence study based on the maximum stress of a cylinder with torsional loading.
 
 .. code:: python
 

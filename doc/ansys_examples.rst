@@ -1,6 +1,14 @@
 ANSYS APDL Interactive Control Examples
 =======================================
-These examples are used to demonstrate how to convert an existing ANSYS APDL script to a python ``pyansys`` script.
+These examples are used to demonstrate how to convert an existing ANSYS APDL script to a python ``pyansys`` script.  You could also simply use the built-in ``ConvertFile`` function within pyansys:
+
+.. code:: python
+
+    import pyansys
+
+    inputfile = 'ansys_inputfile.inp'
+    pyscript = 'pyscript.py'
+    pyansys.ConvertFile(inputfile, pyscript)
 
 
 Torsional Load on a Bar using SURF154 Elements
@@ -35,12 +43,8 @@ Corresponding ``pyansys`` script including the initialization of pyansys:
     import os
     import pyansys
     
-    # get this directory
-    path = os.getcwd()
-
-    # start ANSYS in the current working directory.
-    pyansys.OpenLogger()
-    ansys = pyansys.ANSYS(run_location=path)  # jobname defaults to file
+    # start ANSYS in the current working directory with default jobname "file"
+    ansys = pyansys.ANSYS(run_location=os.getcwd(), interactive_plotting=True)
         
     # define cylinder and mesh parameters
     torque = 100
@@ -54,8 +58,7 @@ Corresponding ``pyansys`` script including the initialization of pyansys:
 
 
 Model Creation
-~~~~~~~~~~~~~~
-    
+~~~~~~~~~~~~~~    
 APDL Script:
 
 .. code::
@@ -165,12 +168,11 @@ Corresponding ``pyansys`` script:
 .. figure:: ./images/cylinder_eplot.png
     :width: 300pt
 
-    Non-interactive GUI Element plot from ANSYS and ``pyansys``
+    Element plot from ``pyansys`` using ``matplotlib``
 
 
 Solution
 ~~~~~~~~
-
 APDL script:
 
 .. code::

@@ -7,6 +7,46 @@ This Python module allows you to:
 
 This python module is a community driven work in progress with additional features regularly added based on user requests.  Open an issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_ if you identity a bug or would like to request an additional method or feature.
 
+
+Installation
+------------
+Installation through pip::
+
+    pip install pyansys
+
+
+Quick Examples
+--------------
+
+Interactive Control
+~~~~~~~~~~~~~~~~~~~
+``pyansys`` lets you create an instance of ANSYS and send commands to it pythonically:
+
+.. code:: python
+
+    import os
+    import pyansys
+
+    path = os.getcwd()
+    ansys = pyansys.ANSYS(run_location=path)
+
+    # create a square area using keypoints
+    ansys.Prep7()
+    ansys.K(1, 0, 0, 0)
+    ansys.K(2, 1, 0, 0)
+    ansys.K(3, 1, 1, 0)
+    ansys.K(4, 0, 1, 0)    
+    ansys.L(1, 2)
+    ansys.L(2, 3)
+    ansys.L(3, 4)
+    ansys.L(4, 1)
+    ansys.Al(1, 2, 3, 4)
+    ansys.Save()
+    ansys.Exit()
+
+
+Direct Access to Binary Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Here's a quick example code block to show how easy it is to load and plots results directly from an ANSYS result file using ``pyansys``:
 
 .. code:: python
