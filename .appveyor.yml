@@ -22,7 +22,7 @@ install:
 build_script:
   - "%PYTHON% -m pip install cibuildwheel==0.9.3"
   - "%PYTHON% -m cibuildwheel --output-dir wheelhouse"
-  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag, won't deploy to pypi"}
 
 artifacts:
   - path: "wheelhouse\\*.whl"
