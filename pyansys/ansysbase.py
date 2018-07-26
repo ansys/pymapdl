@@ -195,6 +195,23 @@ def GetANSYSPath(allow_input=True):
     return exe_loc
 
 
+def ChangeDefaultANSYSPath(exe_loc):
+    """
+    Change your default ansys path
+
+    Parameters
+    ----------
+    exe_loc : str
+        Ansys executable.  Must be a full path.
+
+    """
+    if os.path.isfile(exe_loc):
+        with open(config_file, 'w') as f:
+            f.write(exe_loc)
+    else:
+        raise Exception('File %s is invalid or does not exist' % exe_loc)
+
+
 def SaveANSYSPath(exe_loc=''):
     """ Find ANSYS path or query user """
     print('Cached ANSYS executable %s not found' % exe_loc)
@@ -292,7 +309,7 @@ class ANSYS(object):
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
                  override=False, loglevel='INFO', additional_switches='',
                  start_timeout=20, interactive_plotting=False, log_broadcast=True,
-                 check_version=False):
+                 check_version=True):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
 

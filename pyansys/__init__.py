@@ -9,6 +9,7 @@ from pyansys.cellquality import *
 try:
     from pyansys.ansys import ANSYS
     from pyansys.convert import ConvertFile
+    from pyansys.ansys import ChangeDefaultANSYSPath
 except Exception as e:
     try:
         from pyansys.ansysbase import ANSYS

@@ -26,14 +26,13 @@ Python will automatically attempt to detect your ANSYS binary based on enviornme
 
     Enter location of ANSYS executable: C:\Program Files\ANSYS Inc\v170\ANSYS\bin\winx64\ansys170.exe
 
-The settings file is stored locally and do not need to enter it again.  If you need to change the file, you can find it and manually edit it with:
+The settings file is stored locally and do not need to enter it again.  If you need to change the default ansys path, run the following:
 
 .. code:: python
 
-   import appdirs
-   settings_dir = appdirs.user_data_dir('pyansys')
-   config_file = os.path.join(settings_dir, 'config.txt')
-   print(config_file)
+    import pyansys
+    new_path = 'C:\\Program Files\\ANSYS Inc\\v170\\ANSYS\\bin\\winx64\\ansys170.exe'
+    pyansys.ChangeDefaultANSYSPath(new_path)
 
 
 Running ANSYS from ``pyansys``
