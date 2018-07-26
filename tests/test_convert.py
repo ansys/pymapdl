@@ -11,5 +11,6 @@ def test_convert(tmpdir):
     clines = pyansys.ConvertFile(vm_file, pyscript, loglevel='ERROR')
     assert len(clines)
 
-    for line in clines:
-        exec(line)
+    if pyansys.has_ansys:
+        for line in clines:
+            exec(line)
