@@ -55,11 +55,8 @@ script:
   - $PIP install cibuildwheel==0.9.3
   - cibuildwheel --output-dir wheelhouse
   - if [ "${TRAVIS_TAG:-}" != "" ]; then
-      # build source dist
-      python3 setup.py sdist
-      cp dist/*.tar.gz wheelhouse/
-
-      # upload to pypi
+      python3 setup.py sdist;
+      cp dist/*.tar.gz wheelhouse/;
       pip3 install twine;
       python3 -m twine upload --skip-existing wheelhouse/*;
     fi
