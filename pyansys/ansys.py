@@ -26,6 +26,7 @@ import numpy as np
 import psutil
 from ansys_corba import CORBA
 from pyansys.ansys_functions import _InternalANSYS
+from pyansys.convert import IsFloat
 
 try:
     import matplotlib.pyplot as plt
@@ -148,6 +149,9 @@ ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 # test for png file
 png_test = re.compile('WRITTEN TO FILE file\d\d\d.png')
+
+IGNORED_COMMANDS = ['*vwr',  # *VWRITE
+                    '*cfo']  # *CFOPEN
 
 
 def CheckValidANSYS():
@@ -334,7 +338,7 @@ class ANSYS(_InternalANSYS):
 
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
                  override=False, loglevel='INFO', additional_switches='',
-                 start_timeout=20, interactive_plotting=False, log_broadcast=True,
+                 start_timeout=20, interactive_plotting=False, log_broadcast=False, #True,
                  check_version=True, prefer_pexpect=False):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
@@ -571,7 +575,17 @@ class ANSYS(_InternalANSYS):
                 return response
 
     def RunCorbaCommand(self, command):
-        """ Sends a command to the mapdl server """
+        """
+        Sends a command to the mapdl server
+
+        Notes
+        -----
+        The /OUTPUT command redirects python logger to file rather than
+        the APDL output.  Redirecting the APDL output will break the
+        connection to the server.
+
+
+        """
         if not self.is_alive:
             raise Exception('ANSYS process has been terminated')
 
@@ -580,15 +594,54 @@ class ANSYS(_InternalANSYS):
         if not command:
             raise Exception('Empty command')
 
-        # calling output may kill the server
-        # if '/output' in command.lower():
-        #     raise Exception('Cannot switch output in APDL server mode')        
+        # These commands break the corba server
+        if command[:4].lower() == '/out':
+            # extract filename from command
+            split_command = command.split(',')
+            if len(split_command) > 2:
+                if split_command[2]:
+                    filename = '.'.join(split_command[1:3])
+                else:
+                    filename = split_command[1]
+            elif len(split_command) > 1:
+                filename = split_command[1]
+            else:
+                self.RemoveFileHandler()
+                return '', ''
+
+            if not filename:
+                self.RemoveFileHandler()
+                return '', ''
+
+            if os.path.isabs(filename):
+                filepath = filename
+            else:
+                filepath = os.path.join(self.path, filename)
+
+            if len(split_command) > 3:
+                append = 'append' in split_command[3]
+            else:
+                append = False
+
+            self.AddFileHandler(filepath, append)
+            return '', ''
+        # elif command[:4] == '*vwr':
+            # vwrite changes stdout, and corba doesn't like that
+            # self.log.warning('Ignoring command "%s"' % command)
+            # return '', ''
+
+        elif command[0] == '(':
+            self.log.warning('Ignoring command "%s"' % command)
+            return '', ''
+        elif command[:4].lower() in IGNORED_COMMANDS:  # breaks corba
+            self.log.warning('Ignoring command "%s"' % command)
+            return '', ''
 
         # include error checking
         text = ''
         additional_text = ''
         try:
-            self.log.info('Running command %s' % command)
+            self.log.debug('Running command %s' % command)
             text = self.mapdl.executeCommandToString(command)
             # print supressed output
             additional_text = self.mapdl.executeCommandToString('/GO')
@@ -598,8 +651,9 @@ class ANSYS(_InternalANSYS):
             if 'omniORB.TRANSIENT_ConnectFailed' in error:
                 self.log.error(error)
                 raise Exception('Unable to send command')
-            elif 'WaitingForReply' in error:
-                log.warning(error)
+            # elif 'WaitingForReply' in error:
+            else:
+                self.log.warning(error)
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:
@@ -628,6 +682,36 @@ class ANSYS(_InternalANSYS):
 
         return text, additional_text
         # return '%s\n%s' % (text, additional_text)
+
+    def LoadParameters(self):
+        # load ansys parameters to python
+        self.Parsav('all')  # saves to file.parm by default
+        filename = os.path.join(self.path, 'file.parm')
+        self.parameters, self.arrays = LoadParameters(filename)
+
+    def AddFileHandler(self, filepath, append):
+        """ Adds a file handler to the log """
+        # import pdb; pdb.set_trace()
+        if append:
+            mode = 'a'
+        else:
+            mode = 'w'
+
+        self.fileHandler = logging.FileHandler(filepath)
+        formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+
+        # self.fileHandler.setFormatter(logging.Formatter(formatstr))
+        # self.log.addHandler(self.fileHandler)
+
+        self.fileHandler = logging.FileHandler(filepath, mode=mode)
+        self.fileHandler.setFormatter(logging.Formatter(formatstr))
+        self.fileHandler.setLevel(logging.DEBUG)
+        self.log.addHandler(self.fileHandler)
+        self.log.info('Added file handler at %s' % filepath)
+
+    def RemoveFileHandler(self):
+        self.log.removeHandler(self.fileHandler)
+        self.log.info('Removed file handler')
 
     def DisplayPlot(self, text):
         """ Check if plot exists based on command output """
@@ -744,7 +828,7 @@ class ANSYS(_InternalANSYS):
 
         # exit if timed out
         if telapsed > timeout:
-            err_msg = 'Unable to start ANSYS within %.1f seconds' % start_timeout
+            err_msg = 'Unable to start ANSYS within %.1f seconds' % timeout
             self.log.error(err_msg)
             raise TimeoutError(err_msg)
 
@@ -765,3 +849,68 @@ class ANSYS(_InternalANSYS):
         self.using_corba = True
         self.log.debug('Connected to ANSYS using CORBA interface')
         self.log.debug('Key %s' % key)
+
+
+def LoadParameters(filename):
+    """ load parameters """
+    parameters = {}
+    arrays = {}
+
+    with open(filename) as f:
+        append_mode = False
+        append_text = []
+        for line in f.readlines():
+            if append_mode:
+                if 'END PREAD' in line:
+                    append_mode = False
+                    values = ''.join(append_text).split(' ')
+                    shp = arrays[append_varname].shape
+                    arrays[append_varname] = np.genfromtxt(values).reshape(shp, order='F')
+                else:
+                    append_text.append(line.replace('\n', '').replace('\r', ''))
+
+            elif '*DIM' in line:
+                # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
+                st = line.find(',') + 1
+                varname = line[st:st+8].strip()
+                split_line = line.split(',')
+                arr_type = split_line[2]
+                imax = int(split_line[3])
+                jmax = int(split_line[4])
+                kmax = int(split_line[5])
+
+                if arr_type == 'CHAR':
+                    arrays[varname] = np.empty((imax, jmax, kmax), dtype='<U8', order='F')
+                if arr_type == 'ARRAY':
+                    arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
+                else:
+                    arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
+
+            elif '*SET' in line:
+                st = line.find(',') + 1
+                varname = line[st:st+8].strip()
+                if varname in arrays:
+                    st = line.find('(') + 1
+                    en = line.find(')')
+                    ind = line[st:en].split(',')
+                    i = int(ind[0]) - 1
+                    j = int(ind[1]) - 1
+                    k = int(ind[2]) - 1
+                    value = line[en+2:].strip().replace("'", '')
+                    arrays[varname][i, j, k] = value
+                else:
+                    # break
+                    st = line.find(',', st)
+                    value = line[st + 1:].strip()
+                    if IsFloat(value):
+                        parameters[varname] = float(value)
+                    else:
+                        parameters[varname] = value
+
+            elif '*PREAD' in line:
+                # read a series of values
+                st = line.find(',') + 1
+                append_varname = line[st:st+8].strip()
+                append_mode = True
+
+    return parameters, arrays

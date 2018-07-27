@@ -43,11 +43,9 @@ def ConvertLine(line, obj='ansys', line_ending='\n'):
 
     # check if first item is a valid command
     if command not in valid_functions:
-        if '/COM' in line:
-            return line.replace('/COM', '# ') + line_ending
-        # elif 'VWRITE' in line:  # ignore vwrite prompts (ansys verification files)
-            # return '%s.Run("%s", ignore_prompt=True)%s' % (obj, line, line_ending)
-        elif '*CREATE' in line:  # now writing to macro
+        # if '*VWR' in line:  # the dreaded vwrite
+            # return '%s' % line_ending
+        if '*CREATE' in line:  # now writing to macro
             newline = '%s.block_override = False%s' % (obj, line_ending)
             newline += '%s.Run("%s")%s' % (obj, line, line_ending)
             return newline
@@ -140,8 +138,9 @@ def ConvertFile(filename_in, filename_out, loglevel='INFO', auto_exit=True,
                 file_out.write(cline)
                 clines.append(cline)
 
-            cline = 'ansys.Exit()%s' % line_ending
-            file_out.write(cline)
-            clines.append(cline)
+            if auto_exit:
+                cline = 'ansys.Exit()%s' % line_ending
+                file_out.write(cline)
+                clines.append(cline)
 
     return clines
