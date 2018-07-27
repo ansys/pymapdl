@@ -212,8 +212,10 @@ def DisplayCellQual(meshtype='tet'):
               rng=[0, 1])
 
 
-def CylinderANSYS(plot_vtk=True, plot_ansys=True, as_test=False):
-    
+def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True, as_test=False):
+    """
+    Cylinder demo for ansys
+    """
     # cylinder parameters
     # torque = 100
     radius = 2
@@ -228,7 +230,7 @@ def CylinderANSYS(plot_vtk=True, plot_ansys=True, as_test=False):
         loglevel = 'ERROR'
     else:
         loglevel = 'INFO'
-    ansys = pyansys.ANSYS(override=True, loglevel=loglevel)
+    ansys = pyansys.ANSYS(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
