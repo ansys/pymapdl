@@ -5,10 +5,10 @@ from pyansys.archive_reader import *
 from pyansys.binary_reader import *
 from pyansys.binary_reader import FullReader
 from pyansys.cellquality import *
+from pyansys.convert import ConvertFile
 
 try:
     from pyansys.ansys import ANSYS
-    from pyansys.convert import ConvertFile
     from pyansys.ansys import ChangeDefaultANSYSPath
 except Exception as e:
     try:
