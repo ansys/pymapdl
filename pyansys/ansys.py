@@ -338,7 +338,7 @@ class ANSYS(_InternalANSYS):
 
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
                  override=False, loglevel='INFO', additional_switches='',
-                 start_timeout=20, interactive_plotting=False, log_broadcast=False, #True,
+                 start_timeout=120, interactive_plotting=False, log_broadcast=False, #True,
                  check_version=True, prefer_pexpect=False):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
@@ -458,7 +458,10 @@ class ANSYS(_InternalANSYS):
         if self.process is None:
             return False
         else:
-            return self.process.poll() is None
+            if self.using_corba:
+                return self.process.poll() is None
+            else:
+                return self.process.isalive()
 
     def StartBroadcastLogger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
@@ -570,9 +573,9 @@ class ANSYS(_InternalANSYS):
             else:  # all else
                 self.log.info(response)
 
-            if return_response:
-                response = self.process.before.decode('utf-8')
-                return response
+            # if return_response:
+            response = self.process.before.decode('utf-8')
+            return response, None
 
     def RunCorbaCommand(self, command):
         """
