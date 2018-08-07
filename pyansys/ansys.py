@@ -681,7 +681,7 @@ class ANSYS(_InternalANSYS):
                 self.log.debug(additional_text)
 
         if self._interactive_plotting:
-            self.DisplayPlot()
+            self.DisplayPlot('%s\n%s' % (text, additional_text))
 
         return text, additional_text
         # return '%s\n%s' % (text, additional_text)
