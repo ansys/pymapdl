@@ -142,5 +142,6 @@ setup(
                       'vtkInterface>=0.9.0',
                       'ansys_corba',
                       'appdirs',
-                      'psutil>=5.0.0']
+                      'psutil>=5.0.0',
+                      'pexpect']
 )
