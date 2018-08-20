@@ -12,5 +12,4 @@ def test_convert(tmpdir):
     assert len(clines)
 
     if pyansys.has_ansys:
-        for line in clines:
-            exec(line)
+        exec(open(pyscript).read())

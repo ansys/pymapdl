@@ -84,9 +84,11 @@ Contents
    :maxdepth: 2
 
    ansys_control
-   examples
+   ansys_functions
+   apdl_conversion
    ansys_examples
    loading_results
+   examples
    loading_km
 
 

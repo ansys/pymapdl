@@ -150,8 +150,11 @@ ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 # test for png file
 png_test = re.compile('WRITTEN TO FILE file\d\d\d.png')
 
-IGNORED_COMMANDS = ['*vwr',  # *VWRITE
-                    '*cfo']  # *CFOPEN
+INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
+                  '*cfo': '',
+                  '*CRE': 'Create a function within python or run as non_interactive',
+                  '*END': 'Create a function within python or run as non_interactive',
+                  '*IF': 'Use a python if or run as non_interactive'}
 
 
 def CheckValidANSYS():
@@ -259,8 +262,6 @@ def SaveANSYSPath(exe_loc=''):
     return exe_loc
 
 
-    
-
 class ANSYS(_InternalANSYS):
     """
     This class opens ANSYS in the background and allows commands to be
@@ -321,28 +322,41 @@ class ANSYS(_InternalANSYS):
         When enabled, will avoid using ansys APDL in CORBA server mode
         and will spawn a process and control it using pexpect.  Default False.
 
+    log_apdl : bool, optional
+        Opens an APDL log file named "log.inp" in the current ANSYS working
+        directory.
+
     Examples
     --------
     >>> import pyansys
     >>> ansys = pyansys.ANSYS()
 
     """
-    # default settings
-    allow_ignore = False
-    block_override = None
-    process = None
-    lockfile = ''
-    _interactive_plotting = False
-    using_corba = None
-    auto_continue = True
 
     def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
                  override=False, loglevel='INFO', additional_switches='',
                  start_timeout=120, interactive_plotting=False, log_broadcast=False, #True,
-                 check_version=True, prefer_pexpect=False):
+                 check_version=True, prefer_pexpect=False, log_apdl=True):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
         self.jobname = jobname
+        self.non_interactive = self._non_interactive(self)
+        self.redirected_commands = {'*LIS': self._List}
+
+        # default settings
+        self.allow_ignore = False
+        self.process = None
+        self.lockfile = ''
+        self._interactive_plotting = False
+        self.using_corba = None
+        self.auto_continue = True
+        self.apdl_log = None
+        self._store_commands = False
+        self._stored_commands = []
+        self.response = None
+        self._output = ''
+        self._outfile = None
+        self._stored_commands = []
 
         if exec_file is None:
             # Load cached path
@@ -385,7 +399,7 @@ class ANSYS(_InternalANSYS):
         if os.path.isfile(self.lockfile):
             if not override:
                 raise Exception('Lock file exists for jobname %s \n' % self.jobname +
-                                ' at %s' % self.lockfile +
+                                ' at %s\n' % self.lockfile +
                                 'Set override=True to delete lock and start ANSYS')
             else:
                 os.remove(self.lockfile)
@@ -416,6 +430,37 @@ class ANSYS(_InternalANSYS):
         # setup plotting for PNG
         if interactive_plotting:
             self.EnableInteractivePlotting()
+
+        if log_apdl:
+            if isinstance(log_apdl, str):
+                filename = log_apdl
+            else:
+                filename = os.path.join(self.path, 'log.inp')
+            self.OpenAPDLLog(filename)
+
+    def OpenAPDLLog(self, filename):
+        """
+        Starts writing all APDL commands to an ANSYS input
+
+        Parameters
+        ----------
+        filename : str
+            Filename of the log
+
+        """
+        if self.apdl_log is not None:
+            raise Exception('APDL command logging already enabled.\n')
+
+        self.log.debug('Opening ANSYS log file at %s' % filename)
+        self.apdl_log = open(filename, 'w', 1)  # line buffered
+        self.apdl_log.write('! APDL script generated using pyansys %s\n' %
+                            pyansys.__version__)
+
+    def CloseAPDLLog(self):
+        """ Closes APDL log """
+        if self.apdl_log is not None:
+            self.apdl_log.close()
+        self.apdl_log = None
 
     def OpenProcess(self, nproc, timeout):
         """ Opens an ANSYS process using pexpect """
@@ -450,9 +495,6 @@ class ANSYS(_InternalANSYS):
     def __enter__(self):
         return self
 
-    def RunCommand(**args):
-        warnings.warn('Depreciated.  Use Run instead')
-
     @property
     def is_alive(self):
         if self.process is None:
@@ -486,78 +528,136 @@ class ANSYS(_InternalANSYS):
         except Exception as e:
             pass
 
-    def Run(self, command):
+    def Run(self, command, write_to_log=True):
+        """
+        Runs APDL command(s)
+
+        Parameters
+        ----------
+        command : str
+            ANSYS APDL command.  
+            
+            These commands will be written to a temporary input file and then run
+            using /INPUT.
+
+        write_to_log : bool, optional
+            Overrides APDL log writing.  Default True.  When set to False, will
+            not write command to log even through APDL command logging is enabled.
+
+        Returns
+        -------
+        command_output : str
+            Command output from ANSYS.
+
+        Notes
+        -----
+        When two or more commands need to be run non-interactively
+        (i.e. *VWRITE) then use
+        
+        >>> with ansys.non_interactive:
+        >>>     ansys.Run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        >>>     ansys.Run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        """
+        if self._store_commands:
+            self._stored_commands.append(command)
+            return
+        elif command[:3].upper() in INVAL_COMMANDS:
+            import pdb; pdb.set_trace()
+            exception = Exception('Invalid pyansys command "%s"\n\n%s' %
+                                  (command, INVAL_COMMANDS[command[:3]]))
+            raise exception
+        elif command[:4].upper() in INVAL_COMMANDS:
+            exception = Exception('Invalid pyansys command "%s"\n\n%s' %
+                                  (command, INVAL_COMMANDS[command[:4]]))
+            raise exception
+        elif write_to_log and self.apdl_log is not None:
+            self.apdl_log.write('%s\n' % command)
+
+        if command[:4] in self.redirected_commands:
+            function = self.redirected_commands[command[:4]]
+            return function(command)
+
+        self.response = self._Run(command).strip()
+        if self.response:
+            self.log.info(self.response)
+            if self._outfile:
+                self._outfile.write('%s\n' % self.response)
+        return self.response
+
+    def _Run(self, command):
         if self.using_corba:
             return self.RunCorbaCommand(command)
         else:
             return self.RunProcessCommand(command)
 
-    def RunProcessCommand(self, command, return_response=False, block=True,
-                          continue_on_error=False, ignore_prompt=False, timeout=None):
+    def _List(self, command):
+        """ Replaces *LIST command """
+        items = command.split(',')
+        filename = os.path.join(self.path, '.'.join(items[1:]))
+        if os.path.isfile(filename):
+            self.response = open(filename).read()
+            self.log.info(self.response)
+        else:
+            raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
+
+    def RunProcessCommand(self, command, return_response=True):
         """ Sends command and returns ANSYS's response """
         if not self.process.isalive():
             raise Exception('ANSYS process closed')
 
-        if self.block_override is not None:
-            block = self.block_override
+        if command[:4].lower() == '/out':
+            items = command.split(',')
+            if len(items) > 1:
+                self._output = '.'.join(items[1:])
+            else:
+                self._output = ''
 
         # send the command
         self.log.debug('Sending command %s' % command)
-        if ignore_prompt:
-            self.log.debug('... with ignore_prompt=True')
         self.process.sendline(command)
 
-        if block:
-            self.log.debug('Waiting: TIMEOUT %s' % str(timeout))
-            while True:
-                i = self.process.expect_list(expect_list, timeout=timeout)
-                response = self.process.before.decode('utf-8')
-                if i >= continue_idx and i < warning_idx:  # continue
-                    self.log.debug('Continue: Response index %i.  Matched %s'
-                                   % (i, ready_items[i].decode('utf-8')))
-                    self.log.info(response + ready_items[i].decode('utf-8'))
-                    if self.auto_continue:
-                        user_input = 'y'
-                    else:
-                        user_input = input('Response: ')
-                    self.process.sendline(user_input)
+        while True:
+            i = self.process.expect_list(expect_list, timeout=None)
+            response = self.process.before.decode('utf-8')
+            if i >= continue_idx and i < warning_idx:  # continue
+                self.log.debug('Continue: Response index %i.  Matched %s'
+                               % (i, ready_items[i].decode('utf-8')))
+                self.log.info(response + ready_items[i].decode('utf-8'))
+                if self.auto_continue:
+                    user_input = 'y'
+                else:
+                    user_input = input('Response: ')
+                self.process.sendline(user_input)
 
-                elif i >= warning_idx and i < error_idx:  # warning
-                    self.log.debug('Prompt: Response index %i.  Matched %s'
-                                   % (i, ready_items[i].decode('utf-8')))
-                    self.log.warning(response + ready_items[i].decode('utf-8'))
-                    if self.auto_continue:
-                        user_input = 'y'
-                    else:
-                        user_input = input('Response: ')
-                    self.process.sendline(user_input)
+            elif i >= warning_idx and i < error_idx:  # warning
+                self.log.debug('Prompt: Response index %i.  Matched %s'
+                               % (i, ready_items[i].decode('utf-8')))
+                self.log.warning(response + ready_items[i].decode('utf-8'))
+                if self.auto_continue:
+                    user_input = 'y'
+                else:
+                    user_input = input('Response: ')
+                self.process.sendline(user_input)
 
-                elif i >= error_idx and i < prompt_idx:  # error
-                    self.log.debug('Error index %i.  Matched %s'
-                                   % (i, ready_items[i].decode('utf-8')))
-                    self.log.error(response)
-                    response += ready_items[i].decode('utf-8')
-                    if continue_on_error:
-                        self.process.sendline(user_input)
-                    else:
-                        raise Exception(response)
+            elif i >= error_idx and i < prompt_idx:  # error
+                self.log.debug('Error index %i.  Matched %s'
+                               % (i, ready_items[i].decode('utf-8')))
+                self.log.error(response)
+                response += ready_items[i].decode('utf-8')
+                raise Exception(response)
 
-                elif i >= prompt_idx:  # prompt
-                    self.log.debug('Prompt index %i.  Matched %s'
-                                   % (i, ready_items[i].decode('utf-8')))
-                    self.log.info(response + ready_items[i].decode('utf-8'))
-                    if ignore_prompt:
-                        self.log.debug('Ignoring prompt')
-                        # time.sleep(0.1)
-                        break
-                    else:
-                        user_input = input('Response: ')
-                        self.process.sendline(user_input)
+            elif i >= prompt_idx:  # prompt
+                self.log.debug('Prompt index %i.  Matched %s'
+                               % (i, ready_items[i].decode('utf-8')))
+                self.log.info(response + ready_items[i].decode('utf-8'))
+                # user_input = input('Response: ')
+                # self.process.sendline(user_input)
+                raise Exception('User input expected.  Try using non_interactive')
 
-                else:  # continue item
-                    self.log.debug('continue index %i.  Matched %s'
-                                   % (i, ready_items[i].decode('utf-8')))
-                    break
+            else:  # continue item
+                self.log.debug('continue index %i.  Matched %s'
+                               % (i, ready_items[i].decode('utf-8')))
+                break
 
             # handle response
             if '*** ERROR ***' in response:  # flag error
@@ -573,20 +673,12 @@ class ANSYS(_InternalANSYS):
             else:  # all else
                 self.log.info(response)
 
-            # if return_response:
-            response = self.process.before.decode('utf-8')
-            return response, None
+        # self.log.info(self.response)
+        return self.process.before.decode('utf-8')
 
     def RunCorbaCommand(self, command):
         """
         Sends a command to the mapdl server
-
-        Notes
-        -----
-        The /OUTPUT command redirects python logger to file rather than
-        the APDL output.  Redirecting the APDL output will break the
-        connection to the server.
-
 
         """
         if not self.is_alive:
@@ -597,66 +689,64 @@ class ANSYS(_InternalANSYS):
         if not command:
             raise Exception('Empty command')
 
-        # These commands break the corba server
-        if command[:4].lower() == '/out':
-            # extract filename from command
+        if command[:4].lower() == '/com':
             split_command = command.split(',')
-            if len(split_command) > 2:
-                if split_command[2]:
-                    filename = '.'.join(split_command[1:3])
+            if len(split_command) < 2:
+                return ''
+            elif not split_command[1]:
+                return ''
+            elif split_command[1]:
+                if not split_command[1].strip():
+                    return ''
+
+        # /OUTPUT not redirected properly in corba
+        if command[:4].lower() == '/out':
+            items = command.split(',')                
+            if len(items) > 1:
+                if len(items) > 2:
+                    if items[2].strip():
+                        filename = '.'.join(items[1:3]).strip()
+                    else:
+                        filename = '.'.join(items[1:2]).strip()
                 else:
-                    filename = split_command[1]
-            elif len(split_command) > 1:
-                filename = split_command[1]
+                    filename = items[1]
+
+                if filename:
+                    if os.path.basename(filename) == filename:
+                        filename = os.path.join(self.path, filename)
+                    self._output = filename
+                    if len(items) == 5:
+                        if items[4].lower().strip() == 'append':
+                            self._outfile = open(filename, 'a')
+                    else:
+                        self._outfile = open(filename, 'w')
             else:
-                self.RemoveFileHandler()
-                return '', ''
-
-            if not filename:
-                self.RemoveFileHandler()
-                return '', ''
-
-            if os.path.isabs(filename):
-                filepath = filename
-            else:
-                filepath = os.path.join(self.path, filename)
-
-            if len(split_command) > 3:
-                append = 'append' in split_command[3]
-            else:
-                append = False
-
-            self.AddFileHandler(filepath, append)
-            return '', ''
-        # elif command[:4] == '*vwr':
-            # vwrite changes stdout, and corba doesn't like that
-            # self.log.warning('Ignoring command "%s"' % command)
-            # return '', ''
-
-        elif command[0] == '(':
-            self.log.warning('Ignoring command "%s"' % command)
-            return '', ''
-        elif command[:4].lower() in IGNORED_COMMANDS:  # breaks corba
-            self.log.warning('Ignoring command "%s"' % command)
-            return '', ''
+                self._output = ''
+                if self._outfile:
+                    self._outfile.close()
+                self._outfile = None
+            return ''
 
         # include error checking
         text = ''
         additional_text = ''
-        try:
-            self.log.debug('Running command %s' % command)
-            text = self.mapdl.executeCommandToString(command)
-            # print supressed output
-            additional_text = self.mapdl.executeCommandToString('/GO')
+        # try:
 
-        except Exception as e:
-            error = str(e)
-            if 'omniORB.TRANSIENT_ConnectFailed' in error:
-                self.log.error(error)
-                raise Exception('Unable to send command')
-            # elif 'WaitingForReply' in error:
-            else:
-                self.log.warning(error)
+        self.log.debug('Running command %s' % command)
+        text = self.mapdl.executeCommandToString(command)
+        # print supressed output
+        additional_text = self.mapdl.executeCommandToString('/GO')
+
+        # except Exception as e:
+        #     error = str(e)
+        #     # if 'omniORB.TRANSIENT_ConnectFailed' in error:
+        #     self.log.error(error)
+        #     raise Exception('Unable to send command: %s' % error)
+        #     # elif 'Write error' in error:
+        #     #     self.log.error(error)
+        #     #     raise Exception('Unable to send command: %s' % error)
+        #     # else:
+        #     #     self.log.warning(error)
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:
@@ -669,22 +759,24 @@ class ANSYS(_InternalANSYS):
             if '*** ERROR ***' in text:
                 self.log.error(text)
                 raise Exception(text)
-            else:
-                self.log.info(text)
+            # else:
+                # self.log.info(text)
 
         if additional_text:
             additional_text = additional_text.replace('\\n', '\n')
             if '*** ERROR ***' in additional_text:
                 self.log.error(additional_text)
                 raise Exception(additional_text)
-            else:
-                self.log.debug(additional_text)
+            # else:
+                # self.log.debug(additional_text)
 
         if self._interactive_plotting:
             self.DisplayPlot('%s\n%s' % (text, additional_text))
 
-        return text, additional_text
-        # return '%s\n%s' % (text, additional_text)
+        # return text, additional_text
+        if text == additional_text:
+            additional_text = ''
+        return '%s\n%s' % (text, additional_text)
 
     def LoadParameters(self):
         # load ansys parameters to python
@@ -736,6 +828,7 @@ class ANSYS(_InternalANSYS):
     def __del__(self):
         # clean up when complete
         self.Kill()
+        self.CloseAPDLLog()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # clean up when complete
@@ -758,6 +851,7 @@ class ANSYS(_InternalANSYS):
                 raise Exception(e)
 
         self.log.info('ANSYS exited')
+        self.apdl_log.close()
 
     def Kill(self):
         """ Forces ANSYS process to end and removes lock file """
@@ -852,6 +946,61 @@ class ANSYS(_InternalANSYS):
         self.using_corba = True
         self.log.debug('Connected to ANSYS using CORBA interface')
         self.log.debug('Key %s' % key)
+
+    class _non_interactive:
+        """ 
+        Allows user to enter commands that need to run non-interactively
+
+        Examples
+        --------
+        To use an non-interactive command like *VWRITE, use:
+
+        with ansys.non_interactive:
+            ansys.Run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+            ansys.Run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+
+        """
+        def __init__(self, parent):
+            self.parent = parent
+        def __enter__(self):
+            self.parent.log.debug('entering non-interactive mode')
+            self.parent._store_commands = True
+        def __exit__(self, type, value, traceback):
+            self.parent.log.debug('entering non-interactive mode')
+            self.parent._FlushStored()
+
+    def _FlushStored(self):
+        """
+        Writes stored commands to an input file and runs the input file.
+        Used with non_interactive.
+        """
+        self.log.debug('Flushing stored commands')
+        temp_out = os.path.join(self.path, 'tmp.out')
+        self._stored_commands.insert(0, '/OUTPUT, %s' % temp_out)
+        self._stored_commands.append('/OUTPUT')
+        commands = '\n'.join(self._stored_commands)
+        self.apdl_log.write(commands + '\n')
+
+        # write to an input file
+        base_name = 'tmp.inp'
+        filename = os.path.join(self.path, 'tmp.inp')
+        self.log.debug('Writing the following commands to a temporary ' +
+                       'apdl input file:\n%s' % commands)
+        with open(filename, 'w') as f:
+            f.writelines(commands)
+
+        # import pdb; pdb.set_trace()
+        self._store_commands = False
+        self._stored_commands = []
+        self.Run('/INPUT, %s' % filename, write_to_log=False)
+        self.response = '\n' + open(temp_out).read()
+
+        # clean up output file
+        self.Run('/OUTPUT, %s, , , APPEND' % self._output)
+        for line in open(temp_out).readlines():
+            self.Run('/COM,%s\n' % line[:74])
+
+        self.log.info(self.response)
 
 
 def LoadParameters(filename):

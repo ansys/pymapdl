@@ -6,6 +6,7 @@ import os
 import pyansys
 from vtkInterface.plotting import RunningXServer
 
+__file__ = "/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py"
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
@@ -18,14 +19,13 @@ class TestCyclicResultReader(object):
     result_file = os.path.join(data_path, 'cyclic_%s.rst' % rver)
     try:
         result = pyansys.Result(result_file)
-        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='WARNING',
-                              interactive_plotting=False)
+        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='DEBUG', #loglevel='WARNING',
+                              interactive_plotting=False, prefer_pexpect=True)
 
         # copy result file to ansys's temporary path
         copyfile(result_file, os.path.join(ansys.path, '%s.rst' % rver))
 
         # setup ansys for output without line breaks
-        # import pdb; pdb.set_trace()
         ansys.Post1()
         ansys.Set(1, 1)
         ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
@@ -38,8 +38,11 @@ class TestCyclicResultReader(object):
 
     def test_prnsol_u(self):
         # verify cyclic displacements
-        table = self.ansys.Prnsol('u')[1].splitlines()
-        array = np.genfromtxt(table[7:])
+        table = self.ansys.Prnsol('u').splitlines()
+        if self.ansys.using_corba:
+            array = np.genfromtxt(table[7:])
+        else:
+            array = np.genfromtxt(table[9:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_disp = array[:, 1:-1]
 
@@ -59,23 +62,25 @@ class TestCyclicResultReader(object):
         enode = np.hstack(enode)
 
         # parse ansys result
-        table = self.ansys.Presol('S')[1].splitlines()
+        table = self.ansys.Presol('S').splitlines()
         ansys_element_stress = []
-        line_length = len(table[100])
+        line_length = len(table[15])
         for line in table:
             if len(line) == line_length:
                 ansys_element_stress.append(line)
         ansys_element_stress = np.genfromtxt(ansys_element_stress)
         ansys_enode = ansys_element_stress[:, 0].astype(np.int)
         ansys_element_stress = ansys_element_stress[:, 1:]
-
         assert np.allclose(element_stress, ansys_element_stress)
         assert np.allclose(enode, ansys_enode)
 
     def test_prnsol_s(self):
         # verify cyclic displacements
-        table = self.ansys.Prnsol('s')[1].splitlines()
-        array = np.genfromtxt(table[7:])
+        table = self.ansys.Prnsol('s').splitlines()
+        if self.ansys.using_corba:
+            array = np.genfromtxt(table[7:])
+        else:
+            array = np.genfromtxt(table[10:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
@@ -91,8 +96,11 @@ class TestCyclicResultReader(object):
 
     def test_prnsol_prin(self):
         # verify principal stress
-        table = self.ansys.Prnsol('prin')[1].splitlines()
-        array = np.genfromtxt(table[7:])
+        table = self.ansys.Prnsol('prin').splitlines()
+        if self.ansys.using_corba:
+            array = np.genfromtxt(table[7:])
+        else:
+            array = np.genfromtxt(table[10:])
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
@@ -116,3 +124,6 @@ class TestCyclicResultReader(object):
 
     def test_exit(self):
         self.ansys.Exit()
+
+# self = TestCyclicResultReader()
+# self.test_prnsol_u()

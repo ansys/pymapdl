@@ -1,6 +1,5 @@
-Examples
-========
-
+Archive Result File Examples
+============================
 These examples show how ANSYS binary and ASCII files can be read and displayed using pyansys.  These examples are meant to demonstrate the capabilities of pyansys.  For more details see the other reference pages.
 
 Loading and Plotting an ANSYS Archive File
