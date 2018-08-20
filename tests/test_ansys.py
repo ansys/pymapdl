@@ -6,7 +6,6 @@ import os
 import pyansys
 from vtkInterface.plotting import RunningXServer
 
-__file__ = "/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py"
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
