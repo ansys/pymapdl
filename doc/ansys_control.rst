@@ -510,6 +510,8 @@ While ``pyansys`` is designed to make it easier to control an APDL session by ca
 
 Will write the following to ``"log.inp"``:
 
+.. code::
+
     ! APDL script generated using pyansys 0.30.1
     /PREP7,
     K,1,0,0,0
