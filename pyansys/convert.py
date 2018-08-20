@@ -238,25 +238,25 @@ class FileTranslator():
                     c += 1
 
             line = '%s%s.Run("%s".format(%s))%s' % (self.indent, self.obj_name, command,
-                                                    ', '.join(args), self._line_ending)
+                                                    ', '.join(args), self.line_ending)
 
         elif self.comment:
             line = '%s%s.Run("%s")  # %s%s' % (self.indent, self.obj_name, command,
-                                            self.comment, self._line_ending)
+                                            self.comment, self.line_ending)
         else:
             line = '%s%s.Run("%s")%s' % (self.indent, self.obj_name, command,
-                                         self._line_ending)
+                                         self.line_ending)
 
         self.lines.append(line)
 
     def StoreComment(self):
         """ Stores a line containing only a comment """
-        line = '%s# %s%s' % (self.indent, self.comment, self._line_ending)
+        line = '%s# %s%s' % (self.indent, self.comment, self.line_ending)
         self.lines.append(line)
 
     def StoreEmptyLine(self):
         """ Stores an empty line """
-        self.lines.append(self._line_ending)
+        self.lines.append(self.line_ending)
 
     def StoreCommand(self, function, parameters):
         """ Stores a valid pyansys function with parameters """
@@ -273,10 +273,10 @@ class FileTranslator():
         parameter_str = ', '.join(parsed_parameters)
         if self.comment:
             line = '%s%s.%s(%s)  #%s%s' % (self.indent, self.obj_name, function,
-                                           parameter_str, self.comment, self._line_ending)
+                                           parameter_str, self.comment, self.line_ending)
         else:
             line = '%s%s.%s(%s)%s' % (self.indent, self.obj_name, function,
-                                      parameter_str, self._line_ending)
+                                      parameter_str, self.line_ending)
 
         self.lines.append(line)
 
