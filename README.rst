@@ -62,7 +62,8 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
     ansys.Save()
     ansys.Exit()
 
-.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/aplot.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/aplot.png
+    :width: 500pt
 
 
 Loading and Plotting an ANSYS Archive File
@@ -92,7 +93,8 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     # write this as a vtk xml file 
     grid.Write('hex.vtu')
 
-.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam.png
+    :width: 500pt
 
 You can then load this vtk file using vtkInterface or another program that uses VTK.
     
@@ -153,7 +155,8 @@ You can plot results as well directly from the file as well.
     # Plot the nodal stress in the 'x' direction for the 6th result
     result.PlotNodalStress(5, 'Sx')
 
-.. image:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_stress.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_stress.png
+    :width: 500pt
 
 
 Reading a Full File

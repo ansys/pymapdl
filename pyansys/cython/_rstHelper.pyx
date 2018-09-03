@@ -93,10 +93,11 @@ def LoadNodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
         loc += 8
         for j in range(6):
             nloc[i, j] = GetDouble(&p[loc + j*8])
-    
-    
+
+
 def LoadElements(filename, int ptr, int nelm, 
-                 e_disp_table_py, int [:, ::1] elem, int [::1] etype):
+                 e_disp_table_py, int [:, ::1] elem, int [::1] etype, int [::1] mtype,
+                 int [::1] rcon):
     """
     The following is stored for each element
     mat     - material reference number
@@ -132,10 +133,11 @@ def LoadElements(filename, int ptr, int nelm,
 
         # determine number of nodes in element by getting entries in fortran header
         nread = GetInt(&p[loc])
-        
-        # read in element type
-        etype[i] = GetInt(&p[loc + 12])
-        
+        # blank
+        mtype[i] = GetInt(&p[loc + 8])  # material type
+        etype[i] = GetInt(&p[loc + 12])  # element type
+        rcon[i] = GetInt(&p[loc + 16])  # real constant reference number
+
         # read in nodes
         for j in range(12, nread + 2):
             elem[i, j - 12] = GetInt(&p[loc + 4*j])

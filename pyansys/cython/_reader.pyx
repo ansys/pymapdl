@@ -13,11 +13,11 @@ import numpy as np
 cimport numpy as np
 
 import ctypes
-from libc.stdint cimport int32_t, int64_t
+from libc.stdint cimport int64_t
 
 # Numpy must be initialized. When using numpy from C or Cython you must
 # _always_ do that, or you will have segfaults
-np.import_array()
+# np.import_array()
 
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int, int, int*, int, int)
@@ -233,12 +233,12 @@ def Read(filename):
             
             
     # Initialize element data array.  Use number of lines as nelem is unknown
-    cdef int [:, ::1] elem = np.empty((nelem, 20), dtype=np.int32)
-    cdef int [::1] etype = np.empty(nelem, dtype=np.int32)
-    cdef int [::1] elemnum = np.empty(nelem, dtype=np.int32)
-    cdef int [::1] e_rcon = np.empty(nelem, dtype=np.int32)
-    cdef int [::1] mtype = np.empty(nelem, dtype=np.int32)
-    cdef int [::1] sec_id = np.empty(nelem, dtype=np.int32)
+    cdef int [:, ::1] elem = np.empty((nelem, 20), dtype=ctypes.c_int)
+    cdef int [::1] etype = np.empty(nelem, dtype=ctypes.c_int)
+    cdef int [::1] elemnum = np.empty(nelem, dtype=ctypes.c_int)
+    cdef int [::1] e_rcon = np.empty(nelem, dtype=ctypes.c_int)
+    cdef int [::1] mtype = np.empty(nelem, dtype=ctypes.c_int)
+    cdef int [::1] sec_id = np.empty(nelem, dtype=ctypes.c_int)
 
     # Call C extention to read eblock
     if EBLOCK_found:
@@ -267,7 +267,7 @@ def Read(filename):
 
                 # Get number of items
                 ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
-                component = np.empty(ncomp, np.int32)
+                component = np.empty(ncomp, ctypes.c_int)
 
                 # Get interger size
                 myfgets(line, raw, &n, fsize)
@@ -308,7 +308,7 @@ def Read(filename):
             'e_rcon': np.asarray(e_rcon[:nelem]),
             'node_comps': node_comps,
             'elem_comps': elem_comps,
-            'mtype': np.asarray(mtype),
+            'mtype': np.asarray(mtype),  # material type
             'sec_id': np.asarray(sec_id)}
 
 
@@ -325,7 +325,7 @@ def Read(filename):
 
 #     # Get number of items
 #     ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
-#     component = np.empty(ncomp, np.int32)
+#     component = np.empty(ncomp, ctypes.c_int)
 
 #     # Get interger size
 #     myfgets(line, raw, &n, fsize)
@@ -384,4 +384,4 @@ def ComponentInterperter(component):
         else: # otherwise, append list
             f_new.append(range(abs(component[i - 1]) + 1, abs(component[i]) + 1))
     
-    return np.hstack(f_new).astype(np.int32)
+    return np.hstack(f_new).astype(ctypes.c_int)

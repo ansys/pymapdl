@@ -222,19 +222,19 @@ cdef inline void StoreTet(int64_t [::1] offset, int64_t *ecount, int64_t *ccount
 
     # edge nodes
     # [0, 1, 2, 2, 3, 3, 3, 3]
-    cells[ccount[0]] = numref[elem[i, 0]]; ccount[0] += 1
-    cells[ccount[0]] = numref[elem[i, 1]]; ccount[0] += 1
-    cells[ccount[0]] = numref[elem[i, 2]]; ccount[0] += 1
-    cells[ccount[0]] = numref[elem[i, 4]]; ccount[0] += 1
+    cells[ccount[0]] = numref[elem[i, 0]]; ccount[0] += 1  # 0
+    cells[ccount[0]] = numref[elem[i, 1]]; ccount[0] += 1  # 1
+    cells[ccount[0]] = numref[elem[i, 2]]; ccount[0] += 1  # 2
+    cells[ccount[0]] = numref[elem[i, 4]]; ccount[0] += 1  # 3
         
     # midside nodes
     if not lin:
-        cells[ccount[0]] = numref[elem[i,  8]]; ccount[0] += 1
-        cells[ccount[0]] = numref[elem[i,  9]]; ccount[0] += 1
-        cells[ccount[0]] = numref[elem[i, 11]]; ccount[0] += 1
-        cells[ccount[0]] = numref[elem[i, 16]]; ccount[0] += 1
-        cells[ccount[0]] = numref[elem[i, 17]]; ccount[0] += 1
-        cells[ccount[0]] = numref[elem[i, 18]]; ccount[0] += 1
+        cells[ccount[0]] = numref[elem[i,  8]]; ccount[0] += 1  # 4
+        cells[ccount[0]] = numref[elem[i,  9]]; ccount[0] += 1  # 5
+        cells[ccount[0]] = numref[elem[i, 11]]; ccount[0] += 1  # 6
+        cells[ccount[0]] = numref[elem[i, 16]]; ccount[0] += 1  # 7
+        cells[ccount[0]] = numref[elem[i, 17]]; ccount[0] += 1  # 8
+        cells[ccount[0]] = numref[elem[i, 18]]; ccount[0] += 1  # 9
 
     # increment element counter
     ecount[0] += 1
@@ -467,12 +467,12 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             linetype[i] = int(atype)
 
     # arrays (efficiency warning astype is copying)
-    cdef int [:, ::1] ekey = raw['ekey'].astype(ctypes.c_int)
-    cdef int [:, ::1] elem = raw['elem'].astype(ctypes.c_int)
-    cdef int [::1] etype = raw['etype'].astype(ctypes.c_int)
-    cdef int [::1] nnum = raw['nnum'].astype(ctypes.c_int)
-    cdef int [::1] raw_enum = raw['enum'].astype(ctypes.c_int)
-    cdef int [::1] raw_rcon = raw['e_rcon'].astype(ctypes.c_int)
+    cdef int [:, ::1] ekey = raw['ekey']  # .astype(ctypes.c_int)
+    cdef int [:, ::1] elem = raw['elem']  # .astype(ctypes.c_int)
+    cdef int [::1] etype = raw['etype']  # .astype(ctypes.c_int)
+    cdef int [::1] nnum = raw['nnum']  # .astype(ctypes.c_int)
+    cdef int [::1] raw_enum = raw['enum']  # .astype(ctypes.c_int)
+    cdef int [::1] raw_rcon = raw['e_rcon']  # .astype(ctypes.c_int)
     
     cdef int nelem = elem.shape[0]
     cdef int nnode = nnum.shape[0]
@@ -481,6 +481,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     cdef int [::1] enum = np.empty(nelem, ctypes.c_int)
     cdef int [::1] etype_out = np.empty(nelem, ctypes.c_int)
     cdef int [::1] rcon = np.empty(nelem, ctypes.c_int)
+
+    # input and output material type
+    cdef int [::1] raw_mtype = raw['mtype']  # .astype(ctypes.c_int)
+    cdef int [::1] mtype = np.empty(nelem, ctypes.c_int)
+
+    # ansys numbering etype
+    cdef int [::1] ansys_etype = np.empty(nelem, ctypes.c_int)
 
     # Find the max element type number
     cdef int nekey = ekey.shape[0]
@@ -499,7 +506,8 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     cdef uint8 [::1] cell_type = np.empty(nelem, dtype='uint8')
     
     # different array sizes depending on midside nodes
-    cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)  # max cell is 20 and header is 1
+    # max cell is 20 and header is 1
+    cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)
     
     # Find the highest node number
     cdef int maxnodenum = 0
@@ -510,16 +518,7 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     # Create reference array for node renumbering
     cdef int64_t n
     cdef int64_t [::1] numref = np.empty(maxnodenum + 2, ctypes.c_int64)
-#    numref[0]  = -1 # elements that have missing nodes written as a "0" in cdb
-#
-#    # elements that have missing nodes, but were written such that those
-#    # missing nodes were at the end of the line and were simply not written
-#    # will be stored as a -1
-#    numref[-1] = -1
-
-    # forcing all to -1 to avoid null references
-    numref[:] = -1
-          
+    numref[:] = -1  # to avoid null references
     for n in range(nnode):
         numref[nnum[n]] = n
     
@@ -538,7 +537,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
-                
+
+                # store material type
+                mtype[ecount] = raw_mtype[i]
+
+                # ANSYS etype
+                ansys_etype[ecount] = etype[i]
+
                 # Set to read quadradic nodes
                 if force_linear:
                     lin = 1
@@ -572,6 +577,12 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
 
+                # store material type
+                mtype[ecount] = raw_mtype[i]
+
+                # ANSYS etype
+                ansys_etype[ecount] = etype[i]
+
                 if force_linear:
                     lin = 1
                 else:
@@ -588,6 +599,12 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
+
+                # store material type
+                mtype[ecount] = raw_mtype[i]
+
+                # ANSYS etype
+                ansys_etype[ecount] = etype[i]
 
                 if force_linear:
                     lin = 1
@@ -610,6 +627,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype
                 rcon[ecount] = raw_rcon[i]
+
+                # store material type
+                mtype[ecount] = raw_mtype[i]
+
+                # ANSYS etype
+                ansys_etype[ecount] = etype[i]
+
                 lin = 1
                 StoreLine(offset, &ecount, &ccount, cells, cell_type, 
                              numref, elem, i, lin)
@@ -619,6 +643,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             enum[ecount] = raw_enum[i]
             etype_out[ecount] = elem_etype
             rcon[ecount] = raw_rcon[i]
+
+            # store material type
+            mtype[ecount] = raw_mtype[i]
+
+            # ANSYS etype
+            ansys_etype[ecount] = etype[i]
+
             offset[ecount] = ccount
 
             # add null cell
@@ -627,8 +658,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             cell_type[ecount] = VTK_EMPTY_CELL
             ecount += 1
 
-
-    return np.asarray(cells[:ccount]), np.asarray(offset[:ecount]), \
-           np.asarray(cell_type[:ecount]), np.asarray(numref), \
-           np.asarray(enum[:ecount]), np.asarray(etype_out[:ecount]), \
-           np.asarray(rcon[:ecount])
+    return {'cells': np.asarray(cells[:ccount]),
+            'offset': np.asarray(offset[:ecount]),
+            'cell_type': np.asarray(cell_type[:ecount]),
+            'numref': np.asarray(numref),
+            'enum': np.asarray(enum[:ecount]),
+            'etype': np.asarray(etype_out[:ecount]),
+            'rcon': np.asarray(rcon[:ecount]),
+            'mtype': np.asarray(mtype[:ecount]),
+            'ansys_etype': np.asarray(ansys_etype[:ecount]),
+            }

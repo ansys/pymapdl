@@ -97,9 +97,13 @@ class ReadArchive(object):
                     raise Exception('Element type "%s" ' % eletype +
                                     'cannot be parsed in pyansys')
 
-        result = _parser.Parse(self.raw, force_linear, allowable_types,
-                               null_unallowed)
-        cells, offset, cell_type, numref, enum, etype, rcon = result
+        # parse raw output
+        parsed = _parser.Parse(self.raw, force_linear, allowable_types, null_unallowed)
+        cells = parsed['cells']
+        offset = parsed['offset']
+        cell_type = parsed['cell_type']
+        numref = parsed['numref']        
+        enum = parsed['enum']
 
         # catch bug
         cells[cells > numref.max()] = -1
@@ -108,7 +112,6 @@ class ReadArchive(object):
         if force_linear or np.all(cells != -1):
             nodes = self.raw['nodes'][:, :3].copy()
             nnum = self.raw['nnum']
-
         else:
             mask = cells == -1
 
@@ -145,14 +148,15 @@ class ReadArchive(object):
         # Create unstructured grid
         grid = vtkInterface.UnstructuredGrid(offset, cells, cell_type, nodes)
 
-        # Store original ANSYS numbering
+        # Store original ANSYS element and cell information
         grid.AddPointScalars(nnum, 'ANSYSnodenum')
         grid.AddCellScalars(enum, 'ANSYS_elem_num')
-        grid.AddCellScalars(etype, 'ANSYS_elem_typenum')
-        grid.AddCellScalars(rcon, 'ANSYS_real_constant')
+        grid.AddCellScalars(parsed['etype'], 'ANSYS_elem_typenum')
+        grid.AddCellScalars(parsed['rcon'], 'ANSYS_real_constant')
+        grid.AddCellScalars(parsed['mtype'], 'ansys_material_type')
+        grid.AddCellScalars(parsed['ansys_etype'], 'ansys_etype')
 
         # Add element components to unstructured grid
-        # ibool = np.empty(grid.GetNumberOfCells(), dtype=np.int8)
         for comp in self.raw['elem_comps']:
             mask = np.in1d(enum, self.raw['elem_comps'][comp], assume_unique=True)
             grid.AddCellScalars(mask, comp.strip())
@@ -160,7 +164,7 @@ class ReadArchive(object):
         # Add node components to unstructured grid
         ibool = np.empty(grid.GetNumberOfPoints(), dtype=np.int8)
         for comp in self.raw['node_comps']:
-            ibool[:] = 0  # reset component array
+            ibool[:] = 0
 
             # Convert to new node numbering
             nodenum = numref[self.raw['node_comps'][comp]]
@@ -168,14 +172,12 @@ class ReadArchive(object):
             ibool[nodenum] = 1
             grid.AddPointScalars(ibool, comp.strip())
 
-        grid.AddPointScalars(np.arange(grid.points.shape[0]), 'origid')
-
         # Add tracker for original node numbering
-        npoints = grid.GetNumberOfPoints()
-        grid.AddPointScalars(np.arange(npoints), 'VTKorigID')
+        ind = np.arange(grid.GetNumberOfPoints())
+        grid.AddPointScalars(ind, 'origid')
+        grid.AddPointScalars(ind, 'VTKorigID')
 
         self.vtkuGrid = grid
-
         return grid
 
     def CheckRaw(self):

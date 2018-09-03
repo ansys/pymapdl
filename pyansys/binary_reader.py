@@ -714,9 +714,12 @@ class Result(object):
         elem = np.empty((nelm, 20), np.int32)
         elem[:] = -1
 
+        mtype = np.empty(nelm, np.int32)
+        rcon = np.empty(nelm, np.int32)
+
         # load elements
         _rstHelper.LoadElements(self.filename, ptr, nelm, e_disp_table, elem,
-                                etype)
+                                etype, mtype, rcon)
         enum = self.resultheader['eeqv']
 
         element_type = np.zeros_like(etype)
@@ -729,23 +732,26 @@ class Result(object):
                          'etype': etype,
                          'elem': elem,
                          'enum': enum,
-                         'ekey': np.asarray(ekey, ctypes.c_int64),
-                         'e_rcon': np.ones_like(enum),
+                         'ekey': np.asarray(ekey, ctypes.c_int),
+                         'e_rcon': rcon,
+                         'mtype': mtype,
                          'Element Type': element_type}
 
         # store the reference array
         # Allow quadradic and null unallowed
-        result = _parser.Parse(self.geometry, False, valid_types, True)
-        cells, offset, cell_type, self.numref, _, _, _ = result
+        parsed = _parser.Parse(self.geometry, False, valid_types, True)
+        cells = parsed['cells']
+        offset = parsed['offset']
+        cell_type = parsed['cell_type']
+        self.numref = parsed['numref']        
 
         # catch -1
         cells[cells == -1] = 0
-        # cells[cells >= nnum.size] = 0
 
         # identify nodes that are actually in the solution
         self.insolution = np.in1d(self.geometry['nnum'], self.resultheader['neqv'])
 
-        # Create vtk object if vtk installed
+        # Create vtk object
         nodes = nloc[:, :3]
         self.quadgrid = vtkInterface.UnstructuredGrid(offset, cells,
                                                       cell_type, nodes)

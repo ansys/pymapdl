@@ -6,6 +6,7 @@ from pyansys.binary_reader import *
 from pyansys.binary_reader import FullReader
 from pyansys.cellquality import *
 from pyansys.convert import ConvertFile
+from pyansys.write_archive import WriteNBLOCK, WriteArchive
 
 try:
     from pyansys.ansys import ANSYS
