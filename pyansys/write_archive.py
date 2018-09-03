@@ -487,6 +487,8 @@ def WriteCMBLOCK(filename, items, comp_name, comp_type, digit_width=10):
     for chunk in chunks(toprint, 8):
         lines.append(''.join([digit_formatter] * len(chunk)) % tuple(chunk))
 
+    lines.append('')
+
     # write file
     if sys.version_info[0] == 3:
         string_types = str

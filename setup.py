@@ -139,7 +139,7 @@ setup(
                                        'file.rst', 'file.full']},
 
     install_requires=['numpy>1.9.3',
-                      'vtkInterface>=0.9.0',
+                      'vtkInterface>=0.10.2',
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
