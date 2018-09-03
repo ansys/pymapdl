@@ -356,7 +356,6 @@ class ANSYS(_InternalANSYS):
         self.response = None
         self._output = ''
         self._outfile = None
-        self._stored_commands = []
 
         if exec_file is None:
             # Load cached path
@@ -577,7 +576,12 @@ class ANSYS(_InternalANSYS):
             function = self.redirected_commands[command[:4]]
             return function(command)
 
-        self.response = self._Run(command).strip()
+        text = self._Run(command)
+        if text:
+            self.response = text.strip()
+        else:
+            self.response = ''
+
         if self.response:
             self.log.info(self.response)
             if self._outfile:
@@ -586,7 +590,14 @@ class ANSYS(_InternalANSYS):
 
     def _Run(self, command):
         if self.using_corba:
-            return self.RunCorbaCommand(command)
+            # check if it's a single non-interactive command
+            if command[:4].lower() == 'cdre':
+                with self.non_interactive:
+                    return self.Run(command)
+                # self._stored_commands.append(command)
+                # self.parent._FlushStored()
+            else:
+                return self.RunCorbaCommand(command)
         else:
             return self.RunProcessCommand(command)
 
@@ -615,6 +626,12 @@ class ANSYS(_InternalANSYS):
         # send the command
         self.log.debug('Sending command %s' % command)
         self.process.sendline(command)
+
+        # do not expect
+        if '/MENU' in command:
+            log.info('Enabling GUI')
+            self.process.sendline(command)
+            return
 
         while True:
             i = self.process.expect_list(expect_list, timeout=None)
@@ -670,10 +687,9 @@ class ANSYS(_InternalANSYS):
                     raise Exception(response)
                 else:
                     self.log.warning(response)
-            else:  # all else
+            else:
                 self.log.info(response)
 
-        # self.log.info(self.response)
         return self.process.before.decode('utf-8')
 
     def RunCorbaCommand(self, command):
@@ -701,8 +717,16 @@ class ANSYS(_InternalANSYS):
 
         # /OUTPUT not redirected properly in corba
         if command[:4].lower() == '/out':
-            items = command.split(',')                
-            if len(items) > 1:
+            items = command.split(',')
+
+            if len(items) < 2:  # empty comment
+                return ''
+            elif not items[1]:  # empty comment
+                return ''
+            elif items[1]:
+                if not items[1].strip():    # empty comment
+                    return ''
+            elif len(items) > 1:  # redirect to file
                 if len(items) > 2:
                     if items[2].strip():
                         filename = '.'.join(items[1:3]).strip()
@@ -730,23 +754,12 @@ class ANSYS(_InternalANSYS):
         # include error checking
         text = ''
         additional_text = ''
-        # try:
 
         self.log.debug('Running command %s' % command)
         text = self.mapdl.executeCommandToString(command)
+
         # print supressed output
         additional_text = self.mapdl.executeCommandToString('/GO')
-
-        # except Exception as e:
-        #     error = str(e)
-        #     # if 'omniORB.TRANSIENT_ConnectFailed' in error:
-        #     self.log.error(error)
-        #     raise Exception('Unable to send command: %s' % error)
-        #     # elif 'Write error' in error:
-        #     #     self.log.error(error)
-        #     #     raise Exception('Unable to send command: %s' % error)
-        #     # else:
-        #     #     self.log.warning(error)
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:
@@ -759,16 +772,12 @@ class ANSYS(_InternalANSYS):
             if '*** ERROR ***' in text:
                 self.log.error(text)
                 raise Exception(text)
-            # else:
-                # self.log.info(text)
 
         if additional_text:
             additional_text = additional_text.replace('\\n', '\n')
             if '*** ERROR ***' in additional_text:
                 self.log.error(additional_text)
                 raise Exception(additional_text)
-            # else:
-                # self.log.debug(additional_text)
 
         if self._interactive_plotting:
             self.DisplayPlot('%s\n%s' % (text, additional_text))

@@ -85,7 +85,7 @@ def WriteArchive(filename, grid, mat_num=1, etype_start=1,
 
     # element type
     etype = grid.GetCellScalars('ansys_etype')
-    typenum = grid.cell_arrays['ANSYS_elem_typenum']
+    typenum = grid.GetCellScalars('ANSYS_elem_typenum')
     if etype is None:
         log.info('No ANSYS element type set in input.  ' +
                  'Adding default range starting from %d' % etype_start)
