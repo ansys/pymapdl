@@ -136,7 +136,8 @@ setup(
 
     keywords='vtk ANSYS cdb full rst',
     package_data={'pyansys.examples': ['TetBeam.cdb', 'HexBeam.cdb',
-                                       'file.rst', 'file.full']},
+                                       'file.rst', 'file.full',
+                                       'sector.cdb']},
 
     install_requires=['numpy>1.9.3',
                       'vtkInterface>=0.10.2',

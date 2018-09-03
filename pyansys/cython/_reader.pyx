@@ -164,7 +164,6 @@ def Read(filename):
                 # Call C extention to read eblock
                 nelem = read_eblock(raw, &mtype[0], &etype[0], &e_rcon[0], &sec_id[0],
                                     &elemnum[0], &elem[0, 0], nelem, isz, &n, EOL)
-                break
 
         elif 'R' == line[0]:
             if b'RLBLOCK' in line:
