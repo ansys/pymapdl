@@ -1,2 +1,3 @@
 include pyansys/cython/*.h
 include tests/*
+include pyansys/examples/sector.cdb
