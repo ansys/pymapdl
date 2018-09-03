@@ -1,3 +1,4 @@
+import sys
 import logging
 import os
 import numpy as np
@@ -329,7 +330,7 @@ def WriteNBLOCK(filename, node_id, pos, raw=None, writeangle=None,
 
     Parameters
     ----------
-    filename : filename or file handle
+    filename : str or file handle
         Filename to write node block to.
 
     node_id : np.ndarray
@@ -431,3 +432,71 @@ def WriteNBLOCK(filename, node_id, pos, raw=None, writeangle=None,
             newline='\r\n')
 
 
+def WriteCMBLOCK(filename, items, comp_name, comp_type, digit_width=10):
+    """
+    Writes a CMBLOCK to file.
+
+    Parameters
+    ----------
+    filename : str or file handle
+        File to write CMBLOCK component to
+
+    items : list or np.ndarray
+        Element or node numbers to write.
+
+    comp_name : str
+        Name of the component
+
+    comp_type : str
+        Component type to write.  Should be either 'element' or 'node'.
+    
+    digit_width : int, optional
+        Default 10
+    """
+    items = np.unique(items)
+
+    toprint = []
+    toprint.append(items[0])
+    for i, value in enumerate(np.diff(items)):
+        if value == 1:
+            continue
+        else:
+            if items[i - 1] + 1 == items[i]:
+                toprint.append(-items[i])
+                toprint.append(items[i + 1])
+            else:
+                toprint.append(items[i + 1])
+
+    # catch if last item is part of a list
+    if toprint[-1] != abs(items[-1]):
+        toprint.append(-items[i + 1])
+
+    nitems = len(toprint)
+    lines = []
+    lines.append('CMBLOCK,%s,%s,%8d  ! from pyansys' % (comp_name.upper(),
+                                                        comp_type.upper(),
+                                                        nitems))
+    lines.append('(8i%d)' % digit_width)
+    digit_formatter = '%' + '%d' % digit_width + 'd'
+
+    def chunks(l, n):
+        """Yield successive n-sized chunks from l."""
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+    
+    for chunk in chunks(toprint, 8):
+        lines.append(''.join([digit_formatter] * len(chunk)) % tuple(chunk))
+
+    # write file
+    if sys.version_info[0] == 3:
+        string_types = str
+    else:
+        string_types = basestring
+
+    text = '\r\n'.join(lines)
+
+    # either write to file or file object
+    if isinstance(filename, string_types):
+        open(filename, 'w').write(text)
+    else:
+        filename.write(text)

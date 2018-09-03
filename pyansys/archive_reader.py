@@ -79,12 +79,11 @@ class ReadArchive(object):
         """
 
         if not vtk_loaded:
-            raise Exception(
-                'Unable to load VTK module.  Cannot parse raw cdb data')
+            raise Exception('Unable to load VTK module.  Cannot parse raw cdb data')
 
         if self.CheckRaw():
-            raise Exception(
-                'Missing key data.  Cannot parse into unstructured grid')
+            import pdb; pdb.set_trace()
+            raise Exception('Missing key data.  Cannot parse into unstructured grid')
 
         # Convert to vtk style arrays
         if allowable_types is None:

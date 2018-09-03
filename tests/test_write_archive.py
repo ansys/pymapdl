@@ -30,3 +30,13 @@ def test_writehex(tmpdir):
 
     assert np.allclose(grid.points, grid2.points)
     assert np.allclose(grid.cells, grid2.cells)
+
+
+def test_write_component(tmpdir):
+    items = np.array([1, 20, 50, 51, 52, 53])
+    temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
+
+    comp_name = 'TEST'
+    pyansys.WriteCMBLOCK(temp_archive, items, comp_name, 'node')
+    archive = pyansys.ReadArchive(temp_archive)
+    assert np.allclose(archive.raw['node_comps'][comp_name], items)

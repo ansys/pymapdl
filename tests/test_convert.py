@@ -13,3 +13,9 @@ def test_convert(tmpdir):
 
     if pyansys.has_ansys:
         exec(open(pyscript).read())
+
+vm_file = os.path.join(testfiles_path, 'vm1.dat')
+pyscript = '/tmp/tmp.py'
+clines = pyansys.ConvertFile(vm_file, pyscript, loglevel='DEBUG')
+if pyansys.has_ansys:
+    exec(open(pyscript).read())

@@ -99,7 +99,7 @@ def Read(filename):
     cdef int[5] blocksz
     cdef int i, j
     cdef int tempint
-    cdef int nnodes, linelen, isz
+    cdef int linelen, isz
     cdef float tempflt
 
     # Size temp char array
@@ -111,19 +111,62 @@ def Read(filename):
     rnum = []
     rdat = []
 
+    # NBLOCK
+    cdef int nnodes = 0
+    cdef int [::1] nnum = np.empty(0, ctypes.c_int)
+    cdef double [:, ::1] nodes = np.empty((0, 0))
+
+    # EBLOCK
+    cdef int nelem = 0
+    cdef int [:, ::1] elem = np.empty((0, 0), ctypes.c_int)
+    cdef int [::1] etype = np.empty(0, ctypes.c_int)
+    cdef int [::1] elemnum = np.empty(0, ctypes.c_int)
+    cdef int [::1] e_rcon = np.empty(0, ctypes.c_int)
+    cdef int [::1] mtype = np.empty(0, ctypes.c_int)
+    cdef int [::1] sec_id = np.empty(0, ctypes.c_int)
+
+    # CMBLOCK
+    cdef int ncomp
+    cdef int [::1] component
+    cdef int nblock
+    node_comps = {}
+    elem_comps = {}
+
     # Read data up to and including start of NBLOCK
     while 1:
         if myfgets(line, raw, &n, fsize):
-            raise Exception('No NBLOCK in file.  Check if file is a blocked '+\
-                            'ANSYS archive file.')
+            break
+            # raise Exception('No NBLOCK in file.  Check if file is a blocked '+\
+                            # 'ANSYS archive file.')
                             
         # Record element types
         if 'E' == line[0]:
             if b'ET' in line:
                 elem_type.append([int(line[3:line.find(b',', 5)]),     # element number
                                   int(line[line.find(b',', 5) + 1:])]) # element type        
+
+            elif b'EBLOCK' in line:
+                # Get size of EBLOCK
+                nelem = int(line[line.rfind(b',') + 1:])
                 
-        if 'R' == line[0]:
+                # Get interger block size
+                myfgets(line, raw, &n, fsize)
+                isz = int(line[line.find(b'i') + 1:line.find(b')')])
+
+                # Initialize element data array.  Use number of lines as nelem is unknown
+                elem = np.empty((nelem, 20), dtype=ctypes.c_int)
+                etype = np.empty(nelem, dtype=ctypes.c_int)
+                elemnum = np.empty(nelem, dtype=ctypes.c_int)
+                e_rcon = np.empty(nelem, dtype=ctypes.c_int)
+                mtype = np.empty(nelem, dtype=ctypes.c_int)
+                sec_id = np.empty(nelem, dtype=ctypes.c_int)
+
+                # Call C extention to read eblock
+                nelem = read_eblock(raw, &mtype[0], &etype[0], &e_rcon[0], &sec_id[0],
+                                    &elemnum[0], &elem[0, 0], nelem, isz, &n, EOL)
+                break
+
+        elif 'R' == line[0]:
             if b'RLBLOCK' in line:
                 # Get number of sets
                 ist = line.find(b',') + 1
@@ -185,85 +228,29 @@ def Read(filename):
                             rcon.append(float(line[16 + 16*i:32 + 16*i]))   
             
                     rdat.append(rcon)
-        
-        if 'N' == line[0]: # Test is faster than next line
+
+        elif 'N' == line[0]: # Test is faster than next line
             # if line contains the start of the node block
             if b'NBLOCK' in line:
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
 
-                # Get format of NBLOCk
+                # Get format of NBLOCK
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
                 d_size, f_size, nfld, nexp = GetBlockFormat(line)
-                break
+                nnum = np.empty(nnodes, dtype=ctypes.c_int)
+                nodes = np.empty((nnodes, 6))
 
-
-    #==========================================================================
-    # Read nblock
-    #==========================================================================
-    cdef int [::1] nnum = np.empty(nnodes, dtype=ctypes.c_int)
-    cdef double [:, ::1] nodes = np.empty((nnodes, 6))
-
-    n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes, d_size, f_size, &n,
+                n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes, d_size, f_size, &n,
                     EOL, nexp)
-                    
-    ############### EBLOCK ###############
-    # Seek to the start of the element data
-    cdef int EBLOCK_found
-    cdef int nelem = 0
-    while True:
 
-        # Deal with empty line
-        if myfgets(line, raw, &n, fsize):
-            EBLOCK_found = 0
-            break       
-        
-        if 'E' == line[0]:
-        
-            # if line contains the start of the node block
-            if b'EBLOCK' in line:
-                # Get size of EBLOCK
-                nelem = int(line[line.rfind(b',') + 1:])
-                
-                # Get interger block size
-                myfgets(line, raw, &n, fsize)
-                isz = int(line[line.find(b'i') + 1:line.find(b')')])
-                EBLOCK_found = 1
-                break
-            
-            
-    # Initialize element data array.  Use number of lines as nelem is unknown
-    cdef int [:, ::1] elem = np.empty((nelem, 20), dtype=ctypes.c_int)
-    cdef int [::1] etype = np.empty(nelem, dtype=ctypes.c_int)
-    cdef int [::1] elemnum = np.empty(nelem, dtype=ctypes.c_int)
-    cdef int [::1] e_rcon = np.empty(nelem, dtype=ctypes.c_int)
-    cdef int [::1] mtype = np.empty(nelem, dtype=ctypes.c_int)
-    cdef int [::1] sec_id = np.empty(nelem, dtype=ctypes.c_int)
-
-    # Call C extention to read eblock
-    if EBLOCK_found:
-        nelem = read_eblock(raw, &mtype[0], &etype[0], &e_rcon[0], &sec_id[0],
-                            &elemnum[0], &elem[0, 0], nelem, isz, &n, EOL)
-        
-    # Get node components
-    cdef int ncomp
-    cdef int [::1] component
-    cdef int nblock
-
-    # Store node compondents
-    node_comps = {}
-    elem_comps = {}
-    while True:       
-        # Early exit on end of file (or a null character in the file)
-        if myfgets(line, raw, &n, fsize):
-            break
-        if b'C' == line[0]:  # component
+        elif 'C' == line[0]:  # component
             if b'CMBLOCK' in line:  # component
                 line_comp_type = line.split(b',')[2]
                 # Get Component name
                 ind1 = line.find(b',') + 1
                 ind2 = line.find(b',', ind1)
-                comname = line[ind1:ind2]
+                comname = line[ind1:ind2].decode()
 
                 # Get number of items
                 ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
@@ -278,7 +265,7 @@ def Read(filename):
                 nblock = int(line[line.find(b'(') + 1:line.find(b'i')])
 
                 # Extract nodes
-                for i in xrange(ncomp):
+                for i in range(ncomp):
 
                     # Read new line if at the end of the line
                     if i%nblock == 0:
@@ -312,44 +299,6 @@ def Read(filename):
             'sec_id': np.asarray(sec_id)}
 
 
-# def ReadComponent(char *raw, int fsize, char [1000] line, int n, char [100] tempstr):
-#     """ read a component from an archive file """
-#     cdef int i, ncomp
-#     cdef int [::1] component
-#     cdef int nblock
-
-#     # Get Component name
-#     ind1 = line.find(b',') + 1
-#     ind2 = line.find(b',', ind1)
-#     comname = line[ind1:ind2]
-
-#     # Get number of items
-#     ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
-#     component = np.empty(ncomp, ctypes.c_int)
-
-#     # Get interger size
-#     myfgets(line, raw, &n, fsize)
-#     isz = int(line[line.find(b'i') + 1:line.find(b')')])
-#     tempstr[isz] = '\0'
-
-#     # Number of intergers per line
-#     nblock = int(line[line.find(b'(') + 1:line.find(b'i')])
-
-#     # Extract nodes
-#     for i in xrange(ncomp):
-
-#         # Read new line if at the end of the line
-#         if i % nblock == 0:
-#             myfgets(line, raw, &n, fsize)
-
-#         strncpy(tempstr, line[isz*(i % nblock):], isz)
-#         component[i] = atoi(tempstr)
-
-#     print(comname)
-#     print(np.asarray(ComponentInterperter(component)))
-#     return comname, None
-
-    
 def GetBlockFormat(string):
     """ Get node block format """
     

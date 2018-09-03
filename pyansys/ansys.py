@@ -594,8 +594,6 @@ class ANSYS(_InternalANSYS):
             if command[:4].lower() == 'cdre':
                 with self.non_interactive:
                     return self.Run(command)
-                # self._stored_commands.append(command)
-                # self.parent._FlushStored()
             else:
                 return self.RunCorbaCommand(command)
         else:
@@ -629,7 +627,7 @@ class ANSYS(_InternalANSYS):
 
         # do not expect
         if '/MENU' in command:
-            log.info('Enabling GUI')
+            self.log.info('Enabling GUI')
             self.process.sendline(command)
             return
 
@@ -718,7 +716,6 @@ class ANSYS(_InternalANSYS):
         # /OUTPUT not redirected properly in corba
         if command[:4].lower() == '/out':
             items = command.split(',')
-
             if len(items) < 2:  # empty comment
                 return ''
             elif not items[1]:  # empty comment
@@ -726,7 +723,9 @@ class ANSYS(_InternalANSYS):
             elif items[1]:
                 if not items[1].strip():    # empty comment
                     return ''
-            elif len(items) > 1:  # redirect to file
+
+            items = command.split(',')
+            if len(items) > 1:  # redirect to file
                 if len(items) > 2:
                     if items[2].strip():
                         filename = '.'.join(items[1:3]).strip()
