@@ -17,12 +17,75 @@ log = logging.getLogger(__name__)
 log.setLevel('CRITICAL')
 
 
-def WriteArchive(filename, grid, mat_num=1, etype_start=1,
-                 mtype_start=1, real_constant_start=1, mode='w',
+def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
+                 real_constant_start=1, mode='w',
                  writeNBLOCK=True, enum_start=1, nnum_start=1,
                  include_etype_header=True, line_ending='\r\n'):
     """
-    Writes an ANSYS CDB file given a vtk unstructred grid
+    Writes FEM as an ANSYS APDL archive file.  This function supports the
+    following element types:
+    
+        - vtk.VTK_TETRA
+        - vtk.VTK_QUADRATIC_TETRA
+        - vtk.VTK_PYRAMID
+        - vtk.VTK_QUADRATIC_PYRAMID
+        - vtk.VTK_WEDGE
+        - vtk.VTK_QUADRATIC_WEDGE
+        - vtk.VTK_HEXAHEDRON
+        - vtk.VTK_QUADRATIC_HEXAHEDRON    
+
+    Will automatically renumber nodes and elements if the FEM does not
+    contain ANSYS node or element numbers.  Node numbers are stored as
+    a point array "ANSYSnodenum", and cell numbers are stored as cell
+    array "ANSYS_elem_num".
+
+    Parameters
+    ----------
+    filename : str
+       Filename to write archive file.
+
+    grid : vtk.UnstructuredGrid
+        VTK UnstructuredGrid to convert to an APDL archive file.
+
+    mtype_start : int, optional
+        Material number to assign to elements.  Can be set manually by
+        adding the cell array "mtype" to the unstructured grid.
+
+    etype_start : int, optional
+        Starting element type number.  Can be manually set by adding the
+        cell array "ansys_etype" to the unstructured grid.
+
+    real_constant_start : int, optional
+        Starting real constant to assign to unset cells.  Can be manually
+        set by adding the cell array "ansys_real_constant" to the
+        unstructured grid.
+
+    mode : str, optional
+        File mode.  See help(open)
+
+    writeNBLOCK : bool, optional
+        Write node block when writing archive file.
+
+    writeNBLOCK : bool, optional
+        Write node block when writing archive file.
+
+    enum_start : int, optional
+        Starting element number to assign to unset cells.  Can be manually
+        set by adding the cell array "ANSYS_elem_num" to the
+        unstructured grid.
+
+    nnum_start : int, optional
+        Starting element number to assign to unset points.  Can be manually
+        set by adding the point array "ANSYSnodenum" to the
+        unstructured grid.
+
+    include_etype_header : bool, optional
+        For each element type, includes element type command (e.g. "ET, 1, 186")
+        in the archive file.
+
+    line_ending : str, optional
+        Defaults to windows line ending.
+
     """
     if line_ending is None:
         line_ending = os.linesep
@@ -346,26 +409,7 @@ def WriteNBLOCK(filename, node_id, pos, raw=None, writeangle=None,
         Writes the node angles for each node.  Requires raw.
 
     line_ending : str, optional
-        Line ending.  Must be \r\n or \n
-
-    Notes
-    -----
-    Original python and vtk.UnstructuredGrid version
-    h = '/PREP7\r\n'
-    h += 'NBLOCK,6,SOLID,{:10d},{:10d}\r\n'.format(nodenum[-1], nnode)
-    h += '(3i8,6e20.13)\r\n'
-
-    f.write(h)
-    for i in range(nnode):
-        line = '%8d%8d%8d%20.13E%20.13E%20.13E\r\n' % (nodenum[i], 0, 0,
-                                                       grid.points[i, 0],
-                                                       grid.points[i, 1],
-                                                       grid.points[i, 2])
-        f.write(line)
-
-    # Make footer
-    f.write('N,R5.3,LOC,       -1, \r\n')
-
+        Line ending.
 
     """
     if line_ending is None:
@@ -434,7 +478,7 @@ def WriteNBLOCK(filename, node_id, pos, raw=None, writeangle=None,
 
 def WriteCMBLOCK(filename, items, comp_name, comp_type, digit_width=10):
     """
-    Writes a CMBLOCK to file.
+    Writes a component block, CMBLOCK, to a file.
 
     Parameters
     ----------

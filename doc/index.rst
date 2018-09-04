@@ -86,6 +86,7 @@ Contents
    ansys_control
    ansys_functions
    apdl_conversion
+   ansys_write_archive
    ansys_examples
    loading_results
    examples
