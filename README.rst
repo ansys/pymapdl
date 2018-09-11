@@ -1,5 +1,7 @@
 pyansys
 =======
+.. image:: https://img.shields.io/pypi/v/pyansys.svg
+    :target: https://pypi.org/project/pyansys/
 
 .. image:: https://travis-ci.org/akaszynski/pyansys.svg?branch=master
     :target: https://travis-ci.org/akaszynski/pyansys

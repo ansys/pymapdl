@@ -16,7 +16,7 @@ from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-AxisRotation = vtkInterface.common.AxisRotation
+from vtkInterface.common import AxisRotation
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -1177,7 +1177,7 @@ class Result(object):
         return cpos, stress
 
     def PlotPointScalars(self, scalars, rnum=None, stitle='', colormap=None,
-                         flipscalars=None, screenshot=None, cpos=None,
+                         flipscalars=None, screenshot=None, cpos=None, add_text=True,
                          interactive=True, grid=None, **kwargs):
         """
         Plot a result
@@ -1248,7 +1248,7 @@ class Result(object):
             plobj.SetCameraPosition(cpos)
 
         # add table
-        if rnum is not None:
+        if add_text and rnum is not None:
             plobj.AddText(self.TextResultTable(rnum), fontsize=20)
 
         if screenshot:
@@ -1423,9 +1423,8 @@ class Result(object):
                 raise Exception('There are only %d results in the result file.' % self.nsets)
             return user_input
 
-            return user_input
-        elif isinstance(user_input, list):
-            if len(list) != 2:
+        elif isinstance(user_input, list) or isinstance(user_input, tuple):
+            if len(user_input) != 2:
                 raise Exception('Input must contain (step, loadstep) using  ' +
                                 '1 based indexing (e.g. (1, 1)).')
             ls_table = self.resultheader['ls_table']
@@ -1435,11 +1434,13 @@ class Result(object):
 
             if not np.any(mask):
                 raise Exception('Load step table does not contain ' +
-                                'step %d and substep %d' % user_input)
+                                'step %d and substep %d' % tuple(user_input))
 
             index = mask.nonzero()[0]
             assert index.size == 1, 'Multiple cumulative index matches'
             return index[0]
+        else:
+            raise Exception('Input must be either an int or a list')
 
 
 class CyclicResult(Result):
@@ -1530,11 +1531,6 @@ class CyclicResult(Result):
             and numdof is the number of degrees of freedom.  When full_rotor is True
             the array will be (nSector x nnod x numdof).
 
-        Notes
-        -----
-        Node numbers correspond to self.cyc_nnum, where self is this result
-        object
-
         """
         # get the nodal result
         nnum, result = super(CyclicResult, self).NodalSolution(rnum)
@@ -1548,7 +1544,13 @@ class CyclicResult(Result):
 
             # if repeated mode
             if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
+                hmask = np.abs(hindex_table) == hindex
+                hmatch = np.nonzero(hmask)[0]
+                even = not (hmatch.size % 2)
+                assert even, 'Harmonic result missing matching pair'
+                match_loc = np.where(hmatch == rnum)[0][0]
+                
+                if match_loc % 2:
                     rnum_r = rnum - 1
                 else:
                     rnum_r = rnum + 1
@@ -1705,17 +1707,17 @@ class CyclicResult(Result):
 
     @property
     def mode_table(self):
+        """ unique modes for cyclic results """
         hindex_table = self.resultheader['hindex']
-        c = 0
+        diff = np.diff(np.abs(hindex_table))
+        freqs = self.time_values
         mode_table = [0]
-        for i in range(len(hindex_table) - 1):
-            if hindex_table[i] == hindex_table[i + 1]:
-                c += 1
-                mode_table.append(c)
-            elif abs(hindex_table[i]) != abs(hindex_table[i + 1]):
+        c = 0
+        for i in range(1, freqs.size):
+            if diff[i - 1]:
                 c = 0
                 mode_table.append(c)
-            elif hindex_table[i] > hindex_table[i + 1]:
+            elif np.isclose(freqs[i], freqs[i - 1]):
                 mode_table.append(c)
             else:
                 c += 1
@@ -2046,11 +2048,12 @@ class CyclicResult(Result):
                                      **kwargs)
 
     def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1, show_phase=True,
-                             auto_start=True, auto_close=True, cpos=None, **kwargs):
+                             auto_start=True, auto_close=True, nangles=180,
+                             show_result_info=True,
+                             cpos=None, **kwargs):
         """
         Animate nodal solution
         """
-
         # normalize nodal solution
         nnum, complex_disp = self.NodalSolution(rnum, as_complex=True, full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
@@ -2072,18 +2075,21 @@ class CyclicResult(Result):
 
         orig_pt = self.rotor.points
 
+        if show_result_info:
+            result_info = self.TextResultTable(rnum)
+
         plobj = vtkInterface.PlotClass()
         plobj.AddMesh(self.rotor.Copy(), scalars=np.real(scalars), **kwargs)
         plobj.UpdateCoordinates(orig_pt + np.real(complex_disp), render=False)
         if show_phase:
-            text = plobj.AddText('Phase 0.0 Degrees')
+            text = plobj.AddText('%s\nPhase 0.0 Degrees' % result_info, fontsize=30)
         if cpos:
             plobj.SetCameraPosition(cpos)
 
         # run until q is pressed
         plobj.Plot(interactive=not auto_start, autoclose=False, interactive_update=True)
         while not plobj.q_pressed:
-            for angle in np.linspace(0, np.pi*2, 180):
+            for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
 
@@ -2095,7 +2101,8 @@ class CyclicResult(Result):
                 plobj.UpdateScalars(scalars, render=False)
                 plobj.UpdateCoordinates(orig_pt + complex_disp_adj, render=False)
                 if show_phase:
-                    plobj.textActor.SetInput('Phase %.1f Degrees' % (angle*180/np.pi))
+                    plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                                             (result_info, (angle*180/np.pi)))
                 plobj.Update(30, force_redraw=True)
                 if plobj.q_pressed:
                     break
