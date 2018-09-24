@@ -6,10 +6,18 @@ import os
 import pyansys
 from vtkInterface.plotting import RunningXServer
 
+try:
+    __file__
+except:
+    __file__ = '/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py'
+
+
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
+
 rver = 'v150'  # also have 'v182' but will not work on windows
+# rver = 'v182'  # also have 'v182' but will not work on windows
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 class TestCyclicResultReader(object):
@@ -17,8 +25,9 @@ class TestCyclicResultReader(object):
     # avoids errors in collection
     result_file = os.path.join(data_path, 'cyclic_%s.rst' % rver)
     try:
+        # test if raw results are being read properly by using the normal result reader
         result = pyansys.Result(result_file)
-        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='DEBUG', #loglevel='WARNING',
+        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='DEBUG',
                               interactive_plotting=False, prefer_pexpect=True)
 
         # copy result file to ansys's temporary path
@@ -67,9 +76,11 @@ class TestCyclicResultReader(object):
         for line in table:
             if len(line) == line_length:
                 ansys_element_stress.append(line)
+
         ansys_element_stress = np.genfromtxt(ansys_element_stress)
         ansys_enode = ansys_element_stress[:, 0].astype(np.int)
         ansys_element_stress = ansys_element_stress[:, 1:]
+
         assert np.allclose(element_stress, ansys_element_stress)
         assert np.allclose(enode, ansys_enode)
 
@@ -116,8 +127,10 @@ class TestCyclicResultReader(object):
     @pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
     def test_plot(self):
         filename = '/tmp/temp.png'
-        self.result.PlotNodalSolution(0, screenshot=filename, interactive=False)
-        self.result.PlotNodalStress(0, 'Sx', screenshot=filename, interactive=False)
+        self.result.PlotNodalSolution(0, screenshot=filename,
+                                      interactive=False)
+        # self.result.PlotNodalStress(0, 'Sx', screenshot=filename,
+        #                             interactive=False)
         self.result.PlotPrincipalNodalStress(0, 'SEQV', screenshot=filename,
                                              interactive=False)
 
@@ -126,3 +139,4 @@ class TestCyclicResultReader(object):
 
 # self = TestCyclicResultReader()
 # self.test_prnsol_u()
+

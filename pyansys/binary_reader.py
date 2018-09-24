@@ -408,7 +408,7 @@ class Result(object):
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
-        string = 'There are {:d} results in this file'.format(self.nsets)
+        string = 'There are %d results in this file' % self.nsets
         log.debug(string)
 
         # Get indices to resort nodal and element results
@@ -419,41 +419,12 @@ class Result(object):
         self.nnum = self.resultheader['neqv'][self.sidx]
         self.enum = self.resultheader['eeqv'][self.sidx_elem]
 
-        # Store time values for later retrival
-        # self.GetTimeValues()
-
         # store geometry for later retrival
         self.StoreGeometry()
 
     def Plot(self, **kwargs):
         """ plots result geometry """
-        self.grid.Plot(**kwargs)
-
-    # def ResultsProperties(self):
-    #     """
-    #     Logs results available in the result file and returns a dictionary
-    #     of available results
-
-    #     Logging must be enabled for the results of the check to be shown in the
-    #     console.
-
-    #     Returns
-    #     -------
-    #     result_check : dict
-    #         Dictionary indicating the availability of results.
-
-    #     """
-
-    #     # check number of results
-    #     log.debug(
-    #         'There are {:d} results in this file'.format(
-    #             self.nsets))
-
-    #     if self.resultheader['nSector'] > 1:
-    #         log.debug('Contains results from a cyclic analysis with:')
-    #         log.debug('\t{:d} sectors'.format(self.resultheader['nSector']))
-
-    #     return {'Number of Results': self.nsets}
+        return self.grid.Plot(**kwargs)
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flipscalars=None, cpos=None,
@@ -534,7 +505,7 @@ class Result(object):
             d = scalars
 
         return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
-                                     screenshot, cpos, interactive, **kwargs)
+                                     screenshot, cpos, interactive=interactive, **kwargs)
 
     # for legacy
     def GetTimeValues(self):
@@ -549,10 +520,115 @@ class Result(object):
     def tvalues(self):
         return self.resultheader['time_values']
 
-    def NodalSolution(self, rnum):
+    def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
+                             auto_start=True, autoclose=True, nangles=100, show_phase=True,
+                             show_result_info=True, interpolatebeforemap=True,
+                             cpos=None, **kwargs):
         """
-        Returns the DOF solution for each node in the global Cartesian
-        coordinate system.
+        Animate nodal solution.  Assumes nodal solution is a displacement array from
+        a modal solution.
+
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        comp : str, optional
+            Display component to display.  Options are 'x', 'y', 'z', and
+            'norm', corresponding to the x directin, y direction, z direction,
+            and the combined direction (x**2 + y**2 + z**2)**0.5
+
+        max_disp : float, optional
+            Maximum displacement in the units of the model.  Default 0.1
+
+        auto_start : bool, optional
+            Automatically starts animating.
+
+        autoclose : bool, optional
+            Enabled by default.  Exits plotting session when user closes the
+            window.
+
+        nangles : int, optional
+            Number of "frames" between each full cycle.
+
+        show_phase : bool, optional
+            Shows the phase at each frame.
+
+        show_result_info : bool, optional
+            Includes result information at the bottom left-hand corner of the plot.
+
+        interpolatebeforemap : bool, optional
+            Leaving this at default generally results in a better plot.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.
+
+        kwargs : optional keyword arguments, optional
+            See help(vtkInterface.Plot) for additional keyword arguments.
+
+        """
+        # normalize nodal solution
+        nnum, disp = self.NodalSolution(rnum)
+        disp /= (np.abs(disp).max()/max_disp)
+        disp = disp.reshape(-1, 3)
+        
+        if comp == 'x':
+            axis = 0
+        elif comp == 'y':
+            axis = 1
+        elif comp == 'z':
+            axis = 2
+        else:
+            axis = None
+
+        if axis is not None:
+            scalars = disp[:, axis]
+        else:
+            scalars = (disp*disp).sum(1)**0.5
+
+        orig_pt = self.grid.points
+
+        if show_result_info:
+            result_info = self.TextResultTable(rnum)
+
+        plobj = vtkInterface.PlotClass()
+        plobj.AddMesh(self.grid.Copy(), scalars=np.real(scalars),
+                      interpolatebeforemap=interpolatebeforemap, **kwargs)
+        plobj.UpdateCoordinates(orig_pt, render=False)
+        if show_phase:
+            text = plobj.AddText('%s\nPhase 0.0 Degrees' % result_info, fontsize=30)
+        if cpos:
+            plobj.SetCameraPosition(cpos)
+
+        # run until q is pressed
+        plobj.Plot(interactive=not auto_start, autoclose=False, interactive_update=True)
+        while not plobj.q_pressed:
+            for angle in np.linspace(0, np.pi*2, nangles):
+                mag_adj = np.sin(angle)
+                disp_adj = disp*mag_adj
+
+                if axis is not None:
+                    scalars = disp_adj[:, axis]
+                else:
+                    scalars = (disp_adj*disp_adj).sum(1)**0.5
+
+                plobj.UpdateScalars(scalars, render=False)
+                plobj.UpdateCoordinates(orig_pt + disp_adj, render=False)
+                if show_phase:
+                    plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                                             (result_info, (angle*180/np.pi)))
+                plobj.Update(30, force_redraw=True)
+                if plobj.q_pressed:
+                    break
+
+        if autoclose:
+            return plobj.Close()
+        else:
+            return plobj.Plot()
+
+    def NodalSolution(self, rnum, in_nodal_coord_sys=False):
+        """
+        Returns the DOF solution for each node in the global cartesian
+        coordinate system or nodal coordinate system.
 
         Parameters
         ----------
@@ -564,6 +640,9 @@ class Result(object):
             Resorts the results so that the results correspond to the sorted
             node numbering (self.nnum) (default).  If left unsorted, results
             correspond to the nodal equivalence array self.resultheader['neqv']
+
+        in_nodal_coord_sys : bool, optional
+            When True, returns results in the nodal coordinate system.  Default False.
 
         Returns
         -------
@@ -603,19 +682,20 @@ class Result(object):
         # Reorder based on sorted indexing
         r = r.take(self.sidx, 0)
 
-        # ansys writes the results in the nodal coordinate system.
-        # Convert this to the global coordinate system  (in degrees)
-        angles = self.geometry['nodes'][self.insolution, 3:].T
-        theta_xy, theta_yz, theta_zx = angles
+        if not in_nodal_coord_sys:
+            # ansys writes the results in the nodal coordinate system.
+            # Convert this to the global coordinate system  (in degrees)
+            euler_angles = self.geometry['nodes'][self.insolution, 3:].T
+            theta_xy, theta_yz, theta_zx = euler_angles
 
-        if np.any(theta_xy):
-            vtkInterface.common.AxisRotation(r, theta_xy, inplace=True, axis='z')
+            if np.any(theta_xy):
+                vtkInterface.common.AxisRotation(r, theta_xy, inplace=True, axis='z')
 
-        if np.any(theta_yz):  # untested (!)
-            vtkInterface.common.AxisRotation(r, theta_yz, inplace=True, axis='x')
+            if np.any(theta_yz):
+                vtkInterface.common.AxisRotation(r, theta_yz, inplace=True, axis='x')
 
-        if np.any(theta_zx):  # untested (!)
-            vtkInterface.common.AxisRotation(r, theta_zx, inplace=True, axis='y')
+            if np.any(theta_zx):
+                vtkInterface.common.AxisRotation(r, theta_zx, inplace=True, axis='y')
 
         # also include nodes in output
         return self.nnum, r
@@ -881,6 +961,12 @@ class Result(object):
 
         return nnum, stress
 
+    @property
+    def version(self):
+        """ returns the vesion of ansys used to save this result file """
+        return float(self.resultheader['verstring'])
+
+
     def ElementStress(self, rnum, principal=False):
         """
         Equivalent ANSYS command: PRESOL, S
@@ -934,13 +1020,12 @@ class Result(object):
         # load in raw results
         nnode = nodstr[etype]
         nelemnode = nnode.sum()
-        ver = float(self.resultheader['verstring'])
 
         # bitmask (might use this at some point)
         # bitmask = bin(int(hex(self.resultheader['rstsprs']), base=16)).lstrip('0b')
         # description maybe in resucm.inc
 
-        if ver >= 14.5:
+        if self.version >= 14.5:
             if self.resultheader['rstsprs'] != 0:
                 nitem = 6
             else:
@@ -987,7 +1072,6 @@ class Result(object):
 
         # Get element numbers
         elemnum = self.geometry['enum'][self.sidx_elem]
-
         return element_stress, elemnum, enode
 
     def ElementSolutionData(self, rnum, datatype, sort=True):
@@ -1177,8 +1261,8 @@ class Result(object):
         return cpos, stress
 
     def PlotPointScalars(self, scalars, rnum=None, stitle='', colormap=None,
-                         flipscalars=None, screenshot=None, cpos=None, add_text=True,
-                         interactive=True, grid=None, **kwargs):
+                         flipscalars=None, screenshot=None, cpos=None,
+                         interactive=True, grid=None, add_text=True, **kwargs):
         """
         Plot a result
 
@@ -1221,8 +1305,10 @@ class Result(object):
         """
         if grid is None:
             grid = self.grid
+
+        # make colormap match default ansys
         if colormap is None and flipscalars is None:
-            flipscalars = True
+            flipscalars = False
 
         if 'window_size' in kwargs:
             window_size = kwargs['window_size']
@@ -1483,7 +1569,9 @@ class CyclicResult(Result):
             self.dup_ind = None
         else:
             shift = (self.geometry['nnum'] < self.resultheader['csNds']).sum()
-            self.dup_ind = self.mas_ind + shift
+            self.dup_ind = self.mas_ind + shift + 1
+
+        # import pdb; pdb.set_trace()
 
         # create full rotor
         self.nsector = self.resultheader['nSector']
@@ -1501,7 +1589,8 @@ class CyclicResult(Result):
         vtkappend.Update()
         self.rotor = vtkInterface.UnstructuredGrid(vtkappend.GetOutput())
 
-    def NodalSolution(self, rnum, phase=0, full_rotor=False, as_complex=False):
+    def NodalSolution(self, rnum, phase=0, full_rotor=False, as_complex=False,
+                      in_nodal_coord_sys=False):
         """
         Returns the DOF solution for each node in the global cartesian coordinate system.
 
@@ -1521,6 +1610,9 @@ class CyclicResult(Result):
             Returns result as a complex number, otherwise as the real part rotated by
             phase.  Default False.
 
+        in_nodal_coord_sys : bool, optional
+            When True, returns results in the nodal coordinate system.  Default False.
+
         Returns
         -------
         nnum : np.ndarray
@@ -1531,9 +1623,17 @@ class CyclicResult(Result):
             and numdof is the number of degrees of freedom.  When full_rotor is True
             the array will be (nSector x nnod x numdof).
 
+        Notes
+        -----
+        Somewhere between v15.0 and v18.2 ANSYS stopped writing the duplicate 
+        sector to the result file and instead results in pairs (i.e. harmonic
+        index 1, -1).  This decreases their result file size since harmonic
+        pairs contain the same information as the duplicate sector.
         """
         # get the nodal result
-        nnum, result = super(CyclicResult, self).NodalSolution(rnum)
+        nnum, result = super(CyclicResult, self).NodalSolution(rnum,
+                                                               in_nodal_coord_sys=in_nodal_coord_sys)
+        result_mas = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
         # combine or expand result if not modal
@@ -1543,26 +1643,36 @@ class CyclicResult(Result):
             hindex = hindex_table[rnum]
 
             # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                hmask = np.abs(hindex_table) == hindex
+            last_repeated = False
+            if self.resultheader['nSector'] % 2:
+                last_repeated = hindex == int(self.resultheader['nSector']/2)
+
+            # use duplicate sector if it exists
+            if self.dup_ind is not None:
+                result_dup = result[self.dup_ind]
+                # import pdb; pdb.set_trace()
+
+            # otherwise, use the harmonic pair
+            elif hindex != 0 or last_repeated:
+                hmask = np.abs(hindex_table) == abs(hindex)
                 hmatch = np.nonzero(hmask)[0]
+
                 even = not (hmatch.size % 2)
                 assert even, 'Harmonic result missing matching pair'
                 match_loc = np.where(hmatch == rnum)[0][0]
                 
                 if match_loc % 2:
-                    rnum_r = rnum - 1
+                    rnum_dup = rnum - 1
                 else:
-                    rnum_r = rnum + 1
+                    rnum_dup = rnum + 1
 
                 # get repeated result and combine
-                _, result_r = super(CyclicResult, self).NodalSolution(rnum_r)
+                _, result_dup = super(CyclicResult, self).NodalSolution(rnum_dup)
 
             else:
-                result_r = np.zeros_like(result)
+                result_dup = np.zeros_like(result)
 
-            expanded_result = self.ExpandCyclicModal(result, result_r, hindex, phase,
-                                                     as_complex, full_rotor)
+            expanded_result = self.ExpandCyclicModal(result_mas, result_dup, hindex, phase, as_complex, full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
             expanded_result = ExpandCyclicResults(result, self.mas_ind,
@@ -1575,10 +1685,6 @@ class CyclicResult(Result):
     def ExpandCyclicModal(self, result, result_r, hindex, phase, as_complex,
                           full_rotor):
         """ Combines repeated results from ANSYS """
-        if self.dup_ind is not None:
-            result = result[self.mas_ind]
-            result_r = result_r[self.mas_ind]
-
         if as_complex or full_rotor:
             result_combined = result + result_r*1j
             if phase:
@@ -1949,10 +2055,18 @@ class CyclicResult(Result):
 
         """
         if not full_rotor:  # Plot sector
-            return super(CyclicResult, self).PlotNodalStress(rnum, stype)
+            return super(CyclicResult, self).PlotNodalStress(rnum,
+                                                             stype,
+                                                             label=label,
+                                                             colormap=colormap,
+                                                             flipscalars=flipscalars,
+                                                             cpos=cpos,
+                                                             screenshot=screenshot,
+                                                             interactive=interactive,
+                                                             **kwargs)
 
         rnum = self.ParseStepSubstep(rnum)
-        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
+        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz']
         stype = stype.lower()
         if stype not in stress_types:
             raise Exception('Stress type not in: \n' + str(stress_types))
@@ -2023,9 +2137,6 @@ class CyclicResult(Result):
             Array used to plot stress.
 
         """
-        if not vtkloaded:
-            raise Exception('Cannot plot without VTK')
-
         stype = stype.upper()
         if not full_rotor:  # Plot sector
             return super(CyclicResult, self).PlotPrincipalNodalStress(rnum, stype)
@@ -2048,14 +2159,57 @@ class CyclicResult(Result):
                                      **kwargs)
 
     def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1, show_phase=True,
-                             auto_start=True, auto_close=True, nangles=180,
-                             show_result_info=True,
+                             auto_start=True, autoclose=True, nangles=180,
+                             show_result_info=True, interpolatebeforemap=True,
                              cpos=None, **kwargs):
         """
-        Animate nodal solution
+        Animate nodal solution.  Assumes nodal solution is a displacement array from
+        a modal solution.
+
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        comp : str, optional
+            Display component to display.  Options are 'x', 'y', 'z', and
+            'norm', corresponding to the x directin, y direction, z direction,
+            and the combined direction (x**2 + y**2 + z**2)**0.5
+
+        max_disp : float, optional
+            Maximum displacement in the units of the model.  Default 0.1
+
+        auto_start : bool, optional
+            Automatically starts animating.
+
+        autoclose : bool, optional
+            Enabled by default.  Exits plotting session when user closes the
+            window.
+
+        nangles : int, optional
+            Number of "frames" between each full cycle.
+
+        show_phase : bool, optional
+            Shows the phase at each frame.
+
+        show_result_info : bool, optional
+            Includes result information at the bottom left-hand corner of the plot.
+
+        interpolatebeforemap : bool, optional
+            Leaving this at default generally results in a better plot.
+
+        cpos : list, optional
+            List of camera position, focal point, and view up.
+
+        ncolors : int, optional
+            Number of colors to use when displaying scalars.  Default 256.
+
+        kwargs : optional keyword arguments, optional
+            See help(vtkInterface.Plot) for additional keyword arguments.
+
         """
         # normalize nodal solution
-        nnum, complex_disp = self.NodalSolution(rnum, as_complex=True, full_rotor=True)
+        nnum, complex_disp = self.NodalSolution(rnum, as_complex=True,
+                                                full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
         complex_disp = complex_disp.reshape(-1, 3)
         
@@ -2079,7 +2233,8 @@ class CyclicResult(Result):
             result_info = self.TextResultTable(rnum)
 
         plobj = vtkInterface.PlotClass()
-        plobj.AddMesh(self.rotor.Copy(), scalars=np.real(scalars), **kwargs)
+        plobj.AddMesh(self.rotor.Copy(), scalars=np.real(scalars),
+                      interpolatebeforemap=interpolatebeforemap, **kwargs)
         plobj.UpdateCoordinates(orig_pt + np.real(complex_disp), render=False)
         if show_phase:
             text = plobj.AddText('%s\nPhase 0.0 Degrees' % result_info, fontsize=30)
@@ -2088,6 +2243,7 @@ class CyclicResult(Result):
 
         # run until q is pressed
         plobj.Plot(interactive=not auto_start, autoclose=False, interactive_update=True)
+
         while not plobj.q_pressed:
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
@@ -2100,6 +2256,7 @@ class CyclicResult(Result):
 
                 plobj.UpdateScalars(scalars, render=False)
                 plobj.UpdateCoordinates(orig_pt + complex_disp_adj, render=False)
+
                 if show_phase:
                     plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
@@ -2107,7 +2264,7 @@ class CyclicResult(Result):
                 if plobj.q_pressed:
                     break
 
-        if auto_close:
+        if autoclose:
             return plobj.Close()
         else:
             return plobj.Plot()

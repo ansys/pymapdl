@@ -140,7 +140,7 @@ setup(
                                        'sector.cdb']},
 
     install_requires=['numpy>1.9.3',
-                      'vtkInterface>=0.10.2',
+                      'vtkInterface>=0.11.0',
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',

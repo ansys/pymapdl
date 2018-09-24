@@ -153,6 +153,20 @@ These stresses can be verified using ANSYS using:
    10920   49788.      8798.7     -21929.     -7302.5      11294.      4300.0    
 
 
+Animiating a Modal Solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Solutions from a modal analysis can be animated using ``AnimateNodalSolution``.  For example:
+
+.. code:: python
+
+    from pyansys import examples
+    import pyansys
+
+    result = pyansys.Result(examples.rstfile)
+    result.AnimateNodalSolution(3)
+
+
+
 Results from a Cyclic Analysis
 ------------------------------
 ``pyansys`` can load and display the results of a cyclic analysis:
@@ -250,7 +264,7 @@ The results of a single sector can be displayed as well using the ``PlotNodalSol
 .. image:: ./images/rotor.jpg
 
 The phase of the result can be changed by modifying the ``phase`` option.  See ``help(result.PlotNodalSolution)`` for details on its implementation.
-        
+
 
 Exporting to ParaView
 ---------------------
@@ -275,5 +289,8 @@ The vtk xml file can now be loaded using ParaView.  This screenshot shows the no
 ResultReader Object Methods
 ---------------------------
 
-.. autoclass:: pyansys.ResultReader
+.. autoclass:: pyansys.Result
+    :members:
+
+.. autoclass:: pyansys.CyclicResult
     :members:

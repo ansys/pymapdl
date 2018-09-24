@@ -1,12 +1,17 @@
 import os
+
+import pytest
 import numpy as np
+
 import pyansys
 from pyansys.examples import hexarchivefile
 from pyansys.examples import rstfile
 from pyansys.examples import fullfile
+from vtkInterface.plotting import RunningXServer
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
+
 
 def test_readarchive():
     archive = pyansys.ReadArchive(hexarchivefile)
@@ -57,6 +62,13 @@ def test_loadresult():
     assert enum.size
     assert enode[0].size
 
+
+@pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
+def test_animate_nodal_solution():
+    result = pyansys.ResultReader(rstfile)
+    result.AnimateNodalSolution(0)
+    assert np.any(result.grid.points)
+    
 
 def test_loadbeam():
     linkresult = os.path.join(testfiles_path, 'link1.rst')
