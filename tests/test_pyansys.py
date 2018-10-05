@@ -64,10 +64,13 @@ def test_loadresult():
 
 
 @pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
-def test_animate_nodal_solution():
+def test_animate_nodal_solution(tmpdir):
     result = pyansys.ResultReader(rstfile)
-    result.AnimateNodalSolution(0)
+    temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
+    result.AnimateNodalSolution(0, nangles=20, movie_filename=temp_movie,
+                                interactive=False)
     assert np.any(result.grid.points)
+    assert os.path.isfile(temp_movie)
     
 
 def test_loadbeam():
@@ -82,3 +85,4 @@ def test_fullreader():
     assert dofref.size
     assert k.size
     assert m.size
+

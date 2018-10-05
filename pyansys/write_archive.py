@@ -20,7 +20,8 @@ log.setLevel('CRITICAL')
 def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
                  real_constant_start=1, mode='w',
                  writeNBLOCK=True, enum_start=1, nnum_start=1,
-                 include_etype_header=True, line_ending='\r\n'):
+                 include_etype_header=True, line_ending='\r\n',
+                 reset_etype=False):
     """
     Writes FEM as an ANSYS APDL archive file.  This function supports the
     following element types:
@@ -86,6 +87,11 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
     line_ending : str, optional
         Defaults to windows line ending.
 
+    reset_etype : bool, optional
+        Resets element type.  Element types will automatically be determined 
+        by the shape of the element (i.e. quadradic tetrahedrals will be saved
+        as SOLID187, linear hexahedrals as SOLID185).  Default True.
+
     """
     if line_ending is None:
         line_ending = os.linesep
@@ -148,7 +154,11 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
         rcon[rcon == -1] = real_constant_start
 
     # element type
-    etype = grid.GetCellScalars('ansys_etype')
+    if reset_etype:
+        etype = None
+    else:
+        etype = grid.GetCellScalars('ansys_etype')
+
     typenum = grid.GetCellScalars('ANSYS_elem_typenum')
     if etype is None:
         log.info('No ANSYS element type set in input.  ' +

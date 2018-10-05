@@ -20,6 +20,7 @@ hexarchivefile = os.path.join(dir_path, 'HexBeam.cdb')
 tetarchivefile = os.path.join(dir_path, 'TetBeam.cdb')
 fullfile = os.path.join(dir_path, 'file.full')
 sector_archive_file = os.path.join(dir_path, 'sector.cdb')
+sector_result_file = os.path.join(dir_path, 'sector.rst')
 
 
 def RunAll(run_ansys=False):
@@ -209,10 +210,11 @@ def DisplayCellQual(meshtype='tet'):
 
     # plot cell quality
     grid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
-              rng=[0, 1])
+              rng=[0, 1], flipscalars=True)
 
 
-def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True, as_test=False):
+def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
+                  as_test=False):
     """
     Cylinder demo for ansys
     """
