@@ -292,12 +292,12 @@ class ANSYS(_InternalANSYS):
 
     loglevel : str, optional
         Sets which messages are printed to the console.  Default 'INFO' prints out
-        all ANSYS messages, 'WARNING` prints only messages containing ANSYS warnings,
-        and 'ERROR' prints only error messages.
+        all ANSYS messages, 'WARNING` prints only messages containing ANSYS
+         warnings, and 'ERROR' prints only error messages.
 
     additional_switches : str, optional
-        Additional switches for ANSYS, for example aa_r, and academic research license,
-        would be added with:
+        Additional switches for ANSYS, for example aa_r, and academic 
+        research license, would be added with:
 
         - additional_switches="-aa_r"
 
@@ -308,12 +308,12 @@ class ANSYS(_InternalANSYS):
         Time to wait before raising error that ANSYS is unable to start.
 
     interactive_plotting : bool, optional
-        Enables interactive plotting using matplotlib.  Install matplotlib first.
-        Default False.
+        Enables interactive plotting using matplotlib.  Install matplotlib 
+        first.  Default False.
 
     log_broadcast : bool, optional
-        Additional logging for ansys solution progress.  Default True and visible
-        at log level 'INFO'.
+        Additional logging for ansys solution progress.  Default True and 
+        visible at log level 'INFO'.
 
     check_version : bool, optional
         Check version of binary file and raise exception when invalid.
@@ -333,10 +333,12 @@ class ANSYS(_InternalANSYS):
 
     """
 
-    def __init__(self, exec_file=None, run_location=None, jobname='file', nproc=2,
-                 override=False, loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False, log_broadcast=False, #True,
-                 check_version=True, prefer_pexpect=False, log_apdl=True):
+    def __init__(self, exec_file=None, run_location=None,
+                 jobname='file', nproc=2, override=False,
+                 loglevel='INFO', additional_switches='',
+                 start_timeout=120, interactive_plotting=False,
+                 log_broadcast=False, check_version=True,
+                 prefer_pexpect=False, log_apdl=True):
         """ Initialize connection with ANSYS program """
         self.log = SetupLogger(loglevel.upper())
         self.jobname = jobname
@@ -415,9 +417,9 @@ class ANSYS(_InternalANSYS):
 
         # open a connection to ANSYS
         if (version < 170 and os.name == 'posix') or prefer_pexpect:
-            self.OpenProcess(nproc, start_timeout)
+            self.OpenProcess(nproc, start_timeout, additional_switches)
         else:  # use corba
-            self.OpenCorba(nproc, start_timeout)
+            self.OpenCorba(nproc, start_timeout, additional_switches)
 
             # separate logger for broadcast file
             self.log_broadcast = log_broadcast
@@ -461,9 +463,10 @@ class ANSYS(_InternalANSYS):
             self.apdl_log.close()
         self.apdl_log = None
 
-    def OpenProcess(self, nproc, timeout):
+    def OpenProcess(self, nproc, timeout, additional_switches):
         """ Opens an ANSYS process using pexpect """
-        command = '%s -j %s -np %d' % (self.exec_file, self.jobname, nproc)
+        command = '%s -j %s -np %d %s' % (self.exec_file, self.jobname, nproc,
+                                          additional_switches)
         self.log.debug('Spawning shell process using pexpect')
         self.log.debug('Command: "%s"' % command)
         self.log.debug('At "%s"' % self.path)
@@ -893,15 +896,14 @@ class ANSYS(_InternalANSYS):
     def __call__(self, command, **kwargs):
         return self.Run(command, **kwargs)
 
-    def OpenCorba(self, nproc, timeout):
+    def OpenCorba(self, nproc, timeout, additional_switches):
         """
         Open a connection to ANSYS via a CORBA interface
         """
         self.log.info('Connecting to ANSYS via CORBA')
 
         # command must include "aas" flag to start MAPDL server
-        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d' % (self.exec_file,
-                                                                       self.jobname, nproc)       
+        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self.jobname, nproc, additional_switches)
 
         # add run location to command
         self.log.debug('Spawning shell process with: "%s"' % command)
