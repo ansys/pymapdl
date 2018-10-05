@@ -7,7 +7,7 @@ pyansys
     :target: https://travis-ci.org/akaszynski/pyansys
 
 .. image:: http://readthedocs.org/projects/pyansys/badge/?version=latest
-    :target: https://pyansys.readthedocs.io/en/latest/?badge=latest
+    :target: https://pyansys.readthedocs.io/
 
 This Python module allows you to:
  - Interactively control an instance of ANSYS v17.0 + using Python.
@@ -108,56 +108,116 @@ You can then load this vtk file using vtkInterface or another program that uses 
     grid.Plot()
 
 
-Loading and Plotting an ANSYS Result File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Loading the Result File
+~~~~~~~~~~~~~~~~~~~~~~~
 
-This example reads in binary results from a modal analysis of a beam from ANSYS.
+This example reads in binary results from a modal analysis of a beam from ANSYS.  This section of code does not rely on ``VTK`` and can be used with only numpy installed.
 
 .. code:: python
 
     # Load the reader from pyansys
     import pyansys
+    from pyansys import examples
     
     # Sample result file
-    from pyansys import examples
     rstfile = examples.rstfile
     
-    # Create result reader object by loading the result file
+    # Create result object by loading the result file
     result = pyansys.ResultReader(rstfile)
     
-    # Get the solution time values (natural frequencies for this modal analysis)
+    # Beam natural frequencies
     freqs = result.GetTimeValues()
-    
-    # Get the node numbers in this result file
-    nnum = result.nnum
-    
-    # Get the 1st bending mode shape.  Nodes are ordered according to nnum.
-    disp = result.GetNodalResult(0, True) # uses 0 based indexing 
 
-    # it's just a numpy array
-    print(disp)
+.. code:: python
+
+    >>> print(freq)
+    [ 7366.49503969  7366.49503969 11504.89523664 17285.70459456
+      17285.70459457 20137.19299035]
     
-.. code::
+    # Get the 1st bending mode shape.  Results are ordered based on the sorted 
+    # node numbering.  Note that results are zero indexed
+    nnum, disp = result.NodalSolution(0)
+    
+.. code:: python
 
-    [[  0.           0.           0.        ]
-     [  0.           0.           0.        ]
-     [  0.           0.           0.        ]
-     ..., 
-     [ 21.75315943 -14.01733637  -2.34010126]
-     [ 26.60384371 -17.14955041  -2.40527841]
-     [ 31.50985156 -20.31588852  -2.4327859 ]]
+    >>> print(disp)
+    [[ 2.89623914e+01 -2.82480489e+01 -3.09226692e-01]
+     [ 2.89489249e+01 -2.82342416e+01  2.47536161e+01]
+     [ 2.89177130e+01 -2.82745126e+01  6.05151053e+00]
+     [ 2.88715048e+01 -2.82764960e+01  1.22913304e+01]
+     [ 2.89221536e+01 -2.82479511e+01  1.84965333e+01]
+     [ 2.89623914e+01 -2.82480489e+01  3.09226692e-01]
+     ...
 
-You can plot results as well directly from the file as well.
+
+Plotting Nodal Results
+~~~~~~~~~~~~~~~~~~~~~~
+As the geometry of the model is contained within the result file, you can plot the result without having to load any additional geometry.  Below, displacement for the first mode of the modal analysis beam is plotted using ``VTK``.
 
 .. code:: python
     
-    # Plot the displacement of the 1st in the x direction
-    result.PlotNodalResult(0, 'x', label='Displacement')
+    # Plot the displacement of Mode 0 in the x direction
+    result.PlotNodalSolution(0, 'x', label='Displacement')
 
-    # Plot the nodal stress in the 'x' direction for the 6th result
+
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam_disp.png
+    :width: 500pt
+
+
+Results can be plotted non-interactively and screenshots saved by setting up the camera and saving the result.  This can help with the visualization and post-processing of a batch result.
+
+First, get the camera position from an interactive plot:
+
+.. code:: python
+
+    >>> cpos = result.PlotNodalSolution(0)
+    >>> print(cpos)
+    [(5.2722879880979345, 4.308737919176047, 10.467694436036483),
+     (0.5, 0.5, 2.5),
+     (-0.2565529433509593, 0.9227952809887077, -0.28745339908049733)]
+
+Then generate the plot:
+
+.. code:: python
+
+    result.PlotNodalSolution(0, 'x', label='Displacement', cpos=cpos,
+                             screenshot='hexbeam_disp.png',
+                             window_size=[800, 600], interactive=False)
+
+Stress can be plotted as well using the below code.  The nodal stress is computed in the same manner that ANSYS uses by to determine the stress at each node by averaging the stress evaluated at that node for all attached elements.  For now, only component stresses can be displayed.
+
+.. code:: python
+    
+    # Display node averaged stress in x direction for result 6
     result.PlotNodalStress(5, 'Sx')
 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_stress.png
+    :width: 500pt
+
+
+Nodal stress can also be generated non-interactively with:
+
+.. code:: python
+
+    result.PlotNodalStress(5, 'Sx', cpos=cpos, screenshot=beam_stress.png,
+                           window_size=[800, 600], interactive=False)
+
+
+Animating a Modal Solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mode shapes from a modal analsyis can be animated using ``AnimateNodalSolution``:
+
+.. code:: python
+
+    result.AnimateNodalSolution(0)
+
+If you wish to save the animation to a file, specify the movie_filename and animate it with:
+
+.. code:: python
+
+    result.AnimateNodalSolution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
+
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_mode_shape.gif
     :width: 500pt
 
 

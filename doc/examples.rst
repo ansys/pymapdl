@@ -89,18 +89,6 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
      [ 2.89623914e+01 -2.82480489e+01  3.09226692e-01]
      ...
 
-Animating a Modal Solution
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-Mode shapes from a modal analsyis can be animated using ``AnimateNodalSolution``:
-
-.. code:: python
-
-    result.AnimateNodalSolution(0)
-
-If you wish to save the animation to a file, specify the movie_filename
-
-result.AnimateNodalSolution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
-
 
 Plotting Nodal Results
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -151,6 +139,21 @@ Nodal stress can also be generated non-interactively with:
     result.PlotNodalStress(5, 'Sx', cpos=cpos, screenshot=beam_stress.png,
                            window_size=[800, 600], interactive=False)
 
+Animating a Modal Solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mode shapes from a modal analsyis can be animated using ``AnimateNodalSolution``:
+
+.. code:: python
+
+    result.AnimateNodalSolution(0)
+
+If you wish to save the animation to a file, specify the movie_filename and animate it with:
+
+.. code:: python
+
+    result.AnimateNodalSolution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
+
+.. image:: ./images/beam_mode_shape.gif
 
 
 Built-In Examples
