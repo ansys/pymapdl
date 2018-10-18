@@ -1009,12 +1009,7 @@ class Result(object):
         """
         Equivalent ANSYS command: PRESOL, S
 
-        Retrives the component stresses for each node in the solution.
-
-        This algorithm, like ANSYS, computes the nodal stress by averaging the
-        stress for each element at each node.  Due to the discontinuities
-        across elements, stresses at nodes will vary based on the element
-        they are evaluated from.
+        Retrives the element component stresses.
 
         Parameters
         ----------
@@ -1025,6 +1020,10 @@ class Result(object):
         principal : bool, optional
             Returns principal stresses instead of component stresses.  Default
             False.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system.  Default
+            False and will return the results in the global coordinate system.
 
         Returns
         -------
