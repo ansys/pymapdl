@@ -761,32 +761,51 @@ class Result(object):
             nodstr = np.empty(10000, np.int32)
             etype_ID = np.empty(maxety, np.int32)
             ekey = []
+            keyopts = np.empty((10000, 11), np.int16)
             for i in range(maxety):
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2) * 4)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2)*4)
                 einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
                 etype_ref = einfo[0]
                 etype_ID[i] = einfo[1]
                 ekey.append(einfo)
 
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 60) * 4)
+                # Items 3-14 - element type option keys (keyopts)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 3)*4)
+                keyopts[etype_ref] = np.fromfile(
+                    f, self.resultheader['endian'] + 'i', 11)
+
+                # Item 61 - number of nodes for this element type (nodelm)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 61)*4)
                 nodelm[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 62) * 4)
+                # Item 63 - number of nodes per element having nodal forces, etc. (nodfor)
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 63)*4)
                 nodfor[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2 + 93) * 4)
+                # Item 94 - number of nodes per element having nodal
+                # stresses, etc. (nodstr).  This number is the number
+                # of corner nodes for higher-ordered elements.
+                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 94)*4)
                 nodstr[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
+
+                # with KEYOPT(8)=0, the record contains stresses at
+                # each corner node (first at the bottom shell surface,
+                # then the top surface)
+                if einfo[1] == 181:
+                    if keyopts[etype_ref, 7] == 0:
+                        nodstr[etype_ref] *= 2
 
             # store element table data
             self.element_table = {'nodelm': nodelm,
                                   'nodfor': nodfor,
-                                  'nodstr': nodstr}
+                                  'nodstr': nodstr,
+                                  'keyopts': keyopts}
 
             # get the element description table
-            f.seek((geometry_header['ptrEID'] + 2) * 4)
+            f.seek((geometry_header['ptrEID'] + 2)*4)
             e_disp_table = np.empty(nelm, np.int32)
             e_disp_table[:] = np.fromfile(
                 f, self.resultheader['endian'] + 'i8', nelm)
@@ -987,7 +1006,7 @@ class Result(object):
         return float(self.resultheader['verstring'])
 
 
-    def ElementStress(self, rnum, principal=False):
+    def ElementStress(self, rnum, principal=False, in_element_coord_sys=False):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -1001,11 +1020,12 @@ class Result(object):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a list 
+            containing (step, substep) of the requested result.
 
         principal : bool, optional
-            Returns principal stresses instead of component stresses.  Default False.
+            Returns principal stresses instead of component stresses.  Default
+            False.
 
         Returns
         -------
@@ -1029,17 +1049,13 @@ class Result(object):
         elemtype = self.geometry['Element Type'].astype(np.int32)
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        # shell181 store their stresses in the direction of the element coordinate
-        # system.
-        # rot_mask = np.zeros(elemtype.size, np.int32)
-        # if 181 in self.geometry['ekey'][:, 1]:
-        #     rot_mask[elemtype == 181] = True
-
         etype = etype.astype(c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
         nelemnode = nnode.sum()
+
+        # * For shell elements or layered shell elements
 
         # bitmask (might use this at some point)
         # bitmask = bin(int(hex(self.resultheader['rstsprs']), base=16)).lstrip('0b')
@@ -1055,20 +1071,13 @@ class Result(object):
 
             _rstHelper.ReadElementStress(self.filename,
                                          ele_ind_table + 2,
-                                         nodstr.astype(c_int64),
+                                         nodstr.astype(np.int64),
                                          etype,
                                          ele_data_arr,
-                                         nitem, validmask, elemtype)
+                                         nitem, validmask, elemtype,
+                                         as_global=not in_element_coord_sys)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
-
-
-# filename, int64_t [::1] ele_ind_table, 
-#                       int64_t [::1] nodstr, int64_t [::1] etype,
-#                       float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask,
-#                       int32_t [::1] element_type):
-#     """ Read element results from ANSYS directly into a numpy array """
-#     cdef int64_t i, j, k, ind, nread
 
         else:
             raise Exception('Not implemented for ANSYS older than v14.5')

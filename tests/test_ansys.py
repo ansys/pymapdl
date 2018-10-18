@@ -16,8 +16,8 @@ path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
 
-rver = 'v150'  # also have 'v182' but will not work on windows
-# rver = 'v182'  # also have 'v182' but will not work on windows
+# rver = 'v150'  # also have 'v182' but will not work on windows
+rver = 'v182'  # also have 'v182' but will not work on windows
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 class TestCyclicResultReader(object):
@@ -27,8 +27,16 @@ class TestCyclicResultReader(object):
     try:
         # test if raw results are being read properly by using the normal result reader
         result = pyansys.Result(result_file)
-        ansys = pyansys.ANSYS(override=True, jobname=rver, loglevel='DEBUG',
-                              interactive_plotting=False, prefer_pexpect=True)
+
+        if rver == 'v182':
+            ansys = pyansys.ANSYS('/usr/ansys_inc/v182/ansys/bin/ansys182',
+                                  override=True, jobname=rver, loglevel='DEBUG',
+                                  interactive_plotting=False, prefer_pexpect=True)
+        else:
+            ansys = pyansys.ANSYS('/usr/ansys_inc/v150/ansys/bin/ansys150',
+                                  override=True, jobname=rver, loglevel='DEBUG',
+                                  interactive_plotting=False, prefer_pexpect=True)
+
 
         # copy result file to ansys's temporary path
         copyfile(result_file, os.path.join(ansys.path, '%s.rst' % rver))

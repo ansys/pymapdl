@@ -145,9 +145,17 @@ def LoadElements(filename, int ptr, int nelm,
 
 def ReadElementStress(filename, int64_t [::1] ele_ind_table, 
                       int64_t [::1] nodstr, int64_t [::1] etype,
-                      float [:, ::1] ele_data_arr, int nitem, int32_t [::1] validmask,
-                      int32_t [::1] element_type):
-    """ Read element results from ANSYS directly into a numpy array """
+                      float [:, ::1] ele_data_arr, int nitem,
+                      int32_t [::1] validmask, int32_t [::1] element_type,
+                      int as_global=1):
+    """
+    Read element results from ANSYS directly into a numpy array
+
+    as_global : int, optional
+        Rotates stresses from the element coordinate system to the global
+        cartesian coordinate system.  Default True.
+
+    """
     cdef int64_t i, j, k, ind, nread
     
     cdef FILE* cfile
@@ -170,6 +178,8 @@ def ReadElementStress(filename, int64_t [::1] ele_ind_table,
 
         # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
+
+        # if shell and keyopt 8 is 0, read top and bottom
         nread = nnode_elem*nitem
 
         if ptrENS < 0:  # missing pointer means missing data
@@ -193,7 +203,8 @@ def ReadElementStress(filename, int64_t [::1] ele_ind_table,
                 fread(&eulerangles, sizeof(float), 3, cfile)
 
                 # rotate the first four nodal results
-                EulerRotate(ele_data_arr, eulerangles, c)
+                if as_global:
+                    EulerRotate(ele_data_arr, eulerangles, c)
 
         c += nnode_elem
 
@@ -201,8 +212,8 @@ def ReadElementStress(filename, int64_t [::1] ele_ind_table,
 
 
 # this will have to be generalized at some point
-cdef inline void EulerRotate(float [:, ::1] ele_data_arr, float [3] eulerangles,
-                             int row):
+cdef inline void EulerRotate(float [:, ::1] ele_data_arr,
+                             float [3] eulerangles, int row):
     """
     Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
 
@@ -211,7 +222,9 @@ cdef inline void EulerRotate(float [:, ::1] ele_data_arr, float [3] eulerangles,
     Specific to shell181 elements
 
     # used sympy to generate these equations
-    tensor = np.matrix([[s_xx, s_xy, s_xz], [s_xy, s_yy, s_yz], [s_xz, s_yz, s_zz]])
+    tensor = np.matrix([[s_xx, s_xy, s_xz], 
+                        [s_xy, s_yy, s_yz], 
+                        [s_xz, s_yz, s_zz]])
 
     # always zero for shell elements...
     s_xz = 0
