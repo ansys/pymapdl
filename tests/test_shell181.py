@@ -124,3 +124,5 @@ class TestLoad181():
 
         # wide atol limits considering the 5 sigfig from ASCII tables
         assert np.allclose(stress, np.array(ANSYS_NODE), atol=1E-6)
+
+

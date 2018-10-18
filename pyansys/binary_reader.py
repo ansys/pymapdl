@@ -1005,7 +1005,6 @@ class Result(object):
         """ returns the vesion of ansys used to save this result file """
         return float(self.resultheader['verstring'])
 
-
     def ElementStress(self, rnum, principal=False, in_element_coord_sys=False):
         """
         Equivalent ANSYS command: PRESOL, S
@@ -1039,6 +1038,12 @@ class Result(object):
         enode : list
             Node numbers corresponding to each element's stress results.  One
             list entry for each element
+
+        Notes
+        -----
+        Shell stresses for element 181 are returned for top and bottom layers.
+        Results are ordered such that the top layer and then the bottom layer
+        is reported.
 
         """
         rnum = self.ParseStepSubstep(rnum)
