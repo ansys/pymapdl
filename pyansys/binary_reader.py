@@ -1810,26 +1810,3 @@ def IsInt(value):
         return True
     except:
         return False
-
-
-def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
-                        full_rotor=False):
-    """
-    Expand cyclic results given an array of results and the master/duplicate
-    sector indices
-    """
-
-    # master and duplicate sector solutions
-    u_mas = result[mas_ind]
-
-    # just return single sector
-    if not full_rotor:
-        return u_mas
-
-    # otherwise rotate results (CYC, 1 only)
-    sectors = []
-    angles = np.linspace(0, 2*np.pi, nsector + 1)[:-1] + phase
-    for angle in angles:
-        sectors.append(AxisRotation(u_mas, angle, deg=False, axis='z'))
-
-    return np.asarray(sectors)
