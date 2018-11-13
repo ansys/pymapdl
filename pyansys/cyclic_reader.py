@@ -7,12 +7,13 @@ import logging
 import ctypes
 from ctypes import c_int64
 
-import vtkInterface as vtki
+from vtki.common import axis_rotation
+
+import vtki
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-from vtkInterface.common import AxisRotation
 from pyansys import Result
 
 # Create logger
@@ -48,12 +49,12 @@ class CyclicResult(Result):
 
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
-        mask = self.quadgrid.GetCellScalars('ANSYS_elem_num') <= cs_els
+        mask = self.quadgrid.cell_arrays['ANSYS_elem_num'] <= cs_els
         # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
         node_mask = self.nnum <= self.resultheader['csNds']
 
         self.master_cell_mask = mask
-        self.grid = self.grid.ExtractSelectionCells(np.nonzero(mask)[0])
+        self.grid = self.grid.extract_cells(mask)
 
         # number of nodes in sector may not match number of nodes in geometry
         self.mas_ind = np.nonzero(node_mask)[0]
@@ -74,8 +75,8 @@ class CyclicResult(Result):
         for i in range(self.nsector):
 
             # Transform mesh
-            sector = self.grid.Copy()
-            sector.RotateZ(rang * i)
+            sector = self.grid.copy()
+            sector.rotate_z(rang * i)
             vtkappend.AddInputData(sector)
 
         vtkappend.Update()
@@ -193,7 +194,7 @@ class CyclicResult(Result):
         angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for angle in angles:
             # need to rotate solution and rotate direction
-            result_expanded.append(AxisRotation(result_combined, angle, deg=False,
+            result_expanded.append(axis_rotation(result_combined, angle, deg=False,
                                                 axis='z'))
 
         result_expanded = np.asarray(result_expanded)
@@ -483,11 +484,11 @@ class CyclicResult(Result):
             stitle = 'Normalized\n%s\n' % label
 
         # sometimes there are less nodes in the result than in the geometry
-        npoints = self.grid.GetNumberOfPoints()
+        npoints = self.grid.number_of_points
         if nnum.size != npoints:
             scalars = np.empty_like((self.nsector, npoints))
             scalars[:] = np.nan
-            nnum_grid = self.grid.GetPointScalars('ANSYSnodenum')
+            nnum_grid = self.grid.point_arrays['ANSYSnodenum']
             mask = np.in1d(nnum_grid, nnum)
             scalars[:, mask] = d
             d = scalars
@@ -726,22 +727,22 @@ class CyclicResult(Result):
         if show_result_info:
             result_info = self.TextResultTable(rnum)
 
-        plobj = vtki.PlotClass(off_screen=not interactive)
-        plobj.AddMesh(self.rotor.Copy(), scalars=np.real(scalars),
+        plobj = vtki.Plotter(off_screen=not interactive)
+        plobj.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
                       interpolatebeforemap=interpolatebeforemap, **kwargs)
-        plobj.UpdateCoordinates(orig_pt + np.real(complex_disp), render=False)
+        plobj.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
-        plobj.AddText(' ', fontsize=30)
+        plobj.add_text(' ', fontsize=30)
 
         if cpos:
-            plobj.SetCameraPosition(cpos)
+            plobj.camera_position = cpos
 
         if movie_filename:
-            plobj.OpenMovie(movie_filename)
+            plobj.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.Plot(interactive=False, autoclose=False,
+        plobj.plot(interactive=False, autoclose=False,
                    interactive_update=True)
         first_loop = True
         while not plobj.q_pressed:
@@ -754,8 +755,8 @@ class CyclicResult(Result):
                 else:
                     scalars = (complex_disp_adj*complex_disp_adj).sum(1)**0.5
 
-                plobj.UpdateScalars(scalars, render=False)
-                plobj.UpdateCoordinates(orig_pt + complex_disp_adj,
+                plobj.update_scalars(scalars, render=False)
+                plobj.update_coordinates(orig_pt + complex_disp_adj,
                                         render=False)
 
                 if show_phase:
@@ -763,19 +764,19 @@ class CyclicResult(Result):
                                              (result_info, (angle*180/np.pi)))
 
                 if interactive:
-                    plobj.Update(30, force_redraw=True)
+                    plobj.update(30, force_redraw=True)
 
                 if plobj.q_pressed:
                     break
 
                 if movie_filename and first_loop:
-                    plobj.WriteFrame()
+                    plobj.write_frame()
 
             first_loop = False
             if not interactive:
                 break
 
-        return plobj.Close()
+        return plobj.close()
 
 
 def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
@@ -796,6 +797,6 @@ def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=Fal
     sectors = []
     angles = np.linspace(0, 2*np.pi, nsector + 1)[:-1] + phase
     for angle in angles:
-        sectors.append(AxisRotation(u_mas, angle, deg=False, axis='z'))
+        sectors.append(axis_rotation(u_mas, angle, deg=False, axis='z'))
 
     return np.asarray(sectors)

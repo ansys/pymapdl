@@ -4,11 +4,11 @@ Unstructured grids generated using VTK can be converted to ANSYS APDL archive fi
 
 .. code:: python
 
-    import vtkInterface
-    from vtkInterface import examples
+    import vtki
+    from vtki import examples
     import pyansys
 
-    grid = vtkInterface.UnstructuredGrid(examples.hexbeamfile)
+    grid = vtki.UnstructuredGrid(examples.hexbeamfile)
     script_filename = '/tmp/grid.cdb'
     pyansys.WriteArchive(script_filename, grid)
 

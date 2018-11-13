@@ -7,7 +7,7 @@ import pyansys
 from pyansys.examples import hexarchivefile
 from pyansys.examples import rstfile
 from pyansys.examples import fullfile
-from vtkInterface.plotting import RunningXServer
+from vtki.plotting import running_xserver
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -18,7 +18,7 @@ def test_readarchive():
     grid = archive.ParseVTK()
     assert grid.points.size
     assert grid.cells.size
-    assert grid.GetPointScalars('ANSYSnodenum') is not None
+    assert 'ANSYSnodenum' in grid.point_arrays
     assert np.all(grid.quality > 0)
 
 
@@ -33,7 +33,7 @@ def test_loadresult():
     grid = result.grid
     assert grid.points.size
     assert grid.cells.size
-    assert grid.GetPointScalars('ANSYSnodenum') is not None
+    assert 'ANSYSnodenum' in grid.point_arrays
 
     # check results can be loaded
     nnum, disp = result.NodalSolution(0)
@@ -63,7 +63,7 @@ def test_loadresult():
     assert enode[0].size
 
 
-@pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_animate_nodal_solution(tmpdir):
     result = pyansys.ResultReader(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))

@@ -360,9 +360,9 @@ cdef inline double TetQuadJac(int64_t [::1] cellarr, int c, double [:, ::1] pts)
                     [ 8.4942655 ,  0.40172127,  3.39578674]])
     
     #from femorph import VTK_Plotting
-    #plobj = VTK_Plotting.PlotClass()
+    #plobj = VTK_Plotting.Plotter()
     #plobj.AddPoints(pts)
-    #plobj.Plot(); del plobj
+    #plobj.plot(); del plobj
     
     
     # Progamatically this was difficult as the first column always had to be

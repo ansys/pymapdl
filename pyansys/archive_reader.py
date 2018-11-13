@@ -13,7 +13,7 @@ archive = pyansys.ReadArchive('example.cdb')
 grid = archive.ParseVTK()
 
 # Plot the result
-grid.Plot()
+grid.plot()
 
 """
 import warnings
@@ -27,7 +27,7 @@ from pyansys.elements import valid_types
 # Attempt to load VTK dependent modules
 try:
     import vtk
-    import vtkInterface
+    import vtki
     vtk_loaded = True
 except BaseException:
     warnings.warn('Unable to load vtk dependent modules')
@@ -144,23 +144,23 @@ class ReadArchive(object):
                               np.ones(nextra, np.int32) * -1))
 
         # Create unstructured grid
-        grid = vtkInterface.UnstructuredGrid(offset, cells, cell_type, nodes)
+        grid = vtki.UnstructuredGrid(offset, cells, cell_type, nodes)
 
         # Store original ANSYS element and cell information
-        grid.AddPointScalars(nnum, 'ANSYSnodenum')
-        grid.AddCellScalars(enum, 'ANSYS_elem_num')
-        grid.AddCellScalars(parsed['etype'], 'ANSYS_elem_typenum')
-        grid.AddCellScalars(parsed['rcon'], 'ANSYS_real_constant')
-        grid.AddCellScalars(parsed['mtype'], 'ansys_material_type')
-        grid.AddCellScalars(parsed['ansys_etype'], 'ansys_etype')
+        grid.point_arrays['ANSYSnodenum'] = nnum
+        grid.cell_arrays['ANSYS_elem_num'] = enum
+        grid.cell_arrays['ANSYS_elem_typenum'] = parsed['etype']
+        grid.cell_arrays['ansys_real_constant'] = parsed['rcon']
+        grid.cell_arrays['ansys_material_type'] = parsed['mtype']
+        grid.cell_arrays['ansys_etype'] = parsed['ansys_etype']
 
         # Add element components to unstructured grid
         for comp in self.raw['elem_comps']:
             mask = np.in1d(enum, self.raw['elem_comps'][comp], assume_unique=True)
-            grid.AddCellScalars(mask, comp.strip())
+            grid.cell_arrays[comp.strip()] = mask
 
         # Add node components to unstructured grid
-        ibool = np.empty(grid.GetNumberOfPoints(), dtype=np.int8)
+        ibool = np.empty(grid.number_of_points, dtype=np.uint8)
         for comp in self.raw['node_comps']:
             ibool[:] = 0
 
@@ -168,12 +168,12 @@ class ReadArchive(object):
             nodenum = numref[self.raw['node_comps'][comp]]
 
             ibool[nodenum] = 1
-            grid.AddPointScalars(ibool, comp.strip())
+            grid.point_arrays[comp.strip()] = ibool
 
         # Add tracker for original node numbering
-        ind = np.arange(grid.GetNumberOfPoints())
-        grid.AddPointScalars(ind, 'origid')
-        grid.AddPointScalars(ind, 'VTKorigID')
+        ind = np.arange(grid.number_of_points)
+        grid.point_arrays['origid'] = ind
+        grid.point_arrays['VTKorigID'] = ind
 
         self.vtkuGrid = grid
         return grid

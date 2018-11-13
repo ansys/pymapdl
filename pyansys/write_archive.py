@@ -98,8 +98,8 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
 
     header = '/PREP7%s' % line_ending
 
-    nnode = grid.GetNumberOfPoints()
-    nodenum = grid.GetPointScalars('ANSYSnodenum')
+    nnode = grid.number_of_points
+    nodenum = grid.point_arrays['ANSYSnodenum']
     if nodenum is None:
         log.info('No ANSYS node numbers set in input.  ' +
                  'Adding default range')
@@ -117,7 +117,7 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
 
     # element block
     ncells = grid.GetNumberOfCells()
-    enum = grid.GetCellScalars('ANSYS_elem_num')
+    enum = grid.cell_arrays['ANSYS_elem_num']
     if enum is None:
         log.info('No ANSYS element numbers set in input.  ' +
                  'Adding default range starting from %d' % enum_start)
@@ -134,7 +134,7 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
         enum[enum == -1] = np.arange(start_num, end_num)
 
     # material type
-    mtype = grid.GetCellScalars('ansys_material_type')
+    mtype = grid.cell_arrays['ansys_material_type']
     if mtype is None:
         log.info('No ANSYS element numbers set in input.  ' +
                  'Adding default range starting from %d' % mtype_start)
@@ -144,7 +144,7 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
         mtype[mtype == -1] = mtype_start
 
     # real constant
-    rcon = grid.GetCellScalars('ansys_real_constant')
+    rcon = grid.cell_arrays['ansys_real_constant']
     if rcon is None:
         log.info('No ANSYS element numbers set in input.  ' +
                  'Adding default range starting from %d' % real_constant_start)
@@ -157,9 +157,9 @@ def WriteArchive(filename, grid, mtype_start=1, etype_start=1,
     if reset_etype:
         etype = None
     else:
-        etype = grid.GetCellScalars('ansys_etype')
+        etype = grid.cell_arrays['ansys_etype']
 
-    typenum = grid.GetCellScalars('ANSYS_elem_typenum')
+    typenum = grid.cell_arrays['ANSYS_elem_typenum']
     if etype is None:
         log.info('No ANSYS element type set in input.  ' +
                  'Adding default range starting from %d' % etype_start)

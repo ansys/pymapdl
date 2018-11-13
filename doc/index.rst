@@ -105,7 +105,7 @@ Dependencies:
 
 - ``numpy``
 - ``cython``
-- ``vtkInterface``
+- ``vtki``
 - ``pexpect``
 - ``appdirs``
 - ``vtk``

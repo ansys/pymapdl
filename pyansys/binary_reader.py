@@ -11,13 +11,13 @@ import logging
 import ctypes
 from ctypes import c_int64
 
-import vtkInterface as vtki
+import vtki
 import pyansys
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-from vtkInterface.common import AxisRotation
+from vtki.common import axis_rotation
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -425,7 +425,7 @@ class Result(object):
 
     def Plot(self, **kwargs):
         """ plots result geometry """
-        return self.grid.Plot(**kwargs)
+        return self.grid.plot(**kwargs)
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flipscalars=None, cpos=None,
@@ -496,7 +496,7 @@ class Result(object):
             stitle = 'Normalized\n%s\n' % label
 
         # sometimes there are less nodes in the result than in the geometry
-        npoints = self.grid.GetNumberOfPoints()
+        npoints = self.grid.number_of_points
         if nnum.size != npoints:
             scalars = np.empty(npoints)
             scalars[:] = np.nan
@@ -569,7 +569,7 @@ class Result(object):
             movie non-interactively.
 
         kwargs : optional keyword arguments, optional
-            See help(vtkInterface.Plot) for additional keyword arguments.
+            See help(vtki.Plot) for additional keyword arguments.
 
         """
         # normalize nodal solution
@@ -596,22 +596,22 @@ class Result(object):
         if show_result_info:
             result_info = self.TextResultTable(rnum)
 
-        plobj = vtki.PlotClass(off_screen=not interactive)
-        plobj.AddMesh(self.grid.Copy(), scalars=np.real(scalars),
+        plobj = vtki.Plotter(off_screen=not interactive)
+        plobj.add_mesh(self.grid.copy(), scalars=np.real(scalars),
                       interpolatebeforemap=interpolatebeforemap, **kwargs)
-        plobj.UpdateCoordinates(orig_pt, render=False)
+        plobj.update_coordinates(orig_pt, render=False)
 
         # setup text
-        plobj.AddText(' ', fontsize=30)
+        plobj.add_text(' ', fontsize=30)
 
         if cpos:
-            plobj.SetCameraPosition(cpos)
+            plobj.camera_position = cpos
 
         if movie_filename:
-            plobj.OpenMovie(movie_filename)
+            plobj.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.Plot(interactive=False, autoclose=False,
+        plobj.plot(interactive=False, autoclose=False,
                    interactive_update=True)
         first_loop = True
         while not plobj.q_pressed:
@@ -624,26 +624,26 @@ class Result(object):
                 else:
                     scalars = (disp_adj*disp_adj).sum(1)**0.5
 
-                plobj.UpdateScalars(scalars, render=False)
-                plobj.UpdateCoordinates(orig_pt + disp_adj, render=False)
+                plobj.update_scalars(scalars, render=False)
+                plobj.update_coordinates(orig_pt + disp_adj, render=False)
                 if show_phase:
                     plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
 
                 if interactive:
-                    plobj.Update(30, force_redraw=True)
+                    plobj.update(30, force_redraw=True)
 
                 if plobj.q_pressed:
                     break
 
                 if movie_filename and first_loop:
-                    plobj.WriteFrame()
+                    plobj.write_frame()
 
             first_loop = False
             if not interactive:
                 break
 
-        return plobj.Close()
+        return plobj.close()
 
     def NodalSolution(self, rnum, in_nodal_coord_sys=False):
         """
@@ -709,13 +709,13 @@ class Result(object):
             theta_xy, theta_yz, theta_zx = euler_angles
 
             if np.any(theta_xy):
-                vtki.common.AxisRotation(r, theta_xy, inplace=True, axis='z')
+                vtki.common.axis_rotation(r, theta_xy, inplace=True, axis='z')
 
             if np.any(theta_yz):
-                vtki.common.AxisRotation(r, theta_yz, inplace=True, axis='x')
+                vtki.common.axis_rotation(r, theta_yz, inplace=True, axis='x')
 
             if np.any(theta_zx):
-                vtki.common.AxisRotation(r, theta_zx, inplace=True, axis='y')
+                vtki.common.axis_rotation(r, theta_zx, inplace=True, axis='y')
 
         # also include nodes in output
         return self.nnum, r
@@ -874,10 +874,10 @@ class Result(object):
         nodes = nloc[:, :3]
         self.quadgrid = vtki.UnstructuredGrid(offset, cells,
                                                       cell_type, nodes)
-        self.quadgrid.AddCellScalars(enum, 'ANSYS_elem_num')
-        self.quadgrid.AddPointScalars(nnum, 'ANSYSnodenum')
-        self.quadgrid.AddCellScalars(element_type, 'Element Type')
-        self.grid = self.quadgrid.LinearGridCopy()
+        self.quadgrid.cell_arrays['ANSYS_elem_num'] = enum
+        self.quadgrid.point_arrays['ANSYSnodenum'] = nnum
+        self.quadgrid.cell_arrays['Element Type'] = element_type
+        self.grid = self.quadgrid.linear_copy()
 
     def ElementSolutionHeader(self, rnum):
         """ Get element solution header information """
@@ -977,7 +977,7 @@ class Result(object):
         if ele_ind_table.size != self.grid.GetNumberOfCells():
             if not hasattr(self, 'nsector'):
                 raise Exception('Element table size does not match number of cells')
-            ind = self.grid.GetCellScalars('vtkOriginalCellIds')
+            ind = self.grid.cell_arrays['vtkOriginalCellIds']
             ele_ind_table = ele_ind_table[ind]
 
         data, ncount = _rstHelper.ReadNodalValues(self.filename,
@@ -987,7 +987,7 @@ class Result(object):
                                                   self.grid.cells,
                                                   nitem,
                                                   validmask.astype(np.int32),
-                                                  self.grid.GetNumberOfPoints(),
+                                                  self.grid.number_of_points,
                                                   nodstr,
                                                   etype,
                                                   elemtype)
@@ -995,7 +995,7 @@ class Result(object):
         if nitem != 6:
             data = data[:, :6]
 
-        nnum = self.grid.GetPointScalars('ANSYSnodenum')
+        nnum = self.grid.point_arrays['ANSYSnodenum']
         stress = data/ncount.reshape(-1, 1)
 
         return nnum, stress
@@ -1094,7 +1094,7 @@ class Result(object):
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
         # reorder list using sorted indices
-        enum = self.grid.GetCellScalars('ANSYS_elem_num')
+        enum = self.grid.cell_arrays['ANSYS_elem_num']
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
@@ -1187,7 +1187,7 @@ class Result(object):
                 data = ReadTable(f, 'f')  # TODO: Verify datatype
                 element_data.append(data)
 
-        enum = self.grid.GetCellScalars('ANSYS_elem_num')
+        enum = self.grid.cell_arrays['ANSYS_elem_num']
         if sort:
             sidx = np.argsort(enum)
             enum = enum[sidx]
@@ -1327,7 +1327,7 @@ class Result(object):
         interactive : bool
             Allows user to interact with the plot when True.  Default True.
 
-        grid : vtkInterface PolyData or UnstructuredGrid, optional
+        grid : vtki PolyData or UnstructuredGrid, optional
             Uses self.grid by default.  When specified, uses this grid instead.
 
         Returns
@@ -1356,31 +1356,31 @@ class Result(object):
             full_screen = False
 
         # Plot off screen when not interactive
-        plobj = vtki.PlotClass(off_screen=not(interactive))
-        plobj.AddMesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
+        plobj = vtki.Plotter(off_screen=not(interactive))
+        plobj.add_mesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
                       flipscalars=flipscalars, interpolatebeforemap=True, **kwargs)
 
         # NAN/missing data are white
         plobj.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
 
         if cpos:
-            plobj.SetCameraPosition(cpos)
+            plobj.camera_position = cpos
 
         # add table
         if add_text and rnum is not None:
-            plobj.AddText(self.TextResultTable(rnum), fontsize=20)
+            plobj.add_text(self.TextResultTable(rnum), fontsize=20)
 
         if screenshot:
-            cpos = plobj.Plot(autoclose=False, interactive=interactive,
+            cpos = plobj.plot(autoclose=False, interactive=interactive,
                               window_size=window_size,
                               full_screen=full_screen)
             if screenshot is True:
-                img = plobj.TakeScreenShot()
+                img = plobj.screenshot()
             else:
-                plobj.TakeScreenShot(screenshot)
-            plobj.Close()
+                plobj.screenshot(screenshot)
+            plobj.close()
         else:
-            cpos = plobj.Plot(interactive=interactive, window_size=window_size,
+            cpos = plobj.plot(interactive=interactive, window_size=window_size,
                               full_screen=full_screen)
 
         if screenshot is True:
@@ -1501,17 +1501,17 @@ class Result(object):
         selected for the legacy writer.
         """
         # Copy grid as to not write results to original object
-        grid = self.grid.Copy()
+        grid = self.grid.copy()
 
         for i in range(self.nsets):
             # Nodal results
             _, val = self.NodalSolution(i)
-            grid.AddPointScalars(val, 'NodalSolution{:03d}'.format(i))
+            grid.point_arrays['NodalSolution{:03d}'.format(i)] = val
 
             # Populate with nodal stress at edge nodes
-            nodenum = self.grid.GetPointScalars('ANSYSnodenum')
+            nodenum = self.grid.point_arrays['ANSYSnodenum']
             _, stress = self.NodalStress(i)
-            grid.AddPointScalars(stress, 'NodalStress{:03d}'.format(i))
+            grid.point_arrays['NodalStress{:03d}'.format(i)] = stress
 
         grid.Write(filename)
 

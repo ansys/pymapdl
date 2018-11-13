@@ -90,7 +90,7 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     
     # Create a vtk unstructured grid from the raw data and plot it
     grid = archive.ParseVTK()
-    grid.Plot()
+    grid.plot()
     
     # write this as a vtk xml file 
     grid.Write('hex.vtu')
@@ -98,14 +98,14 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam.png
     :width: 500pt
 
-You can then load this vtk file using vtkInterface or another program that uses VTK.
+You can then load this vtk file using vtki or another program that uses VTK.
     
 .. code:: python
 
     # Load this from vtk
-    import vtkInterface
-    grid = vtkInterface.UnstructuredGrid('hex.vtu')
-    grid.Plot()
+    import vtki
+    grid = vtki.UnstructuredGrid('hex.vtu')
+    grid.plot()
 
 
 Loading the Result File

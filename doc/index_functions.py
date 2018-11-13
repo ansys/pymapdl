@@ -23,8 +23,8 @@ archive.SaveAsVTK('hex.vtu')
 
 
 # Load this from vtk
-import vtkInterface
-grid = vtkInterface.LoadGrid('hex.vtk')
+import vtki
+grid = vtki.LoadGrid('hex.vtk')
 grid.Plot()
 
 

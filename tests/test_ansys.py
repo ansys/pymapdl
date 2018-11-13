@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import os
 import pyansys
-from vtkInterface.plotting import RunningXServer
+from vtki.plotting import running_xserver
 
 try:
     __file__
@@ -132,7 +132,7 @@ class TestCyclicResultReader(object):
         assert np.allclose(ansys_nnum, nnum)
         assert np.allclose(ansys_stress, stress, atol=1E-2)
 
-    @pytest.mark.skipif(not RunningXServer(), reason="Requires active X Server")
+    @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
     def test_plot(self):
         filename = '/tmp/temp.png'
         self.result.PlotNodalSolution(0, screenshot=filename,

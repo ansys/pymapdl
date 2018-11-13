@@ -66,7 +66,7 @@ You can also plot the mode shape of this finite element model.  Since the constr
 
 .. code:: python
     
-    import vtkInterface
+    import vtki
 
     # Get the 4th mode shape
     full_mode_shape = v[:, 3] # x, y, z displacement for each node
@@ -81,23 +81,23 @@ You can also plot the mode shape of this finite element model.  Since the constr
     grid = archive.ParseVTK()
     
     # plot the normalized displacement
-    # grid.Plot(scalars=n)
+    # grid.plot(scalars=n)
     
     # Fancy plot the displacement
-    plobj = vtkInterface.PlotClass()
+    plobj = vtki.Plotter()
     
     # add the nominal mesh
-    plobj.AddMesh(grid, style='wireframe')
+    plobj.add_mesh(grid, style='wireframe')
 	  
     # copy the mesh and displace it
-    new_grid = grid.Copy()
+    new_grid = grid.copy()
     new_grid.points += disp/80
-    plobj.AddMesh(new_grid, scalars=n, stitle='Normalized\nDisplacement',
+    plobj.add_mesh(new_grid, scalars=n, stitle='Normalized\nDisplacement',
                   flipscalars=True)
     
-    plobj.AddText('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
-                  fontsize=30)
-    plobj.Plot()
+    plobj.add_text('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
+                   fontsize=30)
+    plobj.plot()
     
 .. image:: ./images/solved_km.png
 

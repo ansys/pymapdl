@@ -10,7 +10,7 @@ import sys
 import numpy as np
 
 import pyansys
-import vtkInterface
+import vtki
 
 
 # get location of this folder and the example files
@@ -45,7 +45,7 @@ def DisplayHexBeam(as_test=False):
     # Load an archive file
     archive = pyansys.ReadArchive(hexarchivefile)
     grid = archive.ParseVTK()
-    grid.Plot(interactive=False)
+    grid.plot(interactive=False)
 
 
 def LoadResult():
@@ -169,17 +169,17 @@ def SolveKM():
     grid = archive.ParseVTK()
 
     # Fancy plot the displacement
-    plobj = vtkInterface.PlotClass()
+    plobj = vtki.Plotter()
 
     # add two meshes to the plotting class
-    plobj.AddMesh(grid.Copy(), style='wireframe')
-    plobj.AddMesh(grid, scalars=n, stitle='Normalized\nDisplacement',
+    plobj.add_mesh(grid.copy(), style='wireframe')
+    plobj.add_mesh(grid, scalars=n, stitle='Normalized\nDisplacement',
                   flipscalars=True)
     # Update the coordinates by adding the mode shape to the grid
-    plobj.UpdateCoordinates(grid.GetNumpyPoints() + disp / 80, render=False)
-    plobj.AddText('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
+    plobj.update_coordinates(grid.GetNumpyPoints() + disp / 80, render=False)
+    plobj.add_text('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
                   fontsize=30)
-    plobj.Plot()
+    plobj.plot()
 
 
 def DisplayCellQual(meshtype='tet'):
@@ -209,7 +209,7 @@ def DisplayCellQual(meshtype='tet'):
     qual = pyansys.CellQuality(grid)
 
     # plot cell quality
-    grid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
+    grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
               rng=[0, 1], flipscalars=True)
 
 
