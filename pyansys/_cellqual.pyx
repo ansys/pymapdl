@@ -359,7 +359,7 @@ cdef inline double TetQuadJac(int64_t [::1] cellarr, int c, double [:, ::1] pts)
                     [ 8.47671735,  0.38577743,  3.39418213],
                     [ 8.4942655 ,  0.40172127,  3.39578674]])
     
-    #from FEMORPH import VTK_Plotting
+    #from femorph import VTK_Plotting
     #plobj = VTK_Plotting.PlotClass()
     #plobj.AddPoints(pts)
     #plobj.Plot(); del plobj
@@ -2331,62 +2331,6 @@ cdef inline double HexQuadJac(int64_t [::1] cellarr, int c, double [:, ::1] pts)
         jac = normjac
     
     return jac
-
-
-def CompScJac_quad(int64_t [::1] cellarr, double [:, ::1] pts):
-    """
-    FUNCTION SIGNATURE
-    CompScJac_quad(int64_t [::1] cellarr, double [:, ::1] pts)
-    
-    Returns the minimum scaled jacobian for each cell given a cell array from
-    a vtk unstructured grid.  Accounts for effect of midside nodes.
-    
-    Parameters
-    ----------
-    cellarr : int64_t [::1]
-        Cell array from VTK
-        
-    pts : double [:, ::1]
-        Double precision points accompaning cellarr
-    
-    Returns
-    -------
-    qual : np.ndarray
-        Minimum scaled jacobian for each cell from cellarr.
-    
-    """
-    cdef int cellarr_sz = cellarr.size
-
-    cdef int c = 0
-    cdef int i, j, indS, ind0, ind1, ind2
-    cdef double [::1] jacs = np.empty(cellarr_sz)
-    cdef double jac, normjac, detjac, tnorm
-    cdef int cnum = 0
-    while c < cellarr_sz:
-        if cellarr[c] == 4:  # Linear tetrahedral
-            jac = TetLinJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 10:  # Quadradic tetrahedral
-            jac = TetQuadJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 5:  # Pyramid
-            jac = PyrLinJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 13:  # Quadradic pyramid
-            jac = PyrQuadJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 6:  # Linear wedge
-            jac = WegLinJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 15:  # Dradic wedge       
-            jac = WegQuadJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 8:  # Linear hexahedral
-            jac = HexLinJac(cellarr, c + 1, pts)
-        elif cellarr[c] == 20:  # Quadradic hexahedral
-            jac = HexQuadJac(cellarr, c + 1, pts)
-        else:  # unknown element type
-            jac = d_nan
-        # regardless of the element, track jacobian and advance counter
-        c += cellarr[c] + 1
-        jacs[cnum] = jac
-        cnum += 1
-            
-    return np.asarray(jacs)[:cnum]
 
 
 def ComputeQuality(int64_t [::1] cells, int64_t [::1] offset,

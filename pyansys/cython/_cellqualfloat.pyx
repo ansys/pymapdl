@@ -348,7 +348,7 @@ cdef inline float TetQuadJac(long [::1] cellarr, int c, float [:, ::1] pts):
                     [ 8.47671735,  0.38577743,  3.39418213],
                     [ 8.4942655 ,  0.40172127,  3.39578674]])
     
-    #from FEMORPH import VTK_Plotting
+    #from femorph import VTK_Plotting
     #plobj = VTK_Plotting.PlotClass()
     #plobj.AddPoints(pts)
     #plobj.Plot(); del plobj
