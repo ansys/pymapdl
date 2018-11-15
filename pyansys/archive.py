@@ -165,15 +165,9 @@ class Archive(object):
             grid.cell_arrays[comp.strip()] = mask
 
         # Add node components to unstructured grid
-        ibool = np.empty(grid.number_of_points, dtype=np.uint8)
         for comp in self.raw['node_comps']:
-            ibool[:] = 0
-
-            # Convert to new node numbering
-            nodenum = numref[self.raw['node_comps'][comp]]
-
-            ibool[nodenum] = 1
-            grid.point_arrays[comp.strip()] = ibool
+            mask = np.in1d(nnum, self.raw['node_comps'][comp], assume_unique=True)
+            grid.point_arrays[comp.strip()] = mask
 
         # Add tracker for original node numbering
         ind = np.arange(grid.number_of_points)
