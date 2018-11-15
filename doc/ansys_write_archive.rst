@@ -1,6 +1,6 @@
 Write VTK Unstructured Grid as an ANSYS Archive
 ===============================================
-Unstructured grids generated using VTK can be converted to ANSYS APDL archive files and loaded into any version of ANSYS using ``pyansys.WriteArchive``.  The following example using the built-in archive file demonstrates this capability.
+Unstructured grids generated using VTK can be converted to ANSYS APDL archive files and loaded into any version of ANSYS using ``pyansys.save_as_archive``.  The following example using the built-in archive file demonstrates this capability.
 
 .. code:: python
 
@@ -10,7 +10,7 @@ Unstructured grids generated using VTK can be converted to ANSYS APDL archive fi
 
     grid = vtki.UnstructuredGrid(examples.hexbeamfile)
     script_filename = '/tmp/grid.cdb'
-    pyansys.WriteArchive(script_filename, grid)
+    pyansys.save_as_archive(script_filename, grid)
 
     # read in archive in ANSYS and generate cell shape quality report
     ansys = pyansys.ANSYS()
@@ -59,5 +59,5 @@ Linear element types will be written as ANSYS SOLID185, quadratic elements will 
 
 Write Functions
 ---------------
-.. automodule:: pyansys.write_archive
+.. automodule:: pyansys.archive
     :members:
