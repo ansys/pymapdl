@@ -216,7 +216,6 @@ cdef inline void StoreTet(int64_t [::1] offset, int64_t *ecount, int64_t *ccount
     else:
         cells[ccount[0]] = 10; ccount[0] += 1
         cell_type[ecount[0]] = VTK_QUADRATIC_TETRA
-        
 
     # Populate cell array while renumbering nodes
 
@@ -467,13 +466,13 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
             linetype[i] = int(atype)
 
     # arrays (efficiency warning astype is copying)
-    cdef int [:, ::1] ekey = raw['ekey']  # .astype(ctypes.c_int)
-    cdef int [:, ::1] elem = raw['elem']  # .astype(ctypes.c_int)
-    cdef int [::1] etype = raw['etype']  # .astype(ctypes.c_int)
-    cdef int [::1] nnum = raw['nnum']  # .astype(ctypes.c_int)
-    cdef int [::1] raw_enum = raw['enum']  # .astype(ctypes.c_int)
-    cdef int [::1] raw_rcon = raw['e_rcon']  # .astype(ctypes.c_int)
-    
+    cdef int [:, ::1] ekey = raw['ekey']
+    cdef int [:, ::1] elem = raw['elem']
+    cdef int [::1] etype = raw['etype']
+    cdef int [::1] nnum = raw['nnum']
+    cdef int [::1] raw_enum = raw['enum']
+    cdef int [::1] raw_rcon = raw['e_rcon']
+
     cdef int nelem = elem.shape[0]
     cdef int nnode = nnum.shape[0]
 
@@ -522,8 +521,8 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     for n in range(nnode):
         numref[nnum[n]] = n
     
-    # Loop through each element and check if the element type matches one this code
-    # can read
+    # Loop through each element and check if the element type matches
+    # one this code can read
     cdef int64_t ccount = 0 # cell/offset counter
     cdef int64_t ecount = 0 # element number counter
     cdef int64_t cstart
@@ -567,7 +566,6 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 else: # if tetrahedral
                     StoreTet(offset, &ecount, &ccount, cells, cell_type, numref,
                              elem, i, lin)
-
                 break # Continue to next element
 
         # Test for element type B
@@ -657,6 +655,16 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
         
             cell_type[ecount] = VTK_EMPTY_CELL
             ecount += 1
+
+    # cell count might be over maximum reference count
+    cdef int c, nread
+    c = 0
+    while c < ccount:
+        nread = cells[c]; c += 1
+        for i in range(c, c + nread):
+            if cells[i] > nnode:
+                cells[i] = -1
+        c += nread
 
     return {'cells': np.asarray(cells[:ccount]),
             'offset': np.asarray(offset[:ecount]),

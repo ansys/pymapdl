@@ -7,7 +7,7 @@ Loading and Plotting an ANSYS Archive File
 
 .. _examples_ref:
 
-ANSYS archive files containing solid elements (both legacy and modern) can be loaded using ReadArchive and then converted to a vtk object.
+ANSYS archive files containing solid elements (both legacy and modern) can be loaded using Archive and then converted to a vtk object.
 
 
 .. code:: python
@@ -19,14 +19,14 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
     filename = examples.hexarchivefile
     
     # Read ansys archive file
-    archive = pyansys.ReadArchive(filename)
+    archive = pyansys.Archive(filename)
     
     # Print raw data from cdb
     for key in archive.raw:
        print("%s : %s" % (key, archive.raw[key]))
     
     # Create a vtk unstructured grid from the raw data and plot it
-    grid = archive.ParseVTK(force_linear=True)
+    grid = archive.parse_vtk(force_linear=True)
     grid.Plot()
     
     # write this as a vtk xml file 
@@ -180,11 +180,11 @@ This is the source code for the example:
 
     # load archive file and parse for subsequent FEM queries
     from pyansys import examples
-    # archive = pyansys.ReadArchive(examples.hexarchivefile)
-    archive = pyansys.ReadArchive(examples.tetarchivefile)
+    # archive = pyansys.Archive(examples.hexarchivefile)
+    archive = pyansys.Archive(examples.tetarchivefile)
             
     # create vtk object
-    grid = archive.ParseVTK(force_linear=True)
+    grid = archive.parse_vtk(force_linear=True)
 
     # get cell quality
     qual = grid.CellQuality()

@@ -3,12 +3,12 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="321"                  NumberOfCells="40"                  >
       <PointData>
-        <DataArray type="Int32" Name="ANSYSnodenum" format="appended" RangeMin="1"                    RangeMax="321"                  offset="0"                   />
+        <DataArray type="Int32" Name="ansys_node_num" format="appended" RangeMin="1"                    RangeMax="321"                  offset="0"                   />
         <DataArray type="Int64" Name="VTKorigID" format="appended" RangeMin="0"                    RangeMax="320"                  offset="712"                 />
       </PointData>
       <CellData Scalars="ANSYS_real_constant">
-        <DataArray type="Int32" Name="ANSYS_elem_num" format="appended" RangeMin="1"                    RangeMax="40"                   offset="1480"                />
-        <DataArray type="Int32" Name="ANSYS_elem_typenum" format="appended" RangeMin="186"                  RangeMax="186"                  offset="1604"                />
+        <DataArray type="Int32" Name="ansys_elem_num" format="appended" RangeMin="1"                    RangeMax="40"                   offset="1480"                />
+        <DataArray type="Int32" Name="ansys_elem_type_num" format="appended" RangeMin="186"                  RangeMax="186"                  offset="1604"                />
         <DataArray type="Int32" Name="ANSYS_real_constant" format="appended" RangeMin="1"                    RangeMax="1"                    offset="1648"                />
       </CellData>
       <Points>

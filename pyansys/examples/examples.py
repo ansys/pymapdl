@@ -43,8 +43,8 @@ def RunAll(run_ansys=False):
 def DisplayHexBeam(as_test=False):
     """ Displays a hex beam mesh """
     # Load an archive file
-    archive = pyansys.ReadArchive(hexarchivefile)
-    grid = archive.ParseVTK()
+    archive = pyansys.Archive(hexarchivefile)
+    grid = archive.parse_vtk()
     grid.plot(interactive=False)
 
 
@@ -165,8 +165,8 @@ def SolveKM():
     n /= n.max()  # normalize
 
     # load an archive file and create a vtk unstructured grid
-    archive = pyansys.ReadArchive(pyansys.examples.hexarchivefile)
-    grid = archive.ParseVTK()
+    archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+    grid = archive.parse_vtk()
 
     # Fancy plot the displacement
     plobj = vtki.Plotter()
@@ -198,12 +198,12 @@ def DisplayCellQual(meshtype='tet'):
 
     # load archive file and parse for subsequent FEM queries
     if meshtype == 'hex':
-        archive = pyansys.ReadArchive(hexarchivefile)
+        archive = pyansys.Archive(hexarchivefile)
     else:
-        archive = pyansys.ReadArchive(tetarchivefile)
+        archive = pyansys.Archive(tetarchivefile)
 
     # create vtk object
-    grid = archive.ParseVTK()
+    grid = archive.parse_vtk()
 
     # get cell quality
     qual = pyansys.CellQuality(grid)

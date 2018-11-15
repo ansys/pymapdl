@@ -77,8 +77,8 @@ You can also plot the mode shape of this finite element model.  Since the constr
     n /= n.max() # normalize
     
     # load an archive file and create a vtk unstructured grid
-    archive = pyansys.ReadArchive(pyansys.examples.hexarchivefile)
-    grid = archive.ParseVTK()
+    archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+    grid = archive.parse_vtk()
     
     # plot the normalized displacement
     # grid.plot(scalars=n)

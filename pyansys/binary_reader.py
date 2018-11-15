@@ -500,7 +500,7 @@ class Result(object):
         if nnum.size != npoints:
             scalars = np.empty(npoints)
             scalars[:] = np.nan
-            nnum_grid = self.grid.GetPointScalars('ANSYSnodenum')
+            nnum_grid = self.grid.GetPointScalars('ansys_node_num')
             mask = np.in1d(nnum_grid, nnum)
             scalars[mask] = d
             d = scalars
@@ -874,8 +874,8 @@ class Result(object):
         nodes = nloc[:, :3]
         self.quadgrid = vtki.UnstructuredGrid(offset, cells,
                                                       cell_type, nodes)
-        self.quadgrid.cell_arrays['ANSYS_elem_num'] = enum
-        self.quadgrid.point_arrays['ANSYSnodenum'] = nnum
+        self.quadgrid.cell_arrays['ansys_elem_num'] = enum
+        self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Element Type'] = element_type
         self.grid = self.quadgrid.linear_copy()
 
@@ -974,7 +974,7 @@ class Result(object):
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
         # if cyclic rotor
-        if ele_ind_table.size != self.grid.GetNumberOfCells():
+        if ele_ind_table.size != self.grid.number_of_cells:
             if not hasattr(self, 'nsector'):
                 raise Exception('Element table size does not match number of cells')
             ind = self.grid.cell_arrays['vtkOriginalCellIds']
@@ -995,7 +995,7 @@ class Result(object):
         if nitem != 6:
             data = data[:, :6]
 
-        nnum = self.grid.point_arrays['ANSYSnodenum']
+        nnum = self.grid.point_arrays['ansys_node_num']
         stress = data/ncount.reshape(-1, 1)
 
         return nnum, stress
@@ -1094,7 +1094,7 @@ class Result(object):
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
         # reorder list using sorted indices
-        enum = self.grid.cell_arrays['ANSYS_elem_num']
+        enum = self.grid.cell_arrays['ansys_elem_num']
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
@@ -1187,7 +1187,7 @@ class Result(object):
                 data = ReadTable(f, 'f')  # TODO: Verify datatype
                 element_data.append(data)
 
-        enum = self.grid.cell_arrays['ANSYS_elem_num']
+        enum = self.grid.cell_arrays['ansys_elem_num']
         if sort:
             sidx = np.argsort(enum)
             enum = enum[sidx]
@@ -1509,7 +1509,7 @@ class Result(object):
             grid.point_arrays['NodalSolution{:03d}'.format(i)] = val
 
             # Populate with nodal stress at edge nodes
-            nodenum = self.grid.point_arrays['ANSYSnodenum']
+            nodenum = self.grid.point_arrays['ansys_node_num']
             _, stress = self.NodalStress(i)
             grid.point_arrays['NodalStress{:03d}'.format(i)] = stress
 

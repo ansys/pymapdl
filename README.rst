@@ -70,7 +70,7 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
 
 Loading and Plotting an ANSYS Archive File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ANSYS archive files containing solid elements (both legacy and current), can be loaded using ReadArchive and then converted to a vtk object.
+ANSYS archive files containing solid elements (both legacy and current), can be loaded using Archive and then converted to a vtk object.
 
 
 .. code:: python
@@ -82,14 +82,14 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     filename = examples.hexarchivefile
     
     # Read ansys archive file
-    archive = pyansys.ReadArchive(filename)
+    archive = pyansys.Archive(filename)
     
     # Print raw data from cdb
     for key in archive.raw:
        print("%s : %s" % (key, archive.raw[key]))
     
     # Create a vtk unstructured grid from the raw data and plot it
-    grid = archive.ParseVTK()
+    grid = archive.parse_vtk()
     grid.plot()
     
     # write this as a vtk xml file 

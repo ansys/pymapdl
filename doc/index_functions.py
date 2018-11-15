@@ -8,7 +8,7 @@ from pyansys import examples
 filename = examples.hexarchivefile
 
 # Read ansys archive file
-archive = pyansys.ReadArchive(filename)
+archive = pyansys.Archive(filename)
 
 # Print raw data from cdb
 for key in archive.raw:

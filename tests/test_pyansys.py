@@ -13,15 +13,6 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 
-def test_readarchive():
-    archive = pyansys.ReadArchive(hexarchivefile)
-    grid = archive.ParseVTK()
-    assert grid.points.size
-    assert grid.cells.size
-    assert 'ANSYSnodenum' in grid.point_arrays
-    assert np.all(grid.quality > 0)
-
-
 def test_loadresult():
     result = pyansys.ResultReader(rstfile)
 
@@ -33,7 +24,7 @@ def test_loadresult():
     grid = result.grid
     assert grid.points.size
     assert grid.cells.size
-    assert 'ANSYSnodenum' in grid.point_arrays
+    assert 'ansys_node_num' in grid.point_arrays
 
     # check results can be loaded
     nnum, disp = result.NodalSolution(0)

@@ -1,7 +1,5 @@
-/COM,ANSYS RELEASE Release 18.2.2    BUILD 18.2.2    UP20170927       00:54:12
 /PREP7
 /NOPR
-/TITLE, File: /home/alex/Documents/AFRL/Python/femorph/Projects/JetCatStator/Ma
 *IF,_CDRDOFF,EQ,1,THEN     !if solid model was read in
 _CDRDOFF=             !reset flag, numoffs already performed
 *ELSE              !offset database for the following FE model

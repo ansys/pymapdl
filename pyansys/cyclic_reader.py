@@ -49,7 +49,7 @@ class CyclicResult(Result):
 
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
-        mask = self.quadgrid.cell_arrays['ANSYS_elem_num'] <= cs_els
+        mask = self.quadgrid.cell_arrays['ansys_elem_num'] <= cs_els
         # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
         node_mask = self.nnum <= self.resultheader['csNds']
 
@@ -488,7 +488,7 @@ class CyclicResult(Result):
         if nnum.size != npoints:
             scalars = np.empty_like((self.nsector, npoints))
             scalars[:] = np.nan
-            nnum_grid = self.grid.point_arrays['ANSYSnodenum']
+            nnum_grid = self.grid.point_arrays['ansys_node_num']
             mask = np.in1d(nnum_grid, nnum)
             scalars[:, mask] = d
             d = scalars
