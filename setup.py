@@ -86,9 +86,13 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'License :: OSI Approved :: MIT License',
+        'Operating System :: Microsoft :: Windows'
+        'Operating System :: POSIX'
+        'Operating System :: MacOS'
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 
     # Website
@@ -143,7 +147,7 @@ setup(
                                        'sector.cdb']},
 
     install_requires=['numpy>1.9.3',
-                      'vtki>=0.12.0',
+                      'vtki>=0.12.1',
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
