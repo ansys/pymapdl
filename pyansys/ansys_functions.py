@@ -895,7 +895,7 @@ class _InternalANSYS(object):
         command = "RMCLIST," % ()
         return self.Run(command, **kwargs)
 
-    def Latt(self, mat="", real="", type="", kb="", ke="", secnum="",
+    def Latt(self, mat="", real="", type="", unused="", kb="", ke="", secnum="",
              **kwargs):
         """
         APDL Command: LATT
@@ -960,7 +960,9 @@ class _InternalANSYS(object):
         information about setting element attributes.
 
         """
-        command = "LATT,%s,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type), str(kb), str(ke), str(secnum))
+        command = "LATT,%s,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type),
+                                              str(unused), str(kb), str(ke),
+                                              str(secnum))
         return self.Run(command, **kwargs)
 
     def Fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
@@ -59577,7 +59579,7 @@ class _InternalANSYS(object):
 
         Constraints specified by the DA command can conflict with other
         specified constraints.  See Resolution of Conflicting Constraint
-        Specifications\ in the Basic Analysis Guide for details.
+        Specifications in the Basic Analysis Guide for details.
 
         The DA command is also valid in PREP7.
 
@@ -63018,26 +63020,7 @@ class _InternalANSYS(object):
         completed, as shown in this example:
 
         If you are running ANSYS in a Microsoft Windows environment, you must
-        configure BLAT (a freeware program provided with ANSYS). Before issuing
-        the /MAIL command, enter this command from the C:\Program Files\Ansys
-        Inc\V162\Ansys\Bin\Intel directory:
-
-        If you are running ANSYS in a Windows x64 environment, enter this
-        command from the C:\Program Files\Ansys Inc\V162\Ansys\Bin\Winx64
-        directory:
-
-        where:
-
-        <email server name> is the name of the user’s email server; for
-        example, smtphost.xyz.com
-
-        <username>@<domain> is the email address of the user; for example,
-        john.doe@xyz.com
-
-        Because Windows cannot operate on a busy file, you cannot mail standard
-        ANSYS output.  Instead, redirect the output to a file and then mail
-        that file, as shown in this example:
-
+        configure BLAT
         """
         command = "/MAIL,%s,%s,%s" % (str(address), str(fname), str(ext))
         return self.Run(command, **kwargs)
