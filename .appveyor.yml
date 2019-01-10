@@ -4,7 +4,7 @@
 # :License:   MIT License
 
 
-# only build cp35 and cp36 as vtk wheels is only offered in those versions
+# only build cp35, cp36, cp37 as vtk wheels is only offered in those versions
 environment:
   CIBW_BEFORE_BUILD: "pip install numpy cython"
   CIBW_TEST_REQUIRES: "pytest scipy"

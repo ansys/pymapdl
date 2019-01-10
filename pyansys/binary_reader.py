@@ -500,7 +500,7 @@ class Result(object):
         if nnum.size != npoints:
             scalars = np.empty(npoints)
             scalars[:] = np.nan
-            nnum_grid = self.grid.GetPointScalars('ansys_node_num')
+            nnum_grid = self.grid.point_arrays['ansys_node_num']
             mask = np.in1d(nnum_grid, nnum)
             scalars[mask] = d
             d = scalars

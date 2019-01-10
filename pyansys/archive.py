@@ -83,11 +83,10 @@ class Archive(object):
         -------
         uGrid : vtk.vtkUnstructuredGrid
             VTK unstructured grid from archive file.
-
         """
-
         if self.check_raw():
-            raise Exception('Missing key data.  Cannot parse into unstructured grid')
+            raise Exception('Invalid file or missing key data.  ' +
+                            'Cannot parse into unstructured grid')
 
         # Convert to vtk style arrays
         if allowable_types is None:
@@ -107,11 +106,6 @@ class Archive(object):
         cell_type = parsed['cell_type']
         numref = parsed['numref']
         enum = parsed['enum']
-
-        # catch bug
-        # if np.any(cells > numref.max()):
-        # import pdb; pdb.set_trace()
-        # cells[cells > numref.max()] == 0
 
         # Check for missing midside nodes
         if force_linear or np.all(cells != -1):
