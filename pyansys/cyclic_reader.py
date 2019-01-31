@@ -407,7 +407,7 @@ class CyclicResult(Result):
             return nnum, pstress
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
-                          colormap=None, flipscalars=None, cpos=None,
+                          colormap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, full_rotor=True,
                           phase=0, **kwargs):
         """
@@ -430,7 +430,7 @@ class CyclicResult(Result):
         colormap : str, optional
            Colormap string.  See available matplotlib colormaps.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -493,12 +493,12 @@ class CyclicResult(Result):
             scalars[:, mask] = d
             d = scalars
 
-        return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
+        return self.PlotPointScalars(d, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
     def PlotNodalStress(self, rnum, stype, label='',
-                        colormap=None, flipscalars=None, cpos=None,
+                        colormap=None, flip_scalars=None, cpos=None,
                         screenshot=None, interactive=True, full_rotor=True,
                         phase=0, **kwargs):
         """
@@ -519,7 +519,7 @@ class CyclicResult(Result):
         colormap : str, optional
            Colormap string.  See available matplotlib colormaps.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -552,7 +552,7 @@ class CyclicResult(Result):
                                                              stype,
                                                              label=label,
                                                              colormap=colormap,
-                                                             flipscalars=flipscalars,
+                                                             flip_scalars=flip_scalars,
                                                              cpos=cpos,
                                                              screenshot=screenshot,
                                                              interactive=interactive,
@@ -570,11 +570,11 @@ class CyclicResult(Result):
         scalars = stress[:, :, sidx]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
-        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
+        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
                                  cpos=None, screenshot=None, interactive=True,
                                  full_rotor=True, phase=0,
                                  **kwargs):
@@ -599,7 +599,7 @@ class CyclicResult(Result):
            Colormap string.  See available matplotlib colormaps.  Only applicable for
            when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -647,14 +647,14 @@ class CyclicResult(Result):
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
-        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flipscalars,
+        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
     def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
                              nangles=180, show_phase=True,
                              show_result_info=True,
-                             interpolatebeforemap=True, cpos=None,
+                             interpolate_before_map=True, cpos=None,
                              movie_filename=None, interactive=True,
                              **kwargs):
         """
@@ -683,7 +683,7 @@ class CyclicResult(Result):
             Includes result information at the bottom left-hand corner of the
             plot.
 
-        interpolatebeforemap : bool, optional
+        interpolate_before_map : bool, optional
             Leaving this at default generally results in a better plot.
 
         cpos : list, optional
@@ -729,11 +729,11 @@ class CyclicResult(Result):
 
         plobj = vtki.Plotter(off_screen=not interactive)
         plobj.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
-                      interpolatebeforemap=interpolatebeforemap, **kwargs)
+                      interpolate_before_map=interpolate_before_map, **kwargs)
         plobj.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
-        plobj.add_text(' ', fontsize=30)
+        plobj.add_text(' ', font_size=30)
 
         if cpos:
             plobj.camera_position = cpos
@@ -742,7 +742,7 @@ class CyclicResult(Result):
             plobj.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.plot(interactive=False, autoclose=False,
+        plobj.plot(interactive=False, auto_close=False,
                    interactive_update=True)
         first_loop = True
         while not plobj.q_pressed:

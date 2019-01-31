@@ -428,7 +428,7 @@ class Result(object):
         return self.grid.plot(**kwargs)
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
-                          colormap=None, flipscalars=None, cpos=None,
+                          colormap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, **kwargs):
         """
         Plots a nodal result.
@@ -450,7 +450,7 @@ class Result(object):
         colormap : str, optional
            Colormap string.  See available matplotlib colormaps.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -505,7 +505,7 @@ class Result(object):
             scalars[mask] = d
             d = scalars
 
-        return self.PlotPointScalars(d, rnum, stitle, colormap, flipscalars,
+        return self.PlotPointScalars(d, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive=interactive, **kwargs)
 
     # for legacy
@@ -524,7 +524,7 @@ class Result(object):
     def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
                              nangles=100, show_phase=True,
                              show_result_info=True,
-                             interpolatebeforemap=True, cpos=None,
+                             interpolate_before_map=True, cpos=None,
                              movie_filename=None, interactive=True,
                              **kwargs):
         """
@@ -553,7 +553,7 @@ class Result(object):
             Includes result information at the bottom left-hand corner of the
             plot.
 
-        interpolatebeforemap : bool, optional
+        interpolate_before_map : bool, optional
             Leaving this at default generally results in a better plot.
 
         cpos : list, optional
@@ -598,11 +598,11 @@ class Result(object):
 
         plobj = vtki.Plotter(off_screen=not interactive)
         plobj.add_mesh(self.grid.copy(), scalars=np.real(scalars),
-                      interpolatebeforemap=interpolatebeforemap, **kwargs)
+                      interpolate_before_map=interpolate_before_map, **kwargs)
         plobj.update_coordinates(orig_pt, render=False)
 
         # setup text
-        plobj.add_text(' ', fontsize=30)
+        plobj.add_text(' ', font_size=30)
 
         if cpos:
             plobj.camera_position = cpos
@@ -611,7 +611,7 @@ class Result(object):
             plobj.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.plot(interactive=False, autoclose=False,
+        plobj.plot(interactive=False, auto_close=False,
                    interactive_update=True)
         first_loop = True
         while not plobj.q_pressed:
@@ -1236,7 +1236,7 @@ class Result(object):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
                                  cpos=None, screenshot=None, interactive=True,
                                  **kwargs):
         """
@@ -1260,7 +1260,7 @@ class Result(object):
            Colormap string.  See available matplotlib colormaps.  Only applicable for
            when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -1289,12 +1289,12 @@ class Result(object):
 
         # Generate plot
         stitle = 'Nodal Stress\n%s\n' % stype
-        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flipscalars,
+        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
         return cpos, stress
 
     def PlotPointScalars(self, scalars, rnum=None, stitle='', colormap=None,
-                         flipscalars=None, screenshot=None, cpos=None,
+                         flip_scalars=None, screenshot=None, cpos=None,
                          interactive=True, grid=None, add_text=True, **kwargs):
         """
         Plot a result
@@ -1314,7 +1314,7 @@ class Result(object):
             See matplotlib colormaps:
             matplotlib.org/examples/color/colormaps_reference.html
 
-        flipscalars : bool
+        flip_scalars : bool
             Reverses the direction of the colormap.
 
         screenshot : str
@@ -1340,8 +1340,8 @@ class Result(object):
             grid = self.grid
 
         # make colormap match default ansys
-        if colormap is None and flipscalars is None:
-            flipscalars = False
+        if colormap is None and flip_scalars is None:
+            flip_scalars = False
 
         if 'window_size' in kwargs:
             window_size = kwargs['window_size']
@@ -1357,8 +1357,9 @@ class Result(object):
 
         # Plot off screen when not interactive
         plobj = vtki.Plotter(off_screen=not(interactive))
-        plobj.add_mesh(grid, scalars=scalars, stitle=stitle, colormap=colormap,
-                      flipscalars=flipscalars, interpolatebeforemap=True, **kwargs)
+        plobj.add_mesh(grid, scalars=scalars, stitle=stitle,
+                       colormap=colormap, flip_scalars=flip_scalars,
+                       interpolate_before_map=True, **kwargs)
 
         # NAN/missing data are white
         plobj.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
@@ -1368,10 +1369,10 @@ class Result(object):
 
         # add table
         if add_text and rnum is not None:
-            plobj.add_text(self.TextResultTable(rnum), fontsize=20)
+            plobj.add_text(self.TextResultTable(rnum), font_size=20)
 
         if screenshot:
-            cpos = plobj.plot(autoclose=False, interactive=interactive,
+            cpos = plobj.plot(auto_close=False, interactive=interactive,
                               window_size=window_size,
                               full_screen=full_screen)
             if screenshot is True:
@@ -1416,7 +1417,7 @@ class Result(object):
         _, stress = self.PrincipalNodalStress(rnum)
         return stress[:, sidx]
 
-    def PlotNodalStress(self, rnum, stype, colormap=None, flipscalars=None,
+    def PlotNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
                         cpos=None, screenshot=None, interactive=True, **kwargs):
         """
         Plots the stresses at each node in the solution.
@@ -1439,7 +1440,7 @@ class Result(object):
         colormap : str, optional
            Colormap string.  See available matplotlib colormaps.
 
-        flipscalars : bool, optional
+        flip_scalars : bool, optional
             Flip direction of colormap.
 
         cpos : list, optional
@@ -1472,7 +1473,7 @@ class Result(object):
         stress = stress[:, sidx]
 
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flipscalars,
+        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
 
         return cpos

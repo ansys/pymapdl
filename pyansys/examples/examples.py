@@ -174,11 +174,11 @@ def SolveKM():
     # add two meshes to the plotting class
     plobj.add_mesh(grid.copy(), style='wireframe')
     plobj.add_mesh(grid, scalars=n, stitle='Normalized\nDisplacement',
-                  flipscalars=True)
+                  flip_scalars=True)
     # Update the coordinates by adding the mode shape to the grid
     plobj.update_coordinates(grid.GetNumpyPoints() + disp / 80, render=False)
     plobj.add_text('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
-                  fontsize=30)
+                  font_size=30)
     plobj.plot()
 
 
@@ -210,7 +210,7 @@ def DisplayCellQual(meshtype='tet'):
 
     # plot cell quality
     grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
-              rng=[0, 1], flipscalars=True)
+              rng=[0, 1], flip_scalars=True)
 
 
 def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,

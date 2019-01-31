@@ -34,3 +34,4 @@ test.sh
 tests/.coverage
 tests/htmlcov
 tests/cyclic/htmlcov
+.coverage
