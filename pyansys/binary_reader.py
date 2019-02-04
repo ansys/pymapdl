@@ -10,13 +10,15 @@ import warnings
 import logging
 import ctypes
 
+from vtki.common import axis_rotation
 import vtki
+
 import pyansys
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-from vtki.common import axis_rotation
+from pyansys._relaxmidside import relax_plane_scalars
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -126,7 +128,7 @@ RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
 
 
 # element types with stress outputs
-validENS = [45, 92, 95, 181, 185, 186, 187, 223]
+validENS = [45, 92, 95, 181, 185, 186, 187]
 
 
 class FullReader(object):
@@ -426,7 +428,7 @@ class Result(object):
         return self.grid.plot(color=color, show_edges=show_edges, **kwargs)
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
-                          colormap=None, flip_scalars=None, cpos=None,
+                          cmap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, **kwargs):
         """
         Plots a nodal result.
@@ -445,11 +447,11 @@ class Result(object):
         label : str, optional
             Annotation string to add to scalar bar in plot.
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -503,7 +505,7 @@ class Result(object):
             scalars[mask] = d
             d = scalars
 
-        return self.plot_point_scalars(d, rnum, stitle, colormap,
+        return self.plot_point_scalars(d, rnum, stitle, cmap,
                                        flip_scalars, screenshot, cpos,
                                        interactive=interactive,
                                        **kwargs)
@@ -928,12 +930,13 @@ class Result(object):
 
         Retrieves the component stresses for each node in the solution.
 
-        The order of the results corresponds to the sorted node numbering.
+        The order of the results corresponds to the sorted node
+        numbering.
 
-        This algorithm, like ANSYS, computes the nodal stress by averaging the
-        stress for each element at each node.  Due to the discontinunities
-        across elements, stresses will vary based on the element they are
-        evaluated from.
+        This algorithm, like ANSYS, computes the nodal stress by
+        averaging the stress for each element at each node.  Due to
+        the discontinuities across elements, stresses will vary based
+        on the element they are evaluated from.
 
         Parameters
         ----------
@@ -1233,7 +1236,7 @@ class Result(object):
         return nodenum, pstress
 
     def plot_principal_nodal_stress(self, rnum, stype=None,
-                                 colormap=None, flip_scalars=None,
+                                 cmap=None, flip_scalars=None,
                                  cpos=None, screenshot=None,
                                  interactive=True, **kwargs):
         """
@@ -1253,12 +1256,12 @@ class Result(object):
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.  Only applicable for
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.  Only applicable for
            when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -1290,11 +1293,11 @@ class Result(object):
 
         # Generate plot
         stitle = 'Nodal Stress\n%s\n' % stype
-        cpos = self.plot_point_scalars(stress, rnum, stitle, colormap, flip_scalars,
+        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
         return cpos, stress
 
-    def plot_point_scalars(self, scalars, rnum=None, stitle='', colormap=None,
+    def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
                          flip_scalars=None, screenshot=None, cpos=None,
                          interactive=True, grid=None, add_text=True, **kwargs):
         """
@@ -1311,12 +1314,12 @@ class Result(object):
         stitle : str
             Title of the scalar bar.
 
-        colormap : str
-            See matplotlib colormaps:
-            matplotlib.org/examples/color/colormaps_reference.html
+        cmap : str
+            See matplotlib cmaps:
+            matplotlib.org/examples/color/cmaps_reference.html
 
         flip_scalars : bool
-            Reverses the direction of the colormap.
+            Reverses the direction of the cmap.
 
         screenshot : str
             When a filename, saves screenshot to disk.
@@ -1340,8 +1343,8 @@ class Result(object):
         if grid is None:
             grid = self.grid
 
-        # make colormap match default ansys
-        if colormap is None and flip_scalars is None:
+        # make cmap match default ansys
+        if cmap is None and flip_scalars is None:
             flip_scalars = False
 
         if 'window_size' in kwargs:
@@ -1356,10 +1359,23 @@ class Result(object):
         else:
             full_screen = False
 
+        # need to ignore cells containing all nan
+        # breakpoint()
+
+        # cell_mask = np.empty(grid.n_cells, np.bool)
+        offset = grid.offset.astype(np.int32)
+        cells = grid.cells.astype(np.int32)
+        
+        # need special treatment for quatratic plane elements
+        # breakpoint()
+        # scalars = scalars.ravel().astype(np.double)
+        # relax_plane_scalars(grid.celltypes, cells, offset, scalars)
+        # ngrid = grid.extract_cells(grid.celltypes == 12)
+
         # Plot off screen when not interactive
         plobj = vtki.Plotter(off_screen=not(interactive))
         plobj.add_mesh(grid, scalars=scalars, stitle=stitle,
-                       colormap=colormap, flip_scalars=flip_scalars,
+                       cmap=cmap, flip_scalars=flip_scalars,
                        interpolate_before_map=True, **kwargs)
 
         # NAN/missing data are white
@@ -1418,7 +1434,7 @@ class Result(object):
         _, stress = self.principal_nodal_stress(rnum)
         return stress[:, sidx]
 
-    def plot_nodal_stress(self, rnum, stype, colormap=None, flip_scalars=None,
+    def plot_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
                         cpos=None, screenshot=None, interactive=True, **kwargs):
         """
         Plots the stresses at each node in the solution.
@@ -1438,11 +1454,11 @@ class Result(object):
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -1474,7 +1490,7 @@ class Result(object):
         stress = stress[:, sidx]
 
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        cpos = self.plot_point_scalars(stress, rnum, stitle, colormap, flip_scalars,
+        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
 
         return cpos

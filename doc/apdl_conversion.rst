@@ -4,12 +4,12 @@ ANSYS APDL contains over 200 verification files used for ANSYS validation and de
 
 Of particular note in the following examples is how most of the commands can be called as a method to the ansys object rather than sending a string as a command.  Additionally, take note that some commands require the ``with ansys.non_interactive:`` directive since some commands require and will break the CORBA server connection.  Also note that APDL macros that use ``*CREATE`` have been replaced with a python function.  This will make the code easier to debug should it be necessary to insert a break point in the code.
 
-Ideally, all math and variable setting would take place within Python as much as possible as APDL math is much less transparent and more difficult to debug.  These examples only show an automatic translation of a verification file and not optimized code.  Should it be necessary to pull parameters or arrays from ansys, use the ``*GET`` command in conjunction with ``ansys.LoadParameters``.  For example:
+Ideally, all math and variable setting would take place within Python as much as possible as APDL math is much less transparent and more difficult to debug.  These examples only show an automatic translation of a verification file and not optimized code.  Should it be necessary to pull parameters or arrays from ansys, use the ``*GET`` command in conjunction with ``ansys.load_parameters``.  For example:
 
 .. code:: python
 
    ansys.Get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
-   ansys.LoadParameters()
+   ansys.load_parameters()
 
 The parameters are now acessable within the ``ANSYS`` object:
 

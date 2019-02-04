@@ -32,7 +32,7 @@ The settings file is stored locally and do not need to enter it again.  If you n
 
     import pyansys
     new_path = 'C:\\Program Files\\ANSYS Inc\\v170\\ANSYS\\bin\\winx64\\ansys170.exe'
-    pyansys.ChangeDefaultANSYSPath(new_path)
+    pyansys.change_default_ansys_path(new_path)
 
 
 Running ANSYS from ``pyansys``
@@ -287,12 +287,12 @@ Additional examples with more conversion options can be found in the APDL conver
 
 Retreiving Parameters
 ---------------------
-APDL parameters can be retrieved using ``pyansys`` using the ``LoadParameters`` method.  For example, after using the ``*GET`` command:
+APDL parameters can be retrieved using ``pyansys`` using the ``load_parameters`` method.  For example, after using the ``*GET`` command:
 
 .. code:: python
 
    ansys.Get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
-   ansys.LoadParameters()
+   ansys.load_parameters()
 
 The parameters are now accessible within the ``ANSYS`` object:
 
@@ -437,7 +437,7 @@ Or pythonically as:
 
 .. code:: python
 
-    # ANSYS parameters can be obtained using LoadParameters
+    # ANSYS parameters can be obtained using load_parameters
     if ARG1 == 0:
         ansys.Run("*GET,ARG4,NX,ARG2     ")  # RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
         ansys.Run("*GET,ARG5,NY,ARG2")

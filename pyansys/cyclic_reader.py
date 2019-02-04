@@ -343,6 +343,54 @@ class CyclicResult(Result):
         return np.asarray(mode_table)
 
     def nodal_stress(self, rnum, phase=0, as_complex=False, full_rotor=False):
+        """
+        Equivalent ANSYS command: PRNSOL, S
+
+        Retrieves the component stresses for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        This algorithm, like ANSYS, computes the nodal stress by
+        averaging the stress for each element at each node.  Due to
+        the discontinuities across elements, stresses will vary based
+        on the element they are evaluated from.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
+        stress : numpy.ndarray
+            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
+            node.  For the corresponding node numbers, see where
+            result is the result object.
+
+        phase : float
+            Phase adjustment of the stress in degrees.
+
+        as_complex : bool, optional
+            Reports stess as a complex result.  Real and imaginary
+            stresses correspond to the stress of the main and repeated
+            sector.  Stress can be "rotated" using the phase
+            parameter.
+
+        full_rotor : bool, optional
+            Expands the results to the full rotor when True.  Default
+            False.
+
+        Notes
+        -----
+        Nodes without a stress value will be NAN.
+
+        """
         nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
         nnum = nnum[self.mas_ind]
 
@@ -364,8 +412,12 @@ class CyclicResult(Result):
             else:
                 stress_r = np.zeros_like(stress)
 
-            expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, hindex,
-                                                           phase, as_complex, full_rotor)
+            expanded_result = self.expand_cyclic_modal_stress(stress,
+                                                              stress_r,
+                                                              hindex,
+                                                              phase,
+                                                              as_complex,
+                                                              full_rotor)
 
         elif self.resultheader['kan'] == 0:  # static result
             stress_r = np.zeros_like(stress)
@@ -373,17 +425,13 @@ class CyclicResult(Result):
                                                               phase, as_complex,
                                                               full_rotor, scale=False)
 
-            # expanded_result = ExpandCyclicStress(stress, self.mas_ind,
-            #                                       self.dup_ind,
-            #                                       self.nsector, phase,
-            #                                       as_complex, full_rotor)
         else:
             raise Exception('Unsupported analysis type')
 
         return nnum, expanded_result
 
     def principal_nodal_stress(self, rnum, phase=0, as_complex=False,
-                             full_rotor=False):
+                               full_rotor=False):
         """
         Returns principal nodal stress for a cumulative result
 
@@ -426,7 +474,7 @@ class CyclicResult(Result):
             return nnum, pstress
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
-                          colormap=None, flip_scalars=None, cpos=None,
+                          cmap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, full_rotor=True,
                           phase=0, **kwargs):
         """
@@ -446,11 +494,11 @@ class CyclicResult(Result):
         label : str, optional
             Annotation string to add to scalar bar in plot.
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -512,11 +560,11 @@ class CyclicResult(Result):
             scalars[:, mask] = d
             d = scalars
 
-        return self.plot_point_scalars(d, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(d, rnum, stitle, cmap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def plot_nodal_stress(self, rnum, stype, label='', colormap=None,
+    def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
                         flip_scalars=None, cpos=None, screenshot=None,
                         interactive=True, full_rotor=True, phase=0,
                         **kwargs):
@@ -535,11 +583,11 @@ class CyclicResult(Result):
         label : str, optional
             Annotation string to add to scalar bar in plot.
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -570,7 +618,7 @@ class CyclicResult(Result):
             return super(CyclicResult, self).plot_nodal_stress(rnum,
                                                              stype,
                                                              label=label,
-                                                             colormap=colormap,
+                                                             cmap=cmap,
                                                              flip_scalars=flip_scalars,
                                                              cpos=cpos,
                                                              screenshot=screenshot,
@@ -589,11 +637,11 @@ class CyclicResult(Result):
         scalars = stress[:, :, sidx]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
-        return self.plot_point_scalars(scalars, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def plot_principal_nodal_stress(self, rnum, stype, colormap=None, flip_scalars=None,
+    def plot_principal_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
                                  cpos=None, screenshot=None, interactive=True,
                                  full_rotor=True, phase=0,
                                  **kwargs):
@@ -614,12 +662,12 @@ class CyclicResult(Result):
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
 
-        colormap : str, optional
-           Colormap string.  See available matplotlib colormaps.  Only applicable for
+        cmap : str, optional
+           Cmap string.  See available matplotlib cmaps.  Only applicable for
            when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
 
         flip_scalars : bool, optional
-            Flip direction of colormap.
+            Flip direction of cmap.
 
         cpos : list, optional
             List of camera position, focal point, and view up.  Plot first, then
@@ -666,7 +714,7 @@ class CyclicResult(Result):
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
-        return self.plot_point_scalars(scalars, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 

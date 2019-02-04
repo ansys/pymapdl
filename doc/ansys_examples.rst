@@ -246,9 +246,9 @@ Access and plot the results within python using pyansys:
     nodenum, stress = result.nodal_stress(0)
 
     # plot interactively
-    result.PlotNodalResult(0, colormap='bwr')
-    result.plot_nodal_stress(0, 'Sx', colormap='bwr')
-    result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr')
+    result.PlotNodalResult(0, cmap='bwr')
+    result.plot_nodal_stress(0, 'Sx', cmap='bwr')
+    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr')
 
     # plot and save non-interactively
     cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
@@ -258,10 +258,10 @@ Access and plot the results within python using pyansys:
     result.PlotNodalResult(0, interactive=False, cpos=cpos,
                            screenshot=os.path.join(path, 'cylinder_disp.png'))
 
-    result.plot_nodal_stress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+    result.plot_nodal_stress(0, 'Sx', cmap='bwr', interactive=False, cpos=cpos,
                            screenshot=os.path.join(path, 'cylinder_sx.png'))
 
-    result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
+    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr', interactive=False, cpos=cpos,
                                     screenshot=os.path.join(path, 'cylinder_vonmises.png'))
 
 .. figure:: ./images/cylinder_disp.png

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Module to control interaction with an ANSYS shell instance.
-Built using ansys documentation from
+Built using ANSYS documentation from
 https://www.sharcnet.ca/Software/Ansys/
 
 This module makes no claim to own any rights to ANSYS.  It's merely an
@@ -26,7 +26,7 @@ import numpy as np
 import psutil
 from ansys_corba import CORBA
 from pyansys.ansys_functions import _InternalANSYS
-from pyansys.convert import IsFloat
+from pyansys.convert import is_float
 
 try:
     import matplotlib.pyplot as plt
@@ -36,7 +36,7 @@ except:
     matplotlib_loaded = False
 
 
-def FindANSYS():
+def find_ansys():
     """ Searches for ansys path within enviornmental variables """
     versions = []
     paths = []
@@ -73,7 +73,7 @@ def FindANSYS():
     return os.path.join(ansys_bin_path, ansys_bin), version
 
 
-def Tail(filename, nlines):
+def tail(filename, nlines):
     """ Read the last nlines of a text file """
     with open(filename) as qfile:
         qfile.seek(0, os.SEEK_END)
@@ -95,7 +95,7 @@ def Tail(filename, nlines):
         return qfile.read()
 
 
-def KillProcess(proc_pid):
+def kill_process(proc_pid):
     """ kills a process with extreme prejudice """
     process = psutil.Process(proc_pid)
     for proc in process.children(recursive=True):
@@ -157,9 +157,9 @@ INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRI
                   '*IF': 'Use a python if or run as non_interactive'}
 
 
-def CheckValidANSYS():
+def check_valid_ansys():
     """ Checks if a valid version of ANSYS is installed and preconfigured """
-    ansys_bin = GetANSYSPath(allow_input=False)
+    ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
         version = int(re.findall('\d\d\d', ansys_bin)[0])
         return not(version < 170 and os.name != 'posix')
@@ -167,15 +167,15 @@ def CheckValidANSYS():
     return False
 
 
-def SetupLogger(loglevel='INFO'):
+def setup_logger(loglevel='INFO'):
     """ Setup logger """
 
     # return existing log if this function has already been called
-    if hasattr(SetupLogger, 'log'):
-        SetupLogger.log.setLevel(loglevel)
-        ch = SetupLogger.log.handlers[0]
+    if hasattr(setup_logger, 'log'):
+        setup_logger.log.setLevel(loglevel)
+        ch = setup_logger.log.handlers[0]
         ch.setLevel(loglevel)
-        return SetupLogger.log
+        return setup_logger.log
 
     # create logger
     log = logging.getLogger(__name__)
@@ -196,12 +196,12 @@ def SetupLogger(loglevel='INFO'):
     log.addHandler(ch)
 
     # make persistent
-    SetupLogger.log = log
+    setup_logger.log = log
 
     return log
 
 
-def GetANSYSPath(allow_input=True):
+def get_ansys_path(allow_input=True):
     """ Acquires ANSYS Path from a cached file or user input """
     exe_loc = None
     if os.path.isfile(config_file):
@@ -210,14 +210,14 @@ def GetANSYSPath(allow_input=True):
         # verify
         if not os.path.isfile(exe_loc) and allow_input:
             print('Cached ANSYS executable %s not found' % exe_loc)
-            exe_loc = SaveANSYSPath()
+            exe_loc = save_ansys_path()
     elif allow_input:  # create configuration file
-        exe_loc = SaveANSYSPath()
+        exe_loc = save_ansys_path()
 
     return exe_loc
 
 
-def ChangeDefaultANSYSPath(exe_loc):
+def change_default_ansys_path(exe_loc):
     """
     Change your default ansys path
 
@@ -234,10 +234,10 @@ def ChangeDefaultANSYSPath(exe_loc):
         raise Exception('File %s is invalid or does not exist' % exe_loc)
 
 
-def SaveANSYSPath(exe_loc=''):
+def save_ansys_path(exe_loc=''):
     """ Find ANSYS path or query user """
     print('Cached ANSYS executable %s not found' % exe_loc)
-    exe_loc, ver = FindANSYS()
+    exe_loc, ver = find_ansys()
     if os.path.isfile(exe_loc):
         print('Found ANSYS at %s' % exe_loc)
         resp = input('Use this location?  [Y/n]')
@@ -340,7 +340,7 @@ class ANSYS(_InternalANSYS):
                  log_broadcast=False, check_version=True,
                  prefer_pexpect=False, log_apdl=True):
         """ Initialize connection with ANSYS program """
-        self.log = SetupLogger(loglevel.upper())
+        self.log = setup_logger(loglevel.upper())
         self.jobname = jobname
         self.non_interactive = self._non_interactive(self)
         self.redirected_commands = {'*LIS': self._List}
@@ -361,7 +361,7 @@ class ANSYS(_InternalANSYS):
 
         if exec_file is None:
             # Load cached path
-            exec_file = GetANSYSPath()
+            exec_file = get_ansys_path()
             if exec_file is None:
                 raise Exception('Invalid or path or cannot load cached ansys path' +
                                 'Enter one manually using pyansys.ANSYS(exec_file=...)')
@@ -419,12 +419,12 @@ class ANSYS(_InternalANSYS):
         if (version < 170 and os.name == 'posix') or prefer_pexpect:
             self.OpenProcess(nproc, start_timeout, additional_switches)
         else:  # use corba
-            self.OpenCorba(nproc, start_timeout, additional_switches)
+            self.open_corba(nproc, start_timeout, additional_switches)
 
             # separate logger for broadcast file
             self.log_broadcast = log_broadcast
             if self.log_broadcast:
-                self.broadcast_logger = Thread(target=ANSYS.StartBroadcastLogger,
+                self.broadcast_logger = Thread(target=ANSYS.start_broadcast_logger,
                                                args=(weakref.proxy(self),))
                 self.broadcast_logger.start()
 
@@ -457,7 +457,7 @@ class ANSYS(_InternalANSYS):
         self.apdl_log.write('! APDL script generated using pyansys %s\n' %
                             pyansys.__version__)
 
-    def CloseAPDLLog(self):
+    def close_apdl_log(self):
         """ Closes APDL log """
         if self.apdl_log is not None:
             self.apdl_log.close()
@@ -492,7 +492,7 @@ class ANSYS(_InternalANSYS):
 
     def SetLogLevel(self, loglevel):
         """ Sets log level """
-        SetupLogger(loglevel=loglevel.upper())
+        setup_logger(loglevel=loglevel.upper())
 
     def __enter__(self):
         return self
@@ -507,7 +507,7 @@ class ANSYS(_InternalANSYS):
             else:
                 return self.process.isalive()
 
-    def StartBroadcastLogger(self, update_rate=1.0):
+    def start_broadcast_logger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
 
         # listen to broadcast file
@@ -518,7 +518,7 @@ class ANSYS(_InternalANSYS):
                 new_size = os.path.getsize(self.broadcast_file)
                 if new_size != old_size:
                     old_size = new_size
-                    new_tail = Tail(self.broadcast_file, 4)
+                    new_tail = tail(self.broadcast_file, 4)
                     if new_tail != old_tail:
                         lines = new_tail.split('>>')
                         for line in lines:
@@ -782,18 +782,18 @@ class ANSYS(_InternalANSYS):
                 raise Exception(additional_text)
 
         if self._interactive_plotting:
-            self.DisplayPlot('%s\n%s' % (text, additional_text))
+            self.display_plot('%s\n%s' % (text, additional_text))
 
         # return text, additional_text
         if text == additional_text:
             additional_text = ''
         return '%s\n%s' % (text, additional_text)
 
-    def LoadParameters(self):
+    def load_parameters(self):
         # load ansys parameters to python
         self.Parsav('all')  # saves to file.parm by default
         filename = os.path.join(self.path, 'file.parm')
-        self.parameters, self.arrays = LoadParameters(filename)
+        self.parameters, self.arrays = load_parameters(filename)
 
     def AddFileHandler(self, filepath, append):
         """ Adds a file handler to the log """
@@ -819,7 +819,7 @@ class ANSYS(_InternalANSYS):
         self.log.removeHandler(self.fileHandler)
         self.log.info('Removed file handler')
 
-    def DisplayPlot(self, text):
+    def display_plot(self, text):
         """ Check if plot exists based on command output """
         png_found = png_test.findall(text)
         if png_found:
@@ -838,8 +838,8 @@ class ANSYS(_InternalANSYS):
 
     def __del__(self):
         # clean up when complete
-        self.Kill()
-        self.CloseAPDLLog()
+        self.kill()
+        self.close_apdl_log()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # clean up when complete
@@ -864,13 +864,13 @@ class ANSYS(_InternalANSYS):
         self.log.info('ANSYS exited')
         self.apdl_log.close()
 
-    def Kill(self):
+    def kill(self):
         """ Forces ANSYS process to end and removes lock file """
         if self.is_alive:
             try:
                 self.Exit()
             except:
-                KillProcess(self.process.pid)
+                kill_process(self.process.pid)
                 self.log.debug('Killed process %d' % self.process.pid)
 
         if os.path.isfile(self.lockfile):
@@ -896,7 +896,7 @@ class ANSYS(_InternalANSYS):
     def __call__(self, command, **kwargs):
         return self.Run(command, **kwargs)
 
-    def OpenCorba(self, nproc, timeout, additional_switches):
+    def open_corba(self, nproc, timeout, additional_switches):
         """
         Open a connection to ANSYS via a CORBA interface
         """
@@ -977,9 +977,9 @@ class ANSYS(_InternalANSYS):
             self.parent._store_commands = True
         def __exit__(self, type, value, traceback):
             self.parent.log.debug('entering non-interactive mode')
-            self.parent._FlushStored()
+            self.parent._flush_stored()
 
-    def _FlushStored(self):
+    def _flush_stored(self):
         """
         Writes stored commands to an input file and runs the input file.
         Used with non_interactive.
@@ -1013,7 +1013,7 @@ class ANSYS(_InternalANSYS):
         self.log.info(self.response)
 
 
-def LoadParameters(filename):
+def load_parameters(filename):
     """ load parameters """
     parameters = {}
     arrays = {}
@@ -1064,7 +1064,7 @@ def LoadParameters(filename):
                     # break
                     st = line.find(',', st)
                     value = line[st + 1:].strip()
-                    if IsFloat(value):
+                    if is_float(value):
                         parameters[varname] = float(value)
                     else:
                         parameters[varname] = value

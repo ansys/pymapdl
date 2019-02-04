@@ -4,7 +4,23 @@
 # cython: cdivision=True
 # cython: nonecheck=False
 
+import ctypes
+
 from libc.stdint cimport int32_t, int64_t
+# import numpy as np
+
+# VTK celltypes
+ctypedef unsigned char uint8
+cdef uint8 VTK_QUADRATIC_QUAD = 23
+# cdef uint8 VTK_HEXAHEDRON = 12
+# cdef uint8 VTK_PYRAMID = 14
+# cdef uint8 VTK_TETRA = 10
+# cdef uint8 VTK_WEDGE = 13
+# cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
+# cdef uint8 VTK_QUADRATIC_PYRAMID = 27
+# cdef uint8 VTK_QUADRATIC_TETRA = 24
+# cdef uint8 VTK_QUADRATIC_WEDGE = 26
+
 
 #==============================================================================
 # Quadratic element relaxation functions
@@ -226,3 +242,32 @@ def ResetMidside(int64_t [::1] cellarr, double [:, ::1] pts):
             RelaxMid_Hex(cellarr, c + 1, pts, 1)    
                 
         c += cellarr[c] + 1
+
+
+def relax_plane_scalars(uint8 [::1] celltypes, int [::1] cells,
+                        int [::1] offset, double [:] scalars):
+                
+    """
+    Updates mask of cells containing at least one point in the
+    point indices or mask
+    """
+    cdef int ncells = offset.size
+    cdef int ncell_points, cell_offset, index, i, j
+    cdef int point0, point1, point2, point3, point4, point5, point6, point7
+
+    for i in range(ncells):
+        if celltypes[i] == VTK_QUADRATIC_QUAD:
+            cell_offset = offset[i] + 1
+            point0 = cells[cell_offset + 0]
+            point1 = cells[cell_offset + 1]
+            point2 = cells[cell_offset + 2]
+            point3 = cells[cell_offset + 3]
+            point4 = cells[cell_offset + 4]
+            point5 = cells[cell_offset + 5]
+            point6 = cells[cell_offset + 6]
+            point7 = cells[cell_offset + 7]
+
+            scalars[point4] = (scalars[point0] + scalars[point1])/2.0
+            scalars[point5] = (scalars[point1] + scalars[point2])/2.0
+            scalars[point6] = (scalars[point2] + scalars[point3])/2.0
+            scalars[point7] = (scalars[point3] + scalars[point0])/2.0

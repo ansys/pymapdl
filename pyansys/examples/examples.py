@@ -326,17 +326,17 @@ def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
             img = result.plot_nodal_solution(0, interactive=False, cpos=cpos, screenshot=True)
             assert np.any(img)
 
-            img = result.plot_nodal_stress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+            img = result.plot_nodal_stress(0, 'Sx', cmap='bwr', interactive=False, cpos=cpos,
                                          screenshot=True)
             assert np.any(img)
 
-            result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr', interactive=False,
+            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr', interactive=False,
                                             cpos=cpos, screenshot=True)
             assert np.any(img)
         else:
             # plot interactively
-            result.plot_nodal_solution(0, colormap='bwr')
-            result.plot_nodal_stress(0, 'Sx', colormap='bwr')
-            result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr')
+            result.plot_nodal_solution(0, cmap='bwr')
+            result.plot_nodal_stress(0, 'Sx', cmap='bwr')
+            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr')
 
     return True
