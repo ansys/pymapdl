@@ -370,14 +370,14 @@ def ResultReader(filename):
         raise Exception('%s is not a file or cannot be found' % str(filename))
 
     # determine if file is a result file
-    standard_header = ReadStandardHeader(filename)
+    standard_header = read_standard_header(filename)
     if standard_header['file format'] != 12:
         raise Exception('Binary file is not a result file.')
 
     # determine if cyclic
     with open(filename, 'rb') as f:
         f.seek(103 * 4)
-        result_header = ParseHeader(ReadTable(f), RESULT_HEADER_KEYS)
+        result_header = parse_header(ReadTable(f), RESULT_HEADER_KEYS)
 
     if result_header['nSector'] == 1:
         log.debug('Initializing standard result')
@@ -405,7 +405,7 @@ class Result(object):
         """
         # Store filename result header items
         self.filename = filename
-        self.resultheader = GetResultInfo(filename)
+        self.resultheader = result_info(filename)
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
@@ -421,11 +421,14 @@ class Result(object):
         self.enum = self.resultheader['eeqv'][self.sidx_elem]
 
         # store geometry for later retrival
-        self.StoreGeometry()
+        self.store_geometry()
 
-    def Plot(self, **kwargs):
+    def Plot(self):
+        raise Exception('This method is depreciated.  Use plot')
+
+    def plot(self, color='w', show_edges=True, **kwargs):
         """ plots result geometry """
-        return self.grid.plot(**kwargs)
+        return self.grid.plot(color=color, show_edges=show_edges, **kwargs)
 
     def PlotNodalSolution(self, rnum, comp='norm', label='',
                           colormap=None, flip_scalars=None, cpos=None,
@@ -508,18 +511,17 @@ class Result(object):
         return self.PlotPointScalars(d, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive=interactive, **kwargs)
 
-    # for legacy
     def GetTimeValues(self):
-        return self.resultheader['time_values']
+        raise Exception('GetTimeValues is depreciated.  Use time_values instead')
 
     @property
     def time_values(self):
         return self.resultheader['time_values']
 
-    # for legacy
-    @property
-    def tvalues(self):
-        return self.resultheader['time_values']
+    # # for legacy
+    # @property
+    # def tvalues(self):
+    #     return self.resultheader['time_values']
 
     def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
                              nangles=100, show_phase=True,
@@ -594,7 +596,7 @@ class Result(object):
         orig_pt = self.grid.points
 
         if show_result_info:
-            result_info = self.TextResultTable(rnum)
+            result_info = self.text_result_table(rnum)
 
         plobj = vtki.Plotter(off_screen=not interactive)
         plobj.add_mesh(self.grid.copy(), scalars=np.real(scalars),
@@ -720,7 +722,7 @@ class Result(object):
         # also include nodes in output
         return self.nnum, r
 
-    def StoreGeometry(self):
+    def store_geometry(self):
         """ Stores the geometry from the result file """
         # read in the geometry from the result file
         with open(self.filename, 'rb') as f:
@@ -728,7 +730,7 @@ class Result(object):
             # read geometry header
             f.seek(self.resultheader['ptrGEO']*4)
             table = ReadTable(f)
-            geometry_header = ParseHeader(table, GEOMETRY_HEADER_KEYS)
+            geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
             self.geometry_header = geometry_header
 
             # Node information
@@ -879,7 +881,7 @@ class Result(object):
         self.quadgrid.cell_arrays['Element Type'] = element_type
         self.grid = self.quadgrid.linear_copy()
 
-    def ElementSolutionHeader(self, rnum):
+    def element_solution_header(self, rnum):
         """ Get element solution header information """
         # Get the header information from the header dictionary
         # endian = self.resultheader['endian']
@@ -897,7 +899,7 @@ class Result(object):
         # Read a result
         with open(self.filename, 'rb') as f:
             f.seek((rpointers[rnum]) * 4)  # item 20
-            solution_header = ParseHeader(ReadTable(f), SOLUTION_HEADER_KEYS)
+            solution_header = parse_header(ReadTable(f), SOLUTION_HEADER_KEYS)
 
             # key to extrapolate integration
             # = 0 - move
@@ -962,7 +964,7 @@ class Result(object):
         """
         # element header
         rnum = self.ParseStepSubstep(rnum)
-        ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
+        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
         if self.resultheader['rstsprs'] != 0:
             nitem = 6
@@ -1046,7 +1048,7 @@ class Result(object):
 
         """
         rnum = self.ParseStepSubstep(rnum)
-        header = self.ElementSolutionHeader(rnum)
+        header = self.element_solution_header(rnum)
         ele_ind_table, nodstr, etype = header
 
         # certain element types do not output stress
@@ -1170,7 +1172,7 @@ class Result(object):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.ParseStepSubstep(rnum)
-        ele_ind_table, nodstr, etype = self.ElementSolutionHeader(rnum)
+        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
         element_data = []
         f = open(self.filename, 'rb')
@@ -1236,9 +1238,10 @@ class Result(object):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
-                                 cpos=None, screenshot=None, interactive=True,
-                                 **kwargs):
+    def PlotPrincipalNodalStress(self, rnum, stype=None,
+                                 colormap=None, flip_scalars=None,
+                                 cpos=None, screenshot=None,
+                                 interactive=True, **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
@@ -1284,6 +1287,10 @@ class Result(object):
             Array used to plot stress.
 
         """
+        if stype is None:
+            raise Exception("Stress type must be a string from the following list:\n" +
+                            "['S1', 'S2', 'S3', 'SINT', 'SEQV']")
+
         rnum = self.ParseStepSubstep(rnum)
         stress = self.PrincipleStressForPlotting(rnum, stype)
 
@@ -1369,7 +1376,7 @@ class Result(object):
 
         # add table
         if add_text and rnum is not None:
-            plobj.add_text(self.TextResultTable(rnum), font_size=20)
+            plobj.add_text(self.text_result_table(rnum), font_size=20)
 
         if screenshot:
             cpos = plobj.plot(auto_close=False, interactive=interactive,
@@ -1389,10 +1396,10 @@ class Result(object):
         else:
             return cpos
 
-    def TextResultTable(self, rnum):
+    def text_result_table(self, rnum):
         """ Returns a text result table for plotting """
         ls_table = self.resultheader['ls_table']
-        timevalue = self.GetTimeValues()[rnum]
+        timevalue = self.time_values[rnum]
         text = 'Cumulative Index: {:3d}\n'.format(ls_table[rnum, 2])
         if self.resultheader['nSector'] > 1:
             hindex = self.resultheader['hindex'][rnum]
@@ -1478,28 +1485,32 @@ class Result(object):
 
         return cpos
 
-    def SaveAsVTK(self, filename, binary=True):
+    def save_as_vtk(self, filename, binary=True):
         """
-        Appends all results to an unstructured grid and writes it to disk.
+        Appends all results to an unstructured grid and writes it to
+        disk.
 
-        The file extension will select the type of writer to use.  '.vtk' will
-        use the legacy writer, while '.vtu' will select the VTK XML writer.
+        The file extension will select the type of writer to use.
+        '.vtk' will use the legacy writer, while '.vtu' will select
+        the VTK XML writer.
 
         Parameters
         ----------
         filename : str
-            Filename of grid to be written.  The file extension will select the
-            type of writer to use.  '.vtk' will use the legacy writer, while
-            '.vtu' will select the VTK XML writer.
+            Filename of grid to be written.  The file extension will
+            select the type of writer to use.  '.vtk' will use the
+            legacy writer, while '.vtu' will select the VTK XML
+            writer.
 
         binary : bool, optional
-            Writes as a binary file by default.  Set to False to write ASCII
+            Writes as a binary file by default.  Set to False to write
+            ASCII
 
         Notes
         -----
-        Binary files write much faster than ASCII, but binary files written on
-        one system may not be readable on other systems.  Binary can only be
-        selected for the legacy writer.
+        Binary files write much faster than ASCII, but binary files
+        written on one system may not be readable on other systems.
+        Binary can only be selected for the legacy writer.
         """
         # Copy grid as to not write results to original object
         grid = self.grid.copy()
@@ -1516,9 +1527,9 @@ class Result(object):
 
         grid.Write(filename)
 
-    def GetNodalResult(self, i, sort=None):
-        warnings.warn('GetNodalResult is depreciated.  Use NodalSolution instead')
-        return self.NodalSolution(i)
+    def SaveAsVTK(self):
+        """ old method """
+        raise Exception('This method is depreciated.  Use save_as_vtk')
 
     def WriteTables(self, filename):
         """ Write binary tables to ASCII.  Assumes int32  """
@@ -1537,10 +1548,10 @@ class Result(object):
 
     def ParseStepSubstep(self, user_input):
         """ Converts (step, substep) to a cumulative index """
-        if IsInt(user_input):
+        if is_int(user_input):
             # check if result exists
             if user_input > self.nsets - 1:
-                raise Exception('There are only %d results in the result file.' % self.nsets)
+                raise Exception('Only %d result(s) in the result file.' % self.nsets)
             return user_input
 
         elif isinstance(user_input, list) or isinstance(user_input, tuple):
@@ -1563,7 +1574,7 @@ class Result(object):
             raise Exception('Input must be either an int or a list')
 
 
-def GetResultInfo(filename):
+def result_info(filename):
     """
     Returns pointers used to access results from an ANSYS result file.
 
@@ -1578,13 +1589,13 @@ def GetResultInfo(filename):
         Result header
 
     """
-    standard_header = ReadStandardHeader(filename)
+    standard_header = read_standard_header(filename)
     endian = standard_header['endian']
 
     with open(filename, 'rb') as f:
         # Read .RST FILE HEADER
         f.seek(103 * 4)
-        header = ParseHeader(ReadTable(f), RESULT_HEADER_KEYS)
+        header = parse_header(ReadTable(f), RESULT_HEADER_KEYS)
         resultheader = merge_two_dicts(header, standard_header)
 
         # Read nodal equivalence table
@@ -1668,21 +1679,20 @@ def ReadTable(f, dtype='i', nread=None, skip=False, get_nread=True):
     return table
 
 
-def TwoIntsToLong(intl, inth):
+def two_ints_to_long(intl, inth):
     """ Interpert two ints as one long """
     longint = struct.pack(">I", inth) + struct.pack(">I", intl)
     return struct.unpack('>q', longint)[0]
 
 
-def Pol2Cart(rho, phi):
+def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
-
     return x, y
 
 
-def ParseHeader(table, keys):
+def parse_header(table, keys):
     """ parses a header from a table """
     header = {}
     for i, key in enumerate(keys):
@@ -1693,12 +1703,12 @@ def ParseHeader(table, keys):
             basekey = key[:-1]
             intl = header[basekey + 'l']
             inth = header[basekey + 'h']
-            header[basekey] = TwoIntsToLong(intl, inth)
+            header[basekey] = two_ints_to_long(intl, inth)
 
     return header
 
 
-def ReadStandardHeader(filename):
+def read_standard_header(filename):
     """ Reads standard header """
     # f = open(filename, 'rb')
     with open(filename, 'rb') as f:
@@ -1741,7 +1751,7 @@ def ReadStandardHeader(filename):
         header['units'] = unit_types[ReadTable(f, nread=1, get_nread=False)[0]]
 
         f.seek(11 * 4)
-        version = ReadStringFromBinary(f, 1).strip()
+        version = read_string_from_binary(f, 1).strip()
 
         header['verstring'] = version
         header['mainver'] = int(version[:2])
@@ -1751,15 +1761,15 @@ def ReadStandardHeader(filename):
         f.seek(4, 1)
 
         # f.seek(13 * 4)
-        header['machine'] = ReadStringFromBinary(f, 3).strip()
-        header['jobname'] = ReadStringFromBinary(f, 2).strip()
-        header['product'] = ReadStringFromBinary(f, 2).strip()
-        header['special'] = ReadStringFromBinary(f, 1).strip()
-        header['username'] = ReadStringFromBinary(f, 3).strip()
+        header['machine'] = read_string_from_binary(f, 3).strip()
+        header['jobname'] = read_string_from_binary(f, 2).strip()
+        header['product'] = read_string_from_binary(f, 2).strip()
+        header['special'] = read_string_from_binary(f, 1).strip()
+        header['username'] = read_string_from_binary(f, 3).strip()
 
         # Items 23-25 The machine identifier in integer form (three four-character strings)
         # this contains license information
-        header['machine_identifier'] = ReadStringFromBinary(f, 3).strip()
+        header['machine_identifier'] = read_string_from_binary(f, 3).strip()
 
         # Item 26 The system record size
         header['system record size'] = ReadTable(f, nread=1, get_nread=False)[0]
@@ -1772,14 +1782,14 @@ def ReadStandardHeader(filename):
 
         # Items 31-38 The Jobname (eight four-character strings)
         f.seek(32*4)
-        header['jobname2'] = ReadStringFromBinary(f, 8).strip()
+        header['jobname2'] = read_string_from_binary(f, 8).strip()
 
         # Items 41-60 The main analysis title in integer form (20 four-character strings)
         f.seek(42*4)
-        header['title'] = ReadStringFromBinary(f, 20).strip()
+        header['title'] = read_string_from_binary(f, 20).strip()
 
         # Items 61-80 The first subtitle in integer form (20 four-character strings)
-        header['subtitle'] = ReadStringFromBinary(f, 20).strip()
+        header['subtitle'] = read_string_from_binary(f, 20).strip()
 
         # Item 95 The split point of the file (0 means the file will not split)
         f.seek(96*4)
@@ -1787,12 +1797,12 @@ def ReadStandardHeader(filename):
 
         # Items 97-98 LONGINT of the maximum file length (bug here)
         # ints = ReadTable(f, nread=2, get_nread=False)
-        # header['file length'] = TwoIntsToLong(ints[0], ints[1])
+        # header['file length'] = two_ints_to_long(ints[0], ints[1])
 
     return header
 
 
-def ReadStringFromBinary(f, n):
+def read_string_from_binary(f, n):
     """ Read n 4 character binary strings from a file opend in binary mode """
     string = b''
     for i in range(n):
@@ -1804,7 +1814,7 @@ def ReadStringFromBinary(f, n):
         return string
 
 
-def IsInt(value):
+def is_int(value):
     """ Return true if can be parsed as an int """
     try:
         int(value)

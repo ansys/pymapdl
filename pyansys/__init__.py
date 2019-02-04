@@ -7,7 +7,7 @@ from pyansys.binary_reader import *
 from pyansys.cyclic_reader import *
 from pyansys.binary_reader import FullReader
 from pyansys.cellquality import *
-from pyansys.convert import ConvertFile
+from pyansys.convert import convert_script
 
 try:
     from pyansys.ansys import ANSYS

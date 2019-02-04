@@ -1,5 +1,5 @@
 #==============================================================================
-# Load a beam and write it
+# load a beam and write it
 #==============================================================================
 import pyansys
 from pyansys import examples
@@ -19,7 +19,7 @@ archive.ParseFEM()
 archive.uGrid.Plot()
 
 # write this as a vtk xml file 
-archive.SaveAsVTK('hex.vtu')
+archive.save_as_vtk('hex.vtu')
 
 
 # Load this from vtk

@@ -168,7 +168,7 @@ class CyclicResult(Result):
             expanded_result = self.ExpandCyclicModal(result_mas, result_dup, hindex, phase, as_complex, full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
-            expanded_result = ExpandCyclicResults(result, self.mas_ind,
+            expanded_result = expand_cyclic_results(result, self.mas_ind,
                                                   self.dup_ind,
                                                   self.nsector, phase,
                                                   as_complex, full_rotor)
@@ -725,7 +725,7 @@ class CyclicResult(Result):
         orig_pt = self.rotor.points
 
         if show_result_info:
-            result_info = self.TextResultTable(rnum)
+            result_info = self.text_result_table(rnum)
 
         plobj = vtki.Plotter(off_screen=not interactive)
         plobj.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
@@ -779,8 +779,8 @@ class CyclicResult(Result):
         return plobj.close()
 
 
-def ExpandCyclicResults(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
-                        full_rotor=False):
+def expand_cyclic_results(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
+                          full_rotor=False):
     """
     Expand cyclic results given an array of results and the master/duplicate
     sector indices

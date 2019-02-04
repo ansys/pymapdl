@@ -16,8 +16,8 @@ def IsFloat(string):
         return False
 
 
-def ConvertFile(filename_in, filename_out, loglevel='INFO', auto_exit=True,
-                line_ending=None, exec_file=None, macros_as_functions=True):
+def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
+                   line_ending=None, exec_file=None, macros_as_functions=True):
     """
     Converts an ANSYS input file to a python pyansys script.
 

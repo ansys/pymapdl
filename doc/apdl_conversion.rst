@@ -1,6 +1,6 @@
 APDL Conversion Examples
 ========================
-ANSYS APDL contains over 200 verification files used for ANSYS validation and demonstration.  These validation files are used here to demo the use of the ``pyansys`` file translator ``pyansys.ConvertFile``.
+ANSYS APDL contains over 200 verification files used for ANSYS validation and demonstration.  These validation files are used here to demo the use of the ``pyansys`` file translator ``pyansys.convert_script``.
 
 Of particular note in the following examples is how most of the commands can be called as a method to the ansys object rather than sending a string as a command.  Additionally, take note that some commands require the ``with ansys.non_interactive:`` directive since some commands require and will break the CORBA server connection.  Also note that APDL macros that use ``*CREATE`` have been replaced with a python function.  This will make the code easier to debug should it be necessary to insert a break point in the code.
 
@@ -92,7 +92,7 @@ This verification file was translated using:
 .. code:: python
 
     import pyansys
-    pyansys.ConvertFile('vm1.dat', 'vm1.py')
+    pyansys.convert_script('vm1.dat', 'vm1.py')
 
 Translated code:
 
@@ -362,7 +362,7 @@ ANSYS APDL code:
 .. code:: python
 
     import pyansys
-    pyansys.ConvertFile('vm7.dat', 'vm7.py')
+    pyansys.convert_script('vm7.dat', 'vm7.py')
 
 Translated code:
 

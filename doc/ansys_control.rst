@@ -163,7 +163,7 @@ Existing ANSYS scripts can be translated using:
 
     inputfile = 'ansys_inputfile.inp'
     pyscript = 'pyscript.py'
-    pyansys.ConvertFile(inputfile, pyscript)
+    pyansys.convert_script(inputfile, pyscript)
 
 For example, verification file vm1.dat:
 
@@ -378,11 +378,11 @@ Should be written as:
     DISP(-.05)
     DISP(-.1)
 
-If you have an existing input file with a macro, it can be converted using the ``ConvertFile`` function:
+If you have an existing input file with a macro, it can be converted using the ``convert_script`` function:
 
 .. code:: python
 
-    pyansys.ConvertFile(apdl_inputfile, pyscript, macros_as_functions=True)
+    pyansys.convert_script(apdl_inputfile, pyscript, macros_as_functions=True)
 
 See the ``vm7.dat`` example in the APDL Conversion Examples page.
 
