@@ -9,7 +9,6 @@ import numpy as np
 import warnings
 import logging
 import ctypes
-from ctypes import c_int64
 
 import vtki
 import pyansys
@@ -69,7 +68,6 @@ ELEMENT_INDEX_TABLE_INFO = {
     'MNL': 'material nonlinear record'
 }
 
-
 SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                         'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
                         'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST', 'ptrBC',
@@ -128,7 +126,7 @@ RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
 
 
 # element types with stress outputs
-validENS = [45, 92, 95, 181, 185, 186, 187]
+validENS = [45, 92, 95, 181, 185, 186, 187, 223]
 
 
 class FullReader(object):
@@ -172,7 +170,7 @@ class FullReader(object):
             raise Exception(
                 "Unable to read an unsymmetric mass/stiffness matrix.")
 
-    def LoadKM(self, as_sparse=True, sort=False):
+    def load_km(self, as_sparse=True, sort=False):
         """
         Load and construct mass and stiffness matrices from an ANSYS full file.
 
@@ -234,14 +232,14 @@ class FullReader(object):
         # DOF information
         ptrDOF = self.header[36]  # pointer to DOF info
         with open(self.filename, 'rb') as f:
-            ReadTable(f, skip=True)  # standard header
-            ReadTable(f, skip=True)  # full header
-            ReadTable(f, skip=True)  # number of degrees of freedom
-            neqv = ReadTable(f)  # Nodal equivalence table
+            read_table(f, skip=True)  # standard header
+            read_table(f, skip=True)  # full header
+            read_table(f, skip=True)  # number of degrees of freedom
+            neqv = read_table(f)  # Nodal equivalence table
 
             f.seek(ptrDOF*4)
-            ndof = ReadTable(f)
-            const = ReadTable(f)
+            ndof = read_table(f)
+            const = read_table(f)
 
         # degree of freedom reference and number of degress of freedom per node
         dof_ref = [ndof, neqv]
@@ -377,7 +375,7 @@ def ResultReader(filename):
     # determine if cyclic
     with open(filename, 'rb') as f:
         f.seek(103 * 4)
-        result_header = parse_header(ReadTable(f), RESULT_HEADER_KEYS)
+        result_header = parse_header(read_table(f), RESULT_HEADER_KEYS)
 
     if result_header['nSector'] == 1:
         log.debug('Initializing standard result')
@@ -423,14 +421,11 @@ class Result(object):
         # store geometry for later retrival
         self.store_geometry()
 
-    def Plot(self):
-        raise Exception('This method is depreciated.  Use plot')
-
     def plot(self, color='w', show_edges=True, **kwargs):
         """ plots result geometry """
         return self.grid.plot(color=color, show_edges=show_edges, **kwargs)
 
-    def PlotNodalSolution(self, rnum, comp='norm', label='',
+    def plot_nodal_solution(self, rnum, comp='norm', label='',
                           colormap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, **kwargs):
         """
@@ -475,8 +470,8 @@ class Result(object):
 
         """
         # Load result from file
-        rnum = self.ParseStepSubstep(rnum)
-        nnum, result = self.NodalSolution(rnum)
+        rnum = self.parse_step_substep(rnum)
+        nnum, result = self.nodal_solution(rnum)
 
         # Process result
         if comp == 'x':
@@ -508,27 +503,21 @@ class Result(object):
             scalars[mask] = d
             d = scalars
 
-        return self.PlotPointScalars(d, rnum, stitle, colormap, flip_scalars,
-                                     screenshot, cpos, interactive=interactive, **kwargs)
-
-    def GetTimeValues(self):
-        raise Exception('GetTimeValues is depreciated.  Use time_values instead')
+        return self.plot_point_scalars(d, rnum, stitle, colormap,
+                                       flip_scalars, screenshot, cpos,
+                                       interactive=interactive,
+                                       **kwargs)
 
     @property
     def time_values(self):
         return self.resultheader['time_values']
 
-    # # for legacy
-    # @property
-    # def tvalues(self):
-    #     return self.resultheader['time_values']
-
-    def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
-                             nangles=100, show_phase=True,
-                             show_result_info=True,
-                             interpolate_before_map=True, cpos=None,
-                             movie_filename=None, interactive=True,
-                             **kwargs):
+    def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
+                               nangles=100, show_phase=True,
+                               show_result_info=True,
+                               interpolate_before_map=True, cpos=None,
+                               movie_filename=None, interactive=True,
+                               **kwargs):
         """
         Animate nodal solution.  Assumes nodal solution is a displacement 
         array from a modal solution.
@@ -575,7 +564,7 @@ class Result(object):
 
         """
         # normalize nodal solution
-        nnum, disp = self.NodalSolution(rnum)
+        nnum, disp = self.nodal_solution(rnum)
         disp /= (np.abs(disp).max()/max_disp)
         disp = disp.reshape(-1, 3)
         
@@ -647,7 +636,7 @@ class Result(object):
 
         return plobj.close()
 
-    def NodalSolution(self, rnum, in_nodal_coord_sys=False):
+    def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """
         Returns the DOF solution for each node in the global cartesian
         coordinate system or nodal coordinate system.
@@ -676,7 +665,7 @@ class Result(object):
 
         """
         # convert to cumulative index
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
 
         # Get info from result header
         endian = self.resultheader['endian']
@@ -729,7 +718,7 @@ class Result(object):
 
             # read geometry header
             f.seek(self.resultheader['ptrGEO']*4)
-            table = ReadTable(f)
+            table = read_table(f)
             geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
             self.geometry_header = geometry_header
 
@@ -740,7 +729,7 @@ class Result(object):
             _rstHelper.LoadNodes(self.filename, geometry_header['ptrLOC'],
                                  nnod, nloc, nnum)
 
-            # Element Information
+            # Element information
             nelm = geometry_header['nelm']
             maxety = geometry_header['maxety']
 
@@ -781,7 +770,8 @@ class Result(object):
                 nodelm[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
 
-                # Item 63 - number of nodes per element having nodal forces, etc. (nodfor)
+                # Item 63 - number of nodes per element having nodal
+                # forces, etc. (nodfor)
                 f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 63)*4)
                 nodfor[etype_ref] = np.fromfile(
                     f, self.resultheader['endian'] + 'i', 1)
@@ -815,6 +805,9 @@ class Result(object):
             # get pointer to start of element table and adjust element pointers
             ptr = geometry_header['ptrEID'] + e_disp_table[0]
             e_disp_table -= e_disp_table[0]
+
+            # read in coordinate systems
+            c_systems = parse_coordinate_system(f, geometry_header)
 
         # The following is stored for each element
         # mat     - material reference number
@@ -856,7 +849,8 @@ class Result(object):
                          'ekey': np.asarray(ekey, ctypes.c_int),
                          'e_rcon': rcon,
                          'mtype': mtype,
-                         'Element Type': element_type}
+                         'Element Type': element_type,
+                         'coord systems': c_systems}
 
         # store the reference array
         # Allow quadradic and null unallowed
@@ -899,7 +893,7 @@ class Result(object):
         # Read a result
         with open(self.filename, 'rb') as f:
             f.seek((rpointers[rnum]) * 4)  # item 20
-            solution_header = parse_header(ReadTable(f), SOLUTION_HEADER_KEYS)
+            solution_header = parse_header(read_table(f), SOLUTION_HEADER_KEYS)
 
             # key to extrapolate integration
             # = 0 - move
@@ -919,16 +913,16 @@ class Result(object):
             # Seek to element result header
             element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
             f.seek(element_rst_ptr * 4)
-            ele_ind_table = ReadTable(f, 'i8', nelm) + element_rst_ptr
+            ele_ind_table = read_table(f, 'i8', nelm) + element_rst_ptr
 
             # boundary conditions
             # ptr = rpointers[rnum] + solution_header['ptrBC']
             # f.seek(ptr*4)
-            # table = ReadTable(f, 'i')
+            # table = read_table(f, 'i')
 
         return ele_ind_table, nodstr, etype
 
-    def NodalStress(self, rnum):
+    def nodal_stress(self, rnum):
         """
         Equivalent ANSYS command: PRNSOL, S
 
@@ -963,7 +957,7 @@ class Result(object):
 
         """
         # element header
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
         if self.resultheader['rstsprs'] != 0:
@@ -1007,7 +1001,7 @@ class Result(object):
         """ returns the vesion of ansys used to save this result file """
         return float(self.resultheader['verstring'])
 
-    def ElementStress(self, rnum, principal=False, in_element_coord_sys=False):
+    def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
         """
         Equivalent ANSYS command: PRESOL, S
 
@@ -1047,7 +1041,7 @@ class Result(object):
         is reported.
 
         """
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
         header = self.element_solution_header(rnum)
         ele_ind_table, nodstr, etype = header
 
@@ -1055,7 +1049,7 @@ class Result(object):
         elemtype = self.geometry['Element Type'].astype(np.int32)
         validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        etype = etype.astype(c_int64)
+        etype = etype.astype(ctypes.c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
@@ -1075,13 +1069,13 @@ class Result(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
-            _rstHelper.ReadElementStress(self.filename,
-                                         ele_ind_table + 2,
-                                         nodstr.astype(np.int64),
-                                         etype,
-                                         ele_data_arr,
-                                         nitem, validmask, elemtype,
-                                         as_global=not in_element_coord_sys)
+            _rstHelper.read_element_stress(self.filename,
+                                           ele_ind_table + 2,
+                                           nodstr.astype(np.int64),
+                                           etype,
+                                           ele_data_arr,
+                                           nitem, validmask, elemtype,
+                                           as_global=not in_element_coord_sys)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
@@ -1109,7 +1103,7 @@ class Result(object):
         elemnum = self.geometry['enum'][self.sidx_elem]
         return element_stress, elemnum, enode
 
-    def ElementSolutionData(self, rnum, datatype, sort=True):
+    def element_solution_data(self, rnum, datatype, sort=True):
         """
         Retrives element solution data.  Similar to ETABLE.
 
@@ -1171,7 +1165,7 @@ class Result(object):
 
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
         element_data = []
@@ -1179,14 +1173,14 @@ class Result(object):
         for ind in ele_ind_table:
             # read element table index
             f.seek(ind*4)
-            table = ReadTable(f)
+            table = read_table(f)
 
             ptr = table[table_index]
             if ptr <= 0:
                 element_data.append(None)
             else:
                 f.seek((ind + ptr)*4)
-                data = ReadTable(f, 'f')  # TODO: Verify datatype
+                data = read_table(f, 'f')  # TODO: Verify datatype
                 element_data.append(data)
 
         enum = self.grid.cell_arrays['ansys_elem_num']
@@ -1197,7 +1191,7 @@ class Result(object):
 
         return enum, element_data
 
-    def PrincipalNodalStress(self, rnum):
+    def principal_nodal_stress(self, rnum):
         """
         Computes the principal component stresses for each node in the
         solution.
@@ -1228,7 +1222,7 @@ class Result(object):
 
         """
         # get component stress
-        nodenum, stress = self.NodalStress(rnum)
+        nodenum, stress = self.nodal_stress(rnum)
 
         # compute principle stress
         if stress.dtype != np.float32:
@@ -1238,7 +1232,7 @@ class Result(object):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def PlotPrincipalNodalStress(self, rnum, stype=None,
+    def plot_principal_nodal_stress(self, rnum, stype=None,
                                  colormap=None, flip_scalars=None,
                                  cpos=None, screenshot=None,
                                  interactive=True, **kwargs):
@@ -1291,16 +1285,16 @@ class Result(object):
             raise Exception("Stress type must be a string from the following list:\n" +
                             "['S1', 'S2', 'S3', 'SINT', 'SEQV']")
 
-        rnum = self.ParseStepSubstep(rnum)
-        stress = self.PrincipleStressForPlotting(rnum, stype)
+        rnum = self.parse_step_substep(rnum)
+        stress = self.principle_stress_for_plotting(rnum, stype)
 
         # Generate plot
         stitle = 'Nodal Stress\n%s\n' % stype
-        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flip_scalars,
+        cpos = self.plot_point_scalars(stress, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
         return cpos, stress
 
-    def PlotPointScalars(self, scalars, rnum=None, stitle='', colormap=None,
+    def plot_point_scalars(self, scalars, rnum=None, stitle='', colormap=None,
                          flip_scalars=None, screenshot=None, cpos=None,
                          interactive=True, grid=None, add_text=True, **kwargs):
         """
@@ -1329,7 +1323,7 @@ class Result(object):
 
         cpos : list
             3x3 list describing the camera position.  Obtain it by getting the output
-            of PlotPointScalars first.
+            of plot_point_scalars first.
 
         interactive : bool
             Allows user to interact with the plot when True.  Default True.
@@ -1410,7 +1404,7 @@ class Result(object):
 
         return text
 
-    def PrincipleStressForPlotting(self, rnum, stype):
+    def principle_stress_for_plotting(self, rnum, stype):
         """
         returns stress used to plot
 
@@ -1421,17 +1415,17 @@ class Result(object):
 
         sidx = stress_types.index(stype)
 
-        _, stress = self.PrincipalNodalStress(rnum)
+        _, stress = self.principal_nodal_stress(rnum)
         return stress[:, sidx]
 
-    def PlotNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
+    def plot_nodal_stress(self, rnum, stype, colormap=None, flip_scalars=None,
                         cpos=None, screenshot=None, interactive=True, **kwargs):
         """
         Plots the stresses at each node in the solution.
 
         The order of the results corresponds to the sorted node numbering.
-        This algorthim, like ANSYS, computes the node stress by averaging the
-        stress for each element at each node.  Due to the discontinunities
+        This algorithm, like ANSYS, computes the node stress by averaging the
+        stress for each element at each node.  Due to the discontinuities
         across elements, stresses will vary based on the element they are
         evaluated from.
 
@@ -1467,7 +1461,7 @@ class Result(object):
         cpos : list
             3 x 3 vtk camera position.
         """
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
         stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
         stype = stype.lower()
         if stype not in stress_types:
@@ -1476,11 +1470,11 @@ class Result(object):
         sidx = stress_types.index(stype)
 
         # Populate with nodal stress at edge nodes
-        nnum, stress = self.NodalStress(rnum)
+        nnum, stress = self.nodal_stress(rnum)
         stress = stress[:, sidx]
 
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        cpos = self.PlotPointScalars(stress, rnum, stitle, colormap, flip_scalars,
+        cpos = self.plot_point_scalars(stress, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, **kwargs)
 
         return cpos
@@ -1517,27 +1511,23 @@ class Result(object):
 
         for i in range(self.nsets):
             # Nodal results
-            _, val = self.NodalSolution(i)
-            grid.point_arrays['NodalSolution{:03d}'.format(i)] = val
+            _, val = self.nodal_solution(i)
+            grid.point_arrays['nodal_solution{:03d}'.format(i)] = val
 
             # Populate with nodal stress at edge nodes
             nodenum = self.grid.point_arrays['ansys_node_num']
-            _, stress = self.NodalStress(i)
-            grid.point_arrays['NodalStress{:03d}'.format(i)] = stress
+            _, stress = self.nodal_stress(i)
+            grid.point_arrays['nodal_stress{:03d}'.format(i)] = stress
 
-        grid.Write(filename)
+        grid.write(filename)
 
-    def SaveAsVTK(self):
-        """ old method """
-        raise Exception('This method is depreciated.  Use save_as_vtk')
-
-    def WriteTables(self, filename):
+    def write_tables(self, filename):
         """ Write binary tables to ASCII.  Assumes int32  """
         rawresult = open(self.filename, 'rb')
         with open(filename, 'w') as f:
             while True:
                 try:
-                    table = ReadTable(rawresult)
+                    table = read_table(rawresult)
                     f.write('*** %d ***\n' % len(table))
                     for item in table:
                         f.write(str(item) + '\n')
@@ -1546,7 +1536,7 @@ class Result(object):
                     break
         rawresult.close()
 
-    def ParseStepSubstep(self, user_input):
+    def parse_step_substep(self, user_input):
         """ Converts (step, substep) to a cumulative index """
         if is_int(user_input):
             # check if result exists
@@ -1595,16 +1585,16 @@ def result_info(filename):
     with open(filename, 'rb') as f:
         # Read .RST FILE HEADER
         f.seek(103 * 4)
-        header = parse_header(ReadTable(f), RESULT_HEADER_KEYS)
+        header = parse_header(read_table(f), RESULT_HEADER_KEYS)
         resultheader = merge_two_dicts(header, standard_header)
 
         # Read nodal equivalence table
         f.seek(resultheader['ptrNOD']*4)
-        resultheader['neqv'] = ReadTable(f)
+        resultheader['neqv'] = read_table(f)
 
         # Read nodal equivalence table
         f.seek(resultheader['ptrELM']*4)
-        resultheader['eeqv'] = ReadTable(f)
+        resultheader['eeqv'] = read_table(f)
 
         # Read table of pointers to locations of results
         nsets = resultheader['nsets']
@@ -1627,7 +1617,7 @@ def result_info(filename):
 
         # read in time values
         f.seek(resultheader['ptrTIMl']*4)
-        table = ReadTable(f, 'd', resultheader['nsets'])
+        table = read_table(f, 'd', resultheader['nsets'])
         resultheader['time_values'] = table
 
         # load harmonic index of each result
@@ -1654,7 +1644,7 @@ def result_info(filename):
     return resultheader
 
 
-def ReadTable(f, dtype='i', nread=None, skip=False, get_nread=True):
+def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
     """ read fortran style table """
     if get_nread:
         n = np.fromfile(f, 'i', 1)
@@ -1730,11 +1720,11 @@ def read_standard_header(filename):
 
         header = {}
         header['endian'] = endian
-        header['file number'] = ReadTable(f, nread=1, get_nread=False)[0]
-        header['file format'] = ReadTable(f, nread=1, get_nread=False)[0]
-        int_time = str(ReadTable(f, nread=1, get_nread=False)[0])
+        header['file number'] = read_table(f, nread=1, get_nread=False)[0]
+        header['file format'] = read_table(f, nread=1, get_nread=False)[0]
+        int_time = str(read_table(f, nread=1, get_nread=False)[0])
         header['time'] = ':'.join([int_time[0:2], int_time[2:4], int_time[4:]])
-        int_date = str(ReadTable(f, nread=1, get_nread=False)[0])
+        int_date = str(read_table(f, nread=1, get_nread=False)[0])
         if int_date == '-1':
             header['date'] = ''
         else:
@@ -1748,7 +1738,7 @@ def read_standard_header(filename):
                       5: 'MKS',
                       6: 'MPA',
                       7: 'uMKS'}
-        header['units'] = unit_types[ReadTable(f, nread=1, get_nread=False)[0]]
+        header['units'] = unit_types[read_table(f, nread=1, get_nread=False)[0]]
 
         f.seek(11 * 4)
         version = read_string_from_binary(f, 1).strip()
@@ -1772,13 +1762,13 @@ def read_standard_header(filename):
         header['machine_identifier'] = read_string_from_binary(f, 3).strip()
 
         # Item 26 The system record size
-        header['system record size'] = ReadTable(f, nread=1, get_nread=False)[0]
+        header['system record size'] = read_table(f, nread=1, get_nread=False)[0]
 
         # Item 27 The maximum file length
-        # header['file length'] = ReadTable(f, nread=1, get_nread=False)[0]
+        # header['file length'] = read_table(f, nread=1, get_nread=False)[0]
 
         # Item 28 The maximum record number
-        # header['the maximum record number'] = ReadTable(f, nread=1, get_nread=False)[0]
+        # header['the maximum record number'] = read_table(f, nread=1, get_nread=False)[0]
 
         # Items 31-38 The Jobname (eight four-character strings)
         f.seek(32*4)
@@ -1793,10 +1783,10 @@ def read_standard_header(filename):
 
         # Item 95 The split point of the file (0 means the file will not split)
         f.seek(96*4)
-        header['split point'] = ReadTable(f, nread=1, get_nread=False)[0]
+        header['split point'] = read_table(f, nread=1, get_nread=False)[0]
 
         # Items 97-98 LONGINT of the maximum file length (bug here)
-        # ints = ReadTable(f, nread=2, get_nread=False)
+        # ints = read_table(f, nread=2, get_nread=False)
         # header['file length'] = two_ints_to_long(ints[0], ints[1])
 
     return header
@@ -1821,3 +1811,84 @@ def is_int(value):
         return True
     except:
         return False
+
+
+def parse_coordinate_system(f, geometry_header):
+    """
+    Reads in coordinate system information from a binary result file.
+
+    Parameters
+    ----------
+    f : file object
+        Open binary result file.
+
+    geometry_header, dict
+        Dictionary containing pointers to geometry items in the ansys
+        result.
+
+    Returns
+    -------
+    c_systems : dict
+        Dictionary containing one entry for each defined coordinate
+        system.  If no non-standard coordinate systems have been
+        defined, there will be only one None.  First coordinate system
+        is assumed to be global cartesian.
+
+    Notes
+    -----
+    euler angles : [THXY, THYZ, THZX]
+
+    - First rotation about local Z (positive X toward Y).
+    - Second rotation about local X (positive Y toward Z).
+    - Third rotation about local Y (positive Z toward X).
+
+    PAR1
+    Used for elliptical, spheroidal, or toroidal systems. If KCS = 1
+    or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
+    radius (defaults to 1.0 (circle)). If KCS = 3, PAR1 is the major
+    radius of the torus.
+
+    PAR2
+    Used for spheroidal systems. If KCS = 2, PAR2 = ratio of ellipse
+    Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
+
+    Coordinate system type:
+        - 0: Cartesian
+        - 1: Cylindrical (circular or elliptical)
+        - 2: Spherical (or spheroidal)
+        - 3: Toroidal
+    """
+    # number of coordinate systems
+    maxcsy = geometry_header['maxcsy']
+
+    # load coordinate system index table
+    ptr_csy = geometry_header['ptrCSYl']
+    f.seek((ptr_csy + 2) * 4)
+    csy = np.fromfile(f, 'i', maxcsy)
+
+    # parse each coordinate system
+    # The items stored in each record:
+    # * Items 1-9  are the transformation matrix.
+    # * Items 10-12 are the coordinate system origin (XC,YC,ZC).
+    # * Items 13-14 are the coordinate system parameters (PAR1, PAR2).
+    # * Items 16-18 are the angles used to define the coordinate system.
+    # * Items 19-20 are theta and phi singularity keys.
+    # * Item 21 is the coordinate system type (0, 1, 2, or 3).
+    # * Item 22 is the coordinate system reference number.
+    c_systems = [None]
+    for i in range(maxcsy):
+        f.seek((ptr_csy + csy[i] + 2) * 4)
+        data = np.fromfile(f, 'd', 22)
+        c_system = {'transformation matrix': np.array(data[:9].reshape(-1, 3)),
+                    'origin': np.array(data[9:12]),
+                    'PAR1': data[12],
+                    'PAR2': data[13],
+                    'euler angles': data[15:18], # may not be euler
+                    'theta singularity' : data[18],
+                    'phi singularity' : data[19],
+                    'type' : int(data[20]),
+                    'reference num' : int(data[21],)
+                    }
+        c_systems.append(c_system)
+
+    return c_systems

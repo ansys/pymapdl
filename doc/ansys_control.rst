@@ -653,7 +653,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
         # result = pyansys.ResultReader(result file)
 
         # Get maximum von Mises stress at result 1
-        nodenum, stress = result.PrincipalNodalStress(0)  # 0 as it's zero based indexing
+        nodenum, stress = result.principal_nodal_stress(0)  # 0 as it's zero based indexing
 
         # von Mises stress is the last column
         # must be nanmax as the shell element stress is not recorded

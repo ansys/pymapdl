@@ -1,15 +1,14 @@
-import vtk
 import struct
 import os
-import numpy as np
 import warnings
 import logging
 import ctypes
-from ctypes import c_int64
 
+import vtk
+import numpy as np
 from vtki.common import axis_rotation
-
 import vtki
+
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
@@ -24,7 +23,7 @@ np.seterr(divide='ignore', invalid='ignore')
 
 
 class CyclicResult(Result):
-    """ adds cyclic functionality to the result reader in pyansys """
+    """ Adds cyclic functionality to the result reader in pyansys """
 
     def __init__(self, filename):
         """ Initializes object """
@@ -35,17 +34,17 @@ class CyclicResult(Result):
             raise Exception('Result is not a cyclic model')
 
         # Add cyclic properties
-        self.AddCyclicProperties()
+        self.add_cyclic_properties()
 
-    def AddCyclicProperties(self, tol=1E-5):
+    def add_cyclic_properties(self, tol=1E-5):
         """
         Adds cyclic properties to result object
 
         Makes the assumption that all the cyclic nodes are within tol
         """
-        if self.resultheader['csCord'] != 1:
-            warnings.warn('Cyclic coordinate system %d' %
-                          self.resultheader['csCord'])
+        # if self.resultheader['csCord'] != 1:
+            # warnings.warn('Cyclic coordinate system %d' %
+                          # self.resultheader['csCord'])
 
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
@@ -68,21 +67,37 @@ class CyclicResult(Result):
 
         # create full rotor
         self.nsector = self.resultheader['nSector']
+        grid = self.grid.copy()
 
-        # Create rotor of sectors
+        # transform to standard coordinate system
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            try:
+                csys = self.geometry['coord systems'][cs_cord]
+            except:
+                breakpoint()
+            # assemble 4 x 4 matrix
+            trans = np.hstack((csys['transformation matrix'],
+                               csys['origin'].reshape(-1, 1)))
+            matrix = trans_to_matrix(trans)
+            grid.transform(matrix)
+            trans = vtki.trans_from_matrix(matrix)
+
         vtkappend = vtk.vtkAppendFilter()
         rang = 360.0 / self.nsector
         for i in range(self.nsector):
-
             # Transform mesh
-            sector = self.grid.copy()
+            sector = grid.copy()
             sector.rotate_z(rang * i)
             vtkappend.AddInputData(sector)
 
         vtkappend.Update()
-        self.rotor = vtki.UnstructuredGrid(vtkappend.GetOutput())
+        self.rotor = vtki.wrap(vtkappend.GetOutput())
+        if cs_cord > 1:
+            matrix.Invert()
+            self.rotor.transform(matrix)
 
-    def NodalSolution(self, rnum, phase=0, full_rotor=False, as_complex=False,
+    def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                       in_nodal_coord_sys=False):
         """
         Returns the DOF solution for each node in the global cartesian coordinate system.
@@ -124,7 +139,7 @@ class CyclicResult(Result):
         pairs contain the same information as the duplicate sector.
         """
         # get the nodal result
-        nnum, result = super(CyclicResult, self).NodalSolution(rnum,
+        nnum, result = super(CyclicResult, self).nodal_solution(rnum,
                                                                in_nodal_coord_sys=in_nodal_coord_sys)
         result_mas = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
@@ -160,12 +175,16 @@ class CyclicResult(Result):
                     rnum_dup = rnum + 1
 
                 # get repeated result and combine
-                _, result_dup = super(CyclicResult, self).NodalSolution(rnum_dup)
+                _, result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
 
             else:
                 result_dup = np.zeros_like(result)
 
-            expanded_result = self.ExpandCyclicModal(result_mas, result_dup, hindex, phase, as_complex, full_rotor)
+            expanded_result = self.expand_cyclic_modal(result_mas,
+                                                       result_dup,
+                                                       hindex, phase,
+                                                       as_complex,
+                                                       full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
             expanded_result = expand_cyclic_results(result, self.mas_ind,
@@ -175,7 +194,7 @@ class CyclicResult(Result):
 
         return nnum, expanded_result
 
-    def ExpandCyclicModal(self, result, result_r, hindex, phase, as_complex,
+    def expand_cyclic_modal(self, result, result_r, hindex, phase, as_complex,
                           full_rotor):
         """ Combines repeated results from ANSYS """
         if as_complex or full_rotor:
@@ -217,7 +236,7 @@ class CyclicResult(Result):
         else:
             return np.real(result_expanded)
 
-    def ExpandCyclicModalStress(self, result, result_r, hindex, phase, as_complex,
+    def expand_cyclic_modal_stress(self, result, result_r, hindex, phase, as_complex,
                                 full_rotor, scale=True):
         """ Combines repeated results from ANSYS """
         if self.dup_ind is not None:
@@ -262,7 +281,7 @@ class CyclicResult(Result):
 
         return result_expanded
 
-    def HarmonicIndexToCumulative(self, hindex, mode):
+    def harmonic_index_to_cumulative(self, hindex, mode):
         """
         Converts a harmonic index and a 0 index mode number to a cumulative result
         index.
@@ -323,8 +342,8 @@ class CyclicResult(Result):
                 mode_table.append(c)
         return np.asarray(mode_table)
 
-    def NodalStress(self, rnum, phase=0, as_complex=False, full_rotor=False):
-        nnum, stress = super(CyclicResult, self).NodalStress(rnum)
+    def nodal_stress(self, rnum, phase=0, as_complex=False, full_rotor=False):
+        nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
         nnum = nnum[self.mas_ind]
 
         if self.resultheader['kan'] == 2:  # modal analysis
@@ -340,19 +359,19 @@ class CyclicResult(Result):
                     rnum_r = rnum + 1
 
                 # get repeated result and combine
-                _, stress_r = super(CyclicResult, self).NodalStress(rnum_r)
+                _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
 
             else:
                 stress_r = np.zeros_like(stress)
 
-            expanded_result = self.ExpandCyclicModalStress(stress, stress_r, hindex,
+            expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, hindex,
                                                            phase, as_complex, full_rotor)
 
         elif self.resultheader['kan'] == 0:  # static result
             stress_r = np.zeros_like(stress)
-            expanded_result = self.ExpandCyclicModalStress(stress, stress_r, 0,
-                                                           phase, as_complex,
-                                                           full_rotor, scale=False)
+            expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, 0,
+                                                              phase, as_complex,
+                                                              full_rotor, scale=False)
 
             # expanded_result = ExpandCyclicStress(stress, self.mas_ind,
             #                                       self.dup_ind,
@@ -363,7 +382,7 @@ class CyclicResult(Result):
 
         return nnum, expanded_result
 
-    def PrincipalNodalStress(self, rnum, phase=0, as_complex=False,
+    def principal_nodal_stress(self, rnum, phase=0, as_complex=False,
                              full_rotor=False):
         """
         Returns principal nodal stress for a cumulative result
@@ -373,7 +392,7 @@ class CyclicResult(Result):
             raise Exception('Cannot be complex and full rotor')
         
         # get component stress
-        nnum, stress = self.NodalStress(rnum, phase, as_complex, full_rotor)
+        nnum, stress = self.nodal_stress(rnum, phase, as_complex, full_rotor)
 
         # compute principle stress
         if as_complex:
@@ -406,7 +425,7 @@ class CyclicResult(Result):
             pstress[isnan] = np.nan
             return nnum, pstress
 
-    def PlotNodalSolution(self, rnum, comp='norm', label='',
+    def plot_nodal_solution(self, rnum, comp='norm', label='',
                           colormap=None, flip_scalars=None, cpos=None,
                           screenshot=None, interactive=True, full_rotor=True,
                           phase=0, **kwargs):
@@ -460,10 +479,10 @@ class CyclicResult(Result):
         """
         # Load result from file
         if not full_rotor:
-            return super(CyclicResult, self).PlotNodalSolution(rnum)
+            return super(CyclicResult, self).plot_nodal_solution(rnum)
 
-        rnum = self.ParseStepSubstep(rnum)
-        nnum, result = self.NodalSolution(rnum, phase, full_rotor, as_complex=False)
+        rnum = self.parse_step_substep(rnum)
+        nnum, result = self.nodal_solution(rnum, phase, full_rotor, as_complex=False)
 
         # Process result
         if label == '':
@@ -493,14 +512,14 @@ class CyclicResult(Result):
             scalars[:, mask] = d
             d = scalars
 
-        return self.PlotPointScalars(d, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(d, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def PlotNodalStress(self, rnum, stype, label='',
-                        colormap=None, flip_scalars=None, cpos=None,
-                        screenshot=None, interactive=True, full_rotor=True,
-                        phase=0, **kwargs):
+    def plot_nodal_stress(self, rnum, stype, label='', colormap=None,
+                        flip_scalars=None, cpos=None, screenshot=None,
+                        interactive=True, full_rotor=True, phase=0,
+                        **kwargs):
         """
         Plots a nodal result.
 
@@ -548,7 +567,7 @@ class CyclicResult(Result):
 
         """
         if not full_rotor:  # Plot sector
-            return super(CyclicResult, self).PlotNodalStress(rnum,
+            return super(CyclicResult, self).plot_nodal_stress(rnum,
                                                              stype,
                                                              label=label,
                                                              colormap=colormap,
@@ -558,7 +577,7 @@ class CyclicResult(Result):
                                                              interactive=interactive,
                                                              **kwargs)
 
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
         stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz']
         stype = stype.lower()
         if stype not in stress_types:
@@ -566,15 +585,15 @@ class CyclicResult(Result):
         sidx = stress_types.index(stype)
 
         # Populate with nodal stress at edge nodes
-        nnum, stress = self.NodalStress(rnum, phase, False, full_rotor=True)
+        nnum, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
         scalars = stress[:, :, sidx]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
-        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(scalars, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def PlotPrincipalNodalStress(self, rnum, stype, colormap=None, flip_scalars=None,
+    def plot_principal_nodal_stress(self, rnum, stype, colormap=None, flip_scalars=None,
                                  cpos=None, screenshot=None, interactive=True,
                                  full_rotor=True, phase=0,
                                  **kwargs):
@@ -632,26 +651,26 @@ class CyclicResult(Result):
         """
         stype = stype.upper()
         if not full_rotor:  # Plot sector
-            return super(CyclicResult, self).PlotPrincipalNodalStress(rnum, stype)
+            return super(CyclicResult, self).plot_principal_nodal_stress(rnum, stype)
 
         # check inputs
         stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
         if stype not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
         sidx = stress_types.index(stype)
-        rnum = self.ParseStepSubstep(rnum)
+        rnum = self.parse_step_substep(rnum)
 
         # full rotor component stress
-        _, pstress = self.PrincipalNodalStress(rnum, phase, full_rotor=True)
+        _, pstress = self.principal_nodal_stress(rnum, phase, full_rotor=True)
 
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
-        return self.PlotPointScalars(scalars, rnum, stitle, colormap, flip_scalars,
+        return self.plot_point_scalars(scalars, rnum, stitle, colormap, flip_scalars,
                                      screenshot, cpos, interactive, self.rotor,
                                      **kwargs)
 
-    def AnimateNodalSolution(self, rnum, comp='norm', max_disp=0.1,
+    def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                              nangles=180, show_phase=True,
                              show_result_info=True,
                              interpolate_before_map=True, cpos=None,
@@ -703,7 +722,7 @@ class CyclicResult(Result):
 
         """
         # normalize nodal solution
-        nnum, complex_disp = self.NodalSolution(rnum, as_complex=True,
+        nnum, complex_disp = self.nodal_solution(rnum, as_complex=True,
                                                 full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
         complex_disp = complex_disp.reshape(-1, 3)
@@ -800,3 +819,12 @@ def expand_cyclic_results(result, mas_ind, dup_ind, nsector, phase, as_complex=F
         sectors.append(axis_rotation(u_mas, angle, deg=False, axis='z'))
 
     return np.asarray(sectors)
+
+
+def trans_to_matrix(trans):
+    """ Convert a numpy.ndarray to a vtk.vtkMatrix4x4 """
+    matrix = vtk.vtkMatrix4x4()
+    for i in range(trans.shape[0]):
+        for j in range(trans.shape[1]):
+            matrix.SetElement(i, j, trans[i, j])
+    return matrix

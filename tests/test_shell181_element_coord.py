@@ -22,7 +22,7 @@ Node # Sx Sy Sz Sxy Sxz Syz
 143931 -3295 -1272.6 0 223.02 0 0 
 
 It should be noted that the average of Top and Bottom surface is what Pyansys
-currently provides through result.ElementStress(0) command which is in the global
+currently provides through result.element_stress(0) command which is in the global
 coordinate system.
 
 """
@@ -47,7 +47,7 @@ result_file_name = os.path.join(testfiles_path, 'shell181_box.rst')
 
 def test_shell_stress_element_cs():
     result = pyansys.Result(result_file_name)
-    stress, enum, enode = result.ElementStress(0, in_element_coord_sys=True)
+    stress, enum, enode = result.element_stress(0, in_element_coord_sys=True)
 
     idx = np.where(enum == 118223)[0][0]
     assert np.allclose(KNOWN_RESULT_ENODE, enode[idx][:4])

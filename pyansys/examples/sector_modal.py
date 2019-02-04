@@ -32,4 +32,4 @@ ansys.Finish()
 ansys.Save()
 ansys.Exit()
 
-# ansys.result.AnimateNodalSolution(20)
+# ansys.result.animate_nodal_solution(20)

@@ -27,28 +27,28 @@ def test_loadresult():
     assert 'ansys_node_num' in grid.point_arrays
 
     # check results can be loaded
-    nnum, disp = result.NodalSolution(0)
+    nnum, disp = result.nodal_solution(0)
     assert nnum.size
     assert disp.size
 
-    nnum, disp = result.NodalSolution(0)
+    nnum, disp = result.nodal_solution(0)
     assert nnum.size
     assert disp.size
 
-    nnum, disp = result.PrincipalNodalStress(0)
+    nnum, disp = result.principal_nodal_stress(0)
     assert nnum.size
     assert disp.size
 
-    nnum, disp = result.NodalStress(0)
+    nnum, disp = result.nodal_stress(0)
     assert nnum.size
     assert disp.size
 
-    element_stress, enum, enode = result.ElementStress(0)
+    element_stress, enum, enode = result.element_stress(0)
     assert element_stress[0].size
     assert enum.size
     assert enode[0].size
 
-    element_stress, enum, enode = result.ElementStress(0, principal=True)
+    element_stress, enum, enode = result.element_stress(0, principal=True)
     assert element_stress[0].size
     assert enum.size
     assert enode[0].size
@@ -58,7 +58,7 @@ def test_loadresult():
 def test_animate_nodal_solution(tmpdir):
     result = pyansys.ResultReader(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
-    result.AnimateNodalSolution(0, nangles=20, movie_filename=temp_movie,
+    result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
                                 interactive=False)
     assert np.any(result.grid.points)
     assert os.path.isfile(temp_movie)
@@ -72,7 +72,7 @@ def test_loadbeam():
 
 def test_fullreader():
     fobj = pyansys.FullReader(fullfile)
-    dofref, k, m = fobj.LoadKM()
+    dofref, k, m = fobj.load_km()
     assert dofref.size
     assert k.size
     assert m.size

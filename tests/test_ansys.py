@@ -62,7 +62,7 @@ class TestCyclicResultReader(object):
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_disp = array[:, 1:-1]
 
-        nnum, disp = self.result.NodalSolution(0)
+        nnum, disp = self.result.nodal_solution(0)
 
         # cyclic model will only output the master sector
         ansys_nnum = ansys_nnum[:nnum.size]
@@ -73,7 +73,7 @@ class TestCyclicResultReader(object):
 
     def test_presol_s(self):
         # verify element stress
-        element_stress, elemnum, enode = self.result.ElementStress(0)
+        element_stress, elemnum, enode = self.result.element_stress(0)
         element_stress = np.vstack(element_stress)
         enode = np.hstack(enode)
 
@@ -102,7 +102,7 @@ class TestCyclicResultReader(object):
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
-        nnum, stress = self.result.NodalStress(0)
+        nnum, stress = self.result.nodal_stress(0)
 
         # v150 includes nodes in the geometry that aren't in the result
         mask = np.in1d(nnum, ansys_nnum)
@@ -122,7 +122,7 @@ class TestCyclicResultReader(object):
         ansys_nnum = array[:, 0].astype(np.int)
         ansys_stress = array[:, 1:]
 
-        nnum, stress = self.result.PrincipalNodalStress(0)
+        nnum, stress = self.result.principal_nodal_stress(0)
 
         # v150 includes nodes in the geometry that aren't in the result
         mask = np.in1d(nnum, ansys_nnum)
@@ -135,11 +135,11 @@ class TestCyclicResultReader(object):
     @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
     def test_plot(self):
         filename = '/tmp/temp.png'
-        self.result.PlotNodalSolution(0, screenshot=filename,
+        self.result.plot_nodal_solution(0, screenshot=filename,
                                       interactive=False)
-        # self.result.PlotNodalStress(0, 'Sx', screenshot=filename,
+        # self.result.plot_nodal_stress(0, 'Sx', screenshot=filename,
         #                             interactive=False)
-        self.result.PlotPrincipalNodalStress(0, 'SEQV', screenshot=filename,
+        self.result.plot_principal_nodal_stress(0, 'SEQV', screenshot=filename,
                                              interactive=False)
 
     def test_exit(self):

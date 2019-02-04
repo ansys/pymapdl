@@ -28,12 +28,12 @@ class TestResultReader(object):
 
     def test_results_displacement(self):
         textfile = os.path.join(testfiles_path, 'prnsol_u.txt')
-        nnum, r_values = self.result.NodalSolution(0)
+        nnum, r_values = self.result.nodal_solution(0)
         a_values = np.loadtxt(textfile, skiprows=2)[:, 1:4]
         assert np.allclose(r_values, a_values)
 
     def test_results_stress(self):
-        r_nnum, r_values = self.result.NodalStress(0)
+        r_nnum, r_values = self.result.nodal_stress(0)
         textfile = os.path.join(testfiles_path, 'prnsol_s.txt')
         a_values = np.loadtxt(textfile, skiprows=2)[:, 1:]
 
@@ -42,7 +42,7 @@ class TestResultReader(object):
         assert np.allclose(r_values[nanmask], a_values, atol=1E-1)
 
     def test_results_pstress(self):
-        r_nnum, r_values = self.result.PrincipalNodalStress(0)
+        r_nnum, r_values = self.result.principal_nodal_stress(0)
         textfile = os.path.join(testfiles_path, 'prnsol_s_prin.txt')
         a_values = np.loadtxt(textfile, skiprows=2)[:, 1:]
 

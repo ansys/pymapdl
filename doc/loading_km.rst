@@ -5,9 +5,9 @@ The ANSYS full file is a FORTRAN formatted binary file containing the mass and s
 
 Reading a Full File
 -------------------
-This example reads in the mass and stiffness matrices associated with the above example.  ``LoadKM`` sorts degrees of freedom such that the nodes are ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and ``m`` are sparse by default, but if ``scipy`` is not installed, or if the optional parameter ``as_sparse=False`` then they will be full numpy arrays.
+This example reads in the mass and stiffness matrices associated with the above example.  ``load_km`` sorts degrees of freedom such that the nodes are ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and ``m`` are sparse by default, but if ``scipy`` is not installed, or if the optional parameter ``as_sparse=False`` then they will be full numpy arrays.
 
-By default ``LoadKM`` outputs the upper triangle of both matrices.  The constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
+By default ``load_km`` outputs the upper triangle of both matrices.  The constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
 
 By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It is enabled for this example to allow for plotting of the values later on.
 
@@ -19,7 +19,7 @@ By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It i
     
     # Create result reader object and read in full file
     full = pyansys.FullReader(examples.fullfile)
-    dof_ref, k, m = full.LoadKM(sort=True)
+    dof_ref, k, m = full.load_km(sort=True)
 
 
 ANSYS only stores the upper triangular matrix in the full file.  To make the full matrix:

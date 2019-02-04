@@ -64,7 +64,44 @@ Which contains the following keys:
     - ``'enum'`` (non-sorted element numbers associated with elem array)
     - ``'elem'`` (numpy array showing nodes associated with each element, -1 indicates unused entry)
     - ``'ekey'`` (2xn element type reference array)
-    
+    - ``'coord systems'`` (dictionary of coordinate systems)
+
+Coordinate Systems
+~~~~~~~~~~~~~~~~~~
+Non default coordinate systems are always saved to an ANSYS result file.  The coordinate system is zero indexed and individual coordinate systems can be accessed with:
+
+.. code:: python
+
+    >>> coord_idx = 12
+    >>> result.geometry['coord systems'][coord_idx]
+    {'transformation matrix': array([[ 0.0, -1.0,  0.0],
+                                     [ 0.0,  0.0, -1.0],
+                                     [ 1.0,  0.0,  0.0]]),
+     'origin': array([0., 0., 0.]),
+     'PAR1': 1.0,
+     'PAR2': 1.0,
+     'euler angles': array([ -0., -90.,  90.]),
+     'theta singularity': 0.0,
+     'phi singularity': 0.0,
+     'type': 1,
+     'reference num': 12}
+
+A 4x4 transformation matrix can be constructed by concatenating the transformation matrix and the origin into one array.  For example:
+
+.. code:: python
+
+    >>> cs = result.geometry['coord systems'][coord_idx]
+    >>> trans = cs['transformation matrix']
+    >>> origin = cs['origin']
+    >>> bottom = np.zeros(4)
+    >>> bottom[3] = 1
+    >>> tmat = np.hstack((trans, origin.reshape(-1 ,1)))
+    >>> tmat = np.vstack((tmat, bottom))
+
+See the doc string for ``parse_coordinate_system`` for more details regarding the contents of the coordinate systems stored in the result file.
+
+.. autofunction:: pyansys.binary_reader.parse_coordinate_system
+
 
 Accessing Solution Results
 --------------------------
@@ -73,15 +110,15 @@ The DOF solution for an analysis for each node in the analysis can be obtained u
 .. code:: python    
 
     # Return an array of results (nnod x dof)
-    nnum, disp = result.NodalSolution(0) # uses 0 based indexing 
+    nnum, disp = result.nodal_solution(0) # uses 0 based indexing 
     
     # where nnum is the node numbers corresponding to the displacement results
 
     # The same results can be plotted using 
-    result.PlotNodalSolution(0, 'x', label='Displacement') # x displacement
+    result.plot_nodal_solution(0, 'x', label='Displacement') # x displacement
 
     # normalized displacement can be plotted by excluding the direction string
-    result.PlotNodalSolution(0, label='Normalized')
+    result.plot_nodal_solution(0, label='Normalized')
 
 Stress can be obtained as well using the below code.  The nodal stress is computed in the same manner as ANSYS by averaging the stress evaluated at that node for all attached elements.
 
@@ -89,14 +126,14 @@ Stress can be obtained as well using the below code.  The nodal stress is comput
     
     # obtain the component node averaged stress for the first result
     # organized with one [Sx, Sy Sz, Sxy, Syz, Sxz] entry for each node
-    nnum, stress = result.NodalStress(0) # results in a np array (nnod x 6)
+    nnum, stress = result.nodal_stress(0) # results in a np array (nnod x 6)
 
     # Display node averaged stress in x direction for result 6
-    result.PlotNodalStress(5, 'Sx')
+    result.plot_nodal_stress(5, 'Sx')
 
     # Compute principal nodal stresses and plot SEQV for result 1
-    nnum, pstress = result.PrincipalNodalStress(0)
-    result.PlotPrincipalNodalStress(0, 'SEQV')
+    nnum, pstress = result.principal_nodal_stress(0)
+    result.plot_principal_nodal_stress(0, 'SEQV')
 
 Element stress can be obtained using the following segment of code.  Ensure that the element results are expanded for a modal analysis within ANSYS with::
 
@@ -109,7 +146,7 @@ This block of code shows how you can access the non-averaged stresses for the fi
     
     import pyansys
     result = pyansys.ResultReader('file.rst')
-    estress, elem, enode = result.ElementStress(0)
+    estress, elem, enode = result.element_stress(0)
 
     
 These stresses can be verified using ANSYS using:
@@ -155,7 +192,7 @@ These stresses can be verified using ANSYS using:
 
 Animiating a Modal Solution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Solutions from a modal analysis can be animated using ``AnimateNodalSolution``.  For example:
+Solutions from a modal analysis can be animated using ``animate_nodal_solution``.  For example:
 
 .. code:: python
 
@@ -163,7 +200,7 @@ Solutions from a modal analysis can be animated using ``AnimateNodalSolution``. 
     import pyansys
 
     result = pyansys.Result(examples.rstfile)
-    result.AnimateNodalSolution(3)
+    result.animate_nodal_solution(3)
 
 
 
@@ -211,7 +248,7 @@ Alternatively, the result number can be obtained by using:
 
     >>> mode = 1
     >>> harmonic_index = 2
-    >>> result.HarmonicIndexToCumulative(mode, harmonic_index)
+    >>> result.harmonic_index_to_cumulative(mode, harmonic_index)
     24
 
     Using this indexing method, repeated modes are indexed by the same mode index.  To access the other repeated mode, use a negative harmonic index.  Should a result not exist, pyansys will return which modes are available:
@@ -220,7 +257,7 @@ Alternatively, the result number can be obtained by using:
 
     >>> mode = 1
     >>> harmonic_index = 20
-    >>> result.HarmonicIndexToCumulative(mode, harmonic_index)
+    >>> result.harmonic_index_to_cumulative(mode, harmonic_index)
     Exception: Invalid mode for harmonic index 1
     Available modes: [0 1 2 3 4 5 6 7 8 9]
 
@@ -228,7 +265,7 @@ Results from a cyclic analysis require additional post processing to be interper
 
 .. code:: python
 
-    >>> nnum, ms = result.NodalSolution(10) # mode shape of result 11
+    >>> nnum, ms = result.nodal_solution(10) # mode shape of result 11
     >>> print(ms[:3])
     [[ 44.700, 45.953, 38.717]
      [ 42.339, 48.516, 52.475]
@@ -238,7 +275,7 @@ Sometimes it is necessary to determine the maximum displacement of a mode.  To d
 
 .. code:: python
 
-    nnum, ms = result.NodalSolution(0, as_complex=True)
+    nnum, ms = result.nodal_solution(0, as_complex=True)
     norm = np.abs((ms*ms).sum(1)**0.5)
     idx = np.nanargmax(norm)
     ang = np.angle(ms[idx, 0])
@@ -249,21 +286,21 @@ Sometimes it is necessary to determine the maximum displacement of a mode.  To d
     # get only the real response
     ms = np.real(ms)
     
-See ``help(result.NodalSolution)`` for more details.
+See ``help(result.nodal_solution)`` for more details.
 
 The real displacement of the sector is always the real component of the mode shape ``ms``, and this can be varied by multiplying the mode shape by a complex value for a given phase.  To change the phase by 90 degrees simply:
 
-The results of a single sector can be displayed as well using the ``PlotNodalSolution``
+The results of a single sector can be displayed as well using the ``plot_nodal_solution``
 
 .. code:: python
 
     # Plot the result from the first mode of the 2nd harmonic index
-    rnum = result.HarmonicIndexToCumulative(0, 2)
-    result.PlotNodalSolution(rnum, label='Displacement', expand=False)
+    rnum = result.harmonic_index_to_cumulative(0, 2)
+    result.plot_nodal_solution(rnum, label='Displacement', expand=False)
     
 .. image:: ./images/rotor.jpg
 
-The phase of the result can be changed by modifying the ``phase`` option.  See ``help(result.PlotNodalSolution)`` for details on its implementation.
+The phase of the result can be changed by modifying the ``phase`` option.  See ``help(result.plot_nodal_solution)`` for details on its implementation.
 
 
 Exporting to ParaView
@@ -281,7 +318,7 @@ ParaView is a visualization application that can be used for rapid generation of
     # save as a binary vtk xml file
     result.save_as_vtk('beam.vtu')
 
-The vtk xml file can now be loaded using ParaView.  This screenshot shows the nodal displacement of the first result from the result file plotted within `ParaView <https://www.paraview.org/>`_.  Within the vtk file are two point arrays (``NodalResult`` and ``NodalStress``) for each result in the result file.  The nodal result values will depend on the analysis type, while nodal stress will always be the node average stress in the Sx, Sy Sz, Sxy, Syz, and Sxz directions.
+The vtk xml file can now be loaded using ParaView.  This screenshot shows the nodal displacement of the first result from the result file plotted within `ParaView <https://www.paraview.org/>`_.  Within the vtk file are two point arrays (``NodalResult`` and ``nodal_stress``) for each result in the result file.  The nodal result values will depend on the analysis type, while nodal stress will always be the node average stress in the Sx, Sy Sz, Sxy, Syz, and Sxz directions.
 
 .. image:: ./images/paraview.jpg
 

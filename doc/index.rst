@@ -53,13 +53,13 @@ Here's a quick example code block to show how easy it is to load and plots resul
 
     >>> import pyansys
     >>> result = pyansys.ResultReader('rotor.rst')
-    >>> nnum, stress = result.PrincipalNodalStress(0)
+    >>> nnum, stress = result.principal_nodal_stress(0)
     >>> print(stress[:3])
     array([[-1.2874937e-06,  1.2874934e-06,  5.6843419e-14,  0.0000000e+00,  8.1756007e-06, -8.1756007e-06],
            [-1.1674185e-04, -1.1674478e-04, -3.0856981e-04, -1.7892545e-06, -2.5823609e-05,  2.5835518e-05],
            [-5.7354209e-05, -5.5398770e-05, -1.4944717e-04, -1.0580692e-06, -1.7659733e-05, -3.5462126e-06]], dtype=float32)
 
-    >>> estress, elem, enode = result.ElementStress(0)  # element stress for result 0
+    >>> estress, elem, enode = result.element_stress(0)  # element stress for result 0
     >>> estress[0]  # element stress for element 0
     array([[ 1.0236604e+04, -9.2875127e+03, -4.0922625e+04, -2.3697146e+03, -1.9239732e+04,  3.0364934e+03]
            [ 5.9612605e+04,  2.6905924e+01, -3.6161423e+03,  6.6281304e+03,  3.1407712e+02,  2.3195926e+04]
@@ -72,7 +72,7 @@ Here's a quick example code block to show how easy it is to load and plots resul
     >>> enode[0]  # corresponding nodes belonging to for element 0
         array([ 9012,  7614,  9009, 10920], dtype=int32)
 
-    >>> result.PlotNodalSolution(0)
+    >>> result.plot_nodal_solution(0)
 
 .. figure:: ./images/rotor.jpg
     :width: 500pt

@@ -143,7 +143,7 @@ def LoadElements(filename, int ptr, int nelm,
             elem[i, j - 12] = GetInt(&p[loc + 4*j])
 
 
-def ReadElementStress(filename, int64_t [::1] ele_ind_table, 
+def read_element_stress(filename, int64_t [::1] ele_ind_table, 
                       int64_t [::1] nodstr, int64_t [::1] etype,
                       float [:, ::1] ele_data_arr, int nitem,
                       int32_t [::1] validmask, int32_t [::1] element_type,

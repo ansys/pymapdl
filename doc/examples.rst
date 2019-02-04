@@ -76,7 +76,7 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     
     # Get the 1st bending mode shape.  Results are ordered based on the sorted 
     # node numbering.  Note that results are zero indexed
-    nnum, disp = result.NodalSolution(0)
+    nnum, disp = result.nodal_solution(0)
     
 .. code:: python
 
@@ -97,7 +97,7 @@ As the geometry of the model is contained within the result file, you can plot t
 .. code:: python
     
     # Plot the displacement of Mode 0 in the x direction
-    result.PlotNodalSolution(0, 'x', label='Displacement')
+    result.plot_nodal_solution(0, 'x', label='Displacement')
 
 
 .. image:: ./images/hexbeam_disp.png
@@ -109,7 +109,7 @@ First, get the camera position from an interactive plot:
 
 .. code:: python
 
-    >>> cpos = result.PlotNodalSolution(0)
+    >>> cpos = result.plot_nodal_solution(0)
     >>> print(cpos)
     [(5.2722879880979345, 4.308737919176047, 10.467694436036483),
      (0.5, 0.5, 2.5),
@@ -119,7 +119,7 @@ Then generate the plot:
 
 .. code:: python
 
-    result.PlotNodalSolution(0, 'x', label='Displacement', cpos=cpos,
+    result.plot_nodal_solution(0, 'x', label='Displacement', cpos=cpos,
                              screenshot='hexbeam_disp.png',
                              window_size=[800, 600], interactive=False)
 
@@ -128,7 +128,7 @@ Stress can be plotted as well using the below code.  The nodal stress is compute
 .. code:: python
     
     # Display node averaged stress in x direction for result 6
-    result.PlotNodalStress(5, 'Sx')
+    result.plot_nodal_stress(5, 'Sx')
 
 .. image:: ./images/beam_stress.png
 
@@ -136,22 +136,22 @@ Nodal stress can also be generated non-interactively with:
 
 .. code:: python
 
-    result.PlotNodalStress(5, 'Sx', cpos=cpos, screenshot=beam_stress.png,
+    result.plot_nodal_stress(5, 'Sx', cpos=cpos, screenshot=beam_stress.png,
                            window_size=[800, 600], interactive=False)
 
 Animating a Modal Solution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Mode shapes from a modal analsyis can be animated using ``AnimateNodalSolution``:
+Mode shapes from a modal analsyis can be animated using ``animate_nodal_solution``:
 
 .. code:: python
 
-    result.AnimateNodalSolution(0)
+    result.animate_nodal_solution(0)
 
 If you wish to save the animation to a file, specify the movie_filename and animate it with:
 
 .. code:: python
 
-    result.AnimateNodalSolution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
+    result.animate_nodal_solution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
 
 .. image:: ./images/beam_mode_shape.gif
 
@@ -216,4 +216,4 @@ This is the source code for the example:
     result = pyansys.ResultReader(filename)
     
     # Plot node averaged stress in x direction for result 6
-    result.PlotNodalStress(5, 'Sx')
+    result.plot_nodal_stress(5, 'Sx')

@@ -18,7 +18,7 @@ def test_is_cyclic():
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_animate_nodal_solution(tmpdir):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
-    result.AnimateNodalSolution(0, nangles=20, movie_filename=temp_movie,
+    result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
                                 interactive=False)
     assert os.path.isfile(temp_movie)
 

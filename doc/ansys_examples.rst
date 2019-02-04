@@ -241,14 +241,14 @@ Access and plot the results within python using pyansys:
     result = pyansys.ResultReader(resultfile)
 
     # access element results as arrays
-    nnum, stress = result.NodalStress(0)
-    element_stress, elemnum, enode = result.ElementStress(0)
-    nodenum, stress = result.NodalStress(0)
+    nnum, stress = result.nodal_stress(0)
+    element_stress, elemnum, enode = result.element_stress(0)
+    nodenum, stress = result.nodal_stress(0)
 
     # plot interactively
     result.PlotNodalResult(0, colormap='bwr')
-    result.PlotNodalStress(0, 'Sx', colormap='bwr')
-    result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
+    result.plot_nodal_stress(0, 'Sx', colormap='bwr')
+    result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr')
 
     # plot and save non-interactively
     cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
@@ -258,10 +258,10 @@ Access and plot the results within python using pyansys:
     result.PlotNodalResult(0, interactive=False, cpos=cpos,
                            screenshot=os.path.join(path, 'cylinder_disp.png'))
 
-    result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+    result.plot_nodal_stress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
                            screenshot=os.path.join(path, 'cylinder_sx.png'))
 
-    result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
+    result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr', interactive=False, cpos=cpos,
                                     screenshot=os.path.join(path, 'cylinder_vonmises.png'))
 
 .. figure:: ./images/cylinder_disp.png
@@ -440,12 +440,12 @@ Get the nodal and element component stress at time step 0.  Plot the stress in t
 
 .. code:: python
 
-    nodenum, stress = result.NodalStress(0)
-    element_stress, elemnum, enode = result.ElementStress(0)
+    nodenum, stress = result.nodal_stress(0)
+    element_stress, elemnum, enode = result.element_stress(0)
     
     # plot the Z direction stress (the stress at the contact element simulating
     # the spot weld)
-    result.PlotNodalStress(0, 'Sz')
+    result.plot_nodal_stress(0, 'Sz')
 
 .. figure:: ./images/spot_sz.png
     :width: 300pt
@@ -455,8 +455,8 @@ Get the nodal and element component stress at time step 0.  Plot the stress in t
 .. code:: python
 
     # Get the principal nodal stress and plot the von Mises Stress
-    nnum, pstress = result.PrincipalNodalStress(0)
-    result.PlotPrincipalNodalStress(0, 'SEQV')
+    nnum, pstress = result.principal_nodal_stress(0)
+    result.plot_principal_nodal_stress(0, 'SEQV')
 
 .. figure:: ./images/spot_seqv.png
     :width: 300pt

@@ -61,7 +61,7 @@ def LoadResult():
     print('Contains {:d} nodes'.format(len(result.nnum)))
 
     # display result
-    nnum, disp = result.NodalSolution(0)
+    nnum, disp = result.nodal_solution(0)
 
     print('Nodal displacement for nodes 30 to 40 is:')
 
@@ -80,7 +80,7 @@ def DisplayDisplacement():
     fobj = pyansys.ResultReader(rstfile)
 
     print('Displaying ANSYS Mode 1')
-    fobj.PlotNodalSolution(0, label='Displacement')
+    fobj.plot_nodal_solution(0, label='Displacement')
 
 
 def DisplayStress():
@@ -90,15 +90,15 @@ def DisplayStress():
     result = pyansys.ResultReader(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
-    result.PlotNodalStress(5, 'Sx')
+    result.plot_nodal_stress(5, 'Sx')
 
 
-def LoadKM():
+def load_km():
     """ Loads m and k matrices from a full file """
 
     # Create file reader object
     fobj = pyansys.FullReader(fullfile)
-    dofref, k, m = fobj.LoadKM()
+    dofref, k, m = fobj.load_km()
 
     # print results
     ndim = k.shape[0]
@@ -141,7 +141,7 @@ def SolveKM():
 
     # load the mass and stiffness matrices
     full = pyansys.FullReader(pyansys.examples.fullfile)
-    dofref, k, m = full.LoadKM(sort=True)
+    dofref, k, m = full.load_km(sort=True)
 
     # make symmetric
     k += sparse.triu(k, 1).T
@@ -305,12 +305,12 @@ def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
 
     # open the result file
     result = ansys.result
-    element_stress, elemnum, enode = result.ElementStress(0)
+    element_stress, elemnum, enode = result.element_stress(0)
     if as_test:
         assert len(element_stress)
     else:
         print(element_stress[:10])
-    nodenum, stress = result.NodalStress(0)
+    nodenum, stress = result.nodal_stress(0)
     if as_test:
         assert np.any(stress)
     else:
@@ -323,20 +323,20 @@ def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
                     (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
                     (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-            img = result.PlotNodalSolution(0, interactive=False, cpos=cpos, screenshot=True)
+            img = result.plot_nodal_solution(0, interactive=False, cpos=cpos, screenshot=True)
             assert np.any(img)
 
-            img = result.PlotNodalStress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
+            img = result.plot_nodal_stress(0, 'Sx', colormap='bwr', interactive=False, cpos=cpos,
                                          screenshot=True)
             assert np.any(img)
 
-            result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr', interactive=False,
+            result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr', interactive=False,
                                             cpos=cpos, screenshot=True)
             assert np.any(img)
         else:
             # plot interactively
-            result.PlotNodalSolution(0, colormap='bwr')
-            result.PlotNodalStress(0, 'Sx', colormap='bwr')
-            result.PlotPrincipalNodalStress(0, 'SEQV', colormap='bwr')
+            result.plot_nodal_solution(0, colormap='bwr')
+            result.plot_nodal_stress(0, 'Sx', colormap='bwr')
+            result.plot_principal_nodal_stress(0, 'SEQV', colormap='bwr')
 
     return True

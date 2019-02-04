@@ -2,7 +2,7 @@
 In PyAnsys I type
 ```
 test_result = pyansys.ResultReader('sample.rst')
-estress,elem,enode = test_result.ElementStress(0)
+estress,elem,enode = test_result.element_stress(0)
 print(estress[23])
 print(enode[23])
 ```
@@ -31,7 +31,7 @@ ELEMENT=      24        SHELL281
 
 It would also be really useful to be able to read the Nodal Forces and Moment from the Elemental Solution using the: 
 
-ElementSolutionData(0,'ENF',sort=True)
+element_solution_data(0,'ENF',sort=True)
 From PyAnsys for element 24:
 ```
 array([ 7.1140683e-01,  2.5775826e-06,  1.8592998e+00,  1.7531972e-03,
@@ -99,8 +99,8 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
 result_file = os.path.join(testfiles_path, 'shell281.rst')
 test_result = pyansys.ResultReader(result_file, valid_element_types=['281'])
 
-# estress, elem, enode = test_result.ElementStress(0, in_element_coord_sys=False)
-estress, elem, enode = test_result.ElementStress(0, in_element_coord_sys=True)
+# estress, elem, enode = test_result.element_stress(0, in_element_coord_sys=False)
+estress, elem, enode = test_result.element_stress(0, in_element_coord_sys=True)
 print(estress[23][:4])
 
 # debug
@@ -110,22 +110,22 @@ np.isclose(-50.863, estress[23]).any(1).nonzero()
 
 
 f.seek(400284 - 8)
-table = ReadTable(f, 'f')
+table = read_table(f, 'f')
 # f.seek(400284)
 ncomp = 6
 nodstr = 4
 nl = 7
 # nread = nl*3*nodstr*ncomp
-# table = ReadTable(f, 'f', get_nread=False, nread=nread)
+# table = read_table(f, 'f', get_nread=False, nread=nread)
 print((np.isclose(-50.863, table).nonzero()[0] - 1)/table.size)
 
-# print(ReadTable(f, 'i', get_nread=False, nread=1))
+# print(read_table(f, 'i', get_nread=False, nread=1))
 
 
 
 # print(table[:10])
 
-# # elem, res = test_result.ElementSolutionData(0, 'ENF', sort=True)
+# # elem, res = test_result.element_solution_data(0, 'ENF', sort=True)
 # # print(res[23].reshape(8, -1))
 
 
