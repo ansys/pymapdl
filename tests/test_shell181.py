@@ -79,9 +79,6 @@ Nodal Solution results from ANSYS
 import os
 import numpy as np
 import pyansys
-from pyansys.examples import hexarchivefile
-from pyansys.examples import rstfile
-from pyansys.examples import fullfile
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -124,5 +121,3 @@ class TestLoad181():
 
         # wide atol limits considering the 5 sigfig from ASCII tables
         assert np.allclose(stress, np.array(ANSYS_NODE), atol=1E-6)
-
-

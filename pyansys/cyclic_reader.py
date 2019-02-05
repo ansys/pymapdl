@@ -363,16 +363,6 @@ class CyclicResult(Result):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        Returns
-        -------
-        nodenum : numpy.ndarray
-            Node numbers of the result.
-
-        stress : numpy.ndarray
-            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
-            node.  For the corresponding node numbers, see where
-            result is the result object.
-
         phase : float
             Phase adjustment of the stress in degrees.
 
@@ -385,6 +375,16 @@ class CyclicResult(Result):
         full_rotor : bool, optional
             Expands the results to the full rotor when True.  Default
             False.
+
+        Returns
+        -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
+        stress : numpy.ndarray
+            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
+            node.  For the corresponding node numbers, see where
+            result is the result object.
 
         Notes
         -----
@@ -719,11 +719,11 @@ class CyclicResult(Result):
                                      **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
-                             nangles=180, show_phase=True,
-                             show_result_info=True,
-                             interpolate_before_map=True, cpos=None,
-                             movie_filename=None, interactive=True,
-                             **kwargs):
+                               nangles=180, show_phase=True,
+                               show_result_info=True,
+                               interpolate_before_map=True, cpos=None,
+                               movie_filename=None, interactive=True,
+                               **kwargs):
         """
         Animate nodal solution.  Assumes nodal solution is a displacement 
         array from a modal solution.

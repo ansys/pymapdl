@@ -187,6 +187,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
             for j in range(nnode_elem):
                 for k in range(nitem):
                     ele_data_arr[c + j, k] = 0
+
         elif validmask[i]:
             # read the stresses evaluated at the intergration points or nodes
             fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
@@ -310,7 +311,6 @@ def ReadNodalValues(filename, uint8 [::1] celltypes,
         fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
         fread(&ptrENS, sizeof(int32_t), 1, cfile)
 
-
         # Get the nodes in the element
         celltype = celltypes[i]
         offset = offsets[i] + 1
@@ -342,7 +342,7 @@ def ReadNodalValues(filename, uint8 [::1] celltypes,
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
         elif celltype == VTK_TRIANGLE:  # untested
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
-        elif celltype == VTK_QUAD:  # untested
+        elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
         elif celltype == VTK_HEXAHEDRON:
             ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)

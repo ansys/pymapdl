@@ -2,23 +2,23 @@
 Used v150/ansys/customize/user/ResRd.F to help build this interface
 
 """
-import vtk
 import struct
 import os
-import numpy as np
 import warnings
 import logging
 import ctypes
 
+import vtk
 from vtki.common import axis_rotation
 import vtki
+import numpy as np
 
 import pyansys
 from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-from pyansys._relaxmidside import relax_plane_scalars
+# from pyansys._relaxmidside import relax_plane_scalars
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -128,7 +128,7 @@ RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
 
 
 # element types with stress outputs
-validENS = [45, 92, 95, 181, 185, 186, 187]
+validENS = [45, 92, 95, 181, 183, 185, 186, 187]
 
 
 class FullReader(object):
@@ -568,7 +568,7 @@ class Result(object):
         # normalize nodal solution
         nnum, disp = self.nodal_solution(rnum)
         disp /= (np.abs(disp).max()/max_disp)
-        disp = disp.reshape(-1, 3)
+        # disp = disp.reshape(-1, 3)
         
         if comp == 'x':
             axis = 0
@@ -583,6 +583,9 @@ class Result(object):
             scalars = disp[:, axis]
         else:
             scalars = (disp*disp).sum(1)**0.5
+
+        if disp.shape[1] == 2:
+            disp = np.hstack((disp, np.zeros((disp.shape[0], 1))))
 
         orig_pt = self.grid.points
 
@@ -1045,8 +1048,7 @@ class Result(object):
 
         """
         rnum = self.parse_step_substep(rnum)
-        header = self.element_solution_header(rnum)
-        ele_ind_table, nodstr, etype = header
+        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)

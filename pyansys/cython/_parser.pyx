@@ -110,6 +110,7 @@ cdef inline void StoreSurfQuad(int64_t [::1] offset, int64_t *ecount, int64_t *c
 
 
     """
+    cdef int64_t point_2, point_3
     # Populate offset array
     offset[ecount[0]] = ccount[0]
     
@@ -119,20 +120,36 @@ cdef inline void StoreSurfQuad(int64_t [::1] offset, int64_t *ecount, int64_t *c
         # Populate cell array while renumbering nodes
         for j in range(4):
             cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
-        
+
         # Populate cell type array
         cell_type[ecount[0]] = VTK_QUAD
-        
+
     else:
         cells[ccount[0]] = 8; ccount[0] += 1
-        
+
         # Populate cell array while renumbering nodes
-        for j in range(8):
-            cells[ccount[0]] = numref[elem[i, j]]; ccount[0] += 1
-        
-        # Populate cell type array
-        cell_type[ecount[0]] = VTK_QUADRATIC_QUAD
-        
+        # for j in range(8):
+        cells[ccount[0] + 0] = numref[elem[i, 0]]  # i
+        cells[ccount[0] + 1] = numref[elem[i, 1]]  # j
+        cells[ccount[0] + 2] = numref[elem[i, 2]]  # k
+        point_3 = numref[elem[i, 3]]  # m
+
+        # degenerate triangle check
+        if cells[ccount[0] + 2] == point_3:
+            cells[ccount[0] + 3] = numref[elem[i, 4]]  # m
+            cells[ccount[0] + 4] = numref[elem[i, 5]]  # n
+            cells[ccount[0] + 5] = numref[elem[i, 7]]  # p
+            cell_type[ecount[0]] = VTK_QUADRATIC_TRIANGLE
+            ccount[0] += 6
+        else:  # it's a quad
+            cells[ccount[0] + 3] = point_3
+            cells[ccount[0] + 4] = numref[elem[i, 4]]  # m
+            cells[ccount[0] + 5] = numref[elem[i, 5]]  # n
+            cells[ccount[0] + 6] = numref[elem[i, 6]]  # o
+            cells[ccount[0] + 7] = numref[elem[i, 7]]  # p
+            ccount[0] += 8
+            cell_type[ecount[0]] = VTK_QUADRATIC_QUAD
+
     # increment element counter
     ecount[0] += 1
     
