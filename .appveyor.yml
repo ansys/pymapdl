@@ -6,7 +6,7 @@
 
 # only build cp35, cp36, cp37 as vtk wheels is only offered in those versions
 environment:
-  CIBW_BEFORE_BUILD: "pip install numpy cython"
+  CIBW_BEFORE_BUILD: "pip install numpy==1.15.0 cython"
   CIBW_TEST_REQUIRES: "pytest scipy"
   CIBW_TEST_COMMAND: "pytest {project}\\tests"
   CIBW_SKIP: "*win32* cp27-* cp33* cp34*"

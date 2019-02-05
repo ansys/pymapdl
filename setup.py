@@ -146,7 +146,7 @@ setup(
                                        'sector.rst',
                                        'sector.cdb']},
 
-    install_requires=['numpy>1.9.3',
+    install_requires=['numpy>=1.14.0',
                       'vtki>=0.16.3',
                       'ansys_corba',
                       'appdirs',

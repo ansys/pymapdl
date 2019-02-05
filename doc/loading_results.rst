@@ -199,7 +199,7 @@ Solutions from a modal analysis can be animated using ``animate_nodal_solution``
     from pyansys import examples
     import pyansys
 
-    result = pyansys.Result(examples.rstfile)
+    result = pyansys.ResultReader(examples.rstfile)
     result.animate_nodal_solution(3)
 
 
