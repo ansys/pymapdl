@@ -34,7 +34,7 @@ examples module.  For a quick demo, run:
 .. code:: python
 
     from pyansys import examples
-    examples.RunAll()
+    examples.run_all()
 
 
 Controlling ANSYS
