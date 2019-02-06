@@ -10,7 +10,7 @@ from vtki.common import axis_rotation
 import vtki
 
 from pyansys import _parsefull
-from pyansys import _rstHelper
+from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys.elements import valid_types
 from pyansys import Result
@@ -276,7 +276,7 @@ class CyclicResult(Result):
         # rotate cyclic result inplace
         angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for i, angle in enumerate(angles):
-            isnan = _rstHelper.TensorRotateZ(result_expanded[i], angle)
+            isnan = _binary_reader.TensorRotateZ(result_expanded[i], angle)
             result_expanded[i, isnan] = np.nan
 
         return result_expanded
@@ -447,9 +447,9 @@ class CyclicResult(Result):
             stress_r = np.imag(stress).astype(np.float32)
             stress = np.real(stress).astype(np.float32)
 
-            pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+            pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
             pstress[isnan] = np.nan
-            pstress_r, isnan = _rstHelper.ComputePrincipalStress(stress_r)
+            pstress_r, isnan = _binary_reader.ComputePrincipalStress(stress_r)
             pstress_r[isnan] = np.nan
 
             return nnum, pstress + 1j*pstress_r
@@ -461,7 +461,7 @@ class CyclicResult(Result):
             # compute principle stress
             pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
             for i in range(stress.shape[0]):
-                pstress[i], isnan = _rstHelper.ComputePrincipalStress(stress[i])
+                pstress[i], isnan = _binary_reader.ComputePrincipalStress(stress[i])
                 pstress[i, isnan] = np.nan
             return nnum, pstress
 
@@ -469,7 +469,7 @@ class CyclicResult(Result):
             if stress.dtype != np.float32:
                 stress = stress.astype(np.float32)
 
-            pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+            pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
             pstress[isnan] = np.nan
             return nnum, pstress
 

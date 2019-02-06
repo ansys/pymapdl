@@ -132,8 +132,8 @@ setup(
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 Extension("pyansys._rstHelper",
-                           ["pyansys/cython/_rstHelper.pyx"],
+                 Extension("pyansys._binary_reader",
+                           ["pyansys/cython/_binary_reader.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
                  ],

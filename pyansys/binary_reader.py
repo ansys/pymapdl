@@ -15,7 +15,7 @@ import numpy as np
 
 import pyansys
 from pyansys import _parsefull
-from pyansys import _rstHelper
+from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys.elements import valid_types
 
@@ -248,7 +248,7 @@ class FullReader(object):
 
         # Read k and m blocks (see help(ReadArray) for block description)
         if ntermK:
-            krow, kcol, kdata = _rstHelper.ReadArray(self.filename,
+            krow, kcol, kdata = _binary_reader.ReadArray(self.filename,
                                                      ptrSTF,
                                                      ntermK,
                                                      neqn,
@@ -258,7 +258,7 @@ class FullReader(object):
             kdata = None
 
         if ntermM:
-            mrow, mcol, mdata = _rstHelper.ReadArray(self.filename,
+            mrow, mcol, mdata = _binary_reader.ReadArray(self.filename,
                                                      ptrMAS,
                                                      ntermM,
                                                      neqn,
@@ -284,7 +284,7 @@ class FullReader(object):
 
 
         # sort nodal equivalence
-        dof_ref, index, nref, dref = _rstHelper.SortNodalEqlv(neqn, neqv, ndof)
+        dof_ref, index, nref, dref = _binary_reader.SortNodalEqlv(neqn, neqv, ndof)
 
         # store constrained dof information
         unsort_dof_ref = np.vstack((nref, dref)).T
@@ -730,8 +730,8 @@ class Result(object):
             nnod = geometry_header['nnod']
             nnum = np.empty(nnod, np.int32)
             nloc = np.empty((nnod, 6), np.float)
-            _rstHelper.LoadNodes(self.filename, geometry_header['ptrLOC'],
-                                 nnod, nloc, nnum)
+            _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
+                                      nnod, nloc, nnum)
 
             # Element information
             nelm = geometry_header['nelm']
@@ -836,7 +836,7 @@ class Result(object):
         rcon = np.empty(nelm, np.int32)
 
         # load elements
-        _rstHelper.LoadElements(self.filename, ptr, nelm, e_disp_table, elem,
+        _binary_reader.LoadElements(self.filename, ptr, nelm, e_disp_table, elem,
                                 etype, mtype, rcon)
         enum = self.resultheader['eeqv']
 
@@ -981,7 +981,7 @@ class Result(object):
             ind = self.grid.cell_arrays['vtkOriginalCellIds']
             ele_ind_table = ele_ind_table[ind]
 
-        data, ncount = _rstHelper.read_nodal_values(self.filename,
+        data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                     self.grid.celltypes,
                                                     ele_ind_table + 2,
                                                     self.grid.offset,
@@ -1073,7 +1073,7 @@ class Result(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
-            _rstHelper.read_element_stress(self.filename,
+            _binary_reader.read_element_stress(self.filename,
                                            ele_ind_table + 2,
                                            nodstr.astype(np.int64),
                                            etype,
@@ -1089,7 +1089,7 @@ class Result(object):
             raise Exception('Not implemented for ANSYS older than v14.5')
 
         if principal:
-            ele_data_arr, isnan = _rstHelper.ComputePrincipalStress(ele_data_arr)
+            ele_data_arr, isnan = _binary_reader.ComputePrincipalStress(ele_data_arr)
             ele_data_arr[isnan] = np.nan
 
         splitind = np.cumsum(nnode)
@@ -1234,7 +1234,7 @@ class Result(object):
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
 
-        pstress, isnan = _rstHelper.ComputePrincipalStress(stress)
+        pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
         pstress[isnan] = np.nan
         return nodenum, pstress
 

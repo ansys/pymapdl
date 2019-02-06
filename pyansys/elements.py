@@ -23,9 +23,9 @@ https://github.com/akaszynski/pyansys/issues
 
 """
 valid_types = ['1',   # LINK1
-               '42',  # PLANE42
+               '42',  # PLANE42 (legacy of PLANE182)
                '45',  # SOLID45
-               '82',  # PLANE82
+               '82',  # PLANE82 (legacy of PLANE183)
                '92',  # SOLID92
                '95',  # SOLID95
                '154',  # SURF154
