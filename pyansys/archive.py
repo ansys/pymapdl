@@ -90,7 +90,8 @@ class Archive(object):
 
         # Convert to vtk style arrays
         if allowable_types is None:
-            allowable_types = ['45', '95', '185', '186', '92', '187']
+            # allowable_types = ['45', '95', '185', '186', '92', '187']
+            allowable_types = valid_types
         else:
             assert isinstance(allowable_types, list), \
                    'allowable_types must be a list'
@@ -124,7 +125,7 @@ class Archive(object):
 
             # Set new midside nodes directly between their edge nodes
             temp_nodes = nodes.copy()
-            _relaxmidside.ResetMidside(cells, temp_nodes)
+            _relaxmidside.reset_midside(cells, cell_type, offset, temp_nodes)
             nodes[nnodes:] = temp_nodes[nnodes:]
 
             # merge nodes

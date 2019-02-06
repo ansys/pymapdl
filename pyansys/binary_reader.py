@@ -18,7 +18,6 @@ from pyansys import _parsefull
 from pyansys import _rstHelper
 from pyansys import _parser
 from pyansys.elements import valid_types
-# from pyansys._relaxmidside import relax_plane_scalars
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -127,8 +126,8 @@ RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
                       'XfemCrkPropTech']
 
 
-# element types with stress outputs
-validENS = [45, 92, 95, 181, 183, 185, 186, 187]
+# element types with stress outputs (consider not including this)
+# validENS = [45, 92, 95, 181, 182, 183, 185, 186, 187]
 
 
 class FullReader(object):
@@ -973,7 +972,7 @@ class Result(object):
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)
-        validmask = np.in1d(elemtype, validENS).astype(np.int32)
+        # validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
         # if cyclic rotor
         if ele_ind_table.size != self.grid.number_of_cells:
@@ -982,17 +981,17 @@ class Result(object):
             ind = self.grid.cell_arrays['vtkOriginalCellIds']
             ele_ind_table = ele_ind_table[ind]
 
-        data, ncount = _rstHelper.ReadNodalValues(self.filename,
-                                                  self.grid.celltypes,
-                                                  ele_ind_table + 2,
-                                                  self.grid.offset,
-                                                  self.grid.cells,
-                                                  nitem,
-                                                  validmask.astype(np.int32),
-                                                  self.grid.number_of_points,
-                                                  nodstr,
-                                                  etype,
-                                                  elemtype)
+        data, ncount = _rstHelper.read_nodal_values(self.filename,
+                                                    self.grid.celltypes,
+                                                    ele_ind_table + 2,
+                                                    self.grid.offset,
+                                                    self.grid.cells,
+                                                    nitem,
+                                                    # validmask.astype(np.int32),
+                                                    self.grid.number_of_points,
+                                                    nodstr,
+                                                    etype,
+                                                    elemtype)
 
         if nitem != 6:
             data = data[:, :6]
@@ -1052,7 +1051,7 @@ class Result(object):
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)
-        validmask = np.in1d(elemtype, validENS).astype(np.int32)
+        # validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
         etype = etype.astype(ctypes.c_int64)
 
@@ -1079,7 +1078,9 @@ class Result(object):
                                            nodstr.astype(np.int64),
                                            etype,
                                            ele_data_arr,
-                                           nitem, validmask, elemtype,
+                                           nitem,
+                                           # validmask,
+                                           elemtype,
                                            as_global=not in_element_coord_sys)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]

@@ -93,7 +93,7 @@ def test_write_angle(tmpdir):
 def test_missing_midside():
     archive_file = os.path.join(testfiles_path, 'mixed_missing_midside.cdb')
     archive = pyansys.Archive(archive_file)
-    grid = archive.parse_vtk()
+    grid = archive.parse_vtk(allowable_types=['45', '95', '185', '186', '92', '187'])
     assert (grid.quality > 0.0).all()
     assert not np.any(grid.celltypes == VTK_TETRA)
 

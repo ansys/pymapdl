@@ -144,10 +144,11 @@ def LoadElements(filename, int ptr, int nelm,
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
-                      int64_t [::1] nodstr, int64_t [::1] etype,
-                      float [:, ::1] ele_data_arr, int nitem,
-                      int32_t [::1] validmask, int32_t [::1] element_type,
-                      int as_global=1):
+                        int64_t [::1] nodstr, int64_t [::1] etype,
+                        float [:, ::1] ele_data_arr, int nitem,
+                        # int32_t [::1] validmask,
+                        int32_t [::1] element_type,
+                        int as_global=1):
     """
     Read element results from ANSYS directly into a numpy array
 
@@ -188,7 +189,8 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
                 for k in range(nitem):
                     ele_data_arr[c + j, k] = 0
 
-        elif validmask[i]:
+        # elif validmask[i]:
+        else:
             # read the stresses evaluated at the intergration points or nodes
             fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
             fread(&ele_data_arr[c, 0], sizeof(float), nread, cfile)
@@ -275,12 +277,14 @@ cdef inline void EulerRotate(float [:, ::1] ele_data_arr,
         ele_data_arr[c, 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
 
 
-def ReadNodalValues(filename, uint8 [::1] celltypes,
-                    int64_t [::1] ele_ind_table,
-                    int64_t [::1] offsets, int64_t [::1] cells,
-                    int nitems, int32_t [::1] validmask, int npoints,
-                    int32_t [::1] nodstr, int32_t [::1] etype,
-                    int32_t [::1] element_type):
+def read_nodal_values(filename, uint8 [::1] celltypes,
+                      int64_t [::1] ele_ind_table,
+                      int64_t [::1] offsets, int64_t [::1] cells,
+                      int nitems,
+                      # int32_t [::1] validmask,
+                      int npoints,
+                      int32_t [::1] nodstr, int32_t [::1] etype,
+                      int32_t [::1] element_type):
     """ Read element results from ANSYS directly into a numpy array """
     cdef int64_t i, j, k, ind, nread, offset
     cdef int64_t ncells = ele_ind_table.size
@@ -303,8 +307,8 @@ def ReadNodalValues(filename, uint8 [::1] celltypes,
     for i in range(ncells):
 
         # skip if not valid type
-        if not validmask[i]:
-            continue
+        # if not validmask[i]:
+            # continue
         
         # get location of element data
         ele_table = ele_ind_table[i]
