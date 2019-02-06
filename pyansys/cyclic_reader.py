@@ -14,6 +14,7 @@ from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys.elements import valid_types
 from pyansys import Result
+from pyansys.binary_reader import transform, trans_to_matrix
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -42,10 +43,6 @@ class CyclicResult(Result):
 
         Makes the assumption that all the cyclic nodes are within tol
         """
-        # if self.resultheader['csCord'] != 1:
-            # warnings.warn('Cyclic coordinate system %d' %
-                          # self.resultheader['csCord'])
-
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
         mask = self.quadgrid.cell_arrays['ansys_elem_num'] <= cs_els
@@ -72,16 +69,8 @@ class CyclicResult(Result):
         # transform to standard coordinate system
         cs_cord = self.resultheader['csCord']
         if cs_cord > 1:
-            try:
-                csys = self.geometry['coord systems'][cs_cord]
-            except:
-                breakpoint()
-            # assemble 4 x 4 matrix
-            trans = np.hstack((csys['transformation matrix'],
-                               csys['origin'].reshape(-1, 1)))
-            matrix = trans_to_matrix(trans)
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             grid.transform(matrix)
-            trans = vtki.trans_from_matrix(matrix)
 
         vtkappend = vtk.vtkAppendFilter()
         rang = 360.0 / self.nsector
@@ -97,10 +86,23 @@ class CyclicResult(Result):
             matrix.Invert()
             self.rotor.transform(matrix)
 
+    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+        """ return a 4x4 transformation array for a given coordinate system """
+        # assemble 4 x 4 matrix
+        csys = self.geometry['coord systems'][cs_cord]
+        trans = np.hstack((csys['transformation matrix'],
+                           csys['origin'].reshape(-1, 1)))
+        matrix = trans_to_matrix(trans)
+        if as_vtk_matrix:
+            return matrix
+        else:
+            return vtki.trans_from_matrix(matrix)
+
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                       in_nodal_coord_sys=False):
         """
-        Returns the DOF solution for each node in the global cartesian coordinate system.
+        Returns the DOF solution for each node in the global cartesian
+        coordinate system.
 
         Parameters
         ----------
@@ -137,6 +139,7 @@ class CyclicResult(Result):
         sector to the result file and instead results in pairs (i.e. harmonic
         index 1, -1).  This decreases their result file size since harmonic
         pairs contain the same information as the duplicate sector.
+
         """
         # get the nodal result
         nnum, result = super(CyclicResult, self).nodal_solution(rnum,
@@ -237,7 +240,7 @@ class CyclicResult(Result):
             return np.real(result_expanded)
 
     def expand_cyclic_modal_stress(self, result, result_r, hindex, phase, as_complex,
-                                full_rotor, scale=True):
+                                   full_rotor, scale=True):
         """ Combines repeated results from ANSYS """
         if self.dup_ind is not None:
             result = result[self.mas_ind]
@@ -276,7 +279,7 @@ class CyclicResult(Result):
         # rotate cyclic result inplace
         angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
         for i, angle in enumerate(angles):
-            isnan = _binary_reader.TensorRotateZ(result_expanded[i], angle)
+            isnan = _binary_reader.tensor_rotate_z(result_expanded[i], angle)
             result_expanded[i, isnan] = np.nan
 
         return result_expanded
@@ -420,11 +423,26 @@ class CyclicResult(Result):
                                                               full_rotor)
 
         elif self.resultheader['kan'] == 0:  # static result
+
+            # rotate results to Z+ first
+            cs_cord = self.resultheader['csCord']
+            if cs_cord != 1:
+                matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+                matrix.Invert()
+                trans = vtki.trans_from_matrix(matrix)
+                _binary_reader.tensor_arbitrary(stress, trans)
+
             stress_r = np.zeros_like(stress)
             expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, 0,
                                                               phase, as_complex,
                                                               full_rotor, scale=False)
-
+            matrix.Invert()
+            trans = vtki.trans_from_matrix(matrix)
+            if expanded_result.ndim == 3:
+                for i in range(expanded_result.shape[0]):
+                    _binary_reader.tensor_arbitrary(expanded_result[i], trans)
+            else:
+                _binary_reader.tensor_arbitrary(expanded_result, trans)
         else:
             raise Exception('Unsupported analysis type')
 
@@ -565,9 +583,9 @@ class CyclicResult(Result):
                                      **kwargs)
 
     def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
-                        flip_scalars=None, cpos=None, screenshot=None,
-                        interactive=True, full_rotor=True, phase=0,
-                        **kwargs):
+                          flip_scalars=None, cpos=None, screenshot=None,
+                          interactive=True, full_rotor=True, phase=0,
+                          **kwargs):
         """
         Plots a nodal result.
 
@@ -867,12 +885,3 @@ def expand_cyclic_results(result, mas_ind, dup_ind, nsector, phase, as_complex=F
         sectors.append(axis_rotation(u_mas, angle, deg=False, axis='z'))
 
     return np.asarray(sectors)
-
-
-def trans_to_matrix(trans):
-    """ Convert a numpy.ndarray to a vtk.vtkMatrix4x4 """
-    matrix = vtk.vtkMatrix4x4()
-    for i in range(trans.shape[0]):
-        for j in range(trans.shape[1]):
-            matrix.SetElement(i, j, trans[i, j])
-    return matrix

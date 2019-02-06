@@ -10,8 +10,9 @@ from libc.math cimport sqrt, fabs, sin, cos
 from libc.stdio cimport fopen, FILE, fclose, fread, fseek
 from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
 from libc.string cimport memcpy
-
 from libc.stdint cimport int16_t, int32_t, int64_t
+
+from cython.parallel import prange
 ctypedef unsigned char uint8
 
 cdef extern from "numpy/npy_math.h":
@@ -47,6 +48,35 @@ cdef double DEG2RAD = 0.0174532925
 
 cdef int PTR_ENS_IDX = 2
 cdef int PTR_EUL_IDX = 9
+
+
+# from numpy cimport ndarray
+# from cpython cimport list
+
+
+# def CleanDuplicates(list element_stress, list enodes):
+#     """
+#     This will be optimized in the future
+
+#     Removes duplicate nodes in element results
+#     """
+#     cdef int i
+#     for i, enode in enumerate(enodes):
+#         if unique_cython_int(enode) < len(enode):  # don't run unless it's not unique
+#             unode, idx = np.unique(enode, return_index=True)
+#         # if idx.size != enode.size:
+#             enodes[i] = unode
+#             element_stress[i] = element_stress[i][idx]
+
+
+# cdef int unique_cython_int(ndarray[np.int32_t] a):
+#     cdef int i
+#     cdef int n = len(a)
+#     cdef set s = set()
+#     cdef set idx = set()
+#     for i in range(n):
+#         s.add(a[i])
+#     return len(s)
 
 
 cdef inline double get_double(char * array) nogil:
@@ -621,7 +651,78 @@ def SortNodalEqlv(int neqn, int [::1] neqv, int [::1] ndof):
            np.asarray(dref)
 
 
-def TensorRotateZ(double [:, :] stress, float theta_z):
+def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
+    """
+    Rotates a 3D stress tensor by theta about the Z axis
+
+    Notes:
+    -----
+    Used
+    from sympy import Matrix, symbols
+    s_xx, s_yy, s_zz, s_xy, s_yz, s_xz = symbols('s_xx s_yy s_zz s_xy s_yz s_xz')
+    c0, c1, c2, c3, c4, c5, c6, c7, c8 = symbols('c0 c1 c2 c3 c4 c5 c6 c7 c8')
+    
+    R = Matrix([[c0, c1, c2], [c3, c4, c5], [c6, c7, c8]])
+    tensor = Matrix([[s_xx, s_xy, s_xz], [s_xy, s_yy, s_yz], [s_xz, s_yz, s_zz]])
+    R*tensor*R.T
+    """
+    cdef int nnode = stress.shape[0]
+    cdef int i
+
+    cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
+    cdef double s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
+    cdef double c0 = trans[0, 0]
+    cdef double c1 = trans[1, 0]
+    cdef double c2 = trans[2, 0]
+    cdef double c3 = trans[0, 1]
+    cdef double c4 = trans[1, 1]
+    cdef double c5 = trans[2, 1]
+    cdef double c6 = trans[0, 2]
+    cdef double c7 = trans[1, 2]
+    cdef double c8 = trans[2, 2]
+
+    cdef double r0, r1, r2, r3, r4, r5, r6, r7, r8
+
+    for i in range(nnode):
+        s_xx = stress[i, 0]
+        if npy_isnan(s_xx):  # skip
+            isnan[i] = 1
+        else:
+            s_yy = stress[i, 1]
+            s_zz = stress[i, 2]
+            s_xy = stress[i, 3]
+            s_yz = stress[i, 4]
+            s_xz = stress[i, 5]
+
+        r0 = c0*(c0*s_xx + c1*s_xy + c2*s_xz) + c1*(c0*s_xy + c1*s_yy + c2*s_yz) + c2*(c0*s_xz + c1*s_yz + c2*s_zz)
+
+        r1 = c3*(c0*s_xx + c1*s_xy + c2*s_xz) + c4*(c0*s_xy + c1*s_yy + c2*s_yz) + c5*(c0*s_xz + c1*s_yz + c2*s_zz)
+
+        # r2 = c6*(c0*s_xx + c1*s_xy + c2*s_xz) + c7*(c0*s_xy + c1*s_yy + c2*s_yz) + c8*(c0*s_xz + c1*s_yz + c2*s_zz)
+
+        # r3 = c0*(c3*s_xx + c4*s_xy + c5*s_xz) + c1*(c3*s_xy + c4*s_yy + c5*s_yz) + c2*(c3*s_xz + c4*s_yz + c5*s_zz)
+
+        r4 = c3*(c3*s_xx + c4*s_xy + c5*s_xz) + c4*(c3*s_xy + c4*s_yy + c5*s_yz) + c5*(c3*s_xz + c4*s_yz + c5*s_zz)
+
+        r5 = c6*(c3*s_xx + c4*s_xy + c5*s_xz) + c7*(c3*s_xy + c4*s_yy + c5*s_yz) + c8*(c3*s_xz + c4*s_yz + c5*s_zz)
+
+        r6 = c0*(c6*s_xx + c7*s_xy + c8*s_xz) + c1*(c6*s_xy + c7*s_yy + c8*s_yz) + c2*(c6*s_xz + c7*s_yz + c8*s_zz)
+
+        # r7 = c3*(c6*s_xx + c7*s_xy + c8*s_xz) + c4*(c6*s_xy + c7*s_yy + c8*s_yz) + c5*(c6*s_xz + c7*s_yz + c8*s_zz)
+
+        r8 = c6*(c6*s_xx + c7*s_xy + c8*s_xz) + c7*(c6*s_xy + c7*s_yy + c8*s_yz) + c8*(c6*s_xz + c7*s_yz + c8*s_zz)
+
+        stress[i, 0] = r0
+        stress[i, 1] = r4
+        stress[i, 2] = r8
+        stress[i, 3] = r1
+        stress[i, 4] = r5
+        stress[i, 5] = r6
+
+    return np.asarray(isnan).astype(np.bool)
+
+
+def tensor_rotate_z(double [:, :] stress, float theta_z):
     """
     Rotates a 3D stress tensor by theta about the Z axis
 
@@ -769,29 +870,67 @@ def ComputePrincipalStress(float [:, ::1] stress):
     return np.asarray(pstress), np.asarray(isnan).astype(np.bool)
 
 
-from numpy cimport ndarray
-from cpython cimport list
 
-def CleanDuplicates(list element_stress, list enodes):
-    """
-    This will be optimized in the future
 
-    Removes duplicate nodes in element results
-    """
+def affline_transform_double(double [:, ::1] points, double [:, ::1] t):
+    """ Rigidly transforms points based on a 4x4 transform matrix """
+    cdef int npoints = points.shape[0]
+    cdef int i, j
+    cdef double x, y, z
+    cdef double xnew, ynew, znew
+
+    cdef double t00 = t[0, 0]
+    cdef double t01 = t[0, 1]
+    cdef double t02 = t[0, 2]
+    cdef double t03 = t[0, 3]
+
+    cdef double t10 = t[1, 0]
+    cdef double t11 = t[1, 1]
+    cdef double t12 = t[1, 2]
+    cdef double t13 = t[1, 3]
+
+    cdef double t20 = t[2, 0]
+    cdef double t21 = t[2, 1]
+    cdef double t22 = t[2, 2]
+    cdef double t23 = t[2, 3]
+
+    for i in prange(npoints, nogil=True):
+        x = points[i, 0]
+        y = points[i, 1]
+        z = points[i, 2]
+
+        points[i, 0] = t00*x + t01*y + t02*z + t03
+        points[i, 1] = t10*x + t11*y + t12*z + t13
+        points[i, 2] = t20*x + t21*y + t22*z + t23
+
+
+def affline_transform_float(float [:, ::1] points, double [:, ::1] t):
+    """ Rigidly transforms points based on transform matrix t """
+    cdef int npoints = points.shape[0]
     cdef int i
-    for i, enode in enumerate(enodes):
-        if unique_cython_int(enode) < len(enode):  # don't run unless it's not unique
-            unode, idx = np.unique(enode, return_index=True)
-        # if idx.size != enode.size:
-            enodes[i] = unode
-            element_stress[i] = element_stress[i][idx]
+    cdef float x, y, z
+    cdef float xnew, ynew, znew
 
+    cdef float t00 = t[0, 0]
+    cdef float t01 = t[0, 1]
+    cdef float t02 = t[0, 2]
+    cdef float t03 = t[0, 3]
 
-cdef int unique_cython_int(ndarray[np.int32_t] a):
-    cdef int i
-    cdef int n = len(a)
-    cdef set s = set()
-    cdef set idx = set()
-    for i in range(n):
-        s.add(a[i])
-    return len(s)
+    cdef float t10 = t[1, 0]
+    cdef float t11 = t[1, 1]
+    cdef float t12 = t[1, 2]
+    cdef float t13 = t[1, 3]
+
+    cdef float t20 = t[2, 0]
+    cdef float t21 = t[2, 1]
+    cdef float t22 = t[2, 2]
+    cdef float t23 = t[2, 3]
+
+    for i in prange(npoints, nogil=True):
+        x = points[i, 0]
+        y = points[i, 1]
+        z = points[i, 2]
+
+        points[i, 0] = t00*x + t01*y + t02*z + t03
+        points[i, 1] = t10*x + t11*y + t12*z + t13
+        points[i, 2] = t20*x + t21*y + t22*z + t23

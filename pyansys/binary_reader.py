@@ -1051,15 +1051,11 @@ class Result(object):
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)
-        # validmask = np.in1d(elemtype, validENS).astype(np.int32)
-
         etype = etype.astype(ctypes.c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
         nelemnode = nnode.sum()
-
-        # * For shell elements or layered shell elements
 
         # bitmask (might use this at some point)
         # bitmask = bin(int(hex(self.resultheader['rstsprs']), base=16)).lstrip('0b')
@@ -1074,14 +1070,13 @@ class Result(object):
             ele_data_arr[:] = np.nan
 
             _binary_reader.read_element_stress(self.filename,
-                                           ele_ind_table + 2,
-                                           nodstr.astype(np.int64),
-                                           etype,
-                                           ele_data_arr,
-                                           nitem,
-                                           # validmask,
-                                           elemtype,
-                                           as_global=not in_element_coord_sys)
+                                               ele_ind_table + 2,
+                                               nodstr.astype(np.int64),
+                                               etype,
+                                               ele_data_arr,
+                                               nitem,
+                                               elemtype,
+                                               as_global=not in_element_coord_sys)
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
@@ -1096,7 +1091,8 @@ class Result(object):
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
         # reorder list using sorted indices
-        enum = self.grid.cell_arrays['ansys_elem_num']
+        # enum = self.grid.cell_arrays['ansys_elem_num']
+        enum = self.geometry['enum']
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
@@ -1377,6 +1373,9 @@ class Result(object):
 
         # Plot off screen when not interactive
         plobj = vtki.Plotter(off_screen=not(interactive))
+        if 'show_axes' in kwargs:
+            plobj.add_axes()
+
         plobj.add_mesh(grid, scalars=scalars, stitle=stitle,
                        cmap=cmap, flip_scalars=flip_scalars,
                        interpolate_before_map=True, **kwargs)
@@ -1911,3 +1910,35 @@ def parse_coordinate_system(f, geometry_header):
         c_systems.append(c_system)
 
     return c_systems
+
+
+def trans_to_matrix(trans):
+    """ Convert a numpy.ndarray to a vtk.vtkMatrix4x4 """
+    matrix = vtk.vtkMatrix4x4()
+    for i in range(trans.shape[0]):
+        for j in range(trans.shape[1]):
+            matrix.SetElement(i, j, trans[i, j])
+    return matrix
+
+
+def transform(points, trans):
+    """
+    In-place 3d transformation of a points array given a 4x4 
+    transformation matrix.
+
+    Parameters
+    ----------
+    points : np.ndarray or vtk.vtkTransform
+        Points to transform.
+
+    transform : np.ndarray or vtk.vtkTransform
+        4x4 transformation matrix.
+
+    """
+    if isinstance(trans, vtk.vtkMatrix4x4):
+        trans = vtki.trans_from_matrix(trans)
+
+    if points.dtype == np.float32:
+        _binary_reader.affline_transform_float(points, trans)
+    else:
+        _binary_reader.affline_transform_double(points, trans)
