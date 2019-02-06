@@ -23,7 +23,7 @@ sector_archive_file = os.path.join(dir_path, 'sector.cdb')
 sector_result_file = os.path.join(dir_path, 'sector.rst')
 
 
-def RunAll(run_ansys=False):
+def run_all(run_ansys=False):
     """
     Runs all the functions within this module except for the ansys
     tests.
@@ -31,8 +31,8 @@ def RunAll(run_ansys=False):
     """
     testfunctions = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
-        if inspect.isfunction(obj) and name != 'RunAll':
-            if 'ANSYS' in name and not run_ansys:
+        if inspect.isfunction(obj) and name != 'run_all':
+            if 'ansys' in name and not run_ansys:
                 continue
             testfunctions.append(obj)
 
@@ -40,15 +40,17 @@ def RunAll(run_ansys=False):
     any(f() for f in testfunctions)
 
 
-def DisplayHexBeam(as_test=False):
+def show_hex_archive(off_screen=False):
     """ Displays a hex beam mesh """
     # Load an archive file
     archive = pyansys.Archive(hexarchivefile)
     grid = archive.parse_vtk()
-    grid.plot(interactive=False)
+    grid.plot(off_screen=off_screen)
+    assert grid.n_points
+    assert grid.n_cells
 
 
-def LoadResult():
+def load_result():
     """
     Loads a result file and prints out the displacement of all the nodes from
     a modal analysis.
@@ -73,7 +75,7 @@ def LoadResult():
         print('{:2d}  {:10.6f}   {:10.6f}   {:10.6f}'.format(node, x, y, z))
 
 
-def DisplayDisplacement():
+def show_displacement():
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
@@ -83,7 +85,7 @@ def DisplayDisplacement():
     fobj.plot_nodal_solution(0, label='Displacement')
 
 
-def DisplayStress():
+def show_stress():
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
@@ -128,7 +130,7 @@ def load_km():
         print('{:.3f} Hz'.format(f[i]))
 
 
-def SolveKM():
+def solve_km():
     """
     Loads and solves a mass and stiffness matrix from an ansys full file
     """
@@ -172,17 +174,17 @@ def SolveKM():
     plobj = vtki.Plotter()
 
     # add two meshes to the plotting class
-    plobj.add_mesh(grid.copy(), style='wireframe')
+    plobj.add_mesh(grid.copy(), color='w', style='wireframe')
     plobj.add_mesh(grid, scalars=n, stitle='Normalized\nDisplacement',
                   flip_scalars=True)
     # Update the coordinates by adding the mode shape to the grid
-    plobj.update_coordinates(grid.GetNumpyPoints() + disp / 80, render=False)
-    plobj.add_text('Cantliver Beam 4th Mode Shape at {:.4f}'.format(f[3]),
+    plobj.update_coordinates(grid.points + disp / 80, render=False)
+    plobj.add_text('Cantliver Beam 4th\nMode Shape at\n{:.4f}'.format(f[3]),
                   font_size=30)
     plobj.plot()
 
 
-def DisplayCellQual(meshtype='tet'):
+def show_cell_qual(meshtype='tet'):
     """
     Displays minimum scaled jacobian of a sample mesh
 
@@ -213,8 +215,8 @@ def DisplayCellQual(meshtype='tet'):
               rng=[0, 1], flip_scalars=True)
 
 
-def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
-                  as_test=False):
+def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
+                        plot_ansys=True, as_test=False):
     """
     Cylinder demo for ansys
     """
@@ -323,15 +325,19 @@ def CylinderANSYS(exec_file=None, plot_vtk=True, plot_ansys=True,
                     (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
                     (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-            img = result.plot_nodal_solution(0, interactive=False, cpos=cpos, screenshot=True)
+            img = result.plot_nodal_solution(0, interactive=False,
+                                             cpos=cpos, screenshot=True)
             assert np.any(img)
 
-            img = result.plot_nodal_stress(0, 'Sx', cmap='bwr', interactive=False, cpos=cpos,
-                                         screenshot=True)
+            img = result.plot_nodal_stress(0, 'Sx', cmap='bwr',
+                                           interactive=False, cpos=cpos,
+                                           screenshot=True)
             assert np.any(img)
 
-            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr', interactive=False,
-                                            cpos=cpos, screenshot=True)
+            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr',
+                                               interactive=False,
+                                               cpos=cpos,
+                                               screenshot=True)
             assert np.any(img)
         else:
             # plot interactively

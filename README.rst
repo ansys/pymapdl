@@ -10,7 +10,7 @@ pyansys
     :target: https://pyansys.readthedocs.io/
 
 This Python module allows you to:
- - Interactively control an instance of ANSYS v17.0 + using Python.
+ - Interactively control an instance of ANSYS v14.5 + using Python on Linux, >=17.0 on Windows.
  - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
  - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
@@ -126,7 +126,7 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     result = pyansys.ResultReader(rstfile)
     
     # Beam natural frequencies
-    freqs = result.GetTimeValues()
+    freqs = result.time_values
 
 .. code:: python
 
