@@ -59,6 +59,8 @@ def load_result():
 
     # Load result file
     result = pyansys.ResultReader(rstfile)
+    assert result.nsets == 6
+    assert len(result.nnum) == 321
     print('Loaded result file with {:d} result sets'.format(result.nsets))
     print('Contains {:d} nodes'.format(len(result.nnum)))
 
@@ -75,24 +77,24 @@ def load_result():
         print('{:2d}  {:10.6f}   {:10.6f}   {:10.6f}'.format(node, x, y, z))
 
 
-def show_displacement():
+def show_displacement(interactive=True):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
     fobj = pyansys.ResultReader(rstfile)
 
     print('Displaying ANSYS Mode 1')
-    fobj.plot_nodal_solution(0, label='Displacement')
+    fobj.plot_nodal_solution(0, label='Displacement', interactive=interactive)
 
 
-def show_stress():
+def show_stress(interactive=True):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
     result = pyansys.ResultReader(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
-    result.plot_nodal_stress(5, 'Sx')
+    result.plot_nodal_stress(5, 'Sx', interactive=interactive)
 
 
 def load_km():
@@ -128,6 +130,20 @@ def load_km():
     print('First four natural frequencies:')
     for i in range(4):
         print('{:.3f} Hz'.format(f[i]))
+    # breakpoint()
+
+    known_result = np.array([ 1283.20036921, 1283.20036921,
+                              5781.97486169, 6919.39887714,
+                              6919.39887714, 10172.61497694,
+                              16497.85701889, 16497.85701889,
+                              17343.9939669 , 27457.18472747,
+                              27457.18472747, 28908.52552073,
+                              30326.16886062, 39175.76412419,
+                              39175.76412419, 40503.70406456,
+                              49819.91597612, 51043.03965541,
+                              51043.03965541, 52193.86143879])
+
+    assert np.allclose(f, known_result)
 
 
 def solve_km():
@@ -184,7 +200,7 @@ def solve_km():
     plobj.plot()
 
 
-def show_cell_qual(meshtype='tet'):
+def show_cell_qual(meshtype='tet', off_screen=False):
     """
     Displays minimum scaled jacobian of a sample mesh
 
@@ -209,10 +225,11 @@ def show_cell_qual(meshtype='tet'):
 
     # get cell quality
     qual = pyansys.CellQuality(grid)
+    assert np.all(qual > 0)
 
     # plot cell quality
     grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
-              rng=[0, 1], flip_scalars=True)
+              rng=[0, 1], flip_scalars=True, off_screen=off_screen)
 
 
 def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
