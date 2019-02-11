@@ -468,9 +468,10 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
         typeB[1] = -1
 
     # shell types
-    planetype = ['42', '82', '154', '181', '182', '183', '223']
-    cdef int n_type_c = 7
-    cdef int [7] typeC
+    planetype = ['42', '82', '154', '181', '182', '183', '223', '281']
+    cdef int n_type_c = 8
+    assert n_type_c == len(planetype)
+    cdef int [8] typeC
     for i, atype in enumerate(planetype):
         if atype in allowable_types:
             typeC[i] = int(atype)

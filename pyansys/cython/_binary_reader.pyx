@@ -176,7 +176,6 @@ def LoadElements(filename, int ptr, int nelm,
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
                         int64_t [::1] nodstr, int64_t [::1] etype,
                         float [:, ::1] ele_data_arr, int nitem,
-                        # int32_t [::1] validmask,
                         int32_t [::1] element_type,
                         int as_global=1):
     """
@@ -213,13 +212,11 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
         # if shell and keyopt 8 is 0, read top and bottom
         nread = nnode_elem*nitem
 
-        if ptrENS < 0:  # missing pointer means missing data
+        if ptrENS < 0:  # negative pointer means missing data
             # skip this element
             for j in range(nnode_elem):
                 for k in range(nitem):
-                    ele_data_arr[c + j, k] = 0
-
-        # elif validmask[i]:
+                    ele_data_arr[c + j, k] = 0  # consider putting NAN instead
         else:
             # read the stresses evaluated at the intergration points or nodes
             fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
@@ -227,7 +224,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
 
             # this will undoubtedly need to be generalized
             # element euler angle pointer
-            if element_type[i] == 181:
+            if element_type[i] == 181 or element_type[i] == 281:
                 fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
                 fread(&ptrEUL, sizeof(int32_t), 1, cfile)
 

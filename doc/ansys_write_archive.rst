@@ -44,7 +44,7 @@ Resulting ANSYS quality report:
 
 Supported Elements
 ~~~~~~~~~~~~~~~~~~
-At the moment, only solid elements are supported by the ``WriteArchive`` function, to include:
+At the moment, only solid elements are supported by the ``save_as_archive`` function, to include:
 
  - ``vtk.VTK_TETRA``
  - ``vtk.VTK_QUADRATIC_TETRA``
@@ -55,7 +55,7 @@ At the moment, only solid elements are supported by the ``WriteArchive`` functio
  - ``vtk.VTK_HEXAHEDRON``
  - ``vtk.VTK_QUADRATIC_HEXAHEDRON``
 
-Linear element types will be written as ANSYS SOLID185, quadratic elements will be written as ANSYS SOLID186, except for quadratic tetrahedrals, which will be written as SOLID187.
+Linear element types will be written as SOLID185, quadratic elements will be written as SOLID186, except for quadratic tetrahedrals, which will be written as SOLID187.
 
 Write Functions
 ---------------

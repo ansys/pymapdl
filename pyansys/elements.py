@@ -23,8 +23,10 @@ https://github.com/akaszynski/pyansys/issues
 
 """
 valid_types = ['1',   # LINK1
+               '41',  # SHELL41 (legacy of SHELL181)
                '42',  # PLANE42 (legacy of PLANE182)
                '45',  # SOLID45
+               '55',  # PLANE55
                '82',  # PLANE82 (legacy of PLANE183)
                '92',  # SOLID92
                '95',  # SOLID95
@@ -37,4 +39,5 @@ valid_types = ['1',   # LINK1
                '186',  # SOLID186
                '187',  # SOLID187
                '188',  # BEAM188
-               '223']  # PLANE223
+               '223',  # PLANE223
+               '281']  # SHELL281

@@ -756,7 +756,7 @@ class Result(object):
             nodstr = np.empty(10000, np.int32)
             etype_ID = np.empty(maxety, np.int32)
             ekey = []
-            keyopts = np.empty((10000, 11), np.int16)
+            keyopts = np.zeros((10000, 11), np.int16)
             for i in range(maxety):
                 f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2)*4)
                 einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
@@ -790,7 +790,9 @@ class Result(object):
                 # with KEYOPT(8)=0, the record contains stresses at
                 # each corner node (first at the bottom shell surface,
                 # then the top surface)
-                if einfo[1] == 181:
+                #
+                # Only valid for SHELL181 or SHELL281 elements.
+                if einfo[1] == 181 or einfo[1] == 281:
                     if keyopts[etype_ref, 7] == 0:
                         nodstr[etype_ref] *= 2
 
@@ -987,7 +989,6 @@ class Result(object):
                                                     self.grid.offset,
                                                     self.grid.cells,
                                                     nitem,
-                                                    # validmask.astype(np.int32),
                                                     self.grid.number_of_points,
                                                     nodstr,
                                                     etype,
