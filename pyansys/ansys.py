@@ -341,7 +341,7 @@ class ANSYS(_InternalANSYS):
 
     log_apdl : str, optional
         Opens an APDL log file named "log.inp" in the current ANSYS
-        working directory.  Default 'w'.  Change to 'a' to append to
+        working directory.  Default 'w'.  Set to 'a' to append to
         an existing log.
 
     Examples
@@ -450,10 +450,7 @@ class ANSYS(_InternalANSYS):
         self._open(additional_switches)
 
         if log_apdl:
-            if isinstance(log_apdl, str):
-                filename = log_apdl
-            else:
-                filename = os.path.join(self.path, 'log.inp')
+            filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
 
     def _open(self, additional_switches=''):
@@ -490,7 +487,7 @@ class ANSYS(_InternalANSYS):
             raise Exception('APDL command logging already enabled.\n')
 
         self.log.debug('Opening ANSYS log file at %s' % filename)
-        self.apdl_log = open(filename, mode, 1)  # line buffered
+        self.apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         if mode != 'w':
             self.apdl_log.write('! APDL script generated using pyansys %s\n' %
                                 pyansys.__version__)
@@ -890,7 +887,7 @@ class ANSYS(_InternalANSYS):
         filename = os.path.join(self.path, 'file.parm')
         self.parameters, self.arrays = load_parameters(filename)
 
-    def AddFileHandler(self, filepath, append):
+    def add_file_handler(self, filepath, append):
         """ Adds a file handler to the log """
         if append:
             mode = 'a'
@@ -909,7 +906,7 @@ class ANSYS(_InternalANSYS):
         self.log.addHandler(self.fileHandler)
         self.log.info('Added file handler at %s' % filepath)
 
-    def RemoveFileHandler(self):
+    def remove_file_handler(self):
         self.log.removeHandler(self.fileHandler)
         self.log.info('Removed file handler')
 
