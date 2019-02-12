@@ -314,7 +314,7 @@ Caveats and Notes
 
 Command Naming Conventions and Rules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When calling ANSYS commands as functions, each command has been translated from its original ANSYS all caps format to a PEP8 format.  For example, ``ESEL`` is now ``Esel``.  Additionally, ANSYS commands containing a ``/`` or ``*`` have had those characters removed, unless this causes a conflict with an existing name.  Most notable is ``/SOLU`` which would conflict with ``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``Slashsolu`` to differentiate it from ``Solu``.  Out of the 1500 ANSYS commands, about 15 start with ``Slash`` and 8 with ``Star``.  Check the ``ANSYS Object Methods`` reference below when necessary.
+When calling ANSYS commands as functions, each command has been translated from its original ANSYS all CAPS format.  For example, ``ESEL`` is now ``Esel``.  Additionally, ANSYS commands containing a ``/`` or ``*`` have had those characters removed, unless this causes a conflict with an existing name.  Most notable is ``/SOLU`` which would conflict with ``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``Slashsolu`` to differentiate it from ``Solu``.  Out of the 1500 ANSYS commands, about 15 start with ``Slash`` and 8 with ``Star``.  Check the ``ANSYS Object Methods`` reference below when necessary.
 
 ANSYS commands that normally have an empty space, such as ``ESEL, S, TYPE, , 1`` should include an empty string when called by Python:
 
