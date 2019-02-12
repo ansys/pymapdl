@@ -561,6 +561,41 @@ It is often useful to plot geometry and meshes as they are generated and for deb
     Area Plot from ANSYS using ``pyansys``
 
 
+Interactive Breakpoint
+----------------------
+In most circumstances it is not possible, especially when generating geometry, to go without opening up the APDL GUI.  Identifying geometry items can't be done easy using inline plotting, so ``pyansys`` has a ``open_gui`` method that allows you to seamlessly open up the GUI without loosing work or having to restart your session.  For example:
+
+.. code:: python
+
+    import pyansys
+
+    # run ansys with interactive plotting enabled
+    # ansys = pyansys.ANSYS('/usr/ansys_inc/v182/ansys/bin/ansys182',
+    ansys = pyansys.ANSYS(interactive_plotting=True, override=True)
+
+    # create a square area using keypoints
+    ansys.Prep7()
+    ansys.K(1, 0, 0, 0)
+    ansys.K(2, 1, 0, 0)
+    ansys.K(3, 1, 1, 0)
+    ansys.K(4, 0, 1, 0)    
+    ansys.L(1, 2)
+    ansys.L(2, 3)
+    ansys.L(3, 4)
+    ansys.L(4, 1)
+    ansys.Al(1, 2, 3, 4)
+
+    # open up the gui
+    ansys.open_gui()
+
+    # it resumes where you left off...
+    ansys.Et(1, 'MESH200', 6)
+    ansys.Amesh('all')
+    ansys.Eplot()    
+
+This approach avoids the hassle of having to switch back and forth between an interactive session and a scripting session.  Instead, you can have one scripting session and open up a GUI from the scripting session without losing work or progress.  Additionally, none of the changes made in the GUI will affect the script.  You can experiment in the GUI and the script will be left unaffected.
+
+
 Running a Batch
 ---------------
 Instead of running an ANSYS batch by calling ANSYS with an input file, you can instead define a function that runs ansys.  This example runs a mesh convergence study based on the maximum stress of a cylinder with torsional loading.
