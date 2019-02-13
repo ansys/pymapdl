@@ -1538,7 +1538,7 @@ class Result(object):
             _, stress = self.nodal_stress(i)
             grid.point_arrays['nodal_stress{:03d}'.format(i)] = stress
 
-        grid.write(filename)
+        grid.save(filename)
 
     def write_tables(self, filename):
         """ Write binary tables to ASCII.  Assumes int32  """
