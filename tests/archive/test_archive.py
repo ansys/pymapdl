@@ -160,8 +160,8 @@ def test_writehex_missing_node_num(tmpdir):
 
 def test_write_non_ansys_grid(tmpdir):
     grid = vtki.UnstructuredGrid(vtki_examples.hexbeamfile)
-    del grid.point_arrays['ANSYSnodenum']
-    del grid.cell_arrays['ANSYSelemnum']
+    del grid.point_arrays['sample_point_scalars']
+    del grid.cell_arrays['sample_cell_scalars']
 
     try:
         archive_file = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))

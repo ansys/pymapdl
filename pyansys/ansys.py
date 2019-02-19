@@ -52,7 +52,7 @@ def find_ansys():
                     paths.append(path)
 
     if not paths:
-        return None, None
+        return '', ''
 
     maxver_ind = np.argmax(versions)
     maxver = versions[maxver_ind]
@@ -356,7 +356,7 @@ class ANSYS(_InternalANSYS):
                  loglevel='INFO', additional_switches='',
                  start_timeout=120, interactive_plotting=False,
                  log_broadcast=False, check_version=True,
-                 prefer_pexpect=False, log_apdl='w'):
+                 prefer_pexpect=True, log_apdl='w'):
         """ Initialize connection with ANSYS program """
         self.log = setup_logger(loglevel.upper())
         self.jobname = jobname
