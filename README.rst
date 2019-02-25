@@ -64,7 +64,7 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
     ansys.Save()
     ansys.Exit()
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/aplot.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/aplot.png
     :width: 500pt
 
 
@@ -95,7 +95,7 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     # write this as a vtk xml file 
     grid.Write('hex.vtu')
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png
     :width: 500pt
 
 You can then load this vtk file using vtki or another program that uses VTK.
@@ -160,7 +160,7 @@ As the geometry of the model is contained within the result file, you can plot t
     result.plot_nodal_solution(0, 'x', label='Displacement')
 
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/hexbeam_disp.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_disp.png
     :width: 500pt
 
 
@@ -191,7 +191,7 @@ Stress can be plotted as well using the below code.  The nodal stress is compute
     # Display node averaged stress in x direction for result 6
     result.plot_nodal_stress(5, 'Sx')
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_stress.png
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_stress.png
     :width: 500pt
 
 
@@ -217,7 +217,7 @@ If you wish to save the animation to a file, specify the movie_filename and anim
 
     result.animate_nodal_solution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/doc/images/beam_mode_shape.gif
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_mode_shape.gif
     :width: 500pt
 
 
