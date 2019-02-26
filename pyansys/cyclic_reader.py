@@ -56,11 +56,13 @@ class CyclicResult(Result):
         self.mas_ind = np.nonzero(node_mask)[0]
 
         # duplicate sector may not exist
-        if not np.any(self.geometry['nnum'] > self.resultheader['csNds']):
-            self.dup_ind = None
-        else:
-            shift = (self.geometry['nnum'] < self.resultheader['csNds']).sum()
-            self.dup_ind = self.mas_ind + shift + 1
+        # if not np.any(self.geometry['nnum'] > self.resultheader['csNds']):
+        self.dup_ind = None
+        # else:
+            # breakpoint()
+            # this breaks when there are extra nodes in the model
+            # shift = (self.geometry['nnum'] < self.resultheader['csNds']).sum()
+            # self.dup_ind = self.mas_ind + shift + 1
 
         # create full rotor
         self.nsector = self.resultheader['nSector']
@@ -99,7 +101,7 @@ class CyclicResult(Result):
             return vtki.trans_from_matrix(matrix)
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
-                      in_nodal_coord_sys=False):
+                       in_nodal_coord_sys=False):
         """
         Returns the DOF solution for each node in the global cartesian
         coordinate system.
@@ -113,15 +115,17 @@ class CyclicResult(Result):
             Phase to rotate sector result.
 
         full_rotor : bool, optional
-            Expands the single sector solution for the full rotor.  Sectors are rotated
-            counter-clockwise about the axis of rotation.  Default False.
+            Expands the single sector solution for the full rotor.
+            Sectors are rotated counter-clockwise about the axis of
+            rotation.  Default False.
 
         as_complex : bool, optional
-            Returns result as a complex number, otherwise as the real part rotated by
-            phase.  Default False.
+            Returns result as a complex number, otherwise as the real
+            part rotated by phase.  Default False.
 
         in_nodal_coord_sys : bool, optional
-            When True, returns results in the nodal coordinate system.  Default False.
+            When True, returns results in the nodal coordinate system.
+            Default False.
 
         Returns
         -------
@@ -129,21 +133,23 @@ class CyclicResult(Result):
             Node numbers of master sector.
 
         result : np.ndarray
-            Result is (nnod x numdof), nnod is the number of nodes in a sector
-            and numdof is the number of degrees of freedom.  When full_rotor is True
-            the array will be (nSector x nnod x numdof).
+            Result is (nnod x numdof), nnod is the number of nodes in
+            a sector and numdof is the number of degrees of freedom.
+            When full_rotor is True the array will be (nSector x nnod
+            x numdof).
 
         Notes
         -----
-        Somewhere between v15.0 and v18.2 ANSYS stopped writing the duplicate 
-        sector to the result file and instead results in pairs (i.e. harmonic
-        index 1, -1).  This decreases their result file size since harmonic
-        pairs contain the same information as the duplicate sector.
+        Somewhere between v15.0 and v18.2 ANSYS stopped writing the
+        duplicate sector to the result file and instead results in
+        pairs (i.e. harmonic index 1, -1).  This decreases their
+        result file size since harmonic pairs contain the same
+        information as the duplicate sector.
 
         """
         # get the nodal result
         nnum, result = super(CyclicResult, self).nodal_solution(rnum,
-                                                               in_nodal_coord_sys=in_nodal_coord_sys)
+                                                                in_nodal_coord_sys=in_nodal_coord_sys)
         result_mas = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
@@ -154,17 +160,10 @@ class CyclicResult(Result):
             hindex = hindex_table[rnum]
 
             # if repeated mode
-            last_repeated = False
-            if self.resultheader['nSector'] % 2:
-                last_repeated = hindex == int(self.resultheader['nSector']/2)
-
-            # use duplicate sector if it exists
-            if self.dup_ind is not None:
-                result_dup = result[self.dup_ind]
-                # import pdb; pdb.set_trace()
-
-            # otherwise, use the harmonic pair
-            elif hindex != 0 or last_repeated:
+            last_index = hindex == int(self.resultheader['nSector']/2)
+            if hindex == 0 or last_index:
+                result_dup = np.zeros_like(result)
+            else:  # otherwise, use the harmonic pair
                 hmask = np.abs(hindex_table) == abs(hindex)
                 hmatch = np.nonzero(hmask)[0]
 
@@ -180,8 +179,7 @@ class CyclicResult(Result):
                 # get repeated result and combine
                 _, result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
 
-            else:
-                result_dup = np.zeros_like(result)
+            result_dup = result_dup[self.mas_ind]
 
             expanded_result = self.expand_cyclic_modal(result_mas,
                                                        result_dup,
@@ -191,9 +189,9 @@ class CyclicResult(Result):
 
         if self.resultheader['kan'] == 0:  # static analysis
             expanded_result = expand_cyclic_results(result, self.mas_ind,
-                                                  self.dup_ind,
-                                                  self.nsector, phase,
-                                                  as_complex, full_rotor)
+                                                    self.dup_ind,
+                                                    self.nsector, phase,
+                                                    as_complex, full_rotor)
 
         return nnum, expanded_result
 

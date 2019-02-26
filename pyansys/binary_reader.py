@@ -591,25 +591,25 @@ class Result(object):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
-        plobj = vtki.Plotter(off_screen=not interactive)
-        plobj.add_mesh(self.grid.copy(), scalars=np.real(scalars),
+        plotter = vtki.Plotter(off_screen=not interactive)
+        plotter.add_mesh(self.grid.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
-        plobj.update_coordinates(orig_pt, render=False)
+        plotter.update_coordinates(orig_pt, render=False)
 
         # setup text
-        plobj.add_text(' ', font_size=30)
+        plotter.add_text(' ', font_size=30)
 
         if cpos:
-            plobj.camera_position = cpos
+            plotter.camera_position = cpos
 
         if movie_filename:
-            plobj.open_movie(movie_filename)
+            plotter.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.plot(interactive=False, auto_close=False,
+        plotter.plot(interactive=False, auto_close=False,
                    interactive_update=True)
         first_loop = True
-        while not plobj.q_pressed:
+        while not plotter.q_pressed:
             for angle in np.linspace(0, np.pi*2, nangles):
                 mag_adj = np.sin(angle)
                 disp_adj = disp*mag_adj
@@ -619,26 +619,26 @@ class Result(object):
                 else:
                     scalars = (disp_adj*disp_adj).sum(1)**0.5
 
-                plobj.update_scalars(scalars, render=False)
-                plobj.update_coordinates(orig_pt + disp_adj, render=False)
+                plotter.update_scalars(scalars, render=False)
+                plotter.update_coordinates(orig_pt + disp_adj, render=False)
                 if show_phase:
-                    plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                    plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
 
                 if interactive:
-                    plobj.update(30, force_redraw=True)
+                    plotter.update(30, force_redraw=True)
 
-                if plobj.q_pressed:
+                if plotter.q_pressed:
                     break
 
                 if movie_filename and first_loop:
-                    plobj.write_frame()
+                    plotter.write_frame()
 
             first_loop = False
             if not interactive:
                 break
 
-        return plobj.close()
+        return plotter.close()
 
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """
@@ -1298,41 +1298,50 @@ class Result(object):
         return cpos, stress
 
     def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
-                         flip_scalars=None, screenshot=None, cpos=None,
-                         interactive=True, grid=None, add_text=True, **kwargs):
+                           flip_scalars=None, screenshot=None, cpos=None,
+                           interactive=True, grid=None, add_text=True, **kwargs):
         """
-        Plot a result
+        Plot point scalars on active mesh.
 
         Parameters
         ----------
-        rnum : int
-            Cumulative result number.
-
         scalars : np.ndarray
             Node scalars to plot.
 
-        stitle : str
+        rnum : int, optional
+            Cumulative result number.  Used for adding informative
+            text.
+
+        stitle : str, optional
             Title of the scalar bar.
 
-        cmap : str
+        cmap : str, optional
             See matplotlib cmaps:
             matplotlib.org/examples/color/cmaps_reference.html
 
-        flip_scalars : bool
+        flip_scalars : bool, optional
             Reverses the direction of the cmap.
 
-        screenshot : str
+        screenshot : str, optional
             When a filename, saves screenshot to disk.
 
-        cpos : list
-            3x3 list describing the camera position.  Obtain it by getting the output
-            of plot_point_scalars first.
+        cpos : list, optional
+            3x3 list describing the camera position.  Obtain it by
+            getting the output of plot_point_scalars first.
 
-        interactive : bool
-            Allows user to interact with the plot when True.  Default True.
+        interactive : bool, optional
+            Allows user to interact with the plot when True.  Default
+            True.
 
         grid : vtki PolyData or UnstructuredGrid, optional
-            Uses self.grid by default.  When specified, uses this grid instead.
+            Uses self.grid by default.  When specified, uses this grid
+            instead.
+
+        add_text : bool, optional
+            Adds information about the result when rnum is given.
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See help(vtki.plot)
 
         Returns
         -------
@@ -1347,62 +1356,47 @@ class Result(object):
         if cmap is None and flip_scalars is None:
             flip_scalars = False
 
-        if 'window_size' in kwargs:
-            window_size = kwargs['window_size']
-            del kwargs['window_size']
-        else:
-            window_size = [1024, 768]
-
-        if 'full_screen' in kwargs:
-            full_screen = kwargs['full_screen']
-            del kwargs['full_screen']
-        else:
-            full_screen = False
-
-        # need to ignore cells containing all nan
-        # breakpoint()
+        window_size = kwargs.pop('window_size', [1024, 768])
+        full_screen = kwargs.pop('full_screen', False)
 
         # cell_mask = np.empty(grid.n_cells, np.bool)
         offset = grid.offset.astype(np.int32)
         cells = grid.cells.astype(np.int32)
-        
-        # need special treatment for quatratic plane elements
-        # breakpoint()
-        # scalars = scalars.ravel().astype(np.double)
-        # relax_plane_scalars(grid.celltypes, cells, offset, scalars)
-        # ngrid = grid.extract_cells(grid.celltypes == 12)
 
         # Plot off screen when not interactive
-        plobj = vtki.Plotter(off_screen=not(interactive))
+        plotter = vtki.Plotter(off_screen=not(interactive))
         if 'show_axes' in kwargs:
-            plobj.add_axes()
+            plotter.add_axes()
 
-        plobj.add_mesh(grid, scalars=scalars, stitle=stitle,
-                       cmap=cmap, flip_scalars=flip_scalars,
-                       interpolate_before_map=True, **kwargs)
+        if 'background' in kwargs:
+            plotter.background_color = kwargs['background']
+
+        plotter.add_mesh(grid, scalars=scalars, stitle=stitle,
+                         cmap=cmap, flip_scalars=flip_scalars,
+                         interpolate_before_map=True, **kwargs)
 
         # NAN/missing data are white
-        plobj.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
+        plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
 
         if cpos:
-            plobj.camera_position = cpos
+            plotter.camera_position = cpos
 
         # add table
         if add_text and rnum is not None:
-            plobj.add_text(self.text_result_table(rnum), font_size=20)
+            plotter.add_text(self.text_result_table(rnum), font_size=20)
 
         if screenshot:
-            cpos = plobj.plot(auto_close=False, interactive=interactive,
+            cpos = plotter.plot(auto_close=False, interactive=interactive,
                               window_size=window_size,
                               full_screen=full_screen)
             if screenshot is True:
-                img = plobj.screenshot()
+                img = plotter.screenshot()
             else:
-                plobj.screenshot(screenshot)
-            plobj.close()
+                plotter.screenshot(screenshot)
+            plotter.close()
         else:
-            cpos = plobj.plot(interactive=interactive, window_size=window_size,
-                              full_screen=full_screen)
+            cpos = plotter.plot(interactive=interactive, window_size=window_size,
+                                full_screen=full_screen)
 
         if screenshot is True:
             return cpos, img
@@ -1494,7 +1488,7 @@ class Result(object):
 
         stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
         cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, **kwargs)
+                                       screenshot, cpos, interactive, **kwargs)
 
         return cpos
 
