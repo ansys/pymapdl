@@ -492,7 +492,7 @@ class CyclicResult(Result):
     def plot_nodal_solution(self, rnum, comp='norm', label='',
                             cmap=None, flip_scalars=None, cpos=None,
                             screenshot=None, interactive=True, full_rotor=True,
-                            phase=0, component=None, **kwargs):
+                            phase=0, **kwargs):  # nodal_component=None
         """
         Plots a nodal result.
 
@@ -537,17 +537,17 @@ class CyclicResult(Result):
             Phase angle of the modal result in radians.  Only valid
             when full_rotor is True.  Default 0
 
-        component : list, optional
-            Accepts either a string or a list strings of node
-            components to plot.  For example: 
-            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
-
         Returns
         -------
         cpos : list
             Camera position from vtk render window.
 
         """
+        # nodal_component : list, optional
+        #     Accepts either a string or a list strings of node
+        #     components to plot.  For example: 
+        #     ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
         # Load result from file
         if not full_rotor:
             return super(CyclicResult, self).plot_nodal_solution(rnum)

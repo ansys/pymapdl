@@ -54,7 +54,8 @@ def test_plot_component():
     ansys.Run("/SOLU")
     ansys.Antype(2, "NEW")
     ansys.Run("BCSOPT,,INCORE")
-    ansys.Modopt("LANB", 10)
+    ansys.Modopt("LANB", 1)
+    ansys.Mxpand(elcalc='YES')
     ansys.Run("/GOPR")
     ansys.Solve()
     ansys.Finish()
@@ -66,3 +67,6 @@ def test_plot_component():
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
     result.plot_nodal_solution(0, node_components=components, interactive=False)
+    result.plot_nodal_stress(0, 'Sx', node_components=components, interactive=False)
+    result.plot_principal_nodal_stress(0, 'SEQV',
+                                       node_components=components, interactive=False)

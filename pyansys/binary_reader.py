@@ -155,13 +155,12 @@ class FullReader(object):
 
     def __init__(self, filename):
         """
-        Loads full header on initialization
+        Loads full header on initialization.
 
         See ANSYS programmer's reference manual full header section for
         definitions of each header.
 
         """
-
         # check if file exists
         if not os.path.isfile(filename):
             raise Exception('{:s} not found'.format(filename))
@@ -186,24 +185,25 @@ class FullReader(object):
         Parameters
         ----------
         as_sparse : bool, optional
-            Outputs the mass and stiffness matrices as scipy csc sparse arrays
-            when True by default.
+            Outputs the mass and stiffness matrices as scipy csc
+            sparse arrays when True by default.
 
         sort : bool, optional
-            Rearranges the k and m matrices such that the rows correspond to
-            to the sorted rows and columns in dor_ref.  Also sorts dor_ref.
+            Rearranges the k and m matrices such that the rows
+            correspond to to the sorted rows and columns in dor_ref.
+            Also sorts dor_ref.
 
         Returns
         -------
         dof_ref : (n x 2) np.int32 array
-            This array contains the node and degree corresponding to each row
-            and column in the mass and stiffness matrices.  In a 3 DOF
-            analysis the dof intergers will correspond to:
+            This array contains the node and degree corresponding to
+            each row and column in the mass and stiffness matrices.
+            In a 3 DOF analysis the dof intergers will correspond to:
             0 - x
             1 - y
             2 - z
-            Sort these values by node number and DOF by enabling the sort
-            parameter.
+            Sort these values by node number and DOF by enabling the
+            sort parameter.
 
         k : (n x n) np.float or scipy.csc array
             Stiffness array
@@ -213,10 +213,11 @@ class FullReader(object):
 
         Notes
         -----
-        Constrained entries are removed from the mass and stiffness matrices.
+        Constrained entries are removed from the mass and stiffness
+        matrices.
 
-        Constrained dof can be accessed with self.const, which returns the node
-        number and DOF constrained in ANSYS.
+        Constrained DOF can be accessed with self.const, which returns
+        the node number and DOF constrained in ANSYS.
 
         """
         if not os.path.isfile(self.filename):
@@ -1328,45 +1329,55 @@ class Result(object):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def plot_principal_nodal_stress(self, rnum, stype=None,
-                                 cmap=None, flip_scalars=None,
-                                 cpos=None, screenshot=None,
-                                 interactive=True, **kwargs):
+    def plot_principal_nodal_stress(self, rnum, stype=None, cmap=None,
+                                    flip_scalars=None, cpos=None,
+                                    screenshot=None, interactive=True,
+                                    node_components=None, **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         stype : string
-            Stress type to plot.  S1, S2, S3 principal stresses, SINT stress
-            intensity, and SEQV equivalent stress.
+            Stress type to plot.  S1, S2, S3 principal stresses, SINT
+            stress intensity, and SEQV equivalent stress.
 
             Stress type must be a string from the following list:
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
 
         cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.  Only applicable for
-           when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
+           Cmap string.  See available matplotlib cmaps.  Only
+           applicable for when displaying scalars.  Defaults None
+           (rainbow).  Requires matplotlib.
 
         flip_scalars : bool, optional
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.  Default None.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.  Default None.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See help(vtki.plot)
 
         Returns
         -------
@@ -1375,7 +1386,6 @@ class Result(object):
 
         stress : np.ndarray
             Array used to plot stress.
-
         """
         if stype is None:
             raise Exception("Stress type must be a string from the following list:\n" +
@@ -1384,10 +1394,17 @@ class Result(object):
         rnum = self.parse_step_substep(rnum)
         stress = self.principle_stress_for_plotting(rnum, stype)
 
+        if node_components:
+            grid, ind = self._extract_node_components(node_components)
+            stress = stress[ind]
+        else:
+            grid = self.grid
+
         # Generate plot
         stitle = 'Nodal Stress\n%s\n' % stype
         cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, **kwargs)
+                                       screenshot, cpos, interactive, grid=grid,
+                                       **kwargs)
         return cpos, stress
 
     def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
@@ -1528,21 +1545,22 @@ class Result(object):
         return stress[:, sidx]
 
     def plot_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
-                        cpos=None, screenshot=None, interactive=True, **kwargs):
+                          cpos=None, screenshot=None, interactive=True,
+                          node_components=None, **kwargs):
         """
         Plots the stresses at each node in the solution.
 
-        The order of the results corresponds to the sorted node numbering.
-        This algorithm, like ANSYS, computes the node stress by averaging the
-        stress for each element at each node.  Due to the discontinuities
-        across elements, stresses will vary based on the element they are
-        evaluated from.
+        The order of the results corresponds to the sorted node
+        numbering.  This algorithm, like ANSYS, computes the node
+        stress by averaging the stress for each element at each node.
+        Due to the discontinuities across elements, stresses will vary
+        based on the element they are evaluated from.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
@@ -1565,6 +1583,14 @@ class Result(object):
             Default True.  Setting this to False makes the plot generate in the
             background.  Useful when generating plots in a batch mode automatically.
 
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See help(vtki.plot)
+
         Returns
         -------
         cpos : list
@@ -1576,17 +1602,21 @@ class Result(object):
         if stype not in stress_types:
             raise Exception('Stress type not in: \n' + str(stress_types))
 
-        sidx = stress_types.index(stype)
-
-        # Populate with nodal stress at edge nodes
+        # Get nodal stress at the requested component
         nnum, stress = self.nodal_stress(rnum)
+        sidx = stress_types.index(stype)
         stress = stress[:, sidx]
 
-        stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, **kwargs)
+        if node_components:
+            grid, ind = self._extract_node_components(node_components)
+            stress = stress[ind]
+        else:
+            grid = self.grid
 
-        return cpos
+        stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
+        return self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
+                                       screenshot, cpos, interactive, grid=grid,
+                                       **kwargs)
 
     def save_as_vtk(self, filename, binary=True):
         """
