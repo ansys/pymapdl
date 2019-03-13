@@ -490,22 +490,23 @@ class CyclicResult(Result):
             return nnum, pstress
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
-                          cmap=None, flip_scalars=None, cpos=None,
-                          screenshot=None, interactive=True, full_rotor=True,
-                          phase=0, **kwargs):
+                            cmap=None, flip_scalars=None, cpos=None,
+                            screenshot=None, interactive=True, full_rotor=True,
+                            phase=0, component=None, **kwargs):
         """
         Plots a nodal result.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are 'x', 'y', 'z', and
-            'norm', corresponding to the x directin, y direction, z direction,
-            and the combined direction (x**2 + y**2 + z**2)**0.5
+            Display component to display.  Options are 'x', 'y', 'z',
+            and 'norm', corresponding to the x directin, y direction,
+            z direction, and the combined direction (x**2 + y**2 +
+            z**2)**0.5
 
         label : str, optional
             Annotation string to add to scalar bar in plot.
@@ -517,23 +518,29 @@ class CyclicResult(Result):
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
 
         full_rotor : bool, optional
             Expand sector solution to full rotor.
 
         phase : float, optional
-            Phase angle of the modal result in radians.  Only valid when full_rotor
-            is True.  Default 0
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        component : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         Returns
         -------

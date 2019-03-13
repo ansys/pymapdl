@@ -931,3 +931,42 @@ def affline_transform_float(float [:, ::1] points, double [:, ::1] t):
         points[i, 0] = t00*x + t01*y + t02*z + t03
         points[i, 1] = t10*x + t11*y + t12*z + t13
         points[i, 2] = t20*x + t21*y + t22*z + t23
+
+
+cdef inline int cell_lookup(uint8 celltype) nogil:
+    if celltype == VTK_HEXAHEDRON or celltype == VTK_QUADRATIC_HEXAHEDRON:
+        return 8
+    elif celltype == VTK_TETRA or celltype == VTK_QUADRATIC_TETRA:
+        return 4
+    elif celltype == VTK_PYRAMID or celltype == VTK_QUADRATIC_PYRAMID:
+        return 5
+    elif celltype == VTK_WEDGE or celltype == VTK_QUADRATIC_WEDGE:
+        return 6
+
+
+def cells_with_all_nodes(int [::1] offset, int [::1] cells,
+                         uint8 [::1] celltypes, uint8 [::1] point_mask):
+    """
+    Updates mask of cells containing at least one point in the
+    point indices or mask
+    """
+    cdef int ncells = offset.size
+    cdef uint8 celltype
+    cdef int ncell_points
+    cdef int cell_offset, index
+    cdef int i, j
+    cdef uint8 bool_trac
+
+    cdef uint8 [::1] cell_mask = np.ones(ncells, np.uint8)
+
+    with nogil:
+        for i in range(ncells):
+            celltype = celltypes[i]
+            ncell_points = cell_lookup(celltype)
+            cell_offset = offset[i] + 1
+            for j in range(cell_offset, cell_offset + ncell_points):
+                bool_trac = 1
+                if point_mask[cells[j]] != 1:
+                    cell_mask[i] = 0
+
+    return np.asarray(cell_mask, dtype=np.bool)

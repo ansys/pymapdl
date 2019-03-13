@@ -1,5 +1,9 @@
 """
-Used v150/ansys/customize/user/ResRd.F to help build this interface
+Used 
+- v150/ansys/customize/user/ResRd.F
+- v150/ansys/customize/include/fdresu.inc
+
+To help build this interface
 
 """
 import struct
@@ -7,6 +11,7 @@ import os
 import warnings
 import logging
 import ctypes
+from textwrap import wrap
 
 import vtk
 from vtki.common import axis_rotation
@@ -17,7 +22,10 @@ import pyansys
 from pyansys import _parsefull
 from pyansys import _binary_reader
 from pyansys import _parser
+from pyansys import _reader
 from pyansys.elements import valid_types
+from pyansys._binary_reader import cells_with_all_nodes
+
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -427,21 +435,23 @@ class Result(object):
         return self.grid.plot(color=color, show_edges=show_edges, **kwargs)
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
-                          cmap=None, flip_scalars=None, cpos=None,
-                          screenshot=None, interactive=True, **kwargs):
+                            cmap=None, flip_scalars=None, cpos=None,
+                            screenshot=None, interactive=True,
+                            node_components=None, **kwargs):
         """
         Plots a nodal result.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are 'x', 'y', 'z', and
-            'norm', corresponding to the x directin, y direction, z direction,
-            and the combined direction (x**2 + y**2 + z**2)**0.5
+            Display component to display.  Options are 'x', 'y', 'z',
+            and 'norm', corresponding to the x directin, y direction,
+            z direction, and the combined direction (x**2 + y**2 +
+            z**2)**0.5
 
         label : str, optional
             Annotation string to add to scalar bar in plot.
@@ -453,16 +463,22 @@ class Result(object):
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         Returns
         -------
@@ -504,10 +520,47 @@ class Result(object):
             scalars[mask] = d
             d = scalars
 
+        if node_components:
+            grid, ind = self._extract_node_components(node_components)
+            d = d[ind]
+        else:
+            grid = self.grid
+
         return self.plot_point_scalars(d, rnum, stitle, cmap,
                                        flip_scalars, screenshot, cpos,
                                        interactive=interactive,
+                                       grid=grid,
                                        **kwargs)
+
+    def _extract_node_components(self, node_components):
+        """ Returns the part of the grid matching node components """
+        if not self.geometry['components']:  # pragma: no cover
+            raise Exception('Missing component information.\n' +
+                            'Either no components have been stored, or ' +
+                            'the version of this result file is <18.2')
+
+        if isinstance(node_components, str):
+            node_components = [node_components]
+
+        mask = np.zeros(self.grid.n_points, np.bool)
+        for component in node_components:
+            component = component.upper()
+            if component not in self.grid.point_arrays:
+                raise Exception('Result file does not contain node ' +
+                                'component "%s"' % component)
+
+            mask += self.grid.point_arrays[component].view(np.bool)
+            mask = np.logical_not(mask)
+
+        # need to extract the mesh
+        cells = self.grid.cells.astype(np.int32)
+        offset = self.grid.offset.astype(np.int32)
+        cell_mask = cells_with_all_nodes(offset, cells, self.grid.celltypes,
+                                         mask.view(np.uint8))
+
+        grid = self.grid.extract_cells(cell_mask)
+            
+        return grid, grid.point_arrays['vtkOriginalPointIds']
 
     @property
     def time_values(self):
@@ -715,6 +768,38 @@ class Result(object):
         # also include nodes in output
         return self.nnum, r
 
+    def _read_components(self):
+        """
+        Read components from an ansys result file
+
+        Returns
+        components : dict
+            Dictionary of components
+
+        """
+        components = {}
+        ncomp = self.geometry_header['maxcomp']
+        if not ncomp:
+            return components
+
+        ptr_comp = self.geometry_header['ptrCOMP']
+        with open(self.filename, 'rb') as f:
+            f.seek(ptr_comp*4)
+            for i in range(ncomp):
+                table = read_table(f)
+
+                # strings are up to 32 characters
+                raw = table[1:9].tobytes().split(b'\x00')[0]
+
+                name = raw.decode('utf')
+                name =  name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
+                        name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
+                        name[24:28][::-1] + name[28:32][::-1]
+                name = name.strip()
+                components[name] = _reader.component_interperter(table[9:])
+
+        return components
+
     def store_geometry(self):
         """ Stores the geometry from the result file """
         # read in the geometry from the result file
@@ -846,6 +931,8 @@ class Result(object):
         for key, typekey in ekey:
             element_type[etype == key] = typekey
 
+        components = self._read_components()
+
         # store geometry dictionary
         self.geometry = {'nnum': nnum,
                          'nodes': nloc,
@@ -856,7 +943,8 @@ class Result(object):
                          'e_rcon': rcon,
                          'mtype': mtype,
                          'Element Type': element_type,
-                         'coord systems': c_systems}
+                         'coord systems': c_systems,
+                         'components': components}
 
         # store the reference array
         # Allow quadradic and null unallowed
@@ -874,11 +962,16 @@ class Result(object):
 
         # Create vtk object
         nodes = nloc[:, :3]
-        self.quadgrid = vtki.UnstructuredGrid(offset, cells,
-                                                      cell_type, nodes)
+        self.quadgrid = vtki.UnstructuredGrid(offset, cells, cell_type, nodes)
         self.quadgrid.cell_arrays['ansys_elem_num'] = enum
         self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Element Type'] = element_type
+
+        # add node components
+        for component_name in components:
+            mask = np.in1d(nnum, components[component_name])
+            self.quadgrid.point_arrays[component_name] = mask
+
         self.grid = self.quadgrid.linear_copy()
 
     def element_solution_header(self, rnum):
@@ -945,8 +1038,8 @@ class Result(object):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         Returns
         -------
@@ -954,9 +1047,9 @@ class Result(object):
             Node numbers of the result.
 
         stress : numpy.ndarray
-            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner node.
-            For the corresponding node numbers, see
-            where result is the result object.
+            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
+            node.  For the corresponding node numbers, see where
+            result is the result object.
 
         Notes
         -----
@@ -1373,9 +1466,11 @@ class Result(object):
 
         plotter.add_mesh(grid, scalars=scalars, stitle=stitle,
                          cmap=cmap, flip_scalars=flip_scalars,
-                         interpolate_before_map=True, **kwargs)
+                         interpolate_before_map=True,
+                         **kwargs)
 
         # NAN/missing data are white
+        # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
         plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
 
         if cpos:
@@ -1383,7 +1478,8 @@ class Result(object):
 
         # add table
         if add_text and rnum is not None:
-            plotter.add_text(self.text_result_table(rnum), font_size=20)
+            plotter.add_text(self.text_result_table(rnum), font_size=20,
+                             position=[0, 0])
 
         if screenshot:
             cpos = plotter.plot(auto_close=False, interactive=interactive,

@@ -236,7 +236,7 @@ def Read(filename):
 
                 # Get format of NBLOCK
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                d_size, f_size, nfld, nexp = GetBlockFormat(line)
+                d_size, f_size, nfld, nexp = block_format(line)
                 nnum = np.empty(nnodes, dtype=ctypes.c_int)
                 nodes = np.empty((nnodes, 6))
 
@@ -275,10 +275,10 @@ def Read(filename):
 
                 # Convert component to array and store
                 if b'NODE' in line_comp_type:
-                    node_comps[comname] = ComponentInterperter(component)
+                    node_comps[comname] = component_interperter(component)
 
                 elif b'ELEM' in line_comp_type:
-                    elem_comps[comname] = ComponentInterperter(component)
+                    elem_comps[comname] = component_interperter(component)
 
     # Free memory
     free(raw)
@@ -298,9 +298,8 @@ def Read(filename):
             'sec_id': np.asarray(sec_id)}
 
 
-def GetBlockFormat(string):
+def block_format(string):
     """ Get node block format """
-    
     # Digit Size
     d_size = int(string[string.find(b'i') + 1:string.find(b',')])
     f_size = int(string[string.find(b'e') + 1:string.find(b'.')])
@@ -316,15 +315,16 @@ def GetBlockFormat(string):
 
     return d_size, f_size, nfields, nexp
 
-            
-def ComponentInterperter(component):
+
+def component_interperter(component):
     """
     If a node is negative, it is describing a list from the previous
     node.  This is ANSYS's way of saving file size when writing
     components.
 
+    This function has not been optimized.
+
     """
-    
     f_new = []
     for i in range(len(component)):
         if component[i] > 0: # Append if positive
