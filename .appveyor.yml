@@ -21,13 +21,13 @@ install:
 build_script:
   - "%PYTHON% -m pip install cibuildwheel"
   - "%PYTHON% -m cibuildwheel --output-dir wheelhouse"
-  - >
-    IF "%APPVEYOR_REPO_TAG%" == "true"
-    (
-    python -m pip install twine
-    &&
-    python -m twine upload wheelhouse/*.whl --skip-existing
-    )
+  # - >
+  #   IF "%APPVEYOR_REPO_TAG%" == "true"
+  #   (
+  #   python -m pip install twine
+  #   &&
+  #   python -m twine upload wheelhouse/*.whl --skip-existing
+  #   )
 
 artifacts:
   - path: "wheelhouse\\*.whl"
