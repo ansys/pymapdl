@@ -947,8 +947,8 @@ cdef inline int cell_lookup(uint8 celltype) nogil:
 def cells_with_all_nodes(int [::1] offset, int [::1] cells,
                          uint8 [::1] celltypes, uint8 [::1] point_mask):
     """
-    Updates mask of cells containing at least one point in the
-    point indices or mask
+    Updates mask of cells containing all points in the point indices
+    or mask.
     """
     cdef int ncells = offset.size
     cdef uint8 celltype
@@ -968,5 +968,32 @@ def cells_with_all_nodes(int [::1] offset, int [::1] cells,
                 bool_trac = 1
                 if point_mask[cells[j]] != 1:
                     cell_mask[i] = 0
+
+    return np.asarray(cell_mask, dtype=np.bool)
+
+
+def cells_with_all_nodes(int [::1] offset, int [::1] cells,
+                         uint8 [::1] celltypes, uint8 [::1] point_mask):
+    """
+    Updates mask of cells containing at least one point in the point
+    indices or mask.
+    """
+    cdef int ncells = offset.size
+    cdef uint8 celltype
+    cdef int ncell_points
+    cdef int cell_offset, index
+    cdef int i, j
+
+    cdef uint8 [::1] cell_mask = np.zeros(ncells, np.uint8)
+
+    with nogil:
+        for i in range(ncells):
+            celltype = celltypes[i]
+            ncell_points = cell_lookup(celltype)
+            cell_offset = offset[i] + 1
+            for j in range(cell_offset, cell_offset + ncell_points):
+                if point_mask[cells[j]] == 1:
+                    cell_mask[i] = 1
+                    break
 
     return np.asarray(cell_mask, dtype=np.bool)

@@ -70,3 +70,6 @@ def test_plot_component():
     result.plot_nodal_stress(0, 'Sx', node_components=components, interactive=False)
     result.plot_principal_nodal_stress(0, 'SEQV',
                                        node_components=components, interactive=False)
+
+
+result = pyansys.ResultReader(examples.sector_result_file)
