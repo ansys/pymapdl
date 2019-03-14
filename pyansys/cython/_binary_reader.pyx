@@ -972,7 +972,7 @@ def cells_with_all_nodes(int [::1] offset, int [::1] cells,
     return np.asarray(cell_mask, dtype=np.bool)
 
 
-def cells_with_all_nodes(int [::1] offset, int [::1] cells,
+def cells_with_any_nodes(int [::1] offset, int [::1] cells,
                          uint8 [::1] celltypes, uint8 [::1] point_mask):
     """
     Updates mask of cells containing at least one point in the point

@@ -24,7 +24,7 @@ from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys import _reader
 from pyansys.elements import valid_types
-from pyansys._binary_reader import cells_with_all_nodes
+from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
 
 
 # Create logger
@@ -417,8 +417,7 @@ class Result(object):
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
-        string = 'There are %d results in this file' % self.nsets
-        log.debug(string)
+        log.debug('There are %d result(s) in this file' % self.nsets)
 
         # Get indices to resort nodal and element results
         self.sidx = np.argsort(self.resultheader['neqv'])
@@ -438,7 +437,7 @@ class Result(object):
     def plot_nodal_solution(self, rnum, comp='norm', label='',
                             cmap=None, flip_scalars=None, cpos=None,
                             screenshot=None, interactive=True,
-                            node_components=None, **kwargs):
+                            node_components=None, sel_type_all=True, **kwargs):
         """
         Plots a nodal result.
 
@@ -481,6 +480,10 @@ class Result(object):
             components to plot.  For example: 
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
         Returns
         -------
         cpos : list
@@ -511,6 +514,8 @@ class Result(object):
 
             stitle = 'Normalized\n%s\n' % label
 
+        scalars = d
+
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
         if nnum.size != npoints:
@@ -519,21 +524,24 @@ class Result(object):
             nnum_grid = self.grid.point_arrays['ansys_node_num']
             mask = np.in1d(nnum_grid, nnum)
             scalars[mask] = d
-            d = scalars
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components)
-            d = d[ind]
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = d
+            scalars = scalars[ind]
+            # scalars[mask] = np.nan
+            # breakpoint()
+            
         else:
             grid = self.grid
 
-        return self.plot_point_scalars(d, rnum, stitle, cmap,
+        return self.plot_point_scalars(scalars, rnum, stitle, cmap,
                                        flip_scalars, screenshot, cpos,
                                        interactive=interactive,
                                        grid=grid,
                                        **kwargs)
 
-    def _extract_node_components(self, node_components):
+    def _extract_node_components(self, node_components, sel_type_all=True):
         """ Returns the part of the grid matching node components """
         if not self.geometry['components']:  # pragma: no cover
             raise Exception('Missing component information.\n' +
@@ -551,17 +559,23 @@ class Result(object):
                                 'component "%s"' % component)
 
             mask += self.grid.point_arrays[component].view(np.bool)
-            mask = np.logical_not(mask)
+            # mask = np.logical_not(mask)
 
         # need to extract the mesh
         cells = self.grid.cells.astype(np.int32)
         offset = self.grid.offset.astype(np.int32)
-        cell_mask = cells_with_all_nodes(offset, cells, self.grid.celltypes,
-                                         mask.view(np.uint8))
+        if sel_type_all:
+            cell_mask = cells_with_all_nodes(offset, cells, self.grid.celltypes,
+                                             mask.view(np.uint8))
+        else:
+            cell_mask = cells_with_any_nodes(offset, cells, self.grid.celltypes,
+                                             mask.view(np.uint8))
 
+        # breakpoint()
         grid = self.grid.extract_cells(cell_mask)
-            
-        return grid, grid.point_arrays['vtkOriginalPointIds']
+
+        ind = grid.point_arrays['vtkOriginalPointIds']
+        return grid, ind#, mask [ind]
 
     @property
     def time_values(self):
@@ -1332,7 +1346,8 @@ class Result(object):
     def plot_principal_nodal_stress(self, rnum, stype=None, cmap=None,
                                     flip_scalars=None, cpos=None,
                                     screenshot=None, interactive=True,
-                                    node_components=None, **kwargs):
+                                    node_components=None, sel_type_all=True,
+                                    **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
@@ -1376,6 +1391,10 @@ class Result(object):
             components to plot.  For example: 
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
         kwargs : keyword arguments
             Additional keyword arguments.  See help(vtki.plot)
 
@@ -1395,7 +1414,7 @@ class Result(object):
         stress = self.principle_stress_for_plotting(rnum, stype)
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components)
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
             stress = stress[ind]
         else:
             grid = self.grid
@@ -1546,7 +1565,7 @@ class Result(object):
 
     def plot_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
                           cpos=None, screenshot=None, interactive=True,
-                          node_components=None, **kwargs):
+                          node_components=None, sel_type_all=True, **kwargs):
         """
         Plots the stresses at each node in the solution.
 
@@ -1608,7 +1627,7 @@ class Result(object):
         stress = stress[:, sidx]
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components)
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
             stress = stress[ind]
         else:
             grid = self.grid

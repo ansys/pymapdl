@@ -66,10 +66,14 @@ def test_plot_component():
     result = pyansys.ResultReader(filename)
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
-    result.plot_nodal_solution(0, node_components=components, interactive=False)
+    result.plot_nodal_solution(0, node_components=components,
+                               interactive=False, sel_type_all=False)
     result.plot_nodal_stress(0, 'Sx', node_components=components, interactive=False)
     result.plot_principal_nodal_stress(0, 'SEQV',
                                        node_components=components, interactive=False)
 
 
-result = pyansys.ResultReader(examples.sector_result_file)
+# result = pyansys.ResultReader(examples.sector_result_file)
+# result.plot_nodal_solution(0, node_components='REFINE')
+
+# grid, ind = result._extract_node_components('REFINE', False); grid.plot(color='w')
