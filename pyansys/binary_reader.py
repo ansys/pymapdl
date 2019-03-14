@@ -571,8 +571,11 @@ class Result(object):
             cell_mask = cells_with_any_nodes(offset, cells, self.grid.celltypes,
                                              mask.view(np.uint8))
 
-        # breakpoint()
         grid = self.grid.extract_cells(cell_mask)
+
+        if not grid.n_cells:
+            raise Exception('Empty mesh due to component selection\n' +
+                            'Try "sel_type_all=False"')
 
         ind = grid.point_arrays['vtkOriginalPointIds']
         return grid, ind#, mask [ind]
@@ -1591,21 +1594,26 @@ class Result(object):
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
             components to plot.  For example: 
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
             Additional keyword arguments.  See help(vtki.plot)

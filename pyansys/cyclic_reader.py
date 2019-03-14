@@ -15,6 +15,8 @@ from pyansys import _parser
 from pyansys.elements import valid_types
 from pyansys import Result
 from pyansys.binary_reader import transform, trans_to_matrix
+from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
+
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -491,8 +493,10 @@ class CyclicResult(Result):
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
                             cmap=None, flip_scalars=None, cpos=None,
-                            screenshot=None, interactive=True, full_rotor=True,
-                            phase=0, **kwargs):  # nodal_component=None
+                            screenshot=None, interactive=True,
+                            full_rotor=True, phase=0,
+                            node_components=None, sel_type_all=True,
+                            **kwargs):
         """
         Plots a nodal result.
 
@@ -537,20 +541,31 @@ class CyclicResult(Result):
             Phase angle of the modal result in radians.  Only valid
             when full_rotor is True.  Default 0
 
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
         Returns
         -------
         cpos : list
             Camera position from vtk render window.
 
         """
-        # nodal_component : list, optional
-        #     Accepts either a string or a list strings of node
-        #     components to plot.  For example: 
-        #     ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         # Load result from file
         if not full_rotor:
-            return super(CyclicResult, self).plot_nodal_solution(rnum)
+            return super(CyclicResult, self).plot_nodal_solution(rnum,
+                                                                 comp,
+                                                                 label,
+                                                                 cmap,
+                                                                 flip_scalars,
+                                                                 cpos,
+                                                                 screenshot,
+                                                                 interactive,
+                                                                 node_components,
+                                                                 sel_type_all,
+                                                                 **kwargs)
 
         rnum = self.parse_step_substep(rnum)
         nnum, result = self.nodal_solution(rnum, phase, full_rotor, as_complex=False)
@@ -572,9 +587,11 @@ class CyclicResult(Result):
             # Normalize displacement
             d = (result*result).sum(2)**0.5
             stitle = 'Normalized\n%s\n' % label
+        scalars = d
 
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
+        rotor = self.rotor
         if nnum.size != npoints:
             scalars = np.empty_like((self.nsector, npoints))
             scalars[:] = np.nan
@@ -583,13 +600,58 @@ class CyclicResult(Result):
             scalars[:, mask] = d
             d = scalars
 
-        return self.plot_point_scalars(d, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, self.rotor,
-                                     **kwargs)
+        if node_components:
+            rotor, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
+            scalars = scalars.ravel()[ind]
+
+        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
+                                       screenshot, cpos, interactive, rotor,
+                                       **kwargs)
+
+    def _extract_node_components(self, node_components, sel_type_all=True):
+        """ Returns the part of the grid matching node components """
+        if not self.geometry['components']:  # pragma: no cover
+            raise Exception('Missing component information.\n' +
+                            'Either no components have been stored, or ' +
+                            'the version of this result file is <18.2')
+
+        if isinstance(node_components, str):
+            node_components = [node_components]
+
+        mask = np.zeros(self.rotor.n_points, np.bool)
+        for component in node_components:
+            component = component.upper()
+            if component not in self.rotor.point_arrays:
+                raise Exception('Result file does not contain node ' +
+                                'component "%s"' % component)
+
+            mask += self.rotor.point_arrays[component].view(np.bool)
+            # mask = np.logical_not(mask)
+
+        # need to extract the mesh
+        cells = self.rotor.cells.astype(np.int32)
+        offset = self.rotor.offset.astype(np.int32)
+        if sel_type_all:
+            cell_mask = cells_with_all_nodes(offset, cells, self.rotor.celltypes,
+                                             mask.view(np.uint8))
+        else:
+            cell_mask = cells_with_any_nodes(offset, cells, self.rotor.celltypes,
+                                             mask.view(np.uint8))
+
+        extracted_rotor = self.rotor.extract_cells(cell_mask)
+
+        if not extracted_rotor.n_cells:
+            raise Exception('Empty mesh due to component selection\n' +
+                            'Try "sel_type_all=False"')
+
+        ind = extracted_rotor.point_arrays['vtkOriginalPointIds']
+        return extracted_rotor, ind
 
     def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
                           flip_scalars=None, cpos=None, screenshot=None,
                           interactive=True, full_rotor=True, phase=0,
+                          node_components=None, sel_type_all=True,
                           **kwargs):
         """
         Plots a nodal result.
@@ -597,8 +659,8 @@ class CyclicResult(Result):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         stype : string
             Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
@@ -613,23 +675,33 @@ class CyclicResult(Result):
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
 
         full_rotor : bool, optional
             Expand sector solution to full rotor.
 
         phase : float, optional
-            Phase angle of the modal result in radians.  Only valid when full_rotor
-            is True.  Default 0
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
 
         Returns
         -------
@@ -639,14 +711,16 @@ class CyclicResult(Result):
         """
         if not full_rotor:  # Plot sector
             return super(CyclicResult, self).plot_nodal_stress(rnum,
-                                                             stype,
-                                                             label=label,
-                                                             cmap=cmap,
-                                                             flip_scalars=flip_scalars,
-                                                             cpos=cpos,
-                                                             screenshot=screenshot,
-                                                             interactive=interactive,
-                                                             **kwargs)
+                                                               stype,
+                                                               cmap,
+                                                               flip_scalars,
+                                                               label,
+                                                               cpos,
+                                                               screenshot,
+                                                               interactive,
+                                                               node_components,
+                                                               sel_type_all,
+                                                               **kwargs)
 
         rnum = self.parse_step_substep(rnum)
         stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz']
@@ -658,58 +732,80 @@ class CyclicResult(Result):
         # Populate with nodal stress at edge nodes
         nnum, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
         scalars = stress[:, :, sidx]
+        rotor = self.rotor
+
+        if node_components:
+            rotor, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
+            scalars = scalars.ravel()[ind]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
         return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, self.rotor,
+                                     screenshot, cpos, interactive, rotor,
                                      **kwargs)
 
-    def plot_principal_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
-                                 cpos=None, screenshot=None, interactive=True,
-                                 full_rotor=True, phase=0,
-                                 **kwargs):
+    def plot_principal_nodal_stress(self, rnum, stype, cmap=None,
+                                    flip_scalars=None, cpos=None,
+                                    screenshot=None, interactive=True,
+                                    full_rotor=True, phase=0,
+                                    node_components=None,
+                                    sel_type_all=True, **kwargs):
         """
         Plot the principal stress at each node in the solution.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         stype : string
-            Stress type to plot.  S1, S2, S3 principal stresses, SINT stress
-            intensity, and SEQV equivalent stress.
+            Stress type to plot.  S1, S2, S3 principal stresses, SINT
+            stress intensity, and SEQV equivalent stress.
 
             Stress type must be a string from the following list:
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
 
         cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.  Only applicable for
-           when displaying scalars.  Defaults None (rainbow).  Requires matplotlib.
+           Cmap string.  See available matplotlib cmaps.  Only
+           applicable for when displaying scalars.  Defaults None
+           (rainbow).  Requires matplotlib.
 
         flip_scalars : bool, optional
             Flip direction of cmap.
 
         cpos : list, optional
-            List of camera position, focal point, and view up.  Plot first, then
-            output the camera position and save it.
+            List of camera position, focal point, and view up.  Plot
+            first, then output the camera position and save it.
 
         screenshot : str, optional
-            Setting this to a filename will save a screenshot of the plot before
-            closing the figure.  Default None.
+            Setting this to a filename will save a screenshot of the
+            plot before closing the figure.  Default None.
 
         interactive : bool, optional
-            Default True.  Setting this to False makes the plot generate in the
-            background.  Useful when generating plots in a batch mode automatically.
+            Default True.  Setting this to False makes the plot
+            generate in the background.  Useful when generating plots
+            in a batch mode automatically.
 
         full_rotor : bool, optional
             Expand sector solution to full rotor.
 
         phase : float, optional
-            Phase angle of the modal result in radians.  Only valid when full_rotor
-            is True.  Default 0
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See help(vtki.plot)
 
         Returns
         -------
@@ -737,9 +833,16 @@ class CyclicResult(Result):
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
-        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, self.rotor,
-                                     **kwargs)
+        rotor = self.rotor
+
+        if node_components:
+            rotor, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
+            scalars = scalars.ravel()[ind]
+
+        return self.plot_point_scalars(scalars, rnum, stitle, cmap,
+                                       flip_scalars, screenshot, cpos,
+                                       interactive, rotor, **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,

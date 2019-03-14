@@ -9,6 +9,8 @@
 # Builds wheels for Linux using cibuildwheel, inside the manylinux1 Docker image.
 # builds 64-bit Python 2.7, Python3.5, Python3.6
 
+dist: xenial
+
 matrix:
   include:
     - sudo: required
@@ -18,6 +20,18 @@ matrix:
         - docker
       env: PIP=pip
 
+addons:
+  apt:
+    packages:
+      - xvfb
+
+before_script: # configure a headless display to test plot generation
+  - export DISPLAY=:99.0
+  - which Xvfb
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  # - ls -l /etc/init.d/
+  # - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
 
 # for reference, these are the python installs on
 # quay.io/pypa/manylinux1_x86_64
