@@ -1,4 +1,4 @@
-# cython: boundscheck=True
+# cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -8,16 +8,13 @@ from libc.stdio cimport fgets, printf, SEEK_CUR, SEEK_END, ftell, SEEK_SET
 from libc.stdlib cimport atoi, atof
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy, strcmp
+from libc.stdint cimport int64_t
+
+import ctypes
 
 import numpy as np
 cimport numpy as np
 
-import ctypes
-from libc.stdint cimport int64_t
-
-# Numpy must be initialized. When using numpy from C or Cython you must
-# _always_ do that, or you will have segfaults
-# np.import_array()
 
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int, int, int*, int, int)

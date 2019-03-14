@@ -9,6 +9,11 @@ import pip
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
+try:
+    import numpy as np
+except:
+    raise Exception('Please install numpy first with "pip install numpy"')
+
 
 class build_ext(_build_ext):
     """ build class that includes numpy directory """

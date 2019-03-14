@@ -3,7 +3,7 @@
 # cython: cdivision=True
 
 import numpy as np
-cimport numpy as np
+# cimport numpy as np
 import ctypes               
 
 from libc.stdint cimport int32_t, int64_t

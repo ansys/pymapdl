@@ -562,8 +562,8 @@ class Result(object):
             # mask = np.logical_not(mask)
 
         # need to extract the mesh
-        cells = self.grid.cells.astype(np.int32)
-        offset = self.grid.offset.astype(np.int32)
+        cells = self.grid.cells
+        offset = self.grid.offset
         if sel_type_all:
             cell_mask = cells_with_all_nodes(offset, cells, self.grid.celltypes,
                                              mask.view(np.uint8))

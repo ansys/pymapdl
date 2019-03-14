@@ -4,13 +4,12 @@
 
 import ctypes
 import numpy as np
-cimport numpy as np
 
 from libc.math cimport sqrt, fabs, sin, cos
-from libc.stdio cimport fopen, FILE, fclose, fread, fseek
-from libc.stdio cimport SEEK_CUR, ftell, SEEK_SET
+from libc.stdio cimport (fopen, FILE, fclose, fread, fseek, SEEK_CUR,
+                         ftell, SEEK_SET)
 from libc.string cimport memcpy
-from libc.stdint cimport int16_t, int32_t, int64_t
+from libc.stdint cimport int64_t
 
 from cython.parallel import prange
 ctypedef unsigned char uint8
@@ -37,8 +36,11 @@ cdef uint8 VTK_QUADRATIC_PYRAMID = 27
 cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
-# cdef float DEG2RAD = 0.0174532925
 cdef double DEG2RAD = 0.0174532925
+
+ctypedef fused index_type:
+    int
+    int64_t
 
 # ELEMENT_INDEX_TABLE_KEYS = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR',
 #                             'ptrEEL', 'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL',
@@ -48,35 +50,6 @@ cdef double DEG2RAD = 0.0174532925
 
 cdef int PTR_ENS_IDX = 2
 cdef int PTR_EUL_IDX = 9
-
-
-# from numpy cimport ndarray
-# from cpython cimport list
-
-
-# def CleanDuplicates(list element_stress, list enodes):
-#     """
-#     This will be optimized in the future
-
-#     Removes duplicate nodes in element results
-#     """
-#     cdef int i
-#     for i, enode in enumerate(enodes):
-#         if unique_cython_int(enode) < len(enode):  # don't run unless it's not unique
-#             unode, idx = np.unique(enode, return_index=True)
-#         # if idx.size != enode.size:
-#             enodes[i] = unode
-#             element_stress[i] = element_stress[i][idx]
-
-
-# cdef int unique_cython_int(ndarray[np.int32_t] a):
-#     cdef int i
-#     cdef int n = len(a)
-#     cdef set s = set()
-#     cdef set idx = set()
-#     for i in range(n):
-#         s.add(a[i])
-#     return len(s)
 
 
 cdef inline double get_double(char * array) nogil:
@@ -176,7 +149,7 @@ def LoadElements(filename, int ptr, int nelm,
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
                         int64_t [::1] nodstr, int64_t [::1] etype,
                         float [:, ::1] ele_data_arr, int nitem,
-                        int32_t [::1] element_type,
+                        int [::1] element_type,
                         int as_global=1):
     """
     Read element results from ANSYS directly into a numpy array
@@ -196,7 +169,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     cdef float [3] eulerangles
     
     cdef int64_t ele_table, nnode_elem
-    cdef int32_t ptrENS, ptrEUL
+    cdef int ptrENS, ptrEUL
     cdef int64_t c = 0
     for i in range(len(ele_ind_table)):
         # get location of element result pointers
@@ -204,7 +177,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
 
         # element stress pointer
         fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
-        fread(&ptrENS, sizeof(int32_t), 1, cfile)
+        fread(&ptrENS, sizeof(int), 1, cfile)
 
         # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
@@ -226,7 +199,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
             # element euler angle pointer
             if element_type[i] == 181 or element_type[i] == 281:
                 fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
-                fread(&ptrEUL, sizeof(int32_t), 1, cfile)
+                fread(&ptrEUL, sizeof(int), 1, cfile)
 
                 # only read the first three euler angles (thxy, thyz, thzx)
                 fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
@@ -308,10 +281,10 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                       int64_t [::1] ele_ind_table,
                       int64_t [::1] offsets, int64_t [::1] cells,
                       int nitems,
-                      # int32_t [::1] validmask,
+                      # int [::1] validmask,
                       int npoints,
-                      int32_t [::1] nodstr, int32_t [::1] etype,
-                      int32_t [::1] element_type):
+                      int [::1] nodstr, int [::1] etype,
+                      int [::1] element_type):
     """ Read element results from ANSYS directly into a numpy array """
     cdef int64_t i, j, k, ind, nread, offset
     cdef int64_t ncells = ele_ind_table.size
@@ -321,14 +294,14 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     cdef char* c_filename = py_bytes
     cfile = fopen(c_filename, 'rb')
 
-    cdef int32_t [::1] ncount = np.zeros(npoints, ctypes.c_int32)
+    cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
     cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
     cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
 
     cdef float [3] eulerangles
 
     cdef int64_t ele_table, nnode_elem
-    cdef int32_t ptrENS, ptrEUL
+    cdef int ptrENS, ptrEUL
     cdef int64_t c = 0
     cdef uint8 celltype
     for i in range(ncells):
@@ -340,7 +313,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         # get location of element data
         ele_table = ele_ind_table[i]
         fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
-        fread(&ptrENS, sizeof(int32_t), 1, cfile)
+        fread(&ptrENS, sizeof(int), 1, cfile)
 
         # Get the nodes in the element
         celltype = celltypes[i]
@@ -360,7 +333,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
             # element euler angle pointer
             if element_type[i] == 181:
                 fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
-                fread(&ptrEUL, sizeof(int32_t), 1, cfile)
+                fread(&ptrEUL, sizeof(int), 1, cfile)
 
                 # only read the first three euler angles (thxy, thyz, thzx)
                 fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
@@ -400,7 +373,7 @@ wedge_ind[3] = 6
 wedge_ind[4] = 5
 wedge_ind[5] = 4
 
-cdef inline void ReadWedge(int64_t [::1] cells, int64_t index, int32_t [::1] ncount,
+cdef inline void ReadWedge(int64_t [::1] cells, int64_t index, int [::1] ncount,
                            float [:, ::1] data, float [:, ::1] bufferdata,
                            int nitems, FILE* cfile) nogil:
     """
@@ -426,7 +399,7 @@ tet_ind[1] = 1
 tet_ind[2] = 2
 tet_ind[3] = 4
 
-cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int32_t [::1] ncount,
+cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int [::1] ncount,
                                  float [:, ::1] data, float [:, ::1] bufferdata,
                                  int nitems, FILE* cfile) nogil:
     """
@@ -446,7 +419,7 @@ cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int32_t [::
             data[cell, j] += bufferdata[idx, j]
 
 
-cdef inline void ReadElement(int64_t [::1] cells, int64_t index, int32_t [::1] ncount,
+cdef inline void ReadElement(int64_t [::1] cells, int64_t index, int [::1] ncount,
                              float [:, ::1] data, float [:, ::1] bufferdata,
                              int nitems, FILE* cfile, int nnode) nogil:
     """
@@ -666,7 +639,7 @@ def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
     cdef int nnode = stress.shape[0]
     cdef int i
 
-    cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
+    cdef uint8 [::1] isnan = np.zeros(nnode, np.uint8)
     cdef double s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
     cdef double c0 = trans[0, 0]
     cdef double c1 = trans[1, 0]
@@ -716,7 +689,7 @@ def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
         stress[i, 4] = r5
         stress[i, 5] = r6
 
-    return np.asarray(isnan).astype(np.bool)
+    return np.asarray(isnan, np.bool)
 
 
 def tensor_rotate_z(double [:, :] stress, float theta_z):
@@ -735,8 +708,7 @@ def tensor_rotate_z(double [:, :] stress, float theta_z):
     """
     cdef int nnode = stress.shape[0]
     cdef int i
-    # cdef float [:, ::1] stress_rot = np.empty_like(stress)
-    cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
+    cdef uint8 [::1] isnan = np.zeros(nnode, np.uint8)
     cdef double c, s, s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
 
     c = cos(theta_z)
@@ -766,7 +738,7 @@ def tensor_rotate_z(double [:, :] stress, float theta_z):
         stress[i, 4] = c*s_yz + s*s_xz
         stress[i, 5] = c*s_xz - s*s_yz
 
-    return np.asarray(isnan).astype(np.bool)
+    return np.asarray(isnan, dtype=np.bool)
 
 
 def ComputePrincipalStress(float [:, ::1] stress):
@@ -799,7 +771,7 @@ def ComputePrincipalStress(float [:, ::1] stress):
     cdef float s_xx, x_yy, s_zz, s_xy, s_yz, s_xz
     cdef int i
 
-    cdef int16_t [::1] isnan = np.zeros(nnode, np.int16)
+    cdef uint8 [::1] isnan = np.zeros(nnode, np.uint8)
 
     for i in range(nnode):
         s_xx = stress[i, 0]
@@ -864,9 +836,7 @@ def ComputePrincipalStress(float [:, ::1] stress):
 
         pstress[i, 4] = sqrt(0.5*(c1**2 + c2**2 + c3**2))
 
-    return np.asarray(pstress), np.asarray(isnan).astype(np.bool)
-
-
+    return np.asarray(pstress), np.asarray(isnan, np.bool)
 
 
 def affline_transform_double(double [:, ::1] points, double [:, ::1] t):
@@ -944,7 +914,7 @@ cdef inline int cell_lookup(uint8 celltype) nogil:
         return 6
 
 
-def cells_with_all_nodes(int [::1] offset, int [::1] cells,
+def cells_with_all_nodes(index_type [::1] offset, index_type [::1] cells,
                          uint8 [::1] celltypes, uint8 [::1] point_mask):
     """
     Updates mask of cells containing all points in the point indices
@@ -952,11 +922,8 @@ def cells_with_all_nodes(int [::1] offset, int [::1] cells,
     """
     cdef int ncells = offset.size
     cdef uint8 celltype
-    cdef int ncell_points
-    cdef int cell_offset, index
-    cdef int i, j
-    cdef uint8 bool_trac
-
+    cdef int ncell_points, i, j
+    cdef index_type cell_offset
     cdef uint8 [::1] cell_mask = np.ones(ncells, np.uint8)
 
     with nogil:
@@ -965,14 +932,13 @@ def cells_with_all_nodes(int [::1] offset, int [::1] cells,
             ncell_points = cell_lookup(celltype)
             cell_offset = offset[i] + 1
             for j in range(cell_offset, cell_offset + ncell_points):
-                bool_trac = 1
                 if point_mask[cells[j]] != 1:
                     cell_mask[i] = 0
 
     return np.asarray(cell_mask, dtype=np.bool)
 
 
-def cells_with_any_nodes(int [::1] offset, int [::1] cells,
+def cells_with_any_nodes(index_type [::1] offset, index_type [::1] cells,
                          uint8 [::1] celltypes, uint8 [::1] point_mask):
     """
     Updates mask of cells containing at least one point in the point
@@ -981,7 +947,7 @@ def cells_with_any_nodes(int [::1] offset, int [::1] cells,
     cdef int ncells = offset.size
     cdef uint8 celltype
     cdef int ncell_points
-    cdef int cell_offset, index
+    cdef index_type cell_offset
     cdef int i, j
 
     cdef uint8 [::1] cell_mask = np.zeros(ncells, np.uint8)
@@ -997,3 +963,4 @@ def cells_with_any_nodes(int [::1] offset, int [::1] cells,
                     break
 
     return np.asarray(cell_mask, dtype=np.bool)
+    

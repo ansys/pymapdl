@@ -7,7 +7,6 @@
 import ctypes
 
 from libc.stdint cimport int32_t, int64_t
-# import numpy as np
 
 # VTK celltypes
 ctypedef unsigned char uint8

@@ -1,5 +1,5 @@
 import numpy as np
-cimport numpy as np
+# cimport numpy as np
 
 # Definitions from c header
 cdef extern from "parsefull.h":
