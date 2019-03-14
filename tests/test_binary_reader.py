@@ -1,7 +1,10 @@
 import os
 
+import pytest
+from vtki.plotting import running_xserver
 import numpy as np
 import vtki
+
 import pyansys
 from pyansys import examples
 
@@ -12,6 +15,7 @@ except:
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
+
 
 def test_save_as_vtk(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.vtk'))
@@ -29,6 +33,7 @@ def test_save_as_vtk(tmpdir):
         assert np.allclose(arr, result.nodal_stress(i)[1], atol=1E-5, equal_nan=True)
 
 
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_component():
     """
     # create example file for component plotting
@@ -72,6 +77,8 @@ def test_plot_component():
     result.plot_principal_nodal_stress(0, 'SEQV',
                                        node_components=components, interactive=False)
 
+
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_component_rotor():
     result = pyansys.ResultReader(examples.sector_result_file)
     result.plot_nodal_solution(20, full_rotor=True,

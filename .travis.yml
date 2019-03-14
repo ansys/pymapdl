@@ -7,9 +7,9 @@
 # https://github.com/python-rapidjson/python-rapidjson/blob/master/.appveyor.yml
 
 # Builds wheels for Linux using cibuildwheel, inside the manylinux1 Docker image.
-# builds 64-bit Python 2.7, Python3.5, Python3.6
+# builds 64-bit Python 2.7, Python3.5, Python3.6, Python3.7
 
-dist: xenial
+# dist: xenial
 
 matrix:
   include:
@@ -20,18 +20,18 @@ matrix:
         - docker
       env: PIP=pip
 
-addons:
-  apt:
-    packages:
-      - xvfb
+# addons:
+#   apt:
+#     packages:
+#       - xvfb
 
-before_script: # configure a headless display to test plot generation
-  - export DISPLAY=:99.0
-  - which Xvfb
-  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  # - ls -l /etc/init.d/
-  # - sh -e /etc/init.d/xvfb start
-  - sleep 3 # give xvfb some time to start
+# before_script: # configure a headless display to test plot generation
+#   - export DISPLAY=:99.0
+#   - which Xvfb
+#   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+#   # - ls -l /etc/init.d/
+#   # - sh -e /etc/init.d/xvfb start
+#   - sleep 3 # give xvfb some time to start
 
 # for reference, these are the python installs on
 # quay.io/pypa/manylinux1_x86_64
@@ -65,7 +65,7 @@ env:
       # Note: TWINE_PASSWORD is set in Travis settings
 
 script:
-  - $PIP install cibuildwheel==0.9.3
+  - $PIP install cibuildwheel
   - cibuildwheel --output-dir wheelhouse
   - if [ "${TRAVIS_TAG:-}" != "" ]; then
       python3 setup.py sdist;
