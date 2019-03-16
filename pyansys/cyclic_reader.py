@@ -39,56 +39,126 @@ class CyclicResult(Result):
         # Add cyclic properties
         self.add_cyclic_properties()
 
+    def plot(self, color='w', show_edges=True, **kwargs):
+        """
+        Plot full geometry.
+
+        Parameters
+        ----------
+        color : string or 3 item list, optional, defaults to white
+            Either a string, rgb list, or hex color string.  For example:
+                color='white'
+                color='w'
+                color=[1, 1, 1]
+                color='#FFFFFF'
+
+            Color will be overridden when scalars are input.
+
+        show_edges : bool, optional
+            Shows the edges of a mesh.  Does not apply to a wireframe
+            representation.
+
+        style : string, optional
+            Visualization style of the vtk mesh.  One for the following:
+                style='surface'
+                style='wireframe'
+                style='points'
+
+            Defaults to 'surface'
+
+        off_screen : bool
+            Plots off screen when True.  Helpful for saving
+            screenshots without a window popping up.
+
+        full_screen : bool, optional
+            Opens window in full screen.  When enabled, ignores
+            window_size.  Default False.
+
+        screenshot : str or bool, optional
+            Saves screenshot to file when enabled.  See:
+            help(vtkinterface.Plotter.screenshot).  Default disabled.
+
+            When True, takes screenshot and returns numpy array of
+            image.
+
+        window_size : list, optional
+            Window size in pixels.  Defaults to [1024, 768]
+
+        show_bounds : bool, optional
+            Shows mesh bounds when True.  Default False. Alias
+            ``show_grid`` also accepted.
+
+        show_axes : bool, optional
+            Shows a vtk axes widget.  Enabled by default.
+
+        Returns
+        -------
+        cpos : list
+            List of camera position, focal point, and view up.
+        """
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix.Invert()
+        else:
+            matrix = vtk.vtkMatrix4x4()
+            i_matrix = vtk.vtkMatrix4x4()
+
+        off_screen = kwargs.pop('off_screen', False)
+        window_size = kwargs.pop('window_size', None)
+        plotter = vtki.Plotter(off_screen, window_size)
+        rang = 360.0 / self.n_sector
+        for i in range(self.n_sector):
+            actor = plotter.add_mesh(self.mas_grid.copy(False),
+                                     color=color,
+                                     show_edges=show_edges, **kwargs)
+
+            # transform to standard position, rotate about Z axis,
+            # transform back
+            transform = vtk.vtkTransform()
+            transform.RotateZ(rang*i)
+            transform.Update()
+            rot_matrix = transform.GetMatrix()
+
+            if cs_cord > 1:
+                temp_matrix = vtk.vtkMatrix4x4()
+                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+                transform.SetMatrix(rot_matrix)
+
+            actor.SetUserTransform(transform)
+
+        cpos = kwargs.pop('cpos', None)
+        if cpos is None:
+            cpos = plotter.get_default_cam_pos()
+            plotter.camera_position = cpos
+            plotter.camera_set = False
+        else:
+            plotter.camera_position = cpos
+
+        return plotter.plot()
+
     def add_cyclic_properties(self, tol=1E-5):
         """
         Adds cyclic properties to result object
 
         Makes the assumption that all the cyclic nodes are within tol
         """
+        self.n_sector = self.resultheader['nSector']
+
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
         mask = self.quadgrid.cell_arrays['ansys_elem_num'] <= cs_els
-        # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
-        node_mask = self.nnum <= self.resultheader['csNds']
 
         self.master_cell_mask = mask
-        self.grid = self.grid.extract_cells(mask)
+        self.mas_grid = self.grid.extract_cells(mask)
 
         # number of nodes in sector may not match number of nodes in geometry
+        # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
+        node_mask = self.nnum <= self.resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
-
-        # duplicate sector may not exist
-        # if not np.any(self.geometry['nnum'] > self.resultheader['csNds']):
-        self.dup_ind = None
-        # else:
-            # breakpoint()
-            # this breaks when there are extra nodes in the model
-            # shift = (self.geometry['nnum'] < self.resultheader['csNds']).sum()
-            # self.dup_ind = self.mas_ind + shift + 1
-
-        # create full rotor
-        self.nsector = self.resultheader['nSector']
-        grid = self.grid.copy()
-
-        # transform to standard coordinate system
-        cs_cord = self.resultheader['csCord']
-        if cs_cord > 1:
-            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            grid.transform(matrix)
-
-        vtkappend = vtk.vtkAppendFilter()
-        rang = 360.0 / self.nsector
-        for i in range(self.nsector):
-            # Transform mesh
-            sector = grid.copy()
-            sector.rotate_z(rang * i)
-            vtkappend.AddInputData(sector)
-
-        vtkappend.Update()
-        self.rotor = vtki.wrap(vtkappend.GetOutput())
-        if cs_cord > 1:
-            matrix.Invert()
-            self.rotor.transform(matrix)
+        # breakpoint()
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
         """ return a 4x4 transformation array for a given coordinate system """
@@ -155,6 +225,9 @@ class CyclicResult(Result):
         result_mas = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
+        if not full_rotor:
+            return nnum, result_mas
+
         # combine or expand result if not modal
         if self.resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
@@ -190,12 +263,47 @@ class CyclicResult(Result):
                                                        full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
-            expanded_result = expand_cyclic_results(result, self.mas_ind,
-                                                    self.dup_ind,
-                                                    self.nsector, phase,
-                                                    as_complex, full_rotor)
+            expanded_result = self.expand_cyclic_static(result_mas)
 
         return nnum, expanded_result
+
+    def expand_cyclic_static(self, result, tensor=False):
+        """ expands cyclic static results """
+
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix.Invert()
+        else:
+            matrix = vtk.vtkMatrix4x4()
+            i_matrix = vtk.vtkMatrix4x4()
+
+        shp = (self.n_sector, result.shape[0], result.shape[1])
+        full_result = np.empty(shp)
+        full_result[:] = result
+
+        rang = 360.0 / self.n_sector
+        for i in range(self.n_sector):
+            # transform to standard position, rotate about Z axis,
+            # transform back
+            transform = vtk.vtkTransform()
+            transform.RotateZ(rang*i)
+            transform.Update()
+            rot_matrix = transform.GetMatrix()
+
+            if cs_cord > 1:
+                temp_matrix = vtk.vtkMatrix4x4()
+                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+
+            trans = vtki.trans_from_matrix(rot_matrix)
+            if tensor:
+                _binary_reader.tensor_arbitrary(result, trans)
+            else:
+                _binary_reader.affline_transform_double(full_result[i], trans)
+
+        return full_result
 
     def expand_cyclic_modal(self, result, result_r, hindex, phase, as_complex,
                           full_rotor):
@@ -213,7 +321,7 @@ class CyclicResult(Result):
 
         # Generate full rotor solution
         result_expanded = []
-        angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
+        angles = np.linspace(0, 2*np.pi, self.n_sector + 1)[:-1] + phase
         for angle in angles:
             # need to rotate solution and rotate direction
             result_expanded.append(axis_rotation(result_combined, angle, deg=False,
@@ -223,14 +331,14 @@ class CyclicResult(Result):
 
         # scale
         # if hindex == 0 or hindex == self.nsector/2:
-        #     result_expanded /= self.nsector**0.5
+        #     result_expanded /= self.n_sector**0.5
         # else:
-        #     result_expanded /= (self.nsector/2)**0.5
+        #     result_expanded /= (self.n_sector/2)**0.5
 
         # adjust phase of the full result based on the harmonic index
-        f_arr = np.zeros(self.nsector)
+        f_arr = np.zeros(self.n_sector)
         f_arr[hindex] = 1
-        jang = np.fft.ifft(f_arr)[:self.nsector]*self.nsector
+        jang = np.fft.ifft(f_arr)[:self.n_sector]*self.n_sector
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
 
         result_expanded *= cjang.reshape(-1, 1, 1)
@@ -242,10 +350,6 @@ class CyclicResult(Result):
     def expand_cyclic_modal_stress(self, result, result_r, hindex, phase, as_complex,
                                    full_rotor, scale=True):
         """ Combines repeated results from ANSYS """
-        if self.dup_ind is not None:
-            result = result[self.mas_ind]
-            result_r = result_r[self.mas_ind]
-
         if as_complex or full_rotor:
             result_combined = result + result_r*1j
             if phase:
@@ -258,26 +362,25 @@ class CyclicResult(Result):
             return result_combined
 
         # Generate full rotor solution
-        result_expanded = np.empty((self.nsector, result.shape[0], result.shape[1]),
+        result_expanded = np.empty((self.n_sector, result.shape[0], result.shape[1]),
                                    np.complex128)
-        # result_expanded = np.asarray(result_expanded)
         result_expanded[:] = result_combined
 
         # scale
         # if scale:
-        #     if hindex == 0 or hindex == self.nsector/2:
-        #         result_expanded /= self.nsector**0.5
+        #     if hindex == 0 or hindex == self.n_sector/2:
+        #         result_expanded /= self.n_sector**0.5
         #     else:
-        #         result_expanded /= (self.nsector/2)**0.5
+        #         result_expanded /= (self.n_sector/2)**0.5
 
-        f_arr = np.zeros(self.nsector)
+        f_arr = np.zeros(self.n_sector)
         f_arr[hindex] = 1
-        jang = np.fft.ifft(f_arr)[:self.nsector]*self.nsector
+        jang = np.fft.ifft(f_arr)[:self.n_sector]*self.n_sector
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
         result_expanded = np.real(result_expanded*cjang.reshape(-1, 1, 1))
 
         # rotate cyclic result inplace
-        angles = np.linspace(0, 2*np.pi, self.nsector + 1)[:-1] + phase
+        angles = np.linspace(0, 2*np.pi, self.n_sector + 1)[:-1] + phase
         for i, angle in enumerate(angles):
             isnan = _binary_reader.tensor_rotate_z(result_expanded[i], angle)
             result_expanded[i, isnan] = np.nan
@@ -396,6 +499,7 @@ class CyclicResult(Result):
         """
         nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
         nnum = nnum[self.mas_ind]
+        stress = stress[self.mas_ind]
 
         if self.resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
@@ -423,26 +527,28 @@ class CyclicResult(Result):
                                                               full_rotor)
 
         elif self.resultheader['kan'] == 0:  # static result
+            expanded_result = self.expand_cyclic_static(stress, tensor=True)
 
-            # rotate results to Z+ first
-            cs_cord = self.resultheader['csCord']
-            if cs_cord != 1:
-                matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-                matrix.Invert()
-                trans = vtki.trans_from_matrix(matrix)
-                _binary_reader.tensor_arbitrary(stress, trans)
+            # stress_r = np.zeros_like(stress)
+            # expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, 0,
+            #                                                   phase, as_complex,
+            #                                                   full_rotor, scale=False)
 
-            stress_r = np.zeros_like(stress)
-            expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, 0,
-                                                              phase, as_complex,
-                                                              full_rotor, scale=False)
-            matrix.Invert()
-            trans = vtki.trans_from_matrix(matrix)
-            if expanded_result.ndim == 3:
-                for i in range(expanded_result.shape[0]):
-                    _binary_reader.tensor_arbitrary(expanded_result[i], trans)
-            else:
-                _binary_reader.tensor_arbitrary(expanded_result, trans)
+            # cs_cord = self.resultheader['csCord']
+            # if cs_cord != 1:
+            #     # rotate results to Z+ first
+            #     matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            #     matrix.Invert()
+            #     trans = vtki.trans_from_matrix(matrix)
+            #     _binary_reader.tensor_arbitrary(stress, trans)
+
+            #     matrix.Invert()
+            #     trans = vtki.trans_from_matrix(matrix)
+            #     if expanded_result.ndim == 3:
+            #         for i in range(expanded_result.shape[0]):
+            #             _binary_reader.tensor_arbitrary(expanded_result[i], trans)
+            #     else:
+            #         _binary_reader.tensor_arbitrary(expanded_result, trans)
         else:
             raise Exception('Unsupported analysis type')
 
@@ -477,7 +583,7 @@ class CyclicResult(Result):
                 stress = stress.astype(np.float32)
 
             # compute principle stress
-            pstress = np.empty((self.nsector, stress.shape[1], 5), np.float32)
+            pstress = np.empty((self.n_sector, stress.shape[1], 5), np.float32)
             for i in range(stress.shape[0]):
                 pstress[i], isnan = _binary_reader.ComputePrincipalStress(stress[i])
                 pstress[i, isnan] = np.nan
@@ -590,63 +696,25 @@ class CyclicResult(Result):
         scalars = d
 
         # sometimes there are less nodes in the result than in the geometry
-        npoints = self.grid.number_of_points
-        rotor = self.rotor
-        if nnum.size != npoints:
-            scalars = np.empty_like((self.nsector, npoints))
-            scalars[:] = np.nan
-            nnum_grid = self.grid.point_arrays['ansys_node_num']
-            mask = np.in1d(nnum_grid, nnum)
-            scalars[:, mask] = d
-            d = scalars
+        # npoints = self.grid.number_of_points
+        # grid = self.grid
+        # if nnum.size != npoints:
+        #     scalars = np.empty_like((self.n_sector, npoints))
+        #     scalars[:] = np.nan
+        #     nnum_grid = self.grid.point_arrays['ansys_node_num']
+        #     mask = np.in1d(nnum_grid, nnum)
+        #     scalars[:, mask] = d
+        #     d = scalars
 
+        grid = self.mas_grid
         if node_components:
-            rotor, ind = self._extract_node_components(node_components,
+            grid, ind = self._extract_node_components(node_components,
                                                       sel_type_all)
-            scalars = scalars.ravel()[ind]
+            scalars = scalars[:, ind]
 
         return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, rotor,
+                                       screenshot, cpos, interactive, grid,
                                        **kwargs)
-
-    def _extract_node_components(self, node_components, sel_type_all=True):
-        """ Returns the part of the grid matching node components """
-        if not self.geometry['components']:  # pragma: no cover
-            raise Exception('Missing component information.\n' +
-                            'Either no components have been stored, or ' +
-                            'the version of this result file is <18.2')
-
-        if isinstance(node_components, str):
-            node_components = [node_components]
-
-        mask = np.zeros(self.rotor.n_points, np.bool)
-        for component in node_components:
-            component = component.upper()
-            if component not in self.rotor.point_arrays:
-                raise Exception('Result file does not contain node ' +
-                                'component "%s"' % component)
-
-            mask += self.rotor.point_arrays[component].view(np.bool)
-            # mask = np.logical_not(mask)
-
-        # need to extract the mesh
-        cells = self.rotor.cells.astype(np.int32)
-        offset = self.rotor.offset.astype(np.int32)
-        if sel_type_all:
-            cell_mask = cells_with_all_nodes(offset, cells, self.rotor.celltypes,
-                                             mask.view(np.uint8))
-        else:
-            cell_mask = cells_with_any_nodes(offset, cells, self.rotor.celltypes,
-                                             mask.view(np.uint8))
-
-        extracted_rotor = self.rotor.extract_cells(cell_mask)
-
-        if not extracted_rotor.n_cells:
-            raise Exception('Empty mesh due to component selection\n' +
-                            'Try "sel_type_all=False"')
-
-        ind = extracted_rotor.point_arrays['vtkOriginalPointIds']
-        return extracted_rotor, ind
 
     def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
                           flip_scalars=None, cpos=None, screenshot=None,
@@ -727,22 +795,21 @@ class CyclicResult(Result):
         stype = stype.lower()
         if stype not in stress_types:
             raise Exception('Stress type not in: \n' + str(stress_types))
-        sidx = stress_types.index(stype)
 
-        # Populate with nodal stress at edge nodes
         nnum, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
+        sidx = stress_types.index(stype)
         scalars = stress[:, :, sidx]
-        rotor = self.rotor
+        grid = self.mas_grid
 
         if node_components:
-            rotor, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
-            scalars = scalars.ravel()[ind]
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all, self.mas_grid)
+            scalars = scalars[ind]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
         return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                     screenshot, cpos, interactive, rotor,
-                                     **kwargs)
+                                       screenshot, cpos, interactive, grid,
+                                       **kwargs)
 
     def plot_principal_nodal_stress(self, rnum, stype, cmap=None,
                                     flip_scalars=None, cpos=None,
@@ -920,25 +987,25 @@ class CyclicResult(Result):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
-        plobj = vtki.Plotter(off_screen=not interactive)
-        plobj.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
+        plotter = vtki.Plotter(off_screen=not interactive)
+        plotter.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
-        plobj.update_coordinates(orig_pt + np.real(complex_disp), render=False)
+        plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
-        plobj.add_text(' ', font_size=30)
+        plotter.add_text(' ', font_size=30)
 
         if cpos:
-            plobj.camera_position = cpos
+            plotter.camera_position = cpos
 
         if movie_filename:
-            plobj.open_movie(movie_filename)
+            plotter.open_movie(movie_filename)
 
         # run until q is pressed
-        plobj.plot(interactive=False, auto_close=False,
+        plotter.plot(interactive=False, auto_close=False,
                    interactive_update=True)
         first_loop = True
-        while not plobj.q_pressed:
+        while not plotter.q_pressed:
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -948,48 +1015,173 @@ class CyclicResult(Result):
                 else:
                     scalars = (complex_disp_adj*complex_disp_adj).sum(1)**0.5
 
-                plobj.update_scalars(scalars, render=False)
-                plobj.update_coordinates(orig_pt + complex_disp_adj,
+                plotter.update_scalars(scalars, render=False)
+                plotter.update_coordinates(orig_pt + complex_disp_adj,
                                         render=False)
 
                 if show_phase:
-                    plobj.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                    plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
 
                 if interactive:
-                    plobj.update(30, force_redraw=True)
+                    plotter.update(30, force_redraw=True)
 
-                if plobj.q_pressed:
+                if plotter.q_pressed:
                     break
 
                 if movie_filename and first_loop:
-                    plobj.write_frame()
+                    plotter.write_frame()
 
             first_loop = False
             if not interactive:
                 break
 
-        return plobj.close()
+        return plotter.close()
 
+    def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
+                           flip_scalars=None, screenshot=None, cpos=None,
+                           interactive=True, grid=None, add_text=True, **kwargs):
+        """
+        Plot point scalars on active mesh.
 
-def expand_cyclic_results(result, mas_ind, dup_ind, nsector, phase, as_complex=False,
-                          full_rotor=False):
-    """
-    Expand cyclic results given an array of results and the master/duplicate
-    sector indices
-    """
+        Parameters
+        ----------
+        scalars : np.ndarray
+            Node scalars to plot.
 
-    # master and duplicate sector solutions
-    u_mas = result[mas_ind]
+        rnum : int, optional
+            Cumulative result number.  Used for adding informative
+            text.
 
-    # just return single sector
-    if not full_rotor:
-        return u_mas
+        stitle : str, optional
+            Title of the scalar bar.
 
-    # otherwise rotate results (CYC, 1 only)
-    sectors = []
-    angles = np.linspace(0, 2*np.pi, nsector + 1)[:-1] + phase
-    for angle in angles:
-        sectors.append(axis_rotation(u_mas, angle, deg=False, axis='z'))
+        cmap : str, optional
+            See matplotlib cmaps:
+            matplotlib.org/examples/color/cmaps_reference.html
 
-    return np.asarray(sectors)
+        flip_scalars : bool, optional
+            Reverses the direction of the cmap.
+
+        screenshot : str, optional
+            When a filename, saves screenshot to disk.
+
+        cpos : list, optional
+            3x3 list describing the camera position.  Obtain it by
+            getting the output of plot_point_scalars first.
+
+        interactive : bool, optional
+            Allows user to interact with the plot when True.  Default
+            True.
+
+        grid : vtki PolyData or UnstructuredGrid, optional
+            Uses self.grid by default.  When specified, uses this grid
+            instead.
+
+        add_text : bool, optional
+            Adds information about the result when rnum is given.
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See help(vtki.plot)
+
+        Returns
+        -------
+        cpos : list
+            Camera position.
+
+        """
+        if grid is None:
+            grid = self.grid
+
+        # make cmap match default ansys
+        if cmap is None and flip_scalars is None:
+            flip_scalars = False
+
+        window_size = kwargs.pop('window_size', None)
+        full_screen = kwargs.pop('full_screen', False)
+        off_screen = not interactive
+
+        # Plot off screen when not interactive
+        plotter = vtki.Plotter(off_screen=not(interactive))
+        if 'show_axes' in kwargs:
+            plotter.add_axes()
+
+        if 'background' in kwargs:
+            plotter.background_color = kwargs['background']
+
+        rng = [np.nanmin(scalars), np.nanmax(scalars)]
+
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix.Invert()
+        else:
+            matrix = vtk.vtkMatrix4x4()
+            i_matrix = vtk.vtkMatrix4x4()
+
+        # plotter = vtki.Plotter(off_screen, window_size)
+        # actor = plotter.add_mesh(grid.copy(False),
+        #                          scalars=scalars[i], stitle=stitle,
+        #                          cmap=cmap, flip_scalars=flip_scalars,
+        #                          interpolate_before_map=True, rng=rng,
+        #                          **kwargs)
+        # # plotter.add_mesh(grid.copy(False), scalars=scalars[0])
+        # plotter.show()
+
+        plotter = vtki.Plotter(off_screen, window_size)
+        rang = 360.0 / self.n_sector
+        for i in range(self.n_sector):
+
+            actor = plotter.add_mesh(grid.copy(False),
+                                     scalars=scalars[i], stitle=stitle,
+                                     cmap=cmap, flip_scalars=flip_scalars,
+                                     interpolate_before_map=True, rng=rng,
+                                     **kwargs)
+
+            # for transparency issues
+            # plotter.renderers[0].SetUseDepthPeeling(1)
+
+            # NAN/missing data are white
+            plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
+
+            # transform to standard position, rotate about Z axis,
+            # transform back
+            transform = vtk.vtkTransform()
+            transform.RotateZ(rang*i)
+            transform.Update()
+            rot_matrix = transform.GetMatrix()
+
+            if cs_cord > 1:
+                temp_matrix = vtk.vtkMatrix4x4()
+                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+                transform.SetMatrix(rot_matrix)
+
+            actor.SetUserTransform(transform)
+
+        if cpos:
+            plotter.camera_position = cpos
+
+        # add table
+        if add_text and rnum is not None:
+            plotter.add_text(self.text_result_table(rnum), font_size=20,
+                             position=[0, 0])
+
+        if screenshot:
+            cpos = plotter.show(auto_close=False, interactive=interactive,
+                                window_size=window_size,
+                                full_screen=full_screen)
+            if screenshot is True:
+                img = plotter.screenshot()
+            else:
+                plotter.screenshot(screenshot)
+            plotter.close()
+        else:
+            cpos = plotter.plot(interactive=interactive, window_size=window_size,
+                                full_screen=full_screen)
+
+        if screenshot is True:
+            return cpos, img
+        else:
+            return cpos

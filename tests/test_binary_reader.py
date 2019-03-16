@@ -78,17 +78,3 @@ def test_plot_component():
                                        node_components=components, interactive=False)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
-def test_plot_component_rotor():
-    result = pyansys.ResultReader(examples.sector_result_file)
-    result.plot_nodal_solution(20, full_rotor=True,
-                               node_components='REFINE', sel_type_all=False,
-                               interactive=False)
-
-    result.plot_nodal_stress(20, 'Sx', node_components='REFINE',
-                             sel_type_all=False, interactive=False)
-
-    result.plot_principal_nodal_stress(20, 'SEQV',
-                                       node_components='REFINE',
-                                       sel_type_all=False,
-                                       interactive=False)

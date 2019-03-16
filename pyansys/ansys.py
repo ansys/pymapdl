@@ -1126,8 +1126,7 @@ class ANSYS(_InternalANSYS):
         with open(start_file, 'w') as f:
             f.write('RESUME\n')
 
-        args = ()
-        os.system('%s -g -j %s -dir "%s"' % (self.exec_file, name, self.path))
+        os.system('cd "%s"; %s -g -j %s' % (self.path, self.exec_file, name))
 
         # must remove the start file when finished
         os.remove(start_file)
