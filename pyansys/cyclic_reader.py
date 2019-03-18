@@ -815,7 +815,9 @@ class CyclicResult(Result):
                                                       sel_type_all)
             scalars = scalars[ind]
 
-        stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
+        # breakpoint()
+        # scalars[np.isnan(scalars)] = 0
+        stitle = 'Cyclic Rotor\nNodal Stress\n%s\n' % stype.capitalize()
         return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
                                        screenshot, cpos, interactive, grid,
                                        **kwargs)

@@ -206,25 +206,6 @@ def test_harmonic_index_to_cumulative():
         result_z.harmonic_index_to_cumulative(0, 6)
 
 
-# def test_full_z_nodal_stress():
-#     """ need to open gui to output full rotor results """
-#     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
-#                                       'prnsol_s_cyclic_z_full_v182.npz'))
-#     ansys_nnum = from_ansys['nnum']
-#     ansys_stress = from_ansys['stress']
-
-#     rnum = 0
-#     phase = 0
-#     nnum, stress = cyclic_v182_z.nodal_stress(rnum, phase, full_rotor=True)
-
-#     mask = np.in1d(nnum, ansys_nnum)
-#     n = mask.sum()
-#     tmp = ansys_stress.reshape(stress.shape[0], n, 6)
-
-#     assert np.allclose(nnum[mask], ansys_nnum[:n])
-#     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
-
-
 def test_full_x_principal_nodal_stress():
     """ need to open gui to output full rotor results """
     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
@@ -252,52 +233,19 @@ def test_animate_nodal_solution(tmpdir):
     assert os.path.isfile(temp_movie)
 
 
-
-# def test_nodal_solution_v182():
-#     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-#     result = pyansys.open_result(ansys_result_file)
-
-#     nnum, disp = result.nodal_solution(0, full_rotor=True)
-
-#     # cyclic model should only output the master sector
-#     assert nnum.size == 230
-#     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_disp.npz'))
-
-#     # mask = np.in1d(nnum, ansys_nnum)
-#     # n = mask.sum()
-#     # tmp = ansys_disp.reshape(disp.shape[0], n, 3)
-#     # assert np.allclose(disp[:, mask], tmp)
-#     breakpoint()
-
-#     assert np.allclose(from_ansys['ansys_nnum'][:nnum.size], nnum)
-#     assert np.allclose(from_ansys['ansys_disp'][:nnum.size], disp)
-
-
-# arr = np.loadtxt('/tmp/ansys/text.txt', skiprows=2)
-# np.savez(os.path.join(cyclic_testfiles_path,
-#                       'prnsol_u_cyclic_z_full_v182_set_4_2.npz'),
-#          nnum=arr[:, 0].astype(np.int),
-#          disp=arr[:, 1:-1])
-
 def test_cyclic_z_harmonic_displacement():
     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
                                       'prnsol_u_cyclic_z_full_v182_set_4_2.npz'))
     ansys_nnum = from_ansys['nnum']
     ansys_disp = from_ansys['disp']
 
-
-    result = result_z
-    # result = pyansys.open_result('/tmp/ansys/file.rst')
-    # result.plot_nodal_solution((4, 2), 'z')
-    # tmp = ansys_disp.reshape(disp.shape[0], n, 3)
-
     unod, count = np.unique(ansys_nnum, return_counts=True)
-    unod = np.setdiff1d(unod[count == result.n_sector], 32)
+    unod = np.setdiff1d(unod[count == result_z.n_sector], 32)
     mask = np.in1d(ansys_nnum, unod)
     ansys_nnum = ansys_nnum[mask]
     ansys_disp = ansys_disp[mask]
 
-    nnum, disp = result.nodal_solution((4, 2), full_rotor=True)
+    nnum, disp = result_z.nodal_solution((4, 2), full_rotor=True)
     mask = np.in1d(nnum, ansys_nnum)
     n = mask.sum()
     tmp = ansys_disp.reshape(disp.shape[0], n, 3)
@@ -320,3 +268,38 @@ def test_plot_nodal_stress():
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress():
     result_x.plot_principal_nodal_stress(0, 'Seqv', interactive=False)
+
+
+# result_z.plot_principal_nodal_stress(0, 'seqv')
+# result_z.plot_nodal_stress(0, 'sx')
+
+
+
+# arr = np.loadtxt('/tmp/ansys/text.txt', skiprows=2)
+# np.savez(os.path.join(cyclic_testfiles_path,
+#                       'prnsol_s_cyclic_z_full_v182_set_1_1.npz'),
+#          nnum=arr[:, 0].astype(np.int),
+#          stress=arr[:, 1:])
+
+
+# def test_full_z_nodal_stress():
+#     """ need to open gui to output full rotor results """
+#     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
+#                       'prnsol_s_cyclic_z_full_v182_set_1_1.npz'))
+#     ansys_nnum = from_ansys['nnum']
+#     ansys_stress = from_ansys['stress']
+
+#     rnum = 0
+#     phase = 0
+
+#     unod, count = np.unique(ansys_nnum, return_counts=True)
+#     unod = np.setdiff1d(unod[count == result_z.n_sector], 32)
+#     mask = np.in1d(ansys_nnum, unod)
+#     ansys_nnum = ansys_nnum[mask]
+#     ansys_stress = ansys_stress[mask]
+
+#     nnum, stress = result_z.nodal_stress(rnum, phase, full_rotor=True)
+#     mask = np.in1d(nnum, ansys_nnum)
+#     n = mask.sum()
+#     tmp = ansys_stress.reshape(stress.shape[0], n, ansys_stress.shape[1])
+#     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
