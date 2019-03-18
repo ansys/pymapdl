@@ -220,6 +220,7 @@ class CyclicResult(Result):
 
         """
         # get the nodal result
+        rnum = self.parse_step_substep(rnum)
         nnum, result = super(CyclicResult, self).nodal_solution(rnum,
                                                                 in_nodal_coord_sys)
         result = result[self.mas_ind]
@@ -254,7 +255,7 @@ class CyclicResult(Result):
                 # get repeated result and combine
                 _, result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
 
-            # result_dup = result_dup[self.mas_ind]
+            result_dup = result_dup[self.mas_ind]
 
             expanded_result = self.expand_cyclic_modal(result,
                                                        result_dup,
@@ -328,11 +329,11 @@ class CyclicResult(Result):
 
         result_expanded = np.asarray(result_expanded)
 
-        # scale
-        # if hindex == 0 or hindex == self.nsector/2:
-        #     result_expanded /= self.n_sector**0.5
-        # else:
-        #     result_expanded /= (self.n_sector/2)**0.5
+        # ANSYS scales the result
+        if hindex == 0 or hindex == self.n_sector/2:
+            result_expanded /= self.n_sector**0.5
+        else:
+            result_expanded /= (self.n_sector/2)**0.5
 
         # adjust phase of the full result based on the harmonic index
         f_arr = np.zeros(self.n_sector)
@@ -1141,6 +1142,8 @@ class CyclicResult(Result):
         plotter = vtki.Plotter(off_screen=not(interactive))
         if 'show_axes' in kwargs:
             plotter.add_axes()
+        # plotter.add_axes_at_origin()
+        # breakpoint()
 
         if 'background' in kwargs:
             plotter.background_color = kwargs['background']
@@ -1156,16 +1159,6 @@ class CyclicResult(Result):
             matrix = vtk.vtkMatrix4x4()
             i_matrix = vtk.vtkMatrix4x4()
 
-        # plotter = vtki.Plotter(off_screen, window_size)
-        # actor = plotter.add_mesh(grid.copy(False),
-        #                          scalars=scalars[i], stitle=stitle,
-        #                          cmap=cmap, flip_scalars=flip_scalars,
-        #                          interpolate_before_map=True, rng=rng,
-        #                          **kwargs)
-        # # plotter.add_mesh(grid.copy(False), scalars=scalars[0])
-        # plotter.show()
-
-        plotter = vtki.Plotter(off_screen, window_size)
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
 

@@ -28,6 +28,10 @@ result_x = pyansys.open_result(cyclic_x_filename)
 cyclic_v182_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
 cyclic_v182_z = pyansys.open_result(cyclic_v182_file)
 
+# cyclic modal with component
+filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182_w_comp.rst')
+cyclic_v182_z_with_comp = pyansys.open_result(filename)
+
 
 def test_non_cyclic():
     with pytest.raises(Exception):
@@ -48,11 +52,11 @@ def test_plot_x_cyc():
 
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_component_rotor():
-    result_z.plot_nodal_solution(0, full_rotor=False,
+    cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=False,
                                  node_components='REFINE', sel_type_all=False,
                                  interactive=False)
 
-    result_z.plot_nodal_solution(0, full_rotor=True,
+    cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=True,
                                  node_components='REFINE', sel_type_all=False,
                                  interactive=False)
 
@@ -271,14 +275,41 @@ def test_animate_nodal_solution(tmpdir):
 
 # arr = np.loadtxt('/tmp/ansys/text.txt', skiprows=2)
 # np.savez(os.path.join(cyclic_testfiles_path,
-#                       'prnsol_p_cyclic_x_full_v182.npz'),
+#                       'prnsol_u_cyclic_z_full_v182_set_4_2.npz'),
 #          nnum=arr[:, 0].astype(np.int),
-#          stress=arr[:, 1:])
+#          disp=arr[:, 1:-1])
+
+def test_cyclic_z_harmonic_displacement():
+    from_ansys = np.load(os.path.join(cyclic_testfiles_path,
+                                      'prnsol_u_cyclic_z_full_v182_set_4_2.npz'))
+    ansys_nnum = from_ansys['nnum']
+    ansys_disp = from_ansys['disp']
 
 
-# result = pyansys.open_result('/tmp/ansys/file.rst')
-# result_x.plot_nodal_stress(0, 'sz')
-# result_x.plot_principal_nodal_stress(0, 'Seqv')
+    result = result_z
+    # result = pyansys.open_result('/tmp/ansys/file.rst')
+    # result.plot_nodal_solution((4, 2), 'z')
+    # tmp = ansys_disp.reshape(disp.shape[0], n, 3)
+
+    unod, count = np.unique(ansys_nnum, return_counts=True)
+    unod = np.setdiff1d(unod[count == result.n_sector], 32)
+    mask = np.in1d(ansys_nnum, unod)
+    ansys_nnum = ansys_nnum[mask]
+    ansys_disp = ansys_disp[mask]
+
+    nnum, disp = result.nodal_solution((4, 2), full_rotor=True)
+    mask = np.in1d(nnum, ansys_nnum)
+    n = mask.sum()
+    tmp = ansys_disp.reshape(disp.shape[0], n, 3)
+    assert np.allclose(disp[:, mask], tmp, atol=1E-5)
+
+
+def plot_nodal_solution_z_harmonic():
+    result.plot_nodal_solution((4, 2), 'z', show_axes=True, interactive=False)
+
+
+# result.plot_nodal_stress(0, 'sx')
+# result.plot_principal_nodal_stress(0, 'Seqv')
 
 
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")

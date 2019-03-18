@@ -570,11 +570,12 @@ class Result(object):
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
         if nnum.size != npoints:
-            scalars = np.empty(npoints)
-            scalars[:] = np.nan
+            new_scalars = np.empty(npoints)
+            new_scalars[:] = np.nan
             nnum_grid = self.grid.point_arrays['ansys_node_num']
             mask = np.in1d(nnum_grid, nnum)
-            scalars[mask] = d
+            new_scalars[mask] = scalars
+            scalars = new_scalars
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
