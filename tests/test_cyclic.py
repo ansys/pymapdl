@@ -17,12 +17,12 @@ path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
 
-result_z = pyansys.ResultReader(sector_result_file)
+result_z = pyansys.open_result(sector_result_file)
 cyclic_x_filename = os.path.join(testfiles_path, 'cyc12.rst')
-result_x = pyansys.ResultReader(cyclic_x_filename)
+result_x = pyansys.open_result(cyclic_x_filename)
 
 cyclic_v182_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-cyclic_v182_z = pyansys.ResultReader(cyclic_v182_file)
+cyclic_v182_z = pyansys.open_result(cyclic_v182_file)
 
 def test_non_cyclic():
     with pytest.raises(Exception):
@@ -80,7 +80,7 @@ def test_element_stress_v182_non_cyclic():
 
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.ResultReader(ansys_result_file)
+    result = pyansys.open_result(ansys_result_file)
 
     element_stress, elemnum, enode = result.element_stress(0)
     element_stress = np.vstack(element_stress)
@@ -119,7 +119,7 @@ def test_full_x_nodal_solution():
     ansys_disp = from_ansys['disp']
 
 
-    # self = pyansys.ResultReader(cyclic_x_filename)
+    # self = pyansys.open_result(cyclic_x_filename)
     rnum = 0
     phase = 0
     full_rotor = True
@@ -178,6 +178,25 @@ def test_full_x_nodal_stress():
     assert np.allclose(nnum[mask], ansys_nnum[:n])
 
 
+def test_mode_table():
+    assert isinstance(cyclic_v182_z.mode_table, np.ndarray)
+    assert isinstance(result_z.mode_table, np.ndarray)
+    assert isinstance(result_x.mode_table, np.ndarray)
+
+
+def test_harmonic_index_to_cumulative():
+    # harmonic_index_to_cumulative
+    assert result_z.harmonic_index_to_cumulative(0, 0) == 0
+    assert result_z.harmonic_index_to_cumulative(1, 0) == 6
+    assert result_z.harmonic_index_to_cumulative(-7, 2) == 47
+
+    with pytest.raises(Exception):
+        result_z.harmonic_index_to_cumulative(10, 0)
+
+    with pytest.raises(Exception):
+        result_z.harmonic_index_to_cumulative(0, 6)
+
+
 # def test_full_z_nodal_stress():
 #     """ need to open gui to output full rotor results """
 #     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
@@ -197,24 +216,23 @@ def test_full_x_nodal_stress():
 #     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
 
 
-# def test_full_x_principal_nodal_stress():
-#     """ need to open gui to output full rotor results """
-#     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
-#                                       'prnsol_s_cyclic_x_full_v182.npz'))
-#     ansys_nnum = from_ansys['nnum']
-#     ansys_stress = from_ansys['stress']
+def test_full_x_principal_nodal_stress():
+    """ need to open gui to output full rotor results """
+    from_ansys = np.load(os.path.join(cyclic_testfiles_path,
+                                      'prnsol_p_cyclic_x_full_v182.npz'))
+    ansys_nnum = from_ansys['nnum']
+    ansys_stress = from_ansys['stress']
 
-#     # self = pyansys.ResultReader(cyclic_x_filename)
-#     rnum = 0
-#     phase = 0
-#     nnum, stress = result_x.nodal_stress(rnum, phase, full_rotor=True)
+    rnum = 0
+    phase = 0
+    nnum, stress = result_x.principal_nodal_stress(rnum, phase, full_rotor=True)
 
-#     mask = np.in1d(nnum, ansys_nnum)
-#     n = mask.sum()
-#     tmp = ansys_stress.reshape(stress.shape[0], n, 6)
+    mask = np.in1d(nnum, ansys_nnum)
+    n = mask.sum()
+    tmp = ansys_stress.reshape(stress.shape[0], n, 5)
 
-#     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
-#     assert np.allclose(nnum[mask], ansys_nnum[:n])
+    assert np.allclose(nnum[mask], ansys_nnum[:n])
+    assert np.allclose(stress[:, mask], tmp, atol=4E-3)  # loose due to text printing
 
 
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
@@ -227,7 +245,7 @@ def test_animate_nodal_solution(tmpdir):
 
 # def test_nodal_solution_v182():
 #     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-#     result = pyansys.ResultReader(ansys_result_file)
+#     result = pyansys.open_result(ansys_result_file)
 
 #     nnum, disp = result.nodal_solution(0, full_rotor=True)
 
@@ -243,3 +261,10 @@ def test_animate_nodal_solution(tmpdir):
 
 #     assert np.allclose(from_ansys['ansys_nnum'][:nnum.size], nnum)
 #     assert np.allclose(from_ansys['ansys_disp'][:nnum.size], disp)
+
+
+# arr = np.loadtxt('/tmp/ansys/text.txt', skiprows=2)
+# np.savez(os.path.join(cyclic_testfiles_path,
+#                       'prnsol_p_cyclic_x_full_v182.npz'),
+#          nnum=arr[:, 0].astype(np.int),
+#          stress=arr[:, 1:])

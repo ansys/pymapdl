@@ -685,7 +685,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
 
         # to access the results you could have run:
         # resultfile = os.path.join(ansys.path, '%s.rst' % ansys.jobname)
-        # result = pyansys.ResultReader(result file)
+        # result = pyansys.open_result(result file)
 
         # Get maximum von Mises stress at result 1
         nodenum, stress = result.principal_nodal_stress(0)  # 0 as it's zero based indexing

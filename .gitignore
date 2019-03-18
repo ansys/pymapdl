@@ -35,3 +35,4 @@ tests/.coverage
 tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
+*,cover

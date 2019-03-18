@@ -8,7 +8,7 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles', 'solid186')
 
 class TestResultReader(object):
-    result = pyansys.ResultReader(examples.rstfile)
+    result = pyansys.open_result(examples.rstfile)
     archive = pyansys.Archive(examples.hexarchivefile)
 
     def test_geometry_elements(self):

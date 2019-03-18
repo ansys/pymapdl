@@ -63,7 +63,7 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     rstfile = examples.rstfile
     
     # Create result object by loading the result file
-    result = pyansys.ResultReader(rstfile)
+    result = pyansys.open_result(rstfile)
     
     # Beam natural frequencies
     freqs = result.GetTimeValues()
@@ -213,7 +213,7 @@ This is the source code for the example:
     filename = examples.rstfile
     
     # Create rsult object
-    result = pyansys.ResultReader(filename)
+    result = pyansys.open_result(filename)
     
     # Plot node averaged stress in x direction for result 6
     result.plot_nodal_stress(5, 'Sx')

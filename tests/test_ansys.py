@@ -144,7 +144,3 @@ class TestCyclicResultReader(object):
 
     def test_exit(self):
         self.ansys.Exit()
-
-# self = TestCyclicResultReader()
-# self.test_prnsol_u()
-

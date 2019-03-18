@@ -16,7 +16,7 @@ except:
 
 class TestLoad182_183():
     filename = os.path.join(testfiles_path, 'pyansys_182_183_42_82.rst')
-    result = pyansys.ResultReader(filename)
+    result = pyansys.open_result(filename)
 
     def test_load(self):
         assert np.any(self.result.grid.cells)

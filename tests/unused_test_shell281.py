@@ -1,7 +1,7 @@
 """
 In PyAnsys I type
 ```
-test_result = pyansys.ResultReader('sample.rst')
+test_result = pyansys.open_result('sample.rst')
 estress,elem,enode = test_result.element_stress(0)
 print(estress[23])
 print(enode[23])
@@ -97,7 +97,7 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
               [0.20287E-07, 91.212, 27.364, -0.13603E-02, -4.8423, 0.72216E-04]]
 
 result_file = os.path.join(testfiles_path, 'shell281.rst')
-test_result = pyansys.ResultReader(result_file, valid_element_types=['281'])
+test_result = pyansys.open_result(result_file, valid_element_types=['281'])
 
 # estress, elem, enode = test_result.element_stress(0, in_element_coord_sys=False)
 estress, elem, enode = test_result.element_stress(0, in_element_coord_sys=True)

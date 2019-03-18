@@ -983,7 +983,7 @@ class ANSYS(_InternalANSYS):
         resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
         if not os.path.isfile(resultfile):
             raise Exception('No results found at %s' % resultfile)
-        return pyansys.ResultReader(resultfile)
+        return pyansys.open_result(resultfile)
 
     def __call__(self, command, **kwargs):
         return self.Run(command, **kwargs)

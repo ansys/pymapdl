@@ -52,7 +52,7 @@ Here's a quick example code block to show how easy it is to load and plots resul
 .. code:: python
 
     >>> import pyansys
-    >>> result = pyansys.ResultReader('rotor.rst')
+    >>> result = pyansys.open_result('rotor.rst')
     >>> nnum, stress = result.principal_nodal_stress(0)
     >>> print(stress[:3])
     array([[-1.2874937e-06,  1.2874934e-06,  5.6843419e-14,  0.0000000e+00,  8.1756007e-06, -8.1756007e-06],

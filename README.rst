@@ -123,7 +123,7 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     rstfile = examples.rstfile
     
     # Create result object by loading the result file
-    result = pyansys.ResultReader(rstfile)
+    result = pyansys.open_result(rstfile)
     
     # Beam natural frequencies
     freqs = result.time_values

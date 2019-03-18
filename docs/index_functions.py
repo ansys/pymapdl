@@ -41,7 +41,7 @@ hexarchivefile = examples.hexarchivefile
 
 
 # Create result reader object by loading the result file
-result = pyansys.ResultReader(rstfile)
+result = pyansys.open_result(rstfile)
 
 # Get beam natural frequencies
 freqs = result.GetTimeValues()

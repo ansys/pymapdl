@@ -364,7 +364,7 @@ class FullReader(object):
         return dof_ref, k, m
 
 
-def ResultReader(filename):
+def open_result(filename):
     """
     Reads a binary ANSYS result file.
 
