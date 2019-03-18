@@ -542,7 +542,6 @@ class Result(object):
         -------
         cpos : list
             Camera position from vtk render window.
-
         """
         # Load result from file
         rnum = self.parse_step_substep(rnum)
@@ -550,25 +549,23 @@ class Result(object):
 
         # Process result
         if comp == 'x':
-            d = result[:, 0]
+            scalars = result[:, 0]
             stitle = 'X {:s}\n'.format(label)
 
         elif comp == 'y':
-            d = result[:, 1]
+            scalars = result[:, 1]
             stitle = 'Y {:s}\n'.format(label)
 
         elif comp == 'z':
-            d = result[:, 2]
+            scalars = result[:, 2]
             stitle = 'Z {:s}\n'.format(label)
 
         else:
             # Normalize displacement
-            d = result[:, :3]
-            d = (d*d).sum(1)**0.5
+            scalars = result[:, :3]
+            scalars = (scalars*scalars).sum(1)**0.5
 
             stitle = 'Normalized\n%s\n' % label
-
-        scalars = d
 
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
@@ -581,19 +578,25 @@ class Result(object):
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
-            scalars = d
             scalars = scalars[ind]
-            # scalars[mask] = np.nan
-            # breakpoint()
             
         else:
             grid = self.grid
 
-        return self.plot_point_scalars(scalars, rnum, stitle, cmap,
-                                       flip_scalars, screenshot, cpos,
-                                       interactive=interactive,
-                                       grid=grid,
-                                       **kwargs)
+        if hasattr(self, 'n_sector'):
+            # return super(CyclicResult, self).plot_nodal_solution(rnum,
+            from pyansys import CyclicResult
+            return super(CyclicResult, self).plot_point_scalars(scalars, rnum,
+                                                                stitle, cmap,
+                                                                flip_scalars,
+                                                                screenshot, cpos,
+                                                                interactive=interactive,
+                                                                grid=grid, **kwargs)
+        else:
+            return self.plot_point_scalars(scalars, rnum, stitle, cmap,
+                                           flip_scalars, screenshot, cpos,
+                                           interactive=interactive,
+                                           grid=grid, **kwargs)
 
     def _extract_node_components(self, node_components,
                                  sel_type_all=True, grid=None):
@@ -1145,10 +1148,15 @@ class Result(object):
         elemtype = self.geometry['Element Type'].astype(np.int32)
         # validmask = np.in1d(elemtype, validENS).astype(np.int32)
 
-        # if cyclic rotor
-        # if ele_ind_table.size != self.grid.n_cells:
+         # if cyclic rotor
         #     if not hasattr(self, 'n_sector'):
         #         raise Exception('Element table size does not match number of cells')
+        #     ind = self.grid.cell_arrays['vtkOriginalCellIds']
+        #     ele_ind_table = ele_ind_table[ind]
+
+        # for sector results or if the grid doesn't match the number
+        # of table element cells
+        # if ele_ind_table.size != self.grid.n_cells:
         #     ind = self.grid.cell_arrays['vtkOriginalCellIds']
         #     ele_ind_table = ele_ind_table[ind]
 
@@ -1173,7 +1181,7 @@ class Result(object):
 
     @property
     def version(self):
-        """ returns the vesion of ansys used to save this result file """
+        """ The version of ANSYS used to generate this result file """
         return float(self.resultheader['verstring'])
 
     def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
@@ -1185,35 +1193,37 @@ class Result(object):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list 
-            containing (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         principal : bool, optional
-            Returns principal stresses instead of component stresses.  Default
-            False.
+            Returns principal stresses instead of component stresses.
+            Default False.
 
         in_element_coord_sys : bool, optional
-            Returns the results in the element coordinate system.  Default
-            False and will return the results in the global coordinate system.
+            Returns the results in the element coordinate system.
+            Default False and will return the results in the global
+            coordinate system.
 
         Returns
         -------
         element_stress : list
-            Stresses at each element for each node for Sx Sy Sz Sxy Syz Sxz.
-            or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when principal is True.
+            Stresses at each element for each node for Sx Sy Sz Sxy
+            Syz Sxz.  or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
+            principal is True.
 
         enum : np.ndarray
             ANSYS element numbers corresponding to each element.
 
         enode : list
-            Node numbers corresponding to each element's stress results.  One
-            list entry for each element
+            Node numbers corresponding to each element's stress
+            results.  One list entry for each element.
 
         Notes
         -----
-        Shell stresses for element 181 are returned for top and bottom layers.
-        Results are ordered such that the top layer and then the bottom layer
-        is reported.
+        Shell stresses for element 181 are returned for top and bottom
+        layers.  Results are ordered such that the top layer and then
+        the bottom layer is reported.
 
         """
         rnum = self.parse_step_substep(rnum)

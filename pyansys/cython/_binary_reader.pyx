@@ -295,7 +295,11 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     cfile = fopen(c_filename, 'rb')
 
     cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
+
+    # point data
     cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
+
+    # temp buffer to hold data read from element
     cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
 
     cdef float [3] eulerangles
@@ -320,8 +324,11 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         offset = offsets[i] + 1
         
         nnode_elem = nodstr[etype[i]]
+
         # skip this element
-        if ptrENS < 0:  # all zeros
+        if ptrENS == 0:  # if zero, ignore this element
+            continue
+        elif ptrENS < 0:  # if negative, all values are -1
             for j in range(nnode_elem):
                 for k in range(nitems):
                     bufferdata[j, k] = 0
@@ -343,18 +350,18 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                 EulerRotate(bufferdata, eulerangles, c)
 
         if celltype == VTK_LINE:  # untested
-            ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
         elif celltype == VTK_TRIANGLE:  # untested
-            ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
         elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
-            ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
         elif celltype == VTK_HEXAHEDRON:
-            ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
         elif celltype == VTK_PYRAMID:
-            ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
         elif celltype == VTK_TETRA:  # dependent on element type
             if nodstr[etype[i]] == 4:
-                ReadElement(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+                read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
             else:
                 ReadTetrahedral(cells, offset, ncount, data, bufferdata, nitems, cfile)
         elif celltype == VTK_WEDGE:
@@ -409,7 +416,6 @@ cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int [::1] n
     cdef int nread
 
     nread = nitems*5
-    # fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
 
     for i in range(4):
         cell = cells[index + i]
@@ -419,9 +425,9 @@ cdef inline void ReadTetrahedral(int64_t [::1] cells, int64_t index, int [::1] n
             data[cell, j] += bufferdata[idx, j]
 
 
-cdef inline void ReadElement(int64_t [::1] cells, int64_t index, int [::1] ncount,
-                             float [:, ::1] data, float [:, ::1] bufferdata,
-                             int nitems, FILE* cfile, int nnode) nogil:
+cdef inline void read_element(int64_t [::1] cells, int64_t index, int [::1] ncount,
+                              float [:, ::1] data, float [:, ::1] bufferdata,
+                              int nitems, FILE* cfile, int nnode) nogil:
     """
     Reads a generic element type in a linear fashion.  Works for:
     Hexahedron 95 or 186
@@ -621,7 +627,7 @@ def SortNodalEqlv(int neqn, int [::1] neqv, int [::1] ndof):
            np.asarray(dref)
 
 
-def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
+def tensor_arbitrary(double [:, ::1] stress, double [:, :] trans):
     """
     Rotates a 3D stress tensor by theta about the Z axis
 
@@ -642,13 +648,13 @@ def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
     cdef uint8 [::1] isnan = np.zeros(nnode, np.uint8)
     cdef double s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
     cdef double c0 = trans[0, 0]
-    cdef double c1 = trans[1, 0]
-    cdef double c2 = trans[2, 0]
-    cdef double c3 = trans[0, 1]
+    cdef double c1 = trans[0, 1]
+    cdef double c2 = trans[0, 2]
+    cdef double c3 = trans[1, 0]
     cdef double c4 = trans[1, 1]
-    cdef double c5 = trans[2, 1]
-    cdef double c6 = trans[0, 2]
-    cdef double c7 = trans[1, 2]
+    cdef double c5 = trans[1, 2]
+    cdef double c6 = trans[2, 0]
+    cdef double c7 = trans[2, 1]
     cdef double c8 = trans[2, 2]
 
     cdef double r0, r1, r2, r3, r4, r5, r6, r7, r8
@@ -668,17 +674,11 @@ def tensor_arbitrary(double [:, :] stress, double [:, :] trans):
 
         r1 = c3*(c0*s_xx + c1*s_xy + c2*s_xz) + c4*(c0*s_xy + c1*s_yy + c2*s_yz) + c5*(c0*s_xz + c1*s_yz + c2*s_zz)
 
-        # r2 = c6*(c0*s_xx + c1*s_xy + c2*s_xz) + c7*(c0*s_xy + c1*s_yy + c2*s_yz) + c8*(c0*s_xz + c1*s_yz + c2*s_zz)
-
-        # r3 = c0*(c3*s_xx + c4*s_xy + c5*s_xz) + c1*(c3*s_xy + c4*s_yy + c5*s_yz) + c2*(c3*s_xz + c4*s_yz + c5*s_zz)
-
         r4 = c3*(c3*s_xx + c4*s_xy + c5*s_xz) + c4*(c3*s_xy + c4*s_yy + c5*s_yz) + c5*(c3*s_xz + c4*s_yz + c5*s_zz)
 
         r5 = c6*(c3*s_xx + c4*s_xy + c5*s_xz) + c7*(c3*s_xy + c4*s_yy + c5*s_yz) + c8*(c3*s_xz + c4*s_yz + c5*s_zz)
 
         r6 = c0*(c6*s_xx + c7*s_xy + c8*s_xz) + c1*(c6*s_xy + c7*s_yy + c8*s_yz) + c2*(c6*s_xz + c7*s_yz + c8*s_zz)
-
-        # r7 = c3*(c6*s_xx + c7*s_xy + c8*s_xz) + c4*(c6*s_xy + c7*s_yy + c8*s_yz) + c5*(c6*s_xz + c7*s_yz + c8*s_zz)
 
         r8 = c6*(c6*s_xx + c7*s_xy + c8*s_xz) + c7*(c6*s_xy + c7*s_yy + c8*s_yz) + c8*(c6*s_xz + c7*s_yz + c8*s_zz)
 

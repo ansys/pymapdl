@@ -36,8 +36,7 @@ class CyclicResult(Result):
         if self.resultheader['nSector'] == 1:
             raise Exception('Result is not a cyclic model')
 
-        # Add cyclic properties
-        self.add_cyclic_properties()
+        self._add_cyclic_properties()
 
     def plot(self, color='w', show_edges=True, **kwargs):
         """
@@ -46,7 +45,8 @@ class CyclicResult(Result):
         Parameters
         ----------
         color : string or 3 item list, optional, defaults to white
-            Either a string, rgb list, or hex color string.  For example:
+            Either a string, rgb list, or hex color string.  For
+            example:
                 color='white'
                 color='w'
                 color=[1, 1, 1]
@@ -59,10 +59,11 @@ class CyclicResult(Result):
             representation.
 
         style : string, optional
-            Visualization style of the vtk mesh.  One for the following:
-                style='surface'
-                style='wireframe'
-                style='points'
+            Visualization style of the vtk mesh.  One for the
+            following:
+                ``style='surface'``
+                ``style='wireframe'``
+                ``style='points'``
 
             Defaults to 'surface'
 
@@ -110,7 +111,7 @@ class CyclicResult(Result):
         plotter = vtki.Plotter(off_screen, window_size)
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
-            actor = plotter.add_mesh(self.mas_grid.copy(False),
+            actor = plotter.add_mesh(self.grid.copy(False),
                                      color=color,
                                      show_edges=show_edges, **kwargs)
 
@@ -139,7 +140,7 @@ class CyclicResult(Result):
 
         return plotter.plot()
 
-    def add_cyclic_properties(self, tol=1E-5):
+    def _add_cyclic_properties(self):
         """
         Adds cyclic properties to result object
 
@@ -158,7 +159,6 @@ class CyclicResult(Result):
         # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
         node_mask = self.nnum <= self.resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
-        # breakpoint()
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
         """ return a 4x4 transformation array for a given coordinate system """
@@ -221,12 +221,12 @@ class CyclicResult(Result):
         """
         # get the nodal result
         nnum, result = super(CyclicResult, self).nodal_solution(rnum,
-                                                                in_nodal_coord_sys=in_nodal_coord_sys)
-        result_mas = result[self.mas_ind]
+                                                                in_nodal_coord_sys)
+        result = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
         if not full_rotor:
-            return nnum, result_mas
+            return nnum, result
 
         # combine or expand result if not modal
         if self.resultheader['kan'] == 2:  # modal analysis
@@ -254,22 +254,21 @@ class CyclicResult(Result):
                 # get repeated result and combine
                 _, result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
 
-            result_dup = result_dup[self.mas_ind]
+            # result_dup = result_dup[self.mas_ind]
 
-            expanded_result = self.expand_cyclic_modal(result_mas,
+            expanded_result = self.expand_cyclic_modal(result,
                                                        result_dup,
                                                        hindex, phase,
                                                        as_complex,
                                                        full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
-            expanded_result = self.expand_cyclic_static(result_mas)
+            expanded_result = self.expand_cyclic_static(result)
 
         return nnum, expanded_result
 
     def expand_cyclic_static(self, result, tensor=False):
         """ expands cyclic static results """
-
         cs_cord = self.resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
@@ -299,7 +298,7 @@ class CyclicResult(Result):
 
             trans = vtki.trans_from_matrix(rot_matrix)
             if tensor:
-                _binary_reader.tensor_arbitrary(result, trans)
+                _binary_reader.tensor_arbitrary(full_result[i], trans)
             else:
                 _binary_reader.affline_transform_double(full_result[i], trans)
 
@@ -377,15 +376,45 @@ class CyclicResult(Result):
         f_arr[hindex] = 1
         jang = np.fft.ifft(f_arr)[:self.n_sector]*self.n_sector
         cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
-        result_expanded = np.real(result_expanded*cjang.reshape(-1, 1, 1))
+        full_result = np.real(result_expanded*cjang.reshape(-1, 1, 1))
 
-        # rotate cyclic result inplace
-        angles = np.linspace(0, 2*np.pi, self.n_sector + 1)[:-1] + phase
-        for i, angle in enumerate(angles):
-            isnan = _binary_reader.tensor_rotate_z(result_expanded[i], angle)
-            result_expanded[i, isnan] = np.nan
+        # # rotate cyclic result inplace
+        # angles = np.linspace(0, 2*np.pi, self.n_sector + 1)[:-1] + phase
+        # for i, angle in enumerate(angles):
+        #     isnan = _binary_reader.tensor_rotate_z(result_expanded[i], angle)
+        #     result_expanded[i, isnan] = np.nan
 
-        return result_expanded
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix.Invert()
+        else:
+            matrix = vtk.vtkMatrix4x4()
+            i_matrix = vtk.vtkMatrix4x4()
+
+        shp = (self.n_sector, result.shape[0], result.shape[1])
+        full_result = np.empty(shp)
+        full_result[:] = result
+
+        rang = 360.0 / self.n_sector
+        for i in range(self.n_sector):
+            # transform to standard position, rotate about Z axis,
+            # transform back
+            transform = vtk.vtkTransform()
+            transform.RotateZ(rang*i)
+            transform.Update()
+            rot_matrix = transform.GetMatrix()
+
+            if cs_cord > 1:
+                temp_matrix = vtk.vtkMatrix4x4()
+                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+
+            trans = vtki.trans_from_matrix(rot_matrix)
+            _binary_reader.tensor_arbitrary(full_result[i], trans)
+
+        return full_result
 
     def harmonic_index_to_cumulative(self, hindex, mode):
         """
@@ -498,57 +527,35 @@ class CyclicResult(Result):
 
         """
         nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
-        nnum = nnum[self.mas_ind]
-        stress = stress[self.mas_ind]
+        # nnum = nnum[self.mas_ind]
+        # stress = stress[self.mas_ind]
 
-        if self.resultheader['kan'] == 2:  # modal analysis
-            # combine modal solution results
-            hindex_table = self.resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
-                    rnum_r = rnum - 1
-                else:
-                    rnum_r = rnum + 1
-
-                # get repeated result and combine
-                _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
-
-            else:
-                stress_r = np.zeros_like(stress)
-
-            expanded_result = self.expand_cyclic_modal_stress(stress,
-                                                              stress_r,
-                                                              hindex,
-                                                              phase,
-                                                              as_complex,
-                                                              full_rotor)
-
-        elif self.resultheader['kan'] == 0:  # static result
+        if self.resultheader['kan'] == 0:  # static result
             expanded_result = self.expand_cyclic_static(stress, tensor=True)
+        # elif self.resultheader['kan'] == 2:  # modal analysis
+        #     # combine modal solution results
+        #     hindex_table = self.resultheader['hindex']
+        #     hindex = hindex_table[rnum]
 
-            # stress_r = np.zeros_like(stress)
-            # expanded_result = self.expand_cyclic_modal_stress(stress, stress_r, 0,
-            #                                                   phase, as_complex,
-            #                                                   full_rotor, scale=False)
+        #     # if repeated mode
+        #     if hindex != 0 and -hindex in hindex_table:
+        #         if hindex < 0:
+        #             rnum_r = rnum - 1
+        #         else:
+        #             rnum_r = rnum + 1
 
-            # cs_cord = self.resultheader['csCord']
-            # if cs_cord != 1:
-            #     # rotate results to Z+ first
-            #     matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            #     matrix.Invert()
-            #     trans = vtki.trans_from_matrix(matrix)
-            #     _binary_reader.tensor_arbitrary(stress, trans)
+        #         # get repeated result and combine
+        #         _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
 
-            #     matrix.Invert()
-            #     trans = vtki.trans_from_matrix(matrix)
-            #     if expanded_result.ndim == 3:
-            #         for i in range(expanded_result.shape[0]):
-            #             _binary_reader.tensor_arbitrary(expanded_result[i], trans)
-            #     else:
-            #         _binary_reader.tensor_arbitrary(expanded_result, trans)
+        #     else:
+        #         stress_r = np.zeros_like(stress)
+
+        #     expanded_result = self.expand_cyclic_modal_stress(stress,
+        #                                                       stress_r,
+        #                                                       hindex,
+        #                                                       phase,
+        #                                                       as_complex,
+        #                                                       full_rotor)
         else:
             raise Exception('Unsupported analysis type')
 
@@ -803,7 +810,7 @@ class CyclicResult(Result):
 
         if node_components:
             grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all, self.mas_grid)
+                                                      sel_type_all)
             scalars = scalars[ind]
 
         stitle = 'Cyclic Rotor\nNodal Stress\n{:s}\n'.format(stype.capitalize())
@@ -982,13 +989,14 @@ class CyclicResult(Result):
         else:
             scalars = (complex_disp*complex_disp).sum(1)**0.5
 
-        orig_pt = self.rotor.points
+        full_rotor = self._gen_full_rotor()
+        orig_pt = full_rotor.points
 
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
         plotter = vtki.Plotter(off_screen=not interactive)
-        plotter.add_mesh(self.rotor.copy(), scalars=np.real(scalars),
+        plotter.add_mesh(full_rotor.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
         plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
@@ -1037,6 +1045,32 @@ class CyclicResult(Result):
                 break
 
         return plotter.close()
+
+    def _gen_full_rotor(self):
+        """ Create full rotor vtk unstructured grid """
+        grid = self.mas_grid.copy()
+        # transform to standard coordinate system
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            grid.transform(matrix)
+
+        vtkappend = vtk.vtkAppendFilter()
+        rang = 360.0 / self.n_sector
+        for i in range(self.n_sector):
+            # Transform mesh
+            sector = grid.copy()
+            sector.rotate_z(rang * i)
+            vtkappend.AddInputData(sector)
+
+        vtkappend.Update()
+        full_rotor = vtki.wrap(vtkappend.GetOutput())
+
+        if cs_cord > 1:
+            matrix.Invert()
+            full_rotor.transform(matrix)
+
+        return full_rotor
 
     def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
                            flip_scalars=None, screenshot=None, cpos=None,
@@ -1091,7 +1125,7 @@ class CyclicResult(Result):
 
         """
         if grid is None:
-            grid = self.grid
+            grid = self.mas_grid
 
         # make cmap match default ansys
         if cmap is None and flip_scalars is None:
