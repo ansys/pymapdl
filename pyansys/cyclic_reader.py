@@ -532,30 +532,30 @@ class CyclicResult(Result):
 
         if self.resultheader['kan'] == 0:  # static result
             expanded_result = self.expand_cyclic_static(stress, tensor=True)
-        # elif self.resultheader['kan'] == 2:  # modal analysis
-        #     # combine modal solution results
-        #     hindex_table = self.resultheader['hindex']
-        #     hindex = hindex_table[rnum]
+        elif self.resultheader['kan'] == 2:  # modal analysis
+            # combine modal solution results
+            hindex_table = self.resultheader['hindex']
+            hindex = hindex_table[rnum]
 
-        #     # if repeated mode
-        #     if hindex != 0 and -hindex in hindex_table:
-        #         if hindex < 0:
-        #             rnum_r = rnum - 1
-        #         else:
-        #             rnum_r = rnum + 1
+            # if repeated mode
+            if hindex != 0 and -hindex in hindex_table:
+                if hindex < 0:
+                    rnum_r = rnum - 1
+                else:
+                    rnum_r = rnum + 1
 
-        #         # get repeated result and combine
-        #         _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
+                # get repeated result and combine
+                _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
 
-        #     else:
-        #         stress_r = np.zeros_like(stress)
+            else:
+                stress_r = np.zeros_like(stress)
 
-        #     expanded_result = self.expand_cyclic_modal_stress(stress,
-        #                                                       stress_r,
-        #                                                       hindex,
-        #                                                       phase,
-        #                                                       as_complex,
-        #                                                       full_rotor)
+            expanded_result = self.expand_cyclic_modal_stress(stress,
+                                                              stress_r,
+                                                              hindex,
+                                                              phase,
+                                                              as_complex,
+                                                              full_rotor)
         else:
             raise Exception('Unsupported analysis type')
 
@@ -803,7 +803,8 @@ class CyclicResult(Result):
         if stype not in stress_types:
             raise Exception('Stress type not in: \n' + str(stress_types))
 
-        nnum, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
+        _, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
+        stress = stress[:, self.mas_ind]
         sidx = stress_types.index(stype)
         scalars = stress[:, :, sidx]
         grid = self.mas_grid
@@ -903,20 +904,21 @@ class CyclicResult(Result):
 
         # full rotor component stress
         _, pstress = self.principal_nodal_stress(rnum, phase, full_rotor=True)
+        pstress = pstress[:, self.mas_ind]
 
         scalars = pstress[:, :, sidx]
         stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
                  '%s\n' % stype.capitalize()
-        rotor = self.rotor
+        grid = self.mas_grid
 
         if node_components:
-            rotor, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
-            scalars = scalars.ravel()[ind]
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all, self.mas_grid)
+            scalars = scalars[ind]
 
         return self.plot_point_scalars(scalars, rnum, stitle, cmap,
                                        flip_scalars, screenshot, cpos,
-                                       interactive, rotor, **kwargs)
+                                       interactive, grid, **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,

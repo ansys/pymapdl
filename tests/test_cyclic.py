@@ -17,12 +17,17 @@ path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
 
+# modal result z axis
 result_z = pyansys.open_result(sector_result_file)
+
+# static result x axis
 cyclic_x_filename = os.path.join(testfiles_path, 'cyc12.rst')
 result_x = pyansys.open_result(cyclic_x_filename)
 
+# static result z axis
 cyclic_v182_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
 cyclic_v182_z = pyansys.open_result(cyclic_v182_file)
+
 
 def test_non_cyclic():
     with pytest.raises(Exception):
@@ -243,6 +248,7 @@ def test_animate_nodal_solution(tmpdir):
     assert os.path.isfile(temp_movie)
 
 
+
 # def test_nodal_solution_v182():
 #     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
 #     result = pyansys.open_result(ansys_result_file)
@@ -268,3 +274,18 @@ def test_animate_nodal_solution(tmpdir):
 #                       'prnsol_p_cyclic_x_full_v182.npz'),
 #          nnum=arr[:, 0].astype(np.int),
 #          stress=arr[:, 1:])
+
+
+# result = pyansys.open_result('/tmp/ansys/file.rst')
+# result_x.plot_nodal_stress(0, 'sz')
+# result_x.plot_principal_nodal_stress(0, 'Seqv')
+
+
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+def test_plot_nodal_stress():
+    result_x.plot_nodal_stress(0, 'sz', interactive=False)
+
+
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+def test_plot_principal_nodal_stress():
+    result_x.plot_principal_nodal_stress(0, 'Seqv', interactive=False)

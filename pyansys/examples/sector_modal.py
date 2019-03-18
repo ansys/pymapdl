@@ -4,11 +4,11 @@ This script was used to generate the sector modal analysis result file.
 Result file is sector.rst
 """
 import pyansys
+from pyansys import examples
+
 ansys = pyansys.ANSYS()
 
-archivefile = 'sector.cdb'
-
-ansys.Cdread('db', archivefile)
+ansys.Cdread('db', examples.sector_archive_file)
 
 # make cyclic
 ansys('/PREP7')
