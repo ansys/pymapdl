@@ -441,6 +441,9 @@ class ANSYS(_InternalANSYS):
         with open(tmp_inp, 'w') as f:
             f.write('FINISH')
 
+        if os.name != 'posix':
+            prefer_pexpect = False
+
         # open a connection to ANSYS
         self.nproc = nproc
         self.start_timeout = start_timeout
