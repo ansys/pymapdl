@@ -363,6 +363,12 @@ class FullReader(object):
 
         return dof_ref, k, m
 
+def ResultReader(filename):
+    """ Opens ansys binary result file. Depreciated function.  """
+    warnings.warn('This function will be depreciated in 0.36.0\n' +
+                  'Please use "open_result" instead.')
+    open_result(filename)
+
 
 def open_result(filename):
     """
