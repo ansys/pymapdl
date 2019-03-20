@@ -591,7 +591,6 @@ class Result(object):
             grid = self.grid
 
         if hasattr(self, 'n_sector'):
-            # return super(CyclicResult, self).plot_nodal_solution(rnum,
             from pyansys import CyclicResult
             return super(CyclicResult, self).plot_point_scalars(scalars, rnum,
                                                                 stitle, cmap,

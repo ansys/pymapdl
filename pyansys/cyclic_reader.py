@@ -569,7 +569,7 @@ class CyclicResult(Result):
 
         """
         if as_complex and full_rotor:
-            raise Exception('Cannot be complex and full rotor')
+            raise Exception('complex and full_rotor cannot both be True')
         
         # get component stress
         nnum, stress = self.nodal_stress(rnum, phase, as_complex, full_rotor)
@@ -785,18 +785,16 @@ class CyclicResult(Result):
             Camera position from vtk render window.
 
         """
-        if not full_rotor:  # Plot sector
-            return super(CyclicResult, self).plot_nodal_stress(rnum,
-                                                               stype,
-                                                               cmap,
-                                                               flip_scalars,
-                                                               label,
-                                                               cpos,
-                                                               screenshot,
-                                                               interactive,
-                                                               node_components,
-                                                               sel_type_all,
-                                                               **kwargs)
+        # if not full_rotor:  # Plot sector
+        #     super(CyclicResult, self).plot_nodal_stress(rnum,
+        #                                                 stype,
+        #                                                 cmap,
+        #                                                 flip_scalars,
+        #                                                 cpos,
+        #                                                 screenshot,
+        #                                                 interactive,node_components,
+        #                                                 sel_type_all,
+        #                                                 **kwargs)
 
         rnum = self.parse_step_substep(rnum)
         stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz']
@@ -818,9 +816,18 @@ class CyclicResult(Result):
         # breakpoint()
         # scalars[np.isnan(scalars)] = 0
         stitle = 'Cyclic Rotor\nNodal Stress\n%s\n' % stype.capitalize()
-        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, grid,
-                                       **kwargs)
+        if full_rotor:
+            return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
+                                           screenshot, cpos, interactive, grid,
+                                           **kwargs)
+        else:
+            return super(CyclicResult,
+                         self).plot_point_scalars(scalars[0],
+                                                  rnum, stitle, cmap,
+                                                  flip_scalars, screenshot,
+                                                  cpos, interactive, grid,
+                                                  **kwargs)
+
 
     def plot_principal_nodal_stress(self, rnum, stype, cmap=None,
                                     flip_scalars=None, cpos=None,

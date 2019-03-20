@@ -260,19 +260,23 @@ def plot_nodal_solution_z_harmonic():
     result.plot_nodal_solution((4, 2), 'z', show_axes=True, interactive=False)
 
 
-# result.plot_nodal_stress(0, 'sx')
-# result.plot_principal_nodal_stress(0, 'Seqv')
-
-
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_nodal_stress():
     result_x.plot_nodal_stress(0, 'sz', interactive=False)
 
 
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+def test_plot_nodal_stress():
+    result_x.plot_nodal_stress(0, 'sz', interactive=False, full_rotor=False)
+
+
+
+@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress():
     result_x.plot_principal_nodal_stress(0, 'Seqv', interactive=False)
 
+
+# result_x.plot_nodal_stress(0, 'sz', full_rotor=False)
 
 # result_z.plot_principal_nodal_stress(0, 'seqv')
 # result_z.plot_nodal_stress(0, 'sx')
