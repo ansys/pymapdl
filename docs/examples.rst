@@ -14,23 +14,23 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
 
     import pyansys
     from pyansys import examples
-    
+
     # Sample *.cdb
     filename = examples.hexarchivefile
-    
+
     # Read ansys archive file
     archive = pyansys.Archive(filename)
-    
+
     # Print raw data from cdb
     for key in archive.raw:
        print("%s : %s" % (key, archive.raw[key]))
-    
+
     # Create a vtk unstructured grid from the raw data and plot it
     grid = archive.parse_vtk(force_linear=True)
-    grid.Plot()
-    
-    # write this as a vtk xml file 
-    grid.Write('hex.vtu')
+    grid.plot(color='w', show_edges=True)
+
+    # save this as a vtk xml file 
+    grid.save('hex.vtu')
 
 .. image:: ./images/hexbeam.png
 
@@ -42,7 +42,7 @@ You can then load this vtk file using vtki or another program that uses VTK.
     # Load this from vtk
     import vtki
     grid = vtki.UnstructuredGrid('hex.vtk')
-    grid.Plot()
+    grid.plot()
 
 
 Loading and Plotting Results from an ANSYS Result File
@@ -168,7 +168,7 @@ This built-in example displays the minimum scaled jacobian of each element of a 
 .. code:: python
 
     from pyansys import examples
-    examples.DisplayCellQual()
+    examples.show_cell_qual()
 
 .. image:: ./images/cellqual.png
 
@@ -187,10 +187,10 @@ This is the source code for the example:
     grid = archive.parse_vtk(force_linear=True)
 
     # get cell quality
-    qual = grid.CellQuality()
+    qual = grid.quality
     
     # plot cell quality
-    grid.Plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian', rng=[0, 1])
+    grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian', rng=[0, 1])
 
 
 Plot Nodal Stress
@@ -200,7 +200,7 @@ This built in example plots the x component stress from a hexahedral beam.
 .. code:: python
 
     from pyansys import examples
-    examples.DisplayStress()
+    examples.show_stress()
 
 .. image:: ./images/beam_stress.png
 
