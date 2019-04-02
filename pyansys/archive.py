@@ -75,9 +75,9 @@ class Archive(object):
             See help(pyansys.elements) for available element types.
 
         null_unallowed : bool, optional
-            Elements types not matching element types will be stored as empty
-            (null) elements.  Useful for debug or tracking element numbers.
-            Default False.
+            Elements types not matching element types will be stored
+            as empty (null) elements.  Useful for debug or tracking
+            element numbers.  Default False.
 
         Returns
         -------
@@ -101,7 +101,8 @@ class Archive(object):
                                     'cannot be parsed in pyansys')
 
         # parse raw output
-        parsed = _parser.Parse(self.raw, force_linear, allowable_types, null_unallowed)
+        parsed = _parser.Parse(self.raw, force_linear,
+                               allowable_types, null_unallowed)
         cells = parsed['cells']
         offset = parsed['offset']
         cell_type = parsed['cell_type']
@@ -112,6 +113,7 @@ class Archive(object):
         if force_linear or np.all(cells != -1):
             nodes = self.raw['nodes'][:, :3].copy()
             nnum = self.raw['nnum']
+            angles = self.raw['nodes'][:, 3:]
         else:
             mask = cells == -1
 
@@ -135,9 +137,13 @@ class Archive(object):
             # rewrite node numbers
             cells[mask] = idxB + maxnum
             nextra = idxA.shape[0]
-            nodes = np.zeros((nnodes + nextra, 3))
+            nodes = np.empty((nnodes + nextra, 3))
             nodes[:nnodes] = self.raw['nodes'][:, :3]
             nodes[nnodes:] = unique_nodes
+
+            angles = np.empty((nnodes + nextra, 3))
+            angles[:nnodes] = self.raw['nodes'][:, 3:]
+            angles[nnodes:] = 0
 
             # Add extra node numbers
             nnum = np.hstack((self.raw['nnum'],
@@ -156,18 +162,23 @@ class Archive(object):
 
         # Add element components to unstructured grid
         for comp in self.raw['elem_comps']:
-            mask = np.in1d(enum, self.raw['elem_comps'][comp], assume_unique=True)
+            mask = np.in1d(enum, self.raw['elem_comps'][comp],
+                           assume_unique=True)
             grid.cell_arrays[comp.strip()] = mask
 
         # Add node components to unstructured grid
         for comp in self.raw['node_comps']:
-            mask = np.in1d(nnum, self.raw['node_comps'][comp], assume_unique=True)
+            mask = np.in1d(nnum, self.raw['node_comps'][comp],
+                           assume_unique=True)
             grid.point_arrays[comp.strip()] = mask
 
         # Add tracker for original node numbering
         ind = np.arange(grid.number_of_points)
         grid.point_arrays['origid'] = ind
         grid.point_arrays['VTKorigID'] = ind
+
+        # store node angles
+        grid.point_arrays['angles'] = angles
 
         self.vtkuGrid = grid
         return grid
@@ -606,11 +617,9 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         f.write('      -1\r\n')
 
 
-def write_nblock(filename, node_id, pos, raw=None, writeangle=None,
-                line_ending=None):
+def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
     """
-    Numpy implementation of WriteNBLOCK that also includes the original node
-    angles according to the raw cdb data if writeangle is enabled
+    Writes nodes and node angles to file.
 
     Parameters
     ----------
@@ -618,37 +627,33 @@ def write_nblock(filename, node_id, pos, raw=None, writeangle=None,
         Filename to write node block to.
 
     node_id : np.ndarray
-        ANSYS Node numbers.
+        ANSYS node numbers.
 
     pos : np.ndarray
         Node coordinates.
 
-    raw : dict, optional
-        Raw dictionary of original archive.
-
-    writeangle : bool, optional
-        Writes the node angles for each node.  Requires raw.
+    angles : np.ndarray, optional
+        Writes the node angles for each node when included.
 
     line_ending : str, optional
-        Line ending.
+        Line ending.  Defaults to operating system line ending.
 
     """
     if line_ending is None:
         line_ending = os.linesep
 
-    if not raw and writeangle:
-        raise Exception('Cannot write angles without archive file')
-
     assert pos.ndim == 2 and pos.shape[1] == 3, 'Invalid position array'
+    if angles is not None:
+        assert angles.ndim == 2 and angles.shape[1] == 3, 'Invalid angle array'
 
     # Header Tell ANSYS to start reading the node block with 6 fields,
     # associated with a solid, the maximum node number and the number
     # of lines in the node block
     h = '/PREP7 \r\n'
-    h += 'NBLOCK,6,SOLID,{:10d},{:10d}\r\n'.format(np.max(node_id), pos.shape[0])
+    h += 'NBLOCK,6,SOLID,%10d,%10d\r\n' % (np.max(node_id), pos.shape[0])
     h += '(3i8,6e20.13)'
 
-    # Make footer
+    # NBLOCK footer
     f = 'N,R5.3,LOC,       -1, \r\n'
 
     # Sort input data
@@ -656,41 +661,31 @@ def write_nblock(filename, node_id, pos, raw=None, writeangle=None,
     node_id = node_id[ind]
     pos = pos[ind]
 
-    # Write nodes using numpy
-    if writeangle:
-        # Create an empty array of node positions and angles
-        posang = np.zeros((node_id.size, 6))
-        posang[:, :3] = pos  # populate existing positions
-
-        # Mask of raw nodes containing non-zero angles
-        anglemask = np.any(raw['nodes'][:, -3:], 1)
-
-        # Cross correlate those node ids with node_ids from current data
-        maskA = np.in1d(node_id, raw['nnum'][anglemask])
-        maskB = np.in1d(raw['nnum'][anglemask], node_id)
-        posang[maskA, -3:] = raw['nodes'][anglemask][maskB, -3:]
-
-        # stack node IDs and positions
-        n = np.hstack((node_id.reshape(-1, 1), posang))
+    if angles is None:
         np.savetxt(
             filename,
-            n,
+            np.hstack((node_id.reshape(-1, 1), pos)),
             '%8d       0       0' +
             '%20.13E' *
-            6,
+            3,
             header=h,
             footer=f,
             comments='',
             newline='\r\n')
     else:
+        # Array of node positions and angles
+        arr = np.empty((node_id.size, 7))
+        arr[:, 0] = node_id
+        arr[:, 1:4] = pos
+        arr[:, 4:] = angles
+
         # stack node IDs and positions
-        n = np.hstack((node_id.reshape(-1, 1), pos))
         np.savetxt(
             filename,
-            n,
+            arr,
             '%8d       0       0' +
             '%20.13E' *
-            3,
+            6,
             header=h,
             footer=f,
             comments='',

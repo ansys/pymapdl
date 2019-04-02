@@ -82,9 +82,9 @@ def test_write_angle(tmpdir):
     except:
         nblock_filename = '/tmp/nblock.cdb'
 
+    angles = archive.raw['nodes'][:, 3:]
     pyansys.write_nblock(nblock_filename, archive.raw['nnum'],
-                         archive.raw['nodes'][:, :3], raw=archive.raw,
-                         writeangle=True)
+                         archive.raw['nodes'][:, :3], angles)
 
     archive2 = pyansys.Archive(nblock_filename)
     assert np.allclose(archive2.raw['nodes'], archive.raw['nodes'])

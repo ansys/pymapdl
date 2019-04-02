@@ -66,11 +66,11 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     result = pyansys.open_result(rstfile)
     
     # Beam natural frequencies
-    freqs = result.GetTimeValues()
+    freqs = result.time_values
 
 .. code:: python
 
-    >>> print(freq)
+    >>> print(freqs)
     [ 7366.49503969  7366.49503969 11504.89523664 17285.70459456
       17285.70459457 20137.19299035]
     
@@ -137,7 +137,7 @@ Nodal stress can also be generated non-interactively with:
 .. code:: python
 
     result.plot_nodal_stress(5, 'Sx', cpos=cpos, screenshot=beam_stress.png,
-                           window_size=[800, 600], interactive=False)
+                             window_size=[800, 600], interactive=False)
 
 Animating a Modal Solution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
