@@ -1044,7 +1044,8 @@ class Result(object):
         cells[cells == -1] = 0
 
         # identify nodes that are actually in the solution
-        self.insolution = np.in1d(self.geometry['nnum'], self.resultheader['neqv'])
+        self.insolution = np.in1d(self.geometry['nnum'],
+                                  self.resultheader['neqv'])
 
         # Create vtk object
         nodes = nloc[:, :3]

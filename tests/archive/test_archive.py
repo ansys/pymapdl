@@ -239,3 +239,9 @@ def test_write_component(tmpdir):
     pyansys.write_cmblock(temp_archive, items, comp_name, 'node')
     archive = pyansys.Archive(temp_archive)
     assert np.allclose(archive.raw['node_comps'][comp_name], items)
+
+
+def test_read_mesh200():
+    archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
+    grid =archive.parse_vtk()
+    assert grid.n_cells == 1000
