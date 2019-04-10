@@ -53,7 +53,10 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     return 1
                 
 
-def Read(filename):
+def read(filename):
+    """
+    Read blocked ansys archive file.
+    """
     badstr = 'Badly formatted cdb file'
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
@@ -129,28 +132,32 @@ def Read(filename):
     node_comps = {}
     elem_comps = {}
 
+    # keyopt
+    keyopt = {}
+
     # Read data up to and including start of NBLOCK
     while 1:
         if myfgets(line, raw, &n, fsize):
             break
-            # raise Exception('No NBLOCK in file.  Check if file is a blocked '+\
-                            # 'ANSYS archive file.')
-                            
+
         # Record element types
         if 'E' == line[0]:
             if b'ET' in line:
-                elem_type.append([int(line[3:line.find(b',', 5)]),     # element number
-                                  int(line[line.find(b',', 5) + 1:])]) # element type        
+                # element number
+                # element type
+                elem_type.append([int(line[3:line.find(b',', 5)]),
+                                  int(line[line.find(b',', 5) + 1:])])
 
             elif b'EBLOCK' in line:
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
-                
+
                 # Get interger block size
                 myfgets(line, raw, &n, fsize)
                 isz = int(line[line.find(b'i') + 1:line.find(b')')])
 
-                # Initialize element data array.  Use number of lines as nelem is unknown
+                # Initialize element data array.  Use number of lines
+                # as nelem is unknown
                 elem = np.empty((nelem, 20), dtype=ctypes.c_int)
                 etype = np.empty(nelem, dtype=ctypes.c_int)
                 elemnum = np.empty(nelem, dtype=ctypes.c_int)
@@ -159,8 +166,25 @@ def Read(filename):
                 sec_id = np.empty(nelem, dtype=ctypes.c_int)
 
                 # Call C extention to read eblock
-                nelem = read_eblock(raw, &mtype[0], &etype[0], &e_rcon[0], &sec_id[0],
-                                    &elemnum[0], &elem[0, 0], nelem, isz, &n, EOL)
+                nelem = read_eblock(raw, &mtype[0], &etype[0],
+                                    &e_rcon[0], &sec_id[0],
+                                    &elemnum[0], &elem[0, 0], nelem,
+                                    isz, &n, EOL)
+
+        elif b'K' == line[0]:
+            if b'KEYOP' in line:
+                try:
+                    entry = []
+                    for item in line.split(b',')[1:]:
+                        entry.append(int(item))
+                except:
+                    continue
+
+                key_num = int(entry[0])
+                if key_num in keyopt:
+                    keyopt[key_num].append(entry[1:])
+                else:
+                    keyopt[key_num] = [entry[1:]]
 
         elif 'R' == line[0]:
             if b'RLBLOCK' in line:
@@ -168,7 +192,7 @@ def Read(filename):
                 ist = line.find(b',') + 1
                 ien = line[ist:].find(b',') + ist
                 nset = int(line[ist:ien])
-            
+
                 # Skip Format1 and Format2 (always 2i8,6g16.9 and 7g16.9)
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
@@ -177,19 +201,17 @@ def Read(filename):
                 c_set = 0
                 while True:
                     if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                    
                     rcon = [] # real constants
-                    
                     c_set += 1
                     if c_set > nset:
                         break
-                    
+
                     # Get real constant number
                     rnum.append(int(line[:8]))
-                    
+
                     # Number of constants
                     ncon = int(line[8:16])
-                    
+
                     # Get constant data
                     if ncon > 6: # if multiple lines
                         for i in range(6):
@@ -292,7 +314,9 @@ def Read(filename):
             'node_comps': node_comps,
             'elem_comps': elem_comps,
             'mtype': np.asarray(mtype),  # material type
-            'sec_id': np.asarray(sec_id)}
+            'sec_id': np.asarray(sec_id),
+            'keyopt': keyopt
+            }
 
 
 def block_format(string):

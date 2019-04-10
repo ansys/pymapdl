@@ -1,9 +1,10 @@
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
-
+"""
+Parse raw data from a blocked ANSYS archvie file into a VTK format.
+"""
 import numpy as np
-# cimport numpy as np
 import ctypes               
 
 from libc.stdint cimport int32_t, int64_t
@@ -43,11 +44,12 @@ typeB[0] = 92
 typeB[1] = 187
 
 
-cdef inline void StoreLine(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
-                           int64_t [::1] cells, uint8 [::1] cell_type,
-                           int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
-    """
-    Stores surface triangle vtk cell.  Element may be quadradic or linear
+cdef inline void store_line(int64_t [::1] offset, int64_t *ecount,
+                           int64_t *ccount, int64_t [::1] cells, uint8
+                           [::1] cell_type, int64_t [::1] numref, int
+                           [:, ::1] elem, int i, int lin):
+    """Store surface triangle vtk cell.  Element may be quadradic
+    or linear
     """
     # Populate offset array
     offset[ecount[0]] = ccount[0]
@@ -369,21 +371,20 @@ cdef inline void StoreWeg(int64_t [::1] offset, int64_t *ecount, int64_t *ccount
 cdef inline void StoreHex(int64_t [::1] offset, int64_t *ecount, int64_t *ccount, 
                           int64_t [::1] cells, uint8 [::1] cell_type,
                           int64_t [::1] numref, int [:, ::1] elem, int i, int lin):
-    """
-    Stores hexahedral element in vtk arrays.  ANSYS elements are ordered in the
-    same manner as VTK.    
+    """Stores hexahedral element in vtk arrays.  ANSYS elements are
+    ordered in the same manner as VTK.
     
     VTK DOCUMENTATION
     Linear Hexahedral
-    The hexahedron is defined by the eight points (0-7) where (0,1,2,3) is the
-    base of the hexahedron which, using the right hand rule, forms a
-    quadrilaterial whose normal points in the direction of the opposite face
-    (4,5,6,7).
+    The hexahedron is defined by the eight points (0-7) where
+    (0,1,2,3) is the base of the hexahedron which, using the right
+    hand rule, forms a quadrilaterial whose normal points in the
+    direction of the opposite face (4,5,6,7).
 
     Quadradic Hexahedral
     The ordering of the twenty points defining the cell is point ids
-    (0-7, 8-19) where point ids 0-7 are the eight corner vertices of the cube;
-    followed by twelve midedge nodes (8-19)
+    (0-7, 8-19) where point ids 0-7 are the eight corner vertices of
+    the cube; followed by twelve midedge nodes (8-19)
     Note that these midedge nodes correspond lie on the edges defined by:
     Midside   Edge nodes
     8         (0, 1)
@@ -513,37 +514,37 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
     for i in range(nekey):
         if ekey[i, 0] > maxelemtype:
             maxelemtype = ekey[i, 0]
-    
+
     # Create an element type array for indexing
     cdef int [::1] elem_type = np.empty(maxelemtype + 1, ctypes.c_int)
     for i in range(nekey):
         elem_type[ekey[i, 0]] = ekey[i, 1]
-    
+
     # Allocate memory for cell data
     cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
     cdef uint8 [::1] cell_type = np.empty(nelem, dtype='uint8')
-    
+
     # different array sizes depending on midside nodes
     # max cell is 20 and header is 1
     cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)
-    
+
     # Find the highest node number
     cdef int maxnodenum = 0
     for i in range(nnode):
         if nnum[i] > maxnodenum:
             maxnodenum = nnum[i]
-            
+
     # Create reference array for node renumbering
     cdef int64_t n
     cdef int64_t [::1] numref = np.empty(maxnodenum + 2, ctypes.c_int64)
     numref[:] = -1  # to avoid null references
     for n in range(nnode):
         numref[nnum[n]] = n
-    
+
     # Loop through each element and check if the element type matches
     # one this code can read
-    cdef int64_t ccount = 0 # cell/offset counter
-    cdef int64_t ecount = 0 # element number counter
+    cdef int64_t ccount = 0  # cell/offset counter
+    cdef int64_t ecount = 0  # element number counter
     cdef int64_t cstart
     cdef int elem_etype
     for i in range(nelem):
@@ -571,20 +572,20 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                     
                 # Determine element type through logic
                 if elem[i, 6] != elem[i, 7]: # check if hexahedral
-                    StoreHex(offset, &ecount, &ccount, cells, cell_type, numref,
-                             elem, i, lin)
+                    StoreHex(offset, &ecount, &ccount, cells,
+                             cell_type, numref, elem, i, lin)
 
                 elif elem[i, 5] != elem[i, 6]: # check if wedge
-                    StoreWeg(offset, &ecount, &ccount, cells, cell_type, numref,
-                             elem, i, lin)
+                    StoreWeg(offset, &ecount, &ccount, cells,
+                             cell_type, numref, elem, i, lin)
                     
                 elif elem[i, 2] != elem[i, 3]: # check if pyramid
-                    StorePyr(offset, &ecount, &ccount, cells, cell_type, numref,
-                             elem, i, lin)
+                    StorePyr(offset, &ecount, &ccount, cells,
+                             cell_type, numref, elem, i, lin)
                     
                 else: # if tetrahedral
-                    StoreTet(offset, &ecount, &ccount, cells, cell_type, numref,
-                             elem, i, lin)
+                    StoreTet(offset, &ecount, &ccount, cells,
+                             cell_type, numref, elem, i, lin)
                 break # Continue to next element
 
         # Test for element type B
@@ -652,10 +653,11 @@ def Parse(raw, pyforce_linear, allowable_types, py_null_unallowed):
                 ansys_etype[ecount] = etype[i]
 
                 lin = 1
-                StoreLine(offset, &ecount, &ccount, cells, cell_type, 
+                store_line(offset, &ecount, &ccount, cells, cell_type, 
                              numref, elem, i, lin)
 
-        # If permitted, add null element if element isn't in the allowable types
+        # If permitted, add null element if element isn't in the
+        # allowable types
         if cstart == ccount and null_unallowed:
             enum[ecount] = raw_enum[i]
             etype_out[ecount] = elem_etype
