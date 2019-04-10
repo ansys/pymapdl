@@ -1033,7 +1033,8 @@ class Result(object):
 
         # store the reference array
         # Allow quadradic and null unallowed
-        parsed = _parser.Parse(self.geometry, False, valid_types, True)
+        parsed = _parser.parse(self.geometry, False, valid_types, True,
+                               keyopts)
         cells = parsed['cells']
         offset = parsed['offset']
         cell_type = parsed['cell_type']

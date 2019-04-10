@@ -90,7 +90,6 @@ class Archive(object):
 
         # Convert to vtk style arrays
         if allowable_types is None:
-            # allowable_types = ['45', '95', '185', '186', '92', '187']
             allowable_types = valid_types
         else:
             assert isinstance(allowable_types, list), \
@@ -100,9 +99,16 @@ class Archive(object):
                     raise Exception('Element type "%s" ' % eletype +
                                     'cannot be parsed in pyansys')
 
+        # construct keyoption array
+        keyopts = np.zeros((10000, 11), np.int16)
+
+        for keyopt_key in self.raw['keyopt']:
+            for index, value in self.raw['keyopt'][keyopt_key]:
+                keyopts[keyopt_key, index] = value
+
         # parse raw output
-        parsed = _parser.Parse(self.raw, force_linear,
-                               allowable_types, null_unallowed)
+        parsed = _parser.parse(self.raw, force_linear, allowable_types,
+                               null_unallowed, keyopts)
         cells = parsed['cells']
         offset = parsed['offset']
         cell_type = parsed['cell_type']
