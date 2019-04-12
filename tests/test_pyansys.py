@@ -14,7 +14,7 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 
 
 def test_loadresult():
-    result = pyansys.open_result(rstfile)
+    result = pyansys.read_binary(rstfile)
 
     # check result is loaded
     assert result.nsets
@@ -56,7 +56,7 @@ def test_loadresult():
 
 @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
 def test_animate_nodal_solution(tmpdir):
-    result = pyansys.open_result(rstfile)
+    result = pyansys.read_binary(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
                                 interactive=False)
@@ -66,12 +66,12 @@ def test_animate_nodal_solution(tmpdir):
 
 def test_loadbeam():
     linkresult = os.path.join(testfiles_path, 'link1.rst')
-    result = pyansys.open_result(linkresult)
+    result = pyansys.read_binary(linkresult)
     assert np.any(result.grid.cells)
 
 
 def test_fullreader():
-    fobj = pyansys.FullReader(fullfile)
+    fobj = pyansys.read_binary(fullfile)
     dofref, k, m = fobj.load_km()
     assert dofref.size
     assert k.size

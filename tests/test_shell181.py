@@ -96,7 +96,7 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
 
 class TestLoad181():
     filename = os.path.join(testfiles_path, 'shell181.rst')
-    result = pyansys.open_result(filename)
+    result = pyansys.read_binary(filename)
 
     def test_load(self):
         assert np.any(self.result.grid.cells)

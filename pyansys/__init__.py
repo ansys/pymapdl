@@ -1,11 +1,10 @@
 import warnings
 from pyansys._version import __version__
 
-from pyansys.archive import Archive, write_cmblock, write_nblock, save_as_archive
+from pyansys.archive import (Archive, write_cmblock, write_nblock,
+                             save_as_archive)
 
-from pyansys.binary_reader import *
-from pyansys.cyclic_reader import *
-from pyansys.binary_reader import FullReader
+from pyansys.generic_binary import read_binary
 from pyansys.cellquality import *
 from pyansys.convert import convert_script
 

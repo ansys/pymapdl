@@ -1,5 +1,4 @@
-"""
-pyansys examples
+"""pyansys examples
 
 """
 from __future__ import print_function
@@ -58,7 +57,7 @@ def load_result():
     """
 
     # Load result file
-    result = pyansys.open_result(rstfile)
+    result = pyansys.read_binary(rstfile)
     assert result.nsets == 6
     assert len(result.nnum) == 321
     print('Loaded result file with {:d} result sets'.format(result.nsets))
@@ -81,7 +80,7 @@ def show_displacement(interactive=True):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
-    fobj = pyansys.open_result(rstfile)
+    fobj = pyansys.read_binary(rstfile)
 
     print('Displaying ANSYS Mode 1')
     fobj.plot_nodal_solution(0, label='Displacement', interactive=interactive)
@@ -91,7 +90,7 @@ def show_stress(interactive=True):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
-    result = pyansys.open_result(rstfile)
+    result = pyansys.read_binary(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
     result.plot_nodal_stress(5, 'Sx', interactive=interactive)
@@ -101,7 +100,7 @@ def load_km():
     """ Loads m and k matrices from a full file """
 
     # Create file reader object
-    fobj = pyansys.FullReader(fullfile)
+    fobj = pyansys.read_binary(fullfile)
     dofref, k, m = fobj.load_km()
 
     # print results

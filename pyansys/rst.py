@@ -1,17 +1,11 @@
-"""
-Used 
-- v150/ansys/customize/user/ResRd.F
-- v150/ansys/customize/include/fdresu.inc
-
-To help build this interface
+"""Read ANSYS binary result files *.rst
 
 """
-import struct
+# import struct
 import os
 import warnings
 import logging
 import ctypes
-from textwrap import wrap
 
 import vtk
 from vtki.common import axis_rotation
@@ -19,13 +13,13 @@ import vtki
 import numpy as np
 
 import pyansys
-from pyansys import _parsefull
 from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys import _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
-
+from pyansys.common import read_table, parse_header
+from pyansys.generic_binary import read_standard_header
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -79,347 +73,89 @@ ELEMENT_INDEX_TABLE_INFO = {
 
 SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                         'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
-                        'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST', 'ptrBC',
-                        'rxtrap', 'mode', 'isym', 'kcmplx', 'numdof',
+                        'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST',
+                        'ptrBC', 'rxtrap', 'mode', 'isym', 'kcmplx',
+                        'numdof', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
                         'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
                         'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
                         'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
                         'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
                         'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                        'DOFS', 'title', 'title', 'title', 'title',
                         'title', 'title', 'title', 'title', 'title',
                         'title', 'title', 'title', 'title', 'title',
                         'title', 'title', 'title', 'title', 'title',
-                        'title', 'title', 'title', 'title', 'title',
-                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle', 'stitle',
-                        'dbmtim', 'dbmdat', 'dbfncl', 'soltim', 'soldat',
-                        'ptrOND', 'ptrOEL', 'nfldof', 'ptrEXA', 'ptrEXT',
-                        'ptrEXAl', 'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
-                        'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl', 'ptrMSTh',
-                        'ptrBCl', 'ptrBCh', 'ptrTRFl', 'ptrTRFh', 'ptrONDl',
-                        'ptrONDh', 'ptrOELl', 'ptrOELh', 'ptrESLl', 'ptrESLh',
-                        'ptrOSLl', 'ptrOSLh', '0', '0', '0',
-                        'PrinKey', 'numvdof', 'numadof', '0', '0',
-                        'ptrVSLl', 'ptrVSLh', 'ptrASLl', 'ptrASLh', '0',
-                        '0', '0', '0', 'numRotCmp', '0',
-                        'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
-                        'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
+                        'title', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'stitle', 'stitle', 'stitle',
+                        'stitle', 'dbmtim', 'dbmdat', 'dbfncl',
+                        'soltim', 'soldat', 'ptrOND', 'ptrOEL',
+                        'nfldof', 'ptrEXA', 'ptrEXT', 'ptrEXAl',
+                        'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
+                        'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl',
+                        'ptrMSTh', 'ptrBCl', 'ptrBCh', 'ptrTRFl',
+                        'ptrTRFh', 'ptrONDl', 'ptrONDh', 'ptrOELl',
+                        'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
+                        'ptrOSLh', '0', '0', '0', 'PrinKey',
+                        'numvdof', 'numadof', '0', '0', 'ptrVSLl',
+                        'ptrVSLh', 'ptrASLl', 'ptrASLh', '0', '0',
+                        '0', '0', 'numRotCmp', '0', 'ptrRCMl',
+                        'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
+                        'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl',
+                        'ptrGEOh']
 
 GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
-                        'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC', 'ptrCSY',
-                        'ptrEID', 'maxsec', 'secsiz', 'maxmat', 'matsiz',
-                        'ptrMAS', 'csysiz', 'elmsiz', 'etysiz', 'rlsiz',
-                        'ptrETYl', 'ptrETYh', 'ptrRELl', 'ptrRELh', 'ptrCSYl',
-                        'ptrCSYh', 'ptrLOCl', 'ptrLOCh', 'ptrEIDl', 'ptrEIDh',
-                        'ptrMASl', 'ptrMASh', 'ptrSECl', 'ptrSECh', 'ptrMATl',
-                        'ptrMATh', 'ptrCNTl', 'ptrCNTh', 'ptrNODl', 'ptrNODh',
-                        'ptrELMl', 'ptrELMh', 'Glbnnod', 'ptrGNODl', 'ptrGNODh',
-                        'maxn', 'NodesUpd',  'lenbac', 'maxcomp', 'compsiz',
-                        'ptrCOMPl', 'ptrCOMPh']
+                        'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC',
+                        'ptrCSY', 'ptrEID', 'maxsec', 'secsiz',
+                        'maxmat', 'matsiz', 'ptrMAS', 'csysiz',
+                        'elmsiz', 'etysiz', 'rlsiz', 'ptrETYl',
+                        'ptrETYh', 'ptrRELl', 'ptrRELh', 'ptrCSYl',
+                        'ptrCSYh', 'ptrLOCl', 'ptrLOCh', 'ptrEIDl',
+                        'ptrEIDh', 'ptrMASl', 'ptrMASh', 'ptrSECl',
+                        'ptrSECh', 'ptrMATl', 'ptrMATh', 'ptrCNTl',
+                        'ptrCNTh', 'ptrNODl', 'ptrNODh', 'ptrELMl',
+                        'ptrELMh', 'Glbnnod', 'ptrGNODl', 'ptrGNODh',
+                        'maxn', 'NodesUpd', 'lenbac', 'maxcomp',
+                        'compsiz', 'ptrCOMPl', 'ptrCOMPh']
 
 RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
                       'maxe', 'nelm', 'kan', 'nsets', 'ptrend',
-                      'ptrDSIl', 'ptrTIMl', 'ptrLSPl', 'ptrELMl', 'ptrNODl',
-                      'ptrGEOl', 'ptrCYCl', 'CMSflg', 'csEls', 'units',
-                      'nSector', 'csCord', 'ptrEnd8', 'ptrEnd8', 'fsiflag',
-                      'pmeth', 'noffst', 'eoffst', 'nTrans', 'ptrTRANl',
-                      'PrecKey', 'csNds', 'cpxrst', 'extopt', 'nlgeom',
-                      'AvailData', 'mmass', 'kPerturb', 'XfemKey', 'rstsprs',
-                      'ptrDSIh', 'ptrTIMh', 'ptrLSPh', 'ptrCYCh', 'ptrELMh',
-                      'ptrNODh', 'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
-                      'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey', 'cycMSUPkey',
-                      'XfemCrkPropTech']
+                      'ptrDSIl', 'ptrTIMl', 'ptrLSPl', 'ptrELMl',
+                      'ptrNODl', 'ptrGEOl', 'ptrCYCl', 'CMSflg',
+                      'csEls', 'units', 'nSector', 'csCord',
+                      'ptrEnd8', 'ptrEnd8', 'fsiflag', 'pmeth',
+                      'noffst', 'eoffst', 'nTrans', 'ptrTRANl',
+                      'PrecKey', 'csNds', 'cpxrst', 'extopt',
+                      'nlgeom', 'AvailData', 'mmass', 'kPerturb',
+                      'XfemKey', 'rstsprs', 'ptrDSIh', 'ptrTIMh',
+                      'ptrLSPh', 'ptrCYCh', 'ptrELMh', 'ptrNODh',
+                      'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
+                      'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey',
+                      'cycMSUPkey', 'XfemCrkPropTech']
 
 
-# element types with stress outputs (consider not including this)
-# validENS = [45, 92, 95, 181, 182, 183, 185, 186, 187]
-
-
-class FullReader(object):
-    """
-    Stores the results of an ANSYS full file.
+class ResultFile(object):
+    """Reads a binary ANSYS result file.
 
     Parameters
     ----------
-    filename : str
-        Filename of the full file to read.
-
-    Examples
-    --------
-    >>> full = FullReader('file.rst')
-
-    """
-
-    def __init__(self, filename):
-        """
-        Loads full header on initialization.
-
-        See ANSYS programmer's reference manual full header section for
-        definitions of each header.
-
-        """
-        # check if file exists
-        if not os.path.isfile(filename):
-            raise Exception('{:s} not found'.format(filename))
-
-        self.filename = filename
-        self.header = _parsefull.ReturnHeader(filename)
-
-        # Check if lumped (item 11)
-        if self.header[11]:
-            raise Exception(
-                "Unable to read a lumped mass matrix.  Terminating.")
-
-        # Check if arrays are unsymmetric (item 14)
-        if self.header[14]:
-            raise Exception(
-                "Unable to read an unsymmetric mass/stiffness matrix.")
-
-    def load_km(self, as_sparse=True, sort=False):
-        """
-        Load and construct mass and stiffness matrices from an ANSYS full file.
-
-        Parameters
-        ----------
-        as_sparse : bool, optional
-            Outputs the mass and stiffness matrices as scipy csc
-            sparse arrays when True by default.
-
-        sort : bool, optional
-            Rearranges the k and m matrices such that the rows
-            correspond to to the sorted rows and columns in dor_ref.
-            Also sorts dor_ref.
-
-        Returns
-        -------
-        dof_ref : (n x 2) np.int32 array
-            This array contains the node and degree corresponding to
-            each row and column in the mass and stiffness matrices.
-            In a 3 DOF analysis the dof intergers will correspond to:
-            0 - x
-            1 - y
-            2 - z
-            Sort these values by node number and DOF by enabling the
-            sort parameter.
-
-        k : (n x n) np.float or scipy.csc array
-            Stiffness array
-
-        m : (n x n) np.float or scipy.csc array
-            Mass array
-
-        Notes
-        -----
-        Constrained entries are removed from the mass and stiffness
-        matrices.
-
-        Constrained DOF can be accessed with self.const, which returns
-        the node number and DOF constrained in ANSYS.
-
-        """
-        if not os.path.isfile(self.filename):
-            raise Exception('%s not found' % self.filename)
-
-        # see if
-        if as_sparse:
-            try:
-                from scipy.sparse import csc_matrix, coo_matrix
-            except BaseException:
-                raise Exception('Unable to load scipy, matricies will be full')
-                as_sparse = False
-
-        # Get header details
-        neqn = self.header[2]  # Number of equations
-        ntermK = self.header[9]  # number of terms in stiffness matrix
-        ptrSTF = self.header[19]  # Location of stiffness matrix
-        ptrMAS = self.header[27]  # Location in file to mass matrix
-        ntermM = self.header[34]  # number of terms in mass matrix
-        ptrDOF = self.header[36]  # pointer to DOF info
-
-        # DOF information
-        ptrDOF = self.header[36]  # pointer to DOF info
-        with open(self.filename, 'rb') as f:
-            read_table(f, skip=True)  # standard header
-            read_table(f, skip=True)  # full header
-            read_table(f, skip=True)  # number of degrees of freedom
-            neqv = read_table(f)  # Nodal equivalence table
-
-            f.seek(ptrDOF*4)
-            ndof = read_table(f)
-            const = read_table(f)
-
-        # degree of freedom reference and number of degress of freedom per node
-        dof_ref = [ndof, neqv]
-        self.ndof = ndof
-
-        # Read k and m blocks (see help(ReadArray) for block description)
-        if ntermK:
-            krow, kcol, kdata = _binary_reader.ReadArray(self.filename,
-                                                     ptrSTF,
-                                                     ntermK,
-                                                     neqn,
-                                                     const)
-        else:
-            warnings.warn('Missing stiffness matrix')
-            kdata = None
-
-        if ntermM:
-            mrow, mcol, mdata = _binary_reader.ReadArray(self.filename,
-                                                     ptrMAS,
-                                                     ntermM,
-                                                     neqn,
-                                                     const)
-        else:
-            warnings.warn('Missing mass matrix')
-            mdata = None
-
-        # remove constrained entries
-        if np.any(const < 0):
-            if kdata is not None:
-                remove = np.nonzero(const < 0)[0]
-                mask = ~np.logical_or(np.in1d(krow, remove), np.in1d(kcol, remove))
-                krow = krow[mask]
-                kcol = kcol[mask]
-                kdata = kdata[mask]
-
-            if mdata is not None:
-                mask = ~np.logical_or(np.in1d(mrow, remove), np.in1d(mcol, remove))
-                mrow = mrow[mask]
-                mcol = mcol[mask]
-                mdata = mdata[mask]
-
-
-        # sort nodal equivalence
-        dof_ref, index, nref, dref = _binary_reader.SortNodalEqlv(neqn, neqv, ndof)
-
-        # store constrained dof information
-        unsort_dof_ref = np.vstack((nref, dref)).T
-        self.const = unsort_dof_ref[const < 0]
-
-        if sort:  # make sorting the same as ANSYS rdfull would output
-            # resort to make in upper triangle
-            krow = index[krow]
-            kcol = index[kcol]
-            krow, kcol = np.sort(np.vstack((krow, kcol)), 0)
-
-            if mdata is not None:
-                mrow = index[mrow]
-                mcol = index[mcol]
-                mrow, mcol = np.sort(np.vstack((mrow, mcol)), 0)
-
-        else:
-            dof_ref = unsort_dof_ref
-
-        # store data for later reference
-        if kdata is not None:
-            self.krow = krow
-            self.kcol = kcol
-            self.kdata = kdata
-        if mdata is not None:
-            self.mrow = mrow
-            self.mcol = mcol
-            self.mdata = mdata
-
-        # output as a sparse matrix
-        if as_sparse:
-
-            if kdata is not None:
-                k = coo_matrix((neqn,) * 2)
-                k.data = kdata  # data has to be set first
-                k.row = krow
-                k.col = kcol
-
-                # convert to csc matrix (generally faster for sparse solvers)
-                k = csc_matrix(k)
-            else:
-                k = None
-
-            if mdata is not None:
-                m = coo_matrix((neqn,) * 2)
-                m.data = mdata
-                m.row = mrow
-                m.col = mcol
-
-                # convert to csc matrix (generally faster for sparse solvers)
-                m = csc_matrix(m)
-            else:
-                m = None
-
-        else:
-            if kdata is not None:
-                k = np.zeros((neqn,) * 2)
-                k[krow, kcol] = kdata
-            else:
-                k = None
-
-            if mdata is not None:
-                m = np.zeros((neqn,) * 2)
-                m[mrow, mcol] = mdata
-            else:
-                m = None
-
-        return dof_ref, k, m
-
-def ResultReader(filename):
-    """ Opens ansys binary result file. Depreciated function.  """
-    warnings.warn('This function will be depreciated in 0.36.0\n' +
-                  'Please use "open_result" instead.')
-    open_result(filename)
-
-
-def open_result(filename):
-    """
-    Reads a binary ANSYS result file.
-
-    Parameters
-    ----------
-    filename : string
+    filename : str, optional
         Filename of the ANSYS binary result file.
 
-    """
-    if not os.path.isfile(filename):
-        raise Exception('%s is not a file or cannot be found' % str(filename))
-
-    # determine if file is a result file
-    standard_header = read_standard_header(filename)
-    if standard_header['file format'] != 12:
-        raise Exception('Binary file is not a result file.')
-
-    # determine if cyclic
-    with open(filename, 'rb') as f:
-        f.seek(103 * 4)
-        result_header = parse_header(read_table(f), RESULT_HEADER_KEYS)
-
-    if result_header['nSector'] == 1:
-        log.debug('Initializing standard result')
-        return Result(filename)
-    else:
-        log.debug('Initializing cyclic result')
-        return pyansys.CyclicResult(filename)
-
-
-class Result(object):
-    """
-    Reads a binary ANSYS result file.
-
-    Parameters
-    ----------
-    filename : string
-        Filename of the ANSYS binary result file.
+    ignore_cyclic : bool, optional
+        Ignores any cyclic properties.
 
     """
-    def __init__(self, filename):
+    def __init__(self, filename=None, ignore_cyclic=False):
+        """Loads basic result information from result file and
+        initializes result object.
         """
-        Loads basic result information from result file and initializes result
-        object.
+        if filename is not None:
+            self.filename = filename
 
-        """
-        # Store filename result header items
-        self.filename = filename
-        self.resultheader = result_info(filename)
+        self.resultheader = result_info(self.filename)
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
@@ -436,9 +172,17 @@ class Result(object):
         # store geometry for later retrival
         self.store_geometry()
 
+        with open(self.filename, 'rb') as f:
+            f.seek(103*4)  # start of secondary header
+            self.header = parse_header(read_table(f), RESULT_HEADER_KEYS)
+
+        if self.header['nSector'] != 1 and not ignore_cyclic:
+            from pyansys.cyclic_reader import CyclicResult
+            self.__class__ = CyclicResult
+            self.__init__()
+
     def plot(self, color='w', show_edges=True, **kwargs):
-        """
-        Plot result geometry
+        """Plot result geometry
 
         Parameters
         ----------
@@ -584,20 +328,25 @@ class Result(object):
             scalars = new_scalars
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
             scalars = scalars[ind]
-            
+
         else:
             grid = self.grid
 
         if hasattr(self, 'n_sector'):
-            from pyansys import CyclicResult
-            return super(CyclicResult, self).plot_point_scalars(scalars, rnum,
-                                                                stitle, cmap,
+            from pyansys.cyclic_reader import CyclicResult
+            return super(CyclicResult, self).plot_point_scalars(scalars,
+                                                                rnum,
+                                                                stitle,
+                                                                cmap,
                                                                 flip_scalars,
-                                                                screenshot, cpos,
+                                                                screenshot,
+                                                                cpos,
                                                                 interactive=interactive,
-                                                                grid=grid, **kwargs)
+                                                                grid=grid,
+                                                                **kwargs)
         else:
             return self.plot_point_scalars(scalars, rnum, stitle, cmap,
                                            flip_scalars, screenshot, cpos,
@@ -2021,164 +1770,11 @@ def result_info(filename):
     return resultheader
 
 
-def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
-    """ read fortran style table """
-    if get_nread:
-        n = np.fromfile(f, 'i', 1)
-        if not n:
-            raise Exception('end of file')
-
-        tablesize = n[0]
-        f.seek(4, 1)  # skip padding
-
-    # override
-    if nread:
-        tablesize = nread
-
-    if skip:
-        f.seek((tablesize + 1)*4, 1)
-        return
-    else:
-        if dtype == 'double':
-            tablesize //= 2
-        table = np.fromfile(f, dtype, tablesize)
-    f.seek(4, 1)  # skip padding
-    return table
-
-
-def two_ints_to_long(intl, inth):
-    """ Interpert two ints as one long """
-    longint = struct.pack(">I", inth) + struct.pack(">I", intl)
-    return struct.unpack('>q', longint)[0]
-
-
 def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
     return x, y
-
-
-def parse_header(table, keys):
-    """ parses a header from a table """
-    header = {}
-    for i, key in enumerate(keys):
-        header[key] = table[i]
-
-    for key in keys:
-        if 'ptr' in key and key[-1] == 'h':
-            basekey = key[:-1]
-            intl = header[basekey + 'l']
-            inth = header[basekey + 'h']
-            header[basekey] = two_ints_to_long(intl, inth)
-
-    return header
-
-
-def read_standard_header(filename):
-    """ Reads standard header """
-    # f = open(filename, 'rb')
-    with open(filename, 'rb') as f:
-
-        endian = '<'
-        if np.fromfile(f, dtype='<i', count=1) != 100:
-
-            # Check if big enos
-            f.seek(0)
-            if np.fromfile(f, dtype='>i', count=1) == 100:
-                endian = '>'
-
-            # Otherwise, it's probably not a result file
-            else:
-                raise Exception('Unable to determine endian type.  ' +
-                                'Possibly not an ANSYS binary file')
-
-        f.seek(0)
-
-        header = {}
-        header['endian'] = endian
-        header['file number'] = read_table(f, nread=1, get_nread=False)[0]
-        header['file format'] = read_table(f, nread=1, get_nread=False)[0]
-        int_time = str(read_table(f, nread=1, get_nread=False)[0])
-        header['time'] = ':'.join([int_time[0:2], int_time[2:4], int_time[4:]])
-        int_date = str(read_table(f, nread=1, get_nread=False)[0])
-        if int_date == '-1':
-            header['date'] = ''
-        else:
-            header['date'] = '/'.join([int_date[0:4], int_date[4:6], int_date[6:]])
-
-        unit_types = {0: 'User Defined',
-                      1: 'SI',
-                      2: 'CSG',
-                      3: 'U.S. Customary units (feet)',
-                      4: 'U.S. Customary units (inches)',
-                      5: 'MKS',
-                      6: 'MPA',
-                      7: 'uMKS'}
-        header['units'] = unit_types[read_table(f, nread=1, get_nread=False)[0]]
-
-        f.seek(11 * 4)
-        version = read_string_from_binary(f, 1).strip()
-
-        header['verstring'] = version
-        header['mainver'] = int(version[:2])
-        header['subver'] = int(version[-1])
-
-        # there's something hidden at 12
-        f.seek(4, 1)
-
-        # f.seek(13 * 4)
-        header['machine'] = read_string_from_binary(f, 3).strip()
-        header['jobname'] = read_string_from_binary(f, 2).strip()
-        header['product'] = read_string_from_binary(f, 2).strip()
-        header['special'] = read_string_from_binary(f, 1).strip()
-        header['username'] = read_string_from_binary(f, 3).strip()
-
-        # Items 23-25 The machine identifier in integer form (three four-character strings)
-        # this contains license information
-        header['machine_identifier'] = read_string_from_binary(f, 3).strip()
-
-        # Item 26 The system record size
-        header['system record size'] = read_table(f, nread=1, get_nread=False)[0]
-
-        # Item 27 The maximum file length
-        # header['file length'] = read_table(f, nread=1, get_nread=False)[0]
-
-        # Item 28 The maximum record number
-        # header['the maximum record number'] = read_table(f, nread=1, get_nread=False)[0]
-
-        # Items 31-38 The Jobname (eight four-character strings)
-        f.seek(32*4)
-        header['jobname2'] = read_string_from_binary(f, 8).strip()
-
-        # Items 41-60 The main analysis title in integer form (20 four-character strings)
-        f.seek(42*4)
-        header['title'] = read_string_from_binary(f, 20).strip()
-
-        # Items 61-80 The first subtitle in integer form (20 four-character strings)
-        header['subtitle'] = read_string_from_binary(f, 20).strip()
-
-        # Item 95 The split point of the file (0 means the file will not split)
-        f.seek(96*4)
-        header['split point'] = read_table(f, nread=1, get_nread=False)[0]
-
-        # Items 97-98 LONGINT of the maximum file length (bug here)
-        # ints = read_table(f, nread=2, get_nread=False)
-        # header['file length'] = two_ints_to_long(ints[0], ints[1])
-
-    return header
-
-
-def read_string_from_binary(f, n):
-    """ Read n 4 character binary strings from a file opend in binary mode """
-    string = b''
-    for i in range(n):
-        string += f.read(4)[::-1]
-
-    try:
-        return string.decode('utf')
-    except:
-        return string
 
 
 def is_int(value):

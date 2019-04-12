@@ -19,7 +19,7 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 
 def test_save_as_vtk(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.vtk'))
-    result = pyansys.open_result(examples.rstfile)
+    result = pyansys.read_binary(examples.rstfile)
     result.save_as_vtk(filename)
 
     grid = vtki.UnstructuredGrid(filename)
@@ -68,7 +68,7 @@ def test_plot_component():
     """
 
     filename = os.path.join(testfiles_path, 'comp_hex_beam.rst')
-    result = pyansys.open_result(filename)
+    result = pyansys.read_binary(filename)
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
     result.plot_nodal_solution(0, node_components=components,

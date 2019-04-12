@@ -13,10 +13,9 @@ from pyansys import _parsefull
 from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys.elements import valid_types
-from pyansys import Result
-from pyansys.binary_reader import transform, trans_to_matrix
+from pyansys.rst import transform, trans_to_matrix
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
-
+from pyansys.rst import ResultFile
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -25,15 +24,15 @@ log.setLevel('DEBUG')
 np.seterr(divide='ignore', invalid='ignore')
 
 
-class CyclicResult(Result):
+class CyclicResult(ResultFile):
     """ Adds cyclic functionality to the result reader in pyansys """
 
-    def __init__(self, filename):
+    def __init__(self):
         """ Initializes object """
-        super(CyclicResult, self).__init__(filename)
+        # super(CyclicResult, self).__init__()
 
         # sanity check
-        if self.resultheader['nSector'] == 1:
+        if self.header['nSector'] == 1:
             raise Exception('Result is not a cyclic model')
 
         self._add_cyclic_properties()

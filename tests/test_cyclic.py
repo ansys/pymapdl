@@ -21,19 +21,19 @@ testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
 
 # modal result z axis
-result_z = pyansys.open_result(sector_result_file)
+result_z = pyansys.read_binary(sector_result_file)
 
 # static result x axis
 cyclic_x_filename = os.path.join(testfiles_path, 'cyc12.rst')
-result_x = pyansys.open_result(cyclic_x_filename)
+result_x = pyansys.read_binary(cyclic_x_filename)
 
 # static result z axis
 cyclic_v182_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-cyclic_v182_z = pyansys.open_result(cyclic_v182_file)
+cyclic_v182_z = pyansys.read_binary(cyclic_v182_file)
 
 # cyclic modal with component
 filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182_w_comp.rst')
-cyclic_v182_z_with_comp = pyansys.open_result(filename)
+cyclic_v182_z_with_comp = pyansys.read_binary(filename)
 
 
 def test_non_cyclic():
@@ -92,7 +92,7 @@ def test_element_stress_v182_non_cyclic():
 
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.open_result(ansys_result_file)
+    result = pyansys.read_binary(ansys_result_file)
 
     element_stress, elemnum, enode = result.element_stress(0)
     element_stress = np.vstack(element_stress)
@@ -114,7 +114,7 @@ def test_nodal_stress_v182_non_cyclic():
     ansys_stress = array[:, 1:]
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.Result(ansys_result_file)
+    result = pyansys.rst.ResultFile(ansys_result_file, ignore_cyclic=True)
     nnum, stress = result.nodal_stress(0)
 
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_prnsol_s.npz'))
@@ -131,7 +131,7 @@ def test_full_x_nodal_solution():
     ansys_disp = from_ansys['disp']
 
 
-    # self = pyansys.open_result(cyclic_x_filename)
+    # self = pyansys.read_binary(cyclic_x_filename)
     rnum = 0
     phase = 0
     full_rotor = True

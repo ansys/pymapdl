@@ -5,11 +5,12 @@ import numpy as np
 import os
 import pyansys
 from vtki.plotting import running_xserver
+from pyansys.rst import ResultFile
 
-try:
-    __file__
-except:
-    __file__ = '/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py'
+# try:
+#     __file__
+# except:
+#     __file__ = '/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py'
 
 
 path = os.path.dirname(os.path.abspath(__file__))
@@ -26,16 +27,20 @@ class TestCyclicResultReader(object):
     result_file = os.path.join(data_path, 'cyclic_%s.rst' % rver)
     try:
         # test if raw results are being read properly by using the normal result reader
-        result = pyansys.Result(result_file)
+        result = ResultFile(result_file, ignore_cyclic=True)
 
         if rver == 'v182':
             ansys = pyansys.ANSYS('/usr/ansys_inc/v182/ansys/bin/ansys182',
-                                  override=True, jobname=rver, loglevel='DEBUG',
-                                  interactive_plotting=False, prefer_pexpect=True)
+                                  override=True, jobname=rver,
+                                  loglevel='DEBUG',
+                                  interactive_plotting=False,
+                                  prefer_pexpect=True)
         else:
             ansys = pyansys.ANSYS('/usr/ansys_inc/v150/ansys/bin/ansys150',
-                                  override=True, jobname=rver, loglevel='DEBUG',
-                                  interactive_plotting=False, prefer_pexpect=True)
+                                  override=True, jobname=rver,
+                                  loglevel='DEBUG',
+                                  interactive_plotting=False,
+                                  prefer_pexpect=True)
 
 
         # copy result file to ansys's temporary path

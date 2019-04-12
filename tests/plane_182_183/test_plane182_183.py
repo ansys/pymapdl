@@ -14,7 +14,7 @@ except:
     testfiles_path = '/home/alex/afrl/python/source/pyansys/tests/plane_182_183'
 
 filename = os.path.join(testfiles_path, 'pyansys_182_183_42_82.rst')
-result = pyansys.open_result(filename)
+result = pyansys.read_binary(filename)
 
 def test_load():
     assert np.any(result.grid.cells)
