@@ -775,7 +775,8 @@ class ResultFile(object):
 
         # store the reference array
         # Allow quadradic and null unallowed
-        parsed = _parser.Parse(self.geometry, False, valid_types, True)
+        parsed = _parser.parse(self.geometry, False, valid_types, True,
+                               keyopts)
         cells = parsed['cells']
         offset = parsed['offset']
         cell_type = parsed['cell_type']
@@ -785,7 +786,8 @@ class ResultFile(object):
         cells[cells == -1] = 0
 
         # identify nodes that are actually in the solution
-        self.insolution = np.in1d(self.geometry['nnum'], self.resultheader['neqv'])
+        self.insolution = np.in1d(self.geometry['nnum'],
+                                  self.resultheader['neqv'])
 
         # Create vtk object
         nodes = nloc[:, :3]
