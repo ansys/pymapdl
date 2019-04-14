@@ -1,5 +1,5 @@
 Working with a ANSYS Full File (full)
-======================================
+=====================================
 The ANSYS full file is a FORTRAN formatted binary file containing the mass and stiffness from an ANSYS analysis.  Using pyansys it can be loaded into memory as either a sparse or full matrix.
 
 
@@ -18,7 +18,7 @@ By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It i
     from pyansys import examples
     
     # Create result reader object and read in full file
-    full = pyansys.FullReader(examples.fullfile)
+    full = pyansys.open_result(examples.fullfile)
     dof_ref, k, m = full.load_km(sort=True)
 
 
@@ -102,10 +102,10 @@ You can also plot the mode shape of this finite element model.  Since the constr
 .. image:: ./images/solved_km.png
 
 
-This example is built into ``pyansys`` and can be run from  ``examples.SolveKM()``.
+This example is built into ``pyansys`` and can be run from  ``examples.solve_km()``.
 
 
-FullReader Object Methods
--------------------------
-.. autoclass:: pyansys.FullReader
+FullFile Object Methods
+-----------------------
+.. autoclass:: pyansys.full.FullFile
     :members:

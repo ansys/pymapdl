@@ -963,4 +963,56 @@ def cells_with_any_nodes(index_type [::1] offset, index_type [::1] cells,
                     break
 
     return np.asarray(cell_mask, dtype=np.bool)
+
+
+def midside_mask(uint8 [::1] celltypes, index_type [::1] cells,
+                 index_type [::1] offset, int npoints):
+    """Returns a mask of midside nodes
+
+    Parameters
+    ----------
+    celltypes : uint8 [::1]
+        VTK style celltype array
+
+    cells : int32 or int64 [::1]
+        VTK style cell array
+
+    offset : int32 or int64 [::1]
+        VTK style offset array
+
+    npoints : int
+        Number of points
+
+    Returns
+    -------
+    mask : bool np.ndarray
+        True when a midside node.
+    """
+    cdef uint8 [::1] mask = np.zeros(npoints, ctypes.c_uint8)
+    cdef int i, j, c
+    cdef int ncells = celltypes.size
+    cdef uint8 celltype
+
+    for i in range(ncells):
+        # get start location of each cell
+        c = offset[i] + 1
+        celltype = celltypes[i]
     
+        if celltype == VTK_QUADRATIC_TETRA:
+            for j in range(c + 4, c + 10):
+                mask[cells[j]] = 1
+
+        elif celltype == VTK_QUADRATIC_PYRAMID:
+            for j in range(c + 5, c + 13):
+                mask[cells[j]] = 1
+
+        elif celltype == VTK_QUADRATIC_WEDGE:
+            for j in range(c + 6, c + 15):
+                mask[cells[j]] = 1
+
+        elif celltype == VTK_QUADRATIC_HEXAHEDRON:   
+            for j in range(c + 8, c + 20):
+                mask[cells[j]] = 1
+
+    # return as a bool array without copying
+    return np.asarray(mask).view(np.bool)

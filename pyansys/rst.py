@@ -1,25 +1,20 @@
 """Read ANSYS binary result files *.rst
-
 """
 # import struct
-import os
 import warnings
 import logging
 import ctypes
 
 import vtk
-from vtki.common import axis_rotation
 import vtki
 import numpy as np
 
-import pyansys
 from pyansys import _binary_reader
 from pyansys import _parser
 from pyansys import _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
-from pyansys.common import read_table, parse_header
-from pyansys.generic_binary import read_standard_header
+from pyansys.common import read_table, parse_header, read_standard_header
 
 # Create logger
 log = logging.getLogger(__name__)
@@ -148,13 +143,11 @@ class ResultFile(object):
         Ignores any cyclic properties.
 
     """
-    def __init__(self, filename=None, ignore_cyclic=False):
+    def __init__(self, filename, ignore_cyclic=False):
         """Loads basic result information from result file and
         initializes result object.
         """
-        if filename is not None:
-            self.filename = filename
-
+        self.filename = filename
         self.resultheader = result_info(self.filename)
 
         # Get the total number of results and log it

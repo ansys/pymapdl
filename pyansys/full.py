@@ -3,9 +3,8 @@ import warnings
 
 import numpy as np
 
-from pyansys import _parsefull
+from pyansys import _parsefull, _binary_reader
 from pyansys.common import read_table
-from pyansys import _binary_reader
 
 
 class FullFile(object):
@@ -21,13 +20,14 @@ class FullFile(object):
     >>> full = pyansys.read_binary('file.rst')
     """
 
-    def __init__(self):
+    def __init__(self, filename):
         """Loads full header on initialization.
 
         See ANSYS programmer's reference manual full header section for
         definitions of each header.
 
         """
+        self.filename = filename
         self.header = _parsefull.ReturnHeader(self.filename)
 
         # Check if lumped (item 11)
@@ -80,7 +80,6 @@ class FullFile(object):
 
         Constrained DOF can be accessed with self.const, which returns
         the node number and DOF constrained in ANSYS.
-
         """
         if not os.path.isfile(self.filename):
             raise Exception('%s not found' % self.filename)

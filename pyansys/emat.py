@@ -1,5 +1,9 @@
-"""
-This header is straight out of fdemat.inc
+"""pyansys Element matricies file reader
+
+
+This header is straight out of fdemat.inc and can be found online at
+https://www.sharcnet.ca/Software/Ansys/16.2.3/en-us/help/ans_prog/Hlp_P_INT1_6.html
+
 *comdeck,fdemat
 
 c *** Copyright ANSYS.  All Rights Reserved.
@@ -305,7 +309,8 @@ c   kygaf        global applied force matrix calculate key
 c   kygrf        global restoring force matrix calculate key
 
 """
-from pyansys.generic_binary import BinaryFile
+import numpy as np
+
 from pyansys.common import read_table, parse_header
 
 EMAT_HEADER_KEYS = ['fun02', 'nume', 'numdof', 'lenu', 'lenbac',
@@ -318,20 +323,47 @@ EMAT_HEADER_KEYS = ['fun02', 'nume', 'numdof', 'lenu', 'lenbac',
                     'ptrFSTl', 'ptrLSTl', 'ptrBITl', 'ptrEHDl',
                     'ptrIDXl', 'ptrendH', 'ptrendL']
 
+ELEMENT_HEADER_KEYS = ['stkey', 'mkey', 'dkey', 'sskey', 'akey',
+                       'nrkey', 'ikey', '_', '_', 'nmrow']
 
-class EmatFile(BinaryFile):
 
-    def __init__(self):
+class EmatFile(object):
+    """Enables pythonic access for an ANSYS element matrix file.
+
+    Parameters
+    ----------
+    filename : str
+        File to open.  Usually ends in .emat
+
+    Examples
+    --------
+    >>> import pyansys
+    >>> emat_file = pyansys.read_binary('file.emat')
+    """
+
+    def __init__(self, filename):
+        self._element_matrices_index_table = None
+        self._element_equivalence_table = None
+        self._neqv = None
+        self._nnum = None
+        self._eeqv = None
+        self._enum = None
+        self.filename = filename
         self.read_header()
 
     def read_header(self):
-        header = {}
+        """Read standard emat file header"""
         with open(self.filename, 'rb') as f:
             f.seek(103*4)
             self.header = parse_header(read_table(f), EMAT_HEADER_KEYS)
 
-    def read_element_matrix_header(self):
+    def read_element_matrix_header(self, f_index):
         """Read element matrix header
+
+        Parameters
+        ----------
+        f_indes : int
+            Fortran index to the start of the element matrix header.
 
         Notes
         -----
@@ -356,23 +388,283 @@ class EmatFile(BinaryFile):
             1 - vector used
 
         nrkey - newton-raphson(restoring) load 
-
-        vector key (for nonlinear analyses)
             0 - vector not used
             1 - vector used
 
         ikey - imaginary load vector key (for complex analyses)
             0 - vector not used
             1 - vector used 
+
         nmrow - numbers/columns in matrices. 
             If the number is negative, the matrices will be written in
             lower triangular form.
 
         """
-        header_keys = ['stkey', 'mkey', 'dkey', 'sskey', 'akey',
-                       'nrkey', 'ikey', '_', '_', 'nmrow']
-
         with open(self.filename, 'rb') as f:
-            f.seek(4*self.header['ptrEHD'])
-            self.element_matrix_header = parse_header(read_table(f),
-                                                      header_keys)
+            f.seek(4*f_index)
+            return parse_header(read_table(f), ELEMENT_HEADER_KEYS)
+
+    @property
+    def element_matrices_index_table(self):
+        """Return element matrices index table"""
+        if self._element_matrices_index_table is None:
+            with open(self.filename, 'rb') as f:
+                f.seek(self.header['ptrIDX']*4)
+                self._element_matrices_index_table = read_table(f)
+        return self._element_matrices_index_table
+
+    @property
+    def element_equivalence_table(self):
+        """Element equivalence table
+
+        The ANSYS program stores all element data in the numerical
+        order that the SOLUTION processor solves the elements.  This
+        table equates the order number used to the actual element
+        number.
+        """
+        if self._element_equivalence_table is None:
+            with open(self.filename, 'rb') as f:
+                f.seek(self.header['ptrIDX']*4)
+                self._element_matrices_index_table = read_table(f)
+        return self._element_equivalence_table
+
+    # def element_matricies(self, index):
+    #     """Element matrices
+
+    #     This record is repeated for each stiffness, mass, damping, and
+    #     stress stiffening matrix. If the matrix is diagonal, the
+    #     length of the records will benmrow.  If the matrix is
+    #     unsymmetric, the length of the records will be nmrow*nmrow. If
+    #     the matrix is symmetric, only the lower triangular terms are
+    #     written and the lengthof the records will be
+    #     (nmrow)*(nmrow+1)/2.
+    #     """
+    #     self.element_matrices_index_table[index]
+
+    @property
+    def neqv(self):
+        """Nodal equivalence table. This table equates the number used
+        for storage to the actual node number.
+        """
+        if self._neqv is None:
+            with open(self.filename, 'rb') as f:
+                f.seek(self.header['ptrBAC']*4)
+                self._neqv = read_table(f)
+        return self._neqv
+
+    @property
+    def nnum(self):
+        """Sorted ANSYS node numbers"""
+        if self._nnum is None:
+            self._nnum = np.sort(self.neqv)
+        return self._nnum
+
+    @property
+    def eeqv(self):
+        """Element equivalence table.  This table equates the number used
+        for storage to the actual element number.
+        """
+        if self._eeqv is None:
+            with open(self.filename, 'rb') as f:
+                f.seek(self.header['ptrELM']*4)
+                self._eeqv = read_table(f)
+        return self._eeqv
+
+    @property
+    def enum(self):
+        """Sorted ANSYS element numbers"""
+        if self._enum is None:
+            self._enum = np.sort(self.eeqv)
+        return self._enum
+
+    def read_element(self, index, stress=True, mass=True,
+                     damping=True, stress_stiff=True,
+                     applied_force=True, newton_raphson=True,
+                     imaginary_load=True):
+        """Read element by index
+
+        Parameters
+        ----------
+        index : int
+            Element index.  This is not the element number.  Reference
+            the element equivalency table for the actual element
+            number.
+
+        stress : bool, optional
+            Return the stress matrix entries if available.
+
+        mass : bool, optional
+            Return the mass matrix entries if available.
+
+        damping : bool, optional
+            Return the damping matrix entries if available.
+
+        stress_stiff : bool, optional
+            Return the stress stiffening entries if available.
+
+        newton_raphson : bool, optional
+            Return the newton raphson load entries if available.
+
+        applied_force : bool, optional
+            Return the applied load vector if available.
+
+        imaginary_load : bool, optional
+            Return the imaginary load vector if available.
+
+        Returns
+        -------
+        dof_idx : np.ndarray
+            DOF index table. This record specifies the DOF locations
+            of this element matrix in relation to the global
+            matrix. The index is calculated as (N-1)*NUMDOF+DOF, where
+            N is the position number of the node in the nodal
+            equivalence table and DOF is the DOF reference number
+            given above
+
+        element_data : dict
+            Dictionary containing the following entries for each of
+            the corresponding inputs when the item is True.
+            - 'stress' : stress matrix entries
+            - 'mass' : mass matrix entries
+            - 'damping' : damping matrix entries
+            - 'stress_stiff' : stress stiffening matrix entries
+            - 'newton_raphson' : newton rapson load vector
+            - 'applied_force' : applied force vector
+            - 'imaginary_load' : imaginary load vector
+
+        Notes
+        -----
+        If the matrix is diagonal, the length of the records will be
+        nmrow.  If the matrix is unsymmetric, the length of the
+        records will be nmrow*nmrow. If the matrix is symmetric, only
+        the lower triangular terms are written and the length of the
+        records will be ``(nmrow)*(nmrow+1)/2``
+
+        Records are written relative to the dof_idx.  The index is
+        calculated as (N-1)*NUMDOF+DOF, where N is the position number
+        of the node in the nodal equivalence table and DOF is the DOF
+        reference number given by ``dof_idx``.
+        """
+        element_data = {}
+        with open(self.filename, 'rb') as fobj:
+            # seek to the position of the element table in the file
+            fobj.seek(self.element_matrices_index_table[index]*4)
+
+            # matrix header
+            element_header = parse_header(read_table(fobj), ELEMENT_HEADER_KEYS)
+            nmrow = abs(element_header['nmrow'])
+            lower_tri = element_header['nmrow'] < 0
+            if lower_tri:
+                nread = nmrow*(nmrow + 1)//2
+            else:
+                nread = nmrow*nmrow
+
+            # Read DOF index table. This record specifies the DOF locations
+            # of this element matrix in relation to the global
+            # matrix. The index is calculated as (N-1)*NUMDOF+DOF,
+            # where N is the position number of the node in the nodal
+            # equivalence table and DOF is the DOF reference number
+            # given above
+            dof_idx = read_table(fobj) - 1  # adj one based indexing
+
+            # read stress matrix
+            if element_header['stkey']:  # if entry even exists
+                if stress:
+                    stress_entries = read_table(fobj, 'd', nread)
+                    element_data['stress'] = stress_entries
+                else:  # skip
+                    fobj.seek(nread*8 + 12, 1)
+
+            # read mass matrix
+            if element_header['mkey']:  # if entry even exists
+                if mass:
+                    mass_entries = read_table(fobj, 'd', nread)
+                    element_data['mass'] = mass_entries
+                else:  # skip
+                    fobj.seek(nread*8 + 12, 1)
+
+            if element_header['dkey']:
+                if damping:
+                    damping_entries = read_table(fobj, 'd', nread)
+                    element_data['damping'] = damping_entries
+                else:  # skip
+                    fobj.seek(nread*8 + 12, 1)
+
+            if element_header['sskey']:
+                if stress_stiff:
+                    stress_stiff_entries = read_table(fobj, 'd', nread)
+                    element_data['stress_stiff'] = stress_stiff_entries
+                else:  # skip
+                    fobj.seek(nread*8 + 12, 1)
+
+            if element_header['akey']:
+                if applied_force:
+                    applied_force_vector = read_table(fobj, 'd', nmrow)
+                    element_data['applied_force'] = applied_force_vector
+                else:  # skip
+                    fobj.seek(nmrow*8 + 12, 1)
+
+            if element_header['nrkey']:
+                if newton_raphson:
+                    newton_raphson_vector = read_table(fobj, 'd', nmrow)
+                    element_data['newton_raphson'] = newton_raphson_vector
+                else:  # skip
+                    fobj.seek(nmrow*8 + 12, 1)
+
+            if element_header['ikey']:
+                if imaginary_load:
+                    imaginary_load_vector = read_table(fobj, 'd', nmrow)
+                    element_data['imaginary_load'] = imaginary_load_vector
+                else:  # skip
+                    fobj.seek(nmrow*8 + 12, 1)
+
+        return dof_idx, element_data
+
+    @property
+    def n_dof(self):
+        """Number of dofs per node"""
+        return self.header['numdof']
+
+    @property
+    def n_nodes(self):
+        """Number of nodes in the file"""
+        return self.header['lenbac']
+
+    @property
+    def n_elements(self):
+        """Number of elements in the file"""
+        return self.header['nume']
+
+    def global_applied_force(self):
+        """Returns the applied force for each node.
+
+        Returns
+        -------
+        applied_force : np.ndarray
+            Applied force with size (n_nodes, n_dof).  Result is
+            sorted to correspond with the sorted global nodes array.
+        """
+        applied_force = np.zeros(self.n_nodes*self.n_dof)
+        ncount = np.zeros(self.n_nodes*self.n_dof, np.int16)
+
+        for i in range(self.n_elements):
+            dof_idx, element_data = self.read_element(i, stress=False,
+                                                       mass=False, damping=False)
+            if 'applied_force' in element_data:
+                applied_force[dof_idx] += element_data['applied_force']
+                ncount[dof_idx] += 1
+
+        # take the mean of each hit
+        mask = ncount > 0
+        applied_force[mask] /= ncount[mask]
+
+        # resort applied force to correspond to sorted nodes
+        dof_eqv = np.empty((self.n_nodes, self.n_dof), np.int32)
+        dof_eqv[:] = self.neqv.reshape(-1, 1)*3
+        dof_eqv[:, 1] += 1
+        dof_eqv[:, 2] += 2
+
+        s_idx = np.argsort(dof_eqv.ravel())
+        applied_force = applied_force[s_idx].reshape((-1, 3))
+
+        return applied_force

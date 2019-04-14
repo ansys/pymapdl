@@ -1,21 +1,19 @@
-import struct
-import os
-import warnings
+"""Supports reading cyclic strucutral result files from ANSYS
+
+"""
 import logging
-import ctypes
 
 import vtk
 import numpy as np
 from vtki.common import axis_rotation
 import vtki
 
+from pyansys.rst import ResultFile, trans_to_matrix
 from pyansys import _parsefull
 from pyansys import _binary_reader
 from pyansys import _parser
-from pyansys.elements import valid_types
-from pyansys.rst import transform, trans_to_matrix
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
-from pyansys.rst import ResultFile
+
 
 # Create logger
 log = logging.getLogger(__name__)

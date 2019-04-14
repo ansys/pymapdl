@@ -19,12 +19,12 @@ As the ANSYS result files are binary files, the entire file does not need to be 
     import pyansys
     result = pyansys.open_result('file.rst')
     
-Upon initialization the ``ResultReader`` object contains several properties to include the time values from the analysis, node numbering, element numbering, etc.
+Upon initialization the ``ResultFile`` object contains several properties to include the time values from the analysis, node numbering, element numbering, etc.
 
 
-ResultReader Properties
------------------------
-The properties of the ``ResultReader`` are contained in the result header.
+ResultFile Properties
+---------------------
+The properties of the ``ResultFile`` are contained in the result header.
 
 .. code:: python
 
@@ -323,11 +323,11 @@ The vtk xml file can now be loaded using ParaView.  This screenshot shows the no
 .. image:: ./images/paraview.jpg
 
 
-ResultReader Object Methods
+ResultFile Object Methods
 ---------------------------
 
-.. autoclass:: pyansys.Result
+.. autoclass:: pyansys.rst.ResultFile
     :members:
 
-.. autoclass:: pyansys.CyclicResult
+.. autoclass:: pyansys.cyclic_reader.CyclicResult
     :members:

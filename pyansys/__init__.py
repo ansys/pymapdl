@@ -4,7 +4,7 @@ from pyansys._version import __version__
 from pyansys.archive import (Archive, write_cmblock, write_nblock,
                              save_as_archive)
 
-from pyansys.generic_binary import read_binary
+from pyansys.common import read_binary
 from pyansys.cellquality import *
 from pyansys.convert import convert_script
 

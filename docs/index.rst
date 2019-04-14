@@ -91,7 +91,7 @@ Contents
    loading_results
    examples
    loading_km
-
+   loading_emat
 
 Installation
 ------------
