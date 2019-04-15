@@ -16,21 +16,14 @@ grid = archive.parse_vtk()
 grid.plot()
 
 """
-import warnings
 import sys
 import logging
 import os
 
 import numpy as np
-import vtk
-from vtk import VTK_TETRA
-from vtk import VTK_QUADRATIC_TETRA
-from vtk import VTK_PYRAMID
-from vtk import VTK_QUADRATIC_PYRAMID
-from vtk import VTK_WEDGE
-from vtk import VTK_QUADRATIC_WEDGE
-from vtk import VTK_HEXAHEDRON
-from vtk import VTK_QUADRATIC_HEXAHEDRON
+from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
+                 VTK_QUADRATIC_PYRAMID, VTK_WEDGE, VTK_QUADRATIC_WEDGE,
+                 VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON)
 import vtki
 
 from pyansys import _reader
@@ -43,8 +36,7 @@ log.setLevel('CRITICAL')
 
 
 class Archive(object):
-    """
-    Initialize cdb object by reading raw cdb from file
+    """Read a blocked ANSYS archive file.
 
     Parameters
     ----------
@@ -59,14 +51,14 @@ class Archive(object):
 
     def parse_vtk(self, force_linear=False, allowable_types=None,
                   null_unallowed=False):
-        """
-        Parses raw data from cdb file to VTK format.
+        """Parses raw data into to VTK format.
 
         Parameters
         ----------
         force_linear : bool, optional
-            This parser creates quadradic elements if available.  Set this to
-            True to always create linear elements.  Defaults to False.
+            This parser creates quadradic elements if available.  Set
+            this to True to always create linear elements.  Defaults
+            to False.
 
         allowable_types : list, optional
             Allowable element types.  Defaults to:

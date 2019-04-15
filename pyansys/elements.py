@@ -39,5 +39,6 @@ valid_types = ['1',   # LINK1
                '186',  # SOLID186
                '187',  # SOLID187
                '188',  # BEAM188
+               '200',  # MESH200
                '223',  # PLANE223
                '281']  # SHELL281

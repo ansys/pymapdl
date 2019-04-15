@@ -112,8 +112,7 @@ cdef inline void store_quad(int64_t [::1] offset, int64_t *ecount,
     quadradic or linear.
     """
     cdef int64_t point_2, point_3
-    # Populate offset array
-    offset[ecount[0]] = ccount[0]
+    offset[ecount[0]] = ccount[0]  # Populate offset array
     
     if lin:
         cells[ccount[0]] = 4; ccount[0] += 1
@@ -474,6 +473,12 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
     else:
         type_b[1] = -1
 
+    cdef uint8 allow_200
+    if '200' in allowable_types:
+        allow_200 = 1
+    else:
+        allow_200 = 0
+
     # shell types
     planetype = ['42', '82', '154', '181', '182', '183', '223', '281']
     cdef int n_type_c = 8
@@ -640,8 +645,8 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
                     store_triangle(offset, &ecount, &ccount, cells, cell_type, 
                                  numref, elem, i, lin)
                 else:
-                    store_quad(offset, &ecount, &ccount, cells, cell_type, 
-                                  numref, elem, i, lin)
+                    store_quad(offset, &ecount, &ccount, cells,
+                               cell_type, numref, elem, i, lin)
                 break  # Continue to next element
 
         # test if line element
@@ -661,28 +666,29 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
                 store_line(offset, &ecount, &ccount, cells, cell_type, 
                              numref, elem, i, lin)
 
+        # TODO: Fix segfault bug for keyopt==7
         # test if MESH200
-        if elem_etype == 200:
+        if elem_etype == 200 and allow_200:
             keyopt_1 = keyopts[etype[i], 1]
-            if keyopt_1 == 0 or keyopt_1 == 2:  # line with 2 nodes
-                store_line(offset, &ecount, &ccount, cells, cell_type, 
-                           numref, elem, i, 1)
-            elif keyopt_1 == 1 or keyopt_1 == 3:  # line with 3 nodes
-                store_line(offset, &ecount, &ccount, cells, cell_type, 
-                           numref, elem, i, 0)
-            elif keyopt_1 == 4:  # triangle with 3 nodes
-                store_triangle(offset, &ecount, &ccount, cells, cell_type, 
-                               numref, elem, i, 1)
-            elif keyopt_1 == 5:  # triangle with 6 nodes
-                store_triangle(offset, &ecount, &ccount, cells, cell_type, 
-                               numref, elem, i, 0)
-            elif keyopt_1 == 6:  # quadrilateral with 4 nodes
-                store_quad(offset, &ecount, &ccount, cells, cell_type, 
-                           numref, elem, i, 1)
-            elif keyopt_1 == 7:  # quadrilateral with 8 nodes
-                store_quad(offset, &ecount, &ccount, cells, cell_type, 
-                           numref, elem, i, 0)
-            elif keyopt_1 == 8:  # tetrahedron with 4 nodes
+            # if keyopt_1 == 0 or keyopt_1 == 2:  # line with 2 nodes
+            #     store_line(offset, &ecount, &ccount, cells, cell_type, 
+            #                numref, elem, i, 1)
+            # elif keyopt_1 == 1 or keyopt_1 == 3:  # line with 3 nodes
+            #     store_line(offset, &ecount, &ccount, cells, cell_type, 
+            #                numref, elem, i, 0)
+            # elif keyopt_1 == 4:  # triangle with 3 nodes
+            #     store_triangle(offset, &ecount, &ccount, cells, cell_type, 
+            #                    numref, elem, i, 1)
+            # elif keyopt_1 == 5:  # triangle with 6 nodes
+            #     store_triangle(offset, &ecount, &ccount, cells, cell_type, 
+            #                    numref, elem, i, 0)
+            # if keyopt_1 == 6:  # quadrilateral with 4 nodes
+            #     store_quad(offset, &ecount, &ccount, cells, cell_type, 
+            #                numref, elem, i, 1)
+            # if keyopt_1 == 7:  # quadrilateral with 8 nodes
+                # store_quad(offset, &ecount, &ccount, cells, cell_type, 
+                           # numref, elem, i, 0)
+            if keyopt_1 == 8:  # tetrahedron with 4 nodes
                 storetet_type_b(offset, &ecount, &ccount, cells, cell_type, 
                                 numref, elem, i, 1)
             elif keyopt_1 == 9:  # tetrahedron with 10 nodes
