@@ -23,9 +23,9 @@ ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
 def read_binary(filename, **kwargs):
     """
     Reads ANSYS-written binary files:
-    - Jobname.RST A structural or coupled-field analysis
-    - Jobname.EMAT file, storing data related to element matrices
-    - Jobname.FULL file, storing the full stiffness-mass matrix
+    - Jobname.RST: result file from structural analysis
+    - Jobname.EMAT: Stores data related to element matrices
+    - Jobname.FULL Stores the full stiffness-mass matrix
 
     Parameters
     ----------

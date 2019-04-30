@@ -16,7 +16,10 @@ SOLID185
 SOLID186
 SOLID187
 BEAM188
+MESH200
+- KEYOPT 8 and above
 PLANE223
+
 
 To suggest an additional element type, open an issue at
 https://github.com/akaszynski/pyansys/issues

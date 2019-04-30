@@ -56,13 +56,13 @@ class Archive(object):
         Parameters
         ----------
         force_linear : bool, optional
-            This parser creates quadradic elements if available.  Set
+            This parser creates quadratic elements if available.  Set
             this to True to always create linear elements.  Defaults
             to False.
 
         allowable_types : list, optional
-            Allowable element types.  Defaults to:
-            ['45', '95', '185', '186', '92', '187']
+            Allowable element types.  Defaults to all valid element
+            types in ``from pyansys.elements.valid_types``
 
             See help(pyansys.elements) for available element types.
 
@@ -73,7 +73,7 @@ class Archive(object):
 
         Returns
         -------
-        uGrid : vtk.vtkUnstructuredGrid
+        grid : vtk.vtkUnstructuredGrid
             VTK unstructured grid from archive file.
         """
         if self.check_raw():
@@ -92,7 +92,7 @@ class Archive(object):
                                     'cannot be parsed in pyansys')
 
         # construct keyoption array
-        keyopts = np.zeros((10000, 11), np.int16)
+        keyopts = np.zeros((10000, 20), np.int16)
 
         for keyopt_key in self.raw['keyopt']:
             for index, value in self.raw['keyopt'][keyopt_key]:
@@ -178,7 +178,7 @@ class Archive(object):
         # store node angles
         grid.point_arrays['angles'] = angles
 
-        self.vtkuGrid = grid
+        self.grid = grid
         return grid
 
     def check_raw(self):
