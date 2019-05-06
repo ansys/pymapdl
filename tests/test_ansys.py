@@ -4,7 +4,11 @@ import pytest
 import numpy as np
 import os
 import pyansys
-from vtki.plotting import running_xserver
+try:
+    from vtki.plotting import running_xserver as system_supports_plotting
+except:
+    from vtki.plotting import system_supports_plotting
+
 from pyansys.rst import ResultFile
 
 # try:
@@ -137,7 +141,7 @@ class TestCyclicResultReader(object):
         assert np.allclose(ansys_nnum, nnum)
         assert np.allclose(ansys_stress, stress, atol=1E-2)
 
-    @pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+    @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
     def test_plot(self):
         filename = '/tmp/temp.png'
         self.result.plot_nodal_solution(0, screenshot=filename,

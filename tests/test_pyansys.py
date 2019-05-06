@@ -7,7 +7,11 @@ import pyansys
 from pyansys.examples import hexarchivefile
 from pyansys.examples import rstfile
 from pyansys.examples import fullfile
-from vtki.plotting import running_xserver
+try:
+    from vtki.plotting import running_xserver as system_supports_plotting
+except:
+    from vtki.plotting import system_supports_plotting
+
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -54,7 +58,7 @@ def test_loadresult():
     assert enode[0].size
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_animate_nodal_solution(tmpdir):
     result = pyansys.read_binary(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))

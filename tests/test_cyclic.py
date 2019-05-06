@@ -3,7 +3,11 @@ import os
 
 import numpy as np
 import pytest
-from vtki.plotting import running_xserver
+try:
+    from vtki.plotting import running_xserver as system_supports_plotting
+except:
+    from vtki.plotting import system_supports_plotting
+
 
 import pyansys
 from pyansys.examples import sector_result_file, rstfile
@@ -41,19 +45,19 @@ def test_non_cyclic():
         pyansys.CyclicResult(rstfile)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_z_cyc():
     cpos = result_z.plot(off_screen=True)
     assert isinstance(cpos, list)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_x_cyc():
     cpos = result_x.plot(off_screen=True)
     assert isinstance(cpos, list)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_component_rotor():
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=False,
                                  node_components='REFINE', sel_type_all=False,
@@ -165,7 +169,7 @@ def test_full_z_nodal_solution():
     tmp = ansys_disp.reshape(disp.shape[0], n, 3)
     assert np.allclose(disp[:, mask], tmp)
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_full_x_nodal_solution_plot():
     result_x.plot_nodal_solution(0, interactive=False)
 
@@ -228,7 +232,7 @@ def test_full_x_principal_nodal_stress():
     assert np.allclose(stress[:, mask], tmp, atol=4E-3)  # loose due to text printing
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_animate_nodal_solution(tmpdir):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result_z.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
@@ -260,18 +264,18 @@ def plot_nodal_solution_z_harmonic():
     result.plot_nodal_solution((4, 2), 'z', show_axes=True, interactive=False)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress():
     result_x.plot_nodal_stress(0, 'sz', interactive=False)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress():
     result_x.plot_nodal_stress(0, 'sz', interactive=False, full_rotor=False)
 
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress():
     result_x.plot_principal_nodal_stress(0, 'Seqv', interactive=False)
 

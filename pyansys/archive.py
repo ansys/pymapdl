@@ -229,8 +229,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
 
     Will automatically renumber nodes and elements if the FEM does not
     contain ANSYS node or element numbers.  Node numbers are stored as
-    a point array "ansys_node_num", and cell numbers are stored as cell
-    array "ansys_elem_num".
+    a point array "ansys_node_num", and cell numbers are stored as
+    cell array "ansys_elem_num".
 
     Parameters
     ----------
@@ -245,13 +245,13 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         adding the cell array "mtype" to the unstructured grid.
 
     etype_start : int, optional
-        Starting element type number.  Can be manually set by adding the
-        cell array "ansys_etype" to the unstructured grid.
+        Starting element type number.  Can be manually set by adding
+        the cell array "ansys_etype" to the unstructured grid.
 
     real_constant_start : int, optional
-        Starting real constant to assign to unset cells.  Can be manually
-        set by adding the cell array "ansys_real_constant" to the
-        unstructured grid.
+        Starting real constant to assign to unset cells.  Can be
+        manually set by adding the cell array "ansys_real_constant" to
+        the unstructured grid.
 
     mode : str, optional
         File mode.  See help(open)
@@ -260,26 +260,27 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         Write node block when writing archive file.
 
     enum_start : int, optional
-        Starting element number to assign to unset cells.  Can be manually
-        set by adding the cell array "ansys_elem_num" to the
+        Starting element number to assign to unset cells.  Can be
+        manually set by adding the cell array "ansys_elem_num" to the
         unstructured grid.
 
     nnum_start : int, optional
-        Starting element number to assign to unset points.  Can be manually
-        set by adding the point array "ansys_node_num" to the
+        Starting element number to assign to unset points.  Can be
+        manually set by adding the point array "ansys_node_num" to the
         unstructured grid.
 
     include_etype_header : bool, optional
-        For each element type, includes element type command (e.g. "ET, 1, 186")
-        in the archive file.
+        For each element type, includes element type command
+        (e.g. "ET, 1, 186") in the archive file.
 
     line_ending : str, optional
         Defaults to windows line ending.
 
     reset_etype : bool, optional
-        Resets element type.  Element types will automatically be determined 
-        by the shape of the element (i.e. quadradic tetrahedrals will be saved
-        as SOLID187, linear hexahedrals as SOLID185).  Default True.
+        Resets element type.  Element types will automatically be
+        determined by the shape of the element (i.e. quadradic
+        tetrahedrals will be saved as SOLID187, linear hexahedrals as
+        SOLID185).  Default True.
 
     """
     if line_ending is None:

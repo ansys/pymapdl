@@ -1,7 +1,11 @@
 import os
 
 import pytest
-from vtki.plotting import running_xserver
+try:
+    from vtki.plotting import running_xserver as system_supports_plotting
+except:
+    from vtki.plotting import system_supports_plotting
+
 import numpy as np
 import vtki
 
@@ -33,7 +37,7 @@ def test_save_as_vtk(tmpdir):
         assert np.allclose(arr, result.nodal_stress(i)[1], atol=1E-5, equal_nan=True)
 
 
-@pytest.mark.skipif(not running_xserver(), reason="Requires active X Server")
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_component():
     """
     # create example file for component plotting

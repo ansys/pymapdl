@@ -193,7 +193,8 @@ class ResultFile(object):
             representation.
 
         style : string, optional
-            Visualization style of the vtk mesh.  One for the following:
+            Visualization style of the vtk mesh.  One for the
+            following:
                 style='surface'
                 style='wireframe'
                 style='points'
@@ -201,25 +202,26 @@ class ResultFile(object):
             Defaults to 'surface'
 
         off_screen : bool
-            Plots off screen when True.  Helpful for saving screenshots
-            without a window popping up.
+            Plots off screen when True.  Helpful for saving
+            screenshots without a window popping up.
 
         full_screen : bool, optional
-            Opens window in full screen.  When enabled, ignores window_size.
-            Default False.
+            Opens window in full screen.  When enabled, ignores
+            window_size.  Default False.
 
         screenshot : str or bool, optional
             Saves screenshot to file when enabled.  See:
             help(vtkinterface.Plotter.screenshot).  Default disabled.
 
-            When True, takes screenshot and returns numpy array of image.
+            When True, takes screenshot and returns numpy array of
+            image.
 
         window_size : list, optional
             Window size in pixels.  Defaults to [1024, 768]
 
         show_bounds : bool, optional
-            Shows mesh bounds when True.  Default False. Alias ``show_grid`` also
-            accepted.
+            Shows mesh bounds when True.  Default False. Alias
+            ``show_grid`` also accepted.
 
         show_axes : bool, optional
             Shows a vtk axes widget.  Enabled by default.
@@ -234,7 +236,8 @@ class ResultFile(object):
     def plot_nodal_solution(self, rnum, comp='norm', label='',
                             cmap=None, flip_scalars=None, cpos=None,
                             screenshot=None, interactive=True,
-                            node_components=None, sel_type_all=True, **kwargs):
+                            node_components=None, sel_type_all=True,
+                            **kwargs):
         """
         Plots a nodal result.
 
@@ -501,7 +504,7 @@ class ResultFile(object):
 
                 plotter.update_scalars(scalars, render=False)
                 plotter.update_coordinates(orig_pt + disp_adj, render=False)
-                if show_phase:
+                if show_phase and show_result_info:
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
 
@@ -1242,14 +1245,17 @@ class ResultFile(object):
 
         # Generate plot
         stitle = 'Nodal Stress\n%s\n' % stype
-        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, grid=grid,
+        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap,
+                                       flip_scalars, screenshot, cpos,
+                                       interactive, grid=grid,
                                        **kwargs)
         return cpos, stress
 
-    def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
-                           flip_scalars=None, screenshot=None, cpos=None,
-                           interactive=True, grid=None, add_text=True, **kwargs):
+    def plot_point_scalars(self, scalars, rnum=None, stitle='',
+                           cmap=None, flip_scalars=None,
+                           screenshot=None, cpos=None,
+                           interactive=True, grid=None, add_text=True,
+                           **kwargs):
         """
         Plot point scalars on active mesh.
         Parameters
@@ -1306,13 +1312,14 @@ class ResultFile(object):
 
         window_size = kwargs.pop('window_size', [1024, 768])
         full_screen = kwargs.pop('full_screen', False)
+        notebook = kwargs.pop('notebook', False)
 
         # cell_mask = np.empty(grid.n_cells, np.bool)
-        offset = grid.offset.astype(np.int32)
-        cells = grid.cells.astype(np.int32)
+        # offset = grid.offset.astype(np.int32)
+        # cells = grid.cells.astype(np.int32)
 
         # Plot off screen when not interactive
-        plotter = vtki.Plotter(off_screen=not(interactive))
+        plotter = vtki.Plotter(off_screen=not(interactive), notebook=notebook)
         if 'show_axes' in kwargs:
             plotter.add_axes()
 
@@ -1338,160 +1345,22 @@ class ResultFile(object):
 
         if screenshot:
             cpos = plotter.plot(auto_close=False, interactive=interactive,
-                              window_size=window_size,
-                              full_screen=full_screen)
+                                window_size=window_size,
+                                full_screen=full_screen)
             if screenshot is True:
                 img = plotter.screenshot()
             else:
                 plotter.screenshot(screenshot)
             plotter.close()
         else:
-            cpos = plotter.plot(interactive=interactive, window_size=window_size,
+            cpos = plotter.plot(interactive=interactive,
+                                window_size=window_size,
                                 full_screen=full_screen)
 
         if screenshot is True:
             return cpos, img
         else:
             return cpos
-
-    # def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
-    #                        flip_scalars=None, screenshot=None, cpos=None,
-    #                        interactive=True, grid=None, add_text=True, **kwargs):
-    #     """
-    #     Plot point scalars on active mesh.
-
-    #     Parameters
-    #     ----------
-    #     scalars : np.ndarray
-    #         Node scalars to plot.
-
-    #     rnum : int, optional
-    #         Cumulative result number.  Used for adding informative
-    #         text.
-
-    #     stitle : str, optional
-    #         Title of the scalar bar.
-
-    #     cmap : str, optional
-    #         See matplotlib cmaps:
-    #         matplotlib.org/examples/color/cmaps_reference.html
-
-    #     flip_scalars : bool, optional
-    #         Reverses the direction of the cmap.
-
-    #     screenshot : str, optional
-    #         When a filename, saves screenshot to disk.
-
-    #     cpos : list, optional
-    #         3x3 list describing the camera position.  Obtain it by
-    #         getting the output of plot_point_scalars first.
-
-    #     interactive : bool, optional
-    #         Allows user to interact with the plot when True.  Default
-    #         True.
-
-    #     grid : vtki PolyData or UnstructuredGrid, optional
-    #         Uses self.grid by default.  When specified, uses this grid
-    #         instead.
-
-    #     add_text : bool, optional
-    #         Adds information about the result when rnum is given.
-
-    #     kwargs : keyword arguments
-    #         Additional keyword arguments.  See help(vtki.plot)
-
-    #     Returns
-    #     -------
-    #     cpos : list
-    #         Camera position.
-
-    #     """
-    #     if grid is None:
-    #         grid = self.grid
-
-    #     # make cmap match default ansys
-    #     if cmap is None and flip_scalars is None:
-    #         flip_scalars = False
-
-    #     window_size = kwargs.pop('window_size', None)
-    #     full_screen = kwargs.pop('full_screen', False)
-    #     off_screen = not interactive
-
-    #     # Plot off screen when not interactive
-    #     plotter = vtki.Plotter(off_screen=not(interactive))
-    #     if 'show_axes' in kwargs:
-    #         plotter.add_axes()
-
-    #     if 'background' in kwargs:
-    #         plotter.background_color = kwargs['background']
-
-    #     rng = [scalars.min(), scalars.max()]
-
-    #     cs_cord = self.resultheader['csCord']
-    #     if cs_cord > 1:
-    #         matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-    #         i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-    #         i_matrix.Invert()
-    #     else:
-    #         matrix = vtk.vtkMatrix4x4()
-    #         i_matrix = vtk.vtkMatrix4x4()
-
-    #     plotter = vtki.Plotter(off_screen, window_size)
-    #     rang = 360.0 / self.n_sector
-    #     for i in range(self.n_sector):
-
-    #         plotter.add_mesh(grid[i], scalars=scalars[i], stitle=stitle,
-    #                          cmap=cmap, flip_scalars=flip_scalars,
-    #                          interpolate_before_map=True,
-    #                          rng=rng, **kwargs)
-
-
-    #         # for transparency issues
-    #         # plotter.renderers[0].SetUseDepthPeeling(1)  #
-
-    #         # NAN/missing data are white
-    #         plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
-
-    #         # transform to standard position, rotate about Z axis,
-    #         # transform back
-    #         transform = vtk.vtkTransform()
-    #         transform.RotateZ(rang*i)
-    #         transform.Update()
-    #         rot_matrix = transform.GetMatrix()
-
-    #         if cs_cord > 1:
-    #             temp_matrix = vtk.vtkMatrix4x4()
-    #             rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
-    #             rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
-    #             transform.SetMatrix(rot_matrix)
-
-    #         actor.SetUserTransform(transform)
-
-    #     if cpos:
-    #         plotter.camera_position = cpos
-
-    #     # add table
-    #     if add_text and rnum is not None:
-    #         plotter.add_text(self.text_result_table(rnum), font_size=20,
-    #                          position=[0, 0])
-
-    #     if screenshot:
-    #         cpos = plotter.show(auto_close=False, interactive=interactive,
-    #                             window_size=window_size,
-    #                             full_screen=full_screen)
-    #         if screenshot is True:
-    #             img = plotter.screenshot()
-    #         else:
-    #             plotter.screenshot(screenshot)
-    #         plotter.close()
-    #     else:
-    #         cpos = plotter.plot(interactive=interactive, window_size=window_size,
-    #                             full_screen=full_screen)
-
-    #     if screenshot is True:
-    #         return cpos, img
-    #     else:
-    #         return cpos
 
     def text_result_table(self, rnum):
         """ Returns a text result table for plotting """
