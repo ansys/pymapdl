@@ -27,7 +27,6 @@ class CyclicResult(ResultFile):
 
     def __init__(self):
         """ Initializes object """
-        # super(CyclicResult, self).__init__()
 
         # sanity check
         if self.header['nSector'] == 1:
@@ -171,9 +170,8 @@ class CyclicResult(ResultFile):
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):
-        """
-        Returns the DOF solution for each node in the global cartesian
-        coordinate system.
+        """Returns the DOF solution for each node in the global
+        cartesian coordinate system.
 
         Parameters
         ----------
@@ -223,8 +221,8 @@ class CyclicResult(ResultFile):
         result = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
 
-        if not full_rotor:
-            return nnum, result
+        # if not full_rotor:
+        #     return nnum, result
 
         # combine or expand result if not modal
         if self.resultheader['kan'] == 2:  # modal analysis
