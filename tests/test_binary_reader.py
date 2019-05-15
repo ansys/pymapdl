@@ -2,12 +2,12 @@ import os
 
 import pytest
 try:
-    from vtki.plotting import running_xserver as system_supports_plotting
+    from pyvista.plotting import running_xserver as system_supports_plotting
 except:
-    from vtki.plotting import system_supports_plotting
+    from pyvista.plotting import system_supports_plotting
 
 import numpy as np
-import vtki
+import pyvista as pv
 
 import pyansys
 from pyansys import examples
@@ -26,7 +26,7 @@ def test_save_as_vtk(tmpdir):
     result = pyansys.read_binary(examples.rstfile)
     result.save_as_vtk(filename)
 
-    grid = vtki.UnstructuredGrid(filename)
+    grid = pv.UnstructuredGrid(filename)
     for i in range(result.nsets):
         assert 'nodal_solution%03d' % i in grid.point_arrays
         arr = grid.point_arrays['nodal_solution%03d' % i]

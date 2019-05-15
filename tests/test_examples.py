@@ -2,9 +2,9 @@ import pytest
 import pyansys
 from pyansys import examples
 try:
-    from vtki.plotting import running_xserver as system_supports_plotting
+    from pyvista.plotting import running_xserver as system_supports_plotting
 except:
-    from vtki.plotting import system_supports_plotting
+    from pyvista.plotting import system_supports_plotting
 
 import os
 

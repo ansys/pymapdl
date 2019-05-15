@@ -35,13 +35,13 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
 .. image:: ./images/hexbeam.png
 
 
-You can then load this vtk file using vtki or another program that uses VTK.
+You can then load this vtk file using ``pyvista`` or another program that uses VTK.
     
 .. code:: python
 
     # Load this from vtk
-    import vtki
-    grid = vtki.UnstructuredGrid('hex.vtk')
+    import pyvista as pv
+    grid = pv.UnstructuredGrid('hex.vtk')
     grid.plot()
 
 

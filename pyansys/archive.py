@@ -24,7 +24,7 @@ import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_QUADRATIC_PYRAMID, VTK_WEDGE, VTK_QUADRATIC_WEDGE,
                  VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON)
-import vtki
+import pyvista as pv
 
 from pyansys import _reader
 from pyansys import _relaxmidside
@@ -148,7 +148,7 @@ class Archive(object):
                               np.ones(nextra, np.int32) * -1))
 
         # Create unstructured grid
-        grid = vtki.UnstructuredGrid(offset, cells, cell_type, nodes)
+        grid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
 
         # Store original ANSYS element and cell information
         grid.point_arrays['ansys_node_num'] = nnum

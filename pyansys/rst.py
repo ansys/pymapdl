@@ -1,17 +1,14 @@
 """Read ANSYS binary result files *.rst
 """
-# import struct
 import warnings
 import logging
 import ctypes
 
 import vtk
-import vtki
 import numpy as np
+import pyvista as pv
 
-from pyansys import _binary_reader
-from pyansys import _parser
-from pyansys import _reader
+from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
 from pyansys.common import read_table, parse_header, read_standard_header
@@ -24,9 +21,9 @@ np.seterr(divide='ignore', invalid='ignore')
 
 
 def merge_two_dicts(x, y):
-    z = x.copy()   # start with x's keys and values
-    z.update(y)    # modifies z with y's keys and values & returns None
-    return z
+    merged = x.copy()   # start with x's keys and values
+    merged.update(y)    # modifies z with y's keys and values & returns None
+    return merged
 
 
 # Pointer information from ansys interface manual
@@ -141,8 +138,8 @@ class ResultFile(object):
 
     ignore_cyclic : bool, optional
         Ignores any cyclic properties.
-
     """
+
     def __init__(self, filename, ignore_cyclic=False):
         """Loads basic result information from result file and
         initializes result object.
@@ -211,7 +208,7 @@ class ResultFile(object):
 
         screenshot : str or bool, optional
             Saves screenshot to file when enabled.  See:
-            help(vtkinterface.Plotter.screenshot).  Default disabled.
+            help(pyvista.Plotter.screenshot).  Default disabled.
 
             When True, takes screenshot and returns numpy array of
             image.
@@ -444,7 +441,7 @@ class ResultFile(object):
             movie non-interactively.
 
         kwargs : optional keyword arguments, optional
-            See help(vtki.Plot) for additional keyword arguments.
+            See help(pyvista.Plot) for additional keyword arguments.
 
         """
         # normalize nodal solution
@@ -474,7 +471,7 @@ class ResultFile(object):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
-        plotter = vtki.Plotter(off_screen=not interactive)
+        plotter = pv.Plotter(off_screen=not interactive)
         plotter.add_mesh(self.grid.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
         plotter.update_coordinates(orig_pt, render=False)
@@ -587,13 +584,13 @@ class ResultFile(object):
             theta_xy, theta_yz, theta_zx = euler_angles
 
             if np.any(theta_xy):
-                vtki.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
+                pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
 
             if np.any(theta_yz):
-                vtki.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
+                pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
 
             if np.any(theta_zx):
-                vtki.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
+                pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
 
         # also include nodes in output
         return self.nnum, result
@@ -794,7 +791,7 @@ class ResultFile(object):
 
         # Create vtk object
         nodes = nloc[:, :3]
-        self.quadgrid = vtki.UnstructuredGrid(offset, cells, cell_type, nodes)
+        self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
         self.quadgrid.cell_arrays['ansys_elem_num'] = enum
         self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Element Type'] = element_type
@@ -1220,7 +1217,7 @@ class ResultFile(object):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(vtki.plot)
+            Additional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
@@ -1288,7 +1285,7 @@ class ResultFile(object):
             Allows user to interact with the plot when True.  Default
             True.
 
-        grid : vtki PolyData or UnstructuredGrid, optional
+        grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
             Uses self.grid by default.  When specified, uses this grid
             instead.
 
@@ -1296,7 +1293,7 @@ class ResultFile(object):
             Adds information about the result when rnum is given.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(vtki.plot)
+            Additional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
@@ -1319,7 +1316,7 @@ class ResultFile(object):
         # cells = grid.cells.astype(np.int32)
 
         # Plot off screen when not interactive
-        plotter = vtki.Plotter(off_screen=not(interactive), notebook=notebook)
+        plotter = pv.Plotter(off_screen=not(interactive), notebook=notebook)
         if 'show_axes' in kwargs:
             plotter.add_axes()
 
@@ -1440,7 +1437,7 @@ class ResultFile(object):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(vtki.plot)
+            Additional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
@@ -1755,7 +1752,7 @@ def transform(points, trans):
 
     """
     if isinstance(trans, vtk.vtkMatrix4x4):
-        trans = vtki.trans_from_matrix(trans)
+        trans = pv.trans_from_matrix(trans)
 
     if points.dtype == np.float32:
         _binary_reader.affline_transform_float(points, trans)

@@ -244,7 +244,7 @@ def midside_mask(grid):
 
     Parameters
     ----------
-    grid : vtki.UnstructuredGrid
+    grid : pyvista.UnstructuredGrid
         Grid to check.
 
     Returns

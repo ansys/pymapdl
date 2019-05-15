@@ -66,7 +66,7 @@ You can also plot the mode shape of this finite element model.  Since the constr
 
 .. code:: python
     
-    import vtki
+    import pyvista as pv
 
     # Get the 4th mode shape
     full_mode_shape = v[:, 3] # x, y, z displacement for each node
@@ -84,7 +84,7 @@ You can also plot the mode shape of this finite element model.  Since the constr
     # grid.plot(scalars=n)
     
     # Fancy plot the displacement
-    plobj = vtki.Plotter()
+    plobj = pv.Plotter()
     
     # add the nominal mesh
     plobj.add_mesh(grid, style='wireframe')

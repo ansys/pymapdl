@@ -5,8 +5,8 @@ import logging
 
 import vtk
 import numpy as np
-from vtki.common import axis_rotation
-import vtki
+from pyvista.common import axis_rotation
+import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
 from pyansys import _parsefull
@@ -74,7 +74,7 @@ class CyclicResult(ResultFile):
 
         screenshot : str or bool, optional
             Saves screenshot to file when enabled.  See:
-            help(vtkinterface.Plotter.screenshot).  Default disabled.
+            help(pyvista.Plotter.screenshot).  Default disabled.
 
             When True, takes screenshot and returns numpy array of
             image.
@@ -105,7 +105,7 @@ class CyclicResult(ResultFile):
 
         off_screen = kwargs.pop('off_screen', False)
         window_size = kwargs.pop('window_size', None)
-        plotter = vtki.Plotter(off_screen, window_size)
+        plotter = pv.Plotter(off_screen, window_size)
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
             actor = plotter.add_mesh(self.grid.copy(False),
@@ -167,7 +167,7 @@ class CyclicResult(ResultFile):
         if as_vtk_matrix:
             return matrix
         else:
-            return vtki.trans_from_matrix(matrix)
+            return pv.trans_from_matrix(matrix)
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):
@@ -294,7 +294,7 @@ class CyclicResult(ResultFile):
                 rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
 
-            trans = vtki.trans_from_matrix(rot_matrix)
+            trans = pv.trans_from_matrix(rot_matrix)
             if tensor:
                 _binary_reader.tensor_arbitrary(full_result[i], trans)
             else:
@@ -409,7 +409,7 @@ class CyclicResult(ResultFile):
                 rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
 
-            trans = vtki.trans_from_matrix(rot_matrix)
+            trans = pv.trans_from_matrix(rot_matrix)
             _binary_reader.tensor_arbitrary(full_result[i], trans)
 
         return full_result
@@ -887,7 +887,7 @@ class CyclicResult(ResultFile):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(vtki.plot)
+            Additional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
@@ -975,7 +975,7 @@ class CyclicResult(ResultFile):
             movie non-interactively.
 
         kwargs : optional keyword arguments, optional
-            See help(vtki.Plot) for additional keyword arguments.
+            See help(pyvista.plot) for additional keyword arguments.
 
         """
         # normalize nodal solution
@@ -1004,7 +1004,7 @@ class CyclicResult(ResultFile):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
-        plotter = vtki.Plotter(off_screen=not interactive)
+        plotter = pv.Plotter(off_screen=not interactive)
         plotter.add_mesh(full_rotor.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
         plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
@@ -1073,7 +1073,7 @@ class CyclicResult(ResultFile):
             vtkappend.AddInputData(sector)
 
         vtkappend.Update()
-        full_rotor = vtki.wrap(vtkappend.GetOutput())
+        full_rotor = pv.wrap(vtkappend.GetOutput())
 
         if cs_cord > 1:
             matrix.Invert()
@@ -1117,7 +1117,7 @@ class CyclicResult(ResultFile):
             Allows user to interact with the plot when True.  Default
             True.
 
-        grid : vtki PolyData or UnstructuredGrid, optional
+        grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
             Uses self.grid by default.  When specified, uses this grid
             instead.
 
@@ -1125,7 +1125,7 @@ class CyclicResult(ResultFile):
             Adds information about the result when rnum is given.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(vtki.plot)
+            Additional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
@@ -1145,7 +1145,7 @@ class CyclicResult(ResultFile):
         off_screen = not interactive
 
         # Plot off screen when not interactive
-        plotter = vtki.Plotter(off_screen=not(interactive))
+        plotter = pv.Plotter(off_screen=not(interactive))
         if 'show_axes' in kwargs:
             plotter.add_axes()
         # plotter.add_axes_at_origin()

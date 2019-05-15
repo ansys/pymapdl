@@ -9,7 +9,7 @@ import sys
 import numpy as np
 
 import pyansys
-import vtki
+import pyvista as pv
 
 
 # get location of this folder and the example files
@@ -186,7 +186,7 @@ def solve_km():
     grid = archive.parse_vtk()
 
     # Fancy plot the displacement
-    plobj = vtki.Plotter()
+    plobj = pv.Plotter()
 
     # add two meshes to the plotting class
     plobj.add_mesh(grid.copy(), color='w', style='wireframe')

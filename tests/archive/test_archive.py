@@ -1,7 +1,7 @@
 import os
 
-from vtki import examples as vtki_examples
-import vtki
+from pyvista import examples as pyvista_examples
+import pyvista as pv
 import vtk
 from vtk import VTK_TETRA
 import pytest
@@ -159,7 +159,7 @@ def test_writehex_missing_node_num(tmpdir):
 
 
 def test_write_non_ansys_grid(tmpdir):
-    grid = vtki.UnstructuredGrid(vtki_examples.hexbeamfile)
+    grid = pv.UnstructuredGrid(pyvista_examples.hexbeamfile)
     del grid.point_arrays['sample_point_scalars']
     del grid.cell_arrays['sample_cell_scalars']
 

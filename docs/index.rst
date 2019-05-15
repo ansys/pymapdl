@@ -105,12 +105,12 @@ Dependencies:
 
 - ``numpy``
 - ``cython``
-- ``vtki``
+- ``pyvista``
 - ``pexpect``
 - ``appdirs``
 - ``vtk``
 
-Dependencies are installed automatically through ``pip``, except for Python 2.7 in Windows, which will require some additional work to install ``VTK``.  See `installing vtk <http://vtkinterface.readthedocs.io/en/latest/installation.html>`_ for more information.
+Dependencies are installed automatically through ``pip``, except for Python 2.7 in Windows, which will require some additional work to install ``VTK``.  See `installing pyvista <https://docs.pyvista.org/getting-started/installation.html>`_ for more information.
 
 
 License

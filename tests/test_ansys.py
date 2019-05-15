@@ -5,9 +5,9 @@ import numpy as np
 import os
 import pyansys
 try:
-    from vtki.plotting import running_xserver as system_supports_plotting
+    from pyvista.plotting import running_xserver as system_supports_plotting
 except:
-    from vtki.plotting import system_supports_plotting
+    from pyvista.plotting import system_supports_plotting
 
 from pyansys.rst import ResultFile
 

@@ -98,20 +98,19 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png
     :width: 500pt
 
-You can then load this vtk file using vtki or another program that uses VTK.
+You can then load this vtk file using ``pyvista`` or another program that uses VTK.
     
 .. code:: python
 
     # Load this from vtk
-    import vtki
-    grid = vtki.UnstructuredGrid('hex.vtu')
+    import pyvista as pv
+    grid = pv.UnstructuredGrid('hex.vtu')
     grid.plot()
 
 
 Loading the Result File
 ~~~~~~~~~~~~~~~~~~~~~~~
-
-This example reads in binary results from a modal analysis of a beam from ANSYS.  This section of code does not rely on ``VTK`` and can be used with only numpy installed.
+This example reads in binary results from a modal analysis of a beam from ANSYS.
 
 .. code:: python
 

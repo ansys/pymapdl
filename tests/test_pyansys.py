@@ -8,9 +8,9 @@ from pyansys.examples import hexarchivefile
 from pyansys.examples import rstfile
 from pyansys.examples import fullfile
 try:
-    from vtki.plotting import running_xserver as system_supports_plotting
+    from pyvista.plotting import running_xserver as system_supports_plotting
 except:
-    from vtki.plotting import system_supports_plotting
+    from pyvista.plotting import system_supports_plotting
 
 
 test_path = os.path.dirname(os.path.abspath(__file__))
