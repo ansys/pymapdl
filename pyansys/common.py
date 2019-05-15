@@ -10,6 +10,7 @@ import numpy as np
 
 from pyansys import _binary_reader
 
+
 ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
                            3: None,
                            4: 'Full stiffness-mass matrix File',
@@ -73,7 +74,16 @@ def read_binary(filename, **kwargs):
         return FullFile(filename, **kwargs)
     elif file_format == 12:
         from pyansys.rst import ResultFile
-        return ResultFile(filename, **kwargs)
+        result =  ResultFile(filename, **kwargs)
+
+        # check if it's a cyclic result file
+        ignore_cyclic = kwargs.pop('ignore_cyclic', False)
+        if result.header['nSector'] != 1 and not ignore_cyclic:
+            from pyansys.cyclic_reader import CyclicResult
+            return CyclicResult(filename)
+
+        return result
+
     else:
         if file_format in ANSYS_BINARY_FILE_TYPES:
             file_type = ANSYS_BINARY_FILE_TYPES[file_format]

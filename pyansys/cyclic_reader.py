@@ -9,9 +9,7 @@ from pyvista.common import axis_rotation
 import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
-from pyansys import _parsefull
-from pyansys import _binary_reader
-from pyansys import _parser
+from pyansys import (_parsefull, _binary_reader, _parser)
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
 
 
@@ -25,8 +23,9 @@ np.seterr(divide='ignore', invalid='ignore')
 class CyclicResult(ResultFile):
     """ Adds cyclic functionality to the result reader in pyansys """
 
-    def __init__(self):
+    def __init__(self, filename):
         """ Initializes object """
+        super(CyclicResult, self).__init__(filename)
 
         # sanity check
         if self.header['nSector'] == 1:
@@ -220,9 +219,6 @@ class CyclicResult(ResultFile):
                                                                 in_nodal_coord_sys)
         result = result[self.mas_ind]
         nnum = nnum[self.mas_ind]  # only concerned with the master sector
-
-        # if not full_rotor:
-        #     return nnum, result
 
         # combine or expand result if not modal
         if self.resultheader['kan'] == 2:  # modal analysis

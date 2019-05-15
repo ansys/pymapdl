@@ -166,11 +166,6 @@ class ResultFile(object):
             f.seek(103*4)  # start of secondary header
             self.header = parse_header(read_table(f), RESULT_HEADER_KEYS)
 
-        if self.header['nSector'] != 1 and not ignore_cyclic:
-            from pyansys.cyclic_reader import CyclicResult
-            self.__class__ = CyclicResult
-            self.__init__()
-
     def plot(self, color='w', show_edges=True, **kwargs):
         """Plot result geometry
 
