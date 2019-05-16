@@ -491,8 +491,9 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
             typeC[i] = -1
 
     # line elements
-    cdef int [3] linetype
-    for i, atype in enumerate(['1', '180', '188']):
+    cdef int [4] linetype
+    cdef int n_line_type = 4
+    for i, atype in enumerate(['1', '44', '180', '188']):
         if atype in allowable_types:
             linetype[i] = int(atype)
 
@@ -650,7 +651,7 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
                 break  # Continue to next element
 
         # test if line element
-        for j in range(2):
+        for j in range(n_line_type):
             if elem_etype == linetype[j]:
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype

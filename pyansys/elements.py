@@ -3,6 +3,7 @@ Element types pyansys can parse:
 
 LINK1
 PLANE42
+BEAM44
 SOLID45
 PLANE82
 SOLID92
@@ -28,6 +29,7 @@ https://github.com/akaszynski/pyansys/issues
 valid_types = ['1',   # LINK1
                # '41',  # SHELL41 (legacy of SHELL181)
                '42',  # PLANE42 (legacy of PLANE182)
+               '44',  # SOLID44
                '45',  # SOLID45
                '55',  # PLANE55
                '82',  # PLANE82 (legacy of PLANE183)

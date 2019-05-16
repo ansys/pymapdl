@@ -135,8 +135,12 @@ def read_string_from_binary(f, n):
 def parse_header(table, keys):
     """ parses a header from a table """
     header = {}
+    max_entry = len(table) - 1
     for i, key in enumerate(keys):
-        header[key] = table[i]
+        if i > max_entry:
+            header[key] = 0
+        else:
+            header[key] = table[i]
 
     for key in keys:
         if 'ptr' in key and key[-1] == 'h':
