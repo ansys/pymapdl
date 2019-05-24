@@ -9,7 +9,7 @@
 # Builds wheels for Linux using cibuildwheel, inside the manylinux1 Docker image.
 # builds 64-bit Python 2.7, Python3.5, Python3.6, Python3.7
 
-# dist: xenial
+dist: xenial
 
 matrix:
   include:
@@ -19,6 +19,8 @@ matrix:
       services:
         - docker
       env: PIP=pip
+    - os: osx
+      osx_image: xcode8.3
 
 # addons:
 #   apt:
@@ -33,36 +35,31 @@ matrix:
 #   # - sh -e /etc/init.d/xvfb start
 #   - sleep 3 # give xvfb some time to start
 
-# for reference, these are the python installs on
-# quay.io/pypa/manylinux1_x86_64
-# cp27-cp27m
-# cp27-cp27mu
-# cp34-cp34m
-# cp35-cp35m
-# cp36-cp36m
-# cp37-cp37m
-
-# available vtk wheels:
-# vtk-8.1.1-cp27-cp27mu-manylinux1_x86_64.whl 
-# vtk-8.1.1-cp34-cp34m-manylinux1_x86_64.whl 
-# vtk-8.1.1-cp35-cp35m-manylinux1_x86_64.whl
-# vtk-8.1.1-cp36-cp36m-manylinux1_x86_64.whl 
-
-# need to skip 32-bit development
-# quay.io/pypa/manylinux1_i686
-
-# CIBW_SKIP
-# must skip cp27-cp27m
-# cp34m has a vtk bug that I'm not willing on fixing
-
 env:
   global:
-    - CIBW_BEFORE_BUILD="pip install numpy==1.15.0; pip install cython; yum install libXt -y"
+    - CIBW_BEFORE_BUILD_LINUX="pip install numpy==1.15.0; pip install cython;pip install pymeshfix; yum install libXt -y"
+    - CIBW_BEFORE_BUILD_MACOS="pip install numpy==1.15.0; pip install cython; pip install pymeshfix"
     - CIBW_TEST_REQUIRES="pytest scipy matplotlib"
     - CIBW_TEST_COMMAND="pytest {project}/tests"  # fails to include libaries from vtk
     - CIBW_SKIP="cp27-cp27m-manylinux1_x86_64 cp34-* *manylinux1_i686*"
     - TWINE_USERNAME=akaszynski
       # Note: TWINE_PASSWORD is set in Travis settings
+
+# before_install:
+#   # configure a headless display
+#   - git clone --depth 1 git://github.com/pyvista/gl-ci-helpers.git
+#   - source ./gl-ci-helpers/travis/setup_headless_display.sh
+
+install:
+  # Setup for python 3 wheels in Mac OS X
+  - |
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      brew update
+      brew upgrade python
+      # CFLAGS='-stdlib=libc++'
+    fi;
+  - pip3 install --upgrade cibuildwheel
+
 
 script:
   - $PIP install cibuildwheel
@@ -76,9 +73,3 @@ script:
 
 notifications:
   email: false
-
-
-# notes:
-# could conditionally upload to test.pypi
-# - echo $TRAVIS_BRANCH
-# - python3 -m twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing wheelhouse/*
