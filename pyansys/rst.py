@@ -1164,8 +1164,7 @@ class ResultFile(object):
                                     screenshot=None, interactive=True,
                                     node_components=None, sel_type_all=True,
                                     **kwargs):
-        """
-        Plot the principal stress at each node in the solution.
+        """Plot the principal stress at each node in the solution.
 
         Parameters
         ----------
@@ -1544,6 +1543,31 @@ class ResultFile(object):
             return index[0]
         else:
             raise Exception('Input must be either an int or a list')
+
+    def __repr__(self):
+        rst_info = []
+        keys = ['title', 'subtitle', 'units']
+        for key in keys:
+            value = self.resultheader[key]
+            if value:
+                rst_info.append('{:<11s}: {:s}'.format(key.capitalize(), value))
+
+        value = self.resultheader['verstring']
+        rst_info.append('{:<11s}: {:s}'.format('Version', value))
+
+        value = str(self.resultheader['nSector'] > 0)
+        rst_info.append('{:<11s}: {:s}'.format('Cyclic', value))
+
+        value = self.resultheader['nsets']
+        rst_info.append('{:<11s}: {:d}'.format('Result Sets', value))
+
+        value = self.resultheader['nnod']
+        rst_info.append('{:<11s}: {:d}'.format('Nodes', value))
+
+        value = self.resultheader['nelm']
+        rst_info.append('{:<11s}: {:d}'.format('Elements', value))
+
+        return '\n'.join(rst_info)
 
 
 def result_info(filename):
