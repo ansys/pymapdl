@@ -42,7 +42,6 @@ env:
     - CIBW_TEST_REQUIRES="pytest scipy matplotlib"
     - CIBW_TEST_COMMAND="pytest {project}/tests"  # fails to include libaries from vtk
     - CIBW_SKIP="cp27-* cp34-* *manylinux1_i686*"
-CIBW_SKIP:
     - TWINE_USERNAME=akaszynski
       # Note: TWINE_PASSWORD is set in Travis settings
 
