@@ -1044,8 +1044,9 @@ class ANSYS(_InternalANSYS):
             from ansys_corba import CORBA
         except:
             pip_cmd = 'pip install ansys_corba'
-            raise ImportError('Missing ansys_corba.  ' +
-                              'Please install with "%s"' % pip_cmd)
+            raise ImportError('Missing ansys_corba.\n' +
+                              'This feature does not support MAC OS.\n' +\
+                              'Otherwise, please install with "%s"' % pip_cmd)
 
         orb = CORBA.ORB_init()
         self.mapdl = orb.string_to_object(key)

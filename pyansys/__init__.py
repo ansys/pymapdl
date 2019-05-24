@@ -1,4 +1,3 @@
-import warnings
 from pyansys._version import __version__
 
 from pyansys.archive import (Archive, write_cmblock, write_nblock,
@@ -7,17 +6,8 @@ from pyansys.archive import (Archive, write_cmblock, write_nblock,
 from pyansys.common import read_binary
 from pyansys.cellquality import *
 from pyansys.convert import convert_script
-
-try:
-    from pyansys.ansys import ANSYS
-    from pyansys.ansys import change_default_ansys_path
-except:
-    pass
-
-    # try:
-    #     from pyansys.ansysbase import ANSYS
-    # except:
-    #     warnings.warn('Unable to load interactive ANSYS APDL module:\n\n%s' % str(e))
+from pyansys.ansys import ANSYS
+from pyansys.ansys import change_default_ansys_path
 
 try:
     from pyansys import ansys

@@ -153,7 +153,7 @@ setup(
 
     install_requires=['numpy>=1.14.0',
                       'pyvista>=0.19.0',
-                      # 'ansys_corba',
+                      'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
                       'pexpect']
