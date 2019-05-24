@@ -63,7 +63,6 @@ install:
 
 
 script:
-  - $PIP install cibuildwheel
   - cibuildwheel --output-dir wheelhouse
   - if [ "${TRAVIS_TAG:-}" != "" ]; then
       python3 setup.py sdist;
