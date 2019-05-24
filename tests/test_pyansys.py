@@ -17,6 +17,13 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 
+HAS_FFMPEG = True
+try:
+    import imageio_ffmpeg
+except:
+    HAS_FFMPEG = False
+
+
 def test_loadresult():
     result = pyansys.read_binary(rstfile)
 
@@ -59,6 +66,7 @@ def test_loadresult():
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@pytest.mark.skipif(not HAS_FFMPEG, reason="requires imageio_ffmpeg")
 def test_animate_nodal_solution(tmpdir):
     result = pyansys.read_binary(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))

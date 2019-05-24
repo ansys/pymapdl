@@ -17,6 +17,12 @@ try:
 except:
     __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_cyclic.py'
 
+HAS_FFMPEG = True
+try:
+    import imageio_ffmpeg
+except:
+    HAS_FFMPEG = False
+
 
 is_python2 = sys.version_info.major == 2
 
@@ -233,6 +239,7 @@ def test_full_x_principal_nodal_stress():
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@pytest.mark.skipif(not HAS_FFMPEG, reason="requires imageio_ffmpeg")
 def test_animate_nodal_solution(tmpdir):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result_z.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
