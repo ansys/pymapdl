@@ -24,16 +24,16 @@ import pyansys
 import pexpect
 import numpy as np
 import psutil
-from ansys_corba import CORBA
+
 from pyansys.ansys_functions import _InternalANSYS
 from pyansys.convert import is_float
 
 try:
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-    matplotlib_loaded = True
+    MATPLOTLIB_LOADED = True
 except:
-    matplotlib_loaded = False
+    MATPLOTLIB_LOADED = False
 
 
 def find_ansys():
@@ -520,7 +520,7 @@ class ANSYS(_InternalANSYS):
 
     def EnableInteractivePlotting(self):
         """ Enables interactive plotting.  Requires matplotlib """
-        if matplotlib_loaded:
+        if MATPLOTLIB_LOADED:
             self.Show('PNG')
             self._interactive_plotting = True
         else:
@@ -1039,6 +1039,14 @@ class ANSYS(_InternalANSYS):
         with open(keyfile) as f:
             key = f.read()
 
+        # attempt to import corba
+        try:
+            from ansys_corba import CORBA
+        except:
+            pip_cmd = 'pip install ansys_corba'
+            raise ImportError('Missing ansys_corba.  ' +
+                              'Please install with "%s"' % pip_cmd)
+
         orb = CORBA.ORB_init()
         self.mapdl = orb.string_to_object(key)
 
@@ -1053,8 +1061,8 @@ class ANSYS(_InternalANSYS):
         self.log.debug('Key %s' % key)
 
     class _non_interactive:
-        """ 
-        Allows user to enter commands that need to run non-interactively
+        """ Allows user to enter commands that need to run
+        non-interactively.
 
         Examples
         --------
