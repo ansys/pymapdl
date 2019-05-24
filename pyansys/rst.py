@@ -591,13 +591,11 @@ class ResultFile(object):
         return self.nnum, result
 
     def _read_components(self):
-        """
-        Read components from an ansys result file
+        """Read components from an ansys result file
 
         Returns
         components : dict
             Dictionary of components
-
         """
         components = {}
         ncomp = self.geometry_header['maxcomp']
@@ -618,7 +616,9 @@ class ResultFile(object):
                         name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
                         name[24:28][::-1] + name[28:32][::-1]
                 name = name.strip()
-                components[name] = _reader.component_interperter(table[9:])
+                data = table[9:]
+                if data.any():
+                    components[name] = _reader.component_interperter(data)
 
         return components
 
