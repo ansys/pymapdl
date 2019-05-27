@@ -3,14 +3,10 @@ import os
 
 import numpy as np
 import pytest
-try:
-    from pyvista.plotting import running_xserver as system_supports_plotting
-except:
-    from pyvista.plotting import system_supports_plotting
-
+from pyvista.plotting import system_supports_plotting
 
 import pyansys
-from pyansys.examples import sector_result_file, rstfile
+from pyansys.examples import rstfile
 
 try:
     __file__
@@ -31,7 +27,10 @@ testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
 
 # modal result z axis
-result_z = pyansys.read_binary(sector_result_file)
+try:
+    result_z = pyansys.download_sector_modal()
+except:
+    result_z = None
 
 # static result x axis
 cyclic_x_filename = os.path.join(testfiles_path, 'cyc12.rst')
@@ -52,6 +51,7 @@ def test_non_cyclic():
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_plot_z_cyc():
     cpos = result_z.plot(off_screen=True)
     assert isinstance(cpos, list)
@@ -67,19 +67,19 @@ def test_plot_x_cyc():
 def test_plot_component_rotor():
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=False,
                                  node_components='REFINE', sel_type_all=False,
-                                 interactive=False)
+                                 off_screen=True)
 
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=True,
                                  node_components='REFINE', sel_type_all=False,
-                                 interactive=False)
+                                 off_screen=True)
 
     # result_z.plot_nodal_stress(20, 'Sx', node_components='REFINE',
-    #                            sel_type_all=False, interactive=False)
+    #                            sel_type_all=False, off_screen=True)
 
     # result.plot_principal_nodal_stress(20, 'SEQV',
     #                                    node_components='REFINE',
     #                                    sel_type_all=False,
-    #                                    interactive=False)
+    #                                    off_screen=True)
 
 
 def test_element_stress_v182_non_cyclic():
@@ -177,7 +177,7 @@ def test_full_z_nodal_solution():
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_full_x_nodal_solution_plot():
-    result_x.plot_nodal_solution(0, interactive=False)
+    result_x.plot_nodal_solution(0, off_screen=True)
 
 
 def test_full_x_nodal_stress():
@@ -202,10 +202,13 @@ def test_full_x_nodal_stress():
 
 def test_mode_table():
     assert isinstance(cyclic_v182_z.mode_table, np.ndarray)
-    assert isinstance(result_z.mode_table, np.ndarray)
     assert isinstance(result_x.mode_table, np.ndarray)
 
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
+def test_mode_table_result_z():
+    assert isinstance(result_z.mode_table, np.ndarray)
 
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_harmonic_index_to_cumulative():
     # harmonic_index_to_cumulative
     assert result_z.harmonic_index_to_cumulative(0, 0) == 0
@@ -240,14 +243,16 @@ def test_full_x_principal_nodal_stress():
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 @pytest.mark.skipif(not HAS_FFMPEG, reason="requires imageio_ffmpeg")
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_animate_nodal_solution(tmpdir):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result_z.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
-                                interactive=False)
+                                    off_screen=True)
     assert os.path.isfile(temp_movie)
 
 
 @pytest.mark.skipif(is_python2, reason="Python 2.7 has a bug when loading displacements")
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_cyclic_z_harmonic_displacement():
     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
                                       'prnsol_u_cyclic_z_full_v182_set_4_2.npz'))
@@ -268,23 +273,23 @@ def test_cyclic_z_harmonic_displacement():
 
 
 def plot_nodal_solution_z_harmonic():
-    result.plot_nodal_solution((4, 2), 'z', show_axes=True, interactive=False)
+    result.plot_nodal_solution((4, 2), 'z', show_axes=True, off_screen=True)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress():
-    result_x.plot_nodal_stress(0, 'sz', interactive=False)
+    result_x.plot_nodal_stress(0, 'z', off_screen=True)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress():
-    result_x.plot_nodal_stress(0, 'sz', interactive=False, full_rotor=False)
+    result_x.plot_nodal_stress(0, 'z', off_screen=True, full_rotor=False)
 
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress():
-    result_x.plot_principal_nodal_stress(0, 'Seqv', interactive=False)
+    result_x.plot_principal_nodal_stress(0, 'eqv', off_screen=True)
 
 
 # result_x.plot_nodal_stress(0, 'sz', full_rotor=False)

@@ -7,14 +7,19 @@
 environment:
   CIBW_BEFORE_BUILD: "pip install numpy==1.15.0 cython"
   CIBW_TEST_REQUIRES: "pytest scipy matplotlib"
-  CIBW_TEST_COMMAND: "pytest {project}\\tests"
+  CIBW_TEST_COMMAND: "pytest {project}\\tests -v"
   CIBW_SKIP: "*win32* cp27-* cp33* cp34*"
   TWINE_USERNAME: akaszynski
   # Note: TWINE_PASSWORD is set in Appveyor settings
   matrix:
     - PYTHON: "C:\\Python35-x64\\python.exe"
 
+
 install:
+  # configure a headless display
+  - "git clone --depth 1 git://github.com/pyvista/gl-ci-helpers.git"
+  - "powershell gl-ci-helpers/appveyor/install_opengl.ps1"
+  - "SET PYVISTA_OFF_SCREEN=True"
   - pip install twine  # for upload
 
 

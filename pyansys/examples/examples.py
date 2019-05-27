@@ -19,7 +19,7 @@ hexarchivefile = os.path.join(dir_path, 'HexBeam.cdb')
 tetarchivefile = os.path.join(dir_path, 'TetBeam.cdb')
 fullfile = os.path.join(dir_path, 'file.full')
 sector_archive_file = os.path.join(dir_path, 'sector.cdb')
-sector_result_file = os.path.join(dir_path, 'sector.rst')
+# sector_result_file = os.path.join(dir_path, 'sector.rst')
 
 
 def run_all(run_ansys=False):
@@ -39,7 +39,7 @@ def run_all(run_ansys=False):
     any(f() for f in testfunctions)
 
 
-def show_hex_archive(off_screen=False):
+def show_hex_archive(off_screen=None):
     """ Displays a hex beam mesh """
     # Load an archive file
     archive = pyansys.Archive(hexarchivefile)
@@ -76,24 +76,24 @@ def load_result():
         print('{:2d}  {:10.6f}   {:10.6f}   {:10.6f}'.format(node, x, y, z))
 
 
-def show_displacement(interactive=True):
+def show_displacement(off_screen=None):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
     fobj = pyansys.read_binary(rstfile)
 
     print('Displaying ANSYS Mode 1')
-    fobj.plot_nodal_solution(0, label='Displacement', interactive=interactive)
+    fobj.plot_nodal_solution(0, label='Displacement', off_screen=off_screen)
 
 
-def show_stress(interactive=True):
+def show_stress(off_screen=None):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
     result = pyansys.read_binary(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
-    result.plot_nodal_stress(5, 'Sx', interactive=interactive)
+    result.plot_nodal_stress(5, 'x', off_screen=off_screen)
 
 
 def load_km():
@@ -199,7 +199,7 @@ def solve_km():
     plobj.plot()
 
 
-def show_cell_qual(meshtype='tet', off_screen=False):
+def show_cell_qual(meshtype='tet', off_screen=None):
     """
     Displays minimum scaled jacobian of a sample mesh
 
@@ -334,31 +334,16 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
     else:
         print(stress[:10])
 
+    cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
+            (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
+            (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
+
     if plot_vtk:
-        if as_test:
-            # plot and save non-interactively
-            cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
-                    (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
-                    (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
-
-            img = result.plot_nodal_solution(0, interactive=False,
-                                             cpos=cpos, screenshot=True)
-            assert np.any(img)
-
-            img = result.plot_nodal_stress(0, 'Sx', cmap='bwr',
-                                           interactive=False, cpos=cpos,
-                                           screenshot=True)
-            assert np.any(img)
-
-            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr',
-                                               interactive=False,
-                                               cpos=cpos,
-                                               screenshot=True)
-            assert np.any(img)
-        else:
-            # plot interactively
-            result.plot_nodal_solution(0, cmap='bwr')
-            result.plot_nodal_stress(0, 'Sx', cmap='bwr')
-            result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr')
+        result.plot_nodal_solution(0, cpos=cpos, cmap='bwr',
+                                   off_screen=as_test, screenshot=as_test)
+        result.plot_nodal_stress(0, 'x', cpos=cpos, cmap='bwr',
+                                 off_screen=as_test, screenshot=as_test)
+        result.plot_principal_nodal_stress(0, 'EQV', cpos=cpos,
+                                           cmap='bwr', off_screen=as_test, screenshot=as_test)
 
     return True

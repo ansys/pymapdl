@@ -21,8 +21,10 @@ build/
 dist/
 
 # MISC
+_build/
 pyansys/Interface.py
 *.bat
+docs/examples/*
 
 # Testing
 factory/

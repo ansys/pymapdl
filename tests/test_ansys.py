@@ -1,28 +1,20 @@
+import os
 from shutil import copyfile
 
 import pytest
 import numpy as np
-import os
 import pyansys
-try:
-    from pyvista.plotting import running_xserver as system_supports_plotting
-except:
-    from pyvista.plotting import system_supports_plotting
+from pyvista.plotting import system_supports_plotting
 
 from pyansys.rst import ResultFile
-
-# try:
-#     __file__
-# except:
-#     __file__ = '/home/alex/Documents/AFRL/Python/pyansys/Source/tests/test_ansys.py'
 
 
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
 
-# rver = 'v150'  # also have 'v182' but will not work on windows
-rver = 'v182'  # also have 'v182' but will not work on windows
+# rver = 'v150'
+rver = 'v182'
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 class TestCyclicResultReader(object):
@@ -82,7 +74,7 @@ class TestCyclicResultReader(object):
 
     def test_presol_s(self):
         # verify element stress
-        element_stress, elemnum, enode = self.result.element_stress(0)
+        element_stress, _, enode = self.result.element_stress(0)
         element_stress = np.vstack(element_stress)
         enode = np.hstack(enode)
 
@@ -145,11 +137,13 @@ class TestCyclicResultReader(object):
     def test_plot(self):
         filename = '/tmp/temp.png'
         self.result.plot_nodal_solution(0, screenshot=filename,
-                                      interactive=False)
+                                      off_screen=True)
+
         # self.result.plot_nodal_stress(0, 'Sx', screenshot=filename,
-        #                             interactive=False)
-        self.result.plot_principal_nodal_stress(0, 'SEQV', screenshot=filename,
-                                             interactive=False)
+        #                             off_screen=True)
+
+        self.result.plot_principal_nodal_stress(0, 'EQV', screenshot=filename,
+                                                off_screen=True)
 
     def test_exit(self):
         self.ansys.Exit()

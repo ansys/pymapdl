@@ -1,8 +1,13 @@
 """Read ANSYS binary result files *.rst
+
+Used:
+/usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
 """
+import time
 import warnings
 import logging
 import ctypes
+from threading import Thread
 
 import vtk
 import numpy as np
@@ -29,11 +34,19 @@ def merge_two_dicts(x, y):
 # Pointer information from ansys interface manual
 # =============================================================================
 # Individual element index table
-ELEMENT_INDEX_TABLE_KEYS = ['ptrEMS', 'ptrENF', 'ptrENS', 'ptrENG', 'ptrEGR',
-                            'ptrEEL', 'ptrEPL', 'ptrECR', 'ptrETH', 'ptrEUL',
-                            'ptrEFX', 'ptrELF', 'ptrEMN', 'ptrECD', 'ptrENL',
-                            'ptrEHC', 'ptrEPT', 'ptrESF', 'ptrEDI', 'ptrETB',
-                            'ptrECT', 'ptrEXY', 'ptrEBA', 'ptrESV', 'ptrMNL']
+ELEMENT_INDEX_TABLE_KEYS = ['EMS', 'ENF', 'ENS', 'ENG', 'EGR',
+                            'EEL', 'EPL', 'ECR', 'ETH', 'EUL',
+                            'EFX', 'ELF', 'EMN', 'ECD', 'ENL',
+                            'EHC', 'EPT', 'ESF', 'EDI', 'ETB',
+                            'ECT', 'EXY', 'EBA', 'ESV', 'MNL']
+
+ELEMENT_RESULT_NCOMP = {'ENS': 6,
+                        'EEL': 7,
+                        'EPL': 7,
+                        'ECR': 7,
+                        'ETH': 8,
+                        'ENL': 10,
+                        'EDI': 7}
 
 ELEMENT_INDEX_TABLE_INFO = {
     'EMS': 'misc. data',
@@ -146,6 +159,7 @@ class ResultFile(object):
         """
         self.filename = filename
         self.resultheader = result_info(self.filename)
+        self.n_sector = 1
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
@@ -166,72 +180,43 @@ class ResultFile(object):
             f.seek(103*4)  # start of secondary header
             self.header = parse_header(read_table(f), RESULT_HEADER_KEYS)
 
-    def plot(self, color='w', show_edges=True, **kwargs):
+    def plot(self, node_components=None, sel_type_all=True, **kwargs):
         """Plot result geometry
 
         Parameters
         ----------
-        color : string or 3 item list, optional, defaults to white
-            Either a string, rgb list, or hex color string.  For example:
-                color='white'
-                color='w'
-                color=[1, 1, 1]
-                color='#FFFFFF'
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
-            Color will be overridden when scalars are input.
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
 
-        show_edges : bool, optional
-            Shows the edges of a mesh.  Does not apply to a wireframe
-            representation.
-
-        style : string, optional
-            Visualization style of the vtk mesh.  One for the
-            following:
-                style='surface'
-                style='wireframe'
-                style='points'
-
-            Defaults to 'surface'
-
-        off_screen : bool
-            Plots off screen when True.  Helpful for saving
-            screenshots without a window popping up.
-
-        full_screen : bool, optional
-            Opens window in full screen.  When enabled, ignores
-            window_size.  Default False.
-
-        screenshot : str or bool, optional
-            Saves screenshot to file when enabled.  See:
-            help(pyvista.Plotter.screenshot).  Default disabled.
-
-            When True, takes screenshot and returns numpy array of
-            image.
-
-        window_size : list, optional
-            Window size in pixels.  Defaults to [1024, 768]
-
-        show_bounds : bool, optional
-            Shows mesh bounds when True.  Default False. Alias
-            ``show_grid`` also accepted.
-
-        show_axes : bool, optional
-            Shows a vtk axes widget.  Enabled by default.
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
 
         Returns
         -------
         cpos : list
             List of camera position, focal point, and view up.
         """
-        return self.grid.plot(color=color, show_edges=show_edges, **kwargs)
+        show_edges = kwargs.pop('show_edges', True)
+
+        if node_components:
+            grid, _ = self._extract_node_components(node_components, sel_type_all)
+        else:
+            grid = self.grid
+        return self._plot_point_scalars(None, grid=grid, show_edges=show_edges,
+                                        **kwargs)
     
-    def plot_nodal_solution(self, rnum, comp='norm', label='',
-                            cmap=None, flip_scalars=None, cpos=None,
-                            screenshot=None, interactive=True,
+    def plot_nodal_solution(self, rnum, comp='norm',
+                            show_displacement=False,
+                            max_disp=0.1,
                             node_components=None, sel_type_all=True,
                             **kwargs):
-        """
-        Plots a nodal result.
+        """Plots a nodal result.
 
         Parameters
         ----------
@@ -240,32 +225,15 @@ class ResultFile(object):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are 'x', 'y', 'z',
-            and 'norm', corresponding to the x directin, y direction,
-            z direction, and the combined direction (x**2 + y**2 +
-            z**2)**0.5
+            Display component to display.  Options are ``'x'``, ``'y'``, ``'z'``,
+            or ``'norm'``.  This corresponds to the x directin, y direction,
+            z direction, and the normalized result.
 
-        label : str, optional
-            Annotation string to add to scalar bar in plot.
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
 
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.
-
-        interactive : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -284,6 +252,7 @@ class ResultFile(object):
         # Load result from file
         rnum = self.parse_step_substep(rnum)
         nnum, result = self.nodal_solution(rnum)
+        label = 'Displacement'
 
         # Process result
         if comp == 'x':
@@ -315,6 +284,7 @@ class ResultFile(object):
             new_scalars[mask] = scalars
             scalars = new_scalars
 
+        ind = None
         if node_components:
             grid, ind = self._extract_node_components(node_components,
                                                       sel_type_all)
@@ -323,23 +293,34 @@ class ResultFile(object):
         else:
             grid = self.grid
 
-        if hasattr(self, 'n_sector'):
-            from pyansys.cyclic_reader import CyclicResult
-            return super(CyclicResult, self).plot_point_scalars(scalars,
-                                                                rnum,
-                                                                stitle,
-                                                                cmap,
-                                                                flip_scalars,
-                                                                screenshot,
-                                                                cpos,
-                                                                interactive=interactive,
-                                                                grid=grid,
-                                                                **kwargs)
-        else:
-            return self.plot_point_scalars(scalars, rnum, stitle, cmap,
-                                           flip_scalars, screenshot, cpos,
-                                           interactive=interactive,
-                                           grid=grid, **kwargs)
+        if show_displacement:
+            disp = self.nodal_solution(rnum)[1][:, :3]
+            if ind is not None:
+                disp = disp[ind]
+
+            # scale max displacement
+            disp /= (np.abs(disp).max()/max_disp)
+
+            new_points = disp + grid.points
+            grid = grid.copy()
+            grid.points = new_points
+
+        return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
+                                        # show_displacement=show_displacement,
+                                        # displacement_factor=displacement_factor,
+                                        node_components=node_components,
+                                        sel_type_all=sel_type_all,
+                                        **kwargs)
+
+    @property
+    def node_components(self):
+        """ dictionary of ansys node components """
+        ansyscomp = {}
+        for key in self.grid.point_arrays:
+            data = self.grid.point_arrays[key]
+            if data.dtype == 'uint8' or data.dtype == 'bool':
+                ansyscomp[key] = data.view(np.bool)
+        return ansyscomp
 
     def _extract_node_components(self, node_components,
                                  sel_type_all=True, grid=None):
@@ -375,6 +356,8 @@ class ResultFile(object):
             cell_mask = cells_with_any_nodes(offset, cells, grid.celltypes,
                                              mask.view(np.uint8))
 
+        if not cell_mask.any():
+            raise RuntimeError('Empty component')
         reduced_grid = grid.extract_cells(cell_mask)
 
         if not reduced_grid.n_cells:
@@ -382,138 +365,81 @@ class ResultFile(object):
                             'Try "sel_type_all=False"')
 
         ind = reduced_grid.point_arrays['vtkOriginalPointIds']
+        if not ind.any():
+            raise RuntimeError('Invalid component')
+
         return reduced_grid, ind
 
     @property
     def time_values(self):
         return self.resultheader['time_values']
 
-    def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
-                               nangles=100, show_phase=True,
-                               show_result_info=True,
-                               interpolate_before_map=True, cpos=None,
-                               movie_filename=None, interactive=True,
-                               **kwargs):
-        """
-        Animate nodal solution.  Assumes nodal solution is a displacement 
-        array from a modal solution.
+    def animate_nodal_solution(self, rnum, comp='norm',
+                               node_components=None,
+                               sel_type_all=True, add_text=True,
+                               max_disp=0.1, nangles=100,
+                               movie_filename=None, **kwargs):
+        """Animate nodal solution.  Assumes nodal solution is a
+        displacement array from a modal solution.
 
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list 
-            containing (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are 'x', 'y', 'z', and
-            'norm', corresponding to the x directin, y direction, z direction,
-            and the combined direction (x**2 + y**2 + z**2)**0.5
+            Scalar component to display.  Options are 'x', 'y', 'z',
+            and 'norm', and None.
 
         max_disp : float, optional
-            Maximum displacement in the units of the model.  Default 0.1
+            Maximum displacement in the units of the model.  Default
+            0.1
 
         nangles : int, optional
             Number of "frames" between each full cycle.
-
-        show_phase : bool, optional
-            Shows the phase at each frame.
-
-        show_result_info : bool, optional
-            Includes result information at the bottom left-hand corner of the
-            plot.
-
-        interpolate_before_map : bool, optional
-            Leaving this at default generally results in a better plot.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.
 
         movie_filename : str, optional
             Filename of the movie to open.  Filename should end in mp4,
             but other filetypes may be supported.  See "imagio.get_writer".
             A single loop of the mode will be recorded.
 
-        interactive : bool, optional
-            Can be used in conjunction with movie_filename to generate a
-            movie non-interactively.
-
         kwargs : optional keyword arguments, optional
             See help(pyvista.Plot) for additional keyword arguments.
 
         """
-        # normalize nodal solution
-        nnum, disp = self.nodal_solution(rnum)
-        disp /= (np.abs(disp).max()/max_disp)
-        # disp = disp.reshape(-1, 3)
-        
-        if comp == 'x':
-            axis = 0
-        elif comp == 'y':
-            axis = 1
-        elif comp == 'z':
-            axis = 2
+        scalars = None
+        if comp:
+            _, disp = self.nodal_solution(rnum)
+            disp = disp[:, :3]
+
+            if comp == 'x':
+                axis = 0
+            elif comp == 'y':
+                axis = 1
+            elif comp == 'z':
+                axis = 2
+            else:
+                axis = None
+
+            if axis is not None:
+                scalars = disp[:, axis]
+            else:
+                scalars = (disp*disp).sum(1)**0.5
+
+        if node_components:
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            if comp:
+                scalars = scalars[ind]
         else:
-            axis = None
+            grid = self.grid
 
-        if axis is not None:
-            scalars = disp[:, axis]
-        else:
-            scalars = (disp*disp).sum(1)**0.5
-
-        if disp.shape[1] == 2:
-            disp = np.hstack((disp, np.zeros((disp.shape[0], 1))))
-
-        orig_pt = self.grid.points
-
-        if show_result_info:
-            result_info = self.text_result_table(rnum)
-
-        plotter = pv.Plotter(off_screen=not interactive)
-        plotter.add_mesh(self.grid.copy(), scalars=np.real(scalars),
-                      interpolate_before_map=interpolate_before_map, **kwargs)
-        plotter.update_coordinates(orig_pt, render=False)
-
-        # setup text
-        plotter.add_text(' ', font_size=30)
-
-        if cpos:
-            plotter.camera_position = cpos
-
-        if movie_filename:
-            plotter.open_movie(movie_filename)
-
-        # run until q is pressed
-        plotter.plot(interactive=False, auto_close=False,
-                   interactive_update=True)
-        first_loop = True
-        while not plotter.q_pressed:
-            for angle in np.linspace(0, np.pi*2, nangles):
-                mag_adj = np.sin(angle)
-                disp_adj = disp*mag_adj
-
-                if axis is not None:
-                    scalars = disp_adj[:, axis]
-                else:
-                    scalars = (disp_adj*disp_adj).sum(1)**0.5
-
-                plotter.update_scalars(scalars, render=False)
-                plotter.update_coordinates(orig_pt + disp_adj, render=False)
-                if show_phase and show_result_info:
-                    plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                             (result_info, (angle*180/np.pi)))
-
-                if interactive:
-                    plotter.update(30, force_redraw=True)
-
-                if plotter.q_pressed:
-                    break
-
-                if movie_filename and first_loop:
-                    plotter.write_frame()
-
-            first_loop = False
-            if not interactive:
-                break
-
-        return plotter.close()
+        return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
+                                        add_text=add_text,
+                                        animate=True,
+                                        node_components=node_components,
+                                        sel_type_all=sel_type_all,
+                                        nangles=nangles,
+                                        movie_filename=movie_filename,
+                                        max_disp=max_disp, **kwargs)
 
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """
@@ -684,8 +610,7 @@ class ResultFile(object):
                 # Item 63 - number of nodes per element having nodal
                 # forces, etc. (nodfor)
                 f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 63)*4)
-                nodfor[etype_ref] = np.fromfile(
-                    f, self.resultheader['endian'] + 'i', 1)
+                nodfor[etype_ref] = np.fromfile(f, self.resultheader['endian'] + 'i', 1)
 
                 # Item 94 - number of nodes per element having nodal
                 # stresses, etc. (nodstr).  This number is the number
@@ -845,84 +770,69 @@ class ResultFile(object):
 
         return ele_ind_table, nodstr, etype
 
-    def nodal_stress(self, rnum):
-        """
-        Equivalent ANSYS command: PRNSOL, S
+    # def nodal_stress(self, rnum):
+    #     """Equivalent ANSYS command: PRNSOL, S
 
-        Retrieves the component stresses for each node in the solution.
+    #     Retrieves the component stresses for each node in the solution.
 
-        The order of the results corresponds to the sorted node
-        numbering.
+    #     The order of the results corresponds to the sorted node
+    #     numbering.
 
-        This algorithm, like ANSYS, computes the nodal stress by
-        averaging the stress for each element at each node.  Due to
-        the discontinuities across elements, stresses will vary based
-        on the element they are evaluated from.
+    #     This algorithm, like ANSYS, computes the nodal stress by
+    #     averaging the stress for each element at each node.  Due to
+    #     the discontinuities across elements, stresses will vary based
+    #     on the element they are evaluated from.
 
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
+    #     Parameters
+    #     ----------
+    #     rnum : int or list
+    #         Cumulative result number with zero based indexing, or a
+    #         list containing (step, substep) of the requested result.
 
-        Returns
-        -------
-        nodenum : numpy.ndarray
-            Node numbers of the result.
+    #     Returns
+    #     -------
+    #     nodenum : numpy.ndarray
+    #         Node numbers of the result.
 
-        stress : numpy.ndarray
-            Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
-            node.  For the corresponding node numbers, see where
-            result is the result object.
+    #     stress : numpy.ndarray
+    #         Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
+    #         node.  For the corresponding node numbers, see where
+    #         result is the result object.
 
-        Notes
-        -----
-        Nodes without a stress value will be NAN.
+    #     Notes
+    #     -----
+    #     Nodes without a stress value will be NAN.
+    #     """
+    #     # element header
+    #     rnum = self.parse_step_substep(rnum)
+    #     ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
 
-        """
-        # element header
-        rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+    #     if self.resultheader['rstsprs'] != 0:
+    #         nitem = 6
+    #     else:
+    #         nitem = 11
 
-        if self.resultheader['rstsprs'] != 0:
-            nitem = 6
-        else:
-            nitem = 11
+    #     # certain element types do not output stress
+    #     elemtype = self.geometry['Element Type'].astype(np.int32)
 
-        # certain element types do not output stress
-        elemtype = self.geometry['Element Type'].astype(np.int32)
-        # validmask = np.in1d(elemtype, validENS).astype(np.int32)
+    #     data, ncount = _binary_reader.read_nodal_values(self.filename,
+    #                                                     self.grid.celltypes,
+    #                                                     ele_ind_table + 2,
+    #                                                     self.grid.offset,
+    #                                                     self.grid.cells,
+    #                                                     nitem,
+    #                                                     self.grid.number_of_points,
+    #                                                     nodstr,
+    #                                                     etype,
+    #                                                     elemtype)
 
-         # if cyclic rotor
-        #     if not hasattr(self, 'n_sector'):
-        #         raise Exception('Element table size does not match number of cells')
-        #     ind = self.grid.cell_arrays['vtkOriginalCellIds']
-        #     ele_ind_table = ele_ind_table[ind]
+    #     if nitem != 6:
+    #         data = data[:, :6]
 
-        # for sector results or if the grid doesn't match the number
-        # of table element cells
-        # if ele_ind_table.size != self.grid.n_cells:
-        #     ind = self.grid.cell_arrays['vtkOriginalCellIds']
-        #     ele_ind_table = ele_ind_table[ind]
+    #     nnum = self.grid.point_arrays['ansys_node_num']
+    #     stress = data/ncount.reshape(-1, 1)
 
-        data, ncount = _binary_reader.read_nodal_values(self.filename,
-                                                        self.grid.celltypes,
-                                                        ele_ind_table + 2,
-                                                        self.grid.offset,
-                                                        self.grid.cells,
-                                                        nitem,
-                                                        self.grid.number_of_points,
-                                                        nodstr,
-                                                        etype,
-                                                        elemtype)
-
-        if nitem != 6:
-            data = data[:, :6]
-
-        nnum = self.grid.point_arrays['ansys_node_num']
-        stress = data/ncount.reshape(-1, 1)
-
-        return nnum, stress
+    #     return nnum, stress
 
     @property
     def version(self):
@@ -1159,11 +1069,8 @@ class ResultFile(object):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def plot_principal_nodal_stress(self, rnum, stype=None, cmap=None,
-                                    flip_scalars=None, cpos=None,
-                                    screenshot=None, interactive=True,
-                                    node_components=None, sel_type_all=True,
-                                    **kwargs):
+    def plot_principal_nodal_stress(self, rnum, stype=None, node_components=None,
+                                    sel_type_all=True, **kwargs):
         """Plot the principal stress at each node in the solution.
 
         Parameters
@@ -1179,27 +1086,6 @@ class ResultFile(object):
             Stress type must be a string from the following list:
 
             ['S1', 'S2', 'S3', 'SINT', 'SEQV']
-
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.  Only
-           applicable for when displaying scalars.  Defaults None
-           (rainbow).  Requires matplotlib.
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.  Default None.
-
-        interactive : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -1223,7 +1109,7 @@ class ResultFile(object):
         """
         if stype is None:
             raise Exception("Stress type must be a string from the following list:\n" +
-                            "['S1', 'S2', 'S3', 'SINT', 'SEQV']")
+                            "['1', '2', '3', 'INT', 'EQV']")
 
         rnum = self.parse_step_substep(rnum)
         stress = self.principle_stress_for_plotting(rnum, stype)
@@ -1235,20 +1121,26 @@ class ResultFile(object):
             grid = self.grid
 
         # Generate plot
-        stitle = 'Nodal Stress\n%s\n' % stype
-        cpos = self.plot_point_scalars(stress, rnum, stitle, cmap,
-                                       flip_scalars, screenshot, cpos,
-                                       interactive, grid=grid,
-                                       **kwargs)
-        return cpos, stress
+        return self._plot_point_scalars(stress, rnum=rnum, grid=grid, **kwargs)
 
-    def plot_point_scalars(self, scalars, rnum=None, stitle='',
-                           cmap=None, flip_scalars=None,
-                           screenshot=None, cpos=None,
-                           interactive=True, grid=None, add_text=True,
-                           **kwargs):
-        """
-        Plot point scalars on active mesh.
+    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+        """ return a 4x4 transformation array for a given coordinate system """
+        # assemble 4 x 4 matrix
+        csys = self.geometry['coord systems'][cs_cord]
+        trans = np.hstack((csys['transformation matrix'],
+                           csys['origin'].reshape(-1, 1)))
+        matrix = trans_to_matrix(trans)
+        if as_vtk_matrix:
+            return matrix
+        else:
+            return pv.trans_from_matrix(matrix)
+
+    def _plot_point_scalars(self, scalars, rnum=None, grid=None,
+                            show_displacement=False, displacement_factor=1,
+                            add_text=True, animate=False, nangles=100,
+                            movie_filename=None, max_disp=0.1, **kwargs):
+        """Plot point scalars on active mesh.
+
         Parameters
         ----------
         scalars : np.ndarray
@@ -1258,30 +1150,15 @@ class ResultFile(object):
             Cumulative result number.  Used for adding informative
             text.
 
-        stitle : str, optional
-            Title of the scalar bar.
-
-        cmap : str, optional
-            See matplotlib cmaps:
-            matplotlib.org/examples/color/cmaps_reference.html
-
-        flip_scalars : bool, optional
-            Reverses the direction of the cmap.
-
-        screenshot : str, optional
-            When a filename, saves screenshot to disk.
-
-        cpos : list, optional
-            3x3 list describing the camera position.  Obtain it by
-            getting the output of plot_point_scalars first.
-
-        interactive : bool, optional
-            Allows user to interact with the plot when True.  Default
-            True.
-
         grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
             Uses self.grid by default.  When specified, uses this grid
             instead.
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         add_text : bool, optional
             Adds information about the result when rnum is given.
@@ -1297,30 +1174,134 @@ class ResultFile(object):
         if grid is None:
             grid = self.grid
 
-        # make cmap match default ansys
-        if cmap is None and flip_scalars is None:
-            flip_scalars = False
+        disp = None
+        if show_displacement and not animate:
+            disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
+            new_points = disp + grid.points
+            grid = grid.copy()
+            grid.points = new_points
+        elif animate:
+            disp = self.nodal_solution(rnum)[1][:, :3]
 
+        # extract mesh surface
+        mapped_indices = None
+        if 'vtkOriginalPointIds' in grid.point_arrays:
+            mapped_indices = grid.point_arrays['vtkOriginalPointIds']
+
+        mesh = grid.extract_surface()
+        ind = mesh.point_arrays['vtkOriginalPointIds']
+        if disp is not None:
+            if mapped_indices is not None:
+                disp = disp[mapped_indices][ind]
+            else:
+                disp = disp[ind]
+
+            if animate:  # scale for max displacement
+                disp /= (np.abs(disp).max()/max_disp)
+
+        if scalars is not None:
+            if scalars.ndim == 2:
+                scalars = scalars[:, ind]
+            else:
+                scalars = scalars[ind]
+
+            rng = kwargs.pop('rng', [scalars.min(), scalars.max()])
+        else:
+            rng = kwargs.pop('rng', None)
+
+        # add_text = kwargs.pop('add_text', True)
+        smooth_shading = kwargs.pop('smooth_shading', True)
         window_size = kwargs.pop('window_size', [1024, 768])
         full_screen = kwargs.pop('full_screen', False)
         notebook = kwargs.pop('notebook', False)
+        off_screen = kwargs.pop('off_screen', None)
+        cpos = kwargs.pop('cpos', None)
+        screenshot = kwargs.pop('screenshot', None)
+        color = kwargs.pop('color', 'w')
+        interpolate_before_map = kwargs.pop('interpolate_before_map', True)
+        interactive = kwargs.pop('interactive', True)
+        stitle = kwargs.pop('stitle', None)
 
-        # cell_mask = np.empty(grid.n_cells, np.bool)
-        # offset = grid.offset.astype(np.int32)
-        # cells = grid.cells.astype(np.int32)
+        # make cmap match default ansys
+        # if cmap is None and flip_scalars is None:
+        #     flip_scalars = False
 
-        # Plot off screen when not interactive
-        plotter = pv.Plotter(off_screen=not(interactive), notebook=notebook)
-        if 'show_axes' in kwargs:
+        # coordinate transformation for cyclic replication
+        cs_cord = self.resultheader['csCord']
+        if cs_cord > 1:
+            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
+            i_matrix.Invert()
+        else:
+            matrix = vtk.vtkMatrix4x4()
+            i_matrix = vtk.vtkMatrix4x4()
+
+        plotter = pv.Plotter(off_screen=off_screen, notebook=notebook)
+
+        if kwargs.pop('show_axes', True):
             plotter.add_axes()
+        if kwargs.pop('background', None):
+            plotter.background_color = background
 
-        if 'background' in kwargs:
-            plotter.background_color = kwargs['background']
+        n_sector = 1
+        if np.any(scalars):
+            if self.n_sector > 1:
+                if scalars.ndim != 2:
+                    n_sector = 1
+                    scalars = [scalars]
+                elif scalars.ndim == 1:
+                    scalars = [scalars]
+                else:
+                    n_sector = self.n_sector
+            elif scalars.ndim == 1:
+                scalars = [scalars]
+        else:
+            if self.n_sector > 1:
+                if kwargs.pop('full_rotor', True):
+                    n_sector = self.n_sector
+                    scalars = [None]*n_sector
+                else:
+                    scalars = [None]
+            else:
+                scalars = [None]
 
-        plotter.add_mesh(grid, scalars=scalars, stitle=stitle,
-                         cmap=cmap, flip_scalars=flip_scalars,
-                         interpolate_before_map=True,
-                         **kwargs)
+        rang = 360.0 / self.n_sector
+        copied_meshes = []
+
+        if kwargs.pop('overlay_wireframe', False):
+            plotter.add_mesh(self.grid,
+                             color='w',
+                             style='wireframe',
+                             opacity=0.5,
+                             **kwargs)
+
+        for i in range(n_sector):
+            copied_mesh = mesh.copy(False)
+            actor = plotter.add_mesh(copied_mesh,
+                                     color=color,
+                                     scalars=scalars[i],
+                                     rng=rng,
+                                     smooth_shading=smooth_shading,
+                                     interpolate_before_map=interpolate_before_map,
+                                     stitle=stitle,
+                                     **kwargs)
+
+            # transform to standard position, rotate about Z axis,
+            # transform back
+            vtk_transform = vtk.vtkTransform()
+            vtk_transform.RotateZ(rang*i)
+            vtk_transform.Update()
+            rot_matrix = vtk_transform.GetMatrix()
+
+            if cs_cord > 1:
+                temp_matrix = vtk.vtkMatrix4x4()
+                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+                vtk_transform.SetMatrix(rot_matrix)
+
+            actor.SetUserTransform(vtk_transform)
+
+        # plotter.add_scalar_bar()
 
         # NAN/missing data are white
         # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
@@ -1329,12 +1310,45 @@ class ResultFile(object):
         if cpos:
             plotter.camera_position = cpos
 
+        if movie_filename:
+            plotter.open_movie(movie_filename)
+
         # add table
         if add_text and rnum is not None:
-            plotter.add_text(self.text_result_table(rnum), font_size=20,
+            result_text = self.text_result_table(rnum)
+            plotter.add_text(result_text, font_size=20,
                              position=[0, 0])
 
-        if screenshot:
+        if animate:
+            orig_pts = copied_mesh.points.copy()
+            plotter.plot(interactive=False, auto_close=False,
+                         interactive_update=not off_screen)
+
+            first_loop = True
+            while not plotter.q_pressed:
+                for angle in np.linspace(0, np.pi*2, nangles):
+                    mag_adj = np.sin(angle)
+                    if scalars[0] is not None:
+                        copied_mesh['Data'] = scalars[0]*mag_adj
+                    copied_mesh.points = orig_pts + disp*mag_adj
+
+                    if add_text:
+                        plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                                                   (result_text, (angle*180/np.pi)))
+
+                    plotter.update(30, force_redraw=True)
+                    if plotter.q_pressed:
+                        break
+
+                    if movie_filename and first_loop:
+                        plotter.write_frame()
+
+                first_loop = False
+                if off_screen or interactive is False:
+                    break
+            plotter.close()
+
+        elif screenshot:
             cpos = plotter.plot(auto_close=False, interactive=interactive,
                                 window_size=window_size,
                                 full_screen=full_screen)
@@ -1350,8 +1364,8 @@ class ResultFile(object):
 
         if screenshot is True:
             return cpos, img
-        else:
-            return cpos
+
+        return cpos
 
     def text_result_table(self, rnum):
         """ Returns a text result table for plotting """
@@ -1372,7 +1386,7 @@ class ResultFile(object):
         returns stress used to plot
 
         """
-        stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        stress_types = ['1', '2', '3', 'INT', 'EQV']
         if stype.upper() not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
 
@@ -1381,17 +1395,12 @@ class ResultFile(object):
         _, stress = self.principal_nodal_stress(rnum)
         return stress[:, sidx]
 
-    def plot_nodal_stress(self, rnum, stype, cmap=None, flip_scalars=None,
-                          cpos=None, screenshot=None, interactive=True,
-                          node_components=None, sel_type_all=True, **kwargs):
-        """
-        Plots the stresses at each node in the solution.
-
-        The order of the results corresponds to the sorted node
-        numbering.  This algorithm, like ANSYS, computes the node
-        stress by averaging the stress for each element at each node.
-        Due to the discontinuities across elements, stresses will vary
-        based on the element they are evaluated from.
+    def plot_nodal_stress(self, rnum, comp,
+                          show_displacement=False,
+                          displacement_factor=1,
+                          node_components=None,
+                          sel_type_all=True, **kwargs):
+        """Plots the stresses at each node in the solution.
 
         Parameters
         ----------
@@ -1400,26 +1409,14 @@ class ResultFile(object):
             list containing (step, substep) of the requested result.
 
         stype : string
-            Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
-
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.
-
-        interactive : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
+        comp : str, optional
+            Thermal strain component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -1438,31 +1435,14 @@ class ResultFile(object):
         cpos : list
             3 x 3 vtk camera position.
         """
-        rnum = self.parse_step_substep(rnum)
-        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz', 'seqv']
-        stype = stype.lower()
-        if stype not in stress_types:
-            raise Exception('Stress type not in: \n' + str(stress_types))
+        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
+        kwargs['stitle'] = '%s Component Nodal Stress' % comp
+        self._plot_nodal_result(rnum, 'ENS',  comp, available_comps, show_displacement,
+                                displacement_factor, node_components,
+                                sel_type_all, **kwargs)
 
-        # Get nodal stress at the requested component
-        nnum, stress = self.nodal_stress(rnum)
-        sidx = stress_types.index(stype)
-        stress = stress[:, sidx]
-
-        if node_components:
-            grid, ind = self._extract_node_components(node_components, sel_type_all)
-            stress = stress[ind]
-        else:
-            grid = self.grid
-
-        stitle = 'Nodal Stress\n{:s}'.format(stype.capitalize())
-        return self.plot_point_scalars(stress, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, grid=grid,
-                                       **kwargs)
-
-    def save_as_vtk(self, filename, binary=True):
-        """
-        Appends all results to an unstructured grid and writes it to
+    def save_as_vtk(self, filename):
+        """Appends all results to an unstructured grid and writes it to
         disk.
 
         The file extension will select the type of writer to use.
@@ -1476,10 +1456,6 @@ class ResultFile(object):
             select the type of writer to use.  '.vtk' will use the
             legacy writer, while '.vtu' will select the VTK XML
             writer.
-
-        binary : bool, optional
-            Writes as a binary file by default.  Set to False to write
-            ASCII
 
         Notes
         -----
@@ -1550,24 +1526,482 @@ class ResultFile(object):
         for key in keys:
             value = self.resultheader[key]
             if value:
-                rst_info.append('{:<11s}: {:s}'.format(key.capitalize(), value))
+                rst_info.append('{:<12s}: {:s}'.format(key.capitalize(), value))
 
         value = self.resultheader['verstring']
-        rst_info.append('{:<11s}: {:s}'.format('Version', value))
+        rst_info.append('{:<12s}: {:s}'.format('Version', value))
 
-        value = str(self.resultheader['nSector'] > 0)
-        rst_info.append('{:<11s}: {:s}'.format('Cyclic', value))
+        value = str(self.resultheader['nSector'] > 1)
+        rst_info.append('{:<12s}: {:s}'.format('Cyclic', value))
 
         value = self.resultheader['nsets']
-        rst_info.append('{:<11s}: {:d}'.format('Result Sets', value))
+        rst_info.append('{:<12s}: {:d}'.format('Result Sets', value))
 
         value = self.resultheader['nnod']
-        rst_info.append('{:<11s}: {:d}'.format('Nodes', value))
+        rst_info.append('{:<12s}: {:d}'.format('Nodes', value))
 
         value = self.resultheader['nelm']
-        rst_info.append('{:<11s}: {:d}'.format('Elements', value))
+        rst_info.append('{:<12s}: {:d}'.format('Elements', value))
 
         return '\n'.join(rst_info)
+
+    def _nodal_result(self, rnum, result_type):
+        """Generic load nodal result
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        result_type : int
+            EMS: misc. data
+            ENF: nodal forces
+            ENS: nodal stresses
+            ENG: volume and energies
+            EGR: nodal gradients
+            EEL: elastic strains
+            EPL: plastic strains
+            ECR: creep strains
+            ETH: thermal strains
+            EUL: euler angles
+            EFX: nodal fluxes
+            ELF: local forces
+            EMN: misc. non-sum values
+            ECD: element current densities
+            ENL: nodal nonlinear data
+            EHC: calculated heat
+            EPT: element temperatures
+            ESF: element surface stresses
+            EDI: diffusion strains
+            ETB: ETABLE items(post1 only
+            ECT: contact data
+            EXY: integration point locations
+            EBA: back stresses
+            ESV: state variables
+            MNL: material nonlinear record        
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers
+
+        result : np.ndarray
+            Array of result data
+        """
+        # element header
+        rnum = self.parse_step_substep(rnum)
+        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+
+        result_type = result_type.upper()
+        nitem = ELEMENT_RESULT_NCOMP[result_type]
+        if self.resultheader['rstsprs'] == 0 and result_type == 'ENS':
+            nitem = 11
+
+        result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
+
+        # Element types for nodal averaging
+        elemtype = self.geometry['Element Type'].astype(np.int32)
+
+        if self.version < 14.5:
+            read_fun = _binary_reader.read_nodal_values_double
+        else:
+            read_fun = _binary_reader.read_nodal_values
+
+        data, ncount = read_fun(self.filename,
+                                self.grid.celltypes,
+                                ele_ind_table + 2,
+                                self.grid.offset,
+                                self.grid.cells,
+                                nitem,
+                                self.grid.number_of_points,
+                                nodstr,
+                                etype,
+                                elemtype,
+                                result_index)
+
+        if result_type == 'ENS' and nitem != 6:
+            data = data[:, :6]
+
+        nnum = self.grid.point_arrays['ansys_node_num']
+        if np.isnan(data).all():
+            raise ValueError('Result file contains no %s records for result %d' %
+                             (ELEMENT_INDEX_TABLE_INFO[result_type.upper()], rnum))
+
+        # average cross nodes
+        result = data/ncount.reshape(-1, 1)
+        return nnum, result
+
+    def nodal_stress(self, rnum):
+        """Retrieves the component stresses for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        This algorithm, like ANSYS, computes the nodal stress by
+        averaging the stress for each element at each node.  Due to
+        the discontinuities across elements, stresses will vary based
+        on the element they are evaluated from.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
+        stress : numpy.ndarray
+            Stresses at X, Y, Z, XY, YZ, and XZ Sxz averaged at each corner
+            node.
+
+        Notes
+        -----
+        Nodes without a stress value will be NAN.
+        Equivalent ANSYS command: PRNSOL, S
+        """
+        return self._nodal_result(rnum, 'ENS')
+
+    def nodal_thermal_strain(self, rnum):
+        """Nodal component plastic strains.  This record contains
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV, and eswell
+        (element swelling strain).  Plastic strains are always values
+        at the integration points moved to the nodes.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers.
+
+        thermal_strain : np.ndarray
+            Nodal component plastic strains.  Array is in the order
+            X, Y, Z, XY, YZ, XZ, EQV, ESWELL
+        """
+        return self._nodal_result(rnum, 'ETH')
+
+    def plot_nodal_thermal_strain(self, rnum, comp,
+                                  stitle='Nodal Thermal Strain',
+                                  show_displacement=False,
+                                  displacement_factor=1,
+                                  node_components=None,
+                                  sel_type_all=True, **kwargs):
+        """Plot nodal component plastic strains.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number
+
+        comp : str, optional
+            Thermal strain component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+            - ``"EQV"``
+            - ``"ESWELL"``
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
+
+        Examples
+        --------
+        Plot thermal strain for result 0 of verification manual example 33
+        >>> import pyansys
+        >>> result = pyansys.download_verification_result(33)
+        >>> result.plot_nodal_thermal_strain(0)
+        """
+        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV', 'ESWELL']
+        return self._plot_nodal_result(rnum, 'ETH', comp, available_comps,
+                                       show_displacement=show_displacement,
+                                       displacement_factor=displacement_factor,
+                                       node_components=node_components,
+                                       sel_type_all=sel_type_all,
+                                       stitle=stitle,
+                                       **kwargs)
+
+    def nodal_elastic_strain(self, rnum):
+        """Nodal component elastic strains.  This record contains
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.  
+
+        Elastic strains can be can be nodal values extrapolated from
+        the integration points or values at the integration points moved to
+        the nodes
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers.
+
+        elastic_strain : np.ndarray
+            Nodal component elastic strains.  Array is in the order
+            X, Y, Z, XY, YZ, XZ, EEL.
+        """
+        return self._nodal_result(rnum, 'EEL')
+
+    def plot_nodal_elastic_strain(self, rnum, comp,
+                                  stitle='Nodal Elastic Strain',
+                                  show_displacement=False,
+                                  displacement_factor=1,
+                                  node_components=None,
+                                  sel_type_all=True, **kwargs):
+        """Plot nodal component elastic strains.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number
+
+        comp : str, optional
+            Thermal strain component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+            - ``"EQV"``
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
+
+        Examples
+        --------
+        Plot thermal strain for result 0 of verification manual example 33
+        Plot thermal strain for a static pontoon model
+        >>> import pyansys
+        >>> result = pyansys.download_pontoon()
+        >>> result.plot_nodal_elastic_strain(0)
+        """
+        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
+        stitle = ' '.join([comp.upper(), stitle])
+        return self._plot_nodal_result(rnum, 'EEL',
+                                       comp,
+                                       available_comps,
+                                       show_displacement=show_displacement,
+                                       displacement_factor=displacement_factor,
+                                       node_components=node_components,
+                                       sel_type_all=sel_type_all,
+                                       stitle=stitle,
+                                       **kwargs)
+
+    def nodal_plastic_strain(self, rnum):
+        """Nodal component plastic strains.  This record contains
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.  
+
+        Plastic strains are always values at the integration points
+        moved to the nodes.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers.
+
+        plastic_strain : np.ndarray
+            Nodal component plastic strains.  Array is in the order
+            X, Y, Z, XY, YZ, XZ, EEL.
+        """
+        return self._nodal_result(rnum, 'EPL')
+
+    def plot_nodal_plastic_strain(self, rnum, comp,
+                                  stitle='Nodal Plastic Strain',
+                                  show_displacement=False,
+                                  displacement_factor=1,
+                                  node_components=None,
+                                  sel_type_all=True, **kwargs):
+        """Plot nodal component plastic strains.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number
+
+        comp : str, optional
+            Thermal strain component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+            - ``"EQV"``
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
+        """
+        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
+        stitle = ' '.join([comp.upper(), stitle])
+        return self._plot_nodal_result(rnum, 'EPL',
+                                       comp,
+                                       available_comps,
+                                       show_displacement=show_displacement,
+                                       displacement_factor=displacement_factor,
+                                       node_components=node_components,
+                                       sel_type_all=sel_type_all,
+                                       stitle=stitle,
+                                       **kwargs)
+
+    def _plot_nodal_result(self, rnum, result_type, comp, available_comps,
+                           show_displacement=False, displacement_factor=1,
+                           node_components=None,
+                           sel_type_all=True, **kwargs):
+        """Plot nodal results"""
+        comp = comp.upper()
+        if comp not in available_comps:
+            raise ValueError('Invalid component.  Pick one of the following: %s' %
+                             str(available_comps))
+        component_index = available_comps.index(comp)
+
+
+        _, result = self._nodal_result(rnum, result_type)
+        scalars = result[:, component_index]
+
+        if node_components:
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = scalars[ind]
+        else:
+            grid = self.grid
+
+        return self._plot_point_scalars(scalars, grid=grid, rnum=rnum,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
+                                        **kwargs)
+
+    def _animate_time_solution(self, result_type, index=0, frame_rate=10,
+                               show_displacement=True, displacement_factor=1,
+                               off_screen=None):
+        """Animate time solution result"""
+        # load all results
+        results = []
+        for i in range(self.nsets):
+            results.append(self._nodal_result(i, result_type)[1][:, index])
+
+        if show_displacement:
+            disp = []
+            for i in range(self.nsets):
+                disp.append(self.nodal_solution(i)[1][:, :3]*displacement_factor)
+
+        mesh = self.grid.copy()
+        results = np.array(results)
+        if np.all(np.isnan(results)):
+            raise ValueError('Result file contains no %s records' %
+                             ELEMENT_INDEX_TABLE_INFO[result_type.upper()])
+
+        # prepopulate mesh with data
+        mesh['data'] = results[0]
+
+        # set default range
+        rng = [results.min(), results.max()]
+        t_wait = 1/frame_rate
+
+        def plot_thread():
+            plotter = pv.Plotter(off_screen=off_screen)
+            plotter.add_mesh(mesh, scalars='data', rng=rng)
+            plotter.show(auto_close=False, interactive_update=True, interactive=False)
+            text_actor = plotter.add_text('Result 1')
+            while not plotter.q_pressed:
+                for i in range(self.nsets):
+                    mesh['data'] = results[i]
+
+                    if show_displacement:
+                        mesh.points = self.grid.points + disp[i]
+
+                    # if interactive:
+                    plotter.update(30, force_redraw=True)
+                    text_actor.SetInput('Result %d' % (i + 1))
+
+                    if plotter.q_pressed:
+                        break
+
+                    time.sleep(t_wait)
+
+                if off_screen:
+                    break
+
+            plotter.close()
+
+        thread = Thread(target=plot_thread)
+        thread.start()
+
+    @property
+    def available_results(self):
+        """Prints available element result types and returns those keys"""
+        available = []
+        for key in ELEMENT_RESULT_NCOMP:
+            _, result = self._nodal_result(0, key)
+            if np.any(~np.isnan(result)):
+                print(ELEMENT_INDEX_TABLE_INFO[key])
+                available.append(key)
+
+        return available
 
 
 def result_info(filename):

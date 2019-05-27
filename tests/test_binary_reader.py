@@ -76,9 +76,9 @@ def test_plot_component():
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
     result.plot_nodal_solution(0, node_components=components,
-                               interactive=False, sel_type_all=False)
-    result.plot_nodal_stress(0, 'Sx', node_components=components, interactive=False)
-    result.plot_principal_nodal_stress(0, 'SEQV',
-                                       node_components=components, interactive=False)
+                               off_screen=True, sel_type_all=False)
+    result.plot_nodal_stress(0, 'x', node_components=components, off_screen=True)
+    result.plot_principal_nodal_stress(0, 'EQV',
+                                       node_components=components, off_screen=True)
 
 

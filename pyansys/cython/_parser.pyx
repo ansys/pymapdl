@@ -28,15 +28,17 @@ cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
 # ANSYS element type definitions
-cdef int [4] type_a
+cdef int [6] type_a
 
 # Legacy mixed elements
 type_a[0] = 45
 type_a[1] = 95
+type_a[2] = 5
 
 # Current mixed elements
-type_a[2] = 185
-type_a[3] = 186
+type_a[3] = 185
+type_a[4] = 186
+type_a[5] = 226
 
 # Tetrahedrals (legacy and current)
 cdef int [4] type_b
@@ -437,29 +439,39 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
     cdef int16_t keyopt_1
 
     # ANSYS element type definitions
-    cdef int [4] type_a
+    cdef int [6] type_a
 
     # Legacy mixed elements
-    if '45' in allowable_types:
-        type_a[0] = 45
+    if '5' in allowable_types:
+        type_a[0] = 5
     else:
         type_a[0] = -1
 
-    if '95' in allowable_types:
-        type_a[1] = 95
+    if '45' in allowable_types:
+        type_a[1] = 45
     else:
         type_a[1] = -1
 
-    # Current mixed elements
-    if '185' in allowable_types:
-        type_a[2] = 185
+    if '95' in allowable_types:
+        type_a[2] = 95
     else:
         type_a[2] = -1
 
-    if '186' in allowable_types:
-        type_a[3] = 186
+    # Current mixed elements
+    if '185' in allowable_types:
+        type_a[3] = 185
     else:
         type_a[3] = -1
+
+    if '186' in allowable_types:
+        type_a[4] = 186
+    else:
+        type_a[4] = -1
+
+    if '226' in allowable_types:
+        type_a[5] = 226
+    else:
+        type_a[5] = -1
 
     # Tetrahedrals (legacy and current)
     cdef int [2] type_b
@@ -563,7 +575,7 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
         elem_etype = elem_type[etype[i]]
         cstart = ccount
 
-        for j in range(4):
+        for j in range(6):
             if elem_etype == type_a[j]:
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype

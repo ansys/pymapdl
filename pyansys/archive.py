@@ -1,20 +1,5 @@
 """
 Module to read ANSYS ASCII block formatted CDB files
-
-USAGE
-
-# load module
-import pyansys
-
-# load ANSYS cdb file
-archive = pyansys.Archive('example.cdb')
-
-# Parse the raw data into a VTK unstructured grid
-grid = archive.parse_vtk()
-
-# Plot the result
-grid.plot()
-
 """
 import sys
 import logging
@@ -214,18 +199,17 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                     nblock=True, enum_start=1, nnum_start=1,
                     include_etype_header=True, line_ending=None,
                     reset_etype=False, allow_missing=True):
-    """
-    Writes FEM as an ANSYS APDL archive file.  This function supports the
-    following element types:
+    """Writes FEM as an ANSYS APDL archive file.  This function
+    supports the following element types:
     
-        - vtk.VTK_TETRA
-        - vtk.VTK_QUADRATIC_TETRA
-        - vtk.VTK_PYRAMID
-        - vtk.VTK_QUADRATIC_PYRAMID
-        - vtk.VTK_WEDGE
-        - vtk.VTK_QUADRATIC_WEDGE
-        - vtk.VTK_HEXAHEDRON
-        - vtk.VTK_QUADRATIC_HEXAHEDRON    
+        - ``vtk.VTK_TETRA``
+        - ``vtk.VTK_QUADRATIC_TETRA``
+        - ``vtk.VTK_PYRAMID``
+        - ``vtk.VTK_QUADRATIC_PYRAMID``
+        - ``vtk.VTK_WEDGE``
+        - ``vtk.VTK_QUADRATIC_WEDGE``
+        - ``vtk.VTK_HEXAHEDRON``
+        - ``vtk.VTK_QUADRATIC_HEXAHEDRON``
 
     Will automatically renumber nodes and elements if the FEM does not
     contain ANSYS node or element numbers.  Node numbers are stored as

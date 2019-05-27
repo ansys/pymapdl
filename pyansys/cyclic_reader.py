@@ -34,18 +34,17 @@ class CyclicResult(ResultFile):
         self._add_cyclic_properties()
 
     def plot(self, color='w', show_edges=True, **kwargs):
-        """
-        Plot full geometry.
+        """Plot the full rotor geometry.
 
         Parameters
         ----------
         color : string or 3 item list, optional, defaults to white
             Either a string, rgb list, or hex color string.  For
             example:
-                color='white'
-                color='w'
-                color=[1, 1, 1]
-                color='#FFFFFF'
+                ``color='white'``
+                ``color='w'``
+                ``color=[1, 1, 1]``
+                ``color='#FFFFFF'``
 
             Color will be overridden when scalars are input.
 
@@ -101,7 +100,7 @@ class CyclicResult(ResultFile):
             matrix = vtk.vtkMatrix4x4()
             i_matrix = vtk.vtkMatrix4x4()
 
-        off_screen = kwargs.pop('off_screen', False)
+        off_screen = kwargs.pop('off_screen', None)
         window_size = kwargs.pop('window_size', None)
         plotter = pv.Plotter(off_screen, window_size)
         rang = 360.0 / self.n_sector
@@ -598,7 +597,7 @@ class CyclicResult(ResultFile):
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
                             cmap=None, flip_scalars=None, cpos=None,
-                            screenshot=None, interactive=True,
+                            screenshot=None, off_screen=None,
                             full_rotor=True, phase=0,
                             node_components=None, sel_type_all=True,
                             **kwargs):
@@ -662,14 +661,14 @@ class CyclicResult(ResultFile):
         if not full_rotor:
             return super(CyclicResult, self).plot_nodal_solution(rnum,
                                                                  comp,
-                                                                 label,
-                                                                 cmap,
-                                                                 flip_scalars,
-                                                                 cpos,
-                                                                 screenshot,
-                                                                 interactive,
-                                                                 node_components,
-                                                                 sel_type_all,
+                                                                 # label,
+                                                                 cmap=cmap,
+                                                                 flip_scalars=flip_scalars,
+                                                                 cpos=cpos,
+                                                                 screenshot=screenshot,
+                                                                 off_screen=off_screen,
+                                                                 node_components=node_components,
+                                                                 sel_type_all=sel_type_all,
                                                                  **kwargs)
 
         rnum = self.parse_step_substep(rnum)
@@ -712,12 +711,12 @@ class CyclicResult(ResultFile):
             scalars = scalars[:, ind]
 
         return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                       screenshot, cpos, interactive, grid,
+                                       screenshot, cpos, off_screen, grid,
                                        **kwargs)
 
     def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
                           flip_scalars=None, cpos=None, screenshot=None,
-                          interactive=True, full_rotor=True, phase=0,
+                          off_screen=None, full_rotor=True, phase=0,
                           node_components=None, sel_type_all=True,
                           **kwargs):
         """
@@ -749,7 +748,7 @@ class CyclicResult(ResultFile):
             Setting this to a filename will save a screenshot of the
             plot before closing the figure.
 
-        interactive : bool, optional
+        off_screen : bool, optional
             Default True.  Setting this to False makes the plot
             generate in the background.  Useful when generating plots
             in a batch mode automatically.
@@ -776,19 +775,8 @@ class CyclicResult(ResultFile):
             Camera position from vtk render window.
 
         """
-        # if not full_rotor:  # Plot sector
-        #     super(CyclicResult, self).plot_nodal_stress(rnum,
-        #                                                 stype,
-        #                                                 cmap,
-        #                                                 flip_scalars,
-        #                                                 cpos,
-        #                                                 screenshot,
-        #                                                 interactive,node_components,
-        #                                                 sel_type_all,
-        #                                                 **kwargs)
-
         rnum = self.parse_step_substep(rnum)
-        stress_types = ['sx', 'sy', 'sz', 'sxy', 'syz', 'sxz']
+        stress_types = ['x', 'y', 'z', 'xy', 'yz', 'xz']
         stype = stype.lower()
         if stype not in stress_types:
             raise Exception('Stress type not in: \n' + str(stress_types))
@@ -804,25 +792,28 @@ class CyclicResult(ResultFile):
                                                       sel_type_all)
             scalars = scalars[ind]
 
-        # breakpoint()
         # scalars[np.isnan(scalars)] = 0
         stitle = 'Cyclic Rotor\nNodal Stress\n%s\n' % stype.capitalize()
         if full_rotor:
             return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
-                                           screenshot, cpos, interactive, grid,
+                                           screenshot, cpos, off_screen, grid,
                                            **kwargs)
-        else:
-            return super(CyclicResult,
-                         self).plot_point_scalars(scalars[0],
-                                                  rnum, stitle, cmap,
-                                                  flip_scalars, screenshot,
-                                                  cpos, interactive, grid,
-                                                  **kwargs)
+
+        return super(CyclicResult, self)._plot_point_scalars(scalars[0],
+                                                             rnum,
+                                                             stitle=stitle,
+                                                             cmap=cmap,
+                                                             flip_scalars=flip_scalars,
+                                                             screenshot=screenshot,
+                                                             cpos=cpos,
+                                                             off_screen=off_screen,
+                                                             grid=grid,
+                                                             **kwargs)
 
 
     def plot_principal_nodal_stress(self, rnum, stype, cmap=None,
                                     flip_scalars=None, cpos=None,
-                                    screenshot=None, interactive=True,
+                                    screenshot=None, off_screen=None,
                                     full_rotor=True, phase=0,
                                     node_components=None,
                                     sel_type_all=True, **kwargs):
@@ -841,7 +832,7 @@ class CyclicResult(ResultFile):
 
             Stress type must be a string from the following list:
 
-            ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+            ['1', '2', '3', 'INT', 'EQV']
 
         cmap : str, optional
            Cmap string.  See available matplotlib cmaps.  Only
@@ -859,7 +850,7 @@ class CyclicResult(ResultFile):
             Setting this to a filename will save a screenshot of the
             plot before closing the figure.  Default None.
 
-        interactive : bool, optional
+        off_screen : bool, optional
             Default True.  Setting this to False makes the plot
             generate in the background.  Useful when generating plots
             in a batch mode automatically.
@@ -897,7 +888,7 @@ class CyclicResult(ResultFile):
             return super(CyclicResult, self).plot_principal_nodal_stress(rnum, stype)
 
         # check inputs
-        stress_types = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        stress_types = ['1', '2', '3', 'INT', 'EQV']
         if stype not in stress_types:
             raise Exception('Stress type not in \n' + str(stress_types))
         sidx = stress_types.index(stype)
@@ -919,21 +910,20 @@ class CyclicResult(ResultFile):
 
         return self.plot_point_scalars(scalars, rnum, stitle, cmap,
                                        flip_scalars, screenshot, cpos,
-                                       interactive, grid, **kwargs)
+                                       off_screen, grid, **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,
                                show_result_info=True,
                                interpolate_before_map=True, cpos=None,
-                               movie_filename=None, interactive=True,
+                               movie_filename=None, off_screen=None,
                                **kwargs):
-        """
-        Animate nodal solution.  Assumes nodal solution is a displacement 
-        array from a modal solution.
+        """Animate nodal solution.  Assumes nodal solution is a
+        displacement array from a modal solution.
 
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list
-            containing (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
             Display component to display.  Options are 'x', 'y', 'z', and
@@ -964,7 +954,7 @@ class CyclicResult(ResultFile):
             but other filetypes may be supported.  See "imagio.get_writer".
             A single loop of the mode will be recorded.
 
-        interactive : bool, optional
+        off_screen : bool, optional
             Can be used in conjunction with movie_filename to generate a
             movie non-interactively.
 
@@ -972,6 +962,11 @@ class CyclicResult(ResultFile):
             See help(pyvista.plot) for additional keyword arguments.
 
         """
+        if kwargs.pop('smooth_shading', False):
+            raise Exception('"smooth_shading" is not yet supported')
+
+        interactive = kwargs.pop('interactive', None)
+
         # normalize nodal solution
         nnum, complex_disp = self.nodal_solution(rnum, as_complex=True,
                                                 full_rotor=True)
@@ -998,13 +993,13 @@ class CyclicResult(ResultFile):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
-        plotter = pv.Plotter(off_screen=not interactive)
+        plotter = pv.Plotter(off_screen=off_screen)
         plotter.add_mesh(full_rotor.copy(), scalars=np.real(scalars),
                       interpolate_before_map=interpolate_before_map, **kwargs)
         plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
-        plotter.add_text(' ', font_size=30)
+        plotter.add_text(' ', font_size=20, position=[0, 0])
 
         if cpos:
             plotter.camera_position = cpos
@@ -1014,7 +1009,7 @@ class CyclicResult(ResultFile):
 
         # run until q is pressed
         plotter.plot(interactive=False, auto_close=False,
-                   interactive_update=True)
+                     interactive_update=True)
         first_loop = True
         while not plotter.q_pressed:
             for angle in np.linspace(0, np.pi*2, nangles):
@@ -1034,8 +1029,7 @@ class CyclicResult(ResultFile):
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                              (result_info, (angle*180/np.pi)))
 
-                if interactive:
-                    plotter.update(30, force_redraw=True)
+                plotter.update(30, force_redraw=True)
 
                 if plotter.q_pressed:
                     break
@@ -1044,7 +1038,7 @@ class CyclicResult(ResultFile):
                     plotter.write_frame()
 
             first_loop = False
-            if not interactive:
+            if off_screen or not interactive:
                 break
 
         return plotter.close()
@@ -1077,7 +1071,7 @@ class CyclicResult(ResultFile):
 
     def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
                            flip_scalars=None, screenshot=None, cpos=None,
-                           interactive=True, grid=None, add_text=True, **kwargs):
+                           off_screen=None, grid=None, add_text=True, **kwargs):
         """
         Plot point scalars on active mesh.
 
@@ -1136,10 +1130,9 @@ class CyclicResult(ResultFile):
 
         window_size = kwargs.pop('window_size', None)
         full_screen = kwargs.pop('full_screen', False)
-        off_screen = not interactive
 
         # Plot off screen when not interactive
-        plotter = pv.Plotter(off_screen=not(interactive))
+        plotter = pv.Plotter(off_screen=off_screen)
         if 'show_axes' in kwargs:
             plotter.add_axes()
         # plotter.add_axes_at_origin()
@@ -1207,8 +1200,7 @@ class CyclicResult(ResultFile):
                 plotter.screenshot(screenshot)
             plotter.close()
         else:
-            cpos = plotter.plot(interactive=interactive, window_size=window_size,
-                                full_screen=full_screen)
+            cpos = plotter.plot(window_size=window_size, full_screen=full_screen)
 
         if screenshot is True:
             return cpos, img

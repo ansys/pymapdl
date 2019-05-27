@@ -22,18 +22,6 @@ matrix:
     - os: osx
       osx_image: xcode8.3
 
-# addons:
-#   apt:
-#     packages:
-#       - xvfb
-
-# before_script: # configure a headless display to test plot generation
-#   - export DISPLAY=:99.0
-#   - which Xvfb
-#   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-#   # - ls -l /etc/init.d/
-#   # - sh -e /etc/init.d/xvfb start
-#   - sleep 3 # give xvfb some time to start
 
 env:
   global:
@@ -44,11 +32,15 @@ env:
     - CIBW_SKIP="cp27-* cp34-* *manylinux1_i686*"
     - TWINE_USERNAME=akaszynski
       # Note: TWINE_PASSWORD is set in Travis settings
+    # Doctr deploy key for akaszynski/pyansys
+    - secure: "fq244mjOen1NetM9ZLrEGLlFJofOntGlQpcduR2AGnw1mwdC7pzCo8TVYL96JgyJS8NCHZP90p+fTpX4U7yW2v64JcO50rYZfgsjHasx9UQo2mi9Z96/rncyfBkffVKn1nVzIuANqV2/p6BBjdrJv4Sb4LQdu8P2LKCikVPi7gbD1ptL2kHDgG/p2kfnt9A7M9BgtqW4iGr2vgXepoQ5ipyVC3QHovoNGhBeV1Dak08x9qr0Sob9V8yW6ZJX8sF9+dHg2bWVhMyxIOcPAMhH34OHJOmhOKRB4W5MlmL1fDdYCVvlRCzQKA4pP5Qi8uLr0fZzYtgMhH18oyHAqqW+4YWJQgniBpE22vGPmIdnTpUrQdGW0Us39wMcUQcgUM1zIEH5v7oX95UEEy7iSobib4XYKk4cDOukF48PTy0JVfHC08si/We7R256svQfgFSpw/WrhbPHvLHtNJjzi8yTVyOdyvsHTrqZhoFKMmt3PdrI7E+iDk3zUVjPVF7diXf+iCPw7lfP62zVvUP4WUDQ4NtbaAQO0dqjGtMYNjXXXWaXiNjQ/o0bg0VjCyjR/ah+aUMDwSMjCG3lbnG5A4soiPiK1TYCTJK8sjACM2vuDFhygAifSbK8WaKX3szPR0U9Dn/I7n/oPdl1dDveUv/6gKtV6bA36v05w51UoV+IWT0="
 
-# before_install:
-#   # configure a headless display
-#   - git clone --depth 1 git://github.com/pyvista/gl-ci-helpers.git
-#   - source ./gl-ci-helpers/travis/setup_headless_display.sh
+
+before_install:
+  # configure a headless display
+  - git clone --depth 1 git://github.com/pyvista/gl-ci-helpers.git
+  - source ./gl-ci-helpers/travis/setup_headless_display.sh
+
 
 install:
   # Setup for python 3 wheels in Mac OS X
@@ -58,11 +50,30 @@ install:
       brew upgrade python
       # CFLAGS='-stdlib=libc++'
     fi;
+  # for building docs in linux
+  - |
+    if [ "$TRAVIS_OS_NAME" != "osx" ]; then
+      pip3 install -r requirements.txt
+    fi;
   - pip3 install --upgrade cibuildwheel
 
 
 script:
+  - set -e
   - cibuildwheel --output-dir wheelhouse
+  # Make documentation
+  - |
+    if [ "$TRAVIS_OS_NAME" != "osx" ]; then
+      cd ./wheelhouse
+      pip3 install pyansys-*-cp36-cp36m-manylinux1_x86_64.whl
+      cd ../docs
+      make html
+      set -e
+      make html
+      cd ..
+      doctr deploy --built-docs ./docs/_build/html/ .;
+      set +x
+    fi;
   - if [ "${TRAVIS_TAG:-}" != "" ]; then
       python3 setup.py sdist;
       cp dist/*.tar.gz wheelhouse/;

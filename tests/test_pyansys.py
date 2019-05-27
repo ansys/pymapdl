@@ -71,7 +71,7 @@ def test_animate_nodal_solution(tmpdir):
     result = pyansys.read_binary(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
-                                interactive=False)
+                                off_screen=True)
     assert np.any(result.grid.points)
     assert os.path.isfile(temp_movie)
     
