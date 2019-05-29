@@ -15,7 +15,7 @@ matrix:
   include:
     - sudo: required
       language: python
-      python: "3.6"
+      python: "3.7"
       services:
         - docker
       env: PIP=pip
@@ -65,7 +65,7 @@ script:
   - |
     if [ "$TRAVIS_OS_NAME" != "osx" ]; then
       cd ./wheelhouse
-      pip3 install pyansys-*-cp36-cp36m-manylinux1_x86_64.whl
+      pip3 install pyansys-*-cp37-cp37m-manylinux1_x86_64.whl
       cd ../docs
       make html
       set -e
