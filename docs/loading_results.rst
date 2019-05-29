@@ -17,7 +17,7 @@ As the ANSYS result files are binary files, the entire file does not need to be 
 .. code:: python
 
     import pyansys
-    result = pyansys.open_result('file.rst')
+    result = pyansys.read_binary('file.rst')
     
 Upon initialization the ``ResultFile`` object contains several properties to include the time values from the analysis, node numbering, element numbering, etc.
 
@@ -145,7 +145,7 @@ This block of code shows how you can access the non-averaged stresses for the fi
 .. code:: python
     
     import pyansys
-    result = pyansys.open_result('file.rst')
+    result = pyansys.read_binary('file.rst')
     estress, elem, enode = result.element_stress(0)
 
     
@@ -199,7 +199,7 @@ Solutions from a modal analysis can be animated using ``animate_nodal_solution``
     from pyansys import examples
     import pyansys
 
-    result = pyansys.open_result(examples.rstfile)
+    result = pyansys.read_binary(examples.rstfile)
     result.animate_nodal_solution(3)
 
 
@@ -213,7 +213,7 @@ Results from a Cyclic Analysis
     import pyansys
 
     # load the result file    
-    result = pyansys.open_result('rotor.rst')
+    result = pyansys.read_binary('rotor.rst')
     
 You can reference the load step table and harmonic index tables by printing the result header dictionary keys ``'ls_table'`` and ``'hindex'``:
 
@@ -313,7 +313,7 @@ ParaView is a visualization application that can be used for rapid generation of
     from pyansys import examples
 
     # load example beam result file
-    result = pyansys.open_result(examples.rstfile)
+    result = pyansys.read_binary(examples.rstfile)
     
     # save as a binary vtk xml file
     result.save_as_vtk('beam.vtu')

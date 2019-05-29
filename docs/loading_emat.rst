@@ -17,7 +17,7 @@ Load the element matrix file:
 .. code:: python
 
     import pyansys
-    emat_file = pyansys.open_result('file.emat')
+    emat_file = pyansys.read_binary('file.emat')
 
 Read a single element from the result file:
 

@@ -18,7 +18,7 @@ By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It i
     from pyansys import examples
     
     # Create result reader object and read in full file
-    full = pyansys.open_result(examples.fullfile)
+    full = pyansys.read_binary(examples.fullfile)
     dof_ref, k, m = full.load_km(sort=True)
 
 

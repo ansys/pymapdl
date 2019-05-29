@@ -14,7 +14,7 @@ This Python module allows you to:
  - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
  - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
-See the `Documentation <http://pyansys.readthedocs.io>`_ page for more details.
+See the `Documentation <https://akaszynski.github.io/pyansys/>`_ page for more details.
 
 
 Installation
@@ -122,7 +122,7 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
     rstfile = examples.rstfile
     
     # Create result object by loading the result file
-    result = pyansys.open_result(rstfile)
+    result = pyansys.read_binary(rstfile)
     
     # Beam natural frequencies
     freqs = result.time_values

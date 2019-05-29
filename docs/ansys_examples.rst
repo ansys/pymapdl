@@ -238,7 +238,7 @@ Access and plot the results within python using pyansys:
 
     # open the result file using the path used in ANSYS
     resultfile = os.path.join(ansys.path, 'file.rst')
-    result = pyansys.open_result(resultfile)
+    result = pyansys.read_binary(resultfile)
 
     # access element results as arrays
     nnum, stress = result.nodal_stress(0)
@@ -428,7 +428,7 @@ Here's the Python script using ``pyansys`` to access the results after running t
     
     # Open the result file and plot the displacement of time step 3
     resultfile = os.path.join('file.rst')
-    result = pyansys.open_result(resultfile)
+    result = pyansys.read_binary(resultfile)
     result.PlotNodalResult(2)
 
 .. figure:: ./images/spot_disp.png
