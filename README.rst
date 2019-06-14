@@ -6,9 +6,6 @@ pyansys
 .. image:: https://travis-ci.org/akaszynski/pyansys.svg?branch=master
     :target: https://travis-ci.org/akaszynski/pyansys
 
-.. image:: http://readthedocs.org/projects/pyansys/badge/?version=latest
-    :target: https://pyansys.readthedocs.io/
-
 This Python module allows you to:
  - Interactively control an instance of ANSYS v14.5 + using Python on Linux, >=17.0 on Windows.
  - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
