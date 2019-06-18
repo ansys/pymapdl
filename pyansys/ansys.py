@@ -1147,14 +1147,20 @@ class ANSYS(_InternalANSYS):
         self.Exit(close_log=False)
 
         # write temporary input file
-        start_file = os.path.join(self.path, 'start%s.ans' % self.version)
+        start_file = os.path.join(save_path, 'start%s.ans' % self.version)
         with open(start_file, 'w') as f:
             f.write('RESUME\n')
 
-        os.system('cd "%s"; %s -g -j %s' % (self.path, self.exec_file, name))
+        # some versions of ANSYS just look for "start.ans" when starting
+        other_start_file = os.path.join(save_path, 'start.ans')
+        with open(other_start_file, 'w') as f:
+            f.write('RESUME\n')
+
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
 
         # must remove the start file when finished
         os.remove(start_file)
+        os.remove(other_start_file)
 
         # open up script again when finished
         self._open()
