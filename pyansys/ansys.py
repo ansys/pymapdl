@@ -9,6 +9,7 @@ This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.
 
 """
+import string
 import re
 import os
 import tempfile
@@ -19,6 +20,7 @@ import time
 import subprocess
 from threading import Thread
 import weakref
+import random
 
 import pyansys
 import pexpect
@@ -35,6 +37,12 @@ try:
 except:
     MATPLOTLIB_LOADED = False
 
+    
+def random_string(stringLength=10):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+    
 
 def find_ansys():
     """ Searches for ansys path within enviornmental variables """
@@ -112,7 +120,7 @@ if not os.path.isdir(settings_dir):
         warnings.warn('Unable to create settings directory.\n' +
                       'Will be unable to cache ANSYS executable location')
 
-config_file = os.path.join(settings_dir, 'config.txt')
+CONFIG_FILE = os.path.join(settings_dir, 'config.txt')
 
 # specific to pexpect process
 ###############################################################################
@@ -215,8 +223,8 @@ def setup_logger(loglevel='INFO'):
 def get_ansys_path(allow_input=True):
     """ Acquires ANSYS Path from a cached file or user input """
     exe_loc = None
-    if os.path.isfile(config_file):
-        with open(config_file) as f:
+    if os.path.isfile(CONFIG_FILE):
+        with open(CONFIG_FILE) as f:
             exe_loc = f.read()
         # verify
         if not os.path.isfile(exe_loc) and allow_input:
@@ -239,7 +247,7 @@ def change_default_ansys_path(exe_loc):
 
     """
     if os.path.isfile(exe_loc):
-        with open(config_file, 'w') as f:
+        with open(CONFIG_FILE, 'w') as f:
             f.write(exe_loc)
     else:
         raise Exception('File %s is invalid or does not exist' % exe_loc)
@@ -253,6 +261,7 @@ def save_ansys_path(exe_loc=''):
         print('Found ANSYS at %s' % exe_loc)
         resp = input('Use this location?  [Y/n]')
         if resp != 'n':
+            change_default_ansys_path(exe_loc)
             return exe_loc
 
     if exe_loc is not None:
@@ -260,7 +269,7 @@ def save_ansys_path(exe_loc=''):
             return exe_loc
 
     # otherwise, query user for the location
-    with open(config_file, 'w') as f:
+    with open(CONFIG_FILE, 'w') as f:
         try:
             exe_loc = raw_input('Enter location of ANSYS executable: ')
         except NameError:
@@ -887,7 +896,7 @@ class ANSYS(_InternalANSYS):
     def load_parameters(self):
         # load ansys parameters to python
         self.Parsav('all')  # saves to file.parm by default
-        filename = os.path.join(self.path, '%s.parm' % self.jobname)
+        filename = os.path.join(self.path, 'file.parm')
         self.parameters, self.arrays = load_parameters(filename)
 
     def add_file_handler(self, filepath, append):
@@ -931,7 +940,8 @@ class ANSYS(_InternalANSYS):
                 log.error('Unable to find screenshot at %s' % fullfile)
 
     def __del__(self):
-        # clean up when complete
+        """cleans up when complete"""
+        self.Exit()
         self.kill()
         self.close_apdl_log()
 
@@ -1097,7 +1107,10 @@ class ANSYS(_InternalANSYS):
 
         # write to an input file
         base_name = 'tmp.inp'
-        filename = os.path.join(self.path, 'tmp.inp')
+        # filename = os.path.join(self.path, 'tmp.inp')
+        
+        filename = os.path.join(appdirs.user_data_dir('pyansys'),
+                                'tmp_%s.py' % random_string())
         self.log.debug('Writing the following commands to a temporary ' +
                        'apdl input file:\n%s' % commands)
         with open(filename, 'w') as f:
