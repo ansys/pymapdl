@@ -1099,8 +1099,9 @@ class ANSYS(_InternalANSYS):
         Used with non_interactive.
         """
         self.log.debug('Flushing stored commands')
-        temp_out = os.path.join(self.path, 'tmp.out')
-        self._stored_commands.insert(0, '/OUTPUT, %s' % temp_out)
+        tmp_out = os.path.join(appdirs.user_data_dir('pyansys'),
+                               'tmp_%s.out' % random_string())
+        self._stored_commands.insert(0, '/OUTPUT, "%s"' % tmp_out)
         self._stored_commands.append('/OUTPUT')
         commands = '\n'.join(self._stored_commands)
         self.apdl_log.write(commands + '\n')
@@ -1110,7 +1111,7 @@ class ANSYS(_InternalANSYS):
         # filename = os.path.join(self.path, 'tmp.inp')
         
         filename = os.path.join(appdirs.user_data_dir('pyansys'),
-                                'tmp_%s.py' % random_string())
+                                'tmp_%s.inp' % random_string())
         self.log.debug('Writing the following commands to a temporary ' +
                        'apdl input file:\n%s' % commands)
         with open(filename, 'w') as f:
@@ -1119,14 +1120,22 @@ class ANSYS(_InternalANSYS):
         self._store_commands = False
         self._stored_commands = []
         self.Run('/INPUT, %s' % filename, write_to_log=False)
-        self.response = '\n' + open(temp_out).read()
+        if os.path.isfile(tmp_out):
+            self.response = '\n' + open(tmp_out).read()
+        else:
+            warnings.warn('Unable to read response.  ANSYS did not write to "%s"' % tmp_out)
+            self.response = None
 
-        # clean up output file
+        # clean up output file and append the output to the existing output file
         self.Run('/OUTPUT, %s, , , APPEND' % self._output)
-        for line in open(temp_out).readlines():
-            self.Run('/COM,%s\n' % line[:74])
+        if os.path.isfile(tmp_out):
+            for line in open(tmp_out).readlines():
+                self.Run('/COM,%s\n' % line[:74])
 
-        self.log.info(self.response)
+        if self.response is None:
+            self.log.warning('Unable to read response from ANSYS from flushed commands')
+        else:
+            self.log.info(self.response)
 
     def open_gui(self):
         """ Saves existing database and opens up APDL GUI """
