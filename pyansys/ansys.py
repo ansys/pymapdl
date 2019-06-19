@@ -1101,39 +1101,35 @@ class ANSYS(_InternalANSYS):
         self.log.debug('Flushing stored commands')
         tmp_out = os.path.join(appdirs.user_data_dir('pyansys'),
                                'tmp_%s.out' % random_string())
-        self._stored_commands.insert(0, '/OUTPUT, "%s"' % tmp_out)
+        self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
         self._stored_commands.append('/OUTPUT')
         commands = '\n'.join(self._stored_commands)
         self.apdl_log.write(commands + '\n')
 
-        # write to an input file
-        base_name = 'tmp.inp'
-        # filename = os.path.join(self.path, 'tmp.inp')
-        
+        # write to a temporary input file
         filename = os.path.join(appdirs.user_data_dir('pyansys'),
                                 'tmp_%s.inp' % random_string())
         self.log.debug('Writing the following commands to a temporary ' +
                        'apdl input file:\n%s' % commands)
+
         with open(filename, 'w') as f:
             f.writelines(commands)
 
         self._store_commands = False
         self._stored_commands = []
-        self.Run('/INPUT, %s' % filename, write_to_log=False)
+        self.Run("/INPUT, '%s'" % filename, write_to_log=False)
         if os.path.isfile(tmp_out):
             self.response = '\n' + open(tmp_out).read()
-        else:
-            warnings.warn('Unable to read response.  ANSYS did not write to "%s"' % tmp_out)
-            self.response = None
 
-        # clean up output file and append the output to the existing output file
-        self.Run('/OUTPUT, %s, , , APPEND' % self._output)
-        if os.path.isfile(tmp_out):
-            for line in open(tmp_out).readlines():
-                self.Run('/COM,%s\n' % line[:74])
+        # clean up output file and append the output to the existing
+        # output file
+        # self.Run('/OUTPUT, %s, , , APPEND' % self._output)
+        # if os.path.isfile(tmp_out):
+        #     for line in open(tmp_out).readlines():
+        #         self.Run('/COM,%s\n' % line[:74])
 
         if self.response is None:
-            self.log.warning('Unable to read response from ANSYS from flushed commands')
+            self.log.warning('Unable to read response from flushed commands')
         else:
             self.log.info(self.response)
 
@@ -1174,8 +1170,9 @@ class ANSYS(_InternalANSYS):
         # open up script again when finished
         self._open()
         self.Resume(tmp_database)
-        if 'BEGIN' not in prior_processor:
-            self.Run('/%s' % prior_processor)
+        if prior_processor is not None:
+            if 'BEGIN' not in prior_processor:
+                self.Run('/%s' % prior_processor)
 
 def load_parameters(filename):
     """ load parameters """
