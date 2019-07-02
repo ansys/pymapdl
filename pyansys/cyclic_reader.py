@@ -5,7 +5,7 @@ import logging
 
 import vtk
 import numpy as np
-from pyvista.common import axis_rotation
+from pyvista.core.common import axis_rotation
 import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
