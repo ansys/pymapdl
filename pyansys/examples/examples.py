@@ -44,7 +44,7 @@ def show_hex_archive(off_screen=None):
     # Load an archive file
     archive = pyansys.Archive(hexarchivefile)
     grid = archive.parse_vtk()
-    grid.plot(off_screen=off_screen)
+    grid.plot(off_screen=off_screen, color='w', show_edges=True)
     assert grid.n_points
     assert grid.n_cells
 
@@ -83,7 +83,8 @@ def show_displacement(off_screen=None):
     fobj = pyansys.read_binary(rstfile)
 
     print('Displaying ANSYS Mode 1')
-    fobj.plot_nodal_solution(0, label='Displacement', off_screen=off_screen)
+    fobj.plot_nodal_solution(0, label='Displacement', off_screen=off_screen,
+                             n_colors=9, show_edges=True)
 
 
 def show_stress(off_screen=None):
@@ -93,7 +94,7 @@ def show_stress(off_screen=None):
     result = pyansys.read_binary(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
-    result.plot_nodal_stress(5, 'x', off_screen=off_screen)
+    result.plot_nodal_stress(5, 'x', off_screen=off_screen, n_colors=9)
 
 
 def load_km():
@@ -157,7 +158,7 @@ def solve_km():
         return
 
     # load the mass and stiffness matrices
-    full = pyansys.FullReader(pyansys.examples.fullfile)
+    full = pyansys.read_binary(pyansys.examples.fullfile)
     dofref, k, m = full.load_km(sort=True)
 
     # make symmetric
@@ -191,7 +192,7 @@ def solve_km():
     # add two meshes to the plotting class
     plobj.add_mesh(grid.copy(), color='w', style='wireframe')
     plobj.add_mesh(grid, scalars=n, stitle='Normalized\nDisplacement',
-                  flip_scalars=True)
+                   flip_scalars=True, cmap='jet')
     # Update the coordinates by adding the mode shape to the grid
     plobj.update_coordinates(grid.points + disp / 80, render=False)
     plobj.add_text('Cantliver Beam 4th\nMode Shape at\n{:.4f}'.format(f[3]),
@@ -227,7 +228,8 @@ def show_cell_qual(meshtype='tet', off_screen=None):
     assert np.all(qual > 0)
 
     # plot cell quality
-    grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian',
+    grid.plot(scalars=qual, stitle='Cell Minimum Scaled\nJacobian', cmap='bwr',
+              show_edges=True,
               rng=[0, 1], flip_scalars=True, off_screen=off_screen)
 
 

@@ -1210,6 +1210,7 @@ class ResultFile(object):
             rng = kwargs.pop('rng', None)
 
         # add_text = kwargs.pop('add_text', True)
+        cmap = kwargs.pop('cmap', 'jet')
         smooth_shading = kwargs.pop('smooth_shading', True)
         window_size = kwargs.pop('window_size', [1024, 768])
         full_screen = kwargs.pop('full_screen', False)
@@ -1284,6 +1285,7 @@ class ResultFile(object):
                                      smooth_shading=smooth_shading,
                                      interpolate_before_map=interpolate_before_map,
                                      stitle=stitle,
+                                     cmap=cmap,
                                      **kwargs)
 
             # transform to standard position, rotate about Z axis,
@@ -1316,8 +1318,8 @@ class ResultFile(object):
         # add table
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
-            plotter.add_text(result_text, font_size=20,
-                             position=[0, 0])
+            actor = plotter.add_text(result_text, font_size=20)
+                             # position=[0, 0])
 
         if animate:
             orig_pts = copied_mesh.points.copy()
@@ -1333,8 +1335,9 @@ class ResultFile(object):
                     copied_mesh.points = orig_pts + disp*mag_adj
 
                     if add_text:
-                        plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                                   (result_text, (angle*180/np.pi)))
+                        # 2 maps to vtk.vtkCornerAnnotation.UpperLeft
+                        plotter.textActor.SetText(2, '%s\nPhase %.1f Degrees' %
+                                                  (result_text, (angle*180/np.pi)))
 
                     plotter.update(30, force_redraw=True)
                     if plotter.q_pressed:
