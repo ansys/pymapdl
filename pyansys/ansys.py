@@ -13,7 +13,6 @@ import string
 import re
 import os
 import tempfile
-import appdirs
 import warnings
 import logging
 import time
@@ -21,7 +20,9 @@ import subprocess
 from threading import Thread
 import weakref
 import random
+from shutil import copyfile
 
+import appdirs
 import pyansys
 import pexpect
 import numpy as np
@@ -368,7 +369,7 @@ class ANSYS(_InternalANSYS):
                  prefer_pexpect=True, log_apdl='w'):
         """ Initialize connection with ANSYS program """
         self.log = setup_logger(loglevel.upper())
-        self.jobname = jobname
+        self._jobname = jobname
         self.non_interactive = self._non_interactive(self)
         self.redirected_commands = {'*LIS': self._list}
         self._processor = 'BEGIN'
@@ -431,10 +432,10 @@ class ANSYS(_InternalANSYS):
                 raise Exception('%s is not a valid folder' % self.path)
 
         # Check for lock file
-        self.lockfile = os.path.join(self.path, self.jobname + '.lock')
+        self.lockfile = os.path.join(self.path, self._jobname + '.lock')
         if os.path.isfile(self.lockfile):
             if not override:
-                raise Exception('Lock file exists for jobname %s \n' % self.jobname +
+                raise Exception('Lock file exists for jobname %s \n' % self._jobname +
                                 ' at %s\n' % self.lockfile +
                                 'Set override=True to delete lock and start ANSYS')
             else:
@@ -512,7 +513,7 @@ class ANSYS(_InternalANSYS):
 
     def open_process(self, nproc, timeout, additional_switches):
         """ Opens an ANSYS process using pexpect """
-        command = '%s -j %s -np %d %s' % (self.exec_file, self.jobname, nproc,
+        command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
                                           additional_switches)
         self.log.debug('Spawning shell process using pexpect')
         self.log.debug('Command: "%s"' % command)
@@ -1009,7 +1010,7 @@ class ANSYS(_InternalANSYS):
         self.log.info('Connecting to ANSYS via CORBA')
 
         # command must include "aas" flag to start MAPDL server
-        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self.jobname, nproc, additional_switches)
+        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
 
         # add run location to command
         self.log.debug('Spawning shell process with: "%s"' % command)
@@ -1134,8 +1135,15 @@ class ANSYS(_InternalANSYS):
         else:
             self.log.info(self.response)
 
-    def open_gui(self):
-        """ Saves existing database and opens up APDL GUI """
+    def open_gui(self, include_result=True):
+        """ Saves existing database and opens up APDL GUI
+
+        Parameters
+        ----------
+        include_result : bool, optional
+            Allow the result file to be post processed in the GUI.
+
+        """
         temp_dir = tempfile.gettempdir()
         save_path = os.path.join(temp_dir, 'ansys')
         if not os.path.isdir(save_path):
@@ -1151,6 +1159,13 @@ class ANSYS(_InternalANSYS):
         self.Finish()
         self.Save(tmp_database)
         self.Exit(close_log=False)
+
+        # copy result file to temp directory
+        if include_result:
+            resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
+            if os.path.isfile(resultfile):
+                tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
+                copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
         start_file = os.path.join(save_path, 'start%s.ans' % self.version)
@@ -1175,6 +1190,16 @@ class ANSYS(_InternalANSYS):
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
                 self.Run('/%s' % prior_processor)
+
+    @property
+    def jobname(self):
+        """MAPDL job name"""
+        try:
+            self._jobname = self.Inquire(func='JOBNAME').split('=')[1].strip()
+        except:
+            pass
+        return self._jobname
+
 
 def load_parameters(filename):
     """ load parameters """
