@@ -190,6 +190,26 @@ These stresses can be verified using ANSYS using:
    10920   49788.      8798.7     -21929.     -7302.5      11294.      4300.0    
 
 
+Accessing Element Solution Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Individual element results for the entire solution can be accessed using the ``element_solution_data`` method.  For example, to get the volume of each element:
+
+.. code:: python
+
+    import numpy as np
+    import pyansys
+
+    rst = pyansys.read_binary('./file.rst')
+    enum, edata = rst.element_solution_data(0, datatype='ENG')
+
+    # output as a list, but can be viewed as an array since
+    # the results for each element are the same size
+    edata = np.asarray(edata)
+    volume = edata[:, 0]
+
+Documentation for the underlying results can be found in `Description of the Results File <https://www.sharcnet.ca/Software/Ansys/16.2.3/en-us/help/ans_prog/Hlp_P_INT1_2.html>`_.
+
+
 Animiating a Modal Solution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Solutions from a modal analysis can be animated using ``animate_nodal_solution``.  For example:

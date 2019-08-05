@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pytest
 from pyvista.plotting import system_supports_plotting
@@ -14,6 +16,23 @@ try:
     pontoon = pyansys.download_pontoon()
 except:
     pontoon = None
+
+
+test_path = os.path.dirname(os.path.abspath(__file__))
+testfiles_path = os.path.join(test_path, 'testfiles')
+
+
+def test_read_volume():
+    rst_file = os.path.join(testfiles_path, 'vol_test.rst')
+    rst = pyansys.read_binary(rst_file)
+    enum, edata = rst.element_solution_data(0, datatype='ENG')
+    edata = np.asarray(edata)
+    volume = edata[:, 0]
+
+    enum_vtk = np.sort(rst.grid.cell_arrays['ansys_elem_num'])
+    assert np.allclose(enum, enum_vtk)
+    assert np.allclose(volume, 291895460.0)
+
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
 def test_nodal_thermal_strain():
