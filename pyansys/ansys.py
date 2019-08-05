@@ -895,8 +895,8 @@ class ANSYS(_InternalANSYS):
 
     def load_parameters(self):
         # load ansys parameters to python
-        self.Parsav('all')  # saves to file.parm by default
-        filename = os.path.join(self.path, 'file.parm')
+        filename = os.path.join(self.path, 'parameters.parm')
+        self.Parsav('all', filename)
         self.parameters, self.arrays = load_parameters(filename)
 
     def add_file_handler(self, filepath, append):

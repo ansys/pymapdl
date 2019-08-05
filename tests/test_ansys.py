@@ -53,6 +53,8 @@ class TestCyclicResultReader(object):
     except:  # for travis and appveyor
         pass
 
+    breakpoint()
+
     def test_prnsol_u(self):
         # verify cyclic displacements
         table = self.ansys.Prnsol('u').splitlines()
