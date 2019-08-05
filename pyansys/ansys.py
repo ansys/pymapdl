@@ -1189,8 +1189,10 @@ def load_parameters(filename):
                     values = ''.join(append_text).split(' ')
                     shp = arrays[append_varname].shape
                     arrays[append_varname] = np.genfromtxt(values).reshape(shp, order='F')
+                    append_text.clear()
                 else:
-                    append_text.append(line.replace('\n', '').replace('\r', ''))
+                    nosep_line = line.replace('\n', '').replace('\r', '')
+                    append_text.append(" " + re.sub(r"(?<=\d)-(?=\d)"," -", nosep_line))
 
             elif '*DIM' in line:
                 # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
@@ -1204,11 +1206,12 @@ def load_parameters(filename):
 
                 if arr_type == 'CHAR':
                     arrays[varname] = np.empty((imax, jmax, kmax), dtype='<U8', order='F')
-                if arr_type == 'ARRAY':
+                elif arr_type == 'ARRAY':
                     arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
+                elif arr_type == 'TABLE':
+                    arrays[varname] = np.empty((imax+1, jmax+1, kmax), np.double, order='F')
                 else:
                     arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
-
             elif '*SET' in line:
                 st = line.find(',') + 1
                 varname = line[st:st+8].strip()
