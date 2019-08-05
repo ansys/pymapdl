@@ -1218,7 +1218,7 @@ def load_parameters(filename):
                     raw_parameters = np.genfromtxt(values)
 
                     n_entries = np.prod(shp)
-                    if n_entries != parameters.size:
+                    if n_entries != raw_parameters.size:
                         parameters = np.zeros(n_entries)
                         parameters[:raw_parameters.size] = raw_parameters
                         parameters = parameters.reshape(shp)
