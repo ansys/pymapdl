@@ -1215,7 +1215,17 @@ def load_parameters(filename):
                     append_mode = False
                     values = ''.join(append_text).split(' ')
                     shp = arrays[append_varname].shape
-                    arrays[append_varname] = np.genfromtxt(values).reshape(shp, order='F')
+                    raw_parameters = np.genfromtxt(values)
+
+                    n_entries = np.prod(shp)
+                    if n_entries != parameters.size:
+                        parameters = np.zeros(n_entries)
+                        parameters[:raw_parameters.size] = raw_parameters
+                        parameters = parameters.reshape(shp)
+                    else:
+                        parameters = raw_parameters.reshape(shp, order='F')
+
+                    arrays[append_varname] = parameters
                     append_text.clear()
                 else:
                     nosep_line = line.replace('\n', '').replace('\r', '')
