@@ -988,14 +988,24 @@ class ResultFile(object):
         -----
         See ANSYS element documentation for available items for each element type.
 
-        """
+        ENG - Element volume and energies.
+            volume: Element volume
+            senergy: Element energy associated with the stiffness matrix
+            aenergy: Artificial hourglass energy
+            kenergy: Kinetic energy
+            coenergy: Co-energy (magnetics)
+            incenergy: Position not used
+            position not used
+            thenergy: Thermal dissipation energy (see ThermMat, shell131/132 only)
+            position not used
+            position not used
 
-        table_ptr = 'ptr%s' % str(datatype).upper()
+        """
+        table_ptr = datatype.upper()
         if table_ptr not in ELEMENT_INDEX_TABLE_KEYS:
             err_str = 'Data type %s is invalid\n' % str(datatype)
             err_str += '\nAvailable types:\n'
             for key in ELEMENT_INDEX_TABLE_KEYS:
-                key = key[3:]
                 err_str += '\t%s: %s\n' % (key, ELEMENT_INDEX_TABLE_INFO[key])
 
             raise Exception(err_str)
@@ -1003,22 +1013,22 @@ class ResultFile(object):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+        ele_ind_table, _, _ = self.element_solution_header(rnum)
 
         element_data = []
-        f = open(self.filename, 'rb')
-        for ind in ele_ind_table:
-            # read element table index
-            f.seek(ind*4)
-            table = read_table(f)
+        with open(self.filename, 'rb') as file:
+            for ind in ele_ind_table:
+                # read element table index
+                file.seek(ind*4)
+                table = read_table(file)
 
-            ptr = table[table_index]
-            if ptr <= 0:
-                element_data.append(None)
-            else:
-                f.seek((ind + ptr)*4)
-                data = read_table(f, 'f')  # TODO: Verify datatype
-                element_data.append(data)
+                ptr = table[table_index]
+                if ptr <= 0:
+                    element_data.append(None)
+                else:
+                    file.seek((ind + ptr)*4)
+                    data = read_table(file, 'f')  # TODO: Verify datatype
+                    element_data.append(data)
 
         enum = self.grid.cell_arrays['ansys_elem_num']
         if sort:
@@ -1979,7 +1989,10 @@ class ResultFile(object):
 
                     # if interactive:
                     plotter.update(30, force_redraw=True)
-                    text_actor.SetInput('Result %d' % (i + 1))
+                    if hasattr(text_actor, 'SetInput'):
+                        text_actor.SetInput('Result %d' % (i + 1))
+                    else:
+                        text_actor.SetText(0, 'Result %d' % (i + 1))
 
                     if plotter.q_pressed:
                         break
