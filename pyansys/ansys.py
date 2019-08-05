@@ -13,7 +13,6 @@ import string
 import re
 import os
 import tempfile
-import appdirs
 import warnings
 import logging
 import time
@@ -21,7 +20,9 @@ import subprocess
 from threading import Thread
 import weakref
 import random
+from shutil import copyfile
 
+import appdirs
 import pyansys
 import pexpect
 import numpy as np
@@ -368,7 +369,7 @@ class ANSYS(_InternalANSYS):
                  prefer_pexpect=True, log_apdl='w'):
         """ Initialize connection with ANSYS program """
         self.log = setup_logger(loglevel.upper())
-        self.jobname = jobname
+        self._jobname = jobname
         self.non_interactive = self._non_interactive(self)
         self.redirected_commands = {'*LIS': self._list}
         self._processor = 'BEGIN'
@@ -431,10 +432,10 @@ class ANSYS(_InternalANSYS):
                 raise Exception('%s is not a valid folder' % self.path)
 
         # Check for lock file
-        self.lockfile = os.path.join(self.path, self.jobname + '.lock')
+        self.lockfile = os.path.join(self.path, self._jobname + '.lock')
         if os.path.isfile(self.lockfile):
             if not override:
-                raise Exception('Lock file exists for jobname %s \n' % self.jobname +
+                raise Exception('Lock file exists for jobname %s \n' % self._jobname +
                                 ' at %s\n' % self.lockfile +
                                 'Set override=True to delete lock and start ANSYS')
             else:
@@ -512,7 +513,7 @@ class ANSYS(_InternalANSYS):
 
     def open_process(self, nproc, timeout, additional_switches):
         """ Opens an ANSYS process using pexpect """
-        command = '%s -j %s -np %d %s' % (self.exec_file, self.jobname, nproc,
+        command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
                                           additional_switches)
         self.log.debug('Spawning shell process using pexpect')
         self.log.debug('Command: "%s"' % command)
@@ -895,8 +896,8 @@ class ANSYS(_InternalANSYS):
 
     def load_parameters(self):
         # load ansys parameters to python
-        self.Parsav('all')  # saves to file.parm by default
-        filename = os.path.join(self.path, 'file.parm')
+        filename = os.path.join(self.path, 'parameters.parm')
+        self.Parsav('all', filename)
         self.parameters, self.arrays = load_parameters(filename)
 
     def add_file_handler(self, filepath, append):
@@ -958,8 +959,9 @@ class ANSYS(_InternalANSYS):
             if self.using_corba:
                 self.mapdl.terminate()
             else:
-                self.process.sendline('FINISH')
-                self.process.sendline('EXIT')
+                if self.process is not None:
+                    self.process.sendline('FINISH')
+                    self.process.sendline('EXIT')
 
         except Exception as e:
             if 'WaitingForReply' not in str(e):
@@ -1008,7 +1010,7 @@ class ANSYS(_InternalANSYS):
         self.log.info('Connecting to ANSYS via CORBA')
 
         # command must include "aas" flag to start MAPDL server
-        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self.jobname, nproc, additional_switches)
+        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
 
         # add run location to command
         self.log.debug('Spawning shell process with: "%s"' % command)
@@ -1133,8 +1135,15 @@ class ANSYS(_InternalANSYS):
         else:
             self.log.info(self.response)
 
-    def open_gui(self):
-        """ Saves existing database and opens up APDL GUI """
+    def open_gui(self, include_result=True):
+        """ Saves existing database and opens up APDL GUI
+
+        Parameters
+        ----------
+        include_result : bool, optional
+            Allow the result file to be post processed in the GUI.
+
+        """
         temp_dir = tempfile.gettempdir()
         save_path = os.path.join(temp_dir, 'ansys')
         if not os.path.isdir(save_path):
@@ -1151,6 +1160,13 @@ class ANSYS(_InternalANSYS):
         self.Save(tmp_database)
         self.Exit(close_log=False)
 
+        # copy result file to temp directory
+        if include_result:
+            resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
+            if os.path.isfile(resultfile):
+                tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
+                copyfile(resultfile, tmp_resultfile)
+
         # write temporary input file
         start_file = os.path.join(save_path, 'start%s.ans' % self.version)
         with open(start_file, 'w') as f:
@@ -1161,7 +1177,8 @@ class ANSYS(_InternalANSYS):
         with open(other_start_file, 'w') as f:
             f.write('RESUME\n')
 
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
+        os.system('cd "%s" && "%s" -g -j %s -dir %s' % (save_path, self.exec_file,
+                                                        name, save_path))
 
         # must remove the start file when finished
         os.remove(start_file)
@@ -1173,6 +1190,16 @@ class ANSYS(_InternalANSYS):
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
                 self.Run('/%s' % prior_processor)
+
+    @property
+    def jobname(self):
+        """MAPDL job name"""
+        try:
+            self._jobname = self.Inquire(func='JOBNAME').split('=')[1].strip()
+        except:
+            pass
+        return self._jobname
+
 
 def load_parameters(filename):
     """ load parameters """
@@ -1188,9 +1215,21 @@ def load_parameters(filename):
                     append_mode = False
                     values = ''.join(append_text).split(' ')
                     shp = arrays[append_varname].shape
-                    arrays[append_varname] = np.genfromtxt(values).reshape(shp, order='F')
+                    raw_parameters = np.genfromtxt(values)
+
+                    n_entries = np.prod(shp)
+                    if n_entries != raw_parameters.size:
+                        parameters = np.zeros(n_entries)
+                        parameters[:raw_parameters.size] = raw_parameters
+                        parameters = parameters.reshape(shp)
+                    else:
+                        parameters = raw_parameters.reshape(shp, order='F')
+
+                    arrays[append_varname] = parameters
+                    append_text.clear()
                 else:
-                    append_text.append(line.replace('\n', '').replace('\r', ''))
+                    nosep_line = line.replace('\n', '').replace('\r', '')
+                    append_text.append(" " + re.sub(r"(?<=\d)-(?=\d)"," -", nosep_line))
 
             elif '*DIM' in line:
                 # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
@@ -1204,11 +1243,12 @@ def load_parameters(filename):
 
                 if arr_type == 'CHAR':
                     arrays[varname] = np.empty((imax, jmax, kmax), dtype='<U8', order='F')
-                if arr_type == 'ARRAY':
+                elif arr_type == 'ARRAY':
                     arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
+                elif arr_type == 'TABLE':
+                    arrays[varname] = np.empty((imax+1, jmax+1, kmax), np.double, order='F')
                 else:
                     arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
-
             elif '*SET' in line:
                 st = line.find(',') + 1
                 varname = line[st:st+8].strip()
