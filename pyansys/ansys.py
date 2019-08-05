@@ -958,8 +958,9 @@ class ANSYS(_InternalANSYS):
             if self.using_corba:
                 self.mapdl.terminate()
             else:
-                self.process.sendline('FINISH')
-                self.process.sendline('EXIT')
+                if self.process is not None:
+                    self.process.sendline('FINISH')
+                    self.process.sendline('EXIT')
 
         except Exception as e:
             if 'WaitingForReply' not in str(e):
@@ -1161,7 +1162,8 @@ class ANSYS(_InternalANSYS):
         with open(other_start_file, 'w') as f:
             f.write('RESUME\n')
 
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
+        os.system('cd "%s" && "%s" -g -j %s -dir %s' % (save_path, self.exec_file,
+                                                        name, save_path))
 
         # must remove the start file when finished
         os.remove(start_file)
