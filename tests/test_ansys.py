@@ -1,3 +1,4 @@
+import glob
 import os
 from shutil import copyfile
 
@@ -147,3 +148,10 @@ class TestCyclicResultReader(object):
 
     def test_exit(self):
         self.ansys.Exit()
+
+
+def test_read_para():
+    para_path = os.path.join(path, 'testfiles', 'para')
+    para_files = glob.glob(os.path.join(para_path, '*.txt'))
+    for para_file in para_files:
+        arr, parm = pyansys.ansys.load_parameters(para_file)

@@ -1,0 +1,13 @@
+/NOPR
+*DIM,JOBNAME ,STRING,       8,       1,       1,
+*SET,JOBNAME (1,       1,       1),'file    '
+*SET,_RETURN ,  0.000000000000    
+*SET,_SAV1   ,  200.0000000000    
+*SET,_SAV2   ,  10000.00000000    
+*SET,_SAV3   ,  0.000000000000    
+*SET,_SAV4   ,  5.000000000000    
+*SET,_STATUS ,  1.000000000000    
+*SET,_UIQR   ,  0.000000000000    
+*SET,_Z1     ,  0.000000000000    
+*SET,_ZRD    ,  0.000000000000    
+/GO  

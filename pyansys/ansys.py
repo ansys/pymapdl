@@ -1201,8 +1201,25 @@ class ANSYS(_InternalANSYS):
         return self._jobname
 
 
+# TODO: Speed this up with:
+# https://tinodidriksen.com/2011/05/cpp-convert-string-to-double-speed/
 def load_parameters(filename):
-    """ load parameters """
+    """Load parameters from a file
+
+    Parameters
+    ----------
+    filename : str
+        Name of the parameter file to read in.
+
+    Returns
+    -------
+    parameters : dict
+        Dictionary of single value parameters
+{
+    arrays : dict
+        Dictionary of arrays
+
+    """
     parameters = {}
     arrays = {}
 
@@ -1219,13 +1236,13 @@ def load_parameters(filename):
 
                     n_entries = np.prod(shp)
                     if n_entries != raw_parameters.size:
-                        parameters = np.zeros(n_entries)
-                        parameters[:raw_parameters.size] = raw_parameters
-                        parameters = parameters.reshape(shp)
+                        paratmp = np.zeros(n_entries)
+                        paratmp[:raw_parameters.size] = raw_parameters
+                        paratmp = paratmp.reshape(shp)
                     else:
-                        parameters = raw_parameters.reshape(shp, order='F')
+                        paratmp = raw_parameters.reshape(shp, order='F')
 
-                    arrays[append_varname] = parameters
+                    arrays[append_varname] = paratmp.squeeze()
                     append_text.clear()
                 else:
                     nosep_line = line.replace('\n', '').replace('\r', '')
@@ -1247,11 +1264,13 @@ def load_parameters(filename):
                     arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
                 elif arr_type == 'TABLE':
                     arrays[varname] = np.empty((imax+1, jmax+1, kmax), np.double, order='F')
+                elif arr_type == 'STRING':
+                    arrays[varname] = 'str'
                 else:
                     arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
             elif '*SET' in line:
-                st = line.find(',') + 1
-                varname = line[st:st+8].strip()
+                vals = line.split(',')
+                varname = vals[1].strip()
                 if varname in arrays:
                     st = line.find('(') + 1
                     en = line.find(')')
@@ -1260,11 +1279,13 @@ def load_parameters(filename):
                     j = int(ind[1]) - 1
                     k = int(ind[2]) - 1
                     value = line[en+2:].strip().replace("'", '')
-                    arrays[varname][i, j, k] = value
+                    if isinstance(arrays[varname], str):
+                        parameters[varname] = value
+                        del arrays[varname]
+                    else:
+                        arrays[varname][i, j, k] = value
                 else:
-                    # break
-                    st = line.find(',', st)
-                    value = line[st + 1:].strip()
+                    value = vals[-1]
                     if is_float(value):
                         parameters[varname] = float(value)
                     else:
