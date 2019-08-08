@@ -30,9 +30,9 @@ class Archive(object):
 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, read_parameters=False):
         """ Initializes a cdb object """
-        self.raw = _reader.read(filename)
+        self.raw = _reader.read(filename, read_parameters=read_parameters)
 
     def parse_vtk(self, force_linear=False, allowable_types=None,
                   null_unallowed=False):

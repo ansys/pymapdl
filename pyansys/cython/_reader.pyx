@@ -53,14 +53,14 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     return 1
                 
 
-def read(filename):
+def read(filename, read_parameters=False):
     """
     Read blocked ansys archive file.
     """
     badstr = 'Badly formatted cdb file'
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
-    
+    parameters = {}
     # Check file exists
     cdef FILE* cfile
     cfile = fopen(fname, 'r')
@@ -132,6 +132,8 @@ def read(filename):
     node_comps = {}
     elem_comps = {}
 
+    read_nodes = False
+
     # keyopt
     keyopt = {}
 
@@ -193,6 +195,8 @@ def read(filename):
                 ien = line[ist:].find(b',') + ist
                 nset = int(line[ist:ien])
 
+                print(nset)
+
                 # Skip Format1 and Format2 (always 2i8,6g16.9 and 7g16.9)
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
@@ -220,7 +224,7 @@ def read(filename):
                             
                         # advance line
                         if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                         
+                        
                         # read next line
                         while True:
                             if ncon > 7:
@@ -250,6 +254,7 @@ def read(filename):
         elif 'N' == line[0]: # Test is faster than next line
             # if line contains the start of the node block
             if b'NBLOCK' in line:
+                read_nodes = True
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
 
@@ -259,8 +264,8 @@ def read(filename):
                 nnum = np.empty(nnodes, dtype=ctypes.c_int)
                 nodes = np.empty((nnodes, 6))
 
-                n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes, d_size, f_size, &n,
-                    EOL, nexp)
+                n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                                d_size, f_size, &n, EOL, nexp)
 
         elif 'C' == line[0]:  # component
             if b'CMBLOCK' in line:  # component
@@ -299,6 +304,54 @@ def read(filename):
                 elif b'ELEM' in line_comp_type:
                     elem_comps[comname] = component_interperter(component)
 
+        elif '*' == line[0] and read_parameters:  # dim
+            if b'DIM' in line:
+                _, name, _, dim0, dim1, dim2, _ = line.decode().split(',')
+
+                # dim = []
+                # for d in [dim0, dim1, dim2]:
+                #     if d.strip():
+                #         dim.append(int(d))
+
+                # while dim[-1] == 1:
+                #     if len(dim) == 1:
+                #         break
+                #     del dim[-1]
+
+                # init_arr = np.zeros(np.prod(dim))
+
+                myfgets(line, raw, &n, fsize)
+                if b'PREAD' in line:
+                    _, name, arr_size = line.decode().split(',')
+                    name = name.strip()
+                    st = n
+                    en = raw.find(b'END PREAD')
+                    lines = raw[st:en].split()
+                    arr = np.genfromtxt(raw[st:en].split())
+                    # init_arr[arr.size] = arr
+                    parameters[name] = arr
+
+    if not read_nodes:
+        n = 0
+        while 1:
+            if myfgets(line, raw, &n, fsize):
+                break
+
+            if 'N' == line[0]: # Test is faster than next line
+                # if line contains the start of the node block
+                if b'NBLOCK' in line:
+                    # Get size of NBLOCK
+                    nnodes = int(line[line.rfind(b',') + 1:])
+
+                    # Get format of NBLOCK
+                    if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                    d_size, f_size, nfld, nexp = block_format(line)
+                    nnum = np.empty(nnodes, dtype=ctypes.c_int)
+                    nodes = np.empty((nnodes, 6))
+
+                    n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                                    d_size, f_size, &n, EOL, nexp)
+
     # Free memory
     free(raw)
 
@@ -315,7 +368,8 @@ def read(filename):
             'elem_comps': elem_comps,
             'mtype': np.asarray(mtype),  # material type
             'sec_id': np.asarray(sec_id),
-            'keyopt': keyopt
+            'keyopt': keyopt,
+            'parameters': parameters
             }
 
 
