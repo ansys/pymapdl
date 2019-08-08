@@ -53,7 +53,7 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     return 1
                 
 
-def read(filename, read_parameters=False):
+def read(filename, read_parameters=False, debug=False):
     """
     Read blocked ansys archive file.
     """
@@ -145,12 +145,18 @@ def read(filename, read_parameters=False):
         # Record element types
         if 'E' == line[0]:
             if b'ET' in line:
+                if debug:
+                    print('reading ET')
+
                 # element number
                 # element type
                 elem_type.append([int(line[3:line.find(b',', 5)]),
                                   int(line[line.find(b',', 5) + 1:])])
 
             elif b'EBLOCK' in line:
+                if debug:
+                    print('reading EBLOCK')
+
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
 
@@ -175,6 +181,9 @@ def read(filename, read_parameters=False):
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
+                if debug:
+                    print('reading KEYOP')
+
                 try:
                     entry = []
                     for item in line.split(b',')[1:]:
@@ -190,12 +199,13 @@ def read(filename, read_parameters=False):
 
         elif 'R' == line[0]:
             if b'RLBLOCK' in line:
+                if debug:
+                    print('reading RLBLOCK')
+
                 # Get number of sets
                 ist = line.find(b',') + 1
                 ien = line[ist:].find(b',') + ist
                 nset = int(line[ist:ien])
-
-                print(nset)
 
                 # Skip Format1 and Format2 (always 2i8,6g16.9 and 7g16.9)
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
@@ -254,6 +264,9 @@ def read(filename, read_parameters=False):
         elif 'N' == line[0]: # Test is faster than next line
             # if line contains the start of the node block
             if b'NBLOCK' in line:
+                if debug:
+                    print('reading NBLOCK')
+
                 read_nodes = True
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
@@ -269,6 +282,9 @@ def read(filename, read_parameters=False):
 
         elif 'C' == line[0]:  # component
             if b'CMBLOCK' in line:  # component
+                if debug:
+                    print('reading CMBLOCK')
+
                 line_comp_type = line.split(b',')[2]
                 # Get Component name
                 ind1 = line.find(b',') + 1
@@ -322,14 +338,20 @@ def read(filename, read_parameters=False):
 
                 myfgets(line, raw, &n, fsize)
                 if b'PREAD' in line:
+                    if debug:
+                        print('reading PREAD')
+
                     _, name, arr_size = line.decode().split(',')
                     name = name.strip()
                     st = n
-                    en = raw.find(b'END PREAD')
-                    lines = raw[st:en].split()
-                    arr = np.genfromtxt(raw[st:en].split())
-                    # init_arr[arr.size] = arr
-                    parameters[name] = arr
+                    en = raw.find(b'END PREAD', n)
+                    if debug:
+                        print(st, en)
+                    if st != -1 and en != -1:
+                        lines = raw[st:en].split()
+                        arr = np.genfromtxt(raw[st:en].split())
+                        # init_arr[arr.size] = arr
+                        parameters[name] = arr
 
     if not read_nodes:
         n = 0
