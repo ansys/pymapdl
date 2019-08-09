@@ -35,7 +35,7 @@ jobs:
     - script: |
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
         ls s -la
-	ls s/.ci -la
+        ls s/.ci -la
         echo "PWD:" $(pwd)
         echo "Source dir follows"
         echo '$(Build.SourcesDirectory)'
