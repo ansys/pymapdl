@@ -1,0 +1,19 @@
+steps:
+
+# install python on macOS
+- script: .ci/macos-install-python.sh '$(python.version)'
+  displayName: Install Python.org Python
+  condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+    architecture: '$(python.architecture)'
+  condition: and(succeeded(), ne(variables['Agent.OS'], 'Darwin')) 
+
+- script: |
+    mkdir -p dist
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements_build.txt
+    python -m pip install -r requirements_test.txt
+  displayName: 'Install dependencies'

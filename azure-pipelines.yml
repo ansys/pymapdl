@@ -1,19 +1,126 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# azure pipelines build pyansys
+
+variables:
+  package_name: pyansys
 
 trigger:
-- master
+  branches:
+    include:
+    - '*'
+  tags:
+    include:
+    - '*'
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+- job: ManyLinux
+  strategy:
+    matrix:
+      # Python27:
+      #   python.version: '2.7'
+      #   python.architecture: 'x64'
+      # Python35:
+      #   python.version: '3.5'
+      #   python.architecture: 'x64'
+      # Python36:
+      #   python.version: '3.6'
+      #   python.architecture: 'x64'
+      Python37:
+        python.version: '3.7'
+        python.architecture: 'x64'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - template: .ci/checkout.yml
+    - script: |
+        set -ex
+        docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh '$(python.version)'
+        cd ..
+      displayName: Build wheels
+    - template: .ci/azure-publish-dist.yml
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+# - job: BuildDocumentation
+#   pool:
+#     vmImage: 'ubuntu-latest'
+#   dependsOn:
+#   - ManyLinux
+#   steps:
+#   - template: .ci/checkout.yml
+#   - template: .ci/build_documentation.yml
+
+
+# - job: Windows
+#   strategy:
+#     matrix:
+#       # Python35:
+#       #   python.version: '3.5'
+#       #   python.architecture: 'x64'
+#       Python36:
+#         python.version: '3.6'
+#         python.architecture: 'x64'
+#       Python37:
+#         python.version: '3.7'
+#         python.architecture: 'x64'
+#   pool:
+#     vmImage: 'vs2017-win2016'
+#   steps:
+#     - template: .ci/checkout.yml
+#     - template: .ci/azure-setup.yml
+#     - template: .ci/azure-steps.yml
+#     - template: .ci/azure-publish-dist.yml
+
+# - job: macOS
+#   variables:
+#     python.architecture: 'x64'
+#   strategy:
+#     matrix:
+#       # Python27:
+#       #   python.version: '2.7'
+#       Python36:
+#         python.version: '3.6'
+#       Python37:
+#         python.version: '3.7'
+#   pool:
+#     vmImage: 'macOS-10.14'
+#   steps:
+#     - template: .ci/checkout.yml
+#     - script: .ci/macos-install-python.sh '$(python.version)'
+#       displayName: Install Python
+#     - template: .ci/azure-setup.yml
+#     - template: .ci/azure-steps.yml
+#     - template: .ci/azure-publish-dist.yml
+
+# - job: GitHubRelease
+#   pool:
+#     vmImage: 'ubuntu-latest'
+#   dependsOn:
+#   - BuildDocumentation
+#   - Linux
+#   - Windows
+#   - macOS
+#   steps:
+#   - checkout: none
+#   - task: DownloadPipelineArtifact@2
+#     inputs:
+#       buildType: 'current'
+#       targetPath: '$(Pipeline.Workspace)/artifacts'
+#   - script: |
+#       ARTIFACTS='$(Pipeline.Workspace)/artifacts'
+#       RELEASE_FILES='$(Pipeline.Workspace)/release_files'
+#       mkdir -p $RELEASE_FILES
+#       find $ARTIFACTS -name "*.*" -execdir mv {} $RELEASE_FILES \;
+#       echo 'listing release files'
+#       ls $RELEASE_FILES -lh
+#     displayName: 'Flatten artifacts'
+#   - task: GitHubRelease@0
+#     inputs:
+#       gitHubConnection: 'github_auth'
+#       repositoryName: 'femorph/$(package_name)'
+#       action: 'create'
+#       target: '$(Build.SourceVersion)'
+#       tagSource: 'auto'
+#       assets: '$(Pipeline.Workspace)/release_files'
+#       isDraft: true
+#       addChangeLog: true
+#     displayName: Create GitHub Release
+#   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')

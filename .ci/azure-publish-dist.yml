@@ -1,0 +1,12 @@
+steps:
+- task: PublishPipelineArtifact@0
+  inputs:
+    artifactName: 'artifact_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+    targetPath: 'dist'
+
+- script: |
+    python -m pip install twine
+    # python -m twine upload --config-file $(PYPIRC_PATH) dist/* --skip-existing
+    python -m twine upload dist/* --skip-existing
+  displayName: 'Upload Artifacts'
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')

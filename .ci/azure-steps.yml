@@ -1,0 +1,29 @@
+# build wheels on windows
+
+steps:
+- script: |
+    python -m pip install pyansys -f $(WHLPATH)
+  displayName: 'Install'
+
+- script: |
+    python setup.py bdist_wheel
+  displayName: 'Build wheel'
+
+- script: |
+    cd dist
+    python -m pip install $(package_name) -f .
+    cd ..
+  displayName: 'Install'
+
+- script: |
+    pip install pytest pytest-azurepipelines
+    cd tests  # must cd into directory or python will refer to the non-compiled source
+    python -m pytest
+    cd ..
+  displayName: 'Testing'
+
+# - script: |
+#     mkdir wheelhouse
+#     cp dist/$(package_name)* wheelhouse/.
+#     ls -lh wheelhouse
+#   displayName: 'Show dist'
