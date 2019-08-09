@@ -1,0 +1,5 @@
+setuptools>=41.0.0
+wheel>=0.33.0
+numpy>=1.15.0
+cython>=0.29.0
+vtk>=8.0.0

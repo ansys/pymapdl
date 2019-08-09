@@ -11,6 +11,7 @@ trigger:
     include:
     - '*'
 
+
 jobs:
 - job: ManyLinux
   strategy:
@@ -30,7 +31,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - template: .ci/checkout.yml
+    - checkout: none
+    - script: |
+        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(BUILD_SOURCEBRANCHNAME') s
+      displayName: Get Source
     - script: |
         set -ex
         docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh '$(python.version)'
@@ -115,7 +119,7 @@ jobs:
 #   - task: GitHubRelease@0
 #     inputs:
 #       gitHubConnection: 'github_auth'
-#       repositoryName: 'femorph/$(package_name)'
+#       repositoryName: 'pyansys/$(package_name)'
 #       action: 'create'
 #       target: '$(Build.SourceVersion)'
 #       tagSource: 'auto'
