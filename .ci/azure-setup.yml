@@ -1,6 +1,4 @@
 steps:
-
-# install python on macOS
 - script: .ci/macos-install-python.sh '$(python.version)'
   displayName: Install Python.org Python
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))

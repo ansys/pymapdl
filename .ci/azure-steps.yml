@@ -2,10 +2,6 @@
 
 steps:
 - script: |
-    python -m pip install pyansys -f $(WHLPATH)
-  displayName: 'Install'
-
-- script: |
     python setup.py bdist_wheel
   displayName: 'Build wheel'
 
@@ -21,9 +17,3 @@ steps:
     python -m pytest
     cd ..
   displayName: 'Testing'
-
-# - script: |
-#     mkdir wheelhouse
-#     cp dist/$(package_name)* wheelhouse/.
-#     ls -lh wheelhouse
-#   displayName: 'Show dist'

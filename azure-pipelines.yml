@@ -62,25 +62,31 @@ jobs:
 #   - template: .ci/build_documentation.yml
 
 
-# - job: Windows
-#   strategy:
-#     matrix:
-#       # Python35:
-#       #   python.version: '3.5'
-#       #   python.architecture: 'x64'
-#       Python36:
-#         python.version: '3.6'
-#         python.architecture: 'x64'
-#       Python37:
-#         python.version: '3.7'
-#         python.architecture: 'x64'
-#   pool:
-#     vmImage: 'vs2017-win2016'
-#   steps:
-#     - template: .ci/checkout.yml
-#     - template: .ci/azure-setup.yml
-#     - template: .ci/azure-steps.yml
-#     - template: .ci/azure-publish-dist.yml
+- job: Windows
+  strategy:
+    matrix:
+      # Python35:
+      #   python.version: '3.5'
+      #   python.architecture: 'x64'
+      Python36:
+        python.version: '3.6'
+        python.architecture: 'x64'
+      Python37:
+        python.version: '3.7'
+        python.architecture: 'x64'
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - script: |
+        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
+        ls s -la
+	ls s/.ci -la
+        echo "PWD:" $(pwd)
+        echo "Source dir follows"
+        echo '$(Build.SourcesDirectory)'
+    - template: .ci/azure-setup.yml
+    - template: .ci/azure-steps.yml
+    - template: .ci/azure-publish-dist.yml
 
 # - job: macOS
 #   variables:
@@ -97,8 +103,6 @@ jobs:
 #     vmImage: 'macOS-10.14'
 #   steps:
 #     - template: .ci/checkout.yml
-#     - script: .ci/macos-install-python.sh '$(python.version)'
-#       displayName: Install Python
 #     - template: .ci/azure-setup.yml
 #     - template: .ci/azure-steps.yml
 #     - template: .ci/azure-publish-dist.yml
