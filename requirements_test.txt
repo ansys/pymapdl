@@ -1,0 +1,3 @@
+scipy
+pytest
+matplotlib
