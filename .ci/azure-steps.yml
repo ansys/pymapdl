@@ -1,5 +1,4 @@
-# build wheels on windows
-
+# build wheels on windows and macOS
 steps:
 - script: |
     python setup.py bdist_wheel
