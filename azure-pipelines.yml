@@ -45,7 +45,7 @@ jobs:
     - script: |
         set -ex
         # docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 "/io/.ci/build_wheels.sh $(python.version)"
-	docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 ls /
+        docker run -e PLAT=$(plat) -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 ls /
         cd ..
       displayName: Build wheels
     - template: .ci/azure-publish-dist.yml
@@ -90,8 +90,8 @@ jobs:
     matrix:
       # Python27:
       #   python.version: '2.7'
-      Python36:
-        python.version: '3.6'
+      # Python36:
+        # python.version: '3.6'
       Python37:
         python.version: '3.7'
   pool:
