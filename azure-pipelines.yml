@@ -35,6 +35,7 @@ jobs:
     - script: |
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
         ls s -la
+	ls s/.ci -la
         echo "PWD:" $(pwd)
         echo "Source dir follows"
         echo '$(Build.SourcesDirectory)'
@@ -44,7 +45,7 @@ jobs:
       displayName: Pull Docker Image
     - script: |
         set -ex
-        docker run -e package_name=$(package_name) --rm -v '$(Build.SourcesDirectory)':/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh '$(python.version)'
+        docker run -e package_name=$(package_name) --rm -v '$(Build.SourcesDirectory)':/io quay.io/pypa/manylinux2010_x86_64 "/io/.ci/build_wheels.sh '$(python.version)'"
         cd ..
       displayName: Build wheels
     - template: .ci/azure-publish-dist.yml
