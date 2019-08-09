@@ -6,9 +6,6 @@ case $PYTHON_VERSION in
 2.7)
   FULL_VERSION=2.7.16
   ;;
-3.5)
-  FULL_VERSION=3.5.4
-  ;;
 3.6)
   FULL_VERSION=3.6.8
   ;;
