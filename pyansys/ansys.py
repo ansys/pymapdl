@@ -1250,9 +1250,8 @@ def load_parameters(filename):
 
             elif '*DIM' in line:
                 # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
-                st = line.find(',') + 1
-                varname = line[st:st+8].strip()
                 split_line = line.split(',')
+                varname = split_line[1].strip()
                 arr_type = split_line[2]
                 imax = int(split_line[3])
                 jmax = int(split_line[4])
@@ -1268,9 +1267,11 @@ def load_parameters(filename):
                     arrays[varname] = 'str'
                 else:
                     arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
+
             elif '*SET' in line:
                 vals = line.split(',')
-                varname = vals[1].strip()
+                varname = vals[1] + ' '
+                varname = varname[:varname.find('(')].strip()
                 if varname in arrays:
                     st = line.find('(') + 1
                     en = line.find(')')
@@ -1278,7 +1279,7 @@ def load_parameters(filename):
                     i = int(ind[0]) - 1
                     j = int(ind[1]) - 1
                     k = int(ind[2]) - 1
-                    value = line[en+2:].strip().replace("'", '')
+                    value = line[en+2:].strip().replace("'", '').strip()
                     if isinstance(arrays[varname], str):
                         parameters[varname] = value
                         del arrays[varname]
@@ -1293,8 +1294,8 @@ def load_parameters(filename):
 
             elif '*PREAD' in line:
                 # read a series of values
-                st = line.find(',') + 1
-                append_varname = line[st:st+8].strip()
+                split_line = line.split(',')
+                append_varname = split_line[1].strip()
                 append_mode = True
 
     return parameters, arrays
