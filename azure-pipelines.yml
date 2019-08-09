@@ -33,6 +33,7 @@ jobs:
   steps:
     - checkout: none
     - script: |
+        mkdir -p '$(Build.SourcesDirectory)'
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' '$(Build.SourcesDirectory)'
         ls s -la
       displayName: Get Source
