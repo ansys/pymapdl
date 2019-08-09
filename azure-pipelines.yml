@@ -12,7 +12,7 @@ trigger:
     - '*'
 
 jobs:
-- job: ManyLinux
+- job: Linux
   strategy:
     matrix:
       Python35:
