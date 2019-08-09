@@ -45,11 +45,11 @@ jobs:
       displayName: Pull Docker Image
     - script: |
         set -ex
-        docker run -e package_name=$(package_name) --rm -v '$(Build.SourcesDirectory)':/io quay.io/pypa/manylinux2010_x86_64 "/io/.ci/build_wheels.sh '$(python.version)'"
+        # docker run -e package_name=$(package_name) --rm -v '$(Build.SourcesDirectory)':/io quay.io/pypa/manylinux2010_x86_64 "/io/.ci/build_wheels.sh $(python.version)"
+	docker run -e package_name=$(package_name) --rm -v '$(Build.SourcesDirectory)':/io quay.io/pypa/manylinux2010_x86_64 "ls -la /io/"
         cd ..
       displayName: Build wheels
     - template: .ci/azure-publish-dist.yml
-
 
 
 # - job: BuildDocumentation
@@ -68,15 +68,16 @@ jobs:
       # Python35:
       #   python.version: '3.5'
       #   python.architecture: 'x64'
-      Python36:
-        python.version: '3.6'
-        python.architecture: 'x64'
+      # Python36:
+      #   python.version: '3.6'
+      #   python.architecture: 'x64'
       Python37:
         python.version: '3.7'
         python.architecture: 'x64'
   pool:
     vmImage: 'vs2017-win2016'
   steps:
+    - checkout: none
     - script: |
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
         ls s -la
@@ -102,7 +103,7 @@ jobs:
 #   pool:
 #     vmImage: 'macOS-10.14'
 #   steps:
-#     - template: .ci/checkout.yml
+#     - checkout: none
 #     - template: .ci/azure-setup.yml
 #     - template: .ci/azure-steps.yml
 #     - template: .ci/azure-publish-dist.yml
