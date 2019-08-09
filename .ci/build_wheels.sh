@@ -33,6 +33,7 @@ cd /
 
 # test
 "${PYBIN}/pip" install -r /io/requirements_test.txt
+"${PYBIN}/pip" install pytest-azurepipelines
 cd /io/tests
 "${PYBIN}/pytest"
 

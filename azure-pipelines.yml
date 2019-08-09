@@ -16,15 +16,15 @@ jobs:
 - job: ManyLinux
   strategy:
     matrix:
-      # Python27:
-      #   python.version: '2.7'
-      #   python.architecture: 'x64'
-      # Python35:
-      #   python.version: '3.5'
-      #   python.architecture: 'x64'
-      # Python36:
-      #   python.version: '3.6'
-      #   python.architecture: 'x64'
+      Python27:
+        python.version: '2.7'
+        python.architecture: 'x64'
+      Python35:
+        python.version: '3.5'
+        python.architecture: 'x64'
+      Python36:
+        python.version: '3.6'
+        python.architecture: 'x64'
       Python37:
         python.version: '3.7'
         python.architecture: 'x64'
@@ -60,46 +60,46 @@ jobs:
 #   - template: .ci/build_documentation.yml
 
 
-# - job: Windows
-#   strategy:
-#     matrix:
-#       Python35:
-#         python.version: '3.5'
-#         python.architecture: 'x64'
-#       Python36:
-#         python.version: '3.6'
-#         python.architecture: 'x64'
-#       Python37:
-#         python.version: '3.7'
-#         python.architecture: 'x64'
-#   pool:
-#     vmImage: 'vs2017-win2016'
-#   steps:
-#     - checkout: none
-#     - powershell: |
-#         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
-#     - template: .ci/azure-setup.yml
-#     - template: .ci/azure-steps.yml
-#     - template: .ci/azure-publish-dist.yml
+- job: Windows
+  strategy:
+    matrix:
+      Python35:
+        python.version: '3.5'
+        python.architecture: 'x64'
+      Python36:
+        python.version: '3.6'
+        python.architecture: 'x64'
+      Python37:
+        python.version: '3.7'
+        python.architecture: 'x64'
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - checkout: none
+    - powershell: |
+        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
+    - template: .ci/azure-setup.yml
+    - template: .ci/azure-steps.yml
+    - template: .ci/azure-publish-dist.yml
 
-# - job: macOS
-#   variables:
-#     python.architecture: 'x64'
-#   strategy:
-#     matrix:
-#       Python36:
-#         python.version: '3.6'
-#       Python37:
-#         python.version: '3.7'
-#   pool:
-#     vmImage: 'macOS-10.14'
-#   steps:
-#     - checkout: none
-#     - script: |
-#         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
-#     - template: .ci/azure-setup.yml
-#     - template: .ci/azure-steps.yml
-#     - template: .ci/azure-publish-dist.yml
+- job: macOS
+  variables:
+    python.architecture: 'x64'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+    - checkout: none
+    - script: |
+        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
+    - template: .ci/azure-setup.yml
+    - template: .ci/azure-steps.yml
+    - template: .ci/azure-publish-dist.yml
 
 # - job: GitHubRelease
 #   pool:
