@@ -34,8 +34,11 @@ jobs:
     - checkout: none
     - script: |
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
-	ls s
+        ls s
       displayName: Get Source
+    - script: |
+      docker pull quay.io/pypa/manylinux2010_x86_64
+    displayName: Pull Docker Image
     - script: |
         set -ex
         docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh '$(python.version)'
