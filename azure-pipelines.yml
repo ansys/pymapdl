@@ -27,7 +27,7 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - template: ./ci/checkout.yml
+    - template: .ci/checkout.yml
     - script: |
         docker pull quay.io/pypa/manylinux2010_x86_64
       displayName: Pull Docker Image
@@ -53,7 +53,7 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-    - template: ./ci/checkout.yml
+    - template: .ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
@@ -72,10 +72,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-    - checkout: ./ci/checkout.yml
-    - script: |
-        git clone --depth 1 https://github.com/akaszynski/pyansys
-      condition: endsWith(variables['Build.SourceBranchName'], 'merge')
+    - checkout: .ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
