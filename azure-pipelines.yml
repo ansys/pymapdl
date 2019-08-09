@@ -11,14 +11,10 @@ trigger:
     include:
     - '*'
 
-
 jobs:
 - job: ManyLinux
   strategy:
     matrix:
-      Python27:
-        python.version: '2.7'
-        python.architecture: 'x64'
       Python35:
         python.version: '3.5'
         python.architecture: 'x64'
@@ -31,14 +27,7 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - checkout: none
-    - script: |
-        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
-        echo "PWD:" $(pwd)
-        echo "Source dir follows"
-        echo '$(Build.SourcesDirectory)'
-        ls '$(Build.SourcesDirectory)'
-      displayName: Get Source
+    - template: ./ci/checkout.yml
     - script: |
         docker pull quay.io/pypa/manylinux2010_x86_64
       displayName: Pull Docker Image
@@ -48,17 +37,6 @@ jobs:
         cd ..
       displayName: Build wheels
     - template: .ci/azure-publish-dist.yml
-
-
-# - job: BuildDocumentation
-#   pool:
-#     vmImage: 'ubuntu-latest'
-#   dependsOn:
-#   - ManyLinux
-#   steps:
-#   - template: .ci/checkout.yml
-#   - template: .ci/build_documentation.yml
-
 
 - job: Windows
   strategy:
@@ -75,9 +53,7 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-    - checkout: none
-    - powershell: |
-        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
+    - template: ./ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
@@ -87,6 +63,8 @@ jobs:
     python.architecture: 'x64'
   strategy:
     matrix:
+      Python35:
+        python.version: '3.5'
       Python36:
         python.version: '3.6'
       Python37:
@@ -94,44 +72,10 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-    - checkout: none
+    - checkout: ./ci/checkout.yml
     - script: |
-        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' .
+        git clone --depth 1 https://github.com/akaszynski/pyansys
+      condition: endsWith(variables['Build.SourceBranchName'], 'merge')
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
-
-# - job: GitHubRelease
-#   pool:
-#     vmImage: 'ubuntu-latest'
-#   dependsOn:
-#   - BuildDocumentation
-#   - Linux
-#   - Windows
-#   - macOS
-#   steps:
-#   - checkout: none
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       targetPath: '$(Pipeline.Workspace)/artifacts'
-#   - script: |
-#       ARTIFACTS='$(Pipeline.Workspace)/artifacts'
-#       RELEASE_FILES='$(Pipeline.Workspace)/release_files'
-#       mkdir -p $RELEASE_FILES
-#       find $ARTIFACTS -name "*.*" -execdir mv {} $RELEASE_FILES \;
-#       echo 'listing release files'
-#       ls $RELEASE_FILES -lh
-#     displayName: 'Flatten artifacts'
-#   - task: GitHubRelease@0
-#     inputs:
-#       gitHubConnection: 'github_auth'
-#       repositoryName: 'pyansys/$(package_name)'
-#       action: 'create'
-#       target: '$(Build.SourceVersion)'
-#       tagSource: 'auto'
-#       assets: '$(Pipeline.Workspace)/release_files'
-#       isDraft: true
-#       addChangeLog: true
-#     displayName: Create GitHub Release
-#   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
