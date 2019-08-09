@@ -34,6 +34,7 @@ jobs:
     - checkout: none
     - script: |
         git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
+	ls s
       displayName: Get Source
     - script: |
         set -ex
