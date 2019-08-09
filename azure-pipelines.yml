@@ -72,7 +72,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-    - checkout: .ci/checkout.yml
+    - template: .ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
