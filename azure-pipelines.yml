@@ -33,9 +33,9 @@ jobs:
   steps:
     - checkout: none
     - script: |
-        mkdir -p '$(Build.SourcesDirectory)'
-        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' '$(Build.SourcesDirectory)'
+        git clone --depth 1 https://github.com/akaszynski/pyansys -b '$(Build.SourceBranchName)' s
         ls s -la
+	echo "PWD:" $(pwd)
       displayName: Get Source
     - script: |
         docker pull quay.io/pypa/manylinux2010_x86_64
