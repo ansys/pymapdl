@@ -501,14 +501,14 @@ While ``pyansys`` is designed to make it easier to control an APDL session by ca
 
     import pyansys
 
-    ansys = pyansys.ANSYS(log_apdl=True)
+    ansys = pyansys.ANSYS(log_apdl='apdl.log')
     ansys.Prep7()
     ansys.K(1, 0, 0, 0)
     ansys.K(2, 1, 0, 0)
     ansys.K(3, 1, 1, 0)
     ansys.K(4, 0, 1, 0)    
 
-Will write the following to ``"log.inp"``:
+Will write the following to ``"apdl.log"``
 
 .. code::
 
