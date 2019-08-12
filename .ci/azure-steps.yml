@@ -12,7 +12,17 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines
-    cd tests  # must cd into directory or python will refer to the non-compiled source
+    cd tests
     python -m pytest
     cd ..
-  displayName: 'Testing'
+  displayName: 'MacOS Testing'
+  condition: eq(variables['Agent.OS'], 'Darwin')
+
+- powershell: |
+    pip install pytest pytest-azurepipelines
+    ls
+    cd tests
+    python -m pytest
+    cd ..
+  displayName: 'Windows Testing'
+  condition: ne(variables['Agent.OS'], 'Darwin')

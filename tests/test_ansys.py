@@ -8,7 +8,7 @@ import pyansys
 from pyvista.plotting import system_supports_plotting
 
 from pyansys.rst import ResultFile
-
+from pyansys.mapdl import load_parameters
 
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
@@ -158,7 +158,7 @@ def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
     for para_file in para_files:
-        arr, parm = pyansys.mapdl.load_parameters(para_file)
+        arr, parm = load_parameters(para_file)
 
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
