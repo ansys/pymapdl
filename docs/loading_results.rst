@@ -100,7 +100,7 @@ A 4x4 transformation matrix can be constructed by concatenating the transformati
 
 See the doc string for ``parse_coordinate_system`` for more details regarding the contents of the coordinate systems stored in the result file.
 
-.. autofunction:: pyansys.binary_reader.parse_coordinate_system
+.. autofunction:: pyansys.rst.parse_coordinate_system
 
 
 Accessing Solution Results

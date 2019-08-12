@@ -300,13 +300,13 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         directory.
 
     jobname : str, optional
-        ANSYS jobname.  Defaults to 'file'.
+        ANSYS jobname.  Defaults to ``'file'``.
 
     nproc : int, optional
         Number of processors.  Defaults to 2.
 
     override : bool, optional
-        Attempts to delete the *.lock file at the run_location.
+        Attempts to delete the lock file at the run_location.
         Useful when a prior ANSYS session has exited prematurely and
         the lock file has not been deleted.
 
@@ -572,8 +572,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             pass
 
     def run(self, command, write_to_log=True):
-        """
-        Runs APDL command(s)
+        """Runs APDL command(s)
 
         Parameters
         ----------
@@ -595,7 +594,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         Notes
         -----
         When two or more commands need to be run non-interactively
-        (i.e. *VWRITE) then use
+        (i.e. ``*VWRITE``) then use
         
         >>> with ansys.non_interactive:
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")

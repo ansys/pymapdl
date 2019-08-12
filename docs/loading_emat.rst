@@ -1,5 +1,5 @@
-Working with a ANSYS Element Matrix File (*.emat)
-=================================================
+Working with a ANSYS Element Matrix File (.emat)
+================================================
 The ANSYS element matrix file is a FORTRAN formatted binary file containing the following for each element.
 
  - Stiffness matrix
