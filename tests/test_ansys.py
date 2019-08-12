@@ -157,7 +157,7 @@ class TestCyclicResultReader(object):
         self.ansys.exit()
 
 
-@pytest.mark.skipif(AZURE_LINUX, reason="Fails on Azure Linux")
+# @pytest.mark.skipif(AZURE_LINUX, reason="Fails on Azure Linux")
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))

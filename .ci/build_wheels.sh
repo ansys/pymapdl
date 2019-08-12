@@ -20,16 +20,10 @@ case $PYTHON_VERSION in
   ;;
 esac
 
-
+# build and install
 "${PYBIN}/pip" install -r /io/requirements_build.txt
-
-cd /io
-mkdir -p wheelhouse
-"${PYBIN}/python" setup.py bdist_wheel -d /io/wheelhouse
-cd /
-
-# install
-"${PYBIN}/python" -m pip install $package_name -f /io/wheelhouse/
+"${PYBIN}/pip" wheel /io/ -w /io/wheelhouse/
+"${PYBIN}/python" -m pip install $package_name -f /io/wheelhouse/ --no-index
 
 # test
 "${PYBIN}/pip" install -r /io/requirements_test.txt
