@@ -400,8 +400,8 @@ class _MapdlCommands(object):
         nodes nine and above are written on a second record with the same
         format.
         """
-        command = "EWRITE,%s,%s,%s,%s" % (str(fname), str(ext), str(unused),
-                                          str(kappnd), str(format))
+        command = "EWRITE,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(unused),
+                                             str(kappnd), str(format))
         return self.run(command, **kwargs)
 
     def f(self, node="", lab="", value="", value2="", nend="", ninc="",
@@ -855,9 +855,9 @@ class _MapdlCommands(object):
         See Meshing Your Solid Model in the Modeling and Meshing Guide for more
         information about setting element attributes.
         """
-        command = "LATT,%s,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type),
-                                              str(unused), str(kb), str(ke),
-                                              str(secnum))
+        command = "LATT,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type),
+                                                 str(unused), str(kb), str(ke),
+                                                 str(secnum))
         return self.run(command, **kwargs)
 
     def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
@@ -1630,8 +1630,9 @@ class _MapdlCommands(object):
 
             unused - Val6
 
-            unused - PC: The values are encoded in a PC logical font structure.  Value 1 is a
-                     character string, and the remaining values are integers:
+            unused - PC: The values are encoded in a PC logical font
+                     structure.  Value 1 is a character string, and
+                     the remaining values are integers:
 
             Val1 - Family name (e.g., Courier*New) Substitute an asterisk (*) for any blank
                    character that appears in a family name. If Val1 = MENU, all
@@ -2033,15 +2034,15 @@ class _MapdlCommands(object):
         simulations before the NSIM*NREP simulations are done if the
         convergence criteria are met.
         """
-        command = "PDLHS,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nsim),
-                                                     str(nrep),
-                                                     str(isopt),
-                                                     str(unused),
-                                                     str(astop),
-                                                     str(accmean),
-                                                     str(accstdv),
-                                                     str(check),
-                                                     str(seed))
+        command = "PDLHS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nsim),
+                                                        str(nrep),
+                                                        str(isopt),
+                                                        str(unused),
+                                                        str(astop),
+                                                        str(accmean),
+                                                        str(accstdv),
+                                                        str(check),
+                                                        str(seed))
         return self.run(command, **kwargs)
 
     def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
@@ -2314,7 +2315,7 @@ class _MapdlCommands(object):
         command = "PPATH,%s,%s,%s,%s,%s,%s" % (str(point), str(node), str(x), str(y), str(z), str(cs))
         return self.run(command, **kwargs)
 
-    def fclist(self, mat="", temp="", **kwargs):
+    def fclist(self, mat="", unused="", temp="", **kwargs):
         """APDL Command: FCLIST
 
         To list what the failure criteria is that you have input.
@@ -2335,7 +2336,7 @@ class _MapdlCommands(object):
         This command allows you to see what you have already input for failure
         criteria using the FC commands.
         """
-        command = "FCLIST,%s,%s" % (str(mat), str(temp))
+        command = "FCLIST,%s,%s,%s" % (str(mat), str(unused), str(temp))
         return self.run(command, **kwargs)
 
     def d(self, node="", lab="", value="", value2="", nend="", ninc="",
@@ -2664,8 +2665,8 @@ class _MapdlCommands(object):
         command = "/CFORMAT,%s,%s" % (str(nfirst), str(nl_ast))
         return self.run(command, **kwargs)
 
-    def radopt(self, fluxtol="", solver="", maxiter="", toler="", overrlex="",
-               maxfluxiter="", **kwargs):
+    def radopt(self, unused="", fluxtol="", solver="", maxiter="",
+               toler="", overrlex="", maxfluxiter="", **kwargs):
         """APDL Command: RADOPT
 
         Specifies Radiosity Solver options.
@@ -2759,7 +2760,13 @@ class _MapdlCommands(object):
         to 2 for a 2-D analysis, the Gauss-Seidel iterative solver (SOLVER = 0)
         is used.
         """
-        command = "RADOPT,%s,%s,%s,%s,%s,%s" % (str(fluxtol), str(solver), str(maxiter), str(toler), str(overrlex), str(maxfluxiter))
+        command = "RADOPT,%s,%s,%s,%s,%s,%s" % (str(unused),
+                                                str(fluxtol),
+                                                str(solver),
+                                                str(maxiter),
+                                                str(toler),
+                                                str(overrlex),
+                                                str(maxfluxiter))
         return self.run(command, **kwargs)
 
     def tiff(self, kywrd="", opt="", **kwargs):
@@ -3186,7 +3193,7 @@ class _MapdlCommands(object):
         command = "/MPLIB,%s,%s" % (str(r_w_opt), str(path))
         return self.run(command, **kwargs)
 
-    def asbl(self, na="", nl="", keepa="", keepl="", **kwargs):
+    def asbl(self, na="", nl="", unused="", keepa="", keepl="", **kwargs):
         """APDL Command: ASBL
 
         Subtracts lines from areas.
@@ -3234,7 +3241,11 @@ class _MapdlCommands(object):
         model boundary conditions assigned to the original entities will not be
         transferred to the new entities generated.
         """
-        command = "ASBL,%s,%s,%s,%s" % (str(na), str(nl), str(keepa), str(keepl))
+        command = "ASBL,%s,%s,%s,%s,%s" % (str(na),
+                                           str(nl),
+                                           str(unused),
+                                           str(keepa),
+                                           str(keepl))
         return self.run(command, **kwargs)
 
     def neqit(self, neqit="", forcekey="", **kwargs):
@@ -24761,8 +24772,8 @@ class _MapdlCommands(object):
 
         Figure: 10:: : Cell Mesh for the Two-hole Box Section
         """
-        command = "SECREAD,%s,%s,%s" % (str(fname), str(ext),
-                                        str(unused), str(option))
+        command = "SECREAD,%s,%s,%s,%s" % (str(fname), str(ext),
+                                           str(unused), str(option))
         return self.run(command, **kwargs)
 
     def sspe(self, e11="", e21="", e22="", t="", **kwargs):
@@ -25415,7 +25426,7 @@ class _MapdlCommands(object):
         command = "SPLOT,%s,%s,%s,%s" % (str(na1), str(na2), str(ninc), str(mesh))
         return self.run(command, **kwargs)
 
-    def cdread(self, option="", fname="", ext="", fnamei="", exti="",
+    def cdread(self, option="", fname="", ext="", unused="", fnamei="", exti="",
                **kwargs):
         """APDL Command: CDREAD
 
@@ -25494,7 +25505,8 @@ class _MapdlCommands(object):
 
         This command is valid in any processor.
         """
-        command = "CDREAD,%s,%s,%s,%s,%s" % (str(option), str(fname), str(ext), str(fnamei), str(exti))
+        command = "CDREAD,%s,%s,%s,%s,%s,%s" % (str(option), str(fname), str(ext),
+                                                str(unused), str(fnamei), str(exti))
         return self.run(command, **kwargs)
 
     def edpart(self, option="", partid="", cname="", **kwargs):
@@ -25808,7 +25820,7 @@ class _MapdlCommands(object):
         command = "/NUMBER,%s" % (str(nkey))
         return self.run(command, **kwargs)
 
-    def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
+    def pmore(self, unused="", x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
               **kwargs):
         """APDL Command: /PMORE
 

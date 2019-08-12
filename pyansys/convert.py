@@ -86,6 +86,7 @@ class FileTranslator():
         self.macros_as_functions = macros_as_functions
         self._infunction = False
         self.use_function_names = use_function_names
+        self.comment = ''
 
         self.write_header()
         self.initialize_ansys_object(loglevel, exec_file)
@@ -136,7 +137,9 @@ class FileTranslator():
 
         # check if line contains a comment
         if '!' in line:
-            if line[0] == '!':  # entire line is a comment
+            if "'!'" in line or '"!"' in line:
+                pass
+            elif line[0] == '!':  # entire line is a comment
                 self.comment = line.replace('!', '').strip()
                 self.store_comment()
                 return
