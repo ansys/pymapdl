@@ -1,8 +1,8 @@
 import os
 import pyansys
-from pyansys import ansys_functions
+from pyansys import mapdl_functions
 
-VALID_COMMANDS = dir(ansys_functions._InternalANSYS)
+VALID_COMMANDS = dir(mapdl_functions._MapdlCommands)
 
 NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
 
@@ -12,14 +12,13 @@ def is_float(string):
     try:
         float(string)
         return True
-    except:
+    except ValueError:
         return False
 
 
 def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
                    line_ending=None, exec_file=None, macros_as_functions=True):
-    """
-    Converts an ANSYS input file to a python pyansys script.
+    """Converts an ANSYS input file to a python pyansys script.
 
     Parameters
     ----------
@@ -42,6 +41,9 @@ def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
         - \n
         - \r\n
 
+    macros_as_functions : bool, optional
+        Attempt to convert macros to python functions.
+
     Returns
     -------
     clines : list
@@ -50,7 +52,7 @@ def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
     """
     # use_function_names : bool, optional
     #     When enabled, will translate "MP,EX,1,30E6" to "ansys.Mp('EX', 1, 30E6)"
-    #     When disabled, will translate "MP,EX,1,30E6" to ansys.Run("MP,EX,1,30E6")
+    #     When disabled, will translate "MP,EX,1,30E6" to ansys.run("MP,EX,1,30E6")
     #     Enabled by default.
 
     translator = FileTranslator(loglevel, line_ending, exec_file=exec_file,
@@ -91,7 +93,7 @@ class FileTranslator():
         self.lines.append(header)
 
     def write_exit(self):
-        self.lines.append('%s.Exit()%s' % (self.obj_name, self.line_ending))
+        self.lines.append('%s.exit()%s' % (self.obj_name, self.line_ending))
 
     def save(self, filename):
         """ Saves lines to file """
@@ -108,7 +110,7 @@ class FileTranslator():
             exec_file_parameter = '"%s", ' % exec_file
         else:
             exec_file_parameter=''
-        line = 'ansys = pyansys.ANSYS(%sloglevel="%s")%s' % (exec_file_parameter,
+        line = 'ansys = pyansys.Mapdl(%sloglevel="%s")%s' % (exec_file_parameter,
                                                              loglevel,
                                                              self.line_ending)
         self.lines.append(line)
@@ -236,14 +238,14 @@ class FileTranslator():
                     args.append(arg)
                     c += 1
 
-            line = '%s%s.Run("%s".format(%s))%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s".format(%s))%s' % (self.indent, self.obj_name, command,
                                                     ', '.join(args), self.line_ending)
 
         elif self.comment:
-            line = '%s%s.Run("%s")  # %s%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s")  # %s%s' % (self.indent, self.obj_name, command,
                                             self.comment, self.line_ending)
         else:
-            line = '%s%s.Run("%s")%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s")%s' % (self.indent, self.obj_name, command,
                                          self.line_ending)
 
         self.lines.append(line)

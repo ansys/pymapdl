@@ -8,15 +8,15 @@ from pyansys.archive import (Archive, write_cmblock, write_nblock,
 from pyansys.common import read_binary
 from pyansys.cellquality import *
 from pyansys.convert import convert_script
-from pyansys.ansys import ANSYS
-from pyansys.ansys import change_default_ansys_path
+from pyansys.mapdl import ANSYS, Mapdl
+from pyansys.mapdl import change_default_ansys_path
 
 # Sphinx-gallery tools
 from pyansys.sphinx_gallery import Scraper, _get_sg_image_scraper
 
 try:
-    from pyansys import ansys
-    has_ansys = ansys.check_valid_ansys()
+    from pyansys import mapdl
+    has_ansys = mapdl.check_valid_ansys()
 except:
     has_ansys = False
 

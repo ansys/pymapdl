@@ -344,8 +344,7 @@ The vtk xml file can now be loaded using ParaView.  This screenshot shows the no
 
 
 ResultFile Object Methods
----------------------------
-
+-------------------------
 .. autoclass:: pyansys.rst.ResultFile
     :members:
 

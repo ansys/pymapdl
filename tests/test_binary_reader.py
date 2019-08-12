@@ -68,7 +68,7 @@ def test_plot_component():
     ansys.Run("/GOPR")
     ansys.Solve()
     ansys.Finish()
-    ansys.Exit()
+    ansys.exit()
     """
 
     filename = os.path.join(testfiles_path, 'comp_hex_beam.rst')

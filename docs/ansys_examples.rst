@@ -44,7 +44,7 @@ Corresponding ``pyansys`` script including the initialization of pyansys:
     import pyansys
     
     # start ANSYS in the current working directory with default jobname "file"
-    ansys = pyansys.ANSYS(run_location=os.getcwd(), interactive_plotting=True)
+    ansys = pyansys.Mapdl(run_location=os.getcwd(), interactive_plotting=True)
         
     # define cylinder and mesh parameters
     torque = 100
@@ -117,53 +117,53 @@ Corresponding ``pyansys`` script:
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
     # as a tangential pressure
-    ansys.Prep7()
-    ansys.Et(1, 186)
-    ansys.Et(2, 154)
-    ansys.R(1)
-    ansys.R(2)
+    ansys.prep7()
+    ansys.et(1, 186)
+    ansys.et(2, 154)
+    ansys.r(1)
+    ansys.r(2)
     
     # Aluminum properties (or something)
-    ansys.Mp('ex', 1, 10e6)
-    ansys.Mp('nuxy', 1, 0.3)
-    ansys.Mp('dens', 1, 0.1/386.1)
-    ansys.Mp('dens', 2, 0)
+    ansys.mp('ex', 1, 10e6)
+    ansys.mp('nuxy', 1, 0.3)
+    ansys.mp('dens', 1, 0.1/386.1)
+    ansys.mp('dens', 2, 0)
     
     # Simple cylinder
     for i in range(4):
-        ansys.Cylind(radius, '', '', height, 90*(i-1), 90*i)
+        ansys.cylind(radius, '', '', height, 90*(i-1), 90*i)
     
-    ansys.Nummrg('kp')
+    ansys.nummrg('kp')
     
     # non-interactive volume plot (optional)
-    ansys.Show()
-    ansys.Menu('grph')
-    ansys.View(1, 1, 1, 1)
-    ansys.Vplot()
-    ansys.Wait(1)
+    ansys.show()
+    ansys.menu('grph')
+    ansys.view(1, 1, 1, 1)
+    ansys.vplot()
+    ansys.wait(1)
     
     # mesh cylinder
-    ansys.Lsel('s', 'loc', 'x', 0)
-    ansys.Lsel('r', 'loc', 'y', 0)
-    ansys.Lsel('r', 'loc', 'z', 0, height - h_tip)
-    ansys.Lesize('all', elemsize*2)
-    ansys.Mshape(0)
-    ansys.Mshkey(1)
-    ansys.Esize(elemsize)
-    ansys.Allsel('all')
-    ansys.Vsweep('ALL')
-    ansys.Csys(1)
-    ansys.Asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-    ansys.Asel('r', 'loc', 'x', radius)
-    ansys.Local(11, 1)
-    ansys.Csys(0)
-    ansys.Aatt(2, 2, 2, 11)
-    ansys.Amesh('all')
-    ansys.Finish()
+    ansys.lsel('s', 'loc', 'x', 0)
+    ansys.lsel('r', 'loc', 'y', 0)
+    ansys.lsel('r', 'loc', 'z', 0, height - h_tip)
+    ansys.lesize('all', elemsize*2)
+    ansys.mshape(0)
+    ansys.mshkey(1)
+    ansys.esize(elemsize)
+    ansys.allsel('all')
+    ansys.vsweep('ALL')
+    ansys.csys(1)
+    ansys.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+    ansys.asel('r', 'loc', 'x', radius)
+    ansys.local(11, 1)
+    ansys.csys(0)
+    ansys.aatt(2, 2, 2, 11)
+    ansys.amesh('all')
+    ansys.finish()
 
     # plot elements and wait one second (optional)
-    ansys.Eplot()
-    ansys.Wait(1)
+    ansys.eplot()
+    ansys.wait(1)
 
 .. figure:: ./images/cylinder_eplot.png
     :width: 300pt
@@ -211,25 +211,25 @@ Corresponding ``pyansys`` script:
 .. code:: python
 
     # new solution
-    ansys.Slashsolu()  # Using Slash instead of / due to duplicate SOLU command
+    ansys.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
     # ansys('/solu')  # could also use this line
-    ansys.Antype('static', 'new')
-    ansys.Eqslv('pcg', 1e-8)
+    ansys.antype('static', 'new')
+    ansys.eqslv('pcg', 1e-8)
 
     # Apply tangential pressure
-    ansys.Esel('s', 'type', '', 2)
-    ansys.Sfe('all', 2, 'pres', '', pressure)
+    ansys.esel('s', 'type', '', 2)
+    ansys.sfe('all', 2, 'pres', '', pressure)
 
     # Constrain bottom of cylinder/rod
-    ansys.Asel('s', 'loc', 'z', 0)
-    ansys.Nsla('s', 1)
+    ansys.asel('s', 'loc', 'z', 0)
+    ansys.nsla('s', 1)
 
-    ansys.D('all', 'all')
-    ansys.Allsel()
-    ansys.Psf('pres', '', 2)
-    ansys.Pbc('u', 1)
-    ansys.Solve()
-    ansys.Exit()  # Finishes, saves, and exits
+    ansys.d('all', 'all')
+    ansys.allsel()
+    ansys.psf('pres', '', 2)
+    ansys.pbc('u', 1)
+    ansys.solve()
+    ansys.exit()  # Finishes, saves, and exits
 
 
 Access and plot the results within python using pyansys:
@@ -246,7 +246,7 @@ Access and plot the results within python using pyansys:
     nodenum, stress = result.nodal_stress(0)
 
     # plot interactively
-    result.PlotNodalResult(0, cmap='bwr')
+    result.plot_nodal_solution(0, cmap='bwr')
     result.plot_nodal_stress(0, 'Sx', cmap='bwr')
     result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr')
 
@@ -255,14 +255,14 @@ Access and plot the results within python using pyansys:
             (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
             (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-    result.PlotNodalResult(0, interactive=False, cpos=cpos,
-                           screenshot=os.path.join(path, 'cylinder_disp.png'))
+    result.plot_nodal_solution(0, interactive=False, cpos=cpos,
+                               screenshot=os.path.join(path, 'cylinder_disp.png'))
 
     result.plot_nodal_stress(0, 'Sx', cmap='bwr', interactive=False, cpos=cpos,
-                           screenshot=os.path.join(path, 'cylinder_sx.png'))
+                             screenshot=os.path.join(path, 'cylinder_sx.png'))
 
-    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr', interactive=False, cpos=cpos,
-                                    screenshot=os.path.join(path, 'cylinder_vonmises.png'))
+    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr', interactive=False,
+                                       cpos=cpos, screenshot=os.path.join(path, 'cylinder_vonmises.png'))
 
 .. figure:: ./images/cylinder_disp.png
     :width: 300pt
@@ -429,7 +429,7 @@ Here's the Python script using ``pyansys`` to access the results after running t
     # Open the result file and plot the displacement of time step 3
     resultfile = os.path.join('file.rst')
     result = pyansys.read_binary(resultfile)
-    result.PlotNodalResult(2)
+    result.plot_nodal_solution(2)
 
 .. figure:: ./images/spot_disp.png
     :width: 300pt

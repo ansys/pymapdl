@@ -125,12 +125,11 @@ def load_km():
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
 
     # System natural frequencies
-    f = np.real(w)**0.5 / (2 * np.pi)
+    freq = np.real(w)**0.5 / (2 * np.pi)
 
     print('First four natural frequencies:')
     for i in range(4):
-        print('{:.3f} Hz'.format(f[i]))
-    # breakpoint()
+        print('{:.3f} Hz'.format(freq[i]))
 
     known_result = np.array([ 1283.20036921, 1283.20036921,
                               5781.97486169, 6919.39887714,
@@ -143,7 +142,7 @@ def load_km():
                               49819.91597612, 51043.03965541,
                               51043.03965541, 52193.86143879])
 
-    assert np.allclose(f, known_result)
+    assert np.allclose(freq, known_result)
 
 
 def solve_km():
@@ -201,11 +200,10 @@ def solve_km():
 
 
 def show_cell_qual(meshtype='tet', off_screen=None):
-    """
-    Displays minimum scaled jacobian of a sample mesh
+    """Displays minimum scaled jacobian of a sample mesh
 
-    For an ANSYS analysis to run properly, the minimum scaled jacobian of each
-    cell must be greater than 0.
+    For an ANSYS analysis to run properly, the minimum scaled Jacobian
+    of each cell must be greater than 0.
 
     Parameters
     ----------
@@ -252,76 +250,76 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
         loglevel = 'ERROR'
     else:
         loglevel = 'INFO'
-    ansys = pyansys.ANSYS(exec_file=exec_file, override=True, loglevel=loglevel)
+    ansys = pyansys.Mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
     # as a tangential pressure
-    ansys.Prep7()
-    ansys.Et(1, 186)
-    ansys.Et(2, 154)
-    ansys.R(1)
-    ansys.R(2)
+    ansys.prep7()
+    ansys.et(1, 186)
+    ansys.et(2, 154)
+    ansys.r(1)
+    ansys.r(2)
 
     # Aluminum properties (or something)
-    ansys.Mp('ex', 1, 10e6)
-    ansys.Mp('nuxy', 1, 0.3)
-    ansys.Mp('dens', 1, 0.1/386.1)
-    ansys.Mp('dens', 2, 0)
+    ansys.mp('ex', 1, 10e6)
+    ansys.mp('nuxy', 1, 0.3)
+    ansys.mp('dens', 1, 0.1/386.1)
+    ansys.mp('dens', 2, 0)
 
     # Simple cylinder
     for i in range(4):
-        ansys.Cylind(radius, '', '', height, 90*(i-1), 90*i)
+        ansys.cylind(radius, '', '', height, 90*(i-1), 90*i)
 
-    ansys.Nummrg('kp')
+    ansys.nummrg('kp')
 
     # non-interactive volume plot
     if plot_ansys and not as_test:
-        ansys.View(1, 1, 1, 1)
-        ansys.Vplot()
+        ansys.view(1, 1, 1, 1)
+        ansys.vplot()
 
     # mesh cylinder
-    ansys.Lsel('s', 'loc', 'x', 0)
-    ansys.Lsel('r', 'loc', 'y', 0)
-    ansys.Lsel('r', 'loc', 'z', 0, height - h_tip)
-    ansys.Lesize('all', elemsize*2)
-    ansys.Mshape(0)
-    ansys.Mshkey(1)
-    ansys.Esize(elemsize)
-    ansys.Allsel('all')
-    ansys.Vsweep('ALL')
-    ansys.Csys(1)
-    ansys.Asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-    ansys.Asel('r', 'loc', 'x', radius)
-    ansys.Local(11, 1)
-    ansys.Csys(0)
-    ansys.Aatt(2, 2, 2, 11)
-    ansys.Amesh('all')
-    ansys.Finish()
+    ansys.lsel('s', 'loc', 'x', 0)
+    ansys.lsel('r', 'loc', 'y', 0)
+    ansys.lsel('r', 'loc', 'z', 0, height - h_tip)
+    ansys.lesize('all', elemsize*2)
+    ansys.mshape(0)
+    ansys.mshkey(1)
+    ansys.esize(elemsize)
+    ansys.allsel('all')
+    ansys.vsweep('ALL')
+    ansys.csys(1)
+    ansys.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+    ansys.asel('r', 'loc', 'x', radius)
+    ansys.local(11, 1)
+    ansys.csys(0)
+    ansys.aatt(2, 2, 2, 11)
+    ansys.amesh('all')
+    ansys.finish()
 
     if plot_ansys and not as_test:
-        ansys.Eplot()
+        ansys.eplot()
 
     # new solution
-    ansys.Slashsolu()
-    ansys.Antype('static', 'new')
-    ansys.Eqslv('pcg', 1e-8)
+    ansys.slashsolu()
+    ansys.antype('static', 'new')
+    ansys.eqslv('pcg', 1e-8)
 
     # Apply tangential pressure
-    ansys.Esel('s', 'type', '', 2)
-    ansys.Sfe('all', 2, 'pres', '', pressure)
+    ansys.esel('s', 'type', '', 2)
+    ansys.sfe('all', 2, 'pres', '', pressure)
 
     # Constrain bottom of cylinder/rod
-    ansys.Asel('s', 'loc', 'z', 0)
-    ansys.Nsla('s', 1)
+    ansys.asel('s', 'loc', 'z', 0)
+    ansys.nsla('s', 1)
 
-    ansys.D('all', 'all')
-    ansys.Allsel()
-    ansys.Psf('pres', '', 2)
-    ansys.Pbc('u', 1)
-    ansys.Solve()
-    ansys.Finish()
-    ansys.Exit()
+    ansys.d('all', 'all')
+    ansys.allsel()
+    ansys.psf('pres', '', 2)
+    ansys.pbc('u', 1)
+    ansys.solve()
+    ansys.finish()
+    ansys.exit()
 
     # open the result file
     result = ansys.result

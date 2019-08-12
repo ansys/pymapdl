@@ -52,9 +52,9 @@ Unstructured grids generated using VTK can be converted to ANSYS APDL archive fi
 
     # read in archive in ANSYS and generate cell shape quality report
     ansys = pyansys.ANSYS()
-    ansys.Cdread('db', script_filename)
-    ansys.Prep7()
-    ansys.Shpp('SUMM')
+    ansys.cdread('db', script_filename)
+    ansys.prep7()
+    ansys.shpp('SUMM')
 
 Resulting ANSYS quality report:
 

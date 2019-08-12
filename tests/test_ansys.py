@@ -17,6 +17,10 @@ data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 # rver = 'v150'
 rver = 'v182'
 
+MAPDL150BIN = '/usr/ansys_inc/v150/ansys/bin/ansys150'
+MAPDL182BIN = '/usr/ansys_inc/v182/ansys/bin/ansys182'
+MAPDL194BIN = '/usr/ansys_inc/v194/ansys/bin/ansys194'
+
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 class TestCyclicResultReader(object):
 
@@ -27,13 +31,13 @@ class TestCyclicResultReader(object):
         result = ResultFile(result_file, ignore_cyclic=True)
 
         if rver == 'v182':
-            ansys = pyansys.ANSYS('/usr/ansys_inc/v182/ansys/bin/ansys182',
+            ansys = pyansys.Mapdl(MAPDL182BIN,
                                   override=True, jobname=rver,
                                   loglevel='DEBUG',
                                   interactive_plotting=False,
                                   prefer_pexpect=True)
         else:
-            ansys = pyansys.ANSYS('/usr/ansys_inc/v150/ansys/bin/ansys150',
+            ansys = pyansys.Mapdl(MAPDL150BIN,
                                   override=True, jobname=rver,
                                   loglevel='DEBUG',
                                   interactive_plotting=False,
@@ -44,19 +48,19 @@ class TestCyclicResultReader(object):
         copyfile(result_file, os.path.join(ansys.path, '%s.rst' % rver))
 
         # setup ansys for output without line breaks
-        ansys.Post1()
-        ansys.Set(1, 1)
-        ansys.Header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        ansys.post1()
+        ansys.set(1, 1)
+        ansys.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
         nsigfig = 10
-        ansys.Format('', 'E', nsigfig + 9, nsigfig)  
-        ansys.Page(1E9, '', -1, 240)
+        ansys.format('', 'E', nsigfig + 9, nsigfig)  
+        ansys.page(1E9, '', -1, 240)
 
     except:  # for travis and appveyor
         pass
 
     def test_prnsol_u(self):
         # verify cyclic displacements
-        table = self.ansys.Prnsol('u').splitlines()
+        table = self.ansys.prnsol('u').splitlines()
         if self.ansys.using_corba:
             array = np.genfromtxt(table[7:])
         else:
@@ -80,7 +84,7 @@ class TestCyclicResultReader(object):
         enode = np.hstack(enode)
 
         # parse ansys result
-        table = self.ansys.Presol('S').splitlines()
+        table = self.ansys.presol('S').splitlines()
         ansys_element_stress = []
         line_length = len(table[15])
         for line in table:
@@ -96,7 +100,7 @@ class TestCyclicResultReader(object):
 
     def test_prnsol_s(self):
         # verify cyclic displacements
-        table = self.ansys.Prnsol('s').splitlines()
+        table = self.ansys.prnsol('s').splitlines()
         if self.ansys.using_corba:
             array = np.genfromtxt(table[7:])
         else:
@@ -116,7 +120,7 @@ class TestCyclicResultReader(object):
 
     def test_prnsol_prin(self):
         # verify principal stress
-        table = self.ansys.Prnsol('prin').splitlines()
+        table = self.ansys.prnsol('prin').splitlines()
         if self.ansys.using_corba:
             array = np.genfromtxt(table[7:])
         else:
@@ -147,11 +151,29 @@ class TestCyclicResultReader(object):
                                                 off_screen=True)
 
     def test_exit(self):
-        self.ansys.Exit()
+        self.ansys.exit()
 
 
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
     for para_file in para_files:
-        arr, parm = pyansys.ansys.load_parameters(para_file)
+        arr, parm = pyansys.mapdl.load_parameters(para_file)
+
+
+@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+def test_v150():
+    mapdl = pyansys.Mapdl(MAPDL150BIN, override=True)
+    mapdl.prep7()
+
+
+@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+def test_v182():
+    mapdl = pyansys.Mapdl(MAPDL182BIN, override=True)
+    mapdl.prep7()
+
+
+@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+def test_v194():
+    mapdl = pyansys.Mapdl(MAPDL194BIN, override=True)
+    mapdl.prep7()
