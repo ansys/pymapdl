@@ -1,8 +1,8 @@
 import os
 import pyansys
-from pyansys import ansys_functions
+from pyansys import mapdl_functions
 
-VALID_COMMANDS = dir(ansys_functions._InternalANSYS)
+VALID_COMMANDS = dir(mapdl_functions._MapdlCommands)
 
 NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
 
@@ -12,14 +12,14 @@ def is_float(string):
     try:
         float(string)
         return True
-    except:
+    except ValueError:
         return False
 
 
 def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
-                   line_ending=None, exec_file=None, macros_as_functions=True):
-    """
-    Converts an ANSYS input file to a python pyansys script.
+                   line_ending=None, exec_file=None, macros_as_functions=True,
+                   use_function_names=True):
+    """Converts an ANSYS input file to a python pyansys script.
 
     Parameters
     ----------
@@ -42,19 +42,23 @@ def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
         - \n
         - \r\n
 
+    macros_as_functions : bool, optional
+        Attempt to convert macros to python functions.
+
+    use_function_names : bool, optional
+        Convert MAPDL functions to pyansys.Mapdl class methods.  When
+        True "K" will be converted to ``mapdl.k``.  When False, it
+        will be converted to ``mapdl.run('k').
+
     Returns
     -------
     clines : list
         List of lines translated
 
     """
-    # use_function_names : bool, optional
-    #     When enabled, will translate "MP,EX,1,30E6" to "ansys.Mp('EX', 1, 30E6)"
-    #     When disabled, will translate "MP,EX,1,30E6" to ansys.Run("MP,EX,1,30E6")
-    #     Enabled by default.
-
     translator = FileTranslator(loglevel, line_ending, exec_file=exec_file,
-                                macros_as_functions=macros_as_functions)
+                                macros_as_functions=macros_as_functions,
+                                use_function_names=use_function_names)
     with open(filename_in) as file_in:
         for line in file_in.readlines():
             translator.translate_line(line)
@@ -71,7 +75,7 @@ class FileTranslator():
     non_interactive = False
 
     def __init__(self, loglevel='INFO', line_ending=None, exec_file=None,
-                 macros_as_functions=True):
+                 macros_as_functions=True, use_function_names=True):
         self._non_interactive_level = 0
         self.lines = []
         self._functions = []
@@ -81,6 +85,8 @@ class FileTranslator():
             self.line_ending = os.linesep
         self.macros_as_functions = macros_as_functions
         self._infunction = False
+        self.use_function_names = use_function_names
+        self.comment = ''
 
         self.write_header()
         self.initialize_ansys_object(loglevel, exec_file)
@@ -91,7 +97,7 @@ class FileTranslator():
         self.lines.append(header)
 
     def write_exit(self):
-        self.lines.append('%s.Exit()%s' % (self.obj_name, self.line_ending))
+        self.lines.append('%s.exit()%s' % (self.obj_name, self.line_ending))
 
     def save(self, filename):
         """ Saves lines to file """
@@ -108,7 +114,7 @@ class FileTranslator():
             exec_file_parameter = '"%s", ' % exec_file
         else:
             exec_file_parameter=''
-        line = 'ansys = pyansys.ANSYS(%sloglevel="%s")%s' % (exec_file_parameter,
+        line = 'ansys = pyansys.Mapdl(%sloglevel="%s")%s' % (exec_file_parameter,
                                                              loglevel,
                                                              self.line_ending)
         self.lines.append(line)
@@ -131,7 +137,9 @@ class FileTranslator():
 
         # check if line contains a comment
         if '!' in line:
-            if line[0] == '!':  # entire line is a comment
+            if "'!'" in line or '"!"' in line:
+                pass
+            elif line[0] == '!':  # entire line is a comment
                 self.comment = line.replace('!', '').strip()
                 self.store_comment()
                 return
@@ -203,8 +211,10 @@ class FileTranslator():
             elif line[:4] in NON_INTERACTIVE_COMMANDS:
                 self.start_non_interactive()
             self.store_run_command(line)
-        else:
+        elif self.use_function_names:
             self.store_command(command, parameters)
+        else:
+            self.store_run_command(line)
 
     def start_function(self, func_name):
         self._functions.append(func_name)
@@ -236,14 +246,14 @@ class FileTranslator():
                     args.append(arg)
                     c += 1
 
-            line = '%s%s.Run("%s".format(%s))%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s".format(%s))%s' % (self.indent, self.obj_name, command,
                                                     ', '.join(args), self.line_ending)
 
         elif self.comment:
-            line = '%s%s.Run("%s")  # %s%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s")  # %s%s' % (self.indent, self.obj_name, command,
                                             self.comment, self.line_ending)
         else:
-            line = '%s%s.Run("%s")%s' % (self.indent, self.obj_name, command,
+            line = '%s%s.run("%s")%s' % (self.indent, self.obj_name, command,
                                          self.line_ending)
 
         self.lines.append(line)

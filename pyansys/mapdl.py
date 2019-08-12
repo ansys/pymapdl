@@ -28,7 +28,8 @@ import numpy as np
 import psutil
 
 import pyansys
-from pyansys.ansys_functions import _InternalANSYS
+from pyansys.mapdl_functions import _MapdlCommands
+from pyansys.deprec_commands import _DeprecCommands
 from pyansys.convert import is_float
 
 try:
@@ -125,23 +126,23 @@ CONFIG_FILE = os.path.join(settings_dir, 'config.txt')
 
 # specific to pexpect process
 ###############################################################################
-ready_items = [b'BEGIN:',
-               b'PREP7:',
-               b'SOLU_LS[0-9]+:',
-               b'POST1:',
-               b'POST26:',
-               b'RUNSTAT:',
-               b'AUX2:',
-               b'AUX3:',
-               b'AUX12:',
-               b'AUX15:',
+ready_items = [rb'BEGIN:',
+               rb'PREP7:',
+               rb'SOLU_LS[0-9]+:',
+               rb'POST1:',
+               rb'POST26:',
+               rb'RUNSTAT:',
+               rb'AUX2:',
+               rb'AUX3:',
+               rb'AUX12:',
+               rb'AUX15:',
                # continue
-               b'YES,NO OR CONTINUOUS\)\=',
-               b'executed\?',
+               rb'YES,NO OR CONTINUOUS\)\=',
+               rb'executed\?',
                # errors
-               b'SHOULD INPUT PROCESSING BE SUSPENDED\?',
+               rb'SHOULD INPUT PROCESSING BE SUSPENDED\?',
                # prompts
-               b'ENTER FORMAT for',
+               rb'ENTER FORMAT for',
 ]
 
 processors = ['/PREP7',
@@ -154,21 +155,21 @@ processors = ['/PREP7',
               '/AUX15',
               '/MAP',]
 
-continue_idx = ready_items.index(b'YES,NO OR CONTINUOUS\)\=')
-warning_idx = ready_items.index(b'executed\?')
-error_idx = ready_items.index(b'SHOULD INPUT PROCESSING BE SUSPENDED\?')
-prompt_idx = ready_items.index(b'ENTER FORMAT for')
+CONTINUE_IDX = ready_items.index(rb'YES,NO OR CONTINUOUS\)\=')
+WARNING_IDX = ready_items.index(rb'executed\?')
+ERROR_IDX = ready_items.index(rb'SHOULD INPUT PROCESSING BE SUSPENDED\?')
+PROMPT_IDX = ready_items.index(rb'ENTER FORMAT for')
 
 nitems = len(ready_items)
 expect_list = []
 for item in ready_items:
     expect_list.append(re.compile(item))
-ignored = re.compile('[\s\S]+'.join(['WARNING', 'command', 'ignored']))
+ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 ###############################################################################
 
 # test for png file
-png_test = re.compile('WRITTEN TO FILE file\d\d\d.png')
+png_test = re.compile(r'WRITTEN TO FILE file\d\d\d.png')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
@@ -181,7 +182,7 @@ def check_valid_ansys():
     """ Checks if a valid version of ANSYS is installed and preconfigured """
     ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
-        version = int(re.findall('\d\d\d', ansys_bin)[0])
+        version = int(re.findall(r'\d\d\d', ansys_bin)[0])
         return not(version < 170 and os.name != 'posix')
 
     return False
@@ -283,7 +284,7 @@ def save_ansys_path(exe_loc=''):
     return exe_loc
 
 
-class ANSYS(_InternalANSYS):
+class Mapdl(_MapdlCommands, _DeprecCommands):
     """
     This class opens ANSYS in the background and allows commands to be
     passed to a persistent session.
@@ -401,7 +402,7 @@ class ANSYS(_InternalANSYS):
 
         # check ansys version
         if check_version:
-            version = int(re.findall('\d\d\d', self.exec_file)[0])
+            version = int(re.findall(r'\d\d\d', self.exec_file)[0])
             if version < 170 and os.name != 'posix':
                 raise Exception('ANSYS MAPDL server requires version 17.0 or greater ' +
                                 'for windows')
@@ -476,7 +477,7 @@ class ANSYS(_InternalANSYS):
 
         # setup plotting for PNG
         if self.interactive_plotting:
-            self.EnableInteractivePlotting()
+            self.enable_interactive_plotting()
 
     def open_apdl_log(self, filename, mode='w'):
         """Starts writing all APDL commands to an ANSYS input
@@ -521,7 +522,7 @@ class ANSYS(_InternalANSYS):
         self.log.debug(self.process.before.decode('utf-8'))
         self.using_corba = False
 
-    def EnableInteractivePlotting(self):
+    def enable_interactive_plotting(self):
         """ Enables interactive plotting.  Requires matplotlib """
         if MATPLOTLIB_LOADED:
             self.Show('PNG')
@@ -550,7 +551,6 @@ class ANSYS(_InternalANSYS):
 
     def start_broadcast_logger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
-
         # listen to broadcast file
         try:
             old_tail = ''
@@ -571,7 +571,7 @@ class ANSYS(_InternalANSYS):
         except Exception as e:
             pass
 
-    def Run(self, command, write_to_log=True):
+    def run(self, command, write_to_log=True):
         """
         Runs APDL command(s)
 
@@ -598,8 +598,8 @@ class ANSYS(_InternalANSYS):
         (i.e. *VWRITE) then use
         
         >>> with ansys.non_interactive:
-        >>>     ansys.Run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-        >>>     ansys.Run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         """
         if self._store_commands:
             self._stored_commands.append(command)
@@ -637,51 +637,31 @@ class ANSYS(_InternalANSYS):
             # check if it's a single non-interactive command
             if command[:4].lower() == 'cdre':
                 with self.non_interactive:
-                    return self.Run(command)
+                    return self.run(command)
             else:
                 return self.run_corba_command(command)
         else:
             return self.run_process_command(command)
 
-    def store_processor(self, command):
-        """ 
-        Check if a command is changing the processor and store it if so
+    # def store_processor(self, command):
+    #     """ Check if a command is changing the processor and store it
+    #     if so.
+    #     """
+    #     # command may be abbreviated, check
+    #     processors = ['/PREP7',
+    #                   '/POST1',
+    #                   '/SOL', # /SOLUTION
+    #                   '/POST26',
+    #                   '/AUX2',
+    #                   '/AUX3',
+    #                   '/AUX12',
+    #                   '/AUX15']
 
-        # ready_items = [b'BEGIN:',
-        #        b'PREP7:',
-        #        b'SOLU_LS[0-9]+:',
-        #        b'POST1:',
-        #        b'POST26:',
-        #        b'RUNSTAT:',
-        #        b'AUX2:',
-        #        b'AUX3:',
-        #        b'AUX12:',
-        #        b'AUX15:',
-        """
-        # command may be abbreviated, check
-        processors = ['/PREP7',
-                      '/POST1',
-                      '/SOL', # /SOLUTION
-                      '/POST26',
-                      '/AUX2',
-                      '/AUX3',
-                      '/AUX12',
-                      '/AUX15']
-
-        short_proc = ['/PRE',
-                      '/POST',
-                      '/SOL', # /SOLUTION
-                      '/POS',
-                      '/AUX']
-
-        # # command may be as short as 4 characters,  check that
-        # upper_command = command.upper()
-        # short_command = upper_command[:4]
-        
-        # if short_command in short_proc:
-        #     # figure out which
-        #     if 
-
+    #     short_proc = ['/PRE',
+    #                   '/POST',
+    #                   '/SOL', # /SOLUTION
+    #                   '/POS',
+    #                   '/AUX']
 
     def _list(self, command):
         """ Replaces *LIST command """
@@ -720,7 +700,7 @@ class ANSYS(_InternalANSYS):
             i = self.process.expect_list(expect_list, timeout=None)
             response = self.process.before.decode('utf-8')
             full_response += response
-            if i >= continue_idx and i < warning_idx:  # continue
+            if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
                 self.log.debug('Continue: Response index %i.  Matched %s'
                                % (i, ready_items[i].decode('utf-8')))
                 self.log.info(response + ready_items[i].decode('utf-8'))
@@ -730,7 +710,7 @@ class ANSYS(_InternalANSYS):
                     user_input = input('Response: ')
                 self.process.sendline(user_input)
 
-            elif i >= warning_idx and i < error_idx:  # warning
+            elif i >= WARNING_IDX and i < ERROR_IDX:  # warning
                 self.log.debug('Prompt: Response index %i.  Matched %s'
                                % (i, ready_items[i].decode('utf-8')))
                 self.log.warning(response + ready_items[i].decode('utf-8'))
@@ -740,14 +720,14 @@ class ANSYS(_InternalANSYS):
                     user_input = input('Response: ')
                 self.process.sendline(user_input)
 
-            elif i >= error_idx and i < prompt_idx:  # error
+            elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
                 self.log.debug('Error index %i.  Matched %s'
                                % (i, ready_items[i].decode('utf-8')))
                 self.log.error(response)
                 response += ready_items[i].decode('utf-8')
                 raise Exception(response)
 
-            elif i >= prompt_idx:  # prompt
+            elif i >= PROMPT_IDX:  # prompt
                 self.log.debug('Prompt index %i.  Matched %s'
                                % (i, ready_items[i].decode('utf-8')))
                 self.log.info(response + ready_items[i].decode('utf-8'))
@@ -783,12 +763,12 @@ class ANSYS(_InternalANSYS):
     @property
     def processor(self):
         """ Returns the current processor """
-        msg = self.Run('/Status')
+        msg = self.run('/Status')
         processor = None
         matched_line = [line for line in msg.split('\n') if "Current routine" in line]
         if matched_line:
             # get the processor
-            processor = re.findall('\(([^)]+)\)', matched_line[0])[0]
+            processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
         return processor
 
     def run_corba_command(self, command):
@@ -935,17 +915,22 @@ class ANSYS(_InternalANSYS):
 
     def __del__(self):
         """cleans up when complete"""
-        self.Exit()
+        self.exit()
         self.kill()
         self.close_apdl_log()
 
+    def Exit(self):
+        msg = DeprecationWarning('\n"Exit" decpreciated.  \n' +
+                                 'Please use "exit" instead')
+        warnings.warn(msg)
+        self.exit()
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         # clean up when complete
-        self.Exit()
+        self.exit()
 
-    def Exit(self, close_log=True):
-        """
-        Exit ANSYS process without attempting to kill the process.
+    def exit(self, close_log=True):
+        """Exit ANSYS process without attempting to kill the process.
         """
         self.log.debug('Terminating ANSYS')
         try:
@@ -968,7 +953,7 @@ class ANSYS(_InternalANSYS):
         """ Forces ANSYS process to end and removes lock file """
         if self.is_alive:
             try:
-                self.Exit()
+                self.exit()
             except:
                 kill_process(self.process.pid)
                 self.log.debug('Killed process %d' % self.process.pid)
@@ -994,7 +979,7 @@ class ANSYS(_InternalANSYS):
         return pyansys.read_binary(resultfile)
 
     def __call__(self, command, **kwargs):
-        return self.Run(command, **kwargs)
+        return self.run(command, **kwargs)
 
     def open_corba(self, nproc, timeout, additional_switches):
         """
@@ -1075,8 +1060,8 @@ class ANSYS(_InternalANSYS):
         To use an non-interactive command like *VWRITE, use:
 
         with ansys.non_interactive:
-            ansys.Run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-            ansys.Run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+            ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+            ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
 
         """
         def __init__(self, parent):
@@ -1112,16 +1097,16 @@ class ANSYS(_InternalANSYS):
 
         self._store_commands = False
         self._stored_commands = []
-        self.Run("/INPUT, '%s'" % filename, write_to_log=False)
+        self.run("/INPUT, '%s'" % filename, write_to_log=False)
         if os.path.isfile(tmp_out):
             self.response = '\n' + open(tmp_out).read()
 
         # clean up output file and append the output to the existing
         # output file
-        # self.Run('/OUTPUT, %s, , , APPEND' % self._output)
+        # self.run('/OUTPUT, %s, , , APPEND' % self._output)
         # if os.path.isfile(tmp_out):
         #     for line in open(tmp_out).readlines():
-        #         self.Run('/COM,%s\n' % line[:74])
+        #         self.run('/COM,%s\n' % line[:74])
 
         if self.response is None:
             self.log.warning('Unable to read response from flushed commands')
@@ -1151,7 +1136,7 @@ class ANSYS(_InternalANSYS):
         prior_processor = self.processor
         self.Finish()
         self.Save(tmp_database)
-        self.Exit(close_log=False)
+        self.exit(close_log=False)
 
         # copy result file to temp directory
         if include_result:
@@ -1182,16 +1167,32 @@ class ANSYS(_InternalANSYS):
         self.Resume(tmp_database)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
-                self.Run('/%s' % prior_processor)
+                self.run('/%s' % prior_processor)
 
     @property
     def jobname(self):
         """MAPDL job name"""
         try:
-            self._jobname = self.Inquire(func='JOBNAME').split('=')[1].strip()
+            self._jobname = self.inquire(func='JOBNAME').split('=')[1].strip()
         except:
             pass
         return self._jobname
+
+    def Run(self, command):
+        msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +
+                                 'Please use "run" instead')
+        warnings.warn(msg)
+
+        self.run(command)
+
+
+class ANSYS(Mapdl):
+
+    def __init__(self, *args, **kwargs):
+        msg = DeprecationWarning('\nClass "ANSYS" decpreciated.  \n' +
+                                 'Please use "Mapdl" instead')
+        warnings.warn(msg)
+        super(ANSYS, self).__init__(*args, **kwargs)
 
 
 # TODO: Speed this up with:

@@ -1,4 +1,4 @@
-ANSYS Object Methods
---------------------
-.. autoclass:: pyansys.ANSYS
+ANSYS Class Methods
+-------------------
+.. autoclass:: pyansys.Mapdl
     :members:

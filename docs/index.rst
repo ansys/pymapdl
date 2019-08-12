@@ -51,21 +51,21 @@ Interactive Control
     import pyansys
 
     path = os.getcwd()
-    ansys = pyansys.ANSYS(run_location=path)
+    ansys = pyansys.Mapdl(run_location=path)
 
     # create a square area using keypoints
-    ansys.Prep7()
-    ansys.K(1, 0, 0, 0)
-    ansys.K(2, 1, 0, 0)
-    ansys.K(3, 1, 1, 0)
-    ansys.K(4, 0, 1, 0)    
-    ansys.L(1, 2)
-    ansys.L(2, 3)
-    ansys.L(3, 4)
-    ansys.L(4, 1)
-    ansys.Al(1, 2, 3, 4)
-    ansys.Save()
-    ansys.Exit()
+    ansys.prep7()
+    ansys.k(1, 0, 0, 0)
+    ansys.k(2, 1, 0, 0)
+    ansys.k(3, 1, 1, 0)
+    ansys.k(4, 0, 1, 0)    
+    ansys.l(1, 2)
+    ansys.l(2, 3)
+    ansys.l(3, 4)
+    ansys.l(4, 1)
+    ansys.al(1, 2, 3, 4)
+    ansys.save()
+    ansys.exit()
 
 
 Direct Access to Binary Files
@@ -122,6 +122,10 @@ Dependencies:
 Dependencies are installed automatically through ``pip``, except for Python 2.7 in Windows, which will require some additional work to install ``VTK``.  See `installing pyvista <https://docs.pyvista.org/getting-started/installation.html>`_ for more information.
 
 
-License
--------
-This module is licensed under the MIT license.  See the license file for more details.
+License and Acknowledgments
+---------------------------
+``pyansys`` is licensed under the MIT license.
+
+ANSYS documentation and functions build from html provided by `Sharcnet <https://www.sharcnet.ca/Software/Ansys/>`_.  Thanks!
+
+This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
