@@ -3,8 +3,9 @@ pyansys
 .. image:: https://img.shields.io/pypi/v/pyansys.svg
     :target: https://pypi.org/project/pyansys/
 
-.. image:: https://travis-ci.org/akaszynski/pyansys.svg?branch=master
-    :target: https://travis-ci.org/akaszynski/pyansys
+.. image:: https://dev.azure.com/femorph/pyansys/_apis/build/status/akaszynski.pyansys?branchName=master
+    :target: https://dev.azure.com/femorph/pyansys/_build/latest?definitionId=8&branchName=master
+
 
 This Python module allows you to:
  - Interactively control an instance of ANSYS v14.5 + using Python on Linux, >=17.0 on Windows.
@@ -25,8 +26,7 @@ You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_ to download
 
 Quick Examples
 --------------
-Many of the following examples are built in and can be run from the build-in
-examples module.  For a quick demo, run:
+Many of the following examples are built in and can be run from the build-in examples module.  For a quick demo, run:
 
 .. code:: python
 
@@ -47,19 +47,19 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
     ansys = pyansys.ANSYS(run_location=path, interactive_plotting=True)
 
     # create a square area using keypoints
-    ansys.Prep7()
-    ansys.K(1, 0, 0, 0)
-    ansys.K(2, 1, 0, 0)
-    ansys.K(3, 1, 1, 0)
-    ansys.K(4, 0, 1, 0)    
-    ansys.L(1, 2)
-    ansys.L(2, 3)
-    ansys.L(3, 4)
-    ansys.L(4, 1)
-    ansys.Al(1, 2, 3, 4)
-    ansys.Aplot()
-    ansys.Save()
-    ansys.Exit()
+    ansys.prep7()
+    ansys.k(1, 0, 0, 0)
+    ansys.k(2, 1, 0, 0)
+    ansys.k(3, 1, 1, 0)
+    ansys.k(4, 0, 1, 0)    
+    ansys.l(1, 2)
+    ansys.l(2, 3)
+    ansys.l(3, 4)
+    ansys.l(4, 1)
+    ansys.al(1, 2, 3, 4)
+    ansys.aplot()
+    ansys.save()
+    ansys.exit()
 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/aplot.png
     :width: 500pt
@@ -86,11 +86,14 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
        print("%s : %s" % (key, archive.raw[key]))
     
     # Create a vtk unstructured grid from the raw data and plot it
-    grid = archive.parse_vtk()
-    grid.plot()
+    grid = archive.parse_vtk(force_linear=True)
+    grid.plot(color='w', show_edges=True)
     
     # write this as a vtk xml file 
-    grid.Write('hex.vtu')
+    grid.save('hex.vtu')
+
+    # or as a vtk binary
+    grid.save('hex.vtk')
 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png
     :width: 500pt
@@ -201,7 +204,7 @@ Nodal stress can also be generated non-interactively with:
 
 Animating a Modal Solution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Mode shapes from a modal analsyis can be animated using ``animate_nodal_solution``:
+Mode shapes from a modal analysis can be animated using ``animate_nodal_solution``:
 
 .. code:: python
 
@@ -231,7 +234,7 @@ This example reads in the mass and stiffness matrices associated with the above 
     fobj = pyansys.FullReader('file.full')
     dofref, k, m = fobj.load_km()  # returns upper triangle only
 
-    # make k, m full, symmetric matricies
+    # make k, m full, symmetric matrices
     k += sparse.triu(k, 1).T
     m += sparse.triu(m, 1).T
 
@@ -266,7 +269,5 @@ If you have ``scipy`` installed, you can solve the eigensystem for its natural f
 License and Acknowledgments
 ---------------------------
 ``pyansys`` is licensed under the MIT license.
-
-ANSYS documentation and functions build from html provided by `Sharcnet <https://www.sharcnet.ca/Software/Ansys/>`_.  Thanks!
 
 This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
