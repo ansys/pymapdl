@@ -1,3 +1,4 @@
+import socket
 import glob
 import os
 from shutil import copyfile
@@ -12,7 +13,7 @@ from pyansys.rst import ResultFile
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
-is_azure = 'PIPELINE_WORKSPACE' in os.environ
+is_azure = socket.gethostname() != 'enterprise'
 AZURE_LINUX = is_azure and os.name == 'posix'
 
 # rver = 'v150'
@@ -156,7 +157,7 @@ class TestCyclicResultReader(object):
         self.ansys.exit()
 
 
-@pytest.mark.skipif(AZURE_LINUX, reason="Failes on Azure Linux")
+@pytest.mark.skipif(AZURE_LINUX, reason="Fails on Azure Linux")
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
