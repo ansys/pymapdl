@@ -23,11 +23,11 @@ import random
 from shutil import copyfile
 
 import appdirs
-import pyansys
 import pexpect
 import numpy as np
 import psutil
 
+import pyansys
 from pyansys.ansys_functions import _InternalANSYS
 from pyansys.convert import is_float
 
@@ -350,15 +350,13 @@ class ANSYS(_InternalANSYS):
         Default False.
 
     log_apdl : str, optional
-        Opens an APDL log file named "log.inp" in the current ANSYS
-        working directory.  Default 'w'.  Set to 'a' to append to
-        an existing log.
+        Opens an APDL log file in the current ANSYS working directory.
+        Default 'w'.  Set to 'a' to append to an existing log.
 
     Examples
     --------
     >>> import pyansys
     >>> ansys = pyansys.ANSYS()
-
     """
 
     def __init__(self, exec_file=None, run_location=None,
@@ -400,12 +398,6 @@ class ANSYS(_InternalANSYS):
                 raise Exception('Invalid ANSYS executable at %s' % exec_file +
                                 'Enter one manually using pyansys.ANSYS(exec_file="")')
         self.exec_file = exec_file
-
-        # # determine ansys version
-        # if '.exe' in self.exec_file:
-        #     self.version = self.exec_file[-7:-4]
-        # else:
-        #     self.version = self.exec_file[-3:]
 
         # check ansys version
         if check_version:
@@ -487,8 +479,7 @@ class ANSYS(_InternalANSYS):
             self.EnableInteractivePlotting()
 
     def open_apdl_log(self, filename, mode='w'):
-        """
-        Starts writing all APDL commands to an ANSYS input
+        """Starts writing all APDL commands to an ANSYS input
 
         Parameters
         ----------
@@ -499,7 +490,7 @@ class ANSYS(_InternalANSYS):
         if self.apdl_log is not None:
             raise Exception('APDL command logging already enabled.\n')
 
-        self.log.debug('Opening ANSYS log file at %s' % filename)
+        self.log.debug('Opening ANSYS log file at %s', filename)
         self.apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         if mode != 'w':
             self.apdl_log.write('! APDL script generated using pyansys %s\n' %
@@ -516,14 +507,16 @@ class ANSYS(_InternalANSYS):
         command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
                                           additional_switches)
         self.log.debug('Spawning shell process using pexpect')
-        self.log.debug('Command: "%s"' % command)
-        self.log.debug('At "%s"' % self.path)
+        self.log.debug('Command: "%s"', command)
+        self.log.debug('At "%s"', self.path)
         self.process = pexpect.spawn(command, cwd=self.path)
         self.process.delaybeforesend = None
         self.log.debug('Waiting for ansys to start...')
-        self.process.expect('CONTINUE')
-        self.process.sendline('')  # enter to continue
-        self.process.expect('BEGIN:', timeout=timeout)
+
+        index = self.process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
+        if index:
+            self.process.sendline('')  # enter to continue
+            self.process.expect('BEGIN:', timeout=timeout)
         self.log.debug('ANSYS Initialized')
         self.log.debug(self.process.before.decode('utf-8'))
         self.using_corba = False
