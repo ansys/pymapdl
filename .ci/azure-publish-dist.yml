@@ -6,7 +6,6 @@ steps:
 
 - script: |
     python -m pip install twine
-    # python -m twine upload --config-file $(PYPIRC_PATH) dist/* --skip-existing
-    python -m twine upload dist/* --skip-existing
+    python -m twine upload dist/* --skip-existing -p $(TWINE_PASSWORD) -u $(TWINE_USERNAME)
   displayName: 'Upload Artifacts'
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
