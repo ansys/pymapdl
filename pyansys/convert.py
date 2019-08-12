@@ -17,7 +17,8 @@ def is_float(string):
 
 
 def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
-                   line_ending=None, exec_file=None, macros_as_functions=True):
+                   line_ending=None, exec_file=None, macros_as_functions=True,
+                   use_function_names=True):
     """Converts an ANSYS input file to a python pyansys script.
 
     Parameters
@@ -44,19 +45,20 @@ def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
     macros_as_functions : bool, optional
         Attempt to convert macros to python functions.
 
+    use_function_names : bool, optional
+        Convert MAPDL functions to pyansys.Mapdl class methods.  When
+        True "K" will be converted to ``mapdl.k``.  When False, it
+        will be converted to ``mapdl.run('k').
+
     Returns
     -------
     clines : list
         List of lines translated
 
     """
-    # use_function_names : bool, optional
-    #     When enabled, will translate "MP,EX,1,30E6" to "ansys.Mp('EX', 1, 30E6)"
-    #     When disabled, will translate "MP,EX,1,30E6" to ansys.run("MP,EX,1,30E6")
-    #     Enabled by default.
-
     translator = FileTranslator(loglevel, line_ending, exec_file=exec_file,
-                                macros_as_functions=macros_as_functions)
+                                macros_as_functions=macros_as_functions,
+                                use_function_names=use_function_names)
     with open(filename_in) as file_in:
         for line in file_in.readlines():
             translator.translate_line(line)
@@ -73,7 +75,7 @@ class FileTranslator():
     non_interactive = False
 
     def __init__(self, loglevel='INFO', line_ending=None, exec_file=None,
-                 macros_as_functions=True):
+                 macros_as_functions=True, use_function_names=True):
         self._non_interactive_level = 0
         self.lines = []
         self._functions = []
@@ -83,6 +85,7 @@ class FileTranslator():
             self.line_ending = os.linesep
         self.macros_as_functions = macros_as_functions
         self._infunction = False
+        self.use_function_names = use_function_names
 
         self.write_header()
         self.initialize_ansys_object(loglevel, exec_file)
@@ -205,8 +208,10 @@ class FileTranslator():
             elif line[:4] in NON_INTERACTIVE_COMMANDS:
                 self.start_non_interactive()
             self.store_run_command(line)
-        else:
+        elif self.use_function_names:
             self.store_command(command, parameters)
+        else:
+            self.store_run_command(line)
 
     def start_function(self, func_name):
         self._functions.append(func_name)

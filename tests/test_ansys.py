@@ -12,6 +12,8 @@ from pyansys.rst import ResultFile
 path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(path, 'testfiles', 'cyclic_reader')
 
+is_azure = 'PIPELINE_WORKSPACE' in os.environ
+AZURE_LINUX = is_azure and os.name == 'posix'
 
 # rver = 'v150'
 rver = 'v182'
@@ -19,6 +21,7 @@ rver = 'v182'
 MAPDL150BIN = '/usr/ansys_inc/v150/ansys/bin/ansys150'
 MAPDL182BIN = '/usr/ansys_inc/v182/ansys/bin/ansys182'
 MAPDL194BIN = '/usr/ansys_inc/v194/ansys/bin/ansys194'
+
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 class TestCyclicResultReader(object):
@@ -153,12 +156,13 @@ class TestCyclicResultReader(object):
         self.ansys.exit()
 
 
-# def test_read_para():
-#     para_path = os.path.join(path, 'testfiles', 'para')
-#     para_files = glob.glob(os.path.join(para_path, '*.txt'))
-#     from pyansys.mapdl import load_parameters
-#     for para_file in para_files:
-#         arr, parm = load_parameters(para_file)
+@pytest.mark.skipif(AZURE_LINUX, reason="Failes on Azure Linux")
+def test_read_para():
+    para_path = os.path.join(path, 'testfiles', 'para')
+    para_files = glob.glob(os.path.join(para_path, '*.txt'))
+    from pyansys.mapdl import load_parameters
+    for para_file in para_files:
+        arr, parm = load_parameters(para_file)
 
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")

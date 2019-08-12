@@ -348,7 +348,7 @@ class _MapdlCommands(object):
         command = "WRITEMAP,%s" % (str(fname))
         return self.run(command, **kwargs)
 
-    def ewrite(self, fname="", ext="", kappnd="", format="", **kwargs):
+    def ewrite(self, fname="", ext="", unused="", kappnd="", format="", **kwargs):
         """APDL Command: EWRITE
 
         Writes elements to a file.
@@ -400,7 +400,8 @@ class _MapdlCommands(object):
         nodes nine and above are written on a second record with the same
         format.
         """
-        command = "EWRITE,%s,%s,%s,%s" % (str(fname), str(ext), str(kappnd), str(format))
+        command = "EWRITE,%s,%s,%s,%s" % (str(fname), str(ext), str(unused),
+                                          str(kappnd), str(format))
         return self.run(command, **kwargs)
 
     def f(self, node="", lab="", value="", value2="", nend="", ninc="",
@@ -1899,7 +1900,7 @@ class _MapdlCommands(object):
         command = "RSFIT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(slab), str(name), str(rmod), str(ytrans), str(yval), str(xfilt), str(conf))
         return self.run(command, **kwargs)
 
-    def pdlhs(self, nsim="", nrep="", isopt="", _astop="", accmean="",
+    def pdlhs(self, nsim="", nrep="", isopt="", unused="", astop="", accmean="",
               accstdv="", check="", seed="", **kwargs):
         """APDL Command: PDLHS
 
@@ -2032,7 +2033,15 @@ class _MapdlCommands(object):
         simulations before the NSIM*NREP simulations are done if the
         convergence criteria are met.
         """
-        command = "PDLHS,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nsim), str(nrep), str(isopt), str(_astop), str(accmean), str(accstdv), str(check), str(seed))
+        command = "PDLHS,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nsim),
+                                                     str(nrep),
+                                                     str(isopt),
+                                                     str(unused),
+                                                     str(astop),
+                                                     str(accmean),
+                                                     str(accstdv),
+                                                     str(check),
+                                                     str(seed))
         return self.run(command, **kwargs)
 
     def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
@@ -24679,7 +24688,7 @@ class _MapdlCommands(object):
         command = "CNVTOL,%s,%s,%s,%s,%s" % (str(lab), str(value), str(toler), str(norm), str(minref))
         return self.run(command, **kwargs)
 
-    def secread(self, fname="", ext="", option="", **kwargs):
+    def secread(self, fname="", ext="", unused="", option="", **kwargs):
         """APDL Command: SECREAD
 
         Reads a custom section library or a user-defined section mesh into
@@ -24752,7 +24761,8 @@ class _MapdlCommands(object):
 
         Figure: 10:: : Cell Mesh for the Two-hole Box Section
         """
-        command = "SECREAD,%s,%s,%s" % (str(fname), str(ext), str(option))
+        command = "SECREAD,%s,%s,%s" % (str(fname), str(ext),
+                                        str(unused), str(option))
         return self.run(command, **kwargs)
 
     def sspe(self, e11="", e21="", e22="", t="", **kwargs):
@@ -25134,7 +25144,7 @@ class _MapdlCommands(object):
         return self.run(command, **kwargs)
 
     def andata(self, delay="", ncycl="", rsltdat="", min="", max="", incr="",
-               frclst="", autocont="", autocntr="", **kwargs):
+               frclst="", autocont="", unused="", autocntr="", **kwargs):
         """APDL Command: ANDATA
 
         Displays animated graphics data for nonlinear problems.
@@ -25203,7 +25213,16 @@ class _MapdlCommands(object):
 
         This command functions only in the postprocessor.
         """
-        command = "ANDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(delay), str(ncycl), str(rsltdat), str(min), str(max), str(incr), str(frclst), str(autocont), str(autocntr))
+        command = "ANDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(delay),
+                                                         str(ncycl),
+                                                         str(rsltdat),
+                                                         str(min),
+                                                         str(max),
+                                                         str(incr),
+                                                         str(frclst),
+                                                         str(autocont),
+                                                         str(unused),
+                                                         str(autocntr))
         return self.run(command, **kwargs)
 
     def dmpstr(self, coeff="", **kwargs):
