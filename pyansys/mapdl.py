@@ -1126,7 +1126,11 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         
     def get_float(self, entity="", entnum="", item1="", it1num="", item2="",
             it2num="", **kwargs):
-        """ used to get the value of a float-parameter from APDL """
+        """
+        Used to get the value of a float-parameter from APDL
+        Take note, that internally an apdl parameter __floatparameter__ is
+        created/overwritten.
+        """
         line = self.get("__floatparameter__", entity, entnum, item1, it1num,
             item2, it2num, **kwargs)
         return float(re.search(r"(?<=VALUE\=).*", line).group(0))
