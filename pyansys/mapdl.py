@@ -552,6 +552,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def start_broadcast_logger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
         # listen to broadcast file
+        loadstep = 0
+        overall_progress = 0        
         try:
             old_tail = ''
             old_size = 0
@@ -564,8 +566,17 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                         lines = new_tail.split('>>')
                         for line in lines:
                             line = line.strip().replace('<<broadcast::', '')
-                            if line:
-                                self.log.info(line)
+                            if "current-load-step" in line:
+                                n=int(re.search(r'\d+', line).group())
+                                if n>loadstep:
+                                    loadstep=n
+                                    overall_progress = 0
+                                    self.log.info(line)
+                            elif "overall-progress" in line:
+                                n=int(re.search(r'\d+', line).group())
+                                if n>overall_progress:
+                                    overall_progress=n
+                                    self.log.info(line)
                         old_tail = new_tail
                 time.sleep(update_rate)
         except Exception as e:
@@ -1111,7 +1122,18 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.log.warning('Unable to read response from flushed commands')
         else:
             self.log.info(self.response)
-
+        
+    def get_float(self, entity="", entnum="", item1="", it1num="", item2="",
+            it2num="", **kwargs):
+        """
+        Used to get the value of a float-parameter from APDL
+        Take note, that internally an apdl parameter __floatparameter__ is
+        created/overwritten.
+        """
+        line = self.get("__floatparameter__", entity, entnum, item1, it1num,
+            item2, it2num, **kwargs)
+        return float(re.search(r"(?<=VALUE\=).*", line).group(0))
+    
     def open_gui(self, include_result=True):
         """ Saves existing database and opens up APDL GUI
 
