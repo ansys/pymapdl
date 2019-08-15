@@ -1203,8 +1203,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +
                                  'Please use "run" instead')
         warnings.warn(msg)
-
-        self.run(command)
+        return self.run(command)
 
 
 class ANSYS(Mapdl):
