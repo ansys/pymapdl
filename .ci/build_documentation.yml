@@ -1,17 +1,11 @@
 steps:
-- script: |
-    cd ..
-    git clone --single-branch --branch gh-pages https://$(github_pat)@github.com/akaszynski/pyansys.git
-    ls pyansys
-    git config user.email $(gh_email)
-    git config user.name $(gh_user)
-    cd $BUILD_SOURCESDIRECTORY
-  displayName: Push to gh-pages
-
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.7'
   displayName: Select Python Version
+
+- script: .ci/setup_headless_display.sh
+  displayName: Install Headless Display
 
 - script: |
     python -m pip install -r requirements_build.txt
@@ -27,3 +21,18 @@ steps:
     rm -rf dist/*
     make -C docs html
   displayName: Build html Documentation
+
+- script: |
+    cd ..
+    git clone --single-branch --branch gh-pages https://$(github_pat)@github.com/akaszynski/pyansys.git
+    cd pyansys
+    git config user.email $(gh_email)
+    git config user.name $(gh_user)
+    rm -rf !(".git")
+    cp -r $BUILD_SOURCESDIRECTORY/docs/_build/html/* .
+    git add .
+    git commit -am "Pipelines-Bot: Updated site via $(Build.SourceVersion)";
+    # git commit -am "Pipelines-Bot: azure pipelines doc build $(BUILD_DEFINITIONVERSION)"
+    # cd $BUILD_SOURCESDIRECTORY
+    git push
+  displayName: Push to gh-pages
