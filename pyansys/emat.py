@@ -461,12 +461,12 @@ class EmatFile(object):
 
     @property
     def eeqv(self):
-        """Element equivalence table.  This table equates the number used
-        for storage to the actual element number.
+        """Element equivalence table.  This table equates the number
+        used for storage to the actual element number.
         """
         if self._eeqv is None:
             with open(self.filename, 'rb') as f:
-                f.seek(self.header['ptrELM']*4)
+                f.seek(self.header['ptrElm']*4)
                 self._eeqv = read_table(f)
         return self._eeqv
 
