@@ -8,6 +8,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - gh-pages
   tags:
     include:
     - '*'
