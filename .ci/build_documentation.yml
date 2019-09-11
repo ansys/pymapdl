@@ -8,6 +8,13 @@ steps:
   displayName: Install Headless Display
 
 - script: |
+    python -m pip install pyvista
+    export DISPLAY=:99.0
+    export PYVISTA_OFF_SCREEN=True
+    python .ci/pyvista_test.py
+  displayName: 'Test plotting'
+
+- script: |
     python -m pip install -r requirements_build.txt
     python setup.py install
   displayName: Install pyansys
@@ -19,6 +26,10 @@ steps:
 - script: |
     mkdir -p dist
     rm -rf dist/*
+    export DISPLAY=:99.0
+    export PYVISTA_OFF_SCREEN=True
+    export AZURE=True
+
     make -C docs html
   displayName: Build html Documentation
 
