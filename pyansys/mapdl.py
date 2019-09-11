@@ -28,6 +28,7 @@ import numpy as np
 import psutil
 
 import pyansys
+from pyansys.geometry_commands import geometry_commands
 from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.deprec_commands import _DeprecCommands
 from pyansys.convert import is_float
@@ -154,6 +155,7 @@ processors = ['/PREP7',
               '/AUX12',
               '/AUX15',
               '/MAP',]
+
 
 CONTINUE_IDX = ready_items.index(rb'YES,NO OR CONTINUOUS\)\=')
 WARNING_IDX = ready_items.index(rb'executed\?')
@@ -640,6 +642,21 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.log.info(self.response)
             if self._outfile:
                 self._outfile.write('%s\n' % self.response)
+
+        if '*** ERROR ***' in self.response:  # flag error
+            self.log.error(self.response)
+            # if not continue_on_error:
+            raise Exception(self.response)
+
+        # special returns for certain geometry commands
+        try:
+            short_cmd = command.split(',')[0]
+        except:
+            short_cmd = None
+
+        if short_cmd in geometry_commands:
+            return geometry_commands[short_cmd](self.response)
+
         return self.response
 
     def _run(self, command):
@@ -766,6 +783,13 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         if self._interactive_plotting:
             self.display_plot(full_response)
+
+        if 'is not a recognized' in full_response:
+            if not self.allow_ignore:
+                full_response = full_response.replace('This command will be ignored.',
+                                                      '')
+                full_response += '\n\nIgnore these messages by setting allow_ignore=True'
+                raise Exception(full_response)
 
         # return last response and all preceding responses
         return full_response
@@ -957,7 +981,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         self.log.info('ANSYS exited')
         if close_log:
-            self.apdl_log.close()
+            if self.apdl_log is not None:
+                self.apdl_log.close()
 
     def kill(self):
         """ Forces ANSYS process to end and removes lock file """
