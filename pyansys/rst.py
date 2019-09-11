@@ -442,23 +442,24 @@ class ResultFile(object):
                                         max_disp=max_disp, **kwargs)
 
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
-        """
-        Returns the DOF solution for each node in the global cartesian
-        coordinate system or nodal coordinate system.
+        """Returns the DOF solution for each node in the global
+        cartesian coordinate system or nodal coordinate system.
 
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         sort : bool, optional
-            Resorts the results so that the results correspond to the sorted
-            node numbering (self.nnum) (default).  If left unsorted, results
-            correspond to the nodal equivalence array self.resultheader['neqv']
+            Resorts the results so that the results correspond to the
+            sorted node numbering (self.nnum) (default).  If left
+            unsorted, results correspond to the nodal equivalence
+            array self.resultheader['neqv']
 
         in_nodal_coord_sys : bool, optional
-            When True, returns results in the nodal coordinate system.  Default False.
+            When True, returns results in the nodal coordinate system.
+            Default False.
 
         Returns
         -------
@@ -467,7 +468,6 @@ class ResultFile(object):
 
         result : float np.ndarray
             Result is (nnod x numdof), or number of nodes by degrees of freedom
-
         """
         # convert to cumulative index
         rnum = self.parse_step_substep(rnum)
@@ -512,6 +512,10 @@ class ResultFile(object):
 
             if np.any(theta_zx):
                 pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
+
+        # check for invalid values
+        # it seems mapdl writes invalid values as 2*100
+        result[result == 2**100] = 0
 
         # also include nodes in output
         return self.nnum, result
@@ -1333,7 +1337,7 @@ class ResultFile(object):
 
         if animate:
             orig_pts = copied_mesh.points.copy()
-            plotter.plot(interactive=False, auto_close=False,
+            plotter.show(interactive=False, auto_close=False,
                          interactive_update=not off_screen)
 
             first_loop = True
@@ -1362,7 +1366,7 @@ class ResultFile(object):
             plotter.close()
 
         elif screenshot:
-            cpos = plotter.plot(auto_close=False, interactive=interactive,
+            cpos = plotter.show(auto_close=False, interactive=interactive,
                                 window_size=window_size,
                                 full_screen=full_screen)
             if screenshot is True:
@@ -1371,7 +1375,7 @@ class ResultFile(object):
                 plotter.screenshot(screenshot)
             plotter.close()
         else:
-            cpos = plotter.plot(interactive=interactive,
+            cpos = plotter.show(interactive=interactive,
                                 window_size=window_size,
                                 full_screen=full_screen)
 
