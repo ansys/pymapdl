@@ -29,7 +29,6 @@ steps:
     export DISPLAY=:99.0
     export PYVISTA_OFF_SCREEN=True
     export AZURE=True
-
     make -C docs html
   displayName: Build html Documentation
 
@@ -39,11 +38,10 @@ steps:
     cd pyansys
     git config user.email $(gh_email)
     git config user.name $(gh_user)
-    rm -rf !(".git")
+    rm -rf *
     cp -r $BUILD_SOURCESDIRECTORY/docs/_build/html/* .
     git add .
-    git commit -am "Pipelines-Bot: Updated site via $(Build.SourceVersion)";
-    # git commit -am "Pipelines-Bot: azure pipelines doc build $(BUILD_DEFINITIONVERSION)"
+    git commit -am "Pipelines-Bot: Updated site via $(Build.SourceVersion)"
     # cd $BUILD_SOURCESDIRECTORY
     git push
   displayName: Push to gh-pages
