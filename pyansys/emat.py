@@ -413,20 +413,6 @@ class EmatFile(object):
                 self._element_matrices_index_table = read_table(f)
         return self._element_matrices_index_table
 
-    @property
-    def element_equivalence_table(self):
-        """Element equivalence table
-
-        The ANSYS program stores all element data in the numerical
-        order that the SOLUTION processor solves the elements.  This
-        table equates the order number used to the actual element
-        number.
-        """
-        if self._element_equivalence_table is None:
-            with open(self.filename, 'rb') as f:
-                f.seek(self.header['ptrIDX']*4)
-                self._element_matrices_index_table = read_table(f)
-        return self._element_equivalence_table
 
     # def element_matricies(self, index):
     #     """Element matrices
@@ -461,12 +447,18 @@ class EmatFile(object):
 
     @property
     def eeqv(self):
-        """Element equivalence table.  This table equates the number used
-        for storage to the actual element number.
+        """Element equivalence table.  This table equates the number
+        used for storage to the actual element number.
+
+        Notes
+        -----
+        The ANSYS program stores all element data in the numerical
+        order that the SOLUTION processor solves the elements.  This
+        table equates the order number used to the actual element.
         """
         if self._eeqv is None:
             with open(self.filename, 'rb') as f:
-                f.seek(self.header['ptrELM']*4)
+                f.seek(self.header['ptrElm']*4)
                 self._eeqv = read_table(f)
         return self._eeqv
 

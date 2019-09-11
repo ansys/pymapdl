@@ -31,3 +31,13 @@ def test_global_applied_force():
     emat_file = pyansys.read_binary(emat_filename)
     force = emat_file.global_applied_force()
     assert np.allclose(force, 0)
+
+
+def test_eeqv():
+    emat_file = pyansys.read_binary(emat_filename)
+    assert np.allclose(np.sort(emat_file.eeqv), emat_file.enum)
+
+
+def test_neqv():
+    emat_file = pyansys.read_binary(emat_filename)
+    assert np.allclose(np.sort(emat_file.neqv), emat_file.nnum)
