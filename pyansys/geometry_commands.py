@@ -3,7 +3,6 @@ import re
 
 def parse_k(msg):
     """Parse create keypoint message and return keypoint number"""
-
     # grab requested keypoint number
     command = msg.splitlines()[0]
     npt = command.split(',')[1].strip()
