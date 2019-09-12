@@ -6,8 +6,6 @@ https://www.sharcnet.ca/Software/Ansys/
 
 # consider moving the docstrings into a different module
 
-import re
-
 
 class _MapdlCommands(object):
     """ANSYS class containing MAPDl functions generated from ANSYS 16.2
@@ -3617,13 +3615,7 @@ class _MapdlCommands(object):
         system is not recommended.
         """
         command = "A,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8), str(p9), str(p10), str(p11), str(p12), str(p13), str(p14), str(p15), str(p16), str(p17), str(p18))
-        result = self.run(command, **kwargs)
-        res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", result)
-        if res is not None:
-            result = int(res.group(2))
-        else:
-            result = None
-        return result
+        return self.run(command, **kwargs)
 
     def hptcreate(self, type="", entity="", nhp="", label="", val1="", val2="",
                   val3="", **kwargs):
@@ -14884,42 +14876,38 @@ class _MapdlCommands(object):
         redefined only if not yet attached to an area.
         """    
         command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(ndiv), str(space), str(xv1), str(yv1), str(zv1), str(xv2), str(yv2), str(zv2))
-        result = self.run(command, **kwargs)
-        res = re.search(r"(LINE NO\.=\s*)([0-9]+)", result)
-        if res is not None:
-            result = int(res.group(2))
-        else:
-            result = None
-        return result
+        return self.run(command, **kwargs)
 
     def mfoutput(self, freq="", **kwargs):
         """APDL Command: MFOUTPUT
 
-        Specifies results file output frequency for an ANSYS Multi-field solver
-        analysis.
+        Specifies results file output frequency for an ANSYS
+        Multi-field solver analysis.
 
         Parameters
         ----------
         freq
-               N
+            N
 
-             N - Write solution every Nth (and the last) time step. Defaults to 1, for every
-                 time step.
+            N - Write solution every Nth (and the last) time
+                 step. Defaults to 1, for every time step.
 
             -N - Writes up to -N equally spaced results (for multifield auto time stepping).
 
-             NONE - Suppresses writing of results for all multifield time steps.
+            NONE - Suppresses writing of results for all multifield time steps.
 
-             ALL - Writes results for every multifield time step (default).
+            ALL - Writes results for every multifield time step (default).
 
-             LAST - Writes results for only the last multifield time step.
+            LAST - Writes results for only the last multifield time step.
 
-            %array% - Where %array% is the name of an n X 1 X 1 dimensional array parameter defining
-                      n key times, the data for the specified solution results
-                      item is written at those key times. Key times in the
-                      array parameter must appear in ascending order. Value
-                      must be greater than or equal to the ending time values
-                      for the load step.
+            %array% - Where %array% is the name of an n X 1 X 1
+                      dimensional array parameter defining n key
+                      times, the data for the specified solution
+                      results item is written at those key times. Key
+                      times in the array parameter must appear in
+                      ascending order. Value must be greater than or
+                      equal to the ending time values for the load
+                      step.
 
             For restart runs (see MFRSTART command), either change the parameter values to fall between the beginning and ending time values of the load step, or erase the current settings and reissue the command with a new array parameter.  - For more information about defining array parameters, see the *DIM command
                               documentation.
@@ -41407,40 +41395,32 @@ class _MapdlCommands(object):
         Parameters
         ----------
         npt
-            Reference number for keypoint.  If zero, the lowest available
-            number is assigned [NUMSTR].
+            Reference number for keypoint.  If zero, the lowest
+            available number is assigned [NUMSTR].
 
         x, y, z
-            Keypoint location in the active coordinate system (may be R, θ, Z
-            or R, θ, Φ).  If X = P, graphical picking is enabled and all other
-            fields (including NPT) are ignored (valid only in the GUI).
+            Keypoint location in the active coordinate system (may be
+            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
+            enabled and all other fields (including NPT) are ignored
+            (valid only in the GUI).
 
         Returns
         -------
         result : int
-            Returns the Keypoint number of the created Keypoint or None,
-            if something went wrong.
+            Returns the Keypoint number of the created Keypoint or
+            None, if something went wrong.
+
         Notes
         -----
-        Defines a keypoint in the active coordinate system [CSYS] for line,
-        area, and volume descriptions.  A previously defined keypoint of the
-        same number will be redefined.  Keypoints may be redefined only if it
-        is not yet attached to a line or is not yet meshed.  Solid modeling in
-        a toroidal system is not recommended.
+        Defines a keypoint in the active coordinate system [CSYS] for
+        line, area, and volume descriptions.  A previously defined
+        keypoint of the same number will be redefined.  Keypoints may
+        be redefined only if it is not yet attached to a line or is
+        not yet meshed.  Solid modeling in a toroidal system is not
+        recommended.
         """
         command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
-        result = self.run(command, **kwargs)
-
-        if re.search(r"[0-9]+", str(npt)) and not str(npt).strip() == "0":
-            res = re.search(r"(KEYPOINT\s*)([0-9]+)", result)
-        else:
-            res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", result)
-        if res:
-            result = int(res.group(2))
-        else:
-            result = None
-        return result
-
+        return self.run(command, **kwargs)
 
     def batch(self, lab="", **kwargs):
         """APDL Command: /BATCH
