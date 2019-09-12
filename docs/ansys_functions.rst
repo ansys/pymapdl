@@ -34,7 +34,8 @@ Additionally, exceptions are caught and handled within Python.
    set for AL command.                                                     
 
 
-Available Commands
-==================
-.. autoclass:: pyansys.mapdl_functions._MapdlCommands
-    :members:
+..
+   Available Commands
+   ==================
+   .. autoclass:: pyansys.mapdl_functions._MapdlCommands
+       :members:
