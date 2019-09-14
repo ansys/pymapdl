@@ -11,6 +11,8 @@ if pyansys.has_ansys:
 def test_k():
     k0 = mapdl.k("", 0, 0, 0)
     assert k0 is 1
+    k1 = mapdl.k(2, 0, 0, 1)
+    assert k1 is 2
 
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
