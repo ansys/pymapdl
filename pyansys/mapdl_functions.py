@@ -3592,13 +3592,13 @@ class _MapdlCommands(object):
             entry).  At least 3 keypoints must be entered.  If P1 = P,
             graphical picking is enabled and all remaining arguments are
             ignored (valid only in the GUI).
-        
+
         Returns
         -------
         result : int
             Returns the area number of the created area or None,
             if something went wrong.
-            
+
         Notes
         -----
         Keypoints (P1 through P18) must be input in a clockwise or
@@ -14865,7 +14865,7 @@ class _MapdlCommands(object):
         result : int
             Returns the line number of the created line or None,
             if something went wrong.
-            
+
         Notes
         -----
         Defines a line between two keypoints from P1 to P2.  The line shape may
@@ -14874,7 +14874,7 @@ class _MapdlCommands(object):
         generated.  Note that solid modeling in a toroidal coordinate system is
         not recommended.  A curved line is limited to 180°.  Lines may be
         redefined only if not yet attached to an area.
-        """    
+        """
         command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(ndiv), str(space), str(xv1), str(yv1), str(zv1), str(xv2), str(yv2), str(zv2))
         return self.run(command, **kwargs)
 
@@ -15377,7 +15377,7 @@ class _MapdlCommands(object):
 
             Sets volume elements to use current SECNUM command settings. - 1
 
-            Sets volume elements to use section attributes of the pattern area elements. - 
+            Sets volume elements to use section attributes of the pattern area elements. -
 
             ESIZE - Val1 sets the number of element divisions in the direction of volume generation
                     or volume sweep. For VDRAG and VSWEEP, Val1 is overridden
@@ -41600,13 +41600,7 @@ class _MapdlCommands(object):
         This command is valid in any processor.
         """
         command = "AL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(l1), str(l2), str(l3), str(l4), str(l5), str(l6), str(l7), str(l8), str(l9), str(l10))
-        result = self.run(command, **kwargs)
-        res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", result)
-        if res is not None:
-            result = int(res.group(2))
-        else:
-            result = None
-        return result
+        return self.run(command, **kwargs)
 
     def torqc2d(self, rad="", numn="", lcsys="", **kwargs):
         """APDL Command: TORQC2D

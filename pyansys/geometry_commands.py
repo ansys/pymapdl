@@ -3,11 +3,7 @@ import re
 
 def parse_k(msg):
     """Parse create keypoint message and return keypoint number"""
-    # grab requested keypoint number
-    command = msg.splitlines()[0]
-    npt = command.split(',')[1].strip()
-
-    if re.search(r"[0-9]+", npt) and not npt == "0":
+    if not re.search(r"KEYPOINT NUMBER", msg):
         res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
     else:
         res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
@@ -41,7 +37,13 @@ def parse_a(msg):
     return result
 
 
+def parse_al(msg):
+    """Parse create area message and return area number"""
+    return parse_a(msg)
+
+
 geometry_commands = {'K': parse_k,
                      'L': parse_l,
                      'A': parse_a,
+                     'AL': parse_al,
 }
