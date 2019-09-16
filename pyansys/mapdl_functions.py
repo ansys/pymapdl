@@ -41600,13 +41600,7 @@ class _MapdlCommands(object):
         This command is valid in any processor.
         """
         command = "AL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(l1), str(l2), str(l3), str(l4), str(l5), str(l6), str(l7), str(l8), str(l9), str(l10))
-        result = self.run(command, **kwargs)
-        res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", result)
-        if res is not None:
-            result = int(res.group(2))
-        else:
-            result = None
-        return result
+        return self.run(command, **kwargs)
 
     def torqc2d(self, rad="", numn="", lcsys="", **kwargs):
         """APDL Command: TORQC2D
