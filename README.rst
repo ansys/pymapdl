@@ -44,7 +44,7 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
     import pyansys
 
     path = os.getcwd()
-    ansys = pyansys.ANSYS(run_location=path, interactive_plotting=True)
+    ansys = pyansys.Mapdl(run_location=path, interactive_plotting=True)
 
     # create a square area using keypoints
     ansys.prep7()
