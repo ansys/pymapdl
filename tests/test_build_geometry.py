@@ -24,6 +24,18 @@ def test_l():
     
 
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+def test_bsplin():
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.prep7()
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 2, 1, 0)
+    l0 = mapdl.bsplin(k0, k1, k2)
+    assert l0 is 1
+
+
+@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
 def test_a():
     mapdl.finish()
     mapdl.clear()
