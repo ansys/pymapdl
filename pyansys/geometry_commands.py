@@ -26,6 +26,11 @@ def parse_l(msg):
     return result
 
 
+def parse_bsplin(msg):
+    """Parse create bsplin line message and return line number"""
+    return parse_l(msg)
+
+
 def parse_a(msg):
     """Parse create area message and return area number"""
     res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
@@ -44,6 +49,7 @@ def parse_al(msg):
 
 geometry_commands = {'K': parse_k,
                      'L': parse_l,
+                     'BSPLIN': parse_bsplin,
                      'A': parse_a,
                      'AL': parse_al,
 }
