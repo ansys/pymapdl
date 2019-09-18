@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/* #include <errno.h> */
 
 //=============================================================================
 // Fast string to interger convert to ANSYS formatted intergers 
@@ -222,6 +223,7 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
     double dvalue, sign, pow, scale;
 
     int ivalue;
+    int found;
 
     // set file position
     i = *(n);
@@ -241,11 +243,12 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
         for (t=0; t<7; ++t){
             
             // Check if end of line character
-            if (raw[i + EOL - 1] == '\n'){
-                i += EOL;
-                break;
-            }
-
+	    found = 0;
+	    while (raw[i] == '\r' || raw[i] == '\n' ){
+	      ++i;
+	      found = 1;
+	    }
+	    if (found) break;
 
             //init value
             dvalue = 1.0;
@@ -340,16 +343,16 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
                 int *elemnum, int *elem, int nelem, int intsz, int *j,
                 int EOL){
 
-    int i, n, c, k, nnode, tempint, val, g;
+    int i, n, c, nnode, val, g;
     n = *(j) - 1;
 
     // Loop through elements
     for (i=0; i<nelem; ++i){
 
         // Check if end of line
-        if (raw[n + EOL] == '\n'){
-            n += EOL;
-        }
+        while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ){
+	  ++n;
+	}
 
         // Check if at end of the block
         if (checkneg(raw, intsz, &n)){
@@ -377,32 +380,31 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
         n += intsz;
         elemnum[i] = fast_atoi(raw, intsz, &n);
 
+	/* printf("%d\n", elemnum[i]); */
             
         // Read nodes in element
         c = 0;
         while (c < nnode){
-
             // Check if end of line
-            if (raw[n + EOL] == '\n'){
-                n += EOL;
-            }
+            while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ) ++n;
 
-            // Read node
-
-            // Called so much it's worth inlining it
-            // (same as function fast_atoi)
+            // Parse node (same as function fast_atoi)
             val = 0;
             for (g=0; g<intsz; ++g){
                 ++n;
-        
-                // Seek throug white space
-                if (raw[n] == ' ') continue;
-        
+                if (raw[n] == ' ') continue;  // Seek through white space
                 val = val*10 + (raw[n] - '0');
             }
 
-            elem[20*i + c] = val;
+	    /* if (val < 0){ */
+	    /*     printf("File position: %d\n", n); */
+	    /*     printf("Invalid node number on element number %d\n", elemnum[i]); */
+	    /*     perror(""); */
+	    /* 	return 0; */
+	    /* } */
 
+	    /* printf("\t%d", val); */
+            elem[20*i + c] = val;
             ++c;
 
         }
