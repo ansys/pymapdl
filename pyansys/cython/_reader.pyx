@@ -132,7 +132,8 @@ def read(filename, read_parameters=False, debug=False):
     node_comps = {}
     elem_comps = {}
 
-    read_nodes = False
+    nodes_read = False
+    eblock_read = False
 
     # keyopt
     keyopt = {}
@@ -156,6 +157,7 @@ def read(filename, read_parameters=False, debug=False):
             elif b'EBLOCK' in line:
                 if debug:
                     print('reading EBLOCK')
+                eblock_read = True
 
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
@@ -267,7 +269,7 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading NBLOCK')
 
-                read_nodes = True
+                nodes_read = True
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
 
@@ -353,7 +355,8 @@ def read(filename, read_parameters=False, debug=False):
                         # init_arr[arr.size] = arr
                         parameters[name] = arr
 
-    if not read_nodes:
+    # if the node block was not read for some reason
+    if not nodes_read:
         n = 0
         while 1:
             if myfgets(line, raw, &n, fsize):
@@ -373,6 +376,44 @@ def read(filename, read_parameters=False, debug=False):
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
                                     d_size, f_size, &n, EOL, nexp)
+
+    # if eblock was not read for some reason
+    if not eblock_read:
+        n = 0
+        while 1:
+            if myfgets(line, raw, &n, fsize):
+                break
+
+            if 'E' == line[0]:  # faster to test one character
+                if b'EBLOCK' in line:
+                    if debug:
+                        print('reading EBLOCK')
+
+                    # Get size of EBLOCK
+                    nelem = int(line[line.rfind(b',') + 1:])
+
+                    # Get interger block size
+                    myfgets(line, raw, &n, fsize)
+                    isz = int(line[line.find(b'i') + 1:line.find(b')')])
+
+                    if debug:
+                        print('nelem:', nelem)
+                        print('isz:', isz)
+
+                    # Initialize element data array.  Use number of lines
+                    # as nelem is unknown
+                    elem = np.empty((nelem, 20), dtype=ctypes.c_int)
+                    etype = np.empty(nelem, dtype=ctypes.c_int)
+                    elemnum = np.empty(nelem, dtype=ctypes.c_int)
+                    e_rcon = np.empty(nelem, dtype=ctypes.c_int)
+                    mtype = np.empty(nelem, dtype=ctypes.c_int)
+                    sec_id = np.empty(nelem, dtype=ctypes.c_int)
+
+                    # Call C extention to read eblock
+                    nelem = read_eblock(raw, &mtype[0], &etype[0],
+                                        &e_rcon[0], &sec_id[0],
+                                        &elemnum[0], &elem[0, 0], nelem,
+                                        isz, &n, EOL)
 
     # Free memory
     free(raw)
