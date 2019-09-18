@@ -19,7 +19,7 @@ cimport numpy as np
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
-                    int);
+                    int)
 
     
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
@@ -51,7 +51,7 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
         
     # Line exceeds 1000 char (unlikely with ANSYS CDB formatting)
     return 1
-                
+
 
 def read(filename, read_parameters=False, debug=False):
     """
@@ -81,17 +81,17 @@ def read(filename, read_parameters=False, debug=False):
     cdef int n = 0
     
     # Detect end of line character
-    while n < fsize:
-        if raw[n] == '\r':
-            EOL = 2
-            break
-        elif raw[n] == '\n':
-            EOL = 1
-            break
-        n += 1
-        
+    # while n < fsize:
+    #     if raw[n] == '\r':
+    #         EOL = 2
+    #         break
+    #     elif raw[n] == '\n':
+    #         EOL = 1
+    #         break
+    #     n += 1
+
     # Reset line position
-    n = 0
+    # n = 0
     
     # Define variables
     cdef size_t l = 0
@@ -180,6 +180,9 @@ def read(filename, read_parameters=False, debug=False):
                                     &e_rcon[0], &sec_id[0],
                                     &elemnum[0], &elem[0, 0], nelem,
                                     isz, &n, EOL)
+
+                if nelem == 0:
+                    raise Exception('Unable to read element block')
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
@@ -414,6 +417,9 @@ def read(filename, read_parameters=False, debug=False):
                                         &e_rcon[0], &sec_id[0],
                                         &elemnum[0], &elem[0, 0], nelem,
                                         isz, &n, EOL)
+
+                    if nelem == 0:
+                        raise Exception('Unable to read element block')
 
     # Free memory
     free(raw)
