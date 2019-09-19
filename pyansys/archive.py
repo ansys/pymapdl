@@ -198,7 +198,7 @@ def unique_rows(a):
 def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                     real_constant_start=1, mode='w',
                     nblock=True, enum_start=1, nnum_start=1,
-                    include_etype_header=True, line_ending=None,
+                    include_etype_header=True,
                     reset_etype=False, allow_missing=True):
     """Writes FEM as an ANSYS APDL archive file.  This function
     supports the following element types:
@@ -258,21 +258,13 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         For each element type, includes element type command
         (e.g. "ET, 1, 186") in the archive file.
 
-    line_ending : str, optional
-        Defaults to windows line ending.
-
     reset_etype : bool, optional
         Resets element type.  Element types will automatically be
         determined by the shape of the element (i.e. quadradic
         tetrahedrals will be saved as SOLID187, linear hexahedrals as
         SOLID185).  Default True.
-
     """
-    if line_ending is None:
-        # line_ending = os.linesep
-        line_ending = '\r\n'
-
-    header = '/PREP7%s' % line_ending
+    header = '/PREP7\n'
 
     # node numbers
     if 'ansys_node_num' in grid.point_arrays:
@@ -287,7 +279,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
             raise Exception('Missing node numbers.  Exiting due "allow_missing=False"')
         start_num = nodenum.max() + 1
         if nnum_start > start_num:
-           start_num = nnum_start
+            start_num = nnum_start
         nadd = np.sum(nodenum == -1)
         end_num = start_num + nadd
         log.info('FEM missing some node numbers.  Adding node numbering ' +
@@ -356,7 +348,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         if include_etype_header and not invalid:
             _, ind = np.unique(etype, return_index=True)
             for idx in ind:
-                header += 'ET, %d, %d%s' % (etype[idx], typenum[idx], line_ending)
+                header += 'ET, %d, %d\n' % (etype[idx], typenum[idx])
     else:
         missing = True
 
@@ -395,41 +387,9 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         typenum[etype == etype_186] = 186
         typenum[etype == etype_187] = 187
 
-        header += 'ET, %d, 185%s' % (etype_185, line_ending)
-        header += 'ET, %d, 186%s' % (etype_186, line_ending)
-        header += 'ET, %d, 187%s' % (etype_187, line_ending)
-
-    # if np.any(etype == -1):
-    #     log.info('Some elements are missing element type numbers.  Adding...')
-    #     if etype_start > etype.max():
-    #         etype_start = etype.max()
-
-    #     missing_mask = etype == -1
-    #     missing_etype = etype[missing_mask]
-
-    #     etype_185 = etype_start + 2
-    #     missing_etype[grid.celltypes == VTK_TETRA] = etype_185
-    #     missing_etype[grid.celltypes == VTK_HEXAHEDRON] = etype_185
-    #     missing_etype[grid.celltypes == VTK_WEDGE] = etype_185
-    #     missing_etype[grid.celltypes == VTK_PYRAMID] = etype_185
-
-    #     etype_186 = etype_start
-    #     missing_etype[grid.celltypes == VTK_QUADRATIC_HEXAHEDRON] = etype_186
-    #     missing_etype[grid.celltypes == VTK_QUADRATIC_WEDGE] = etype_186
-    #     missing_etype[grid.celltypes == VTK_QUADRATIC_PYRAMID] = etype_186
-
-    #     etype_187 = etype_start + 1
-    #     missing_etype[grid.celltypes == VTK_QUADRATIC_TETRA] = etype_187
-
-    #     etype[missing_mask] = missing_etype
-
-    #     typenum[missing_mask][missing_etype == etype_185] = 185
-    #     typenum[missing_mask][missing_etype == etype_186] = 186
-    #     typenum[missing_mask][missing_etype == etype_187] = 187
-
-    #     header += 'ET, %d, 185%s' % (etype_185, line_ending)
-    #     header += 'ET, %d, 186%s' % (etype_186, line_ending)
-    #     header += 'ET, %d, 187%s' % (etype_187, line_ending)
+        header += 'ET, %d, 185\n' % etype_185
+        header += 'ET, %d, 186\n' % etype_186
+        header += 'ET, %d, 187\n' % etype_187
 
     # number of nodes written per element
     elem_nnodes = np.empty(etype.size, np.int32)
@@ -442,12 +402,12 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
 
         # write node block
         if write_nblock:
-            write_nblock(f, nodenum, grid.points, line_ending=line_ending)
+            write_nblock(f, nodenum, grid.points)
 
         # eblock header
         h = ''
-        h += 'EBLOCK,19,SOLID,{:10d},{:10d}\r\n'.format(enum[-1], ncells)
-        h += '(19i8)\r\n'
+        h += 'EBLOCK,19,SOLID,{:10d},{:10d}\n'.format(enum[-1], ncells)
+        h += '(19i8)\n'
         f.write(h)
 
         # nnode = tets.shape[1]
@@ -477,7 +437,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
 
             if celltypes[i] == VTK_QUADRATIC_TETRA:
                 if typenum[i] == 187:
-                    line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n%8d%8d\r\n' % tuple(nodes)
+                    line += '%8d%8d%8d%8d%8d%8d%8d%8d\n%8d%8d\n' % tuple(nodes)
                 else:  # must be 186
                     writenodes = (nodes[0],  # 0,  I
                                   nodes[1],  # 1,  J
@@ -500,8 +460,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                                   nodes[9],  # 18, A
                                   nodes[9])  # 19, B (duplicate of A)
 
-                    line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[:8]
-                    line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[8:]
+                    line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[:8]
+                    line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[8:]
 
 
             elif celltypes[i] == VTK_TETRA:
@@ -513,7 +473,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[3],  # 5,  N (duplicate of M)
                               nodes[3],  # 6,  O (duplicate of M)
                               nodes[3])  # 7,  P (duplicate of M)
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes
 
             elif celltypes[i] == VTK_WEDGE:
                 writenodes = (nodes[2],  # 0,  I
@@ -524,7 +484,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[4],  # 5,  N
                               nodes[3],  # 6,  O
                               nodes[3])  # 7,  P (duplicate of O)
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes
 
             elif celltypes[i] == VTK_QUADRATIC_WEDGE:
                 writenodes = (nodes[2],  # 0,  I
@@ -547,8 +507,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[13], # 17, Z
                               nodes[12], # 18, A
                               nodes[12]) # 19, B (duplicate of A)
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[:8]
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[8:]
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[:8]
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[8:]
 
             elif celltypes[i] == VTK_QUADRATIC_PYRAMID:
                 writenodes = (nodes[0],  # 0,  I
@@ -572,8 +532,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[11], # 18, A
                               nodes[12]) # 19, B (duplicate of A)
 
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[:8]
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[8:]
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[:8]
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[8:]
 
             elif celltypes[i] == VTK_PYRAMID:
                 writenodes = (nodes[0],  # 0,  I
@@ -584,26 +544,25 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[4],  # 5,  N (duplicate of M)
                               nodes[4],  # 6,  O (duplicate of M)
                               nodes[4])  # 7,  P (duplicate of M)
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % writenodes[:8]
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[:8]
 
             elif celltypes[i] == VTK_HEXAHEDRON:
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % tuple(nodes)
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes)
 
             elif celltypes[i] == VTK_QUADRATIC_HEXAHEDRON:
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % tuple(nodes[:8])
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\r\n' % tuple(nodes[8:])
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[:8])
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[8:])
 
             else:
                 raise Exception('Invalid write cell type %d' % celltypes[i])
 
             f.write(line)
 
-        f.write('      -1\r\n')
+        f.write('      -1\n')
 
 
-def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
-    """
-    Writes nodes and node angles to file.
+def write_nblock(filename, node_id, pos, angles=None):
+    """Writes nodes and node angles to file.
 
     Parameters
     ----------
@@ -618,14 +577,7 @@ def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
 
     angles : np.ndarray, optional
         Writes the node angles for each node when included.
-
-    line_ending : str, optional
-        Line ending.  Defaults to operating system line ending.
-
     """
-    if line_ending is None:
-        line_ending = os.linesep
-
     assert pos.ndim == 2 and pos.shape[1] == 3, 'Invalid position array'
     if angles is not None:
         assert angles.ndim == 2 and angles.shape[1] == 3, 'Invalid angle array'
@@ -633,12 +585,12 @@ def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
     # Header Tell ANSYS to start reading the node block with 6 fields,
     # associated with a solid, the maximum node number and the number
     # of lines in the node block
-    h = '/PREP7 \r\n'
-    h += 'NBLOCK,6,SOLID,%10d,%10d\r\n' % (np.max(node_id), pos.shape[0])
+    h = '/PREP7 \n'
+    h += 'NBLOCK,6,SOLID,%10d,%10d\n' % (np.max(node_id), pos.shape[0])
     h += '(3i8,6e20.13)'
 
     # NBLOCK footer
-    f = 'N,R5.3,LOC,       -1, \r\n'
+    f = 'N,R5.3,LOC,       -1, \n'
 
     # Sort input data
     ind = np.argsort(node_id)
@@ -655,7 +607,7 @@ def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
             header=h,
             footer=f,
             comments='',
-            newline='\r\n')
+            newline='\n')
     else:
         # Array of node positions and angles
         arr = np.empty((node_id.size, 7))
@@ -673,7 +625,7 @@ def write_nblock(filename, node_id, pos, angles=None, line_ending=None):
             header=h,
             footer=f,
             comments='',
-            newline='\r\n')
+            newline='\n')
 
 
 def write_cmblock(filename, items, comp_name, comp_type, digit_width=10):
@@ -734,7 +686,7 @@ def write_cmblock(filename, items, comp_name, comp_type, digit_width=10):
     else:
         string_types = basestring
 
-    text = '\r\n'.join(lines)
+    text = '\n'.join(lines)
 
     # either write to file or file object
     if isinstance(filename, string_types):
