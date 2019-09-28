@@ -948,10 +948,21 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 log.error('Unable to find screenshot at %s' % fullfile)
 
     def __del__(self):
-        """cleans up when complete"""
-        self.exit()
-        self.kill()
-        self.close_apdl_log()
+        """Clean up when complete"""
+        try:
+            self.exit()
+        except exception as e:
+            log.error('exit: %s', str(e))
+
+        try:
+            self.kill()
+        except exception as e:
+            log.error('kill: %s', str(e))
+
+        try:
+            self.close_apdl_log()
+        except exception as e:
+            log.error('close_apdl_log: %s', str(e))
 
     def Exit(self):
         msg = DeprecationWarning('\n"Exit" decpreciated.  \n' +
