@@ -19,7 +19,7 @@ cimport numpy as np
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
-                    int);
+                    int)
 
     
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
@@ -51,7 +51,7 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
         
     # Line exceeds 1000 char (unlikely with ANSYS CDB formatting)
     return 1
-                
+
 
 def read(filename, read_parameters=False, debug=False):
     """
@@ -81,17 +81,17 @@ def read(filename, read_parameters=False, debug=False):
     cdef int n = 0
     
     # Detect end of line character
-    while n < fsize:
-        if raw[n] == '\r':
-            EOL = 2
-            break
-        elif raw[n] == '\n':
-            EOL = 1
-            break
-        n += 1
-        
+    # while n < fsize:
+    #     if raw[n] == '\r':
+    #         EOL = 2
+    #         break
+    #     elif raw[n] == '\n':
+    #         EOL = 1
+    #         break
+    #     n += 1
+
     # Reset line position
-    n = 0
+    # n = 0
     
     # Define variables
     cdef size_t l = 0
@@ -132,7 +132,8 @@ def read(filename, read_parameters=False, debug=False):
     node_comps = {}
     elem_comps = {}
 
-    read_nodes = False
+    nodes_read = False
+    eblock_read = False
 
     # keyopt
     keyopt = {}
@@ -156,6 +157,7 @@ def read(filename, read_parameters=False, debug=False):
             elif b'EBLOCK' in line:
                 if debug:
                     print('reading EBLOCK')
+                eblock_read = True
 
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
@@ -178,6 +180,9 @@ def read(filename, read_parameters=False, debug=False):
                                     &e_rcon[0], &sec_id[0],
                                     &elemnum[0], &elem[0, 0], nelem,
                                     isz, &n, EOL)
+
+                if nelem == 0:
+                    raise Exception('Unable to read element block')
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
@@ -267,7 +272,7 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading NBLOCK')
 
-                read_nodes = True
+                nodes_read = True
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
 
@@ -353,7 +358,8 @@ def read(filename, read_parameters=False, debug=False):
                         # init_arr[arr.size] = arr
                         parameters[name] = arr
 
-    if not read_nodes:
+    # if the node block was not read for some reason
+    if not nodes_read:
         n = 0
         while 1:
             if myfgets(line, raw, &n, fsize):
@@ -373,6 +379,47 @@ def read(filename, read_parameters=False, debug=False):
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
                                     d_size, f_size, &n, EOL, nexp)
+
+    # if eblock was not read for some reason
+    if not eblock_read:
+        n = 0
+        while 1:
+            if myfgets(line, raw, &n, fsize):
+                break
+
+            if 'E' == line[0]:  # faster to test one character
+                if b'EBLOCK' in line:
+                    if debug:
+                        print('reading EBLOCK')
+
+                    # Get size of EBLOCK
+                    nelem = int(line[line.rfind(b',') + 1:])
+
+                    # Get interger block size
+                    myfgets(line, raw, &n, fsize)
+                    isz = int(line[line.find(b'i') + 1:line.find(b')')])
+
+                    if debug:
+                        print('nelem:', nelem)
+                        print('isz:', isz)
+
+                    # Initialize element data array.  Use number of lines
+                    # as nelem is unknown
+                    elem = np.empty((nelem, 20), dtype=ctypes.c_int)
+                    etype = np.empty(nelem, dtype=ctypes.c_int)
+                    elemnum = np.empty(nelem, dtype=ctypes.c_int)
+                    e_rcon = np.empty(nelem, dtype=ctypes.c_int)
+                    mtype = np.empty(nelem, dtype=ctypes.c_int)
+                    sec_id = np.empty(nelem, dtype=ctypes.c_int)
+
+                    # Call C extention to read eblock
+                    nelem = read_eblock(raw, &mtype[0], &etype[0],
+                                        &e_rcon[0], &sec_id[0],
+                                        &elemnum[0], &elem[0, 0], nelem,
+                                        isz, &n, EOL)
+
+                    if nelem == 0:
+                        raise Exception('Unable to read element block')
 
     # Free memory
     free(raw)
