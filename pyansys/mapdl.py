@@ -1158,7 +1158,53 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         line = self.get("__floatparameter__", entity, entnum, item1, it1num,
             item2, it2num, **kwargs)
         return float(re.search(r"(?<=VALUE\=).*", line).group(0))
-    
+
+    def read_float_parameter(self, parameter_name):
+        """
+        Read out the value of a ANSYS parameter to use in python.
+        Can raise TypeError.
+
+        Parameters
+        ----------
+        parameter_name : str
+            Name of the parameter inside ANSYS.
+
+        Returns
+        -------
+        float
+            Value of ANSYS parameter.
+
+        """
+        try:
+            line = self.run(parameter_name + " = " + parameter_name)
+        except TypeError:
+            print('Input variable parameter_name should be string')
+            raise
+        return float(re.search(r"(?<=\=).*", line).group(0))
+
+    def read_float_from_inline_function(self, function_str):
+        """
+        Use a APDL inline function to get a float value from ANSYS.
+        Take note, that internally an APDL parameter __floatparameter__ is
+        created/overwritten.
+        Example:
+            inline_function = "node({},{},{})".format(x, y, z)
+            node = apdl.read_float_from_inline_function(inline_function)
+
+        Parameters
+        ----------
+        function_str : str
+            String containing an inline function as used in APDL..
+
+        Returns
+        -------
+        float
+            Value returned by inline function..
+
+        """
+        self.run("__floatparameter__="+function_str)
+        return self.read_float_parameter("__floatparameter__")
+
     def open_gui(self, include_result=True):
         """ Saves existing database and opens up APDL GUI
 
