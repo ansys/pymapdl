@@ -148,6 +148,8 @@ setup(
     keywords='vtk ANSYS cdb full rst',
     package_data={'pyansys.examples': ['TetBeam.cdb',
                                        'HexBeam.cdb',
+                                       'hex_db_150.db',
+                                       'hex_db_194.db',
                                        'file.rst',
                                        'file.full',
                                        'sector.rst',
