@@ -2025,8 +2025,7 @@ class ResultFile(object):
 
 
 def result_info(filename):
-    """
-    Returns pointers used to access results from an ANSYS result file.
+    """Returns pointers used to access results from an ANSYS result file.
 
     Parameters
     ----------

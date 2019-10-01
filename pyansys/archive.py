@@ -3,7 +3,6 @@ Module to read ANSYS ASCII block formatted CDB files
 """
 import sys
 import logging
-import os
 
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
@@ -11,10 +10,9 @@ from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON)
 import pyvista as pv
 
+from pyansys.vtk_helper import raw_to_grid
 from pyansys import _reader
-from pyansys import _relaxmidside
-from pyansys import _parser
-from pyansys.elements import valid_types
+
 
 log = logging.getLogger(__name__)
 log.setLevel('CRITICAL')
@@ -34,6 +32,7 @@ class Archive(object):
         """ Initializes a cdb object """
         self.raw = _reader.read(filename, read_parameters=read_parameters,
                                 debug=verbose)
+        self.grid = None
 
     def parse_vtk(self, force_linear=False, allowable_types=None,
                   null_unallowed=False):
@@ -62,137 +61,14 @@ class Archive(object):
         grid : vtk.vtkUnstructuredGrid
             VTK unstructured grid from archive file.
         """
-        if self.check_raw():
-            raise Exception('Invalid file or missing key data.  ' +
-                            'Cannot parse into unstructured grid')
-
-        # Convert to vtk style arrays
-        if allowable_types is None:
-            allowable_types = valid_types
-        else:
-            assert isinstance(allowable_types, list), \
-                   'allowable_types must be a list'
-            for eletype in allowable_types:
-                if str(eletype) not in valid_types:
-                    raise Exception('Element type "%s" ' % eletype +
-                                    'cannot be parsed in pyansys')
-
-        # construct keyoption array
-        keyopts = np.zeros((10000, 20), np.int16)
-
-        for keyopt_key in self.raw['keyopt']:
-            for index, value in self.raw['keyopt'][keyopt_key]:
-                keyopts[keyopt_key, index] = value
-
-        # parse raw output
-        parsed = _parser.parse(self.raw, force_linear, allowable_types,
-                               null_unallowed, keyopts)
-        cells = parsed['cells']
-        offset = parsed['offset']
-        cell_type = parsed['cell_type']
-        numref = parsed['numref']
-        enum = parsed['enum']
-
-        # Check for missing midside nodes
-        if force_linear or np.all(cells != -1):
-            nodes = self.raw['nodes'][:, :3].copy()
-            nnum = self.raw['nnum']
-            angles = self.raw['nodes'][:, 3:]
-        else:
-            mask = cells == -1
-
-            nextra = mask.sum()
-            maxnum = numref.max() + 1
-            cells[mask] = np.arange(maxnum, maxnum + nextra)
-
-            nnodes = self.raw['nodes'].shape[0]
-            nodes = np.zeros((nnodes + nextra, 3))
-            nodes[:nnodes] = self.raw['nodes'][:, :3]
-
-            # Set new midside nodes directly between their edge nodes
-            temp_nodes = nodes.copy()
-            _relaxmidside.reset_midside(cells, cell_type, offset, temp_nodes)
-            nodes[nnodes:] = temp_nodes[nnodes:]
-
-            # merge nodes
-            new_nodes = temp_nodes[nnodes:]
-            unique_nodes, idxA, idxB = unique_rows(new_nodes)
-
-            # rewrite node numbers
-            cells[mask] = idxB + maxnum
-            nextra = idxA.shape[0]
-            nodes = np.empty((nnodes + nextra, 3))
-            nodes[:nnodes] = self.raw['nodes'][:, :3]
-            nodes[nnodes:] = unique_nodes
-
-            angles = np.empty((nnodes + nextra, 3))
-            angles[:nnodes] = self.raw['nodes'][:, 3:]
-            angles[nnodes:] = 0
-
-            # Add extra node numbers
-            nnum = np.hstack((self.raw['nnum'],
-                              np.ones(nextra, np.int32) * -1))
-
-        # Create unstructured grid
-        grid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
-
-        # Store original ANSYS element and cell information
-        grid.point_arrays['ansys_node_num'] = nnum
-        grid.cell_arrays['ansys_elem_num'] = enum
-        grid.cell_arrays['ansys_elem_type_num'] = parsed['etype']
-        grid.cell_arrays['ansys_real_constant'] = parsed['rcon']
-        grid.cell_arrays['ansys_material_type'] = parsed['mtype']
-        grid.cell_arrays['ansys_etype'] = parsed['ansys_etype']
-
-        # Add element components to unstructured grid
-        for comp in self.raw['elem_comps']:
-            mask = np.in1d(enum, self.raw['elem_comps'][comp],
-                           assume_unique=True)
-            grid.cell_arrays[comp.strip()] = mask
-
-        # Add node components to unstructured grid
-        for comp in self.raw['node_comps']:
-            mask = np.in1d(nnum, self.raw['node_comps'][comp],
-                           assume_unique=True)
-            grid.point_arrays[comp.strip()] = mask
-
-        # Add tracker for original node numbering
-        ind = np.arange(grid.number_of_points)
-        grid.point_arrays['origid'] = ind
-        grid.point_arrays['VTKorigID'] = ind
-
-        # store node angles
-        grid.point_arrays['angles'] = angles
-
-        self.grid = grid
-        return grid
-
-    def check_raw(self):
-        """ Check if raw data can be converted into an unstructured grid """
-        try:
-            self.raw['elem'][0, 0]
-            self.raw['enum'][0]
-        except BaseException:
-            return 1
-
-        return 0
+        self.grid = raw_to_grid(self.raw, allowable_types, force_linear, null_unallowed)
+        return self.grid
 
 
 def chunks(l, n):
     """ Yield successive n-sized chunks from l """
     for i in range(0, len(l), n):
         yield l[i:i + n]
-
-
-def unique_rows(a):
-    """ Returns unique rows of a and indices of those rows """
-    if not a.flags.c_contiguous:
-        a = np.ascontiguousarray(a)
-
-    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
-    _, idx, idx2 = np.unique(b, True, True)
-
-    return a[idx], idx, idx2
 
 
 def save_as_archive(filename, grid, mtype_start=1, etype_start=1,

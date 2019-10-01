@@ -113,6 +113,11 @@ setup(
                            extra_compile_args=cmp_arg,
                            language='c'),
 
+                 Extension("pyansys._db_reader",
+                           ["pyansys/cython/_db_reader.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
                  Extension('pyansys._reader',
                            ['pyansys/cython/_reader.pyx',
                             'pyansys/cython/reader.c'],
