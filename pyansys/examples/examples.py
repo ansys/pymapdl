@@ -15,11 +15,14 @@ import pyvista as pv
 # get location of this folder and the example files
 dir_path = os.path.dirname(os.path.realpath(__file__))
 rstfile = os.path.join(dir_path, 'file.rst')
+hex_database_v194 = os.path.join(dir_path, 'hex_db_194.db')
+hex_database_v150 = os.path.join(dir_path, 'hex_db_150.db')
+hex_database = os.path.join(dir_path, 'hex_db_194.db')
 hexarchivefile = os.path.join(dir_path, 'HexBeam.cdb')
 tetarchivefile = os.path.join(dir_path, 'TetBeam.cdb')
 fullfile = os.path.join(dir_path, 'file.full')
 sector_archive_file = os.path.join(dir_path, 'sector.cdb')
-# sector_result_file = os.path.join(dir_path, 'sector.rst')
+
 
 
 def run_all(run_ansys=False):
