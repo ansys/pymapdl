@@ -111,6 +111,28 @@ SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                         'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl',
                         'ptrGEOh']
 
+SOLUTION_HEADER_KEYS_DP = ['timfrq',  'lfacto',  'lfactn', 'cptime', 'tref',
+                           'tunif', 'tbulk', 'volbase', 'tstep', '__unused',
+                           'accel_x', 'accel_y', 'accel_z', 'omega_v_x', 'omega_v_y',
+                           'omega_v_z', 'omega_a_x', 'omega_a_y', 'omega_a_z', 'omegacg_v_x',
+                           'omegacg_v_y', 'omegacg_v_z', 'omegacg_a_x', 'omegacg_a_y', 'omegacg_a_z',
+                           'cgcent', 'cgcent', 'cgcent', 'fatjack', 'fatjack',
+                           'dval1', 'pCnvVal', #'pCnvVal', 'pCnvVal',
+                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
+                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
+                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal']
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (60)
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (70)
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (80)
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (90)
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
+# c                                    timdat,  timdat,  timdat,  timdat,  timdat   (100)
+]
+
 GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
                         'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC',
                         'ptrCSY', 'ptrEID', 'maxsec', 'secsiz',
@@ -727,7 +749,54 @@ class ResultFile(object):
 
         self.grid = self.quadgrid.linear_copy()
 
-    def element_solution_header(self, rnum):
+    def solution_info(self, rnum):
+        """Return an informative dictionary of solution data for a
+        result.
+
+        Returns
+        -------
+        header : dict
+            Double precision solution header data.
+
+        Notes
+        -----
+        The keys of the solution header is described below:
+
+        timfrq - Time value (or frequency value, for a modal or
+                 harmonic analysis)
+
+        lfacto  - the "old" load factor (used in ramping a load
+                  between old and new values)
+        lfactn  - the "new" load factor
+        cptime  - elapsed cpu time (in seconds)
+        tref    - the reference temperature
+        tunif   - the uniform temperature
+        tbulk   - Bulk temp for FLOTRAN film coefs.
+        VolBase - Initial total volume for VOF
+        tstep   - Time Step size for FLOTRAN analysis
+        0.0     - position not used
+        accel   - linear acceleration terms
+        omega   - angular velocity (first 3 terms) and angular acceleration (second 3 terms)
+        omegacg - angular velocity (first 3 terms) and angular
+                  acceleration (second 3 terms) these velocity/acceleration
+                  terms are computed about the center of gravity
+        cgcent  - (x,y,z) location of center of gravity
+        fatjack - FATJACK ocean wave data (wave height and period)
+        dval1   - if pmeth=0: FATJACK ocean wave direction
+                  if pmeth=1: p-method convergence values
+        pCnvVal - p-method convergence values
+        """
+        # Check if result is available
+        if rnum > self.nsets - 1:
+            raise Exception('There are only %d results in the result file.' % self.nsets)
+
+        with open(self.filename, 'rb') as f:
+            # f = open(self.filename, 'rb')
+            f.seek(self.resultheader['rpointers'][rnum] * 4)
+            read_table(f, skip=True)  # skip pointers table
+            return parse_header(read_table(f, None), SOLUTION_HEADER_KEYS_DP)
+
+    def _element_solution_header(self, rnum):
         """ Get element solution header information """
         # Get the header information from the header dictionary
         # endian = self.resultheader['endian']
@@ -809,7 +878,7 @@ class ResultFile(object):
     #     """
     #     # element header
     #     rnum = self.parse_step_substep(rnum)
-    #     ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+    #     ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
 
     #     if self.resultheader['rstsprs'] != 0:
     #         nitem = 6
@@ -886,7 +955,7 @@ class ResultFile(object):
 
         """
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+        ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)
@@ -1017,7 +1086,7 @@ class ResultFile(object):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, _, _ = self.element_solution_header(rnum)
+        ele_ind_table, _, _ = self._element_solution_header(rnum)
 
         element_data = []
         with open(self.filename, 'rb') as file:
@@ -1607,7 +1676,7 @@ class ResultFile(object):
         """
         # element header
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self.element_solution_header(rnum)
+        ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
 
         result_type = result_type.upper()
         nitem = ELEMENT_RESULT_NCOMP[result_type]

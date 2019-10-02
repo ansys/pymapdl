@@ -92,3 +92,9 @@ def test_repr():
 @pytest.mark.skipif(pontoon is None, reason="Requires example files")
 def test_available_results():
     assert 'ENS' in pontoon.available_results
+
+
+@pytest.mark.skipif(vm33 is None, reason="Requires example files")
+def test_solution_info():
+    info = vm33.solution_info(0)
+    assert 'omega_a_x' in info

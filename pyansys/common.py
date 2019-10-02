@@ -142,7 +142,14 @@ def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
             raise Exception('end of file')
 
         tablesize = n[0]
-        f.seek(4, 1)  # skip padding
+        if dtype is None:
+            ansys_dtype = np.fromfile(f, 'i', 1)
+            if ansys_dtype == 0:
+                dtype = 'double'
+            else:
+                dtype = 'i'
+        else:
+            f.seek(4, 1)  # skip padding
 
     # override
     if nread:
