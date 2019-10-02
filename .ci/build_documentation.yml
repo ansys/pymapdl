@@ -35,6 +35,8 @@ steps:
 - script: |
     cd ..
     git clone --single-branch --branch gh-pages https://$(github_pat)@github.com/akaszynski/pyansys.git
+    git gc --prune=now
+    git remote prune origin
     cd pyansys
     git config user.email $(gh_email)
     git config user.name $(gh_user)
