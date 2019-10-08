@@ -18,7 +18,45 @@ ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
                            9: 'Modal Results File',
                            10: 'Reduced Displacement File',
                            12: 'Result file',
+                           16: 'Database file',
                            45: 'Component Mode Synthesis Matrices (CMS) File'}
+
+
+
+# c *** standard usage of the block number (buffers) and file unit number(FUN)
+# c     for the ansys files
+# c
+# c     File     FileName   Unit File    Block      Description
+# c     EMAT ->    EMATNM       FUN02        2      element matrices
+# c     ESAV ->    ESAVNM       FUN03        1      element save data
+# c     R000 ->    R000NM       FUN03        7      element save data
+# c     FULL ->    FULLNM       FUN04        3      full matrices
+# c     EROT ->    EROTNM       FUN07        4      element matrices
+# c     SUB  ->    SUBNM        FUN08        8/7    substructuring
+# c     MODE ->    MODENM       FUN09        8 (7)  mode file
+# c     RDSP ->    RDSPNM       FUN10        7      Reduced displacement file
+# c     RFRQ ->    RFRQNM       FUN10        7      Reduced complex displacement (MSUP)
+# c     TRI  ->    TRINM        FUN11        3      tri stiffness
+# c     RST  ->    RSTNM        FUN12        6      results
+# c     DSUB ->    DSUBNM       FUN13        5      displacement substructure
+# c                             FUN14               input file? 
+# c                             FUN15               output file?
+# c     RDB  ->                 FUN16               back up file
+# c                             FUN17               temporary file (used in different cases)
+# c     MODEL->    MODENM_LEFT  FUN19       19      mode file for left eigen modes
+# c     SCR1 ->                 FUN22               scratch file
+# c     SCR2 ->                 FUN23               scratch file
+# c     SCR3 ->                 FUN24               scratch file
+# c     SCR4 ->                 FUN26               scratch file
+# c     TMP  ->                 FUN28               temporary file used for rewrite a file
+# c     OPT  ->                 FUN36               optimization data file
+# c     LN40 ->                 FUN40               Boeing reduced matrix
+# c     LN41 ->                 FUN41               Boeing reduced matrix
+# c     LN42 ->                 FUN42               Boeing reduced matrix
+# c     MLV  ->                 FUN43        8      load vector file (substructure)
+# c                             FUN44               ?
+# c     IST  ->                 FUN63               initial stress file
+# c     ASI  ->    ASIRSTNM     FUN66        9      asi results
 
 
 def read_binary(filename, **kwargs):
@@ -74,7 +112,7 @@ def read_binary(filename, **kwargs):
         return FullFile(filename, **kwargs)
     elif file_format == 12:
         from pyansys.rst import ResultFile
-        result =  ResultFile(filename, **kwargs)
+        result = ResultFile(filename, **kwargs)
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
@@ -83,6 +121,10 @@ def read_binary(filename, **kwargs):
             return CyclicResult(filename)
 
         return result
+
+    elif file_format == 16:
+        from pyansys.db import Database
+        return Database(filename, debug=kwargs.pop('debug', False))
 
     else:
         if file_format in ANSYS_BINARY_FILE_TYPES:
@@ -100,7 +142,14 @@ def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
             raise Exception('end of file')
 
         tablesize = n[0]
-        f.seek(4, 1)  # skip padding
+        if dtype is None:
+            ansys_dtype = np.fromfile(f, 'i', 1)
+            if ansys_dtype == 0:
+                dtype = 'double'
+            else:
+                dtype = 'i'
+        else:
+            f.seek(4, 1)  # skip padding
 
     # override
     if nread:
@@ -108,7 +157,7 @@ def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
 
     if skip:
         f.seek((tablesize + 1)*4, 1)
-        return
+        return tablesize
     else:
         if dtype == 'double':
             tablesize //= 2

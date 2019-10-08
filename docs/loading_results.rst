@@ -105,6 +105,49 @@ See the doc string for ``parse_coordinate_system`` for more details regarding th
 
 Accessing Solution Results
 --------------------------
+You can obtain detailed information using ``solution_info`` for each result:
+
+.. code:: python
+
+    # return a dictionary of solution info for the first result
+    info = result.solution_info(0)
+
+    for key in info:
+        print(key, info[key])
+
+This yields::
+
+    timfrq 1.0
+    lfacto 1.0
+    lfactn 1.0
+    cptime 50.9189941460218
+    tref 0.0
+    tunif 0.0
+    tbulk 82.0
+    volbase 0.0
+    tstep 0.0
+    __unused 0.0
+    accel_x 0.0
+    accel_y 0.0
+    accel_z 0.0
+    omega_v_x 0.0
+    omega_v_y 0.0
+    omega_v_z 100
+    omega_a_x 0.0
+    omega_a_y 0.0
+    omega_a_z 0.0
+    omegacg_v_x 0.0
+    omegacg_v_y 0.0
+    omegacg_v_z 0.0
+    omegacg_a_x 0.0
+    omegacg_a_y 0.0
+    omegacg_a_z 0.0
+    cgcent 0.0
+    fatjack 0.0
+    dval1 0.0
+    pCnvVal 0.0
+
+
 The DOF solution for an analysis for each node in the analysis can be obtained using the code block below.  These results correspond to the node numbers in the result file.  This array is sized by the number of nodes by the number of degrees of freedom.
 
 .. code:: python    
