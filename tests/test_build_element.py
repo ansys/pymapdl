@@ -17,9 +17,3 @@ def test_et():
     assert n_plane183 == n_compare
     n_plane183 = mapdl.et(17, "PLANE183")
     assert n_plane183 == 17
-
-
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_invalid():
-    with pytest.raises(Exception):
-        mapdl.a(0, 0, 0, 0)
