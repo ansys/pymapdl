@@ -29,6 +29,7 @@ import psutil
 
 import pyansys
 from pyansys.geometry_commands import geometry_commands
+from pyansys.element_commands import element_commands
 from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.deprec_commands import _DeprecCommands
 from pyansys.convert import is_float
@@ -656,6 +657,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         if short_cmd in geometry_commands:
             return geometry_commands[short_cmd](self.response)
+
+        if short_cmd in element_commands:
+            return element_commands[short_cmd](self.response)
 
         return self.response
 
