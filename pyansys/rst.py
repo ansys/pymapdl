@@ -592,14 +592,19 @@ class ResultFile(object):
                     else:# integer count
                         nitems = two_ints_to_long(reclenl, reclenh)
                     # read record that contains the list of nodes for which DOF solutions are available
-                    nodlist = np.fromfile(f,endian+dtype,nitems)[:,np.newaxis]
+                    # seems to be in internal ordering
+                    nodlist = np.fromfile(f,endian+dtype,nitems)#[:,np.newaxis]
                     
                     # Reorder based on sorted indexing
-                    neqv = self.resultheader['neqv']
-                    sidx = self.sidx
-                    sidx = np.tile(sidx,nodlist.shape)
-                    idx = neqv==nodlist
-                    sidx = sidx[idx]
+                    #neqv = self.resultheader['neqv']
+                    #sidx = self.sidx
+                    #sidx = np.tile(sidx,nodlist.shape)
+                    #sidx = neqv==nodlist
+                    #sidx = sidx[idx]
+                    
+                    # convert to numpy indices
+                    sidx = nodlist -1
+                    
                 else:
                     # Reorder based on sorted indexing
                     sidx = self.sidx
