@@ -37,7 +37,7 @@ The settings file is stored locally and do not need to enter it again.  If you n
 
 Running ANSYS from ``pyansys``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ANSYS can be started from python using the ``pyansys.ANSYS`` class.  This starts in a temporary directory by default.  You can change this to your current directory with:
+ANSYS can be started from python using the ``pyansys.Mapdl`` class.  This starts in a temporary directory by default.  You can change this to your current directory with:
 
 .. code:: python
 
@@ -47,7 +47,7 @@ ANSYS can be started from python using the ``pyansys.ANSYS`` class.  This starts
     path = os.getcwd()
     ansys = pyansys.Mapdl(run_location=path)
 
-ANSYS is now active and you can send commands to it as if it was just a python class.
+ANSYS is now active and you can send commands to it as if it was just a Python object.
 
 
 Using ANSYS from ``pyansys``
@@ -84,12 +84,12 @@ ANSYS interactively returns the result of each command and it is stored to the l
    Keypoint 1 is referenced by only one line.  Improperly connected line   
    set for AL command.                                                     
 
-This means that exceptions will be caught immediately.  This means that you can write your ANSYS scripts in python, run them interactively and then as a batch without worrying if the script will run correctly if you had instead outputted it to a script file.
+This Exception was be caught immediately.  This means that you can write your ANSYS scripts in python, run them interactively and then as a batch without worrying if the script will run correctly if you had instead outputted it to a script file.
 
 
 Calling ANSYS Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-One advantage of writing scripts using ``pyansys`` is the ability to call ANSYS commands as python functions from the ``ANSYS`` class.  For example, instead of sending commands to ANSYS as in the area creation example, we can instead run:
+One advantage of writing scripts using ``pyansys`` is the ability to call ANSYS commands as python functions from the ``Mapdl`` class.  For example, instead of sending commands to ANSYS as in the area creation example, we can instead run:
 
 .. code:: python
 

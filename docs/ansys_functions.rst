@@ -1,6 +1,6 @@
 ANSYS Functions
 ===============
-These functions can be called directly from an ``ANSYS`` object.  This is to simplifiy calling ANSYS, especially when inputs are variables within Python.  For example, the following two commands are equivalent:
+These functions can be called directly from an ``Mapdl`` object.  This is to simplifiy calling ANSYS, especially when inputs are variables within Python.  For example, the following two commands are equivalent:
 
 .. code:: python
 
