@@ -26,11 +26,6 @@ def parse_l(msg):
     return result
 
 
-def parse_bsplin(msg):
-    """Parse create bsplin line message and return line number"""
-    return parse_l(msg)
-
-
 def parse_a(msg):
     """Parse create area message and return area number"""
     res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
@@ -38,7 +33,26 @@ def parse_a(msg):
         result = int(res.group(2))
     else:
         result = None
+    return result
 
+
+def parse_v(msg):
+    """Parse create volume message and return volume number"""
+    res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
+    if res is not None:
+        result = int(res.group(2))
+    else:
+        result = None
+    return result
+
+
+def parse_n(msg):
+    """Parse create node message and return node number"""
+    res = re.search(r"(NODE\s*)([0-9]+)", msg)
+    if res is not None:
+        result = int(res.group(2))
+    else:
+        result = None
     return result
 
 
@@ -47,9 +61,16 @@ def parse_al(msg):
     return parse_a(msg)
 
 
+def parse_bsplin(msg):
+    """Parse create bsplin line message and return line number"""
+    return parse_l(msg)
+
+
 geometry_commands = {'K': parse_k,
                      'L': parse_l,
-                     'BSPLIN': parse_bsplin,
                      'A': parse_a,
+                     'V': parse_v,
+                     'N': parse_n,
                      'AL': parse_al,
+                     'BSPLIN': parse_bsplin,
 }
