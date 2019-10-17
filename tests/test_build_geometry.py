@@ -8,6 +8,7 @@ if pyansys.has_ansys:
 
 @pytest.fixture(scope='function')
 def cleared():
+    mapdl.finish()
     mapdl.clear()
     mapdl.prep7()
     yield
