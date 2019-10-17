@@ -462,14 +462,17 @@ class ResultFile(object):
                                         movie_filename=movie_filename,
                                         max_disp=max_disp, **kwargs)
 
-    def nodal_time_history(self, solution_type = 'NSL', in_nodal_coord_sys=False):
+    def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
-        Parameters:
+        Parameters
+        ----------
         solution_type: str, optional
-            Specify, whether nodal displacements ('NSL'), nodal velocities ('VEL')
-            or nodal accelerations ('ACC') will be read.
+            Specify, whether nodal displacements ('NSL'), nodal
+            velocities ('VEL') or nodal accelerations ('ACC') will be
+            read.
+
         in_nodal_coord_sys : bool, optional
             When True, returns results in the nodal coordinate system.
             Default False.
@@ -480,12 +483,12 @@ class ResultFile(object):
             Node numbers associated with the results.
 
         result : float np.ndarray
-            Result is (self.nsets x nnod x Sumdof), or number of time steps 
+            Result is ``self.nsets x nnod x Sumdof``, or number of time steps 
             by number of nodes by degrees of freedom
         """
         if not solution_type in ('NSL','VEL','ACC'):
-            raise Exception("Argument 'solution type' must be either 'NSL', 'VEL' or 'ACC'.")
-        
+            raise ValueError("Argument 'solution type' must be either 'NSL', 'VEL', or 'ACC'")
+
         # Get info from result header
         endian = self.resultheader['endian']
         rpointers = self.resultheader['rpointers']
@@ -495,39 +498,39 @@ class ResultFile(object):
         with open(self.filename, 'rb') as f:
             # get first solution header and assume, following solution headers are equal
             f.seek((rpointers[0]) * 4)
-            
+
             solution_header = parse_header(read_table(f), SOLUTION_HEADER_KEYS)
-            
+
             mask = solution_header['mask']
             #PDBN = bool(mask & 0b1<<10)
             pdnsl = bool(solution_header['AvailData'] & 0b1<<27)
             PDVEL = bool(mask & 0b1<<27)
             PDACC = bool(mask & 0b1<<28)
-            
+
             if solution_type == 'NSL' and not pdnsl:
                 raise Exception("Result file does not contain nodal displacements.")
-            
+
             if solution_type == 'VEL' and not PDVEL:
                 raise Exception("Result file does not contain nodal velocities.")
-            
+
             if solution_type == 'ACC' and not PDACC:
                 raise Exception("Result file does not contain nodal accelerations.")
-        
+
             nnod = solution_header['nnod']
             numdof = solution_header['numdof']
             nfldof = solution_header['nfldof']
             Sumdof = numdof + nfldof
-            
+
             #numvdof = solution_header['numvdof'] # does not seem to be set in transient analysis
             #if not numvdof: numvodf = Sumdof 
             #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
             #if not numadof: numadof = Sumdof 
-            
+
             results = np.zeros((nsets, nnod, Sumdof))
-            
+
             # iterate over all loadsteps
             for rnum in range(self.nsets):
-                
+
                 # Seek to result table and to get pointer to DOF results of result table
                 if solution_type == 'NSL': # Nodal Displacements
                     f.seek((rpointers[rnum] + 12) * 4)  # item 11
@@ -547,31 +550,31 @@ class ResultFile(object):
                     ptrASLh = np.fromfile(f, endian + 'i', 1)[0]
                     ptrASL = two_ints_to_long(ptrASLl, ptrASLh)
                     ptrSL = ptrASL
-                    
+
                 f.seek((rpointers[rnum] + ptrSL) * 4)
-                
+
                 # integer count that tells how long the record is
                 reclenl = np.fromfile(f,endian+'i',1)[0]
                 # read as unsigned integer to to read and reset 31st bit
                 reclenh = np.fromfile(f, endian+'u4',1)[0]
-                
+
                 # bit 31 is set in higher order part, if the record contains integers
                 is_integer= bool(reclenh & 0b1<<31)
                 dtype = ['d','i'][is_integer]
                 #reset 31st bit and represent as int32
                 reclenh = np.int32(reclenh&~0b1<<31)
-                
+
                 if not is_integer:# double count
                     nitems = int(two_ints_to_long(reclenl, reclenh)/2)
                 else:# integer count
                     nitems = two_ints_to_long(reclenl, reclenh)
-                
+
                 result = np.fromfile(f, endian + dtype, nitems)
                 result = result.reshape((-1, Sumdof))
-                
+
                 # skip over last 4 bits that repear rec_len
                 f.read(4)
-                
+
                 # PDBN should be set if only a subset of nodes was output
                 # PDBN is set only when solution type: nodal solution/displacement
                 # PDBN is not set when solution type: acceleration, velocities 
@@ -580,13 +583,13 @@ class ResultFile(object):
                     reclenl = np.fromfile(f,endian+'i',1)[0]
                     # read as unsigned integer to read and toogle 31st bit
                     reclenh = np.fromfile(f, endian+'u4',1)[0]
-                    
+
                     # bit 31 is set in higher order part, if the record contains integers
                     is_integer= bool(reclenh & 0b1<<31)
                     dtype = ['d','i'][is_integer]
                     #reset 31st bit and represent as int32
                     reclenh = np.int32(reclenh&~0b1<<31)
-                    
+
                     if not is_integer:# double count
                         nitems = int(two_ints_to_long(reclenl, reclenh)/2)
                     else:# integer count
@@ -594,26 +597,26 @@ class ResultFile(object):
                     # read record that contains the list of nodes for which DOF solutions are available
                     # seems to be in internal ordering
                     nodlist = np.fromfile(f,endian+dtype,nitems)#[:,np.newaxis]
-                    
+
                     # Reorder based on sorted indexing
                     #neqv = self.resultheader['neqv']
                     #sidx = self.sidx
                     #sidx = np.tile(sidx,nodlist.shape)
                     #sidx = neqv==nodlist
                     #sidx = sidx[idx]
-                    
+
                     # convert to numpy indices
                     sidx = nodlist -1
-                    
+
                 else:
                     # Reorder based on sorted indexing
                     sidx = self.sidx
-                
+
                 results[rnum,sidx,:]=result
 
             f.close()
 
-        
+
         if not in_nodal_coord_sys:
             # ansys writes the results in the nodal coordinate system.
             # Convert this to the global coordinate system  (in degrees)
@@ -623,7 +626,7 @@ class ResultFile(object):
                 result = results[rnum,:,:]
                 if np.any(theta_xy):
                     pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
-    
+
                 if np.any(theta_yz):
                     pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
     
