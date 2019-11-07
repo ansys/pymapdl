@@ -9,6 +9,7 @@ import os
 import numpy as np
 
 from pyansys import _binary_reader
+from collections import Counter
 
 
 ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
@@ -185,12 +186,25 @@ def parse_header(table, keys):
     """ parses a header from a table """
     header = {}
     max_entry = len(table) - 1
+    # some keys occure multiple times and refer to arrays of some sort
+    counter = Counter(keys)
+    del counter['0']
+
+    #initialize lists/arrays
+    for key, count in counter.items():
+        if count > 1:
+            header[key]=[]
+            
     for i, key in enumerate(keys):
         if i > max_entry:
             header[key] = 0
         else:
-            header[key] = table[i]
-
+            if counter[key]>1: # multiple items in the header -> list/array
+                if table[i]: # skip zeros
+                    header[key].append(table[i])
+            else:
+                header[key] = table[i] 
+    
     for key in keys:
         if 'ptr' in key and key[-1] == 'h':
             basekey = key[:-1]
