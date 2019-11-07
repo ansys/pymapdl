@@ -47,3 +47,4 @@ steps:
     # cd $BUILD_SOURCESDIRECTORY
     git push
   displayName: Push to gh-pages
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/master')

@@ -906,6 +906,21 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return '%s\n%s' % (text, additional_text)
 
     def load_parameters(self):
+        """Loads and returns all current parameters
+
+        Examples
+        --------
+        >>> parameters, arrays = mapdl.load_parameters()
+        >>> print(parameters)
+        {'ANSINTER_': 2.0,
+        'CID': 3.0,
+        'TID': 4.0,
+        '_ASMDIAG': 5.363415510271,
+        '_MAXELEMNUM': 26357.0,
+        '_MAXELEMTYPE': 7.0,
+        '_MAXNODENUM': 40908.0,
+        '_MAXREALCONST': 1.0}
+        """
         # load ansys parameters to python
         filename = os.path.join(self.path, 'parameters.parm')
         self.Parsav('all', filename)
@@ -1315,7 +1330,7 @@ def load_parameters(filename):
     -------
     parameters : dict
         Dictionary of single value parameters
-{
+
     arrays : dict
         Dictionary of arrays
 
