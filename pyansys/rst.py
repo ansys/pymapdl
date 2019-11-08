@@ -76,7 +76,7 @@ ELEMENT_INDEX_TABLE_INFO = {
     'MNL': 'material nonlinear record'
 }
 
-SOLUTION_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
+SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                         'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
                         'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST',
                         'ptrBC', 'rxtrap', 'mode', 'isym', 'kcmplx',
@@ -499,7 +499,7 @@ class ResultFile(object):
             # get first solution header and assume, following solution headers are equal
             f.seek((rpointers[0]) * 4)
 
-            solution_header = parse_header(read_table(f), SOLUTION_HEADER_KEYS)
+            solution_header = parse_header(read_table(f), SOLUTION_DATA_HEADER_KEYS)
 
             mask = solution_header['mask']
             #PDBN = bool(mask & 0b1<<10)
@@ -972,7 +972,27 @@ class ResultFile(object):
             f.seek(self.resultheader['rpointers'][rnum] * 4)
             read_table(f, skip=True)  # skip pointers table
             return parse_header(read_table(f, None), SOLUTION_HEADER_KEYS_DP)
+    
+    def solution_data_info(self, rnum):
+        """Return an informative dictionary of solution data for a
+        result.
 
+        Returns
+        -------
+        header : dict
+            Integer solution data header data.
+        """
+        # Check if result is available
+        if rnum > self.nsets - 1:
+            raise Exception('There are only %d results in the result file.' % self.nsets)
+
+        with open(self.filename, 'rb') as f:
+            # f = open(self.filename, 'rb')
+            f.seek(self.resultheader['rpointers'][rnum] * 4)
+            solution_data_header = parse_header(read_table(f,None), SOLUTION_DATA_HEADER_KEYS)  # skip pointers table
+
+        return solution_data_header
+    
     def _element_solution_header(self, rnum):
         """ Get element solution header information """
         # Get the header information from the header dictionary
@@ -991,7 +1011,7 @@ class ResultFile(object):
         # Read a result
         with open(self.filename, 'rb') as f:
             f.seek((rpointers[rnum]) * 4)  # item 20
-            solution_header = parse_header(read_table(f), SOLUTION_HEADER_KEYS)
+            solution_header = parse_header(read_table(f), SOLUTION_DATA_HEADER_KEYS)
 
             # key to extrapolate integration
             # = 0 - move
