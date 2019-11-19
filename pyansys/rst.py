@@ -1549,6 +1549,10 @@ class ResultFile(object):
         rang = 360.0 / self.n_sector
         copied_meshes = []
 
+        # remove extra keyword args
+        kwargs.pop('node_components', None)
+        kwargs.pop('sel_type_all', None)
+
         if kwargs.pop('overlay_wireframe', False):
             plotter.add_mesh(self.grid,
                              color='w',

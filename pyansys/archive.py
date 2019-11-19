@@ -423,7 +423,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                 line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % writenodes[:8]
 
             elif celltypes[i] == VTK_HEXAHEDRON:
-                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes)
+                line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[:8])
 
             elif celltypes[i] == VTK_QUADRATIC_HEXAHEDRON:
                 line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[:8])
