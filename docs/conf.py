@@ -93,7 +93,7 @@ sphinx_gallery_conf = {
     "within_subsection_order": FileNameSortKey,
 
     # directory where function granular galleries are stored
-    "backreferences_dir": False,
+    "backreferences_dir": None,
 
     # Modules for which function level galleries are created.  In
     "doc_module": "pyansys",
