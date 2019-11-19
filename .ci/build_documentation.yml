@@ -42,6 +42,7 @@ steps:
     git config user.name $(gh_user)
     rm -rf *
     cp -r $BUILD_SOURCESDIRECTORY/docs/_build/html/* .
+    touch .nojekyll
     git add .
     git commit -am "Pipelines-Bot: Updated site via $(Build.SourceVersion)"
     # cd $BUILD_SOURCESDIRECTORY
