@@ -143,12 +143,26 @@ def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
             raise Exception('end of file')
 
         tablesize = n[0]
-        if dtype is None:
-            ansys_dtype = np.fromfile(f, 'i', 1)
-            if ansys_dtype == 0:
-                dtype = 'double'
+        if dtype is None:  # read flags to get data type
+            # ansys_dtype = np.fromfile(f, 'i', 1)
+            flags = f.read(4)[-1]
+            type_flag = flags >> 0 & 1
+            prec_flag = flags >> 1 & 1
+            # zlib_flag = flags >> 2 & 1
+            sparse_flag = flags >> 3 & 1
+            if sparse_flag:
+                raise NotImplementedError('Cannot read sparse results.\nPlease run with "/FCOMP,RST,0" to disable writing sparse results')
+
+            if type_flag:
+                if prec_flag:
+                    dtype = 'short'
+                else:
+                    dtype = 'i'
             else:
-                dtype = 'i'
+                if prec_flag:
+                    dtype = 'float'
+                else:
+                    dtype = 'double'
         else:
             f.seek(4, 1)  # skip padding
 
@@ -165,7 +179,6 @@ def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
         table = np.fromfile(f, dtype, tablesize)
     f.seek(4, 1)  # skip padding
     return table
-
 
 
 def read_string_from_binary(f, n):
