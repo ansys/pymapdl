@@ -77,10 +77,25 @@ def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
     cdef int i
     cdef int j
     
-    cdef bytes buf
+    cdef bytes buf, flags_buf
     with open(filename, "rb") as f:
+        # ansys stores flags in the 8th byte from start
+        f.seek((ptrLOC)*4)
+        flags_buf = f.read(8)
+
         f.seek((ptrLOC + 2)*4)
         buf = f.read(nnod*68)
+
+    cdef char * flags = flags_buf
+    # cdef int type_flag = (p[7] >> 0) & 1         # flag 31
+    # cdef int prec_flag = (p[7] >> 1) & 1         # flag 30
+    # cdef int zlib_flag = (p[7] >> 2) & 1         # flag 29
+    cdef int sparse_flag = (flags[7] >> 3) & 1       # flag 28
+    # cdef int zlib_sparse_flag = (p[7] >> 4) & 1  # flag 27
+
+    if sparse_flag:
+        raise NotImplementedError('Cannot read sparse results.\nPlease run MAPDL with "/FCOMP,RST,0" to disable writing sparse results')
+
     
     cdef char * p = buf
     cdef int loc
