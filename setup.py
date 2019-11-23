@@ -140,9 +140,11 @@ setup(
                            language='c'),
 
                  Extension("pyansys._binary_reader",
-                           ["pyansys/cython/_binary_reader.pyx"],
+                           ["pyansys/cython/_binary_reader.pyx",
+                            # "pyansys/cython/SparseBufferToVec.cpp",
+                            "pyansys/cython/binary_reader.cpp"],
                            extra_compile_args=cmp_arg,
-                           language='c'),
+                           language='c++'),
                  ],
 
     keywords='vtk ANSYS cdb full rst',

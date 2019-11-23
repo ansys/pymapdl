@@ -1,3 +1,4 @@
+# cython: language_level=3
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
@@ -16,6 +17,13 @@ ctypedef unsigned char uint8
 
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
+
+cdef extern from 'binary_reader.h':
+    void read_nodes(const char*, int, int, int*, double*)
+
+cdef extern from 'binary_reader.h':
+    void* read_record(const char*, int, int*, int*, int*)
+
 
 # VTK numbering for vtk cells
 cdef uint8 VTK_EMPTY_CELL = 0
@@ -41,6 +49,60 @@ cdef double DEG2RAD = 0.0174532925
 ctypedef fused index_type:
     int
     int64_t
+
+
+###############################################################################
+from libc.stdlib cimport free
+from cpython cimport PyObject, Py_INCREF
+
+# Import the Python-level symbols of numpy
+import numpy as np
+
+# Import the C-level symbols of numpy
+cimport numpy as np
+
+# Numpy must be initialized. When using numpy from C or Cython you must
+# _always_ do that, or you will have segfaults
+np.import_array()
+
+# We need to build an array-wrapper class to deallocate our array when
+# the Python object is deleted.
+
+cdef class ArrayWrapper:
+    cdef void* data_ptr
+    cdef int size
+
+    cdef set_data(self, int size, void* data_ptr):
+        """ Set the data of the array
+        This cannot be done in the constructor as it must recieve C-level
+        arguments.
+        Parameters:
+        -----------
+        size: int
+            Length of the array.
+        data_ptr: void*
+            Pointer to the data            
+        """
+        self.data_ptr = data_ptr
+        self.size = size
+
+    def __array__(self):
+        """ Here we use the __array__ method, that is called when numpy
+            tries to get an array from the object."""
+        cdef np.npy_intp shape[1]
+        shape[0] = <np.npy_intp> self.size
+        # Create a 1D array, of length 'size'
+        ndarray = np.PyArray_SimpleNewFromData(1, shape,
+                                               np.NPY_INT, self.data_ptr)
+        return ndarray
+
+    def __dealloc__(self):
+        """ Frees the array. This is called by Python when all the
+        references to the object are gone. """
+        free(<void*>self.data_ptr)
+
+
+###############################################################################
 
 
 cdef int PTR_ENS_IDX = 2
@@ -72,40 +134,52 @@ def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
     def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc, 
        int [::1] nnum):
         
-    """
-    
-    cdef int i
-    cdef int j
-    
+    """    
     cdef bytes buf, flags_buf
-    with open(filename, "rb") as f:
-        # ansys stores flags in the 8th byte from start
-        f.seek((ptrLOC)*4)
-        flags_buf = f.read(8)
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    read_nodes(c_filename, ptrLOC, nnod, &nnum[0], &nloc[0, 0])
 
-        f.seek((ptrLOC + 2)*4)
-        buf = f.read(nnod*68)
 
-    cdef char * flags = flags_buf
-    # cdef int type_flag = (p[7] >> 0) & 1         # flag 31
-    # cdef int prec_flag = (p[7] >> 1) & 1         # flag 30
-    # cdef int zlib_flag = (p[7] >> 2) & 1         # flag 29
-    cdef int sparse_flag = (flags[7] >> 3) & 1       # flag 28
-    # cdef int zlib_sparse_flag = (p[7] >> 4) & 1  # flag 27
+def c_read_record(filename, int ptr):
+    """Read an ANSYS record and return a numpy array"""
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
 
-    if sparse_flag:
-        raise NotImplementedError('Cannot read sparse results.\nPlease run MAPDL with "/FCOMP,RST,0" to disable writing sparse results')
+    cdef int prec_flag, type_flag, size
+    cdef void* c_ptr
+    c_ptr = read_record(c_filename, ptr, &prec_flag, &type_flag, &size)
 
-    
-    cdef char * p = buf
-    cdef int loc
-    for i in range(nnod):
-        # get node number (stored as double, cast to int)
-        loc = i*68
-        nnum[i] = <int>get_double(&p[loc])
-        loc += 8
-        for j in range(6):
-            nloc[i, j] = get_double(&p[loc + j*8])
+    print('type_flag: ', type_flag)
+    print('prec_flag: ', prec_flag)
+
+    if type_flag:
+        if prec_flag:
+            dtype = np.int64
+        else:
+            dtype = np.int32
+    else:
+        if prec_flag:
+            dtype = np.float32
+        else:
+            dtype = np.float64
+
+    # wrap c_array 
+    array_wrapper = ArrayWrapper()
+    array_wrapper.set_data(size, c_ptr) 
+
+    cdef np.ndarray ndarray
+    ndarray = np.array(array_wrapper, copy=False)
+
+    # Assign our object to the 'base' of the ndarray object
+    ndarray.base = <PyObject*> array_wrapper
+
+    # Increment the reference count, as the above assignement was done in
+    # C, and Python does not know that there is this additional reference
+    Py_INCREF(array_wrapper)
+
+    # print(dtype, size)
+    return ndarray.view(dtype)
 
 
 def LoadElements(filename, int ptr, int nelm, 

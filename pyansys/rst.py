@@ -15,7 +15,8 @@ import pyvista as pv
 
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
-from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
+from pyansys._binary_reader import (cells_with_any_nodes,
+                                    cells_with_all_nodes, c_read_record)
 from pyansys.common import read_table, parse_header, read_standard_header, two_ints_to_long
 
 # Create logger
@@ -174,7 +175,7 @@ class ResultFile(object):
         Ignores any cyclic properties.
     """
 
-    def __init__(self, filename, ignore_cyclic=False):
+    def __init__(self, filename, ignore_cyclic=False, read_geometry=True):
         """Loads basic result information from result file and
         initializes result object.
         """
@@ -195,7 +196,8 @@ class ResultFile(object):
         self.enum = self.resultheader['eeqv'][self.sidx_elem]
 
         # store geometry for later retrival
-        self.store_geometry()
+        if read_geometry:
+            self.store_geometry()
 
         with open(self.filename, 'rb') as f:
             f.seek(103*4)  # start of secondary header
@@ -751,6 +753,14 @@ class ResultFile(object):
 
         return components
 
+    @property
+    def geometry_ptr(self):
+        with open(self.filename, 'rb') as f:
+            # read geometry header
+            f.seek(self.resultheader['ptrGEO']*4)
+            table = read_table(f)
+            return parse_header(table, GEOMETRY_HEADER_KEYS)
+
     def store_geometry(self):
         """ Stores the geometry from the result file """
         # read in the geometry from the result file
@@ -774,9 +784,7 @@ class ResultFile(object):
             maxety = geometry_header['maxety']
 
             # pointer to the element type index table
-            f.seek((geometry_header['ptrETY'] + 2) * 4)
-            e_type_table = np.fromfile(
-                f, self.resultheader['endian'] + 'i', maxety)
+            e_type_table = c_read_record(self.filename, geometry_header['ptrETY'])
 
             # store information for each element type
             # make these arrays large so you can reference a value via element
