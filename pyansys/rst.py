@@ -784,6 +784,7 @@ class ResultFile(object):
 
             # pointer to the element type index table
             e_type_table = read_record(self.filename, geometry_header['ptrETY'])
+            # e_type_table = e_type_table[e_type_table != 0]
 
             # store information for each element type
             # make these arrays large so you can reference a value via element
@@ -797,19 +798,21 @@ class ResultFile(object):
 
             # number of nodes per element having nodal stresses
             nodstr = np.empty(10000, np.int32)
-            etype_id = np.empty(maxety, np.int32)
+            # etype_id = np.empty(maxety, np.int32)
             ekey = []
             keyopts = np.zeros((10000, 11), np.int16)
             for i in range(maxety):
+                if not e_type_table[i]:
+                    continue
+
                 ptr = geometry_header['ptrETY'] + e_type_table[i]
                 einfo = read_record(self.filename, ptr)
 
                 etype_ref = einfo[0]
-                etype_id[i] = einfo[1]
+                # etype_id[i] = einfo[1]
                 ekey.append(einfo[:2])
 
                 # Items 3-14 - element type option keys (keyopts)
-                # f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 3)*4)
                 keyopts[etype_ref] = einfo[2:13]
 
                 # Item 61 - number of nodes for this element type (nodelm)
@@ -845,8 +848,8 @@ class ResultFile(object):
             # dtype = self.resultheader['endian'] + 'i8'
             # e_disp_table[:] = np.fromfile(f, dtype, nelm)
 
-            ptr = geometry_header['ptrEID']
-            e_disp_table = read_record(self.filename, ptr).view(np.int64)
+            ptr_eid = geometry_header['ptrEID']
+            e_disp_table = read_record(self.filename, ptr_eid).view(np.int64)
 
             # assert np.allclose(record, e_disp_table)
 
