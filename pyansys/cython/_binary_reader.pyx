@@ -71,8 +71,9 @@ np.import_array()
 cdef class ArrayWrapper:
     cdef void* data_ptr
     cdef int size
+    cdef int my_dtype
 
-    cdef set_data(self, int size, void* data_ptr):
+    cdef set_data(self, int size, void* data_ptr, int my_dtype=0):
         """ Set the data of the array
         This cannot be done in the constructor as it must recieve C-level
         arguments.
@@ -84,7 +85,8 @@ cdef class ArrayWrapper:
             Pointer to the data            
         """
         self.data_ptr = data_ptr
-        self.size = size
+        self.size = size        
+        self.my_dtype = my_dtype
 
     def __array__(self):
         """ Here we use the __array__ method, that is called when numpy
@@ -92,8 +94,19 @@ cdef class ArrayWrapper:
         cdef np.npy_intp shape[1]
         shape[0] = <np.npy_intp> self.size
         # Create a 1D array, of length 'size'
-        ndarray = np.PyArray_SimpleNewFromData(1, shape,
-                                               np.NPY_INT, self.data_ptr)
+        if self.my_dtype == 0:
+            ndarray = np.PyArray_SimpleNewFromData(1, shape,
+                                                   np.NPY_INT16, self.data_ptr)
+        elif self.my_dtype == 1:
+            ndarray = np.PyArray_SimpleNewFromData(1, shape,
+                                                   np.NPY_INT32, self.data_ptr)
+        elif self.my_dtype == 2:
+            ndarray = np.PyArray_SimpleNewFromData(1, shape,
+                                                   np.NPY_FLOAT32, self.data_ptr)
+        else:
+            ndarray = np.PyArray_SimpleNewFromData(1, shape,
+                                                   np.NPY_FLOAT64, self.data_ptr)
+
         return ndarray
 
     def __dealloc__(self):
@@ -146,27 +159,24 @@ def c_read_record(filename, int ptr):
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
 
-    cdef int prec_flag, type_flag, size
+    cdef int prec_flag, type_flag, size, my_dtype
     cdef void* c_ptr
     c_ptr = read_record(c_filename, ptr, &prec_flag, &type_flag, &size)
 
-    print('type_flag: ', type_flag)
-    print('prec_flag: ', prec_flag)
-
     if type_flag:
         if prec_flag:
-            dtype = np.int64
+            my_dtype = 0
         else:
-            dtype = np.int32
+            my_dtype = 1
     else:
         if prec_flag:
-            dtype = np.float32
+            my_dtype = 2
         else:
-            dtype = np.float64
+            my_dtype = 3
 
     # wrap c_array 
     array_wrapper = ArrayWrapper()
-    array_wrapper.set_data(size, c_ptr) 
+    array_wrapper.set_data(size, c_ptr, my_dtype)
 
     cdef np.ndarray ndarray
     ndarray = np.array(array_wrapper, copy=False)
@@ -178,13 +188,11 @@ def c_read_record(filename, int ptr):
     # C, and Python does not know that there is this additional reference
     Py_INCREF(array_wrapper)
 
-    # print(dtype, size)
-    return ndarray.view(dtype)
+    return ndarray
 
 
-def LoadElements(filename, int ptr, int nelm, 
-                 e_disp_table_py, int [:, ::1] elem, int [::1] etype, int [::1] mtype,
-                 int [::1] rcon):
+def load_elements(filename, int ptr, int nelm, e_disp_table_py, int [:, ::1] elem,
+                  int [::1] etype, int [::1] mtype, int [::1] rcon):
     """
     The following is stored for each element
     mat     - material reference number
@@ -228,6 +236,61 @@ def LoadElements(filename, int ptr, int nelm,
         # read in nodes
         for j in range(12, nread + 2):
             elem[i, j - 12] = get_int(&p[loc + 4*j])
+
+
+def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
+                   int [:, ::1] elem, int [::1] etype, int [::1] mtype,
+                   int [::1] rcon):
+    """
+    The following is stored for each element
+    0 - mat     - material reference number
+    1 - type    - element type number
+    2 - real    - real constant reference number
+    3 - secnum  - section number
+    4 - esys    - element coordinate system
+    5 - death   - death flat (1 live, 0 dead)
+    6 - solidm  - solid model reference
+    7 - shape   - coded shape key
+    8 - elnum   - element number
+    9 - baseeid - base element number
+    10 - NODES   - node numbers defining the element
+    """
+    
+    cdef int i, j
+
+    cdef int prec_flag, type_flag, size
+    cdef void* c_ptr
+
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cdef int* element
+    cdef short* s_element
+
+    cdef int val, nread, elem_loc
+    for i in range(nelem):
+        # load element
+        elem_loc = loc + e_disp_table[i]
+        c_ptr = read_record(c_filename, elem_loc, &prec_flag, &type_flag,
+                            &size)
+
+        if prec_flag:
+            s_element = <short*>c_ptr
+            mtype[i] = s_element[0]  # material type
+            etype[i] = s_element[1]  # element type
+            rcon[i] = s_element[2] # real constant reference number
+
+            # read in nodes
+            for j in range(10, size):
+                elem[i, j - 10] = s_element[j]
+        else:
+            element = <int*>c_ptr
+            mtype[i] = element[0]  # material type
+            etype[i] = element[1]  # element type
+            rcon[i] = element[2] # real constant reference number
+
+            # read in nodes
+            for j in range(10, size):
+                elem[i, j - 10] = element[j]
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 

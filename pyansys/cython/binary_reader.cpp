@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <fstream>
-#include "SparseBufferToVec.h"
 #include <exception>
 
 using namespace std;
@@ -15,6 +14,25 @@ using namespace std;
 #define	MEMCOPY(from,to,n_items,type) MEM_COPY((char *)(from),(char *)(to),(unsigned)(n_items)*sizeof(type))
 #define IS_ON(e,p)   ((e) & (1u << (p)))
 
+
+static int NbBitsOn( int iVal)
+{
+  static int nbbitsperchar[] =
+    {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,
+     3,4,4,5,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,
+     3,4,4,5,4,5,5,6,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,
+     3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+     3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,1,2,2,3,2,3,3,4,2,3,3,4,
+     3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,
+     3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,2,3,3,4,
+     3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+     3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8};
+ 
+  unsigned char	*cval = (unsigned char *)(&iVal);
+  
+  return( nbbitsperchar[cval[0]] + nbbitsperchar[cval[1]] +
+	  nbbitsperchar[cval[2]] + nbbitsperchar[cval[3]]);
+}
 
 
 // populate a node given a record using the bsparse algorithm
@@ -132,7 +150,7 @@ void read_nodes(const char* filename, int ptrLOC, int nrec, int *nnum, double *n
 // }
 
 template <class T>
-char* read_bsparse_record(T *buffer, int *size){
+char* ReadBsparseRecord(T *buffer, int *size){
   int *raw = (int*)buffer;
   *size = *raw++;
   int bitcod = *raw++;
@@ -158,6 +176,81 @@ char* read_bsparse_record(T *buffer, int *size){
 
 }
 
+char* ReadShortBsparseRecord(int *raw, int *size)
+{
+  *size = *raw++;
+  int bitcod = *raw++;
+
+  short *vec = new short[*size]();
+  short	*tbuf = (short *)raw;
+  int	iloc = -1;
+  int nb = NbBitsOn(bitcod);
+
+  if (nb%2) nb++;
+  while ( ++iloc < *size)
+    {
+      if ( IS_ON( bitcod, iloc)){
+	vec[iloc] = *tbuf++;
+      }
+    }
+
+  return (char*)vec;
+}
+
+
+template <class T>
+char* WindowedSparseBufferToVec(T *buffer, int *size){
+
+  int iShift = sizeof(T)/sizeof(int);
+
+  int *raw = (int*)buffer;
+  *size = *raw++;
+  int NWin = *raw++;
+
+  T *vec = new T[*size];
+  T *adr = vec;
+  MEM_ZERO( adr, *size*sizeof(T));
+
+  int iLoc, iLen;
+  if ( NWin > 0)
+  do {
+
+    /* ===== We read the location of the new Window */
+    iLoc = *raw++;	/* ===== iLoc = Where start the next window */
+    // cout << "iLoc: " << iLoc << endl;
+
+    if ( iLoc > 0)	/* ===== One isolated NonZero Value - no need to store a Window Len */
+      {
+	vec[iLoc] = ((T *)raw)[0];
+	raw += iShift;
+      }
+    else		/* ===== New Window of size iLen */
+      {
+	T *adr = vec + (-iLoc);	/* Start of the Windows in the output vector */
+	iLen = *raw++;		/* Length of the Window */
+	// cout << "Length of the Window: " << iLen << endl;
+
+	if (iLen > 0)			/* ===== Non Constant Values */
+	  {
+	    // cout << "Non Constant Values: " << iLen << endl;
+	    MEMCOPY( (T *)raw, adr, iLen, T);
+	    
+	    raw += iShift*iLen;
+	  }
+	else /* ===== Constant Value : only one value is stored */
+	  {
+	    // cout << "Constant Value : only one value is stored: " << iLoc << endl;
+	    iLen = - iLen;
+	    T ValCst = *((T *)(raw)); raw += iShift;
+	    do (*(adr++) = ValCst); while (--iLen > 0);
+	  }
+      }
+  } while ( --NWin > 0);
+
+  return (char*)vec;
+}
+
+
 // read a record and return the pointer to the array
 void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
 	    int* size){
@@ -172,27 +265,47 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
   *size = bufsize;
 
   // always read record
-  // char *ivect4;
   char *raw = new char[4*bufsize];
   binFile.read(raw, 4*bufsize);
 
-  if (bsparse_flag || wsparse_flag){
-
+  if (bsparse_flag){
+    // cout << "bsparse_record" << endl;
     if (*type_flag){
       if (*prec_flag){
-	cout << "Exception: Short not programmed " << endl;
+	raw = ReadShortBsparseRecord((int*)raw, size);
+	// *size /= 2;
       } else{
-	raw = read_bsparse_record((int*)raw, size);
+	raw = ReadBsparseRecord((int*)raw, size);
+	// *size *= 2;
       }
     } else{  // a float/double
       if (*prec_flag){
-	raw = read_bsparse_record((float*)raw, size);
+	raw = ReadBsparseRecord((float*)raw, size);
       } else{
-	raw = read_bsparse_record((double*)raw, size);
+	raw = ReadBsparseRecord((double*)raw, size);
+	// *size *= 2;
       }
     }
-    *size *= 2;
+  } else if (wsparse_flag) {
+    // cout << "windowed_record" << endl;
+    if (*type_flag){
+      if (*prec_flag){
+	raw = WindowedSparseBufferToVec((short*)raw, size);
+      } else{
+	raw = WindowedSparseBufferToVec((int*)raw, size);
+	// *size *= 2;
+      }
+    } else{  // a float/double
+      if (*prec_flag){
+	raw = WindowedSparseBufferToVec((float*)raw, size);
+      } else{
+	raw = WindowedSparseBufferToVec((double*)raw, size);
+	// *size *= 2;
+      }
+    }
+    
   }
+  
 
   return raw;
 }

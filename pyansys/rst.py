@@ -15,13 +15,13 @@ import pyvista as pv
 
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
-from pyansys._binary_reader import (cells_with_any_nodes,
-                                    cells_with_all_nodes, c_read_record)
+from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
+from pyansys._binary_reader import c_read_record as read_record
 from pyansys.common import read_table, parse_header, read_standard_header, two_ints_to_long
 
 # Create logger
-log = logging.getLogger(__name__)
-log.setLevel('DEBUG')
+LOG = logging.getLogger(__name__)
+LOG.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -185,7 +185,7 @@ class ResultFile(object):
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
-        log.debug('There are %d result(s) in this file' % self.nsets)
+        LOG.debug('There are %d result(s) in this file', self.nsets)
 
         # Get indices to resort nodal and element results
         self.sidx = np.argsort(self.resultheader['neqv'])
@@ -199,9 +199,9 @@ class ResultFile(object):
         if read_geometry:
             self.store_geometry()
 
-        with open(self.filename, 'rb') as f:
-            f.seek(103*4)  # start of secondary header
-            self.header = parse_header(read_table(f), RESULT_HEADER_KEYS)
+        self.header = parse_header(read_record(self.filename, 103),
+                                   RESULT_HEADER_KEYS)
+        self.geometry_header = {}
 
     def plot(self, node_components=None, sel_type_all=True, **kwargs):
         """Plot result geometry
@@ -753,13 +753,13 @@ class ResultFile(object):
 
         return components
 
-    @property
-    def geometry_ptr(self):
-        with open(self.filename, 'rb') as f:
-            # read geometry header
-            f.seek(self.resultheader['ptrGEO']*4)
-            table = read_table(f)
-            return parse_header(table, GEOMETRY_HEADER_KEYS)
+    # @property
+    # def geometry_ptr(self):
+    #     with open(self.filename, 'rb') as f:
+    #         # read geometry header
+    #         f.seek(self.resultheader['ptrGEO']*4)
+    #         table = read_table(f)
+    #         return parse_header(table, GEOMETRY_HEADER_KEYS)
 
     def store_geometry(self):
         """ Stores the geometry from the result file """
@@ -767,8 +767,7 @@ class ResultFile(object):
         with open(self.filename, 'rb') as f:
 
             # read geometry header
-            f.seek(self.resultheader['ptrGEO']*4)
-            table = read_table(f)
+            table = read_record(self.filename, self.resultheader['ptrGEO'])
             geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
             self.geometry_header = geometry_header
 
@@ -784,7 +783,7 @@ class ResultFile(object):
             maxety = geometry_header['maxety']
 
             # pointer to the element type index table
-            e_type_table = c_read_record(self.filename, geometry_header['ptrETY'])
+            e_type_table = read_record(self.filename, geometry_header['ptrETY'])
 
             # store information for each element type
             # make these arrays large so you can reference a value via element
@@ -798,37 +797,32 @@ class ResultFile(object):
 
             # number of nodes per element having nodal stresses
             nodstr = np.empty(10000, np.int32)
-            etype_ID = np.empty(maxety, np.int32)
+            etype_id = np.empty(maxety, np.int32)
             ekey = []
             keyopts = np.zeros((10000, 11), np.int16)
             for i in range(maxety):
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 2)*4)
-                einfo = np.fromfile(f, self.resultheader['endian'] + 'i', 2)
+                ptr = geometry_header['ptrETY'] + e_type_table[i]
+                einfo = read_record(self.filename, ptr)
+
                 etype_ref = einfo[0]
-                etype_ID[i] = einfo[1]
-                ekey.append(einfo)
+                etype_id[i] = einfo[1]
+                ekey.append(einfo[:2])
 
                 # Items 3-14 - element type option keys (keyopts)
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 3)*4)
-                keyopts[etype_ref] = np.fromfile(
-                    f, self.resultheader['endian'] + 'i', 11)
+                # f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 3)*4)
+                keyopts[etype_ref] = einfo[2:13]
 
                 # Item 61 - number of nodes for this element type (nodelm)
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 61)*4)
-                nodelm[etype_ref] = np.fromfile(
-                    f, self.resultheader['endian'] + 'i', 1)
+                nodelm[etype_ref] = einfo[60]
 
                 # Item 63 - number of nodes per element having nodal
                 # forces, etc. (nodfor)
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 63)*4)
-                nodfor[etype_ref] = np.fromfile(f, self.resultheader['endian'] + 'i', 1)
+                nodfor[etype_ref] = einfo[62]
 
                 # Item 94 - number of nodes per element having nodal
                 # stresses, etc. (nodstr).  This number is the number
                 # of corner nodes for higher-ordered elements.
-                f.seek((geometry_header['ptrETY'] + e_type_table[i] + 1 + 94)*4)
-                nodstr[etype_ref] = np.fromfile(
-                    f, self.resultheader['endian'] + 'i', 1)
+                nodstr[etype_ref] = einfo[93]
 
                 # with KEYOPT(8)=0, the record contains stresses at
                 # each corner node (first at the bottom shell surface,
@@ -846,13 +840,21 @@ class ResultFile(object):
                                   'keyopts': keyopts}
 
             # get the element description table
-            f.seek((geometry_header['ptrEID'] + 2)*4)
-            e_disp_table = np.empty(nelm, np.int32)
-            e_disp_table[:] = np.fromfile(
-                f, self.resultheader['endian'] + 'i8', nelm)
+            # f.seek((geometry_header['ptrEID'] + 2)*4)
+            # e_disp_table = np.empty(nelm, np.int64)
+            # dtype = self.resultheader['endian'] + 'i8'
+            # e_disp_table[:] = np.fromfile(f, dtype, nelm)
+
+            ptr = geometry_header['ptrEID']
+            e_disp_table = read_record(self.filename, ptr).view(np.int64)
+
+            # assert np.allclose(record, e_disp_table)
+
+            # doesn't work as it's a long int
+            # e_disp_table = read_record(self.filename, geometry_header['ptrEID'])
 
             # get pointer to start of element table and adjust element pointers
-            ptr = geometry_header['ptrEID'] + e_disp_table[0]
+            ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
             e_disp_table -= e_disp_table[0]
 
             # read in coordinate systems
@@ -881,8 +883,9 @@ class ResultFile(object):
         rcon = np.empty(nelm, np.int32)
 
         # load elements
-        _binary_reader.LoadElements(self.filename, ptr, nelm, e_disp_table, elem,
-                                etype, mtype, rcon)
+        _binary_reader.load_elements2(self.filename, ptr_elem, nelm,
+                                      e_disp_table, elem, etype, mtype, rcon)
+
         enum = self.resultheader['eeqv']
 
         element_type = np.zeros_like(etype)
@@ -2398,8 +2401,8 @@ def is_int(value):
 
 
 def parse_coordinate_system(f, geometry_header):
-    """
-    Reads in coordinate system information from a binary result file.
+    """Reads in coordinate system information from a binary result
+    file.
 
     Parameters
     ----------
@@ -2488,8 +2491,7 @@ def trans_to_matrix(trans):
 
 
 def transform(points, trans):
-    """
-    In-place 3d transformation of a points array given a 4x4 
+    """In-place 3d transformation of a points array given a 4x4
     transformation matrix.
 
     Parameters
