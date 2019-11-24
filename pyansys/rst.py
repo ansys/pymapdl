@@ -181,7 +181,7 @@ class ResultFile(object):
         initializes result object.
         """
         self.filename = filename
-        self.resultheader = result_info(self.filename)
+        self.resultheader = self._read_result_header()
         self.n_sector = 1
 
         # Get the total number of results and log it
@@ -202,6 +202,164 @@ class ResultFile(object):
 
         self.header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
         self.geometry_header = {}
+
+    def _read_result_header(self):
+        """Returns pointers used to access results from an ANSYS result file.
+
+        Parameters
+        ----------
+        filename : string
+            Filename of result file.
+
+        Returns
+        -------
+        resultheader : dictionary
+            Result header
+        """
+        # consider moving this to the main class
+        standard_header = read_standard_header(self.filename)
+
+        # Read .RST FILE HEADER
+        header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
+        resultheader = merge_two_dicts(header, standard_header)
+
+        # Read nodal equivalence table
+        resultheader['neqv'] = self.read_record(resultheader['ptrNOD'])
+
+        # Read nodal equivalence table
+        resultheader['eeqv'] = self.read_record(resultheader['ptrELM'])
+
+        # Read table of pointers to locations of results
+        nsets = resultheader['nsets']
+        # f.seek((resultheader['ptrDSI'] + 2) * 4)  # Start of pointer, then empty, then data
+
+        # Data sets index table. This record contains the record pointers
+        # for the beginning of each data set. The first resmax records are
+        # the first 32 bits of the index, the second resmax records are
+        # the second 32 bits f.seek((ptrDSIl + 0) * 4)
+        record = self.read_record(resultheader['ptrDSI'])
+        raw0 = record[:resultheader['resmax']].tobytes()
+        raw1 = record[resultheader['resmax']:].tobytes()
+
+        # this combines the two ints, not that efficient
+        subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
+        subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
+        longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
+        longraw = b''.join(longraw)
+        rpointers = np.frombuffer(longraw, 'i8')
+
+        assert (rpointers >= 0).all(), 'Data set index table has negative pointers'
+        resultheader['rpointers'] = rpointers
+
+        # read in time values
+        record = self.read_record(resultheader['ptrTIM'])
+        resultheader['time_values'] = record[:resultheader['nsets']]
+
+        # load harmonic index of each result
+        if resultheader['ptrCYC']:
+            record = self.read_record(resultheader['ptrCYC'])
+            hindex = record[:resultheader['nsets']]
+
+            # ansys 15 doesn't track negative harmonic indices
+            if not np.any(hindex < -1):
+                # check if duplicate frequencies
+                tvalues = resultheader['time_values']
+                for i in range(tvalues.size - 1):
+                    # adjust tolarance(?)
+                    if np.isclose(tvalues[i], tvalues[i + 1]):  
+                        hindex[i + 1] *= -1
+
+            resultheader['hindex'] = hindex
+
+        # load step table with columns:
+        # [loadstep, substep, and cumulative]
+        record = self.read_record(resultheader['ptrLSP'])
+        resultheader['ls_table'] = record[:resultheader['nsets']*3].reshape(-1, 3)
+
+        return resultheader
+
+
+    def parse_coordinate_system(self):
+        """Reads in coordinate system information from a binary result
+        file.
+
+        Parameters
+        ----------
+        f : file object
+            Open binary result file.
+
+        geometry_header, dict
+            Dictionary containing pointers to geometry items in the ansys
+            result.
+
+        Returns
+        -------
+        c_systems : dict
+            Dictionary containing one entry for each defined coordinate
+            system.  If no non-standard coordinate systems have been
+            defined, there will be only one None.  First coordinate system
+            is assumed to be global cartesian.
+
+        Notes
+        -----
+        euler angles : [THXY, THYZ, THZX]
+
+        - First rotation about local Z (positive X toward Y).
+        - Second rotation about local X (positive Y toward Z).
+        - Third rotation about local Y (positive Z toward X).
+
+        PAR1
+        Used for elliptical, spheroidal, or toroidal systems. If KCS = 1
+        or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
+        radius (defaults to 1.0 (circle)). If KCS = 3, PAR1 is the major
+        radius of the torus.
+
+        PAR2
+        Used for spheroidal systems. If KCS = 2, PAR2 = ratio of ellipse
+        Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
+
+        Coordinate system type:
+            - 0: Cartesian
+            - 1: Cylindrical (circular or elliptical)
+            - 2: Spherical (or spheroidal)
+            - 3: Toroidal
+        """
+        # number of coordinate systems
+        maxcsy = self.geometry_header['maxcsy']
+
+        # load coordinate system index table
+        ptr_csy = self.geometry_header['ptrCSY']
+        if ptr_csy:
+            csy = self.read_record(ptr_csy)
+
+        # parse each coordinate system
+        # The items stored in each record:
+        # * Items 1-9  are the transformation matrix.
+        # * Items 10-12 are the coordinate system origin (XC,YC,ZC).
+        # * Items 13-14 are the coordinate system parameters (PAR1, PAR2).
+        # * Items 16-18 are the angles used to define the coordinate system.
+        # * Items 19-20 are theta and phi singularity keys.
+        # * Item 21 is the coordinate system type (0, 1, 2, or 3).
+        # * Item 22 is the coordinate system reference number.
+        c_systems = [None]
+        for i in range(maxcsy):
+            if not csy[i]:
+                c_system = None
+            else:
+                data = self.read_record(ptr_csy + csy[i])
+                c_system = {'transformation matrix': np.array(data[:9].reshape(-1, 3)),
+                            'origin': np.array(data[9:12]),
+                            'PAR1': data[12],
+                            'PAR2': data[13],
+                            'euler angles': data[15:18], # may not be euler
+                            'theta singularity' : data[18],
+                            'phi singularity' : data[19],
+                            'type' : int(data[20]),
+                            'reference num' : int(data[21],)
+                            }
+            c_systems.append(c_system)
+
+        return c_systems
 
     def plot(self, node_components=None, sel_type_all=True, **kwargs):
         """Plot result geometry
@@ -497,76 +655,73 @@ class ResultFile(object):
         nsets = self.nsets
 
         # Read a result
-        with open(self.filename, 'rb') as f:
-            # get first solution header and assume, following solution
-            # headers are equal
-            record = self.read_record(rpointers[0])
-            solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
+        # with open(self.filename, 'rb') as f:
+        # get first solution header and assume, following solution
+        # headers are equal
+        record = self.read_record(rpointers[0])
+        solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
 
-            mask = solution_header['mask']
-            #PDBN = bool(mask & 0b1<<10)
-            pdnsl = bool(solution_header['AvailData'] & 0b1<<27)
-            PDVEL = bool(mask & 0b1<<27)
-            PDACC = bool(mask & 0b1<<28)
+        mask = solution_header['mask']
+        #PDBN = bool(mask & 0b1<<10)
+        pdnsl = bool(solution_header['AvailData'] & 0b1<<27)
+        PDVEL = bool(mask & 0b1<<27)
+        PDACC = bool(mask & 0b1<<28)
 
-            if solution_type == 'NSL' and not pdnsl:
-                raise Exception("Result file does not contain nodal displacements.")
+        if solution_type == 'NSL' and not pdnsl:
+            raise Exception("Result file does not contain nodal displacements.")
 
-            if solution_type == 'VEL' and not PDVEL:
-                raise Exception("Result file does not contain nodal velocities.")
+        if solution_type == 'VEL' and not PDVEL:
+            raise Exception("Result file does not contain nodal velocities.")
 
-            if solution_type == 'ACC' and not PDACC:
-                raise Exception("Result file does not contain nodal accelerations.")
+        if solution_type == 'ACC' and not PDACC:
+            raise Exception("Result file does not contain nodal accelerations.")
 
-            nnod = solution_header['nnod']
-            numdof = solution_header['numdof']
-            nfldof = solution_header['nfldof']
-            Sumdof = numdof + nfldof
+        nnod = solution_header['nnod']
+        numdof = solution_header['numdof']
+        nfldof = solution_header['nfldof']
+        sumdof = numdof + nfldof
 
-            #numvdof = solution_header['numvdof'] # does not seem to be set in transient analysis
-            #if not numvdof: numvodf = Sumdof 
-            #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
-            #if not numadof: numadof = Sumdof 
+        #numvdof = solution_header['numvdof'] # does not seem to be set in transient analysis
+        #if not numvdof: numvodf = sumdof 
+        #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
+        #if not numadof: numadof = sumdof 
 
-            results = np.zeros((nsets, nnod, Sumdof))  # should be empty(?)
+        # iterate over all loadsteps
+        results = np.zeros((nsets, nnod, sumdof))
+        for rnum in range(self.nsets):
 
-            # iterate over all loadsteps
-            for rnum in range(self.nsets):
+            # Seek to result table and to get pointer to DOF
+            # results of result table
+            rptr = self.read_record(rpointers[rnum])                
+            if solution_type == 'NSL':  # Nodal Displacements
+                ptrSL = rptr[10] # item 12
+            elif solution_type == 'VEL':  # Nodal Velocities
+                # from items 131, 132
+                ptrSL = two_ints_to_long(rptr[130], rptr[131])
+            elif solution_type == 'ACC':  # Nodal Accelerations
+                # from items 133, 134
+                ptrSL = two_ints_to_long(rptr[132], rptr[133])
 
-                # Seek to result table and to get pointer to DOF
-                # results of result table
-                rptr = self.read_record(rpointers[rnum])                
-                if solution_type == 'NSL':  # Nodal Displacements
-                    ptrSL = rptr[10] # item 12
-                elif solution_type == 'VEL':  # Nodal Velocities
-                    # from items 131, 132
-                    ptrSL = two_ints_to_long(rptr[130], rptr[131])
-                elif solution_type == 'ACC':  # Nodal Accelerations
-                    # from items 133, 134
-                    ptrSL = two_ints_to_long(rptr[132], rptr[133])
+            record, sz = self.read_record(rpointers[rnum] + ptrSL,
+                                 return_bufsize=True)
+            # nitems = record.size
+            result = record.reshape((-1, sumdof))
 
-                record, sz = self.read_record(rpointers[rnum] + ptrSL,
-                                     return_bufsize=True)
-                # nitems = record.size
-                result = record.reshape((-1, Sumdof))
+            # PDBN should be set if only a subset of nodes was output
+            # PDBN is set only when solution type: nodal solution/displacement
+            # PDBN is not set when solution type: acceleration, velocities 
+            if record.size != sumdof*nnod:
+                # read the next record to the internal indexing reording
+                nodlist = self.read_record(rpointers[rnum] + ptrSL + sz)
 
-                # PDBN should be set if only a subset of nodes was output
-                # PDBN is set only when solution type: nodal solution/displacement
-                # PDBN is not set when solution type: acceleration, velocities 
-                if record.size != Sumdof*nnod:
-                    # read the next record to the internal indexing reording
-                    nodlist = self.read_record(rpointers[rnum] + ptrSL + sz)
+                # convert to zero index
+                sidx = nodlist -1
 
-                    # convert to zero index
-                    sidx = nodlist -1
+            else:
+                # Reorder based on sorted indexing
+                sidx = self.sidx
 
-                else:
-                    # Reorder based on sorted indexing
-                    sidx = self.sidx
-
-                results[rnum, sidx, :] = result
-
-            f.close()
+            results[rnum, sidx, :] = result
 
 
         if not in_nodal_coord_sys:
@@ -701,9 +856,10 @@ class ResultFile(object):
         return self.nnum, result
 
     def _read_components(self):
-        """Read components from an ansys result file
+        """Read components from an ANSYS result file
 
         Returns
+        -------
         components : dict
             Dictionary of components
         """
@@ -712,127 +868,116 @@ class ResultFile(object):
         if not ncomp:
             return components
 
-        ptr_comp = self.geometry_header['ptrCOMP']
-        with open(self.filename, 'rb') as f:
-            f.seek(ptr_comp*4)
-            for i in range(ncomp):
-                table = read_table(f)
+        # Read through components
+        file_ptr = self.geometry_header['ptrCOMP']
+        for _ in range(ncomp):
+            table, sz = self.read_record(file_ptr, True)
+            file_ptr += sz  # increment file_pointer
 
-                # strings are up to 32 characters
-                raw = table[1:9].tobytes().split(b'\x00')[0]
+            # strings are up to 32 characters
+            raw = table[1:9].tobytes().split(b'\x00')[0]
 
-                name = raw.decode('utf')
-                name =  name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
-                        name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
-                        name[24:28][::-1] + name[28:32][::-1]
-                name = name.strip()
-                data = table[9:]
-                if data.any():
-                    components[name] = _reader.component_interperter(data)
+            name = raw.decode('utf')
+            name =  name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
+                    name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
+                    name[24:28][::-1] + name[28:32][::-1]
+            name = name.strip()
+            data = table[9:]
+            if data.any():
+                components[name] = _reader.component_interperter(data)
 
         return components
 
-    # @property
-    # def geometry_ptr(self):
-    #     with open(self.filename, 'rb') as f:
-    #         # read geometry header
-    #         f.seek(self.resultheader['ptrGEO']*4)
-    #         table = read_table(f)
-    #         return parse_header(table, GEOMETRY_HEADER_KEYS)
-
     def store_geometry(self):
         """ Stores the geometry from the result file """
-        # read in the geometry from the result file
-        with open(self.filename, 'rb') as f:
+        # read geometry header
+        table = self.read_record(self.resultheader['ptrGEO'])
+        geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
+        self.geometry_header = geometry_header
 
-            # read geometry header
-            table = self.read_record(self.resultheader['ptrGEO'])
-            geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
-            self.geometry_header = geometry_header
+        # Node information
+        nnod = geometry_header['nnod']
+        nnum = np.empty(nnod, np.int32)
+        nloc = np.empty((nnod, 6), np.float)
+        _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
+                                  nnod, nloc, nnum)
 
-            # Node information
-            nnod = geometry_header['nnod']
-            nnum = np.empty(nnod, np.int32)
-            nloc = np.empty((nnod, 6), np.float)
-            _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
-                                      nnod, nloc, nnum)
+        # Element information
+        nelm = geometry_header['nelm']
+        maxety = geometry_header['maxety']
 
-            # Element information
-            nelm = geometry_header['nelm']
-            maxety = geometry_header['maxety']
+        # pointer to the element type index table
+        e_type_table = self.read_record(geometry_header['ptrETY'])
+        # e_type_table = e_type_table[e_type_table != 0]
 
-            # pointer to the element type index table
-            e_type_table = self.read_record(geometry_header['ptrETY'])
-            # e_type_table = e_type_table[e_type_table != 0]
+        # store information for each element type
+        # make these arrays large so you can reference a value via element
+        # type numbering
 
-            # store information for each element type
-            # make these arrays large so you can reference a value via element
-            # type numbering
+        # number of nodes for this element type
+        nodelm = np.empty(10000, np.int32)
 
-            # number of nodes for this element type
-            nodelm = np.empty(10000, np.int32)
+        # number of nodes per element having nodal forces
+        nodfor = np.empty(10000, np.int32)
 
-            # number of nodes per element having nodal forces
-            nodfor = np.empty(10000, np.int32)
+        # number of nodes per element having nodal stresses
+        nodstr = np.empty(10000, np.int32)
+        # etype_id = np.empty(maxety, np.int32)
+        ekey = []
+        keyopts = np.zeros((10000, 11), np.int16)
+        for i in range(maxety):
+            if not e_type_table[i]:
+                continue
 
-            # number of nodes per element having nodal stresses
-            nodstr = np.empty(10000, np.int32)
-            # etype_id = np.empty(maxety, np.int32)
-            ekey = []
-            keyopts = np.zeros((10000, 11), np.int16)
-            for i in range(maxety):
-                if not e_type_table[i]:
-                    continue
+            ptr = geometry_header['ptrETY'] + e_type_table[i]
+            einfo = self.read_record(ptr)
 
-                ptr = geometry_header['ptrETY'] + e_type_table[i]
-                einfo = self.read_record(ptr)
+            etype_ref = einfo[0]
+            # etype_id[i] = einfo[1]
+            ekey.append(einfo[:2])
 
-                etype_ref = einfo[0]
-                # etype_id[i] = einfo[1]
-                ekey.append(einfo[:2])
+            # Items 3-14 - element type option keys (keyopts)
+            keyopts[etype_ref] = einfo[2:13]
 
-                # Items 3-14 - element type option keys (keyopts)
-                keyopts[etype_ref] = einfo[2:13]
+            # Item 61 - number of nodes for this element type (nodelm)
+            nodelm[etype_ref] = einfo[60]
 
-                # Item 61 - number of nodes for this element type (nodelm)
-                nodelm[etype_ref] = einfo[60]
+            # Item 63 - number of nodes per element having nodal
+            # forces, etc. (nodfor)
+            nodfor[etype_ref] = einfo[62]
 
-                # Item 63 - number of nodes per element having nodal
-                # forces, etc. (nodfor)
-                nodfor[etype_ref] = einfo[62]
+            # Item 94 - number of nodes per element having nodal
+            # stresses, etc. (nodstr).  This number is the number
+            # of corner nodes for higher-ordered elements.
+            nodstr[etype_ref] = einfo[93]
 
-                # Item 94 - number of nodes per element having nodal
-                # stresses, etc. (nodstr).  This number is the number
-                # of corner nodes for higher-ordered elements.
-                nodstr[etype_ref] = einfo[93]
+            # with KEYOPT(8)=0, the record contains stresses at
+            # each corner node (first at the bottom shell surface,
+            # then the top surface)
+            #
+            # Only valid for SHELL181 or SHELL281 elements.
+            if einfo[1] == 181 or einfo[1] == 281:
+                if keyopts[etype_ref, 7] == 0:
+                    nodstr[etype_ref] *= 2
 
-                # with KEYOPT(8)=0, the record contains stresses at
-                # each corner node (first at the bottom shell surface,
-                # then the top surface)
-                #
-                # Only valid for SHELL181 or SHELL281 elements.
-                if einfo[1] == 181 or einfo[1] == 281:
-                    if keyopts[etype_ref, 7] == 0:
-                        nodstr[etype_ref] *= 2
+        # store element table data
+        self.element_table = {'nodelm': nodelm,
+                              'nodfor': nodfor,
+                              'nodstr': nodstr,
+                              'keyopts': keyopts}
 
-            # store element table data
-            self.element_table = {'nodelm': nodelm,
-                                  'nodfor': nodfor,
-                                  'nodstr': nodstr,
-                                  'keyopts': keyopts}
+        # the element description table
+        # must view this record as int64, even though ansys reads
+        # it in as a 32 bit int
+        ptr_eid = geometry_header['ptrEID']
+        e_disp_table = self.read_record(ptr_eid).view(np.int64)
 
-            # the element description table
-            # must view this record as int64, even though ansys reads
-            # it in as a 32 bit int
-            ptr_eid = geometry_header['ptrEID']
-            e_disp_table = self.read_record(ptr_eid).view(np.int64)
+        # get pointer to start of element table and adjust element pointers
+        ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
+        e_disp_table -= e_disp_table[0]
 
-            # get pointer to start of element table and adjust element pointers
-            ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
-            e_disp_table -= e_disp_table[0]
-
-            # read in coordinate systems
-            c_systems = parse_coordinate_system(f, geometry_header)
+        # read in coordinate systems
+        c_systems = self.parse_coordinate_system()
 
         # The following is stored for each element
         # mat     - material reference number
@@ -2279,85 +2424,6 @@ class ResultFile(object):
         return available
 
 
-def result_info(filename):
-    """Returns pointers used to access results from an ANSYS result file.
-
-    Parameters
-    ----------
-    filename : string
-        Filename of result file.
-
-    Returns
-    -------
-    resultheader : dictionary
-        Result header
-
-    """
-    standard_header = read_standard_header(filename)
-    endian = standard_header['endian']
-
-    with open(filename, 'rb') as f:
-        # Read .RST FILE HEADER
-        f.seek(103 * 4)
-        header = parse_header(read_table(f), RESULT_HEADER_KEYS)
-        resultheader = merge_two_dicts(header, standard_header)
-
-        # Read nodal equivalence table
-        f.seek(resultheader['ptrNOD']*4)
-        resultheader['neqv'] = read_table(f)
-
-        # Read nodal equivalence table
-        f.seek(resultheader['ptrELM']*4)
-        resultheader['eeqv'] = read_table(f)
-
-        # Read table of pointers to locations of results
-        nsets = resultheader['nsets']
-        f.seek((resultheader['ptrDSI'] + 2) * 4)  # Start of pointer, then empty, then data
-
-        # Data sets index table. This record contains the record pointers
-        # for the beginning of each data set. The first resmax records are
-        # the first 32 bits of the index, the second resmax records are
-        # the second 32 bits f.seek((ptrDSIl + 0) * 4)
-        raw0 = f.read(resultheader['resmax']*4)
-        raw1 = f.read(resultheader['resmax']*4)
-        subraw0 = [raw0[i*4:(i+1)*4] for i in range(nsets)]
-        subraw1 = [raw1[i*4:(i+1)*4] for i in range(nsets)]
-        longraw = [subraw0[i] + subraw1[i] for i in range(nsets)]
-        longraw = b''.join(longraw)
-        rpointers = np.frombuffer(longraw, 'i8')
-
-        assert np.all(rpointers >= 0), 'Data set index table has negative pointers'
-        resultheader['rpointers'] = rpointers
-
-        # read in time values
-        f.seek(resultheader['ptrTIMl']*4)
-        table = read_table(f, 'd', resultheader['nsets'])
-        resultheader['time_values'] = table
-
-        # load harmonic index of each result
-        if resultheader['ptrCYC']:
-            f.seek((resultheader['ptrCYC'] + 2) * 4)
-            hindex = np.fromfile(f, 'i', count=resultheader['nsets'])
-
-            # ansys 15 doesn't track negative harmonic indices
-            if not np.any(hindex < -1):
-                # check if duplicate frequencies
-                tvalues = resultheader['time_values']
-                for i in range(tvalues.size - 1):
-                    if np.isclose(tvalues[i], tvalues[i + 1]):  # adjust tolarance(?)
-                        hindex[i + 1] *= -1
-
-            resultheader['hindex'] = hindex
-
-        # load step table with columns:
-        # [loadstep, substep, and cumulative]
-        f.seek((resultheader['ptrLSP'] + 2) * 4)  # Start of pointer, then empty, then data
-        table = np.fromfile(f, endian + 'i', count=resultheader['nsets'] * 3)
-        resultheader['ls_table'] = table.reshape((-1, 3))
-
-    return resultheader
-
-
 def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """
     x = rho * np.cos(phi)
@@ -2372,87 +2438,6 @@ def is_int(value):
         return True
     except:
         return False
-
-
-def parse_coordinate_system(f, geometry_header):
-    """Reads in coordinate system information from a binary result
-    file.
-
-    Parameters
-    ----------
-    f : file object
-        Open binary result file.
-
-    geometry_header, dict
-        Dictionary containing pointers to geometry items in the ansys
-        result.
-
-    Returns
-    -------
-    c_systems : dict
-        Dictionary containing one entry for each defined coordinate
-        system.  If no non-standard coordinate systems have been
-        defined, there will be only one None.  First coordinate system
-        is assumed to be global cartesian.
-
-    Notes
-    -----
-    euler angles : [THXY, THYZ, THZX]
-
-    - First rotation about local Z (positive X toward Y).
-    - Second rotation about local X (positive Y toward Z).
-    - Third rotation about local Y (positive Z toward X).
-
-    PAR1
-    Used for elliptical, spheroidal, or toroidal systems. If KCS = 1
-    or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-    radius (defaults to 1.0 (circle)). If KCS = 3, PAR1 is the major
-    radius of the torus.
-
-    PAR2
-    Used for spheroidal systems. If KCS = 2, PAR2 = ratio of ellipse
-    Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-    Coordinate system type:
-        - 0: Cartesian
-        - 1: Cylindrical (circular or elliptical)
-        - 2: Spherical (or spheroidal)
-        - 3: Toroidal
-    """
-    # number of coordinate systems
-    maxcsy = geometry_header['maxcsy']
-
-    # load coordinate system index table
-    ptr_csy = geometry_header['ptrCSYl']
-    f.seek((ptr_csy + 2) * 4)
-    csy = np.fromfile(f, 'i', maxcsy)
-
-    # parse each coordinate system
-    # The items stored in each record:
-    # * Items 1-9  are the transformation matrix.
-    # * Items 10-12 are the coordinate system origin (XC,YC,ZC).
-    # * Items 13-14 are the coordinate system parameters (PAR1, PAR2).
-    # * Items 16-18 are the angles used to define the coordinate system.
-    # * Items 19-20 are theta and phi singularity keys.
-    # * Item 21 is the coordinate system type (0, 1, 2, or 3).
-    # * Item 22 is the coordinate system reference number.
-    c_systems = [None]
-    for i in range(maxcsy):
-        f.seek((ptr_csy + csy[i] + 2) * 4)
-        data = np.fromfile(f, 'd', 22)
-        c_system = {'transformation matrix': np.array(data[:9].reshape(-1, 3)),
-                    'origin': np.array(data[9:12]),
-                    'PAR1': data[12],
-                    'PAR2': data[13],
-                    'euler angles': data[15:18], # may not be euler
-                    'theta singularity' : data[18],
-                    'phi singularity' : data[19],
-                    'type' : int(data[20]),
-                    'reference num' : int(data[21],)
-                    }
-        c_systems.append(c_system)
-
-    return c_systems
 
 
 def trans_to_matrix(trans):
