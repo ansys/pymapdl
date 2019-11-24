@@ -22,7 +22,7 @@ cdef extern from 'binary_reader.h':
     void read_nodes(const char*, int, int, int*, double*)
 
 cdef extern from 'binary_reader.h':
-    void* read_record(const char*, int, int*, int*, int*)
+    void* read_record(const char*, int, int*, int*, int*, int*)
 
 
 # VTK numbering for vtk cells
@@ -154,14 +154,14 @@ def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc,
     read_nodes(c_filename, ptrLOC, nnod, &nnum[0], &nloc[0, 0])
 
 
-def c_read_record(filename, int ptr):
+def c_read_record(filename, int ptr, int return_bufsize=0):
     """Read an ANSYS record and return a numpy array"""
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
 
-    cdef int prec_flag, type_flag, size, my_dtype
+    cdef int prec_flag, type_flag, size, my_dtype, bufsize
     cdef void* c_ptr
-    c_ptr = read_record(c_filename, ptr, &prec_flag, &type_flag, &size)
+    c_ptr = read_record(c_filename, ptr, &prec_flag, &type_flag, &size, &bufsize)
 
     if type_flag:
         if prec_flag:
@@ -188,7 +188,10 @@ def c_read_record(filename, int ptr):
     # C, and Python does not know that there is this additional reference
     Py_INCREF(array_wrapper)
 
-    return ndarray
+    if return_bufsize:
+        return ndarray, bufsize
+    else:
+        return ndarray
 
 
 def load_elements(filename, int ptr, int nelm, e_disp_table_py, int [:, ::1] elem,
@@ -258,7 +261,7 @@ def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
     
     cdef int i, j
 
-    cdef int prec_flag, type_flag, size
+    cdef int prec_flag, type_flag, size, bufsize
     cdef void* c_ptr
 
     cdef bytes py_bytes = filename.encode()
@@ -271,7 +274,7 @@ def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
         # load element
         elem_loc = loc + e_disp_table[i]
         c_ptr = read_record(c_filename, elem_loc, &prec_flag, &type_flag,
-                            &size)
+                            &size, &bufsize)
 
         if prec_flag:
             s_element = <short*>c_ptr

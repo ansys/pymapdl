@@ -253,7 +253,7 @@ char* WindowedSparseBufferToVec(T *buffer, int *size){
 
 // read a record and return the pointer to the array
 void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
-	    int* size){
+		  int* size, int* out_bufsize){
 
   int bsparse_flag, wsparse_flag, zlib_flag;
 
@@ -267,6 +267,7 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
   // always read record
   char *raw = new char[4*bufsize];
   binFile.read(raw, 4*bufsize);
+  *out_bufsize = bufsize + 3;  // include header and footer
 
   if (bsparse_flag){
     // cout << "bsparse_record" << endl;

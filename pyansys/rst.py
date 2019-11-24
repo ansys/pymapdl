@@ -16,8 +16,9 @@ import pyvista as pv
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
-from pyansys._binary_reader import c_read_record as read_record
-from pyansys.common import read_table, parse_header, read_standard_header, two_ints_to_long
+from pyansys._binary_reader import c_read_record
+from pyansys.common import (read_table, parse_header,
+                            read_standard_header, two_ints_to_long)
 
 # Create logger
 LOG = logging.getLogger(__name__)
@@ -199,8 +200,7 @@ class ResultFile(object):
         if read_geometry:
             self.store_geometry()
 
-        self.header = parse_header(read_record(self.filename, 103),
-                                   RESULT_HEADER_KEYS)
+        self.header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
         self.geometry_header = {}
 
     def plot(self, node_components=None, sel_type_all=True, **kwargs):
@@ -485,10 +485,10 @@ class ResultFile(object):
             Node numbers associated with the results.
 
         result : float np.ndarray
-            Result is ``self.nsets x nnod x Sumdof``, or number of time steps 
-            by number of nodes by degrees of freedom
+            Result is ``self.nsets x nnod x Sumdof``, or number of
+            time steps by number of nodes by degrees of freedom.
         """
-        if not solution_type in ('NSL','VEL','ACC'):
+        if solution_type not in ('NSL', 'VEL', 'ACC'):
             raise ValueError("Argument 'solution type' must be either 'NSL', 'VEL', or 'ACC'")
 
         # Get info from result header
@@ -498,10 +498,10 @@ class ResultFile(object):
 
         # Read a result
         with open(self.filename, 'rb') as f:
-            # get first solution header and assume, following solution headers are equal
-            f.seek((rpointers[0]) * 4)
-
-            solution_header = parse_header(read_table(f), SOLUTION_DATA_HEADER_KEYS)
+            # get first solution header and assume, following solution
+            # headers are equal
+            record = self.read_record(rpointers[0])
+            solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
 
             mask = solution_header['mask']
             #PDBN = bool(mask & 0b1<<10)
@@ -528,93 +528,43 @@ class ResultFile(object):
             #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
             #if not numadof: numadof = Sumdof 
 
-            results = np.zeros((nsets, nnod, Sumdof))
+            results = np.zeros((nsets, nnod, Sumdof))  # should be empty(?)
 
             # iterate over all loadsteps
             for rnum in range(self.nsets):
 
-                # Seek to result table and to get pointer to DOF results of result table
-                if solution_type == 'NSL': # Nodal Displacements
-                    f.seek((rpointers[rnum] + 12) * 4)  # item 11
-                    ptrNSLl = np.fromfile(f, endian + 'i', 1)[0]
-                    ptrSL = ptrNSLl
-                elif solution_type == 'VEL':# Nodal Velocities
-                    f.seek((rpointers[rnum] + 132) * 4)  # item 131
-                    ptrVSLl = np.fromfile(f, endian + 'i', 1)[0]
-                    f.seek((rpointers[rnum] + 133) * 4)  # item 132
-                    ptrVSLh = np.fromfile(f, endian + 'i', 1)[0]
-                    ptrVSL = two_ints_to_long(ptrVSLl, ptrVSLh)
-                    ptrSL = ptrVSL
-                elif solution_type == 'ACC':# Nodal Accelerations
-                    f.seek((rpointers[rnum] + 134) * 4)  # item 133
-                    ptrASLl = np.fromfile(f, endian + 'i', 1)[0]
-                    f.seek((rpointers[rnum] + 135) * 4)  # item 134
-                    ptrASLh = np.fromfile(f, endian + 'i', 1)[0]
-                    ptrASL = two_ints_to_long(ptrASLl, ptrASLh)
-                    ptrSL = ptrASL
+                # Seek to result table and to get pointer to DOF
+                # results of result table
+                rptr = self.read_record(rpointers[rnum])                
+                if solution_type == 'NSL':  # Nodal Displacements
+                    ptrSL = rptr[10] # item 12
+                elif solution_type == 'VEL':  # Nodal Velocities
+                    # from items 131, 132
+                    ptrSL = two_ints_to_long(rptr[130], rptr[131])
+                elif solution_type == 'ACC':  # Nodal Accelerations
+                    # from items 133, 134
+                    ptrSL = two_ints_to_long(rptr[132], rptr[133])
 
-                f.seek((rpointers[rnum] + ptrSL) * 4)
-
-                # integer count that tells how long the record is
-                reclenl = np.fromfile(f,endian+'i',1)[0]
-                # read as unsigned integer to to read and reset 31st bit
-                reclenh = np.fromfile(f, endian+'u4',1)[0]
-
-                # bit 31 is set in higher order part, if the record contains integers
-                is_integer= bool(reclenh & 0b1<<31)
-                dtype = ['d','i'][is_integer]
-                #reset 31st bit and represent as int32
-                reclenh = np.int32(reclenh&~0b1<<31)
-
-                if not is_integer:# double count
-                    nitems = int(two_ints_to_long(reclenl, reclenh)/2)
-                else:# integer count
-                    nitems = two_ints_to_long(reclenl, reclenh)
-
-                result = np.fromfile(f, endian + dtype, nitems)
-                result = result.reshape((-1, Sumdof))
-
-                # skip over last 4 bits that repear rec_len
-                f.read(4)
+                record, sz = self.read_record(rpointers[rnum] + ptrSL,
+                                     return_bufsize=True)
+                # nitems = record.size
+                result = record.reshape((-1, Sumdof))
 
                 # PDBN should be set if only a subset of nodes was output
                 # PDBN is set only when solution type: nodal solution/displacement
                 # PDBN is not set when solution type: acceleration, velocities 
-                if nitems != Sumdof*nnod:
-                    # integer count that tells how long the record is
-                    reclenl = np.fromfile(f,endian+'i',1)[0]
-                    # read as unsigned integer to read and toogle 31st bit
-                    reclenh = np.fromfile(f, endian+'u4',1)[0]
+                if record.size != Sumdof*nnod:
+                    # read the next record to the internal indexing reording
+                    nodlist = self.read_record(rpointers[rnum] + ptrSL + sz)
 
-                    # bit 31 is set in higher order part, if the record contains integers
-                    is_integer= bool(reclenh & 0b1<<31)
-                    dtype = ['d','i'][is_integer]
-                    #reset 31st bit and represent as int32
-                    reclenh = np.int32(reclenh&~0b1<<31)
-
-                    if not is_integer:# double count
-                        nitems = int(two_ints_to_long(reclenl, reclenh)/2)
-                    else:# integer count
-                        nitems = two_ints_to_long(reclenl, reclenh)
-                    # read record that contains the list of nodes for which DOF solutions are available
-                    # seems to be in internal ordering
-                    nodlist = np.fromfile(f,endian+dtype,nitems)#[:,np.newaxis]
-
-                    # Reorder based on sorted indexing
-                    #neqv = self.resultheader['neqv']
-                    #sidx = self.sidx
-                    #sidx = np.tile(sidx,nodlist.shape)
-                    #sidx = neqv==nodlist
-                    #sidx = sidx[idx]
-
-                    # convert to numpy indices
+                    # convert to zero index
                     sidx = nodlist -1
 
                 else:
                     # Reorder based on sorted indexing
                     sidx = self.sidx
 
-                results[rnum,sidx,:]=result
+                results[rnum, sidx, :] = result
 
             f.close()
 
@@ -641,7 +591,36 @@ class ResultFile(object):
 
         # also include nodes in output
         return self.nnum, results
-    
+
+    def read_record(self, pointer, return_bufsize=False):
+        """Reads a record at a given position.
+
+        Because ANSYS 19.0+ uses compression by default, you must use
+        this method rather than ``np.fromfile``.
+
+        Parameters
+        ----------
+        pointer : int
+            ANSYS file position (n words from start of file.  A word
+            is four bytes.
+
+        return_bufsize : bool, optional
+            Returns the number of words read (includes header and
+            footer).  Useful for determining the new position in the
+            file after reading a record.
+
+        Returns
+        -------
+        record : np.ndarray
+            The record read as a ``n x 1`` numpy array.
+
+        bufsize : float, optional
+            When ``return_bufsize`` is enabled, returns the number of
+            words read.
+
+        """
+        return c_read_record(self.filename, pointer, return_bufsize)
+
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
@@ -767,7 +746,7 @@ class ResultFile(object):
         with open(self.filename, 'rb') as f:
 
             # read geometry header
-            table = read_record(self.filename, self.resultheader['ptrGEO'])
+            table = self.read_record(self.resultheader['ptrGEO'])
             geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
             self.geometry_header = geometry_header
 
@@ -783,7 +762,7 @@ class ResultFile(object):
             maxety = geometry_header['maxety']
 
             # pointer to the element type index table
-            e_type_table = read_record(self.filename, geometry_header['ptrETY'])
+            e_type_table = self.read_record(geometry_header['ptrETY'])
             # e_type_table = e_type_table[e_type_table != 0]
 
             # store information for each element type
@@ -806,7 +785,7 @@ class ResultFile(object):
                     continue
 
                 ptr = geometry_header['ptrETY'] + e_type_table[i]
-                einfo = read_record(self.filename, ptr)
+                einfo = self.read_record(ptr)
 
                 etype_ref = einfo[0]
                 # etype_id[i] = einfo[1]
@@ -842,19 +821,11 @@ class ResultFile(object):
                                   'nodstr': nodstr,
                                   'keyopts': keyopts}
 
-            # get the element description table
-            # f.seek((geometry_header['ptrEID'] + 2)*4)
-            # e_disp_table = np.empty(nelm, np.int64)
-            # dtype = self.resultheader['endian'] + 'i8'
-            # e_disp_table[:] = np.fromfile(f, dtype, nelm)
-
+            # the element description table
+            # must view this record as int64, even though ansys reads
+            # it in as a 32 bit int
             ptr_eid = geometry_header['ptrEID']
-            e_disp_table = read_record(self.filename, ptr_eid).view(np.int64)
-
-            # assert np.allclose(record, e_disp_table)
-
-            # doesn't work as it's a long int
-            # e_disp_table = read_record(self.filename, geometry_header['ptrEID'])
+            e_disp_table = self.read_record(ptr_eid).view(np.int64)
 
             # get pointer to start of element table and adjust element pointers
             ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
