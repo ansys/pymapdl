@@ -49,10 +49,10 @@ cdef extern from "<iostream>" namespace "std::ios_base" nogil:
      cdef open_mode binary
 
 
-cdef extern from "numpy/npy_math.h":
+cdef extern from "numpy/npy_math.h" nogil:
     bint npy_isnan(double x)
 
-cdef extern from 'binary_reader.hpp':
+cdef extern from 'binary_reader.hpp' nogil:
     void read_nodes(const char*, int, int, int*, double*)
     void* read_record(const char*, int, int*, int*, int*, int*)
     void* read_record_stream(ifstream*, int, void*, int*, int*, int*)
@@ -387,76 +387,7 @@ def load_elements(filename, int loc, int nelem, int64_t [::1] e_disp_table,
 #                 elem[i, j - 10] = element[j]
 
 
-
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
-                        int64_t [::1] nodstr, int64_t [::1] etype,
-                        float [:, ::1] ele_data_arr, int nitem,
-                        int [::1] element_type,
-                        int as_global=1):
-    """
-    Read element results from ANSYS directly into a numpy array
-
-    as_global : int, optional
-        Rotates stresses from the element coordinate system to the global
-        cartesian coordinate system.  Default True.
-
-    """
-    cdef int64_t i, j, k, ind, nread
-    
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'rb')
-
-    cdef float [3] eulerangles
-    
-    cdef int64_t ele_table, nnode_elem
-    cdef int ptrENS, ptrEUL
-    cdef int64_t c = 0
-    for i in range(len(ele_ind_table)):
-        # get location of element result pointers
-        ele_table = ele_ind_table[i]
-
-        # element stress pointer
-        fseek(cfile, (ele_table + PTR_ENS_IDX)*4, SEEK_SET)
-        fread(&ptrENS, sizeof(int), 1, cfile)
-
-        # Get the nodes in the element
-        nnode_elem = nodstr[etype[i]]
-
-        # if shell and keyopt 8 is 0, read top and bottom
-        nread = nnode_elem*nitem
-
-        if ptrENS < 0:  # negative pointer means missing data
-            # skip this element
-            for j in range(nnode_elem):
-                for k in range(nitem):
-                    ele_data_arr[c + j, k] = 0  # consider putting NAN instead
-        else:
-            # read the stresses evaluated at the intergration points or nodes
-            fseek(cfile, (ele_table + ptrENS)*4, SEEK_SET)
-            fread(&ele_data_arr[c, 0], sizeof(float), nread, cfile)
-
-            # this will undoubtedly need to be generalized
-            # element euler angle pointer
-            if element_type[i] == 181 or element_type[i] == 281:
-                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
-                fread(&ptrEUL, sizeof(int), 1, cfile)
-
-                # only read the first three euler angles (thxy, thyz, thzx)
-                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
-                fread(&eulerangles, sizeof(float), 3, cfile)
-
-                # rotate the first four nodal results
-                if as_global:
-                    euler_rotate(ele_data_arr, eulerangles, c)
-
-        c += nnode_elem
-
-    fclose(cfile)
-
-
-def read_element_stress2(filename, int64_t [::1] ele_ind_table, 
                         int64_t [::1] nodstr, int64_t [::1] etype,
                         float [:, ::1] ele_data_arr, int nitem,
                         int [::1] element_type,
@@ -484,10 +415,12 @@ def read_element_stress2(filename, int64_t [::1] ele_ind_table,
     cdef int64_t ele_table, nnode_elem
     cdef int ptr_ens, ptr_eul
     cdef int64_t c = 0
-    for i, ele_table in enumerate(ele_ind_table):
+    for i in range(len(ele_ind_table)):
+        ele_table = ele_ind_table[i]
         # store elemenet element result pointers
         read_record_stream(binfile, ele_table, <void*>&pointers,
                            &prec_flag, &type_flag, &size)
+        ptr_ens = pointers[PTR_ENS_IDX]
 
         # Get the nodes in the element
         nnode_elem = nodstr[etype[i]]
@@ -502,7 +435,7 @@ def read_element_stress2(filename, int64_t [::1] ele_ind_table,
                     ele_data_arr[c + j, k] = 0  # consider putting NAN instead
         else:
             # read the stresses evaluated at the intergration points or nodes
-            read_record_stream(binfile, ele_table + pointers[PTR_ENS_IDX],
+            read_record_stream(binfile, ele_table + ptr_ens,
                                <void*>&ele_data_arr[c, 0], &prec_flag,
                                &type_flag, &size)
 
@@ -524,9 +457,8 @@ def read_element_stress2(filename, int64_t [::1] ele_ind_table,
 
 # TODO: this will have to be generalized at some point
 cdef inline void euler_rotate(float [:, ::1] ele_data_arr,
-                             float [3] eulerangles, int row):
-    """
-    Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
+                             float [3] eulerangles, int row) nogil:
+    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
 
     Acts on rows 0 - 3 relative to row
 
@@ -1307,8 +1239,7 @@ def tensor_arbitrary(double [:, ::1] stress, double [:, :] trans):
 
 
 def tensor_rotate_z(double [:, :] stress, float theta_z):
-    """
-    Rotates a 3D stress tensor by theta about the Z axis
+    """Rotates a 3D stress tensor by theta about the Z axis
 
     Notes:
     -----
@@ -1331,12 +1262,6 @@ def tensor_rotate_z(double [:, :] stress, float theta_z):
     for i in range(nnode):
         s_xx = stress[i, 0]
         if npy_isnan(s_xx):
-            # stress_rot[i, 0] = 0
-            # stress_rot[i, 1] = 0
-            # stress_rot[i, 2] = 0
-            # stress_rot[i, 3] = 0
-            # stress_rot[i, 4] = 0
-            # stress_rot[i, 5] = 0
             isnan[i] = 1
         else:
             s_yy = stress[i, 1]
