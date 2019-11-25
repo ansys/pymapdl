@@ -1264,7 +1264,7 @@ class ResultFile(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
-            _binary_reader.read_element_stress_new(self.filename,
+            _binary_reader.read_element_stress(self.filename,
                                                ele_ind_table,
                                                nodstr.astype(np.int64),
                                                etype, ele_data_arr,
@@ -1340,6 +1340,9 @@ class ResultFile(object):
 
         Returns
         -------
+        enum : np.ndarray
+            Element numbers.
+
         element_data : list
             List with one data item for each element.
 
@@ -1399,8 +1402,8 @@ class ResultFile(object):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         Returns
         -------
@@ -1971,14 +1974,27 @@ class ResultFile(object):
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
 
-        if self.version < 14.5:
-            read_fun = _binary_reader.read_nodal_values_double
-        else:
-            read_fun = _binary_reader.read_nodal_values
+        # if self.version < 14.5:
+        #     read_fun = _binary_reader.read_nodal_values_double
+        #     # ele_ind_table += 2
+        # else:
+        #     read_fun = _binary_reader.read_nodal_values_new
+            
+        # data, ncount = _binary_reader.read_nodal_values(self.filename,
+        #                         self.grid.celltypes,
+        #                         ele_ind_table + 2,
+        #                         self.grid.offset,
+        #                         self.grid.cells,
+        #                         nitem,
+        #                         self.grid.number_of_points,
+        #                         nodstr,
+        #                         etype,
+        #                         elemtype,
+        #                         result_index)
 
-        data, ncount = read_fun(self.filename,
+        data, ncount = _binary_reader.read_nodal_values_new(self.filename,
                                 self.grid.celltypes,
-                                ele_ind_table + 2,
+                                ele_ind_table,
                                 self.grid.offset,
                                 self.grid.cells,
                                 nitem,

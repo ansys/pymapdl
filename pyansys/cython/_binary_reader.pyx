@@ -392,75 +392,6 @@ def load_elements(filename, int loc, int nelem, int64_t [::1] e_disp_table,
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
-                        int64_t [::1] nodstr, int64_t [::1] etype,
-                        float [:, ::1] ele_data_arr, int nitem,
-                        int [::1] element_type,
-                        int as_global=1):
-    """Read element results from ANSYS directly into a numpy array
-
-    as_global : int, optional
-        Rotates stresses from the element coordinate system to the global
-        cartesian coordinate system.  Default True.
-
-    """
-    cdef int64_t i, j, k, ind, nread
-
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-
-    cdef ifstream* binfile = new ifstream(c_filename, binary)
-    cdef int prec_flag, type_flag, size
-
-    cdef float [64] tmpbuffer
-    cdef float [3] eulerangles
-    cdef int [1024] pointers  # tmp array of pointers
-    cdef void* cptr
-    cdef int64_t ele_table, nnode_elem
-    cdef int ptr_ens, ptr_eul
-    cdef int64_t c = 0
-    for i in range(len(ele_ind_table)):
-        ele_table = ele_ind_table[i]
-        # store elemenet element result pointers
-        read_record_stream(binfile, ele_table, <void*>&pointers,
-                           &prec_flag, &type_flag, &size)
-        ptr_ens = pointers[PTR_ENS_IDX]
-
-        # Get the nodes in the element
-        nnode_elem = nodstr[etype[i]]
-
-        # if shell and keyopt 8 is 0, read top and bottom
-        nread = nnode_elem*nitem
-
-        if ptr_ens < 0:  # negative pointer means missing data
-            # skip this element
-            for j in range(nnode_elem):
-                for k in range(nitem):
-                    ele_data_arr[c + j, k] = 0  # consider putting NAN instead
-        else:
-            # read the stresses evaluated at the intergration points or nodes
-            cptr = <void*>&ele_data_arr[c, 0]
-            read_record_stream(binfile, ele_table + ptr_ens,
-                               cptr, &prec_flag,
-                               &type_flag, &size)
-
-            # TODO: this will undoubtedly need to be generalized
-            if element_type[i] == 181 or element_type[i] == 281:
-                # only concerned with the first three euler angles (thxy, thyz, thzx)
-                read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
-                                   <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
-                eulerangles[0] = tmpbuffer[0]  # TODO: clean up
-                eulerangles[1] = tmpbuffer[1]  # TODO: clean up
-                eulerangles[2] = tmpbuffer[2]  # TODO: clean up
-
-                # rotate the first four nodal results
-                if as_global:
-                    euler_rotate(ele_data_arr, eulerangles, c)
-
-        c += nnode_elem
-
-
-def read_element_stress_new(filename, int64_t [::1] ele_ind_table, 
                             int64_t [::1] nodstr, int64_t [::1] etype,
                             float [:, ::1] ele_data_arr, int nitem,
                             int [::1] element_type,
@@ -470,7 +401,6 @@ def read_element_stress_new(filename, int64_t [::1] ele_ind_table,
     as_global : int, optional
         Rotates stresses from the element coordinate system to the global
         cartesian coordinate system.  Default True.
-
     """
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
@@ -487,12 +417,11 @@ def read_element_stress_new(filename, int64_t [::1] ele_ind_table,
         c += nnode_elem
 
 
-cdef inline void read_element_result(ifstream *binfile, int ele_table,
-                                     int result_index,
-                                     int nnode_elem, int nitem, float *arr,
-                                     int element_type, int as_global) nogil:
+cdef inline int read_element_result(ifstream *binfile, int ele_table,
+                                    int result_index,
+                                    int nnode_elem, int nitem, float *arr,
+                                    int element_type, int as_global=1) nogil:
     """Populate array with results from a single element"""
-
     cdef int i, j, k, c
     cdef int [1024] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
@@ -504,6 +433,8 @@ cdef inline void read_element_result(ifstream *binfile, int ele_table,
                        &prec_flag, &type_flag, &size)
     cdef int ptr = pointers[result_index]
 
+    if ptr == 0:
+        return 1
     if ptr < 0:  # negative pointer means missing data
         # skip this element
         for j in range(nnode_elem):
@@ -524,6 +455,7 @@ cdef inline void read_element_result(ifstream *binfile, int ele_table,
             if as_global:
                 euler_rotate_gen(arr, tmpbuffer, nitem)
 
+    return 0
 
 cdef inline void euler_rotate_gen(float_or_double *arr,
                                   float_or_double [64] eulerangles, int nitem) nogil:
@@ -805,22 +737,22 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                 euler_rotate(bufferdata, eulerangles, c)
 
         if celltype == VTK_LINE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 2)
         elif celltype == VTK_TRIANGLE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 3)
         elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
         elif celltype == VTK_HEXAHEDRON:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 8)
         elif celltype == VTK_PYRAMID:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 5)
         elif celltype == VTK_TETRA:  # dependent on element type
             if nodstr[etype[i]] == 4:
-                read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+                read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
             else:
-                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems, cfile)
+                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
         elif celltype == VTK_WEDGE:
-            read_wedge(cells, offset, ncount, data, bufferdata, nitems, cfile)
+            read_wedge(cells, offset, ncount, data, bufferdata, nitems)
 
     fclose(cfile)
 
@@ -874,10 +806,9 @@ def read_nodal_values_new(filename, uint8 [::1] celltypes,
     cdef int64_t i, j, k, ind, nread, offset
     cdef int64_t ncells = ele_ind_table.size
 
-    cdef FILE* cfile
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
-    
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
 
     cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
 
@@ -886,72 +817,42 @@ def read_nodal_values_new(filename, uint8 [::1] celltypes,
 
     # temp buffer to hold data read from element
     cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
-    cdef float [3] eulerangles
 
     cdef int64_t ele_table, nnode_elem
-    cdef int ptr_result, ptrEUL
-    cdef int64_t c = 0
+    cdef int ptr_result, skip
+    cdef int c = 0
     cdef uint8 celltype
     for i in range(ncells):
+        # read element data
+        nnode_elem = nodstr[etype[i]]
+        skip = read_element_result(binfile, ele_ind_table[i],
+                                   result_index, nnode_elem, nitems,
+                                   &bufferdata[0, 0], element_type[i])
 
-        # skip if not valid type
-        # if not validmask[i]:
-            # continue
-        
-        # get location of element data
-        ele_table = ele_ind_table[i]
-        fseek(cfile, (ele_table + result_index)*4, SEEK_SET)
-        fread(&ptr_result, sizeof(int), 1, cfile)
+        if skip:
+            continue
 
         # Get the nodes in the element
         celltype = celltypes[i]
         offset = offsets[i] + 1
-        
-        nnode_elem = nodstr[etype[i]]
-
-        # skip this element
-        if ptr_result == 0:  # if zero, ignore this element
-            continue
-        elif ptr_result < 0:  # if negative, all values are -1
-            for j in range(nnode_elem):
-                for k in range(nitems):
-                    bufferdata[j, k] = 0
-        else:
-            fseek(cfile, (ele_table + ptr_result)*4, SEEK_SET)
-            fread(&bufferdata[0, 0], sizeof(float), nnode_elem*nitems, cfile)        
-
-            #### this will undoubtedly need to be generalized ####
-            # element euler angle pointer
-            if element_type[i] == 181:
-                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
-                fread(&ptrEUL, sizeof(int), 1, cfile)
-
-                # only read the first three euler angles (thxy, thyz, thzx)
-                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
-                fread(&eulerangles, sizeof(float), 3, cfile)
-
-                # rotate the first four nodal results
-                euler_rotate(bufferdata, eulerangles, c)
 
         if celltype == VTK_LINE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 2)
         elif celltype == VTK_TRIANGLE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 3)
         elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
         elif celltype == VTK_HEXAHEDRON:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 8)
         elif celltype == VTK_PYRAMID:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 5)
         elif celltype == VTK_TETRA:  # dependent on element type
             if nodstr[etype[i]] == 4:
-                read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+                read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
             else:
-                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems, cfile)
+                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
         elif celltype == VTK_WEDGE:
-            read_wedge(cells, offset, ncount, data, bufferdata, nitems, cfile)
-
-    fclose(cfile)
+            read_wedge(cells, offset, ncount, data, bufferdata, nitems)
 
     return np.asarray(data), np.asarray(ncount)
 
@@ -1066,28 +967,28 @@ def read_nodal_values_double(filename, uint8 [::1] celltypes,
 
         if celltype == VTK_LINE:  # untested
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 2)
+                                bufferdata, nitems, 2)
         elif celltype == VTK_TRIANGLE:  # untested
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 3)
+                                bufferdata, nitems, 3)
         elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 4)
+                                bufferdata, nitems, 4)
         elif celltype == VTK_HEXAHEDRON:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 8)
+                                bufferdata, nitems, 8)
         elif celltype == VTK_PYRAMID:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 5)
+                                bufferdata, nitems, 5)
         elif celltype == VTK_TETRA:  # dependent on element type
             if nodstr[etype[i]] == 4:
                 read_element_double(cells, offset, ncount, data,
-                                    bufferdata, nitems, cfile, 4)
+                                    bufferdata, nitems, 4)
             else:
                 read_tetrahedral_double(cells, offset, ncount, data,
-                                        bufferdata, nitems, cfile)
+                                        bufferdata, nitems)
         elif celltype == VTK_WEDGE:
-            read_wedge_double(cells, offset, ncount, data, bufferdata, nitems, cfile)
+            read_wedge_double(cells, offset, ncount, data, bufferdata, nitems)
 
     fclose(cfile)
 
@@ -1204,28 +1105,28 @@ def read_nodal_values_double_new(filename, uint8 [::1] celltypes,
 
         if celltype == VTK_LINE:  # untested
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 2)
+                                bufferdata, nitems, 2)
         elif celltype == VTK_TRIANGLE:  # untested
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 3)
+                                bufferdata, nitems, 3)
         elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 4)
+                                bufferdata, nitems, 4)
         elif celltype == VTK_HEXAHEDRON:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 8)
+                                bufferdata, nitems, 8)
         elif celltype == VTK_PYRAMID:
             read_element_double(cells, offset, ncount, data,
-                                bufferdata, nitems, cfile, 5)
+                                bufferdata, nitems, 5)
         elif celltype == VTK_TETRA:  # dependent on element type
             if nodstr[etype[i]] == 4:
                 read_element_double(cells, offset, ncount, data,
-                                    bufferdata, nitems, cfile, 4)
+                                    bufferdata, nitems, 4)
             else:
                 read_tetrahedral_double(cells, offset, ncount, data,
-                                        bufferdata, nitems, cfile)
+                                        bufferdata, nitems)
         elif celltype == VTK_WEDGE:
-            read_wedge_double(cells, offset, ncount, data, bufferdata, nitems, cfile)
+            read_wedge_double(cells, offset, ncount, data, bufferdata, nitems)
 
     return np.asarray(data), np.asarray(ncount)
 
@@ -1241,14 +1142,13 @@ wedge_ind[5] = 4
 
 cdef inline void read_wedge(int64_t [::1] cells, int64_t index, int [::1] ncount,
                            float [:, ::1] data, float [:, ::1] bufferdata,
-                           int nitems, FILE* cfile) nogil:
+                           int nitems) nogil:
     """
     [0, 1, 2, 2, 3, 4, 5, 5]
     [0, 1, 2,  , 4, 5, 6,  ]
     """
     cdef int64_t i, j, cell, idx
     cdef int nread = nitems*8
-    # fread(&bufferdata[0, 0], sizeof(float), nread, cfile)
     
     for i in range(6):
         cell = cells[index + i]
@@ -1261,7 +1161,7 @@ cdef inline void read_wedge(int64_t [::1] cells, int64_t index, int [::1] ncount
 cdef inline void read_wedge_double(int64_t [::1] cells,
                                    int64_t index, int [::1] ncount,
                                    double [:, ::1] data, double [:, ::1] bufferdata,
-                                   int nitems, FILE* cfile) nogil:
+                                   int nitems) nogil:
     """
     [0, 1, 2, 2, 3, 4, 5, 5]
     [0, 1, 2,  , 4, 5, 6,  ]
@@ -1285,7 +1185,7 @@ tet_ind[3] = 4
 
 cdef inline void read_tetrahedral(int64_t [::1] cells, int64_t index, int [::1] ncount,
                                   float [:, ::1] data, float [:, ::1] bufferdata,
-                                  int nitems, FILE* cfile) nogil:
+                                  int nitems) nogil:
     """
     # see documentation at _parser.StoreTet
     """
@@ -1306,7 +1206,7 @@ cdef inline void read_tetrahedral_double(int64_t [::1] cells, int64_t index,
                                          int [::1] ncount,
                                          double [:, ::1] data,
                                          double [:, ::1] bufferdata,
-                                         int nitems, FILE* cfile) nogil:
+                                         int nitems) nogil:
     """
     # see documentation at _parser.StoreTet
     """
@@ -1325,7 +1225,7 @@ cdef inline void read_tetrahedral_double(int64_t [::1] cells, int64_t index,
 
 cdef inline void read_element(int64_t [::1] cells, int64_t index, int [::1] ncount,
                               float [:, ::1] data, float [:, ::1] bufferdata,
-                              int nitems, FILE* cfile, int nnode) nogil:
+                              int nitems, int nnode) nogil:
     """
     Reads a generic element type in a linear fashion.  Works for:
     Hexahedron 95 or 186
@@ -1333,7 +1233,6 @@ cdef inline void read_element(int64_t [::1] cells, int64_t index, int [::1] ncou
     Tetrahedral 187
     """
     cdef int64_t i, j, cell, idx
-    # fread(&bufferdata[0, 0], sizeof(float), nitems*nnode, cfile)
 
     for i in range(nnode):
         cell = cells[index + i]
@@ -1345,7 +1244,7 @@ cdef inline void read_element(int64_t [::1] cells, int64_t index, int [::1] ncou
 cdef inline void read_element_double(int64_t [::1] cells, int64_t index,
                                      int [::1] ncount,
                                      double [:, ::1] data, double [:, ::1] bufferdata,
-                                     int nitems, FILE* cfile, int nnode) nogil:
+                                     int nitems, int nnode) nogil:
     """
     Reads a generic element type in a linear fashion.  Works for:
     Hexahedron 95 or 186
