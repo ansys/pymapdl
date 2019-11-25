@@ -1266,8 +1266,13 @@ class ResultFile(object):
 
             _binary_reader.read_element_stress(self.filename, ele_ind_table + 2, nodstr.astype(np.int64), etype, ele_data_arr, nitem, elemtype, as_global=not in_element_coord_sys)
 
-            # ele_data_arr2 = np.empty_like(ele_data_arr)
-            # _binary_reader.read_element_stress2(self.filename, ele_ind_table, nodstr.astype(np.int64), etype, ele_data_arr2, nitem, elemtype, as_global=not in_element_coord_sys)
+            _binary_reader.read_element_stress2(self.filename,
+                                                ele_ind_table,
+                                                nodstr.astype(np.int64),
+                                                etype, ele_data_arr2,
+                                                nitem, elemtype,
+                                                as_global=not
+                                                in_element_coord_sys)
             
 
             if nitem != 6:
