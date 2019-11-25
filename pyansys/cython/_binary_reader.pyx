@@ -83,6 +83,10 @@ ctypedef fused index_type:
     int
     int64_t
 
+ctypedef fused float_or_double:
+    float
+    double
+
 
 ###############################################################################
 from libc.stdlib cimport free
@@ -411,7 +415,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     cdef float [64] tmpbuffer
     cdef float [3] eulerangles
     cdef int [1024] pointers  # tmp array of pointers
-
+    cdef void* cptr
     cdef int64_t ele_table, nnode_elem
     cdef int ptr_ens, ptr_eul
     cdef int64_t c = 0
@@ -435,8 +439,9 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
                     ele_data_arr[c + j, k] = 0  # consider putting NAN instead
         else:
             # read the stresses evaluated at the intergration points or nodes
+            cptr = <void*>&ele_data_arr[c, 0]
             read_record_stream(binfile, ele_table + ptr_ens,
-                               <void*>&ele_data_arr[c, 0], &prec_flag,
+                               cptr, &prec_flag,
                                &type_flag, &size)
 
             # TODO: this will undoubtedly need to be generalized
@@ -453,6 +458,125 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
                     euler_rotate(ele_data_arr, eulerangles, c)
 
         c += nnode_elem
+
+
+def read_element_stress_new(filename, int64_t [::1] ele_ind_table, 
+                            int64_t [::1] nodstr, int64_t [::1] etype,
+                            float [:, ::1] ele_data_arr, int nitem,
+                            int [::1] element_type,
+                            int as_global=1):
+    """Read element results from ANSYS directly into a numpy array
+
+    as_global : int, optional
+        Rotates stresses from the element coordinate system to the global
+        cartesian coordinate system.  Default True.
+
+    """
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+    cdef int i
+    cdef int c = 0
+    for i in range(len(ele_ind_table)):
+        nnode_elem = nodstr[etype[i]]
+
+        read_element_result(binfile, ele_ind_table[i],
+                            PTR_ENS_IDX, nnode_elem, nitem,
+                            &ele_data_arr[c, 0], element_type[i], as_global)
+        c += nnode_elem
+
+
+cdef inline void read_element_result(ifstream *binfile, int ele_table,
+                                     int result_index,
+                                     int nnode_elem, int nitem, float *arr,
+                                     int element_type, int as_global) nogil:
+    """Populate array with results from a single element"""
+
+    cdef int i, j, k, c
+    cdef int [1024] pointers  # tmp array of pointers
+    cdef int prec_flag, type_flag, size
+    cdef float [64] tmpbuffer  # for euler results
+    cdef float [3] eulerangles
+
+    # store elemenet element result pointers
+    read_record_stream(binfile, ele_table, <void*>&pointers,
+                       &prec_flag, &type_flag, &size)
+    cdef int ptr = pointers[result_index]
+
+    if ptr < 0:  # negative pointer means missing data
+        # skip this element
+        for j in range(nnode_elem):
+            for k in range(nitem):
+                arr[j*nitem + k] = 0  # consider putting NAN instead
+    else:
+        # read the stresses evaluated at the intergration points or nodes
+        read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
+                           &type_flag, &size)
+
+        # TODO: this will undoubtedly need to be generalized
+        if element_type == 181 or element_type == 281:
+            # only concerned with the first three euler angles (thxy, thyz, thzx)
+            read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+                               <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
+
+            # rotate the first four nodal results
+            if as_global:
+                euler_rotate_gen(arr, tmpbuffer, nitem)
+
+
+cdef inline void euler_rotate_gen(float_or_double *arr,
+                                  float_or_double [64] eulerangles, int nitem) nogil:
+    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
+
+    Acts on rows 0 - 3 relative to row
+
+    Specific to shell181 elements
+
+    # used sympy to generate these equations
+    tensor = np.matrix([[s_xx, s_xy, s_xz], 
+                        [s_xy, s_yy, s_yz], 
+                        [s_xz, s_yz, s_zz]])
+
+    # always zero for shell elements...
+    s_xz = 0
+    s_zz = 0
+    s_yz = 0
+
+    from sympy import Matrix, symbols
+
+    c1, c2, c3, s1, s2, s3, s_xx, s_yy, s_xy = symbols('c1 c2 c3 s1 s2 s3 s_xx s_yy s_xy')
+    tensor = np.matrix([[s_xx, s_xy, 0], [s_xy, s_yy, 0], [0, 0, 0]])
+    
+
+    R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
+                [-s1*c2, c1*c2, s2],
+                [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
+
+    ans = R.T*tensor*R
+    """    
+    cdef double s_xx, s_xy, s_yy
+    cdef double c1 = cos(DEG2RAD*eulerangles[0])
+    cdef double c2 = cos(DEG2RAD*eulerangles[1])
+    cdef double c3 = cos(DEG2RAD*eulerangles[2])
+    cdef double s1 = sin(DEG2RAD*eulerangles[0])
+    cdef double s2 = sin(DEG2RAD*eulerangles[1])
+    cdef double s3 = sin(DEG2RAD*eulerangles[2])
+
+    cdef int i
+    for i in range(4):
+        # grab the element component stresses
+        s_xx = arr[i*nitem + 0]
+        s_yy = arr[i*nitem + 1]
+        s_xy = arr[i*nitem + 3]
+
+        # the rest are zero (no out of plane stress)
+        arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
+        arr[i*nitem + 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1)) + (c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1))*(c1*s2*s3 + c3*s1)
+        arr[i*nitem + 2] = -c2*s3*(-c2*s3*s_xx + s2*s_xy) + s2*(-c2*s3*s_xy + s2*s_yy)
+        arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
+        arr[i*nitem + 4] = -c2*s3*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1))
+        arr[i*nitem + 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
 
 
 # TODO: this will have to be generalized at some point
@@ -485,8 +609,6 @@ cdef inline void euler_rotate(float [:, ::1] ele_data_arr,
                 [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
 
     ans = R.T*tensor*R
-    
-
     """    
     cdef double c1 = cos(DEG2RAD*eulerangles[0])
     cdef double c2 = cos(DEG2RAD*eulerangles[1])
@@ -519,8 +641,8 @@ cdef inline void euler_rotate(float [:, ::1] ele_data_arr,
 
 cdef inline void euler_rotate_double(double [:, ::1] ele_data_arr,
                                      double [3] eulerangles, int row):
-    """
-    Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
+    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in
+    eulerangles
 
     Acts on rows 0 - 3 relative to row
 
@@ -547,8 +669,6 @@ cdef inline void euler_rotate_double(double [:, ::1] ele_data_arr,
                 [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
 
     ans = R.T*tensor*R
-    
-
     """    
     cdef double c1 = cos(DEG2RAD*eulerangles[0])
     cdef double c2 = cos(DEG2RAD*eulerangles[1])
@@ -557,7 +677,6 @@ cdef inline void euler_rotate_double(double [:, ::1] ele_data_arr,
     cdef double s1 = sin(DEG2RAD*eulerangles[0])
     cdef double s2 = sin(DEG2RAD*eulerangles[1])
     cdef double s3 = sin(DEG2RAD*eulerangles[2])
-
 
     cdef double s_xx, s_xy, s_yy
 
@@ -579,7 +698,6 @@ cdef inline void euler_rotate_double(double [:, ::1] ele_data_arr,
         ele_data_arr[c, 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
 
 
-
 def read_nodal_values(filename, uint8 [::1] celltypes,
                       int64_t [::1] ele_ind_table,
                       int64_t [::1] offsets, int64_t [::1] cells,
@@ -588,7 +706,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                       int [::1] nodstr, int [::1] etype,
                       int [::1] element_type,
                       int result_index):
-    """Read element results from ANSYS directly into a numpy array
+    """Read nodal results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray
         Array of ANSYS element types.
@@ -709,17 +827,133 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     return np.asarray(data), np.asarray(ncount)
 
 
-# def read_record_from_file(filename):
-#     cdef bytes py_bytes = filename.encode()
-#     cdef char* c_filename = py_bytes
-#     cdef ifstream* binfile = new ifstream(c_filename, binary)
+def read_nodal_values_new(filename, uint8 [::1] celltypes,
+                      int64_t [::1] ele_ind_table,
+                      int64_t [::1] offsets, int64_t [::1] cells,
+                      int nitems,
+                      int npoints,
+                      int [::1] nodstr, int [::1] etype,
+                      int [::1] element_type,
+                      int result_index):
+    """Read nodal results from ANSYS directly into a numpy array
 
-#     cdef int prec_flag, type_flag, size, my_dtype, bufsize
-#     cdef int [::1] arr = np.empty(200, np.int32)
-#     cdef void* ptr = <void*>&arr[0]
+    element_type : int [::1] np.ndarray
+        Array of ANSYS element types.
 
-#     read_record_stream(binfile, ptr, &prec_flag, &type_flag, &size)
-#     return arr
+    result_index : int
+        EMS - 0 : misc. data
+        ENF - 1 : nodal forces
+        ENS - 2 : nodal stresses
+        ENG - 3 : volume and energies
+        EGR - 4 : nodal gradients
+        EEL - 5 : elastic strains
+        EPL - 6 : plastic strains
+        ECR - 7 : creep strains
+        ETH - 8 : thermal strains
+        EUL - 9 : euler angles
+        EFX - 10 : nodal fluxes
+        ELF - 11 : local forces
+        EMN - 12 : misc. non-sum values
+        ECD - 13 : element current densities
+        ENL - 14 : nodal nonlinear data
+        EHC - 15 : calculated heat
+        EPT - 16 : element temperatures
+        ESF - 17 : element surface stresses
+        EDI - 18 : diffusion strains
+        ETB - 19 : ETABLE items(post1 only
+        ECT - 20 : contact data
+        EXY - 21 : integration point locations
+        EBA - 22 : back stresses
+        ESV - 23 : state variables
+        MNL - 24 : material nonlinear record
+
+    Returns
+    -------
+
+    """
+    cdef int64_t i, j, k, ind, nread, offset
+    cdef int64_t ncells = ele_ind_table.size
+
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    
+
+    cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
+
+    # point data
+    cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
+
+    # temp buffer to hold data read from element
+    cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
+    cdef float [3] eulerangles
+
+    cdef int64_t ele_table, nnode_elem
+    cdef int ptr_result, ptrEUL
+    cdef int64_t c = 0
+    cdef uint8 celltype
+    for i in range(ncells):
+
+        # skip if not valid type
+        # if not validmask[i]:
+            # continue
+        
+        # get location of element data
+        ele_table = ele_ind_table[i]
+        fseek(cfile, (ele_table + result_index)*4, SEEK_SET)
+        fread(&ptr_result, sizeof(int), 1, cfile)
+
+        # Get the nodes in the element
+        celltype = celltypes[i]
+        offset = offsets[i] + 1
+        
+        nnode_elem = nodstr[etype[i]]
+
+        # skip this element
+        if ptr_result == 0:  # if zero, ignore this element
+            continue
+        elif ptr_result < 0:  # if negative, all values are -1
+            for j in range(nnode_elem):
+                for k in range(nitems):
+                    bufferdata[j, k] = 0
+        else:
+            fseek(cfile, (ele_table + ptr_result)*4, SEEK_SET)
+            fread(&bufferdata[0, 0], sizeof(float), nnode_elem*nitems, cfile)        
+
+            #### this will undoubtedly need to be generalized ####
+            # element euler angle pointer
+            if element_type[i] == 181:
+                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
+                fread(&ptrEUL, sizeof(int), 1, cfile)
+
+                # only read the first three euler angles (thxy, thyz, thzx)
+                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
+                fread(&eulerangles, sizeof(float), 3, cfile)
+
+                # rotate the first four nodal results
+                euler_rotate(bufferdata, eulerangles, c)
+
+        if celltype == VTK_LINE:  # untested
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 2)
+        elif celltype == VTK_TRIANGLE:  # untested
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 3)
+        elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+        elif celltype == VTK_HEXAHEDRON:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 8)
+        elif celltype == VTK_PYRAMID:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 5)
+        elif celltype == VTK_TETRA:  # dependent on element type
+            if nodstr[etype[i]] == 4:
+                read_element(cells, offset, ncount, data, bufferdata, nitems, cfile, 4)
+            else:
+                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems, cfile)
+        elif celltype == VTK_WEDGE:
+            read_wedge(cells, offset, ncount, data, bufferdata, nitems, cfile)
+
+    fclose(cfile)
+
+    return np.asarray(data), np.asarray(ncount)
 
 
 def read_nodal_values_double(filename, uint8 [::1] celltypes,
@@ -856,6 +1090,142 @@ def read_nodal_values_double(filename, uint8 [::1] celltypes,
             read_wedge_double(cells, offset, ncount, data, bufferdata, nitems, cfile)
 
     fclose(cfile)
+
+    return np.asarray(data), np.asarray(ncount)
+
+
+def read_nodal_values_double_new(filename, uint8 [::1] celltypes,
+                             int64_t [::1] ele_ind_table,
+                             int64_t [::1] offsets, int64_t [::1] cells,
+                             int nitems,
+                             int npoints,
+                             int [::1] nodstr, int [::1] etype,
+                             int [::1] element_type,
+                             int result_index):
+    """Read element results from ANSYS directly into a numpy array
+
+    element_type : int [::1] np.ndarray
+        Array of ANSYS element types.
+
+    result_index : int
+        EMS - 0 : misc. data
+        ENF - 1 : nodal forces
+        ENS - 2 : nodal stresses
+        ENG - 3 : volume and energies
+        EGR - 4 : nodal gradients
+        EEL - 5 : elastic strains
+        EPL - 6 : plastic strains
+        ECR - 7 : creep strains
+        ETH - 8 : thermal strains
+        EUL - 9 : euler angles
+        EFX - 10 : nodal fluxes
+        ELF - 11 : local forces
+        EMN - 12 : misc. non-sum values
+        ECD - 13 : element current densities
+        ENL - 14 : nodal nonlinear data
+        EHC - 15 : calculated heat
+        EPT - 16 : element temperatures
+        ESF - 17 : element surface stresses
+        EDI - 18 : diffusion strains
+        ETB - 19 : ETABLE items(post1 only
+        ECT - 20 : contact data
+        EXY - 21 : integration point locations
+        EBA - 22 : back stresses
+        ESV - 23 : state variables
+        MNL - 24 : material nonlinear record
+
+    Returns
+    -------
+
+    """
+    cdef int64_t i, j, k, ind, nread, offset
+    cdef int64_t ncells = ele_ind_table.size
+
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+    # number of times each node is "hit"
+    cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
+
+    # point data
+    cdef double [:, ::1] data = np.zeros((npoints, nitems), np.double)
+
+    # temp buffer to hold data read from element
+    cdef double [:, ::1] bufferdata = np.zeros((20, nitems), np.double)
+    cdef double [3] eulerangles
+
+    cdef int64_t ele_table, nnode_elem
+    cdef int ptr_result, ptrEUL
+    cdef int64_t c = 0
+    cdef uint8 celltype
+    cdef int [1024] pointers  # tmp array of element result pointers
+    cdef double [64] tmpbuffer
+    cdef int prec_flag, type_flag, size
+
+    for i in range(ncells):
+        
+        # get location of element data
+        # store elemenet element result pointers
+        ele_table = ele_ind_table[i]
+        read_record_stream(binfile, ele_table, <void*>&pointers,
+                           &prec_flag, &type_flag, &size)
+        ptr_result = pointers[result_index]
+
+        # Get the number of nodes in the element
+        celltype = celltypes[i]
+        offset = offsets[i] + 1
+        nnode_elem = nodstr[etype[i]]
+
+        # skip this element
+        if ptr_result == 0:  # if zero, ignore this element
+            continue
+        elif ptr_result < 0:  # if negative, all values are 0
+            for j in range(nnode_elem):
+                for k in range(nitems):
+                    bufferdata[j, k] = 0
+        else:
+            # read element result
+            read_record_stream(binfile, ele_table + ptr_result,
+                               &bufferdata[0, 0],
+                               &prec_flag, &type_flag, &size)
+
+            if element_type[i] == 181 or element_type[i] == 281:
+                # only concerned with the first three euler angles (thxy, thyz, thzx)
+                read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+                                   <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
+                eulerangles[0] = tmpbuffer[0]  # TODO: clean up
+                eulerangles[1] = tmpbuffer[1]  # TODO: clean up
+                eulerangles[2] = tmpbuffer[2]  # TODO: clean up
+
+                # rotate the first four nodal results
+                euler_rotate_double(bufferdata, eulerangles, c)
+
+        if celltype == VTK_LINE:  # untested
+            read_element_double(cells, offset, ncount, data,
+                                bufferdata, nitems, cfile, 2)
+        elif celltype == VTK_TRIANGLE:  # untested
+            read_element_double(cells, offset, ncount, data,
+                                bufferdata, nitems, cfile, 3)
+        elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
+            read_element_double(cells, offset, ncount, data,
+                                bufferdata, nitems, cfile, 4)
+        elif celltype == VTK_HEXAHEDRON:
+            read_element_double(cells, offset, ncount, data,
+                                bufferdata, nitems, cfile, 8)
+        elif celltype == VTK_PYRAMID:
+            read_element_double(cells, offset, ncount, data,
+                                bufferdata, nitems, cfile, 5)
+        elif celltype == VTK_TETRA:  # dependent on element type
+            if nodstr[etype[i]] == 4:
+                read_element_double(cells, offset, ncount, data,
+                                    bufferdata, nitems, cfile, 4)
+            else:
+                read_tetrahedral_double(cells, offset, ncount, data,
+                                        bufferdata, nitems, cfile)
+        elif celltype == VTK_WEDGE:
+            read_wedge_double(cells, offset, ncount, data, bufferdata, nitems, cfile)
 
     return np.asarray(data), np.asarray(ncount)
 

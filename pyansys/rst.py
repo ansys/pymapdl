@@ -1201,7 +1201,7 @@ class ResultFile(object):
         """ The version of ANSYS used to generate this result file """
         return float(self.resultheader['verstring'])
 
-    def element_stress(self, rnum, principal=False, in_element_coord_sys=False, old=True):
+    def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
         """Retrives the element component stresses.
 
         Equivalent ANSYS command: PRESOL, S
@@ -1264,18 +1264,19 @@ class ResultFile(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
-            _binary_reader.read_element_stress(self.filename,
-                                               ele_ind_table + 2,
+            _binary_reader.read_element_stress_new(self.filename,
+                                               ele_ind_table,
                                                nodstr.astype(np.int64),
                                                etype, ele_data_arr,
                                                nitem, elemtype,
                                                as_global=not in_element_coord_sys)
 
+
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
         else:
-            raise Exception('Not implemented for ANSYS older than v14.5')
+            raise NotImplementedError('Not implemented for ANSYS older than v14.5')
 
         if principal:
             ele_data_arr, isnan = _binary_reader.compute_principal_stress(ele_data_arr)
