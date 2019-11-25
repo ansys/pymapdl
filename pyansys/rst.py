@@ -650,7 +650,6 @@ class ResultFile(object):
             raise ValueError("Argument 'solution type' must be either 'NSL', 'VEL', or 'ACC'")
 
         # Get info from result header
-        endian = self.resultheader['endian']
         rpointers = self.resultheader['rpointers']
         nsets = self.nsets
 
@@ -808,24 +807,14 @@ class ResultFile(object):
         rnum = self.parse_step_substep(rnum)
 
         # Get info from result header
-        endian = self.resultheader['endian']
         numdof = self.resultheader['numdof']
         nnod = self.resultheader['nnod']
         rpointers = self.resultheader['rpointers']
 
         # Read a result
-        with open(self.filename, 'rb') as f:
-
-            # Seek to result table and to get pointer to DOF results of result table
-            f.seek((rpointers[rnum] + 12) * 4)  # item 11
-            ptrNSLl = np.fromfile(f, endian + 'i', 1)[0]
-
-            # Seek and read DOF results
-            f.seek((rpointers[rnum] + ptrNSLl + 2) * 4)
-            nitems = nnod * numdof
-            result = np.fromfile(f, endian + 'd', nitems)
-
-            f.close()
+        ptrnsl = self.read_record(rpointers[rnum])[10]
+        nitems = nnod * numdof
+        result = self.read_record(rpointers[rnum] + ptrnsl)[:nitems]
 
         # Reshape to number of degrees of freedom
         result = result.reshape((-1, numdof))
@@ -1002,8 +991,8 @@ class ResultFile(object):
         rcon = np.empty(nelm, np.int32)
 
         # load elements
-        _binary_reader.load_elements2(self.filename, ptr_elem, nelm,
-                                      e_disp_table, elem, etype, mtype, rcon)
+        _binary_reader.load_elements(self.filename, ptr_elem, nelm,
+                                     e_disp_table, elem, etype, mtype, rcon)
 
         enum = self.resultheader['eeqv']
 
@@ -1083,7 +1072,8 @@ class ResultFile(object):
         tstep   - Time Step size for FLOTRAN analysis
         0.0     - position not used
         accel   - linear acceleration terms
-        omega   - angular velocity (first 3 terms) and angular acceleration (second 3 terms)
+        omega   - angular velocity (first 3 terms) and angular acceleration
+                  (second 3 terms)
         omegacg - angular velocity (first 3 terms) and angular
                   acceleration (second 3 terms) these velocity/acceleration
                   terms are computed about the center of gravity
@@ -1095,34 +1085,16 @@ class ResultFile(object):
         """
         # Check if result is available
         if rnum > self.nsets - 1:
-            raise Exception('There are only %d results in the result file.' % self.nsets)
+            raise Exception('There are only %d results in the result file.'
+                            % self.nsets)
 
-        with open(self.filename, 'rb') as f:
-            # f = open(self.filename, 'rb')
-            f.seek(self.resultheader['rpointers'][rnum] * 4)
-            read_table(f, skip=True)  # skip pointers table
-            return parse_header(read_table(f, None), SOLUTION_HEADER_KEYS_DP)
-    
-    def solution_data_info(self, rnum):
-        """Return an informative dictionary of solution data for a
-        result.
+        # skip pointers table
+        ptr = self.resultheader['rpointers'][rnum]
+        _, sz = self.read_record(ptr, True)
 
-        Returns
-        -------
-        header : dict
-            Integer solution data header data.
-        """
-        # Check if result is available
-        if rnum > self.nsets - 1:
-            raise Exception('There are only %d results in the result file.' % self.nsets)
+        table = self.read_record(ptr + sz)
+        return parse_header(table, SOLUTION_HEADER_KEYS_DP)
 
-        with open(self.filename, 'rb') as f:
-            # f = open(self.filename, 'rb')
-            f.seek(self.resultheader['rpointers'][rnum] * 4)
-            solution_data_header = parse_header(read_table(f,None), SOLUTION_DATA_HEADER_KEYS)  # skip pointers table
-
-        return solution_data_header
-    
     def _element_solution_header(self, rnum):
         """ Get element solution header information """
         # Get the header information from the header dictionary
@@ -1132,41 +1104,31 @@ class ResultFile(object):
         nodstr = self.element_table['nodstr']
         etype = self.geometry['etype']
 
-        # Check if result is available
-        # if rnum > self.nsets - 1:
-        #     raise Exception(
-        #         'There are only {:d} results in the result file.'.format(
-        #             self.nsets))
+        # read result solution header 
+        record = self.read_record(rpointers[rnum])
+        solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
 
-        # Read a result
-        with open(self.filename, 'rb') as f:
-            f.seek((rpointers[rnum]) * 4)  # item 20
-            solution_header = parse_header(read_table(f), SOLUTION_DATA_HEADER_KEYS)
+        # key to extrapolate integration
+        # = 0 - move
+        # = 1 - extrapolate unless active
+        # non-linear
+        # = 2 - extrapolate always
+        if solution_header['rxtrap'] == 0:
+            warnings.warn('Strains and stresses are being evaluated at ' +
+                          'gauss points and not extrapolated')
 
-            # key to extrapolate integration
-            # = 0 - move
-            # = 1 - extrapolate unless active
-            # non-linear
-            # = 2 - extrapolate always
-            if solution_header['rxtrap'] == 0:
-                warnings.warn('Strains and stresses are being evaluated at ' +
-                              'gauss points and not extrapolated')
+        # 64-bit pointer to element solution
+        if not solution_header['ptrESL']:
+            raise Exception('No element solution in result set %d\n'
+                            % (rnum + 1) + 'Try running with "MXPAND,,,,YES"')
 
-            # 64-bit pointer to element solution
-            if not solution_header['ptrESL']:
-                f.close()
-                raise Exception('No element solution in result set %d\n' % (rnum + 1) +
-                                'Try running with "MXPAND,,,,YES"')
+        # Seek to element result header
+        element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
+        ele_ind_table = self.read_record(element_rst_ptr).view(np.int64)
+        ele_ind_table += element_rst_ptr
 
-            # Seek to element result header
-            element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
-            f.seek(element_rst_ptr * 4)
-            ele_ind_table = read_table(f, 'i8', nelm) + element_rst_ptr
-
-            # boundary conditions
-            # ptr = rpointers[rnum] + solution_header['ptrBC']
-            # f.seek(ptr*4)
-            # table = read_table(f, 'i')
+        # boundary conditions
+        # bc = self.read_record(rpointers[rnum] + solution_header['ptrBC'])
 
         return ele_ind_table, nodstr, etype
 
@@ -1240,10 +1202,9 @@ class ResultFile(object):
         return float(self.resultheader['verstring'])
 
     def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
-        """
-        Equivalent ANSYS command: PRESOL, S
+        """Retrives the element component stresses.
 
-        Retrives the element component stresses.
+        Equivalent ANSYS command: PRESOL, S
 
         Parameters
         ----------
@@ -1279,7 +1240,6 @@ class ResultFile(object):
         Shell stresses for element 181 are returned for top and bottom
         layers.  Results are ordered such that the top layer and then
         the bottom layer is reported.
-
         """
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
@@ -1304,14 +1264,12 @@ class ResultFile(object):
             ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
-            _binary_reader.read_element_stress(self.filename,
-                                               ele_ind_table + 2,
-                                               nodstr.astype(np.int64),
-                                               etype,
-                                               ele_data_arr,
-                                               nitem,
-                                               elemtype,
-                                               as_global=not in_element_coord_sys)
+            _binary_reader.read_element_stress(self.filename, ele_ind_table + 2, nodstr.astype(np.int64), etype, ele_data_arr, nitem, elemtype, as_global=not in_element_coord_sys)
+
+            # ele_data_arr2 = np.empty_like(ele_data_arr)
+            # _binary_reader.read_element_stress2(self.filename, ele_ind_table, nodstr.astype(np.int64), etype, ele_data_arr2, nitem, elemtype, as_global=not in_element_coord_sys)
+            
+
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
@@ -1319,7 +1277,7 @@ class ResultFile(object):
             raise Exception('Not implemented for ANSYS older than v14.5')
 
         if principal:
-            ele_data_arr, isnan = _binary_reader.ComputePrincipalStress(ele_data_arr)
+            ele_data_arr, isnan = _binary_reader.compute_principal_stress(ele_data_arr)
             ele_data_arr[isnan] = np.nan
 
         splitind = np.cumsum(nnode)
@@ -1341,8 +1299,7 @@ class ResultFile(object):
         return element_stress, elemnum, enode
 
     def element_solution_data(self, rnum, datatype, sort=True):
-        """
-        Retrives element solution data.  Similar to ETABLE.
+        """Retrives element solution data.  Similar to ETABLE.
 
         Parameters
         ----------
@@ -1399,7 +1356,6 @@ class ResultFile(object):
             thenergy: Thermal dissipation energy (see ThermMat, shell131/132 only)
             position not used
             position not used
-
         """
         table_ptr = datatype.upper()
         if table_ptr not in ELEMENT_INDEX_TABLE_KEYS:
@@ -1410,25 +1366,21 @@ class ResultFile(object):
 
             raise Exception(err_str)
 
+        # location of data pointer within each element result table
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, _, _ = self._element_solution_header(rnum)
 
+        # read element data
         element_data = []
-        with open(self.filename, 'rb') as file:
-            for ind in ele_ind_table:
-                # read element table index
-                file.seek(ind*4)
-                table = read_table(file)
-
-                ptr = table[table_index]
-                if ptr <= 0:
-                    element_data.append(None)
-                else:
-                    file.seek((ind + ptr)*4)
-                    data = read_table(file, 'f')  # TODO: Verify datatype
-                    element_data.append(data)
+        for ind in ele_ind_table:
+            # read element table index pointer to data
+            ptr = self.read_record(ind)[table_index]
+            if ptr != 0:
+                element_data.append(self.read_record(ind + ptr))
+            else:
+                element_data.append(None)
 
         enum = self.grid.cell_arrays['ansys_elem_num']
         if sort:
@@ -1439,9 +1391,8 @@ class ResultFile(object):
         return enum, element_data
 
     def principal_nodal_stress(self, rnum):
-        """
-        Computes the principal component stresses for each node in the
-        solution.
+        """Computes the principal component stresses for each node in
+        the solution.
 
         Parameters
         ----------
@@ -1466,7 +1417,6 @@ class ResultFile(object):
         which returns:
         S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
         equivalent stress.
-
         """
         # get component stress
         nodenum, stress = self.nodal_stress(rnum)
@@ -1475,7 +1425,7 @@ class ResultFile(object):
         if stress.dtype != np.float32:
             stress = stress.astype(np.float32)
 
-        pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
+        pstress, isnan = _binary_reader.compute_principal_stress(stress)
         pstress[isnan] = np.nan
         return nodenum, pstress
 
@@ -1889,7 +1839,7 @@ class ResultFile(object):
             grid.point_arrays['nodal_solution{:03d}'.format(i)] = val
 
             # Populate with nodal stress at edge nodes
-            nodenum = self.grid.point_arrays['ansys_node_num']
+            # nodenum = self.grid.point_arrays['ansys_node_num']
             _, stress = self.nodal_stress(i)
             grid.point_arrays['nodal_stress{:03d}'.format(i)] = stress
 
@@ -1918,7 +1868,7 @@ class ResultFile(object):
                 raise Exception('Only %d result(s) in the result file.' % self.nsets)
             return user_input
 
-        elif isinstance(user_input, list) or isinstance(user_input, tuple):
+        elif isinstance(user_input, (list, tuple)):
             if len(user_input) != 2:
                 raise Exception('Input must contain (step, loadstep) using  ' +
                                 '1 based indexing (e.g. (1, 1)).')

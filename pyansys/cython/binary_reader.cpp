@@ -143,12 +143,6 @@ void read_nodes(const char* filename, int ptrLOC, int nrec, int *nnum, double *n
 }
 
 
-// T GetMax (T a, T b) {
-//   T result;
-//   result = (a>b)? a : b;
-//   return (result);
-// }
-
 template <class T>
 char* ReadBsparseRecord(T *buffer, int *size){
   int *raw = (int*)buffer;
@@ -166,15 +160,28 @@ char* ReadBsparseRecord(T *buffer, int *size){
       vec[iloc] = 0;
     }
   }
-
-  // int i;
-  // for (i=0; i<*size; i++){
-  //   printf("%f\n", vec[i]);
-  // }
-
   return (char*)vec;
-
 }
+
+// read binary sparse record to a vector
+template <class T>
+void ReadBsparseRecordToVec(int *raw, int *size, T*vec){
+  *size = *raw++;
+  int bitcod = *raw++;
+
+  T *tbuf = (T*)raw;
+
+  int iloc = -1;
+  while (++iloc < *size){
+    if (IS_ON(bitcod, iloc)){ // store value
+        vec[iloc] = *tbuf++;
+    } else{  // set value to zero
+      vec[iloc] = 0;
+    }
+  }
+}
+
+
 
 char* ReadShortBsparseRecord(int *raw, int *size)
 {
@@ -198,8 +205,28 @@ char* ReadShortBsparseRecord(int *raw, int *size)
 }
 
 
+void ReadShortBsparseRecordToVec(int *raw, int *size, short *vec)
+{
+  *size = *raw++;
+  int bitcod = *raw++;
+
+  short	*tbuf = (short *)raw;
+  int	iloc = -1;
+  int nb = NbBitsOn(bitcod);
+
+  if (nb%2) nb++;
+  while ( ++iloc < *size)
+    {
+      if ( IS_ON( bitcod, iloc)){
+	vec[iloc] = *tbuf++;
+      }
+    }
+
+}
+
+
 template <class T>
-char* WindowedSparseBufferToVec(T *buffer, int *size){
+char* ReadWindowedSparseBuffer(T *buffer, int *size){
 
   int iShift = sizeof(T)/sizeof(int);
 
@@ -251,6 +278,202 @@ char* WindowedSparseBufferToVec(T *buffer, int *size){
 }
 
 
+char* ReadWindowedSparseBufferDouble(int *raw, int *size, double *vec){
+  int iShift = sizeof(double)/sizeof(int);
+  *size = *raw++;
+  int NWin = *raw++;
+
+  double *adr = vec;
+  MEM_ZERO( adr, *size*sizeof(double));
+
+  int iLoc, iLen;
+  if ( NWin > 0)
+  do {
+
+    /* ===== We read the location of the new Window */
+    iLoc = *raw++;	/* ===== iLoc = Where start the next window */
+    // cout << "iLoc: " << iLoc << endl;
+
+    if ( iLoc > 0)	/* ===== One isolated NonZero Value - no need to store a Window Len */
+      {
+	vec[iLoc] = ((double *)raw)[0];
+	raw += iShift;
+      }
+    else		/* ===== New Window of size iLen */
+      {
+	double *adr = vec + (-iLoc);	/* Start of the Windows in the output vector */
+	iLen = *raw++;		/* Length of the Window */
+	// cout << "Length of the Window: " << iLen << endl;
+
+	if (iLen > 0)			/* ===== Non Constant Values */
+	  {
+	    // cout << "Non Constant Values: " << iLen << endl;
+	    MEMCOPY( (double *)raw, adr, iLen, double);
+	    
+	    raw += iShift*iLen;
+	  }
+	else /* ===== Constant Value : only one value is stored */
+	  {
+	    // cout << "Constant Value : only one value is stored: " << iLoc << endl;
+	    iLen = - iLen;
+	    double ValCst = *((double *)(raw)); raw += iShift;
+	    do (*(adr++) = ValCst); while (--iLen > 0);
+	  }
+      }
+  } while ( --NWin > 0);
+
+  return (char*)vec;
+}
+
+
+char* ReadWindowedSparseBufferFloat(int *raw, int *size, float *vec){
+  int iShift = sizeof(float)/sizeof(int);
+  *size = *raw++;
+  int NWin = *raw++;
+
+  float *adr = vec;
+  MEM_ZERO( adr, *size*sizeof(float));
+
+  int iLoc, iLen;
+  if ( NWin > 0)
+  do {
+
+    /* ===== We read the location of the new Window */
+    iLoc = *raw++;	/* ===== iLoc = Where start the next window */
+    // cout << "iLoc: " << iLoc << endl;
+
+    if ( iLoc > 0)	/* ===== One isolated NonZero Value - no need to store a Window Len */
+      {
+	vec[iLoc] = ((float *)raw)[0];
+	raw += iShift;
+      }
+    else		/* ===== New Window of size iLen */
+      {
+	float *adr = vec + (-iLoc);	/* Start of the Windows in the output vector */
+	iLen = *raw++;		/* Length of the Window */
+	// cout << "Length of the Window: " << iLen << endl;
+
+	if (iLen > 0)			/* ===== Non Constant Values */
+	  {
+	    // cout << "Non Constant Values: " << iLen << endl;
+	    MEMCOPY( (float *)raw, adr, iLen, float);
+	    
+	    raw += iShift*iLen;
+	  }
+	else /* ===== Constant Value : only one value is stored */
+	  {
+	    // cout << "Constant Value : only one value is stored: " << iLoc << endl;
+	    iLen = - iLen;
+	    float ValCst = *((float *)(raw)); raw += iShift;
+	    do (*(adr++) = ValCst); while (--iLen > 0);
+	  }
+      }
+  } while ( --NWin > 0);
+
+  return (char*)vec;
+}
+
+
+char* ReadWindowedSparseBufferInt(int *raw, int *size, int *vec){
+
+  int iShift = sizeof(int)/sizeof(int);
+  *size = *raw++;
+  int NWin = *raw++;
+
+  int *adr = vec;
+  MEM_ZERO( adr, *size*sizeof(int));
+
+  int iLoc, iLen;
+  if ( NWin > 0)
+  do {
+
+    /* ===== We read the location of the new Window */
+    iLoc = *raw++;	/* ===== iLoc = Where start the next window */
+    // cout << "iLoc: " << iLoc << endl;
+
+    if ( iLoc > 0)	/* ===== One isolated NonZero Value - no need to store a Window Len */
+      {
+	vec[iLoc] = ((int *)raw)[0];
+	raw += iShift;
+      }
+    else		/* ===== New Window of size iLen */
+      {
+	int *adr = vec + (-iLoc);	/* Start of the Windows in the output vector */
+	iLen = *raw++;		/* Length of the Window */
+	// cout << "Length of the Window: " << iLen << endl;
+
+	if (iLen > 0)			/* ===== Non Constant Values */
+	  {
+	    // cout << "Non Constant Values: " << iLen << endl;
+	    MEMCOPY( (int *)raw, adr, iLen, int);
+	    
+	    raw += iShift*iLen;
+	  }
+	else /* ===== Constant Value : only one value is stored */
+	  {
+	    // cout << "Constant Value : only one value is stored: " << iLoc << endl;
+	    iLen = - iLen;
+	    int ValCst = *((int *)(raw)); raw += iShift;
+	    do (*(adr++) = ValCst); while (--iLen > 0);
+	  }
+      }
+  } while ( --NWin > 0);
+
+  return (char*)vec;
+}
+
+
+char* ReadWindowedSparseBufferShort(int *raw, int *size, short *vec){
+
+  int iShift = sizeof(short)/sizeof(int);
+
+  *size = *raw++;
+  int NWin = *raw++;
+
+  short *adr = vec;
+  MEM_ZERO( adr, *size*sizeof(short));
+
+  int iLoc, iLen;
+  if ( NWin > 0)
+  do {
+
+    /* ===== We read the location of the new Window */
+    iLoc = *raw++;	/* ===== iLoc = Where start the next window */
+    // cout << "iLoc: " << iLoc << endl;
+
+    if ( iLoc > 0)	/* ===== One isolated NonZero Value - no need to store a Window Len */
+      {
+	vec[iLoc] = ((short *)raw)[0];
+	raw += iShift;
+      }
+    else		/* ===== New Window of size iLen */
+      {
+	short *adr = vec + (-iLoc);	/* Start of the Windows in the output vector */
+	iLen = *raw++;		/* Length of the Window */
+	// cout << "Length of the Window: " << iLen << endl;
+
+	if (iLen > 0)			/* ===== Non Constant Values */
+	  {
+	    // cout << "Non Constant Values: " << iLen << endl;
+	    MEMCOPY( (short *)raw, adr, iLen, short);
+	    
+	    raw += iShift*iLen;
+	  }
+	else /* ===== Constant Value : only one value is stored */
+	  {
+	    // cout << "Constant Value : only one value is stored: " << iLoc << endl;
+	    iLen = - iLen;
+	    short ValCst = *((short *)(raw)); raw += iShift;
+	    do (*(adr++) = ValCst); while (--iLen > 0);
+	  }
+      }
+  } while ( --NWin > 0);
+
+  return (char*)vec;
+}
+
+
+
 // read a record and return the pointer to the array
 void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
 		  int* size, int* out_bufsize){
@@ -274,34 +497,29 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
     if (*type_flag){
       if (*prec_flag){
 	raw = ReadShortBsparseRecord((int*)raw, size);
-	// *size /= 2;
       } else{
 	raw = ReadBsparseRecord((int*)raw, size);
-	// *size *= 2;
       }
     } else{  // a float/double
       if (*prec_flag){
 	raw = ReadBsparseRecord((float*)raw, size);
       } else{
 	raw = ReadBsparseRecord((double*)raw, size);
-	// *size *= 2;
       }
     }
   } else if (wsparse_flag) {
     // cout << "windowed_record" << endl;
     if (*type_flag){
       if (*prec_flag){
-	raw = WindowedSparseBufferToVec((short*)raw, size);
+	raw = ReadWindowedSparseBuffer((short*)raw, size);
       } else{
-	raw = WindowedSparseBufferToVec((int*)raw, size);
-	// *size *= 2;
+	raw = ReadWindowedSparseBuffer((int*)raw, size);
       }
     } else{  // a float/double
       if (*prec_flag){
-	raw = WindowedSparseBufferToVec((float*)raw, size);
+	raw = ReadWindowedSparseBuffer((float*)raw, size);
       } else{
-	raw = WindowedSparseBufferToVec((double*)raw, size);
-	// *size *= 2;
+	raw = ReadWindowedSparseBuffer((double*)raw, size);
       }
     }
     
@@ -310,6 +528,67 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
 
   return raw;
 }
+
+// populate arr with a record
+// This function differs from read_record as it must be supplied with ``arr``, which must be sized properly to support the data coming from the file.
+void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
+			 int* type_flag, int* size){
+
+  // seek to data location if supplied with a pointer
+  if (loc >= 0){
+    file->seekg(loc*4);
+  }
+
+  int bsparse_flag, wsparse_flag, zlib_flag;
+  int bufsize = read_header(file, &bsparse_flag, &wsparse_flag,
+			    &zlib_flag, prec_flag, type_flag);
+
+  *size = bufsize;
+
+  // always read record
+  char *raw = new char[4*bufsize];
+
+  if (bsparse_flag){
+    // write to temporary record
+    file->read(raw, 4*bufsize);
+
+    // cout << "bsparse_record" << endl;
+    if (*type_flag){
+      if (*prec_flag){
+	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);
+      } else{
+	ReadBsparseRecordToVec((int*)raw, size, (int*)arr);
+      }
+    } else{  // a float or a double
+      if (*prec_flag){
+	ReadBsparseRecordToVec((int*)raw, size, (float*)arr);
+      } else{
+	ReadBsparseRecordToVec((int*)raw, size, (double*)arr);
+      }
+    }
+
+  } else if (wsparse_flag) {
+    if (*type_flag){
+      if (*prec_flag){
+	raw = ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
+      } else{
+	raw = ReadWindowedSparseBufferInt((int*)raw, size, (int*)arr);
+      }
+    } else{  // a float/double
+      if (*prec_flag){
+	raw = ReadWindowedSparseBufferFloat((int*)raw, size, (float*)arr);
+      } else{
+	raw = ReadWindowedSparseBufferDouble((int*)raw, size, (double*)arr);
+      }
+    }
+
+  } else {// write directly to the array
+    file->read((char*)arr, 4*bufsize);
+  }    
+  
+  return raw;
+}
+
 
 /** 
  *! This function decrypts and expands a sparse vector

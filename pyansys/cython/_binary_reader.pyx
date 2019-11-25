@@ -12,17 +12,50 @@ from libc.stdio cimport (fopen, FILE, fclose, fread, fseek, SEEK_CUR,
 from libc.string cimport memcpy
 from libc.stdint cimport int64_t
 
+
 from cython.parallel import prange
 ctypedef unsigned char uint8
+
+
+cdef extern from "<iostream>" namespace "std" nogil:
+     cdef cppclass ostream:
+          ostream& write(const char*, int) except +
+     cdef cppclass istream:
+          istream& read(const char*, int) except +
+     cdef cppclass ifstream(istream):
+          ifstream(const char *, open_mode) except +
+
+
+cdef extern from "<fstream>" namespace "std" nogil:          
+     cdef cppclass filebuf:
+          pass
+        
+     cdef cppclass fstream:
+          void close()
+          bint is_open()
+          void open(const char*, open_mode)
+          void open(const char&, open_mode)
+          filebuf* rdbuf() const
+          filebuf* rdbuf(filebuf* sb)
+
+     cdef cppclass ifstream(istream):
+          ifstream(const char*) except +
+          ifstream(const char*, open_mode) except+
+
+
+cdef extern from "<iostream>" namespace "std::ios_base" nogil:
+     cdef cppclass open_mode:
+          pass
+     cdef open_mode binary
+
 
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
 
-cdef extern from 'binary_reader.h':
+cdef extern from 'binary_reader.hpp':
     void read_nodes(const char*, int, int, int*, double*)
-
-cdef extern from 'binary_reader.h':
     void* read_record(const char*, int, int*, int*, int*, int*)
+    void* read_record_stream(ifstream*, int, void*, int*, int*, int*)
 
 
 # VTK numbering for vtk cells
@@ -162,6 +195,17 @@ def c_read_record(filename, int ptr, int return_bufsize=0):
     cdef int prec_flag, type_flag, size, my_dtype, bufsize
     cdef void* c_ptr
     c_ptr = read_record(c_filename, ptr, &prec_flag, &type_flag, &size, &bufsize)
+    cdef np.ndarray ndarray = wrap_array(c_ptr, size, type_flag, prec_flag)
+
+    if return_bufsize:
+        return ndarray, bufsize
+    else:
+        return ndarray
+
+
+cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
+    """wrap a c array as a numpy array"""
+    cdef int my_dtype
 
     if type_flag:
         if prec_flag:
@@ -188,64 +232,60 @@ def c_read_record(filename, int ptr, int return_bufsize=0):
     # C, and Python does not know that there is this additional reference
     Py_INCREF(array_wrapper)
 
-    if return_bufsize:
-        return ndarray, bufsize
-    else:
-        return ndarray
+    return ndarray
 
 
-def load_elements(filename, int ptr, int nelm, e_disp_table_py, int [:, ::1] elem,
-                  int [::1] etype, int [::1] mtype, int [::1] rcon):
-    """
-    The following is stored for each element
-    mat     - material reference number
-    type    - element type number
-    real    - real constant reference number
-    secnum  - section number
-    esys    - element coordinate system
-    death   - death flat (1 live, 0 dead)
-    solidm  - solid model reference
-    shape   - coded shape key
-    elnum   - element number
-    baseeid - base element number
-    NODES   - node numbers defining the element
-    """
+
+# def load_elements(filename, int ptr, int nelm, e_disp_table_py, int [:, ::1] elem,
+#                   int [::1] etype, int [::1] mtype, int [::1] rcon):
+#     """The following is stored for each element
+#     mat     - material reference number
+#     type    - element type number
+#     real    - real constant reference number
+#     secnum  - section number
+#     esys    - element coordinate system
+#     death   - death flat (1 live, 0 dead)
+#     solidm  - solid model reference
+#     shape   - coded shape key
+#     elnum   - element number
+#     baseeid - base element number
+#     NODES   - node numbers defining the element
+#     """
     
-    cdef int i, j
+#     cdef int i, j
     
-    cdef int [::1] e_disp_table = e_disp_table_py.astype(ctypes.c_int)
+#     cdef int [::1] e_disp_table = e_disp_table_py.astype(ctypes.c_int)
     
-    cdef bytes buf
-    with open(filename, "rb") as f:
-        f.seek(ptr*4)
-        buf = f.read((e_disp_table[nelm - 1] + 32)*4)
+#     cdef bytes buf
+#     with open(filename, "rb") as f:
+#         f.seek(ptr*4)
+#         buf = f.read((e_disp_table[nelm - 1] + 32)*4)
         
-    cdef char * p = buf
-    cdef int loc
+#     cdef char * p = buf
+#     cdef int loc
     
-    cdef int val
-    cdef int nread
-    for i in range(nelm):
-        # location in element table
-        loc = e_disp_table[i]*4
+#     cdef int val
+#     cdef int nread
+#     for i in range(nelm):
+#         # location in element table
+#         loc = e_disp_table[i]*4
 
-        # determine number of nodes in element by getting entries in fortran header
-        nread = get_int(&p[loc])
-        # blank
-        mtype[i] = get_int(&p[loc + 8])  # material type
-        etype[i] = get_int(&p[loc + 12])  # element type
-        rcon[i] = get_int(&p[loc + 16])  # real constant reference number
+#         # determine number of nodes in element by getting entries in fortran header
+#         nread = get_int(&p[loc])
+#         # blank
+#         mtype[i] = get_int(&p[loc + 8])  # material type
+#         etype[i] = get_int(&p[loc + 12])  # element type
+#         rcon[i] = get_int(&p[loc + 16])  # real constant reference number
 
-        # read in nodes
-        for j in range(12, nread + 2):
-            elem[i, j - 12] = get_int(&p[loc + 4*j])
+#         # read in nodes
+#         for j in range(12, nread + 2):
+#             elem[i, j - 12] = get_int(&p[loc + 4*j])
 
 
-def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
+def load_elements(filename, int loc, int nelem, int64_t [::1] e_disp_table,
                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
                    int [::1] rcon):
-    """
-    The following is stored for each element
+    """The following is stored for each element
     0 - mat     - material reference number
     1 - type    - element type number
     2 - real    - real constant reference number
@@ -294,6 +334,58 @@ def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
             # read in nodes
             for j in range(10, size):
                 elem[i, j - 10] = element[j]
+
+
+# def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
+#                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
+#                    int [::1] rcon):
+#     """The following is stored for each element
+#     0 - mat     - material reference number
+#     1 - type    - element type number
+#     2 - real    - real constant reference number
+#     3 - secnum  - section number
+#     4 - esys    - element coordinate system
+#     5 - death   - death flat (1 live, 0 dead)
+#     6 - solidm  - solid model reference
+#     7 - shape   - coded shape key
+#     8 - elnum   - element number
+#     9 - baseeid - base element number
+#     10 - NODES   - node numbers defining the element
+#     """
+#     cdef int i, j
+#     cdef int prec_flag, type_flag, size, bufsize
+
+#     cdef bytes py_bytes = filename.encode()
+#     cdef char* c_filename = py_bytes
+#     cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+#     cdef int val, nread, elem_loc
+#     for i in range(nelem):
+#         # seek to element location
+#         binfile.seekg((loc + e_disp_table[i])*4);
+        
+#         read_record_stream(binfile, <void*>elem[i, 0], &prec_flag, &type_flag,
+# 			   &size)
+
+#         if prec_flag:
+#             s_element = <short*>c_ptr
+#             mtype[i] = s_element[0]  # material type
+#             etype[i] = s_element[1]  # element type
+#             rcon[i] = s_element[2] # real constant reference number
+
+#             # read in nodes
+#             for j in range(10, size):
+#                 elem[i, j - 10] = s_element[j]
+#         else:
+#             element = <int*>c_ptr
+#             mtype[i] = element[0]  # material type
+#             etype[i] = element[1]  # element type
+#             rcon[i] = element[2] # real constant reference number
+
+#             # read in nodes
+#             for j in range(10, size):
+#                 elem[i, j - 10] = element[j]
+
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
@@ -364,7 +456,73 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     fclose(cfile)
 
 
-# this will have to be generalized at some point
+def read_element_stress2(filename, int64_t [::1] ele_ind_table, 
+                        int64_t [::1] nodstr, int64_t [::1] etype,
+                        float [:, ::1] ele_data_arr, int nitem,
+                        int [::1] element_type,
+                        int as_global=1):
+    """Read element results from ANSYS directly into a numpy array
+
+    as_global : int, optional
+        Rotates stresses from the element coordinate system to the global
+        cartesian coordinate system.  Default True.
+
+    """
+    cdef int64_t i, j, k, ind, nread
+
+    cdef FILE* cfile
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
+    cdef int prec_flag, type_flag, size
+
+    cdef float [64] tmpbuffer
+    cdef float [3] eulerangles
+    cdef int [1024] pointers  # tmp array of pointers
+
+    cdef int64_t ele_table, nnode_elem
+    cdef int ptr_ens, ptr_eul
+    cdef int64_t c = 0
+    for i, ele_table in enumerate(ele_ind_table):
+        # store elemenet element result pointers
+        read_record_stream(binfile, ele_table, <void*>&pointers,
+                           &prec_flag, &type_flag, &size)
+
+        # Get the nodes in the element
+        nnode_elem = nodstr[etype[i]]
+
+        # if shell and keyopt 8 is 0, read top and bottom
+        nread = nnode_elem*nitem
+
+        if ptr_ens < 0:  # negative pointer means missing data
+            # skip this element
+            for j in range(nnode_elem):
+                for k in range(nitem):
+                    ele_data_arr[c + j, k] = 0  # consider putting NAN instead
+        else:
+            # read the stresses evaluated at the intergration points or nodes
+            read_record_stream(binfile, ele_table + pointers[PTR_ENS_IDX],
+                               <void*>&ele_data_arr[c, 0], &prec_flag,
+                               &type_flag, &size)
+
+            # TODO: this will undoubtedly need to be generalized
+            if element_type[i] == 181 or element_type[i] == 281:
+                # only concerned with the first three euler angles (thxy, thyz, thzx)
+                read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+                                   <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
+                eulerangles[0] = tmpbuffer[0]  # TODO: clean up
+                eulerangles[1] = tmpbuffer[1]  # TODO: clean up
+                eulerangles[2] = tmpbuffer[2]  # TODO: clean up
+
+                # rotate the first four nodal results
+                if as_global:
+                    euler_rotate(ele_data_arr, eulerangles, c)
+
+        c += nnode_elem
+
+
+# TODO: this will have to be generalized at some point
 cdef inline void euler_rotate(float [:, ::1] ele_data_arr,
                              float [3] eulerangles, int row):
     """
@@ -498,8 +656,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                       int [::1] nodstr, int [::1] etype,
                       int [::1] element_type,
                       int result_index):
-    """
-    Read element results from ANSYS directly into a numpy array
+    """Read element results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray
         Array of ANSYS element types.
@@ -620,6 +777,19 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     return np.asarray(data), np.asarray(ncount)
 
 
+# def read_record_from_file(filename):
+#     cdef bytes py_bytes = filename.encode()
+#     cdef char* c_filename = py_bytes
+#     cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+#     cdef int prec_flag, type_flag, size, my_dtype, bufsize
+#     cdef int [::1] arr = np.empty(200, np.int32)
+#     cdef void* ptr = <void*>&arr[0]
+
+#     read_record_stream(binfile, ptr, &prec_flag, &type_flag, &size)
+#     return arr
+
+
 def read_nodal_values_double(filename, uint8 [::1] celltypes,
                              int64_t [::1] ele_ind_table,
                              int64_t [::1] offsets, int64_t [::1] cells,
@@ -628,8 +798,7 @@ def read_nodal_values_double(filename, uint8 [::1] celltypes,
                              int [::1] nodstr, int [::1] etype,
                              int [::1] element_type,
                              int result_index):
-    """
-    Read element results from ANSYS directly into a numpy array
+    """Read element results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray
         Array of ANSYS element types.
@@ -712,7 +881,9 @@ def read_nodal_values_double(filename, uint8 [::1] celltypes,
                     bufferdata[j, k] = 0
         else:
             fseek(cfile, (ele_table + ptr_result)*4, SEEK_SET)
-            fread(&bufferdata[0, 0], sizeof(double), nnode_elem*nitems, cfile)        
+
+            # replace with new read sparse...
+            fread(&bufferdata[0, 0], sizeof(double), nnode_elem*nitems, cfile)
 
             #### this will undoubtedly need to be generalized ####
             # element euler angle pointer
@@ -1184,9 +1355,8 @@ def tensor_rotate_z(double [:, :] stress, float theta_z):
     return np.asarray(isnan, dtype=np.bool)
 
 
-def ComputePrincipalStress(float [:, ::1] stress):
-    """
-    Returns the principal stresses based on component stresses.
+def compute_principal_stress(float [:, ::1] stress):
+    """Returns the principal stresses based on component stresses.
 
     Parameters
     ----------

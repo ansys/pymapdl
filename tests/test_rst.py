@@ -22,6 +22,13 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 
+@pytest.mark.skipif(vm33 is None, reason="Requires example files")
+def test_write_tables(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join('vm33.txt'))
+    vm33.write_tables(filename)
+    assert os.path.isfile(filename)
+
+
 def test_read_volume():
     rst_file = os.path.join(testfiles_path, 'vol_test.rst')
     rst = pyansys.read_binary(rst_file)
