@@ -1269,7 +1269,7 @@ class ResultFile(object):
             _binary_reader.read_element_stress2(self.filename,
                                                 ele_ind_table,
                                                 nodstr.astype(np.int64),
-                                                etype, ele_data_arr2,
+                                                etype, ele_data_arr,
                                                 nitem, elemtype,
                                                 as_global=not
                                                 in_element_coord_sys)
