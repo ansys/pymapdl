@@ -52,6 +52,7 @@ def compilerName():
 compiler = compilerName()
 if compiler == 'unix':
     cmp_arg = ['-O3', '-w']
+    # cmp_arg = ['/RTC']  # debug
 else:
     cmp_arg = ['/Ox', '-w']
 

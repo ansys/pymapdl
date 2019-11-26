@@ -7,6 +7,8 @@ from pyvista.plotting import system_supports_plotting
 from pyansys.examples.downloads import _download_and_read as download_and_read
 import pyansys
 
+skip_windows = os.name == 'nt'
+
 try:
     vm33 = pyansys.download_verification_result(33)
 except:
@@ -21,8 +23,6 @@ try:
     vm240_sparse = download_and_read('vm240_sparse.rst')
 except:
     vm240_sparse = None
-
-
 
 
 try:
@@ -120,7 +120,7 @@ def test_solution_info():
     assert 'omega_a_x' in info
 
 
-@pytest.mark.skipif(vm240 is None or vm240_sparse is None,
+@pytest.mark.skipif(vm240 is None or vm240_sparse is None or skip_windows,
                     reason="Requires example files")
 def test_sparse_nodal_solution():
     nnum, stress = vm240.nodal_stress(0)

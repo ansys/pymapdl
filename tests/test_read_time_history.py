@@ -14,8 +14,7 @@ RESULT = pyansys.read_binary(TESTFILE)
 skip_windows = os.name == 'nt'
 
 @pytest.mark.parametrize("time_hist_key", ['NSL', 'VEL', 'ACC'])
-@pytest.mark.skipif(skip_windows,
-                    reason="windows ishaving trouble")
+@pytest.mark.skipif(skip_windows, reason="windows ishaving trouble")
 def test_time_history(time_hist_key):
     nnum, values = RESULT.nodal_time_history(time_hist_key)
     assert np.allclose(nnum, RESULT.nnum)
