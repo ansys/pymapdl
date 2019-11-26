@@ -55,7 +55,7 @@ cdef extern from "numpy/npy_math.h" nogil:
 cdef extern from 'binary_reader.hpp' nogil:
     void read_nodes(const char*, int, int, int*, double*)
     void* read_record(const char*, int, int*, int*, int*, int*)
-    void* read_record_stream(ifstream*, int, void*, int*, int*, int*)
+    void read_record_stream(ifstream*, int, void*, int*, int*, int*)
 
 
 # VTK numbering for vtk cells
@@ -420,10 +420,10 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
 cdef inline int read_element_result(ifstream *binfile, int ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, float *arr,
-                                    int element_type, int as_global=1): # nogil:
+                                    int element_type, int as_global=1) nogil:
     """Populate array with results from a single element"""
     cdef int i, j, k, c
-    cdef char [128] pointers  # 25 items, max size int
+    cdef int [128] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float [64] tmpbuffer  # for euler results
     cdef float [3] eulerangles
@@ -431,6 +431,8 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
     # store elemenet element result pointers
     read_record_stream(binfile, ele_table, <void*>&pointers,
                        &prec_flag, &type_flag, &size)
+    # cdef int ptr = pointers[result_index]
+
     cdef int ptr
 
     if prec_flag:
@@ -449,17 +451,18 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
         # read the stresses evaluated at the intergration points or nodes
         read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
                            &type_flag, &size)
-        
 
         # TODO: this will undoubtedly need to be generalized
         if element_type == 181 or element_type == 281:
             # only concerned with the first three euler angles (thxy, thyz, thzx)
-            if prec_flag:
-                ptr = (<short*>pointers)[PTR_EUL_IDX]
-            else:
-                ptr = (<int*>pointers)[PTR_EUL_IDX]
 
-            read_record_stream(binfile, ele_table + ptr,
+            # if prec_flag:
+            #     ptr = (<short*>pointers)[PTR_EUL_IDX]
+            # else:
+            #     ptr = (<int*>pointers)[PTR_EUL_IDX]
+            # read_record_stream(binfile, ele_table + ptr,
+
+            read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
             # rotate the first four nodal results

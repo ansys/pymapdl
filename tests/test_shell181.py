@@ -80,6 +80,15 @@ import os
 import numpy as np
 import pyansys
 
+# import faulthandler
+# faulthandler.enable()
+
+try:
+    __file__
+except NameError:
+    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_shell181.py'
+
+
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
@@ -103,7 +112,7 @@ class TestLoad181():
         assert np.any(self.result.grid.points)
 
     def test_element_stress(self):
-        element_stress, elemnum, enode = self.result.element_stress(0)
+        element_stress, _, _ = self.result.element_stress(0)
         element0 = element_stress[0]
 
         # ansys prints both postiive and negative component values
@@ -121,3 +130,11 @@ class TestLoad181():
 
         # wide atol limits considering the 5 sigfig from ASCII tables
         assert np.allclose(stress, np.array(ANSYS_NODE), atol=1E-6)
+
+
+if __name__ == '__main__':
+    tester = TestLoad181()
+    tester.test_load()
+    tester.test_element_stress()  # <--
+    tester.test_nodal_stress()
+    print('done')

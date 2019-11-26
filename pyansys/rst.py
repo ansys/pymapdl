@@ -1201,8 +1201,7 @@ class ResultFile(object):
         """ The version of ANSYS used to generate this result file """
         return float(self.resultheader['verstring'])
 
-    def element_stress(self, rnum, principal=False, in_element_coord_sys=False,
-                       sort=True):
+    def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
         """Retrives the element component stresses.
 
         Equivalent ANSYS command: PRESOL, S
@@ -1262,7 +1261,10 @@ class ResultFile(object):
                 nitem = 6
             else:
                 nitem = 11
-            ele_data_arr = np.empty((nelemnode, nitem), np.float32)
+
+            # add extra elements to data array.  Sometimes there are
+            # more items than listed in the result header (or something isn't captured here)
+            ele_data_arr = np.empty((nelemnode + 10, nitem), np.float32)  
             ele_data_arr[:] = np.nan
 
             _binary_reader.read_element_stress(self.filename,
@@ -1272,11 +1274,15 @@ class ResultFile(object):
                                                nitem, elemtype,
                                                as_global=not in_element_coord_sys)
 
+
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 
         else:
             raise NotImplementedError('Not implemented for ANSYS older than v14.5')
+
+        # trim off extra data
+        ele_data_arr = ele_data_arr[:nelemnode]
 
         if principal:
             ele_data_arr, isnan = _binary_reader.compute_principal_stress(ele_data_arr)
@@ -1288,12 +1294,8 @@ class ResultFile(object):
         # reorder list using sorted indices
         # enum = self.grid.cell_arrays['ansys_elem_num']
         enum = self.geometry['enum']
-
-        if sort:
-            sidx = np.argsort(enum)
-            element_stress = [element_stress[i] for i in sidx]
-        else:
-            sidx = np.arange(enum.size)
+        sidx = np.argsort(enum)
+        element_stress = [element_stress[i] for i in sidx]
 
         elem = self.geometry['elem']
         enode = []
@@ -1997,16 +1999,16 @@ class ResultFile(object):
         #                         result_index)
 
         data, ncount = _binary_reader.read_nodal_values(self.filename,
-                                                        self.grid.celltypes,
-                                                        ele_ind_table,
-                                                        self.grid.offset,
-                                                        self.grid.cells,
-                                                        nitem,
-                                                        self.grid.number_of_points,
-                                                        nodstr,
-                                                        etype,
-                                                        elemtype,
-                                                        result_index)
+                                self.grid.celltypes,
+                                ele_ind_table,
+                                self.grid.offset,
+                                self.grid.cells,
+                                nitem,
+                                self.grid.number_of_points,
+                                nodstr,
+                                etype,
+                                elemtype,
+                                result_index)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]

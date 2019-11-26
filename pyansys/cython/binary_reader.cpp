@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 #define	MEM_ZERO(where,size)	memset((where),'\0',(size))
 #define	MEM_COPY(from,to,size)	memcpy((to),(from),(size))
 #define	MEMCOPY(from,to,n_items,type) MEM_COPY((char *)(from),(char *)(to),(unsigned)(n_items)*sizeof(type))
@@ -188,7 +187,7 @@ char* ReadShortBsparseRecord(int *raw, int *size)
 
   short *vec = new short[*size]();
   short	*tbuf = (short *)raw;
-  int	iloc = -1;
+  int iloc = -1;
   int nb = NbBitsOn(bitcod);
 
   if (nb%2) nb++;
@@ -209,7 +208,7 @@ void ReadShortBsparseRecordToVec(int *raw, int *size, short *vec)
   int bitcod = *raw++;
 
   short	*tbuf = (short *)raw;
-  int iloc = -1;
+  int	iloc = -1;
   int nb = NbBitsOn(bitcod);
 
   if (nb%2) nb++;
@@ -506,7 +505,7 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
 
 // populate arr with a record
 // This function differs from read_record as it must be supplied with ``arr``, which must be sized properly to support the data coming from the file.
-void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
+void read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
 			 int* type_flag, int* size){
 
   // seek to data location if supplied with a pointer
@@ -518,16 +517,17 @@ void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
   int bufsize = read_header(file, &bsparse_flag, &wsparse_flag,
 			    &zlib_flag, prec_flag, type_flag);
   *size = bufsize;
-  if (bufsize < 0){
-    return NULL;
-  }
 
   // always read record
   char *raw = new char[4*bufsize];
+  if (bufsize < 0){
+    return;
+  }
 
   if (bsparse_flag){
     // write to temporary record
     file->read(raw, 4*bufsize);
+
     if (*type_flag){
       if (*prec_flag){
 	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);
@@ -543,6 +543,7 @@ void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
     }
 
   } else if (wsparse_flag) {
+    file->read(raw, 4*bufsize);
     if (*type_flag){
       if (*prec_flag){
 	raw = ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
@@ -561,7 +562,6 @@ void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
     file->read((char*)arr, 4*bufsize);
   }    
   
-  return raw;
 }
 
 

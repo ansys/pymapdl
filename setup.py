@@ -5,7 +5,6 @@ from io import open as io_open
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
-from Cython.Build import cythonize
 
 try:
     import numpy as np
@@ -68,55 +67,6 @@ with io_open(version_file, mode='r') as fd:
     exec(fd.read())
 
 
-extensions =[
-    Extension("pyansys._parsefull",
-              ['pyansys/cython/_parsefull.pyx',
-               'pyansys/cython/parsefull.c'],
-              extra_compile_args=cmp_arg,
-              language='c'),
-
-    Extension("pyansys._parser",
-              ["pyansys/cython/_parser.pyx"],
-              extra_compile_args=cmp_arg,
-              language='c'),
-
-    Extension("pyansys._db_reader",
-            ["pyansys/cython/_db_reader.pyx"],
-              extra_compile_args=cmp_arg,
-              language='c'),
-    
-    Extension('pyansys._reader',
-              ['pyansys/cython/_reader.pyx',
-               'pyansys/cython/reader.c'],
-              extra_compile_args=cmp_arg,
-              language='c',),
-    
-    Extension("pyansys._relaxmidside",
-              ["pyansys/cython/_relaxmidside.pyx"],
-              extra_compile_args=cmp_arg,
-              language='c'),
-
-    Extension("pyansys._cellqual",
-              ["pyansys/_cellqual.pyx"],
-              extra_compile_args=cmp_arg,
-              language='c'),
-    
-    Extension("pyansys._cellqualfloat",
-              ["pyansys/cython/_cellqualfloat.pyx"],
-              extra_compile_args=cmp_arg,
-              language='c'),
-    
-    Extension("pyansys._binary_reader",
-              ["pyansys/cython/_binary_reader.pyx",
-               # "pyansys/cython/SparseBufferToVec.cpp",
-               "pyansys/cython/binary_reader.cpp"],
-              # extra_compile_args=cmp_arg,
-              # gdb_debug=True,
-              language='c++'),
-]
-
-
-
 # Actual setup
 setup(
     name='pyansys',
@@ -152,7 +102,51 @@ setup(
 
     # Build cython modules
     cmdclass={'build_ext': build_ext},
-    ext_modules=extensions,
+    ext_modules=[Extension("pyansys._parsefull",
+                           ['pyansys/cython/_parsefull.pyx',
+                            'pyansys/cython/parsefull.c'],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension("pyansys._parser",
+                           ["pyansys/cython/_parser.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension("pyansys._db_reader",
+                           ["pyansys/cython/_db_reader.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension('pyansys._reader',
+                           ['pyansys/cython/_reader.pyx',
+                            'pyansys/cython/reader.c'],
+                           extra_compile_args=cmp_arg,
+                           language='c',),
+
+                 Extension("pyansys._relaxmidside",
+                           ["pyansys/cython/_relaxmidside.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension("pyansys._cellqual",
+                           ["pyansys/_cellqual.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension("pyansys._cellqualfloat",
+                           ["pyansys/cython/_cellqualfloat.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
+                 Extension("pyansys._binary_reader",
+                           ["pyansys/cython/_binary_reader.pyx",
+                            # "pyansys/cython/SparseBufferToVec.cpp",
+                            "pyansys/cython/binary_reader.cpp"],
+                           extra_compile_args=cmp_arg,
+                           language='c++'),
+                 ],
+
     keywords='vtk ANSYS cdb full rst',
     package_data={'pyansys.examples': ['TetBeam.cdb',
                                        'HexBeam.cdb',

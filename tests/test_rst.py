@@ -12,7 +12,6 @@ try:
 except:
     vm33 = None
 
-
 try:
     vm240 = pyansys.download_verification_result(240)
 except:
@@ -22,6 +21,8 @@ try:
     vm240_sparse = download_and_read('vm240_sparse.rst')
 except:
     vm240_sparse = None
+
+
 
 
 try:
