@@ -1201,7 +1201,8 @@ class ResultFile(object):
         """ The version of ANSYS used to generate this result file """
         return float(self.resultheader['verstring'])
 
-    def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
+    def element_stress(self, rnum, principal=False, in_element_coord_sys=False,
+                       sort=True):
         """Retrives the element component stresses.
 
         Equivalent ANSYS command: PRESOL, S
@@ -1261,7 +1262,7 @@ class ResultFile(object):
                 nitem = 6
             else:
                 nitem = 11
-            ele_data_arr = np.empty((nelemnode, nitem), np.float32)
+            ele_data_arr = np.empty((nelemnode*100, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
             _binary_reader.read_element_stress(self.filename,
@@ -1270,7 +1271,6 @@ class ResultFile(object):
                                                etype, ele_data_arr,
                                                nitem, elemtype,
                                                as_global=not in_element_coord_sys)
-
 
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
@@ -1288,8 +1288,12 @@ class ResultFile(object):
         # reorder list using sorted indices
         # enum = self.grid.cell_arrays['ansys_elem_num']
         enum = self.geometry['enum']
-        sidx = np.argsort(enum)
-        element_stress = [element_stress[i] for i in sidx]
+
+        if sort:
+            sidx = np.argsort(enum)
+            element_stress = [element_stress[i] for i in sidx]
+        else:
+            sidx = np.arange(enum.size)
 
         elem = self.geometry['elem']
         enode = []
@@ -1992,17 +1996,17 @@ class ResultFile(object):
         #                         elemtype,
         #                         result_index)
 
-        data, ncount = _binary_reader.read_nodal_values_new(self.filename,
-                                self.grid.celltypes,
-                                ele_ind_table,
-                                self.grid.offset,
-                                self.grid.cells,
-                                nitem,
-                                self.grid.number_of_points,
-                                nodstr,
-                                etype,
-                                elemtype,
-                                result_index)
+        data, ncount = _binary_reader.read_nodal_values(self.filename,
+                                                        self.grid.celltypes,
+                                                        ele_ind_table,
+                                                        self.grid.offset,
+                                                        self.grid.cells,
+                                                        nitem,
+                                                        self.grid.number_of_points,
+                                                        nodstr,
+                                                        etype,
+                                                        elemtype,
+                                                        result_index)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]

@@ -54,6 +54,9 @@ def _retrieve_file(url, filename):
     return local_path, resp
 
 
+def download_file(filename):
+    return _download_file(filename)
+
 def _download_file(filename):
     url = _get_vtk_file_url(filename)
     return _retrieve_file(url, filename)

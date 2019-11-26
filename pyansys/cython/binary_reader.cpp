@@ -6,8 +6,6 @@
 
 using namespace std;
 
-// #define	MEM_ZERO(where, size)	memset((where),'\0',(size))
-// #define IS_ON(e, p)   ((e) & (1u << (p)))
 
 #define	MEM_ZERO(where,size)	memset((where),'\0',(size))
 #define	MEM_COPY(from,to,size)	memcpy((to),(from),(size))
@@ -211,7 +209,7 @@ void ReadShortBsparseRecordToVec(int *raw, int *size, short *vec)
   int bitcod = *raw++;
 
   short	*tbuf = (short *)raw;
-  int	iloc = -1;
+  int iloc = -1;
   int nb = NbBitsOn(bitcod);
 
   if (nb%2) nb++;
@@ -520,6 +518,9 @@ void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
   int bufsize = read_header(file, &bsparse_flag, &wsparse_flag,
 			    &zlib_flag, prec_flag, type_flag);
   *size = bufsize;
+  if (bufsize < 0){
+    return NULL;
+  }
 
   // always read record
   char *raw = new char[4*bufsize];
@@ -527,7 +528,6 @@ void* read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
   if (bsparse_flag){
     // write to temporary record
     file->read(raw, 4*bufsize);
-
     if (*type_flag){
       if (*prec_flag){
 	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);

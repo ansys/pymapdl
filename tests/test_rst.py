@@ -4,12 +4,24 @@ import numpy as np
 import pytest
 from pyvista.plotting import system_supports_plotting
 
+from pyansys.examples.downloads import _download_and_read as download_and_read
 import pyansys
 
 try:
     vm33 = pyansys.download_verification_result(33)
 except:
     vm33 = None
+
+
+try:
+    vm240 = pyansys.download_verification_result(240)
+except:
+    vm240 = None
+
+try:
+    vm240_sparse = download_and_read('vm240_sparse.rst')
+except:
+    vm240_sparse = None
 
 
 try:
@@ -105,3 +117,12 @@ def test_available_results():
 def test_solution_info():
     info = vm33.solution_info(0)
     assert 'omega_a_x' in info
+
+
+@pytest.mark.skipif(vm240 is None or vm240_sparse is None,
+                    reason="Requires example files")
+def test_sparse_nodal_solution():
+    nnum, stress = vm240.nodal_stress(0)
+    sparse_nnum, sparse_stress = vm240_sparse.nodal_stress(0)
+    assert np.allclose(sparse_stress, stress, equal_nan=True)
+    assert np.allclose(nnum, sparse_nnum)
