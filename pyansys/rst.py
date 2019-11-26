@@ -1262,7 +1262,7 @@ class ResultFile(object):
                 nitem = 6
             else:
                 nitem = 11
-            ele_data_arr = np.empty((nelemnode*100, nitem), np.float32)
+            ele_data_arr = np.empty((nelemnode, nitem), np.float32)
             ele_data_arr[:] = np.nan
 
             _binary_reader.read_element_stress(self.filename,
