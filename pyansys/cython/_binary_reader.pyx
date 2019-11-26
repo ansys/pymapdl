@@ -53,7 +53,7 @@ cdef extern from "<iostream>" namespace "std::ios_base" nogil:
 cdef extern from "numpy/npy_math.h" nogil:
     bint npy_isnan(double x)
 
-cdef extern from 'binary_reader.hpp' nogil:
+cdef extern from 'binary_reader.h' nogil:
     void read_nodes(const char*, int, int, int*, double*)
     void* read_record(const char*, int, int*, int*, int*, int*)
     void read_record_stream(ifstream*, int, void*, int*, int*, int*)
