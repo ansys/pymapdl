@@ -16,8 +16,8 @@ import pyvista as pv
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
-from pyansys._binary_reader import c_read_record
-from pyansys.common import (read_table, parse_header,
+
+from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, two_ints_to_long)
 
 # Create logger
@@ -164,7 +164,7 @@ RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
                       'cycMSUPkey', 'XfemCrkPropTech']
 
 
-class ResultFile(object):
+class ResultFile(AnsysBinary):
     """Reads a binary ANSYS result file.
 
     Parameters
@@ -745,35 +745,6 @@ class ResultFile(object):
 
         # also include nodes in output
         return self.nnum, results
-
-    def read_record(self, pointer, return_bufsize=False):
-        """Reads a record at a given position.
-
-        Because ANSYS 19.0+ uses compression by default, you must use
-        this method rather than ``np.fromfile``.
-
-        Parameters
-        ----------
-        pointer : int
-            ANSYS file position (n words from start of file.  A word
-            is four bytes.
-
-        return_bufsize : bool, optional
-            Returns the number of words read (includes header and
-            footer).  Useful for determining the new position in the
-            file after reading a record.
-
-        Returns
-        -------
-        record : np.ndarray
-            The record read as a ``n x 1`` numpy array.
-
-        bufsize : float, optional
-            When ``return_bufsize`` is enabled, returns the number of
-            words read.
-
-        """
-        return c_read_record(self.filename, pointer, return_bufsize)
 
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
@@ -1980,23 +1951,11 @@ class ResultFile(object):
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
 
-        # if self.version < 14.5:
-        #     read_fun = _binary_reader.read_nodal_values_double
-        #     # ele_ind_table += 2
-        # else:
-        #     read_fun = _binary_reader.read_nodal_values_new
-            
-        # data, ncount = _binary_reader.read_nodal_values(self.filename,
-        #                         self.grid.celltypes,
-        #                         ele_ind_table + 2,
-        #                         self.grid.offset,
-        #                         self.grid.cells,
-        #                         nitem,
-        #                         self.grid.number_of_points,
-        #                         nodstr,
-        #                         etype,
-        #                         elemtype,
-        #                         result_index)
+        if self.version < 14.5:
+            # uses legacy function
+            read_fun = _binary_reader.read_nodal_values_legacy
+        else:
+            read_fun = _binary_reader.read_nodal_values
 
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                 self.grid.celltypes,
@@ -2439,7 +2398,4 @@ def transform(points, trans):
     if isinstance(trans, vtk.vtkMatrix4x4):
         trans = pv.trans_from_matrix(trans)
 
-    if points.dtype == np.float32:
-        _binary_reader.affline_transform_float(points, trans)
-    else:
-        _binary_reader.affline_transform_double(points, trans)
+    _binary_reader.affline_transform(points, trans)

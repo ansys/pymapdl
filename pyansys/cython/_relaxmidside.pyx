@@ -229,12 +229,11 @@ cdef inline void relax_mid_hex(int64_t [::1] cellarr, int c, double [:, ::1] pts
         pts[ind17, j] = pts[ind17, j]*(1 - rfac) + (pts[ind1, j] + pts[ind5, j])*0.5*rfac
         pts[ind18, j] = pts[ind18, j]*(1 - rfac) + (pts[ind2, j] + pts[ind6, j])*0.5*rfac
         pts[ind19, j] = pts[ind19, j]*(1 - rfac) + (pts[ind3, j] + pts[ind7, j])*0.5*rfac
-           
-           
+
+
 def reset_midside(int64_t [::1] cellarr, uint8 [::1] celltypes,
                   int64_t [::1] offset, double [:, ::1] pts):
-    """    
-    Resets positions of midside nodes to directly between edge nodes.    
+    """Resets positions of midside nodes to directly between edge nodes.    
 
     Parameters
     ----------

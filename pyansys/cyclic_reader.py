@@ -9,7 +9,7 @@ from pyvista.core.common import axis_rotation
 import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
-from pyansys import (_parsefull, _binary_reader, _parser)
+from pyansys import _binary_reader, _parser
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
 
 
@@ -291,7 +291,7 @@ class CyclicResult(ResultFile):
             if tensor:
                 _binary_reader.tensor_arbitrary(full_result[i], trans)
             else:
-                _binary_reader.affline_transform_double(full_result[i], trans)
+                _binary_reader.affline_transform(full_result[i], trans)
 
         return full_result
 

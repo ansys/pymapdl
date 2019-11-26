@@ -102,12 +102,7 @@ setup(
 
     # Build cython modules
     cmdclass={'build_ext': build_ext},
-    ext_modules=[Extension("pyansys._parsefull",
-                           ['pyansys/cython/_parsefull.pyx',
-                            'pyansys/cython/parsefull.c'],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
-
+    ext_modules=[
                  Extension("pyansys._parser",
                            ["pyansys/cython/_parser.pyx"],
                            extra_compile_args=cmp_arg,
@@ -141,7 +136,6 @@ setup(
 
                  Extension("pyansys._binary_reader",
                            ["pyansys/cython/_binary_reader.pyx",
-                            # "pyansys/cython/SparseBufferToVec.cpp",
                             "pyansys/cython/binary_reader.cpp"],
                            extra_compile_args=cmp_arg,
                            language='c++'),
