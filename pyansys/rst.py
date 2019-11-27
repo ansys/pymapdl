@@ -1234,8 +1234,8 @@ class ResultFile(AnsysBinary):
                 nitem = 11
 
             # add extra elements to data array.  Sometimes there are
-            # more items than listed in the result header (or something isn't captured here)
-            ele_data_arr = np.empty((nelemnode + 10, nitem), np.float32)  
+            # more items than listed in the result header (or there's a mistake here)
+            ele_data_arr = np.empty((nelemnode + 50, nitem), np.float32)  
             ele_data_arr[:] = np.nan
 
             _binary_reader.read_element_stress(self.filename,
@@ -1360,7 +1360,8 @@ class ResultFile(AnsysBinary):
             # read element table index pointer to data
             ptr = self.read_record(ind)[table_index]
             if ptr != 0:
-                element_data.append(self.read_record(ind + ptr))
+                record = self.read_record(ind + ptr)
+                element_data.append(record)
             else:
                 element_data.append(None)
 
@@ -1744,7 +1745,7 @@ class ResultFile(AnsysBinary):
         _, stress = self.principal_nodal_stress(rnum)
         return stress[:, sidx]
 
-    def plot_nodal_stress(self, rnum, comp,
+    def plot_nodal_stress(self, rnum, comp=None,
                           show_displacement=False,
                           displacement_factor=1,
                           node_components=None,
@@ -1757,7 +1758,6 @@ class ResultFile(AnsysBinary):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        stype : string
         comp : str, optional
             Thermal strain component to display.  Available options:
             - ``"X"``
@@ -1785,6 +1785,9 @@ class ResultFile(AnsysBinary):
             3 x 3 vtk camera position.
         """
         available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
+
+        if comp is None:
+            raise ValueError('Missing "comp" parameter.  Please select from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
         self._plot_nodal_result(rnum, 'ENS',  comp, available_comps, show_displacement,
                                 displacement_factor, node_components,

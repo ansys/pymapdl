@@ -195,6 +195,8 @@ char* ReadShortBsparseRecord(int *raw, int *size)
     {
       if ( IS_ON( bitcod, iloc)){
 	vec[iloc] = *tbuf++;
+      } else{
+	vec[iloc] = 0;
       }
     }
 
@@ -216,6 +218,8 @@ void ReadShortBsparseRecordToVec(int *raw, int *size, short *vec)
     {
       if ( IS_ON( bitcod, iloc)){
 	vec[iloc] = *tbuf++;
+      } else {
+	vec[iloc] = 0;
       }
     }
 
@@ -519,15 +523,14 @@ void read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
   *size = bufsize;
 
   // always read record
-  char *raw = new char[4*bufsize];
-  if (bufsize < 0){
+  if (bufsize <= 0){
     return;
   }
+  char *raw = new char[4*bufsize];
 
   if (bsparse_flag){
     // write to temporary record
     file->read(raw, 4*bufsize);
-
     if (*type_flag){
       if (*prec_flag){
 	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);
@@ -546,15 +549,15 @@ void read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
     file->read(raw, 4*bufsize);
     if (*type_flag){
       if (*prec_flag){
-	raw = ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
+	ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
       } else{
-	raw = ReadWindowedSparseBufferInt((int*)raw, size, (int*)arr);
+	ReadWindowedSparseBufferInt((int*)raw, size, (int*)arr);
       }
     } else{  // a float/double
       if (*prec_flag){
-	raw = ReadWindowedSparseBufferFloat((int*)raw, size, (float*)arr);
+	ReadWindowedSparseBufferFloat((int*)raw, size, (float*)arr);
       } else{
-	raw = ReadWindowedSparseBufferDouble((int*)raw, size, (double*)arr);
+	ReadWindowedSparseBufferDouble((int*)raw, size, (double*)arr);
       }
     }
 

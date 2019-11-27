@@ -52,9 +52,10 @@ def compilerName():
 compiler = compilerName()
 if compiler == 'unix':
     cmp_arg = ['-O3', '-w']
-    # cmp_arg = ['/RTC']  # debug
+    # cmp_arg = ['-fsanitize=address']
 else:
     cmp_arg = ['/Ox', '-w']
+    # cmp_arg = ['/RTC']  # debug
 
 
 # Get version from version info

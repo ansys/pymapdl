@@ -374,25 +374,23 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
 cdef inline int read_element_result(ifstream *binfile, int ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, float *arr,
-                                    int element_type, int as_global=1) nogil:
+                                    int element_type, int as_global=1):
     """Populate array with results from a single element"""
-    cdef int i, j, k, c
-    cdef int [128] pointers  # tmp array of pointers
+    cdef int i, j, k, c, ptr
+    cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float [64] tmpbuffer  # for euler results
     cdef float [3] eulerangles
+    cdef short* spointers = <short*>pointers
 
     # store elemenet element result pointers
     read_record_stream(binfile, ele_table, <void*>&pointers,
                        &prec_flag, &type_flag, &size)
-    # cdef int ptr = pointers[result_index]
-
-    cdef int ptr
 
     if prec_flag:
-        ptr = <int>(<short*>pointers)[result_index]
+        ptr = spointers[result_index]
     else:
-        ptr = (<int*>pointers)[result_index]
+        ptr = pointers[result_index]
 
     if ptr == 0:
         return 1
@@ -411,11 +409,11 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
             # only concerned with the first three euler angles (thxy, thyz, thzx)
 
             # if prec_flag:
-            #     ptr = (<short*>pointers)[PTR_EUL_IDX]
+            #     ptr = spointers[PTR_EUL_IDX]
             # else:
-            #     ptr = (<int*>pointers)[PTR_EUL_IDX]
-            # read_record_stream(binfile, ele_table + ptr,
+            #     ptr = pointers[PTR_EUL_IDX]
 
+            # read_record_stream(binfile, ele_table + ptr,
             read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
@@ -578,10 +576,6 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         EBA - 22 : back stresses
         ESV - 23 : state variables
         MNL - 24 : material nonlinear record
-
-    Returns
-    -------
-
     """
     cdef int64_t i, j, k, ind, nread, offset
     cdef int64_t ncells = ele_ind_table.size
@@ -608,7 +602,6 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         skip = read_element_result(binfile, ele_ind_table[i],
                                    result_index, nnode_elem, nitems,
                                    &bufferdata[0, 0], element_type[i])
-
         if skip:
             continue
 

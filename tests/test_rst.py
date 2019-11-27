@@ -8,6 +8,7 @@ from pyansys.examples.downloads import _download_and_read as download_and_read
 import pyansys
 
 skip_windows = os.name == 'nt'
+skip_windows = False
 
 try:
     vm33 = pyansys.download_verification_result(33)
