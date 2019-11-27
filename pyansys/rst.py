@@ -174,6 +174,14 @@ class ResultFile(AnsysBinary):
 
     ignore_cyclic : bool, optional
         Ignores any cyclic properties.
+
+    read_geometry : bool, optional
+        Debug parameter.
+
+    Examples
+    --------
+    >>> import pyansys
+    >>> rst = pyansys.read_binary('file.rst')
     """
 
     def __init__(self, filename, ignore_cyclic=False, read_geometry=True):
@@ -231,7 +239,6 @@ class ResultFile(AnsysBinary):
 
         # Read table of pointers to locations of results
         nsets = resultheader['nsets']
-        # f.seek((resultheader['ptrDSI'] + 2) * 4)  # Start of pointer, then empty, then data
 
         # Data sets index table. This record contains the record pointers
         # for the beginning of each data set. The first resmax records are
@@ -277,7 +284,6 @@ class ResultFile(AnsysBinary):
         resultheader['ls_table'] = record[:resultheader['nsets']*3].reshape(-1, 3)
 
         return resultheader
-
 
     def parse_coordinate_system(self):
         """Reads in coordinate system information from a binary result
@@ -382,6 +388,12 @@ class ResultFile(AnsysBinary):
         -------
         cpos : list
             List of camera position, focal point, and view up.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> rst.plot()
         """
         show_edges = kwargs.pop('show_edges', True)
 
@@ -397,7 +409,7 @@ class ResultFile(AnsysBinary):
                             max_disp=0.1,
                             node_components=None, sel_type_all=True,
                             **kwargs):
-        """Plots a nodal result.
+        """Plots the nodal solution.
 
         Parameters
         ----------
@@ -429,6 +441,15 @@ class ResultFile(AnsysBinary):
         -------
         cpos : list
             Camera position from vtk render window.
+
+        Examples
+        --------
+        Plot the nodal solution result 0 of verification manual
+        example 
+
+        >>> import pyansys
+        >>> result = pyansys.download_verification_result(33)
+        >>> result.plot_nodal_solution(0)
         """
         # Load result from file
         rnum = self.parse_step_substep(rnum)
@@ -756,12 +777,6 @@ class ResultFile(AnsysBinary):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        sort : bool, optional
-            Resorts the results so that the results correspond to the
-            sorted node numbering (self.nnum) (default).  If left
-            unsorted, results correspond to the nodal equivalence
-            array self.resultheader['neqv']
-
         in_nodal_coord_sys : bool, optional
             When True, returns results in the nodal coordinate system.
             Default False.
@@ -772,26 +787,61 @@ class ResultFile(AnsysBinary):
             Node numbers associated with the results.
 
         result : float np.ndarray
-            Result is (nnod x numdof), or number of nodes by degrees of freedom
+            Result is (``nnod`` x ``sumdof``), or number of nodes by degrees
+            of freedom which includes ``numdof`` and ``nfldof``.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, data = rst.nodal_solution(0)
+
+        Notes
+        -----
+        Some solution results may not include all node numbers.  This
+        is reflected in the ``result`` and ``nnum`` arrays.
+
         """
         # convert to cumulative index
         rnum = self.parse_step_substep(rnum)
 
-        # Get info from result header
-        numdof = self.resultheader['numdof']
-        nnod = self.resultheader['nnod']
-        rpointers = self.resultheader['rpointers']
+        # result pointer
+        ptr_rst = self.resultheader['rpointers'][rnum]
+        result_solution_header = parse_header(self.read_record(ptr_rst),
+                                       SOLUTION_DATA_HEADER_KEYS)
 
-        # Read a result
-        ptrnsl = self.read_record(rpointers[rnum])[10]
-        nitems = nnod * numdof
-        result = self.read_record(rpointers[rnum] + ptrnsl)[:nitems]
+        nnod = result_solution_header['nnod']
+        numdof = result_solution_header['numdof']
+        nfldof = result_solution_header['nfldof']
+        sumdof = numdof + nfldof
 
-        # Reshape to number of degrees of freedom
-        result = result.reshape((-1, numdof))
+        ptr_nsl = result_solution_header['ptrNSL']
 
-        # Reorder based on sorted indexing
-        result = result.take(self.sidx, 0)
+        # Read the nodal solution
+        result, bufsz = self.read_record(ptr_nsl + ptr_rst, True)
+        result = result.reshape(-1, sumdof)
+
+        # no idea why the result written is twice as long...
+        result = result[:result.shape[0]//2]
+
+        # # it's possible that not all results are written
+        if result.shape[0] != nnod:
+            # read second buffer containing the node indices of the
+            # results and convert from fortran to zero indexing
+            sidx = self.read_record(ptr_nsl + ptr_rst + bufsz) - 1
+            unsort_nnum = self.resultheader['neqv'][sidx]
+
+            # now, sort using the new sorted node numbers indices
+            new_sidx = np.argsort(unsort_nnum)
+            nnum = unsort_nnum[new_sidx]
+            result = result[new_sidx]
+
+            # these are the associated nodal locations
+            # sidx_inv = np.argsort(self.sidx)
+            # nodes = self.geometry['nodes'][sidx_inv][sidx][:, :3]
+        else:
+            nnum = self.nnum
+            result = result.take(self.sidx, 0)        
 
         if not in_nodal_coord_sys:
             # ansys writes the results in the nodal coordinate system.
@@ -813,7 +863,7 @@ class ResultFile(AnsysBinary):
         result[result == 2**100] = 0
 
         # also include nodes in output
-        return self.nnum, result
+        return nnum, result
 
     def _read_components(self):
         """Read components from an ANSYS result file
@@ -1359,7 +1409,7 @@ class ResultFile(AnsysBinary):
         for ind in ele_ind_table:
             # read element table index pointer to data
             ptr = self.read_record(ind)[table_index]
-            if ptr != 0:
+            if ptr > 0:
                 record = self.read_record(ind + ptr)
                 element_data.append(record)
             else:
@@ -1960,7 +2010,7 @@ class ResultFile(AnsysBinary):
         else:
             read_fun = _binary_reader.read_nodal_values
 
-        data, ncount = _binary_reader.read_nodal_values(self.filename,
+        data, ncount = read_fun(self.filename,
                                 self.grid.celltypes,
                                 ele_ind_table,
                                 self.grid.offset,
@@ -1980,7 +2030,7 @@ class ResultFile(AnsysBinary):
             raise ValueError('Result file contains no %s records for result %d' %
                              (ELEMENT_INDEX_TABLE_INFO[result_type.upper()], rnum))
 
-        # average cross nodes
+        # average across nodes
         result = data/ncount.reshape(-1, 1)
         return nnum, result
 
@@ -1991,10 +2041,10 @@ class ResultFile(AnsysBinary):
         The order of the results corresponds to the sorted node
         numbering.
 
-        This algorithm, like ANSYS, computes the nodal stress by
-        averaging the stress for each element at each node.  Due to
-        the discontinuities across elements, stresses will vary based
-        on the element they are evaluated from.
+        Computes the nodal stress by averaging the stress for each
+        element at each node.  Due to the discontinuities across
+        elements, stresses will vary based on the element they are
+        evaluated from.
 
         Parameters
         ----------
@@ -2004,12 +2054,18 @@ class ResultFile(AnsysBinary):
 
         Returns
         -------
-        nodenum : numpy.ndarray
+        nnum : numpy.ndarray
             Node numbers of the result.
 
         stress : numpy.ndarray
             Stresses at X, Y, Z, XY, YZ, and XZ Sxz averaged at each corner
             node.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.nodal_stress(0)
 
         Notes
         -----
@@ -2038,6 +2094,15 @@ class ResultFile(AnsysBinary):
         thermal_strain : np.ndarray
             Nodal component plastic strains.  Array is in the order
             X, Y, Z, XY, YZ, XZ, EQV, ESWELL
+
+        Examples
+        --------
+        Load the nodal thermal strain for the first solution
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, thermal_strain = rst.nodal_thermal_strain(0)
+
         """
         return self._nodal_result(rnum, 'ETH')
 
@@ -2086,6 +2151,7 @@ class ResultFile(AnsysBinary):
         Examples
         --------
         Plot thermal strain for result 0 of verification manual example 33
+
         >>> import pyansys
         >>> result = pyansys.download_verification_result(33)
         >>> result.plot_nodal_thermal_strain(0)
@@ -2121,6 +2187,14 @@ class ResultFile(AnsysBinary):
         elastic_strain : np.ndarray
             Nodal component elastic strains.  Array is in the order
             X, Y, Z, XY, YZ, XZ, EEL.
+
+        Examples
+        --------
+        Load the nodal elastic strain for the first solution.
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, elastic_strain = rst.nodal_elastic_strain(0)
         """
         return self._nodal_result(rnum, 'EEL')
 
@@ -2167,8 +2241,8 @@ class ResultFile(AnsysBinary):
 
         Examples
         --------
-        Plot thermal strain for result 0 of verification manual example 33
         Plot thermal strain for a static pontoon model
+
         >>> import pyansys
         >>> result = pyansys.download_pontoon()
         >>> result.plot_nodal_elastic_strain(0)
@@ -2206,6 +2280,14 @@ class ResultFile(AnsysBinary):
         plastic_strain : np.ndarray
             Nodal component plastic strains.  Array is in the order
             X, Y, Z, XY, YZ, XZ, EEL.
+
+        Examples
+        --------
+        Load the nodal plastic strain for the first solution.
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, plastic_strain = rst.nodal_plastic_strain(0)
         """
         return self._nodal_result(rnum, 'EPL')
 
@@ -2249,6 +2331,15 @@ class ResultFile(AnsysBinary):
 
         **kwargs : keyword arguments
             Optional keyword arguments.  See help(pyvista.plot)
+
+        Examples
+        --------
+        Plot plastic strain for a static pontoon model
+
+        >>> import pyansys
+        >>> result = pyansys.download_pontoon()
+        >>> result.plot_nodal_plastic_strain(0)
+
         """
         available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
         stitle = ' '.join([comp.upper(), stitle])

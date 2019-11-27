@@ -7,9 +7,6 @@ from pyvista.plotting import system_supports_plotting
 from pyansys.examples.downloads import _download_and_read as download_and_read
 import pyansys
 
-skip_windows = os.name == 'nt'
-skip_windows = False
-
 try:
     vm33 = pyansys.download_verification_result(33)
 except:
@@ -32,8 +29,20 @@ except:
     pontoon = None
 
 
+try:
+    __file__
+except:  # for testing
+    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_rst.py'
+
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
+
+is16_filename = os.path.join(testfiles_path, 'is16.rst')
+is16_known_result = os.path.join(testfiles_path, 'is16.npz')
+if os.path.isfile(is16_filename):
+    is16 = pyansys.read_binary(is16_filename)
+else:
+    is16 = None
 
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
@@ -121,10 +130,18 @@ def test_solution_info():
     assert 'omega_a_x' in info
 
 
-@pytest.mark.skipif(vm240 is None or vm240_sparse is None or skip_windows,
+@pytest.mark.skipif(vm240 is None or vm240_sparse is None,
                     reason="Requires example files")
 def test_sparse_nodal_solution():
     nnum, stress = vm240.nodal_stress(0)
     sparse_nnum, sparse_stress = vm240_sparse.nodal_stress(0)
     assert np.allclose(sparse_stress, stress, equal_nan=True)
     assert np.allclose(nnum, sparse_nnum)
+
+
+@pytest.mark.skipif(is16 is None, reason="Requires example files")
+def test_is16():
+    npz_rst = np.load(is16_known_result)
+    nnum, data = is16.nodal_solution(0)
+    np.allclose(data, npz_rst['data'], atol=1E-6)
+    np.allclose(nnum, npz_rst['nnum'])
