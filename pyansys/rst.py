@@ -1153,70 +1153,6 @@ class ResultFile(AnsysBinary):
 
         return ele_ind_table, nodstr, etype
 
-    # def nodal_stress(self, rnum):
-    #     """Equivalent ANSYS command: PRNSOL, S
-
-    #     Retrieves the component stresses for each node in the solution.
-
-    #     The order of the results corresponds to the sorted node
-    #     numbering.
-
-    #     This algorithm, like ANSYS, computes the nodal stress by
-    #     averaging the stress for each element at each node.  Due to
-    #     the discontinuities across elements, stresses will vary based
-    #     on the element they are evaluated from.
-
-    #     Parameters
-    #     ----------
-    #     rnum : int or list
-    #         Cumulative result number with zero based indexing, or a
-    #         list containing (step, substep) of the requested result.
-
-    #     Returns
-    #     -------
-    #     nodenum : numpy.ndarray
-    #         Node numbers of the result.
-
-    #     stress : numpy.ndarray
-    #         Stresses at Sx Sy Sz Sxy Syz Sxz averaged at each corner
-    #         node.  For the corresponding node numbers, see where
-    #         result is the result object.
-
-    #     Notes
-    #     -----
-    #     Nodes without a stress value will be NAN.
-    #     """
-    #     # element header
-    #     rnum = self.parse_step_substep(rnum)
-    #     ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
-
-    #     if self.resultheader['rstsprs'] != 0:
-    #         nitem = 6
-    #     else:
-    #         nitem = 11
-
-    #     # certain element types do not output stress
-    #     elemtype = self.geometry['Element Type'].astype(np.int32)
-
-    #     data, ncount = _binary_reader.read_nodal_values(self.filename,
-    #                                                     self.grid.celltypes,
-    #                                                     ele_ind_table + 2,
-    #                                                     self.grid.offset,
-    #                                                     self.grid.cells,
-    #                                                     nitem,
-    #                                                     self.grid.number_of_points,
-    #                                                     nodstr,
-    #                                                     etype,
-    #                                                     elemtype)
-
-    #     if nitem != 6:
-    #         data = data[:, :6]
-
-    #     nnum = self.grid.point_arrays['ansys_node_num']
-    #     stress = data/ncount.reshape(-1, 1)
-
-    #     return nnum, stress
-
     @property
     def version(self):
         """ The version of ANSYS used to generate this result file """
@@ -1995,32 +1931,38 @@ class ResultFile(AnsysBinary):
         ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
 
         result_type = result_type.upper()
-        nitem = ELEMENT_RESULT_NCOMP[result_type]
         if self.resultheader['rstsprs'] == 0 and result_type == 'ENS':
             nitem = 11
+        elif result_type in ELEMENT_RESULT_NCOMP:
+            nitem = ELEMENT_RESULT_NCOMP[result_type]
+        else:
+            nitem = 1
 
         result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
 
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
 
-        if self.version < 14.5:
-            # uses legacy function
-            read_fun = _binary_reader.read_nodal_values_legacy
-        else:
-            read_fun = _binary_reader.read_nodal_values
+        if self.version < 14.5:  # values stored as double precision
+            tarr = np.empty(1, np.float64)
+            my_dtype = 1
+        else:    # values stored as single precision
+            tarr = np.empty(1, np.float32)
+            my_dtype = 0
 
-        data, ncount = read_fun(self.filename,
-                                self.grid.celltypes,
-                                ele_ind_table,
-                                self.grid.offset,
-                                self.grid.cells,
-                                nitem,
-                                self.grid.number_of_points,
-                                nodstr,
-                                etype,
-                                elemtype,
-                                result_index)
+        data, ncount = _binary_reader.read_nodal_values_adv(self.filename,
+                                                        self.grid.celltypes,
+                                                        ele_ind_table,
+                                                        self.grid.offset,
+                                                        self.grid.cells,
+                                                        nitem,
+                                                        self.grid.number_of_points,
+                                                        nodstr,
+                                                        etype,
+                                                        elemtype,
+                                                        result_index,
+                                                        tarr,
+                                                        my_dtype)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]
@@ -2073,6 +2015,93 @@ class ResultFile(AnsysBinary):
         Equivalent ANSYS command: PRNSOL, S
         """
         return self._nodal_result(rnum, 'ENS')
+
+    def nodal_temperature(self, rnum):
+        """Retrieves the temperature for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        Equivalent MAPDL command: PRNSOL, TEMP
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : numpy.ndarray
+            Node numbers of the result.
+
+        temperature : numpy.ndarray
+            Tempature at each node.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.nodal_temperature(0)
+
+        """
+        nnum, temp = self._nodal_result(rnum, 'EPT')
+        temp = temp.ravel()
+        return nnum, temp
+
+    def plot_nodal_temperature(self, rnum, show_displacement=False,
+                               displacement_factor=1, node_components=None,
+                               sel_type_all=True, **kwargs):
+        """Plot nodal temperature
+
+        Parameters
+        ----------
+        rnum : int
+            Result number
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example: 
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
+
+        Examples
+        --------
+        Plot thermal strain of a sample file
+
+        >>> import pyansys
+        >>> result = pyansys.read_binary('file.rst')
+        >>> result.plot_nodal_temperature(0)
+
+        Plot while showing edges and disabling lighting
+        >>> result.plot_nodal_temperature(0, show_edges=True, lighting=False)
+        """
+        _, scalars = self.nodal_temperature(rnum)
+
+        grid = self.grid
+        if node_components:
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = scalars[ind]
+
+        return self._plot_point_scalars(scalars, grid=grid, rnum=rnum,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
+                                        stitle='Nodal Tempature',
+                                        **kwargs)
+
 
     def nodal_thermal_strain(self, rnum):
         """Nodal component plastic strains.  This record contains
@@ -2363,7 +2392,6 @@ class ResultFile(AnsysBinary):
             raise ValueError('Invalid component.  Pick one of the following: %s' %
                              str(available_comps))
         component_index = available_comps.index(comp)
-
 
         _, result = self._nodal_result(rnum, result_type)
         scalars = result[:, component_index]

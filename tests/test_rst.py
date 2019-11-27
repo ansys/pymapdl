@@ -44,6 +44,9 @@ if os.path.isfile(is16_filename):
 else:
     is16 = None
 
+temperature_rst = os.path.join(testfiles_path, 'temp_v13.rst')
+temperature_known_result = os.path.join(testfiles_path, 'temp_v13.npz')
+
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
 def test_write_tables(tmpdir):
@@ -143,5 +146,24 @@ def test_sparse_nodal_solution():
 def test_is16():
     npz_rst = np.load(is16_known_result)
     nnum, data = is16.nodal_solution(0)
-    np.allclose(data, npz_rst['data'], atol=1E-6)
-    np.allclose(nnum, npz_rst['nnum'])
+    assert np.allclose(data, npz_rst['data'], atol=1E-6)
+    assert np.allclose(nnum, npz_rst['nnum'])
+
+
+@pytest.mark.skipif(not os.path.isfile(temperature_rst),
+                    reason="Requires example files")
+def test_read_temperature():
+    temp_rst = pyansys.read_binary(temperature_rst)
+    nnum, temp = temp_rst.nodal_temperature(0)
+
+    npz_rst = np.load(temperature_known_result)
+    assert np.allclose(nnum, npz_rst['nnum'])
+    assert np.allclose(temp, npz_rst['temp'])
+
+
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@pytest.mark.skipif(not os.path.isfile(temperature_rst),
+                    reason="Requires example files")
+def test_plot_nodal_temperature():
+    temp_rst = pyansys.read_binary(temperature_rst)
+    temp_rst.plot_nodal_temperature(0, off_screen=True)

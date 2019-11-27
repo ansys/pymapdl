@@ -100,10 +100,10 @@ cimport numpy as np  # C-level symbols of numpy
 # _always_ do that, or you will have segfaults
 np.import_array()
 
-# We need to build an array-wrapper class to deallocate our array when
-# the Python object is deleted.
 
 cdef class ArrayWrapper:
+    """Array wrapper class to deallocate our array when the Python
+    object is deleted."""
     cdef void* data_ptr
     cdef int size
     cdef int my_dtype
@@ -177,19 +177,15 @@ cdef inline int get_int(char * array) nogil:
     return result
 
 
-def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc, 
+def load_nodes(filename, int ptr_loc, int nnod, double [:, ::1] nloc, 
               int [::1] nnum):
     """Wrapper for cpp function
-    
-    Function signature
-    def load_nodes(filename, int ptrLOC, int nnod, double [:, ::1] nloc, 
-       int [::1] nnum):
 
     """    
     cdef bytes buf, flags_buf
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
-    read_nodes(c_filename, ptrLOC, nnod, &nnum[0], &nloc[0, 0])
+    read_nodes(c_filename, ptr_loc, nnod, &nnum[0], &nloc[0, 0])
 
 
 def c_read_record(filename, int ptr, int return_bufsize=0):
@@ -365,13 +361,13 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     for i in range(len(ele_ind_table)):
         nnode_elem = nodstr[etype[i]]
 
-        read_element_result(binfile, ele_ind_table[i],
+        read_element_result_float(binfile, ele_ind_table[i],
                             PTR_ENS_IDX, nnode_elem, nitem,
                             &ele_data_arr[c, 0], element_type[i], as_global)
         c += nnode_elem
 
 
-cdef inline int read_element_result(ifstream *binfile, int ele_table,
+cdef inline int read_element_result_float(ifstream *binfile, int ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, float *arr,
                                     int element_type, int as_global=1):
@@ -419,12 +415,65 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
 
             # rotate the first four nodal results
             if as_global:
-                euler_rotate_gen(arr, tmpbuffer, nitem)
+                euler_rotate(arr, tmpbuffer, nitem)
 
     return 0
 
-cdef inline void euler_rotate_gen(float_or_double *arr,
-                                  float_or_double [64] eulerangles, int nitem) nogil:
+cdef inline int read_element_result(ifstream *binfile, int ele_table,
+                                    int result_index,
+                                    int nnode_elem, int nitem, float_or_double *arr,
+                                    int element_type, int as_global=1):
+    """Populate array with results from a single element"""
+    cdef int i, j, k, c, ptr
+    cdef int [4096] pointers  # tmp array of pointers
+    cdef int prec_flag, type_flag, size
+    cdef float_or_double [64] tmpbuffer  # for euler results
+    cdef float_or_double [3] eulerangles
+    cdef short* spointers = <short*>pointers
+
+    # store elemenet element result pointers
+    read_record_stream(binfile, ele_table, <void*>&pointers,
+                       &prec_flag, &type_flag, &size)
+
+    if prec_flag:
+        ptr = spointers[result_index]
+    else:
+        ptr = pointers[result_index]
+
+    if ptr == 0:
+        return 1
+    if ptr < 0:  # negative pointer means missing data
+        # skip this element
+        for j in range(nnode_elem):
+            for k in range(nitem):
+                arr[j*nitem + k] = 0  # consider putting NAN instead
+    else:
+        # read the stresses evaluated at the intergration points or nodes
+        read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
+                           &type_flag, &size)
+
+        # TODO: this will undoubtedly need to be generalized
+        if element_type == 181 or element_type == 281:
+            # only concerned with the first three euler angles (thxy, thyz, thzx)
+
+            # if prec_flag:
+            #     ptr = spointers[PTR_EUL_IDX]
+            # else:
+            #     ptr = pointers[PTR_EUL_IDX]
+
+            # read_record_stream(binfile, ele_table + ptr,
+            read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+                               <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
+
+            # rotate the first four nodal results
+            if as_global:
+                euler_rotate(arr, tmpbuffer, nitem)
+
+    return 0
+
+
+cdef inline void euler_rotate(float_or_double *arr,
+                              float_or_double [64] eulerangles, int nitem) nogil:
     """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
 
     Acts on rows 0 - 3 relative to row
@@ -477,78 +526,27 @@ cdef inline void euler_rotate_gen(float_or_double *arr,
         arr[i*nitem + 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
 
 
-# 
-cdef inline void euler_rotate_legacy(double [:, ::1] ele_data_arr,
-                                     double [3] eulerangles, int row) nogil:
-    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in
-    eulerangles
-
-    Acts on rows 0 - 3 relative to row
-
-    Specific to shell181 elements
-
-    # used sympy to generate these equations
-    tensor = np.matrix([[s_xx, s_xy, s_xz], 
-                        [s_xy, s_yy, s_yz], 
-                        [s_xz, s_yz, s_zz]])
-
-    # always zero for shell elements...
-    s_xz = 0
-    s_zz = 0
-    s_yz = 0
-
-    from sympy import Matrix, symbols
-
-    c1, c2, c3, s1, s2, s3, s_xx, s_yy, s_xy = symbols('c1 c2 c3 s1 s2 s3 s_xx s_yy s_xy')
-    tensor = np.matrix([[s_xx, s_xy, 0], [s_xy, s_yy, 0], [0, 0, 0]])
-    
-
-    R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
-                [-s1*c2, c1*c2, s2],
-                [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
-
-    ans = R.T*tensor*R
-    """    
-    cdef double c1 = cos(DEG2RAD*eulerangles[0])
-    cdef double c2 = cos(DEG2RAD*eulerangles[1])
-    cdef double c3 = cos(DEG2RAD*eulerangles[2])
-
-    cdef double s1 = sin(DEG2RAD*eulerangles[0])
-    cdef double s2 = sin(DEG2RAD*eulerangles[1])
-    cdef double s3 = sin(DEG2RAD*eulerangles[2])
-
-    cdef double s_xx, s_xy, s_yy
-
-    cdef int i, c
-    for i in range(4):
-        c = i + row
-
-        # grab the element component stresses
-        s_xx = ele_data_arr[c, 0]
-        s_yy = ele_data_arr[c, 1]
-        s_xy = ele_data_arr[c, 3]
-
-        # the rest are zero (no out of plane stress)
-        ele_data_arr[c, 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
-        ele_data_arr[c, 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1)) + (c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1))*(c1*s2*s3 + c3*s1)
-        ele_data_arr[c, 2] = -c2*s3*(-c2*s3*s_xx + s2*s_xy) + s2*(-c2*s3*s_xy + s2*s_yy)
-        ele_data_arr[c, 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
-        ele_data_arr[c, 4] = -c2*s3*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1))
-        ele_data_arr[c, 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
-
-
-def read_nodal_values(filename, uint8 [::1] celltypes,
-                      int64_t [::1] ele_ind_table,
-                      int64_t [::1] offsets, int64_t [::1] cells,
-                      int nitems,
-                      int npoints,
-                      int [::1] nodstr, int [::1] etype,
-                      int [::1] element_type,
-                      int result_index):
+def read_nodal_values_adv(filename, uint8 [::1] celltypes,
+                          int64_t [::1] ele_ind_table,
+                          int64_t [::1] offsets, int64_t [::1] cells,
+                          int nitems,
+                          int npoints,
+                          int [::1] nodstr, int [::1] etype,
+                          int [::1] element_type,
+                          int result_index,
+                          float_or_double [::1] dtype_arr,
+                          int dtype):
     """Read nodal results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray
         Array of ANSYS element types.
+
+    dtype_arr : np.ndarray
+        Set the type of this to control the C side of type setting.
+
+    dtype : int
+        Set the type of this to control the numpy side of type
+        setting.  0 for float32, 1 for float64.
 
     result_index : int
         EMS - 0 : misc. data
@@ -587,10 +585,20 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
 
     # point data
-    cdef float [:, ::1] data = np.zeros((npoints, nitems), np.float32)
+    cdef float_or_double [:, ::1] data
+
+    if dtype:
+        data = np.zeros((npoints, nitems), np.float64)
+    else:
+        data = np.zeros((npoints, nitems), np.float32)
 
     # temp buffer to hold data read from element
-    cdef float [:, ::1] bufferdata = np.zeros((20, nitems), np.float32)
+    cdef float_or_double [:, ::1] bufferdata
+
+    if dtype:
+        bufferdata = np.zeros((20, nitems), np.float64)
+    else:
+        bufferdata = np.zeros((20, nitems), np.float32)
 
     cdef int64_t ele_table, nnode_elem
     cdef int ptr_result, skip
@@ -626,137 +634,6 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                 read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
         elif celltype == VTK_WEDGE:
             read_wedge(cells, offset, ncount, data, bufferdata, nitems)
-
-    return np.asarray(data), np.asarray(ncount)
-
-
-def read_nodal_values_legacy(filename, uint8 [::1] celltypes,
-                             int64_t [::1] ele_ind_table,
-                             int64_t [::1] offsets, int64_t [::1] cells,
-                             int nitems,
-                             int npoints,
-                             int [::1] nodstr, int [::1] etype,
-                             int [::1] element_type,
-                             int result_index):
-    """Read element results from ANSYS directly into a numpy array
-
-    element_type : int [::1] np.ndarray
-        Array of ANSYS element types.
-
-    result_index : int
-        EMS - 0 : misc. data
-        ENF - 1 : nodal forces
-        ENS - 2 : nodal stresses
-        ENG - 3 : volume and energies
-        EGR - 4 : nodal gradients
-        EEL - 5 : elastic strains
-        EPL - 6 : plastic strains
-        ECR - 7 : creep strains
-        ETH - 8 : thermal strains
-        EUL - 9 : euler angles
-        EFX - 10 : nodal fluxes
-        ELF - 11 : local forces
-        EMN - 12 : misc. non-sum values
-        ECD - 13 : element current densities
-        ENL - 14 : nodal nonlinear data
-        EHC - 15 : calculated heat
-        EPT - 16 : element temperatures
-        ESF - 17 : element surface stresses
-        EDI - 18 : diffusion strains
-        ETB - 19 : ETABLE items(post1 only
-        ECT - 20 : contact data
-        EXY - 21 : integration point locations
-        EBA - 22 : back stresses
-        ESV - 23 : state variables
-        MNL - 24 : material nonlinear record
-
-    Returns
-    -------
-
-    """
-    cdef int64_t i, j, k, ind, nread, offset
-    cdef int64_t ncells = ele_ind_table.size
-
-    cdef FILE* cfile
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cfile = fopen(c_filename, 'rb')
-
-    cdef int [::1] ncount = np.zeros(npoints, ctypes.c_int32)
-
-    # point data
-    cdef double [:, ::1] data = np.zeros((npoints, nitems), np.double)
-
-    # temp buffer to hold data read from element
-    cdef double [:, ::1] bufferdata = np.zeros((20, nitems), np.double)
-    cdef double [3] eulerangles
-
-    cdef int64_t ele_table, nnode_elem
-    cdef int ptr_result, ptrEUL
-    cdef int64_t c = 0
-    cdef uint8 celltype
-    for i in range(ncells):
-
-        # skip if not valid type
-        # if not validmask[i]:
-            # continue
-        
-        # get location of element data
-        ele_table = ele_ind_table[i]
-        fseek(cfile, (ele_table + result_index)*4, SEEK_SET)
-        fread(&ptr_result, sizeof(int), 1, cfile)
-
-        # Get the nodes in the element
-        celltype = celltypes[i]
-        offset = offsets[i] + 1
-        
-        nnode_elem = nodstr[etype[i]]
-
-        # skip this element
-        if ptr_result == 0:  # if zero, ignore this element
-            continue
-        elif ptr_result < 0:  # if negative, all values are -1
-            for j in range(nnode_elem):
-                for k in range(nitems):
-                    bufferdata[j, k] = 0
-        else:
-            fseek(cfile, (ele_table + ptr_result)*4, SEEK_SET)
-
-            # replace with new read sparse...
-            fread(&bufferdata[0, 0], sizeof(double), nnode_elem*nitems, cfile)
-
-            #### this will undoubtedly need to be generalized ####
-            # element euler angle pointer
-            if element_type[i] == 181:
-                fseek(cfile, (ele_table + PTR_EUL_IDX)*4, SEEK_SET)
-                fread(&ptrEUL, sizeof(int), 1, cfile)
-
-                # only read the first three euler angles (thxy, thyz, thzx)
-                fseek(cfile, (ele_table + ptrEUL)*4, SEEK_SET)
-                fread(&eulerangles, sizeof(double), 3, cfile)
-
-                # rotate the first four nodal results
-                euler_rotate_legacy(bufferdata, eulerangles, c)
-
-        if celltype == VTK_LINE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, 2)
-        elif celltype == VTK_TRIANGLE:  # untested
-            read_element(cells, offset, ncount, data, bufferdata, nitems, 3)
-        elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
-        elif celltype == VTK_HEXAHEDRON:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, 8)
-        elif celltype == VTK_PYRAMID:
-            read_element(cells, offset, ncount, data, bufferdata, nitems, 5)
-        elif celltype == VTK_TETRA:  # dependent on element type
-            if nodstr[etype[i]] == 4:
-                read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
-            else:
-                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
-        elif celltype == VTK_WEDGE:
-            read_wedge(cells, offset, ncount, data, bufferdata, nitems)
-
-    fclose(cfile)
 
     return np.asarray(data), np.asarray(ncount)
 
@@ -868,13 +745,6 @@ def read_array(filename, int ptr, int nterm, int neqn, int [::1] const):
     
     data_diag : numpy double array
         Data belonging to the diag entries
-    
-    
-    Notes
-    -----
-    Function signature    
-    ReadArray(filename, int ptrSTF, int nread, int nterm, int neqn,
-              int [::1] const)
     """
 
     cdef int i, j, k, ind
@@ -885,24 +755,24 @@ def read_array(filename, int ptr, int nterm, int neqn, int [::1] const):
 
     cdef char * p = buf # python to c character array pointer
     cdef int loc = 0 # location long buffer
-    
+
     # Number of terms is the number of terms stored in the upper triangle
     cdef int [::1] krow = np.empty(nterm, np.int32)
     cdef int [::1] kcol = np.empty(nterm, np.int32)
     cdef double [::1] kdata = np.empty(nterm)
-    
+
     cdef int [::1] kdiag = np.empty(neqn, np.int32)
     cdef double [::1] kdata_diag = np.empty(neqn)
-    
+
     cdef int c = 0 # index counter
     cdef int d = 0 # data counter
     cdef int c_diag = 0 # diag counter
     cdef int row, col, nitems, intval
     cdef double val
-    
+
     for i in range(neqn):
         col = i
-        
+
         # number of items to read
         nitems = get_int(&p[loc]); loc += 4
         loc += 4
@@ -930,17 +800,16 @@ def read_array(filename, int ptr, int nterm, int neqn, int [::1] const):
 
         # seek past end of data
         loc += 4
-                    
+
     return np.asarray(krow)[:c], np.asarray(kcol)[:c], np.asarray(kdata)[:c]
 
 
 def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
-    """
-    Reads in full file details required for the assembly of the mass and 
-    stiffness matrices.
+    """    Reads in full file details required for the assembly of the
+    mass and stiffness matrices.
 
-    The reference arrays are sorted by default, though this increases the
-    bandwidth of the mass and stiffness matrices.
+    The reference arrays are sorted by default, though this increases
+    the bandwidth of the mass and stiffness matrices.
 
     Parameters
     ----------
@@ -965,10 +834,10 @@ def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
     cdef int i, j, ind
 
     # create sorting array
-    cdef int nNodes = ndof.size
-    cdef int [::1] cumdof = np.empty(nNodes, np.int32)
+    cdef int nnodes = ndof.size
+    cdef int [::1] cumdof = np.empty(nnodes, np.int32)
     cdef int csum = 0
-    for i in range(nNodes):
+    for i in range(nnodes):
         cumdof[i] = csum
         csum += ndof[i]
         
@@ -977,7 +846,7 @@ def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
     cdef int [::1] dref = np.empty(neqn, np.int32)
     cdef int c = 0
     cdef int val
-    for i in range(nNodes):
+    for i in range(nnodes):
         val = neqv[i]
         for j in range(ndof[i]):
             nref[c] = val
@@ -986,15 +855,15 @@ def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
 
     # sort nodal equivalance array
     cdef int [::1] sidx = np.argsort(neqv).astype(np.int32)
-    cdef int [::1] ndof_sort = np.empty(nNodes, np.int32)
-    for i in range(nNodes):
+    cdef int [::1] ndof_sort = np.empty(nnodes, np.int32)
+    for i in range(nnodes):
         ndof_sort[i] = ndof[sidx[i]]
 
     cdef int d = 0
     # create an index array.  this tells the array readers where
     # to place each row and col when it's sorted
     cdef int [::1] index_arr = np.empty(neqn, np.int32)
-    for i in range(nNodes):
+    for i in range(nnodes):
         ind = sidx[i]
         c = cumdof[ind]
         for j in range(ndof[i]):
@@ -1014,8 +883,7 @@ def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
 
 
 def tensor_arbitrary(double [:, ::1] stress, double [:, :] trans):
-    """
-    Rotates a 3D stress tensor by theta about the Z axis
+    """Rotates a 3D stress tensor by theta about the Z axis
 
     Notes:
     -----
