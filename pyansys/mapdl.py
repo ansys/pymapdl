@@ -288,9 +288,8 @@ def save_ansys_path(exe_loc=''):
 
 
 class Mapdl(_MapdlCommands, _DeprecCommands):
-    """
-    This class opens ANSYS in the background and allows commands to be
-    passed to a persistent session.
+    """This class opens ANSYS in the background and allows commands to
+    be passed to a persistent session.
 
     Parameters
     ----------
@@ -360,7 +359,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     Examples
     --------
     >>> import pyansys
-    >>> ansys = pyansys.ANSYS()
+    >>> mapdl = pyansys.Mapdl()
     """
 
     def __init__(self, exec_file=None, run_location=None,
@@ -970,18 +969,18 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         """Clean up when complete"""
         try:
             self.exit()
-        except exception as e:
-            log.error('exit: %s', str(e))
+        except Exception as e:
+            self.log.error('exit: %s', str(e))
 
         try:
             self.kill()
-        except exception as e:
-            log.error('kill: %s', str(e))
+        except Exception as e:
+            self.log.error('kill: %s', str(e))
 
         try:
             self.close_apdl_log()
-        except exception as e:
-            log.error('close_apdl_log: %s', str(e))
+        except Exception as e:
+            self.log.error('Close_apdl_log: %s', str(e))
 
     def Exit(self):
         msg = DeprecationWarning('\n"Exit" decpreciated.  \n' +

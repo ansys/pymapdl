@@ -250,8 +250,9 @@ If you have ``scipy`` installed, you can solve the eigensystem for its natural f
 
     # Solve
     w, v = linalg.eigsh(k, k=20, M=m, sigma=10000)
+
     # System natural frequencies
-    f = (np.real(w))**0.5/(2*np.pi)
+    f = np.real(w)**0.5/(2*np.pi)
     
     print('First four natural frequencies')
     for i in range(4):
