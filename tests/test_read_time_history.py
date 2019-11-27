@@ -11,7 +11,6 @@ TESTFILE = os.path.join(TESTFILES_PATH, 'time_hist-nsl_acc_vel-component.rst')
 RESULT = pyansys.read_binary(TESTFILE)
 
 
-
 @pytest.mark.parametrize("time_hist_key", ['NSL', 'VEL', 'ACC'])
 def test_time_history(time_hist_key):
     nnum, values = RESULT.nodal_time_history(time_hist_key)

@@ -13,7 +13,7 @@ steps:
 - script: |
     pip install pytest pytest-azurepipelines
     cd tests
-    python -m pytest
+    python -m pytest -v
     cd ..
   displayName: 'MacOS Testing'
   condition: eq(variables['Agent.OS'], 'Darwin')
@@ -22,7 +22,7 @@ steps:
     pip install pytest pytest-azurepipelines
     ls
     cd tests
-    python -m pytest
+    python -m pytest -v
     cd ..
   displayName: 'Windows Testing'
   condition: ne(variables['Agent.OS'], 'Darwin')

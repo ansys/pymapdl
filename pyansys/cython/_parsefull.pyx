@@ -9,7 +9,7 @@ cdef extern from "parsefull.h":
                    int*, char*, int*, int);
 
 
-def ReturnHeader(filename):
+def return_header(filename):
     """ Just reads in the header """
     # Convert python string to char array
     cdef bytes py_bytes = filename.encode()
@@ -22,9 +22,8 @@ def ReturnHeader(filename):
     return np.asarray(fheader)
     
     
-def Load_KM(filename, is_sorted):
-    """
-    Reads an ANSYS full file and returns indices to construct symmetric, real, 
+def load_km(filename, is_sorted):
+    """Reads an ANSYS full file and returns indices to construct symmetric, real, 
     and sparse mass and stiffness matrices
     """
     # convert to int

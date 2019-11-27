@@ -9,7 +9,7 @@ from pyvista.core.common import axis_rotation
 import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
-from pyansys import (_parsefull, _binary_reader, _parser)
+from pyansys import _binary_reader, _parser
 from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
 
 
@@ -291,7 +291,7 @@ class CyclicResult(ResultFile):
             if tensor:
                 _binary_reader.tensor_arbitrary(full_result[i], trans)
             else:
-                _binary_reader.affline_transform_double(full_result[i], trans)
+                _binary_reader.affline_transform(full_result[i], trans)
 
         return full_result
 
@@ -569,9 +569,9 @@ class CyclicResult(ResultFile):
             stress_r = np.imag(stress).astype(np.float32)
             stress = np.real(stress).astype(np.float32)
 
-            pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
+            pstress, isnan = _binary_reader.compute_principal_stress(stress)
             pstress[isnan] = np.nan
-            pstress_r, isnan = _binary_reader.ComputePrincipalStress(stress_r)
+            pstress_r, isnan = _binary_reader.compute_principal_stress(stress_r)
             pstress_r[isnan] = np.nan
 
             return nnum, pstress + 1j*pstress_r
@@ -583,7 +583,7 @@ class CyclicResult(ResultFile):
             # compute principle stress
             pstress = np.empty((self.n_sector, stress.shape[1], 5), np.float32)
             for i in range(stress.shape[0]):
-                pstress[i], isnan = _binary_reader.ComputePrincipalStress(stress[i])
+                pstress[i], isnan = _binary_reader.compute_principal_stress(stress[i])
                 pstress[i, isnan] = np.nan
             return nnum, pstress
 
@@ -591,7 +591,7 @@ class CyclicResult(ResultFile):
             if stress.dtype != np.float32:
                 stress = stress.astype(np.float32)
 
-            pstress, isnan = _binary_reader.ComputePrincipalStress(stress)
+            pstress, isnan = _binary_reader.compute_principal_stress(stress)
             pstress[isnan] = np.nan
             return nnum, pstress
 

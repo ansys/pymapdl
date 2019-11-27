@@ -38,3 +38,6 @@ tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
 *,cover
+
+# ignore certain result files
+tests/testfiles/is16.rst
