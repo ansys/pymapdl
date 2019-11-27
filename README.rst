@@ -266,6 +266,15 @@ If you have ``scipy`` installed, you can solve the eigensystem for its natural f
     6919.399 Hz
 
 
+Additional Tools
+----------------
+There are additional tools created by @natter1 at `pyansysTools <https://github.com/natter1/pyansysTools.git>`_ which include the following features:
+
+ - Inline class, implementing the ANSYS inline functions
+ - Macros class, with macros for repeating tasks (right now, it's only one macro for creating symmetric contact pairs)
+ - The geo2d class, to easily create 2d geometries
+
+
 License and Acknowledgments
 ---------------------------
 ``pyansys`` is licensed under the MIT license.
