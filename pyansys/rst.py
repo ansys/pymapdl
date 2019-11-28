@@ -1119,13 +1119,12 @@ class ResultFile(AnsysBinary):
     def _element_solution_header(self, rnum):
         """ Get element solution header information """
         # Get the header information from the header dictionary
-        # endian = self.resultheader['endian']
+
         rpointers = self.resultheader['rpointers']
-        nelm = self.resultheader['nelm']
         nodstr = self.element_table['nodstr']
         etype = self.geometry['etype']
 
-        # read result solution header 
+        # read result solution header
         record = self.read_record(rpointers[rnum])
         solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
 

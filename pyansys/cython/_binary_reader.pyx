@@ -54,9 +54,9 @@ cdef extern from "numpy/npy_math.h" nogil:
     bint npy_isnan(double x)
 
 cdef extern from 'binary_reader.h' nogil:
-    void read_nodes(const char*, int, int, int*, double*)
-    void* read_record(const char*, int, int*, int*, int*, int*)
-    void read_record_stream(ifstream*, int, void*, int*, int*, int*)
+    void read_nodes(const char*, int64_t, int, int*, double*)
+    void* read_record(const char*, int64_t, int*, int*, int*, int*)
+    void read_record_stream(ifstream*, int64_t, void*, int*, int*, int*)
 
 
 # VTK numbering for vtk cells
@@ -188,7 +188,7 @@ def load_nodes(filename, int ptr_loc, int nnod, double [:, ::1] nloc,
     read_nodes(c_filename, ptr_loc, nnod, &nnum[0], &nloc[0, 0])
 
 
-def c_read_record(filename, int ptr, int return_bufsize=0):
+def c_read_record(filename, int64_t ptr, int return_bufsize=0):
     """Read an ANSYS record and return a numpy array"""
     cdef bytes py_bytes = filename.encode()
     cdef char* c_filename = py_bytes
@@ -236,7 +236,7 @@ cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
     return ndarray
 
 
-def load_elements(filename, int loc, int nelem, int64_t [::1] e_disp_table,
+def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
                    int [::1] rcon):
     """The following is stored for each element
@@ -263,7 +263,8 @@ def load_elements(filename, int loc, int nelem, int64_t [::1] e_disp_table,
     cdef int* element
     cdef short* s_element
 
-    cdef int val, nread, elem_loc
+    cdef int val, nread
+    cdef int64_t elem_loc
     for i in range(nelem):
         # load element
         elem_loc = loc + e_disp_table[i]
@@ -367,12 +368,13 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
         c += nnode_elem
 
 
-cdef inline int read_element_result_float(ifstream *binfile, int ele_table,
+cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, float *arr,
                                     int element_type, int as_global=1):
     """Populate array with results from a single element"""
-    cdef int i, j, k, c, ptr
+    cdef int i, j, k, c,
+    cdef int64_t ptr
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float [64] tmpbuffer  # for euler results
