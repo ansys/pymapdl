@@ -4,6 +4,11 @@
 #include <fstream>
 #include <exception>
 
+// necessary for ubuntu build on azure
+#ifdef __linux__
+  #include <stdint.h>
+#endif
+
 using namespace std;
 
 #define	MEM_ZERO(where,size)	memset((where),'\0',(size))
@@ -11,7 +16,6 @@ using namespace std;
 #define	MEMCOPY(from,to,n_items,type) MEM_COPY((char *)(from),(char *)(to),(unsigned)(n_items)*sizeof(type))
 #define IS_ON(e,p)   ((e) & (1u << (p)))
 
-// int64_t
 
 static int NbBitsOn( int iVal)
 {
