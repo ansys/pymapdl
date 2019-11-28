@@ -11,6 +11,7 @@ using namespace std;
 #define	MEMCOPY(from,to,n_items,type) MEM_COPY((char *)(from),(char *)(to),(unsigned)(n_items)*sizeof(type))
 #define IS_ON(e,p)   ((e) & (1u << (p)))
 
+// int64_t
 
 static int NbBitsOn( int iVal)
 {
@@ -103,7 +104,8 @@ int read_header(ifstream* binFile, int* bsparse_flag, int* wsparse_flag,
 }
 
 
-void read_nodes(const char* filename, int ptrLOC, int nrec, int *nnum, double *nodes){
+void read_nodes(const char* filename, int64_t ptrLOC, int nrec, int *nnum,
+		double *nodes){
 
   // max buf size
   char *raw = new char[68*4];
@@ -455,7 +457,7 @@ char* ReadWindowedSparseBufferShort(int *raw, int *size, short *vec){
 
 
 // read a record and return the pointer to the array
-void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
+void* read_record(const char* filename, int64_t ptr, int* prec_flag, int* type_flag,
 		  int* size, int* out_bufsize){
 
   int bsparse_flag, wsparse_flag, zlib_flag;
@@ -509,7 +511,7 @@ void* read_record(const char* filename, int ptr, int* prec_flag, int* type_flag,
 
 // populate arr with a record
 // This function differs from read_record as it must be supplied with ``arr``, which must be sized properly to support the data coming from the file.
-void read_record_stream(ifstream* file, int loc, void* arr, int* prec_flag,
+void read_record_stream(ifstream* file, int64_t loc, void* arr, int* prec_flag,
 			 int* type_flag, int* size){
 
   // seek to data location if supplied with a pointer
