@@ -450,6 +450,11 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> result = pyansys.download_verification_result(33)
         >>> result.plot_nodal_solution(0)
+
+        Plot with a white background and showing edges
+
+        >>> result.plot_nodal_solution(0, background='w', show_edges=True)
+
         """
         # Load result from file
         rnum = self.parse_step_substep(rnum)
@@ -1537,7 +1542,6 @@ class ResultFile(AnsysBinary):
         else:
             rng = kwargs.pop('rng', None)
 
-        # add_text = kwargs.pop('add_text', True)
         cmap = kwargs.pop('cmap', 'jet')
         smooth_shading = kwargs.pop('smooth_shading', True)
         window_size = kwargs.pop('window_size', [1024, 768])
@@ -1551,10 +1555,6 @@ class ResultFile(AnsysBinary):
         interactive = kwargs.pop('interactive', True)
         stitle = kwargs.pop('stitle', None)
 
-        # make cmap match default ansys
-        # if cmap is None and flip_scalars is None:
-        #     flip_scalars = False
-
         # coordinate transformation for cyclic replication
         cs_cord = self.resultheader['csCord']
         if cs_cord > 1:
@@ -1567,10 +1567,12 @@ class ResultFile(AnsysBinary):
 
         plotter = pv.Plotter(off_screen=off_screen, notebook=notebook)
 
+        # set axes
         if kwargs.pop('show_axes', True):
             plotter.add_axes()
-        if kwargs.pop('background', None):
-            plotter.background_color = background
+
+        # set background
+        plotter.background_color = kwargs.pop('background', None)
 
         n_sector = 1
         if np.any(scalars):
@@ -1858,7 +1860,7 @@ class ResultFile(AnsysBinary):
             raise Exception('Input must be either an int or a list')
 
     def __repr__(self):
-        rst_info = []
+        rst_info = ['ANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
             value = self.resultheader[key]

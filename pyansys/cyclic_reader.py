@@ -596,13 +596,12 @@ class CyclicResult(ResultFile):
             return nnum, pstress
 
     def plot_nodal_solution(self, rnum, comp='norm', label='',
-                            cmap=None, flip_scalars=None, cpos=None,
+                            flip_scalars=None, cpos=None,
                             screenshot=None, off_screen=None,
                             full_rotor=True, phase=0,
                             node_components=None, sel_type_all=True,
                             **kwargs):
-        """
-        Plots a nodal result.
+        """Plots a nodal result.
 
         Parameters
         ----------
@@ -618,9 +617,6 @@ class CyclicResult(ResultFile):
 
         label : str, optional
             Annotation string to add to scalar bar in plot.
-
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
             Flip direction of cmap.
@@ -661,8 +657,6 @@ class CyclicResult(ResultFile):
         if not full_rotor:
             return super(CyclicResult, self).plot_nodal_solution(rnum,
                                                                  comp,
-                                                                 # label,
-                                                                 cmap=cmap,
                                                                  flip_scalars=flip_scalars,
                                                                  cpos=cpos,
                                                                  screenshot=screenshot,
@@ -710,11 +704,11 @@ class CyclicResult(ResultFile):
                                                       sel_type_all)
             scalars = scalars[:, ind]
 
-        return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
+        return self.plot_point_scalars(scalars, rnum, stitle, flip_scalars,
                                        screenshot, cpos, off_screen, grid,
                                        **kwargs)
 
-    def plot_nodal_stress(self, rnum, stype, label='', cmap=None,
+    def plot_nodal_stress(self, rnum, stype, label='',
                           flip_scalars=None, cpos=None, screenshot=None,
                           off_screen=None, full_rotor=True, phase=0,
                           node_components=None, sel_type_all=True,
@@ -733,9 +727,6 @@ class CyclicResult(ResultFile):
 
         label : str, optional
             Annotation string to add to scalar bar in plot.
-
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.
 
         flip_scalars : bool, optional
             Flip direction of cmap.
@@ -795,14 +786,13 @@ class CyclicResult(ResultFile):
         # scalars[np.isnan(scalars)] = 0
         stitle = 'Cyclic Rotor\nNodal Stress\n%s\n' % stype.capitalize()
         if full_rotor:
-            return self.plot_point_scalars(scalars, rnum, stitle, cmap, flip_scalars,
+            return self.plot_point_scalars(scalars, rnum, stitle, flip_scalars,
                                            screenshot, cpos, off_screen, grid,
                                            **kwargs)
 
         return super(CyclicResult, self)._plot_point_scalars(scalars[0],
                                                              rnum,
                                                              stitle=stitle,
-                                                             cmap=cmap,
                                                              flip_scalars=flip_scalars,
                                                              screenshot=screenshot,
                                                              cpos=cpos,
@@ -811,7 +801,7 @@ class CyclicResult(ResultFile):
                                                              **kwargs)
 
 
-    def plot_principal_nodal_stress(self, rnum, stype, cmap=None,
+    def plot_principal_nodal_stress(self, rnum, stype,
                                     flip_scalars=None, cpos=None,
                                     screenshot=None, off_screen=None,
                                     full_rotor=True, phase=0,
@@ -833,11 +823,6 @@ class CyclicResult(ResultFile):
             Stress type must be a string from the following list:
 
             ['1', '2', '3', 'INT', 'EQV']
-
-        cmap : str, optional
-           Cmap string.  See available matplotlib cmaps.  Only
-           applicable for when displaying scalars.  Defaults None
-           (rainbow).  Requires matplotlib.
 
         flip_scalars : bool, optional
             Flip direction of cmap.
@@ -908,7 +893,7 @@ class CyclicResult(ResultFile):
                                                       sel_type_all, self.mas_grid)
             scalars = scalars[ind]
 
-        return self.plot_point_scalars(scalars, rnum, stitle, cmap,
+        return self.plot_point_scalars(scalars, rnum, stitle,
                                        flip_scalars, screenshot, cpos,
                                        off_screen, grid, **kwargs)
 
@@ -1069,7 +1054,7 @@ class CyclicResult(ResultFile):
 
         return full_rotor
 
-    def plot_point_scalars(self, scalars, rnum=None, stitle='', cmap=None,
+    def plot_point_scalars(self, scalars, rnum=None, stitle='',
                            flip_scalars=None, screenshot=None, cpos=None,
                            off_screen=None, grid=None, add_text=True, **kwargs):
         """
@@ -1086,10 +1071,6 @@ class CyclicResult(ResultFile):
 
         stitle : str, optional
             Title of the scalar bar.
-
-        cmap : str, optional
-            See matplotlib cmaps:
-            matplotlib.org/examples/color/cmaps_reference.html
 
         flip_scalars : bool, optional
             Reverses the direction of the cmap.
@@ -1124,22 +1105,17 @@ class CyclicResult(ResultFile):
         if grid is None:
             grid = self.mas_grid
 
-        # make cmap match default ansys
-        if cmap is None and flip_scalars is None:
-            flip_scalars = False
-
         window_size = kwargs.pop('window_size', None)
         full_screen = kwargs.pop('full_screen', False)
+        cmap = kwargs.pop('cmap', 'jet')
 
         # Plot off screen when not interactive
         plotter = pv.Plotter(off_screen=off_screen)
         if 'show_axes' in kwargs:
             plotter.add_axes()
-        # plotter.add_axes_at_origin()
-        # breakpoint()
 
-        if 'background' in kwargs:
-            plotter.background_color = kwargs['background']
+        # set background
+        plotter.background_color = kwargs.pop('background', None)
 
         rng = [np.nanmin(scalars), np.nanmax(scalars)]
 
