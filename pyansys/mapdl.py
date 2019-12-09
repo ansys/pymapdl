@@ -516,7 +516,11 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.process.delaybeforesend = None
         self.log.debug('Waiting for ansys to start...')
 
-        index = self.process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
+        try:
+            index = self.process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
+        except:  # capture failure
+            raise Exception(self.process.before.decode('utf-8'))
+
         if index:
             self.process.sendline('')  # enter to continue
             self.process.expect('BEGIN:', timeout=timeout)
