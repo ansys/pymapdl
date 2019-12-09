@@ -20,7 +20,7 @@ import subprocess
 from threading import Thread
 import weakref
 import random
-from shutil import copyfile
+from shutil import copyfile, rmtree
 
 import appdirs
 import pexpect
@@ -1058,6 +1058,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         # command must include "aas" flag to start MAPDL server
         command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
 
+        # remove the broadcast file if it exists:
+        if os.path.isfile(self.broadcast_file):
+            os.remove(self.broadcast_file)
+
         # add run location to command
         self.log.debug('Spawning shell process with: "%s"' % command)
         self.log.debug('At "%s"' % self.path)
@@ -1120,16 +1124,16 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log.debug('Key %s' % key)
 
     class _non_interactive:
-        """ Allows user to enter commands that need to run
+        """Allows user to enter commands that need to run
         non-interactively.
 
         Examples
         --------
         To use an non-interactive command like *VWRITE, use:
 
-        with ansys.non_interactive:
-            ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-            ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>> with ansys.non_interactive:
+                ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+                ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
 
         """
         def __init__(self, parent):
@@ -1142,9 +1146,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.parent._flush_stored()
 
     def _flush_stored(self):
-        """
-        Writes stored commands to an input file and runs the input file.
-        Used with non_interactive.
+        """Writes stored commands to an input file and runs the input
+        file.  Used with non_interactive.
         """
         self.log.debug('Flushing stored commands')
         tmp_out = os.path.join(appdirs.user_data_dir('pyansys'),
@@ -1181,10 +1184,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         else:
             self.log.info(self.response)
         
-    def get_float(self, entity="", entnum="", item1="", it1num="", item2="",
-            it2num="", **kwargs):
-        """
-        Used to get the value of a float-parameter from APDL
+    def get_float(self, entity="", entnum="", item1="", it1num="",
+            item2="", it2num="", **kwargs):
+        """Used to get the value of a float-parameter from APDL
         Take note, that internally an apdl parameter __floatparameter__ is
         created/overwritten.
         """
@@ -1193,8 +1195,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return float(re.search(r"(?<=VALUE\=).*", line).group(0))
 
     def read_float_parameter(self, parameter_name):
-        """
-        Read out the value of a ANSYS parameter to use in python.
+        """Read out the value of a ANSYS parameter to use in python.
         Can raise TypeError.
 
         Parameters
@@ -1206,7 +1207,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         -------
         float
             Value of ANSYS parameter.
-
         """
         try:
             line = self.run(parameter_name + " = " + parameter_name)
@@ -1216,13 +1216,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return float(re.search(r"(?<=\=).*", line).group(0))
 
     def read_float_from_inline_function(self, function_str):
-        """
-        Use a APDL inline function to get a float value from ANSYS.
+        """Use a APDL inline function to get a float value from ANSYS.
         Take note, that internally an APDL parameter __floatparameter__ is
         created/overwritten.
-        Example:
-            inline_function = "node({},{},{})".format(x, y, z)
-            node = apdl.read_float_from_inline_function(inline_function)
 
         Parameters
         ----------
@@ -1234,23 +1230,28 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         float
             Value returned by inline function..
 
+        Examples
+        --------
+        >>> inline_function = "node({},{},{})".format(x, y, z)
+        >>> node = apdl.read_float_from_inline_function(inline_function)
         """
         self.run("__floatparameter__="+function_str)
         return self.read_float_parameter("__floatparameter__")
 
     def open_gui(self, include_result=True):
-        """ Saves existing database and opens up APDL GUI
+        """Saves existing database and opens up APDL GUI
 
         Parameters
         ----------
         include_result : bool, optional
             Allow the result file to be post processed in the GUI.
-
         """
+        # specify a path for the temporary database
         temp_dir = tempfile.gettempdir()
-        save_path = os.path.join(temp_dir, 'ansys')
-        if not os.path.isdir(save_path):
-            os.mkdir(save_path)
+        save_path = os.path.join(temp_dir, 'ansys_tmp')
+        if os.path.isdir(save_path):
+            rmtree(save_path)
+        os.mkdir(save_path)
 
         name = 'tmp'
         tmp_database = os.path.join(save_path, '%s.db' % name)
@@ -1259,9 +1260,13 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         # get the state, close, and finish
         prior_processor = self.processor
-        self.Finish()
-        self.Save(tmp_database)
+        self.finish()
+        self.save(tmp_database)
         self.exit(close_log=False)
+
+        # # verify lock file is gone
+        # while os.path.isfile(self.lockfile):
+        #     time.sleep(0.1)
 
         # copy result file to temp directory
         if include_result:
@@ -1280,8 +1285,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         with open(other_start_file, 'w') as f:
             f.write('RESUME\n')
 
-        os.system('cd "%s" && "%s" -g -j %s -dir %s' % (save_path, self.exec_file,
-                                                        name, save_path))
+        # issue system command to run ansys in GUI mode
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
 
         # must remove the start file when finished
         os.remove(start_file)
@@ -1336,7 +1341,6 @@ def load_parameters(filename):
 
     arrays : dict
         Dictionary of arrays
-
     """
     parameters = {}
     arrays = {}
