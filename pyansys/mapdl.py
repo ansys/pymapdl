@@ -1294,6 +1294,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         # issue system command to run ansys in GUI mode
         os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
+        cwd = os.getcwd()  # added code
+        os.chdir(save_path)  # added code
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
+        os.chdir(cwd)  # added code
 
         # must remove the start file when finished
         os.remove(start_file)
