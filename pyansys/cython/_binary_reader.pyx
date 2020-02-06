@@ -40,9 +40,9 @@ cdef extern from "<fstream>" namespace "std" nogil:
           filebuf* rdbuf(filebuf* sb)
 
      cdef cppclass ifstream(istream):
+          # void close()
           ifstream(const char*) except +
           ifstream(const char*, open_mode) except+
-
 
 cdef extern from "<iostream>" namespace "std::ios_base" nogil:
      cdef cppclass open_mode:
@@ -636,6 +636,8 @@ def read_nodal_values_adv(filename, uint8 [::1] celltypes,
                 read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
         elif celltype == VTK_WEDGE:
             read_wedge(cells, offset, ncount, data, bufferdata, nitems)
+
+    del binfile
 
     return np.asarray(data), np.asarray(ncount)
 

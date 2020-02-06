@@ -1,10 +1,8 @@
+import shutil
 import os
 
 import pytest
-try:
-    from pyvista.plotting import running_xserver as system_supports_plotting
-except:
-    from pyvista.plotting import system_supports_plotting
+from pyvista.plotting import system_supports_plotting
 
 import numpy as np
 import pyvista as pv
@@ -16,6 +14,7 @@ try:
     __file__
 except:
     __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_binary_reader.py'
+
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -82,3 +81,9 @@ def test_plot_component():
                                        node_components=components, off_screen=True)
 
 
+def test_file_close(tmpdir):
+    tmpfile = str(tmpdir.mkdir("tmpdir").join('tmp.vtk'))
+    shutil.copy(examples.rstfile, tmpfile)
+    rst = pyansys.read_binary(tmpfile)
+    nnum, stress = rst.nodal_stress(0)
+    os.remove(tmpfile)
