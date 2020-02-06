@@ -9,6 +9,7 @@ This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.
 
 """
+import glob
 import string
 import re
 import os
@@ -172,7 +173,7 @@ ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 ###############################################################################
 
 # test for png file
-png_test = re.compile(r'WRITTEN TO FILE file\d\d\d.png')
+png_test = re.compile(r'WRITTEN TO FILE')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
@@ -796,7 +797,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 self.log.info(response)
 
         if self._interactive_plotting:
-            self.display_plot(full_response)
+            self._display_plot(full_response)
 
         if 'is not a recognized' in full_response:
             if not self.allow_ignore:
@@ -908,7 +909,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 raise Exception(additional_text)
 
         if self._interactive_plotting:
-            self.display_plot('%s\n%s' % (text, additional_text))
+            self._display_plot('%s\n%s' % (text, additional_text))
 
         # return text, additional_text
         if text == additional_text:
@@ -959,22 +960,27 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log.removeHandler(self.fileHandler)
         self.log.info('Removed file handler')
 
-    def display_plot(self, text):
-        """ Check if plot exists based on command output """
+    def _display_plot(self, text):
+        """Display the last generated plot from ANSYS"""        
         png_found = png_test.findall(text)
         if png_found:
             # flush graphics writer
-            self.Show('CLOSE')
-            self.Show('PNG')
-            filename = png_found[0][-11:]
-            fullfile = os.path.join(self.path, filename)
-            if os.path.isfile(fullfile):
-                img = mpimg.imread(fullfile)
-                imgplot = plt.imshow(img)
+            self.show('CLOSE')
+            self.show('PNG')
+
+            # get last filename based on the current jobname
+            filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
+            filenames.sort()
+            filename = filenames[-1]
+            # filename = os.path.join(self.path, filename)
+            if os.path.isfile(filename):
+                img = mpimg.imread(filename)
+                plt.imshow(img)
                 plt.axis('off')
                 plt.show()  # consider in-line plotting
             else:
-                log.error('Unable to find screenshot at %s' % fullfile)
+                self.log.error('Unable to find screenshot at %s' % filename)
+        pass
 
     def __del__(self):
         """Clean up when complete"""
@@ -1190,15 +1196,15 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.log.warning('Unable to read response from flushed commands')
         else:
             self.log.info(self.response)
-        
+
     def get_float(self, entity="", entnum="", item1="", it1num="",
-            item2="", it2num="", **kwargs):
+                  item2="", it2num="", **kwargs):
         """Used to get the value of a float-parameter from APDL
         Take note, that internally an apdl parameter __floatparameter__ is
         created/overwritten.
         """
         line = self.get("__floatparameter__", entity, entnum, item1, it1num,
-            item2, it2num, **kwargs)
+                        item2, it2num, **kwargs)
         return float(re.search(r"(?<=VALUE\=).*", line).group(0))
 
     def read_float_parameter(self, parameter_name):
@@ -1305,14 +1311,17 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         # open up script again when finished
         self._open()
-        self.Resume(tmp_database)
+        self.resume(tmp_database)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
                 self.run('/%s' % prior_processor)
 
     @property
     def jobname(self):
-        """MAPDL job name"""
+        """MAPDL job name.
+
+        This is requested from teh active mapdl instance
+        """
         try:
             self._jobname = self.inquire(func='JOBNAME').split('=')[1].strip()
         except:
