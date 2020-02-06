@@ -180,8 +180,8 @@ Then generate the plot:
 .. code:: python
 
     result.plot_nodal_solution(0, 'x', label='Displacement', cpos=cpos,
-                             screenshot='hexbeam_disp.png',
-                             window_size=[800, 600], interactive=False)
+                               screenshot='hexbeam_disp.png',
+                               window_size=[800, 600], interactive=False)
 
 Stress can be plotted as well using the below code.  The nodal stress is computed in the same manner that ANSYS uses by to determine the stress at each node by averaging the stress evaluated at that node for all attached elements.  For now, only component stresses can be displayed.
 
@@ -271,13 +271,21 @@ Additional Tools
 ----------------
 There are additional tools created by @natter1 at `pyansysTools <https://github.com/natter1/pyansysTools.git>`_ which include the following features:
 
- - Inline class, implementing the ANSYS inline functions
- - Macros class, with macros for repeating tasks (right now, it's only one macro for creating symmetric contact pairs)
- - The geo2d class, to easily create 2d geometries
+ - Inline class: Implementing the ANSYS inline functions
+ - Macros class: Macros for repeating tasks
+ - The geo2d class: Easily create 2d geometries
+
+You can also install `pyansystools` with
+
+```
+pip install pyansystools
+```
 
 
 License and Acknowledgments
 ---------------------------
 ``pyansys`` is licensed under the MIT license.
 
-This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
+This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a Python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
+
+To get a copy of ANSYS, please visit `ANSYS <https://www.ansys.com/>`_
