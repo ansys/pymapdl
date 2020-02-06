@@ -41,12 +41,12 @@ try:
 except:
     MATPLOTLIB_LOADED = False
 
-    
+
 def random_string(stringLength=10):
     """Generate a random string of fixed length """
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
-    
+
 
 def find_ansys():
     """ Searches for ansys path within enviornmental variables """
@@ -360,6 +360,13 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     --------
     >>> import pyansys
     >>> mapdl = pyansys.Mapdl()
+
+    Run MAPDL with the smp switch and specify the location of the
+    ansys binary
+
+    >>> import pyansys
+    >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
+                              additional_switches='-smp')
     """
 
     def __init__(self, exec_file=None, run_location=None,

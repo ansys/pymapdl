@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pytest
 from pyvista.plotting import system_supports_plotting
+from pyvista.plotting.renderer import CameraPosition
 
 import pyansys
 from pyansys.examples import rstfile
@@ -54,24 +55,25 @@ def test_non_cyclic():
 @pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_plot_z_cyc():
     cpos = result_z.plot(off_screen=True)
-    assert isinstance(cpos, list)
+    assert isinstance(cpos, CameraPosition)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_x_cyc():
     cpos = result_x.plot(off_screen=True)
-    assert isinstance(cpos, list)
+    assert isinstance(cpos, CameraPosition)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_component_rotor():
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=False,
-                                 node_components='REFINE', sel_type_all=False,
-                                 off_screen=True)
+                                                node_components='REFINE',
+                                                sel_type_all=False,
+                                                off_screen=True)
 
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=True,
-                                 node_components='REFINE', sel_type_all=False,
-                                 off_screen=True)
+                                                node_components='REFINE',
+                                                sel_type_all=False, off_screen=True)
 
     # result_z.plot_nodal_stress(20, 'Sx', node_components='REFINE',
     #                            sel_type_all=False, off_screen=True)

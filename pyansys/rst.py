@@ -2197,7 +2197,7 @@ class ResultFile(AnsysBinary):
 
     def nodal_elastic_strain(self, rnum):
         """Nodal component elastic strains.  This record contains
-        strains in the order X, Y, Z, XY, YZ, XZ, EQV.  
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.
 
         Elastic strains can be can be nodal values extrapolated from
         the integration points or values at the integration points moved to
