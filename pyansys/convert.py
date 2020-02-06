@@ -8,7 +8,7 @@ NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
 
 
 def is_float(string):
-    """ Returns true when a string can be converted to a float """
+    """Returns true when a string can be converted to a float"""
     try:
         float(string)
         return True
@@ -36,7 +36,7 @@ def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
         Adds a line to the end of the script to exit ANSYS.  Default True.
 
     line_ending : str, optional
-        When None, automatically determined by OS being used.  
+        When None, automatically determined by OS being used.
         Acceptable inputs are:
 
         - \n
@@ -113,7 +113,7 @@ class FileTranslator():
         if exec_file:
             exec_file_parameter = '"%s", ' % exec_file
         else:
-            exec_file_parameter=''
+            exec_file_parameter = ''
         line = 'ansys = pyansys.Mapdl(%sloglevel="%s")%s' % (exec_file_parameter,
                                                              loglevel,
                                                              self.line_ending)
@@ -130,7 +130,7 @@ class FileTranslator():
         self._line_ending = line_ending
 
     def translate_line(self, line):
-        """ Converts a single line from an ANSYS APDL script """
+        """Converts a single line from an ANSYS APDL script """
         self.comment = ''
         line = line.strip()
         line = line.replace('"', "'")
@@ -143,7 +143,7 @@ class FileTranslator():
                 self.comment = line.replace('!', '').strip()
                 self.store_comment()
                 return
-            else: # command and in-line comment
+            else:  # command and in-line comment
                 split_line = line.split('!')
                 line = split_line[0]
                 self.comment = ' '.join(split_line[1:])
@@ -194,7 +194,7 @@ class FileTranslator():
             self.store_run_command(line)
             return
 
-        command = items[0].capitalize().strip()
+        command = items[0].lower().strip()
         parameters = items[1:]
         if not command:
             self.store_empty_line()
@@ -232,9 +232,8 @@ class FileTranslator():
         self.indent = self.indent + '    '
 
     def store_run_command(self, command):
-        """
-        Stores pyansys.ANSYS command that cannot be broken down into a
-        function and parameters.
+        """Stores pyansys.ANSYS command that cannot be broken down
+        into a function and parameters.
         """
         if self._infunction and 'ARG' in command:
             args = []
@@ -251,7 +250,7 @@ class FileTranslator():
 
         elif self.comment:
             line = '%s%s.run("%s")  # %s%s' % (self.indent, self.obj_name, command,
-                                            self.comment, self.line_ending)
+                                               self.comment, self.line_ending)
         else:
             line = '%s%s.run("%s")%s' % (self.indent, self.obj_name, command,
                                          self.line_ending)
@@ -259,16 +258,16 @@ class FileTranslator():
         self.lines.append(line)
 
     def store_comment(self):
-        """ Stores a line containing only a comment """
+        """Stores a line containing only a comment"""
         line = '%s# %s%s' % (self.indent, self.comment, self.line_ending)
         self.lines.append(line)
 
     def store_empty_line(self):
-        """ Stores an empty line """
+        """Stores an empty line"""
         self.lines.append(self.line_ending)
 
     def store_command(self, function, parameters):
-        """ Stores a valid pyansys function with parameters """
+        """Stores a valid pyansys function with parameters"""
         parsed_parameters = []
         for parameter in parameters:
             parameter = parameter.strip()
