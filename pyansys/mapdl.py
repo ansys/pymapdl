@@ -972,7 +972,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
             filenames.sort()
             filename = filenames[-1]
-            # filename = os.path.join(self.path, filename)
+
             if os.path.isfile(filename):
                 img = mpimg.imread(filename)
                 plt.imshow(img)
