@@ -46,7 +46,6 @@ class TestCyclicResultReader(object):
                                   interactive_plotting=False,
                                   prefer_pexpect=True)
 
-
         # copy result file to ansys's temporary path
         copyfile(result_file, os.path.join(ansys.path, '%s.rst' % rver))
 
@@ -55,7 +54,7 @@ class TestCyclicResultReader(object):
         ansys.set(1, 1)
         ansys.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
         nsigfig = 10
-        ansys.format('', 'E', nsigfig + 9, nsigfig)  
+        ansys.format('', 'E', nsigfig + 9, nsigfig)
         ansys.page(1E9, '', -1, 240)
 
     except:  # for travis and appveyor

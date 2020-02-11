@@ -96,8 +96,7 @@ class AnsysBinary():
 
 
 def read_binary(filename, **kwargs):
-    """
-    Reads ANSYS-written binary files:
+    """Reads ANSYS-written binary files:
     - Jobname.RST: result file from structural analysis
     - Jobname.EMAT: Stores data related to element matrices
     - Jobname.FULL Stores the full stiffness-mass matrix
@@ -130,8 +129,7 @@ def read_binary(filename, **kwargs):
     - Jobname.MODE file, storing data related to a modal analysis
     - Jobname.RMG A magnetic analysis
     - Jobname.RFL A FLOTRAN analysis (a legacy results file)
-    - Jobname.RTH A thermal analysis    
-
+    - Jobname.RTH A thermal analysis
     """
     if not os.path.isfile(filename):
         raise FileNotFoundError('%s is not a file or cannot be found' %

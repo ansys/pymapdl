@@ -50,19 +50,21 @@ def random_string(stringLength=10):
 
 
 def find_ansys():
-    """ Searches for ansys path within enviornmental variables """
+    """Searches for ansys path within enviornmental variables"""
     versions = []
     paths = []
     for var in os.environ:
         if 'ANSYS' in var:
             if '_DIR' in var:
-                try:
-                    versions.append(int(var[5:8]))
-                except:
-                    continue
+
+                # add path if valid
                 path = os.environ[var]
                 if os.path.isdir(path):
-                    paths.append(path)
+
+                    # add path if version number is in path
+                    if is_float(var[5:8]):
+                        versions.append(int(var[5:8]))
+                        paths.append(path)
 
     if not paths:
         return '', ''

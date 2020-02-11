@@ -132,7 +132,7 @@ class CyclicResult(ResultFile):
         else:
             plotter.camera_position = cpos
 
-        return plotter.plot()
+        return plotter.show()
 
     def _add_cyclic_properties(self):
         """
@@ -993,7 +993,7 @@ class CyclicResult(ResultFile):
             plotter.open_movie(movie_filename)
 
         # run until q is pressed
-        plotter.plot(interactive=False, auto_close=False,
+        plotter.show(interactive=False, auto_close=False,
                      interactive_update=True)
         first_loop = True
         while not plotter.q_pressed:
@@ -1167,7 +1167,7 @@ class CyclicResult(ResultFile):
                              position=[0, 0])
 
         if screenshot:
-            cpos = plotter.show(auto_close=False, interactive=interactive,
+            cpos = plotter.show(auto_close=False,
                                 window_size=window_size,
                                 full_screen=full_screen)
             if screenshot is True:
@@ -1176,7 +1176,7 @@ class CyclicResult(ResultFile):
                 plotter.screenshot(screenshot)
             plotter.close()
         else:
-            cpos = plotter.plot(window_size=window_size, full_screen=full_screen)
+            cpos = plotter.show(window_size=window_size, full_screen=full_screen)
 
         if screenshot is True:
             return cpos, img

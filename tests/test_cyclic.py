@@ -110,7 +110,6 @@ def test_element_stress_v182_non_cyclic():
     element_stress = np.vstack(element_stress)
     enode = np.hstack(enode)
 
-
     # cyclic model will only output the master sector
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_presol.npz'))
     assert np.allclose(from_ansys['element_stress'], element_stress)
