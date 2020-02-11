@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Module to control interaction with an ANSYS shell instance.
+"""Module to control interaction with an ANSYS shell instance.
 Built using ANSYS documentation from
 https://www.sharcnet.ca/Software/Ansys/
 
@@ -50,42 +47,57 @@ def random_string(stringLength=10):
 
 
 def find_ansys():
-    """Searches for ansys path within enviornmental variables"""
-    versions = []
-    paths = []
+    """Searches for ansys path within environmental variables.
+
+    Reutrns
+    -------
+    ansys_exe_path : str
+        Full path to ANSYS executable
+
+    version : float
+        Version of ANSYS
+    """
+    ansys_sysdir_var = 'ANSYS_SYSDIR'
+    paths = {}
     for var in os.environ:
-        if 'ANSYS' in var:
-            if '_DIR' in var:
+        if 'ANSYS' in var and '_DIR' in var:
+            # add path if valid
+            path = os.environ[var]
+            if os.path.isdir(path):
 
-                # add path if valid
-                path = os.environ[var]
-                if os.path.isdir(path):
-
-                    # add path if version number is in path
-                    if is_float(var[5:8]):
-                        versions.append(int(var[5:8]))
-                        paths.append(path)
+                # add path if version number is in path
+                version_str = var[5:8]
+                if is_float(version_str):
+                    paths[int(version_str)] = path
 
     if not paths:
         return '', ''
 
-    maxver_ind = np.argmax(versions)
-    maxver = versions[maxver_ind]
-    ansys_path = paths[maxver_ind]
-    ansys_sysdir_var = 'ANSYS_SYSDIR'
-    if ansys_sysdir_var in os.environ:
-        sysdir = os.environ[ansys_sysdir_var]
-    else:
-        sysdir = ''
+    # check through all available paths and return the latest version
+    while paths:
+        version = max(paths.keys())
+        ansys_path = paths[version]
 
-    ansys_bin_path = os.path.join(ansys_path, 'bin', sysdir)
-    if 'win' in sysdir:
-        ansys_bin = 'ansys%d.exe' % maxver
-    else:
-        ansys_bin = 'ansys%d' % maxver
+        if ansys_sysdir_var in os.environ:
+            sysdir = os.environ[ansys_sysdir_var]
+            ansys_bin_path = os.path.join(ansys_path, 'bin', sysdir)
+            if 'win' in sysdir:
+                ansys_exe = 'ansys%d.exe' % version
+            else:
+                ansys_exe = 'ansys%d' % version
+        else:
+            ansys_bin_path = os.path.join(ansys_path, 'bin')
+            ansys_exe = 'ansys%d' % version
 
-    version = float(maxver)/10.0
-    return os.path.join(ansys_bin_path, ansys_bin), version
+        ansys_exe_path = os.path.join(ansys_bin_path, ansys_exe)
+        if os.path.isfile(ansys_exe_path):
+            break
+        else:
+            paths.pop(version)
+            paths.remove(ansys_path)
+
+    version_float = float(version)/10.0
+    return ansys_exe_path, version_float
 
 
 def tail(filename, nlines):
