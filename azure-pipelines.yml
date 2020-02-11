@@ -30,7 +30,6 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - template: .ci/checkout.yml
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '3.7'
@@ -60,7 +59,6 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-    - template: .ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
@@ -77,7 +75,6 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-    - template: .ci/checkout.yml
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
@@ -92,5 +89,4 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - template: .ci/checkout.yml
     - template: .ci/build_documentation.yml
