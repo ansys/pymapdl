@@ -992,11 +992,19 @@ class CyclicResult(ResultFile):
         if movie_filename:
             plotter.open_movie(movie_filename)
 
+        self.animating = True
+
+        def q_callback():
+            """exit when user wants to leave"""
+            self.animating = False
+
+        plotter.add_key_event("q", q_callback)
+
         # run until q is pressed
         plotter.show(interactive=False, auto_close=False,
                      interactive_update=True)
         first_loop = True
-        while not plotter.q_pressed:
+        while self.animating:
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -1008,16 +1016,13 @@ class CyclicResult(ResultFile):
 
                 plotter.update_scalars(scalars, render=False)
                 plotter.update_coordinates(orig_pt + complex_disp_adj,
-                                        render=False)
+                                           render=False)
 
                 if show_phase:
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                             (result_info, (angle*180/np.pi)))
+                                              (result_info, (angle*180/np.pi)))
 
                 plotter.update(30, force_redraw=True)
-
-                if plotter.q_pressed:
-                    break
 
                 if movie_filename and first_loop:
                     plotter.write_frame()
@@ -1057,8 +1062,7 @@ class CyclicResult(ResultFile):
     def plot_point_scalars(self, scalars, rnum=None, stitle='',
                            flip_scalars=None, screenshot=None, cpos=None,
                            off_screen=None, grid=None, add_text=True, **kwargs):
-        """
-        Plot point scalars on active mesh.
+        """Plot point scalars on active mesh.
 
         Parameters
         ----------
