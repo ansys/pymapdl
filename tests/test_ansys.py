@@ -10,10 +10,10 @@ from pyvista.plotting import system_supports_plotting
 path = os.path.dirname(os.path.abspath(__file__))
 
 # rver = 'v150'
-rver = 'v182'
 # rver = 'v182'
-# rver = 'v194'
+rver = 'v194'
 # rver = 'v201'
+# rver = 'v202'
 MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
             'v182': '/usr/ansys_inc/v182/ansys/bin/ansys182',
             'v194': '/usr/ansys_inc/v194/ansys/bin/ansys194',
@@ -21,6 +21,7 @@ MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
             'v202': '/usr/ansys_inc/v202/ansys/bin/ansys202'}
 
 HAS_ANSYS = os.path.isfile(MAPDLBIN[rver])
+RSETS = list(zip(range(1, 9), [1]*8))
 
 
 @pytest.fixture(scope='module')
@@ -47,18 +48,18 @@ def mapdl():
     # setup and solve
     mapdl('/SOLU')
     mapdl.Antype(2, 'new')
-    mapdl.Modopt('lanb', 3, 1, 10000)
+    mapdl.Modopt('lanb', 1, 1, 100000)
     mapdl.Eqslv('SPARSE')
     mapdl.Lumpm(0)
     mapdl.Pstres(0)
     mapdl.Bcsoption('INCORE')
     mapdl.mxpand(elcalc='YES')
+    # mapdl.cycopt('
     mapdl.solve()
     mapdl.finish()
 
     # setup ansys for output without line breaks
     mapdl.post1()
-    mapdl.set(1, 1)
     mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
     nsigfig = 10
     mapdl.format('', 'E', nsigfig + 9, nsigfig)
@@ -67,8 +68,10 @@ def mapdl():
     return mapdl
 
 
+@pytest.mark.parametrize("rset", RSETS)
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_prnsol_u(mapdl):
+def test_prnsol_u(mapdl, rset):
+    mapdl.set(*rset)
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
     if mapdl.using_corba:
@@ -78,7 +81,7 @@ def test_prnsol_u(mapdl):
     ansys_nnum = array[:, 0].astype(np.int)
     ansys_disp = array[:, 1:-1]
 
-    nnum, disp = mapdl.result.nodal_solution(0)
+    nnum, disp = mapdl.result.nodal_solution(rset)
 
     # cyclic model will only output the master sector
     ansys_nnum = ansys_nnum[:nnum.size]
@@ -88,10 +91,13 @@ def test_prnsol_u(mapdl):
     assert np.allclose(ansys_disp, disp)
 
 
+@pytest.mark.parametrize("rset", RSETS)
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_presol_s(mapdl):
+def test_presol_s(mapdl, rset):
+    mapdl.set(*rset)
+
     # verify element stress
-    element_stress, _, enode = mapdl.result.element_stress(0)
+    element_stress, _, enode = mapdl.result.element_stress(rset)
     element_stress = np.vstack(element_stress)
     enode = np.hstack(enode)
 
@@ -107,12 +113,16 @@ def test_presol_s(mapdl):
     ansys_enode = ansys_element_stress[:, 0].astype(np.int)
     ansys_element_stress = ansys_element_stress[:, 1:]
 
-    assert np.allclose(element_stress, ansys_element_stress)
-    assert np.allclose(enode, ansys_enode)
+    arr_sz = element_stress.shape[0]
+    assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
+    assert np.allclose(enode, ansys_enode[:arr_sz])
 
 
+@pytest.mark.parametrize("rset", RSETS)
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_prnsol_s(mapdl):
+def test_prnsol_s(mapdl, rset):
+    mapdl.set(*rset)
+
     # verify cyclic displacements
     table = mapdl.prnsol('s').splitlines()
     if mapdl.using_corba:
@@ -122,19 +132,23 @@ def test_prnsol_s(mapdl):
     ansys_nnum = array[:, 0].astype(np.int)
     ansys_stress = array[:, 1:]
 
-    nnum, stress = mapdl.result.nodal_stress(0)
+    nnum, stress = mapdl.result.nodal_stress(rset)
 
     # v150 includes nodes in the geometry that aren't in the result
     mask = np.in1d(nnum, ansys_nnum)
     nnum = nnum[mask]
     stress = stress[mask]
 
-    assert np.allclose(ansys_nnum, nnum)
-    assert np.allclose(ansys_stress, stress)
+    arr_sz = nnum.shape[0]
+    assert np.allclose(nnum, ansys_nnum[:arr_sz])
+    assert np.allclose(stress, ansys_stress[:arr_sz])
 
 
+@pytest.mark.parametrize("rset", RSETS)
 @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_prnsol_prin(mapdl):
+def test_prnsol_prin(mapdl, rset):
+    mapdl.set(*rset)
+
     # verify principal stress
     table = mapdl.prnsol('prin').splitlines()
     if mapdl.using_corba:
@@ -144,15 +158,16 @@ def test_prnsol_prin(mapdl):
     ansys_nnum = array[:, 0].astype(np.int)
     ansys_stress = array[:, 1:]
 
-    nnum, stress = mapdl.result.principal_nodal_stress(0)
+    nnum, stress = mapdl.result.principal_nodal_stress(rset)
 
     # v150 includes nodes in the geometry that aren't in the result
     mask = np.in1d(nnum, ansys_nnum)
     nnum = nnum[mask]
     stress = stress[mask]
 
-    assert np.allclose(ansys_nnum, nnum)
-    assert np.allclose(ansys_stress, stress, atol=1E-5, rtol=1E-4)
+    arr_sz = nnum.shape[0]
+    assert np.allclose(nnum, ansys_nnum[:arr_sz])
+    assert np.allclose(stress, ansys_stress[:arr_sz], atol=1E-5, rtol=1E-3)
 
 
 # @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
@@ -176,22 +191,22 @@ def test_read_para():
         arr, parm = load_parameters(para_file)
 
 
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_v150():
-    mapdl = pyansys.Mapdl(MAPDLBIN['v150'], override=True)
-    mapdl.prep7()
-    mapdl.exit()
+# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# def test_v150():
+#     mapdl = pyansys.Mapdl(MAPDLBIN['v150'], override=True)
+#     mapdl.prep7()
+#     mapdl.exit()
 
 
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_v182():
-    mapdl = pyansys.Mapdl(MAPDLBIN['v182'], override=True)
-    mapdl.prep7()
-    mapdl.exit()
+# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# def test_v182():
+#     mapdl = pyansys.Mapdl(MAPDLBIN['v182'], override=True)
+#     mapdl.prep7()
+#     mapdl.exit()
 
 
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_v194():
-    mapdl = pyansys.Mapdl(MAPDLBIN['v194'], override=True)
-    mapdl.prep7()
-    mapdl.exit()
+# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# def test_v194():
+#     mapdl = pyansys.Mapdl(MAPDLBIN['v194'], override=True)
+#     mapdl.prep7()
+#     mapdl.exit()

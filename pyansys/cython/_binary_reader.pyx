@@ -238,7 +238,7 @@ cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
 
 def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
-                   int [::1] rcon):
+                   int [::1] rcon, int [::1] esys):
     """The following is stored for each element
     0 - mat     - material reference number
     1 - type    - element type number
@@ -276,6 +276,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
             mtype[i] = s_element[0]  # material type
             etype[i] = s_element[1]  # element type
             rcon[i] = s_element[2] # real constant reference number
+            esys[i] = s_element[4]
 
             # read in nodes
             for j in range(10, size):
@@ -285,61 +286,11 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
             mtype[i] = element[0]  # material type
             etype[i] = element[1]  # element type
             rcon[i] = element[2] # real constant reference number
+            esys[i] = element[4]
 
             # read in nodes
             for j in range(10, size):
                 elem[i, j - 10] = element[j]
-
-
-# def load_elements2(filename, int loc, int nelem, int64_t [::1] e_disp_table,
-#                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
-#                    int [::1] rcon):
-#     """The following is stored for each element
-#     0 - mat     - material reference number
-#     1 - type    - element type number
-#     2 - real    - real constant reference number
-#     3 - secnum  - section number
-#     4 - esys    - element coordinate system
-#     5 - death   - death flat (1 live, 0 dead)
-#     6 - solidm  - solid model reference
-#     7 - shape   - coded shape key
-#     8 - elnum   - element number
-#     9 - baseeid - base element number
-#     10 - NODES   - node numbers defining the element
-#     """
-#     cdef int i, j
-#     cdef int prec_flag, type_flag, size, bufsize
-
-#     cdef bytes py_bytes = filename.encode()
-#     cdef char* c_filename = py_bytes
-#     cdef ifstream* binfile = new ifstream(c_filename, binary)
-
-#     cdef int val, nread, elem_loc
-#     for i in range(nelem):
-#         # seek to element location
-#         binfile.seekg((loc + e_disp_table[i])*4);
-        
-#         read_record_stream(binfile, <void*>elem[i, 0], &prec_flag, &type_flag,
-# 			   &size)
-
-#         if prec_flag:
-#             s_element = <short*>c_ptr
-#             mtype[i] = s_element[0]  # material type
-#             etype[i] = s_element[1]  # element type
-#             rcon[i] = s_element[2] # real constant reference number
-
-#             # read in nodes
-#             for j in range(10, size):
-#                 elem[i, j - 10] = s_element[j]
-#         else:
-#             element = <int*>c_ptr
-#             mtype[i] = element[0]  # material type
-#             etype[i] = element[1]  # element type
-#             rcon[i] = element[2] # real constant reference number
-
-#             # read in nodes
-#             for j in range(10, size):
-#                 elem[i, j - 10] = element[j]
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
@@ -402,24 +353,25 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
         read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
                            &type_flag, &size)
 
-        # TODO: this will undoubtedly need to be generalized
-        if element_type == 181 or element_type == 281:
-            # only concerned with the first three euler angles (thxy, thyz, thzx)
-
-            # if prec_flag:
-            #     ptr = spointers[PTR_EUL_IDX]
-            # else:
-            #     ptr = pointers[PTR_EUL_IDX]
-
-            # read_record_stream(binfile, ele_table + ptr,
+        # rotate out of element coordinate system
+        if as_global:
+            # read in euler angles
             read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
-            # rotate the first four nodal results
-            if as_global:
-                euler_rotate(arr, tmpbuffer, nitem)
+            
+            # verify there are actually euler angles
+            if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
+
+                # if element_type == 181 or element_type == 281:
+                #     # rotate the first four nodal results
+                #     euler_rotate_shell(arr, tmpbuffer, nitem)
+                # else:
+                #     # generalized
+                euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
 
     return 0
+
 
 cdef inline int read_element_result(ifstream *binfile, int ele_table,
                                     int result_index,
@@ -454,29 +406,31 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
         read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
                            &type_flag, &size)
 
-        # TODO: this will undoubtedly need to be generalized
-        if element_type == 181 or element_type == 281:
-            # only concerned with the first three euler angles (thxy, thyz, thzx)
-
-            # if prec_flag:
-            #     ptr = spointers[PTR_EUL_IDX]
-            # else:
-            #     ptr = pointers[PTR_EUL_IDX]
-
-            # read_record_stream(binfile, ele_table + ptr,
+        # rotate out of element coordinate system
+        if as_global:
+            # read in euler angles
             read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
-            # rotate the first four nodal results
-            if as_global:
-                euler_rotate(arr, tmpbuffer, nitem)
+            
+            # verify there are actually euler angles
+            if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
+
+                # if element_type == 181 or element_type == 281:
+                #     # rotate the first four nodal results
+                #     euler_rotate_shell(arr, tmpbuffer, nitem)
+                # else:
+                #     # generalized
+                euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
+                
 
     return 0
 
 
-cdef inline void euler_rotate(float_or_double *arr,
-                              float_or_double [64] eulerangles, int nitem) nogil:
-    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in eulerangles
+cdef inline void euler_rotate_shell(float_or_double *arr,
+                                    float_or_double [64] eulerangles, int nitem) nogil:
+    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in
+    ``eulerangles``
 
     Acts on rows 0 - 3 relative to row
 
@@ -484,13 +438,18 @@ cdef inline void euler_rotate(float_or_double *arr,
 
     # used sympy to generate these equations
     tensor = np.matrix([[s_xx, s_xy, s_xz], 
-                        [s_xy, s_yy, s_yz], 
-                        [s_xz, s_yz, s_zz]])
+                        [s_yx, s_yy, s_yz], 
+                        [s_zx, s_zy, s_zz]])
+
+    # which is the same as ...
+    tensor = np.matrix([[ s_xx,  s_xy, s_xz], 
+                        [-s_xy,  s_yy, s_yz], 
+                        [-s_zx, -s_zy, s_zz]])
 
     # always zero for shell elements...
     s_xz = 0
-    s_zz = 0
     s_yz = 0
+    s_zz = 0
 
     from sympy import Matrix, symbols
 
@@ -518,14 +477,86 @@ cdef inline void euler_rotate(float_or_double *arr,
         s_xx = arr[i*nitem + 0]
         s_yy = arr[i*nitem + 1]
         s_xy = arr[i*nitem + 3]
-
         # the rest are zero (no out of plane stress)
+
         arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
         arr[i*nitem + 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1)) + (c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1))*(c1*s2*s3 + c3*s1)
         arr[i*nitem + 2] = -c2*s3*(-c2*s3*s_xx + s2*s_xy) + s2*(-c2*s3*s_xy + s2*s_yy)
         arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3))
         arr[i*nitem + 4] = -c2*s3*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1))
         arr[i*nitem + 5] = -c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3))
+
+
+cdef inline void euler_rotate(float_or_double *arr,
+                              float_or_double [64] eulerangles, int nitem,
+                              int n_node) nogil:
+    """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in
+    ``eulerangles`` on the stress values in ``arr``
+
+    Notes
+    -----
+    Used sympy to generate these equations
+    import numpy as np
+    from sympy import Matrix, symbols
+    c1, c2, c3, s1, s2, s3 = symbols('c1 c2 c3 s1 s2 s3')
+    s_xx, s_xy, s_yy, s_xz, s_yz, s_zz = symbols('s_xx s_xy s_yy s_xz s_yz s_zz')
+
+    tensor = np.matrix([[ s_xx,  s_xy, s_xz], 
+                        [-s_xy,  s_yy, s_yz], 
+                        [-s_xz, -s_yz, s_zz]])
+
+    R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
+                [-s1*c2, c1*c2, s2],
+                [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
+
+    ans = R.T*tensor*R
+
+
+    print('XX', ans[0, 0])
+    print('YY', ans[1, 1])
+    print('ZZ', ans[2, 2])
+
+    print('XY', ans[0, 1])
+    print('YZ', ans[1, 2])
+    print('XZ', ans[0, 2])
+    """    
+    cdef double s_xx, s_xy, s_yy, s_xz, s_yz, s_zz
+    cdef double c1 = cos(DEG2RAD*eulerangles[0])
+    cdef double c2 = cos(DEG2RAD*eulerangles[1])
+    cdef double c3 = cos(DEG2RAD*eulerangles[2])
+    cdef double s1 = sin(DEG2RAD*eulerangles[0])
+    cdef double s2 = sin(DEG2RAD*eulerangles[1])
+    cdef double s3 = sin(DEG2RAD*eulerangles[2])
+
+    # rotate each node in the element
+    cdef int i
+    for i in range(n_node):
+        # grab the node component stresses
+        s_xx = arr[i*nitem + 0]
+        s_yy = arr[i*nitem + 1]
+        s_zz = arr[i*nitem + 2]
+        s_xy = arr[i*nitem + 3]
+        s_yz = arr[i*nitem + 4]
+        s_xz = arr[i*nitem + 5]
+
+        # store rotated component stresses 
+        # XX (good)
+        arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2)) + (c1*c3 - s1*s2*s3)*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2)) + (c1*s3 + c3*s1*s2)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2))
+
+        # YY
+        arr[i*nitem + 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) - s_yz*(-c1*c3*s2 + s1*s3)) + (-c1*c3*s2 + s1*s3)*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) + (c1*s2*s3 + c3*s1)*(-c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) - s_xz*(-c1*c3*s2 + s1*s3))
+
+        # ZZ
+        arr[i*nitem + 2] = c2*c3*(c2*c3*s_zz - c2*s3*s_xz + s2*s_yz) - c2*s3*(-c2*c3*s_xz - c2*s3*s_xx - s2*s_xy) + s2*(-c2*c3*s_yz - c2*s3*s_xy + s2*s_yy)
+
+        # XY (good)
+        arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2)) + (-c1*c3*s2 + s1*s3)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) + (c1*s2*s3 + c3*s1)*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2))
+
+        # YZ
+        arr[i*nitem + 4] = c2*c3*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) - c2*s3*(-c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) - s_xz*(-c1*c3*s2 + s1*s3)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) - s_yz*(-c1*c3*s2 + s1*s3))
+
+        # XZ
+        arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2))
 
 
 def read_nodal_values_adv(filename, uint8 [::1] celltypes,
@@ -696,7 +727,8 @@ cdef inline void read_tetrahedral(int64_t [::1] cells, int64_t index, int [::1] 
 
 
 cdef inline void read_element(int64_t [::1] cells, int64_t index, int [::1] ncount,
-                              float_or_double [:, ::1] data, float_or_double [:, ::1] bufferdata,
+                              float_or_double [:, ::1] data,
+                              float_or_double [:, ::1] bufferdata,
                               int nitems, int nnode) nogil:
     """
     Reads a generic element type in a linear fashion.  Works for:

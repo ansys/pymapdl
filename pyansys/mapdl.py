@@ -311,7 +311,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     exec_file : str, optional
         The location of the ANSYS executable.  Will use the cached
         location when left at the default None.
-    
+
     run_location : str, optional
         ANSYS working directory.  Defaults to a temporary working
         directory.
@@ -1039,7 +1039,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             if 'WaitingForReply' not in str(e):
                 raise Exception(e)
 
-        self.log.info('ANSYS exited')
+        # self.log.info('ANSYS exited')
         if close_log:
             if self.apdl_log is not None:
                 self.apdl_log.close()

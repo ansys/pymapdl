@@ -146,13 +146,17 @@ def read_binary(filename, **kwargs):
         return FullFile(filename, **kwargs)
     elif file_format == 12:
         from pyansys.rst import ResultFile
-        result = ResultFile(filename, **kwargs)
+        read_geometry = kwargs.pop('read_geometry', True)
+        result = ResultFile(filename, read_geometry=False, **kwargs)
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
         if result.header['nSector'] != 1 and not ignore_cyclic:
             from pyansys.cyclic_reader import CyclicResult
             return CyclicResult(filename)
+
+        if read_geometry:
+            result.store_geometry()
 
         return result
 

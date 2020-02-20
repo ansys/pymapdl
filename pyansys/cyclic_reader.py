@@ -1,6 +1,4 @@
-"""Supports reading cyclic strucutral result files from ANSYS
-
-"""
+"""Supports reading cyclic structural result files from ANSYS"""
 import logging
 
 import vtk
@@ -9,8 +7,7 @@ from pyvista.core.common import axis_rotation
 import pyvista as pv
 
 from pyansys.rst import ResultFile, trans_to_matrix
-from pyansys import _binary_reader, _parser
-from pyansys._binary_reader import cells_with_any_nodes, cells_with_all_nodes
+from pyansys import _binary_reader
 
 
 # Create logger
@@ -21,15 +18,15 @@ np.seterr(divide='ignore', invalid='ignore')
 
 
 class CyclicResult(ResultFile):
-    """ Adds cyclic functionality to the result reader in pyansys """
+    """Adds cyclic functionality to the result class"""
 
     def __init__(self, filename):
         """ Initializes object """
         super(CyclicResult, self).__init__(filename)
 
         # sanity check
-        if self.header['nSector'] == 1:
-            raise Exception('Result is not a cyclic model')
+        if self.n_sector == 1:
+            raise RuntimeError('Result is not a cyclic model')
 
         self._add_cyclic_properties()
 
@@ -135,12 +132,7 @@ class CyclicResult(ResultFile):
         return plotter.show()
 
     def _add_cyclic_properties(self):
-        """
-        Adds cyclic properties to result object
-
-        Makes the assumption that all the cyclic nodes are within tol
-        """
-        self.n_sector = self.resultheader['nSector']
+        """Add cyclic properties"""
 
         # idenfity the sector based on number of elements in master sector
         cs_els = self.resultheader['csEls']
@@ -153,6 +145,7 @@ class CyclicResult(ResultFile):
         # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
         node_mask = self.nnum <= self.resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
+        self.dup_ind = np.nonzero(~node_mask)[0]
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
         """ return a 4x4 transformation array for a given coordinate system """
@@ -214,10 +207,12 @@ class CyclicResult(ResultFile):
         """
         # get the nodal result
         rnum = self.parse_step_substep(rnum)
-        nnum, result = super(CyclicResult, self).nodal_solution(rnum,
+        full_nnum, full_result = super(CyclicResult, self).nodal_solution(rnum,
                                                                 in_nodal_coord_sys)
-        result = result[self.mas_ind]
-        nnum = nnum[self.mas_ind]  # only concerned with the master sector
+
+        # only concerned with the master sector
+        result = full_result[self.mas_ind]
+        nnum = full_nnum[self.mas_ind]
 
         # combine or expand result if not modal
         if self.resultheader['kan'] == 2:  # modal analysis
@@ -233,19 +228,20 @@ class CyclicResult(ResultFile):
                 hmask = np.abs(hindex_table) == abs(hindex)
                 hmatch = np.nonzero(hmask)[0]
 
-                even = not (hmatch.size % 2)
-                assert even, 'Harmonic result missing matching pair'
-                match_loc = np.where(hmatch == rnum)[0][0]
-                
-                if match_loc % 2:
-                    rnum_dup = rnum - 1
+                if hmatch.size % 2:
+                    # combine the matching sector
+                    result_dup = full_result[self.dup_ind]
                 else:
-                    rnum_dup = rnum + 1
+                    match_loc = np.where(hmatch == rnum)[0][0]
 
-                # get repeated result and combine
-                _, result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
+                    if match_loc % 2:
+                        rnum_dup = rnum - 1
+                    else:
+                        rnum_dup = rnum + 1
 
-            result_dup = result_dup[self.mas_ind]
+                    # get repeated result and combine
+                    _, full_result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
+                    result_dup = full_result_dup[self.mas_ind]
 
             expanded_result = self.expand_cyclic_modal(result,
                                                        result_dup,
@@ -469,19 +465,16 @@ class CyclicResult(ResultFile):
         return np.asarray(mode_table)
 
     def nodal_stress(self, rnum, phase=0, as_complex=False, full_rotor=False):
-        """
-        Equivalent ANSYS command: PRNSOL, S
-
-        Retrieves the component stresses for each node in the
+        """Retrieves the component stresses for each node in the
         solution.
 
         The order of the results corresponds to the sorted node
         numbering.
 
-        This algorithm, like ANSYS, computes the nodal stress by
-        averaging the stress for each element at each node.  Due to
-        the discontinuities across elements, stresses will vary based
-        on the element they are evaluated from.
+        Computes the nodal stress by averaging the stress for each
+        element at each node.  Due to the discontinuities across
+        elements, stresses will vary based on the element they are
+        evaluated from.
 
         Parameters
         ----------
@@ -493,7 +486,7 @@ class CyclicResult(ResultFile):
             Phase adjustment of the stress in degrees.
 
         as_complex : bool, optional
-            Reports stess as a complex result.  Real and imaginary
+            Reports stress as a complex result.  Real and imaginary
             stresses correspond to the stress of the main and repeated
             sector.  Stress can be "rotated" using the phase
             parameter.
@@ -512,11 +505,18 @@ class CyclicResult(ResultFile):
             node.  For the corresponding node numbers, see where
             result is the result object.
 
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.nodal_stress(0)
+
         Notes
         -----
         Nodes without a stress value will be NAN.
 
         """
+        rnum = self.parse_step_substep(rnum)
         nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
         # nnum = nnum[self.mas_ind]
         # stress = stress[self.mas_ind]

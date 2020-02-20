@@ -79,38 +79,38 @@ ELEMENT_INDEX_TABLE_INFO = {
 }
 
 SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
-                        'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
-                        'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST',
-                        'ptrBC', 'rxtrap', 'mode', 'isym', 'kcmplx',
-                        'numdof', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                        'DOFS', 'title', 'title', 'title', 'title',
-                        'title', 'title', 'title', 'title', 'title',
-                        'title', 'title', 'title', 'title', 'title',
-                        'title', 'title', 'title', 'title', 'title',
-                        'title', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'stitle', 'stitle', 'stitle',
-                        'stitle', 'dbmtim', 'dbmdat', 'dbfncl',
-                        'soltim', 'soldat', 'ptrOND', 'ptrOEL',
-                        'nfldof', 'ptrEXA', 'ptrEXT', 'ptrEXAl',
-                        'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
-                        'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl',
-                        'ptrMSTh', 'ptrBCl', 'ptrBCh', 'ptrTRFl',
-                        'ptrTRFh', 'ptrONDl', 'ptrONDh', 'ptrOELl',
-                        'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
-                        'ptrOSLh', 'sizeDEAD', 'ptrDEADl', 'ptrDEADh',
-                         'PrinKey','numvdof', 'numadof', '0', '0',
-                         'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0', 
-                         '0', '0', '0', 'numRotCmp', '0', 
-                         'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
-                        'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
+                             'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
+                             'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST',
+                             'ptrBC', 'rxtrap', 'mode', 'isym', 'kcmplx',
+                             'numdof', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
+                             'DOFS', 'title', 'title', 'title', 'title',
+                             'title', 'title', 'title', 'title', 'title',
+                             'title', 'title', 'title', 'title', 'title',
+                             'title', 'title', 'title', 'title', 'title',
+                             'title', 'stitle', 'stitle', 'stitle',
+                             'stitle', 'stitle', 'stitle', 'stitle',
+                             'stitle', 'stitle', 'stitle', 'stitle',
+                             'stitle', 'stitle', 'stitle', 'stitle',
+                             'stitle', 'stitle', 'stitle', 'stitle',
+                             'stitle', 'dbmtim', 'dbmdat', 'dbfncl',
+                             'soltim', 'soldat', 'ptrOND', 'ptrOEL',
+                             'nfldof', 'ptrEXA', 'ptrEXT', 'ptrEXAl',
+                             'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
+                             'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl',
+                             'ptrMSTh', 'ptrBCl', 'ptrBCh', 'ptrTRFl',
+                             'ptrTRFh', 'ptrONDl', 'ptrONDh', 'ptrOELl',
+                             'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
+                             'ptrOSLh', 'sizeDEAD', 'ptrDEADl', 'ptrDEADh',
+                             'PrinKey','numvdof', 'numadof', '0', '0',
+                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0', 
+                             '0', '0', '0', 'numRotCmp', '0', 
+                             'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
+                             'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
 
 SOLUTION_HEADER_KEYS_DP = ['timfrq',  'lfacto',  'lfactn', 'cptime', 'tref',
                            'tunif', 'tbulk', 'volbase', 'tstep', '__unused',
@@ -190,7 +190,6 @@ class ResultFile(AnsysBinary):
         """
         self.filename = filename
         self.resultheader = self._read_result_header()
-        self.n_sector = 1
 
         # Get the total number of results and log it
         self.nsets = len(self.resultheader['rpointers'])
@@ -210,6 +209,11 @@ class ResultFile(AnsysBinary):
 
         self.header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
         self.geometry_header = {}
+
+    @property
+    def n_sector(self):
+        """Number of sectors"""
+        return self.resultheader['nSector']
 
     def _read_result_header(self):
         """Returns pointers used to access results from an ANSYS result file.
@@ -357,11 +361,11 @@ class ResultFile(AnsysBinary):
                             'origin': np.array(data[9:12]),
                             'PAR1': data[12],
                             'PAR2': data[13],
-                            'euler angles': data[15:18], # may not be euler
-                            'theta singularity' : data[18],
-                            'phi singularity' : data[19],
-                            'type' : int(data[20]),
-                            'reference num' : int(data[21],)
+                            'euler angles': data[15:18],  # may not be euler
+                            'theta singularity': data[18],
+                            'phi singularity': data[19],
+                            'type': int(data[20]),
+                            'reference num': int(data[21],)
                             }
             c_systems.append(c_system)
 
@@ -403,7 +407,7 @@ class ResultFile(AnsysBinary):
             grid = self.grid
         return self._plot_point_scalars(None, grid=grid, show_edges=show_edges,
                                         **kwargs)
-    
+
     def plot_nodal_solution(self, rnum, comp='norm',
                             show_displacement=False,
                             max_disp=0.1,
@@ -755,13 +759,13 @@ class ResultFile(AnsysBinary):
             euler_angles = self.geometry['nodes'][self.insolution, 3:].T
             theta_xy, theta_yz, theta_zx = euler_angles
             for rnum in range(nsets):
-                result = results[rnum,:,:]
+                result = results[rnum, :, :]
                 if np.any(theta_xy):
                     pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
 
                 if np.any(theta_yz):
                     pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
-    
+
                 if np.any(theta_zx):
                     pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
 
@@ -813,7 +817,7 @@ class ResultFile(AnsysBinary):
         # result pointer
         ptr_rst = self.resultheader['rpointers'][rnum]
         result_solution_header = parse_header(self.read_record(ptr_rst),
-                                       SOLUTION_DATA_HEADER_KEYS)
+                                              SOLUTION_DATA_HEADER_KEYS)
 
         nnod = result_solution_header['nnod']
         numdof = result_solution_header['numdof']
@@ -893,9 +897,9 @@ class ResultFile(AnsysBinary):
             raw = table[1:9].tobytes().split(b'\x00')[0]
 
             name = raw.decode('utf')
-            name =  name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
-                    name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
-                    name[24:28][::-1] + name[28:32][::-1]
+            name = name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
+                   name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
+                   name[24:28][::-1] + name[28:32][::-1]
             name = name.strip()
             data = table[9:]
             if data.any():
@@ -923,7 +927,6 @@ class ResultFile(AnsysBinary):
 
         # pointer to the element type index table
         e_type_table = self.read_record(geometry_header['ptrETY'])
-        # e_type_table = e_type_table[e_type_table != 0]
 
         # store information for each element type
         # make these arrays large so you can reference a value via element
@@ -948,7 +951,6 @@ class ResultFile(AnsysBinary):
             einfo = self.read_record(ptr)
 
             etype_ref = einfo[0]
-            # etype_id[i] = einfo[1]
             ekey.append(einfo[:2])
 
             # Items 3-14 - element type option keys (keyopts)
@@ -1015,10 +1017,11 @@ class ResultFile(AnsysBinary):
 
         mtype = np.empty(nelm, np.int32)
         rcon = np.empty(nelm, np.int32)
+        esys = np.empty(nelm, np.int32)
 
         # load elements
         _binary_reader.load_elements(self.filename, ptr_elem, nelm,
-                                     e_disp_table, elem, etype, mtype, rcon)
+                                     e_disp_table, elem, etype, mtype, rcon, esys)
 
         enum = self.resultheader['eeqv']
 
@@ -1035,6 +1038,7 @@ class ResultFile(AnsysBinary):
                          'elem': elem,
                          'enum': enum,
                          'ekey': np.asarray(ekey, ctypes.c_int),
+                         'esys': esys,
                          'e_rcon': rcon,
                          'mtype': mtype,
                          'Element Type': element_type,
@@ -1917,7 +1921,7 @@ class ResultFile(AnsysBinary):
             EXY: integration point locations
             EBA: back stresses
             ESV: state variables
-            MNL: material nonlinear record        
+            MNL: material nonlinear record
 
         Returns
         -------
