@@ -1,20 +1,30 @@
+import os
 import pytest
 import pyansys
 
-if pyansys.has_ansys:
-    mapdl = pyansys.Mapdl(override=True)
+
+if 'PYANSYS_IGNORE_ANSYS' in os.environ:
+    has_ansys = False
+else:
+    has_ansys = pyansys.has_ansys
+
+
+
+@pytest.fixture(scope='module')
+def mapdl():
+    return pyansys.Mapdl(override=True)
 
 
 @pytest.fixture(scope='function')
-def cleared():
+def cleared(mapdl):
     mapdl.finish()
     mapdl.clear()
     mapdl.prep7()
     yield
 
 
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_e(cleared):
+@pytest.mark.skipif(not has_ansys, reason="Requires ANSYS installed")
+def test_e(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)
     n1 = mapdl.n("", 1, 0, 0)
@@ -27,8 +37,8 @@ def test_e(cleared):
     assert e1 == 2
 
 
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
-def test_et(cleared):
+@pytest.mark.skipif(not has_ansys, reason="Requires ANSYS installed")
+def test_et(mapdl, cleared):
     n_plane183 = mapdl.et("", "PLANE183")
     assert n_plane183 == 1
     n_compare = int(mapdl.get_float("ETYP", 0, "NUM", "MAX"))

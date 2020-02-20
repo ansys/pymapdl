@@ -106,7 +106,7 @@ def test_element_stress_v182_non_cyclic():
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
     result = pyansys.read_binary(ansys_result_file)
 
-    element_stress, elemnum, enode = result.element_stress(0)
+    element_stress, elemnum, enode = result.element_stress(0, False, False)
     element_stress = np.vstack(element_stress)
     enode = np.hstack(enode)
 
@@ -328,3 +328,7 @@ def test_plot_principal_nodal_stress():
 #     n = mask.sum()
 #     tmp = ansys_stress.reshape(stress.shape[0], n, ansys_stress.shape[1])
 #     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
+
+
+# if __name__ == '__main__':
+#     test_element_stress_v182_non_cyclic()

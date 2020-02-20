@@ -325,7 +325,7 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                                     int element_type, int as_global=1):
     """Populate array with results from a single element"""
     cdef int i, j, k, c,
-    cdef int64_t ptr
+    cdef int64_t ptr, eul_ptr
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float [64] tmpbuffer  # for euler results
@@ -338,8 +338,10 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
 
     if prec_flag:
         ptr = spointers[result_index]
+        eul_ptr = spointers[PTR_EUL_IDX]
     else:
         ptr = pointers[result_index]
+        eul_ptr = pointers[PTR_EUL_IDX]
 
     if ptr == 0:
         return 1
@@ -354,15 +356,13 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                            &type_flag, &size)
 
         # rotate out of element coordinate system
-        if as_global:
+        if as_global and eul_ptr > 0:
             # read in euler angles
-            read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+            read_record_stream(binfile, ele_table + eul_ptr,
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
-
             
             # verify there are actually euler angles
             if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
-
                 # if element_type == 181 or element_type == 281:
                 #     # rotate the first four nodal results
                 #     euler_rotate_shell(arr, tmpbuffer, nitem)
@@ -378,7 +378,7 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
                                     int nnode_elem, int nitem, float_or_double *arr,
                                     int element_type, int as_global=1):
     """Populate array with results from a single element"""
-    cdef int i, j, k, c, ptr
+    cdef int i, j, k, c, ptr, eul_ptr
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float_or_double [64] tmpbuffer  # for euler results
@@ -391,8 +391,10 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
 
     if prec_flag:
         ptr = spointers[result_index]
+        eul_ptr = spointers[PTR_EUL_IDX]
     else:
         ptr = pointers[result_index]
+        eul_ptr = pointers[PTR_EUL_IDX]
 
     if ptr == 0:
         return 1
@@ -407,15 +409,13 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
                            &type_flag, &size)
 
         # rotate out of element coordinate system
-        if as_global:
+        if as_global and eul_ptr > 0:
             # read in euler angles
-            read_record_stream(binfile, ele_table + pointers[PTR_EUL_IDX],
+            read_record_stream(binfile, ele_table + eul_ptr,
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
-            
             # verify there are actually euler angles
             if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
-
                 # if element_type == 181 or element_type == 281:
                 #     # rotate the first four nodal results
                 #     euler_rotate_shell(arr, tmpbuffer, nitem)
@@ -489,7 +489,7 @@ cdef inline void euler_rotate_shell(float_or_double *arr,
 
 cdef inline void euler_rotate(float_or_double *arr,
                               float_or_double [64] eulerangles, int nitem,
-                              int n_node) nogil:
+                              int n_node):
     """Performs a 3-1-2 euler rotation given thxy, thyz, thzx in
     ``eulerangles`` on the stress values in ``arr``
 

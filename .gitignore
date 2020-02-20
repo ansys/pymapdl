@@ -25,6 +25,7 @@ _build/
 pyansys/Interface.py
 *.bat
 docs/examples/*
+run_tests.sh
 
 # Testing
 factory/
@@ -38,6 +39,7 @@ tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
 *,cover
+
 
 # ignore certain result files
 tests/testfiles/is16.rst

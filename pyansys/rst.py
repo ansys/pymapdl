@@ -1657,15 +1657,22 @@ class ResultFile(AnsysBinary):
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
             actor = plotter.add_text(result_text, font_size=20)
-                             # position=[0, 0])
 
         if animate:
             orig_pts = copied_mesh.points.copy()
             plotter.show(interactive=False, auto_close=False,
                          interactive_update=not off_screen)
 
+            self.animating = True
+
+            def q_callback():
+                """exit when user wants to leave"""
+                self.animating = False
+
+            plotter.add_key_event("q", q_callback)
+
             first_loop = True
-            while not plotter.q_pressed:
+            while self.animating:
                 for angle in np.linspace(0, np.pi*2, nangles):
                     mag_adj = np.sin(angle)
                     if scalars[0] is not None:
@@ -1678,7 +1685,7 @@ class ResultFile(AnsysBinary):
                                                   (result_text, (angle*180/np.pi)))
 
                     plotter.update(30, force_redraw=True)
-                    if plotter.q_pressed:
+                    if not self.animating:
                         break
 
                     if movie_filename and first_loop:

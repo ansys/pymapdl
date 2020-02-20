@@ -14,6 +14,7 @@ from pyansys.mapdl import change_default_ansys_path
 # Sphinx-gallery tools
 from pyansys.sphinx_gallery import Scraper, _get_sg_image_scraper
 
+
 try:
     from pyansys import mapdl
     has_ansys = mapdl.check_valid_ansys()
