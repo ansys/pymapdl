@@ -1052,7 +1052,7 @@ class ResultFile(AnsysBinary):
         cells = parsed['cells']
         offset = parsed['offset']
         cell_type = parsed['cell_type']
-        self.numref = parsed['numref']        
+        self.numref = parsed['numref']
 
         # catch -1
         cells[cells == -1] = 0
@@ -1340,7 +1340,7 @@ class ResultFile(AnsysBinary):
             for key in ELEMENT_INDEX_TABLE_KEYS:
                 err_str += '\t%s: %s\n' % (key, ELEMENT_INDEX_TABLE_INFO[key])
 
-            raise Exception(err_str)
+            raise ValueError(err_str)
 
         # location of data pointer within each element result table
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
@@ -1363,7 +1363,7 @@ class ResultFile(AnsysBinary):
         if sort:
             sidx = np.argsort(enum)
             enum = enum[sidx]
-            element_data = [element_data[i] for i in sidx]        
+            element_data = [element_data[i] for i in sidx]
 
         return enum, element_data
 
@@ -2481,13 +2481,15 @@ class ResultFile(AnsysBinary):
     @property
     def available_results(self):
         """Prints available element result types and returns those keys"""
-        available = []
-        for key in ELEMENT_RESULT_NCOMP:
-            _, result = self._nodal_result(0, key)
-            if np.any(~np.isnan(result)):
-                print(ELEMENT_INDEX_TABLE_INFO[key])
-                available.append(key)
+        ele_ind_table, _, _ = self._element_solution_header(0)
 
+        # get the keys from the first element (not ideal...)
+        mask = self.read_record(ele_ind_table[0]) > 0
+        keys = [ELEMENT_INDEX_TABLE_KEYS[i] for i in mask.nonzero()[0]]
+
+        available = {}
+        for key in keys:
+            available[key] = ELEMENT_INDEX_TABLE_INFO[key]
         return available
 
 

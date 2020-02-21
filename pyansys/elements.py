@@ -34,9 +34,11 @@ valid_types = ['1',   # LINK1
                '44',  # SOLID44
                '45',  # SOLID45
                '55',  # PLANE55
+               '70',  # SOLID70
                '82',  # PLANE82 (legacy of PLANE183)
                '92',  # SOLID92
                '95',  # SOLID95
+               '152',  # SURF152
                '154',  # SURF154
                '180',  # LINK180
                '181',  # SHELL181

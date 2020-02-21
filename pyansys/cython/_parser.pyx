@@ -27,23 +27,24 @@ cdef uint8 VTK_QUADRATIC_PYRAMID = 27
 cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
-# ANSYS element type definitions
-cdef int [6] type_a
+# # ANSYS element type definitions
+# cdef int [6] type_a
 
-# Legacy mixed elements
-type_a[0] = 45
-type_a[1] = 95
-type_a[2] = 5
+# # Legacy mixed elements
+# type_a[0] = 5
+# type_a[1] = 45
+# type_a[2] = 95
 
-# Current mixed elements
-type_a[3] = 185
-type_a[4] = 186
-type_a[5] = 226
+# # Current mixed elements
+# type_a[3] = 185
+# type_a[4] = 186
+# type_a[5] = 226
+# type_a[6] = 70
 
-# Tetrahedrals (legacy and current)
-cdef int [4] type_b
-type_b[0] = 92
-type_b[1] = 187
+# # Tetrahedrals (legacy and current)
+# cdef int [4] type_b
+# type_b[0] = 92
+# type_b[1] = 187
 
 
 cdef inline void store_line(int64_t [::1] offset, int64_t *ecount,
@@ -439,7 +440,7 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
     cdef int16_t keyopt_1
 
     # ANSYS element type definitions
-    cdef int [6] type_a
+    cdef int [7] type_a
 
     # Legacy mixed elements
     if '5' in allowable_types:
@@ -473,6 +474,11 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
     else:
         type_a[5] = -1
 
+    if '70' in allowable_types:
+        type_a[6] = 70
+    else:
+        type_a[6] = -1
+
     # Tetrahedrals (legacy and current)
     cdef int [2] type_b
     if '92' in allowable_types:
@@ -492,10 +498,10 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
         allow_200 = 0
 
     # shell types
-    planetype = ['42', '82', '154', '181', '182', '183', '223', '281']
-    cdef int n_type_c = 8
+    planetype = ['42', '82', '152', '154', '181', '182', '183', '223', '281']
+    cdef int n_type_c = 9
     assert n_type_c == len(planetype)
-    cdef int [8] typeC
+    cdef int [9] typeC
     for i, atype in enumerate(planetype):
         if atype in allowable_types:
             typeC[i] = int(atype)
@@ -575,7 +581,7 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
         elem_etype = elem_type[etype[i]]
         cstart = ccount
 
-        for j in range(6):
+        for j in range(7):
             if elem_etype == type_a[j]:
                 enum[ecount] = raw_enum[i]
                 etype_out[ecount] = elem_etype

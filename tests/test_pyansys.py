@@ -4,13 +4,8 @@ import pytest
 import numpy as np
 
 import pyansys
-from pyansys.examples import hexarchivefile
-from pyansys.examples import rstfile
-from pyansys.examples import fullfile
-try:
-    from pyvista.plotting import running_xserver as system_supports_plotting
-except:
-    from pyvista.plotting import system_supports_plotting
+from pyansys.examples import rstfile, fullfile
+from pyvista.plotting import system_supports_plotting
 
 
 test_path = os.path.dirname(os.path.abspath(__file__))
@@ -20,7 +15,7 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 HAS_FFMPEG = True
 try:
     import imageio_ffmpeg
-except:
+except ImportError:
     HAS_FFMPEG = False
 
 
@@ -71,10 +66,10 @@ def test_animate_nodal_solution(tmpdir):
     result = pyansys.read_binary(rstfile)
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
-                                off_screen=True)
+                                  off_screen=True)
     assert np.any(result.grid.points)
     assert os.path.isfile(temp_movie)
-    
+
 
 def test_loadbeam():
     linkresult = os.path.join(testfiles_path, 'link1.rst')
@@ -88,4 +83,3 @@ def test_fullreader():
     assert dofref.size
     assert k.size
     assert m.size
-

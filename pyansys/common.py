@@ -240,21 +240,21 @@ def parse_header(table, keys):
     counter = Counter(keys)
     del counter['0']
 
-    #initialize lists/arrays
+    # initialize lists/arrays
     for key, count in counter.items():
         if count > 1:
-            header[key]=[]
-            
+            header[key] = []
+
     for i, key in enumerate(keys):
         if i > max_entry:
             header[key] = 0
         else:
-            if counter[key]>1: # multiple items in the header -> list/array
-                if table[i]: # skip zeros
+            if counter[key]>1:  # multiple items in the header -> list/array
+                if table[i]:  # skip zeros
                     header[key].append(table[i])
             else:
                 header[key] = table[i] 
-    
+
     for key in keys:
         if 'ptr' in key and key[-1] == 'h':
             basekey = key[:-1]
@@ -378,9 +378,8 @@ def midside_mask(grid):
     -------
     mask : bool np.ndarray
         True when a midside node.
-
     """
     return _binary_reader.midside_mask(grid.celltypes,
-                                   grid.cells,
-                                   grid.offset,
-                                   grid.number_of_points)
+                                       grid.cells,
+                                       grid.offset,
+                                       grid.number_of_points)
