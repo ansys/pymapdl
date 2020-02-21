@@ -356,19 +356,37 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                            &type_flag, &size)
 
         # rotate out of element coordinate system
-        if as_global and eul_ptr > 0:
+        if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:
             # read in euler angles
             read_record_stream(binfile, ele_table + eul_ptr,
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
-            
-            # verify there are actually euler angles
-            if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
-                # if element_type == 181 or element_type == 281:
-                #     # rotate the first four nodal results
-                #     euler_rotate_shell(arr, tmpbuffer, nitem)
-                # else:
-                #     # generalized
-                euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
+
+            if size == 3:
+                # --For uniform reduced integration lower-order 
+                # elements (e.g. PLANE182, KEYOPT(1)=1 and
+                # SOLID185 KEYOPT(2)=1):
+                # the angles are at the centroid and the number
+                # of items is 3.
+                if element_type == 181 or element_type == 281:
+                    euler_rotate_shell(arr, tmpbuffer, nitem)
+                else:
+                    euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
+            else:
+                for i in range(nnode_elem):
+                    euler_rotate(&arr[i*nitem], &tmpbuffer[3*i], nitem, 1)
+                # --For other formulations of lower-order 
+                # elements (e.g. PLANE182 and SOLID185) and
+                # the higher-order elements
+                # (e.g. PLANE183, SOLID186, and SOLID187):
+                # The number of items in this record is
+                # (nodstr*3).
+
+            # TODO: NOT IMPLEMENTED
+            # --For layered solid elements, add NL values,
+            # so that the number of items in this record 
+            # is (nodstr*3)+NL.
+
+
 
     return 0
 
@@ -409,20 +427,35 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
                            &type_flag, &size)
 
         # rotate out of element coordinate system
-        if as_global and eul_ptr > 0:
+        if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:
             # read in euler angles
             read_record_stream(binfile, ele_table + eul_ptr,
                                <void*>&tmpbuffer, &prec_flag, &type_flag, &size)
 
-            # verify there are actually euler angles
-            if tmpbuffer[0] or tmpbuffer[1] or tmpbuffer[2]:
-                # if element_type == 181 or element_type == 281:
-                #     # rotate the first four nodal results
-                #     euler_rotate_shell(arr, tmpbuffer, nitem)
-                # else:
-                #     # generalized
-                euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
-                
+            if size == 3:
+                # --For uniform reduced integration lower-order 
+                # elements (e.g. PLANE182, KEYOPT(1)=1 and
+                # SOLID185 KEYOPT(2)=1):
+                # the angles are at the centroid and the number
+                # of items is 3.
+                if element_type == 181 or element_type == 281:
+                    euler_rotate_shell(arr, tmpbuffer, nitem)
+                else:
+                    euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
+            else:
+                for i in range(nnode_elem):
+                    euler_rotate(&arr[i*nitem], &tmpbuffer[3*i], nitem, 1)
+                # --For other formulations of lower-order 
+                # elements (e.g. PLANE182 and SOLID185) and
+                # the higher-order elements
+                # (e.g. PLANE183, SOLID186, and SOLID187):
+                # The number of items in this record is
+                # (nodstr*3).
+
+            # TODO: NOT IMPLEMENTED
+            # --For layered solid elements, add NL values,
+            # so that the number of items in this record 
+            # is (nodstr*3)+NL.
 
     return 0
 
@@ -535,7 +568,7 @@ cdef inline void euler_rotate(float_or_double *arr,
         s_xz = arr[i*nitem + 5]
 
         # store rotated component stresses 
-        # XX (good)
+        # XX
         arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + (c1*s3 + c3*s1*s2)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2))
 
         # YY
@@ -544,7 +577,7 @@ cdef inline void euler_rotate(float_or_double *arr,
         # ZZ
         arr[i*nitem + 2] = c2*c3*(c2*c3*s_zz - c2*s3*s_xz + s2*s_yz) - c2*s3*(c2*c3*s_xz - c2*s3*s_xx + s2*s_xy) + s2*(c2*c3*s_yz - c2*s3*s_xy + s2*s_yy)
 
-        # XY (good)
+        # XY
         arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2)) + (-c1*c3*s2 + s1*s3)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2))
 
         # YZ
@@ -554,16 +587,16 @@ cdef inline void euler_rotate(float_or_double *arr,
         arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2))
 
 
-def read_nodal_values_adv(filename, uint8 [::1] celltypes,
-                          int64_t [::1] ele_ind_table,
-                          int64_t [::1] offsets, int64_t [::1] cells,
-                          int nitems,
-                          int npoints,
-                          int [::1] nodstr, int [::1] etype,
-                          int [::1] element_type,
-                          int result_index,
-                          float_or_double [::1] dtype_arr,
-                          int dtype):
+def read_nodal_values(filename, uint8 [::1] celltypes,
+                      int64_t [::1] ele_ind_table,
+                      int64_t [::1] offsets, int64_t [::1] cells,
+                      int nitems,
+                      int npoints,
+                      int [::1] nodstr, int [::1] etype,
+                      int [::1] element_type,
+                      int result_index,
+                      float_or_double [::1] dtype_arr,
+                      int dtype):
     """Read nodal results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray

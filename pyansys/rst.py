@@ -1962,19 +1962,19 @@ class ResultFile(AnsysBinary):
             tarr = np.empty(1, np.float32)
             my_dtype = 0
 
-        data, ncount = _binary_reader.read_nodal_values_adv(self.filename,
-                                                            self.grid.celltypes,
-                                                            ele_ind_table,
-                                                            self.grid.offset,
-                                                            self.grid.cells,
-                                                            nitem,
-                                                            self.grid.number_of_points,
-                                                            nodstr,
-                                                            etype,
-                                                            elemtype,
-                                                            result_index,
-                                                            tarr,
-                                                            my_dtype)
+        data, ncount = _binary_reader.read_nodal_values(self.filename,
+                                                        self.grid.celltypes,
+                                                        ele_ind_table,
+                                                        self.grid.offset,
+                                                        self.grid.cells,
+                                                        nitem,
+                                                        self.grid.number_of_points,
+                                                        nodstr,
+                                                        etype,
+                                                        elemtype,
+                                                        result_index,
+                                                        tarr,
+                                                        my_dtype)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]

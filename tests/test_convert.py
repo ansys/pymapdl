@@ -17,6 +17,7 @@ def test_convert(tmpdir):
     if pyansys.has_ansys:
         exec(open(pyscript).read())
 
+
 def test_convert_no_use_function_names(tmpdir):
     vm_file = os.path.join(testfiles_path, 'vm1.dat')
     pyscript = str(tmpdir.mkdir("tmpdir").join('vm1.py'))
