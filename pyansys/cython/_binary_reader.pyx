@@ -438,13 +438,8 @@ cdef inline void euler_rotate_shell(float_or_double *arr,
 
     # used sympy to generate these equations
     tensor = np.matrix([[s_xx, s_xy, s_xz], 
-                        [s_yx, s_yy, s_yz], 
-                        [s_zx, s_zy, s_zz]])
-
-    # which is the same as ...
-    tensor = np.matrix([[ s_xx,  s_xy, s_xz], 
-                        [-s_xy,  s_yy, s_yz], 
-                        [-s_zx, -s_zy, s_zz]])
+                        [s_xy, s_yy, s_yz], 
+                        [s_xz, s_yz, s_zz]])
 
     # always zero for shell elements...
     s_xz = 0
@@ -501,9 +496,9 @@ cdef inline void euler_rotate(float_or_double *arr,
     c1, c2, c3, s1, s2, s3 = symbols('c1 c2 c3 s1 s2 s3')
     s_xx, s_xy, s_yy, s_xz, s_yz, s_zz = symbols('s_xx s_xy s_yy s_xz s_yz s_zz')
 
-    tensor = np.matrix([[ s_xx,  s_xy, s_xz], 
-                        [-s_xy,  s_yy, s_yz], 
-                        [-s_xz, -s_yz, s_zz]])
+    tensor = np.matrix([[s_xx, s_xy, s_xz], 
+                        [s_xy, s_yy, s_yz], 
+                        [s_xz, s_yz, s_zz]])
 
     R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
                 [-s1*c2, c1*c2, s2],
@@ -541,22 +536,22 @@ cdef inline void euler_rotate(float_or_double *arr,
 
         # store rotated component stresses 
         # XX (good)
-        arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2)) + (c1*c3 - s1*s2*s3)*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2)) + (c1*s3 + c3*s1*s2)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2))
+        arr[i*nitem + 0] = -c2*s1*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2)) + (c1*c3 - s1*s2*s3)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + (c1*s3 + c3*s1*s2)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2))
 
         # YY
-        arr[i*nitem + 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) - s_yz*(-c1*c3*s2 + s1*s3)) + (-c1*c3*s2 + s1*s3)*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) + (c1*s2*s3 + c3*s1)*(-c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) - s_xz*(-c1*c3*s2 + s1*s3))
+        arr[i*nitem + 1] = c1*c2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) + s_yz*(-c1*c3*s2 + s1*s3)) + (-c1*c3*s2 + s1*s3)*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) + (c1*s2*s3 + c3*s1)*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) + s_xz*(-c1*c3*s2 + s1*s3))
 
         # ZZ
-        arr[i*nitem + 2] = c2*c3*(c2*c3*s_zz - c2*s3*s_xz + s2*s_yz) - c2*s3*(-c2*c3*s_xz - c2*s3*s_xx - s2*s_xy) + s2*(-c2*c3*s_yz - c2*s3*s_xy + s2*s_yy)
+        arr[i*nitem + 2] = c2*c3*(c2*c3*s_zz - c2*s3*s_xz + s2*s_yz) - c2*s3*(c2*c3*s_xz - c2*s3*s_xx + s2*s_xy) + s2*(c2*c3*s_yz - c2*s3*s_xy + s2*s_yy)
 
         # XY (good)
-        arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2)) + (-c1*c3*s2 + s1*s3)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) + (c1*s2*s3 + c3*s1)*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2))
+        arr[i*nitem + 3] = c1*c2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2)) + (-c1*c3*s2 + s1*s3)*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) + (c1*s2*s3 + c3*s1)*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2))
 
         # YZ
-        arr[i*nitem + 4] = c2*c3*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) - c2*s3*(-c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) - s_xz*(-c1*c3*s2 + s1*s3)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) - s_yz*(-c1*c3*s2 + s1*s3))
+        arr[i*nitem + 4] = c2*c3*(c1*c2*s_yz + s_xz*(c1*s2*s3 + c3*s1) + s_zz*(-c1*c3*s2 + s1*s3)) - c2*s3*(c1*c2*s_xy + s_xx*(c1*s2*s3 + c3*s1) + s_xz*(-c1*c3*s2 + s1*s3)) + s2*(c1*c2*s_yy + s_xy*(c1*s2*s3 + c3*s1) + s_yz*(-c1*c3*s2 + s1*s3))
 
         # XZ
-        arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) - s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) - s_yz*(c1*s3 + c3*s1*s2))
+        arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2))
 
 
 def read_nodal_values_adv(filename, uint8 [::1] celltypes,
