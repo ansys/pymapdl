@@ -1239,7 +1239,6 @@ class ResultFile(AnsysBinary):
                                                nitem, elemtype,
                                                as_global=not in_element_coord_sys)
 
-
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
 

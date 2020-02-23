@@ -78,7 +78,7 @@ cdef uint8 VTK_QUADRATIC_PYRAMID = 27
 cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
-cdef double DEG2RAD = 0.0174532925
+cdef double DEG2RAD = 0.017453292519943295
 
 ctypedef fused index_type:
     int
@@ -329,13 +329,14 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float [64] tmpbuffer  # for euler results
+    cdef char [16384] tmp_data_buffer
     cdef float [3] eulerangles
     cdef short* spointers = <short*>pointers
 
-    # store elemenet element result pointers
+    # store element result pointers
     read_record_stream(binfile, ele_table, <void*>&pointers,
                        &prec_flag, &type_flag, &size)
-
+ 
     if prec_flag:
         ptr = spointers[result_index]
         eul_ptr = spointers[PTR_EUL_IDX]
@@ -352,8 +353,14 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                 arr[j*nitem + k] = 0  # consider putting NAN instead
     else:
         # read the stresses evaluated at the intergration points or nodes
-        read_record_stream(binfile, ele_table + ptr, <void*>arr, &prec_flag,
-                           &type_flag, &size)
+        # arr is incremented in read_record_stream
+        read_record_stream(binfile, ele_table + ptr, <void*>tmp_data_buffer,
+                           &prec_flag, &type_flag, &size)
+
+        # copy to main array
+        if prec_flag:
+            for i in range(size):
+                arr[i] = (<float*>tmp_data_buffer)[i]
 
         # rotate out of element coordinate system
         if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:
@@ -372,21 +379,19 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
                 else:
                     euler_rotate(arr, tmpbuffer, nitem, nnode_elem)
             else:
-                for i in range(nnode_elem):
-                    euler_rotate(&arr[i*nitem], &tmpbuffer[3*i], nitem, 1)
                 # --For other formulations of lower-order 
                 # elements (e.g. PLANE182 and SOLID185) and
                 # the higher-order elements
                 # (e.g. PLANE183, SOLID186, and SOLID187):
                 # The number of items in this record is
                 # (nodstr*3).
+                for i in range(nnode_elem):
+                    euler_rotate(&arr[i*nitem], &tmpbuffer[3*i], nitem, 1)
 
             # TODO: NOT IMPLEMENTED
             # --For layered solid elements, add NL values,
             # so that the number of items in this record 
             # is (nodstr*3)+NL.
-
-
 
     return 0
 
@@ -529,10 +534,11 @@ cdef inline void euler_rotate(float_or_double *arr,
     c1, c2, c3, s1, s2, s3 = symbols('c1 c2 c3 s1 s2 s3')
     s_xx, s_xy, s_yy, s_xz, s_yz, s_zz = symbols('s_xx s_xy s_yy s_xz s_yz s_zz')
 
-    tensor = np.matrix([[s_xx, s_xy, s_xz], 
-                        [s_xy, s_yy, s_yz], 
+    tensor = np.matrix([[s_xx, s_xy, s_xz],
+                        [s_xy, s_yy, s_yz],
                         [s_xz, s_yz, s_zz]])
 
+    # from: https://www.simutechgroup.com/tips-and-tricks/fea-articles/286-fea-tips-tricks-ansys-rotation-convention
     R = Matrix([[c1*c3 - s1*s2*s3, s1*c3 + c1*s2*s3, -s3*c2],
                 [-s1*c2, c1*c2, s2],
                 [c1*s3 + s1*s2*c3, s1*s3 - c1*c3*s2, c2*c3]])
@@ -711,7 +717,8 @@ wedge_ind[4] = 5
 wedge_ind[5] = 4
 
 cdef inline void read_wedge(int64_t [::1] cells, int64_t index, int [::1] ncount,
-                           float_or_double [:, ::1] data, float_or_double [:, ::1] bufferdata,
+                           float_or_double [:, ::1] data,
+                            float_or_double [:, ::1] bufferdata,
                            int nitems) nogil:
     """
     [0, 1, 2, 2, 3, 4, 5, 5]
