@@ -634,7 +634,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         -----
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) then use
-        
+
         >>> with ansys.non_interactive:
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
@@ -643,7 +643,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
-            import pdb; pdb.set_trace()
             exception = Exception('Invalid pyansys command "%s"\n\n%s' %
                                   (command, INVAL_COMMANDS[command[:3]]))
             raise exception
@@ -652,7 +651,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                                   (command, INVAL_COMMANDS[command[:4]]))
             raise exception
         elif write_to_log and self.apdl_log is not None:
-            self.apdl_log.write('%s\n' % command)
+            if not self.apdl_log.closed:
+                self.apdl_log.write('%s\n' % command)
 
         if command[:4] in self.redirected_commands:
             function = self.redirected_commands[command[:4]]
@@ -1334,11 +1334,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         This is requested from the active mapdl instance
         """
-        try:
-            self._jobname = self.inquire(func='JOBNAME').split('=')[1].strip()
-        except:
-            pass
-        return self._jobname
+        return self.inquire('JOBNAME')
 
     def inquire(self, func):
         """Returns system information
@@ -1385,11 +1381,12 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         >>> mapdl.inquire('RSTFILE')
         'file.rst'
         """
+        response = ''
         try:
-            response = self.run(f'/INQUIRE, , {func}')
+            response = self.run(f'/INQUIRE, , %s' % func)
             return response.split('=')[1].strip()
         except IndexError:
-            raise Exception(f'Cannot parse {response}')
+            raise RuntimeError(f'Cannot parse %s' % response)
 
     def Run(self, command):
         msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +
