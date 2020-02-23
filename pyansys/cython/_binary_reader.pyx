@@ -295,7 +295,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
                             int64_t [::1] nodstr, int64_t [::1] etype,
-                            float [:, ::1] ele_data_arr, int nitem,
+                            double [:, ::1] ele_data_arr, int nitem,
                             int [::1] element_type,
                             int as_global=1):
     """Read element results from ANSYS directly into a numpy array
@@ -313,9 +313,9 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     for i in range(len(ele_ind_table)):
         nnode_elem = nodstr[etype[i]]
 
-        read_element_result_float(binfile, ele_ind_table[i],
-                            PTR_ENS_IDX, nnode_elem, nitem,
-                            &ele_data_arr[c, 0], element_type[i], as_global)
+        read_element_result_double(binfile, ele_ind_table[i],
+                                   PTR_ENS_IDX, nnode_elem, nitem,
+                                   &ele_data_arr[c, 0], element_type[i], as_global)
         c += nnode_elem
 
 
@@ -396,6 +396,92 @@ cdef inline int read_element_result_float(ifstream *binfile, int64_t ele_table,
     return 0
 
 
+cdef inline int read_element_result_double(ifstream *binfile, int ele_table,
+                                           int result_index,
+                                           int nnode_elem, int nitem, double *arr,
+                                           int element_type, int as_global=1):
+    """Populate array with results from a single element"""
+    cdef int i, j, k, c, ptr, eul_ptr
+    cdef int [4096] pointers  # tmp array of pointers
+    cdef int prec_flag, type_flag, size
+    cdef char [16384] tmp_data_buffer
+    cdef double [512] euler_angles  # 8*3*20 -->512
+    cdef short* spointers = <short*>pointers
+
+    # store elemenet element result pointers
+    read_record_stream(binfile, ele_table, <void*>&pointers,
+                       &prec_flag, &type_flag, &size)
+
+    if prec_flag:
+        ptr = spointers[result_index]
+        eul_ptr = spointers[PTR_EUL_IDX]
+    else:
+        ptr = pointers[result_index]
+        eul_ptr = pointers[PTR_EUL_IDX]
+
+    if ptr == 0:
+        return 1
+    if ptr < 0:  # negative pointer means missing data
+        # skip this element
+        for j in range(nnode_elem):
+            for k in range(nitem):
+                arr[j*nitem + k] = 0  # consider putting NAN instead
+    else:
+        # read the stresses evaluated at the intergration points or nodes
+        read_record_stream(binfile, ele_table + ptr, <void*>tmp_data_buffer,
+                           &prec_flag, &type_flag, &size)
+
+        # copy to main array
+        if prec_flag:
+            for i in range(size):
+                arr[i] = <double>(<float*>tmp_data_buffer)[i]
+        else:
+            # we don't need to copy here
+            for i in range(size):
+                arr[i] = (<double*>tmp_data_buffer)[i]
+
+        # rotate out of element coordinate system
+        if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:
+            # read in euler angles
+            read_record_stream(binfile, ele_table + eul_ptr,
+                               <void*>tmp_data_buffer, &prec_flag, &type_flag, &size)
+
+            # copy to main array
+            if prec_flag:
+                for i in range(size):
+                    euler_angles[i] = <double>(<float*>tmp_data_buffer)[i]
+            else:  # we don't need to copy here...
+                for i in range(size):
+                    euler_angles[i] = (<double*>tmp_data_buffer)[i]            
+
+            if size == 3:
+                # --For uniform reduced integration lower-order 
+                # elements (e.g. PLANE182, KEYOPT(1)=1 and
+                # SOLID185 KEYOPT(2)=1):
+                # the angles are at the centroid and the number
+                # of items is 3.
+                # if element_type == 181 or element_type == 281:
+                    # euler_rotate_shell(arr, euler_angles, nitem)
+                # else:
+                euler_rotate(arr, euler_angles, nitem, nnode_elem)
+            else:
+                for i in range(nnode_elem):
+                    euler_rotate(&arr[i*nitem], &euler_angles[3*i], nitem, 1)
+                # --For other formulations of lower-order 
+                # elements (e.g. PLANE182 and SOLID185) and
+                # the higher-order elements
+                # (e.g. PLANE183, SOLID186, and SOLID187):
+                # The number of items in this record is
+                # (nodstr*3).
+
+            # TODO: NOT IMPLEMENTED
+            # --For layered solid elements, add NL values,
+            # so that the number of items in this record 
+            # is (nodstr*3)+NL.
+
+    return 0
+
+
 cdef inline int read_element_result(ifstream *binfile, int ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, float_or_double *arr,
@@ -405,7 +491,6 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef float_or_double [64] tmpbuffer  # for euler results
-    cdef float_or_double [3] eulerangles
     cdef short* spointers = <short*>pointers
 
     # store elemenet element result pointers

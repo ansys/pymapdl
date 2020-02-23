@@ -1062,8 +1062,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     @property
     def results(self):
         """ Returns a binary interface to the result file """
-        warnings.warn('Depreciated.  Use "result" instead')
-        return self.result
+        raise NotImplementedError('Depreciated.  Use "result" instead')
 
     @property
     def result(self):
@@ -1333,13 +1332,64 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def jobname(self):
         """MAPDL job name.
 
-        This is requested from teh active mapdl instance
+        This is requested from the active mapdl instance
         """
         try:
             self._jobname = self.inquire(func='JOBNAME').split('=')[1].strip()
         except:
             pass
         return self._jobname
+
+    def inquire(self, func):
+        """Returns system information
+
+        Parameters
+        ----------
+        func : str
+           Specifies the type of system information returned.  See the
+           notes section for more information.
+
+        Returns
+        -------
+        value : str
+            Value of the inquired item.
+
+        Notes
+        -----
+        Allowable func entries
+        LOGIN - Returns the pathname of the login directory on Linux
+        systems or the pathname of the default directory (including
+        drive letter) on Windows systems.
+
+        - ``DOCU`` - Pathname of the ANSYS docu directory.
+        - ``APDL`` - Pathname of the ANSYS APDL directory.
+        - ``PROG`` - Pathname of the ANSYS executable directory.
+        - ``AUTH`` - Pathname of the directory in which the license file resides.
+        - ``USER`` - Name of the user currently logged-in.
+        - ``DIRECTORY`` - Pathname of the current directory.
+        - ``JOBNAME`` - Current Jobname.
+        - ``RSTDIR`` - Result file directory
+        - ``RSTFILE`` - Result file name
+        - ``RSTEXT`` - Result file extension
+        - ``OUTPUT`` - Current output file name
+
+        Examples
+        --------
+        Return the job name
+
+        >>> mapdl.inquire('JOBNAME')
+        'file'
+
+        Return the result file name
+
+        >>> mapdl.inquire('RSTFILE')
+        'file.rst'
+        """
+        try:
+            response = self.run(f'/INQUIRE, , {func}')
+            return response.split('=')[1].strip()
+        except IndexError:
+            raise Exception(f'Cannot parse {response}')
 
     def Run(self, command):
         msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +

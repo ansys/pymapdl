@@ -1229,8 +1229,8 @@ class ResultFile(AnsysBinary):
 
             # add extra elements to data array.  Sometimes there are
             # more items than listed in the result header (or there's a mistake here)
-            ele_data_arr = np.empty((nelemnode + 50, nitem), np.float32)  
-            ele_data_arr[:] = np.nan
+            ele_data_arr = np.empty((nelemnode + 50, nitem), np.float64)
+            ele_data_arr[:] = np.nan  # necessary?  should do this in read stress
 
             _binary_reader.read_element_stress(self.filename,
                                                ele_ind_table,
