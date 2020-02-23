@@ -1383,10 +1383,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         """
         response = ''
         try:
-            response = self.run(f'/INQUIRE, , %s' % func)
+            response = self.run('/INQUIRE, , %s' % func)
             return response.split('=')[1].strip()
         except IndexError:
-            raise RuntimeError(f'Cannot parse %s' % response)
+            raise RuntimeError('Cannot parse %s' % response)
 
     def Run(self, command):
         msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +
