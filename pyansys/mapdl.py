@@ -1067,10 +1067,16 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     @property
     def result(self):
         """ Returns a binary interface to the result file """
-        resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
+        try:
+            result_path = self.inquire('RSTFILE')
+            if not os.path.dirname(result_path):
+                result_path = os.path.join(self.path, result_path)
+        except:
+            resultfile = os.path.join(self.path, '%s.rst' % self._jobname)
+
         if not os.path.isfile(resultfile):
-            raise Exception('No results found at %s' % resultfile)
-        return pyansys.read_binary(resultfile)
+            raise FileNotFoundError('No results found at %s' % result_path)
+        return pyansys.read_binary(result_path)
 
     def __call__(self, command, **kwargs):
         return self.run(command, **kwargs)
