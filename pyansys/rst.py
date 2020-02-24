@@ -1229,8 +1229,8 @@ class ResultFile(AnsysBinary):
 
             # add extra elements to data array.  Sometimes there are
             # more items than listed in the result header (or there's a mistake here)
-            ele_data_arr = np.empty((nelemnode + 50, nitem), np.float32)  
-            ele_data_arr[:] = np.nan
+            ele_data_arr = np.empty((nelemnode + 50, nitem), np.float64)
+            ele_data_arr[:] = np.nan  # necessary?  should do this in read stress
 
             _binary_reader.read_element_stress(self.filename,
                                                ele_ind_table,
@@ -1238,7 +1238,6 @@ class ResultFile(AnsysBinary):
                                                etype, ele_data_arr,
                                                nitem, elemtype,
                                                as_global=not in_element_coord_sys)
-
 
             if nitem != 6:
                 ele_data_arr = ele_data_arr[:, :6]
@@ -1397,11 +1396,6 @@ class ResultFile(AnsysBinary):
         """
         # get component stress
         nodenum, stress = self.nodal_stress(rnum)
-
-        # compute principle stress
-        if stress.dtype != np.float32:
-            stress = stress.astype(np.float32)
-
         pstress, isnan = _binary_reader.compute_principal_stress(stress)
         pstress[isnan] = np.nan
         return nodenum, pstress
@@ -1955,12 +1949,12 @@ class ResultFile(AnsysBinary):
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
 
-        if self.version < 14.5:  # values stored as double precision
-            tarr = np.empty(1, np.float64)
-            my_dtype = 1
-        else:    # values stored as single precision
-            tarr = np.empty(1, np.float32)
-            my_dtype = 0
+        # if self.version < 14.5:  # values stored as double precision
+        # tarr = np.empty(1, np.float64)
+            # my_dtype = 1
+        # else:    # values stored as single precision
+        #     tarr = np.empty(1, np.float32)
+        #     my_dtype = 0
 
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                         self.grid.celltypes,
@@ -1972,9 +1966,7 @@ class ResultFile(AnsysBinary):
                                                         nodstr,
                                                         etype,
                                                         elemtype,
-                                                        result_index,
-                                                        tarr,
-                                                        my_dtype)
+                                                        result_index)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]

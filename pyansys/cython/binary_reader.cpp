@@ -166,7 +166,8 @@ char* ReadBsparseRecord(T *buffer, int *size){
   return (char*)vec;
 }
 
-// read binary sparse record to a vector
+
+// read binary sparse record and store in a vector
 template <class T>
 void ReadBsparseRecordToVec(int *raw, int *size, T*vec){
   *size = *raw++;
@@ -186,8 +187,7 @@ void ReadBsparseRecordToVec(int *raw, int *size, T*vec){
 
 
 
-char* ReadShortBsparseRecord(int *raw, int *size)
-{
+char* ReadShortBsparseRecord(int *raw, int *size){
   *size = *raw++;
   int bitcod = *raw++;
 
@@ -457,7 +457,6 @@ char* ReadWindowedSparseBufferShort(int *raw, int *size, short *vec){
 
   return (char*)vec;
 }
-
 
 
 // read a record and return the pointer to the array

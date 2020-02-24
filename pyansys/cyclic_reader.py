@@ -554,20 +554,53 @@ class CyclicResult(ResultFile):
 
     def principal_nodal_stress(self, rnum, phase=0, as_complex=False,
                                full_rotor=False):
-        """
-        Returns principal nodal stress for a cumulative result
+        """Computes the principal component stresses for each node in
+        the solution.
 
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        phase : float
+            Phase adjustment of the stress in degrees.
+
+        as_complex : bool, optional
+            Returns result as a complex number, otherwise as the real
+            part rotated by phase.  Default False.
+
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        Returns
+        -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
+        pstress : numpy.ndarray
+            Principal stresses, stress intensity, and equivalant stress.
+            [sigma1, sigma2, sigma3, sint, seqv]
+
+        Notes
+        -----
+        ANSYS equivalant of:
+        PRNSOL, S, PRIN
+
+        which returns:
+        S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
+        equivalent stress.
         """
         if as_complex and full_rotor:
             raise Exception('complex and full_rotor cannot both be True')
-        
+
         # get component stress
         nnum, stress = self.nodal_stress(rnum, phase, as_complex, full_rotor)
 
         # compute principle stress
         if as_complex:
-            stress_r = np.imag(stress).astype(np.float32)
-            stress = np.real(stress).astype(np.float32)
+            stress_r = np.imag(stress)
+            stress = np.real(stress)
 
             pstress, isnan = _binary_reader.compute_principal_stress(stress)
             pstress[isnan] = np.nan
@@ -577,20 +610,14 @@ class CyclicResult(ResultFile):
             return nnum, pstress + 1j*pstress_r
 
         elif full_rotor:
-            if stress.dtype != np.float32:
-                stress = stress.astype(np.float32)
-
             # compute principle stress
-            pstress = np.empty((self.n_sector, stress.shape[1], 5), np.float32)
+            pstress = np.empty((self.n_sector, stress.shape[1], 5), np.float64)
             for i in range(stress.shape[0]):
                 pstress[i], isnan = _binary_reader.compute_principal_stress(stress[i])
                 pstress[i, isnan] = np.nan
             return nnum, pstress
 
         else:
-            if stress.dtype != np.float32:
-                stress = stress.astype(np.float32)
-
             pstress, isnan = _binary_reader.compute_principal_stress(stress)
             pstress[isnan] = np.nan
             return nnum, pstress

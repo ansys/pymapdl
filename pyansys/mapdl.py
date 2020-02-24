@@ -352,8 +352,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         start.
 
     interactive_plotting : bool, optional
-        Enables interactive plotting using matplotlib.  Install
-        matplotlib first.  Default False.
+        Enables interactive plotting using ``matplotlib``.  Default
+        False.
 
     log_broadcast : bool, optional
         Additional logging for ansys solution progress.  Default True
@@ -487,15 +487,15 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         """
         Opens up ANSYS an ansys process using either pexpect or
         ansys_corba.
-        """ 
+        """
         if (int(self.version) < 170 and os.name == 'posix') or self.prefer_pexpect:
-            self.open_process(self.nproc, self.start_timeout, additional_switches)
+            self._open_process(self.nproc, self.start_timeout, additional_switches)
         else:  # use corba
             self.open_corba(self.nproc, self.start_timeout, additional_switches)
 
             # separate logger for broadcast file
             if self.log_broadcast:
-                self.broadcast_logger = Thread(target=ANSYS.start_broadcast_logger,
+                self.broadcast_logger = Thread(target=ANSYS._start_broadcast_logger,
                                                args=(weakref.proxy(self),))
                 self.broadcast_logger.start()
 
@@ -521,13 +521,13 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.apdl_log.write('! APDL script generated using pyansys %s\n' %
                                 pyansys.__version__)
 
-    def close_apdl_log(self):
+    def _close_apdl_log(self):
         """ Closes APDL log """
         if self.apdl_log is not None:
             self.apdl_log.close()
         self.apdl_log = None
 
-    def open_process(self, nproc, timeout, additional_switches):
+    def _open_process(self, nproc, timeout, additional_switches):
         """ Opens an ANSYS process using pexpect """
         command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
                                           additional_switches)
@@ -577,11 +577,11 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             else:
                 return self.process.isalive()
 
-    def start_broadcast_logger(self, update_rate=1.0):
+    def _start_broadcast_logger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
         # listen to broadcast file
         loadstep = 0
-        overall_progress = 0        
+        overall_progress = 0
         try:
             old_tail = ''
             old_size = 0
@@ -616,8 +616,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         Parameters
         ----------
         command : str
-            ANSYS APDL command.  
-            
+            ANSYS APDL command.
+
             These commands will be written to a temporary input file and then run
             using /INPUT.
 
@@ -634,7 +634,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         -----
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) then use
-        
+
         >>> with ansys.non_interactive:
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
@@ -643,7 +643,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
-            import pdb; pdb.set_trace()
             exception = Exception('Invalid pyansys command "%s"\n\n%s' %
                                   (command, INVAL_COMMANDS[command[:3]]))
             raise exception
@@ -652,7 +651,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                                   (command, INVAL_COMMANDS[command[:4]]))
             raise exception
         elif write_to_log and self.apdl_log is not None:
-            self.apdl_log.write('%s\n' % command)
+            if not self.apdl_log.closed:
+                self.apdl_log.write('%s\n' % command)
 
         if command[:4] in self.redirected_commands:
             function = self.redirected_commands[command[:4]]
@@ -695,9 +695,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 with self.non_interactive:
                     return self.run(command)
             else:
-                return self.run_corba_command(command)
+                return self._run_corba_command(command)
         else:
-            return self.run_process_command(command)
+            return self._run_process_command(command)
 
     # def store_processor(self, command):
     #     """ Check if a command is changing the processor and store it
@@ -729,7 +729,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         else:
             raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
 
-    def run_process_command(self, command, return_response=True):
+    def _run_process_command(self, command, return_response=True):
         """ Sends command and returns ANSYS's response """
         if not self.process.isalive():
             raise Exception('ANSYS process closed')
@@ -834,7 +834,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
         return processor
 
-    def run_corba_command(self, command):
+    def _run_corba_command(self, command):
         """
         Sends a command to the mapdl server
 
@@ -1009,9 +1009,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.log.error('kill: %s', str(e))
 
         try:
-            self.close_apdl_log()
+            self._close_apdl_log()
         except Exception as e:
-            self.log.error('Close_apdl_log: %s', str(e))
+            self.log.error('Failed to close apdl log: %s', str(e))
 
     def Exit(self):
         msg = DeprecationWarning('\n"Exit" decpreciated.  \n' +
@@ -1062,16 +1062,21 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     @property
     def results(self):
         """ Returns a binary interface to the result file """
-        warnings.warn('Depreciated.  Use "result" instead')
-        return self.result
+        raise NotImplementedError('Depreciated.  Use "result" instead')
 
     @property
     def result(self):
         """ Returns a binary interface to the result file """
-        resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
-        if not os.path.isfile(resultfile):
-            raise Exception('No results found at %s' % resultfile)
-        return pyansys.read_binary(resultfile)
+        try:
+            result_path = self.inquire('RSTFILE')
+            if not os.path.dirname(result_path):
+                result_path = os.path.join(self.path, '%s.rst' % result_path)
+        except:
+            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
+
+        if not os.path.isfile(result_path):
+            raise FileNotFoundError('No results found at %s' % result_path)
+        return pyansys.read_binary(result_path)
 
     def __call__(self, command, **kwargs):
         return self.run(command, **kwargs)
@@ -1165,9 +1170,11 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         """
         def __init__(self, parent):
             self.parent = parent
+
         def __enter__(self):
             self.parent.log.debug('entering non-interactive mode')
             self.parent._store_commands = True
+
         def __exit__(self, type, value, traceback):
             self.parent.log.debug('entering non-interactive mode')
             self.parent._flush_stored()
@@ -1333,13 +1340,61 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def jobname(self):
         """MAPDL job name.
 
-        This is requested from teh active mapdl instance
+        This is requested from the active mapdl instance
         """
+        return self.inquire('JOBNAME')
+
+    def inquire(self, func):
+        """Returns system information
+
+        Parameters
+        ----------
+        func : str
+           Specifies the type of system information returned.  See the
+           notes section for more information.
+
+        Returns
+        -------
+        value : str
+            Value of the inquired item.
+
+        Notes
+        -----
+        Allowable func entries
+        LOGIN - Returns the pathname of the login directory on Linux
+        systems or the pathname of the default directory (including
+        drive letter) on Windows systems.
+
+        - ``DOCU`` - Pathname of the ANSYS docu directory.
+        - ``APDL`` - Pathname of the ANSYS APDL directory.
+        - ``PROG`` - Pathname of the ANSYS executable directory.
+        - ``AUTH`` - Pathname of the directory in which the license file resides.
+        - ``USER`` - Name of the user currently logged-in.
+        - ``DIRECTORY`` - Pathname of the current directory.
+        - ``JOBNAME`` - Current Jobname.
+        - ``RSTDIR`` - Result file directory
+        - ``RSTFILE`` - Result file name
+        - ``RSTEXT`` - Result file extension
+        - ``OUTPUT`` - Current output file name
+
+        Examples
+        --------
+        Return the job name
+
+        >>> mapdl.inquire('JOBNAME')
+        'file'
+
+        Return the result file name
+
+        >>> mapdl.inquire('RSTFILE')
+        'file.rst'
+        """
+        response = ''
         try:
-            self._jobname = self.inquire(func='JOBNAME').split('=')[1].strip()
-        except:
-            pass
-        return self._jobname
+            response = self.run('/INQUIRE, , %s' % func)
+            return response.split('=')[1].strip()
+        except IndexError:
+            raise RuntimeError('Cannot parse %s' % response)
 
     def Run(self, command):
         msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +

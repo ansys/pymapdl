@@ -6,7 +6,6 @@ import numpy as np
 import pyansys
 
 from pyvista.plotting import system_supports_plotting
-
 path = os.path.dirname(os.path.abspath(__file__))
 
 # rver = 'v150'
@@ -20,7 +19,12 @@ MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
             'v201': '/usr/ansys_inc/v201/ansys/bin/ansys201',
             'v202': '/usr/ansys_inc/v202/ansys/bin/ansys202'}
 
-HAS_ANSYS = os.path.isfile(MAPDLBIN[rver])
+if 'PYANSYS_IGNORE_ANSYS' in os.environ:
+    HAS_ANSYS = False
+else:
+    HAS_ANSYS = os.path.isfile(MAPDLBIN[rver])
+
+
 RSETS = list(zip(range(1, 9), [1]*8))
 
 
@@ -68,8 +72,19 @@ def mapdl():
     return mapdl
 
 
+@pytest.fixture(scope='function')
+def cleared(mapdl):
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.prep7()
+    yield
+
+
+###############################################################################
+# Testing binary reader
+###############################################################################
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_prnsol_u(mapdl, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
@@ -92,7 +107,7 @@ def test_prnsol_u(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_presol_s(mapdl, rset):
     mapdl.set(*rset)
 
@@ -119,7 +134,7 @@ def test_presol_s(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_prnsol_s(mapdl, rset):
     mapdl.set(*rset)
 
@@ -145,7 +160,7 @@ def test_prnsol_s(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_prnsol_prin(mapdl, rset):
     mapdl.set(*rset)
 
@@ -191,22 +206,135 @@ def test_read_para():
         arr, parm = load_parameters(para_file)
 
 
-# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 # def test_v150():
 #     mapdl = pyansys.Mapdl(MAPDLBIN['v150'], override=True)
 #     mapdl.prep7()
 #     mapdl.exit()
 
 
-# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 # def test_v182():
 #     mapdl = pyansys.Mapdl(MAPDLBIN['v182'], override=True)
 #     mapdl.prep7()
 #     mapdl.exit()
 
 
-# @pytest.mark.skipif(not pyansys.has_ansys, reason="Requires ANSYS installed")
+# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 # def test_v194():
 #     mapdl = pyansys.Mapdl(MAPDLBIN['v194'], override=True)
 #     mapdl.prep7()
 #     mapdl.exit()
+
+
+###############################################################################
+# Building elements
+###############################################################################
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_e(mapdl, cleared):
+    mapdl.et("", 183)
+    n0 = mapdl.n("", 0, 0, 0)
+    n1 = mapdl.n("", 1, 0, 0)
+    n2 = mapdl.n("", 1, 1, 0)
+    n3 = mapdl.n("", 0, 1, 1)
+    n4 = mapdl.n("", 0, 1, -1)
+    e0 = mapdl.e(n0, n1, n2, n3)
+    assert e0 == 1
+    e1 = mapdl.e(n0, n1, n2, n4)
+    assert e1 == 2
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_et(mapdl, cleared):
+    n_plane183 = mapdl.et("", "PLANE183")
+    assert n_plane183 == 1
+    n_compare = int(mapdl.get_float("ETYP", 0, "NUM", "MAX"))
+    assert n_plane183 == n_compare
+    n_plane183 = mapdl.et(17, "PLANE183")
+    assert n_plane183 == 17
+
+
+
+###############################################################################
+# Building geometry
+###############################################################################
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_k(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    assert k0 is 1
+    k1 = mapdl.k(2, 0, 0, 1)
+    assert k1 is 2
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_l(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    l0 = mapdl.l(k0, k1)
+    assert l0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_a(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 0, 1, 0)
+    a0 = mapdl.a(k0, k1, k2)
+    assert a0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_v(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 0, 1, 0)
+    k3 = mapdl.k("", 0, 0, 1)
+    v0 = mapdl.v(k0, k1, k2, k3)
+    assert v0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_n(cleared, mapdl):
+    n0 = mapdl.n("", 0, 0, 0)
+    assert n0 is 1
+    n1 = mapdl.n(2, 0, 0, 1)
+    assert n1 is 2
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_bsplin(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 2, 1, 0)
+    l0 = mapdl.bsplin(k0, k1, k2)
+    assert l0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_a(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    a0 = mapdl.a(k0, k1, k2, k3)
+    assert a0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_al(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k1, k2)
+    l2 = mapdl.l(k2, k3)
+    l3 = mapdl.l(k3, k0)
+    a0 = mapdl.al(l0, l1, l2, l3)
+    assert a0 is 1
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_invalid():
+    with pytest.raises(Exception):
+        mapdl.a(0, 0, 0, 0)
