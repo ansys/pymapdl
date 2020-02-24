@@ -1070,11 +1070,11 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         try:
             result_path = self.inquire('RSTFILE')
             if not os.path.dirname(result_path):
-                result_path = os.path.join(self.path, result_path)
+                result_path = os.path.join(self.path, '%s.rst' % result_path)
         except:
-            resultfile = os.path.join(self.path, '%s.rst' % self._jobname)
+            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
 
-        if not os.path.isfile(resultfile):
+        if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
