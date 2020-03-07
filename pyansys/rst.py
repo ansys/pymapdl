@@ -18,7 +18,7 @@ from pyansys.elements import valid_types
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
 
 from pyansys.common import (read_table, parse_header, AnsysBinary,
-                            read_standard_header, two_ints_to_long)
+                            read_standard_header, two_ints_to_long, rotate_to_global)
 
 # Create logger
 LOG = logging.getLogger(__name__)
@@ -691,10 +691,10 @@ class ResultFile(AnsysBinary):
         solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
 
         mask = solution_header['mask']
-        #PDBN = bool(mask & 0b1<<10)
-        pdnsl = bool(solution_header['AvailData'] & 0b1<<27)
-        PDVEL = bool(mask & 0b1<<27)
-        PDACC = bool(mask & 0b1<<28)
+        # PDBN = bool(mask & 0b1<<10)
+        pdnsl = bool(solution_header['AvailData'] & 0b1 << 27)
+        PDVEL = bool(mask & 0b1 << 27)
+        PDACC = bool(mask & 0b1 << 28)
 
         if solution_type == 'NSL' and not pdnsl:
             raise Exception("Result file does not contain nodal displacements.")
@@ -718,30 +718,28 @@ class ResultFile(AnsysBinary):
         # iterate over all loadsteps
         results = np.zeros((nsets, nnod, sumdof))
         for rnum in range(self.nsets):
-
             # Seek to result table and to get pointer to DOF
             # results of result table
-            rptr = self.read_record(rpointers[rnum])                
+            rsol_header = parse_header(self.read_record(rpointers[rnum]),
+                                       SOLUTION_DATA_HEADER_KEYS)
             if solution_type == 'NSL':  # Nodal Displacements
-                ptrSL = rptr[10] # item 12
+                ptr_sl = rsol_header['ptrNSL']
             elif solution_type == 'VEL':  # Nodal Velocities
-                # from items 131, 132
-                ptrSL = two_ints_to_long(rptr[130], rptr[131])
+                ptr_sl = rsol_header['ptrVSL']
             elif solution_type == 'ACC':  # Nodal Accelerations
-                # from items 133, 134
-                ptrSL = two_ints_to_long(rptr[132], rptr[133])
+                ptr_sl = rsol_header['ptrASL']
 
-            record, sz = self.read_record(rpointers[rnum] + ptrSL,
-                                 return_bufsize=True)
+            record, sz = self.read_record(rpointers[rnum] + ptr_sl,
+                                          return_bufsize=True)
             # nitems = record.size
             result = record.reshape((-1, sumdof))
 
             # PDBN should be set if only a subset of nodes was output
             # PDBN is set only when solution type: nodal solution/displacement
-            # PDBN is not set when solution type: acceleration, velocities 
+            # PDBN is not set when solution type: acceleration, velocities
             if record.size != sumdof*nnod:
                 # read the next record to the internal indexing reording
-                nodlist = self.read_record(rpointers[rnum] + ptrSL + sz)
+                nodlist = self.read_record(rpointers[rnum] + ptr_sl + sz)
 
                 # convert to zero index
                 sidx = nodlist -1
@@ -752,25 +750,15 @@ class ResultFile(AnsysBinary):
 
             results[rnum, sidx, :] = result
 
-
         if not in_nodal_coord_sys:
-            # ansys writes the results in the nodal coordinate system.
-            # Convert this to the global coordinate system  (in degrees)
             euler_angles = self.geometry['nodes'][self.insolution, 3:].T
-            theta_xy, theta_yz, theta_zx = euler_angles
+
             for rnum in range(nsets):
                 result = results[rnum, :, :]
-                if np.any(theta_xy):
-                    pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
-
-                if np.any(theta_yz):
-                    pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
-
-                if np.any(theta_zx):
-                    pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
+                rotate_to_global(result, euler_angles)
 
         # check for invalid values
-        # it seems mapdl writes invalid values as 2*100
+        # mapdl writes invalid values as 2*100
         results[results == 2**100] = 0
 
         # also include nodes in output
@@ -850,22 +838,12 @@ class ResultFile(AnsysBinary):
             # nodes = self.geometry['nodes'][sidx_inv][sidx][:, :3]
         else:
             nnum = self.nnum
-            result = result.take(self.sidx, 0)        
+            result = result.take(self.sidx, 0)
 
+        # Convert result to the global coordinate system
         if not in_nodal_coord_sys:
-            # ansys writes the results in the nodal coordinate system.
-            # Convert this to the global coordinate system  (in degrees)
             euler_angles = self.geometry['nodes'][self.insolution, 3:].T
-            theta_xy, theta_yz, theta_zx = euler_angles
-
-            if np.any(theta_xy):
-                pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
-
-            if np.any(theta_yz):
-                pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
-
-            if np.any(theta_zx):
-                pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
+            rotate_to_global(result, euler_angles)
 
         # check for invalid values
         # it seems mapdl writes invalid values as 2*100
@@ -1461,10 +1439,11 @@ class ResultFile(AnsysBinary):
         trans = np.hstack((csys['transformation matrix'],
                            csys['origin'].reshape(-1, 1)))
         matrix = trans_to_matrix(trans)
+
         if as_vtk_matrix:
             return matrix
-        else:
-            return pv.trans_from_matrix(matrix)
+
+        return pv.trans_from_matrix(matrix)
 
     def _plot_point_scalars(self, scalars, rnum=None, grid=None,
                             show_displacement=False, displacement_factor=1,

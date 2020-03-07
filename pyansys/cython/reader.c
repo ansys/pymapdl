@@ -214,7 +214,7 @@ __inline double fast_atof(char *raw, int fltsz, int*i){
 // Reads NBLOCK from ANSYS.  Raw string is from Python reader and file is
 // positioned at the start of the data of NBLOCK
 //=============================================================================
-int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
+int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
 		int fltsz, int *n, int EOL, int nexp){
 
 
@@ -234,10 +234,11 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int intsz,
         // Starts assuming file is positioned on node number
 
         // Read node number
-        nnum[k] = fast_atoi2(raw, intsz, &i);
+        nnum[k] = fast_atoi2(raw, intsz[0], &i);
 
         // skip fields 2 and 3
-        i += intsz*2;
+        i += intsz[1];
+	i += intsz[2];
 
         // Read next 6 fields
         for (t=0; t<7; ++t){

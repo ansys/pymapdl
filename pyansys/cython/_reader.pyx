@@ -17,7 +17,7 @@ cimport numpy as np
 
 
 cdef extern from "reader.h":
-    int read_nblock(char*, int*, double*, int, int, int, int*, int, int)
+    int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
                     int)
 
@@ -80,19 +80,6 @@ def read(filename, read_parameters=False, debug=False):
     cdef int EOL
     cdef int n = 0
     
-    # Detect end of line character
-    # while n < fsize:
-    #     if raw[n] == '\r':
-    #         EOL = 2
-    #         break
-    #     elif raw[n] == '\n':
-    #         EOL = 1
-    #         break
-    #     n += 1
-
-    # Reset line position
-    # n = 0
-    
     # Define variables
     cdef size_t l = 0
     cdef ssize_t read
@@ -128,6 +115,7 @@ def read(filename, read_parameters=False, debug=False):
     # CMBLOCK
     cdef int ncomp
     cdef int [::1] component
+    cdef int [::1] d_size
     cdef int nblock
     node_comps = {}
     elem_comps = {}
@@ -278,12 +266,12 @@ def read(filename, read_parameters=False, debug=False):
 
                 # Get format of NBLOCK
                 if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                d_size, f_size, nfld, nexp = block_format(line)
+                d_size, f_size, nfld, nexp = node_block_format(line)
                 nnum = np.empty(nnodes, dtype=ctypes.c_int)
                 nodes = np.empty((nnodes, 6))
 
                 n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                d_size, f_size, &n, EOL, nexp)
+                                &d_size[0], f_size, &n, EOL, nexp)
 
         elif 'C' == line[0]:  # component
             if b'CMBLOCK' in line:  # component
@@ -373,12 +361,12 @@ def read(filename, read_parameters=False, debug=False):
 
                     # Get format of NBLOCK
                     if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                    d_size, f_size, nfld, nexp = block_format(line)
+                    d_size, f_size, nfld, nexp = node_block_format(line)
                     nnum = np.empty(nnodes, dtype=ctypes.c_int)
                     nodes = np.empty((nnodes, 6))
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    d_size, f_size, &n, EOL, nexp)
+                                    &d_size[0], f_size, &n, EOL, nexp)
 
     # if eblock was not read for some reason
     if not eblock_read:
@@ -442,21 +430,44 @@ def read(filename, read_parameters=False, debug=False):
             }
 
 
-def block_format(string):
-    """ Get node block format """
-    # Digit Size
-    d_size = int(string[string.find(b'i') + 1:string.find(b',')])
-    f_size = int(string[string.find(b'e') + 1:string.find(b'.')])
+def node_block_format(string):
+    """ Get node block format
 
-    # get number of possible intergers in the float scientific notation
-    if b'e' in string[string.find(b'.'):]:
-        st = string.find(b'.')
-        st += string[st:].find(b'e') + 1
-        nexp = int(string[st:].replace(b')', b''))
-    else:  # sub ANSYS v17
-        nexp = 2
-    nfields = int(string[string.find(b',') + 1:string.find(b'e')])
+    Example formats:
+    (3i9,6e21.13e3)
+    3 ints, all 9 digits wide followed by 6 floats
 
+    (1i7,2i9,6e21.13)
+    1 int 7 digits wide, 2 ints, 9 digits wide, 6 floats
+    """
+    string = string.decode().replace('(', '').replace(')', '')
+    fields = string.split(',')
+
+    # double and float size
+    d_size = np.empty(3, np.int32)
+    nexp = 2  # default when missing
+    nfields = 6
+    f_size = 21
+    c = 0 
+    for field in fields:
+        print(field)
+        if 'i' in field:
+            items = field.split('i')
+            for n in range(int(items[0])):
+                d_size[c] = int(items[1])
+                c += 1
+        elif 'e' in field:
+            f_size = int(field.split('e')[1].split('.')[0])
+            print(f_size)
+
+            # get number of possible intergers in the float scientific notation
+            if 'e' in field.split('.')[1]:
+                nexp = int(field.split('.')[1].split('e')[1])
+            
+
+            nfields = int(field.split('e')[0])
+
+    print(d_size, f_size, nfields, nexp)
     return d_size, f_size, nfields, nexp
 
 

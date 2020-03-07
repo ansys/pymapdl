@@ -238,7 +238,7 @@ def test_write_component(tmpdir):
 
 def test_read_mesh200():
     archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
-    grid =archive.parse_vtk()
+    grid = archive.parse_vtk()
     assert grid.n_cells == 1000
 
 
@@ -251,3 +251,7 @@ def test_read_parm():
     assert len(archive.raw['parameters']) == 2
     for parm in archive.raw['parameters']:
         assert isinstance(archive.raw['parameters'][parm], np.ndarray)
+
+
+if __name__ == '__main__':
+    test_init_archive()

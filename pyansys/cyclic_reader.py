@@ -292,9 +292,10 @@ class CyclicResult(ResultFile):
         return full_result
 
     def expand_cyclic_modal(self, result, result_r, hindex, phase, as_complex,
-                          full_rotor):
+                            full_rotor):
         """ Combines repeated results from ANSYS """
         if as_complex or full_rotor:
+            # BUG: this needs to be fliped to match ANSYS
             result_combined = result + result_r*1j
             if phase:
                 result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)

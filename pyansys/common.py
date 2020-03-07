@@ -8,10 +8,10 @@ import os
 from collections import Counter
 
 import numpy as np
+import pyvista as pv
 
 from pyansys._binary_reader import c_read_record
 from pyansys import _binary_reader
-
 
 ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
                            3: None,
@@ -383,3 +383,31 @@ def midside_mask(grid):
                                        grid.cells,
                                        grid.offset,
                                        grid.number_of_points)
+
+
+def rotate_to_global(result, euler_angles):
+    """Rotate a result set to the global coordinate system
+
+    ANSYS writes the results in the nodal coordinate system and
+    they use the ZXY euler rotation method.
+
+    Rotates results in-place.
+
+    Parameters
+    ----------
+    result : np.ndarray
+        Nodal result set to rotate.  Sized ``n_node`` x ``ndof``
+
+    euler_angles : np.ndarray
+        Array of euler angles sized 3 x ``n_node`` in degrees.
+
+    """
+    theta_xy, theta_yz, theta_zx = euler_angles
+    if np.any(theta_xy):
+        pv.common.axis_rotation(result, theta_xy, inplace=True, axis='z')
+
+    if np.any(theta_yz):
+        pv.common.axis_rotation(result, theta_yz, inplace=True, axis='x')
+
+    if np.any(theta_zx):
+        pv.common.axis_rotation(result, theta_zx, inplace=True, axis='y')
