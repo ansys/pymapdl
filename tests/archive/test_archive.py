@@ -253,5 +253,17 @@ def test_read_parm():
         assert isinstance(archive.raw['parameters'][parm], np.ndarray)
 
 
+def test_read_wb_nblock():
+    expected = np.array([[9.89367578e-02, -8.07092192e-04,  8.53764953e+00,
+                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+                         [9.65803244e-02,  2.00906704e-02,  8.53744951e+00,
+                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+                         [9.19243555e-02,  3.98781615e-02,  8.53723652e+00,
+                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00]])
+    filename = os.path.join(testfiles_path, 'workbench_193.cdb')
+    archive = pyansys.Archive(filename)
+    assert np.allclose(archive.raw['nodes'], expected)
+
+
 if __name__ == '__main__':
     test_init_archive()

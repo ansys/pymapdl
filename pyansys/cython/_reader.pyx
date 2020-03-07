@@ -77,7 +77,7 @@ def read(filename, read_parameters=False, debug=False):
     fclose(cfile)
     
     # File counter
-    cdef int EOL
+    cdef int EOL, tmpval, start_pos
     cdef int n = 0
     
     # Define variables
@@ -257,21 +257,52 @@ def read(filename, read_parameters=False, debug=False):
         elif 'N' == line[0]: # Test is faster than next line
             # if line contains the start of the node block
             if b'NBLOCK' in line:
+                start_pos = n
                 if debug:
                     print('reading NBLOCK')
 
                 nodes_read = True
                 # Get size of NBLOCK
                 nnodes = int(line[line.rfind(b',') + 1:])
+                # this value may be wrong... 
 
                 # Get format of NBLOCK
-                if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                if myfgets(line, raw, &n, fsize):
+                    raise Exception('Unable to read nblock format line or '
+                                    'at end of file.')
                 d_size, f_size, nfld, nexp = node_block_format(line)
                 nnum = np.empty(nnodes, dtype=ctypes.c_int)
                 nodes = np.empty((nnodes, 6))
 
                 n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
                                 &d_size[0], f_size, &n, EOL, nexp)
+
+                # verify at the end of the block
+                if myfgets(line, raw, &n, fsize):
+                    raise Exception('Unable to read end of nblock or at end of file')
+                if b'N,R5.3,LOC' not in line:
+                    if debug:
+                        print('N,R5.3,LOC not at end of block')
+                    # need to reread the number of nodes
+                    n = start_pos
+                    if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                    nnodes = 0
+                    while True:
+                        if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                        if b'N,R5.3,LOC' in line:
+                            break
+                        nnodes += 1
+
+                    # reread nodes
+                    n = start_pos
+                    if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                    d_size, f_size, nfld, nexp = node_block_format(line)
+                    nnum = np.empty(nnodes, dtype=ctypes.c_int)
+                    nodes = np.zeros((nnodes, 6))
+
+                    n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                                    &d_size[0], f_size, &n, EOL, nexp)
+
 
         elif 'C' == line[0]:  # component
             if b'CMBLOCK' in line:  # component

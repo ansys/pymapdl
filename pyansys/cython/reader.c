@@ -219,7 +219,7 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
 
 
     char tempstr[100];
-    int i, j, k, nread, t;
+    int i, j, k, nread, t, actual_nread;
     double dvalue, sign, pow, scale;
 
     int ivalue;
@@ -262,15 +262,31 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
                 sign = 1.0;
             }
 
-            // read first interger
+	    // verify not a sign
+	    // certain versions of workbench outputted archive files
+	    // have different float formats
             ++i;
+            if (raw[i] == '-') {
+                sign = -1.0;
+		actual_nread = nread - 1;
+            }
+            else if (raw[i] != ' '){
+	        --i;
+		actual_nread = nread;
+            }
+	    else{
+	      actual_nread = nread - 1;
+            }
+
+	    // read first interger
+	    ++i;
             dvalue *= raw[i] - '0';
 
             // next is always a '.', skip it
             ++i;
 
             pow = 0.1;
-            for (j=0; j<nread; ++j){
+            for (j=0; j<actual_nread; ++j){
                 ++i;
                 dvalue += (raw[i] - '0')*pow;
                 pow *= 0.1;
