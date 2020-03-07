@@ -450,7 +450,6 @@ def node_block_format(string):
     f_size = 21
     c = 0 
     for field in fields:
-        print(field)
         if 'i' in field:
             items = field.split('i')
             for n in range(int(items[0])):
@@ -458,16 +457,13 @@ def node_block_format(string):
                 c += 1
         elif 'e' in field:
             f_size = int(field.split('e')[1].split('.')[0])
-            print(f_size)
 
             # get number of possible intergers in the float scientific notation
             if 'e' in field.split('.')[1]:
                 nexp = int(field.split('.')[1].split('e')[1])
-            
 
             nfields = int(field.split('e')[0])
 
-    print(d_size, f_size, nfields, nexp)
     return d_size, f_size, nfields, nexp
 
 
