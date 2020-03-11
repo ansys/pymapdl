@@ -531,11 +531,13 @@ void read_record_stream(ifstream* file, int64_t loc, void* arr, int* prec_flag,
   if (bufsize <= 0){
     return;
   }
+
   char *raw = new char[4*bufsize];
 
   if (bsparse_flag){
     // write to temporary record
     file->read(raw, 4*bufsize);
+    
     if (*type_flag){
       if (*prec_flag){
 	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);

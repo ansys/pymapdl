@@ -36,3 +36,16 @@ except:
 
 
 from pyansys.examples.downloads import *
+
+
+def configure_pyvista():
+    """Configure PyVista's ``rcParams`` for pyansys"""
+    import pyvista as pv
+    pv.rcParams['interactive'] = True
+    pv.rcParams["cmap"] = "jet"
+    pv.rcParams["font"]["family"] = "courier"
+    pv.rcParams["title"] = "pyansys"
+    return
+
+
+configure_pyvista()

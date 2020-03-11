@@ -32,5 +32,5 @@ rotor.plot_nodal_solution(0)
 
 ###############################################################################
 # animate a mode
-rotor.animate_nodal_solution(10, interactive=False)
-# set interactive to True to enable continuous plotting
+rotor.animate_nodal_solution(10, loop=False)
+# set loop to True to enable continuous plotting

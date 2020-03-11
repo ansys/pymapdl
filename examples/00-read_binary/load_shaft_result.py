@@ -65,8 +65,8 @@ shaft.plot_nodal_solution(1, node_components=['SHAFT_MESH'], n_colors=10,
                           cpos=cpos)
 
 ###############################################################################
-# Animate a mode of a component the shaft 
+# Animate a mode of a component the shaft
 shaft.animate_nodal_solution(5, node_components='SHAFT_MESH', comp='norm',
                              max_disp=10, show_edges=True, cmap='bwr', cpos=cpos,
-                             interactive=False)
-# set interactive to True to plot continiously
+                             loop=False)
+# set loop to True to plot continiously

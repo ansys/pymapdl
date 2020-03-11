@@ -6,12 +6,17 @@ import numpy as np
 import pyansys
 
 from pyvista.plotting import system_supports_plotting
+try:
+    __file__
+except NameError:
+    __file__ = '/home/alex/python/pyansys/tests/test_ansys.py'
 path = os.path.dirname(os.path.abspath(__file__))
+
 
 # rver = 'v150'
 # rver = 'v182'
-rver = 'v194'
-# rver = 'v201'
+# rver = 'v194'
+rver = 'v201'
 # rver = 'v202'
 MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
             'v182': '/usr/ansys_inc/v182/ansys/bin/ansys182',
@@ -30,6 +35,7 @@ RSETS = list(zip(range(1, 9), [1]*8))
 
 @pytest.fixture(scope='module')
 def mapdl():
+    # os.environ['I_MPI_SHM_LMT'] = 'shm'
     mapdl = pyansys.Mapdl(MAPDLBIN[rver],
                           override=True, jobname=rver,
                           loglevel='ERROR',
@@ -58,7 +64,6 @@ def mapdl():
     mapdl.Pstres(0)
     mapdl.Bcsoption('INCORE')
     mapdl.mxpand(elcalc='YES')
-    # mapdl.cycopt('
     mapdl.solve()
     mapdl.finish()
 

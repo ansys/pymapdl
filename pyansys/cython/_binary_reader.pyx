@@ -320,14 +320,14 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
 
 
 cdef inline int read_element_result(ifstream *binfile, int ele_table,
-                                           int result_index,
-                                           int nnode_elem, int nitem, double *arr,
-                                           int element_type, int as_global=1):
+                                    int result_index,
+                                    int nnode_elem, int nitem, double *arr,
+                                    int element_type, int as_global=1):
     """Populate array with results from a single element"""
     cdef int i, j, k, c, ptr, eul_ptr
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
-    cdef char [16384] tmp_data_buffer
+    cdef char [131072] tmp_data_buffer  # 2**17
     cdef double [512] euler_angles  # 8*3*20 -->512
     cdef short* spointers = <short*>pointers
 
@@ -533,6 +533,7 @@ cdef inline void euler_rotate(float_or_double *arr,
         arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2))
 
 
+# there is absolutely a memory leak here
 def read_nodal_values(filename, uint8 [::1] celltypes,
                       int64_t [::1] ele_ind_table,
                       int64_t [::1] offsets, int64_t [::1] cells,
@@ -566,7 +567,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         EPT - 16 : element temperatures
         ESF - 17 : element surface stresses
         EDI - 18 : diffusion strains
-        ETB - 19 : ETABLE items(post1 only
+        ETB - 19 : ETABLE items
         ECT - 20 : contact data
         EXY - 21 : integration point locations
         EBA - 22 : back stresses
@@ -593,11 +594,13 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
     cdef int c = 0
     cdef uint8 celltype
     for i in range(ncells):
+
         # read element data
         nnode_elem = nodstr[etype[i]]
         skip = read_element_result(binfile, ele_ind_table[i],
                                    result_index, nnode_elem, nitems,
                                    &bufferdata[0, 0], element_type[i])
+
         if skip:
             continue
 

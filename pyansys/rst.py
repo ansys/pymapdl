@@ -3,6 +3,8 @@
 Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
 """
+from collections.abc import Iterable
+from itertools import compress
 import time
 import warnings
 import logging
@@ -27,12 +29,6 @@ LOG.setLevel('DEBUG')
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def merge_two_dicts(x, y):
-    merged = x.copy()   # start with x's keys and values
-    merged.update(y)    # modifies z with y's keys and values & returns None
-    return merged
-
-
 # Pointer information from ansys interface manual
 # =============================================================================
 # Individual element index table
@@ -51,31 +47,31 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'EDI': 7}
 
 ELEMENT_INDEX_TABLE_INFO = {
-    'EMS': 'misc. data',
-    'ENF': 'nodal forces',
-    'ENS': 'nodal stresses',
-    'ENG': 'volume and energies',
-    'EGR': 'nodal gradients',
-    'EEL': 'elastic strains',
-    'EPL': 'plastic strains',
-    'ECR': 'creep strains',
-    'ETH': 'thermal strains',
-    'EUL': 'euler angles',
-    'EFX': 'nodal fluxes',
-    'ELF': 'local forces',
-    'EMN': 'misc. non-sum values',
-    'ECD': 'element current densities',
-    'ENL': 'nodal nonlinear data',
-    'EHC': 'calculated heat generations',
-    'EPT': 'element temperatures',
-    'ESF': 'element surface stresses',
-    'EDI': 'diffusion strains',
-    'ETB': 'ETABLE items',
-    'ECT': 'contact data',
-    'EXY': 'integration point locations',
-    'EBA': 'back stresses',
-    'ESV': 'state variables',
-    'MNL': 'material nonlinear record'
+    'EMS': 'Misc. data',
+    'ENF': 'Nodal forces',
+    'ENS': 'Nodal stresses',
+    'ENG': 'Volume and energies',
+    'EGR': 'Nodal gradients',
+    'EEL': 'Elastic strains',
+    'EPL': 'Plastic strains',
+    'ECR': 'Creep strains',
+    'ETH': 'Thermal strains',
+    'EUL': 'Euler angles',
+    'EFX': 'Nodal fluxes',
+    'ELF': 'Local forces',
+    'EMN': 'Misc. non-sum values',
+    'ECD': 'Element current densities',
+    'ENL': 'Nodal nonlinear data',
+    'EHC': 'Calculated heat generations',
+    'EPT': 'Element temperatures',
+    'ESF': 'Element surface stresses',
+    'EDI': 'Diffusion strains',
+    'ETB': 'Etable items',
+    'ECT': 'Contact data',
+    'EXY': 'Integration point locations',
+    'EBA': 'Back stresses',
+    'ESV': 'State variables',
+    'MNL': 'Material nonlinear record'
 }
 
 SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
@@ -107,8 +103,8 @@ SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                              'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
                              'ptrOSLh', 'sizeDEAD', 'ptrDEADl', 'ptrDEADh',
                              'PrinKey','numvdof', 'numadof', '0', '0',
-                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0', 
-                             '0', '0', '0', 'numRotCmp', '0', 
+                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0',
+                             '0', '0', '0', 'numRotCmp', '0',
                              'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
                              'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
 
@@ -118,21 +114,7 @@ SOLUTION_HEADER_KEYS_DP = ['timfrq',  'lfacto',  'lfactn', 'cptime', 'tref',
                            'omega_v_z', 'omega_a_x', 'omega_a_y', 'omega_a_z', 'omegacg_v_x',
                            'omegacg_v_y', 'omegacg_v_z', 'omegacg_a_x', 'omegacg_a_y', 'omegacg_a_z',
                            'cgcent', 'cgcent', 'cgcent', 'fatjack', 'fatjack',
-                           'dval1', 'pCnvVal', #'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal']
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (60)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (70)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (80)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (90)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat   (100)
-]
+                           'dval1', 'pCnvVal']
 
 GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
                         'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC',
@@ -184,7 +166,7 @@ class ResultFile(AnsysBinary):
     >>> rst = pyansys.read_binary('file.rst')
     """
 
-    def __init__(self, filename, ignore_cyclic=False, read_geometry=True):
+    def __init__(self, filename, read_geometry=True, **kwargs):
         """Loads basic result information from result file and
         initializes result object.
         """
@@ -378,7 +360,7 @@ class ResultFile(AnsysBinary):
         ----------
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -601,6 +583,13 @@ class ResultFile(AnsysBinary):
             Scalar component to display.  Options are 'x', 'y', 'z',
             and 'norm', and None.
 
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        add_text : bool, optional
+            Adds information about the result when rnum is given.
+
         max_disp : float, optional
             Maximum displacement in the units of the model.  Default
             0.1
@@ -609,13 +598,28 @@ class ResultFile(AnsysBinary):
             Number of "frames" between each full cycle.
 
         movie_filename : str, optional
-            Filename of the movie to open.  Filename should end in mp4,
-            but other filetypes may be supported.  See "imagio.get_writer".
-            A single loop of the mode will be recorded.
+            Filename of the movie to open.  Filename should end in
+            ``'mp4'``, but other filetypes may be supported.  See
+            ``imagio.get_writer``.  A single loop of the mode will be
+            recorded.
 
         kwargs : optional keyword arguments, optional
             See help(pyvista.Plot) for additional keyword arguments.
 
+        Examples
+        --------
+        Animate first result
+
+        >>> rst.animate_nodal_solution(0)
+
+        Animate second result while displaying the x scalars
+        without looping
+
+        >>> rst.animate_nodal_solution(1, comp='x', loop=False)
+
+        Animate second result and save as a movie
+
+        >>> rst.animate_nodal_solution(0, movie_filename='disp.mp4')
         """
         scalars = None
         if comp:
@@ -818,8 +822,10 @@ class ResultFile(AnsysBinary):
         result, bufsz = self.read_record(ptr_nsl + ptr_rst, True)
         result = result.reshape(-1, sumdof)
 
-        # no idea why the result written is twice as long...
-        result = result[:result.shape[0]//2]
+        # additional entries are sometimes written for no discernible
+        # reason
+        if result.shape[0] > nnod:
+            result = result[:nnod]
 
         # # it's possible that not all results are written
         if result.shape[0] != nnod:
@@ -845,11 +851,8 @@ class ResultFile(AnsysBinary):
             euler_angles = self.geometry['nodes'][self.insolution, 3:].T
             rotate_to_global(result, euler_angles)
 
-        # check for invalid values
-        # it seems mapdl writes invalid values as 2*100
+        # check for invalid values (mapdl writes invalid values as 2*100)
         result[result == 2**100] = 0
-
-        # also include nodes in output
         return nnum, result
 
     def _read_components(self):
@@ -1090,6 +1093,7 @@ class ResultFile(AnsysBinary):
         dval1   - if pmeth=0: FATJACK ocean wave direction
                   if pmeth=1: p-method convergence values
         pCnvVal - p-method convergence values
+
         """
         # Check if result is available
         if rnum > self.nsets - 1:
@@ -1474,13 +1478,15 @@ class ResultFile(AnsysBinary):
             Adds information about the result when rnum is given.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             Camera position.
         """
+        loop = kwargs.pop('loop', False)
+
         if grid is None:
             grid = self.grid
 
@@ -1665,7 +1671,9 @@ class ResultFile(AnsysBinary):
                         plotter.write_frame()
 
                 first_loop = False
-                if off_screen or interactive is False:
+                # if off_screen or interactive is False:
+                #     break
+                if not loop:
                     break
             plotter.close()
 
@@ -1754,55 +1762,147 @@ class ResultFile(AnsysBinary):
         -------
         cpos : list
             3 x 3 vtk camera position.
+
+        Examples
+        --------
+        Plot the X component nodal stress while showing displacement.
+
+        >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
         available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
 
         if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select from the following:\n%s' % available_comps)
+            raise ValueError('Missing "comp" parameter.  Please select'
+                             ' from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
         self._plot_nodal_result(rnum, 'ENS',  comp, available_comps, show_displacement,
                                 displacement_factor, node_components,
                                 sel_type_all, **kwargs)
 
-    def save_as_vtk(self, filename):
-        """Appends all results to an unstructured grid and writes it to
-        disk.
+    def save_as_vtk(self, filename, rsets=None, result_types=['ENS']):
+        """Writes results to a vtk readable file.
 
         The file extension will select the type of writer to use.
-        '.vtk' will use the legacy writer, while '.vtu' will select
-        the VTK XML writer.
+        ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
+        select the VTK XML writer.
 
         Parameters
         ----------
         filename : str
             Filename of grid to be written.  The file extension will
-            select the type of writer to use.  '.vtk' will use the
-            legacy writer, while '.vtu' will select the VTK XML
+            select the type of writer to use.  ``'.vtk'`` will use the
+            legacy writer, while ``'.vtu'`` will select the VTK XML
             writer.
+
+        rsets : collections.Iterable
+            List of result sets to write.  For example ``range(3)``
+
+        result_types : list
+            Result type to write.  For example ``['ENF', 'ENS']``
+            List of some or all of the following:
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
 
         Notes
         -----
         Binary files write much faster than ASCII, but binary files
         written on one system may not be readable on other systems.
         Binary can only be selected for the legacy writer.
+
+        Examples
+        --------
+        Write in binary
+
+        >>> rst.save_as_vtk('results.vtk')
+
+        Write using the xml writer
+
+        >>> rst.save_as_vtk('results.vtu')
+
+        Write only nodal and elastic strain for the first result
+
+        >>> rst.save_as_vtk('results.vtk', [0], ['EEL', 'EPL']
+
         """
         # Copy grid as to not write results to original object
         grid = self.grid.copy()
 
-        for i in range(self.nsets):
+        if rsets is None:
+            rsets = range(self.nsets)
+        elif isinstance(rsets, int):
+            rsets = [rsets]
+        elif not isinstance(rsets, Iterable):
+            raise TypeError('rsets must be an iterable like [0, 1, 2] or range(3)')
+
+        if result_types is None:
+            result_types = ELEMENT_INDEX_TABLE_KEYS
+        elif not isinstance(result_types, list):
+            raise TypeError('result_types must be a list of solution types')
+        else:
+            for item in result_types:
+                if item not in ELEMENT_INDEX_TABLE_KEYS:
+                    raise ValueError('Invalid result type "%s" % item')
+
+        try:
+            from tqdm import tqdm
+            pbar = tqdm(total=len(rsets), desc='Saving to file')
+        except ImportError:
+            pbar = None
+
+        for i in rsets:
             # Nodal results
             _, val = self.nodal_solution(i)
-            grid.point_arrays['nodal_solution{:03d}'.format(i)] = val
+            grid.point_arrays['Nodal Solution {:d}'.format(i)] = val
 
-            # Populate with nodal stress at edge nodes
-            # nodenum = self.grid.point_arrays['ansys_node_num']
-            _, stress = self.nodal_stress(i)
-            grid.point_arrays['nodal_stress{:03d}'.format(i)] = stress
+            # Nodal results
+            for rtype, rtype_desc in self.available_results.items():
+                if rtype in result_types:
+                    _, values = self._nodal_result(i, rtype)
+                    grid.point_arrays['{:s} {:d}'.format(rtype_desc, i)] = values
+
+            if pbar is not None:
+                pbar.update(1)
 
         grid.save(filename)
+        if pbar is not None:
+            pbar.close()
 
     def write_tables(self, filename):
-        """ Write binary tables to ASCII.  Assumes int32  """
+        """Write binary tables to ASCII.  Assumes int32
+
+        Parameters
+        ----------
+        filename : str
+            Filename to write the tables to.
+
+        Examples
+        --------
+        >>> rst.write_tables('tables.txt')
+        """
         rawresult = open(self.filename, 'rb')
         with open(filename, 'w') as f:
             while True:
@@ -1843,8 +1943,8 @@ class ResultFile(AnsysBinary):
         else:
             raise Exception('Input must be either an int or a list')
 
-    def __repr__(self):
-        rst_info = ['ANSYS MAPDL Result file object']
+    def __str__(self):
+        rst_info = ['PyANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
             value = self.resultheader[key]
@@ -1865,6 +1965,10 @@ class ResultFile(AnsysBinary):
 
         value = self.resultheader['nelm']
         rst_info.append('{:<12s}: {:d}'.format('Elements', value))
+
+        rst_info.append('\nAvailable Results:')
+        for key, value in self.available_results.items():
+            rst_info.append('{:<4s}: {:s}'.format(key, value))
 
         return '\n'.join(rst_info)
 
@@ -1927,14 +2031,6 @@ class ResultFile(AnsysBinary):
 
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
-
-        # if self.version < 14.5:  # values stored as double precision
-        # tarr = np.empty(1, np.float64)
-            # my_dtype = 1
-        # else:    # values stored as single precision
-        #     tarr = np.empty(1, np.float32)
-        #     my_dtype = 0
-
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                         self.grid.celltypes,
                                                         ele_ind_table,
@@ -2027,7 +2123,6 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_temperature(0)
-
         """
         nnum, temp = self._nodal_result(rnum, 'EPT')
         temp = temp.ravel()
@@ -2070,6 +2165,7 @@ class ResultFile(AnsysBinary):
         >>> result.plot_nodal_temperature(0)
 
         Plot while showing edges and disabling lighting
+
         >>> result.plot_nodal_temperature(0, show_edges=True, lighting=False)
         """
         _, scalars = self.nodal_temperature(rnum)
@@ -2084,7 +2180,6 @@ class ResultFile(AnsysBinary):
                                         displacement_factor=displacement_factor,
                                         stitle='Nodal Tempature',
                                         **kwargs)
-
 
     def nodal_thermal_strain(self, rnum):
         """Nodal component plastic strains.  This record contains
@@ -2114,7 +2209,6 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0)
-
         """
         return self._nodal_result(rnum, 'ETH')
 
@@ -2150,7 +2244,7 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -2454,14 +2548,11 @@ class ResultFile(AnsysBinary):
         """Prints available element result types and returns those keys"""
         ele_ind_table, _, _ = self._element_solution_header(0)
 
-        # get the keys from the first element (not ideal...)
-        mask = self.read_record(ele_ind_table[0]) > 0
-        keys = [ELEMENT_INDEX_TABLE_KEYS[i] for i in mask.nonzero()[0]]
-
-        available = {}
-        for key in keys:
-            available[key] = ELEMENT_INDEX_TABLE_INFO[key]
-        return available
+        # get the keys from the first element (not perfect...)
+        n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
+        mask = self.read_record(ele_ind_table[0])[:n_rec] > 0
+        keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
+        return {key: ELEMENT_INDEX_TABLE_INFO[key] for key in keys}
 
 
 def pol2cart(rho, phi):
@@ -2506,3 +2597,10 @@ def transform(points, trans):
         trans = pv.trans_from_matrix(trans)
 
     _binary_reader.affline_transform(points, trans)
+
+
+def merge_two_dicts(x, y):
+    merged = x.copy()   # start with x's keys and values
+    merged.update(y)    # modifies z with y's keys and values & returns None
+    return merged
+

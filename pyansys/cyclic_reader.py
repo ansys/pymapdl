@@ -28,7 +28,20 @@ class CyclicResult(ResultFile):
         if self.n_sector == 1:
             raise RuntimeError('Result is not a cyclic model')
 
+        self._animating = False
         self._add_cyclic_properties()
+        self._positive_cyclic_dir = False
+
+    @property
+    def positive_cyclic_dir(self):
+        """Rotor results are default anit-clockwise.  Set this to
+        `True` if cyclic results to not look correct.
+        """
+        return self._positive_cyclic_dir
+
+    @positive_cyclic_dir.setter
+    def positive_cyclic_dir(self, value):
+        self._positive_cyclic_dir = bool(value)
 
     def plot(self, color='w', show_edges=True, **kwargs):
         """Plot the full rotor geometry.
@@ -141,8 +154,8 @@ class CyclicResult(ResultFile):
         self.master_cell_mask = mask
         self.mas_grid = self.grid.extract_cells(mask)
 
-        # number of nodes in sector may not match number of nodes in geometry
-        # node_mask = self.geometry['nnum'] <= self.resultheader['csNds']
+        # NOTE: number of nodes in sector may not match number of
+        # nodes in geometry
         node_mask = self.nnum <= self.resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
         self.dup_ind = np.nonzero(~node_mask)[0]
@@ -243,11 +256,11 @@ class CyclicResult(ResultFile):
                     _, full_result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
                     result_dup = full_result_dup[self.mas_ind]
 
-            expanded_result = self.expand_cyclic_modal(result,
-                                                       result_dup,
-                                                       hindex, phase,
-                                                       as_complex,
-                                                       full_rotor)
+            expanded_result = self._expand_cyclic_modal(result,
+                                                        result_dup,
+                                                        hindex, phase,
+                                                        as_complex,
+                                                        full_rotor)
 
         if self.resultheader['kan'] == 0:  # static analysis
             expanded_result = self.expand_cyclic_static(result)
@@ -291,12 +304,15 @@ class CyclicResult(ResultFile):
 
         return full_result
 
-    def expand_cyclic_modal(self, result, result_r, hindex, phase, as_complex,
-                            full_rotor):
+    def _expand_cyclic_modal(self, result, result_r, hindex, phase, as_complex,
+                             full_rotor):
         """ Combines repeated results from ANSYS """
         if as_complex or full_rotor:
-            # BUG: this needs to be fliped to match ANSYS
-            result_combined = result + result_r*1j
+            # Matches ansys direction
+            if self._positive_cyclic_dir:
+                result_combined = result + result_r*1j
+            else:
+                result_combined = result - result_r*1j
             if phase:
                 result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
         else:  # convert to real
@@ -311,8 +327,9 @@ class CyclicResult(ResultFile):
         angles = np.linspace(0, 2*np.pi, self.n_sector + 1)[:-1] + phase
         for angle in angles:
             # need to rotate solution and rotate direction
-            result_expanded.append(axis_rotation(result_combined, angle, deg=False,
-                                                axis='z'))
+            result_expanded.append(axis_rotation(result_combined,
+                                                 angle, deg=False,
+                                                 axis='z'))
 
         result_expanded = np.asarray(result_expanded)
 
@@ -334,8 +351,8 @@ class CyclicResult(ResultFile):
         else:
             return np.real(result_expanded)
 
-    def expand_cyclic_modal_stress(self, result, result_r, hindex, phase, as_complex,
-                                   full_rotor, scale=True):
+    def _expand_cyclic_modal_stress(self, result, result_r, hindex,
+                                    phase, as_complex, full_rotor):
         """ Combines repeated results from ANSYS """
         if as_complex or full_rotor:
             result_combined = result + result_r*1j
@@ -352,13 +369,6 @@ class CyclicResult(ResultFile):
         result_expanded = np.empty((self.n_sector, result.shape[0], result.shape[1]),
                                    np.complex128)
         result_expanded[:] = result_combined
-
-        # scale
-        # if scale:
-        #     if hindex == 0 or hindex == self.n_sector/2:
-        #         result_expanded /= self.n_sector**0.5
-        #     else:
-        #         result_expanded /= (self.n_sector/2)**0.5
 
         f_arr = np.zeros(self.n_sector)
         f_arr[hindex] = 1
@@ -405,22 +415,21 @@ class CyclicResult(ResultFile):
         return full_result
 
     def harmonic_index_to_cumulative(self, hindex, mode):
-        """
-        Converts a harmonic index and a 0 index mode number to a cumulative result
-        index.
+        """Converts a harmonic index and a 0 index mode number to a
+        cumulative result index.
 
-        Harmonic indices are stored as positive and negative pairs for modes other
-        than 0 and N/nsectors.
+        Harmonic indices are stored as positive and negative pairs for
+        modes other than 0 and N/nsectors.
 
         Parameters
         ----------
         hindex : int
-            Harmonic index.  Must be less than or equal to nsectors/2.  May be
-            positive or negative
+            Harmonic index.  Must be less than or equal to nsectors/2.
+            May be positive or negative
 
         mode : int
-            Mode number.  0 based indexing.  Access mode pairs by with a negative/positive
-            harmonic index.
+            Mode number.  0 based indexing.  Access mode pairs by with
+            a negative/positive harmonic index.
 
         Returns
         -------
@@ -542,14 +551,14 @@ class CyclicResult(ResultFile):
             else:
                 stress_r = np.zeros_like(stress)
 
-            expanded_result = self.expand_cyclic_modal_stress(stress,
-                                                              stress_r,
-                                                              hindex,
-                                                              phase,
-                                                              as_complex,
-                                                              full_rotor)
+            expanded_result = self._expand_cyclic_modal_stress(stress,
+                                                               stress_r,
+                                                               hindex,
+                                                               phase,
+                                                               as_complex,
+                                                               full_rotor)
         else:
-            raise Exception('Unsupported analysis type')
+            raise RuntimeError('Unsupported analysis type')
 
         return nnum, expanded_result
 
@@ -927,7 +936,7 @@ class CyclicResult(ResultFile):
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,
-                               show_result_info=True,
+                               show_result_info=True, loop=True,
                                interpolate_before_map=True, cpos=None,
                                movie_filename=None, off_screen=None,
                                **kwargs):
@@ -978,14 +987,14 @@ class CyclicResult(ResultFile):
         if kwargs.pop('smooth_shading', False):
             raise Exception('"smooth_shading" is not yet supported')
 
-        interactive = kwargs.pop('interactive', None)
+        # interactive = kwargs.pop('interactive', None)
 
         # normalize nodal solution
         nnum, complex_disp = self.nodal_solution(rnum, as_complex=True,
-                                                full_rotor=True)
+                                                 full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
         complex_disp = complex_disp.reshape(-1, 3)
-        
+
         if comp == 'x':
             axis = 0
         elif comp == 'y':
@@ -1006,10 +1015,11 @@ class CyclicResult(ResultFile):
         if show_result_info:
             result_info = self.text_result_table(rnum)
 
+        plot_mesh = full_rotor.copy()
         plotter = pv.Plotter(off_screen=off_screen)
-        plotter.add_mesh(full_rotor.copy(), scalars=np.real(scalars),
-                      interpolate_before_map=interpolate_before_map, **kwargs)
-        plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
+        plotter.add_mesh(plot_mesh, scalars=np.real(scalars),
+                         interpolate_before_map=interpolate_before_map, **kwargs)
+        # plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
         plotter.add_text(' ', font_size=20, position=[0, 0])
@@ -1020,11 +1030,10 @@ class CyclicResult(ResultFile):
         if movie_filename:
             plotter.open_movie(movie_filename)
 
-        self.animating = True
-
+        self._animating = True
         def q_callback():
             """exit when user wants to leave"""
-            self.animating = False
+            self._animating = False
 
         plotter.add_key_event("q", q_callback)
 
@@ -1032,7 +1041,7 @@ class CyclicResult(ResultFile):
         plotter.show(interactive=False, auto_close=False,
                      interactive_update=True)
         first_loop = True
-        while self.animating:
+        while self._animating:
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -1043,20 +1052,23 @@ class CyclicResult(ResultFile):
                     scalars = (complex_disp_adj*complex_disp_adj).sum(1)**0.5
 
                 plotter.update_scalars(scalars, render=False)
-                plotter.update_coordinates(orig_pt + complex_disp_adj,
-                                           render=False)
+                plot_mesh.points[:] = orig_pt + complex_disp_adj
 
                 if show_phase:
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                              (result_info, (angle*180/np.pi)))
+                                               (result_info, (angle*180/np.pi)))
 
-                plotter.update(30, force_redraw=True)
+                plotter.update(30, force_redraw=False)
 
                 if movie_filename and first_loop:
                     plotter.write_frame()
 
+                if not self._animating:
+                    break
+
             first_loop = False
-            if off_screen or not interactive:
+
+            if not loop:
                 break
 
         return plotter.close()
