@@ -9,6 +9,7 @@ import pyvista as pv
 
 import pyansys
 from pyansys import examples
+from pyansys.rst import ELEMENT_INDEX_TABLE_INFO
 
 try:
     __file__
@@ -19,21 +20,31 @@ except:
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
+@pytest.fixture(scope='module')
+def example_result():
+    return pyansys.read_binary(examples.rstfile)
 
-def test_save_as_vtk(tmpdir):
+result_types = ['ENS', 'EPT', 'ETH', 'EEL', 'ENG']# 'ENF']
+@pytest.mark.parametrize("result_type", result_types)
+def test_save_as_vtk(tmpdir, example_result, result_type):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.vtk'))
-    result = pyansys.read_binary(examples.rstfile)
-    result.save_as_vtk(filename)
+    example_result.save_as_vtk(filename, result_types=[result_type])
 
     grid = pv.UnstructuredGrid(filename)
-    for i in range(result.nsets):
-        assert 'nodal_solution%03d' % i in grid.point_arrays
-        arr = grid.point_arrays['nodal_solution%03d' % i]
-        assert np.allclose(arr, result.nodal_solution(i)[1], atol=1E-5)
+    for i in range(example_result.nsets):
+        key = 'Nodal Solution %d' % i
+        assert key in grid.point_arrays
+        arr = grid.point_arrays[key]
+        assert np.allclose(arr, example_result.nodal_solution(i)[1], atol=1E-5)
+        # breakpoint()
 
-        assert 'nodal_stress%03d' % i in grid.point_arrays
-        arr = grid.point_arrays['nodal_stress%03d' % i]
-        assert np.allclose(arr, result.nodal_stress(i)[1], atol=1E-5, equal_nan=True)
+        key = '%s %d' % (ELEMENT_INDEX_TABLE_INFO[result_type], i)
+        assert key in grid.point_arrays
+        arr = grid.point_arrays[key]
+        _, rst_arr = example_result._nodal_result(i, result_type)
+        if rst_arr.shape[1] == 1:
+            rst_arr = rst_arr.ravel()
+        assert np.allclose(arr, rst_arr, atol=1E-5, equal_nan=True)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")

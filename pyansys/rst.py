@@ -3,6 +3,8 @@
 Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
 """
+from collections.abc import Iterable
+from itertools import compress
 import time
 import warnings
 import logging
@@ -45,31 +47,31 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'EDI': 7}
 
 ELEMENT_INDEX_TABLE_INFO = {
-    'EMS': 'misc. data',
-    'ENF': 'nodal forces',
-    'ENS': 'nodal stresses',
-    'ENG': 'volume and energies',
-    'EGR': 'nodal gradients',
-    'EEL': 'elastic strains',
-    'EPL': 'plastic strains',
-    'ECR': 'creep strains',
-    'ETH': 'thermal strains',
-    'EUL': 'euler angles',
-    'EFX': 'nodal fluxes',
-    'ELF': 'local forces',
-    'EMN': 'misc. non-sum values',
-    'ECD': 'element current densities',
-    'ENL': 'nodal nonlinear data',
-    'EHC': 'calculated heat generations',
-    'EPT': 'element temperatures',
-    'ESF': 'element surface stresses',
-    'EDI': 'diffusion strains',
-    'ETB': 'ETABLE items',
-    'ECT': 'contact data',
-    'EXY': 'integration point locations',
-    'EBA': 'back stresses',
-    'ESV': 'state variables',
-    'MNL': 'material nonlinear record'
+    'EMS': 'Misc. data',
+    'ENF': 'Nodal forces',
+    'ENS': 'Nodal stresses',
+    'ENG': 'Volume and energies',
+    'EGR': 'Nodal gradients',
+    'EEL': 'Elastic strains',
+    'EPL': 'Plastic strains',
+    'ECR': 'Creep strains',
+    'ETH': 'Thermal strains',
+    'EUL': 'Euler angles',
+    'EFX': 'Nodal fluxes',
+    'ELF': 'Local forces',
+    'EMN': 'Misc. non-sum values',
+    'ECD': 'Element current densities',
+    'ENL': 'Nodal nonlinear data',
+    'EHC': 'Calculated heat generations',
+    'EPT': 'Element temperatures',
+    'ESF': 'Element surface stresses',
+    'EDI': 'Diffusion strains',
+    'ETB': 'Etable items',
+    'ECT': 'Contact data',
+    'EXY': 'Integration point locations',
+    'EBA': 'Back stresses',
+    'ESV': 'State variables',
+    'MNL': 'Material nonlinear record'
 }
 
 SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
@@ -1777,9 +1779,8 @@ class ResultFile(AnsysBinary):
                                 displacement_factor, node_components,
                                 sel_type_all, **kwargs)
 
-    def save_as_vtk(self, filename):
-        """Converts all results to an unstructured grid and writes it
-        to disk.
+    def save_as_vtk(self, filename, rsets=None, result_types=['ENS']):
+        """Writes results to a vtk readable file.
 
         The file extension will select the type of writer to use.
         ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
@@ -1792,6 +1793,39 @@ class ResultFile(AnsysBinary):
             select the type of writer to use.  ``'.vtk'`` will use the
             legacy writer, while ``'.vtu'`` will select the VTK XML
             writer.
+
+        rsets : collections.Iterable
+            List of result sets to write.  For example ``range(3)``
+
+        result_types : list
+            Result type to write.  For example ``['ENF', 'ENS']``
+            List of some or all of the following:
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
 
         Notes
         -----
@@ -1809,21 +1843,53 @@ class ResultFile(AnsysBinary):
 
         >>> rst.save_as_vtk('results.vtu')
 
+        Write only nodal and elastic strain for the first result
+
+        >>> rst.save_as_vtk('results.vtk', [0], ['EEL', 'EPL']
+
         """
         # Copy grid as to not write results to original object
         grid = self.grid.copy()
 
-        for i in range(self.nsets):
+        if rsets is None:
+            rsets = range(self.nsets)
+        elif isinstance(rsets, int):
+            rsets = [rsets]
+        elif not isinstance(rsets, Iterable):
+            raise TypeError('rsets must be an iterable like [0, 1, 2] or range(3)')
+
+        if result_types is None:
+            result_types = ELEMENT_INDEX_TABLE_KEYS
+        elif not isinstance(result_types, list):
+            raise TypeError('result_types must be a list of solution types')
+        else:
+            for item in result_types:
+                if item not in ELEMENT_INDEX_TABLE_KEYS:
+                    raise ValueError('Invalid result type "%s" % item')
+
+        try:
+            from tqdm import tqdm
+            pbar = tqdm(total=len(rsets), desc='Saving to file')
+        except ImportError:
+            pbar = None
+
+        for i in rsets:
             # Nodal results
             _, val = self.nodal_solution(i)
-            grid.point_arrays['nodal_solution{:03d}'.format(i)] = val
+            grid.point_arrays['Nodal Solution {:d}'.format(i)] = val
 
-            # Populate with nodal stress at edge nodes
-            # nodenum = self.grid.point_arrays['ansys_node_num']
-            _, stress = self.nodal_stress(i)
-            grid.point_arrays['nodal_stress{:03d}'.format(i)] = stress
+            # Nodal results
+            for rtype, rtype_desc in self.available_results.items():
+                if rtype in result_types:
+                    _, values = self._nodal_result(i, rtype)
+                    grid.point_arrays['{:s} {:d}'.format(rtype_desc, i)] = values
+
+            if pbar is not None:
+                pbar.update(1)
 
         grid.save(filename)
+        if pbar is not None:
+            pbar.close()
 
     def write_tables(self, filename):
         """Write binary tables to ASCII.  Assumes int32
@@ -1878,7 +1944,7 @@ class ResultFile(AnsysBinary):
             raise Exception('Input must be either an int or a list')
 
     def __str__(self):
-        rst_info = ['ANSYS MAPDL Result file object']
+        rst_info = ['PyANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
             value = self.resultheader[key]
@@ -1899,6 +1965,10 @@ class ResultFile(AnsysBinary):
 
         value = self.resultheader['nelm']
         rst_info.append('{:<12s}: {:d}'.format('Elements', value))
+
+        rst_info.append('\nAvailable Results:')
+        for key, value in self.available_results.items():
+            rst_info.append('{:<4s}: {:s}'.format(key, value))
 
         return '\n'.join(rst_info)
 
@@ -2479,13 +2549,10 @@ class ResultFile(AnsysBinary):
         ele_ind_table, _, _ = self._element_solution_header(0)
 
         # get the keys from the first element (not perfect...)
-        mask = self.read_record(ele_ind_table[0]) > 0
-        keys = [ELEMENT_INDEX_TABLE_KEYS[i] for i in mask.nonzero()[0]]
-
-        available = {}
-        for key in keys:
-            available[key] = ELEMENT_INDEX_TABLE_INFO[key]
-        return available
+        n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
+        mask = self.read_record(ele_ind_table[0])[:n_rec] > 0
+        keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
+        return {key: ELEMENT_INDEX_TABLE_INFO[key] for key in keys}
 
 
 def pol2cart(rho, phi):
