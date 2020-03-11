@@ -27,12 +27,6 @@ LOG.setLevel('DEBUG')
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def merge_two_dicts(x, y):
-    merged = x.copy()   # start with x's keys and values
-    merged.update(y)    # modifies z with y's keys and values & returns None
-    return merged
-
-
 # Pointer information from ansys interface manual
 # =============================================================================
 # Individual element index table
@@ -364,7 +358,7 @@ class ResultFile(AnsysBinary):
         ----------
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -587,6 +581,13 @@ class ResultFile(AnsysBinary):
             Scalar component to display.  Options are 'x', 'y', 'z',
             and 'norm', and None.
 
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        add_text : bool, optional
+            Adds information about the result when rnum is given.
+
         max_disp : float, optional
             Maximum displacement in the units of the model.  Default
             0.1
@@ -595,13 +596,28 @@ class ResultFile(AnsysBinary):
             Number of "frames" between each full cycle.
 
         movie_filename : str, optional
-            Filename of the movie to open.  Filename should end in mp4,
-            but other filetypes may be supported.  See "imagio.get_writer".
-            A single loop of the mode will be recorded.
+            Filename of the movie to open.  Filename should end in
+            ``'mp4'``, but other filetypes may be supported.  See
+            ``imagio.get_writer``.  A single loop of the mode will be
+            recorded.
 
         kwargs : optional keyword arguments, optional
             See help(pyvista.Plot) for additional keyword arguments.
 
+        Examples
+        --------
+        Animate first result
+
+        >>> rst.animate_nodal_solution(0)
+
+        Animate second result while displaying the x scalars
+        without looping
+
+        >>> rst.animate_nodal_solution(1, comp='x', loop=False)
+
+        Animate second result and save as a movie
+
+        >>> rst.animate_nodal_solution(0, movie_filename='disp.mp4')
         """
         scalars = None
         if comp:
@@ -804,8 +820,10 @@ class ResultFile(AnsysBinary):
         result, bufsz = self.read_record(ptr_nsl + ptr_rst, True)
         result = result.reshape(-1, sumdof)
 
-        # no idea why the result written is twice as long...
-        result = result[:result.shape[0]//2]
+        # additional entries are sometimes written for no discernible
+        # reason
+        if result.shape[0] > nnod:
+            result = result[:nnod]
 
         # # it's possible that not all results are written
         if result.shape[0] != nnod:
@@ -831,11 +849,8 @@ class ResultFile(AnsysBinary):
             euler_angles = self.geometry['nodes'][self.insolution, 3:].T
             rotate_to_global(result, euler_angles)
 
-        # check for invalid values
-        # it seems mapdl writes invalid values as 2*100
+        # check for invalid values (mapdl writes invalid values as 2*100)
         result[result == 2**100] = 0
-
-        # also include nodes in output
         return nnum, result
 
     def _read_components(self):
@@ -2515,3 +2530,10 @@ def transform(points, trans):
         trans = pv.trans_from_matrix(trans)
 
     _binary_reader.affline_transform(points, trans)
+
+
+def merge_two_dicts(x, y):
+    merged = x.copy()   # start with x's keys and values
+    merged.update(y)    # modifies z with y's keys and values & returns None
+    return merged
+
