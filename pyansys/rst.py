@@ -107,8 +107,8 @@ SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
                              'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
                              'ptrOSLh', 'sizeDEAD', 'ptrDEADl', 'ptrDEADh',
                              'PrinKey','numvdof', 'numadof', '0', '0',
-                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0', 
-                             '0', '0', '0', 'numRotCmp', '0', 
+                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0',
+                             '0', '0', '0', 'numRotCmp', '0',
                              'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
                              'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
 
@@ -118,21 +118,7 @@ SOLUTION_HEADER_KEYS_DP = ['timfrq',  'lfacto',  'lfactn', 'cptime', 'tref',
                            'omega_v_z', 'omega_a_x', 'omega_a_y', 'omega_a_z', 'omegacg_v_x',
                            'omegacg_v_y', 'omegacg_v_z', 'omegacg_a_x', 'omegacg_a_y', 'omegacg_a_z',
                            'cgcent', 'cgcent', 'cgcent', 'fatjack', 'fatjack',
-                           'dval1', 'pCnvVal', #'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal',
-                           # 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal', 'pCnvVal']
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (60)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (70)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (80)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,  (90)
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat,
-# c                                    timdat,  timdat,  timdat,  timdat,  timdat   (100)
-]
+                           'dval1', 'pCnvVal']
 
 GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
                         'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC',
@@ -184,7 +170,7 @@ class ResultFile(AnsysBinary):
     >>> rst = pyansys.read_binary('file.rst')
     """
 
-    def __init__(self, filename, ignore_cyclic=False, read_geometry=True):
+    def __init__(self, filename, read_geometry=True, **kwargs):
         """Loads basic result information from result file and
         initializes result object.
         """
@@ -1090,6 +1076,7 @@ class ResultFile(AnsysBinary):
         dval1   - if pmeth=0: FATJACK ocean wave direction
                   if pmeth=1: p-method convergence values
         pCnvVal - p-method convergence values
+
         """
         # Check if result is available
         if rnum > self.nsets - 1:
@@ -1474,13 +1461,15 @@ class ResultFile(AnsysBinary):
             Adds information about the result when rnum is given.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             Camera position.
         """
+        loop = kwargs.pop('loop', False)
+
         if grid is None:
             grid = self.grid
 
@@ -1665,7 +1654,9 @@ class ResultFile(AnsysBinary):
                         plotter.write_frame()
 
                 first_loop = False
-                if off_screen or interactive is False:
+                # if off_screen or interactive is False:
+                #     break
+                if not loop:
                     break
             plotter.close()
 
@@ -1754,30 +1745,37 @@ class ResultFile(AnsysBinary):
         -------
         cpos : list
             3 x 3 vtk camera position.
+
+        Examples
+        --------
+        Plot the X component nodal stress while showing displacement.
+
+        >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
         available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
 
         if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select from the following:\n%s' % available_comps)
+            raise ValueError('Missing "comp" parameter.  Please select'
+                             ' from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
         self._plot_nodal_result(rnum, 'ENS',  comp, available_comps, show_displacement,
                                 displacement_factor, node_components,
                                 sel_type_all, **kwargs)
 
     def save_as_vtk(self, filename):
-        """Appends all results to an unstructured grid and writes it to
-        disk.
+        """Converts all results to an unstructured grid and writes it
+        to disk.
 
         The file extension will select the type of writer to use.
-        '.vtk' will use the legacy writer, while '.vtu' will select
-        the VTK XML writer.
+        ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
+        select the VTK XML writer.
 
         Parameters
         ----------
         filename : str
             Filename of grid to be written.  The file extension will
-            select the type of writer to use.  '.vtk' will use the
-            legacy writer, while '.vtu' will select the VTK XML
+            select the type of writer to use.  ``'.vtk'`` will use the
+            legacy writer, while ``'.vtu'`` will select the VTK XML
             writer.
 
         Notes
@@ -1785,6 +1783,17 @@ class ResultFile(AnsysBinary):
         Binary files write much faster than ASCII, but binary files
         written on one system may not be readable on other systems.
         Binary can only be selected for the legacy writer.
+
+        Examples
+        --------
+        Write in binary
+
+        >>> rst.save_as_vtk('results.vtk')
+
+        Write using the xml writer
+
+        >>> rst.save_as_vtk('results.vtu')
+
         """
         # Copy grid as to not write results to original object
         grid = self.grid.copy()
@@ -1802,7 +1811,17 @@ class ResultFile(AnsysBinary):
         grid.save(filename)
 
     def write_tables(self, filename):
-        """ Write binary tables to ASCII.  Assumes int32  """
+        """Write binary tables to ASCII.  Assumes int32
+
+        Parameters
+        ----------
+        filename : str
+            Filename to write the tables to.
+
+        Examples
+        --------
+        >>> rst.write_tables('tables.txt')
+        """
         rawresult = open(self.filename, 'rb')
         with open(filename, 'w') as f:
             while True:
@@ -1843,7 +1862,7 @@ class ResultFile(AnsysBinary):
         else:
             raise Exception('Input must be either an int or a list')
 
-    def __repr__(self):
+    def __str__(self):
         rst_info = ['ANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
@@ -1927,14 +1946,6 @@ class ResultFile(AnsysBinary):
 
         # Element types for nodal averaging
         elemtype = self.geometry['Element Type'].astype(np.int32)
-
-        # if self.version < 14.5:  # values stored as double precision
-        # tarr = np.empty(1, np.float64)
-            # my_dtype = 1
-        # else:    # values stored as single precision
-        #     tarr = np.empty(1, np.float32)
-        #     my_dtype = 0
-
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                         self.grid.celltypes,
                                                         ele_ind_table,
@@ -2027,7 +2038,6 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_temperature(0)
-
         """
         nnum, temp = self._nodal_result(rnum, 'EPT')
         temp = temp.ravel()
@@ -2070,6 +2080,7 @@ class ResultFile(AnsysBinary):
         >>> result.plot_nodal_temperature(0)
 
         Plot while showing edges and disabling lighting
+
         >>> result.plot_nodal_temperature(0, show_edges=True, lighting=False)
         """
         _, scalars = self.nodal_temperature(rnum)
@@ -2084,7 +2095,6 @@ class ResultFile(AnsysBinary):
                                         displacement_factor=displacement_factor,
                                         stitle='Nodal Tempature',
                                         **kwargs)
-
 
     def nodal_thermal_strain(self, rnum):
         """Nodal component plastic strains.  This record contains
@@ -2114,7 +2124,6 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0)
-
         """
         return self._nodal_result(rnum, 'ETH')
 
@@ -2150,7 +2159,7 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -2454,7 +2463,7 @@ class ResultFile(AnsysBinary):
         """Prints available element result types and returns those keys"""
         ele_ind_table, _, _ = self._element_solution_header(0)
 
-        # get the keys from the first element (not ideal...)
+        # get the keys from the first element (not perfect...)
         mask = self.read_record(ele_ind_table[0]) > 0
         keys = [ELEMENT_INDEX_TABLE_KEYS[i] for i in mask.nonzero()[0]]
 
