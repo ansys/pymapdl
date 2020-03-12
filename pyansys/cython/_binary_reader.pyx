@@ -319,7 +319,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
         c += nnode_elem
 
 
-cdef inline int read_element_result(ifstream *binfile, int ele_table,
+cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, double *arr,
                                     int element_type, int as_global=1):
@@ -328,12 +328,13 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
     cdef char [131072] tmp_data_buffer  # 2**17
-    cdef double [512] euler_angles  # 8*3*20 -->512
+    cdef double [512] euler_angles  # 8*3*20 --> 512
     cdef short* spointers = <short*>pointers
 
     # store elemenet element result pointers
     read_record_stream(binfile, ele_table, <void*>&pointers,
                        &prec_flag, &type_flag, &size)
+    # expect size to be 25 here as of v19.1
 
     if prec_flag:
         ptr = spointers[result_index]
@@ -342,7 +343,7 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
         ptr = pointers[result_index]
         eul_ptr = pointers[PTR_EUL_IDX]
 
-    if ptr == 0:
+    if ptr == 0:  # 0 means skip
         return 1
     if ptr < 0:  # negative pointer means missing data
         # skip this element
@@ -350,7 +351,7 @@ cdef inline int read_element_result(ifstream *binfile, int ele_table,
             for k in range(nitem):
                 arr[j*nitem + k] = 0  # consider putting NAN instead
     else:
-        # read the stresses evaluated at the intergration points or nodes
+        # read the results evaluated at the integration points or nodes
         read_record_stream(binfile, ele_table + ptr, <void*>tmp_data_buffer,
                            &prec_flag, &type_flag, &size)
 
@@ -600,7 +601,6 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         skip = read_element_result(binfile, ele_ind_table[i],
                                    result_index, nnode_elem, nitems,
                                    &bufferdata[0, 0], element_type[i])
-
         if skip:
             continue
 
