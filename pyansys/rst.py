@@ -277,15 +277,6 @@ class ResultFile(AnsysBinary):
         """Reads in coordinate system information from a binary result
         file.
 
-        Parameters
-        ----------
-        f : file object
-            Open binary result file.
-
-        geometry_header, dict
-            Dictionary containing pointers to geometry items in the ansys
-            result.
-
         Returns
         -------
         c_systems : dict
@@ -1467,8 +1458,9 @@ class ResultFile(AnsysBinary):
     def _plot_point_scalars(self, scalars, rnum=None, grid=None,
                             show_displacement=False, displacement_factor=1,
                             add_text=True, animate=False, nangles=100,
-                            overlay_wireframe=False,
-                            movie_filename=None, max_disp=0.1, **kwargs):
+                            overlay_wireframe=False, node_components=None,
+                            sel_type_all=True, movie_filename=None,
+                            max_disp=0.1, **kwargs):
         """Plot point scalars on active mesh.
 
         Parameters
@@ -1512,9 +1504,14 @@ class ResultFile(AnsysBinary):
         disp = None
         if show_displacement and not animate:
             disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
+            if node_components:
+                _, ind = self._extract_node_components(node_components, sel_type_all)
+                disp = disp[ind]
+
             new_points = disp + grid.points
             grid = grid.copy()
             grid.points = new_points
+
         elif animate:
             disp = self.nodal_solution(rnum)[1][:, :3]
 
