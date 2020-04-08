@@ -68,6 +68,13 @@ def test_read_volume():
 
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
+def nodal_displacement():
+    nnum, disp = vm33.nodal_displacement(0)
+    assert isinstance(nnum, np.ndarray)
+    assert isinstance(disp, np.ndarray)
+
+
+@pytest.mark.skipif(vm33 is None, reason="Requires example files")
 def test_nodal_thermal_strain():
     _, tstrain = vm33.nodal_thermal_strain(0)
     assert np.any(tstrain)
@@ -110,6 +117,13 @@ def test_plot_pontoon():
 def test_plot_pontoon_nodal_displacement():
     pontoon.plot_nodal_solution(0, show_displacement=True,
                                 overlay_wireframe=True, off_screen=True)
+
+
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@pytest.mark.skipif(pontoon is None, reason="Requires example files")
+def test_plot_pontoon_nodal_displacement():
+    pontoon.plot_nodal_displacement(0, show_displacement=True,
+                                    overlay_wireframe=True, off_screen=True)
 
 
 @pytest.mark.skipif(pontoon is None, reason="Requires example files")
