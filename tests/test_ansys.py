@@ -343,3 +343,19 @@ def test_al(cleared, mapdl):
 def test_invalid():
     with pytest.raises(Exception):
         mapdl.a(0, 0, 0, 0)
+
+
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+def test_al(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k1, k2)
+    l2 = mapdl.l(k2, k3)
+    l3 = mapdl.l(k3, k0)
+    a0 = mapdl.al(l0, l1, l2, l3)
+    mapdl.enable_interactive_plotting()
+    mapdl._show_matplotlib_figures = False
+    mapdl.aplot()
