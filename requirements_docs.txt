@@ -1,3 +1,4 @@
+matplotlib
 Sphinx
 sphinx-autobuild
 sphinx-rtd-theme
