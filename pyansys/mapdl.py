@@ -187,7 +187,6 @@ ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 ###############################################################################
 
 # test for png file
-# png_test = re.compile(r'WRITTEN TO FILE')
 png_test = re.compile('WRITTEN TO FILE(.*).png')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
