@@ -104,6 +104,7 @@ int read_header(ifstream* binFile, int* bsparse_flag, int* wsparse_flag,
   *prec_flag = (raw[7] >> 6) & 1;
   *type_flag = (raw[7] >> 7) & 1;
 
+  delete[] raw;
   return bufsize;
 }
 
@@ -142,6 +143,8 @@ void read_nodes(const char* filename, int64_t ptrLOC, int nrec, int *nnum,
   //   flag = (buffer[7] >> i) & 1;
   //   printf("%d, %d\n", i, flag);
   // }
+
+  delete[] raw;
 
 }
 
@@ -538,17 +541,17 @@ void read_record_stream(ifstream* file, int64_t loc, void* arr, int* prec_flag,
     // write to temporary record
     file->read(raw, 4*bufsize);
     
-    if (*type_flag){
+     if (*type_flag){
       if (*prec_flag){
-	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);
+  	ReadShortBsparseRecordToVec((int*)raw, size, (short*)arr);
       } else{
-	ReadBsparseRecordToVec((int*)raw, size, (int*)arr);
+  	ReadBsparseRecordToVec((int*)raw, size, (int*)arr);
       }
     } else{  // a float or a double
       if (*prec_flag){
-	ReadBsparseRecordToVec((int*)raw, size, (float*)arr);
+  	ReadBsparseRecordToVec((int*)raw, size, (float*)arr);
       } else{
-	ReadBsparseRecordToVec((int*)raw, size, (double*)arr);
+  	ReadBsparseRecordToVec((int*)raw, size, (double*)arr);
       }
     }
 
@@ -556,34 +559,22 @@ void read_record_stream(ifstream* file, int64_t loc, void* arr, int* prec_flag,
     file->read(raw, 4*bufsize);
     if (*type_flag){
       if (*prec_flag){
-	ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
+  	ReadWindowedSparseBufferShort((int*)raw, size, (short*)arr);
       } else{
-	ReadWindowedSparseBufferInt((int*)raw, size, (int*)arr);
+  	ReadWindowedSparseBufferInt((int*)raw, size, (int*)arr);
       }
     } else{  // a float/double
       if (*prec_flag){
-	ReadWindowedSparseBufferFloat((int*)raw, size, (float*)arr);
+  	ReadWindowedSparseBufferFloat((int*)raw, size, (float*)arr);
       } else{
-	ReadWindowedSparseBufferDouble((int*)raw, size, (double*)arr);
+  	ReadWindowedSparseBufferDouble((int*)raw, size, (double*)arr);
       }
     }
 
   } else {// write directly to the array
     file->read((char*)arr, 4*bufsize);
   }    
+
+  delete[] raw;
   
 }
-
-
-/** 
- *! This function decrypts and expands a sparse vector
- * 
- * \param kbfint		[IN]  1 if the [31] flag is true, 0 otherwize
- * \param precision		[IN]  1 if the [30] flag is true, 0 otherwize
- * \param bsparse		[IN]  1 if the [27] flag is true, 0 otherwize
- * \param Buffer4		[IN]  The sparse buffer to be expanded
- * \param kL			[OUT] The size of the expanded record
- * \param ivect4		[OUT] The expanded record
- */
-
-

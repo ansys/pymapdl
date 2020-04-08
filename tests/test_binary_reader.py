@@ -1,5 +1,7 @@
+import gc
 import shutil
 import os
+import psutil
 
 import pytest
 from pyvista.plotting import system_supports_plotting
@@ -10,6 +12,7 @@ import pyvista as pv
 import pyansys
 from pyansys import examples
 from pyansys.rst import ELEMENT_INDEX_TABLE_INFO
+
 
 try:
     __file__
@@ -23,6 +26,7 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 @pytest.fixture(scope='module')
 def example_result():
     return pyansys.read_binary(examples.rstfile)
+
 
 result_types = ['ENS', 'EPT', 'ETH', 'EEL', 'ENG']# 'ENF']
 @pytest.mark.parametrize("result_type", result_types)
@@ -98,3 +102,14 @@ def test_file_close(tmpdir):
     rst = pyansys.read_binary(tmpfile)
     nnum, stress = rst.nodal_stress(0)
     os.remove(tmpfile)
+
+
+# def test_memory_leak(example_result):
+#     process = psutil.Process(os.getpid())
+#     gc.collect()
+#     init = process.memory_info().rss
+#     for _ in range(100):
+#         example_result._nodal_result(0, 'ENS')
+
+#     gc.collect()
+#     assert (process.memory_info().rss - init) == 0
