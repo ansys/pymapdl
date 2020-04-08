@@ -187,7 +187,7 @@ ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 ###############################################################################
 
 # test for png file
-png_test = re.compile(r'WRITTEN TO FILE')
+png_test = re.compile('WRITTEN TO FILE(.*).png')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
@@ -410,6 +410,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.response = None
         self._output = ''
         self._outfile = None
+        self._show_matplotlib_figures = True
 
         if exec_file is None:
             # Load cached path
@@ -550,10 +551,21 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log.debug(self.process.before.decode('utf-8'))
         self.using_corba = False
 
-    def enable_interactive_plotting(self):
-        """ Enables interactive plotting.  Requires matplotlib """
+    def enable_interactive_plotting(self, pixel_res=1600):
+        """Enables interactive plotting.  Requires matplotlib
+
+        Parameters
+        ----------
+        pixel_res : int
+            Pixel resolution.  Valid values are from 256 to 2400.
+            Lowering the pixel resolution produces a "fuzzier" image;
+            increasing the resolution produces a "sharper" image but
+            takes a little longer.
+
+        """
         if MATPLOTLIB_LOADED:
-            self.Show('PNG')
+            self.show('PNG')
+            self.gfile(1200)
             self._interactive_plotting = True
         else:
             raise Exception('Install matplotlib to use enable interactive plotting\n' +
@@ -975,7 +987,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log.info('Removed file handler')
 
     def _display_plot(self, text):
-        """Display the last generated plot from ANSYS"""        
+        """Display the last generated plot from ANSYS"""
         png_found = png_test.findall(text)
         if png_found:
             # flush graphics writer
@@ -991,7 +1003,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 img = mpimg.imread(filename)
                 plt.imshow(img)
                 plt.axis('off')
-                plt.show()  # consider in-line plotting
+                if self._show_matplotlib_figures:
+                    plt.show()  # consider in-line plotting
             else:
                 self.log.error('Unable to find screenshot at %s' % filename)
         pass
