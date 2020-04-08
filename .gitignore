@@ -39,7 +39,7 @@ tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
 *,cover
-
+flycheck*
 
 # ignore certain result files
 tests/testfiles/is16.rst

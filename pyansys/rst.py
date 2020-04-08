@@ -10,11 +10,13 @@ import warnings
 import logging
 import ctypes
 from threading import Thread
+from functools import wraps
 
 import vtk
 import numpy as np
 import pyvista as pv
 
+import pyansys
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
@@ -392,7 +394,7 @@ class ResultFile(AnsysBinary):
 
     def plot_nodal_solution(self, rnum, comp='norm',
                             show_displacement=False,
-                            max_disp=0.1,
+                            displacement_factor=1.0,
                             node_components=None, sel_type_all=True,
                             **kwargs):
         """Plots the nodal solution.
@@ -404,9 +406,10 @@ class ResultFile(AnsysBinary):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are ``'x'``, ``'y'``, ``'z'``,
-            or ``'norm'``.  This corresponds to the x directin, y direction,
-            z direction, and the normalized result.
+            Display component to display.  Options are ``'x'``,
+            ``'y'``, ``'z'``, or ``'norm'``.  This corresponds to the
+            x directin, y direction, z direction, and the normalized
+            result.
 
         show_displacement : bool, optional
             Deforms mesh according to the result.
@@ -416,7 +419,7 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -431,7 +434,7 @@ class ResultFile(AnsysBinary):
         Examples
         --------
         Plot the nodal solution result 0 of verification manual
-        example 
+        example
 
         >>> import pyansys
         >>> result = pyansys.download_verification_result(33)
@@ -486,24 +489,18 @@ class ResultFile(AnsysBinary):
         else:
             grid = self.grid
 
-        if show_displacement:
-            disp = self.nodal_solution(rnum)[1][:, :3]
-            if ind is not None:
-                disp = disp[ind]
-
-            # scale max displacement
-            disp /= (np.abs(disp).max()/max_disp)
-
-            new_points = disp + grid.points
-            grid = grid.copy()
-            grid.points = new_points
-
         return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
-                                        # show_displacement=show_displacement,
-                                        # displacement_factor=displacement_factor,
+                                        stitle=stitle,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
                                         node_components=node_components,
                                         sel_type_all=sel_type_all,
                                         **kwargs)
+
+    @wraps(plot_nodal_solution)
+    def plot_nodal_displacement(self, *args, **kwargs):
+        """wraps plot_nodal_solution"""
+        self.plot_nodal_solution(*args, **kwargs)
 
     @property
     def node_components(self):
@@ -580,8 +577,8 @@ class ResultFile(AnsysBinary):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Scalar component to display.  Options are 'x', 'y', 'z',
-            and 'norm', and None.
+            Scalar component to display.  Options are ``'x'``,
+            ``'y'``, ``'z'``, and ``'norm'``, and ``None``.
 
         sel_type_all : bool, optional
             If node_components is specified, plots those elements
@@ -656,6 +653,11 @@ class ResultFile(AnsysBinary):
                                         movie_filename=movie_filename,
                                         max_disp=max_disp, **kwargs)
 
+    @wraps(animate_nodal_solution)
+    def animate_nodal_displacement(self, *args, **kwargs):
+        """wraps animate_nodal_solution"""
+        self.animate_nodal_solution(*args, **kwargs)
+
     def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
@@ -663,9 +665,9 @@ class ResultFile(AnsysBinary):
         Parameters
         ----------
         solution_type: str, optional
-            Specify, whether nodal displacements ('NSL'), nodal
-            velocities ('VEL') or nodal accelerations ('ACC') will be
-            read.
+            Specify, whether nodal displacements (``'NSL'``), nodal
+            velocities (``'VEL'``) or nodal accelerations (``'ACC'``)
+            will be read.
 
         in_nodal_coord_sys : bool, optional
             When True, returns results in the nodal coordinate system.
@@ -854,6 +856,11 @@ class ResultFile(AnsysBinary):
         # check for invalid values (mapdl writes invalid values as 2*100)
         result[result == 2**100] = 0
         return nnum, result
+
+    @wraps(nodal_solution)
+    def nodal_displacement(self, *args, **kwargs):
+        """wraps plot_nodal_solution"""
+        self.nodal_solution(*args, **kwargs)
 
     def _read_components(self):
         """Read components from an ANSYS result file
@@ -1172,7 +1179,7 @@ class ResultFile(AnsysBinary):
         -------
         element_stress : list
             Stresses at each element for each node for Sx Sy Sz Sxy
-            Syz Sxz.  or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
+            Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
             principal is True.
 
         enum : np.ndarray
@@ -1402,7 +1409,7 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -1423,6 +1430,7 @@ class ResultFile(AnsysBinary):
         if stype is None:
             raise Exception("Stress type must be a string from the following list:\n" +
                             "['1', '2', '3', 'INT', 'EQV']")
+        stype = stype.upper()
 
         rnum = self.parse_step_substep(rnum)
         stress = self.principle_stress_for_plotting(rnum, stype)
@@ -1433,7 +1441,14 @@ class ResultFile(AnsysBinary):
         else:
             grid = self.grid
 
-        # Generate plot
+        if 'stitle' not in kwargs:
+            stype_stitle_map = {'1': 'Principal Stress 1',
+                                '2': 'Principal Stress 2',
+                                '3': 'Principal Stress 3',
+                                'INT': 'Stress Intensity',
+                                'EQV': 'von Mises Stress'}
+            kwargs['stitle'] = stype_stitle_map[stype]
+
         return self._plot_point_scalars(stress, rnum=rnum, grid=grid, **kwargs)
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
@@ -1452,6 +1467,7 @@ class ResultFile(AnsysBinary):
     def _plot_point_scalars(self, scalars, rnum=None, grid=None,
                             show_displacement=False, displacement_factor=1,
                             add_text=True, animate=False, nangles=100,
+                            overlay_wireframe=False,
                             movie_filename=None, max_disp=0.1, **kwargs):
         """Plot point scalars on active mesh.
 
@@ -1476,6 +1492,9 @@ class ResultFile(AnsysBinary):
 
         add_text : bool, optional
             Adds information about the result when rnum is given.
+
+        overlay_wireframe : bool, optional
+            Overlay a wireframe of the original undeformed mesh.
 
         kwargs : keyword arguments
             Additional keyword arguments.  See ``help(pyvista.plot)``
@@ -1586,12 +1605,9 @@ class ResultFile(AnsysBinary):
         kwargs.pop('node_components', None)
         kwargs.pop('sel_type_all', None)
 
-        if kwargs.pop('overlay_wireframe', False):
-            plotter.add_mesh(self.grid,
-                             color='w',
-                             style='wireframe',
-                             opacity=0.5,
-                             **kwargs)
+        if overlay_wireframe:
+            plotter.add_mesh(self.grid, color='w', style='wireframe',
+                             opacity=0.5, **kwargs)
 
         for i in range(n_sector):
             copied_mesh = mesh.copy(False)

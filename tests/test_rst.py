@@ -108,7 +108,7 @@ def test_plot_pontoon():
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 @pytest.mark.skipif(pontoon is None, reason="Requires example files")
 def test_plot_pontoon_nodal_displacement():
-    pontoon.plot_nodal_solution(0, show_displacement=True, max_disp=10,
+    pontoon.plot_nodal_solution(0, show_displacement=True,
                                 overlay_wireframe=True, off_screen=True)
 
 
