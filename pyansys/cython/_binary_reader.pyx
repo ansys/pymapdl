@@ -12,6 +12,7 @@ from libc.stdio cimport (fopen, FILE, fclose, fread, fseek, SEEK_CUR,
                          ftell, SEEK_SET)
 from libc.string cimport memcpy
 from libc.stdint cimport int64_t
+from libc.stdlib cimport malloc, free
 
 
 from cython.parallel import prange
@@ -317,7 +318,7 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
                                    PTR_ENS_IDX, nnode_elem, nitem,
                                    &ele_data_arr[c, 0], element_type[i], as_global)
         c += nnode_elem
-
+    
 
 cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                                     int result_index,
