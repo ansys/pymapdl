@@ -280,7 +280,8 @@ def read(filename, read_parameters=False, debug=False):
                 # verify at the end of the block
                 if myfgets(line, raw, &n, fsize):
                     raise Exception('Unable to read end of nblock or at end of file')
-                if b'N,R5.3,LOC' not in line:
+
+                if 'N,R5.3,LOC' not in line.decode().replace(' ', ''):
                     if debug:
                         print('N,R5.3,LOC not at end of block')
                     # need to reread the number of nodes
@@ -289,7 +290,7 @@ def read(filename, read_parameters=False, debug=False):
                     nnodes = 0
                     while True:
                         if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                        if b'N,R5.3,LOC' in line:
+                        if 'N,R5.3,LOC' not in line.decode().replace(' ', ''):
                             break
                         nnodes += 1
 
