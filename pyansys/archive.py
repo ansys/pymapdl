@@ -520,11 +520,14 @@ def write_cmblock(filename, items, comp_name, comp_type, digit_width=10):
         Name of the component
 
     comp_type : str
-        Component type to write.  Should be either 'element' or 'node'.
+        Component type to write.  Should be either 'ELEMENT' or 'NODE'.
     
     digit_width : int, optional
         Default 10
     """
+    if comp_type.upper() not in ['ELEMENT', 'NODE']:
+        raise ValueError("`comp_type` must be either 'ELEMENT' or 'NODE'")
+
     items = np.unique(items)
 
     toprint = []
