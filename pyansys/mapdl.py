@@ -1130,6 +1130,14 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def load_parameters(self):
         """Loads and returns all current parameters
 
+        Returns
+        -------
+        parameters : dict
+            Dictionary of single value parameters.
+
+        arrays : dict
+            Dictionary of MAPDL arrays.
+
         Examples
         --------
         >>> parameters, arrays = mapdl.load_parameters()
@@ -1147,6 +1155,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         filename = os.path.join(self.path, 'parameters.parm')
         self.Parsav('all', filename)
         self.parameters, self.arrays = load_parameters(filename)
+        return self.parameters, self.arrays
 
     def add_file_handler(self, filepath, append):
         """ Adds a file handler to the log """
