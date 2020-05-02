@@ -16,13 +16,14 @@ import vtk
 import numpy as np
 import pyvista as pv
 
-import pyansys
 from pyansys import _binary_reader, _parser, _reader
 from pyansys.elements import valid_types
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
-
+from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
+                               solution_data_header_keys, solution_header_keys_dp,
+                               result_header_keys)
 from pyansys.common import (read_table, parse_header, AnsysBinary,
-                            read_standard_header, two_ints_to_long, rotate_to_global)
+                            read_standard_header, rotate_to_global)
 
 # Create logger
 LOG = logging.getLogger(__name__)
@@ -48,105 +49,6 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'ENL': 10,
                         'EDI': 7}
 
-ELEMENT_INDEX_TABLE_INFO = {
-    'EMS': 'Misc. data',
-    'ENF': 'Nodal forces',
-    'ENS': 'Nodal stresses',
-    'ENG': 'Volume and energies',
-    'EGR': 'Nodal gradients',
-    'EEL': 'Elastic strains',
-    'EPL': 'Plastic strains',
-    'ECR': 'Creep strains',
-    'ETH': 'Thermal strains',
-    'EUL': 'Euler angles',
-    'EFX': 'Nodal fluxes',
-    'ELF': 'Local forces',
-    'EMN': 'Misc. non-sum values',
-    'ECD': 'Element current densities',
-    'ENL': 'Nodal nonlinear data',
-    'EHC': 'Calculated heat generations',
-    'EPT': 'Element temperatures',
-    'ESF': 'Element surface stresses',
-    'EDI': 'Diffusion strains',
-    'ETB': 'Etable items',
-    'ECT': 'Contact data',
-    'EXY': 'Integration point locations',
-    'EBA': 'Back stresses',
-    'ESV': 'State variables',
-    'MNL': 'Material nonlinear record'
-}
-
-SOLUTION_DATA_HEADER_KEYS = ['pv3num', 'nelm', 'nnod', 'mask', 'itime',
-                             'iter', 'ncumit', 'nrf', 'cs_LSC', 'nmast',
-                             'ptrNSL', 'ptrESL', 'ptrRF', 'ptrMST',
-                             'ptrBC', 'rxtrap', 'mode', 'isym', 'kcmplx',
-                             'numdof', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'DOFS', 'DOFS', 'DOFS', 'DOFS',
-                             'DOFS', 'title', 'title', 'title', 'title',
-                             'title', 'title', 'title', 'title', 'title',
-                             'title', 'title', 'title', 'title', 'title',
-                             'title', 'title', 'title', 'title', 'title',
-                             'title', 'stitle', 'stitle', 'stitle',
-                             'stitle', 'stitle', 'stitle', 'stitle',
-                             'stitle', 'stitle', 'stitle', 'stitle',
-                             'stitle', 'stitle', 'stitle', 'stitle',
-                             'stitle', 'stitle', 'stitle', 'stitle',
-                             'stitle', 'dbmtim', 'dbmdat', 'dbfncl',
-                             'soltim', 'soldat', 'ptrOND', 'ptrOEL',
-                             'nfldof', 'ptrEXA', 'ptrEXT', 'ptrEXAl',
-                             'ptrEXAh', 'ptrEXTl', 'ptrEXTh', 'ptrNSLl',
-                             'ptrNSLh', 'ptrRFl', 'ptrRFh', 'ptrMSTl',
-                             'ptrMSTh', 'ptrBCl', 'ptrBCh', 'ptrTRFl',
-                             'ptrTRFh', 'ptrONDl', 'ptrONDh', 'ptrOELl',
-                             'ptrOELh', 'ptrESLl', 'ptrESLh', 'ptrOSLl',
-                             'ptrOSLh', 'sizeDEAD', 'ptrDEADl', 'ptrDEADh',
-                             'PrinKey','numvdof', 'numadof', '0', '0',
-                             'ptrVSLl','ptrVSLh', 'ptrASLl', 'ptrASLh', '0',
-                             '0', '0', '0', 'numRotCmp', '0',
-                             'ptrRCMl', 'ptrRCMh', 'nNodStr', '0', 'ptrNDSTRl',
-                             'ptrNDSTRh', 'AvailData', 'geomID', 'ptrGEOl', 'ptrGEOh']
-
-SOLUTION_HEADER_KEYS_DP = ['timfrq',  'lfacto',  'lfactn', 'cptime', 'tref',
-                           'tunif', 'tbulk', 'volbase', 'tstep', '__unused',
-                           'accel_x', 'accel_y', 'accel_z', 'omega_v_x', 'omega_v_y',
-                           'omega_v_z', 'omega_a_x', 'omega_a_y', 'omega_a_z', 'omegacg_v_x',
-                           'omegacg_v_y', 'omegacg_v_z', 'omegacg_a_x', 'omegacg_a_y', 'omegacg_a_z',
-                           'cgcent', 'cgcent', 'cgcent', 'fatjack', 'fatjack',
-                           'dval1', 'pCnvVal']
-
-GEOMETRY_HEADER_KEYS = ['__unused', 'maxety', 'maxrl', 'nnod', 'nelm',
-                        'maxcsy', 'ptrETY', 'ptrREL', 'ptrLOC',
-                        'ptrCSY', 'ptrEID', 'maxsec', 'secsiz',
-                        'maxmat', 'matsiz', 'ptrMAS', 'csysiz',
-                        'elmsiz', 'etysiz', 'rlsiz', 'ptrETYl',
-                        'ptrETYh', 'ptrRELl', 'ptrRELh', 'ptrCSYl',
-                        'ptrCSYh', 'ptrLOCl', 'ptrLOCh', 'ptrEIDl',
-                        'ptrEIDh', 'ptrMASl', 'ptrMASh', 'ptrSECl',
-                        'ptrSECh', 'ptrMATl', 'ptrMATh', 'ptrCNTl',
-                        'ptrCNTh', 'ptrNODl', 'ptrNODh', 'ptrELMl',
-                        'ptrELMh', 'Glbnnod', 'ptrGNODl', 'ptrGNODh',
-                        'maxn', 'NodesUpd', 'lenbac', 'maxcomp',
-                        'compsiz', 'ptrCOMPl', 'ptrCOMPh']
-
-RESULT_HEADER_KEYS = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
-                      'maxe', 'nelm', 'kan', 'nsets', 'ptrend',
-                      'ptrDSIl', 'ptrTIMl', 'ptrLSPl', 'ptrELMl',
-                      'ptrNODl', 'ptrGEOl', 'ptrCYCl', 'CMSflg',
-                      'csEls', 'units', 'nSector', 'csCord',
-                      'ptrEnd8', 'ptrEnd8', 'fsiflag', 'pmeth',
-                      'noffst', 'eoffst', 'nTrans', 'ptrTRANl',
-                      'PrecKey', 'csNds', 'cpxrst', 'extopt',
-                      'nlgeom', 'AvailData', 'mmass', 'kPerturb',
-                      'XfemKey', 'rstsprs', 'ptrDSIh', 'ptrTIMh',
-                      'ptrLSPh', 'ptrCYCh', 'ptrELMh', 'ptrNODh',
-                      'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
-                      'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey',
-                      'cycMSUPkey', 'XfemCrkPropTech']
-
 
 class ResultFile(AnsysBinary):
     """Reads a binary ANSYS result file.
@@ -160,7 +62,8 @@ class ResultFile(AnsysBinary):
         Ignores any cyclic properties.
 
     read_geometry : bool, optional
-        Debug parameter.
+        Debug parameter.  Set to False to disable reading in the
+        geometry.
 
     Examples
     --------
@@ -189,10 +92,10 @@ class ResultFile(AnsysBinary):
 
         # store geometry for later retrival
         if read_geometry:
-            self.store_geometry()
+            self._store_geometry()
 
-        self.header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
-        self.geometry_header = {}
+        self.header = parse_header(self.read_record(103), result_header_keys)
+        self._geometry_header = {}
 
     @property
     def n_sector(self):
@@ -216,7 +119,7 @@ class ResultFile(AnsysBinary):
         standard_header = read_standard_header(self.filename)
 
         # Read .RST FILE HEADER
-        header = parse_header(self.read_record(103), RESULT_HEADER_KEYS)
+        header = parse_header(self.read_record(103), result_header_keys)
         resultheader = merge_two_dicts(header, standard_header)
 
         # Read nodal equivalence table
@@ -273,7 +176,7 @@ class ResultFile(AnsysBinary):
 
         return resultheader
 
-    def parse_coordinate_system(self):
+    def _parse_coordinate_system(self):
         """Reads in coordinate system information from a binary result
         file.
 
@@ -310,10 +213,10 @@ class ResultFile(AnsysBinary):
             - 3: Toroidal
         """
         # number of coordinate systems
-        maxcsy = self.geometry_header['maxcsy']
+        maxcsy = self._geometry_header['maxcsy']
 
         # load coordinate system index table
-        ptr_csy = self.geometry_header['ptrCSY']
+        ptr_csy = self._geometry_header['ptrCSY']
         if ptr_csy:
             csy = self.read_record(ptr_csy)
 
@@ -685,7 +588,7 @@ class ResultFile(AnsysBinary):
         # get first solution header and assume, following solution
         # headers are equal
         record = self.read_record(rpointers[0])
-        solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
+        solution_header = parse_header(record, solution_data_header_keys)
 
         mask = solution_header['mask']
         # PDBN = bool(mask & 0b1<<10)
@@ -718,7 +621,7 @@ class ResultFile(AnsysBinary):
             # Seek to result table and to get pointer to DOF
             # results of result table
             rsol_header = parse_header(self.read_record(rpointers[rnum]),
-                                       SOLUTION_DATA_HEADER_KEYS)
+                                       solution_data_header_keys)
             if solution_type == 'NSL':  # Nodal Displacements
                 ptr_sl = rsol_header['ptrNSL']
             elif solution_type == 'VEL':  # Nodal Velocities
@@ -802,7 +705,7 @@ class ResultFile(AnsysBinary):
         # result pointer
         ptr_rst = self.resultheader['rpointers'][rnum]
         result_solution_header = parse_header(self.read_record(ptr_rst),
-                                              SOLUTION_DATA_HEADER_KEYS)
+                                              solution_data_header_keys)
 
         nnod = result_solution_header['nnod']
         numdof = result_solution_header['numdof']
@@ -862,12 +765,12 @@ class ResultFile(AnsysBinary):
             Dictionary of components
         """
         components = {}
-        ncomp = self.geometry_header['maxcomp']
+        ncomp = self._geometry_header['maxcomp']
         if not ncomp:
             return components
 
         # Read through components
-        file_ptr = self.geometry_header['ptrCOMP']
+        file_ptr = self._geometry_header['ptrCOMP']
         for _ in range(ncomp):
             table, sz = self.read_record(file_ptr, True)
             file_ptr += sz  # increment file_pointer
@@ -886,12 +789,12 @@ class ResultFile(AnsysBinary):
 
         return components
 
-    def store_geometry(self):
+    def _store_geometry(self):
         """ Stores the geometry from the result file """
         # read geometry header
         table = self.read_record(self.resultheader['ptrGEO'])
-        geometry_header = parse_header(table, GEOMETRY_HEADER_KEYS)
-        self.geometry_header = geometry_header
+        geometry_header = parse_header(table, geometry_header_keys)
+        self._geometry_header = geometry_header
 
         # Node information
         nnod = geometry_header['nnod']
@@ -972,8 +875,8 @@ class ResultFile(AnsysBinary):
         ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
         e_disp_table -= e_disp_table[0]
 
-        # read in coordinate systems
-        c_systems = self.parse_coordinate_system()
+        # read in coordinate systems, material properties, and sections
+        c_systems = self._parse_coordinate_system()
 
         # The following is stored for each element
         # mat     - material reference number
@@ -989,11 +892,10 @@ class ResultFile(AnsysBinary):
         # NODES   - node numbers defining the element
 
         # allocate memory for this (a maximum of 21 points per element)
-        etype = np.empty(nelm, np.int32)
-
         elem = np.empty((nelm, 20), np.int32)
         elem[:] = -1
 
+        etype = np.empty(nelm, np.int32)
         mtype = np.empty(nelm, np.int32)
         rcon = np.empty(nelm, np.int32)
         esys = np.empty(nelm, np.int32)
@@ -1109,7 +1011,7 @@ class ResultFile(AnsysBinary):
         _, sz = self.read_record(ptr, True)
 
         table = self.read_record(ptr + sz)
-        return parse_header(table, SOLUTION_HEADER_KEYS_DP)
+        return parse_header(table, solution_header_keys_dp)
 
     def _element_solution_header(self, rnum):
         """ Get element solution header information """
@@ -1121,7 +1023,7 @@ class ResultFile(AnsysBinary):
 
         # read result solution header
         record = self.read_record(rpointers[rnum])
-        solution_header = parse_header(record, SOLUTION_DATA_HEADER_KEYS)
+        solution_header = parse_header(record, solution_data_header_keys)
 
         # key to extrapolate integration
         # = 0 - move
@@ -1323,7 +1225,7 @@ class ResultFile(AnsysBinary):
             err_str = 'Data type %s is invalid\n' % str(datatype)
             err_str += '\nAvailable types:\n'
             for key in ELEMENT_INDEX_TABLE_KEYS:
-                err_str += '\t%s: %s\n' % (key, ELEMENT_INDEX_TABLE_INFO[key])
+                err_str += '\t%s: %s\n' % (key, element_index_table_info[key])
 
             raise ValueError(err_str)
 
@@ -2068,7 +1970,7 @@ class ResultFile(AnsysBinary):
         nnum = self.grid.point_arrays['ansys_node_num']
         if np.isnan(data).all():
             raise ValueError('Result file contains no %s records for result %d' %
-                             (ELEMENT_INDEX_TABLE_INFO[result_type.upper()], rnum))
+                             (element_index_table_info[result_type.upper()], rnum))
 
         # average across nodes
         result = data/ncount.reshape(-1, 1)
@@ -2521,7 +2423,7 @@ class ResultFile(AnsysBinary):
         results = np.array(results)
         if np.all(np.isnan(results)):
             raise ValueError('Result file contains no %s records' %
-                             ELEMENT_INDEX_TABLE_INFO[result_type.upper()])
+                             element_index_table_info[result_type.upper()])
 
         # prepopulate mesh with data
         mesh['data'] = results[0]
@@ -2571,7 +2473,7 @@ class ResultFile(AnsysBinary):
         n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
         mask = self.read_record(ele_ind_table[0])[:n_rec] > 0
         keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
-        return {key: ELEMENT_INDEX_TABLE_INFO[key] for key in keys}
+        return {key: element_index_table_info[key] for key in keys}
 
 
 def pol2cart(rho, phi):

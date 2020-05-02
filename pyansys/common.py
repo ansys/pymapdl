@@ -156,7 +156,7 @@ def read_binary(filename, **kwargs):
             return CyclicResult(filename)
 
         if read_geometry:
-            result.store_geometry()
+            result._store_geometry()
 
         return result
 
