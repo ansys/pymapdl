@@ -997,10 +997,12 @@ class ResultFile(AnsysBinary):
         mtype = np.empty(nelm, np.int32)
         rcon = np.empty(nelm, np.int32)
         esys = np.empty(nelm, np.int32)
+        nsec = np.empty(nelm, np.int32)
 
         # load elements
         _binary_reader.load_elements(self.filename, ptr_elem, nelm,
-                                     e_disp_table, elem, etype, mtype, rcon, esys)
+                                     e_disp_table, elem, etype, mtype, rcon, esys,
+                                     nsec)
 
         enum = self.resultheader['eeqv']
 
@@ -1016,6 +1018,7 @@ class ResultFile(AnsysBinary):
                          'etype': etype,
                          'elem': elem,
                          'enum': enum,
+                         'nsec': nsec,
                          'ekey': np.asarray(ekey, ctypes.c_int),
                          'esys': esys,
                          'e_rcon': rcon,
@@ -1046,6 +1049,9 @@ class ResultFile(AnsysBinary):
         self.quadgrid.cell_arrays['ansys_elem_num'] = enum
         self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Element Type'] = element_type
+        self.quadgrid.cell_arrays['Section Number'] = nsec
+        self.quadgrid.cell_arrays['Material Type'] = mtype
+        self.quadgrid.cell_arrays['Element Coordinate System'] = esys
 
         # add node components
         for component_name in components:
