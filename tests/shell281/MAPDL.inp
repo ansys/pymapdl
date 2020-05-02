@@ -1,0 +1,129 @@
+
+!List element properties for element #1
+elist,1,,,1,0 
+
+ LIST ALL SELECTED ELEMENTS IN RANGE         1  TO         1  STEP       1
+ DO NOT LIST NODES
+ 
+    ELEM MAT TYP REL ESY SEC             
+ 
+       1   1   1   1  13   3 
+
+
+
+
+
+
+!List section properties for section #3 (referenced by element #1)
+SLIST,3,,,BRIEF,
+
+
+ LIST SECTION ID SETS       3 TO       3 BY      1
+          Details = 0       
+                     
+   SECTION ID NUMBER:           3
+   SHELL SECTION TYPE:    
+   SHELL SECTION NAME IS:             
+   SHELL SECTION DATA SUMMARY:
+    Number of Layers    =      3
+    Total Thickness     =     0.003000
+
+  Layer      Thickness   MatID   Ori. Angle  Num Intg. Pts
+
+      1        0.0010     2        0.0000     3
+      2        0.0010     2       45.0000     3
+      3        0.0010     2      -45.0000     3
+                 
+    Shell Section is offset to BOTTOM surface of Shell
+
+    Section Solution Controls
+    User Transverse Shear Stiffness (11)=  0.0000    
+                                    (22)=  0.0000    
+                                    (12)=  0.0000    
+    Added Mass Per Unit Area            =  0.0000    
+    Hourglass Scale Factor; Membrane    =  1.0000    
+                            Bending     =  1.0000    
+    Drill Stiffness Scale Factor        =  1.0000    
+
+
+
+
+
+
+!List material properties for material number 2 (used in section #3 in element #1)
+mplist,2
+
+
+ LIST MATERIALS        2 TO        2 BY        1
+  PROPERTY= ALL 
+
+ MATERIAL NUMBER        2
+
+      TEMP        EX  
+               0.4000000E+11
+
+      TEMP        EY  
+               0.1000000E+11
+
+      TEMP        EZ  
+               0.1000000E+11
+
+      TEMP        GXY 
+               0.5000000E+10
+
+      TEMP        GYZ 
+               0.5000000E+10
+
+      TEMP        GXZ 
+               0.5000000E+10
+
+      TEMP        PRXY
+               0.3000000    
+
+      TEMP        PRYZ
+               0.3000000    
+
+      TEMP        PRXZ
+               0.3000000    
+ 
+
+
+
+ 
+
+!List strength values for material number 2 (used in section #3 in element #1)
+tblist,fcli,2 
+
+
+ LIST DATA TABLE  FCLI  FOR MATERIAL      2
+
+               FC LIMIT (FCLI) Table For Material     2
+               Stress Strength Limits                                                          
+
+                     1 
+ Temps     0.0000000e+00 
+ XTEN     8.0000000e+08 
+ XCMP     -7.0000000e+08 
+ YTEN     4.5000000e+07 
+ YCMP     -1.5000000e+08 
+ ZTEN     4.5000000e+01 
+ ZCMP     -1.5000000e+08 
+   XY     5.0000000e+07 
+   YZ     5.0000000e+07 
+   XZ     5.0000000e+07 
+ XYCP     0.0000000e+00 
+ YZCP     0.0000000e+00 
+ XZCP     0.0000000e+00 
+ XZIT     3.0000000e-01 
+ XZIC     2.5000000e-01 
+ YZIT     2.0000000e-01 
+ YZIC     2.0000000e-01 
+ GI/GII   0.0000000e+00 
+ ETA_L    0.0000000e+00 
+ ETA_T    0.0000000e+00 
+ ALPHA_0  0.0000000e+00 
+
+
+
+   
+			   

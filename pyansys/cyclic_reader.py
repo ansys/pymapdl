@@ -101,7 +101,7 @@ class CyclicResult(ResultFile):
         cpos : list
             List of camera position, focal point, and view up.
         """
-        cs_cord = self.resultheader['csCord']
+        cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
@@ -148,7 +148,7 @@ class CyclicResult(ResultFile):
         """Add cyclic properties"""
 
         # idenfity the sector based on number of elements in master sector
-        cs_els = self.resultheader['csEls']
+        cs_els = self._resultheader['csEls']
         mask = self.quadgrid.cell_arrays['ansys_elem_num'] <= cs_els
 
         self.master_cell_mask = mask
@@ -156,7 +156,7 @@ class CyclicResult(ResultFile):
 
         # NOTE: number of nodes in sector may not match number of
         # nodes in geometry
-        node_mask = self.nnum <= self.resultheader['csNds']
+        node_mask = self.nnum <= self._resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
         self.dup_ind = np.nonzero(~node_mask)[0]
 
@@ -228,13 +228,13 @@ class CyclicResult(ResultFile):
         nnum = full_nnum[self.mas_ind]
 
         # combine or expand result if not modal
-        if self.resultheader['kan'] == 2:  # modal analysis
+        if self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
-            hindex_table = self.resultheader['hindex']
+            hindex_table = self._resultheader['hindex']
             hindex = hindex_table[rnum]
 
             # if repeated mode
-            last_index = hindex == int(self.resultheader['nSector']/2)
+            last_index = hindex == int(self._resultheader['nSector']/2)
             if hindex == 0 or last_index:
                 result_dup = np.zeros_like(result)
             else:  # otherwise, use the harmonic pair
@@ -262,14 +262,14 @@ class CyclicResult(ResultFile):
                                                         as_complex,
                                                         full_rotor)
 
-        if self.resultheader['kan'] == 0:  # static analysis
+        if self._resultheader['kan'] == 0:  # static analysis
             expanded_result = self.expand_cyclic_static(result)
 
         return nnum, expanded_result
 
     def expand_cyclic_static(self, result, tensor=False):
         """ expands cyclic static results """
-        cs_cord = self.resultheader['csCord']
+        cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
@@ -382,7 +382,7 @@ class CyclicResult(ResultFile):
         #     isnan = _binary_reader.tensor_rotate_z(result_expanded[i], angle)
         #     result_expanded[i, isnan] = np.nan
 
-        cs_cord = self.resultheader['csCord']
+        cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
@@ -437,7 +437,7 @@ class CyclicResult(ResultFile):
             Cumulative index number.  Zero based indexing.
 
         """
-        hindex_table = self.resultheader['hindex']
+        hindex_table = self._resultheader['hindex']
         if not np.any(abs(hindex) == np.abs(hindex_table)):
             raise Exception('Invalid harmonic index.\n' +
                             'Available indices: %s' % np.unique(hindex_table))
@@ -458,7 +458,7 @@ class CyclicResult(ResultFile):
     @property
     def mode_table(self):
         """ unique modes for cyclic results """
-        hindex_table = self.resultheader['hindex']
+        hindex_table = self._resultheader['hindex']
         diff = np.diff(np.abs(hindex_table))
         freqs = self.time_values
         mode_table = [0]
@@ -531,11 +531,11 @@ class CyclicResult(ResultFile):
         # nnum = nnum[self.mas_ind]
         # stress = stress[self.mas_ind]
 
-        if self.resultheader['kan'] == 0:  # static result
+        if self._resultheader['kan'] == 0:  # static result
             expanded_result = self.expand_cyclic_static(stress, tensor=True)
-        elif self.resultheader['kan'] == 2:  # modal analysis
+        elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
-            hindex_table = self.resultheader['hindex']
+            hindex_table = self._resultheader['hindex']
             hindex = hindex_table[rnum]
 
             # if repeated mode
@@ -1077,7 +1077,7 @@ class CyclicResult(ResultFile):
         """ Create full rotor vtk unstructured grid """
         grid = self.mas_grid.copy()
         # transform to standard coordinate system
-        cs_cord = self.resultheader['csCord']
+        cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             grid.transform(matrix)
@@ -1163,7 +1163,7 @@ class CyclicResult(ResultFile):
 
         rng = [np.nanmin(scalars), np.nanmax(scalars)]
 
-        cs_cord = self.resultheader['csCord']
+        cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)

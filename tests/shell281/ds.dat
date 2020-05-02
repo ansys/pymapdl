@@ -1,0 +1,267 @@
+/batch
+/config,noeldb,1     ! force off writing results to database
+*get,_wallstrt,active,,time,wall
+! ANSYS input file written by Workbench version 2020 R1
+! File used for geometry attach: C:\Users\enno.eyb\AppData\Local\Temp\WB_BW-WS-EE_enno.eyb_8016_2\unsaved_project_files\dp0\global\MECH\SYS\AssembledModel\SYS.pmdb
+/title,SHELL281--Static Structural (C3)
+*DIM,_wb_ProjectScratch_dir,string,248
+_wb_ProjectScratch_dir(1) = 'C:\Work\PycharmProjects\ANSYS\_ProjectScratch\Scr5ADD\'
+*DIM,_wb_SolverFiles_dir,string,248
+_wb_SolverFiles_dir(1) = 'C:\Work\PycharmProjects\ANSYS\SHELL281_files\dp0\SYS\MECH\'
+*DIM,_wb_userfiles_dir,string,248
+_wb_userfiles_dir(1) = 'C:\Work\PycharmProjects\ANSYS\SHELL281_files\user_files\'
+/com,--- Data in consistent MKS units. See Solving Units in the help system for more information.
+/units,MKS
+/nopr
+/wb,file,start              !  signify a WB generated input file
+/prep7
+! Turn off shape checking because checks already performed inside WB mesher.
+! See help system for more information.
+SHPP,OFF,,NOWARN
+/nolist
+etcon,set             ! allow ANSYS to choose best KEYOP's for 180x elements
+/com,*********** Nodes for the whole assembly ***********
+nblock,3,,8
+(1i9,3e20.9e3)
+        1     0.000000000E+00     1.000000000E-01     0.000000000E+00
+        2     0.000000000E+00     0.000000000E+00     0.000000000E+00
+        3     1.000000000E-01     0.000000000E+00     0.000000000E+00
+        4     1.000000000E-01     1.000000000E-01     0.000000000E+00
+        5     0.000000000E+00     5.000000000E-02     0.000000000E+00
+        6     5.000000000E-02     1.000000000E-01     0.000000000E+00
+        7     5.000000000E-02     0.000000000E+00     0.000000000E+00
+        8     1.000000000E-01     5.000000000E-02     0.000000000E+00
+-1
+/wb,elem,start            !  set before creation of elements
+/com,*********** Elements for Body 1 "ACP-Pre\Surface(ACP (Pre))" ***********
+et,1,281
+keyo,1,8,2       ! set Layer data storage
+eblock,19,solid,,1
+(19i9)
+        1        1        1        1        0        0        0        0        8        0        1        3        4        1        2        8        6        5        7
+-1
+!Material Id = {36C240FE-744C-4E8A-A40F-D47B8908CE76}
+/wb,elem,end               !  done creating elements
+/com,*********** Send User Defined Coordinate System(s) ***********
+local,12,0,0.,0.,0.,0.,0.,0.
+csys,0
+toffst,273.15,  ! Temperature offset from absolute zero
+/com,*********** Set Reference Temperature ***********
+tref,22.
+/wb,mat,start              !  starting to send materials
+/com,*********** Send Materials ***********
+MP,EX,1,40000000000,	! Pa
+MP,EY,1,10000000000,	! Pa
+MP,EZ,1,10000000000,	! Pa
+MP,PRXY,1,0.3,
+MP,PRYZ,1,0.3,
+MP,PRXZ,1,0.3,
+MP,GXY,1,5000000000,	! Pa
+MP,GYZ,1,5000000000,	! Pa
+MP,GXZ,1,5000000000,	! Pa
+
+TB,FCLI,1,1,20,1
+TBDATA,1,800000000
+TBDATA,2,-700000000
+TBDATA,3,45000000
+TBDATA,4,-150000000
+TBDATA,5,45
+TBDATA,6,-150000000
+TBDATA,7,50000000
+TBDATA,8,50000000
+TBDATA,9,50000000
+TBDATA,13,0.3
+TBDATA,14,0.25
+TBDATA,15,0.2
+TBDATA,16,0.2
+
+/wb,mat,end                !  done sending materials
+/com,*********** Send Sheet Properties ***********
+sectype,1,shell
+secdata,1.e-003
+secoff,mid
+
+
+/com,*********** Sending Coordinate Systems for External Layered Section***********
+local,13,0,5.e-002,5.e-002,0.,3.50835464926744e-015,0.,0.
+csys,0
+
+/com,*********** Sending Materials for External Layered Section***********
+MP,EX,2,40000000000,	! Pa
+MP,EY,2,10000000000,	! Pa
+MP,EZ,2,10000000000,	! Pa
+MP,PRXY,2,0.3,
+MP,PRYZ,2,0.3,
+MP,PRXZ,2,0.3,
+MP,GXY,2,5000000000,	! Pa
+MP,GYZ,2,5000000000,	! Pa
+MP,GXZ,2,5000000000,	! Pa
+
+TB,FCLI,2,1,20,1
+TBDATA,1,800000000
+TBDATA,2,-700000000
+TBDATA,3,45000000
+TBDATA,4,-150000000
+TBDATA,5,45
+TBDATA,6,-150000000
+TBDATA,7,50000000
+TBDATA,8,50000000
+TBDATA,9,50000000
+TBDATA,13,0.3
+TBDATA,14,0.25
+TBDATA,15,0.2
+TBDATA,16,0.2
+
+
+/com,*********** Send External Layered Section Properties ***********
+CMBLOCK,_CM_EXT_SEC_0,ELEM,        1
+(8i10)
+         1
+sectype,3,shell
+secdata,0.001,2,0
+secdata,0.001,2,45
+secdata,0.001,2,-45
+secoff,bottom
+emod,_cm_ext_sec_0,secnum,3
+emod,1,esys,13
+
+!************************* Model Summary ********************
+!ACP-Pre\Surface(ACP (Pre)),	UD,	matid,	1
+!************************* End Model Summary ********************
+! get the diagonal of the bounding box. Needed later for other things
+*get,_xmin,node,,mnloc,x
+*get,_ymin,node,,mnloc,y
+*get,_zmin,node,,mnloc,z
+*get,_xmax,node,,mxloc,x
+*get,_ymax,node,,mxloc,y
+*get,_zmax,node,,mxloc,z
+_ASMDIAG=(_xmax-_xmin)*(_xmax-_xmin)+(_ymax-_ymin)*(_ymax-_ymin)+(_zmax-_zmin)*(_zmax-_zmin)
+_ASMDIAG=SQRT(_ASMDIAG)
+/wb,contact,start          !  starting to send contact
+/wb,contact,end            !  done creating contacts
+/golist
+/wb,load,start             !  starting to send loads
+/com,*********** Fixed Supports ***********
+CMBLOCK,_FIXEDSU,NODE,        1
+(8i10)
+         2
+cmsel,s,_FIXEDSU
+d,all,all
+nsel,all
+/com,******* Constant Zero Displacement X *******
+CMBLOCK,_DISPZEROUX,NODE,        2
+(8i10)
+         1         5
+cmsel,s,_DISPZEROUX
+d,all,ux,0
+nsel,all
+/gst,on,on
+fini
+*get,_numnode,node,0,count
+*get,_numelem,elem,0,count
+*get, _MAXELEMNUM, elem, 0, NUM, MAX
+*get, _MAXNODENUM, node, 0, NUM, MAX
+*get, _MAXELEMTYPE, etyp, 0, NUM, MAX
+*get, _MAXREALCONST, real, 0, NUM, MAX
+/go
+/wb,load,end               !  done creating loads
+/com,--- Number of total nodes = %_numnode%
+/com,--- Number of contact elements = 0
+/com,--- Number of spring elements = 0
+/com,--- Number of bearing elements = 0
+/com,--- Number of solid elements = 1
+/com,--- Number of condensed parts = 0
+/com,--- Number of total elements = %_numelem%
+*get,_wallbsol,active,,time,wall
+/com,****************************************************************************
+/com,*************************    SOLUTION       ********************************
+/com,****************************************************************************
+/solu
+antype,0                   ! static analysis
+_thickRatio=  0     ! Ratio of thick parts in the model
+eqsl,sparse,,,,,1
+cntr,print,1               ! print out contact info and also make no initial contact an error
+dmpoption,emat,no             ! Don't combine emat file for DANSYS
+dmpoption,esav,no             ! Don't combine esav file for DANSYS
+nldiag,cont,iter           ! print out contact info each equilibrium iteration
+rescontrol,,none                 ! Do not keep any restart files
+/com,****************************************************
+/com,******************* SOLVE FOR LS 1 OF 1 ****************
+/com,*** Set Displacements ***
+CMBLOCK,_CM54UX_XP,NODE,        3
+(8i10)
+         3         4         8
+cmsel,s,_CM54UX_XP
+d,all,ux,1.e-003
+nsel,all
+
+/com,*** Component For All Non-Zero UX Displacements ***
+cmsel,s,_CM54ux_xp
+cm,_DISPNONZEROUX,NODE
+nsel,all
+
+/nopr
+/gopr
+nsub,1,1,1
+time,1.
+outres,erase
+outres,all,none
+outres,nsol,all,
+outres,rsol,all
+outres,eangl,all
+outres,etmp,all
+outres,veng,all
+outres,strs,all,
+outres,epel,all,
+outres,eppl,all,
+outres,cont,all,
+! ****** Begin Command Snippet ******
+!   Commands inserted into this file will be executed just prior to the ANSYS SOLVE command.
+!   These commands may supersede command settings set by Workbench.
+
+!   Active UNIT system in Workbench when this object was created:  Metric (m, kg, N, s, V, A)
+!   NOTE:  Any data that requires units (such as mass) is assumed to be in the consistent solver unit system.
+!                See Solving Units in the help system for more information.
+
+
+cdwrite,db,file,cdb
+
+! ****** End   Command Snippet ******
+! *********** WB SOLVE COMMAND ***********
+! check interactive state
+*get,ANSINTER_,active,,int
+*if,ANSINTER_,ne,0,then
+/eof
+*endif
+solve
+/com *************** Write FE CONNECTORS ********* 
+CEWRITE,file,ce,,INTE
+/com,****************************************************
+/com,*************** FINISHED SOLVE FOR LS 1 *************
+*get,_wallasol,active,,time,wall
+/nopr
+*get,_numnode,node,0,count
+*get,_numelem,elem,0,count
+*get, _MAXELEMNUM, elem, 0, NUM, MAX
+*get, _MAXNODENUM, node, 0, NUM, MAX,,,INTERNAL
+*get, _MAXELEMTYPE, etyp, 0, NUM, MAX
+*get, _MAXREALCONST, real, 0, NUM, MAX
+/gopr
+/post1
+xmlo,ENCODING,ISO-8859-1
+xmlo,parm
+/xml,parm,xml
+fini
+/gopr
+*get,_walldone,active,,time,wall
+_preptime=(_wallbsol-_wallstrt)*3600
+_solvtime=(_wallasol-_wallbsol)*3600
+_posttime=(_walldone-_wallasol)*3600
+_totaltim=(_walldone-_wallstrt)*3600
+*get,_dlbratio,active,0,solu,dlbr
+*get,_combtime,active,0,solu,comb
+/com,--- Number of total nodes = %_numnode%
+/com,--- Number of total elements = %_numelem%
+/com,--- Element load balance ratio = %_dlbratio%
+/com,--- Time to combine distributed files = %_combtime%
+/wb,file,end               ! done with WB generated input

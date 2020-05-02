@@ -5,15 +5,17 @@ import pyansys
 import pytest
 
 
-TEST_PATH = os.path.dirname(os.path.abspath(__file__))
-TESTFILES_PATH = os.path.join(TEST_PATH, 'testfiles')
-TESTFILE = os.path.join(TESTFILES_PATH, 'time_hist-nsl_acc_vel-component.rst')
-RESULT = pyansys.read_binary(TESTFILE)
+@pytest.fixture(scope='module')
+def result():
+    test_path = os.path.dirname(os.path.abspath(__file__))
+    testfiles_path = os.path.join(test_path, 'testfiles')
+    testfile = os.path.join(testfiles_path, 'time_hist-nsl_acc_vel-component.rst')
+    return pyansys.read_binary(testfile)
 
 
 @pytest.mark.parametrize("time_hist_key", ['NSL', 'VEL', 'ACC'])
-def test_time_history(time_hist_key):
-    nnum, values = RESULT.nodal_time_history(time_hist_key)
-    assert np.allclose(nnum, RESULT.nnum)
+def test_time_history(time_hist_key, result):
+    nnum, values = result.nodal_time_history(time_hist_key)
+    assert np.allclose(nnum, result.nnum)
     assert values.ndim == 3
     assert values.shape[1] == nnum.size

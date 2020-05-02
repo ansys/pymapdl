@@ -1,5 +1,6 @@
 import os
 
+import pytest
 import numpy as np
 
 import pyansys
@@ -15,29 +16,27 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 emat_filename = os.path.join(testfiles_path, 'file.emat')
 
 
-def test_load_emat():
-    emat_file = pyansys.read_binary(emat_filename)
-    assert isinstance(emat_file, EmatFile)
+@pytest.fixture(scope='module')
+def emat():
+    emat_bin = pyansys.read_binary(emat_filename)
+    assert isinstance(emat_bin, EmatFile)
+    return emat_bin
 
 
-def test_load_element():
-    emat_file = pyansys.read_binary(emat_filename)
-    dof_idx, element_data = emat_file.read_element(0)
+def test_load_element(emat):
+    dof_idx, element_data = emat.read_element(0)
     assert 'stress' in element_data
     assert 'mass' in element_data
 
 
-def test_global_applied_force():
-    emat_file = pyansys.read_binary(emat_filename)
-    force = emat_file.global_applied_force()
+def test_global_applied_force(emat):
+    force = emat.global_applied_force()
     assert np.allclose(force, 0)
 
 
-def test_eeqv():
-    emat_file = pyansys.read_binary(emat_filename)
-    assert np.allclose(np.sort(emat_file.eeqv), emat_file.enum)
+def test_eeqv(emat):
+    assert np.allclose(np.sort(emat.eeqv), emat.enum)
 
 
-def test_neqv():
-    emat_file = pyansys.read_binary(emat_filename)
-    assert np.allclose(np.sort(emat_file.neqv), emat_file.nnum)
+def test_neqv(emat):
+    assert np.allclose(np.sort(emat.neqv), emat.nnum)

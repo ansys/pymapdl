@@ -77,11 +77,11 @@ Nodal Solution results from ANSYS
 
 """
 import os
+
+import pytest
 import numpy as np
 import pyansys
 
-# import faulthandler
-# faulthandler.enable()
 
 try:
     __file__
@@ -103,38 +103,33 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
               [0.20287E-07, 91.212, 27.364, -0.13603E-02, -4.8423, 0.72216E-04]]
 
 
-class TestLoad181():
+@pytest.fixture(scope='module')
+def result():
     filename = os.path.join(testfiles_path, 'shell181.rst')
-    result = pyansys.read_binary(filename)
-
-    def test_load(self):
-        assert np.any(self.result.grid.cells)
-        assert np.any(self.result.grid.points)
-
-    def test_element_stress(self):
-        element_stress, _, _ = self.result.element_stress(0)
-        element0 = element_stress[0]
-
-        # ansys prints both postiive and negative component values
-        if np.sign(element0[0][0]) != np.sign(ANSYS_ELEM[0][0]):
-            element0 *= -1
-
-        # wide atol limits considering the 5 sigfig from ASCII tables
-        assert np.allclose(element0, np.array(ANSYS_ELEM), atol=1E-6)
-
-    def test_nodal_stress(self):
-        nnum, stress = self.result.nodal_stress(0)
-        # element0 = element_stress[0]
-        if np.sign(stress[0][0]) != np.sign(ANSYS_NODE[0][0]):
-            stress *= -1
-
-        # wide atol limits considering the 5 sigfig from ASCII tables
-        assert np.allclose(stress, np.array(ANSYS_NODE), atol=1E-6)
+    return pyansys.read_binary(filename)
 
 
-if __name__ == '__main__':
-    tester = TestLoad181()
-    tester.test_load()
-    tester.test_element_stress()  # <--
-    tester.test_nodal_stress()
-    print('done')
+def test_load(result):
+    assert np.any(result.grid.cells)
+    assert np.any(result.grid.points)
+
+
+def test_element_stress(result):
+    element_stress, _, _ = result.element_stress(0)
+    element0 = element_stress[0]
+
+    # ansys prints both postiive and negative component values
+    if np.sign(element0[0][0]) != np.sign(ANSYS_ELEM[0][0]):
+        element0 *= -1
+
+    # wide atol limits considering the 5 sigfig from ASCII tables
+    assert np.allclose(element0, np.array(ANSYS_ELEM), atol=1E-6)
+
+
+def test_nodal_stress(result):
+    nnum, stress = result.nodal_stress(0)
+    if np.sign(stress[0][0]) != np.sign(ANSYS_NODE[0][0]):
+        stress *= -1
+
+    # wide atol limits considering the 5 sigfig from ASCII tables
+    assert np.allclose(stress, np.array(ANSYS_NODE), atol=1E-6)
