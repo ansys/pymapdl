@@ -98,6 +98,7 @@ class ResultFile(AnsysBinary):
         self.header = parse_header(self.read_record(103), result_header_keys)
         self._geometry_header = {}
         self._materials = None
+        self._section_data = None
 
     @property
     def n_sector(self):
@@ -253,42 +254,38 @@ class ResultFile(AnsysBinary):
 
     def _load_materials(self):
         """Reads the material properties from the result file.
-        
+
         Materials property table is stored at ptrMAT, which contains
         pointers to each material property array for each material.
         Each array contains a material property (e.g. EX, or elastic
         modulus in the X direction) and there may be one or many
         values for each material (up to 101).
         """
-        self._geometry_header['nummat']
-        ptr_mat = self._geometry_header['ptrMAT']
-        mat = self.read_record(ptr_mat)
 
         def read_mat_data(ptr):
             """reads double precision material data given an offset from ptrMAT"""
-            arr = self.read_record(ptr_mat + ptr)
+            arr = self.read_record(self._geometry_header['ptrMAT'] + ptr)
             arr = arr[arr != 0]
             if arr.size == 1:
                 return arr[0]
 
-        materials = {}
+        mat_table = self.read_record(self._geometry_header['ptrMAT'])
+        self._materials = {}
         for i in range(self._geometry_header['nummat']):
             # pointers to the material data for each material
-            mat_data_ptr = mat[3 + 176*i:3 + 176*i + 159]
+            mat_data_ptr = mat_table[3 + 176*i:3 + 176*i + 159]
             material = {}
-            for i, key in enumerate(mp_keys):
-                ptr = mat_data_ptr[i + 1]
+            for j, key in enumerate(mp_keys):
+                ptr = mat_data_ptr[j + 1]
                 if ptr:
                     material[key] = read_mat_data(ptr)
 
             # store by material number
-            materials[mat_data_ptr[0]] = material
-
-        return materials
+            self._materials[mat_data_ptr[0]] = material
 
     @property
     def materials(self):
-        """The material properties from the result file
+        """Result file material properties.
 
         Returns
         -------
@@ -300,6 +297,7 @@ class ResultFile(AnsysBinary):
         NOTES
         -----
         Material properties:
+
         - EX : Elastic modulus, element x direction (Force/Area)
         - EY : Elastic modulus, element y direction (Force/Area)
         - EZ : Elastic modulus, element z direction (Force/Area)
@@ -317,7 +315,8 @@ class ResultFile(AnsysBinary):
         - GYZ : Shear modulus, y-z plane (Force/Area)
         - GXZ : Shear modulus, x-z plane (Force/Area)
         - DAMP : K matrix multiplier for damping [BETAD] (Time)
-        - MU : Coefficient of friction (or, for FLUID29 and FLUID30 elements, boundary admittance)
+        - MU : Coefficient of friction (or, for FLUID29 and FLUID30 
+               elements, boundary admittance)
         - DENS : Mass density (Mass/Vol)
         - C : Specific heat (Heat/Mass*Temp)
         - ENTH : Enthalpy (e DENS*C d(Temp)) (Heat/Vol)
@@ -344,12 +343,53 @@ class ResultFile(AnsysBinary):
         - MGXX : Magnetic coercive force, element x direction (Charge / (Length*Time))
         - MGYY : Magnetic coercive force, element y direction (Charge / (Length*Time))
         - MGZZ : Magnetic coercive force, element z direction (Charge / (Length*Time))
-
         """
         if self._materials is None:
-            self._materials = self._load_materials()
-
+            self._load_materials()
         return self._materials
+
+    def _load_section_data(self):
+        """Loads the section data from the result file"""
+        ptr_sec = self._geometry_header['ptrSEC']
+        sec_table = self.read_record(ptr_sec)
+
+        self._section_data = {}
+        for offset in sec_table:
+            if offset:
+                table = self.read_record(ptr_sec + offset)
+                self._section_data[int(table[0])] = table[1:]
+
+        # it might be possible to interpert the section data...
+        # sec[3] # total thickness
+        # sec[4] # number of layers (?)
+        # sec[5] # total integration points (?)
+
+        # sec[29] # start of a layer (thickness)
+        # - MatID
+        # - Ori. Angle
+        # - Num Intg.
+        # sec[33] # start of another layer
+        # sec[37] # start of another layer
+
+    @property
+    def section_data(self):
+        """The section data from the result file
+
+        Returns
+        -------
+        section_data : dict
+            Dictionary of the section data with the section numbers as
+            keys.
+
+        Notes
+        -----
+        There is limited documentation on how ANSYS stores the
+        sections within a result file, and as such it may be difficult
+        to interpret the section data for a given model.
+        """
+        if self._section_data is None:
+            self._load_section_data()
+        return self._section_data
 
     def plot(self, node_components=None, sel_type_all=True, **kwargs):
         """Plot result geometry

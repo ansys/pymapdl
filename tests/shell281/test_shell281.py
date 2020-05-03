@@ -1,6 +1,8 @@
 import os
 
 import pytest
+import numpy as np
+
 import pyansys
 
 
@@ -25,3 +27,10 @@ def test_materials(rst):
     material['GYZ'] = 5000000000
     material['GXZ'] = 5000000000
 
+
+def test_materials(rst):
+    sections = rst.section_data
+    assert isinstance(sections, dict)
+    # assert isinstance(sections[3], np.ndarray)
+
+    # TODO: add known result types for the section data
