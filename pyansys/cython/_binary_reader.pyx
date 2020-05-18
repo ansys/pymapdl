@@ -14,6 +14,9 @@ from libc.string cimport memcpy
 from libc.stdint cimport int64_t
 from libc.stdlib cimport malloc, free
 
+# debug
+from libc.stdio cimport printf
+
 
 from cython.parallel import prange
 ctypedef unsigned char uint8
@@ -297,9 +300,16 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
                         int64_t [::1] nodstr, int64_t [::1] etype,
                         double [:, ::1] ele_data_arr, int nitem,
-                        int [::1] element_type,
+                        int [::1] element_type, int64_t ptr_off,
                         int as_global=1):
     """Read element results from ANSYS directly into a numpy array
+
+    ele_ind_table : int64_t [::1]
+        Pointer to the result header of an element relative to the
+        result index.
+
+    ptr_off : int
+        ``ele_ind_table`` offset from the file head.
 
     as_global : int, optional
         Rotates stresses from the element coordinate system to the global
@@ -314,10 +324,11 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
     for i in range(len(ele_ind_table)):
         nnode_elem = nodstr[etype[i]]
 
-        read_element_result(binfile, ele_ind_table[i],
-                                   PTR_ENS_IDX, nnode_elem, nitem,
-                                   &ele_data_arr[c, 0], element_type[i], as_global)
-        c += nnode_elem
+        if ele_ind_table[i] != 0:
+            read_element_result(binfile, ele_ind_table[i] + ptr_off,
+                                PTR_ENS_IDX, nnode_elem, nitem,
+                                &ele_data_arr[c, 0], element_type[i], as_global)
+            c += nnode_elem
     
 
 cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
@@ -325,9 +336,10 @@ cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                                     int nnode_elem, int nitem, double *arr,
                                     int element_type, int as_global=1):
     """Populate array with results from a single element"""
-    cdef int i, j, k, c, ptr, eul_ptr
+    cdef int i, j, k, c, nitems
     cdef int [4096] pointers  # tmp array of pointers
     cdef int prec_flag, type_flag, size
+    cdef int64_t ptr, eul_ptr
     cdef char [131072] tmp_data_buffer  # 2**17
     cdef double [512] euler_angles  # 8*3*20 --> 512
     cdef short* spointers = <short*>pointers
@@ -337,6 +349,7 @@ cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                        &prec_flag, &type_flag, &size)
     # expect size to be 25 here as of v19.1
 
+    # always cast 
     if prec_flag:
         ptr = spointers[result_index]
         eul_ptr = spointers[PTR_EUL_IDX]
@@ -356,12 +369,15 @@ cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
         read_record_stream(binfile, ele_table + ptr, <void*>tmp_data_buffer,
                            &prec_flag, &type_flag, &size)
 
+        # if size < 0:
+        #     raise MemoryError('Negative array size')
+
         # copy to main array
         if prec_flag:
             for i in range(size):
                 arr[i] = <double>(<float*>tmp_data_buffer)[i]
         else:
-            # we don't need to copy here
+            # EFFICIENCY WARNING: we don't need to copy here
             for i in range(size):
                 arr[i] = (<double*>tmp_data_buffer)[i]
 
@@ -535,19 +551,24 @@ cdef inline void euler_rotate(float_or_double *arr,
         arr[i*nitem + 5] = c2*c3*(-c2*s1*s_yz + s_xz*(c1*c3 - s1*s2*s3) + s_zz*(c1*s3 + c3*s1*s2)) - c2*s3*(-c2*s1*s_xy + s_xx*(c1*c3 - s1*s2*s3) + s_xz*(c1*s3 + c3*s1*s2)) + s2*(-c2*s1*s_yy + s_xy*(c1*c3 - s1*s2*s3) + s_yz*(c1*s3 + c3*s1*s2))
 
 
-# there is absolutely a memory leak here
 def read_nodal_values(filename, uint8 [::1] celltypes,
                       int64_t [::1] ele_ind_table,
-                      int64_t [::1] offsets, int64_t [::1] cells,
+                      int64_t [::1] offsets,
+                      int64_t [::1] cells,
                       int nitems,
                       int npoints,
-                      int [::1] nodstr, int [::1] etype,
+                      int [::1] nodstr,
+                      int [::1] etype,
                       int [::1] element_type,
-                      int result_index):
+                      int result_index,
+                      int64_t ptr_off):
     """Read nodal results from ANSYS directly into a numpy array
 
     element_type : int [::1] np.ndarray
         Array of ANSYS element types.
+
+    ptr_off : int64_t
+        Pointer offset
 
     result_index : int
         EMS - 0 : misc. data
@@ -599,11 +620,14 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
 
         # read element data
         nnode_elem = nodstr[etype[i]]
-        skip = read_element_result(binfile, ele_ind_table[i],
-                                   result_index, nnode_elem, nitems,
-                                   &bufferdata[0, 0], element_type[i])
-        if skip:
+        if ele_ind_table[i] == 0:  # element contains no data
             continue
+        else:
+            skip = read_element_result(binfile, ele_ind_table[i] + ptr_off,
+                                       result_index, nnode_elem, nitems,
+                                       &bufferdata[0, 0], element_type[i])
+            if skip:
+                continue
 
         # Get the nodes in the element
         celltype = celltypes[i]
@@ -626,7 +650,6 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
                 read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
         elif celltype == VTK_WEDGE:
             read_wedge(cells, offset, ncount, data, bufferdata, nitems)
-
     del binfile
 
     return np.asarray(data), np.asarray(ncount)

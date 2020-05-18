@@ -140,6 +140,8 @@ setup(
                            ["pyansys/cython/_binary_reader.pyx",
                             "pyansys/cython/binary_reader.cpp"],
                            extra_compile_args=cmp_arg,
+                           # extra_compile_args=['-g'],
+                           # extra_link_args=['-g'],
                            language='c++'),
                  ],
 

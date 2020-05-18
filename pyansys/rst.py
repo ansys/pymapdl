@@ -1106,7 +1106,28 @@ class ResultFile(AnsysBinary):
         return parse_header(table, SOLUTION_HEADER_KEYS_DP)
 
     def _element_solution_header(self, rnum):
-        """ Get element solution header information """
+        """Return the element solution header information.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        Returns
+        -------
+        ele_ind_table :
+            A table of pointers relative to the element result table
+            offset containing element result pointers.
+
+        nodstr : np.ndarray
+            Array containing the number of nodes with values for each element.
+
+        etype : np.ndarray
+            Element type array
+
+        element_rst_ptr : int
+            Offset to the start of the element result table.
+        """
         # Get the header information from the header dictionary
 
         rpointers = self.resultheader['rpointers']
@@ -1134,12 +1155,12 @@ class ResultFile(AnsysBinary):
         # Seek to element result header
         element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
         ele_ind_table = self.read_record(element_rst_ptr).view(np.int64)
-        ele_ind_table += element_rst_ptr
+        # ele_ind_table += element_rst_ptr
 
         # boundary conditions
         # bc = self.read_record(rpointers[rnum] + solution_header['ptrBC'])
 
-        return ele_ind_table, nodstr, etype
+        return ele_ind_table, nodstr, etype, element_rst_ptr
 
     @property
     def version(self):
@@ -1187,7 +1208,7 @@ class ResultFile(AnsysBinary):
         the bottom layer is reported.
         """
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
+        ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         # certain element types do not output stress
         elemtype = self.geometry['Element Type'].astype(np.int32)
@@ -1217,6 +1238,7 @@ class ResultFile(AnsysBinary):
                                                nodstr.astype(np.int64),
                                                etype, ele_data_arr,
                                                nitem, elemtype,
+                                               ptr_off,
                                                as_global=not in_element_coord_sys)
 
             if nitem != 6:
@@ -1325,18 +1347,21 @@ class ResultFile(AnsysBinary):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, _, _ = self._element_solution_header(rnum)
+        ele_ind_table, _, _, ptr_off = self._element_solution_header(rnum)
 
         # read element data
         element_data = []
         for ind in ele_ind_table:
-            # read element table index pointer to data
-            ptr = self.read_record(ind)[table_index]
-            if ptr > 0:
-                record = self.read_record(ind + ptr)
-                element_data.append(record)
-            else:
+            if ind == 0:
                 element_data.append(None)
+            else:
+                # read element table index pointer to data
+                ptr = self.read_record(ind + ptr_off)[table_index]
+                if ptr > 0:
+                    record = self.read_record(ptr_off + ind + ptr)
+                    element_data.append(record)
+                else:
+                    element_data.append(None)
 
         enum = self.grid.cell_arrays['ansys_elem_num']
         if sort:
@@ -2030,7 +2055,7 @@ class ResultFile(AnsysBinary):
         """
         # element header
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, nodstr, etype = self._element_solution_header(rnum)
+        ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         result_type = result_type.upper()
         if self.resultheader['rstsprs'] == 0 and result_type == 'ENS':
@@ -2054,7 +2079,8 @@ class ResultFile(AnsysBinary):
                                                         nodstr,
                                                         etype,
                                                         elemtype,
-                                                        result_index)
+                                                        result_index,
+                                                        ptr_off)
 
         if result_type == 'ENS' and nitem != 6:
             data = data[:, :6]
@@ -2559,11 +2585,11 @@ class ResultFile(AnsysBinary):
     @property
     def available_results(self):
         """Prints available element result types and returns those keys"""
-        ele_ind_table, _, _ = self._element_solution_header(0)
+        ele_ind_table, _, _, ptr_off = self._element_solution_header(0)
 
         # get the keys from the first element (not perfect...)
         n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
-        mask = self.read_record(ele_ind_table[0])[:n_rec] > 0
+        mask = self.read_record(ele_ind_table[0] + ptr_off)[:n_rec] > 0
         keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
         return {key: ELEMENT_INDEX_TABLE_INFO[key] for key in keys}
 
