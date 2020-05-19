@@ -242,7 +242,7 @@ cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
 
 def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
                    int [:, ::1] elem, int [::1] etype, int [::1] mtype,
-                   int [::1] rcon, int [::1] esys):
+                   int [::1] rcon, int [::1] esys, int [::1] secn):
     """The following is stored for each element
     0 - mat     - material reference number
     1 - type    - element type number
@@ -280,6 +280,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
             mtype[i] = s_element[0]  # material type
             etype[i] = s_element[1]  # element type
             rcon[i] = s_element[2] # real constant reference number
+            secn[i] = s_element[3] # section number
             esys[i] = s_element[4]
 
             # read in nodes
@@ -290,6 +291,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
             mtype[i] = element[0]  # material type
             etype[i] = element[1]  # element type
             rcon[i] = element[2] # real constant reference number
+            secn[i] = element[3] # section number
             esys[i] = element[4]
 
             # read in nodes

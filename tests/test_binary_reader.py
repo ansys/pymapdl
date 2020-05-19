@@ -1,7 +1,5 @@
-import gc
 import shutil
 import os
-import psutil
 
 import pytest
 from pyvista.plotting import system_supports_plotting
@@ -11,7 +9,7 @@ import pyvista as pv
 
 import pyansys
 from pyansys import examples
-from pyansys.rst import ELEMENT_INDEX_TABLE_INFO
+from pyansys._rst_keys import element_index_table_info
 
 
 try:
@@ -42,7 +40,7 @@ def test_save_as_vtk(tmpdir, example_result, result_type):
         assert np.allclose(arr, example_result.nodal_solution(i)[1], atol=1E-5)
         # breakpoint()
 
-        key = '%s %d' % (ELEMENT_INDEX_TABLE_INFO[result_type], i)
+        key = '%s %d' % (element_index_table_info[result_type], i)
         assert key in grid.point_arrays
         arr = grid.point_arrays[key]
         _, rst_arr = example_result._nodal_result(i, result_type)
@@ -64,7 +62,7 @@ def test_plot_component():
 
     ansys.Nsel('S', 'NODE', '', 1, 40)
     ansys.Cm('MY_OTHER_COMPONENT', 'NODE')
-    
+
     ansys.Allsel()
 
     # Aluminum properties (or something)

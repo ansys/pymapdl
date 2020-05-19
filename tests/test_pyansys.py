@@ -18,10 +18,12 @@ try:
 except ImportError:
     HAS_FFMPEG = False
 
+@pytest.fixture(scope='module')
+def result():
+    return pyansys.read_binary(rstfile)
 
-def test_loadresult():
-    result = pyansys.read_binary(rstfile)
 
+def test_loadresult(result):
     # check result is loaded
     assert result.nsets
     assert result.nnum.size
@@ -62,8 +64,7 @@ def test_loadresult():
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 @pytest.mark.skipif(not HAS_FFMPEG, reason="requires imageio_ffmpeg")
-def test_animate_nodal_solution(tmpdir):
-    result = pyansys.read_binary(rstfile)
+def test_animate_nodal_solution(tmpdir, result):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
                                   off_screen=True)
@@ -72,9 +73,9 @@ def test_animate_nodal_solution(tmpdir):
 
 
 def test_loadbeam():
-    linkresult = os.path.join(testfiles_path, 'link1.rst')
-    result = pyansys.read_binary(linkresult)
-    assert np.any(result.grid.cells)
+    linkresult_path = os.path.join(testfiles_path, 'link1.rst')
+    linkresult = pyansys.read_binary(linkresult_path)
+    assert np.any(linkresult.grid.cells)
 
 
 def test_fullreader():
