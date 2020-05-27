@@ -146,12 +146,7 @@ setup(
                            language='c'),
 
                  Extension("pyansys._cellqual",
-                           ["pyansys/_cellqual.pyx"],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
-
-                 Extension("pyansys._cellqualfloat",
-                           ["pyansys/cython/_cellqualfloat.pyx"],
+                           ["pyansys/cython/_cellqual.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 

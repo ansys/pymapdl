@@ -37,22 +37,23 @@ def all_solid_cells_archive():
     return pyansys.Archive(os.path.join(testfiles_path, 'all_solid_cells.cdb'))
 
 
-def test_properties_raw(hex_archive):
+def test_archive_init(hex_archive):
     assert isinstance(hex_archive.raw, dict)
+    assert isinstance(hex_archive.grid, pv.UnstructuredGrid)
 
 
 def test_parse_vtk(hex_archive):
-    grid = hex_archive.parse_vtk()
+    grid = hex_archive.grid
     assert grid.points.size
     assert grid.cells.size
     assert 'ansys_node_num' in grid.point_arrays
-    assert np.all(grid.quality > 0)
+    assert np.all(hex_archive.quality > 0)
 
     with pytest.raises(Exception):
-        hex_archive.parse_vtk(allowable_types=186)
+        hex_archive._parse_vtk(allowable_types=186)
 
     with pytest.raises(Exception):
-        hex_archive.parse_vtk(allowable_types=[1, 2, 3])
+        hex_archive._parse_vtk(allowable_types=[1, 2, 3])
 
 
 def test_invalid_archive(tmpdir, hex_archive):
