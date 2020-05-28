@@ -12,6 +12,25 @@ except:
     raise Exception('Please install numpy first with "pip install numpy"')
 
 
+# Check if binaries exist
+def check_cython():
+    path = os.path.dirname(__file__)
+    has_binary_reader = False
+    for filename in os.listdir('pyansys'):
+        if '_binary_reader' in filename:
+            has_binary_reader = True
+
+    if not has_binary_reader:
+        # ensure cython is installed before trying to build
+        try:
+            import cython
+        except ImportError:
+            raise ImportError('\n\n\nTo build pyansys please install Cython with:\n\n'
+                              'pip install cython\n\n') from None
+
+check_cython()
+
+
 class build_ext(_build_ext):
     """ build class that includes numpy directory """
     def finalize_options(self):
@@ -160,5 +179,7 @@ setup(
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
-                      'pexpect']
+                      'pexpect',
+                      'vtk<=9.0.0'
+    ]
 )
