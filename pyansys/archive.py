@@ -14,6 +14,7 @@ import vtk
 from pyansys._cellqual import cell_quality_float, cell_quality
 from pyansys.elements import valid_types
 from pyansys import _relaxmidside, _parser, _reader
+from pyansys.misc import vtk_cell_info
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -54,7 +55,6 @@ class Archive():
     --------
     >>> import pyansys
     >>> hex_beam = pyansys.Archive(pyansys.examples.hexarchivefile)
-    >>> hex_beam
     """
 
     def __init__(self, filename, read_parameters=False,
@@ -79,16 +79,12 @@ class Archive():
 
     @property
     def quality(self):
-        cells = self.grid.cells
-        if cells.dtype != np.int64:
-            cells = cells.astype(np.int64)
-
-        offset = self.grid.offset
         celltypes = self.grid.celltypes
         points = self.grid.points
-
+        cells, offset = vtk_cell_info(self.grid)
         if points.dtype == np.float64:
             return cell_quality(cells, offset, celltypes, points)
+
         return cell_quality_float(cells, offset, celltypes, points)
 
     @wraps(pv.plot)

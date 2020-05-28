@@ -6,7 +6,6 @@ from pyansys.archive import (Archive, write_cmblock, write_nblock,
                              save_as_archive)
 
 from pyansys.common import read_binary
-from pyansys.cellquality import *
 from pyansys.convert import convert_script
 from pyansys.mapdl import ANSYS, Mapdl
 from pyansys.mapdl import change_default_ansys_path
