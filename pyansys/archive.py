@@ -32,6 +32,10 @@ class Archive():
     filename : string
         Filename of block formatted cdb file
 
+    read_parameters : bool, optional
+        Optionally read parameters from the archive file.  Default
+        ``False``.
+
     parse_vtk : bool, optional
         When ``True``, parse the raw data into to VTK format.
 
@@ -55,6 +59,15 @@ class Archive():
     --------
     >>> import pyansys
     >>> hex_beam = pyansys.Archive(pyansys.examples.hexarchivefile)
+    >>> print(hex_beam.nodes)
+    [[0.   0.   0.   0.   0.   0.  ]
+     [1.   0.   0.   0.   0.   0.  ]
+     [0.25 0.   0.   0.   0.   0.  ]
+     ...
+     [0.75 0.5  3.5  0.   0.   0.  ]
+     [0.75 0.5  4.   0.   0.   0.  ]
+     [0.75 0.5  4.5  0.   0.   0.  ]]
+
     """
 
     def __init__(self, filename, read_parameters=False,
@@ -62,13 +75,68 @@ class Archive():
                  allowable_types=None, null_unallowed=False,
                  verbose=False):
         """ Initializes a cdb object """
-        self.raw = _reader.read(filename, read_parameters=read_parameters,
-                                debug=verbose)
+        self._read_parameters = read_parameters
+        raw = _reader.read(filename, read_parameters=read_parameters,
+                           debug=verbose)
+
+        self._nodes = raw['nodes']
+        self._rnum = raw['rnum']
+        self._rdat = raw['rdat']
+        self._ekey = raw['ekey']
+        self._nnum = raw['nnum']
+        self._nodes = raw['nodes']
+        self._enum = raw['enum']
+        self._elem = raw['elem']
+        self._etype = raw['etype']
+        self._e_rcon = raw['e_rcon']
+        self._node_comps = raw['node_comps']
+        self._elem_comps = raw['elem_comps']
+        self._mtype = raw['mtype']
+        self._sec_id = raw['sec_id']
+        self._keyopt = raw['keyopt']
+        self._parameters = raw['parameters']
 
         self._grid = None
         if parse_vtk:
-            self._grid = raw_to_grid(self.raw, allowable_types, force_linear,
+            self._grid = raw_to_grid(raw, allowable_types, force_linear,
                                      null_unallowed)       
+
+    # @property
+    # def 
+
+    @property
+    def rnum(self):
+        """Real constant data"""
+        return self._rnum
+
+    @property
+    def nodes(self):
+        """Nodes from the archive file
+
+        The resulting array includes node coordinates along with node
+        angles.  To get just the node coordinates, exclude the last
+        three columns of the array.
+        """
+        return self._nodes
+
+    @property
+    def parameters(self):
+        """Parameters stored in the archive file"""
+        if not self._read_parameters:
+            raise AttributeError('No parameters read.  Enable reading parameters'
+                                 'with ``read_parameters=True``')
+        return self._parameters
+        
+
+    @property
+    def raw(self):
+        raise AttributeError('The `raw` attribute has been depreciated.  Access'
+                             '  the values directy from the archive object.\n\n'
+                             '    Instead of:\n'
+                             '    archive.raw["nodes"]\n'
+                             '    \n'
+                             '    Use\n'
+                             '    print(archive.nodes)')
 
     @property
     def grid(self):
@@ -79,6 +147,12 @@ class Archive():
 
     @property
     def quality(self):
+        """Minimum scaled jacobian cell quality.
+
+        Negative values indicate invalid cells while positive values
+        indicate valid cells.  Varies between -1 and 1.
+
+        """
         celltypes = self.grid.celltypes
         points = self.grid.points
         cells, offset = vtk_cell_info(self.grid)
@@ -628,6 +702,11 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
     grid : vtk.vtkUnstructuredGrid
         VTK unstructured grid from archive file.
     """
+    # do not parse if there are no nodes or elements
+    if not (len(raw['nodes']) or len(raw['elem'])):
+        return
+
+
     # Convert to vtk style arrays
     if allowable_types is None:
         allowable_types = valid_types
@@ -647,8 +726,7 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
             keyopts[keyopt_key, index] = value
 
     # parse raw output
-    parsed = _parser.parse(raw, force_linear, allowable_types,
-                           null_unallowed, keyopts)
+    parsed = _parser.parse(raw, force_linear, allowable_types, null_unallowed, keyopts)
 
     cells = parsed['cells']
     offset = parsed['offset']

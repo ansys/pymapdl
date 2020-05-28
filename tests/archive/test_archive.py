@@ -60,10 +60,10 @@ def test_invalid_archive(tmpdir, hex_archive):
     nblock_filename = str(tmpdir.mkdir("tmpdir").join('nblock.cdb'))
     pyansys.write_nblock(nblock_filename, hex_archive.raw['nnum'],
                          hex_archive.raw['nodes'][:, :3])
-    new_archive = pyansys.Archive(nblock_filename)
-
-    with pytest.raises(Exception):
-        new_archive.parse_vtk()
+    
+    archive = pyansys.Archive(nblock_filename)
+    with pytest.raises(AttributeError):
+        archive.grid
 
 
 def test_write_angle(tmpdir, hex_archive):
@@ -72,8 +72,8 @@ def test_write_angle(tmpdir, hex_archive):
     pyansys.write_nblock(nblock_filename, hex_archive.raw['nnum'],
                          hex_archive.raw['nodes'][:, :3], angles)
 
-    archive_new = pyansys.Archive(nblock_filename)
-    assert np.allclose(archive_new.raw['nodes'], hex_archive.raw['nodes'])
+    archive = pyansys.Archive(nblock_filename, parse_vtk=False)
+    assert np.allclose(archive.raw['nodes'], hex_archive.raw['nodes'])
 
 
 @pytest.mark.skipif(IS_MAC, reason="TODO: Unexplained behavior")
