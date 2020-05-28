@@ -101,21 +101,113 @@ class Archive():
             self._grid = raw_to_grid(raw, allowable_types, force_linear,
                                      null_unallowed)       
 
-    # @property
-    # def 
+    @property
+    def etype(self):
+        """"""
 
     @property
-    def rnum(self):
-        """Real constant data"""
+    def elem(self):
+        """Array of element connectivity.
+
+        Each row is a element containing 20 entries of an individual
+        elements connectivity.  Unused entries are ``-1``.
+
+        Examples
+        --------
+        >>> archive.elem
+        array([[252576, 252577, 250644, ...,     -1,     -1,     -1],
+               [252571, 252572, 250620, ...,     -1,     -1,     -1],
+               [252577, 252578, 250619, ...,     -1,     -1,     -1],
+               ...,
+               [251878, 362635, 252073, ...,     -1,     -1,     -1],
+               [252073, 362835, 252074, ...,     -1,     -1,     -1],
+               [362635, 251878, 362623, ...,     -1,     -1,     -1]])
+        """
+        return self._elem
+
+    @property
+    def enum(self):
+        """Array of element numbers.
+
+        Examples
+        --------
+        >>> archive.enum
+        array([    1,     2,     3, ...,  9998,  9999, 10000])
+        """
+        return self._enum
+
+    @property
+    def nnum(self):
+        """Array of node numbers.
+
+        Examples
+        --------
+        >>> archive.nnum
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        return self._nnum
+
+    @property
+    def ekey(self):
+        """Element type key
+
+        Array containing element type numbers in the first column and
+        the element types (like SURF154) in the second column.
+
+        Examples
+        --------
+        >>> archive.ekey
+        array([[  1,  45],
+               [  2,  95],
+               [  3,  92],
+               [ 60, 154]], dtype=int32)
+        """
+        return self._ekey
+
+    @property
+    def rlblock(self):
+        """Real constant data from the RLBLOCK.
+
+        Examples
+        --------
+        >>> archive.rlblock
+        [[0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.02 ],
+         [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.01 ],
+         [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.005],
+         [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.005]]
+        """
+        return self._rnum
+
+    @property
+    def rlblock_num(self):
+        """Indices from the real constant data
+
+        Examples
+        --------
+        >>> archive.rnum
+        array([60, 61, 62, 63])
+        """
         return self._rnum
 
     @property
     def nodes(self):
-        """Nodes from the archive file
+        """Nodes from the archive file.
 
         The resulting array includes node coordinates along with node
         angles.  To get just the node coordinates, exclude the last
         three columns of the array.
+        
+        Examples
+        --------
+        >>> archive.nodes
+        [[0.   0.   0.   0.   0.   0.  ]
+         [1.   0.   0.   0.   0.   0.  ]
+         [0.25 0.   0.   0.   0.   0.  ]
+         ...
+         [0.75 0.5  3.5  0.   0.   0.  ]
+         [0.75 0.5  4.   0.   0.   0.  ]
+         [0.75 0.5  4.5  0.   0.   0.  ]]
+
         """
         return self._nodes
 
@@ -140,6 +232,11 @@ class Archive():
 
     @property
     def grid(self):
+        """VTK and pyvista grid of the archive file.
+
+        
+
+        """
         if self._grid is None:
             raise AttributeError('Archive must be parsed as a vtk grid.\n'
                                  'Set `parse_vtk=True`')
