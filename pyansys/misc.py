@@ -29,7 +29,13 @@ def vtk_cell_info(grid):
 
     """
     if VTK9:
-        cells, offset = grid.cell_connectivity, grid.offset - 1
+        # for pyvista < 0.25.0
+        if not hasattr(grid, 'cell_connectivity'):
+            carr = grid.GetCells()
+            cells = vtk.util.numpy_support.vtk_to_numpy(carr.GetConnectivityArray())
+        else:
+            cells = grid.cell_connectivity
+        offset = grid.offset - 1
     else:
         cells, offset = grid.cells, grid.offset
 

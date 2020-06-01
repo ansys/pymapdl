@@ -26,15 +26,8 @@ cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
 
-# get the int type from vtk
-# IF VTK_ID_TYPE_INT:
-#     ctypedef int vtk_int
-# ELSE:
-ctypedef int64_t vtk_int 
-
 cdef double div_fac = 1/3.0
 cdef double div_fac6 = 1/6.0
-
 cdef double TAU_WEG = (4/5.0)*(1 - 2**0.5*1.0/39**(1/4.0))
 
 # NAN
@@ -109,7 +102,7 @@ cdef inline float vector_norm_float(float [3] vec) nogil:
 #==============================================================================
 # Quadratic element relaxation functions
 #==============================================================================
-cdef inline void tet_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
+cdef inline void tet_relax_mid(int64_t [::1] cells, int c, double [:, ::1] pts,
                               double rfac) nogil:
     """
     Resets the midside nodes of the tetrahedral starting at index c
@@ -140,7 +133,7 @@ cdef inline void tet_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
         pts[ind9, j] = pts[ind9, j]*(1 - rfac) + (pts[ind2, j] + pts[ind3, j])*0.5*rfac
 
 
-cdef inline void pyr_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
+cdef inline void pyr_relax_mid(int64_t [::1] cells, int c, double [:, ::1] pts,
                               double rfac) nogil:
     """
     
@@ -181,7 +174,7 @@ cdef inline void pyr_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
         pts[ind12, j] = pts[ind12, j]*(1 - rfac) + (pts[ind3, j] + pts[ind4, j])*0.5*rfac
 
 
-cdef inline void weg_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
+cdef inline void weg_relax_mid(int64_t [::1] cells, int c, double [:, ::1] pts,
                               double rfac) nogil:
     """
     
@@ -225,7 +218,7 @@ cdef inline void weg_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
         pts[ind14, j] = pts[ind14, j]*(1 - rfac) + (pts[ind2, j] + pts[ind5, j])*0.5*rfac
 
 
-cdef inline void hex_relax_mid(vtk_int [::1] cells, int c, double [:, ::1] pts,
+cdef inline void hex_relax_mid(int64_t [::1] cells, int c, double [:, ::1] pts,
                               double rfac) nogil:
 
     """
@@ -674,7 +667,7 @@ cdef inline float repair_weg_float(float [8][3] temp_fpos,
     return old_vol
 
 
-cdef inline double tet_lin_qual(vtk_int [::1] cells, int c, double [:, ::1] pts) nogil:
+cdef inline double tet_lin_qual(int64_t [::1] cells, int c, double [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a tetrahedral cell's edge nodes """
     
     cdef int indS, ind0, ind1, ind2    
@@ -708,7 +701,7 @@ cdef inline double tet_lin_qual(vtk_int [::1] cells, int c, double [:, ::1] pts)
     return jac*1.414213562373095
 
 
-cdef inline float tet_lin_qual_float(vtk_int [::1] cells, int c,
+cdef inline float tet_lin_qual_float(int64_t [::1] cells, int c,
                                       float [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a tetrahedral cell's edge nodes """
     
@@ -743,7 +736,7 @@ cdef inline float tet_lin_qual_float(vtk_int [::1] cells, int c,
     return jac*1.414213562373095
 
 
-cdef inline double pyr_lin_qual(vtk_int [::1] cells, int c,
+cdef inline double pyr_lin_qual(int64_t [::1] cells, int c,
                              double [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a pyramid cell's edge nodes  """
         
@@ -779,7 +772,7 @@ cdef inline double pyr_lin_qual(vtk_int [::1] cells, int c,
     return jac*1.14
 
 
-cdef inline float pyr_lin_qual_float(vtk_int [::1] cells, int c,
+cdef inline float pyr_lin_qual_float(int64_t [::1] cells, int c,
                                      float [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a pyramid cell's edge nodes  """
     cdef int indS, ind0, ind1, ind2    
@@ -811,7 +804,7 @@ cdef inline float pyr_lin_qual_float(vtk_int [::1] cells, int c,
     return jac*1.14
 
 
-cdef inline double weg_lin_qual(vtk_int [::1] cells, int c,
+cdef inline double weg_lin_qual(int64_t [::1] cells, int c,
                              double [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a wedge cell's edge nodes  """
         
@@ -847,7 +840,7 @@ cdef inline double weg_lin_qual(vtk_int [::1] cells, int c,
     return jac*1.154
 
 
-cdef inline float weg_lin_qual_float(vtk_int [::1] cells, int c,
+cdef inline float weg_lin_qual_float(int64_t [::1] cells, int c,
                                      float [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a wedge cell's edge nodes  """
     cdef int indS, ind0, ind1, ind2    
@@ -880,7 +873,7 @@ cdef inline float weg_lin_qual_float(vtk_int [::1] cells, int c,
     return jac*1.154
 
 
-cdef inline double hex_lin_qual(vtk_int [::1] cells, int c, double [:, ::1] pts) nogil:
+cdef inline double hex_lin_qual(int64_t [::1] cells, int c, double [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a hexahedrals cell's edge nodes  """
     cdef int indS, ind0, ind1, ind2    
         
@@ -914,7 +907,7 @@ cdef inline double hex_lin_qual(vtk_int [::1] cells, int c, double [:, ::1] pts)
     return jac
 
 
-cdef inline float hex_lin_qual_float(vtk_int [::1] cells, int c,
+cdef inline float hex_lin_qual_float(int64_t [::1] cells, int c,
                                       float [:, ::1] pts) nogil:
     """ Returns minimum scaled jacobian of a hexahedrals cell's edge nodes  """
     cdef int indS, ind0, ind1, ind2    
@@ -952,7 +945,7 @@ cdef inline float hex_lin_qual_float(vtk_int [::1] cells, int c,
 #==============================================================================
 # Quadradic shape Checking functions
 #==============================================================================
-cdef inline double tet_quad_qual(vtk_int [::1] cells, int c,
+cdef inline double tet_quad_qual(int64_t [::1] cells, int c,
                               double [:, ::1] pts) nogil:
     """
     Shape function checking code generated by the following comments.  Shape
@@ -1248,7 +1241,7 @@ cdef inline double tet_quad_qual(vtk_int [::1] cells, int c,
     return jac*1.414213562373095
 
 
-cdef inline float tet_quad_qual_float(vtk_int [::1] cells, int c,
+cdef inline float tet_quad_qual_float(int64_t [::1] cells, int c,
                                        float [:, ::1] pts) nogil:
     cdef float [3] e0
     cdef float [3] e1
@@ -1410,7 +1403,7 @@ cdef inline float tet_quad_qual_float(vtk_int [::1] cells, int c,
     return jac*1.414213562373095
 
 
-cdef inline double pyr_quad_qual(vtk_int [::1] cells, int c,
+cdef inline double pyr_quad_qual(int64_t [::1] cells, int c,
                                  double [:, ::1] pts) nogil:
     """
     Shape function checking code generated by printing the following code using
@@ -1797,7 +1790,7 @@ cdef inline double pyr_quad_qual(vtk_int [::1] cells, int c,
     return jac*1.14
 
 
-cdef inline float pyr_quad_qual_float(vtk_int [::1] cells, int c,
+cdef inline float pyr_quad_qual_float(int64_t [::1] cells, int c,
                                       float [:, ::1] pts) nogil:
     cdef float [3] e0
     cdef float [3] e1
@@ -2118,7 +2111,7 @@ cdef inline float pyr_quad_qual_float(vtk_int [::1] cells, int c,
     return jac*1.14
 
 
-cdef inline double weg_quad_qual(vtk_int [::1] cells, int c,
+cdef inline double weg_quad_qual(int64_t [::1] cells, int c,
                                  double [:, ::1] pts) nogil:
     """
     Compute the cell quality of a single quadratic cell
@@ -2491,7 +2484,7 @@ cdef inline double weg_quad_qual(vtk_int [::1] cells, int c,
     return jac*1.154
 
 
-cdef inline float weg_quad_qual_float(vtk_int [::1] cells, int c,
+cdef inline float weg_quad_qual_float(int64_t [::1] cells, int c,
                                       float [:, ::1] pts) nogil:
     """
     Compute the cell quality of a single quadratic cell
@@ -2864,7 +2857,7 @@ cdef inline float weg_quad_qual_float(vtk_int [::1] cells, int c,
     return jac*1.154
 
 
-cdef inline double hex_quad_qual(vtk_int [::1] cells, int c,
+cdef inline double hex_quad_qual(int64_t [::1] cells, int c,
                               double [:, ::1] pts) nogil:
     """
     Quadradic shape functions derived and then printed in pre-index form using
@@ -3859,7 +3852,7 @@ cdef inline double hex_quad_qual(vtk_int [::1] cells, int c,
     return jac
 
 
-cdef inline float hex_quad_qual_float(vtk_int [::1] cells, int c,
+cdef inline float hex_quad_qual_float(int64_t [::1] cells, int c,
                                       float [:, ::1] pts) nogil:
     cdef float jac = 1.1
     cdef float [3] e0
@@ -4477,7 +4470,7 @@ cdef inline float volume_hex_float(float [8][3] points) nogil:
     return fabs(vol)*0.125
 
 
-def cell_quality(vtk_int [::1] cells, vtk_int [::1] offset,
+def cell_quality(int64_t [::1] cells, int64_t [::1] offset,
                  uint8 [::1] celltypes, double [:, ::1] pts, int as_linear=0):
     """    
     Returns the minimum scaled jacobian for each cell given a cell array from
@@ -4485,7 +4478,7 @@ def cell_quality(vtk_int [::1] cells, vtk_int [::1] offset,
     
     Parameters
     ----------
-    cells : vtk_int [::1]
+    cells : int64_t [::1]
         Cell array from VTK
 
     offset :
@@ -4518,7 +4511,7 @@ def cell_quality(vtk_int [::1] cells, vtk_int [::1] offset,
 
     """
     cdef int i
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef double [::1] quality = np.empty(ncells)
     cdef uint8 celltype
 
@@ -4567,7 +4560,7 @@ def cell_quality(vtk_int [::1] cells, vtk_int [::1] offset,
 
 
 
-def cell_quality_float(vtk_int [::1] cells, vtk_int [::1] offset,
+def cell_quality_float(int64_t [::1] cells, int64_t [::1] offset,
                        uint8 [::1] celltypes, float [:, ::1] pts, int as_linear=0):
     """    
     Returns the minimum scaled jacobian for each cell given a cell
@@ -4575,7 +4568,7 @@ def cell_quality_float(vtk_int [::1] cells, vtk_int [::1] offset,
 
     Parameters
     ----------
-    cells : vtk_int [::1]
+    cells : int64_t [::1]
         Cell array from VTK
 
     offset :
@@ -4608,7 +4601,7 @@ def cell_quality_float(vtk_int [::1] cells, vtk_int [::1] offset,
 
     """
     cdef int i
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef float [::1] quality = np.empty(ncells, np.float32)
     cdef uint8 celltype
 

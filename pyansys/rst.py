@@ -81,6 +81,7 @@ class ResultFile(AnsysBinary):
         """
         self.filename = filename
         self._resultheader = self._read_result_header()
+        self._animating = False
 
         # Get the total number of results and log it
         self.nsets = len(self._resultheader['rpointers'])
@@ -521,8 +522,7 @@ class ResultFile(AnsysBinary):
 
         ind = None
         if node_components:
-            grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
             scalars = scalars[ind]
 
         else:
@@ -573,10 +573,9 @@ class ResultFile(AnsysBinary):
                                 'component "%s"' % component)
 
             mask += grid.point_arrays[component].view(np.bool)
-            # mask = np.logical_not(mask)
 
         # need to extract the mesh
-        offset, cells = vtk_cell_info(grid)
+        cells, offset = vtk_cell_info(grid)
         if sel_type_all:
             cell_mask = cells_with_all_nodes(offset, cells, grid.celltypes,
                                              mask.view(np.uint8))
@@ -2606,12 +2605,18 @@ class ResultFile(AnsysBinary):
         rng = [results.min(), results.max()]
         t_wait = 1/frame_rate
 
+        def q_callback():
+            """exit when user wants to leave"""
+            self._animating = False
+
+        self._animating = True
         def plot_thread():
             plotter = pv.Plotter(off_screen=off_screen)
+            plotter.add_key_event("q", q_callback)
             plotter.add_mesh(mesh, scalars='data', rng=rng)
             plotter.show(auto_close=False, interactive_update=True, interactive=False)
             text_actor = plotter.add_text('Result 1')
-            while not plotter.q_pressed:
+            while self._animating:
                 for i in range(self.nsets):
                     mesh['data'] = results[i]
 
@@ -2624,9 +2629,6 @@ class ResultFile(AnsysBinary):
                         text_actor.SetInput('Result %d' % (i + 1))
                     else:
                         text_actor.SetText(0, 'Result %d' % (i + 1))
-
-                    if plotter.q_pressed:
-                        break
 
                     time.sleep(t_wait)
 

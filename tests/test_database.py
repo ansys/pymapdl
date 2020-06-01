@@ -9,37 +9,36 @@ d_v194 = pyansys.read_binary(pyansys.examples.hex_database_v194, debug=True)
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_nodes(database):
-    assert np.allclose(database.nodes, archive.raw['nodes'][:, :3])
+    assert np.allclose(database.nodes, archive.nodes[:, :3])
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_node_num(database):
-    assert np.allclose(database.nnum, archive.raw['nnum'])
+    assert np.allclose(database.nnum, archive.nnum)
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_enum(database):
-    assert np.allclose(database.enum, archive.raw['enum'])
+    assert np.allclose(database.enum, archive.enum)
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_elements(database):
-    assert np.allclose(database.elem, archive.raw['elem'])
+    assert np.allclose(database.elem, archive.elem)
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_material(database):
-    assert np.allclose(database.mtype, archive.raw['mtype'])
+    assert np.allclose(database.mtype, archive.material_type)
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_etype(database):
-    assert np.allclose(database.etype, archive.raw['etype'])
+    assert np.allclose(database.etype, archive._raw['etype'])
 
 
 @pytest.mark.parametrize('database', [d_v150, d_v194])
 def test_parse_vtk(database):
-    archive.parse_vtk()
     database.parse_vtk()
 
     assert np.allclose(database.grid.points, archive.grid.points)

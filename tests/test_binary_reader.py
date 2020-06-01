@@ -87,7 +87,6 @@ def test_plot_component():
     result = pyansys.read_binary(filename)
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
-    breakpoint()
     result.plot_nodal_solution(0, node_components=components,
                                off_screen=True, sel_type_all=False)
     result.plot_nodal_stress(0, 'x', node_components=components, off_screen=True)

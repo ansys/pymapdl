@@ -1,5 +1,6 @@
 """Module to read ANSYS ASCII block formatted CDB files
 """
+import os
 import sys
 import logging
 from functools import wraps
@@ -59,14 +60,24 @@ class Archive():
     --------
     >>> import pyansys
     >>> hex_beam = pyansys.Archive(pyansys.examples.hexarchivefile)
-    >>> print(hex_beam.nodes)
-    [[0.   0.   0.   0.   0.   0.  ]
-     [1.   0.   0.   0.   0.   0.  ]
-     [0.25 0.   0.   0.   0.   0.  ]
-     ...
-     [0.75 0.5  3.5  0.   0.   0.  ]
-     [0.75 0.5  4.   0.   0.   0.  ]
-     [0.75 0.5  4.5  0.   0.   0.  ]]
+    >>> print(hex_beam)
+    ANSYS Archive File HexBeam.cdb
+      Number of Nodes:              40
+      Number of Elements:           321
+      Number of Element Types:      1
+      Number of Node Components:    2
+      Number of Element Components: 2
+
+    Print the node array
+
+    >>> hex_beam.nodes
+    array([[0.  , 0.  , 0.  ],
+           [1.  , 0.  , 0.  ],
+           [0.25, 0.  , 0.  ],
+           ...,
+           [0.75, 0.5 , 3.5 ],
+           [0.75, 0.5 , 4.  ],
+           [0.75, 0.5 , 4.5 ]])
 
     """
 
@@ -74,36 +85,370 @@ class Archive():
                  parse_vtk=True, force_linear=False,
                  allowable_types=None, null_unallowed=False,
                  verbose=False):
-        """ Initializes a cdb object """
+        """Initializes an instance of the archive class."""
         self._read_parameters = read_parameters
-        raw = _reader.read(filename, read_parameters=read_parameters,
-                           debug=verbose)
+        self._filename = filename
+        self._raw = _reader.read(filename, read_parameters=read_parameters,
+                                 debug=verbose)
 
-        self._nodes = raw['nodes']
-        self._rnum = raw['rnum']
-        self._rdat = raw['rdat']
-        self._ekey = raw['ekey']
-        self._nnum = raw['nnum']
-        self._nodes = raw['nodes']
-        self._enum = raw['enum']
-        self._elem = raw['elem']
-        self._etype = raw['etype']
-        self._e_rcon = raw['e_rcon']
-        self._node_comps = raw['node_comps']
-        self._elem_comps = raw['elem_comps']
-        self._mtype = raw['mtype']
-        self._sec_id = raw['sec_id']
-        self._keyopt = raw['keyopt']
-        self._parameters = raw['parameters']
-
+        self._etype = None  # internal element type reference
         self._grid = None
         if parse_vtk:
-            self._grid = raw_to_grid(raw, allowable_types, force_linear,
-                                     null_unallowed)       
+            self._grid = raw_to_grid(self._raw, allowable_types, force_linear,
+                                     null_unallowed)
+
+    @property
+    def key_option(self):
+        """Additional key options for element types
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive.key_option
+        {}
+        """
+        return self._raw['keyopt']
+
+    @property
+    def material_type(self):
+        """Material type index of each element in the archive.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive.material_type
+        array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1], dtype=int32)
+        """
+        return self._raw['mtype']
+
+    @property
+    def element_components(self):
+        """Element components for the archive.
+
+        Output is a dictionary of element components.  Each entry is an
+        array of MAPDL element numbers corresponding to the element
+        component.  The keys are element component names.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.element_components
+        {'ECOMP1 ': array([17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                           30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+                           dtype=int32),
+        'ECOMP2 ': array([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                          14, 15, 16, 17, 18, 19, 20, 23, 24], dtype=int32)}
+        """
+        return self._raw['elem_comps']
+
+    @property
+    def node_components(self):
+        """Node components for the archive.
+
+        Output is a dictionary of node components.  Each entry is an
+        array of MAPDL node numbers corresponding to the node
+        component.  The keys are node component names.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.node_components
+        {'NCOMP2  ': array([  1,   2,   3,   4,   5,   6,   7,   8,
+                 14,  15,  16,  17,  18,  19,  20,  21,  43,  44,
+                 62,  63,  64,  81,  82,  90,  91,  92,  93,  94,
+                 118, 119, 120, 121, 122, 123, 124, 125, 126, 137,
+                 147, 148, 149, 150, 151, 152, 153, 165, 166, 167,
+                 193, 194, 195, 202, 203, 204, 205, 206, 207, 221,
+                 240, 258, 267, 268, 276, 277, 278, 285, 286, 287,
+                 304, 305, 306, 313, 314, 315, 316], dtype=int32),
+        ...,
+        }
+        """
+        return self._raw['node_comps']
+
+    @property
+    def elem_real_constant(self):
+        """Real constant reference for each element.
+
+        Use the data within ``rlblock`` and ``rlblock_num`` to get the
+        real constant datat for each element.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.elem_real_constant
+        array([ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+                1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+                1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+                ...,
+                1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 61, 61, 61, 61,
+               61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61,
+               61], dtype=int32)
+
+        """
+        return self._raw['e_rcon']
 
     @property
     def etype(self):
-        """"""
+        """Element type of each element.
+
+        This is the ansys element type for each element.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.ekey
+        array([ 45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,
+                45,  45,  45,  45,  45,  45,  45,  45,  92,  92,  92,
+                92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,
+                ...,
+                92,  92,  92,  92,  92, 154, 154, 154, 154, 154, 154,
+               154, 154, 154, 154, 154, 154, 154, 154, 154, 154, 154,
+               154], dtype=int32)
+
+        Notes
+        -----
+        Element types are listed below.  Please see the APDL Element
+        Reference for more details:
+
+        https://www.mm.bme.hu/~gyebro/files/vem/ansys_14_element_reference.pdf
+
+        - LINK1
+        - PLANE2
+        - BEAM3
+        - BEAM4
+        - SOLID5
+        - COMBIN7
+        - LINK8
+        - INFIN9
+        - LINK10
+        - LINK11
+        - CONTAC12
+        - PLANE13
+        - COMBIN14
+        - FLUID15
+        - PIPE16
+        - PIPE17
+        - PIPE18
+        - SURF19
+        - PIPE20
+        - MASS21
+        - SURF22
+        - BEAM23
+        - BEAM24
+        - PLANE25
+        - MATRIX27
+        - SHELL28
+        - FLUID29
+        - FLUID30
+        - LINK31
+        - LINK32
+        - LINK33
+        - LINK34
+        - PLANE35
+        - SOURC36
+        - COMBIN37
+        - FLUID38
+        - COMBIN39
+        - COMBIN40
+        - SHELL41
+        - PLANE42
+        - SHELL43
+        - BEAM44
+        - SOLID45
+        - SOLID46
+        - INFIN47
+        - MATRIX50
+        - SHELL51
+        - CONTAC52
+        - PLANE53
+        - BEAM54
+        - PLANE55
+        - SHELL57
+        - PIPE59
+        - PIPE60
+        - SHELL61
+        - SOLID62
+        - SHELL63
+        - SOLID64
+        - SOLID65
+        - FLUID66
+        - PLANE67
+        - LINK68
+        - SOLID69
+        - SOLID70
+        - MASS71
+        - PLANE75
+        - PLANE77
+        - PLANE78
+        - FLUID79
+        - FLUID80
+        - FLUID81
+        - PLANE82
+        - PLANE83
+        - SOLID87
+        - VISCO88
+        - VISCO89
+        - SOLID90
+        - SHELL91
+        - SOLID92
+        - SHELL93
+        - CIRCU94
+        - SOLID95
+        - SOLID96
+        - SOLID97
+        - SOLID98
+        - SHELL99
+        - USER100
+        - USER101
+        - USER102
+        - USER103
+        - USER104
+        - USER105
+        - VISCO106
+        - VISCO107
+        - VISCO108
+        - TRANS109
+        - INFIN110
+        - INFIN111
+        - ROT112
+        - INTER115
+        - FLUID116
+        - EDGE117
+        - HF118
+        - HF119
+        - HF120
+        - PLANE121
+        - SOLID122
+        - SOLID123
+        - CIRCU124
+        - CIRCU125
+        - TRANS126
+        - FLUID129
+        - FLUID130
+        - SHELL131
+        - SHELL132
+        - TRANS135
+        - FLUID136
+        - FLUID137
+        - FLUID138
+        - FLUID139
+        - ROM140
+        - SHELL143
+        - ROM144
+        - SURF151
+        - SURF152
+        - SURF153
+        - SURF154
+        - SURF155
+        - SURF156
+        - SHELL157
+        - SURF159
+        - TARGE169
+        - TARGE170
+        - CONTA171
+        - CONTA172
+        - CONTA173
+        - CONTA174
+        - CONTA175
+        - CONTA176
+        - CONTA177
+        - CONTA178
+        - PRETS179
+        - LINK180
+        - SHELL181
+        - PLANE182
+        - PLANE183
+        - RBAR184
+        - SOLID185
+        - SOLID186
+        - SOLID187
+        - BEAM188
+        - BEAM189
+        - SOLID190
+        - SOLID191
+        - INTER192
+        - INTER193
+        - INTER194
+        - INTER195
+        - LAYER196
+        - LAYER197
+        - FOLLW201
+        - INTER202
+        - INTER203
+        - INTER204
+        - INTER205
+        - INTER206
+        - SHELL208
+        - SHELL209
+        - CPT212
+        - CPT213
+        - COMBI214
+        - CPT215
+        - CPT216
+        - CPT217
+        - FLUID218
+        - FLUID219
+        - FLUID220
+        - FLUID221
+        - PLANE222
+        - SOLID223
+        - SOLID225
+        - SOLID226
+        - SOLID227
+        - PLANE230
+        - SOLID231
+        - SOLID232
+        - PLANE233
+        - SOLID236
+        - SOLID237
+        - PLANE238
+        - SOLID239
+        - SOLID240
+        - HSFLD241
+        - HSFLD242
+        - COMBI250
+        - SURF251
+        - SURF252
+        - INFIN257
+        - INFIN258
+        - INFIN259
+        - INFIN260
+        - GLINK262
+        - REINF263
+        - REINF264
+        - REINF265
+        - SOLID272
+        - SOLID273
+        - SOLID278
+        - SOLID279
+        - CABLE280
+        - SHELL281
+        - SHELL282
+        - SHELL283
+        - SOLID285
+        - PIPE288
+        - PIPE289
+        - ELBOW290
+        - SOLID291
+        - PLANE292
+        - PLANE293
+        - USER300
+
+        """
+        if self._etype is None:
+            arr = np.empty(self._raw['ekey'][:, 0].max() + 1, np.int32)
+            arr[self._raw['ekey'][:, 0]] = self._raw['ekey'][:, 1]
+            self._etype = arr[self._raw['etype']]
+        return self._etype
 
     @property
     def elem(self):
@@ -114,6 +459,8 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.elem
         array([[252576, 252577, 250644, ...,     -1,     -1,     -1],
                [252571, 252572, 250620, ...,     -1,     -1,     -1],
@@ -123,7 +470,7 @@ class Archive():
                [252073, 362835, 252074, ...,     -1,     -1,     -1],
                [362635, 251878, 362623, ...,     -1,     -1,     -1]])
         """
-        return self._elem
+        return self._raw['elem']
 
     @property
     def enum(self):
@@ -131,10 +478,12 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.enum
         array([    1,     2,     3, ...,  9998,  9999, 10000])
         """
-        return self._enum
+        return self._raw['enum']
 
     @property
     def nnum(self):
@@ -142,10 +491,12 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.nnum
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
-        return self._nnum
+        return self._raw['nnum']
 
     @property
     def ekey(self):
@@ -156,13 +507,15 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.ekey
         array([[  1,  45],
                [  2,  95],
                [  3,  92],
                [ 60, 154]], dtype=int32)
         """
-        return self._ekey
+        return self._raw['ekey']
 
     @property
     def rlblock(self):
@@ -170,13 +523,15 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.rlblock
         [[0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.02 ],
          [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.01 ],
          [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.005],
          [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.005]]
         """
-        return self._rnum
+        return self._raw['rdat']
 
     @property
     def rlblock_num(self):
@@ -184,41 +539,67 @@ class Archive():
 
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.rnum
         array([60, 61, 62, 63])
         """
-        return self._rnum
+        return self._raw['rnum']
 
     @property
     def nodes(self):
         """Nodes from the archive file.
 
-        The resulting array includes node coordinates along with node
-        angles.  To get just the node coordinates, exclude the last
-        three columns of the array.
-        
         Examples
         --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.nodes
-        [[0.   0.   0.   0.   0.   0.  ]
-         [1.   0.   0.   0.   0.   0.  ]
-         [0.25 0.   0.   0.   0.   0.  ]
-         ...
-         [0.75 0.5  3.5  0.   0.   0.  ]
-         [0.75 0.5  4.   0.   0.   0.  ]
-         [0.75 0.5  4.5  0.   0.   0.  ]]
-
+        [[0.   0.   0.  ]
+         [1.   0.   0.  ]
+         [0.25 0.   0.  ]
+         ...,
+         [0.75 0.5  3.5 ]
+         [0.75 0.5  4.  ]
+         [0.75 0.5  4.5 ]]
         """
-        return self._nodes
+        return self._raw['nodes'][:, :3]
+
+    @property
+    def node_angles(self):
+        """Node angles from the archive file.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.nodes
+        [[0.   0.   0.  ]
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]
+         ...,
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]]
+        """
+        return self._raw['nodes'][:, 3:]
 
     @property
     def parameters(self):
-        """Parameters stored in the archive file"""
+        """Parameters stored in the archive file
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+                                      read_parameters=True)
+        >>> archive.parameters
+        {}
+        """
         if not self._read_parameters:
-            raise AttributeError('No parameters read.  Enable reading parameters'
-                                 'with ``read_parameters=True``')
-        return self._parameters
-        
+            raise AttributeError('No parameters read.  Read the archive again '
+                                 ' with ``read_parameters=True``')
+        return self._raw['parameters']
 
     @property
     def raw(self):
@@ -234,8 +615,18 @@ class Archive():
     def grid(self):
         """VTK and pyvista grid of the archive file.
 
-        
-
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive.grid
+        UnstructuredGrid (0x7ffa237f08a0)
+          N Cells:      40
+          N Points:     321
+          X Bounds:     0.000e+00, 1.000e+00
+          Y Bounds:     0.000e+00, 1.000e+00
+          Z Bounds:     0.000e+00, 5.000e+00
+          N Arrays:     13
         """
         if self._grid is None:
             raise AttributeError('Archive must be parsed as a vtk grid.\n'
@@ -249,6 +640,14 @@ class Archive():
         Negative values indicate invalid cells while positive values
         indicate valid cells.  Varies between -1 and 1.
 
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive.quality
+        array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
+               1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
+               1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
         """
         celltypes = self.grid.celltypes
         points = self.grid.points
@@ -257,6 +656,16 @@ class Archive():
             return cell_quality(cells, offset, celltypes, points)
 
         return cell_quality_float(cells, offset, celltypes, points)
+
+    def __repr__(self):
+        basename = os.path.basename(self._filename)
+        txt = 'ANSYS Archive File %s\n' % basename
+        txt += '  Number of Nodes:              %d\n' % len(self.enum)
+        txt += '  Number of Elements:           %d\n' % len(self.nnum)
+        txt += '  Number of Element Types:      %d\n' % len(self.ekey)
+        txt += '  Number of Node Components:    %d\n' % len(self.node_components)
+        txt += '  Number of Element Components: %d\n' % len(self.element_components)
+        return txt
 
     @wraps(pv.plot)
     def plot(self, *args, **kwargs):
@@ -277,7 +686,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                     reset_etype=False, allow_missing=True):
     """Writes FEM as an ANSYS APDL archive file.  This function
     supports the following element types:
-    
+
         - ``vtk.VTK_TETRA``
         - ``vtk.VTK_QUADRATIC_TETRA``
         - ``vtk.VTK_PYRAMID``
@@ -371,7 +780,7 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         log.info('No ANSYS element numbers set in input.  ' +
                  'Adding default range starting from %d' % enum_start)
         enum = np.arange(1, ncells + 1)
- 
+
     if np.any(enum == -1):
         if not allow_missing:
             raise Exception('-1 encountered in "ansys_elem_num".\n'
@@ -485,17 +894,19 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         h += '(19i8)\n'
         f.write(h)
 
-        # nnode = tets.shape[1]
-        cells = grid.cells
         celltypes = grid.celltypes
-        offset = grid.offset
-        for i in range(ncells):
-            c = offset[i]
-            nnode = cells[c]
-            c += 1
+        cells, offset = vtk_cell_info(grid)
+        if VTK9:
+            offset += 1
 
-            # get nodes as a tuple
-            nodes = nodenum[cells[c:c + nnode]]
+        for i in range(ncells):
+            if VTK9:
+                nodes = nodenum[cells[offset[i]:offset[i + 1]]]
+            else:
+                c = offset[i]
+                nnode = cells[c]
+                c += 1
+                nodes = nodenum[cells[c:c + nnode]]
 
             cellinfo = (mtype[i],          # Field 1: material reference number
                         etype[i],          # Field 2: element type number
@@ -503,8 +914,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                         1,                 # Field 4: section number
                         0,                 # Field 5: element coordinate system
                         0,                 # Field 6: Birth/death flag
-                        0,                 # Field 7: 
-                        0,                 # Field 8: 
+                        0,                 # Field 7:
+                        0,                 # Field 8:
                         elem_nnodes[i],    # Field 9: Number of nodes
                         0,                 # Field 10: Not Used
                         enum[i])           # Field 11: Element number
@@ -752,7 +1163,7 @@ def write_cmblock(filename, items, comp_name, comp_type, digit_width=10):
                                                         nitems))
     lines.append('(8i%d)' % digit_width)
     digit_formatter = '%' + '%d' % digit_width + 'd'
-    
+
     for chunk in chunks(toprint, 8):
         lines.append(''.join([digit_formatter] * len(chunk)) % tuple(chunk))
 
@@ -800,9 +1211,8 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
         VTK unstructured grid from archive file.
     """
     # do not parse if there are no nodes or elements
-    if not (len(raw['nodes']) or len(raw['elem'])):
+    if not len(raw['nodes']) or not len(raw['elem']):
         return
-
 
     # Convert to vtk style arrays
     if allowable_types is None:

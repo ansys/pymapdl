@@ -4,10 +4,8 @@ import pytest
 import numpy as np
 import pyansys
 
-try:
-    testfiles_path = os.path.dirname(os.path.abspath(__file__))
-except:
-    testfiles_path = '/home/alex/afrl/python/source/pyansys/tests/'
+testfiles_path = os.path.dirname(os.path.abspath(__file__))
+
 
 @pytest.fixture(scope='module')
 def archive():
@@ -16,16 +14,15 @@ def archive():
 
 
 def test_archive_load(archive):
-    assert archive.raw['nnum'].size == 12484
-    assert archive.raw['elem'].shape[0] == 6000
+    assert archive.nnum.size == 12484
+    assert archive.elem.shape[0] == 6000
 
 
 def test_parse(archive):
-    nnode = archive.raw['nnum'].size
-    nelem = archive.raw['elem'].shape[0]
-    grid = archive.parse_vtk()
-    assert grid.n_points == nnode
-    assert grid.n_cells == nelem
-    assert np.sum(grid.celltypes == 9) == 3000
-    assert np.sum(grid.celltypes == 23) == 3000
-    assert np.allclose(archive.raw['nodes'][:, :3], grid.points)
+    nnode = archive.nnum.size
+    nelem = archive.elem.shape[0]
+    assert archive.grid.n_points == nnode
+    assert archive.grid.n_cells == nelem
+    assert np.sum(archive.grid.celltypes == 9) == 3000
+    assert np.sum(archive.grid.celltypes == 23) == 3000
+    assert np.allclose(archive.nodes, archive.grid.points)
