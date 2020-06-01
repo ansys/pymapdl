@@ -174,5 +174,7 @@ setup(
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
-                      'pexpect']
+                      'pexpect',
+                      'vtk<9.0.0'
+    ]
 )
