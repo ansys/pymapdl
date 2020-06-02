@@ -40,7 +40,8 @@ def mapdl():
                           override=True, jobname=rver,
                           loglevel='ERROR',
                           interactive_plotting=False,
-                          prefer_pexpect=True)
+                          additional_switches=['-smp'],
+                          prefer_pexpect=False)
 
     # build the cyclic model
     mapdl.prep7()

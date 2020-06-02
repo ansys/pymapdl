@@ -676,6 +676,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         """
         if (int(self.version) < 170 and os.name == 'posix') or self.prefer_pexpect:
             self._open_process(self.nproc, self.start_timeout, additional_switches)
+        elif int(self.version) >= 200 and os.name == 'posix':
+            raise RuntimeError('`ansys_corba` is not supported on Linux for '
+                               'MAPDL v20.0 and greater.  Please use:\n'
+                               '    prefer_pexpect=True')
         else:  # use corba
             self.open_corba(self.nproc, self.start_timeout, additional_switches)
 
