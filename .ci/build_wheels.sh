@@ -27,6 +27,6 @@ esac
 cd io
 "${PYBIN}/pip" install -r requirements_build.txt
 "${PYBIN}/python" setup.py bdist_wheel
-auditwheel repair dist/pyansys
+auditwheel repair dist/pyansys*.whl
 rm -f dist/* -y
 mv wheelhouse/*manylinux1* dist/
