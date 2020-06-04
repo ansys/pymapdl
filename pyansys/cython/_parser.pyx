@@ -27,25 +27,6 @@ cdef uint8 VTK_QUADRATIC_PYRAMID = 27
 cdef uint8 VTK_QUADRATIC_WEDGE = 26
 cdef uint8 VTK_QUADRATIC_HEXAHEDRON = 25
 
-# # ANSYS element type definitions
-# cdef int [6] type_a
-
-# # Legacy mixed elements
-# type_a[0] = 5
-# type_a[1] = 45
-# type_a[2] = 95
-
-# # Current mixed elements
-# type_a[3] = 185
-# type_a[4] = 186
-# type_a[5] = 226
-# type_a[6] = 70
-
-# # Tetrahedrals (legacy and current)
-# cdef int [4] type_b
-# type_b[0] = 92
-# type_b[1] = 187
-
 
 cdef inline void store_line(int64_t [::1] offset, int64_t *ecount,
                            int64_t *ccount, int64_t [::1] cells,
@@ -498,10 +479,10 @@ def parse(raw, pyforce_linear, allowable_types, py_null_unallowed,
         allow_200 = 0
 
     # shell types
-    planetype = ['42', '82', '152', '154', '181', '182', '183', '223', '281']
-    cdef int n_type_c = 9
+    planetype = ['42', '82', '152', '154', '181', '182', '183', '223', '238', '281']
+    cdef int n_type_c = 10
     assert n_type_c == len(planetype)
-    cdef int [9] typeC
+    cdef int [10] typeC
     for i, atype in enumerate(planetype):
         if atype in allowable_types:
             typeC[i] = int(atype)
