@@ -20,6 +20,7 @@ cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
                     int)
+    int read_eblock_full(char*, int*, int, int, int*)
 
     
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
@@ -149,28 +150,20 @@ def read(filename, read_parameters=False, debug=False):
 
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
+                if nelem == 0:
+                    raise Exception('Unable to read element block')
 
                 # Get interger block size
                 myfgets(line, raw, &n, fsize)
                 isz = int(line[line.find(b'i') + 1:line.find(b')')])
 
-                # Initialize element data array.  Use number of lines
-                # as nelem is unknown
-                elem = np.empty((nelem, 20), dtype=ctypes.c_int)
-                etype = np.empty(nelem, dtype=ctypes.c_int)
-                elemnum = np.empty(nelem, dtype=ctypes.c_int)
-                e_rcon = np.empty(nelem, dtype=ctypes.c_int)
-                mtype = np.empty(nelem, dtype=ctypes.c_int)
-                sec_id = np.empty(nelem, dtype=ctypes.c_int)
+                # element field data and connectivity
+                elem = np.empty(nelem*30, dtype=ctypes.c_int)
+                elem_offset = np.empty(nelem, dtype=ctypes.c_int)
 
-                # Call C extention to read eblock
-                nelem = read_eblock(raw, &mtype[0], &etype[0],
-                                    &e_rcon[0], &sec_id[0],
-                                    &elemnum[0], &elem[0, 0], nelem,
-                                    isz, &n, EOL)
-
-                if nelem == 0:
-                    raise Exception('Unable to read element block')
+                # Call C extention to populate the element array
+                elem_arr_sz
+                c = read_eblock_full(&elem_offset, &elem[0], nelem, isz, &n)
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:

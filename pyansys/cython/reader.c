@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* #include <errno.h> */
 
 //=============================================================================
 // Fast string to interger convert to ANSYS formatted intergers 
@@ -14,14 +13,11 @@ __inline int fast_atoi(char * raw, int intsz, int *i){
     for (c=0; c<intsz; ++c){
         ++*(i);
 
-        // Seek throug white space
+        // Seek through white space
         if (raw[*(i)] == ' ') continue;
 
         val = val*10 + (raw[*(i)] - '0');
     }
-
-    // Pass counter position back to file position counter
-//    *(i) = c;
 
     return val;
 }
@@ -32,7 +28,7 @@ __inline int fast_atoi2(char * raw, int intsz, int *i){
 
     val = 0;
     for (c=0; c<intsz; ++c){
-        // Seek throug white space
+        // Seek through white space
         if (raw[*(i)] == ' '){
             ++*(i);
             continue;
@@ -441,3 +437,88 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
 
 
 }
+
+
+//=============================================================================
+// Reads EBLOCK from ANSYS.  Raw string is from Python reader and file is
+// positioned at the start of the data of EBLOCK
+//=============================================================================
+int read_eblock_full(char *raw, int *elem, int nelem, int intsz, int *j){
+
+  int i, n, c, nnode, val, g, endval;
+  n = *(j) - 1;
+
+  // Loop through elements
+  for (i=0; i<nelem; ++i){
+
+    // Check if end of line
+    while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ){
+      ++n;
+    }
+
+    // Check if at end of the block
+    if (checkneg(raw, intsz, &n)){
+      break;
+    }
+    n -= intsz; // since checkneg advances by intsz
+        
+
+    // Field 1: material reference number
+    // Field 2: element type number
+    // Field 3: real constant reference number
+    // Field 4: section number
+    // Field 5: element coordinate system
+    // Field 6: Birth/death flag
+    // Field 7:
+    // Field 8:
+    // Field 9: Number of nodes
+    // Field 10: Not Used
+    // Field 11: Element number
+
+    // Read in Fields 1 - 11
+    endval = i + 11;
+    for (; i < endval; i++){
+      elem[i] = fast_atoi(raw, intsz, &n);
+    }
+
+    // Read nodes in element
+    endval = i + elem[i - 3];
+    for (; i < endval; i++){
+      // Check if end of line
+      while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ) ++n;
+
+      // Parse node (same as function fast_atoi)
+      val = 0;
+      for (g=0; g<intsz; ++g){
+	++n;
+	if (raw[n] == ' ') continue;  // Seek through white space
+	val = val*10 + (raw[n] - '0');
+      }
+      elem[i] = val;
+    }            
+  }
+
+  // update file position
+  *(j) = n;
+
+  // return array position
+  return i;
+
+}
+
+  /* CVEC<int>	elem(31 * nElems); */
+  /* int ielem(0), iel(1); */
+  /* while ( ( ielem = elnext( &ielem)) > 0) */
+  /*   { */
+  /*     int n = elmget( &ielem, _elmdat, NodPtr); */
+	
+  /*     elem[iel-1] = cc; // split point */
+	
+  /*     for (int ii=0; ii<10; ii++, cc++) */
+  /* 	elem[cc] = _elmdat[ii];	 */
+      
+  /*     for (int ii=0; ii<n; ii++, cc++) */
+  /* 	elem[cc] = NodPtr[ii];	 */
+
+  /*     iel++; */
+  /*   } */

@@ -150,6 +150,11 @@ setup(
                            extra_compile_args=cmp_arg,
                            language='c'),
 
+                 Extension("pyansys._vtk_support",
+                           ["pyansys/cython/_vtk_support.pyx"],
+                           extra_compile_args=cmp_arg,
+                           language='c'),
+
                  Extension("pyansys._binary_reader",
                            ["pyansys/cython/_binary_reader.pyx",
                             "pyansys/cython/binary_reader.cpp"],
