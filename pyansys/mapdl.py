@@ -1295,7 +1295,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log.info('Connecting to ANSYS via CORBA')
 
         # command must include "aas" flag to start MAPDL server
-        command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
+        # command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
+        command = '"%s" -j %s -aas -np %d %s' % (self.exec_file, self._jobname,
+                                                 nproc, additional_switches)
 
         # remove the broadcast file if it exists:
         if os.path.isfile(self.broadcast_file):
@@ -1346,17 +1348,18 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         except:
             pip_cmd = 'pip install ansys_corba'
             raise ImportError('Missing ansys_corba.\n' +
-                              'This feature does not support MAC OS.\n' +\
+                              'This feature does not support MAC OS.\n' + \
                               'Otherwise, please install with "%s"' % pip_cmd)
 
         orb = CORBA.ORB_init()
         self.mapdl = orb.string_to_object(key)
 
-        # quick test
+        # must be the very first command
         try:
+            text = self.mapdl.executeCommandToString('/batch')
             self.mapdl.getComponentName()
         except:
-            raise Exception('Unable to connect to APDL server')
+            raise RuntimeError('Unable to connect to APDL server')
 
         self.using_corba = True
         self.log.debug('Connected to ANSYS using CORBA interface')

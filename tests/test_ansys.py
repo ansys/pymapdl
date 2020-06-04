@@ -16,8 +16,8 @@ path = os.path.dirname(os.path.abspath(__file__))
 # rver = 'v150'
 # rver = 'v182'
 # rver = 'v194'
-rver = 'v201'
-# rver = 'v202'
+# rver = 'v201'
+rver = 'v202'
 MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
             'v182': '/usr/ansys_inc/v182/ansys/bin/ansys182',
             'v194': '/usr/ansys_inc/v194/ansys/bin/ansys194',
@@ -40,7 +40,8 @@ def mapdl():
                           override=True, jobname=rver,
                           loglevel='ERROR',
                           interactive_plotting=False,
-                          prefer_pexpect=True)
+                          additional_switches='-smp',
+                          prefer_pexpect=False)
 
     # build the cyclic model
     mapdl.prep7()
@@ -95,7 +96,7 @@ def test_prnsol_u(mapdl, rset):
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
     if mapdl.using_corba:
-        array = np.genfromtxt(table[7:])
+        array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[9:])
     ansys_nnum = array[:, 0].astype(np.int)
@@ -146,7 +147,7 @@ def test_prnsol_s(mapdl, rset):
     # verify cyclic displacements
     table = mapdl.prnsol('s').splitlines()
     if mapdl.using_corba:
-        array = np.genfromtxt(table[7:])
+        array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
     ansys_nnum = array[:, 0].astype(np.int)
@@ -172,7 +173,7 @@ def test_prnsol_prin(mapdl, rset):
     # verify principal stress
     table = mapdl.prnsol('prin').splitlines()
     if mapdl.using_corba:
-        array = np.genfromtxt(table[7:])
+        array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
     ansys_nnum = array[:, 0].astype(np.int)
@@ -190,46 +191,12 @@ def test_prnsol_prin(mapdl, rset):
     assert np.allclose(stress, ansys_stress[:arr_sz], atol=1E-5, rtol=1E-3)
 
 
-# @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
-# def test_plot(self):
-#     filename = '/tmp/temp.png'
-#     self.result.plot_nodal_solution(0, screenshot=filename,
-#                                   off_screen=True)
-
-#     # self.result.plot_nodal_stress(0, 'Sx', screenshot=filename,
-#     #                             off_screen=True)
-
-#     self.result.plot_principal_nodal_stress(0, 'EQV', screenshot=filename,
-#                                             off_screen=True)
-
-
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
     from pyansys.mapdl import load_parameters
     for para_file in para_files:
         arr, parm = load_parameters(para_file)
-
-
-# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
-# def test_v150():
-#     mapdl = pyansys.Mapdl(MAPDLBIN['v150'], override=True)
-#     mapdl.prep7()
-#     mapdl.exit()
-
-
-# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
-# def test_v182():
-#     mapdl = pyansys.Mapdl(MAPDLBIN['v182'], override=True)
-#     mapdl.prep7()
-#     mapdl.exit()
-
-
-# @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
-# def test_v194():
-#     mapdl = pyansys.Mapdl(MAPDLBIN['v194'], override=True)
-#     mapdl.prep7()
-#     mapdl.exit()
 
 
 ###############################################################################

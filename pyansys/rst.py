@@ -25,6 +25,9 @@ from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
 from pyansys._mp_keys import mp_keys
 from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, rotate_to_global)
+from pyansys.misc import vtk_cell_info
+
+VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
 # Create logger
 LOG = logging.getLogger(__name__)
@@ -78,6 +81,7 @@ class ResultFile(AnsysBinary):
         """
         self.filename = filename
         self._resultheader = self._read_result_header()
+        self._animating = False
 
         # Get the total number of results and log it
         self.nsets = len(self._resultheader['rpointers'])
@@ -518,8 +522,7 @@ class ResultFile(AnsysBinary):
 
         ind = None
         if node_components:
-            grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
             scalars = scalars[ind]
 
         else:
@@ -570,11 +573,9 @@ class ResultFile(AnsysBinary):
                                 'component "%s"' % component)
 
             mask += grid.point_arrays[component].view(np.bool)
-            # mask = np.logical_not(mask)
 
         # need to extract the mesh
-        cells = grid.cells
-        offset = grid.offset
+        cells, offset = vtk_cell_info(grid)
         if sel_type_all:
             cell_mask = cells_with_all_nodes(offset, cells, grid.celltypes,
                                              mask.view(np.uint8))
@@ -1089,7 +1090,10 @@ class ResultFile(AnsysBinary):
 
         # Create vtk object
         nodes = nloc[:, :3]
-        self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
+        if VTK9:
+            self.quadgrid = pv.UnstructuredGrid(cells, cell_type, nodes)
+        else:
+            self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
         self.quadgrid.cell_arrays['ansys_elem_num'] = enum
         self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Element Type'] = element_type
@@ -2118,12 +2122,13 @@ class ResultFile(AnsysBinary):
         result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
 
         # Element types for nodal averaging
+        cells, offset = vtk_cell_info(self.grid)
         elemtype = self.geometry['Element Type'].astype(np.int32)
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                         self.grid.celltypes,
                                                         ele_ind_table,
-                                                        self.grid.offset,
-                                                        self.grid.cells,
+                                                        offset,
+                                                        cells,
                                                         nitem,
                                                         self.grid.number_of_points,
                                                         nodstr,
@@ -2600,12 +2605,18 @@ class ResultFile(AnsysBinary):
         rng = [results.min(), results.max()]
         t_wait = 1/frame_rate
 
+        def q_callback():
+            """exit when user wants to leave"""
+            self._animating = False
+
+        self._animating = True
         def plot_thread():
             plotter = pv.Plotter(off_screen=off_screen)
+            plotter.add_key_event("q", q_callback)
             plotter.add_mesh(mesh, scalars='data', rng=rng)
             plotter.show(auto_close=False, interactive_update=True, interactive=False)
             text_actor = plotter.add_text('Result 1')
-            while not plotter.q_pressed:
+            while self._animating:
                 for i in range(self.nsets):
                     mesh['data'] = results[i]
 
@@ -2618,9 +2629,6 @@ class ResultFile(AnsysBinary):
                         text_actor.SetInput('Result %d' % (i + 1))
                     else:
                         text_actor.SetText(0, 'Result %d' % (i + 1))
-
-                    if plotter.q_pressed:
-                        break
 
                     time.sleep(t_wait)
 

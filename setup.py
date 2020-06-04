@@ -112,10 +112,10 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Operating System :: MacOS',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
     # Website
@@ -146,12 +146,7 @@ setup(
                            language='c'),
 
                  Extension("pyansys._cellqual",
-                           ["pyansys/_cellqual.pyx"],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
-
-                 Extension("pyansys._cellqualfloat",
-                           ["pyansys/cython/_cellqualfloat.pyx"],
+                           ["pyansys/cython/_cellqual.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
@@ -175,11 +170,10 @@ setup(
                                        'sector.cdb']},
 
     install_requires=['numpy>=1.14.0',
-                      'pyvista>=0.21.0',
+                      'pyvista>=0.25.0',
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
                       'pexpect',
-                      'vtk<9.0.0'
     ]
 )

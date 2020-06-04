@@ -21,8 +21,6 @@ LINEAR_CELL_TYPES = [VTK_TETRA,
                      VTK_WEDGE,
                      VTK_HEXAHEDRON]
 
-# QUADRATIC_CELL_TYPES = 
-
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'test_data')
 
@@ -37,108 +35,102 @@ def all_solid_cells_archive():
     return pyansys.Archive(os.path.join(testfiles_path, 'all_solid_cells.cdb'))
 
 
-def test_properties_raw(hex_archive):
-    assert isinstance(hex_archive.raw, dict)
+@pytest.fixture(scope='module')
+def all_solid_cells_archive_linear():
+    return pyansys.Archive(os.path.join(testfiles_path, 'all_solid_cells.cdb'),
+                           force_linear=True)
+
+
+def test_archive_init(hex_archive):
+    assert isinstance(hex_archive._raw, dict)
+    assert isinstance(hex_archive.grid, pv.UnstructuredGrid)
 
 
 def test_parse_vtk(hex_archive):
-    grid = hex_archive.parse_vtk()
+    grid = hex_archive.grid
     assert grid.points.size
     assert grid.cells.size
     assert 'ansys_node_num' in grid.point_arrays
-    assert np.all(grid.quality > 0)
+    assert np.all(hex_archive.quality > 0)
 
     with pytest.raises(Exception):
-        hex_archive.parse_vtk(allowable_types=186)
+        hex_archive._parse_vtk(allowable_types=186)
 
     with pytest.raises(Exception):
-        hex_archive.parse_vtk(allowable_types=[1, 2, 3])
+        hex_archive._parse_vtk(allowable_types=[1, 2, 3])
 
 
 def test_invalid_archive(tmpdir, hex_archive):
     nblock_filename = str(tmpdir.mkdir("tmpdir").join('nblock.cdb'))
-    pyansys.write_nblock(nblock_filename, hex_archive.raw['nnum'],
-                         hex_archive.raw['nodes'][:, :3])
-    new_archive = pyansys.Archive(nblock_filename)
+    pyansys.write_nblock(nblock_filename, hex_archive.nnum,
+                         hex_archive.nodes)
 
-    with pytest.raises(Exception):
-        new_archive.parse_vtk()
+    archive = pyansys.Archive(nblock_filename)
+    with pytest.raises(AttributeError):
+        archive.grid
 
 
 def test_write_angle(tmpdir, hex_archive):
     nblock_filename = str(tmpdir.mkdir("tmpdir").join('nblock.cdb'))
-    angles = hex_archive.raw['nodes'][:, 3:]
-    pyansys.write_nblock(nblock_filename, hex_archive.raw['nnum'],
-                         hex_archive.raw['nodes'][:, :3], angles)
+    pyansys.write_nblock(nblock_filename, hex_archive.nnum,
+                         hex_archive.nodes, hex_archive.node_angles)
 
-    archive_new = pyansys.Archive(nblock_filename)
-    assert np.allclose(archive_new.raw['nodes'], hex_archive.raw['nodes'])
+    archive = pyansys.Archive(nblock_filename, parse_vtk=False)
+    assert np.allclose(archive.nodes, hex_archive.nodes)
 
 
 @pytest.mark.skipif(IS_MAC, reason="TODO: Unexplained behavior")
 def test_missing_midside():
+    allowable_types = ['45', '95', '185', '186', '92', '187']
     archive_file = os.path.join(testfiles_path, 'mixed_missing_midside.cdb')
-    archive = pyansys.Archive(archive_file)
-    grid = archive.parse_vtk(allowable_types=['45', '95', '185', '186', '92', '187'])
-    assert (grid.quality > 0.0).all()
-    assert not np.any(grid.celltypes == VTK_TETRA)
+    archive = pyansys.Archive(archive_file, allowable_types=allowable_types)
+    assert (archive.quality > 0.0).all()
+    assert not np.any(archive.grid.celltypes == VTK_TETRA)
 
 
 def test_writehex(tmpdir, hex_archive):
-    grid = hex_archive.parse_vtk()
-
     temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
-    pyansys.save_as_archive(temp_archive, grid)
+    pyansys.save_as_archive(temp_archive, hex_archive.grid)
 
     archive_new = pyansys.Archive(temp_archive)
-    grid2 = archive_new.parse_vtk()
-
-    assert np.allclose(grid.points, grid2.points)
-    assert np.allclose(grid.cells, grid2.cells)
+    assert np.allclose(hex_archive.grid.points, archive_new.grid.points)
+    assert np.allclose(hex_archive.grid.cells, archive_new.grid.cells)
 
 
 def test_writesector(tmpdir):
     archive = pyansys.Archive(examples.sector_archive_file)
-    grid = archive.parse_vtk()
 
-    temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
-    pyansys.save_as_archive(temp_archive, grid)
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
+    pyansys.save_as_archive(filename, archive.grid)
+    archive_new = pyansys.Archive(filename)
 
-    archive2 = pyansys.Archive(temp_archive)
-    grid2 = archive2.parse_vtk()
-
-    assert np.allclose(grid.points, grid2.points)
-    assert np.allclose(grid.cells, grid2.cells)
+    assert np.allclose(archive.grid.points, archive_new.grid.points)
+    assert np.allclose(archive.grid.cells, archive_new.grid.cells)
 
 
 def test_writehex_missing_elem_num(tmpdir, hex_archive):
-    grid = hex_archive.parse_vtk()
+    grid = hex_archive.grid
     grid.cell_arrays['ansys_elem_num'][:10] = -1
     grid.cell_arrays['ansys_etype'] = np.ones(grid.number_of_cells)*-1
     grid.cell_arrays['ansys_elem_type_num'] = np.ones(grid.number_of_cells)*-1
 
-    temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
-    pyansys.save_as_archive(temp_archive, grid)
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
+    pyansys.save_as_archive(filename, grid)
+    archive_new = pyansys.Archive(filename)
 
-    archive2 = pyansys.Archive(temp_archive)
-    grid2 = archive2.parse_vtk()
-
-    assert np.allclose(grid.points.shape, grid2.points.shape)
-    assert np.allclose(grid.cells.size, grid2.cells.size)
+    assert np.allclose(hex_archive.grid.points, archive_new.grid.points)
+    assert np.allclose(hex_archive.grid.cells, archive_new.grid.cells)
 
 
 def test_writehex_missing_node_num(tmpdir, hex_archive):
-    grid = hex_archive.parse_vtk()
-    grid.point_arrays['ansys_node_num'][:-1] = -1
+    hex_archive.grid.point_arrays['ansys_node_num'][:-1] = -1
 
     temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
-    pyansys.save_as_archive(temp_archive, grid)
+    pyansys.save_as_archive(temp_archive, hex_archive.grid)
+    archive_new = pyansys.Archive(temp_archive)
 
-    archive2 = pyansys.Archive(temp_archive)
-    grid2 = archive2.parse_vtk()
-
-    assert np.allclose(grid.points.shape, grid2.points.shape)
-    assert np.allclose(grid.cells.size, grid2.cells.size)
+    assert np.allclose(hex_archive.grid.points.shape, archive_new.grid.points.shape)
+    assert np.allclose(hex_archive.grid.cells.size, archive_new.grid.cells.size)
 
 
 def test_write_non_ansys_grid(tmpdir):
@@ -150,15 +142,17 @@ def test_write_non_ansys_grid(tmpdir):
 
 
 def test_read_complex_archive(all_solid_cells_archive):
-    grid = all_solid_cells_archive.parse_vtk()
+    grid = all_solid_cells_archive.grid
     assert grid.number_of_cells == 4
     assert np.unique(grid.celltypes).size == 4
     assert np.all(grid.celltypes > 20)
-    assert np.all(grid.quality > 0.0)
+    assert np.all(all_solid_cells_archive.quality > 0.0)
 
-    linear_grid = all_solid_cells_archive.parse_vtk(force_linear=True)
-    assert np.all(linear_grid.celltypes < 20)
-    assert np.all(linear_grid.quality > 0.0)
+
+def test_read_complex_archive_linear(all_solid_cells_archive_linear):
+    grid = all_solid_cells_archive_linear.grid
+    assert np.all(grid.celltypes < 20)
+    assert np.all(all_solid_cells_archive_linear.quality > 0.0)
 
 
 @pytest.mark.parametrize('celltype', [VTK_QUADRATIC_TETRA,
@@ -166,7 +160,7 @@ def test_read_complex_archive(all_solid_cells_archive):
                                       VTK_QUADRATIC_WEDGE,
                                       VTK_QUADRATIC_HEXAHEDRON])
 def test_write_quad_complex_archive(tmpdir, celltype, all_solid_cells_archive):
-    grid = all_solid_cells_archive.parse_vtk()
+    grid = all_solid_cells_archive.grid
     mask = grid.celltypes == celltype
     assert mask.any()
     grid = grid.extract_cells(mask)
@@ -178,30 +172,25 @@ def test_write_quad_complex_archive(tmpdir, celltype, all_solid_cells_archive):
 
     pyansys.save_as_archive(tmp_archive_file, grid)
     new_archive = pyansys.Archive(tmp_archive_file)
-    new_grid = new_archive.parse_vtk()
-    assert np.allclose(grid.cells, new_grid.cells)
-    assert np.allclose(grid.points, new_grid.points)
-    assert (new_grid.quality > 0.0).all()
+    assert np.allclose(grid.cells, new_archive.grid.cells)
+    assert np.allclose(grid.points, new_archive.grid.points)
+    assert (new_archive.quality > 0.0).all()
 
 
 @pytest.mark.parametrize('celltype', LINEAR_CELL_TYPES)
-def test_write_lin_archive(tmpdir, celltype, all_solid_cells_archive):
-    linear_grid = all_solid_cells_archive.parse_vtk(force_linear=True)
+def test_write_lin_archive(tmpdir, celltype, all_solid_cells_archive_linear):
+    linear_grid = all_solid_cells_archive_linear.grid
 
     mask = linear_grid.celltypes == celltype
     assert mask.any()
     linear_grid = linear_grid.extract_cells(mask)
 
-    try:
-        tmp_archive_file = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
-    except:
-        tmp_archive_file = '/tmp/nblock.cdb'
+    tmp_archive_file = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
 
     pyansys.save_as_archive(tmp_archive_file, linear_grid)
     new_archive = pyansys.Archive(tmp_archive_file)
-    new_linear_grid = new_archive.parse_vtk()
-    assert np.allclose(linear_grid.cells, new_linear_grid.cells)
-    assert np.allclose(linear_grid.points, new_linear_grid.points)
+    assert np.allclose(linear_grid.cells, new_archive.grid.cells)
+    assert np.allclose(linear_grid.points, new_archive.grid.points)
 
 
 def test_write_component(tmpdir):
@@ -211,33 +200,31 @@ def test_write_component(tmpdir):
     comp_name = 'TEST'
     pyansys.write_cmblock(temp_archive, items, comp_name, 'node')
     archive = pyansys.Archive(temp_archive)
-    assert np.allclose(archive.raw['node_comps'][comp_name], items)
+    assert np.allclose(archive.node_components[comp_name], items)
 
 
 def test_read_mesh200():
     archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
-    grid = archive.parse_vtk()
-    assert grid.n_cells == 1000
+    assert archive.grid.n_cells == 1000
 
 
 def test_read_parm():
     filename = os.path.join(testfiles_path, 'parm.cdb')
     archive = pyansys.Archive(filename)
-    assert len(archive.raw['parameters']) == 0
+    with pytest.raises(AttributeError):
+        archive.parameters
 
     archive = pyansys.Archive(filename, read_parameters=True)
-    assert len(archive.raw['parameters']) == 2
-    for parm in archive.raw['parameters']:
-        assert isinstance(archive.raw['parameters'][parm], np.ndarray)
+    assert len(archive.parameters) == 2
+    for parm in archive.parameters:
+        assert isinstance(archive.parameters[parm], np.ndarray)
 
 
 def test_read_wb_nblock():
-    expected = np.array([[9.89367578e-02, -8.07092192e-04,  8.53764953e+00,
-                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-                         [9.65803244e-02,  2.00906704e-02,  8.53744951e+00,
-                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-                         [9.19243555e-02,  3.98781615e-02,  8.53723652e+00,
-                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00]])
+    expected = np.array([[9.89367578e-02, -8.07092192e-04,  8.53764953e+00],
+                         [9.65803244e-02,  2.00906704e-02,  8.53744951e+00],
+                         [9.19243555e-02,  3.98781615e-02,  8.53723652e+00]])
     filename = os.path.join(testfiles_path, 'workbench_193.cdb')
     archive = pyansys.Archive(filename)
-    assert np.allclose(archive.raw['nodes'], expected)
+    assert np.allclose(archive.nodes, expected)
+    assert np.allclose(archive.node_angles, 0)

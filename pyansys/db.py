@@ -6,7 +6,7 @@ import numpy as np
 
 from pyansys import _db_reader
 from pyansys.common import read_table, parse_header, read_standard_header
-from pyansys.vtk_helper import raw_to_grid
+from pyansys.archive import raw_to_grid
 from pyansys._reader import component_interperter
 
 

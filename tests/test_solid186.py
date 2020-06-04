@@ -27,20 +27,15 @@ def archive():
 
 def test_geometry_elements(result, archive):
     r_elem = result.geometry['elem'][result.sidx_elem]
-    a_elem = archive.raw['elem']
-    assert np.allclose(r_elem, a_elem)
+    assert np.allclose(r_elem, archive.elem)
 
 
 def test_geometry_nodes(result, archive):
-    r_node = result.geometry['nodes']
-    a_node = archive.raw['nodes']
-    assert np.allclose(r_node, a_node)
+    assert np.allclose(result.geometry['nodes'][:, :3], archive.nodes)
 
 
 def test_geometry_nodenum(result, archive):
-    r_values = result.geometry['nnum']
-    a_values = archive.raw['nnum']
-    assert np.allclose(r_values, a_values)
+    assert np.allclose(result.geometry['nnum'], archive.nnum)
 
 
 def test_results_displacement(result):

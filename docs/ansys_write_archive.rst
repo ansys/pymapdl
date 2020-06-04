@@ -10,19 +10,15 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
     import pyansys
     from pyansys import examples
 
-    # Sample *.cdb
-    filename = examples.hexarchivefile
+    # Read a sample archive file
+    archive = pyansys.Archive(examples.hexarchivefile)
 
-    # Read ansys archive file
-    archive = pyansys.Archive(filename)
+    # Print various raw data from cdb
+    print(archive.nnum, archive.nodes)
 
-    # Print raw data from cdb
-    for key in archive.raw:
-       print("%s : %s" % (key, archive.raw[key]))
-
-    # Create a vtk unstructured grid from the raw data and plot it
-    grid = archive.parse_vtk(force_linear=True)
-    grid.plot(color='w', show_edges=True)
+    # access a vtk unstructured grid from the raw data and plot it
+    grid = archive.grid
+    archive.plot(color='w', show_edges=True)
 
 
 You can also optionally read in any stored parameters within the archive file by enabling the ``read_parameters`` parameter.
@@ -30,10 +26,13 @@ You can also optionally read in any stored parameters within the archive file by
 .. code:: python
 
     import pyansys
-    archive = pyansys.Archive('mesh.cdb')
+    archive = pyansys.Archive('mesh.cdb', read_parameters=True)
 
     # parameters are stored as a dictionary
-    print(archive.raw['parameters'])
+    archive.parameters
+
+See the `Archive` class documentation below for more details on the
+class methods and properties.
 
 
 Writing ANSYS Archives
@@ -46,12 +45,13 @@ Unstructured grids generated using VTK can be converted to ANSYS APDL archive fi
     from pyvista import examples
     import pyansys
 
+    # load in a vtk unstructured grid
     grid = pv.UnstructuredGrid(examples.hexbeamfile)
     script_filename = '/tmp/grid.cdb'
     pyansys.save_as_archive(script_filename, grid)
 
     # read in archive in ANSYS and generate cell shape quality report
-    ansys = pyansys.ANSYS()
+    ansys = pyansys.Mapdl()
     ansys.cdread('db', script_filename)
     ansys.prep7()
     ansys.shpp('SUMM')
@@ -97,7 +97,7 @@ Linear element types will be written as SOLID185, quadratic elements will be wri
 
 
 
-Write Functions
----------------
-.. automodule:: pyansys.archive
+Archive Class
+-------------
+.. autoclass:: pyansys.archive.Archive
     :members:
