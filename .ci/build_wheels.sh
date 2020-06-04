@@ -18,27 +18,15 @@ case $PYTHON_VERSION in
 3.7)
   PYBIN="/opt/python/cp37-cp37m/bin"
   ;;
+3.8)
+  PYBIN="/opt/python/cp38-cp38/bin"
+  ;;
 esac
 
-# build and install
-"${PYBIN}/pip" install -r /io/requirements_build.txt
-"${PYBIN}/pip" wheel /io/ -w /io/wheelhouse/
-"${PYBIN}/python" -m pip install $package_name -f /io/wheelhouse/ --no-index
-
-# test
-"${PYBIN}/pip" install -r /io/requirements_test.txt
-"${PYBIN}/pip" install pytest-azurepipelines
-cd /io/tests
-"${PYBIN}/pytest"
-
-# move and rename wheels to dist
-ls /io/wheelhouse
-mkdir -p /io/dist
-rm -rf /io/dist/*
-cd /io/
-find wheelhouse -name $package_name-* | while read FILE ; do
-  NEWFILE="$(echo $FILE |sed -e 's/\linux/manylinux1/')"
-  NEWFILE="$(echo $NEWFILE |sed -e 's/\wheelhouse/dist/')"
-  cp $FILE $NEWFILE
-done
-ls /io/dist
+# build, don't install
+cd io
+"${PYBIN}/pip" install -r requirements_build.txt
+"${PYBIN}/python" setup.py bdist_wheel
+auditwheel repair dist/pyansys
+rm -f dist/* -y
+mv wheelhouse/*manylinux1* dist/

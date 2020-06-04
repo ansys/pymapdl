@@ -112,10 +112,10 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Operating System :: MacOS',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
     # Website
@@ -170,7 +170,7 @@ setup(
                                        'sector.cdb']},
 
     install_requires=['numpy>=1.14.0',
-                      'pyvista>=0.25.0',  # must be 0.25.0
+                      'pyvista>=0.25.0',
                       'ansys_corba',
                       'appdirs',
                       'psutil>=5.0.0',
