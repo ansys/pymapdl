@@ -19,6 +19,7 @@
 pyansys.egg-info/
 build/
 dist/
+wheelhouse
 
 # MISC
 _build/
