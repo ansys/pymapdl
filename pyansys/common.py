@@ -172,8 +172,13 @@ def read_binary(filename, **kwargs):
         raise RuntimeError('ANSYS binary "%s" not supported' % file_type)
 
 
-def read_table(f, dtype='i', nread=None, skip=False, get_nread=True):
+def read_table(f, dtype='i', nread=None, skip=False, get_nread=True, cython=False):
     """ read fortran style table """
+    if cython:
+        arr, bufsz = c_read_record(f.name, f.tell()//4, True)
+        f.seek(bufsz*4, 1)
+        return arr
+
     if get_nread:
         n = np.fromfile(f, 'i', 1)
         if not n:
