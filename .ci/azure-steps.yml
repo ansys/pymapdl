@@ -1,3 +1,6 @@
+variables:
+  ALLOW_PLOTTING: true
+
 steps:
 # build wheels on windows and macOS
 - script: |
@@ -18,5 +21,3 @@ steps:
     python -m pytest -v --cov pyvista --cov-report html
     cd ..
   displayName: 'Unit Testing'
-  variables:
-    ALLOW_PLOTTING: true
