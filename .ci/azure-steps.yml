@@ -18,4 +18,5 @@ steps:
     python -m pytest -v --cov pyvista --cov-report html
     cd ..
   displayName: 'Unit Testing'
-
+  variables:
+    ALLOW_PLOTTING: true

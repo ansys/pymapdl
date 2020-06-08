@@ -270,7 +270,7 @@ def change_default_ansys_path(exe_loc):
         with open(CONFIG_FILE, 'w') as f:
             f.write(exe_loc)
     else:
-        raise Exception('File %s is invalid or does not exist' % exe_loc)
+        raise FileNotFoundError('File %s is invalid or does not exist' % exe_loc)
 
 
 def save_ansys_path(exe_loc=''):
@@ -295,7 +295,7 @@ def save_ansys_path(exe_loc=''):
         except NameError:
             exe_loc = input('Enter location of ANSYS executable: ')
         if not os.path.isfile(exe_loc):
-            raise Exception('ANSYS executable not found at this location:\n%s' % exe_loc)
+            raise FileNotFoundError('ANSYS executable not found at this location:\n%s' % exe_loc)
 
         f.write(exe_loc)
 
@@ -579,15 +579,14 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.log = setup_logger(loglevel.upper())
         self._jobname = jobname
         self.non_interactive = self._non_interactive(self)
-        self.redirected_commands = {'*LIS': self._list}
-        self._processor = 'BEGIN'
+        self._redirected_commands = {'*LIS': self._list}
 
         # default settings
         self.allow_ignore = False
-        self.process = None
+        self._process = None
         self.lockfile = ''
         self._interactive_plotting = False
-        self.using_corba = None
+        self._using_corba = None
         self.auto_continue = True
         self.apdl_log = None
         self._store_commands = False
@@ -596,26 +595,29 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self._output = ''
         self._outfile = None
         self._show_matplotlib_figures = True
+        self._corba_server = None
 
         if exec_file is None:
             # Load cached path
             exec_file = get_ansys_path()
             if exec_file is None:
-                raise Exception('Invalid or path or cannot load cached ansys path' +
-                                'Enter one manually using pyansys.ANSYS(exec_file=...)')
+                raise FileNotFoundError('Invalid or path or cannot load cached '
+                                        'ansys path.  Enter one manually using '
+                                        'pyansys.Mapdl(exec_file=...)')
 
         else:  # verify ansys exists at this location
             if not os.path.isfile(exec_file):
-                raise Exception('Invalid ANSYS executable at %s' % exec_file +
-                                'Enter one manually using pyansys.ANSYS(exec_file="")')
+                raise FileNotFoundError('Invalid ANSYS executable at %s'
+                                        % exec_file + 'Enter one manually using '
+                                        'pyansys.Mapdl(exec_file=)')
         self.exec_file = exec_file
 
         # check ansys version
         if check_version:
             version = int(re.findall(r'\d\d\d', self.exec_file)[0])
             if version < 170 and os.name != 'posix':
-                raise Exception('ANSYS MAPDL server requires version 17.0 or greater ' +
-                                'for windows')
+                raise RuntimeError('ANSYS MAPDL server on Windows requires'
+                                   'v17.0 or greater.')
             self.version = str(version)
 
         # create temporary directory
@@ -627,22 +629,29 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 try:
                     os.mkdir(self.path)
                 except:
-                    raise Exception('Unable to create temporary working '
-                                    'directory %s\n' % self.path +
-                                    'Please specify run_location=')
+                    raise RuntimeError('Unable to create temporary working '
+                                       'directory %s\n' % self.path +
+                                       'Please specify run_location=')
         else:
             if not os.path.isdir(self.path):
-                raise Exception('%s is not a valid folder' % self.path)
+                raise FileNotFoundError('"%s" is not a valid directory' % self.path)
 
         # Check for lock file
         self.lockfile = os.path.join(self.path, self._jobname + '.lock')
         if os.path.isfile(self.lockfile):
             if not override:
-                raise Exception('Lock file exists for jobname %s \n' % self._jobname +
-                                ' at %s\n' % self.lockfile +
-                                'Set override=True to delete lock and start ANSYS')
+                raise FileExistsError('Lock file exists for jobname %s \n'
+                                      % self._jobname +
+                                      ' at %s\n' % self.lockfile +
+                                      'Set ``override=True`` to delete lock '
+                                      'and start ANSYS')
             else:
-                os.remove(self.lockfile)
+                try:
+                    os.remove(self.lockfile)
+                except PermissionError:
+                    raise PermissionError('Unable to remove lock file.  '
+                                          'Another instance of ANSYS might be '
+                                          'running at "%s"' % self.path)
 
         # key will be output here when ansys server is available
         self.broadcast_file = os.path.join(self.path, 'mapdl_broadcasts.txt')
@@ -677,7 +686,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         if (int(self.version) < 170 and os.name == 'posix') or self.prefer_pexpect:
             self._open_process(self.nproc, self.start_timeout, additional_switches)
         else:  # use corba
-            self.open_corba(self.nproc, self.start_timeout, additional_switches)
+            self._open_corba(self.nproc, self.start_timeout, additional_switches)
 
             # separate logger for broadcast file
             if self.log_broadcast:
@@ -699,7 +708,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         """
         if self.apdl_log is not None:
-            raise Exception('APDL command logging already enabled.\n')
+            raise RuntimeError('APDL command logging already enabled.\n')
 
         self.log.debug('Opening ANSYS log file at %s', filename)
         self.apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
@@ -714,27 +723,27 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.apdl_log = None
 
     def _open_process(self, nproc, timeout, additional_switches):
-        """ Opens an ANSYS process using pexpect """
+        """Opens an ANSYS process using pexpect"""
         command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
                                           additional_switches)
         self.log.debug('Spawning shell process using pexpect')
         self.log.debug('Command: "%s"', command)
         self.log.debug('At "%s"', self.path)
-        self.process = pexpect.spawn(command, cwd=self.path)
-        self.process.delaybeforesend = None
+        self._process = pexpect.spawn(command, cwd=self.path)
+        self._process.delaybeforesend = None
         self.log.debug('Waiting for ansys to start...')
 
         try:
-            index = self.process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
+            index = self._process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
         except:  # capture failure
-            raise Exception(self.process.before.decode('utf-8'))
+            raise RuntimeError(self._process.before.decode('utf-8'))
 
         if index:
-            self.process.sendline('')  # enter to continue
-            self.process.expect('BEGIN:', timeout=timeout)
+            self._process.sendline('')  # enter to continue
+            self._process.expect('BEGIN:', timeout=timeout)
         self.log.debug('ANSYS Initialized')
-        self.log.debug(self.process.before.decode('utf-8'))
-        self.using_corba = False
+        self.log.debug(self._process.before.decode('utf-8'))
+        self._using_corba = False
 
     def enable_interactive_plotting(self, pixel_res=1600):
         """Enables interactive plotting.  Requires matplotlib
@@ -743,17 +752,16 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         ----------
         pixel_res : int
             Pixel resolution.  Valid values are from 256 to 2400.
-            Lowering the pixel resolution produces a "fuzzier" image;
-            increasing the resolution produces a "sharper" image but
-            takes a little longer.
-
+            Lowering the pixel resolution produces a "fuzzier" image.
+            Increasing the resolution produces a "sharper" image but
+            takes longer to render.
         """
         if MATPLOTLIB_LOADED:
             self.show('PNG')
             self.gfile(1200)
             self._interactive_plotting = True
         else:
-            raise Exception('Install matplotlib to use enable interactive plotting\n' +
+            raise ImportError('Install matplotlib to use enable interactive plotting\n' +
                             'or turn interactive plotting off with:\n' +
                             'interactive_plotting=False')
 
@@ -766,13 +774,14 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
     @property
     def is_alive(self):
-        if self.process is None:
+        if self._process is None:
             return False
         else:
-            if self.using_corba:
-                return self.process.poll() is None
+            if self._using_corba:
+                # return self.process.poll() is None
+                return True
             else:
-                return self.process.isalive()
+                return self._process.isalive()
 
     def _start_broadcast_logger(self, update_rate=1.0):
         """ separate logger using broadcast_file """
@@ -840,19 +849,19 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
-            exception = Exception('Invalid pyansys command "%s"\n\n%s' %
-                                  (command, INVAL_COMMANDS[command[:3]]))
+            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+                                     (command, INVAL_COMMANDS[command[:3]]))
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = Exception('Invalid pyansys command "%s"\n\n%s' %
-                                  (command, INVAL_COMMANDS[command[:4]]))
+            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+                                     (command, INVAL_COMMANDS[command[:4]]))
             raise exception
         elif write_to_log and self.apdl_log is not None:
             if not self.apdl_log.closed:
                 self.apdl_log.write('%s\n' % command)
 
-        if command[:4] in self.redirected_commands:
-            function = self.redirected_commands[command[:4]]
+        if command[:4] in self._redirected_commands:
+            function = self._redirected_commands[command[:4]]
             return function(command)
 
         text = self._run(command)
@@ -886,7 +895,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return self.response
 
     def _run(self, command):
-        if self.using_corba:
+        if self._using_corba:
             # check if it's a single non-interactive command
             if command[:4].lower() == 'cdre':
                 with self.non_interactive:
@@ -895,26 +904,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 return self._run_corba_command(command)
         else:
             return self._run_process_command(command)
-
-    # def store_processor(self, command):
-    #     """ Check if a command is changing the processor and store it
-    #     if so.
-    #     """
-    #     # command may be abbreviated, check
-    #     processors = ['/PREP7',
-    #                   '/POST1',
-    #                   '/SOL', # /SOLUTION
-    #                   '/POST26',
-    #                   '/AUX2',
-    #                   '/AUX3',
-    #                   '/AUX12',
-    #                   '/AUX15']
-
-    #     short_proc = ['/PRE',
-    #                   '/POST',
-    #                   '/SOL', # /SOLUTION
-    #                   '/POS',
-    #                   '/AUX']
 
     def _list(self, command):
         """ Replaces *LIST command """
@@ -928,7 +917,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
     def _run_process_command(self, command, return_response=True):
         """ Sends command and returns ANSYS's response """
-        if not self.process.isalive():
+        if not self._process.isalive():
             raise Exception('ANSYS process closed')
 
         if command[:4].lower() == '/out':
@@ -940,18 +929,18 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
         # send the command
         self.log.debug('Sending command %s' % command)
-        self.process.sendline(command)
+        self._process.sendline(command)
 
         # do not expect
         if '/MENU' in command:
             self.log.info('Enabling GUI')
-            self.process.sendline(command)
+            self._process.sendline(command)
             return
 
         full_response = ''
         while True:
-            i = self.process.expect_list(expect_list, timeout=None)
-            response = self.process.before.decode('utf-8')
+            i = self._process.expect_list(expect_list, timeout=None)
+            response = self._process.before.decode('utf-8')
             full_response += response
             if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
                 self.log.debug('Continue: Response index %i.  Matched %s'
@@ -961,7 +950,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                     user_input = 'y'
                 else:
                     user_input = input('Response: ')
-                self.process.sendline(user_input)
+                self._process.sendline(user_input)
 
             elif i >= WARNING_IDX and i < ERROR_IDX:  # warning
                 self.log.debug('Prompt: Response index %i.  Matched %s'
@@ -971,7 +960,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                     user_input = 'y'
                 else:
                     user_input = input('Response: ')
-                self.process.sendline(user_input)
+                self._process.sendline(user_input)
 
             elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
                 self.log.debug('Error index %i.  Matched %s'
@@ -985,7 +974,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                                % (i, ready_items[i].decode('utf-8')))
                 self.log.info(response + ready_items[i].decode('utf-8'))
                 # user_input = input('Response: ')
-                # self.process.sendline(user_input)
+                # self._process.sendline(user_input)
                 raise Exception('User input expected.  Try using non_interactive')
 
             else:  # continue item
@@ -1096,10 +1085,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         additional_text = ''
 
         self.log.debug('Running command %s' % command)
-        text = self.mapdl.executeCommandToString(command)
+        text = self._corba_server.executeCommandToString(command)
 
         # print supressed output
-        additional_text = self.mapdl.executeCommandToString('/GO')
+        additional_text = self._corba_server.executeCommandToString('/GO')
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:
@@ -1231,22 +1220,20 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.exit()
 
     def exit(self, close_log=True):
-        """Exit ANSYS process without attempting to kill the process.
-        """
+        """Exit ANSYS process without attempting to kill the process."""
         self.log.debug('Terminating ANSYS')
         try:
-            if self.using_corba:
-                self.mapdl.terminate()
+            if self._using_corba:
+                self._corba_server.terminate()
             else:
-                if self.process is not None:
-                    self.process.sendline('FINISH')
-                    self.process.sendline('EXIT')
+                if self._process is not None:
+                    self._process.sendline('FINISH')
+                    self._process.sendline('EXIT')
 
         except Exception as e:
             if 'WaitingForReply' not in str(e):
                 raise Exception(e)
 
-        # self.log.info('ANSYS exited')
         if close_log:
             if self.apdl_log is not None:
                 self.apdl_log.close()
@@ -1257,14 +1244,15 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             try:
                 self.exit()
             except:
-                kill_process(self.process.pid)
-                self.log.debug('Killed process %d' % self.process.pid)
+                if not self._using_corba:
+                    kill_process(self._process.pid)
+                    self.log.debug('Killed process %d' % self._process.pid)
 
         if os.path.isfile(self.lockfile):
             try:
                 os.remove(self.lockfile)
             except:
-                self.log.warning('Unable to remove lock file %s ' % self.lockfile)
+                pass
 
     @property
     def results(self):
@@ -1288,16 +1276,14 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def __call__(self, command, **kwargs):
         return self.run(command, **kwargs)
 
-    def open_corba(self, nproc, timeout, additional_switches):
-        """
-        Open a connection to ANSYS via a CORBA interface
-        """
+    def _open_corba(self, nproc, timeout, additional_switches):
+        """Open a connection to ANSYS via a CORBA interface"""
         self.log.info('Connecting to ANSYS via CORBA')
+        self._using_corba = True
 
         # command must include "aas" flag to start MAPDL server
-        # command = '"%s" -j %s -aas -i tmp.inp -o out.txt -b -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
-        command = '"%s" -j %s -aas -np %d %s' % (self.exec_file, self._jobname,
-                                                 nproc, additional_switches)
+        # if int(self.version) < 190:
+        command = '"%s" -aas -j %s -b -i tmp.inp -o out.txt -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
 
         # remove the broadcast file if it exists:
         if os.path.isfile(self.broadcast_file):
@@ -1306,12 +1292,17 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         # add run location to command
         self.log.debug('Spawning shell process with: "%s"' % command)
         self.log.debug('At "%s"' % self.path)
-        old_path = os.getcwd()
-        os.chdir(self.path)
-        self.process = subprocess.Popen(command,
-                                        shell=True,
-                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        os.chdir(old_path)
+
+        if os.name == 'nt':
+            old_path = os.getcwd()
+            os.chdir(self.path)
+            os.system('START /B MAPDL %s 2> NUL' % command)
+            os.chdir(old_path)
+            self._process = True
+        else:
+            self._process = subprocess.Popen(command, shell=True,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE, cwd=self.path)
 
         # listen for broadcast file
         self.log.debug('Waiting for valid key in %s' % self.broadcast_file)
@@ -1352,16 +1343,17 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                               'Otherwise, please install with "%s"' % pip_cmd)
 
         orb = CORBA.ORB_init()
-        self.mapdl = orb.string_to_object(key)
+        self._corba_server = orb.string_to_object(key)
 
-        # must be the very first command
+        # set to non-interactive
+        if os.name != 'nt':
+            text = self._corba_server.executeCommandToString('/BATCH')
+
         try:
-            text = self.mapdl.executeCommandToString('/batch')
-            self.mapdl.getComponentName()
+            self._corba_server.getComponentName()
         except:
             raise RuntimeError('Unable to connect to APDL server')
 
-        self.using_corba = True
         self.log.debug('Connected to ANSYS using CORBA interface')
         self.log.debug('Key %s' % key)
 

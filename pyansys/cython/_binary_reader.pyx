@@ -1,6 +1,6 @@
 # cython: embedsignature=True
 # cython: language_level=3
-# cython: boundscheck=True
+# cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -1155,7 +1155,7 @@ def cells_with_all_nodes(index_type [::1] offset, index_type [::1] cells,
     Updates mask of cells containing all points in the point indices
     or mask.
     """
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef uint8 celltype
     cdef int ncell_points, i, j
     cdef index_type cell_offset
@@ -1179,7 +1179,7 @@ def cells_with_any_nodes(index_type [::1] offset, index_type [::1] cells,
     Updates mask of cells containing at least one point in the point
     indices or mask.
     """
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef uint8 celltype
     cdef int ncell_points
     cdef index_type cell_offset

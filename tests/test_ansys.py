@@ -6,28 +6,23 @@ import numpy as np
 import pyansys
 
 from pyvista.plotting import system_supports_plotting
-try:
-    __file__
-except NameError:
-    __file__ = '/home/alex/python/pyansys/tests/test_ansys.py'
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-# rver = 'v150'
-# rver = 'v182'
-# rver = 'v194'
-# rver = 'v201'
-rver = 'v202'
-MAPDLBIN = {'v150': '/usr/ansys_inc/v150/ansys/bin/ansys150',
-            'v182': '/usr/ansys_inc/v182/ansys/bin/ansys182',
-            'v194': '/usr/ansys_inc/v194/ansys/bin/ansys194',
-            'v201': '/usr/ansys_inc/v201/ansys/bin/ansys201',
-            'v202': '/usr/ansys_inc/v202/ansys/bin/ansys202'}
+rver = '194'
+if os.name == 'nt':
+    ans_root = 'c:/Program Files/ANSYS Inc/'
+    MAPDLBIN = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
+                            'ANSYS%s.exe' % rver)
+else:
+    ans_root = '/usr/ansys_inc'
+    MAPDLBIN = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
+                            'ansys%s' % rver)
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
-    HAS_ANSYS = os.path.isfile(MAPDLBIN[rver])
+    HAS_ANSYS = os.path.isfile(MAPDLBIN)
 
 
 RSETS = list(zip(range(1, 9), [1]*8))
@@ -35,11 +30,8 @@ RSETS = list(zip(range(1, 9), [1]*8))
 
 @pytest.fixture(scope='module')
 def mapdl():
-    # os.environ['I_MPI_SHM_LMT'] = 'shm'
-    mapdl = pyansys.Mapdl(MAPDLBIN[rver],
-                          override=True, jobname=rver,
-                          loglevel='ERROR',
-                          interactive_plotting=False,
+    mapdl = pyansys.Mapdl(MAPDLBIN,
+                          override=True,
                           additional_switches='-smp',
                           prefer_pexpect=False)
 
@@ -95,7 +87,7 @@ def test_prnsol_u(mapdl, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
-    if mapdl.using_corba:
+    if mapdl._using_corba:
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[9:])
@@ -146,7 +138,7 @@ def test_prnsol_s(mapdl, rset):
 
     # verify cyclic displacements
     table = mapdl.prnsol('s').splitlines()
-    if mapdl.using_corba:
+    if mapdl._using_corba:
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -172,7 +164,7 @@ def test_prnsol_prin(mapdl, rset):
 
     # verify principal stress
     table = mapdl.prnsol('prin').splitlines()
-    if mapdl.using_corba:
+    if mapdl._using_corba:
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -233,9 +225,9 @@ def test_et(mapdl, cleared):
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
-    assert k0 is 1
+    assert k0 == 1
     k1 = mapdl.k(2, 0, 0, 1)
-    assert k1 is 2
+    assert k1 == 2
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -243,7 +235,7 @@ def test_l(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     l0 = mapdl.l(k0, k1)
-    assert l0 is 1
+    assert l0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -252,7 +244,7 @@ def test_a(cleared, mapdl):
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 0, 1, 0)
     a0 = mapdl.a(k0, k1, k2)
-    assert a0 is 1
+    assert a0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -262,15 +254,15 @@ def test_v(cleared, mapdl):
     k2 = mapdl.k("", 0, 1, 0)
     k3 = mapdl.k("", 0, 0, 1)
     v0 = mapdl.v(k0, k1, k2, k3)
-    assert v0 is 1
+    assert v0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_n(cleared, mapdl):
     n0 = mapdl.n("", 0, 0, 0)
-    assert n0 is 1
+    assert n0 == 1
     n1 = mapdl.n(2, 0, 0, 1)
-    assert n1 is 2
+    assert n1 == 2
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -279,7 +271,7 @@ def test_bsplin(cleared, mapdl):
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 2, 1, 0)
     l0 = mapdl.bsplin(k0, k1, k2)
-    assert l0 is 1
+    assert l0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -289,7 +281,7 @@ def test_a(cleared, mapdl):
     k2 = mapdl.k("", 1, 1, 0)
     k3 = mapdl.k("", 0, 1, 0)
     a0 = mapdl.a(k0, k1, k2, k3)
-    assert a0 is 1
+    assert a0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
@@ -303,7 +295,7 @@ def test_al(cleared, mapdl):
     l2 = mapdl.l(k2, k3)
     l3 = mapdl.l(k3, k0)
     a0 = mapdl.al(l0, l1, l2, l3)
-    assert a0 is 1
+    assert a0 == 1
 
 
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")

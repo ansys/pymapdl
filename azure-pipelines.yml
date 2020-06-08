@@ -1,4 +1,4 @@
-# azure pipelines build pyansys
+# azure pipelines build and test pyansys
 
 variables:
   package_name: pyansys

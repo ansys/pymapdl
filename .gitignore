@@ -20,6 +20,7 @@ pyansys.egg-info/
 build/
 dist/
 wheelhouse
+.eggs
 
 # MISC
 _build/
