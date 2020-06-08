@@ -1,6 +1,7 @@
 # azure pipelines build and test pyansys
 
 variables:
+  ALLOW_PLOTTING: true
   package_name: pyansys
 
 

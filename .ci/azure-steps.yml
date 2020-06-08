@@ -1,6 +1,3 @@
-variables:
-  ALLOW_PLOTTING: true
-
 steps:
 # build wheels on windows and macOS
 - script: |
