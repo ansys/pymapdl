@@ -40,6 +40,14 @@ except:
     MATPLOTLIB_LOADED = False
 
 
+class DepreciationError(RuntimeError):
+    """Exception when a function is depreciated."""
+
+    def __init__(self, message):
+        """Empty init."""
+        RuntimeError.__init__(self, message)
+
+
 def random_string(stringLength=10):
     """Generate a random string of fixed length """
     letters = string.ascii_lowercase
@@ -1286,7 +1294,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return pyansys.read_binary(result_path)
 
     def __call__(self, command, **kwargs):
-        return self.run(command, **kwargs)
+        raise DepreciationError('\nDirectly calling the Mapdl class is depreciated' +
+                                'Please use "run" instead')
 
     def open_corba(self, nproc, timeout, additional_switches):
         """
@@ -1607,10 +1616,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             raise RuntimeError('Cannot parse %s' % response)
 
     def Run(self, command):
-        msg = DeprecationWarning('\nCommand "Run" decpreciated.  \n' +
-                                 'Please use "run" instead')
-        warnings.warn(msg)
-        return self.run(command)
+        """Depreciated"""
+        raise DepreciationError('\nCommand "Run" decpreciated.  \n' +
+                                'Please use "run" instead'
 
 
 class ANSYS(Mapdl):
