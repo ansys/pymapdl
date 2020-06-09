@@ -8,9 +8,12 @@ pyansys
 
 
 This Python module allows you to:
- - Interactively control an instance of ANSYS v14.5 + using Python on Linux, >=17.0 on Windows.
- - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
- - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)`` files.
+ - Interactively control an instance of ANSYS v14.5 + using Python on
+   Linux, >=17.0 on Windows.
+ - Extract data directly from binary ANSYS v14.5+ files and to display
+   or animate them.
+ - Rapidly read in binary result ``(.rst)``, binary mass and stiffness
+   ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
 See the `Documentation <https://akaszynski.github.io/pyansys/>`_ page for more details.
 
@@ -21,12 +24,14 @@ Installation through pip::
 
     pip install pyansys
 
-You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
+You can also visit `GitHub <https://github.com/akaszynski/pyansys>`_
+to download the source.
 
 
 Quick Examples
 --------------
-Many of the following examples are built in and can be run from the build-in examples module.  For a quick demo, run:
+Many of the following examples are built in and can be run from the
+build-in examples module.  For a quick demo, run:
 
 .. code:: python
 
@@ -36,7 +41,9 @@ Many of the following examples are built in and can be run from the build-in exa
 
 Controlling ANSYS
 ~~~~~~~~~~~~~~~~~
-Create an instance of ANSYS and interactively send commands to it.  This is a direct interface and does not rely on writing a temporary script file.  You can also generate plots using ``matplotlib``.
+Create an instance of ANSYS and interactively send commands to it.
+This is a direct interface and does not rely on writing a temporary
+script file.  You can also generate plots using ``matplotlib``.
 
 .. code:: python
 
@@ -44,22 +51,22 @@ Create an instance of ANSYS and interactively send commands to it.  This is a di
     import pyansys
 
     path = os.getcwd()
-    ansys = pyansys.Mapdl(run_location=path, interactive_plotting=True)
+    mapdl = pyansys.launch_mapdl(run_location=path, interactive_plotting=True)
 
     # create a square area using keypoints
-    ansys.prep7()
-    ansys.k(1, 0, 0, 0)
-    ansys.k(2, 1, 0, 0)
-    ansys.k(3, 1, 1, 0)
-    ansys.k(4, 0, 1, 0)    
-    ansys.l(1, 2)
-    ansys.l(2, 3)
-    ansys.l(3, 4)
-    ansys.l(4, 1)
-    ansys.al(1, 2, 3, 4)
-    ansys.aplot()
-    ansys.save()
-    ansys.exit()
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)    
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 4)
+    mapdl.l(4, 1)
+    mapdl.al(1, 2, 3, 4)
+    mapdl.aplot()
+    mapdl.save()
+    mapdl.exit()
 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/aplot.png
     :width: 500pt
@@ -110,7 +117,8 @@ You can then load this vtk file using ``pyvista`` or another program that uses V
 
 Loading the Result File
 ~~~~~~~~~~~~~~~~~~~~~~~
-This example reads in binary results from a modal analysis of a beam from ANSYS.
+This example reads in binary results from a modal analysis of a beam
+from ANSYS.
 
 .. code:: python
 
@@ -151,7 +159,10 @@ This example reads in binary results from a modal analysis of a beam from ANSYS.
 
 Plotting Nodal Results
 ~~~~~~~~~~~~~~~~~~~~~~
-As the geometry of the model is contained within the result file, you can plot the result without having to load any additional geometry.  Below, displacement for the first mode of the modal analysis beam is plotted using ``VTK``.
+As the geometry of the model is contained within the result file, you
+can plot the result without having to load any additional geometry.
+Below, displacement for the first mode of the modal analysis beam is
+plotted using ``VTK``.
 
 .. code:: python
     
@@ -163,7 +174,9 @@ As the geometry of the model is contained within the result file, you can plot t
     :width: 500pt
 
 
-Results can be plotted non-interactively and screenshots saved by setting up the camera and saving the result.  This can help with the visualization and post-processing of a batch result.
+Results can be plotted non-interactively and screenshots saved by
+setting up the camera and saving the result.  This can help with the
+visualization and post-processing of a batch result.
 
 First, get the camera position from an interactive plot:
 
@@ -183,7 +196,11 @@ Then generate the plot:
                                screenshot='hexbeam_disp.png',
                                window_size=[800, 600], interactive=False)
 
-Stress can be plotted as well using the below code.  The nodal stress is computed in the same manner that ANSYS uses by to determine the stress at each node by averaging the stress evaluated at that node for all attached elements.  For now, only component stresses can be displayed.
+Stress can be plotted as well using the below code.  The nodal stress
+is computed in the same manner that ANSYS uses by to determine the
+stress at each node by averaging the stress evaluated at that node for
+all attached elements.  For now, only component stresses can be
+displayed.
 
 .. code:: python
     
@@ -222,7 +239,8 @@ If you wish to save the animation to a file, specify the movie_filename and anim
 
 Reading a Full File
 -------------------
-This example reads in the mass and stiffness matrices associated with the above example.
+This example reads in the mass and stiffness matrices associated with
+the above example.
 
 .. code:: python
 
@@ -238,7 +256,8 @@ This example reads in the mass and stiffness matrices associated with the above 
     k += sparse.triu(k, 1).T
     m += sparse.triu(m, 1).T
 
-If you have ``scipy`` installed, you can solve the eigensystem for its natural frequencies and mode shapes.
+If you have ``scipy`` installed, you can solve the eigensystem for its
+natural frequencies and mode shapes.
 
 .. code:: python
 
@@ -273,7 +292,7 @@ There are additional tools created by @natter1 at `pyansysTools <https://github.
 
  - Inline class: Implementing the ANSYS inline functions
  - Macros class: Macros for repeating tasks
- - The geo2d class: Easily create 2d geometries
+ - The ``geo2d`` class: Easily create 2d geometries
 
 You can also install `pyansystools` with
 
@@ -286,6 +305,11 @@ License and Acknowledgments
 ---------------------------
 ``pyansys`` is licensed under the MIT license.
 
-This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a Python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
+This module, ``pyansys`` makes no commercial claim over ANSYS
+whatsoever.  This tool extends the functionality of ``ANSYS`` by
+adding a Python interface in both file interface as well as
+interactive scripting without changing the core behavior or license of
+the original software.  The use of the interactive APDL control of
+``pyansys`` requires a legally licensed local copy of ANSYS.
 
 To get a copy of ANSYS, please visit `ANSYS <https://www.ansys.com/>`_
