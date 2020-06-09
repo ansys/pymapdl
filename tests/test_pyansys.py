@@ -18,6 +18,7 @@ try:
 except ImportError:
     HAS_FFMPEG = False
 
+
 @pytest.fixture(scope='module')
 def result():
     return pyansys.read_binary(rstfile)

@@ -1,3 +1,5 @@
+import psutil
+
 import numpy as np
 import vtk
 
@@ -46,3 +48,11 @@ def vtk_cell_info(grid):
         offset = offset.astype(np.int64)
 
     return cells, offset
+
+
+def kill_process(proc_pid):
+    """ kills a process with extreme prejudice """
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()

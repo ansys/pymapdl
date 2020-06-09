@@ -2,10 +2,17 @@ pyansys Documentation
 =====================
 This Python module allows you to:
  - Interactively control an instance of ANSYS v17.0 + using Python.
- - Extract data directly from binary ANSYS v14.5+ files and to display or animate them.
- - Rapidly read in binary result ``(.rst)``, binary mass and stiffness ``(.full)``, and ASCII block archive ``(.cdb)``, and element matrix ``(.emat)`` files.
+ - Extract data directly from binary ANSYS v14.5+ files and to display
+   or animate them.
+ - Rapidly read in binary result ``(.rst)``, binary mass and stiffness
+   ``(.full)``, and ASCII block archive ``(.cdb)``, and element matrix
+   ``(.emat)`` files.
 
-This python module is a community driven work in progress with additional features regularly added based on user requests.  Open an issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_ if you identity a bug or would like to request an additional method or feature.
+This python module is a community driven work in progress with
+additional features regularly added based on user requests.  Open an
+issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_
+if you identity a bug or would like to request an additional method or
+feature.
 
 .. toctree::
    :maxdepth: 2
@@ -51,26 +58,27 @@ Interactive Control
     import pyansys
 
     path = os.getcwd()
-    ansys = pyansys.Mapdl(run_location=path)
+    mapdl = pyansys.launch_mapdl(run_location=path)
 
     # create a square area using keypoints
-    ansys.prep7()
-    ansys.k(1, 0, 0, 0)
-    ansys.k(2, 1, 0, 0)
-    ansys.k(3, 1, 1, 0)
-    ansys.k(4, 0, 1, 0)    
-    ansys.l(1, 2)
-    ansys.l(2, 3)
-    ansys.l(3, 4)
-    ansys.l(4, 1)
-    ansys.al(1, 2, 3, 4)
-    ansys.save()
-    ansys.exit()
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)    
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 4)
+    mapdl.l(4, 1)
+    mapdl.al(1, 2, 3, 4)
+    mapdl.save()
+    mapdl.exit()
 
 
 Direct Access to Binary Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Here's a quick example code block to show how easy it is to load and plots results directly from an ANSYS result file using ``pyansys``:
+Here's a quick example code block to show how easy it is to load and
+plots results directly from an ANSYS result file using ``pyansys``:
 
 .. code:: python
 

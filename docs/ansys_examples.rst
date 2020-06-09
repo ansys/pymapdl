@@ -44,7 +44,7 @@ Corresponding ``pyansys`` script including the initialization of pyansys:
     import pyansys
     
     # start ANSYS in the current working directory with default jobname "file"
-    ansys = pyansys.Mapdl(run_location=os.getcwd(), interactive_plotting=True)
+    mapdl = pyansys.launch_mapdl(run_location=os.getcwd(), interactive_plotting=True)
         
     # define cylinder and mesh parameters
     torque = 100
@@ -117,53 +117,53 @@ Corresponding ``pyansys`` script:
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
     # as a tangential pressure
-    ansys.prep7()
-    ansys.et(1, 186)
-    ansys.et(2, 154)
-    ansys.r(1)
-    ansys.r(2)
+    mapdl.prep7()
+    mapdl.et(1, 186)
+    mapdl.et(2, 154)
+    mapdl.r(1)
+    mapdl.r(2)
     
     # Aluminum properties (or something)
-    ansys.mp('ex', 1, 10e6)
-    ansys.mp('nuxy', 1, 0.3)
-    ansys.mp('dens', 1, 0.1/386.1)
-    ansys.mp('dens', 2, 0)
+    mapdl.mp('ex', 1, 10e6)
+    mapdl.mp('nuxy', 1, 0.3)
+    mapdl.mp('dens', 1, 0.1/386.1)
+    mapdl.mp('dens', 2, 0)
     
     # Simple cylinder
     for i in range(4):
-        ansys.cylind(radius, '', '', height, 90*(i-1), 90*i)
+        mapdl.cylind(radius, '', '', height, 90*(i-1), 90*i)
     
-    ansys.nummrg('kp')
+    mapdl.nummrg('kp')
     
     # non-interactive volume plot (optional)
-    ansys.show()
-    ansys.menu('grph')
-    ansys.view(1, 1, 1, 1)
-    ansys.vplot()
-    ansys.wait(1)
+    mapdl.show()
+    mapdl.menu('grph')
+    mapdl.view(1, 1, 1, 1)
+    mapdl.vplot()
+    mapdl.wait(1)
     
     # mesh cylinder
-    ansys.lsel('s', 'loc', 'x', 0)
-    ansys.lsel('r', 'loc', 'y', 0)
-    ansys.lsel('r', 'loc', 'z', 0, height - h_tip)
-    ansys.lesize('all', elemsize*2)
-    ansys.mshape(0)
-    ansys.mshkey(1)
-    ansys.esize(elemsize)
-    ansys.allsel('all')
-    ansys.vsweep('ALL')
-    ansys.csys(1)
-    ansys.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-    ansys.asel('r', 'loc', 'x', radius)
-    ansys.local(11, 1)
-    ansys.csys(0)
-    ansys.aatt(2, 2, 2, 11)
-    ansys.amesh('all')
-    ansys.finish()
+    mapdl.lsel('s', 'loc', 'x', 0)
+    mapdl.lsel('r', 'loc', 'y', 0)
+    mapdl.lsel('r', 'loc', 'z', 0, height - h_tip)
+    mapdl.lesize('all', elemsize*2)
+    mapdl.mshape(0)
+    mapdl.mshkey(1)
+    mapdl.esize(elemsize)
+    mapdl.allsel('all')
+    mapdl.vsweep('ALL')
+    mapdl.csys(1)
+    mapdl.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+    mapdl.asel('r', 'loc', 'x', radius)
+    mapdl.local(11, 1)
+    mapdl.csys(0)
+    mapdl.aatt(2, 2, 2, 11)
+    mapdl.amesh('all')
+    mapdl.finish()
 
     # plot elements and wait one second (optional)
-    ansys.eplot()
-    ansys.wait(1)
+    mapdl.eplot()
+    mapdl.wait(1)
 
 .. figure:: ./images/cylinder_eplot.png
     :width: 300pt
@@ -211,25 +211,25 @@ Corresponding ``pyansys`` script:
 .. code:: python
 
     # new solution
-    ansys.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
+    mapdl.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
     # ansys('/solu')  # could also use this line
-    ansys.antype('static', 'new')
-    ansys.eqslv('pcg', 1e-8)
+    mapdl.antype('static', 'new')
+    mapdl.eqslv('pcg', 1e-8)
 
     # Apply tangential pressure
-    ansys.esel('s', 'type', '', 2)
-    ansys.sfe('all', 2, 'pres', '', pressure)
+    mapdl.esel('s', 'type', '', 2)
+    mapdl.sfe('all', 2, 'pres', '', pressure)
 
     # Constrain bottom of cylinder/rod
-    ansys.asel('s', 'loc', 'z', 0)
-    ansys.nsla('s', 1)
+    mapdl.asel('s', 'loc', 'z', 0)
+    mapdl.nsla('s', 1)
 
-    ansys.d('all', 'all')
-    ansys.allsel()
-    ansys.psf('pres', '', 2)
-    ansys.pbc('u', 1)
-    ansys.solve()
-    ansys.exit()  # Finishes, saves, and exits
+    mapdl.d('all', 'all')
+    mapdl.allsel()
+    mapdl.psf('pres', '', 2)
+    mapdl.pbc('u', 1)
+    mapdl.solve()
+    mapdl.exit()  # Finishes, saves, and exits
 
 
 Access and plot the results within python using pyansys:
@@ -237,7 +237,7 @@ Access and plot the results within python using pyansys:
 .. code:: python
 
     # open the result file using the path used in ANSYS
-    resultfile = os.path.join(ansys.path, 'file.rst')
+    resultfile = os.path.join(mapdl.path, 'file.rst')
     result = pyansys.read_binary(resultfile)
 
     # access element results as arrays
@@ -420,7 +420,8 @@ This ANSYS APDL example demonstrates how to model spot welding on three thin she
     solve
     FINISH
 
-Here's the Python script using ``pyansys`` to access the results after running the ANSYS analysis.
+Here's the Python script using ``pyansys`` to access the results after
+running the ANSYS analysis.
 
 .. code:: python
     
@@ -436,15 +437,16 @@ Here's the Python script using ``pyansys`` to access the results after running t
 
     Spot Weld: Displacement
 
-Get the nodal and element component stress at time step 0.  Plot the stress in the Z direction.
+Get the nodal and element component stress at time step 0.  Plot the
+stress in the Z direction.
 
 .. code:: python
 
     nodenum, stress = result.nodal_stress(0)
     element_stress, elemnum, enode = result.element_stress(0)
     
-    # plot the Z direction stress (the stress at the contact element simulating
-    # the spot weld)
+    # Plot the Z direction stress:
+    # The stress at the contact element simulating the spot weld
     result.plot_nodal_stress(0, 'Sz')
 
 .. figure:: ./images/spot_sz.png
