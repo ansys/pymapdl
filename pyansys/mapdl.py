@@ -6,6 +6,7 @@ This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.
 
 """
+import time
 import glob
 import string
 import re
@@ -1300,6 +1301,7 @@ class _Mapdl(_MapdlCommands):
         include_result : bool, optional
             Allow the result file to be post processed in the GUI.
         """
+
         # specify a path for the temporary database
         temp_dir = tempfile.gettempdir()
         save_path = os.path.join(temp_dir, 'ansys_tmp')

@@ -10,6 +10,7 @@ import psutil
 import pexpect
 
 from pyansys.mapdl import _Mapdl
+from pyansys.misc import kill_process
 
 ready_items = [rb'BEGIN:',
                rb'PREP7:',
@@ -43,6 +44,7 @@ ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 
 class MapdlConsole(_Mapdl):
+    """Control interaction with an ANSYS shell instance."""
 
     def __init__(self, exec_file=None, run_location=None,
                  jobname='file', nproc=2, override=False,
@@ -59,7 +61,8 @@ class MapdlConsole(_Mapdl):
                          log_apdl)
 
     def _launch(self):
-        command = '%s -j %s -np %d %s' % (self._exec_file, self._jobname, self._nproc,
+        command = '%s -j %s -np %d %s' % (self._exec_file,
+                                          self._jobname, self._nproc,
                                           self._additional_switches)
         self._log.debug('Spawning shell process using pexpect')
         self._log.debug('Command: "%s"', command)
@@ -214,11 +217,3 @@ class MapdlConsole(_Mapdl):
             except:
                 kill_process(self._process.pid)
                 self._log.debug('Killed process %d' % self._process.pid)
-
-
-def kill_process(proc_pid):
-    """ kills a process with extreme prejudice """
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.kill()
-    process.kill()

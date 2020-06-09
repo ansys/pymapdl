@@ -1,6 +1,5 @@
-"""CORBA implementation of the MAPDL interface
-
-"""
+"""CORBA implementation of the MAPDL interface"""
+import atexit
 from threading import Thread
 import time
 import re
@@ -8,15 +7,24 @@ import os
 import subprocess
 
 from pyansys.mapdl import _Mapdl
+from pyansys.misc import kill_process
 
-# attempt to import corba
 try:
     from ansys_corba import CORBA
 except:
-    pip_cmd = 'pip install ansys_corba'
-    raise ImportError('Missing ansys_corba.\n' +
-                      'This feature is not supported on MAC OS.\n' +
-                      'Otherwise, please install with "%s"' % pip_cmd)
+    raise ImportError('Missing ansys_corba libaries.\n' +
+                      'Only supported on Python3.5 - Python3.8 for '
+                      'Linux and Windows\n')
+
+INSTANCES = []
+
+# Windows has issues when closing
+@atexit.register
+def cleanup():
+    if os.name == 'nt':
+        for instance in INSTANCES:
+            instance.kill()
+
 
 def threaded(fn):
     """ calls a function using a thread """
@@ -50,6 +58,7 @@ def tail(filename, nlines):
 
 
 class MapdlCorba(_Mapdl):
+    """CORBA implementation of the MAPDL interface"""
 
     def __init__(self, exec_file, run_location,
                  jobname='file', nproc=2, override=False,
@@ -61,6 +70,7 @@ class MapdlCorba(_Mapdl):
         self._broadcast_logger = None
         self._server = None
         self._log_broadcast = log_broadcast
+        self._window_title = None
 
         # CORBA/AAS was introduced in v17
         version = int(re.findall(r'\d\d\d', exec_file)[0])
@@ -73,6 +83,7 @@ class MapdlCorba(_Mapdl):
                          override, loglevel, additional_switches,
                          start_timeout, interactive_plotting,
                          log_apdl)
+        INSTANCES.append(self)
 
     @property
     def _broadcast_file(self):
@@ -102,15 +113,19 @@ class MapdlCorba(_Mapdl):
         self._log.debug('Spawning shell process with: "%s"', command)
         self._log.debug('At "%s"', self.path)
 
+        # after v19, this is the only way this will work...
         if os.name == 'nt':
-            old_path = os.getcwd()
-            os.chdir(self.path)
-            os.system('START /B MAPDL %s 2> NUL' % command)
-            os.chdir(old_path)
+            self._window_title = 'MAPDL'
+            command = 'START /B MAPDL %s' % command
+
+        # set stdout
+        if self._log.level < 20:  # < INFO
+            # no redirect
+            self._process = subprocess.Popen(command, shell=True, cwd=self.path)
         else:
-            subprocess.Popen(command, shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, cwd=self.path)
+            self._process = subprocess.Popen(command, shell=True, cwd=self.path,
+                                             stdout=subprocess.PIPE,
+                                             stderr=subprocess.PIPE)
 
         # listen for broadcast file
         self._log.debug('Waiting for valid key in %s', self._broadcast_file)
@@ -141,13 +156,12 @@ class MapdlCorba(_Mapdl):
         with open(keyfile) as f:
             key = f.read()
 
-        from ansys_corba import CORBA
         orb = CORBA.ORB_init()
         self._server = orb.string_to_object(key)
 
         # set to non-interactive
-        if os.name != 'nt':
-            text = self._server.executeCommandToString('/BATCH')
+        # if os.name != 'nt':
+            # text = self._server.executeCommandToString('/BATCH')
 
         try:
             self._server.getComponentName()
@@ -208,9 +222,23 @@ class MapdlCorba(_Mapdl):
 
     def kill(self):
         """Forces ANSYS process to end and removes lock file"""
-        self.exit()
-        # there's no real way to end the process in windows as CORBA
-        # spawns a new process, so we're just running exit here
+        try:
+            self.exit()
+        except:
+            pass
+
+        if self._process is not None:
+            kill_process(self._process.pid)
+
+        try:
+            self._close_apdl_log()
+        except:
+            pass
+
+        try:
+            self._remove_lockfile()
+        except:
+            pass
 
     def _run(self, command):
         """Sends a command to the mapdl server via the CORBA interface"""
