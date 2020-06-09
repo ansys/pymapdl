@@ -178,7 +178,7 @@ class MapdlConsole(_Mapdl):
         # return last response and all preceding responses
         return full_response
 
-    def exit(self, timeout=3):
+    def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process.
 
         Parameters
@@ -191,6 +191,9 @@ class MapdlConsole(_Mapdl):
         if self._process is not None:
             self._process.sendline('FINISH')
             self._process.sendline('EXIT')
+
+        if close_log:
+            self._close_apdl_log()
 
         # edge case: need to wait until process dies, otherwise future
         # commands might talk to a dead process...

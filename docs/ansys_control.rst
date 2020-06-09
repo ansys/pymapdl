@@ -572,41 +572,53 @@ such as ``APLOT``, ``EPLOT``, and ``KPLOT`` will open up a
 
 Interactive Breakpoint
 ----------------------
-In most circumstances it is not possible, especially when generating geometry, to go without opening up the APDL GUI.  Identifying geometry items can't be done easy using inline plotting, so ``pyansys`` has an ``open_gui`` method that allows you to seamlessly open up the GUI without loosing work or having to restart your session.  For example:
+In most circumstances it is not possible, especially when generating
+geometry, to go without opening up the APDL GUI.  Identifying geometry
+items can't be done easy using inline plotting, so ``pyansys`` has an
+``open_gui`` method that allows you to seamlessly open up the GUI
+without loosing work or having to restart your session.  For example:
 
 .. code:: python
 
     import pyansys
 
     # run ansys with interactive plotting enabled
-    ansys = pyansys.launch_mapdl()
+    mapdl = pyansys.launch_mapdl()
 
     # create a square area using keypoints
-    ansys.prep7()
-    ansys.k(1, 0, 0, 0)
-    ansys.k(2, 1, 0, 0)
-    ansys.k(3, 1, 1, 0)
-    ansys.k(4, 0, 1, 0)    
-    ansys.l(1, 2)
-    ansys.l(2, 3)
-    ansys.l(3, 4)
-    ansys.l(4, 1)
-    ansys.al(1, 2, 3, 4)
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)    
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 4)
+    mapdl.l(4, 1)
+    mapdl.al(1, 2, 3, 4)
 
     # open up the gui
-    ansys.open_gui()
+    mapdl.open_gui()
 
     # it resumes where you left off...
-    ansys.et(1, 'MESH200', 6)
-    ansys.amesh('all')
-    ansys.eplot()    
+    mapdl.et(1, 'MESH200', 6)
+    mapdl.amesh('all')
+    mapdl.eplot()    
 
-This approach avoids the hassle of having to switch back and forth between an interactive session and a scripting session.  Instead, you can have one scripting session and open up a GUI from the scripting session without losing work or progress.  Additionally, none of the changes made in the GUI will affect the script.  You can experiment in the GUI and the script will be left unaffected.
+This approach avoids the hassle of having to switch back and forth
+between an interactive session and a scripting session.  Instead, you
+can have one scripting session and open up a GUI from the scripting
+session without losing work or progress.  Additionally, none of the
+changes made in the GUI will affect the script.  You can experiment in
+the GUI and the script will be left unaffected.
 
 
 Running a Batch
 ---------------
-Instead of running an ANSYS batch by calling ANSYS with an input file, you can instead define a function that runs ansys.  This example runs a mesh convergence study based on the maximum stress of a cylinder with torsional loading.
+Instead of running an ANSYS batch by calling ANSYS with an input file,
+you can instead define a function that runs MAPDL.  This example runs
+a mesh convergence study based on the maximum stress of a cylinder
+with torsional loading.
 
 .. code:: python
 
@@ -617,8 +629,8 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
         """ Report the maximum von Mises stress of a Cantilever supported cylinder"""
 
         # clear
-        ansys.finish()
-        ansys.clear()
+        mapdl.finish()
+        mapdl.clear()
 
         # cylinder parameters
         radius = 2
@@ -627,72 +639,72 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
         force = 100/radius
         pressure = force/(h_tip*2*np.pi*radius)
 
-        ansys.prep7()
-        ansys.et(1, 186)
-        ansys.et(2, 154)
-        ansys.r(1)
-        ansys.r(2)
+        mapdl.prep7()
+        mapdl.et(1, 186)
+        mapdl.et(2, 154)
+        mapdl.r(1)
+        mapdl.r(2)
 
         # Aluminum properties (or something)
-        ansys.mp('ex', 1, 10e6)
-        ansys.mp('nuxy', 1, 0.3)
-        ansys.mp('dens', 1, 0.1/386.1)
-        ansys.mp('dens', 2, 0)
+        mapdl.mp('ex', 1, 10e6)
+        mapdl.mp('nuxy', 1, 0.3)
+        mapdl.mp('dens', 1, 0.1/386.1)
+        mapdl.mp('dens', 2, 0)
 
         # Simple cylinder
         for i in range(4):
-            ansys.cylind(radius, '', '', height, 90*(i-1), 90*i)
+            mapdl.cylind(radius, '', '', height, 90*(i-1), 90*i)
 
-        ansys.nummrg('kp')            
+        mapdl.nummrg('kp')            
 
         # mesh cylinder
-        ansys.lsel('s', 'loc', 'x', 0)
-        ansys.lsel('r', 'loc', 'y', 0)
-        ansys.lsel('r', 'loc', 'z', 0, height - h_tip)
-        # ansys.lesize('all', elemsize*2)
-        ansys.mshape(0)
-        ansys.mshkey(1)
-        ansys.esize(elemsize)
-        ansys.allsel('all')
-        ansys.vsweep('ALL')
-        ansys.csys(1)
-        ansys.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-        ansys.asel('r', 'loc', 'x', radius)
-        ansys.local(11, 1)
-        ansys.csys(0)
-        ansys.aatt(2, 2, 2, 11)
-        ansys.amesh('all')
-        ansys.finish()
+        mapdl.lsel('s', 'loc', 'x', 0)
+        mapdl.lsel('r', 'loc', 'y', 0)
+        mapdl.lsel('r', 'loc', 'z', 0, height - h_tip)
+        # mapdl.lesize('all', elemsize*2)
+        mapdl.mshape(0)
+        mapdl.mshkey(1)
+        mapdl.esize(elemsize)
+        mapdl.allsel('all')
+        mapdl.vsweep('ALL')
+        mapdl.csys(1)
+        mapdl.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
+        mapdl.asel('r', 'loc', 'x', radius)
+        mapdl.local(11, 1)
+        mapdl.csys(0)
+        mapdl.aatt(2, 2, 2, 11)
+        mapdl.amesh('all')
+        mapdl.finish()
 
         if plot:
-            ansys.view(1, 1, 1, 1)
-            ansys.eplot()
+            mapdl.view(1, 1, 1, 1)
+            mapdl.eplot()
 
         # new solution
-        ansys.slashsolu()
-        ansys.antype('static', 'new')
-        ansys.eqslv('pcg', 1e-8)
+        mapdl.slashsolu()
+        mapdl.antype('static', 'new')
+        mapdl.eqslv('pcg', 1e-8)
 
         # Apply tangential pressure
-        ansys.esel('s', 'type', '', 2)
-        ansys.sfe('all', 2, 'pres', '', pressure)
+        mapdl.esel('s', 'type', '', 2)
+        mapdl.sfe('all', 2, 'pres', '', pressure)
 
         # Constrain bottom of cylinder/rod
-        ansys.asel('s', 'loc', 'z', 0)
-        ansys.nsla('s', 1)
+        mapdl.asel('s', 'loc', 'z', 0)
+        mapdl.nsla('s', 1)
 
-        ansys.d('all', 'all')
-        ansys.allsel()
-        ansys.psf('pres', '', 2)
-        ansys.pbc('u', 1)
-        ansys.solve()
-        ansys.finish()
+        mapdl.d('all', 'all')
+        mapdl.allsel()
+        mapdl.psf('pres', '', 2)
+        mapdl.pbc('u', 1)
+        mapdl.solve()
+        mapdl.finish()
 
         # access results using ANSYS object
-        result = ansys.result
+        result = mapdl.result
 
         # to access the results you could have run:
-        # resultfile = os.path.join(ansys.path, '%s.rst' % ansys.jobname)
+        # resultfile = os.path.join(mapdl.path, '%s.rst' % mapdl.jobname)
         # result = pyansys.read_binary(result file)
 
         # Get maximum von Mises stress at result 1
@@ -707,7 +719,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
 
 
     # initialize ANSYS
-    ansys = pyansys.Mapdl(override=True, loglevel='error')
+    mapdl = pyansys.launch_mapdl(override=True, loglevel='ERROR')
 
     result_summ = []
     for elemsize in np.linspace(0.6, 0.15, 15):
@@ -718,7 +730,7 @@ Instead of running an ANSYS batch by calling ANSYS with an input file, you can i
               % (elemsize, nnode, maxstress))
 
     # Exit ANSYS
-    ansys.exit()
+    mapdl.exit()
 
 This is the result from the script:
 
@@ -741,7 +753,7 @@ This is the result from the script:
     Element size 0.150000: 412324 nodes and maximum vom Mises stress 144.275406
 
 
-ANSYS Object Methods
+MAPDL Object Methods
 --------------------
-.. autoclass:: pyansys.Mapdl
+.. autoclass:: pyansys._Mapdl
     :members:

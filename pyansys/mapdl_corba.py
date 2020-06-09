@@ -61,15 +61,18 @@ class MapdlCorba(_Mapdl):
         self._broadcast_logger = None
         self._server = None
         self._log_broadcast = log_broadcast
+
+        # CORBA/AAS was introduced in v17
+        version = int(re.findall(r'\d\d\d', exec_file)[0])
+        if version < 170:
+            raise RuntimeError('MAPDL AAS CORBA server requires '
+                               'v17.0 or greater.')
+
+        # this will launch MAPDL
         super().__init__(exec_file, run_location, jobname, nproc,
                          override, loglevel, additional_switches,
                          start_timeout, interactive_plotting,
                          log_apdl)
-
-        # check ansys version
-        if int(self.version) < 170:
-            raise RuntimeError('MAPDL AAS CORBA server requires '
-                               'v17.0 or greater.')
 
     @property
     def _broadcast_file(self):
@@ -88,7 +91,6 @@ class MapdlCorba(_Mapdl):
             f.write('FINISH')
 
         # command must include "aas" flag to start MAPDL server
-        # if int(self.version) < 190:
         command = '"%s" -aas -j %s -b -i tmp.inp -o out.txt -np %d %s' % (self._exec_file, self._jobname, self._nproc, self._additional_switches)
 
         # remove the broadcast file if it exists as the key will be

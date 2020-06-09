@@ -884,11 +884,7 @@ class _Mapdl(_MapdlCommands):
     @property
     def _lockfile(self):
         """lockfile path"""
-        try:
-            return os.path.join(self.path, self.jobname + '.lock')
-        except:
-            return os.path.join(self.path, self._jobname + '.lock')
-        
+        return os.path.join(self.path, self.jobname + '.lock')
 
     @property
     def allow_ignore(self):
@@ -1149,21 +1145,14 @@ class _Mapdl(_MapdlCommands):
         try:
             self.exit()
         except Exception as e:
-            self._log.error('exit: %s', str(e))
+            if hasattr(self, '_log'):
+                self._log.error('exit: %s', str(e))
 
         try:
             self.kill()
         except Exception as e:
-            self._log.error('kill: %s', str(e))
-
-        try:
-            self._close_apdl_log()
-        except Exception as e:
-            self._log.error('Failed to close apdl log: %s', str(e))
-
-    def Exit(self):
-        raise NotImplementedError('\n"Exit" decpreciated.  \n'
-                                  'Please use "exit" instead')
+            if hasattr(self, '_log'):
+                self._log.error('kill: %s', str(e))
 
     def _remove_lockfile(self):
         """Removes lockfile"""
@@ -1369,9 +1358,11 @@ class _Mapdl(_MapdlCommands):
 
         This is requested from the active mapdl instance.
         """
-        jobname = self.inquire('JOBNAME')
-        self._jobname = jobname
-        return jobname
+        try:
+            self._jobname = self.inquire('JOBNAME')
+        except:
+            pass
+        return self._jobname
 
     def inquire(self, func):
         """Returns system information.
@@ -1425,7 +1416,7 @@ class _Mapdl(_MapdlCommands):
         except IndexError:
             raise RuntimeError('Cannot parse %s' % response)
 
-    def Run(self, command):
+    def Run(self, command):  # pragma: no cover
         """Depreciated"""
         raise NotImplementedError('\nCommand "Run" decpreciated.  \n'
                                   'Please use "run" instead')
