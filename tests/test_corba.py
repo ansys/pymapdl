@@ -343,4 +343,5 @@ def test_exit(mapdl):
     mapdl.exit()
     with pytest.raises(RuntimeError):
         mapdl.prep7()
+
     assert not os.path.isfile(mapdl._lockfile)

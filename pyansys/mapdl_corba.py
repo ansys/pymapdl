@@ -208,7 +208,7 @@ class MapdlCorba(_Mapdl):
         except Exception as e:
             pass
 
-    def exit(self, close_log=True):
+    def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process"""
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
@@ -218,7 +218,14 @@ class MapdlCorba(_Mapdl):
         if close_log:
             self._close_apdl_log()
 
-        self._remove_lockfile()
+        # wait for lockfile to be removed
+        if timeout:
+            tstart = time.time()
+            while os.path.isfile(self._lockfile):
+                time.sleep(0.05)
+                telap = tstart - time.time()
+                if telap > timeout:
+                    return 1
 
     def kill(self):
         """Forces ANSYS process to end and removes lock file"""
@@ -227,7 +234,7 @@ class MapdlCorba(_Mapdl):
         except:
             pass
 
-        if self._process is not None:
+        if self._process is not None and os.name == 'linux':
             kill_process(self._process.pid)
 
         try:

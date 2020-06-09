@@ -50,6 +50,8 @@ def test_clear(mapdl):
     assert 'BEGIN' in mapdl.processor
 
 
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@pytest.mark.skipif(not LINUX, reason="ConsoleMapdl requires linux")
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
     with pytest.raises(RuntimeError):
