@@ -5,7 +5,7 @@ import pyansys
 from pyansys import examples
 from pyvista.plotting import system_supports_plotting
 
-HAS_IMAGEIO = False
+HAS_IMAGEIO = True
 try:
     import imageio_ffmpeg
 except ImportError:

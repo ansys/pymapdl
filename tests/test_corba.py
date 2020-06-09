@@ -4,8 +4,8 @@ import os
 import pytest
 import numpy as np
 import pyansys
+from pyansys.mapdl_corba import MapdlCorba
 
-from pyvista.plotting import system_supports_plotting
 path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -30,10 +30,10 @@ RSETS = list(zip(range(1, 9), [1]*8))
 
 @pytest.fixture(scope='module')
 def mapdl():
-    mapdl = pyansys.Mapdl(MAPDLBIN,
-                          override=True,
-                          additional_switches='-smp',
-                          prefer_pexpect=False)
+    mapdl = pyansys.launch_mapdl(MAPDLBIN,
+                                 override=True,
+                                 additional_switches='-smp',  # for Linux
+                                 prefer_pexpect=False)
 
     # build the cyclic model
     mapdl.prep7()
@@ -49,13 +49,13 @@ def mapdl():
     mapdl.emodif('ALL', 'MAT', 1)
 
     # setup and solve
-    mapdl('/SOLU')
-    mapdl.Antype(2, 'new')
-    mapdl.Modopt('lanb', 1, 1, 100000)
-    mapdl.Eqslv('SPARSE')
-    mapdl.Lumpm(0)
-    mapdl.Pstres(0)
-    mapdl.Bcsoption('INCORE')
+    mapdl.run('/SOLU')
+    mapdl.antype(2, 'new')
+    mapdl.modopt('lanb', 1, 1, 100000)
+    mapdl.eqslv('SPARSE')
+    mapdl.lumpm(0)
+    mapdl.pstres(0)
+    mapdl.bcsoption('INCORE')
     mapdl.mxpand(elcalc='YES')
     mapdl.solve()
     mapdl.finish()
@@ -87,7 +87,7 @@ def test_prnsol_u(mapdl, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
-    if mapdl._using_corba:
+    if isinstance(mapdl, MapdlCorba):
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[9:])
@@ -138,7 +138,7 @@ def test_prnsol_s(mapdl, rset):
 
     # verify cyclic displacements
     table = mapdl.prnsol('s').splitlines()
-    if mapdl._using_corba:
+    if isinstance(mapdl, MapdlCorba):
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -164,7 +164,7 @@ def test_prnsol_prin(mapdl, rset):
 
     # verify principal stress
     table = mapdl.prnsol('prin').splitlines()
-    if mapdl._using_corba:
+    if isinstance(mapdl, MapdlCorba):
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -318,3 +318,29 @@ def test_al(cleared, mapdl):
     mapdl.enable_interactive_plotting()
     mapdl._show_matplotlib_figures = False
     mapdl.aplot()
+
+
+def test_logging(mapdl, tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
+    with pytest.raises(RuntimeError):
+        mapdl.open_apdl_log(filename, mode='w')
+
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl._apdl_log.flush()
+
+    out = open(mapdl._apdl_log.name).read().strip().split()[-5:]
+    assert 'PREP7' in out[0]
+    assert 'K,4,0,1,0' in out[-1]
+
+
+# must be at end as this uses a scoped fixture
+def test_exit(mapdl):
+    mapdl.exit()
+    with pytest.raises(RuntimeError):
+        mapdl.prep7()
+    assert not os.path.isfile(mapdl._lockfile)

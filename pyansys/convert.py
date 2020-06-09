@@ -114,9 +114,9 @@ class FileTranslator():
             exec_file_parameter = '"%s", ' % exec_file
         else:
             exec_file_parameter = ''
-        line = 'ansys = pyansys.Mapdl(%sloglevel="%s")%s' % (exec_file_parameter,
-                                                             loglevel,
-                                                             self.line_ending)
+        line = 'ansys = pyansys.launch_mapdl(%sloglevel="%s")%s' % (exec_file_parameter,
+                                                                    loglevel,
+                                                                    self.line_ending)
         self.lines.append(line)
 
     @property

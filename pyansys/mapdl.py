@@ -13,39 +13,24 @@ import os
 import tempfile
 import warnings
 import logging
-import time
-import subprocess
-from threading import Thread
-import weakref
 import random
 from shutil import copyfile, rmtree
 
 import appdirs
-import pexpect
 import numpy as np
-import psutil
 
 import pyansys
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.mapdl_functions import _MapdlCommands
-from pyansys.deprec_commands import _DeprecCommands
 from pyansys.convert import is_float
 
+MATPLOTLIB_LOADED = True
 try:
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-    MATPLOTLIB_LOADED = True
 except:
     MATPLOTLIB_LOADED = False
-
-
-class DepreciationError(RuntimeError):
-    """Exception when a function is depreciated."""
-
-    def __init__(self, message):
-        """Empty init."""
-        RuntimeError.__init__(self, message)
 
 
 def random_string(stringLength=10):
@@ -108,36 +93,6 @@ def find_ansys():
     return ansys_exe_path, version_float
 
 
-def tail(filename, nlines):
-    """ Read the last nlines of a text file """
-    with open(filename) as qfile:
-        qfile.seek(0, os.SEEK_END)
-        endf = position = qfile.tell()
-        linecnt = 0
-        while position >= 0:
-            qfile.seek(position)
-            next_char = qfile.read(1)
-            if next_char == "\n" and position != endf-1:
-                linecnt += 1
-
-            if linecnt == nlines:
-                break
-            position -= 1
-
-        if position < 0:
-            qfile.seek(0)
-
-        return qfile.read()
-
-
-def kill_process(proc_pid):
-    """ kills a process with extreme prejudice """
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.kill()
-    process.kill()
-
-
 # settings directory
 settings_dir = appdirs.user_data_dir('pyansys')
 if not os.path.isdir(settings_dir):
@@ -151,51 +106,22 @@ CONFIG_FILE = os.path.join(settings_dir, 'config.txt')
 
 # specific to pexpect process
 ###############################################################################
-ready_items = [rb'BEGIN:',
-               rb'PREP7:',
-               rb'SOLU_LS[0-9]+:',
-               rb'POST1:',
-               rb'POST26:',
-               rb'RUNSTAT:',
-               rb'AUX2:',
-               rb'AUX3:',
-               rb'AUX12:',
-               rb'AUX15:',
-               # continue
-               rb'YES,NO OR CONTINUOUS\)\=',
-               rb'executed\?',
-               # errors
-               rb'SHOULD INPUT PROCESSING BE SUSPENDED\?',
-               # prompts
-               rb'ENTER FORMAT for',
-]
 
-processors = ['/PREP7',
-              '/POST1',
-              '/SOLUTION',
-              '/POST26',
-              '/AUX2',
-              '/AUX3',
-              '/AUX12',
-              '/AUX15',
-              '/MAP',]
+# processors = ['/PREP7',
+#               '/POST1',
+#               '/SOLUTION',
+#               '/POST26',
+#               '/AUX2',
+#               '/AUX3',
+#               '/AUX12',
+#               '/AUX15',
+#               '/MAP',]
 
-
-CONTINUE_IDX = ready_items.index(rb'YES,NO OR CONTINUOUS\)\=')
-WARNING_IDX = ready_items.index(rb'executed\?')
-ERROR_IDX = ready_items.index(rb'SHOULD INPUT PROCESSING BE SUSPENDED\?')
-PROMPT_IDX = ready_items.index(rb'ENTER FORMAT for')
-
-nitems = len(ready_items)
-expect_list = []
-for item in ready_items:
-    expect_list.append(re.compile(item))
-ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 ###############################################################################
 
 # test for png file
-png_test = re.compile('WRITTEN TO FILE(.*).png')
+PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
@@ -310,7 +236,31 @@ def save_ansys_path(exe_loc=''):
     return exe_loc
 
 
-class Mapdl(_MapdlCommands, _DeprecCommands):
+def check_lock_file(path, jobname, override):
+    # Check for lock file
+    lockfile = os.path.join(path, jobname + '.lock')
+    if os.path.isfile(lockfile):
+        if not override:
+            raise FileExistsError('Lock file exists for jobname %s \n'
+                                  % jobname +
+                                  ' at %s\n' % lockfile +
+                                  'Set ``override=True`` to delete lock '
+                                  'and start ANSYS')
+        else:
+            try:
+                os.remove(lockfile)
+            except PermissionError:
+                raise PermissionError('Unable to remove lock file.  '
+                                      'Another instance of ANSYS might be '
+                                      'running at "%s"' % path)
+
+
+def launch_mapdl(exec_file=None, run_location=None,
+                 jobname='file', nproc=2, override=False,
+                 loglevel='INFO', additional_switches='',
+                 start_timeout=120, interactive_plotting=False,
+                 log_broadcast=False, check_version=True,
+                 prefer_pexpect=True, log_apdl='w'):
     """This class opens ANSYS in the background and allows commands to
     be passed to a persistent session.
 
@@ -366,7 +316,328 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
     log_broadcast : bool, optional
         Additional logging for ansys solution progress.  Default True
-        and visible at log level 'INFO'.
+        and visible at log level 'INFO'.  Only applicable when using
+        CORBA.
+
+    check_version : bool, optional
+        Check version of binary file and raise exception when invalid.
+
+    prefer_pexpect : bool, optional
+        When enabled, will avoid using ansys APDL in CORBA server mode
+        and will spawn a process and control it using pexpect.
+        Default False.
+
+    log_apdl : str, optional
+        Opens an APDL log file in the current ANSYS working directory.
+        Default 'w'.  Set to 'a' to append to an existing log.
+
+    Examples
+    --------
+    >>> import pyansys
+    >>> mapdl = pyansys.Mapdl()
+
+    Run MAPDL with the smp switch and specify the location of the
+    ansys binary
+
+    >>> import pyansys
+    >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
+                              additional_switches='-smp')
+
+    Notes
+    -----
+    ANSYS MAPDL has the following command line options as of v20.1
+
+    -aas : Enables server mode
+     When enabling server mode, a custom name for the keyfile can be
+     specified using the ``-iorFile`` option.  This is the CORBA that
+     pyansys uses for Windows (and linux when
+     ``prefer_pexpect=False``).
+
+    -acc <device> : Enables the use of GPU hardware.  Enables the use of
+     GPU hardware to accelerate the analysis. See GPU Accelerator
+     Capability in the Parallel Processing Guide for more information.
+
+    -amfg : Enables the additive manufacturing capability.
+     Requires an additive manufacturing license. For general
+     information about this feature, see AM Process Simulation in
+     ANSYS Workbench.
+
+    -ansexe <executable> :  activates a custom mechanical APDL executable.
+     In the ANSYS Workbench environment, activates a custom
+     Mechanical APDL executable.
+
+    -b <list or nolist> : Activates batch mode
+     The options ``-b`` list or ``-b`` by itself cause the input
+     listing to be included in the output. The ``-b`` nolist option
+     causes the input listing not to be included. For more information
+     about running Mechanical APDL in batch mode, see Batch Mode.
+
+    -custom <executable> : Calls a custom Mechanical APDL executable
+     See Running Your Custom Executable in the Programmer's Reference
+     for more information.
+
+    -d <device> : Specifies the type of graphics device
+     This option applies only to interactive mode. For Linux systems,
+     graphics device choices are X11, X11C, or 3D. For Windows
+     systems, graphics device options are WIN32 or WIN32C, or 3D.
+
+    -db value : Initial memory allocation
+     Defines the portion of workspace (memory) to be used as the
+     initial allocation for the database. The default is 1024
+     MB. Specify a negative number to force a fixed size throughout
+     the run; useful on small memory systems.
+
+    -dir <path> : Defines the initial working directory
+     Using the ``-dir`` option overrides the
+     ``ANSYS201_WORKING_DIRECTORY`` environment variable.
+
+    -dis : Enables Distributed ANSYS
+     See the Parallel Processing Guide for more information.
+
+    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
+     Requires DesignXplorer.
+
+    -g : Launches the Mechanical APDL program with the GUI
+     Graphical User Interface (GUI) on. If you select this option, an
+     X11 graphics device is assumed for Linux unless the ``-d`` option
+     specifies a different device. This option is not used on Windows
+     systems. To activate the GUI after Mechanical APDL has started,
+     enter two commands in the input window: /SHOW to define the
+     graphics device, and /MENU,ON to activate the GUI. The ``-g`` option
+     is valid only for interactive mode.  Note: If you start
+     Mechanical APDL via the ``-g`` option, the program ignores any /SHOW
+     command in the start.ans file and displays a splash screen
+     briefly before opening the GUI windows.
+
+    -i <inputname> : Specifies the name of the file to read
+     Inputs an input file into Mechanical APDL for batch
+     processing.
+
+    -iorFile <keyfile_name> : Specifies the name of the server keyfile
+     Name of the server keyfile when enabling server mode. If this
+     option is not supplied, the default name of the keyfile is
+     ``aas_MapdlID.txt``. For more information, see Mechanical APDL as
+     a Server Keyfile in the Mechanical APDL as a Server User's Guide.
+
+    -j <Jobname> : Specifies the initial jobname
+     A name assigned to all files generated by the program for a
+     specific model. If you omit the ``-j`` option, the jobname is assumed
+     to be file.
+
+    -l <language> : Specifies a language file to use other than English
+     This option is valid only if you have a translated message file
+     in an appropriately named subdirectory in
+     ``/ansys_inc/v201/ansys/docu`` or
+     ``Program Files\ANSYS\Inc\V201\ANSYS\docu``
+
+    -m <workspace> : Specifies the total size of the workspace
+     Workspace (memory) in megabytes used for the initial
+     allocation. If you omit the ``-m`` option, the default is 2 GB
+     (2048 MB). Specify a negative number to force a fixed size
+     throughout the run.
+
+    -machines <IP> : Specifies the distributed machines
+     Machines on which to run a Distributed ANSYS analysis. See
+     Starting Distributed ANSYS in the Parallel Processing Guide for
+     more information.
+
+    -mpi <value> : Specifies the type of MPI to use.
+     See the Parallel Processing Guide for more information.
+
+    -mpifile <appfile> : Specifies an existing MPI file
+     Specifies an existing MPI file (appfile) to be used in a
+     Distributed ANSYS run. See Using MPI Files in the Parallel
+     Processing Guide for more information.
+
+    -na <value>: Specifies the number of GPU accelerator devices
+     Nubmer of GPU devices per machine or compute node when running
+     with the GPU accelerator feature. See GPU Accelerator Capability
+     in the Parallel Processing Guide for more information.
+
+    -name <value> : Defines Mechanical APDL parameters
+     Set mechanical APDL parameters at program start-up. The parameter
+     name must be at least two characters long. For details about
+     parameters, see the ANSYS Parametric Design Language Guide.
+
+    -np <value> : Specifies the number of processors
+     Number of processors to use when running Distributed ANSYS or
+     Shared-memory ANSYS. See the Parallel Processing Guide for more
+     information.
+
+    -o <outputname> : Output file
+     Specifies the name of the file to store the output from a batch
+     execution of Mechanical APDL
+
+    -p <productname> : ANSYS session product
+     Defines the ANSYS session product that will run during the
+     session. For more detailed information about the ``-p`` option,
+     see Selecting an ANSYS Product via the Command Line.
+
+    -ppf <license feature name> : HPC license
+     Specifies which HPC license to use during a parallel processing
+     run. See HPC Licensing in the Parallel Processing Guide for more
+     information.
+
+    -rcopy <path> : Path to remote copy of files
+     On a Linux cluster, specifies the full path to the program used
+     to perform remote copy of files. The default value is
+     ``/usr/bin/scp``.
+
+    -s <read or noread> : Read startup file
+     Specifies whether the program reads the ``start.ans`` file at
+     start-up. If you omit the ``-s`` option, Mechanical APDL reads the
+     start.ans file in interactive mode and not in batch mode.
+
+    -schost <host>: Coupling service host
+     Specifies the host machine on which the coupling service is
+     running (to which the co-simulation participant/solver must
+     connect) in a System Coupling analysis.
+
+    -scid <value> : System Coupling analysis licensing ID
+     Specifies the licensing ID of the System Coupling analysis.
+
+    -sclic <port@host> : System Coupling analysis host
+     Specifies the licensing port and host to use for the System
+     Coupling analysis.
+
+    -scname <solver> : Name of the co-simulation participant
+     Specifies the unique name used by the co-simulation participant
+     to identify itself to the coupling service in a System Coupling
+     analysis. For Linux systems, you need to quote the name to have
+     the name recognized if it contains a space: (e.g.
+     ``-scname "Solution 1"``)
+
+    -scport <port> : Coupling service port
+     Specifies the port on the host machine upon which the coupling
+     service is listening for connections from co-simulation
+     participants in a System Coupling analysis.
+
+    -smp : Enables shared-memory parallelism.
+     See the Parallel Processing Guide for more information.
+
+    -usersh : Enable MPI remote shell.
+     Directs the MPI software (used by Distributed ANSYS) to use the
+     remote shell (rsh) protocol instead of the default secure shell
+     (ssh) protocol. See Configuring Distributed ANSYS in the Parallel
+     Processing Guide for more information.
+
+    -v : Return version info
+     Returns the Mechanical APDL release number, update number,
+     copyright date, customer number, and license manager version
+     number.
+    """
+    if exec_file is None:
+        # Load cached path
+        exec_file = get_ansys_path()
+        if exec_file is None:
+            raise FileNotFoundError('Invalid or path or cannot load cached '
+                                    'ansys path.  Enter one manually using '
+                                    'pyansys.Mapdl(exec_file=...)')
+    else:  # verify ansys exists at this location
+        if not os.path.isfile(exec_file):
+            raise FileNotFoundError('Invalid ANSYS executable at %s'
+                                    % exec_file + 'Enter one manually using '
+                                    'pyansys.Mapdl(exec_file=)')
+
+    if run_location is None:
+        temp_dir = tempfile.gettempdir()
+        run_location = os.path.join(temp_dir, 'ansys')
+        if not os.path.isdir(run_location):
+            try:
+                os.mkdir(run_location)
+            except:
+                raise RuntimeError('Unable to create temporary working '
+                                   'directory %s\n' % run_location +
+                                   'Please specify run_location=')
+    else:
+        if not os.path.isdir(run_location):
+            raise FileNotFoundError('"%s" is not a valid directory' % run_location)
+
+    check_lock_file(run_location, jobname, override)
+
+    if os.name != 'posix':
+        prefer_pexpect = False
+
+    if prefer_pexpect:
+        from pyansys.mapdl_console import MapdlConsole
+        return MapdlConsole(exec_file,
+                            run_location,
+                            jobname=jobname,
+                            nproc=nproc,
+                            override=override,
+                            loglevel=loglevel,
+                            additional_switches=additional_switches,
+                            start_timeout=start_timeout,
+                            interactive_plotting=interactive_plotting,
+                            log_apdl=log_apdl)
+    else:
+        from pyansys.mapdl_corba import MapdlCorba
+        return MapdlCorba(exec_file,
+                          run_location,
+                          jobname=jobname,
+                          nproc=nproc,
+                          override=override,
+                          loglevel=loglevel,
+                          additional_switches=additional_switches,
+                          start_timeout=start_timeout,
+                          interactive_plotting=interactive_plotting,
+                          log_apdl=log_apdl,
+                          log_broadcast=log_broadcast)
+
+
+class _Mapdl(_MapdlCommands):
+    """This class opens ANSYS in the background and allows commands to
+    be passed to a persistent session.
+
+    Parameters
+    ----------
+    exec_file : str, optional
+        The location of the ANSYS executable.  Will use the cached
+        location when left at the default None.
+
+    run_location : str, optional
+        ANSYS working directory.  Defaults to a temporary working
+        directory.
+
+    jobname : str, optional
+        ANSYS jobname.  Defaults to ``'file'``.
+
+    nproc : int, optional
+        Number of processors.  Defaults to 2.
+
+    override : bool, optional
+        Attempts to delete the lock file at the run_location.
+        Useful when a prior ANSYS session has exited prematurely and
+        the lock file has not been deleted.
+
+    wait : bool, optional
+        When True, waits until ANSYS has been initialized before
+        initializing the python ansys object.  Set this to False for
+        debugging.
+
+    loglevel : str, optional
+        Sets which messages are printed to the console.  Default
+        'INFO' prints out all ANSYS messages, 'WARNING` prints only
+        messages containing ANSYS warnings, and 'ERROR' prints only
+        error messages.
+
+    additional_switches : str, optional
+        Additional switches for ANSYS, for example aa_r, and academic
+        research license, would be added with:
+
+        - additional_switches="-aa_r"
+
+        Avoid adding switches like -i -o or -b as these are already
+        included to start up the ANSYS MAPDL server.  See the notes
+        section for additional details.
+
+    start_timeout : float, optional
+        Time to wait before raising error that ANSYS is unable to
+        start.
+
+    interactive_plotting : bool, optional
+        Enables interactive plotting using ``matplotlib``.  Default
+        False.
 
     check_version : bool, optional
         Check version of binary file and raise exception when invalid.
@@ -577,181 +848,103 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
     """
 
-    def __init__(self, exec_file=None, run_location=None,
-                 jobname='file', nproc=2, override=False,
-                 loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False,
-                 log_broadcast=False, check_version=True,
-                 prefer_pexpect=True, log_apdl='w'):
+    def __init__(self, exec_file, run_location,
+                 jobname, nproc, override,
+                 loglevel, additional_switches,
+                 start_timeout, interactive_plotting,
+                 log_apdl):
         """ Initialize connection with ANSYS program """
-        self.log = setup_logger(loglevel.upper())
+        self.path = run_location
+        self._exec_file = exec_file
         self._jobname = jobname
-        self.non_interactive = self._non_interactive(self)
-        self._redirected_commands = {'*LIS': self._list}
-
-        # default settings
-        self.allow_ignore = False
-        self._process = None
-        self.lockfile = ''
-        self._interactive_plotting = False
-        self._using_corba = None
-        self.auto_continue = True
-        self.apdl_log = None
+        self._start_timeout = start_timeout
+        self._nproc = nproc
+        self._additional_switches = additional_switches
+        self._allow_ignore = False
+        self._interactive_plotting = interactive_plotting
+        self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
         self.response = None
-        self._output = ''
         self._outfile = None
         self._show_matplotlib_figures = True
-        self._corba_server = None
 
-        if exec_file is None:
-            # Load cached path
-            exec_file = get_ansys_path()
-            if exec_file is None:
-                raise FileNotFoundError('Invalid or path or cannot load cached '
-                                        'ansys path.  Enter one manually using '
-                                        'pyansys.Mapdl(exec_file=...)')
+        self._log = setup_logger(loglevel.upper())
+        self.non_interactive = self._non_interactive(self)
+        self._redirected_commands = {'*LIS': self._list}
+        self.version = re.findall(r'\d\d\d', self._exec_file)[0]
 
-        else:  # verify ansys exists at this location
-            if not os.path.isfile(exec_file):
-                raise FileNotFoundError('Invalid ANSYS executable at %s'
-                                        % exec_file + 'Enter one manually using '
-                                        'pyansys.Mapdl(exec_file=)')
-        self.exec_file = exec_file
-
-        # check ansys version
-        if check_version:
-            version = int(re.findall(r'\d\d\d', self.exec_file)[0])
-            if version < 170 and os.name != 'posix':
-                raise RuntimeError('ANSYS MAPDL server on Windows requires'
-                                   'v17.0 or greater.')
-            self.version = str(version)
-
-        # create temporary directory
-        self.path = run_location
-        if self.path is None:
-            temp_dir = tempfile.gettempdir()
-            self.path = os.path.join(temp_dir, 'ansys')
-            if not os.path.isdir(self.path):
-                try:
-                    os.mkdir(self.path)
-                except:
-                    raise RuntimeError('Unable to create temporary working '
-                                       'directory %s\n' % self.path +
-                                       'Please specify run_location=')
-        else:
-            if not os.path.isdir(self.path):
-                raise FileNotFoundError('"%s" is not a valid directory' % self.path)
-
-        # Check for lock file
-        self.lockfile = os.path.join(self.path, self._jobname + '.lock')
-        if os.path.isfile(self.lockfile):
-            if not override:
-                raise FileExistsError('Lock file exists for jobname %s \n'
-                                      % self._jobname +
-                                      ' at %s\n' % self.lockfile +
-                                      'Set ``override=True`` to delete lock '
-                                      'and start ANSYS')
-            else:
-                try:
-                    os.remove(self.lockfile)
-                except PermissionError:
-                    raise PermissionError('Unable to remove lock file.  '
-                                          'Another instance of ANSYS might be '
-                                          'running at "%s"' % self.path)
-
-        # key will be output here when ansys server is available
-        self.broadcast_file = os.path.join(self.path, 'mapdl_broadcasts.txt')
-        if os.path.isfile(self.broadcast_file):
-            os.remove(self.broadcast_file)
-
-        # create a dummy input file
-        tmp_inp = os.path.join(self.path, 'tmp.inp')
-        with open(tmp_inp, 'w') as f:
-            f.write('FINISH')
-
-        if os.name != 'posix':
-            prefer_pexpect = False
-
-        # open a connection to ANSYS
-        self.nproc = nproc
-        self.start_timeout = start_timeout
-        self.prefer_pexpect = prefer_pexpect
-        self.log_broadcast = log_broadcast
-        self.interactive_plotting = interactive_plotting
-        self._open(additional_switches)
+        # launch MAPDL
+        self._launch()
 
         if log_apdl:
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
 
-    def _open(self, additional_switches=''):
-        """
-        Opens up ANSYS an ansys process using either pexpect or
-        ansys_corba.
-        """
-        if (int(self.version) < 170 and os.name == 'posix') or self.prefer_pexpect:
-            self._open_process(self.nproc, self.start_timeout, additional_switches)
-        else:  # use corba
-            self._open_corba(self.nproc, self.start_timeout, additional_switches)
+    @property
+    def _lockfile(self):
+        """lockfile path"""
+        try:
+            return os.path.join(self.path, self.jobname + '.lock')
+        except:
+            return os.path.join(self.path, self._jobname + '.lock')
+        
 
-            # separate logger for broadcast file
-            if self.log_broadcast:
-                self.broadcast_logger = Thread(target=ANSYS._start_broadcast_logger,
-                                               args=(weakref.proxy(self),))
-                self.broadcast_logger.start()
+    @property
+    def allow_ignore(self):
+        """Invalid commands will be ignored rather than exceptions
 
-        # setup plotting for PNG
-        if self.interactive_plotting:
-            self.enable_interactive_plotting()
+        A command executed in the wrong processor will raise an
+        exception when ``allow_ignore=False``.  This is the default
+        behavior.
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.k(1, 0, 0, 0)
+        Exception:  K is not a recognized POST1 command, abbreviation, or macro.
+
+        Ignore these messages by setting allow_ignore=True
+
+        >>> mapdl.allow_ignore = True
+        2020-06-08 21:39:58,094 [INFO] pyansys.mapdl: K is not a
+        recognized POST1 command, abbreviation, or macro.  This
+        command will be ignored.
+
+        *** WARNING *** CP = 0.372 TIME= 21:39:58
+        K is not a recognized POST1 command, abbreviation, or macro.
+        This command will be ignored.
+
+        """
+        return self._allow_ignore
+
+    @allow_ignore.setter
+    def allow_ignore(self, value):
+        """Set allow ignore"""
+        self._allow_ignore = bool(value)
 
     def open_apdl_log(self, filename, mode='w'):
-        """Starts writing all APDL commands to an ANSYS input
+        """Start writing all APDL commands to an ANSYS input file.
 
         Parameters
         ----------
         filename : str
-            Filename of the log
-
+            Filename of the log.
         """
-        if self.apdl_log is not None:
+        if self._apdl_log is not None:
             raise RuntimeError('APDL command logging already enabled.\n')
 
-        self.log.debug('Opening ANSYS log file at %s', filename)
-        self.apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
+        self._log.debug('Opening ANSYS log file at %s', filename)
+        self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         if mode != 'w':
-            self.apdl_log.write('! APDL script generated using pyansys %s\n' %
-                                pyansys.__version__)
+            self._apdl_log.write('! APDL script generated using pyansys %s\n' %
+                                 pyansys.__version__)
 
     def _close_apdl_log(self):
         """ Closes APDL log """
-        if self.apdl_log is not None:
-            self.apdl_log.close()
-        self.apdl_log = None
-
-    def _open_process(self, nproc, timeout, additional_switches):
-        """Opens an ANSYS process using pexpect"""
-        command = '%s -j %s -np %d %s' % (self.exec_file, self._jobname, nproc,
-                                          additional_switches)
-        self.log.debug('Spawning shell process using pexpect')
-        self.log.debug('Command: "%s"', command)
-        self.log.debug('At "%s"', self.path)
-        self._process = pexpect.spawn(command, cwd=self.path)
-        self._process.delaybeforesend = None
-        self.log.debug('Waiting for ansys to start...')
-
-        try:
-            index = self._process.expect(['BEGIN:', 'CONTINUE'], timeout=timeout)
-        except:  # capture failure
-            raise RuntimeError(self._process.before.decode('utf-8'))
-
-        if index:
-            self._process.sendline('')  # enter to continue
-            self._process.expect('BEGIN:', timeout=timeout)
-        self.log.debug('ANSYS Initialized')
-        self.log.debug(self._process.before.decode('utf-8'))
-        self._using_corba = False
+        if self._apdl_log is not None:
+            self._apdl_log.close()
+        self._apdl_log = None
 
     def enable_interactive_plotting(self, pixel_res=1600):
         """Enables interactive plotting.  Requires matplotlib
@@ -770,59 +963,12 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self._interactive_plotting = True
         else:
             raise ImportError('Install matplotlib to use enable interactive plotting\n' +
-                            'or turn interactive plotting off with:\n' +
-                            'interactive_plotting=False')
+                              'or turn interactive plotting off with:\n' +
+                              'interactive_plotting=False')
 
     def set_log_level(self, loglevel):
-        """ Sets log level """
+        """Sets log level"""
         setup_logger(loglevel=loglevel.upper())
-
-    def __enter__(self):
-        return self
-
-    @property
-    def is_alive(self):
-        if self._process is None:
-            return False
-        else:
-            if self._using_corba:
-                # return self.process.poll() is None
-                return True
-            else:
-                return self._process.isalive()
-
-    def _start_broadcast_logger(self, update_rate=1.0):
-        """ separate logger using broadcast_file """
-        # listen to broadcast file
-        loadstep = 0
-        overall_progress = 0
-        try:
-            old_tail = ''
-            old_size = 0
-            while self.is_alive:
-                new_size = os.path.getsize(self.broadcast_file)
-                if new_size != old_size:
-                    old_size = new_size
-                    new_tail = tail(self.broadcast_file, 4)
-                    if new_tail != old_tail:
-                        lines = new_tail.split('>>')
-                        for line in lines:
-                            line = line.strip().replace('<<broadcast::', '')
-                            if "current-load-step" in line:
-                                n=int(re.search(r'\d+', line).group())
-                                if n>loadstep:
-                                    loadstep=n
-                                    overall_progress = 0
-                                    self.log.info(line)
-                            elif "overall-progress" in line:
-                                n=int(re.search(r'\d+', line).group())
-                                if n>overall_progress:
-                                    overall_progress=n
-                                    self.log.info(line)
-                        old_tail = new_tail
-                time.sleep(update_rate)
-        except Exception as e:
-            pass
 
     def run(self, command, write_to_log=True):
         """Runs APDL command(s)
@@ -832,12 +978,10 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         command : str
             ANSYS APDL command.
 
-            These commands will be written to a temporary input file and then run
-            using /INPUT.
-
         write_to_log : bool, optional
-            Overrides APDL log writing.  Default True.  When set to False, will
-            not write command to log even through APDL command logging is enabled.
+            Overrides APDL log writing.  Default True.  When set to
+            False, will not write command to log even if APDL
+            command logging is enabled.
 
         Returns
         -------
@@ -847,7 +991,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         Notes
         -----
         When two or more commands need to be run non-interactively
-        (i.e. ``*VWRITE``) then use
+        (i.e. ``*VWRITE``) use
 
         >>> with ansys.non_interactive:
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
@@ -864,9 +1008,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
                                      (command, INVAL_COMMANDS[command[:4]]))
             raise exception
-        elif write_to_log and self.apdl_log is not None:
-            if not self.apdl_log.closed:
-                self.apdl_log.write('%s\n' % command)
+        elif write_to_log and self._apdl_log is not None:
+            if not self._apdl_log.closed:
+                self._apdl_log.write('%s\n' % command)
 
         if command[:4] in self._redirected_commands:
             function = self._redirected_commands[command[:4]]
@@ -879,12 +1023,12 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.response = ''
 
         if self.response:
-            self.log.info(self.response)
+            self._log.info(self.response)
             if self._outfile:
                 self._outfile.write('%s\n' % self.response)
 
         if '*** ERROR ***' in self.response:  # flag error
-            self.log.error(self.response)
+            self._log.error(self.response)
             # if not continue_on_error:
             raise Exception(self.response)
 
@@ -903,15 +1047,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         return self.response
 
     def _run(self, command):
-        if self._using_corba:
-            # check if it's a single non-interactive command
-            if command[:4].lower() == 'cdre':
-                with self.non_interactive:
-                    return self.run(command)
-            else:
-                return self._run_corba_command(command)
-        else:
-            return self._run_process_command(command)
+        raise NotImplementedError('Implemented by child class')
 
     def _list(self, command):
         """ Replaces *LIST command """
@@ -919,103 +1055,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         filename = os.path.join(self.path, '.'.join(items[1:]))
         if os.path.isfile(filename):
             self.response = open(filename).read()
-            self.log.info(self.response)
+            self._log.info(self.response)
         else:
             raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
-
-    def _run_process_command(self, command, return_response=True):
-        """ Sends command and returns ANSYS's response """
-        if not self._process.isalive():
-            raise Exception('ANSYS process closed')
-
-        if command[:4].lower() == '/out':
-            items = command.split(',')
-            if len(items) > 1:
-                self._output = '.'.join(items[1:])
-            else:
-                self._output = ''
-
-        # send the command
-        self.log.debug('Sending command %s' % command)
-        self._process.sendline(command)
-
-        # do not expect
-        if '/MENU' in command:
-            self.log.info('Enabling GUI')
-            self._process.sendline(command)
-            return
-
-        full_response = ''
-        while True:
-            i = self._process.expect_list(expect_list, timeout=None)
-            response = self._process.before.decode('utf-8')
-            full_response += response
-            if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
-                self.log.debug('Continue: Response index %i.  Matched %s'
-                               % (i, ready_items[i].decode('utf-8')))
-                self.log.info(response + ready_items[i].decode('utf-8'))
-                if self.auto_continue:
-                    user_input = 'y'
-                else:
-                    user_input = input('Response: ')
-                self._process.sendline(user_input)
-
-            elif i >= WARNING_IDX and i < ERROR_IDX:  # warning
-                self.log.debug('Prompt: Response index %i.  Matched %s'
-                               % (i, ready_items[i].decode('utf-8')))
-                self.log.warning(response + ready_items[i].decode('utf-8'))
-                if self.auto_continue:
-                    user_input = 'y'
-                else:
-                    user_input = input('Response: ')
-                self._process.sendline(user_input)
-
-            elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
-                self.log.debug('Error index %i.  Matched %s'
-                               % (i, ready_items[i].decode('utf-8')))
-                self.log.error(response)
-                response += ready_items[i].decode('utf-8')
-                raise Exception(response)
-
-            elif i >= PROMPT_IDX:  # prompt
-                self.log.debug('Prompt index %i.  Matched %s'
-                               % (i, ready_items[i].decode('utf-8')))
-                self.log.info(response + ready_items[i].decode('utf-8'))
-                # user_input = input('Response: ')
-                # self._process.sendline(user_input)
-                raise Exception('User input expected.  Try using non_interactive')
-
-            else:  # continue item
-                self.log.debug('continue index %i.  Matched %s'
-                               % (i, ready_items[i].decode('utf-8')))
-                break
-            
-            # handle response
-            if '*** ERROR ***' in response:  # flag error
-                self.log.error(response)
-                if not continue_on_error:
-                    raise Exception(response)
-            elif ignored.search(response):  # flag ignored command
-                if not self.allow_ignore:
-                    self.log.error(response)
-                    raise Exception(response)
-                else:
-                    self.log.warning(response)
-            else:
-                self.log.info(response)
-
-        if self._interactive_plotting:
-            self._display_plot(full_response)
-
-        if 'is not a recognized' in full_response:
-            if not self.allow_ignore:
-                full_response = full_response.replace('This command will be ignored.',
-                                                      '')
-                full_response += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(full_response)
-
-        # return last response and all preceding responses
-        return full_response
 
     @property
     def processor(self):
@@ -1027,102 +1069,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             # get the processor
             processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
         return processor
-
-    def _run_corba_command(self, command):
-        """
-        Sends a command to the mapdl server
-
-        """
-        if not self.is_alive:
-            raise Exception('ANSYS process has been terminated')
-
-        # cleanup command
-        command = command.strip()
-        if not command:
-            raise Exception('Empty command')
-
-        if command[:4].lower() == '/com':
-            split_command = command.split(',')
-            if len(split_command) < 2:
-                return ''
-            elif not split_command[1]:
-                return ''
-            elif split_command[1]:
-                if not split_command[1].strip():
-                    return ''
-
-        # /OUTPUT not redirected properly in corba
-        if command[:4].lower() == '/out':
-            items = command.split(',')
-            if len(items) < 2:  # empty comment
-                return ''
-            elif not items[1]:  # empty comment
-                return ''
-            elif items[1]:
-                if not items[1].strip():    # empty comment
-                    return ''
-
-            items = command.split(',')
-            if len(items) > 1:  # redirect to file
-                if len(items) > 2:
-                    if items[2].strip():
-                        filename = '.'.join(items[1:3]).strip()
-                    else:
-                        filename = '.'.join(items[1:2]).strip()
-                else:
-                    filename = items[1]
-
-                if filename:
-                    if os.path.basename(filename) == filename:
-                        filename = os.path.join(self.path, filename)
-                    self._output = filename
-                    if len(items) == 5:
-                        if items[4].lower().strip() == 'append':
-                            self._outfile = open(filename, 'a')
-                    else:
-                        self._outfile = open(filename, 'w')
-            else:
-                self._output = ''
-                if self._outfile:
-                    self._outfile.close()
-                self._outfile = None
-            return ''
-
-        # include error checking
-        text = ''
-        additional_text = ''
-
-        self.log.debug('Running command %s' % command)
-        text = self._corba_server.executeCommandToString(command)
-
-        # print supressed output
-        additional_text = self._corba_server.executeCommandToString('/GO')
-
-        if 'is not a recognized' in text:
-            if not self.allow_ignore:
-                text = text.replace('This command will be ignored.', '')
-                text += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(text)
-
-        if text:
-            text = text.replace('\\n', '\n')
-            if '*** ERROR ***' in text:
-                self.log.error(text)
-                raise Exception(text)
-
-        if additional_text:
-            additional_text = additional_text.replace('\\n', '\n')
-            if '*** ERROR ***' in additional_text:
-                self.log.error(additional_text)
-                raise Exception(additional_text)
-
-        if self._interactive_plotting:
-            self._display_plot('%s\n%s' % (text, additional_text))
-
-        # return text, additional_text
-        if text == additional_text:
-            additional_text = ''
-        return '%s\n%s' % (text, additional_text)
 
     def load_parameters(self):
         """Loads and returns all current parameters
@@ -1164,22 +1110,20 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.fileHandler = logging.FileHandler(filepath)
         formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 
-        # self.fileHandler.setFormatter(logging.Formatter(formatstr))
-        # self.log.addHandler(self.fileHandler)
-
         self.fileHandler = logging.FileHandler(filepath, mode=mode)
         self.fileHandler.setFormatter(logging.Formatter(formatstr))
         self.fileHandler.setLevel(logging.DEBUG)
-        self.log.addHandler(self.fileHandler)
-        self.log.info('Added file handler at %s' % filepath)
+        self._log.addHandler(self.fileHandler)
+        self._log.info('Added file handler at %s' % filepath)
 
     def remove_file_handler(self):
-        self.log.removeHandler(self.fileHandler)
-        self.log.info('Removed file handler')
+        """Removes the filehander from the log"""
+        self._log.removeHandler(self.fileHandler)
+        self._log.info('Removed file handler')
 
     def _display_plot(self, text):
         """Display the last generated plot from ANSYS"""
-        png_found = png_test.findall(text)
+        png_found = PNG_TEST.findall(text)
         if png_found:
             # flush graphics writer
             self.show('CLOSE')
@@ -1197,7 +1141,7 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
                 if self._show_matplotlib_figures:
                     plt.show()  # consider in-line plotting
             else:
-                self.log.error('Unable to find screenshot at %s' % filename)
+                self._log.error('Unable to find screenshot at %s' % filename)
         pass
 
     def __del__(self):
@@ -1205,71 +1149,33 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         try:
             self.exit()
         except Exception as e:
-            self.log.error('exit: %s', str(e))
+            self._log.error('exit: %s', str(e))
 
         try:
             self.kill()
         except Exception as e:
-            self.log.error('kill: %s', str(e))
+            self._log.error('kill: %s', str(e))
 
         try:
             self._close_apdl_log()
         except Exception as e:
-            self.log.error('Failed to close apdl log: %s', str(e))
+            self._log.error('Failed to close apdl log: %s', str(e))
 
     def Exit(self):
-        msg = DeprecationWarning('\n"Exit" decpreciated.  \n' +
-                                 'Please use "exit" instead')
-        warnings.warn(msg)
-        self.exit()
+        raise NotImplementedError('\n"Exit" decpreciated.  \n'
+                                  'Please use "exit" instead')
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # clean up when complete
-        self.exit()
-
-    def exit(self, close_log=True):
-        """Exit ANSYS process without attempting to kill the process."""
-        self.log.debug('Terminating ANSYS')
-        try:
-            if self._using_corba:
-                self._corba_server.terminate()
-            else:
-                if self._process is not None:
-                    self._process.sendline('FINISH')
-                    self._process.sendline('EXIT')
-
-        except Exception as e:
-            if 'WaitingForReply' not in str(e):
-                raise Exception(e)
-
-        if close_log:
-            if self.apdl_log is not None:
-                self.apdl_log.close()
-
-    def kill(self):
-        """ Forces ANSYS process to end and removes lock file """
-        if self.is_alive:
+    def _remove_lockfile(self):
+        """Removes lockfile"""
+        if os.path.isfile(self._lockfile):
             try:
-                self.exit()
-            except:
-                if not self._using_corba:
-                    kill_process(self._process.pid)
-                    self.log.debug('Killed process %d' % self._process.pid)
-
-        if os.path.isfile(self.lockfile):
-            try:
-                os.remove(self.lockfile)
+                os.remove(self._lockfile)
             except:
                 pass
 
     @property
-    def results(self):
-        """ Returns a binary interface to the result file """
-        raise NotImplementedError('Depreciated.  Use "result" instead')
-
-    @property
     def result(self):
-        """ Returns a binary interface to the result file """
+        """Returns a binary interface to the result file."""
         try:
             result_path = self.inquire('RSTFILE')
             if not os.path.dirname(result_path):
@@ -1281,90 +1187,9 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
-    def __call__(self, command, **kwargs):
-        raise DepreciationError('\nDirectly calling the Mapdl class is depreciated' +
-                                'Please use "run" instead')
-
-    def _open_corba(self, nproc, timeout, additional_switches):
-        """Open a connection to ANSYS via a CORBA interface"""
-        self.log.info('Connecting to ANSYS via CORBA')
-        self._using_corba = True
-
-        # command must include "aas" flag to start MAPDL server
-        # if int(self.version) < 190:
-        command = '"%s" -aas -j %s -b -i tmp.inp -o out.txt -np %d %s' % (self.exec_file, self._jobname, nproc, additional_switches)
-
-        # remove the broadcast file if it exists:
-        if os.path.isfile(self.broadcast_file):
-            os.remove(self.broadcast_file)
-
-        # add run location to command
-        self.log.debug('Spawning shell process with: "%s"' % command)
-        self.log.debug('At "%s"' % self.path)
-
-        if os.name == 'nt':
-            old_path = os.getcwd()
-            os.chdir(self.path)
-            os.system('START /B MAPDL %s 2> NUL' % command)
-            os.chdir(old_path)
-            self._process = True
-        else:
-            self._process = subprocess.Popen(command, shell=True,
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE, cwd=self.path)
-
-        # listen for broadcast file
-        self.log.debug('Waiting for valid key in %s' % self.broadcast_file)
-        telapsed = 0
-        tstart = time.time()
-        while telapsed < timeout:
-            try:
-                if os.path.isfile(self.broadcast_file):
-                    with open(self.broadcast_file, 'r') as f:
-                        text = f.read()
-                        if 'visited:collaborativecosolverunitior' in text:
-                            self.log.debug('Initialized ANSYS')
-                            break
-                time.sleep(0.1)
-                telapsed = time.time() - tstart
-
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-
-        # exit if timed out
-        if telapsed > timeout:
-            err_msg = 'Unable to start ANSYS within %.1f seconds' % timeout
-            self.log.error(err_msg)
-            raise TimeoutError(err_msg)
-
-        # open server
-        keyfile = os.path.join(self.path, 'aaS_MapdlId.txt')
-        with open(keyfile) as f:
-            key = f.read()
-
-        # attempt to import corba
-        try:
-            from ansys_corba import CORBA
-        except:
-            pip_cmd = 'pip install ansys_corba'
-            raise ImportError('Missing ansys_corba.\n' +
-                              'This feature does not support MAC OS.\n' + \
-                              'Otherwise, please install with "%s"' % pip_cmd)
-
-        orb = CORBA.ORB_init()
-        self._corba_server = orb.string_to_object(key)
-
-        # set to non-interactive
-        if os.name != 'nt':
-            text = self._corba_server.executeCommandToString('/BATCH')
-
-        try:
-            self._corba_server.getComponentName()
-        except:
-            raise RuntimeError('Unable to connect to APDL server')
-
-        self.log.debug('Connected to ANSYS using CORBA interface')
-        self.log.debug('Key %s' % key)
+    def __call__(self, command, **kwargs):  # pragma: no cover
+        raise NotImplementedError('\nDirectly calling the Mapdl class is depreciated'
+                                  'Please use ``run`` instead')
 
     class _non_interactive:
         """Allows user to enter commands that need to run
@@ -1383,29 +1208,29 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
             self.parent = parent
 
         def __enter__(self):
-            self.parent.log.debug('entering non-interactive mode')
+            self.parent._log.debug('entering non-interactive mode')
             self.parent._store_commands = True
 
         def __exit__(self, type, value, traceback):
-            self.parent.log.debug('entering non-interactive mode')
+            self.parent._log.debug('entering non-interactive mode')
             self.parent._flush_stored()
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
         """
-        self.log.debug('Flushing stored commands')
+        self._log.debug('Flushing stored commands')
         tmp_out = os.path.join(appdirs.user_data_dir('pyansys'),
                                'tmp_%s.out' % random_string())
         self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
         self._stored_commands.append('/OUTPUT')
         commands = '\n'.join(self._stored_commands)
-        self.apdl_log.write(commands + '\n')
+        self._apdl_log.write(commands + '\n')
 
         # write to a temporary input file
         filename = os.path.join(appdirs.user_data_dir('pyansys'),
                                 'tmp_%s.inp' % random_string())
-        self.log.debug('Writing the following commands to a temporary ' +
+        self._log.debug('Writing the following commands to a temporary ' +
                        'apdl input file:\n%s' % commands)
 
         with open(filename, 'w') as f:
@@ -1417,23 +1242,18 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         if os.path.isfile(tmp_out):
             self.response = '\n' + open(tmp_out).read()
 
-        # clean up output file and append the output to the existing
-        # output file
-        # self.run('/OUTPUT, %s, , , APPEND' % self._output)
-        # if os.path.isfile(tmp_out):
-        #     for line in open(tmp_out).readlines():
-        #         self.run('/COM,%s\n' % line[:74])
-
         if self.response is None:
-            self.log.warning('Unable to read response from flushed commands')
+            self._log.warning('Unable to read response from flushed commands')
         else:
-            self.log.info(self.response)
+            self._log.info(self.response)
 
     def get_float(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Used to get the value of a float-parameter from APDL
-        Take note, that internally an apdl parameter __floatparameter__ is
-        created/overwritten.
+        """Get the value of a float-parameter from APDL.
+
+        Notes
+        -----
+        An APDL parameter __floatparameter__ is created/overwritten.
         """
         line = self.get("__floatparameter__", entity, entnum, item1, it1num,
                         item2, it2num, **kwargs)
@@ -1509,10 +1329,6 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         self.save(tmp_database)
         self.exit(close_log=False)
 
-        # # verify lock file is gone
-        # while os.path.isfile(self.lockfile):
-        #     time.sleep(0.1)
-
         # copy result file to temp directory
         if include_result:
             resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
@@ -1533,15 +1349,15 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self.exec_file, name))
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self._exec_file, name))
         os.chdir(cwd)
 
         # must remove the start file when finished
         os.remove(start_file)
         os.remove(other_start_file)
 
-        # open up script again when finished
-        self._open()
+        # reload database when finished
+        self._launch()
         self.resume(tmp_database)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
@@ -1551,12 +1367,14 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
     def jobname(self):
         """MAPDL job name.
 
-        This is requested from the active mapdl instance
+        This is requested from the active mapdl instance.
         """
-        return self.inquire('JOBNAME')
+        jobname = self.inquire('JOBNAME')
+        self._jobname = jobname
+        return jobname
 
     def inquire(self, func):
-        """Returns system information
+        """Returns system information.
 
         Parameters
         ----------
@@ -1593,12 +1411,12 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
         Return the job name
 
         >>> mapdl.inquire('JOBNAME')
-        'file'
+        file
 
         Return the result file name
 
         >>> mapdl.inquire('RSTFILE')
-        'file.rst'
+        file.rst
         """
         response = ''
         try:
@@ -1609,17 +1427,8 @@ class Mapdl(_MapdlCommands, _DeprecCommands):
 
     def Run(self, command):
         """Depreciated"""
-        raise DepreciationError('\nCommand "Run" decpreciated.  \n' +
-                                'Please use "run" instead'
-
-
-class ANSYS(Mapdl):
-
-    def __init__(self, *args, **kwargs):
-        msg = DeprecationWarning('\nClass "ANSYS" decpreciated.  \n' +
-                                 'Please use "Mapdl" instead')
-        warnings.warn(msg)
-        super(ANSYS, self).__init__(*args, **kwargs)
+        raise NotImplementedError('\nCommand "Run" decpreciated.  \n'
+                                  'Please use "run" instead')
 
 
 # TODO: Speed this up with:
