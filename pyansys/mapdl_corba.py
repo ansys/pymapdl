@@ -70,7 +70,6 @@ class MapdlCorba(_Mapdl):
         self._broadcast_logger = None
         self._server = None
         self._log_broadcast = log_broadcast
-        self._window_title = None
 
         # CORBA/AAS was introduced in v17
         version = int(re.findall(r'\d\d\d', exec_file)[0])
@@ -115,15 +114,15 @@ class MapdlCorba(_Mapdl):
 
         # after v19, this is the only way this will work...
         if os.name == 'nt':
-            self._window_title = 'MAPDL'
-            command = 'START /B MAPDL %s' % command
+            command = 'START /B "MAPDL" %s' % command
 
         # set stdout
-        if self._log.level < 20:  # < INFO
-            # no redirect
-            self._process = subprocess.Popen(command, shell=True, cwd=self.path)
+        if self._log.level < 20:  # < INFO            
+            self._process = subprocess.Popen(command, shell=True, 
+                                             cwd=self.path)
         else:
-            self._process = subprocess.Popen(command, shell=True, cwd=self.path,
+            self._process = subprocess.Popen(command, shell=True, 
+                                             cwd=self.path,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE)
 
