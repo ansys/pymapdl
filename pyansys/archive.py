@@ -1,5 +1,4 @@
-"""Module to read ANSYS ASCII block formatted CDB files
-"""
+"""Module to read ANSYS ASCII block formatted CDB files"""
 import os
 import sys
 import logging
@@ -229,25 +228,23 @@ class Archive():
 
     @property
     def elem(self):
-        """Array of element connectivity.
-
-        Each row is a element containing 20 entries of an individual
-        elements connectivity.  Unused entries are ``-1``.
+        """List of element connectivity in ANSYS node numbering.
 
         Examples
         --------
         >>> import pyansys
         >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.elem
-        array([[252576, 252577, 250644, ...,     -1,     -1,     -1],
-               [252571, 252572, 250620, ...,     -1,     -1,     -1],
-               [252577, 252578, 250619, ...,     -1,     -1,     -1],
-               ...,
-               [251878, 362635, 252073, ...,     -1,     -1,     -1],
-               [252073, 362835, 252074, ...,     -1,     -1,     -1],
-               [362635, 251878, 362623, ...,     -1,     -1,     -1]])
+        [array([  1,   4,  19,  15,  63,  91, 286, 240,   3,  18,  17,
+                 16,  81, 276, 267, 258,  62,  90, 285, 239],
+         array([  4,   2,   8,  19,  91,  44, 147, 286,   5,   7,  21,
+                 18, 109, 137, 313, 276,  90,  43, 146, 285],
+         array([ 15,  19,  12,  10, 240, 286, 203, 175,  17,  20,  13,
+                 14, 267, 304, 221, 230, 239, 285, 202, 174],
+        ...
         """
-        return self._raw['elem']
+        elements = np.split(self._raw['elem'], self._raw['elem_off'])
+        return [element[9:] for element in elements]
 
     @property
     def enum(self):

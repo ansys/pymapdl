@@ -150,8 +150,8 @@ setup(
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 Extension("pyansys._vtk_support",
-                           ["pyansys/cython/_vtk_support.pyx"],
+                 Extension("pyansys.vtk_support",
+                           ["pyansys/cython/vtk_support.c"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 

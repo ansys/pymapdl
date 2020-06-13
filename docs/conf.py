@@ -19,10 +19,6 @@ pyvista.FIGURE_PATH = os.path.join(os.path.abspath('./images/'), 'auto-generated
 if not os.path.exists(pyvista.FIGURE_PATH):
     os.makedirs(pyvista.FIGURE_PATH)
 
-# necessary when building the sphinx gallery
-pyvista.BUILDING_GALLERY = True
-
-
 # -- General configuration ------------------------------------------------
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -32,8 +28,19 @@ pyvista.BUILDING_GALLERY = True
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.napoleon',
+              'sphinx.ext.doctest',
+              'sphinx.ext.autosummary',
+              'notfound.extension',
+              'sphinx_copybutton',
               'sphinx_gallery.gen_gallery',
-              'sphinx.ext.napoleon']
+              'sphinx.ext.extlinks',
+              'sphinx.ext.coverage',
+              ]
+
+# extensions = ['sphinx.ext.autodoc',
+#               'sphinx_gallery.gen_gallery',
+#               'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyansys'
-copyright = u'2019, Alex Kaszynski'
+copyright = u'2020, Alex Kaszynski'
 author = u'Alex Kaszynski'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -185,6 +192,3 @@ texinfo_documents = [
      author, 'pyansys', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

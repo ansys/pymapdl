@@ -22,72 +22,24 @@ __inline int fast_atoi(char * raw, int intsz, int *i){
     return val;
 }
 
-__inline int fast_atoi2(char * raw, int intsz, int *i){
-    int val;
-    int c;
+__inline int fast_atoi2(char* raw, int intsz){
 
-    val = 0;
-    for (c=0; c<intsz; ++c){
-        // Seek through white space
-        if (raw[*(i)] == ' '){
-            ++*(i);
-            continue;
-        }
+  int val;
+  int c;
 
-        val = val*10 + (raw[*(i)] - '0');
-        ++*(i);
+  val = 0;
+  for (c=0; c<intsz; ++c){
+    // Seek through white space
+    if (raw[0] == ' '){
+      ++raw;
+      continue;
     }
 
-    // Pass counter position back to file position counter
-//    *(i) = c;
+    val = val*10 + (raw[0] - '0');
+    ++raw;
+  }
 
-    return val;
-}
-
-
-__inline int verbose_fast_atoi(char * raw, int intsz, int *i){
-    int val;
-    int c;
-
-    val = 0;
-    for (c=0; c<intsz; ++c){
-        ++*(i);
-        printf("%c", raw[*(i)]);
-
-        // Seek throug white space
-        if (raw[*(i)] == ' ') continue;
-
-        val = val*10 + (raw[*(i)] - '0');
-    }
-
-    // Pass counter position back to file position counter
-//    *(i) = c;
-
-    return val;
-}
-
-
-__inline int verbose_fast_atoi2(char * raw, int intsz, int *i){
-    int val;
-    int c;
-
-    val = 0;
-    for (c=0; c<intsz; ++c){
-        printf("%c", raw[*(i)]);
-        // Seek throug white space
-        if (raw[*(i)] == ' '){
-            ++*(i);
-            continue;
-        }
-
-        val = val*10 + (raw[*(i)] - '0');
-        ++*(i);
-    }
-
-    // Pass counter position back to file position counter
-//    *(i) = c;
-
-    return val;
+  return val;
 }
 
 
@@ -108,243 +60,57 @@ __inline int checkneg(char * raw, int intsz, int *i){
     return found;
 }
 
-__inline int verbose_checkneg(char * raw, int intsz, int *i){
-    int c;
-    int found = 0;
-    for (c=0; c<intsz; ++c){
-        printf("%c", raw[*(i)]);
-        // Seek throug white space
-        if (raw[*(i)] == '-'){
-            found = 1;
-        }
-        ++*(i);
+__inline int checkneg_raw(char * raw, int intsz){
+  int c;
+  for (c=0; c<intsz; ++c){
+    if (raw[0] == '-'){
+      return 1;
     }
-
-    return found;
+    ++raw;
+  }
+  return 0;
 }
 
-
-
-
-void main(){
-    //
-}
-
-
 //=============================================================================
-// Fast string to flot converter for ANSYS formatted floats
-//=============================================================================
-__inline double fast_atof(char *raw, int fltsz, int*i){
-
-    int ivalue, j, nread;
-    double dvalue, sign, scale, pow;
-    char tempstr[100];
-
-    int c = *(i);
-    *(i) += fltsz;
-
-    //init value
-    dvalue = 1.0;
-
-    // check sign
-    if (raw[c] == '-') {
-        sign = -1.0;
-    }
-    else{
-        sign = 1.0;
-    }
-
-    // read first interger
-    ++c;            
-    dvalue *= raw[c] - '0';
-
-    // next is always a '.', skip it
-    ++c;
-
-    nread = fltsz - 7; // sign, first int, point, xxx, scinot (4)
-    pow = 0.1;
-    for (j=0; j<nread; ++j){
-        ++c;
-        dvalue += (raw[c] - '0')*pow;
-        pow *= 0.1;
-
-    }
-
-    // apply sign
-    dvalue *= sign;
-
-    // Read exponent
-    // Skip the E
-    ++c; 
-
-    // store sign of exponent
-    ++c;
-    tempstr[0] = raw[c];
-    
-    // read exponent
-    ++c;
-    ivalue = 10*(raw[c] - '0');
-    ++c;
-    ivalue += raw[c] - '0';
-
-    ++c;
-    if (ivalue == 0) {
-        // Store value
-        return dvalue;
-    }
-
-    scale = 1.0;
-    while (ivalue > 0) { scale *= 10.0; ivalue -=  1; }
-
-    if (tempstr[0] == '+'){
-        return dvalue *= scale;
-    }
-    else{
-        return dvalue /= scale;
-    }
-   
-}
-
-
-//=============================================================================
-// Reads NBLOCK from ANSYS.  Raw string is from Python reader and file is
+// reads nblock from ANSYS.  Raw string is from Python reader and file is
 // positioned at the start of the data of NBLOCK
 //=============================================================================
 int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
 		int fltsz, int *n, int EOL, int nexp){
 
+  // set to start of the NBLOCK
+  raw += n[0];
+  int len_orig = strlen(raw);
+  int j;
 
-    char tempstr[100];
-    int i, j, k, nread, t, actual_nread;
-    double dvalue, sign, pow, scale;
-
-    int ivalue;
-    int found;
-
-    // set file position
-    i = *(n);
-
-    /* Read node data */
-    nread = fltsz - 5 - nexp; // sign, first int, point, xxx, scinot (4)
-    for (k=0; k<nnodes; ++k){
-        // Starts assuming file is positioned on node number
-
-        // Read node number
-        nnum[k] = fast_atoi2(raw, intsz[0], &i);
-
-        // skip fields 2 and 3
-        i += intsz[1];
-	i += intsz[2];
-
-        // Read next 6 fields
-        for (t=0; t<7; ++t){
-            
-            // Check if end of line character
-	    found = 0;
-	    while (raw[i] == '\r' || raw[i] == '\n' ){
-	      ++i;
-	      found = 1;
-	    }
-	    if (found) break;
-
-            //init value
-            dvalue = 1.0;
-
-            // check sign
-            if (raw[i] == '-') {
-                sign = -1.0;
-            }
-            else{
-                sign = 1.0;
-            }
-
-	    // verify not a sign
-	    // certain versions of workbench outputted archive files
-	    // have different float formats
-            ++i;
-            if (raw[i] == '-') {
-                sign = -1.0;
-		actual_nread = nread - 1;
-            }
-            else if (raw[i] != ' '){
-	        --i;
-		actual_nread = nread;
-            }
-	    else{
-	      actual_nread = nread - 1;
-            }
-
-	    // read first interger
-	    ++i;
-            dvalue *= raw[i] - '0';
-
-            // next is always a '.', skip it
-            ++i;
-
-            pow = 0.1;
-            for (j=0; j<actual_nread; ++j){
-                ++i;
-                dvalue += (raw[i] - '0')*pow;
-                pow *= 0.1;
-            }
-
-            // apply sign
-            dvalue *= sign;
-
-            // Read exponent
-            // Skip the E
-            ++i;
-
-
-            // store sign of exponent
-            ++i;
-            tempstr[0] = raw[i];
-            
-            // read exponent
-	    pow = 1;
-	    for (j=1; j<nexp; ++j){
-	      pow *= 10;
-	    }
-
-	    ivalue = 0;
-	    for (j=nexp; j>0; --j){
-	      ++i;
-	      ivalue += pow*(raw[i] - '0');
-	      pow /= 10;
-	    }
-
-            ++i;
-            if (ivalue == 0) {
-                // Store value
-                nodes[k*6 + t] = dvalue;
-                continue;
-            }
-
-            scale = 1.0;
-            while (ivalue > 0) { scale *= 10.0; ivalue -=  1; }
-
-            if (tempstr[0] == '+'){
-                dvalue *= scale;
-            }
-            else{
-                dvalue /= scale;
-            }
-
-            // Store value
-            nodes[k*6 + t] = dvalue;
-
-        }
-
-        // make empty fields 0.0
-        for (j=t; j<6; ++j){
-            nodes[k*6 + j] = 0.0;
-        }
-
+  for (int i=0; i<nnodes; i++){
+    nnum[i] = fast_atoi2(raw, intsz[0]);
+    raw += intsz[0];
+    raw += intsz[1];
+    raw += intsz[2];
+    
+    for (j=0; j<6; j++){
+      if (raw[0] == '\r' || raw[0] == '\n'){
+	break;
+      }
+      // performance is slow here.  Need a specialized strtod for ANSYS floats
+      nodes[6*i + j] = strtod(raw, &raw);
     }
 
-    // return file position
-    return i;
-    
+    // remaining are zeros
+    for (; j<6; j++){
+      nodes[6*i + j] = 0;
+    }
+
+    while (raw[0] == '\r' || raw[0] == '\n'){
+      ++raw;
+    }
+  }
+
+  // return file position
+  int fpos = len_orig - strlen(raw) + n[0];
+  return fpos;
+
 }
 
 
@@ -392,8 +158,6 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
         // Skip Field 10 and read Field 11: Element number
         n += intsz;
         elemnum[i] = fast_atoi(raw, intsz, &n);
-
-	/* printf("%d\n", elemnum[i]); */
             
         // Read nodes in element
         c = 0;
@@ -409,14 +173,6 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
                 val = val*10 + (raw[n] - '0');
             }
 
-	    /* if (val < 0){ */
-	    /*     printf("File position: %d\n", n); */
-	    /*     printf("Invalid node number on element number %d\n", elemnum[i]); */
-	    /*     perror(""); */
-	    /* 	return 0; */
-	    /* } */
-
-	    /* printf("\t%d", val); */
             elem[20*i + c] = val;
             ++c;
 
@@ -439,86 +195,107 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
 }
 
 
-//=============================================================================
-// Reads EBLOCK from ANSYS.  Raw string is from Python reader and file is
-// positioned at the start of the data of EBLOCK
-//=============================================================================
-int read_eblock_full(char *raw, int *elem, int nelem, int intsz, int *j){
 
-  int i, n, c, nnode, val, g, endval;
-  n = *(j) - 1;
+/* ============================================================================
+ * Function:  read_eblock_fill
+ *
+ * Reads EBLOCK from ANSYS archive file.
+ * raw : Raw string is from Python reader
+ * 
+ * elem_off : Indices of the start of each element in ``elem``
+ *
+ * elem: Array of elements
+ *   Each element contains 10 items plus the nodes belonging to the
+ *   element.  The first 10 items are:
+ *     mat    - material reference number
+ *     type   - element type number
+ *     real   - real constant reference number
+ *     secnum - section number
+ *     esys   - element coordinate system
+ *     death  - death flag (0 - alive, 1 - dead)
+ *     solidm - solid model reference
+ *     shape  - coded shape key
+ *     elnum  - element number
+ *     baseeid- base element number (applicable to reinforcing elements only
+ *     nodes  - The nodes belonging to the element in ANSYS numbering.
+ *
+ * nelem : Number of elements.
+ * 
+ * pos : Position of the start of the EBLOCK.
+ * ==========================================================================*/
+int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
+		     int intsz, int *pos){
+
+  int i, j, nnode;
+
+  // set to start of the EBLOCK
+  raw += pos[0];
+  int len_orig = strlen(raw);
+  int c = 0;  // position in elem array
 
   // Loop through elements
   for (i=0; i<nelem; ++i){
+    // store start of each element
+    elem_off[i] = c;
 
     // Check if end of line
-    while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ){
-      ++n;
+    while (raw[0] == '\r' || raw[0] == '\n' ){
+      ++raw;
     }
 
     // Check if at end of the block
-    if (checkneg(raw, intsz, &n)){
+    if (checkneg_raw(raw, intsz)){
+      raw += intsz;
       break;
     }
-    n -= intsz; // since checkneg advances by intsz
-        
 
+    // ANSYS archive format:
     // Field 1: material reference number
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 2: element type number
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 3: real constant reference number
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 4: section number
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 5: element coordinate system
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 6: Birth/death flag
-    // Field 7:
-    // Field 8:
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
+    // Field 7: Solid model reference
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
+    // Field 8: Coded shape key
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+
     // Field 9: Number of nodes
+    nnode = fast_atoi2(raw, intsz); raw += intsz;
+
     // Field 10: Not Used
+    raw += intsz;
+    
     // Field 11: Element number
-
-    // Read in Fields 1 - 11
-    endval = i + 11;
-    for (; i < endval; i++){
-      elem[i] = fast_atoi(raw, intsz, &n);
-    }
-
+    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    
     // Read nodes in element
-    endval = i + elem[i - 3];
-    for (; i < endval; i++){
-      // Check if end of line
-      while (raw[n + 1] == '\r' || raw[n + 1] == '\n' ) ++n;
-
-      // Parse node (same as function fast_atoi)
-      val = 0;
-      for (g=0; g<intsz; ++g){
-	++n;
-	if (raw[n] == ' ') continue;  // Seek through white space
-	val = val*10 + (raw[n] - '0');
-      }
-      elem[i] = val;
+    /* int end_pos = c + nnode; */
+    /* printf("%d\n", nnode); */
+    for (j=0; j < nnode; j++){
+      // skip through EOL
+      while (raw[0] == '\r' || raw[0] == '\n' ) ++raw;
+      elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
     }            
   }
 
   // update file position
-  *(j) = n;
+  *(pos) = len_orig - strlen(raw) + pos[0];
 
-  // return array position
-  return i;
-
+  // Return total data read
+  return c;
 }
-
-  /* CVEC<int>	elem(31 * nElems); */
-  /* int ielem(0), iel(1); */
-  /* while ( ( ielem = elnext( &ielem)) > 0) */
-  /*   { */
-  /*     int n = elmget( &ielem, _elmdat, NodPtr); */
-	
-  /*     elem[iel-1] = cc; // split point */
-	
-  /*     for (int ii=0; ii<10; ii++, cc++) */
-  /* 	elem[cc] = _elmdat[ii];	 */
-      
-  /*     for (int ii=0; ii<n; ii++, cc++) */
-  /* 	elem[cc] = NodPtr[ii];	 */
-
-  /*     iel++; */
-  /*   } */

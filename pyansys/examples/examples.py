@@ -244,7 +244,7 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
         loglevel = 'ERROR'
     else:
         loglevel = 'INFO'
-    ansys = pyansys.Mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
+    ansys = pyansys.launch_mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque

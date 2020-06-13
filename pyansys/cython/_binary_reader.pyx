@@ -826,8 +826,8 @@ def read_array(filename, int ptr, int nterm, int neqn, int [::1] const):
 
 
 def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
-    """    Reads in full file details required for the assembly of the
-    mass and stiffness matrices.
+    """Read in full file details required for the assembly of the mass
+    and stiffness matrices.
 
     The reference arrays are sorted by default, though this increases
     the bandwidth of the mass and stiffness matrices.
@@ -881,13 +881,13 @@ def sort_nodal_eqlv(int neqn, int [::1] neqv, int [::1] ndof):
         ndof_sort[i] = ndof[sidx[i]]
 
     cdef int d = 0
-    # create an index array.  this tells the array readers where
+    # create an index array.  This tells the array readers where
     # to place each row and col when it's sorted
     cdef int [::1] index_arr = np.empty(neqn, np.int32)
     for i in range(nnodes):
         ind = sidx[i]
         c = cumdof[ind]
-        for j in range(ndof[i]):
+        for j in range(ndof[ind]):
             s_neqv_dof[d] = c + j
             index_arr[c + j] = d
             d += 1
@@ -1155,7 +1155,7 @@ def cells_with_all_nodes(index_type [::1] offset, index_type [::1] cells,
     Updates mask of cells containing all points in the point indices
     or mask.
     """
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef uint8 celltype
     cdef int ncell_points, i, j
     cdef index_type cell_offset
@@ -1179,7 +1179,7 @@ def cells_with_any_nodes(index_type [::1] offset, index_type [::1] cells,
     Updates mask of cells containing at least one point in the point
     indices or mask.
     """
-    cdef int ncells = offset.size
+    cdef int ncells = celltypes.size
     cdef uint8 celltype
     cdef int ncell_points
     cdef index_type cell_offset

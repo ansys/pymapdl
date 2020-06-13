@@ -7,7 +7,7 @@ from pyansys.archive import (Archive, write_cmblock, write_nblock,
 
 from pyansys.common import read_binary
 from pyansys.convert import convert_script
-from pyansys.mapdl import ANSYS, Mapdl
+from pyansys.mapdl import launch_mapdl
 from pyansys.mapdl import change_default_ansys_path
 
 # Sphinx-gallery tools

@@ -18,13 +18,12 @@ cimport numpy as np
 
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
-    int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
-                    int)
-    int read_eblock_full(char*, int*, int, int, int*)
+    int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*, int)
+    int read_eblock_full(char*, int*, int*, int, int, int*);
 
-    
+
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
-    """ Copies a single line from instr to outstr starting from position n """
+    """Copies a single line from instr to outstr starting from position n """
     
     cdef int k = n[0]
     
@@ -85,9 +84,7 @@ def read(filename, read_parameters=False, debug=False):
     cdef size_t l = 0
     cdef ssize_t read
     cdef int[5] blocksz
-    cdef int i, j
-    cdef int tempint
-    cdef int linelen, isz
+    cdef int i, j, linelen, isz, tempint
     cdef float tempflt
 
     # Size temp char array
@@ -106,12 +103,9 @@ def read(filename, read_parameters=False, debug=False):
 
     # EBLOCK
     cdef int nelem = 0
-    cdef int [:, ::1] elem = np.empty((0, 0), ctypes.c_int)
-    cdef int [::1] etype = np.empty(0, ctypes.c_int)
-    cdef int [::1] elemnum = np.empty(0, ctypes.c_int)
-    cdef int [::1] e_rcon = np.empty(0, ctypes.c_int)
-    cdef int [::1] mtype = np.empty(0, ctypes.c_int)
-    cdef int [::1] sec_id = np.empty(0, ctypes.c_int)
+    cdef int elem_sz = 0
+    cdef int [::1] elem = np.empty(0, ctypes.c_int)
+    cdef int [::1] elem_off = np.empty(0, ctypes.c_int)
 
     # CMBLOCK
     cdef int ncomp
@@ -157,13 +151,10 @@ def read(filename, read_parameters=False, debug=False):
                 myfgets(line, raw, &n, fsize)
                 isz = int(line[line.find(b'i') + 1:line.find(b')')])
 
-                # element field data and connectivity
+                # Populate element field data and connectivity
                 elem = np.empty(nelem*30, dtype=ctypes.c_int)
-                elem_offset = np.empty(nelem, dtype=ctypes.c_int)
-
-                # Call C extention to populate the element array
-                elem_arr_sz
-                c = read_eblock_full(&elem_offset, &elem[0], nelem, isz, &n)
+                elem_off = np.empty(nelem, dtype=ctypes.c_int)
+                elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz, &n)
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
@@ -418,18 +409,11 @@ def read(filename, read_parameters=False, debug=False):
 
                     # Initialize element data array.  Use number of lines
                     # as nelem is unknown
-                    elem = np.empty((nelem, 20), dtype=ctypes.c_int)
-                    etype = np.empty(nelem, dtype=ctypes.c_int)
-                    elemnum = np.empty(nelem, dtype=ctypes.c_int)
-                    e_rcon = np.empty(nelem, dtype=ctypes.c_int)
-                    mtype = np.empty(nelem, dtype=ctypes.c_int)
-                    sec_id = np.empty(nelem, dtype=ctypes.c_int)
-
-                    # Call C extention to read eblock
-                    nelem = read_eblock(raw, &mtype[0], &etype[0],
-                                        &e_rcon[0], &sec_id[0],
-                                        &elemnum[0], &elem[0, 0], nelem,
-                                        isz, &n, EOL)
+                    # Populate element field data and connectivity
+                    elem = np.empty(nelem*30, dtype=ctypes.c_int)
+                    elem_off = np.empty(nelem, dtype=ctypes.c_int)
+                    elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz,
+                                               &n)
 
                     if nelem == 0:
                         raise Exception('Unable to read element block')
@@ -442,14 +426,10 @@ def read(filename, read_parameters=False, debug=False):
             'ekey': np.asarray(elem_type, ctypes.c_int),
             'nnum': np.asarray(nnum),
             'nodes': np.asarray(nodes),
-            'enum': np.asarray(elemnum[:nelem]),
-            'elem': np.array(elem[:nelem]),
-            'etype': np.asarray(etype[:nelem]),
-            'e_rcon': np.asarray(e_rcon[:nelem]),
+            'elem': np.array(elem[:elem_sz]),
+            'elem_off': np.array(elem_off),
             'node_comps': node_comps,
             'elem_comps': elem_comps,
-            'mtype': np.asarray(mtype),  # material type
-            'sec_id': np.asarray(sec_id),
             'keyopt': keyopt,
             'parameters': parameters
             }

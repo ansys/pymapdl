@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 
 import pyansys
-from pyansys.examples import rstfile, fullfile
+from pyansys.examples import rstfile
 from pyvista.plotting import system_supports_plotting
 
 
@@ -17,6 +17,7 @@ try:
     import imageio_ffmpeg
 except ImportError:
     HAS_FFMPEG = False
+
 
 @pytest.fixture(scope='module')
 def result():
@@ -76,11 +77,3 @@ def test_loadbeam():
     linkresult_path = os.path.join(testfiles_path, 'link1.rst')
     linkresult = pyansys.read_binary(linkresult_path)
     assert np.any(linkresult.grid.cells)
-
-
-def test_fullreader():
-    fobj = pyansys.read_binary(fullfile)
-    dofref, k, m = fobj.load_km()
-    assert dofref.size
-    assert k.size
-    assert m.size
