@@ -243,7 +243,7 @@ class Archive():
                  14, 267, 304, 221, 230, 239, 285, 202, 174],
         ...
         """
-        elements = np.split(self._raw['elem'], self._raw['elem_off'])
+        elements = np.split(self._raw['elem'], self._raw['elem_off'][1:-1])
         return [element[9:] for element in elements]
 
     @property

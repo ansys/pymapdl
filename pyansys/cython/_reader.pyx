@@ -153,7 +153,7 @@ def read(filename, read_parameters=False, debug=False):
 
                 # Populate element field data and connectivity
                 elem = np.empty(nelem*30, dtype=ctypes.c_int)
-                elem_off = np.empty(nelem, dtype=ctypes.c_int)
+                elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
                 elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz, &n)
 
         elif b'K' == line[0]:
@@ -411,7 +411,7 @@ def read(filename, read_parameters=False, debug=False):
                     # as nelem is unknown
                     # Populate element field data and connectivity
                     elem = np.empty(nelem*30, dtype=ctypes.c_int)
-                    elem_off = np.empty(nelem, dtype=ctypes.c_int)
+                    elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
                     elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz,
                                                &n)
 

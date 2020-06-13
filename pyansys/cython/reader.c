@@ -297,5 +297,6 @@ int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
   *(pos) = len_orig - strlen(raw) + pos[0];
 
   // Return total data read
+  elem_off[i + 1] = c;
   return c;
 }
