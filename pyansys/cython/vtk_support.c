@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /* VTK numbering for vtk cells */
 uint8_t VTK_EMPTY_CELL = 0;
@@ -29,6 +30,7 @@ uint8_t VTK_QUADRATIC_HEXAHEDRON = 25;
 // 4: 3d Solid (Hexahedral, wedge, pyramid, tetrahedral)
 // 5: Tetrahedral
 
+/*
 int ETYPE_MAP[] = {0, // Empty for FORTRAN based indexing
 		   2,  // LINK1
 		   3,  // PLANE2
@@ -174,7 +176,7 @@ int ETYPE_MAP[] = {0, // Empty for FORTRAN based indexing
 		   0,  // UNUSED142
 		   3,  // SHELL143
 		   0,  // ROM144
->		   0,  // UNUSED145
+		   0,  // UNUSED145
 		   0,  // UNUSED146
 		   0,  // UNUSED147
 		   0,  // UNUSED148
@@ -328,19 +330,31 @@ int ETYPE_MAP[] = {0, // Empty for FORTRAN based indexing
 		   0,  // UNUSED299
 		   0, // USER300 
 };
+*/
+
+// Contains data for VTK UnstructuredGrid
+struct VtkData {
+  int64_t *offset;
+  int64_t *cells;
+  uint8_t *celltypes;
+  int loc;  // current position within cells
+  int *nref;  // conversion between ansys and vtk numbering
+};
+struct VtkData vtk_data;
 
 
 // Populate offset, cell type, and prepare the cell array for a cell
-void add_cell(int64_t *offset, int64_t *cells, uint8_t *celltypes,
-	      int build_offset, int *loc, int n_points, uint8_t celltype){
+void add_cell(bool build_offset, int n_points, uint8_t celltype){
   if (build_offset){
-    offset[0] = loc[0]; offset++;
+    vtk_data.offset[0] = vtk_data.loc;
+    vtk_data.offset++;
   }
-  celltypes[0] = celltype; celltypes++;
-  cells[loc[0]] = n_points++;
-  loc[0]++;
+  vtk_data.celltypes[0] = celltype;
+  vtk_data.celltypes++;
+  vtk_data.cells[vtk_data.loc++] = n_points;
   return;
 }
+
 
 
 /* ============================================================================
@@ -373,41 +387,216 @@ void add_cell(int64_t *offset, int64_t *cells, uint8_t *celltypes,
  * 18        (2, 6)
  * 19        (3, 7)
  */
-void add_hex(int64_t *offset, int64_t *cells, uint8_t *celltypes,
-		       int build_offset, int *loc, int *elem, int off, bool quad){
-  if (quad) {
-    add_cell(offset, cells, celltypes, build_offset, loc, 20,
-	     VTK_QUADRATIC_HEXAHEDRON);
+void add_hex(bool build_offset, int *elem, bool quad){
+  int n_points;
+  if (quad){
+    n_points = 20;
+    add_cell(build_offset, n_points, VTK_QUADRATIC_HEXAHEDRON);
   } else {
-    add_cell(offset, cells, celltypes, build_offset, loc, 8, VTK_HEXAHEDRON);
+    n_points = 8;
+    add_cell(build_offset, n_points, VTK_HEXAHEDRON);
   }
 
-  cells[loc[0]] = elem[off + 0]; loc[0]++;
-  cells[loc[0]] = elem[off + 1]; loc[0]++;
-  cells[loc[0]] = elem[off + 2]; loc[0]++;
-  cells[loc[0]] = elem[off + 3]; loc[0]++;
-  cells[loc[0]] = elem[off + 4]; loc[0]++;
-  cells[loc[0]] = elem[off + 5]; loc[0]++;
-  cells[loc[0]] = elem[off + 6]; loc[0]++;
-  cells[loc[0]] = elem[off + 7]; loc[0]++;
-
-  if (quad){
-    cells[loc[0]] = elem[off + 8]; loc[0]++;
-    cells[loc[0]] = elem[off + 9]; loc[0]++;
-    cells[loc[0]] = elem[off + 10]; loc[0]++;
-    cells[loc[0]] = elem[off + 11]; loc[0]++;
-    cells[loc[0]] = elem[off + 12]; loc[0]++;
-    cells[loc[0]] = elem[off + 13]; loc[0]++;
-    cells[loc[0]] = elem[off + 14]; loc[0]++;
-    cells[loc[0]] = elem[off + 15]; loc[0]++;
-    cells[loc[0]] = elem[off + 16]; loc[0]++;
-    cells[loc[0]] = elem[off + 17]; loc[0]++;
-    cells[loc[0]] = elem[off + 18]; loc[0]++;
-    cells[loc[0]] = elem[off + 19]; loc[0]++;
+  // translate connectivity
+  for (int i=0; i<n_points; i++){
+    /* printf("vtk_data.cells[%d] = vtk_data.nref[%d]\n", vtk_data.loc, elem[i]); */
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
   }
 
   return;
 }
+
+
+
+/* ============================================================================
+Store wedge element in vtk arrays.  ANSYS elements are ordered
+differently than vtk elements.  ANSYS orders counter-clockwise and
+VTK orders clockwise
+    
+VTK DOCUMENTATION
+Linear Wedge
+The wedge is defined by the six points (0-5) where (0,1,2) is the
+base of the wedge which, using the right hand rule, forms a
+triangle whose normal points outward (away from the triangular
+face (3,4,5)).
+
+Quadradic Wedge 
+The ordering of the fifteen points defining the
+cell is point ids (0-5,6-14) where point ids 0-5 are the six
+corner vertices of the wedge, defined analogously to the six
+points in vtkWedge (points (0,1,2) form the base of the wedge
+which, using the right hand rule, forms a triangle whose normal
+points away from the triangular face (3,4,5)); followed by nine
+midedge nodes (6-14). Note that these midedge nodes correspond lie
+on the edges defined by : 
+(0,1), (1,2), (2,0), (3,4), (4,5), (5,3), (0,3), (1,4), (2,5)
+*/
+void add_wedge(bool build_offset, int *elem, bool quad){
+  if (quad){
+    add_cell(build_offset, 15, VTK_QUADRATIC_WEDGE);
+  } else {
+    add_cell(build_offset, 6, VTK_WEDGE);
+  }
+
+  // [0, 1, 2, 2, 3, 4, 5, 5]
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[2]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[1]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[6]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[5]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[4]];
+
+  if (quad){
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[9]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[8]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[11]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[13]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[12]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[15]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[18]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[17]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[16]];
+  }
+
+  return;
+}
+
+
+void add_pyr(bool build_offset, int *elem, bool quad){
+  int i;  // counter
+  if (quad){
+    add_cell(build_offset, 13, VTK_QUADRATIC_PYRAMID);
+  } else {
+    add_cell(build_offset, 5, VTK_PYRAMID);
+  }
+
+  // [0, 1, 2, 3, 4, X, X, X]
+  for (i=0; i<5; i++){
+     vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
+  }
+
+  if (quad){
+    for (i=8; i<12; i++){
+      vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
+    }
+
+    for (i=16; i<20; i++){
+      vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
+    }
+  }
+  return;
+}
+
+
+
+/* ============================================================================
+ * Stores tetrahedral element in vtk arrays.  ANSYS elements are
+ * ordered the same as vtk elements.
+ * 
+ * VTK DOCUMENTATION:
+ * Linear
+ * The tetrahedron is defined by the four points (0-3); where (0,1,2)
+ * is the base of the tetrahedron which, using the right hand rule,
+ * forms a triangle whose normal points in the direction of the
+ * fourth point.
+ * 
+ * Quadradic   
+ * The cell includes a mid-edge node on each of the size edges of the
+ * tetrahedron. The ordering of the ten points defining the cell is
+ * point ids (0-3,4-9) where ids 0-3 are the four tetra vertices; and
+ * point ids 4-9 are the midedge nodes between:
+ * (0,1), (1,2), (2,0), (0,3), (1,3), and (2,3)
+============================================================================ */
+void add_tet(bool build_offset, int *elem, bool quad){
+  if (quad){
+    add_cell(build_offset, 10, VTK_QUADRATIC_TETRA);
+  } else {
+    add_cell(build_offset, 4, VTK_TETRA);
+  }
+
+  // edge nodes
+  // [0, 1, 2, 2, 3, 3, 3, 3]
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[1]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[2]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[4]];
+
+  if (quad){
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[8]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[9]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[11]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[16]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[17]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[18]];
+  }
+
+  return;
+}
+
+void add_quad(bool build_offset, int *elem, bool is_quad){
+  int n_points;
+  if (is_quad){
+    n_points = 8;
+    add_cell(build_offset, n_points, VTK_QUADRATIC_QUAD);
+  } else {
+    n_points = 4;
+    add_cell(build_offset, n_points, VTK_QUAD);
+  }
+
+  // translate connectivity
+  for (int i=0; i<n_points; i++){
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
+  }
+
+  return;
+}
+
+void add_tri(bool build_offset, int *elem, bool quad){
+  if (quad){
+    add_cell(build_offset, 6, VTK_QUADRATIC_TRIANGLE);
+  } else {
+    add_cell(build_offset, 3, VTK_TRIANGLE);
+  }
+
+  // edge nodes
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[1]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[2]];
+
+  if (quad){
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[4]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[5]];
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[7]];
+  }
+
+  return;
+}
+
+
+void add_line(bool build_offset, int *elem, bool quad){
+  if (quad){
+    add_cell(build_offset, 3, VTK_QUADRATIC_EDGE);
+  } else {
+    add_cell(build_offset, 2, VTK_LINE);
+  }
+
+  // edge nodes
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[1]];
+  if (quad){
+    vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[2]];
+  }
+
+  return;
+}
+
+
+void add_point(bool build_offset, int *elem){
+  add_cell(build_offset, 1, VTK_VERTEX);
+  vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
+  return;
+}
+
 
 
 /*
@@ -434,27 +623,6 @@ on the edges defined by :
 (0,1), (1,2), (2,0), (3,4), (4,5), (5,3), (0,3), (1,4), (2,5)
 */
 
-void add_quadratic_wedge(int64_t *offset, int64_t *cells, uint8_t *celltypes,
-			 int build_offset, int *loc, int *elem, int off){
-  add_cell(offset, cells, celltypes, build_offset, loc, 15, VTK_QUADRATIC_WEDGE);
-  cells[loc[0]] = elem[off + 12]; loc[0]++;
-  cells[loc[0]] = elem[off + 11]; loc[0]++;
-  cells[loc[0]] = elem[off + 10]; loc[0]++;
-  cells[loc[0]] = elem[off + 16]; loc[0]++;
-  cells[loc[0]] = elem[off + 15]; loc[0]++;
-  cells[loc[0]] = elem[off + 14]; loc[0]++;
-  cells[loc[0]] = elem[off + 19]; loc[0]++;
-  cells[loc[0]] = elem[off + 18]; loc[0]++;
-  cells[loc[0]] = elem[off + 21]; loc[0]++;
-  cells[loc[0]] = elem[off + 23]; loc[0]++;
-  cells[loc[0]] = elem[off + 22]; loc[0]++;
-  cells[loc[0]] = elem[off + 25]; loc[0]++;
-  cells[loc[0]] = elem[off + 28]; loc[0]++;
-  cells[loc[0]] = elem[off + 27]; loc[0]++;
-  cells[loc[0]] = elem[off + 26]; loc[0]++;
-
-  return;
-}
 
 
 /* ============================================================================
@@ -500,119 +668,77 @@ void add_quadratic_wedge(int64_t *offset, int64_t *cells, uint8_t *celltypes,
  * 
  * build_offset: Enable, disable populating offset array
  * ==========================================================================*/
-void ans_to_vtk(int nelem, int *elem, int *elem_off, int *type_ref, int nnode,
-		int *nnum, int64_t *offset, int64_t *cells, uint8_t *celltypes,
-		int build_offset){
-  bool is_tri, is_quad;
+int ans_to_vtk(int nelem, int *elem, int *elem_off, int *type_ref, int nnode,
+	       int *nnum, int64_t *offset, int64_t *cells, uint8_t *celltypes,
+	       int build_offset, int * etype_map){
+  bool is_quad;
   int i;  // counter
-  int loc = 0;
   int nnode_elem;  // number of nodes belonging to the element
   int off;  // location of the element nodes
+  int etype;  // ANSYS element type number
 
-  // index ansys node number to C based VTK compatible indexing
-  int *nref = (int *) malloc(nnum[nnode - 1]);
+  // index ansys node number to VTK C based compatible indexing
+  // max node number should be last node
+  int *nref = (int*) malloc(nnum[nnode - 1] * sizeof(int));
   for (i=0; i<nnode; i++){
     nref[nnum[i]] = i;
   }
 
+  // populate global vtk data
+  vtk_data.offset = offset;
+  vtk_data.cells = cells;
+  vtk_data.celltypes = celltypes;
+  vtk_data.nref = nref;
+  vtk_data.loc = 0;
+
   // Convert each element from ANSYS connectivity to VTK connectivity
   for (i=0; i<nelem; i++){
+    /* printf("Element %d \n", i); */
     // etype
-    off = elem_off[i] + 10; // to the start of the nodes
-    switch (ETYPE_MAP[type_ref[off]]){
+    etype = elem[elem_off[i] + 1];
+    off = elem_off[i] + 9; // to the start of the nodes
+    /* printf("off = %d \n", off); */
+    nnode_elem = elem_off[i + 1] - off;  // number of nodes in element
+    /* printf("nnode_elem = %d \n", nnode_elem); */
+    /* printf("type_ref[%d]\n", type_ref[etype]); */
+    /* printf("case is %d\n", ETYPE_MAP[type_ref[etype]]); */
+
+    switch (etype_map[type_ref[etype]]){
     case 0:  // not supported
-      add_cell(offset, cells, celltypes, build_offset, &loc, 0, VTK_EMPTY_CELL);
-      loc++;
+      add_cell(build_offset, 0, VTK_EMPTY_CELL);
 
     case 1: // point
-      add_cell(offset, cells, celltypes, build_offset, &loc, 1, VTK_VERTEX);
-      cells[loc] = elem[off + 10]; loc++;  // add connectivity
+      add_point(build_offset, &elem[off]);
 
     case 2: // line
-      if (elem_off[i + 1] - off == 2){
-	add_cell(offset, cells, celltypes, build_offset, &loc, 2, VTK_LINE);
-	cells[loc] = elem[off + 0]; loc++;
-	cells[loc] = elem[off + 1]; loc++;
-      }
-      else {
-	add_cell(offset, cells, celltypes, build_offset, &loc, 3, VTK_QUADRATIC_EDGE);
-	cells[loc] = elem[off + 0]; loc++;
-	cells[loc] = elem[off + 1]; loc++;
-	cells[loc] = elem[off + 2]; loc++;
-    }
+      add_line(build_offset, &elem[off], nnode_elem > 2);
 
-    case 3:  // Shell
-      is_quad = elem_off[i + 1] - off > 4;
-      is_tri = elem[off + 2] == elem[off + 13];
-      if (is_tri){
-	if (is_quad){  // QUADRATIC_TRIANGLE
-	  add_cell(offset, cells, celltypes, build_offset, &loc, 6,
-		   VTK_QUADRATIC_TRIANGLE);
-	  cells[loc] = elem[off + 0]; loc++;
-	  cells[loc] = elem[off + 1]; loc++;
-	  cells[loc] = elem[off + 2]; loc++;
-	  cells[loc] = elem[off + 4]; loc++;
-	  cells[loc] = elem[off + 5]; loc++;
-	  cells[loc] = elem[off + 7]; loc++;
-	} else {  // TRIANGLE
-	  add_cell(offset, cells, celltypes, build_offset, &loc, 3, VTK_TRIANGLE);
-	  cells[loc] = elem[off + 0]; loc++;
-	  cells[loc] = elem[off + 1]; loc++;
-	  cells[loc] = elem[off + 2]; loc++;
-	}
+    case 3:  // shell
+      is_quad = nnode_elem > 4;
+      if (elem[off + 2] == elem[off + 13]){
+  	add_tri(build_offset, &elem[off], is_quad);
       } else {  // is quadrilateral
-	if (is_quad){  // QUADRATIC_QUAD
-	  add_cell(offset, cells, celltypes, build_offset, &loc, VTK_QUADRATIC_QUAD);
-	  cells[loc] = elem[off + 0]; loc++;
-	  cells[loc] = elem[off + 1]; loc++;
-	  cells[loc] = elem[off + 2]; loc++;
-	  cells[loc] = elem[off + 3]; loc++;
-	  cells[loc] = elem[off + 4]; loc++;
-	  cells[loc] = elem[off + 5]; loc++;
-	  cells[loc] = elem[off + 6]; loc++;
-	  cells[loc] = elem[off + 7]; loc++;
-	} else {  // QUAD
-	  add_cell(offset, cells, celltypes, build_offset, &loc, 4, VTK_QUAD);
-	  cells[loc] = elem[off + 0]; loc++;
-	  cells[loc] = elem[off + 1]; loc++;
-	  cells[loc] = elem[off + 2]; loc++;
-	  cells[loc] = elem[off + 3]; loc++;
-	}
+  	add_quad(build_offset, &elem[off], is_quad);
       }
 
-    case 4: // Solid
-      is_quad = elem_off[i + 1] - off > 8;
+    case 4: // solid
+      /* printf("Adding SOLID\n"); */
+      is_quad = nnode_elem > 8;
       if (elem[off + 6] != elem[off + 7]){ // hexahedral
-	if (is_quad){
-	  add_quadratic_hex(offset, cells, celltypes, build_offset, &loc, elem, off);
-	} else {
-	  add_hex(offset, cells, celltypes, build_offset, &loc, elem, off);
-	}
-      } else if (elem[off + 5] != elem[off + 6]){ //
-	if (is_quad){
-	  add_quadratic_wedge(offset, cells, celltypes, build_offset, &loc, elem, off);
-	} else {
-	  add_wedge(offset, cells, celltypes, build_offset, &loc, elem, off);
-	}
+  	add_hex(build_offset, &elem[off], is_quad);
+      } else if (elem[off + 5] != elem[off + 6]){ // wedge
+  	add_wedge(build_offset, &elem[off], is_quad);
       } else if (elem[off + 2] != elem[off + 3]) { // pyramid
-	if (is_quad){
-	  add_quadratic_pyr(offset, cells, celltypes, build_offset, &loc, elem, off);
-	} else {
-	  add_pyr(offset, cells, celltypes, build_offset, &loc, elem, off);
-	}
+  	add_pyr(build_offset, &elem[off], is_quad);
       } else { // tetrahedral
-	if (is_quad){
-	  add_quadratic_tet(offset, cells, celltypes, build_offset, &loc, elem, off);
-	} else {
-	  add_tet(offset, cells, celltypes, build_offset, &loc, elem, off);
-	}
+  	add_tet(build_offset, &elem[off], is_quad);
       }
 
-  }
-	
-    
-  }
+    } // end of switch
+    /* printf("Done\n\n"); */
+  }  // end of loop
 
-  return;
-
+  /* printf("FINISHING\n\n"); */
+  free(nref);
+  return vtk_data.loc;
 }

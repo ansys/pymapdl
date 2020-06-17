@@ -289,7 +289,7 @@ int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
     for (j=0; j < nnode; j++){
       // skip through EOL
       while (raw[0] == '\r' || raw[0] == '\n' ) ++raw;
-      elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+      elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
     }            
   }
 
@@ -297,6 +297,6 @@ int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
   *(pos) = len_orig - strlen(raw) + pos[0];
 
   // Return total data read
-  elem_off[i + 1] = c;
+  elem_off[nelem] = c;
   return c;
 }

@@ -9,6 +9,7 @@ from libc.stdlib cimport atoi, atof
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy, strcmp
 from libc.stdint cimport int64_t
+ctypedef unsigned char uint8_t
 
 import ctypes
 
@@ -19,8 +20,11 @@ cimport numpy as np
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
     int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*, int)
-    int read_eblock_full(char*, int*, int*, int, int, int*);
+    int read_eblock_full(char*, int*, int*, int, int, int*)
 
+cdef extern from 'vtk_support.h':
+    int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*,
+                   int, int*)
 
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     """Copies a single line from instr to outstr starting from position n """
@@ -473,10 +477,9 @@ def node_block_format(string):
 
 
 def component_interperter(component):
-    """
-    If a node is negative, it is describing a list from the previous
-    node.  This is ANSYS's way of saving file size when writing
-    components.
+    """If a node is negative, it is describing a list from the
+    previous node.  This is ANSYS's way of saving file size when
+    writing components.
 
     This function has not been optimized.
 
@@ -489,3 +492,21 @@ def component_interperter(component):
             f_new.append(range(abs(component[i - 1]) + 1, abs(component[i]) + 1))
     
     return np.hstack(f_new).astype(ctypes.c_int)
+
+
+def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
+                    int [::1] nnum, int build_offset, int [::] etype_map):
+    """Convert ansys style connectivity to VTK connectivity"""
+    cdef int nelem = elem_off.size - 1
+    cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
+    cdef uint8_t [::1] celltypes = np.empty(nelem, dtype='uint8')
+
+    # Allocate connectivity
+    # max cell size is 20 (VTK_HEXAHEDRAL) and cell header is 1
+    cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)
+    cdef int loc = ans_to_vtk(nelem, &elem[0], &elem_off[0],
+                              &type_ref[0], nnum.size, &nnum[0],
+                              &offset[0], &cells[0], &celltypes[0],
+                              build_offset, &etype_map[0])
+
+    return np.asarray(offset), np.asarray(celltypes), np.asarray(cells[:loc])

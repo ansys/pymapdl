@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 from functools import wraps
+import warnings
 
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
@@ -12,7 +13,7 @@ import pyvista as pv
 import vtk
 
 from pyansys._cellqual import cell_quality_float, cell_quality
-from pyansys.elements import valid_types
+from pyansys.elements import ETYPE_MAP
 from pyansys import _relaxmidside, _parser, _reader
 from pyansys.misc import vtk_cell_info
 
@@ -21,6 +22,8 @@ VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 log = logging.getLogger(__name__)
 log.setLevel('CRITICAL')
 
+INVALID_ALLOWABLE_TYPES = TypeError('`allowable_types` must be an array '
+                                    'of ANSYS element types from 1 and 300')
 
 class Archive():
     """Read a blocked ANSYS archive file.
@@ -82,8 +85,7 @@ class Archive():
 
     def __init__(self, filename, read_parameters=False,
                  parse_vtk=True, force_linear=False,
-                 allowable_types=None, null_unallowed=False,
-                 verbose=False):
+                 allowable_types=None, null_unallowed=False, verbose=False):
         """Initializes an instance of the archive class."""
         self._read_parameters = read_parameters
         self._filename = filename
@@ -92,9 +94,50 @@ class Archive():
 
         self._etype = None  # internal element type reference
         self._grid = None
+
         if parse_vtk:
-            self._grid = raw_to_grid(self._raw, allowable_types, force_linear,
-                                     null_unallowed)
+            self._parse_vtk(allowable_types, force_linear)
+
+    def _parse_vtk(self, allowable_types=None, force_linear=False):
+        """Convert ANSYS element connectivity to a VTK UnstructuredGrid"""
+
+        if not len(self._raw['nodes']) or not len(self._raw['elem']):
+            warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
+            return
+
+        etype_map = ETYPE_MAP
+        if allowable_types is not None:
+            try:
+                allowable_types = np.asarray(allowable_types)
+            except:
+                raise INVALID_ALLOWABLE_TYPES
+
+            if not issubclass(allowable_types.dtype.type, np.integer):
+                raise TypeError('Element types must be an integer array-like')
+            elif allowable_types.min() < 1 or allowable_types.max() > 300:
+                raise INVALID_ALLOWABLE_TYPES
+
+            etype_map = np.zeros_like(ETYPE_MAP)
+            etype_map[allowable_types] = ETYPE_MAP[allowable_types]
+
+        type_ref = np.empty(2 << 15, np.int32)  # 65536
+        type_ref[self._raw['ekey'][:, 0]] = self._raw['ekey'][:, 1]
+        breakpoint()
+        offset, celltypes, cells = _reader.ans_vtk_convert(self._raw['elem'],
+                                                           self._raw['elem_off'],
+                                                           type_ref,
+                                                           self._raw['nnum'],
+                                                           not VTK9,
+                                                           etype_map)
+
+        if VTK9:
+            self._grid = pv.UnstructuredGrid(cells, celltypes, self.nodes, deep=False)
+        else:
+            self._grid = pv.UnstructuredGrid(offset, cells, celltypes, self.nodes,
+                                             deep=False)
+
+        if force_linear:
+            self._grid = self._grid.linear_copy()
 
     @property
     def key_option(self):
@@ -103,7 +146,7 @@ class Archive():
         Examples
         --------
         >>> import pyansys
-        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.key_option
         {}
         """
@@ -116,7 +159,7 @@ class Archive():
         Examples
         --------
         >>> import pyansys
-        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.material_type
         array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -392,7 +435,7 @@ class Archive():
         Examples
         --------
         >>> import pyansys
-        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.grid
         UnstructuredGrid (0x7ffa237f08a0)
           N Cells:      40
@@ -417,7 +460,7 @@ class Archive():
         Examples
         --------
         >>> import pyansys
-        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
         >>> archive.quality
         array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
                1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
@@ -958,7 +1001,8 @@ def write_cmblock(filename, items, comp_name, comp_type, digit_width=10):
         filename.write(text)
 
 
-def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
+def raw_to_grid(elem, elem_off, ekey, nnum, raw, allowable_types,
+                force_linear, null_unallowed):
     """Parses raw data into to VTK format.
 
     Parameters
@@ -970,7 +1014,7 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
 
     allowable_types : list, optional
         Allowable element types.  Defaults to all valid element
-        types in ``from pyansys.elements.valid_types``
+        types in ``from pyansys.elements``
 
         See help(pyansys.elements) for available element types.
 
@@ -989,15 +1033,20 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
         return
 
     # Convert to vtk style arrays
-    if allowable_types is None:
-        allowable_types = valid_types
-    else:
-        assert isinstance(allowable_types, list), \
-               'allowable_types must be a list'
-        for eletype in allowable_types:
-            if str(eletype) not in valid_types:
-                raise Exception('Element type "%s" ' % eletype +
-                                'cannot be parsed in pyansys')
+    etype_map = ETYPE_MAP
+    if allowable_types is not None:
+        try:
+            allowable_types = np.asarray(allowable_types)
+        except:
+            raise INVALID_ALLOWABLE_TYPES
+
+        if not issubclass(allowable_types.dtype.type, np.integer):
+            raise TypeError('Element types must be an integer array-like')
+        elif allowable_types.max() > 300 or allowable_types.min() < 1:
+            raise INVALID_ALLOWABLE_TYPES
+
+        etype_map = np.zeros_like(ETYPE_MAP)
+        etype_map[allowable_types] = ETYPE_MAP[allowable_types]
 
     # construct keyoption array
     keyopts = np.zeros((10000, 20), np.int16)
@@ -1006,8 +1055,16 @@ def raw_to_grid(raw, allowable_types, force_linear, null_unallowed):
         for index, value in raw['keyopt'][keyopt_key]:
             keyopts[keyopt_key, index] = value
 
+            type_ref = np.empty(65536, np.int32)
+            type_ref[ekey[:, 0]] = ekey[:, 1]
+
+
     # parse raw output
-    parsed = _parser.parse(raw, force_linear, allowable_types, null_unallowed, keyopts)
+    _reader.ans_vtk_convert(elem, elem_off, type_ref, nnum, True, etype_map)
+    # def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
+    #                     int [::1] nnum, int build_offset, int [::] etype_map):
+
+    # parsed = _parser.parse(raw, force_linear, allowable_types, null_unallowed, keyopts)
 
     cells = parsed['cells']
     offset = parsed['offset']

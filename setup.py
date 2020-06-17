@@ -124,10 +124,10 @@ setup(
     # Build cython modules
     cmdclass={'build_ext': build_ext},
     ext_modules=[
-                 Extension("pyansys._parser",
-                           ["pyansys/cython/_parser.pyx"],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
+                 # Extension("pyansys._parser",
+                 #           ["pyansys/cython/_parser.pyx"],
+                 #           extra_compile_args=cmp_arg,
+                 #           language='c'),
 
                  Extension("pyansys._db_reader",
                            ["pyansys/cython/_db_reader.pyx"],
@@ -136,7 +136,8 @@ setup(
 
                  Extension('pyansys._reader',
                            ['pyansys/cython/_reader.pyx',
-                            'pyansys/cython/reader.c'],
+                            'pyansys/cython/reader.c',
+                            'pyansys/cython/vtk_support.c'],
                            extra_compile_args=cmp_arg,
                            language='c',),
 
@@ -147,11 +148,6 @@ setup(
 
                  Extension("pyansys._cellqual",
                            ["pyansys/cython/_cellqual.pyx"],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
-
-                 Extension("pyansys.vtk_support",
-                           ["pyansys/cython/vtk_support.c"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
