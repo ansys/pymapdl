@@ -53,11 +53,11 @@ def test_parse_vtk(hex_archive):
     assert 'ansys_node_num' in grid.point_arrays
     assert np.all(hex_archive.quality > 0)
 
-    with pytest.raises(Exception):
-        hex_archive._parse_vtk(allowable_types=186)
+    with pytest.raises(TypeError):
+        hex_archive._parse_vtk(allowable_types=-1)
 
-    with pytest.raises(Exception):
-        hex_archive._parse_vtk(allowable_types=[1, 2, 3])
+    with pytest.raises(TypeError):
+        hex_archive._parse_vtk(allowable_types=3.0)
 
 
 def test_invalid_archive(tmpdir, hex_archive):
@@ -81,7 +81,7 @@ def test_write_angle(tmpdir, hex_archive):
 
 @pytest.mark.skipif(IS_MAC, reason="TODO: Unexplained behavior")
 def test_missing_midside():
-    allowable_types = ['45', '95', '185', '186', '92', '187']
+    allowable_types = [45, 95, 185, 186, 92, 187]
     archive_file = os.path.join(testfiles_path, 'mixed_missing_midside.cdb')
     archive = pyansys.Archive(archive_file, allowable_types=allowable_types)
     assert (archive.quality > 0.0).all()
@@ -91,7 +91,6 @@ def test_missing_midside():
 def test_writehex(tmpdir, hex_archive):
     temp_archive = str(tmpdir.mkdir("tmpdir").join('tmp.cdb'))
     pyansys.save_as_archive(temp_archive, hex_archive.grid)
-
     archive_new = pyansys.Archive(temp_archive)
     assert np.allclose(hex_archive.grid.points, archive_new.grid.points)
     assert np.allclose(hex_archive.grid.cells, archive_new.grid.cells)
@@ -189,8 +188,8 @@ def test_write_lin_archive(tmpdir, celltype, all_solid_cells_archive_linear):
 
     pyansys.save_as_archive(tmp_archive_file, linear_grid)
     new_archive = pyansys.Archive(tmp_archive_file)
-    assert np.allclose(linear_grid.cells, new_archive.grid.cells)
-    assert np.allclose(linear_grid.points, new_archive.grid.points)
+    assert new_archive.quality > 0
+    assert np.allclose(linear_grid.celltypes, new_archive.grid.celltypes)
 
 
 def test_write_component(tmpdir):

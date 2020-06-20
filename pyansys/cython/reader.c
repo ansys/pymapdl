@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 //=============================================================================
 // Fast string to interger convert to ANSYS formatted intergers 
@@ -38,7 +39,6 @@ __inline int fast_atoi2(char* raw, int intsz){
     val = val*10 + (raw[0] - '0');
     ++raw;
   }
-
   return val;
 }
 
@@ -251,46 +251,52 @@ int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
 
     // ANSYS archive format:
     // Field 1: material reference number
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 2: element type number
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 3: real constant reference number
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 4: section number
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 5: element coordinate system
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 6: Birth/death flag
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 7: Solid model reference
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 8: Coded shape key
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
 
     // Field 9: Number of nodes
     nnode = fast_atoi2(raw, intsz); raw += intsz;
+
+    /* // sanity check */
+    /* if (nnode > 20){ */
+    /*   printf("Element %d\n", i); */
+    /*   perror("Greater than 20 nodes\n"); */
+    /*   exit(1); */
+    /* } */
 
     // Field 10: Not Used
     raw += intsz;
     
     // Field 11: Element number
-    elem[c] = fast_atoi2(raw, intsz); raw += intsz; c += 1;
+    elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
     
     // Read nodes in element
-    /* int end_pos = c + nnode; */
-    /* printf("%d\n", nnode); */
-    for (j=0; j < nnode; j++){
+    for (j=0; j<nnode; j++){
+      /* printf("reading node %d\n", j); */
       // skip through EOL
       while (raw[0] == '\r' || raw[0] == '\n' ) ++raw;
       elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
-    }            
+    }
   }
 
   // update file position

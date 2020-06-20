@@ -13,14 +13,14 @@ import pyvista as pv
 from pyansys._binary_reader import c_read_record
 from pyansys import _binary_reader
 
-ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
-                           3: None,
+ANSYS_BINARY_FILE_TYPES = {2: 'Element Matrix File',
+                           3: 'Element Save Data file',
                            4: 'Full stiffness-mass matrix File',
                            8: 'Substructure Matrices File',
                            9: 'Modal Results File',
                            10: 'Reduced Displacement File',
-                           12: 'Result file',
-                           16: 'Database file',
+                           12: 'Result File',
+                           16: 'Database File',
                            45: 'Component Mode Synthesis Matrices (CMS) File'}
 
 
@@ -41,7 +41,7 @@ ANSYS_BINARY_FILE_TYPES = {2: 'Element matrix file',
 # c     TRI  ->    TRINM        FUN11        3      tri stiffness
 # c     RST  ->    RSTNM        FUN12        6      results
 # c     DSUB ->    DSUBNM       FUN13        5      displacement substructure
-# c                             FUN14               input file? 
+# c                             FUN14               input file?
 # c                             FUN15               output file?
 # c     RDB  ->                 FUN16               back up file
 # c                             FUN17               temporary file (used in different cases)
@@ -160,16 +160,13 @@ def read_binary(filename, **kwargs):
 
         return result
 
-    elif file_format == 16:
-        from pyansys.db import Database
-        return Database(filename, debug=kwargs.pop('debug', False))
+    # elif file_format == 16:
+    #     from pyansys.db import Database
+    #     return Database(filename, debug=kwargs.pop('debug', False))
 
-    else:
-        if file_format in ANSYS_BINARY_FILE_TYPES:
-            file_type = ANSYS_BINARY_FILE_TYPES[file_format]
-        else:
-            file_type = str(file_format)
-        raise RuntimeError('ANSYS binary "%s" not supported' % file_type)
+    # No file matches
+    file_type = ANSYS_BINARY_FILE_TYPES.get(file_format, str(file_format))
+    raise RuntimeError('ANSYS binary "%s" not supported' % file_type)
 
 
 def read_table(f, dtype='i', nread=None, skip=False, get_nread=True, cython=False):

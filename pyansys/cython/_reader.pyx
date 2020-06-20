@@ -23,8 +23,7 @@ cdef extern from "reader.h":
     int read_eblock_full(char*, int*, int*, int, int, int*)
 
 cdef extern from 'vtk_support.h':
-    int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*,
-                   int, int*)
+    int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*, int)
 
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     """Copies a single line from instr to outstr starting from position n """
@@ -495,7 +494,7 @@ def component_interperter(component):
 
 
 def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
-                    int [::1] nnum, int build_offset, int [::] etype_map):
+                    int [::1] nnum, int build_offset):
     """Convert ansys style connectivity to VTK connectivity"""
     cdef int nelem = elem_off.size - 1
     cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
@@ -507,6 +506,6 @@ def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
     cdef int loc = ans_to_vtk(nelem, &elem[0], &elem_off[0],
                               &type_ref[0], nnum.size, &nnum[0],
                               &offset[0], &cells[0], &celltypes[0],
-                              build_offset, &etype_map[0])
+                              build_offset)
 
     return np.asarray(offset), np.asarray(celltypes), np.asarray(cells[:loc])

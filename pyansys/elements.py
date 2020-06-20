@@ -229,7 +229,7 @@ import numpy as np
 # 1: Point
 # 2: Line
 # 3: Shell
-# 4: 3d Solid (Hexahedral, wedge, pyramid, tetrahedral)
+# 4: 3D Solid (Hexahedral, wedge, pyramid, tetrahedral)
 # 5: Tetrahedral
 
 _etype_map = [0, # Empty for FORTRAN based indexing

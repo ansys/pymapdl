@@ -254,8 +254,8 @@ def reset_midside(int64_t [::1] cellarr, uint8 [::1] celltypes,
     for i in range(ncells):
         celltype = celltypes[i]
         c = offset[i] + 1
-        # if celltype == VTK_QUADRATIC_QUAD:
-            # relax_mid_quad(cellarr, c, pts, 1)
+        if celltype == VTK_QUADRATIC_QUAD:
+            relax_mid_quad(cellarr, c, pts, 1)
         if celltype == VTK_QUADRATIC_TETRA:
             relax_mid_tet(cellarr, c, pts, 1)
         elif celltype == VTK_QUADRATIC_PYRAMID:

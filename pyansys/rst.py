@@ -16,8 +16,8 @@ import vtk
 import numpy as np
 import pyvista as pv
 
-from pyansys import _binary_reader, _parser, _reader
-from pyansys.elements import valid_types
+from pyansys import _binary_reader, _reader
+from pyansys.geometry import Geometry
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
 from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                solution_data_header_keys, solution_header_keys_dp,
@@ -96,6 +96,7 @@ class ResultFile(AnsysBinary):
         self.enum = self._resultheader['eeqv'][self.sidx_elem]
 
         # store geometry for later retrival
+        self.geometry = None
         if read_geometry:
             self._store_geometry()
 
@@ -942,9 +943,9 @@ class ResultFile(AnsysBinary):
         # Node information
         nnod = geometry_header['nnod']
         nnum = np.empty(nnod, np.int32)
-        nloc = np.empty((nnod, 6), np.float)
+        nodes = np.empty((nnod, 6), np.float)
         _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
-                                  nnod, nloc, nnum)
+                                  nnod, nodes, nnum)
 
         # Element information
         nelm = geometry_header['nelm']
@@ -1021,82 +1022,56 @@ class ResultFile(AnsysBinary):
         # read in coordinate systems, material properties, and sections
         c_systems = self._parse_coordinate_system()
 
-        # The following is stored for each element
-        # mat     - material reference number
-        # type    - element type number
-        # real    - real constant reference number
-        # secnum  - section number
-        # esys    - element coordinate system
-        # death   - death flat (1 live, 0 dead)
-        # solidm  - solid model reference
-        # shape   - coded shape key
-        # elnum   - element number
-        # baseeid - base element number
-        # NODES   - node numbers defining the element
-
-        # allocate memory for this (a maximum of 21 points per element)
-        elem = np.empty((nelm, 20), np.int32)
-        elem[:] = -1
-
-        etype = np.empty(nelm, np.int32)
-        mtype = np.empty(nelm, np.int32)
-        rcon = np.empty(nelm, np.int32)
-        esys = np.empty(nelm, np.int32)
-        nsec = np.empty(nelm, np.int32)
-
         # load elements
-        _binary_reader.load_elements(self.filename, ptr_elem, nelm,
-                                     e_disp_table, elem, etype, mtype, rcon, esys,
-                                     nsec)
+        elem, elem_off = _binary_reader.load_elements(self.filename, ptr_elem,
+                                                      nelm, e_disp_table)
 
-        enum = self._resultheader['eeqv']
-
-        element_type = np.zeros_like(etype)
-        for key, typekey in ekey:
-            element_type[etype == key] = typekey
+        # enum = self._resultheader['eeqv']
 
         components = self._read_components()
 
-        # store geometry dictionary
-        self.geometry = {'nnum': nnum,
-                         'nodes': nloc,
-                         'etype': etype,
-                         'elem': elem,
-                         'enum': enum,
-                         'nsec': nsec,
-                         'ekey': np.asarray(ekey, ctypes.c_int),
-                         'esys': esys,
-                         'e_rcon': rcon,
-                         'mtype': mtype,
-                         'Element Type': element_type,
-                         'coord systems': c_systems,
-                         'components': components}
+        #                  'esys': esys,
+
+        # # store geometry dictionary
+        #                  'nsec': nsec,
+        #                  'coord systems': c_systems,
+        #                  'components': components}
+
+        self.geometry = Geometry(nnum, nodes, elem, elem_off, ekey,
+                                 node_comps=self._read_components())
+        breakpoint()
+        
+        # element_type = np.zeros_like(etype)
+        # for key, typekey in ekey:
+        #     element_type[etype == key] = typekey
+
+        # breakpoint()
+                                 
 
         # store the reference array
         # Allow quadradic and null unallowed
-        parsed = _parser.parse(self.geometry, False, valid_types, True,
-                               keyopts)
-        cells = parsed['cells']
-        offset = parsed['offset']
-        cell_type = parsed['cell_type']
-        self.numref = parsed['numref']
+        # parsed = _parser.parse(self.geometry, False, valid_types, True,
+                               # keyopts)
+        # cells = parsed['cells']
+        # offset = parsed['offset']
+        # cell_type = parsed['cell_type']
+        # self.numref = parsed['numref']
 
         # catch -1
-        cells[cells == -1] = 0
+        # cells[cells == -1] = 0
 
         # identify nodes that are actually in the solution
-        self.insolution = np.in1d(self.geometry['nnum'],
-                                  self._resultheader['neqv'])
+        self.insolution = np.in1d(self.geometry.nnum,
+                                  self._resultheader['neqv'], assume_unique=True)
 
         # Create vtk object
-        nodes = nloc[:, :3]
-        if VTK9:
-            self.quadgrid = pv.UnstructuredGrid(cells, cell_type, nodes)
-        else:
-            self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
-        self.quadgrid.cell_arrays['ansys_elem_num'] = enum
-        self.quadgrid.point_arrays['ansys_node_num'] = nnum
-        self.quadgrid.cell_arrays['Element Type'] = element_type
+        # nodes = nodes[:, :3]
+        # if VTK9:
+        #     self.quadgrid = pv.UnstructuredGrid(cells, cell_type, nodes)
+        # else:
+        #     self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
+        # self.quadgrid.cell_arrays['ansys_elem_num'] = enum
+        # self.quadgrid.point_arrays['ansys_node_num'] = nnum
         self.quadgrid.cell_arrays['Section Number'] = nsec
         self.quadgrid.cell_arrays['Material Type'] = mtype
         self.quadgrid.cell_arrays['Element Coordinate System'] = esys
@@ -1265,7 +1240,7 @@ class ResultFile(AnsysBinary):
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         # certain element types do not output stress
-        elemtype = self.geometry['Element Type'].astype(np.int32)
+        elemtype = self.geometry.etype
         etype = etype.astype(ctypes.c_int64)
 
         # load in raw results
@@ -1317,13 +1292,12 @@ class ResultFile(AnsysBinary):
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
-        elem = self.geometry['elem']
         enode = []
         for i in sidx:
-            enode.append(elem[i, :nnode[i]])
+            enode.append(self.geometry.enum[i, :nnode[i]])
 
         # Get element numbers
-        elemnum = self.geometry['enum'][self.sidx_elem]
+        elemnum = self.geometry.enum[self.sidx_elem]
         return element_stress, elemnum, enode
 
     def element_solution_data(self, rnum, datatype, sort=True):
@@ -2123,7 +2097,6 @@ class ResultFile(AnsysBinary):
 
         # Element types for nodal averaging
         cells, offset = vtk_cell_info(self.grid)
-        elemtype = self.geometry['Element Type'].astype(np.int32)
         data, ncount = _binary_reader.read_nodal_values(self.filename,
                                                         self.grid.celltypes,
                                                         ele_ind_table,
@@ -2133,7 +2106,7 @@ class ResultFile(AnsysBinary):
                                                         self.grid.number_of_points,
                                                         nodstr,
                                                         etype,
-                                                        elemtype,
+                                                        self.geometry.etype,
                                                         result_index,
                                                         ptr_off)
 
