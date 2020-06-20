@@ -2,16 +2,14 @@
 import os
 import sys
 import logging
-from functools import wraps
 
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_QUADRATIC_PYRAMID, VTK_WEDGE, VTK_QUADRATIC_WEDGE,
                  VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON)
-import pyvista as pv
 import vtk
 
-from pyansys import _relaxmidside, _reader
+from pyansys import _reader
 from pyansys.misc import vtk_cell_info
 from pyansys.geometry import Geometry
 
