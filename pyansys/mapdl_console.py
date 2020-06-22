@@ -83,10 +83,6 @@ class MapdlConsole(_Mapdl):
         self._log.debug('ANSYS Initialized')
         self._log.debug(self._process.before.decode('utf-8'))
 
-        # setup plotting for PNG
-        if self._interactive_plotting:
-            self.enable_interactive_plotting()
-
     def _run(self, command):
         """Sends command and returns ANSYS's response"""
         if not self._process.isalive():

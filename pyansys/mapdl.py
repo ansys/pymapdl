@@ -882,6 +882,10 @@ class _Mapdl(_MapdlCommands):
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
 
+        # setup plotting for PNG
+        if self._interactive_plotting:
+            self.enable_interactive_plotting()
+
     @property
     def _lockfile(self):
         """lockfile path"""
