@@ -317,7 +317,8 @@ def test_al(cleared, mapdl):
     a0 = mapdl.al(l0, l1, l2, l3)
     mapdl.enable_interactive_plotting()
     mapdl._show_matplotlib_figures = False
-    mapdl.aplot()
+    response = mapdl.aplot()
+    assert 'WRITTEN TO FILE' in response
 
 
 def test_logging(mapdl, tmpdir):

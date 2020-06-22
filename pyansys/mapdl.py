@@ -1143,7 +1143,6 @@ class _Mapdl(_MapdlCommands):
                     plt.show()  # consider in-line plotting
             else:
                 self._log.error('Unable to find screenshot at %s' % filename)
-        pass
 
     def __del__(self):
         """Clean up when complete"""
