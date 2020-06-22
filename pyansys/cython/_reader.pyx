@@ -1,4 +1,4 @@
-# cython: boundscheck=True
+# cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -134,10 +134,13 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading ET')
 
+
                 # element number
                 # element type
-                elem_type.append([int(line[3:line.find(b',', 5)]),
-                                  int(line[line.find(b',', 5) + 1:])])
+                et_val = line.decode().split(',')
+                elem_type.append([int(et_val[1]), int(et_val[2])])
+                # elem_type.append([int(line[3:line.find(b',', 5)]),
+                                  # int(line[line.find(b',', 5) + 1:])])
 
             elif b'EBLOCK' in line:
                 if debug:

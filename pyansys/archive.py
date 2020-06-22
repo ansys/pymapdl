@@ -607,7 +607,7 @@ def write_nblock(filename, node_id, pos, angles=None):
             filename,
             np.hstack((node_id.reshape(-1, 1), pos)),
             '%8d       0       0' +
-            '%20.13E' *
+            '%20.12E' *
             3,
             header=h,
             footer=f,
@@ -625,7 +625,7 @@ def write_nblock(filename, node_id, pos, angles=None):
             filename,
             arr,
             '%8d       0       0' +
-            '%20.13E' *
+            '%20.12E' *
             6,
             header=h,
             footer=f,

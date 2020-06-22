@@ -100,7 +100,7 @@ __inline int ans_strtod(char *raw, int fltsz, double *arr){
     if (*raw == '-'){
       esign = -1;
     }
-    raw++;
+    raw++; i++; i++;  // skip E and sign
     /* printf(" %d<%d ", i, fltsz); */
     for (; i<fltsz; i++){
       // read to whitespace or end of the line
@@ -114,11 +114,15 @@ __inline int ans_strtod(char *raw, int fltsz, double *arr){
   }
 
   // seek through end of float value
-  *arr = val;
+  if (sign == -1){
+    *arr = -val;
+  }
+  else {
+    *arr = val;
+  }
   /* printf(", %f", val); */
 
-  // Return 0 when a number has a been read
-  return 0;
+  return 0;  // Return 0 when a number has a been read
 }
 
 

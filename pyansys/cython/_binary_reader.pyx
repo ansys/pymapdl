@@ -1,6 +1,6 @@
 # cython: embedsignature=True
 # cython: language_level=3
-# cython: boundscheck=True
+# cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
 
