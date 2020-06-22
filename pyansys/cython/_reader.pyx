@@ -1,4 +1,4 @@
-# cython: boundscheck=False
+# cython: boundscheck=True
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -18,7 +18,7 @@ cimport numpy as np
 
 
 cdef extern from "reader.h":
-    int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
+    int read_nblock(char*, int*, double*, int, int*, int, int*)
     int read_eblock(char*, int*, int*, int, int, int*)
 
 cdef extern from 'vtk_support.h':
@@ -79,7 +79,7 @@ def read(filename, read_parameters=False, debug=False):
     fclose(cfile)
     
     # File counter
-    cdef int EOL, tmpval, start_pos
+    cdef int tmpval, start_pos
     cdef int n = 0
     
     # Define variables
@@ -261,7 +261,7 @@ def read(filename, read_parameters=False, debug=False):
                 nodes = np.empty((nnodes, 6))
 
                 n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                &d_size[0], f_size, &n, EOL, nexp)
+                                &d_size[0], f_size, &n)
 
                 # verify at the end of the block
                 if myfgets(line, raw, &n, fsize):
@@ -288,7 +288,7 @@ def read(filename, read_parameters=False, debug=False):
                     nodes = np.zeros((nnodes, 6))
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    &d_size[0], f_size, &n, EOL, nexp)
+                                    &d_size[0], f_size, &n)
 
 
         elif 'C' == line[0]:  # component
@@ -384,7 +384,7 @@ def read(filename, read_parameters=False, debug=False):
                     nodes = np.empty((nnodes, 6))
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    &d_size[0], f_size, &n, EOL, nexp)
+                                    &d_size[0], f_size, &n)
 
     # if eblock was not read for some reason
     if not eblock_read:

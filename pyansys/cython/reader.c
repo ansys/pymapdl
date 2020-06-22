@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 
 //=============================================================================
 // Fast string to interger convert to ANSYS formatted intergers 
@@ -29,7 +30,7 @@ __inline int fast_atoi(char* raw, int intsz){
 //=============================================================================
 // Checks for negative character 
 //=============================================================================
-__inline int checkneg(char * raw, int intsz){
+__inline int checkneg(char *raw, int intsz){
   int c;
   for (c=0; c<intsz; ++c){
     if (raw[0] == '-'){
@@ -40,36 +41,116 @@ __inline int checkneg(char * raw, int intsz){
   return 0;
 }
 
+
 // Reads various ansys float formats in the form of 
-// 3.7826539829200E+00
-// 
-// 
-/* double ans_strtod( */
+// "3.7826539829200E+00"
+// "1.0000000000000E-001"
+// "        -6.01203 "
+//
+// fltsz : Number of characters to read in a floating point number
+__inline int ans_strtod(char *raw, int fltsz, double *arr){
+  int i;
+  double sign = 1;
+
+  for (i=0; i<fltsz; i++){
+    if (*raw == '\r' || *raw == '\n'){
+      // value is zero then
+      arr[0] = 0;
+      /* printf("EOL"); */
+      return 1;
+    }
+    else if (*raw != ' '){  // always skip whitespace
+      break;
+    }
+    raw++;
+  }
+
+  // either a number of a sign
+  if (*raw == '-'){
+    sign = -1;
+    ++raw;
+    ++i;
+  }
+
+  // next value is always a number
+  double val = *raw++ - '0'; i++;
+
+  // next value is always a "."
+  raw++; i++;
+
+  // Read through the rest of the number
+  double k = 0.1;
+  for (; i<fltsz; i++){
+    if (*raw == 'E'){
+      break;
+    }
+    else if (*raw >= '0' && *raw <= '9') {
+      val += (*raw++ - '0') * k;
+      k *= 0.1;
+    }
+  }
+
+  // Might have scientific notation left, for example:
+  // 1.0000000000000E-001
+  int evalue = 0;
+  int esign = 1;
+  if (*raw == 'E'){
+    raw++; // skip "E"
+    // always a sign of some sort
+    if (*raw == '-'){
+      esign = -1;
+    }
+    raw++;
+    /* printf(" %d<%d ", i, fltsz); */
+    for (; i<fltsz; i++){
+      // read to whitespace or end of the line
+      if (*raw == ' ' || *raw == '\r' || *raw == '\n'){
+	break;
+      }
+      evalue = evalue*10 + (*raw++ - '0');
+    }
+    val *= pow(10, esign*evalue);
+      
+  }
+
+  // seek through end of float value
+  *arr = val;
+  /* printf(", %f", val); */
+
+  // Return 0 when a number has a been read
+  return 0;
+}
+
 
 //=============================================================================
 // reads nblock from ANSYS.  Raw string is from Python reader and file is
 // positioned at the start of the data of NBLOCK
 //=============================================================================
 int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
-		int fltsz, int *n, int EOL, int nexp){
+		int fltsz, int *n){
 
   // set to start of the NBLOCK
   raw += n[0];
   int len_orig = strlen(raw);
-  int j;
+  int j, i_val, eol;
+  /* double val; */
 
   for (int i=0; i<nnodes; i++){
-    nnum[i] = fast_atoi(raw, intsz[0]);
+    i_val = fast_atoi(raw, intsz[0]);
+    /* printf("%d", i_val); */
+    nnum[i] = i_val;
     raw += intsz[0];
     raw += intsz[1];
     raw += intsz[2];
     
     for (j=0; j<6; j++){
-      if (raw[0] == '\r' || raw[0] == '\n'){
+      eol = ans_strtod(raw, fltsz, &nodes[6*i + j]);
+      if (eol) {
 	break;
       }
-      // performance is slow here.  Need a specialized strtod for ANSYS floats
-      nodes[6*i + j] = strtod(raw, &raw);
+      else {
+	raw += fltsz;
+      }
     }
 
     // remaining are zeros
@@ -77,9 +158,15 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
       nodes[6*i + j] = 0;
     }
 
-    while (raw[0] == '\r' || raw[0] == '\n'){
+    // possible whitespace (occurs in hypermesh generated files)
+    while (*raw == ' '){
       ++raw;
     }
+
+    while (*raw == '\r' || *raw == '\n'){
+      ++raw;
+    }
+    /* printf("\n"); */
   }
 
   // return file position

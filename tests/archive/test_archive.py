@@ -227,3 +227,16 @@ def test_read_wb_nblock():
     archive = pyansys.Archive(filename)
     assert np.allclose(archive.nodes, expected)
     assert np.allclose(archive.node_angles, 0)
+
+
+def test_read_hypermesh():
+    expected = np.array([[-6.01203, 2.98129, 2.38556],
+                         [-3.03231, 2.98067, 2.38309],
+                         [-0.03485, 2.98004, 2.3805],
+                         [2.98794, 2.97941, 2.37773],
+                         [5.98956, 2.97878, 2.37488],
+                         [5.98956, 5.97878, 2.37488]])
+
+    filename = os.path.join(testfiles_path, 'U_SHAPE.cdb')
+    archive = pyansys.Archive(filename, verbose=True)
+    assert np.allclose(archive.nodes[:6], expected)
