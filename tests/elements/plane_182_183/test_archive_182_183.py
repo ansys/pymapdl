@@ -15,12 +15,12 @@ def archive():
 
 def test_archive_load(archive):
     assert archive.nnum.size == 12484
-    assert archive.elem.shape[0] == 6000
+    assert len(archive.elem) == 6000
 
 
 def test_parse(archive):
     nnode = archive.nnum.size
-    nelem = archive.elem.shape[0]
+    nelem = len(archive.elem)
     assert archive.grid.n_points == nnode
     assert archive.grid.n_cells == nelem
     assert np.sum(archive.grid.celltypes == 9) == 3000

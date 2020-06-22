@@ -9,6 +9,7 @@ from libc.stdlib cimport atoi, atof
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy, strcmp
 from libc.stdint cimport int64_t
+ctypedef unsigned char uint8_t
 
 import ctypes
 
@@ -17,13 +18,14 @@ cimport numpy as np
 
 
 cdef extern from "reader.h":
-    int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
-    int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*,
-                    int)
+    int read_nblock(char*, int*, double*, int, int*, int, int*)
+    int read_eblock(char*, int*, int*, int, int, int*)
 
-    
+cdef extern from 'vtk_support.h':
+    int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*, int)
+
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
-    """ Copies a single line from instr to outstr starting from position n """
+    """Copies a single line from instr to outstr starting from position n """
     
     cdef int k = n[0]
     
@@ -77,16 +79,14 @@ def read(filename, read_parameters=False, debug=False):
     fclose(cfile)
     
     # File counter
-    cdef int EOL, tmpval, start_pos
+    cdef int tmpval, start_pos
     cdef int n = 0
     
     # Define variables
     cdef size_t l = 0
     cdef ssize_t read
     cdef int[5] blocksz
-    cdef int i, j
-    cdef int tempint
-    cdef int linelen, isz
+    cdef int i, j, linelen, isz, tempint
     cdef float tempflt
 
     # Size temp char array
@@ -105,12 +105,9 @@ def read(filename, read_parameters=False, debug=False):
 
     # EBLOCK
     cdef int nelem = 0
-    cdef int [:, ::1] elem = np.empty((0, 0), ctypes.c_int)
-    cdef int [::1] etype = np.empty(0, ctypes.c_int)
-    cdef int [::1] elemnum = np.empty(0, ctypes.c_int)
-    cdef int [::1] e_rcon = np.empty(0, ctypes.c_int)
-    cdef int [::1] mtype = np.empty(0, ctypes.c_int)
-    cdef int [::1] sec_id = np.empty(0, ctypes.c_int)
+    cdef int elem_sz = 0
+    cdef int [::1] elem = np.empty(0, ctypes.c_int)
+    cdef int [::1] elem_off = np.empty(0, ctypes.c_int)
 
     # CMBLOCK
     cdef int ncomp
@@ -137,10 +134,13 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading ET')
 
+
                 # element number
                 # element type
-                elem_type.append([int(line[3:line.find(b',', 5)]),
-                                  int(line[line.find(b',', 5) + 1:])])
+                et_val = line.decode().split(',')
+                elem_type.append([int(et_val[1]), int(et_val[2])])
+                # elem_type.append([int(line[3:line.find(b',', 5)]),
+                                  # int(line[line.find(b',', 5) + 1:])])
 
             elif b'EBLOCK' in line:
                 if debug:
@@ -149,28 +149,17 @@ def read(filename, read_parameters=False, debug=False):
 
                 # Get size of EBLOCK
                 nelem = int(line[line.rfind(b',') + 1:])
+                if nelem == 0:
+                    raise Exception('Unable to read element block')
 
                 # Get interger block size
                 myfgets(line, raw, &n, fsize)
                 isz = int(line[line.find(b'i') + 1:line.find(b')')])
 
-                # Initialize element data array.  Use number of lines
-                # as nelem is unknown
-                elem = np.empty((nelem, 20), dtype=ctypes.c_int)
-                etype = np.empty(nelem, dtype=ctypes.c_int)
-                elemnum = np.empty(nelem, dtype=ctypes.c_int)
-                e_rcon = np.empty(nelem, dtype=ctypes.c_int)
-                mtype = np.empty(nelem, dtype=ctypes.c_int)
-                sec_id = np.empty(nelem, dtype=ctypes.c_int)
-
-                # Call C extention to read eblock
-                nelem = read_eblock(raw, &mtype[0], &etype[0],
-                                    &e_rcon[0], &sec_id[0],
-                                    &elemnum[0], &elem[0, 0], nelem,
-                                    isz, &n, EOL)
-
-                if nelem == 0:
-                    raise Exception('Unable to read element block')
+                # Populate element field data and connectivity
+                elem = np.empty(nelem*30, dtype=ctypes.c_int)
+                elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
+                elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz, &n)
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
@@ -275,7 +264,7 @@ def read(filename, read_parameters=False, debug=False):
                 nodes = np.empty((nnodes, 6))
 
                 n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                &d_size[0], f_size, &n, EOL, nexp)
+                                &d_size[0], f_size, &n)
 
                 # verify at the end of the block
                 if myfgets(line, raw, &n, fsize):
@@ -302,7 +291,7 @@ def read(filename, read_parameters=False, debug=False):
                     nodes = np.zeros((nnodes, 6))
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    &d_size[0], f_size, &n, EOL, nexp)
+                                    &d_size[0], f_size, &n)
 
 
         elif 'C' == line[0]:  # component
@@ -398,7 +387,7 @@ def read(filename, read_parameters=False, debug=False):
                     nodes = np.empty((nnodes, 6))
 
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    &d_size[0], f_size, &n, EOL, nexp)
+                                    &d_size[0], f_size, &n)
 
     # if eblock was not read for some reason
     if not eblock_read:
@@ -425,18 +414,11 @@ def read(filename, read_parameters=False, debug=False):
 
                     # Initialize element data array.  Use number of lines
                     # as nelem is unknown
-                    elem = np.empty((nelem, 20), dtype=ctypes.c_int)
-                    etype = np.empty(nelem, dtype=ctypes.c_int)
-                    elemnum = np.empty(nelem, dtype=ctypes.c_int)
-                    e_rcon = np.empty(nelem, dtype=ctypes.c_int)
-                    mtype = np.empty(nelem, dtype=ctypes.c_int)
-                    sec_id = np.empty(nelem, dtype=ctypes.c_int)
-
-                    # Call C extention to read eblock
-                    nelem = read_eblock(raw, &mtype[0], &etype[0],
-                                        &e_rcon[0], &sec_id[0],
-                                        &elemnum[0], &elem[0, 0], nelem,
-                                        isz, &n, EOL)
+                    # Populate element field data and connectivity
+                    elem = np.empty(nelem*30, dtype=ctypes.c_int)
+                    elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
+                    elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz,
+                                               &n)
 
                     if nelem == 0:
                         raise Exception('Unable to read element block')
@@ -449,14 +431,10 @@ def read(filename, read_parameters=False, debug=False):
             'ekey': np.asarray(elem_type, ctypes.c_int),
             'nnum': np.asarray(nnum),
             'nodes': np.asarray(nodes),
-            'enum': np.asarray(elemnum[:nelem]),
-            'elem': np.array(elem[:nelem]),
-            'etype': np.asarray(etype[:nelem]),
-            'e_rcon': np.asarray(e_rcon[:nelem]),
+            'elem': np.array(elem[:elem_sz]),
+            'elem_off': np.array(elem_off),
             'node_comps': node_comps,
             'elem_comps': elem_comps,
-            'mtype': np.asarray(mtype),  # material type
-            'sec_id': np.asarray(sec_id),
             'keyopt': keyopt,
             'parameters': parameters
             }
@@ -500,10 +478,9 @@ def node_block_format(string):
 
 
 def component_interperter(component):
-    """
-    If a node is negative, it is describing a list from the previous
-    node.  This is ANSYS's way of saving file size when writing
-    components.
+    """If a node is negative, it is describing a list from the
+    previous node.  This is ANSYS's way of saving file size when
+    writing components.
 
     This function has not been optimized.
 
@@ -516,3 +493,21 @@ def component_interperter(component):
             f_new.append(range(abs(component[i - 1]) + 1, abs(component[i]) + 1))
     
     return np.hstack(f_new).astype(ctypes.c_int)
+
+
+def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
+                    int [::1] nnum, int build_offset):
+    """Convert ansys style connectivity to VTK connectivity"""
+    cdef int nelem = elem_off.size - 1
+    cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
+    cdef uint8_t [::1] celltypes = np.empty(nelem, dtype='uint8')
+
+    # Allocate connectivity
+    # max cell size is 20 (VTK_HEXAHEDRAL) and cell header is 1
+    cdef int64_t [::1] cells = np.empty(nelem*21, ctypes.c_int64)
+    cdef int loc = ans_to_vtk(nelem, &elem[0], &elem_off[0],
+                              &type_ref[0], nnum.size, &nnum[0],
+                              &offset[0], &cells[0], &celltypes[0],
+                              build_offset)
+
+    return np.asarray(offset), np.asarray(celltypes), np.asarray(cells[:loc])

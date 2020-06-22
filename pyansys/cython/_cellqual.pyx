@@ -1238,7 +1238,8 @@ cdef inline double tet_quad_qual(int64_t [::1] cells, int c,
         jac = normjac
     
     # adjust jacobian
-    return jac*1.414213562373095
+    # return jac*1.414213562373095
+    return jac
 
 
 cdef inline float tet_quad_qual_float(int64_t [::1] cells, int c,

@@ -1,7 +1,6 @@
 """pyansys examples
 
 """
-from __future__ import print_function
 import os
 import inspect
 import sys
@@ -59,9 +58,9 @@ def load_result():
     # Load result file
     result = pyansys.read_binary(rstfile)
     assert result.nsets == 6
-    assert len(result.nnum) == 321
+    assert len(result.geometry.nnum) == 321
     print('Loaded result file with {:d} result sets'.format(result.nsets))
-    print('Contains {:d} nodes'.format(len(result.nnum)))
+    print('Contains {:d} nodes'.format(len(result.geometry.nnum)))
 
     # display result
     nnum, disp = result.nodal_solution(0)
@@ -69,7 +68,7 @@ def load_result():
     print('Nodal displacement for nodes 30 to 40 is:')
 
     for i in range(29, 40):
-        node = result.nnum[i]
+        node = result.geometry.nnum[i]
         x = disp[i, 0]
         y = disp[i, 1]
         z = disp[i, 2]

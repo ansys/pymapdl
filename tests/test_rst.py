@@ -55,6 +55,14 @@ def test_write_tables(tmpdir):
     assert os.path.isfile(filename)
 
 
+@pytest.mark.skipif(vm33 is None, reason="Requires example files")
+def test_nodal_displacement():
+    nnum, result = vm33.nodal_solution(0)
+    nnum_, result_ = vm33.nodal_displacement(0)
+    assert np.allclose(nnum, nnum_)
+    assert np.allclose(result, result_)
+
+
 def test_read_volume():
     rst_file = os.path.join(testfiles_path, 'vol_test.rst')
     rst = pyansys.read_binary(rst_file)

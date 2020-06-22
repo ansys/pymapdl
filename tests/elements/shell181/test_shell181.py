@@ -82,16 +82,6 @@ import pytest
 import numpy as np
 import pyansys
 
-
-try:
-    __file__
-except NameError:
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_shell181.py'
-
-
-test_path = os.path.dirname(os.path.abspath(__file__))
-testfiles_path = os.path.join(test_path, 'testfiles')
-
 ANSYS_ELEM = [[0.17662E-07, 79.410, -11.979, -0.11843E-02, 4.8423, -0.72216E-04],
               [0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
               [0.20287E-07, 91.212, 27.364, -0.13603E-02, -4.8423, 0.72216E-04],
@@ -105,8 +95,8 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
 
 @pytest.fixture(scope='module')
 def result():
-    filename = os.path.join(testfiles_path, 'shell181.rst')
-    return pyansys.read_binary(filename)
+    test_path = os.path.dirname(os.path.abspath(__file__))
+    return pyansys.read_binary(os.path.join(test_path, 'shell181.rst'))
 
 
 def test_load(result):

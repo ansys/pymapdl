@@ -240,10 +240,19 @@ cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
     return ndarray
 
 
-def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
-                   int [:, ::1] elem, int [::1] etype, int [::1] mtype,
-                   int [::1] rcon, int [::1] esys, int [::1] secn):
-    """The following is stored for each element
+def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
+    """Load elements from an ansys result file.
+
+    filename : str
+        Filename containing the result file.
+
+    loc : int64_t
+        Pointer to the element table
+
+    e_disp_table : int64_t [::1]
+        Array containing pointers to the individual elements relative to ``loc``.
+
+    The following is stored for each element
     0 - mat     - material reference number
     1 - type    - element type number
     2 - real    - real constant reference number
@@ -256,7 +265,6 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
     9 - baseeid - base element number
     10 - NODES   - node numbers defining the element
     """
-    
     cdef int i, j
 
     cdef int prec_flag, type_flag, size, bufsize
@@ -269,38 +277,40 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table,
 
     cdef int val, nread
     cdef int64_t elem_loc
+
+    # elem connectivity and info (10 fields + maximum of 20 nodes per element)
+    cdef int [::1] elem = np.empty(nelem*30, np.int32)
+    cdef int [::1] elem_off = np.empty(nelem + 1, np.int32)
+
+    cdef int c = 0  # cell position counter
     for i in range(nelem):
         # load element
         elem_loc = loc + e_disp_table[i]
         c_ptr = read_record(c_filename, elem_loc, &prec_flag, &type_flag,
                             &size, &bufsize)
 
+        # start of the element
+        elem_off[i] = c
+
+        # read in entire element
         if prec_flag:
             s_element = <short*>c_ptr
-            mtype[i] = s_element[0]  # material type
-            etype[i] = s_element[1]  # element type
-            rcon[i] = s_element[2] # real constant reference number
-            secn[i] = s_element[3] # section number
-            esys[i] = s_element[4]
-
-            # read in nodes
-            for j in range(10, size):
-                elem[i, j - 10] = s_element[j]
+            for j in range(size):
+                elem[c + j] = s_element[j]
         else:
             element = <int*>c_ptr
-            mtype[i] = element[0]  # material type
-            etype[i] = element[1]  # element type
-            rcon[i] = element[2] # real constant reference number
-            secn[i] = element[3] # section number
-            esys[i] = element[4]
+            for j in range(size):
+                elem[c + j] = element[j]
+        c += size
 
-            # read in nodes
-            for j in range(10, size):
-                elem[i, j - 10] = element[j]
+    # add final position here for parser to know the size of the last element
+    elem_off[nelem] = c
+
+    return np.array(elem[:c]), np.array(elem_off)
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
-                        int64_t [::1] nodstr, int64_t [::1] etype,
+                        int64_t [::1] nodstr, int [::1] etype,
                         double [:, ::1] ele_data_arr, int nitem,
                         int [::1] element_type, int64_t ptr_off,
                         int as_global=1):

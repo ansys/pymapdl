@@ -51,10 +51,11 @@ class CyclicResult(ResultFile):
         color : string or 3 item list, optional, defaults to white
             Either a string, rgb list, or hex color string.  For
             example:
-                ``color='white'``
-                ``color='w'``
-                ``color=[1, 1, 1]``
-                ``color='#FFFFFF'``
+
+            - ``color='white'``
+            - ``color='w'``
+            - ``color=[1, 1, 1]``
+            - ``color='#FFFFFF'``
 
             Color will be overridden when scalars are input.
 
@@ -65,11 +66,12 @@ class CyclicResult(ResultFile):
         style : string, optional
             Visualization style of the vtk mesh.  One for the
             following:
-                ``style='surface'``
-                ``style='wireframe'``
-                ``style='points'``
 
-            Defaults to 'surface'
+            - ``style='surface'``
+            - ``style='wireframe'``
+            - ``style='points'``
+
+            Defaults to ``'surface'``
 
         off_screen : bool
             Plots off screen when True.  Helpful for saving
@@ -81,7 +83,7 @@ class CyclicResult(ResultFile):
 
         screenshot : str or bool, optional
             Saves screenshot to file when enabled.  See:
-            help(pyvista.Plotter.screenshot).  Default disabled.
+            ``help(pyvista.Plotter.screenshot)``.  Default disabled.
 
             When True, takes screenshot and returns numpy array of
             image.
@@ -156,21 +158,9 @@ class CyclicResult(ResultFile):
 
         # NOTE: number of nodes in sector may not match number of
         # nodes in geometry
-        node_mask = self.nnum <= self._resultheader['csNds']
+        node_mask = self._neqv[self._sidx] <= self._resultheader['csNds']
         self.mas_ind = np.nonzero(node_mask)[0]
         self.dup_ind = np.nonzero(~node_mask)[0]
-
-    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
-        """ return a 4x4 transformation array for a given coordinate system """
-        # assemble 4 x 4 matrix
-        csys = self.geometry['coord systems'][cs_cord]
-        trans = np.hstack((csys['transformation matrix'],
-                           csys['origin'].reshape(-1, 1)))
-        matrix = trans_to_matrix(trans)
-        if as_vtk_matrix:
-            return matrix
-        else:
-            return pv.trans_from_matrix(matrix)
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):

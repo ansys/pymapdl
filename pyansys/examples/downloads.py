@@ -86,3 +86,18 @@ def download_sector_modal():
 def download_pontoon():
     """Download modal analysis of a cyclic turbine sector"""
     return _download_and_read('pontoon.rst')
+
+
+def _download_solid239_240():
+    """SOLID239 and SOLID240 file for unit testing"""
+    return _download_and_read('solid239_240.rth')
+
+
+def _download_plane238():
+    """PLANE result for unit testing"""
+    return _download_and_read('plane238.rth')
+
+
+def _download_shell181():
+    """SHELL181 result for unit testing"""
+    return _download_and_read('shell181.rst')

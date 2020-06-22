@@ -42,8 +42,8 @@ KNOWN_RESULT_STRESS = np.array([[2272.9, 968.77, 0, -222.11, 0, 0],
                                 [-3295, -1272.6, 0, 223.02, 0, 0]])
 
 test_path = os.path.dirname(os.path.abspath(__file__))
-testfiles_path = os.path.join(test_path, 'testfiles')
-result_file_name = os.path.join(testfiles_path, 'shell181_box.rst')
+result_file_name = os.path.join(test_path, 'shell181_box.rst')
+
 
 def test_shell_stress_element_cs():
     result = pyansys.read_binary(result_file_name)
