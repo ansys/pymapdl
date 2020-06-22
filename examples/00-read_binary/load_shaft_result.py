@@ -13,8 +13,8 @@ import pyansys
 shaft = pyansys.download_shaft_modal()
 
 ###############################################################################
-# Geometry is stored both as a dictionary...
-print(shaft.geometry.keys())
+# Geometry is stored as a class
+print(shaft.geometry)
 
 ###############################################################################
 # ...as a VTK object

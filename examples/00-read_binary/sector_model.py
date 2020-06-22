@@ -1,5 +1,5 @@
 """
-.. _ref_load_shaft_result:
+.. _ref_sector_model:
 
 Shaft Modal Analysis
 ~~~~~~~~~~~~~~~~~~~~
