@@ -12,8 +12,8 @@ except:
     raise Exception('Please install numpy first with "pip install numpy"')
 
 
-# Check if binaries exist
 def check_cython():
+    """Check if binaries exist and if not check if Cython is installed"""
     path = os.path.dirname(__file__)
     has_binary_reader = False
     for filename in os.listdir('pyansys'):
@@ -124,15 +124,10 @@ setup(
     # Build cython modules
     cmdclass={'build_ext': build_ext},
     ext_modules=[
-                 # Extension("pyansys._parser",
-                 #           ["pyansys/cython/_parser.pyx"],
+                 # Extension("pyansys._db_reader",
+                 #           ["pyansys/cython/_db_reader.pyx"],
                  #           extra_compile_args=cmp_arg,
                  #           language='c'),
-
-                 Extension("pyansys._db_reader",
-                           ["pyansys/cython/_db_reader.pyx"],
-                           extra_compile_args=cmp_arg,
-                           language='c'),
 
                  Extension('pyansys._reader',
                            ['pyansys/cython/_reader.pyx',
@@ -155,8 +150,6 @@ setup(
                            ["pyansys/cython/_binary_reader.pyx",
                             "pyansys/cython/binary_reader.cpp"],
                            extra_compile_args=cmp_arg,
-                           # extra_compile_args=['-g'],
-                           # extra_link_args=['-g'],
                            language='c++'),
                  ],
 
