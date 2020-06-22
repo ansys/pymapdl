@@ -12,6 +12,7 @@ import vtk
 from pyansys import _reader
 from pyansys.misc import vtk_cell_info
 from pyansys.geometry import Geometry
+from pyansys._cellqual import cell_quality_float, cell_quality
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -136,6 +137,59 @@ class Archive(Geometry):
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)
         return txt
+
+    @property
+    def grid(self):
+        """VTK and pyvista grid of the archive file.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.grid
+        UnstructuredGrid (0x7ffa237f08a0)
+          N Cells:      40
+          N Points:     321
+          X Bounds:     0.000e+00, 1.000e+00
+          Y Bounds:     0.000e+00, 1.000e+00
+          Z Bounds:     0.000e+00, 5.000e+00
+          N Arrays:     13
+        """
+        if self._grid is None:
+            raise AttributeError('Archive must be parsed as a vtk grid.\n'
+                                 'Set `parse_vtk=True`')
+        return self._grid
+
+    @property
+    def quality(self):
+        """Minimum scaled jacobian cell quality.
+
+        Negative values indicate invalid cells while positive values
+        indicate valid cells.  Varies between -1 and 1.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.quality
+        array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
+               1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
+               1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
+        """
+        if self._grid is None:
+            raise AttributeError('Archive must be parsed as a vtk grid.\n'
+                                 'Set `parse_vtk=True`')
+        celltypes = self.grid.celltypes
+        points = self.grid.points
+        cells, offset = vtk_cell_info(self.grid)
+        if points.dtype == np.float64:
+            qual = cell_quality(cells, offset, celltypes, points)
+        else:
+            qual = cell_quality_float(cells, offset, celltypes, points)
+
+        # set qual of null cells to 1
+        qual[self._grid.celltypes == 0] = 1
+        return qual
 
 
 def chunks(l, n):

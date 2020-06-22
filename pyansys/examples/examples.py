@@ -1,7 +1,6 @@
 """pyansys examples
 
 """
-from __future__ import print_function
 import os
 import inspect
 import sys

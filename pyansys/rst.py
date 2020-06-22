@@ -540,7 +540,7 @@ class ResultFile(AnsysBinary):
     @wraps(plot_nodal_solution)
     def plot_nodal_displacement(self, *args, **kwargs):
         """wraps plot_nodal_solution"""
-        self.plot_nodal_solution(*args, **kwargs)
+        return self.plot_nodal_solution(*args, **kwargs)
 
     @property
     def node_components(self):
@@ -898,7 +898,7 @@ class ResultFile(AnsysBinary):
     @wraps(nodal_solution)
     def nodal_displacement(self, *args, **kwargs):
         """wraps plot_nodal_solution"""
-        self.nodal_solution(*args, **kwargs)
+        return self.nodal_solution(*args, **kwargs)
 
     def _read_components(self):
         """Read components from an ANSYS result file
