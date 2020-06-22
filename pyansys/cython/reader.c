@@ -197,7 +197,7 @@ int read_eblock(char *raw, int *mtype, int *etype, int *e_rcon, int *sec_id,
 
 
 /* ============================================================================
- * Function:  read_eblock_fill
+ * Function:  read_eblock_full
  *
  * Reads EBLOCK from ANSYS archive file.
  * raw : Raw string is from Python reader
@@ -289,7 +289,10 @@ int read_eblock_full(char *raw, int *elem_off, int *elem, int nelem,
     
     // Field 11: Element number
     elem[c++] = fast_atoi2(raw, intsz); raw += intsz;
-    
+
+    // Need an additional value for consitency with other formats
+    elem[c++] = 0;
+
     // Read nodes in element
     for (j=0; j<nnode; j++){
       /* printf("reading node %d\n", j); */

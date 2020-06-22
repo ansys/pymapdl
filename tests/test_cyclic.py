@@ -117,13 +117,15 @@ def test_element_stress_v182_non_cyclic():
     result = pyansys.read_binary(ansys_result_file)
 
     element_stress, elemnum, enode = result.element_stress(0, False, False)
+    assert np.allclose(np.sort(elemnum), elemnum), 'elemnum must be sorted'
+
     element_stress = np.vstack(element_stress)
     enode = np.hstack(enode)
 
     # cyclic model will only output the master sector
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_presol.npz'))
-    assert np.allclose(from_ansys['element_stress'], element_stress)
     assert np.allclose(from_ansys['enode'], enode)
+    assert np.allclose(from_ansys['element_stress'], element_stress)
 
 
 def test_nodal_stress_v182_non_cyclic():
@@ -159,6 +161,8 @@ def test_full_x_nodal_solution(result_x):
     nnum, disp = result_x.nodal_solution(rnum, phase, full_rotor=True,
                                          as_complex=False,
                                          in_nodal_coord_sys=False)
+
+    assert np.allclose(np.sort(nnum), nnum), 'nnum must be sorted'
 
     mask = np.in1d(nnum, ansys_nnum)
     n = mask.sum()

@@ -41,6 +41,11 @@ def all_solid_cells_archive_linear():
                            force_linear=True)
 
 
+def test_read_mesh200():
+    archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
+    assert archive.grid.n_cells == 1000
+
+
 def test_archive_init(hex_archive):
     assert isinstance(hex_archive._raw, dict)
     assert isinstance(hex_archive.grid, pv.UnstructuredGrid)
@@ -200,11 +205,6 @@ def test_write_component(tmpdir):
     pyansys.write_cmblock(temp_archive, items, comp_name, 'node')
     archive = pyansys.Archive(temp_archive)
     assert np.allclose(archive.node_components[comp_name], items)
-
-
-def test_read_mesh200():
-    archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
-    assert archive.grid.n_cells == 1000
 
 
 def test_read_parm():

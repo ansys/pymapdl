@@ -88,12 +88,12 @@ class ResultFile(AnsysBinary):
         LOG.debug('There are %d result(s) in this file', self.nsets)
 
         # Get indices to resort nodal and element results
-        self.sidx = np.argsort(self._resultheader['neqv'])
-        self.sidx_elem = np.argsort(self._resultheader['eeqv'])
+        self._sidx = np.argsort(self._resultheader['neqv'])
+        self._sidx_elem = np.argsort(self._resultheader['eeqv'])
 
         # Store node numbering in ANSYS
-        self.nnum = self._resultheader['neqv'][self.sidx]
-        self.enum = self._resultheader['eeqv'][self.sidx_elem]
+        self._neqv = self._resultheader['neqv']
+        self._eeqv = self._resultheader['eeqv']  # unsorted
 
         # store geometry for later retrival
         self.geometry = None
@@ -558,7 +558,7 @@ class ResultFile(AnsysBinary):
         if grid is None:
             grid = self.grid
 
-        if not self.geometry['components']:  # pragma: no cover
+        if not self.geometry.node_components:  # pragma: no cover
             raise Exception('Missing component information.\n' +
                             'Either no components have been stored, or ' +
                             'the version of this result file is <18.2')
@@ -790,12 +790,12 @@ class ResultFile(AnsysBinary):
 
             else:
                 # Reorder based on sorted indexing
-                sidx = self.sidx
+                sidx = self._sidx
 
             results[rnum, sidx, :] = result
 
         if not in_nodal_coord_sys:
-            euler_angles = self.geometry['nodes'][self.insolution, 3:].T
+            euler_angles = self.geometry.node_angles[self._insolution].T
 
             for rnum in range(nsets):
                 result = results[rnum, :, :]
@@ -806,7 +806,7 @@ class ResultFile(AnsysBinary):
         results[results == 2**100] = 0
 
         # also include nodes in output
-        return self.nnum, results
+        return self._neqv[self._sidx], results
 
     def nodal_solution(self, rnum, in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
@@ -880,15 +880,15 @@ class ResultFile(AnsysBinary):
             result = result[new_sidx]
 
             # these are the associated nodal locations
-            # sidx_inv = np.argsort(self.sidx)
+            # sidx_inv = np.argsort(self._sidx)
             # nodes = self.geometry['nodes'][sidx_inv][sidx][:, :3]
         else:
-            nnum = self.nnum
-            result = result.take(self.sidx, 0)
+            nnum = self._neqv[self._sidx]
+            result = result.take(self._sidx, 0)
 
         # Convert result to the global coordinate system
         if not in_nodal_coord_sys:
-            euler_angles = self.geometry['nodes'][self.insolution, 3:].T
+            euler_angles = self.geometry.node_angles[self._insolution].T
             rotate_to_global(result, euler_angles)
 
         # check for invalid values (mapdl writes invalid values as 2*100)
@@ -1020,68 +1020,22 @@ class ResultFile(AnsysBinary):
         e_disp_table -= e_disp_table[0]
 
         # read in coordinate systems, material properties, and sections
-        c_systems = self._parse_coordinate_system()
+        self._c_systems = self._parse_coordinate_system()
 
         # load elements
         elem, elem_off = _binary_reader.load_elements(self.filename, ptr_elem,
                                                       nelm, e_disp_table)
 
-        # enum = self._resultheader['eeqv']
-
-        components = self._read_components()
-
-        #                  'esys': esys,
-
-        # # store geometry dictionary
-        #                  'nsec': nsec,
-        #                  'coord systems': c_systems,
-        #                  'components': components}
-
-        self.geometry = Geometry(nnum, nodes, elem, elem_off, ekey,
+        # Store geometry and parse to VTK quadradic and null unallowed
+        self.geometry = Geometry(nnum, nodes, elem, elem_off, np.array(ekey),
                                  node_comps=self._read_components())
-        breakpoint()
-        
-        # element_type = np.zeros_like(etype)
-        # for key, typekey in ekey:
-        #     element_type[etype == key] = typekey
-
-        # breakpoint()
-                                 
-
-        # store the reference array
-        # Allow quadradic and null unallowed
-        # parsed = _parser.parse(self.geometry, False, valid_types, True,
-                               # keyopts)
-        # cells = parsed['cells']
-        # offset = parsed['offset']
-        # cell_type = parsed['cell_type']
-        # self.numref = parsed['numref']
-
-        # catch -1
-        # cells[cells == -1] = 0
+        self.quadgrid = self.geometry._parse_vtk(null_unallowed=True,
+                                                 fix_midside=False)
+        self.grid = self.quadgrid.linear_copy()
 
         # identify nodes that are actually in the solution
-        self.insolution = np.in1d(self.geometry.nnum,
-                                  self._resultheader['neqv'], assume_unique=True)
-
-        # Create vtk object
-        # nodes = nodes[:, :3]
-        # if VTK9:
-        #     self.quadgrid = pv.UnstructuredGrid(cells, cell_type, nodes)
-        # else:
-        #     self.quadgrid = pv.UnstructuredGrid(offset, cells, cell_type, nodes)
-        # self.quadgrid.cell_arrays['ansys_elem_num'] = enum
-        # self.quadgrid.point_arrays['ansys_node_num'] = nnum
-        self.quadgrid.cell_arrays['Section Number'] = nsec
-        self.quadgrid.cell_arrays['Material Type'] = mtype
-        self.quadgrid.cell_arrays['Element Coordinate System'] = esys
-
-        # add node components
-        for component_name in components:
-            mask = np.in1d(nnum, components[component_name])
-            self.quadgrid.point_arrays[component_name] = mask
-
-        self.grid = self.quadgrid.linear_copy()
+        self._insolution = np.in1d(self.geometry.nnum, self._resultheader['neqv'],
+                                   assume_unique=True)
 
     def solution_info(self, rnum):
         """Return an informative dictionary of solution data for a
@@ -1161,7 +1115,6 @@ class ResultFile(AnsysBinary):
 
         rpointers = self._resultheader['rpointers']
         nodstr = self.element_table['nodstr']
-        etype = self.geometry['etype']
 
         # read result solution header
         record = self.read_record(rpointers[rnum])
@@ -1189,7 +1142,7 @@ class ResultFile(AnsysBinary):
         # boundary conditions
         # bc = self.read_record(rpointers[rnum] + solution_header['ptrBC'])
 
-        return ele_ind_table, nodstr, etype, element_rst_ptr
+        return ele_ind_table, nodstr, self.geometry._ans_etype, element_rst_ptr
 
     @property
     def version(self):
@@ -1241,7 +1194,6 @@ class ResultFile(AnsysBinary):
 
         # certain element types do not output stress
         elemtype = self.geometry.etype
-        etype = etype.astype(ctypes.c_int64)
 
         # load in raw results
         nnode = nodstr[etype]
@@ -1258,7 +1210,8 @@ class ResultFile(AnsysBinary):
                 nitem = 11
 
             # add extra elements to data array.  Sometimes there are
-            # more items than listed in the result header (or there's a mistake here)
+            # more items than listed in the result header (or there's
+            # a mistake here)
             ele_data_arr = np.empty((nelemnode + 50, nitem), np.float64)
             ele_data_arr[:] = np.nan  # necessary?  should do this in read stress
 
@@ -1287,17 +1240,16 @@ class ResultFile(AnsysBinary):
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
         # reorder list using sorted indices
-        # enum = self.grid.cell_arrays['ansys_elem_num']
-        enum = self.geometry['enum']
+        enum = self._eeqv
         sidx = np.argsort(enum)
         element_stress = [element_stress[i] for i in sidx]
 
         enode = []
         for i in sidx:
-            enode.append(self.geometry.enum[i, :nnode[i]])
+            enode.append(self.geometry.elem[i][10:10+nnode[i]])
 
         # Get element numbers
-        elemnum = self.geometry.enum[self.sidx_elem]
+        elemnum = self._eeqv[self._sidx_elem]
         return element_stress, elemnum, enode
 
     def element_solution_data(self, rnum, datatype, sort=True):
@@ -1391,7 +1343,7 @@ class ResultFile(AnsysBinary):
                 else:
                     element_data.append(None)
 
-        enum = self.grid.cell_arrays['ansys_elem_num']
+        enum = self._eeqv
         if sort:
             sidx = np.argsort(enum)
             enum = enum[sidx]
@@ -1498,7 +1450,7 @@ class ResultFile(AnsysBinary):
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
         """ return a 4x4 transformation array for a given coordinate system """
         # assemble 4 x 4 matrix
-        csys = self.geometry['coord systems'][cs_cord]
+        csys = self._c_systems[cs_cord]
         trans = np.hstack((csys['transformation matrix'],
                            csys['origin'].reshape(-1, 1)))
         matrix = trans_to_matrix(trans)

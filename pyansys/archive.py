@@ -130,8 +130,8 @@ class Archive(Geometry):
     def __repr__(self):
         basename = os.path.basename(self._filename)
         txt = 'ANSYS Archive File %s\n' % basename
-        txt += '  Number of Nodes:              %d\n' % len(self.enum)
-        txt += '  Number of Elements:           %d\n' % len(self.nnum)
+        txt += '  Number of Nodes:              %d\n' % len(self.nnum)
+        txt += '  Number of Elements:           %d\n' % len(self.enum)
         txt += '  Number of Element Types:      %d\n' % len(self.ekey)
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)

@@ -5,11 +5,6 @@ import numpy as np
 import pyansys
 from pyansys import examples
 
-try:
-    __file__
-except NameError:
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_solid186.py'
-
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles', 'solid186')
@@ -26,16 +21,16 @@ def archive():
 
 
 def test_geometry_elements(result, archive):
-    r_elem = result.geometry['elem'][result.sidx_elem]
+    r_elem = np.array(result.geometry.elem)[result._sidx_elem]
     assert np.allclose(r_elem, archive.elem)
 
 
 def test_geometry_nodes(result, archive):
-    assert np.allclose(result.geometry['nodes'][:, :3], archive.nodes)
+    assert np.allclose(result.geometry.nodes[:, :3], archive.nodes)
 
 
 def test_geometry_nodenum(result, archive):
-    assert np.allclose(result.geometry['nnum'], archive.nnum)
+    assert np.allclose(result.geometry.nnum, archive.nnum)
 
 
 def test_results_displacement(result):

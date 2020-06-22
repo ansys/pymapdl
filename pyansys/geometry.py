@@ -42,6 +42,9 @@ class Geometry():
         self._mtype = None  # cached ansys material type
         self._node_angles = None  # cached node angles
         self._node_coord = None  # cached node coordinates
+        self._cached_elements = None  # cached list of elements
+        self._secnum = None  # cached section number
+        self._esys = None  # cached element coordinate system
 
         # must be set by subclass
         self._nnum = nnum
@@ -58,8 +61,17 @@ class Geometry():
         self._keyopt = keyopt
 
     def _parse_vtk(self, allowable_types=None, force_linear=False,
-                   null_unallowed=False):
-        """Convert ANSYS element connectivity to a VTK UnstructuredGrid"""
+                   null_unallowed=False, fix_midside=True):
+        """Convert raw ANSYS nodes and elements to a VTK UnstructuredGrid
+
+        Parameters
+        ----------
+        fix_midside : bool, optional
+            Adds additional midside nodes when ``True``.  When
+            ``False``, missing ANSYS cells will simply point to the
+            first node.
+
+        """
         if not len(self._nodes) or not len(self._elem):
             warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
             return
@@ -87,11 +99,12 @@ class Geometry():
         # special treatment for MESH200
         if allowable_types is None or 200 in allowable_types:
             for etype_ind, etype in self._ekey:
-                if etype == 200:
+                if etype == 200 and etype_ind in self.key_option:
                     # keyoption 1 contains various cell types
                     # map them to the corresponding type (see elements.py)
                     mapped = MESH200_MAP[self.key_option[etype_ind][0][1]]
                     type_ref[etype_ind] = mapped
+
         offset, celltypes, cells = _reader.ans_vtk_convert(self._elem,
                                                            self._elem_off,
                                                            type_ref,
@@ -101,8 +114,11 @@ class Geometry():
 
         # fix missing midside
         if np.any(cells == -1):
-            nodes, angles, nnum = fix_missing_midside(cells, nodes, celltypes,
-                                                      offset, angles, nnum)
+            if fix_midside:
+                nodes, angles, nnum = fix_missing_midside(cells, nodes, celltypes,
+                                                          offset, angles, nnum)
+            else:
+                cells[cells == -1] = 0
 
         if VTK9:
             grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)
@@ -274,7 +290,7 @@ class Geometry():
         -----
         Element types are listed below.  Please see the APDL Element
         Reference for more details:
-
+]
         https://www.mm.bme.hu/~gyebro/files/vem/ansys_14_element_reference.pdf
         """
         if self._etype is None:
@@ -289,6 +305,39 @@ class Geometry():
         if self.__ans_etype is None:
             self.__ans_etype = self._elem[self._elem_off[:-1] + 1]
         return self.__ans_etype
+
+    @property
+    def section(self):
+        """Section number
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.section
+        array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1], dtype=int32)
+        """
+        if self._secnum is None:
+            self._secnum = self._elem[self._elem_off[:-1] + 3]  # FIELD 3
+        return self._secnum
+
+    def element_coord_system(self):
+        """Element coordinate system number
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+        >>> archive.element_coord_system
+        array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+               0, 0], dtype=int32)
+        """
+        if self._esys is None:
+            self._esys = self._elem[self._elem_off[:-1] + 4]  # FIELD 4
+        return self._esys
 
     @property
     def elem(self):
@@ -322,8 +371,9 @@ class Geometry():
                  14, 267, 304, 221, 230, 239, 285, 202, 174],
         ...
         """
-        elements = np.split(self._elem, self._elem_off[1:-1])
-        return elements
+        if self._cached_elements is None:
+            self._cached_elements = np.split(self._elem, self._elem_off[1:-1])
+        return self._cached_elements
 
     @property
     def enum(self):
@@ -498,8 +548,8 @@ class Geometry():
 
     def __repr__(self):
         txt = 'ANSYS Geometry\n'
-        txt += '  Number of Nodes:              %d\n' % len(self.enum)
-        txt += '  Number of Elements:           %d\n' % len(self.nnum)
+        txt += '  Number of Nodes:              %d\n' % len(self.nnum)
+        txt += '  Number of Elements:           %d\n' % len(self.enum)
         txt += '  Number of Element Types:      %d\n' % len(self.ekey)
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)

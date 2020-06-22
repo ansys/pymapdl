@@ -279,7 +279,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
     cdef int64_t elem_loc
 
     # elem connectivity and info (10 fields + maximum of 20 nodes per element)
-    cdef int [::1] elem = np.empty(nelem*31, np.int32)
+    cdef int [::1] elem = np.empty(nelem*30, np.int32)
     cdef int [::1] elem_off = np.empty(nelem + 1, np.int32)
 
     cdef int c = 0  # cell position counter
@@ -310,7 +310,7 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
 
 
 def read_element_stress(filename, int64_t [::1] ele_ind_table, 
-                        int64_t [::1] nodstr, int64_t [::1] etype,
+                        int64_t [::1] nodstr, int [::1] etype,
                         double [:, ::1] ele_data_arr, int nitem,
                         int [::1] element_type, int64_t ptr_off,
                         int as_global=1):

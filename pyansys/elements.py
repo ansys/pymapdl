@@ -232,8 +232,8 @@ import numpy as np
 # 4: 3D Solid (Hexahedral, wedge, pyramid, tetrahedral)
 # 5: Tetrahedral
 
-_etype_map = [0, # Empty for FORTRAN based indexing
-	      2,  # LINK1
+
+_etype_map = [0, 2,  # LINK1
 	      3,  # PLANE2
 	      3,  # BEAM3
 	      3,  # BEAM4
@@ -423,6 +423,7 @@ _etype_map = [0, # Empty for FORTRAN based indexing
 	      2,  # BEAM188
 	      2,  # BEAM189
 	      4,  # SOLSH190
+              0,  # UNUSED191
 	      4,  # INTER192
 	      0,  # INTER193
 	      0,  # INTER194
@@ -447,6 +448,7 @@ _etype_map = [0, # Empty for FORTRAN based indexing
 	      0,  # CPT213
 	      0,  # COMBI214
 	      0,  # CPT215
+              0,  # UNUSED216
 	      5,  # CPT217
 	      3,  # FLUID218
 	      3,  # FLUID219
@@ -490,6 +492,7 @@ _etype_map = [0, # Empty for FORTRAN based indexing
 	      0,  # INFIN257
 	      0,  # INFIN258
 	      0,  # INFIN259
+              0,  # UNUSED260
 	      4,  # UNUSED261
 	      0,  # GLINK262
 	      0,  # REINF263
@@ -533,3 +536,4 @@ _etype_map = [0, # Empty for FORTRAN based indexing
 ]
 
 ETYPE_MAP = np.array(_etype_map, dtype=np.int32)
+

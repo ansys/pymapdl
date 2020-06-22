@@ -752,7 +752,7 @@ int ans_to_vtk(int nelem, int *elem, int *elem_off, int *type_ref, int nnode,
     /* printf("Element %d \n", i); */
     // etype
     etype = elem[elem_off[i] + 1];
-    off = elem_off[i] + 9; // to the start of the nodes
+    off = elem_off[i] + 10; // to the start of the nodes
     /* printf("off = %d \n", off); */
     nnode_elem = elem_off[i + 1] - off;  // number of nodes in element
     /* printf("nnode_elem = %d \n", nnode_elem); */
