@@ -290,7 +290,7 @@ class Geometry():
         -----
         Element types are listed below.  Please see the APDL Element
         Reference for more details:
-]
+
         https://www.mm.bme.hu/~gyebro/files/vem/ansys_14_element_reference.pdf
         """
         if self._etype is None:

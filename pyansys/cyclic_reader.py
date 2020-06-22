@@ -51,10 +51,11 @@ class CyclicResult(ResultFile):
         color : string or 3 item list, optional, defaults to white
             Either a string, rgb list, or hex color string.  For
             example:
-                ``color='white'``
-                ``color='w'``
-                ``color=[1, 1, 1]``
-                ``color='#FFFFFF'``
+
+            - ``color='white'``
+            - ``color='w'``
+            - ``color=[1, 1, 1]``
+            - ``color='#FFFFFF'``
 
             Color will be overridden when scalars are input.
 
@@ -65,11 +66,12 @@ class CyclicResult(ResultFile):
         style : string, optional
             Visualization style of the vtk mesh.  One for the
             following:
-                ``style='surface'``
-                ``style='wireframe'``
-                ``style='points'``
 
-            Defaults to 'surface'
+            - ``style='surface'``
+            - ``style='wireframe'``
+            - ``style='points'``
+
+            Defaults to ``'surface'``
 
         off_screen : bool
             Plots off screen when True.  Helpful for saving
@@ -81,7 +83,7 @@ class CyclicResult(ResultFile):
 
         screenshot : str or bool, optional
             Saves screenshot to file when enabled.  See:
-            help(pyvista.Plotter.screenshot).  Default disabled.
+            ``help(pyvista.Plotter.screenshot)``.  Default disabled.
 
             When True, takes screenshot and returns numpy array of
             image.

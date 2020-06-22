@@ -1,6 +1,11 @@
 Working with a ANSYS Result File (rst)
 ======================================
-The ANSYS result file is a FORTRAN formatted binary file containing the results written from an ANSYS analysis.  The results, at a minimum, contain the geometry of the model analyzed along with the nodal and element results.  Depending on the analysis, these results could be anything from modal displacements to nodal temperatures.  At this time, only the following results are supported by this code:
+The ANSYS result file is a FORTRAN formatted binary file containing
+the results written from an ANSYS analysis.  The results, at a
+minimum, contain the geometry of the model analyzed along with the
+nodal and element results.  Depending on the analysis, these results
+could be anything from modal displacements to nodal temperatures.  At
+this time, only the following results are supported by this code:
 
     - Nodal DOF results from a static analysis or modal analysis.
     - Nodal DOF results from a cyclic static or modal analysis.
@@ -12,14 +17,19 @@ We're working on adding additional plotting and retrieval functions to the code 
 
 Loading the Result File
 -----------------------
-As the ANSYS result files are binary files, the entire file does not need to be loaded into memory in order to retrieve results.  This module accesses the results through a python object `result` which you can create with:
+As the ANSYS result files are binary files, the entire file does not
+need to be loaded into memory in order to retrieve results.  This
+module accesses the results through a python object `result` which you
+can create with:
 
 .. code:: python
 
     import pyansys
     result = pyansys.read_binary('file.rst')
     
-Upon initialization the ``ResultFile`` object contains several properties to include the time values from the analysis, node numbering, element numbering, etc.
+Upon initialization the ``ResultFile`` object contains several
+properties to include the time values from the analysis, node
+numbering, element numbering, etc.
 
 
 ResultFile Properties
@@ -49,22 +59,31 @@ The sorted node and element numbering of a result can be obtained with:
 
 Geometry
 --------
-The geometry of the model can be accessed directly from the dictionary by 
-accessing:
+The geometry of the model can be found by querying the
+``pyansys.geometry.Geometry`` class.
 
 .. code:: python
 
-    result.geometry
-    
-Which contains the following keys:
+    >>> import pyansys
+    >>> from pyansys import examples
+    >>> rst = pyansys.read_binary(examples.rstfile)
+    >>> print(rst.geometry)
 
-    - ``'nnum'`` (sorted node numbering )
-    - ``'nodes'`` (node positions)
-    - ``'etype'`` (element type)
-    - ``'enum'`` (non-sorted element numbers associated with elem array)
-    - ``'elem'`` (numpy array showing nodes associated with each element, -1 indicates unused entry)
-    - ``'ekey'`` (2xn element type reference array)
-    - ``'coord systems'`` (dictionary of coordinate systems)
+.. code::
+
+    ANSYS Geometry
+      Number of Nodes:              321
+      Number of Elements:           40
+      Number of Element Types:      1
+      Number of Node Components:    0
+      Number of Element Components: 0
+
+
+Which contains the following attributes:
+
+.. autoclass:: pyansys.geometry.Geometry
+    :members:
+
 
 Coordinate Systems
 ~~~~~~~~~~~~~~~~~~
@@ -86,7 +105,8 @@ Non default coordinate systems are always saved to an ANSYS result file.  The co
      'type': 1,
      'reference num': 12}
 
-A 4x4 transformation matrix can be constructed by concatenating the transformation matrix and the origin into one array.  For example:
+A 4x4 transformation matrix can be constructed by concatenating the
+transformation matrix and the origin into one array.  For example:
 
 .. code:: python
 
@@ -98,9 +118,8 @@ A 4x4 transformation matrix can be constructed by concatenating the transformati
     >>> tmat = np.hstack((trans, origin.reshape(-1 ,1)))
     >>> tmat = np.vstack((tmat, bottom))
 
-See the doc string for ``parse_coordinate_system`` for more details regarding the contents of the coordinate systems stored in the result file.
-
-.. autofunction:: pyansys.rst.parse_coordinate_system
+See ``parse_coordinate_system`` for more details regarding the
+contents of the coordinate systems stored in the result file.
 
 
 Accessing Solution Results

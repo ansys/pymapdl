@@ -755,5 +755,5 @@ This is the result from the script:
 
 MAPDL Object Methods
 --------------------
-.. autoclass:: pyansys._Mapdl
+.. autoclass:: pyansys.mapdl._Mapdl
     :members:

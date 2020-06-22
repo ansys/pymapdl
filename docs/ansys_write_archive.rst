@@ -1,9 +1,10 @@
-Reading and Writing ANSYS Archives
-==================================
+Reading and Writing ANSYS Archive Files
+=======================================
 
 Reading ANSYS Archives
 ----------------------
-ANSYS archive files containing solid elements (both legacy and modern) can be loaded using Archive and then converted to a vtk object:
+ANSYS archive files containing elements (both legacy and modern) can
+be loaded using Archive and then converted to a ``vtk`` object:
 
 .. code:: python
 
@@ -21,7 +22,8 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
     archive.plot(color='w', show_edges=True)
 
 
-You can also optionally read in any stored parameters within the archive file by enabling the ``read_parameters`` parameter.
+You can also optionally read in any stored parameters within the
+archive file by enabling the ``read_parameters`` parameter.
 
 .. code:: python
 
@@ -37,7 +39,10 @@ class methods and properties.
 
 Writing ANSYS Archives
 ----------------------
-Unstructured grids generated using VTK can be converted to ANSYS APDL archive files and loaded into any version of ANSYS using ``pyansys.save_as_archive``.  The following example using the built-in archive file demonstrates this capability.
+Unstructured grids generated using VTK can be converted to ANSYS APDL
+archive files and loaded into any version of ANSYS using
+``pyansys.save_as_archive``.  The following example using the built-in
+archive file demonstrates this capability.
 
 .. code:: python
 
@@ -82,7 +87,8 @@ Resulting ANSYS quality report:
 
 Supported Elements
 ~~~~~~~~~~~~~~~~~~
-At the moment, only solid elements are supported by the ``save_as_archive`` function, to include:
+At the moment, only solid elements are supported by the
+``save_as_archive`` function, to include:
 
  - ``vtk.VTK_TETRA``
  - ``vtk.VTK_QUADRATIC_TETRA``
@@ -93,11 +99,13 @@ At the moment, only solid elements are supported by the ``save_as_archive`` func
  - ``vtk.VTK_HEXAHEDRON``
  - ``vtk.VTK_QUADRATIC_HEXAHEDRON``
 
-Linear element types will be written as SOLID185, quadratic elements will be written as SOLID186, except for quadratic tetrahedrals, which will be written as SOLID187.
-
+Linear element types will be written as SOLID185, quadratic elements
+will be written as SOLID186, except for quadratic tetrahedrals, which
+will be written as SOLID187.
 
 
 Archive Class
 -------------
 .. autoclass:: pyansys.archive.Archive
     :members:
+    :inherited-members:

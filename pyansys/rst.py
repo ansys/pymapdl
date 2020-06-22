@@ -184,7 +184,7 @@ class ResultFile(AnsysBinary):
 
         return resultheader
 
-    def _parse_coordinate_system(self):
+    def parse_coordinate_system(self):
         """Reads in coordinate system information from a binary result
         file.
 
@@ -1020,7 +1020,7 @@ class ResultFile(AnsysBinary):
         e_disp_table -= e_disp_table[0]
 
         # read in coordinate systems, material properties, and sections
-        self._c_systems = self._parse_coordinate_system()
+        self._c_systems = self.parse_coordinate_system()
 
         # load elements
         elem, elem_off = _binary_reader.load_elements(self.filename, ptr_elem,
@@ -1041,6 +1041,12 @@ class ResultFile(AnsysBinary):
         """Return an informative dictionary of solution data for a
         result.
 
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
         Returns
         -------
         header : dict
@@ -1048,38 +1054,35 @@ class ResultFile(AnsysBinary):
 
         Notes
         -----
-        The keys of the solution header is described below:
+        The keys of the solution header are described below:
 
-        timfrq - Time value (or frequency value, for a modal or
-                 harmonic analysis)
-
-        lfacto  - the "old" load factor (used in ramping a load
-                  between old and new values)
-        lfactn  - the "new" load factor
-        cptime  - elapsed cpu time (in seconds)
-        tref    - the reference temperature
-        tunif   - the uniform temperature
-        tbulk   - Bulk temp for FLOTRAN film coefs.
-        VolBase - Initial total volume for VOF
-        tstep   - Time Step size for FLOTRAN analysis
-        0.0     - position not used
-        accel   - linear acceleration terms
-        omega   - angular velocity (first 3 terms) and angular acceleration
-                  (second 3 terms)
-        omegacg - angular velocity (first 3 terms) and angular
-                  acceleration (second 3 terms) these velocity/acceleration
-                  terms are computed about the center of gravity
-        cgcent  - (x,y,z) location of center of gravity
-        fatjack - FATJACK ocean wave data (wave height and period)
-        dval1   - if pmeth=0: FATJACK ocean wave direction
-                  if pmeth=1: p-method convergence values
-        pCnvVal - p-method convergence values
-
+        - timfrq : Time value (or frequency value, for a modal or
+                   harmonic analysis)
+        - lfacto : the "old" load factor (used in ramping a load
+                    between old and new values)
+        - lfactn  : The "new" load factor
+        - cptime  : Elapsed CPU time (in seconds)
+        - tref    : The reference temperature
+        - tunif   : The uniform temperature
+        - tbulk   : Bulk temp for FLOTRAN film coefs.
+        - VolBase : Initial total volume for VOF
+        - tstep   : Time Step size for FLOTRAN analysis
+        - 0.0     : Position not used
+        - accel   : Linear acceleration terms
+        - omega   : Angular velocity (first 3 terms) and angular acceleration
+                    (second 3 terms)
+        - omegacg : Angular velocity (first 3 terms) and angular
+                    acceleration (second 3 terms) these
+                    velocity/acceleration terms are computed about the
+                    center of gravity
+        - cgcent  : (X,y,z) location of center of gravity
+        - fatjack : Fatjack ocean wave data (wave height and period)
+        - dval1   : If pmeth=0: FATJACK ocean wave direction
+                    if pmeth=1: p-method convergence values
+        - pCnvVal : P-method convergence values
         """
-        # Check if result is available
-        if rnum > self.nsets - 1:
-            raise Exception('There are only %d results in the result file.'
-                            % self.nsets)
+        # convert to cumulative index
+        rnum = self.parse_step_substep(rnum)
 
         # skip pointers table
         ptr = self._resultheader['rpointers'][rnum]
