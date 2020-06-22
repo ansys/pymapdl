@@ -19,8 +19,7 @@ cimport numpy as np
 
 cdef extern from "reader.h":
     int read_nblock(char*, int*, double*, int, int*, int, int*, int, int)
-    int read_eblock(char*, int*, int*, int*, int*, int*, int*, int, int, int*, int)
-    int read_eblock_full(char*, int*, int*, int, int, int*)
+    int read_eblock(char*, int*, int*, int, int, int*)
 
 cdef extern from 'vtk_support.h':
     int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*, int)
@@ -157,7 +156,7 @@ def read(filename, read_parameters=False, debug=False):
                 # Populate element field data and connectivity
                 elem = np.empty(nelem*30, dtype=ctypes.c_int)
                 elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
-                elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz, &n)
+                elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz, &n)
 
         elif b'K' == line[0]:
             if b'KEYOP' in line:
@@ -415,7 +414,7 @@ def read(filename, read_parameters=False, debug=False):
                     # Populate element field data and connectivity
                     elem = np.empty(nelem*30, dtype=ctypes.c_int)
                     elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
-                    elem_sz = read_eblock_full(raw, &elem_off[0], &elem[0], nelem, isz,
+                    elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz,
                                                &n)
 
                     if nelem == 0:
