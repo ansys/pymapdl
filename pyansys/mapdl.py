@@ -882,6 +882,10 @@ class _Mapdl(_MapdlCommands):
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
 
+        # setup plotting for PNG
+        if self._interactive_plotting:
+            self.enable_interactive_plotting()
+
     @property
     def _lockfile(self):
         """lockfile path"""
@@ -1139,7 +1143,6 @@ class _Mapdl(_MapdlCommands):
                     plt.show()  # consider in-line plotting
             else:
                 self._log.error('Unable to find screenshot at %s' % filename)
-        pass
 
     def __del__(self):
         """Clean up when complete"""

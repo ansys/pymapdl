@@ -2,7 +2,6 @@ import glob
 import os
 
 import pytest
-import numpy as np
 import pyansys
 from pyansys.mapdl_console import MapdlConsole
 
