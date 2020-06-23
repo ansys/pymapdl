@@ -136,10 +136,9 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
   // set to start of the NBLOCK
   raw += n[0];
   int len_orig = strlen(raw);
-  int j, i_val, eol;
-  /* double val; */
+  int i, j, i_val, eol;
 
-  for (int i=0; i<nnodes; i++){
+  for (i=0; i<nnodes; i++){
     i_val = fast_atoi(raw, intsz[0]);
     /* printf("%d", i_val); */
     nnum[i] = i_val;

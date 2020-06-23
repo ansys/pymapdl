@@ -6,7 +6,8 @@ import logging
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_QUADRATIC_PYRAMID, VTK_WEDGE, VTK_QUADRATIC_WEDGE,
-                 VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON)
+                 VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON, VTK_TRIANGLE, VTK_QUAD,
+                 VTK_QUADRATIC_TRIANGLE, VTK_QUADRATIC_QUAD)
 import vtk
 
 from pyansys import _reader
@@ -227,6 +228,8 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
 
     grid : vtk.UnstructuredGrid
         VTK UnstructuredGrid to convert to an APDL archive file.
+        PolyData will automatically be converted to an unstructured
+        mesh.
 
     mtype_start : int, optional
         Material number to assign to elements.  Can be set manually by
@@ -385,17 +388,25 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         etype_187 = etype_start + 1
         etype[grid.celltypes == VTK_QUADRATIC_TETRA] = etype_187
 
+        # Surface elements
+        etype_181 = etype_start + 3
+        etype[grid.celltypes == VTK_TRIANGLE] = etype_181
+        etype[grid.celltypes == VTK_QUAD] = etype_181
+
         typenum = np.empty_like(etype)
         typenum[etype == etype_185] = 185
         typenum[etype == etype_186] = 186
         typenum[etype == etype_187] = 187
+        typenum[etype == etype_181] = 181
 
         header += 'ET, %d, 185\n' % etype_185
         header += 'ET, %d, 186\n' % etype_186
         header += 'ET, %d, 187\n' % etype_187
+        header += 'ET, %d, 181\n' % etype_181
 
     # number of nodes written per element
     elem_nnodes = np.empty(etype.size, np.int32)
+    elem_nnodes[typenum == 181] = 4
     elem_nnodes[typenum == 185] = 8
     elem_nnodes[typenum == 186] = 20
     elem_nnodes[typenum == 187] = 10
@@ -558,8 +569,15 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                 line += '%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[:8])
                 line += '%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d%8d\n' % tuple(nodes[8:])
 
+            elif celltypes[i] == VTK_TRIANGLE:
+                writenodes = (nodes[0],  # 0,  I
+                              nodes[1],  # 1,  J
+                              nodes[2],  # 2,  K
+                              nodes[2])  # 3,  L (duplicate of K)
+                line += '%8d%8d%8d%8d\n' % writenodes
+
             else:
-                raise Exception('Invalid write cell type %d' % celltypes[i])
+                raise RuntimeError('Invalid write cell type %d' % celltypes[i])
 
             f.write(line)
 
