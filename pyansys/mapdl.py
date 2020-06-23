@@ -1169,12 +1169,11 @@ class _Mapdl(_MapdlCommands):
     @property
     def result(self):
         """Returns a binary interface to the result file."""
-        try:
-            result_path = self.inquire('RSTFILE')
+        result_path = self.inquire('RSTFILE')
+        if not result_path:
+            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
             if not os.path.dirname(result_path):
                 result_path = os.path.join(self.path, '%s.rst' % result_path)
-        except:
-            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
 
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
