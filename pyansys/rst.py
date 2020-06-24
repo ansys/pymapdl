@@ -8,7 +8,6 @@ from itertools import compress
 import time
 import warnings
 import logging
-import ctypes
 from threading import Thread
 from functools import wraps
 
@@ -1545,7 +1544,11 @@ class ResultFile(AnsysBinary):
             else:
                 scalars = scalars[ind]
 
-            rng = kwargs.pop('rng', [scalars.min(), scalars.max()])
+            if animate:
+                smax = np.abs(scalars).max()
+                rng = kwargs.pop('rng', [-smax, smax])
+            else:
+                rng = kwargs.pop('rng', [scalars.min(), scalars.max()])
         else:
             rng = kwargs.pop('rng', None)
 
@@ -1604,7 +1607,6 @@ class ResultFile(AnsysBinary):
                 scalars = [None]
 
         rang = 360.0 / self.n_sector
-        copied_meshes = []
 
         # remove extra keyword args
         kwargs.pop('node_components', None)
@@ -1651,7 +1653,10 @@ class ResultFile(AnsysBinary):
             plotter.camera_position = cpos
 
         if movie_filename:
-            plotter.open_movie(movie_filename)
+            if movie_filename.strip()[-3:] == 'gif':
+                plotter.open_gif(movie_filename)
+            else:
+                plotter.open_movie(movie_filename)
 
         # add table
         if add_text and rnum is not None:
@@ -1663,37 +1668,47 @@ class ResultFile(AnsysBinary):
             plotter.show(interactive=False, auto_close=False,
                          interactive_update=not off_screen)
 
-            self.animating = True
+            self._animating = True
 
             def q_callback():
                 """exit when user wants to leave"""
-                self.animating = False
+                self._animating = False
 
             plotter.add_key_event("q", q_callback)
 
             first_loop = True
-            while self.animating:
-                for angle in np.linspace(0, np.pi*2, nangles):
+            cached_normals = [None for _ in range(nangles)]
+            while self._animating:
+                for j, angle in enumerate(np.linspace(0, np.pi*2, nangles)):
                     mag_adj = np.sin(angle)
                     if scalars[0] is not None:
-                        copied_mesh['Data'] = scalars[0]*mag_adj
-                    copied_mesh.points = orig_pts + disp*mag_adj
+                        copied_mesh.active_scalars[:] = scalars[0]*mag_adj
+
+                    copied_mesh.points[:] = orig_pts + disp*mag_adj
+
+                    # normals have to be updated on the fly
+                    if smooth_shading:
+                        if cached_normals[j] is None:
+                            copied_mesh.compute_normals(cell_normals=False,
+                                                        inplace=True)
+                            cached_normals[j] = copied_mesh.point_arrays['Normals']
+                        else:
+                            copied_mesh.point_arrays['Normals'][:] = cached_normals[j]
 
                     if add_text:
                         # 2 maps to vtk.vtkCornerAnnotation.UpperLeft
                         plotter.textActor.SetText(2, '%s\nPhase %.1f Degrees' %
                                                   (result_text, (angle*180/np.pi)))
 
-                    plotter.update(30, force_redraw=True)
-                    if not self.animating:
+                    # at max supported framerate
+                    plotter.update(1, force_redraw=True)
+                    if not self._animating:
                         break
 
                     if movie_filename and first_loop:
                         plotter.write_frame()
 
                 first_loop = False
-                # if off_screen or interactive is False:
-                #     break
                 if not loop:
                     break
             plotter.close()

@@ -1048,7 +1048,7 @@ class CyclicResult(ResultFile):
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
                                                (result_info, (angle*180/np.pi)))
 
-                plotter.update(30, force_redraw=False)
+                plotter.update(1, force_redraw=True)
 
                 if movie_filename and first_loop:
                     plotter.write_frame()

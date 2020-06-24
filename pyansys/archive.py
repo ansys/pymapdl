@@ -9,6 +9,7 @@ from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON, VTK_TRIANGLE, VTK_QUAD,
                  VTK_QUADRATIC_TRIANGLE, VTK_QUADRATIC_QUAD)
 import vtk
+import pyvista as pv
 
 from pyansys import _reader
 from pyansys.misc import vtk_cell_info
@@ -271,6 +272,9 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         SOLID185).  Default True.
     """
     header = '/PREP7\n'
+
+    if isinstance(grid, pv.PolyData):
+        grid = grid.cast_to_unstructured_grid()
 
     # node numbers
     if 'ansys_node_num' in grid.point_arrays:
@@ -574,6 +578,13 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[1],  # 1,  J
                               nodes[2],  # 2,  K
                               nodes[2])  # 3,  L (duplicate of K)
+                line += '%8d%8d%8d%8d\n' % writenodes
+
+            elif celltypes[i] == VTK_QUAD:
+                writenodes = (nodes[0],  # 0,  I
+                              nodes[1],  # 1,  J
+                              nodes[2],  # 2,  K
+                              nodes[3])  # 3,  L
                 line += '%8d%8d%8d%8d\n' % writenodes
 
             else:
