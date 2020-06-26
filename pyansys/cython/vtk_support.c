@@ -455,7 +455,7 @@ int ans_to_vtk(int nelem, int *elem, int *elem_off, int *type_ref, int nnode,
       break;
     case 3:  // shell
       is_quad = nnode_elem > 4;
-      if (elem[off + 2] == elem[off + 13]){
+      if (elem[off + 2] == elem[off + 3]){
   	add_tri(build_offset, &elem[off], is_quad);
       } else {  // is quadrilateral
   	add_quad(build_offset, &elem[off], is_quad);

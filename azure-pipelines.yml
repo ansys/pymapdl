@@ -86,14 +86,14 @@ jobs:
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
 
-- job: build_docs
-  variables:
-    gh_user: akaszynski
-    gh_repo: pyansys.github.io
-    gh_pass: $(github_pat)
-    gh_email: $(github_email)
-    gh_auth_header: $(echo -n "${gh_user}:$(github_pat)" | base64);
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - template: .ci/build_documentation.yml
+# - job: build_docs
+#   variables:
+#     gh_user: akaszynski
+#     gh_repo: pyansys.github.io
+#     gh_pass: $(github_pat)
+#     gh_email: $(github_email)
+#     gh_auth_header: $(echo -n "${gh_user}:$(github_pat)" | base64);
+#   pool:
+#     vmImage: 'ubuntu-16.04'
+#   steps:
+#     - template: .ci/build_documentation.yml
