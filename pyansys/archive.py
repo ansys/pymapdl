@@ -9,6 +9,7 @@ from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
                  VTK_HEXAHEDRON, VTK_QUADRATIC_HEXAHEDRON, VTK_TRIANGLE, VTK_QUAD,
                  VTK_QUADRATIC_TRIANGLE, VTK_QUADRATIC_QUAD)
 import vtk
+import pyvista as pv
 
 from pyansys import _reader
 from pyansys.misc import vtk_cell_info
@@ -200,10 +201,11 @@ def chunks(l, n):
 
 
 def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
-                    real_constant_start=1, mode='w',
-                    nblock=True, enum_start=1, nnum_start=1,
-                    include_etype_header=True,
-                    reset_etype=False, allow_missing=True):
+                    real_constant_start=1, mode='w', nblock=True,
+                    enum_start=1, nnum_start=1,
+                    include_etype_header=True, reset_etype=False,
+                    allow_missing=True, include_surface_elements=True,
+                    include_solid_elements=True):
     """Writes FEM as an ANSYS APDL archive file.  This function
     supports the following element types:
 
@@ -269,8 +271,41 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
         determined by the shape of the element (i.e. quadradic
         tetrahedrals will be saved as SOLID187, linear hexahedrals as
         SOLID185).  Default True.
+
+    include_surface_elements : bool, optional
+        Includes surface elements when writing the archive file and
+        saves them as SHELL181.
+
+    include_solid_elements : bool, optional
+        Includes solid elements when writing the archive file and
+        saves them as SOLID185, SOLID186, or SOLID187.
+
     """
     header = '/PREP7\n'
+
+    if isinstance(grid, pv.PolyData):
+        grid = grid.cast_to_unstructured_grid()
+
+    allowable = []
+    if include_solid_elements:
+        allowable.extend([VTK_TETRA,
+                          VTK_QUADRATIC_TETRA,
+                          VTK_PYRAMID,
+                          VTK_QUADRATIC_PYRAMID,
+                          VTK_WEDGE,
+                          VTK_QUADRATIC_WEDGE,
+                          VTK_HEXAHEDRON,
+                          VTK_QUADRATIC_HEXAHEDRON])
+
+    if include_surface_elements:
+        allowable.extend([VTK_TRIANGLE,
+                          VTK_QUAD])
+                          # VTK_QUADRATIC_TRIANGLE,
+                          # VTK_QUADRATIC_QUAD
+
+    # extract allowable cell types
+    mask = np.in1d(grid.celltypes, allowable)
+    grid = grid.extract_cells(mask)
 
     # node numbers
     if 'ansys_node_num' in grid.point_arrays:
@@ -576,8 +611,15 @@ def save_as_archive(filename, grid, mtype_start=1, etype_start=1,
                               nodes[2])  # 3,  L (duplicate of K)
                 line += '%8d%8d%8d%8d\n' % writenodes
 
-            else:
-                raise RuntimeError('Invalid write cell type %d' % celltypes[i])
+            elif celltypes[i] == VTK_QUAD:
+                writenodes = (nodes[0],  # 0,  I
+                              nodes[1],  # 1,  J
+                              nodes[2],  # 2,  K
+                              nodes[3])  # 3,  L
+                line += '%8d%8d%8d%8d\n' % writenodes
+
+            # else:
+            #     raise RuntimeError('Invalid write cell type %d' % celltypes[i])
 
             f.write(line)
 

@@ -536,7 +536,7 @@ def launch_mapdl(exec_file=None, run_location=None,
                                     'pyansys.Mapdl(exec_file=...)')
     else:  # verify ansys exists at this location
         if not os.path.isfile(exec_file):
-            raise FileNotFoundError('Invalid ANSYS executable at %s'
+            raise FileNotFoundError('Invalid ANSYS executable at "%s"'
                                     % exec_file + 'Enter one manually using '
                                     'pyansys.Mapdl(exec_file=)')
 
@@ -1097,7 +1097,7 @@ class _Mapdl(_MapdlCommands):
         """
         # load ansys parameters to python
         filename = os.path.join(self.path, 'parameters.parm')
-        self.Parsav('all', filename)
+        self.parsav('all', filename)
         self.parameters, self.arrays = load_parameters(filename)
         return self.parameters, self.arrays
 
@@ -1169,11 +1169,15 @@ class _Mapdl(_MapdlCommands):
     @property
     def result(self):
         """Returns a binary interface to the result file."""
-        result_path = self.inquire('RSTFILE')
+        try:
+            result_path = self.inquire('RSTFILE')
+        except RuntimeError:
+            result_path = ''
+
         if not result_path:
             result_path = os.path.join(self.path, '%s.rst' % self._jobname)
-            if not os.path.dirname(result_path):
-                result_path = os.path.join(self.path, '%s.rst' % result_path)
+        elif not os.path.dirname(result_path):
+            result_path = os.path.join(self.path, '%s.rst' % result_path)
 
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
@@ -1241,19 +1245,172 @@ class _Mapdl(_MapdlCommands):
 
     def get_float(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Get the value of a float-parameter from APDL.
+        """Runs the *GET command with a default parameter
+
+        See `help(get)` for more details.
+
+        Parameters
+        ----------
+        entity
+            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
+            VOLU, PDS, etc., as shown for Entity = in the tables below.
+
+        entnum
+            The number or label for the entity (as shown for ENTNUM = in the
+            tables below). In some cases, a zero (or blank) ENTNUM represents
+            all entities of the set.
+
+        item1
+            The name of a particular item for the given entity. Valid items are
+            as shown in the Item1 columns of the tables below.
+
+        it1num
+            The number (or label) for the specified Item1 (if any). Valid
+            IT1NUM values are as shown in the IT1NUM columns of the tables
+            below. Some Item1 labels do not require an IT1NUM value.
+
+        item2, it2num
+            A second set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        Returns
+        -------
+        par : float
+            Floating point value of the parameter.
+
+        Examples
+        --------
+        Retreive the number of nodes.
+
+        >>> value = ansys.get('node', '', 'count')
+        >>> value
+        3003
+
+        Retreive the number of nodes using keywords.
+
+        >>> value = ansys.get(entity='node', item1='count')
+        >>> value
+        3003
+        """
+        return self.get(entity=entity, entnum=entnum, item1=item1, it1num=it1num,
+                        item2=item2, it2num=it2num, **kwargs)
+
+    def get(self, par="__floatparameter__", entity="", entnum="",
+            item1="", it1num="", item2="", it2num="", **kwargs):
+        """APDL Command: *GET
+
+        Retrieves a value and stores it as a scalar parameter or part
+        of an array parameter.
+
+        Parameters
+        ----------
+        par
+            The name of the resulting parameter. See *SET for name
+            restrictions.
+
+        entity
+            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
+            VOLU, PDS, etc., as shown for Entity = in the tables below.
+
+        entnum
+            The number or label for the entity (as shown for ENTNUM = in the
+            tables below). In some cases, a zero (or blank) ENTNUM represents
+            all entities of the set.
+
+        item1
+            The name of a particular item for the given entity. Valid items are
+            as shown in the Item1 columns of the tables below.
+
+        it1num
+            The number (or label) for the specified Item1 (if any). Valid
+            IT1NUM values are as shown in the IT1NUM columns of the tables
+            below. Some Item1 labels do not require an IT1NUM value.
+
+        item2, it2num
+            A second set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        Returns
+        -------
+        par : float
+            Floating point value of the parameter.
+
+        Examples
+        --------
+        Retreive the number of nodes
+
+        >>> value = ansys.get('val', 'node', '', 'count')
+        >>> value
+        3003
+
+        Retreive the number of nodes using keywords.  Note that the
+        parameter name is optional.
+
+        >>> value = ansys.get(entity='node', item1='count')
+        >>> value
+        3003
 
         Notes
         -----
-        An APDL parameter __floatparameter__ is created/overwritten.
+        *GET retrieves a value for a specified item and stores the value as a
+        scalar parameter, or as a value in a user-named array parameter. An
+        item is identified by various keyword, label, and number combinations.
+        Usage is similar to the *SET command except that the parameter values
+        are retrieved from previously input or calculated results. For example,
+        *GET,A,ELEM,5,CENT,X returns the centroid x-location of element 5 and
+        stores the result as parameter A. *GET command operations, along with
+        the associated Get functions return values in the active coordinate
+        system unless stated otherwise. A Get function is an alternative in-
+        line function that can be used to retrieve a value instead of the *GET
+        command (see Using In-line Get Functions for more information).
+
+        Both *GET and *VGET retrieve information from the active data stored in
+        memory. The database is often the source, and sometimes the information
+        is retrieved from common memory blocks that the program uses to
+        manipulate information. Although POST1 and POST26 operations use a
+        *.rst file, *GET data is accessed from the database or from the common
+        blocks. Get operations do not access the *.rst file directly. For
+        repeated gets of sequential items, such as from a series of elements,
+        see the *VGET command.
+
+        Most items are stored in the database after they are calculated and are
+        available anytime thereafter. Items are grouped according to where they
+        are usually first defined or calculated. Preprocessing data will often
+        not reflect the calculated values generated from section data. Do not
+        use *GET to obtain data from elements that use calculated section data,
+        such as beams or shells. Most of the general items listed below are
+        available from all modules. Each of the sections for accessing *GET
+        parameters are shown in the following order:
+
+        *GET General Entity Items
+
+        *GET Preprocessing Entity Items
+
+        *GET Solution Entity Items
+
+        *GET Postprocessing Entity Items
+
+        *GET Probabilistic Design Entity Items
+
+        The *GET command is valid in any processor.
         """
-        line = self.get("__floatparameter__", entity, entnum, item1, it1num,
-                        item2, it2num, **kwargs)
-        return float(re.search(r"(?<=VALUE\=).*", line).group(0))
+        command = "*GET,%s,%s,%s,%s,%s,%s,%s" % (str(par),
+                                                 str(entity),
+                                                 str(entnum),
+                                                 str(item1),
+                                                 str(it1num),
+                                                 str(item2),
+                                                 str(it2num))
+        response = self.run(command, **kwargs)
+        try:
+            return float(response.split('=')[-1])
+        except:
+            return None
 
     def read_float_parameter(self, parameter_name):
         """Read out the value of a ANSYS parameter to use in python.
-        Can raise TypeError.
 
         Parameters
         ----------
@@ -1264,13 +1421,38 @@ class _Mapdl(_MapdlCommands):
         -------
         float
             Value of ANSYS parameter.
+
+        Examples
+        --------
+        >>> ansys.get('myparm', 'node', '', 'count')
+        >>> value = ansys.read_float_parameter('myparm')
+        >>> value
+        3003
+
+        Retreive the value in an array.  This example creates a block
+        of elements and stores the element numbers in an array.  Then
+        it retreives the first value of that array
+
+        >>> ansys.prep7()
+        >>> ansys.block(0,1,0,1,0,1)
+        >>> ansys.et(1, 186)
+        >>> ansys.vmesh('all')
+        >>> ansys.run('*VGET, ELEM_ARR, ELEM, , elist')
+        >>> ansys.read_float_parameter('ELEM_ARR(1)')
+        1.0
+
+        You could also retrieve ELEM_ARR with
+
+        >>> values, arrays = ansys.load_parameters()
+        >>> arrays
+        {'ELEM_ARR': array([1., 2., 3., 4., 5., 6., 7., 8.])}
+
         """
         try:
-            line = self.run(parameter_name + " = " + parameter_name)
+            response = self.run(parameter_name + " = " + parameter_name)
         except TypeError:
-            print('Input variable parameter_name should be string')
-            raise
-        return float(re.search(r"(?<=\=).*", line).group(0))
+            raise TypeError('Input variable `parameter_name` should be string')
+        return float(response.split('=')[-1])
 
     def read_float_from_inline_function(self, function_str):
         """Use a APDL inline function to get a float value from ANSYS.
