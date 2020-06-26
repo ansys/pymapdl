@@ -26,7 +26,7 @@ conjunction with ``mapdl.load_parameters``.  For example:
    mapdl.get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
    mapdl.load_parameters()
 
-The parameters are now acessable within the ``ANSYS`` object:
+The parameters are now accessible within the ``ANSYS`` object:
 
 .. code:: python
 

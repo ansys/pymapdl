@@ -1679,7 +1679,7 @@ class ResultFile(AnsysBinary):
             first_loop = True
             cached_normals = [None for _ in range(nangles)]
             while self._animating:
-                for j, angle in enumerate(np.linspace(0, np.pi*2, nangles)):
+                for j, angle in enumerate(np.linspace(0, np.pi*2, nangles + 1)[:-1]):
                     mag_adj = np.sin(angle)
                     if scalars[0] is not None:
                         copied_mesh.active_scalars[:] = scalars[0]*mag_adj

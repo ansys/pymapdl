@@ -18,7 +18,7 @@ mapdl = pyansys.launch_mapdl(loglevel='WARNING', override=True)
 mesh = pv.Plane(i_resolution=100, j_resolution=100)
 
 mesh.plot(color='w', show_edges=True)
-
+ 
 ###############################################################################
 # Write the mesh to an archive file
 archive_filename = os.path.join(mapdl.path, 'tmp.cdb')
