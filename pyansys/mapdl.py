@@ -6,7 +6,6 @@ This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.
 
 """
-import time
 import glob
 import string
 import re
@@ -19,6 +18,7 @@ from shutil import copyfile, rmtree
 
 import appdirs
 import numpy as np
+import pyvista as pv
 
 import pyansys
 from pyansys.geometry_commands import geometry_commands
@@ -192,13 +192,27 @@ def get_ansys_path(allow_input=True):
 
 
 def change_default_ansys_path(exe_loc):
-    """
-    Change your default ansys path
+    """Change your default ansys path.
 
     Parameters
     ----------
     exe_loc : str
-        Ansys executable.  Must be a full path.
+        Ansys executable path.  Must be a full path.
+
+    Examples
+    --------
+    Change default ansys location on Linux
+
+    >>> import pyansys
+    >>> pyansys.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
+    >>> pyansys.mapdl.get_ansys_path()
+    '/ansys_inc/v201/ansys/bin/ansys201'
+
+    Change default ansys location on Windows
+    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
+    >>> pyansys.change_default_ansys_path(ans_pth)
+    >>> pyansys.mapdl.check_valid_ansys()
+    True
 
     """
     if os.path.isfile(exe_loc):
@@ -869,6 +883,8 @@ class _Mapdl(_MapdlCommands):
         self.response = None
         self._outfile = None
         self._show_matplotlib_figures = True
+        self._nblock_cache = None
+        self._archive_cache = None
 
         self._log = setup_logger(loglevel.upper())
         self.non_interactive = self._non_interactive(self)
@@ -885,6 +901,11 @@ class _Mapdl(_MapdlCommands):
         # setup plotting for PNG
         if self._interactive_plotting:
             self.enable_interactive_plotting()
+
+    def _reset_cache(self):
+        """Reset cached NBLOCK and other items"""
+        self._nblock_cache = None
+        self._archive_cache = None
 
     @property
     def _lockfile(self):
@@ -947,6 +968,197 @@ class _Mapdl(_MapdlCommands):
             self._apdl_log.close()
         self._apdl_log = None
 
+    def nplot(self, knum="", vtk=False, **kwargs):
+        """APDL Command: NPLOT
+
+        Displays nodes.
+
+        Parameters
+        ----------
+        knum : int, optional
+            Node number key:
+
+            - 0 : No node numbers on display (default).
+            - 1 : Include node numbers on display.  See also /PNUM command.
+
+        vtk : bool, optional
+           Display nodes using VTK.
+
+        Examples
+        --------
+        Plot using VTK while showing labels and changing the background
+
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(11, 10, 0, 0)
+        >>> mapdl.fill(1, 11, 9)
+        >>> mapdl.nplot(vtk=True, knum=True, background='w', color='k',
+                        off_screen=True, show_bounds=True)
+
+        Plot without using VTK
+
+        >>> mapdl.enable_interactive_plotting()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(11, 10, 0, 0)
+        >>> mapdl.fill(1, 11, 9)
+        >>> mapdl.nplot()
+
+        Notes
+        -----
+        Only selected nodes [NSEL] are displayed.  Elements need not
+        be defined.  See the DSYS command for display coordinate
+        system.
+
+        This command is valid in any processor.
+        """
+        if vtk:
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', False))
+            pl.add_points(self.nodes, color=kwargs.pop('color', 'w'))
+            pl.show_axes()
+            if 'background' in kwargs:
+                pl.set_background(kwargs['background'])
+            if knum:
+                pl.add_point_labels(self.nodes, self.nnum)
+
+            if 'cpos' in kwargs:
+                pl.camera_position = kwargs['cpos']
+
+            if 'show_bounds' in kwargs:
+                if kwargs['show_bounds']:
+                    pl.show_bounds()
+
+            return pl.show()
+        else:
+            return super().nplot(knum, **kwargs)
+
+    @property
+    def nodes(self):
+        """The coordinates of the active selected nodes as an array.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(10, 10, 0, 0)
+        >>> mapdl.fill(1, 10, 9)
+        >>> mapdl.nodes
+        array([[ 1.,  0.,  0.],
+               [ 2.,  0.,  0.],
+               [ 3.,  0.,  0.],
+               [ 4.,  0.,  0.],
+               [ 5.,  0.,  0.],
+               [ 6.,  0.,  0.],
+               [ 7.,  0.,  0.],
+               [ 8.,  0.,  0.],
+               [ 9.,  0.,  0.],
+               [10.,  0.,  0.]])
+        """
+        return self._nblock.nodes
+
+    @property
+    def nnum(self):
+        """The node numbers of the selected nodes
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(10, 10, 0, 0)
+        >>> mapdl.fill(1, 10, 9)
+        >>> mapdl.nnum
+        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
+        """
+        return self._nblock.nnum
+
+    # consider caching this
+    @property
+    def _nblock(self):
+        """Write the NBLOCK and read it in as a pyansys.Archive """
+        if self._archive_cache is not None:
+            return self._archive_cache
+
+        elif self._nblock_cache is None:
+            # temporarily disable log
+            prior_log_level = self._log.level
+            self._log.setLevel('CRITICAL')
+
+            # create a temporary ELEM component so elements can be unselected
+            cname = '__tmp_elem__'
+            self.cm(cname, 'ELEM')
+            self.esel('NONE')
+
+            arch_filename = os.path.join(self.path, 'tmp.cdb')
+            self.cdwrite('db', arch_filename)
+            self.cmsel('S', cname, 'ELEM')
+
+            # resume log
+            self._log.setLevel(prior_log_level)
+
+            # read in tmp archive file
+            self._nblock_cache = pyansys.Archive(arch_filename, parse_vtk=False)
+
+        return self._nblock_cache
+
+    @property
+    def _archive(self):
+        """Write entire archive to ASCII and read it in as a pyansys.Archive """
+        if self._archive_cache is None:
+            # temporarily disable log
+            prior_log_level = self._log.level
+            self._log.setLevel('CRITICAL')
+
+            # write database to an archive file
+            arch_filename = os.path.join(self.path, 'tmp.cdb')
+            self.cdwrite('db', arch_filename)
+            self._archive_cache = pyansys.Archive(arch_filename, parse_vtk=False)
+            self._log.setLevel(prior_log_level)
+        return self._archive_cache
+
+    @property
+    def elements(self):
+        """List of elements containing raw ansys information.
+
+        Each element contains 10 items plus the nodes belonging to the
+        element.  The first 10 items are:
+
+        - FIELD 0 : material reference number
+        - FIELD 1 : element type number
+        - FIELD 2 : real constant reference number
+        - FIELD 3 : section number
+        - FIELD 4 : element coordinate system
+        - FIELD 5 : death flag (0 - alive, 1 - dead)
+        - FIELD 6 : solid model reference
+        - FIELD 7 : coded shape key
+        - FIELD 8 : element number
+        - FIELD 9 : base element number (applicable to reinforcing elements only)
+        - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl(override=True, loglevel='WARNING')
+        >>> mapdl.et(1, 188)
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(2, 1, 0, 0)
+        >>> mapdl.n(3, 2, 0, 0)
+        >>> mapdl.n(4, 3, 0, 0)
+        >>> mapdl.e(1, 2)
+        >>> mapdl.e(2, 3)
+        >>> mapdl.e(3, 4)
+        >>> mapdl.elements
+        [array([1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 4, 5], dtype=int32)]
+
+        """
+        return self._archive.elem
+
     def enable_interactive_plotting(self, pixel_res=1600):
         """Enables interactive plotting.  Requires matplotlib
 
@@ -960,7 +1172,7 @@ class _Mapdl(_MapdlCommands):
         """
         if MATPLOTLIB_LOADED:
             self.show('PNG')
-            self.gfile(1200)
+            self.gfile(pixel_res)
             self._interactive_plotting = True
         else:
             raise ImportError('Install matplotlib to use enable interactive plotting\n' +
@@ -1178,6 +1390,10 @@ class _Mapdl(_MapdlCommands):
             result_path = os.path.join(self.path, '%s.rst' % self._jobname)
         elif not os.path.dirname(result_path):
             result_path = os.path.join(self.path, '%s.rst' % result_path)
+
+        # there may be multiple result files at this location (if not
+        # combining results)
+        
 
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)

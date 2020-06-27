@@ -2,6 +2,7 @@
 import os
 import sys
 import logging
+from functools import wraps
 
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
@@ -192,6 +193,11 @@ class Archive(Geometry):
         # set qual of null cells to 1
         qual[self._grid.celltypes == 0] = 1
         return qual
+
+    @wraps(pv.plot)
+    def plot(self, *args, **kwargs):
+        """Plot the ANSYS archive file"""
+        self.grid.plot(*args, **kwargs)
 
 
 def chunks(l, n):

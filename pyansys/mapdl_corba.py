@@ -248,6 +248,7 @@ class MapdlCorba(_Mapdl):
 
     def _run(self, command):
         """Sends a command to the mapdl server via the CORBA interface"""
+        self._reset_cache()
         if self._server is None:
             raise RuntimeError('ANSYS exited')
 

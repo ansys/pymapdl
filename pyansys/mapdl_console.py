@@ -85,6 +85,8 @@ class MapdlConsole(_Mapdl):
 
     def _run(self, command):
         """Sends command and returns ANSYS's response"""
+        self._reset_cache()
+
         if not self._process.isalive():
             raise RuntimeError('ANSYS exited')
 

@@ -227,11 +227,11 @@ import numpy as np
 # element type to VTK conversion function call map
 # 0: skip
 # 1: Point
-# 2: Line
+# 2: Line (linear or quadratic)
 # 3: Shell
 # 4: 3D Solid (Hexahedral, wedge, pyramid, tetrahedral)
 # 5: Tetrahedral
-
+# 6: Line (always linear)
 
 _etype_map = [0, 2,  # LINK1
 	      3,  # PLANE2
@@ -420,7 +420,7 @@ _etype_map = [0, 2,  # LINK1
 	      4,  # SOLID185
 	      4,  # SOLID186
 	      5,  # SOLID187
-	      2,  # BEAM188
+	      6,  # BEAM188
 	      2,  # BEAM189
 	      4,  # SOLSH190
               0,  # UNUSED191
