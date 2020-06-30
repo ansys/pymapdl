@@ -495,8 +495,9 @@ def component_interperter(component):
     return np.hstack(f_new).astype(ctypes.c_int)
 
 
-def ans_vtk_convert(int [::1] elem, int [::1] elem_off, int [::1] type_ref,
-                    int [::1] nnum, int build_offset):
+def ans_vtk_convert(const int [::1] elem, const int [::1] elem_off,
+                    const int [::1] type_ref,
+                    const int [::1] nnum, int build_offset):
     """Convert ansys style connectivity to VTK connectivity"""
     cdef int nelem = elem_off.size - 1
     cdef int64_t [::1] offset = np.empty(nelem, ctypes.c_int64)
