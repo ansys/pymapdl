@@ -5,10 +5,12 @@ from pyansys._version import __version__
 from pyansys.archive import (Archive, write_cmblock, write_nblock,
                              save_as_archive)
 
+from pyansys.cell_quality import quality
 from pyansys.common import read_binary
 from pyansys.convert import convert_script
 from pyansys.mapdl import launch_mapdl
 from pyansys.mapdl import change_default_ansys_path
+
 
 # Sphinx-gallery tools
 from pyansys.sphinx_gallery import Scraper, _get_sg_image_scraper

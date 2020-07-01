@@ -39,10 +39,6 @@ jobs:
         docker pull quay.io/pypa/manylinux2010_x86_64
         docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh $(python.version)
       displayName: Build wheels using manylinux2010
-    - script: |
-        pip install https://www.vtk.org/files/release/9.0/vtk-9.0.0-cp38-cp38-linux_x86_64.whl
-      displayName: Install VTK9 for Python 3.8
-      condition: eq(variables['python.version'], '3.8')
     - template: .ci/azure-steps.yml      
     - template: .ci/azure-publish-dist.yml
 
