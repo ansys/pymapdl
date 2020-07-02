@@ -14,7 +14,7 @@ import pyvista as pv
 from pyansys import _reader
 from pyansys.misc import vtk_cell_info
 from pyansys.geometry import Geometry
-from pyansys._cellqual import cell_quality_float, cell_quality
+from pyansys.cell_quality import quality
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -181,17 +181,7 @@ class Archive(Geometry):
         if self._grid is None:
             raise AttributeError('Archive must be parsed as a vtk grid.\n'
                                  'Set `parse_vtk=True`')
-        celltypes = self.grid.celltypes
-        points = self.grid.points
-        cells, offset = vtk_cell_info(self.grid)
-        if points.dtype == np.float64:
-            qual = cell_quality(cells, offset, celltypes, points)
-        else:
-            qual = cell_quality_float(cells, offset, celltypes, points)
-
-        # set qual of null cells to 1
-        qual[self._grid.celltypes == 0] = 1
-        return qual
+        return quality(self._grid)
 
 
 def chunks(l, n):
