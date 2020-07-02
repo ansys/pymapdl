@@ -71,10 +71,10 @@ def compilerName():
 compiler = compilerName()
 if compiler == 'unix':
     cmp_arg = ['-O3', '-w']
-    # cmp_arg = ['-fsanitize=address']
+#    if sys.platform == 'darwin':
+#        cmp_arg.append('-flat_namespace')
 else:
     cmp_arg = ['/Ox', '-w']
-    # cmp_arg = ['/RTC']  # debug
 
 
 # Get version from version info
@@ -124,11 +124,6 @@ setup(
     # Build cython modules
     cmdclass={'build_ext': build_ext},
     ext_modules=[
-                 # Extension("pyansys._db_reader",
-                 #           ["pyansys/cython/_db_reader.pyx"],
-                 #           extra_compile_args=cmp_arg,
-                 #           language='c'),
-
                  Extension('pyansys._reader',
                            ['pyansys/cython/_reader.pyx',
                             'pyansys/cython/reader.c',

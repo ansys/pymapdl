@@ -22,7 +22,8 @@ cdef extern from "reader.h":
     int read_eblock(char*, int*, int*, int, int, int*)
 
 cdef extern from 'vtk_support.h':
-    int ans_to_vtk(int, int*, int*, int*, int, int*, int64_t*, int64_t*, uint8_t*, int)
+    int ans_to_vtk(const int, const int*, const int*, const int*, const int,
+    const int*, int64_t*, int64_t*, uint8_t*, const int)
 
 cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     """Copies a single line from instr to outstr starting from position n """
