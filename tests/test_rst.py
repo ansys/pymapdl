@@ -1,3 +1,7 @@
+"""
+Sample result file generated with 
+
+"""
 import os
 
 import numpy as np
@@ -29,23 +33,21 @@ except:
     pontoon = None
 
 
-try:
-    __file__
-except:  # for testing
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_rst.py'
-
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 is16_filename = os.path.join(testfiles_path, 'is16.rst')
 is16_known_result = os.path.join(testfiles_path, 'is16.npz')
 if os.path.isfile(is16_filename):
+
     is16 = pyansys.read_binary(is16_filename)
 else:
     is16 = None
 
 temperature_rst = os.path.join(testfiles_path, 'temp_v13.rst')
 temperature_known_result = os.path.join(testfiles_path, 'temp_v13.npz')
+
+
 
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
