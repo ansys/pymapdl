@@ -30,8 +30,8 @@ MESH200_MAP = {0: 2,  # line
 
 class Geometry():
 
-    def __init__(self, nnum, nodes, elem, elem_off, ekey, node_comps={},
-                 elem_comps={}, rdat=[], rnum=[], keyopt={}):
+    def __init__(self, nnum, nodes, elem=None, elem_off=None, ekey=None,
+                 node_comps={}, elem_comps={}, rdat=[], rnum=[], keyopt={}):
         self._etype = None  # internal element type reference
         self._grid = None  # VTK grid
         self._enum = None  # cached element numbering
@@ -44,7 +44,7 @@ class Geometry():
         self._secnum = None  # cached section number
         self._esys = None  # cached element coordinate system
 
-        # must be set by subclass
+        # Set on init
         self._nnum = nnum
         self._nodes = nodes
         self._elem = elem

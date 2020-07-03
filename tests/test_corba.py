@@ -349,12 +349,10 @@ def test_logging(mapdl, tmpdir):
 
 def test_nodes(cleared, mapdl):
     mapdl.prep7()
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    expected = np.zeros((11, 3))
-    expected[:, 0] = range(0, 11)
-    assert np.allclose(mapdl.nodes, expected)
+    mapdl.cdread('db', pyansys.examples.sector_archive_file)
+    archive = pyansys.Archive(pyansys.examples.sector_archive_file, parse_vtk=False)
+    mapdl.nwrite('/tmp/ansys/tmp.nodes')
+    assert np.allclose(mapdl.nodes, archive.nodes)
 
 
 def test_nnum(cleared, mapdl):

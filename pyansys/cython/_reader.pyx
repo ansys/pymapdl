@@ -18,6 +18,7 @@ cimport numpy as np
 
 
 cdef extern from "reader.h":
+    int read_nblock_from_nwrite(char*, int*, double*, int)
     int read_nblock(char*, int*, double*, int, int*, int, int*)
     int read_eblock(char*, int*, int*, int, int, int*)
 
@@ -513,3 +514,12 @@ def ans_vtk_convert(const int [::1] elem, const int [::1] elem_off,
                               build_offset)
 
     return np.asarray(offset), np.asarray(celltypes), np.asarray(cells[:loc])
+
+
+def read_from_nwrite(filename, int nnodes):
+    """Read the node coordinates from the output from the MAPDL NWRITE command"""
+    cdef int [::1] nnum = np.empty(nnodes, ctypes.c_int)
+    cdef double [:, ::1] nodes = np.empty((nnodes, 3), np.double)
+
+    read_nblock_from_nwrite(filename, &nnum[0], &nodes[0, 0], nnodes)
+    return np.array(nnum), np.array(nodes)

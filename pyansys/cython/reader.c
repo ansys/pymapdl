@@ -125,6 +125,76 @@ __inline int ans_strtod(char *raw, int fltsz, double *arr){
   return 0;  // Return 0 when a number has a been read
 }
 
+static inline double ans_strtod2(char *raw, int fltsz){
+  int i;
+  double sign = 1;
+
+  for (i=0; i<fltsz; i++){
+    if (*raw == '\r' || *raw == '\n'){
+      // value is zero then
+      return 0;
+    }
+    else if (*raw != ' '){  // always skip whitespace
+      break;
+    }
+    raw++;
+  }
+
+  // either a number of a sign
+  if (*raw == '-'){
+    sign = -1;
+    ++raw;
+    ++i;
+  }
+
+  // next value is always a number
+  double val = *raw++ - '0'; i++;
+
+  // next value is always a "."
+  raw++; i++;
+
+  // Read through the rest of the number
+  double k = 0.1;
+  for (; i<fltsz; i++){
+    if (*raw == 'E'){
+      break;
+    }
+    else if (*raw >= '0' && *raw <= '9') {
+      val += (*raw++ - '0') * k;
+      k *= 0.1;
+    }
+  }
+
+  // Might have scientific notation left, for example:
+  // 1.0000000000000E-001
+  int evalue = 0;
+  int esign = 1;
+  if (*raw == 'E'){
+    raw++; // skip "E"
+    // always a sign of some sort
+    if (*raw == '-'){
+      esign = -1;
+    }
+    raw++; i++; i++;  // skip E and sign
+    for (; i<fltsz; i++){
+      // read to whitespace or end of the line
+      if (*raw == ' ' || *raw == '\r' || *raw == '\n'){
+	break;
+      }
+      evalue = evalue*10 + (*raw++ - '0');
+    }
+    val *= pow(10, esign*evalue);
+      
+  }
+
+  // seek through end of float value
+  if (sign == -1){
+    return -val;
+  }
+  return val;
+
+}
+
 
 //=============================================================================
 // reads nblock from ANSYS.  Raw string is from Python reader and file is
@@ -177,6 +247,59 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
   return fpos;
 
 }
+
+
+/* Read just the node coordinates from the output from the MAPDL
+ *  NWRITE command
+ * (I8, 6G20.13) to write out NODE,X,Y,Z,THXY,THYZ,THZX
+ */
+int read_nblock_from_nwrite(const char* filename, int *nnum, double *nodes,
+			    int nnodes){
+  FILE * stream = fopen(filename, "r");
+
+  if(stream == NULL)
+    {
+      printf("Error opening file");
+      exit(1);
+    }
+
+  // set to start of the NBLOCK
+  int bufsize = 9 + 21*3 + 2;  // One int, 3 floats, two end char max (/r/n)
+  char buffer[bufsize];  
+  int i;
+
+  for (i=0; i<nnodes; i++){
+    fgets(buffer, bufsize, stream);
+    nnum[i] = fast_atoi(&buffer[0], 9);
+
+    // X
+    if (buffer[9] == '\r' || buffer[9] == '\n'){
+      nodes[i*3 + 0] = 0;
+      nodes[i*3 + 1] = 0;
+      nodes[i*3 + 2] = 0;
+      continue;
+    }
+    nodes[i*3 + 0] = ans_strtod2(&buffer[9], 21);
+
+    // Y
+    if (buffer[30] == '\r' || buffer[30] == '\n'){
+      nodes[i*3 + 1] = 0;
+      nodes[i*3 + 2] = 0;
+      continue;
+    }
+    nodes[i*3 + 1] = ans_strtod2(&buffer[30], 21);
+
+    // Z
+    if (buffer[51] == '\r' || buffer[51] == '\n'){
+      nodes[i*3 + 2] = 0;
+      continue;
+    }
+    nodes[i*3 + 2] = ans_strtod2(&buffer[51], 21);
+
+  }
+  return 0;
+}
+
 
 
 /* ============================================================================

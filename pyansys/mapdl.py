@@ -25,12 +25,13 @@ from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.convert import is_float
+from pyansys import _reader
 
 MATPLOTLIB_LOADED = True
 try:
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-except:
+except ImportError:
     MATPLOTLIB_LOADED = False
 
 
@@ -1089,22 +1090,36 @@ class _Mapdl(_MapdlCommands):
             prior_log_level = self._log.level
             self._log.setLevel('CRITICAL')
 
-            # create a temporary ELEM component so elements can be unselected
-            cname = '__tmp_elem__'
-            self.cm(cname, 'ELEM')
-            self.esel('NONE')
+            # # create a temporary ELEM component so elements can be unselected
+            # cname = '__tmp_elem__'
+            # self.cm(cname, 'ELEM')
+            # self.esel('NONE')
 
-            arch_filename = os.path.join(self.path, 'tmp.cdb')
-            self.cdwrite('db', arch_filename)
-            self.cmsel('S', cname, 'ELEM')
+            nblock_filename = os.path.join(self.path, 'tmp.nodes')
+            self.nwrite(nblock_filename)
+            # self.cdwrite('db', arch_filename)
+            # self.cmsel('S', cname, 'ELEM')
 
             # resume log
             self._log.setLevel(prior_log_level)
 
             # read in tmp archive file
-            self._nblock_cache = pyansys.Archive(arch_filename, parse_vtk=False)
+            nnum, nodes = _reader.read_from_nwrite(nblock_filename.encode(),
+                                                   self.n_node)
+            self._nblock_cache = pyansys.geometry.Geometry(nnum, nodes)
 
         return self._nblock_cache
+
+    @property
+    def n_node(self):
+        """Number of nodes currently selected
+
+        Examples
+        --------
+        >>> mapdl.n_node
+        665
+        """
+        return int(self.get(entity='NODE', item1='COUNT'))
 
     @property
     def _archive(self):
