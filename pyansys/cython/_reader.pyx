@@ -21,6 +21,7 @@ cdef extern from "reader.h":
     int read_nblock_from_nwrite(char*, int*, double*, int)
     int read_nblock(char*, int*, double*, int, int*, int, int*)
     int read_eblock(char*, int*, int*, int, int, int*)
+    int write_array_ascii(const char*, const double*, int nvalues);
 
 cdef extern from 'vtk_support.h':
     int ans_to_vtk(const int, const int*, const int*, const int*, const int,
@@ -523,3 +524,8 @@ def read_from_nwrite(filename, int nnodes):
 
     read_nblock_from_nwrite(filename, &nnum[0], &nodes[0, 0], nnodes)
     return np.array(nnum), np.array(nodes)
+
+
+def write_array(filename, const double [::1] arr):
+    cdef int nvalues = arr.size
+    write_array_ascii(filename, &arr[0], nvalues)

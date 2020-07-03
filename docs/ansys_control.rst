@@ -1,22 +1,41 @@
 ANSYS APDL Interactive Control
 ==============================
-ANSYS APDL allows for the direct scripting of ANSYS through ANSYS input files.  Unfortunately, APDL relies on an outdated scripting language that is difficult to read and control.  The weaknesses of this language are often compensated by generating APDL scripts using a secondary scripting tool like ``MATLAB`` or ``Python``.  However, this added layer of complexity means that the development feedback loop is quite long as the user must export and run an entire script before determining if it ran correctly or of the results are valid.  This module seeks to rectify that.
+ANSYS APDL allows for the direct scripting of ANSYS through ANSYS
+input files.  Unfortunately, APDL relies on an outdated scripting
+language that is difficult to read and control.  The weaknesses of
+this language are often compensated by generating APDL scripts using a
+secondary scripting tool like ``MATLAB`` or ``Python``.  However, this
+added layer of complexity means that the development feedback loop is
+quite long as the user must export and run an entire script before
+determining if it ran correctly or of the results are valid.  This
+module seeks to rectify that.
 
-The interface control module requires ANSYS to be installed on the system running ``pyansys`` for it to operate.
+The interface control module requires ANSYS to be installed on the
+system running ``pyansys`` for it to operate.
 
 
 Initial Setup and Example
 -------------------------
-The ``ANSYS`` control module within ``pyansys`` creates an instance of an interactive Shell of ``ANSYS`` in the background and sends commands to that shell.  Errors and warnings are processed Pythonically letting the user develop a script real-time without worrying about if it will function correctly when deployed in batch mode.
+The ``ANSYS`` control module within ``pyansys`` creates an instance of
+an interactive Shell of ``ANSYS`` in the background and sends commands
+to that shell.  Errors and warnings are processed Pythonically letting
+the user develop a script real-time without worrying about if it will
+function correctly when deployed in batch mode.
 
-To run, ``pyansys`` needs to know the location of the ANSYS binary.  When running for the first time, ``pyansys`` will request the location of the ANSYS executable.  You can test your installation ``pyansys`` and set it up by running the following in python:
+To run, ``pyansys`` needs to know the location of the ANSYS binary.
+When running for the first time, ``pyansys`` will request the location
+of the ANSYS executable.  You can test your installation ``pyansys``
+and set it up by running the following in python:
 
 .. code:: python
 
     from pyansys import examples
     examples.ansys_cylinder_demo()
 
-Python will automatically attempt to detect your ANSYS binary based on environmental variables.  If it is unable to find a copy of ANSYS, you will be prompted for the location of the ANSYS executable.  Here is a sample input for Linux and Windows:
+Python will automatically attempt to detect your ANSYS binary based on
+environmental variables.  If it is unable to find a copy of ANSYS, you
+will be prompted for the location of the ANSYS executable.  Here is a
+sample input for Linux and Windows:
 
 .. code::
 
@@ -26,7 +45,8 @@ Python will automatically attempt to detect your ANSYS binary based on environme
 
     Enter location of ANSYS executable: C:\Program Files\ANSYS Inc\v170\ANSYS\bin\winx64\ansys170.exe
 
-The settings file is stored locally and do not need to enter it again.  If you need to change the default ansys path, run the following:
+The settings file is stored locally and do not need to enter it again.
+If you need to change the default ansys path, run the following:
 
 .. code:: python
 
@@ -49,7 +69,8 @@ to your current directory with:
     path = os.getcwd()
     mapdl = pyansys.launch_mapdl(run_location=path)
 
-ANSYS is now active and you can send commands to it as if it was just a Python object.
+ANSYS is now active and you can send commands to it as if it was just
+a Python object.
 
 
 Using ANSYS from ``pyansys``
@@ -69,7 +90,9 @@ For example, if we wanted to create a surface using keypoints we could run:
     mapdl.run('L, 4, 1')
     mapdl.run('AL, 1, 2, 3, 4')
 
-ANSYS interactively returns the result of each command and it is stored to the logging module.  Errors are caught immediately.  For example:
+ANSYS interactively returns the result of each command and it is
+stored to the logging module.  Errors are caught immediately.  For
+example:
 
 .. code:: python
 
@@ -289,7 +312,9 @@ Additional examples with more conversion options can be found in the APDL conver
 
 Retreiving Parameters
 ---------------------
-APDL parameters can be retrieved using ``pyansys`` using the ``load_parameters`` method.  For example, after using the ``*GET`` command:
+APDL parameters can be retrieved using ``pyansys`` using the
+``load_parameters`` method.  For example, after using the ``*GET``
+command:
 
 .. code:: python
 
@@ -311,14 +336,25 @@ The parameters are now accessible within the ``MAPDL`` object:
     >>> mapdl.parameters['DEF_Y']
     4.532094298033
 
+
 Caveats and Notes
 -----------------
 
 Command Naming Conventions and Rules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When calling MAPDL commands as functions, each command has been translated from its original MAPDL all CAPS format to a PEP8 compatible format.  For example, ``ESEL`` is now ``esel``.  Additionally, MAPDL commands containing a ``/`` or ``*`` have had those characters removed, unless this causes a conflict with an existing name.  Most notable is ``/SOLU`` which would conflict with ``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``slashsolu`` to differentiate it from ``solu``.  Out of the 1500 MAPDL commands, about 15 start with ``slash`` and 8 with ``star``.  Check the ``MAPDL Object Methods`` reference below when necessary.
+When calling MAPDL commands as functions, each command has been
+translated from its original MAPDL all CAPS format to a PEP8
+compatible format.  For example, ``ESEL`` is now ``esel``.
+Additionally, MAPDL commands containing a ``/`` or ``*`` have had
+those characters removed, unless this causes a conflict with an
+existing name.  Most notable is ``/SOLU`` which would conflict with
+``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``slashsolu``
+to differentiate it from ``solu``.  Out of the 1500 MAPDL commands,
+about 15 start with ``slash`` and 8 with ``star``.  Check the ``MAPDL
+Object Methods`` reference below when necessary.
 
-MAPDL commands that normally have an empty space, such as ``ESEL, S, TYPE, , 1`` should include an empty string when called by Python:
+MAPDL commands that normally have an empty space, such as ``ESEL, S,
+TYPE, , 1`` should include an empty string when called by Python:
 
 .. code:: python
 
@@ -337,7 +373,12 @@ None of these restrictions apply to commands run with ``run``:
     mapdl.run('/SOLU')
     mapdl.solve()
 
-Some commands can only be run non-interactively in a script.  ``pyansys`` gets around this restriction by writing the commands to a temporary input file and then reading the input file.  To run a group of commands that must be run non-interactively, set the ``MAPDL`` object to run a series of commands as an input file by using ``non_interactive`` as in this example:
+Some commands can only be run non-interactively in a script.
+``pyansys`` gets around this restriction by writing the commands to a
+temporary input file and then reading the input file.  To run a group
+of commands that must be run non-interactively, set the ``MAPDL``
+object to run a series of commands as an input file by using
+``non_interactive`` as in this example:
 
 .. code:: python
 
@@ -345,7 +386,9 @@ Some commands can only be run non-interactively in a script.  ``pyansys`` gets a
         mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
 
-Also note that macros created within pyansys (rather than loaded from a file) do not appear to run correctly.  For example, the macro ``DISP`` created using the ``*CREATE`` command within APDL:
+Also note that macros created within pyansys (rather than loaded from
+a file) do not appear to run correctly.  For example, the macro
+``DISP`` created using the ``*CREATE`` command within APDL:
 
 .. code::
 
@@ -380,7 +423,8 @@ Should be written as:
     DISP(-.05)
     DISP(-.1)
 
-If you have an existing input file with a macro, it can be converted using the ``convert_script`` function:
+If you have an existing input file with a macro, it can be converted
+using the ``convert_script`` function:
 
 .. code:: python
 
@@ -388,13 +432,14 @@ If you have an existing input file with a macro, it can be converted using the `
 
 See the ``vm7.dat`` example in the APDL Conversion Examples page.
 
-..
-   If you're using a blocked macro, it's possible to write a macro using ``with mapdl.non_interactive:``.  See the ``vm8.dat`` example in the APDL Conversion Examples page.
 
 
 Conditional Statements and Loops
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-APDL conditional statements such as ``*IF`` must be either implemented pythonically or using ``with mapdl.non_interactive:``.  See the ``vm8.dat`` example in the APDL Conversion Examples page.  For example:
+APDL conditional statements such as ``*IF`` must be either implemented
+pythonically or using ``with mapdl.non_interactive:``.  See the
+``vm8.dat`` example in the APDL Conversion Examples page.  For
+example:
 
 .. code:: 
 
@@ -751,6 +796,36 @@ This is the result from the script:
     Element size 0.214286: 142496 nodes and maximum vom Mises stress 143.559128
     Element size 0.182143: 211966 nodes and maximum vom Mises stress 143.953430
     Element size 0.150000: 412324 nodes and maximum vom Mises stress 144.275406
+
+
+Sending Arrays to MAPDL
+-----------------------
+You can send ``numpy`` arrays or Python lists directly to MAPDL using
+``load_array``.  This is far more efficient than individually sending
+parameters to MAPDL through python or MAPDL.  It uses ``*VREAD``
+behind the scenes and will be replaced with a faster interface in the
+future.
+
+.. code:: python
+    import pyansys
+    import numpy as np
+    mapdl = pyansys.launch_mapdl()
+    arr = np.random.random((5, 3))
+    mapdl.load_array(arr, 'MYARR')
+
+Verify the data has been propertly loaded to MAPDL by accessing the
+first element.  Note that MAPDL uses fortran (1) based indexing.
+
+.. code:: python
+
+   >>> mapdl.read_float_parameter('MYARR(1, 1)')
+   2020-07-03 21:49:54,387 [INFO] pyansys.mapdl: MYARR(1, 1) = MYARR(1, 1)
+
+   PARAMETER MYARR(1,1) =    0.7960742456
+
+   >>> arr[0]
+   0.7960742456194109
+
 
 
 MAPDL Object Methods

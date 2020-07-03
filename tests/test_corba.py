@@ -391,6 +391,24 @@ def test_elements(cleared, mapdl):
 
     assert np.allclose(np.array(mapdl.elements), expected)
 
+@pytest.mark.parametrize("arr", ([1, 2, 3],
+                                 [[1, 2, 3], [1, 2, 3]],
+                                 np.random.random((10)),
+                                 np.random.random((10, 3)),
+                                 np.random.random((10, 3, 3))))
+def test_load_array(cleared, mapdl, arr):
+    mapdl.load_array(arr, 'MYARR')
+    parm, mapdl_arrays = mapdl.load_parameters()
+    assert np.allclose(mapdl_arrays['MYARR'], arr)
+
+
+def test_load_array_err(cleared, mapdl):
+    with pytest.raises(TypeError):
+        mapdl.load_array(['apple'], 'MYARR')
+
+    with pytest.raises(ValueError):
+        mapdl.load_array(np.empty((1, 1, 1, 1)), 'MYARR')
+
 
 # must be at end as this uses a scoped fixture
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")

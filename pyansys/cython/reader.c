@@ -297,6 +297,8 @@ int read_nblock_from_nwrite(const char* filename, int *nnum, double *nodes,
     nodes[i*3 + 2] = ans_strtod2(&buffer[51], 21);
 
   }
+
+  fclose(stream);
   return 0;
 }
 
@@ -413,4 +415,19 @@ int read_eblock(char *raw, int *elem_off, int *elem, int nelem, int intsz,
   // Return total data read
   elem_off[nelem] = c;
   return c;
+}
+
+// Simply write an array to disk as ASCII
+int write_array_ascii(const char* filename, const double *arr,
+		      const int nvalues){
+  FILE * stream = fopen(filename, "w");
+  int i;
+
+  for (i=0; i<nvalues; i++) {
+    fprintf(stream, "%20.12E\n", arr[i]);
+  }
+
+  fclose(stream);
+
+  return 0;
 }
