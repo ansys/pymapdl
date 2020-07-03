@@ -81,6 +81,10 @@ def cleared(mapdl):
     yield
 
 
+def test_str(mapdl):
+    assert 'ANSYS Mechanical' in str(mapdl)
+
+
 ###############################################################################
 # Testing binary reader
 ###############################################################################

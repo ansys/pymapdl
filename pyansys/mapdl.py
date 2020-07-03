@@ -2020,6 +2020,26 @@ class _Mapdl(_MapdlCommands):
         self.solve()
         self.finish()
 
+    def __str__(self):
+        try:
+            stats = self.slashstatus()
+        except:
+            return 'MAPDL exited'
+
+        st = stats.find('*** YOU ARE IN')
+        en = stats.find('INITIAL', st)
+
+        version_str = '\n'.join(stats[st:en].splitlines()[1:])
+        version_str = version_str.split('CUSTOMER')[0].strip() + '\n\n'
+
+        st = stats.find('Current routine')
+        en = stats.find('Active options for this analysis type')
+
+        routine_str = ' ' + stats[st:en].strip()
+
+        pyansys_version_str = '\n\n pyansys version: %s' % pyansys.__version__
+        return version_str + routine_str + pyansys_version_str
+
 
 # TODO: Speed this up with:
 # https://tinodidriksen.com/2011/05/cpp-convert-string-to-double-speed/
