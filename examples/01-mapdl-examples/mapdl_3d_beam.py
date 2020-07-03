@@ -14,7 +14,7 @@ import os
 from pyansys import examples
 import pyansys
 
-os.environ['I_MPI_SHM_LMT'] = 'shm'
+os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
 mapdl = pyansys.launch_mapdl(override=True)
 
 mapdl.cdread('db', examples.hexarchivefile)
