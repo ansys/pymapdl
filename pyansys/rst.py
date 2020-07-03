@@ -395,13 +395,19 @@ class ResultFile(AnsysBinary):
             self._load_section_data()
         return self._section_data
 
-    def plot(self, node_components=None, sel_type_all=True, **kwargs):
+    def plot(self, node_components=None, element_components=None,
+             sel_type_all=True, **kwargs):
         """Plot result geometry
 
         Parameters
         ----------
         node_components : list, optional
             Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
             components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
@@ -422,20 +428,31 @@ class ResultFile(AnsysBinary):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> rst.plot()
+
+        Plot just the element component 'ROTOR_SHAFT'
+
+        >>> rst.plot(element_components='ROTOR_SHAFT')
+
+        Plot two node components
+        >>> rst.plot(node_components=['MY_COMPONENT', 'MY_OTHER_COMPONENT'])
         """
-        show_edges = kwargs.pop('show_edges', True)
+        kwargs.setdefault('show_edges', True)
 
         if node_components:
             grid, _ = self._extract_node_components(node_components, sel_type_all)
+        elif element_components:
+            grid, _ = self._extract_element_components(element_components)
         else:
             grid = self.grid
-        return self._plot_point_scalars(None, grid=grid, show_edges=show_edges,
-                                        **kwargs)
+
+        return self._plot_point_scalars(None, grid=grid, **kwargs)
 
     def plot_nodal_solution(self, rnum, comp='norm',
                             show_displacement=False,
                             displacement_factor=1.0,
-                            node_components=None, sel_type_all=True,
+                            node_components=None,
+                            element_components=None,
+                            sel_type_all=True,
                             **kwargs):
         """Plots the nodal solution.
 
@@ -459,6 +476,11 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
             components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
@@ -524,7 +546,9 @@ class ResultFile(AnsysBinary):
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
             scalars = scalars[ind]
-
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
+            scalars = scalars[ind]
         else:
             grid = self.grid
 
@@ -543,17 +567,43 @@ class ResultFile(AnsysBinary):
 
     @property
     def node_components(self):
-        """ dictionary of ansys node components """
-        ansyscomp = {}
-        for key in self.grid.point_arrays:
-            data = self.grid.point_arrays[key]
-            if data.dtype == 'uint8' or data.dtype == 'bool':
-                ansyscomp[key] = data.view(np.bool)
-        return ansyscomp
+        """Dictionary of ansys node components from the result file.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> from pyansys import examples
+        >>> rst = pyansys.read_binary(examples.rstfile)
+        >>> rst.node_components.keys()
+        dict_keys(['ECOMP1', 'ECOMP2', 'ELEM_COMP'])
+        >>> rst.node_components['NODE_COMP']
+        array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+              20], dtype=int32)
+        """
+        return self.geometry.node_components
+
+    @property
+    def element_components(self):
+        """Dictionary of ansys element components from the result file.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> from pyansys import examples
+        >>> rst = pyansys.read_binary(examples.rstfile)
+        >>> rst.element_components
+        {'ECOMP1': array([17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40], dtype=int32),
+        'ECOMP2': array([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                14, 15, 16, 17, 18, 19, 20, 23, 24], dtype=int32),
+        'ELEM_COMP': array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                16, 17, 18, 19, 20], dtype=int32)}
+        """
+        return self.geometry.element_components
 
     def _extract_node_components(self, node_components,
                                  sel_type_all=True, grid=None):
-        """ Returns the part of the grid matching node components """
+        """Return the part of the grid matching node components """
         if grid is None:
             grid = self.grid
 
@@ -569,8 +619,8 @@ class ResultFile(AnsysBinary):
         for component in node_components:
             component = component.upper()
             if component not in grid.point_arrays:
-                raise Exception('Result file does not contain node ' +
-                                'component "%s"' % component)
+                raise KeyError('Result file does not contain node ' +
+                               'component "%s"' % component)
 
             mask += grid.point_arrays[component].view(np.bool)
 
@@ -588,8 +638,40 @@ class ResultFile(AnsysBinary):
         reduced_grid = grid.extract_cells(cell_mask)
 
         if not reduced_grid.n_cells:
-            raise Exception('Empty mesh due to component selection\n' +
-                            'Try "sel_type_all=False"')
+            raise RuntimeError('Empty mesh due to component selection\n' +
+                               'Try "sel_type_all=False"')
+
+        ind = reduced_grid.point_arrays['vtkOriginalPointIds']
+        if not ind.any():
+            raise RuntimeError('Invalid selection.\n' +
+                               'Try ``sel_type_all=False``')
+
+        return reduced_grid, ind
+
+    def _extract_element_components(self, element_components, grid=None):
+        """Return the part of the grid matching element components"""
+        if grid is None:
+            grid = self.grid
+
+        if not self.geometry.element_components:  # pragma: no cover
+            raise Exception('Missing component information.\n' +
+                            'Either no components have been stored, or ' +
+                            'the version of this result file is <18.2')
+
+        if isinstance(element_components, str):
+            element_components = [element_components]
+
+        cell_mask = np.zeros(grid.n_cells, np.bool)
+        for component in element_components:
+            component = component.upper()
+            if component not in grid.cell_arrays:
+                raise KeyError('Result file does not contain element ' +
+                               'component "%s"' % component)
+            cell_mask += grid.cell_arrays[component].view(np.bool)
+
+        if not cell_mask.any():
+            raise RuntimeError('Empty component')
+        reduced_grid = grid.extract_cells(cell_mask)
 
         ind = reduced_grid.point_arrays['vtkOriginalPointIds']
         if not ind.any():
@@ -603,6 +685,7 @@ class ResultFile(AnsysBinary):
 
     def animate_nodal_solution(self, rnum, comp='norm',
                                node_components=None,
+                               element_components=None,
                                sel_type_all=True, add_text=True,
                                max_disp=0.1, nangles=100,
                                movie_filename=None, **kwargs):
@@ -616,6 +699,16 @@ class ResultFile(AnsysBinary):
         comp : str, optional
             Scalar component to display.  Options are ``'x'``,
             ``'y'``, ``'z'``, and ``'norm'``, and ``None``.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
             If node_components is specified, plots those elements
@@ -678,6 +771,10 @@ class ResultFile(AnsysBinary):
             grid, ind = self._extract_node_components(node_components, sel_type_all)
             if comp:
                 scalars = scalars[ind]
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
+            if comp:
+                scalars = scalars[ind]
         else:
             grid = self.grid
 
@@ -685,6 +782,7 @@ class ResultFile(AnsysBinary):
                                         add_text=add_text,
                                         animate=True,
                                         node_components=node_components,
+                                        element_components=element_components,
                                         sel_type_all=sel_type_all,
                                         nangles=nangles,
                                         movie_filename=movie_filename,
@@ -906,11 +1004,24 @@ class ResultFile(AnsysBinary):
         -------
         components : dict
             Dictionary of components
+
+        Notes
+        -----
+        Only available as of ~v194 and newer.
+
+        From fdresu.inc:
+
+        Component/assembly data.  The first word will describe the
+        type of component or assembly (1=node component, 2=elem
+        component, 11->15 assembly) For components, values 2->9 are
+        the component name converted to integers.  The remaining
+        values are the list of nodes/elems in the component.  For
+        assemblies, the remaining values (in groups of 8) are the
+        component names converted to integers.
         """
-        components = {}
+        node_comp = {}
+        elem_comp = {}
         ncomp = self._geometry_header['maxcomp']
-        if not ncomp:
-            return components
 
         # Read through components
         file_ptr = self._geometry_header['ptrCOMP']
@@ -918,22 +1029,22 @@ class ResultFile(AnsysBinary):
             table, sz = self.read_record(file_ptr, True)
             file_ptr += sz  # increment file_pointer
 
-            # strings are up to 32 characters
-            raw = table[1:9].tobytes().split(b'\x00')[0]
-
-            name = raw.decode('utf')
+            name = table[1:9].tobytes().split(b'\x00')[0].decode('utf')
             name = name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
                    name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
                    name[24:28][::-1] + name[28:32][::-1]
             name = name.strip()
             data = table[9:]
             if data.any():
-                components[name] = _reader.component_interperter(data)
+                if table[0] == 1:  # node component
+                    node_comp[name] = _reader.component_interperter(data)
+                elif table[0] == 2:
+                    elem_comp[name] = _reader.component_interperter(data)
 
-        return components
+        return node_comp, elem_comp
 
     def _store_geometry(self):
-        """ Stores the geometry from the result file """
+        """Store the geometry from the result file"""
         # read geometry header
         table = self.read_record(self._resultheader['ptrGEO'])
         geometry_header = parse_header(table, geometry_header_keys)
@@ -1026,8 +1137,9 @@ class ResultFile(AnsysBinary):
                                                       nelm, e_disp_table)
 
         # Store geometry and parse to VTK quadradic and null unallowed
+        ncomp, ecomp = self._read_components()
         self.geometry = Geometry(nnum, nodes, elem, elem_off, np.array(ekey),
-                                 node_comps=self._read_components())
+                                 node_comps=ncomp, elem_comps=ecomp)
         self.quadgrid = self.geometry._parse_vtk(null_unallowed=True,
                                                  fix_midside=False)
         self.grid = self.quadgrid.linear_copy()
@@ -1133,8 +1245,8 @@ class ResultFile(AnsysBinary):
 
         # 64-bit pointer to element solution
         if not solution_header['ptrESL']:
-            raise Exception('No element solution in result set %d\n'
-                            % (rnum + 1) + 'Try running with "MXPAND,,,,YES"')
+            raise ValueError('No element solution in result set %d\n'
+                             % (rnum + 1) + 'Try running with "MXPAND,,,,YES"')
 
         # Seek to element result header
         element_rst_ptr = rpointers[rnum] + solution_header['ptrESL']
@@ -1369,12 +1481,20 @@ class ResultFile(AnsysBinary):
             Node numbers of the result.
 
         pstress : numpy.ndarray
-            Principal stresses, stress intensity, and equivalant stress.
+            Principal stresses, stress intensity, and equivalent stress.
             [sigma1, sigma2, sigma3, sint, seqv]
+
+        Examples
+        --------
+        Load the principal nodal stress for the first solution.
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.principal_nodal_stress(0)
 
         Notes
         -----
-        ANSYS equivalant of:
+        ANSYS equivalent of:
         PRNSOL, S, PRIN
 
         which returns:
@@ -1387,7 +1507,9 @@ class ResultFile(AnsysBinary):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def plot_principal_nodal_stress(self, rnum, stype=None, node_components=None,
+    def plot_principal_nodal_stress(self, rnum, stype=None,
+                                    node_components=None,
+                                    element_components=None,
                                     sel_type_all=True, **kwargs):
         """Plot the principal stress at each node in the solution.
 
@@ -1407,6 +1529,11 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
             components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
@@ -1435,6 +1562,9 @@ class ResultFile(AnsysBinary):
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
+            stress = stress[ind]
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
             stress = stress[ind]
         else:
             grid = self.grid
@@ -1466,6 +1596,7 @@ class ResultFile(AnsysBinary):
                             show_displacement=False, displacement_factor=1,
                             add_text=True, animate=False, nangles=100,
                             overlay_wireframe=False, node_components=None,
+                            element_components=None,
                             sel_type_all=True, movie_filename=None,
                             max_disp=0.1, **kwargs):
         """Plot point scalars on active mesh.
@@ -1514,7 +1645,9 @@ class ResultFile(AnsysBinary):
             if node_components:
                 _, ind = self._extract_node_components(node_components, sel_type_all)
                 disp = disp[ind]
-
+            elif element_components:
+                _, ind = self._extract_element_components(element_components)
+                disp = disp[ind]
             new_points = disp + grid.points
             grid = grid.copy()
             grid.points = new_points
@@ -1764,6 +1897,7 @@ class ResultFile(AnsysBinary):
                           show_displacement=False,
                           displacement_factor=1,
                           node_components=None,
+                          element_components=None,
                           sel_type_all=True, **kwargs):
         """Plots the stresses at each node in the solution.
 
@@ -1784,7 +1918,12 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -1811,8 +1950,10 @@ class ResultFile(AnsysBinary):
             raise ValueError('Missing "comp" parameter.  Please select'
                              ' from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
-        self._plot_nodal_result(rnum, 'ENS',  comp, available_comps, show_displacement,
+        self._plot_nodal_result(rnum, 'ENS', comp, available_comps,
+                                show_displacement,
                                 displacement_factor, node_components,
+                                element_components,
                                 sel_type_all, **kwargs)
 
     def save_as_vtk(self, filename, rsets=None, result_types=['ENS']):
@@ -2167,7 +2308,8 @@ class ResultFile(AnsysBinary):
 
     def plot_nodal_temperature(self, rnum, show_displacement=False,
                                displacement_factor=1, node_components=None,
-                               sel_type_all=True, **kwargs):
+                               element_components=None, sel_type_all=True,
+                               **kwargs):
         """Plot nodal temperature
 
         Parameters
@@ -2183,7 +2325,12 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -2210,6 +2357,9 @@ class ResultFile(AnsysBinary):
         grid = self.grid
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = scalars[ind]
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
             scalars = scalars[ind]
 
         return self._plot_point_scalars(scalars, grid=grid, rnum=rnum,
@@ -2254,6 +2404,7 @@ class ResultFile(AnsysBinary):
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
+                                  element_components=None,
                                   sel_type_all=True, **kwargs):
         """Plot nodal component plastic strains.
 
@@ -2284,12 +2435,17 @@ class ResultFile(AnsysBinary):
             components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
         sel_type_all : bool, optional
             If node_components is specified, plots those elements
             containing all nodes of the component.  Default True.
 
         **kwargs : keyword arguments
-            Optional keyword arguments.  See help(pyvista.plot)
+            Optional keyword arguments.  See ``help(pyvista.plot)``
 
         Examples
         --------
@@ -2313,8 +2469,8 @@ class ResultFile(AnsysBinary):
         strains in the order X, Y, Z, XY, YZ, XZ, EQV.
 
         Elastic strains can be can be nodal values extrapolated from
-        the integration points or values at the integration points moved to
-        the nodes
+        the integration points or values at the integration points
+        moved to the nodes.
 
         Parameters
         ----------
@@ -2346,8 +2502,9 @@ class ResultFile(AnsysBinary):
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
+                                  element_components=None,
                                   sel_type_all=True, **kwargs):
-        """Plot nodal component elastic strains.
+        """Plot nodal elastic strain.
 
         Parameters
         ----------
@@ -2372,7 +2529,12 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -2398,6 +2560,7 @@ class ResultFile(AnsysBinary):
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
+                                       element_components=element_components,
                                        sel_type_all=sel_type_all,
                                        stitle=stitle,
                                        **kwargs)
@@ -2439,6 +2602,7 @@ class ResultFile(AnsysBinary):
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
+                                  element_components=None,
                                   sel_type_all=True, **kwargs):
         """Plot nodal component plastic strains.
 
@@ -2465,7 +2629,12 @@ class ResultFile(AnsysBinary):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -2498,7 +2667,7 @@ class ResultFile(AnsysBinary):
 
     def _plot_nodal_result(self, rnum, result_type, comp, available_comps,
                            show_displacement=False, displacement_factor=1,
-                           node_components=None,
+                           node_components=None, element_components=None,
                            sel_type_all=True, **kwargs):
         """Plot nodal results"""
         comp = comp.upper()
@@ -2512,6 +2681,9 @@ class ResultFile(AnsysBinary):
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = scalars[ind]
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
             scalars = scalars[ind]
         else:
             grid = self.grid
@@ -2586,7 +2758,10 @@ class ResultFile(AnsysBinary):
     @property
     def available_results(self):
         """Prints available element result types and returns those keys"""
-        ele_ind_table, _, _, ptr_off = self._element_solution_header(0)
+        try:
+            ele_ind_table, _, _, ptr_off = self._element_solution_header(0)
+        except ValueError:
+            return {}
 
         # get the keys from the first element (not perfect...)
         n_rec = len(ELEMENT_INDEX_TABLE_KEYS)

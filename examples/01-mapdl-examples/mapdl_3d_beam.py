@@ -26,8 +26,10 @@ mapdl.nsel('S', 'LOC', 'Z')
 mapdl.d('all', 'all')
 mapdl.allsel()
 
-mapdl.modal_analysis(nmode=1)
+mapdl.mxpand(elcalc='YES')
+mapdl.modal_analysis(nmode=6)
 
 # view the results using pyansys's result viewer
 result = mapdl.result
-result.animate_nodal_solution(3, show_edges=True, loop=True)
+pyansys.read_binary('/home/alex/python/pyansys/tests/testfiles/hex_201.rst')
+result.animate_nodal_solution(0, show_edges=True, loop=True)
