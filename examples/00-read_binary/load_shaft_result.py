@@ -7,6 +7,8 @@ Shaft Modal Analysis
 Visualize a shaft modal analysis
 
 """
+# sphinx_gallery_thumbnail_number = 6
+
 import pyansys
 
 # Download an example shaft modal analysis result file
@@ -68,5 +70,7 @@ shaft.plot_nodal_solution(1, element_components=['SHAFT_MESH'], n_colors=10,
 # Animate a mode of a component the shaft
 shaft.animate_nodal_solution(5, element_components='SHAFT_MESH', comp='norm',
                              max_disp=10, show_edges=True, cmap='bwr', cpos=cpos,
-                             loop=False)
+                             loop=False, movie_filename='demo.gif', nangles=30)
+
 # set loop to True to plot continiously
+# Disable movie_filename and increase nangles for a smoother plot

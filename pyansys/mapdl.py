@@ -1015,7 +1015,7 @@ class _Mapdl(_MapdlCommands):
         This command is valid in any processor.
         """
         if vtk:
-            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', False))
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
             pl.add_points(self.nodes, color=kwargs.pop('color', 'w'))
             pl.show_axes()
             if 'background' in kwargs:

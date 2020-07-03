@@ -1,3 +1,15 @@
+"""
+.. _ref_load_shaft_result:
+
+MAPDL 3D Beam Example
+~~~~~~~~~~~~~~~~~~~~~
+
+This is a simple example that loads an archive file containing a beam
+and then runs a modal analysis using the simplified ``modal_analysis``
+method.
+
+"""
+
 import os
 from pyansys import examples
 import pyansys
@@ -28,8 +40,9 @@ mapdl.allsel()
 
 mapdl.mxpand(elcalc='YES')
 mapdl.modal_analysis(nmode=6)
+mapdl.exit()
 
 # view the results using pyansys's result viewer
 result = mapdl.result
-pyansys.read_binary('/home/alex/python/pyansys/tests/testfiles/hex_201.rst')
-result.animate_nodal_solution(0, show_edges=True, loop=True)
+result.animate_nodal_solution(0, show_edges=True, loop=False,
+                              movie_filename='demo.gif')

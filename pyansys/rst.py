@@ -557,6 +557,7 @@ class ResultFile(AnsysBinary):
                                         show_displacement=show_displacement,
                                         displacement_factor=displacement_factor,
                                         node_components=node_components,
+                                        element_components=element_components,
                                         sel_type_all=sel_type_all,
                                         **kwargs)
 
@@ -687,7 +688,7 @@ class ResultFile(AnsysBinary):
                                node_components=None,
                                element_components=None,
                                sel_type_all=True, add_text=True,
-                               max_disp=0.1, nangles=100,
+                               max_disp=0.1, nangles=100, loop=True,
                                movie_filename=None, **kwargs):
         """Animate nodal solution.  Assumes nodal solution is a
         displacement array from a modal solution.
@@ -786,7 +787,7 @@ class ResultFile(AnsysBinary):
                                         sel_type_all=sel_type_all,
                                         nangles=nangles,
                                         movie_filename=movie_filename,
-                                        max_disp=max_disp, **kwargs)
+                                        max_disp=max_disp, loop=loop, **kwargs)
 
     @wraps(animate_nodal_solution)
     def animate_nodal_displacement(self, *args, **kwargs):
