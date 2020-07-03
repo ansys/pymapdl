@@ -265,7 +265,7 @@ int read_nblock_from_nwrite(const char* filename, int *nnum, double *nodes,
 
   // set to start of the NBLOCK
   const int bufsize = 74;  // One int, 3 floats, two end char max (/r/n)
-  char buffer[bufsize];
+  char buffer[74];
   int i;
 
   for (i=0; i<nnodes; i++){
