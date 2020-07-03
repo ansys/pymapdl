@@ -1,5 +1,3 @@
-import psutil
-
 import numpy as np
 import vtk
 
@@ -51,7 +49,8 @@ def vtk_cell_info(grid):
 
 
 def kill_process(proc_pid):
-    """ kills a process with extreme prejudice """
+    """Kill a process with extreme prejudice"""
+    import psutil  # imported here to avoid import errors when unused
     process = psutil.Process(proc_pid)
     for proc in process.children(recursive=True):
         proc.kill()

@@ -1,12 +1,9 @@
 """Module to control interaction with an ANSYS shell instance.
-Built using ANSYS documentation from
-https://www.sharcnet.ca/Software/Ansys/
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
 import time
 import re
-import psutil
 import pexpect
 
 from pyansys.mapdl import _Mapdl
