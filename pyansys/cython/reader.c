@@ -264,8 +264,8 @@ int read_nblock_from_nwrite(const char* filename, int *nnum, double *nodes,
     }
 
   // set to start of the NBLOCK
-  int bufsize = 9 + 21*3 + 2;  // One int, 3 floats, two end char max (/r/n)
-  char buffer[bufsize];  
+  const int bufsize = 74;  // One int, 3 floats, two end char max (/r/n)
+  char buffer[bufsize];
   int i;
 
   for (i=0; i<nnodes; i++){
@@ -416,6 +416,7 @@ int read_eblock(char *raw, int *elem_off, int *elem, int nelem, int intsz,
   elem_off[nelem] = c;
   return c;
 }
+
 
 // Simply write an array to disk as ASCII
 int write_array_ascii(const char* filename, const double *arr,
