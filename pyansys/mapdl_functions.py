@@ -39323,23 +39323,23 @@ class _MapdlCommands(object):
             Analysis type (defaults to the previously specified analysis type,
             or to STATIC if none specified):
 
-            STATIC or 0 - Perform a static analysis.  Valid for all degrees of freedom.
+            STATIC or 0 - Perform a static analysis.  Valid for all degrees of freedom.
 
-            BUCKLE or 1 - Perform a buckling analysis.  Implies that a previous static solution was
+            BUCKLE or 1 - Perform a buckling analysis.  Implies that a previous static solution was
                           performed with prestress effects calculated
                           (PSTRES,ON).  Valid for structural degrees of freedom
                           only.
 
-            MODAL or 2 - Perform a modal analysis.  Valid for structural and fluid degrees of freedom.
+            MODAL or 2 - Perform a modal analysis.  Valid for structural and fluid degrees of freedom.
 
-            HARMIC or 3 - Perform a harmonic analysis.  Valid for structural, fluid, magnetic, and
+            HARMIC or 3 - Perform a harmonic analysis.  Valid for structural, fluid, magnetic, and
                           electrical degrees of freedom.
 
-            TRANS or 4 - Perform a transient analysis.  Valid for all degrees of freedom.
+            TRANS or 4 - Perform a transient analysis.  Valid for all degrees of freedom.
 
-            SUBSTR or 7 - Perform a substructure analysis.  Valid for all degrees of freedom.
+            SUBSTR or 7 - Perform a substructure analysis.  Valid for all degrees of freedom.
 
-            SPECTR or 8 - Perform a spectrum analysis.  Implies that a previous modal analysis was
+            SPECTR or 8 - Perform a spectrum analysis.  Implies that a previous modal analysis was
                           performed.  Valid for structural degrees of freedom
                           only.
 
@@ -39704,7 +39704,7 @@ class _MapdlCommands(object):
         fname
             Device name, file name, or keyword, as listed below:
 
-            <device name> - Any valid graphics display device name (e.g., X11, 3-D etc.).  Defaults to X11
+            <device name> - Any valid graphics display device name (e.g., X11, 3-D etc.).  Defaults to X11
                             for most systems.  See Getting Started with
                             Graphics in the Basic Analysis Guide for details.
                             A device name must be defined before activating the
@@ -41033,8 +41033,8 @@ class _MapdlCommands(object):
             a modal (ANTYPE,MODAL) or harmonic (ANTYPE,HARMIC) analyses.  If
             FACT = VELO, the harmonic velocities (v) are calculated from the
             displacements (d) at a particular frequency (f) according to the
-            relationship v = 2 πfd.  Similarly, if FACT = ACEL, the harmonic
-            accelerations (a) are calculated as a = (2 πf)2d.
+            relationship v = 2 πfd.  Similarly, if FACT = ACEL, the harmonic
+            accelerations (a) are calculated as a = (2 πf)2d.
 
         kimg
             Used only with results from complex analyses:
@@ -42640,7 +42640,7 @@ class _MapdlCommands(object):
         lab
             Turns element reordering on or off.
 
-            ON (or blank) - Re-establishes original element ordering (default).
+            ON (or blank) - Re-establishes original element ordering (default).
 
             OFF - Original ordering is not used and program establishes its own ordering at the
                   beginning of the solution phase.
@@ -45197,9 +45197,9 @@ class _MapdlCommands(object):
         key
             Option values:
 
-            OFF (0) - Do not apply selected style.
+            OFF (0) - Do not apply selected style.
 
-            ON (1) - Apply selected style.
+            ON (1) - Apply selected style.
 
             nnnn - If Lab is DIG1 or DIG2, input the number of digits.
 
@@ -45734,12 +45734,12 @@ class _MapdlCommands(object):
 
         item
             Label identifying the item for interpolation.  Valid item labels
-            are shown in Table 216: PDEF - valid Item and Component Labels
+            are shown in Table 216: PDEF - valid Item and Component Labels
             below.  Some items also require a component label.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in Table 216: PDEF - valid Item and Component Labels below.
+            shown in Table 216: PDEF - valid Item and Component Labels below.
 
         avglab
             Option to average across element boundaries:
@@ -46045,17 +46045,17 @@ class _MapdlCommands(object):
             graphical picking is enabled and NUM is ignored (valid only in the
             GUI).
 
-            L (or LINE) - PSMESH operates on all elements in the line specified by NUM. New pretension
+            L (or LINE) - PSMESH operates on all elements in the line specified by NUM. New pretension
                           nodes are associated with NUM or entities below it.
                           Any subsequent LCLEAR operation of NUM deletes the
                           pretension elements and nodes created by PSMESH.
 
-            A (or AREA) - PSMESH operates on all elements in the area specified by NUM. New pretension
+            A (or AREA) - PSMESH operates on all elements in the area specified by NUM. New pretension
                           nodes are associated with NUM or entities below it.
                           Any subsequent ACLEAR of NUM deletes the pretension
                           elements and nodes created by PSMESH.
 
-            V (or VOLU) - PSMESH operates on all elements in the volume specified by NUM. New pretension
+            V (or VOLU) - PSMESH operates on all elements in the volume specified by NUM. New pretension
                           nodes are associated with NUM or entities below it.
                           Any subsequent VCLEAR of NUM deletes the pretension
                           elements and nodes created by PSMESH.
@@ -46704,11 +46704,11 @@ class _MapdlCommands(object):
         key
             Calculation key:
 
-             0  - No inertia relief calculations.
+             0  - No inertia relief calculations.
 
-             1  - Counterbalance loads with inertia relief forces.
+             1  - Counterbalance loads with inertia relief forces.
 
-            -1  - Precalculate masses for summary printout only (no inertia relief).
+            -1  - Precalculate masses for summary printout only (no inertia relief).
 
         Notes
         -----
@@ -46782,7 +46782,7 @@ class _MapdlCommands(object):
 
         dx, dy, dz
             Node location increments in the active coordinate system (DR, Dθ,
-            DZ for cylindrical, DR, D θ, DΦ for spherical or toroidal).
+            DZ for cylindrical, DR, D θ, DΦ for spherical or toroidal).
 
         knonrot
             When KNONROT = 0, the nodes on coupled sets are rotated into
@@ -48104,7 +48104,7 @@ class _MapdlCommands(object):
 
             CM - Apply texture to the component named in N1. N2 and NINC are ignored.
 
-            ON, OFF - Sets the specified texture display on or off. All other fields are ignored.
+            ON, OFF - Sets the specified texture display on or off. All other fields are ignored.
 
             File - If Lab = File, the command format is /TXTRE, File, Key_Index, Fname, Fext, --,
                    Format (This variant of the command is applicable to 2-D
@@ -48439,7 +48439,7 @@ class _MapdlCommands(object):
             Keyword that indicates the type of joint element data being
             defined.
 
-            LSYS or blank - Define local coordinate systems at the nodes that form the MPC184 joint
+            LSYS or blank - Define local coordinate systems at the nodes that form the MPC184 joint
                             element.
 
             RDOF - Define the relative degrees of freedom to be fixed for an MPC184-General joint
@@ -48723,12 +48723,12 @@ class _MapdlCommands(object):
         type
             Shading type:
 
-            FACET or 0 - Facet shading (one color per area face) (default).
+            FACET or 0 - Facet shading (one color per area face) (default).
 
-            GOURAUD or 1 - Gouraud smooth shading (smooth variation of color based on interpolated vertex
+            GOURAUD or 1 - Gouraud smooth shading (smooth variation of color based on interpolated vertex
                            colors).
 
-            PHONG or 2 - Phong smooth shading (smooth variation of color based on interpolated vertex
+            PHONG or 2 - Phong smooth shading (smooth variation of color based on interpolated vertex
                          normals).
 
         Notes
@@ -49228,7 +49228,7 @@ class _MapdlCommands(object):
 
             Common logarithm: LOG10(Par1). - Nearest integer: 2.783 becomes 3.0, -1.75 becomes -2.0.
 
-            Logical complement: values   0.0 (false) become 1.0 (true).  Values > 0.0 (true) become 0.0 (false). - Principal stresses (nX5). Par1 contains the nX6 component stresses for the n
+            Logical complement: values   0.0 (false) become 1.0 (true).  Values > 0.0 (true) become 0.0 (false). - Principal stresses (nX5). Par1 contains the nX6 component stresses for the n
                               locations of the calculations.
 
             Power function: Par1**CON1. Exponentiation of any negative number in the vector Par1 to a non-integer power is performed by exponentiating the positive number and prepending the minus sign. For example, -4**2.3 is -(4**2.3). - Sine: SIN(Par1).
@@ -49260,10 +49260,10 @@ class _MapdlCommands(object):
                               points to be transformed are specified in array
                               Par1 (having 3 consecutive columns of data, with
                               the columns containing the local coordinate
-                              locations (x, y, z or r, θ, z or etc.) of the
+                              locations (x, y, z or r, θ, z or etc.) of the
                               points).  Only the starting row index and the
                               column index for the x coordinates are specified,
-                              such as A(1,1).  The y and z coordinates (or θ
+                              such as A(1,1).  The y and z coordinates (or θ
                               and z, or etc.) of the vector are assumed to
                               begin in the corresponding next columns, such as
                               A(1,2) and A(1,3).  Local coordinate locations
@@ -49506,7 +49506,7 @@ class _MapdlCommands(object):
         Parameters
         ----------
         tcolor
-            Text color (0  TCOLOR   15):
+            Text color (0  TCOLOR   15):
 
             0 - Black.
 
@@ -50594,7 +50594,7 @@ class _MapdlCommands(object):
 
             NOPL - Pressure load stiffness not included for any elements.
 
-            (blank) (default) - Include pressure load stiffness for elements SURF153, SURF154, SURF156,
+            (blank) (default) - Include pressure load stiffness for elements SURF153, SURF154, SURF156,
                               SURF159, SHELL181, PLANE182, PLANE183, SOLID185,
                               SOLID186, SOLID187, SOLSH190, BEAM188, BEAM189,
                               FOLLW201, SHELL208, SHELL209, SOLID272, SOLID273,
@@ -51025,8 +51025,8 @@ class _MapdlCommands(object):
             a modal or harmonic (ANTYPE,HARMIC) analyses.  If FACT = VELO, the
             harmonic velocities (v) are calculated from the displacements (d)
             at a particular frequency (f) according to the relationship v =
-            2 πfd.  Similarly, if FACT = ACEL, the harmonic accelerations (a)
-            are calculated as a = (2 πf)2d.
+            2 πfd.  Similarly, if FACT = ACEL, the harmonic accelerations (a)
+            are calculated as a = (2 πf)2d.
 
         kimg
             Used only with results from complex analyses:
@@ -51378,21 +51378,21 @@ class _MapdlCommands(object):
             Horizontal, Vertical - If Kywrd = ORIENT, the terms Horizontal or Vertical determine the orientation
                               of the plot.
 
-            0, 1, 2 - If Kywrd = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
+            0, 1, 2 - If Kywrd = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
                       Grayscale and Color, respectively.
 
-            1, 0 - If Kywrd = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text
+            1, 0 - If Kywrd = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text
                    (0) fonts will be used
 
         val
             VAL is active only when Kywrd = COMP, and determines the degree of
             compression applied to the exported file (see above).
 
-            1  - Apply the default, optimum value for compression. This value represents the
+            1  - Apply the default, optimum value for compression. This value represents the
                  best combination of speed and compression. It varies according
                  to the release level of the ZLIB compression package.
 
-            1-9  - Use this value to specify a specific compression level. 1 is the lowest
+            1-9  - Use this value to specify a specific compression level. 1 is the lowest
                    compression level (fastest) and 9 is the highest compression
                    level (slowest).
         """
@@ -53348,7 +53348,7 @@ class _MapdlCommands(object):
             Valid driver name (see Getting Started with Graphics in the Basic
             Analysis Guide for details):
 
-            <device name> - Any linked terminal driver (such as X11, TEKTRONIX, etc.)
+            <device name> - Any linked terminal driver (such as X11, TEKTRONIX, etc.)
 
             HPGL - Hewlett-Packard Graphics Language
 
@@ -53585,22 +53585,22 @@ class _MapdlCommands(object):
         lab
             Specifies the criteria for causing a cutback.  Valid labels are:
 
-            PLSLIMIT  - Maximum equivalent plastic strain allowed within a time-step (substep).  If the
+            PLSLIMIT  - Maximum equivalent plastic strain allowed within a time-step (substep).  If the
                         calculated value exceeds the VALUE, the program
                         performs a cutback (bisection).  VALUE defaults to 0.15
                         (15%).
 
-            CRPLIMIT  - Set values for calculating the maximum equivalent creep ratio allowed within a
+            CRPLIMIT  - Set values for calculating the maximum equivalent creep ratio allowed within a
                         time step. If the calculated maximum creep ratio
                         exceeds the defined creep ratio limit, the program
                         performs a cutback.
 
-            DSPLIMIT  - Maximum incremental displacement within the solution field in a time step
+            DSPLIMIT  - Maximum incremental displacement within the solution field in a time step
                         (substep).  If the maximum calculated value exceeds
                         VALUE, the program performs a cutback (bisection).
                         VALUE defaults to 1.0 x 107.
 
-            NPOINT  - Number of points in a cycle for a second order dynamic equation, used to
+            NPOINT  - Number of points in a cycle for a second order dynamic equation, used to
                       control automatic time stepping.  If the number of
                       solution points per cycle is less than VALUE, the program
                       performs a cutback in time step size. VALUE defaults to
@@ -53608,14 +53608,14 @@ class _MapdlCommands(object):
                       larger number of points yields a more accurate solution
                       but also increases the solution run time.
 
-            This option works well for linear problems. For nonlinear analyses, other factors such as contact status changes and solution convergence rate can overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL Theory Reference for more information on automatic time stepping. - NOITERPREDICT 
+            This option works well for linear problems. For nonlinear analyses, other factors such as contact status changes and solution convergence rate can overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL Theory Reference for more information on automatic time stepping. - NOITERPREDICT 
 
             If VALUE is 0 (default), an internal auto time step scheme will predict the number of iterations for nonlinear convergence and perform a cutback earlier than the number of iterations specified by the NEQIT command. This is the recommended option. If VALUE is 1, the solution will iterate (if nonconvergent) to NEQIT number of iterations before a cutback is invoked. It is sometimes useful for poorly-convergent problems, but rarely needed in general. - Bisection is also controlled by contact status change, plasticity or creep
                               strain limit, and other factors. If any of these
                               factors occur, bisection will still take place,
                               regardless of the NOITERPREDICT setting.
 
-            CUTBACKFACTOR  - Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
+            CUTBACKFACTOR  - Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
                              than 0.0 and less than 1.0. This option is active
                              only if AUTOTS,ON is set.
 
@@ -53626,24 +53626,24 @@ class _MapdlCommands(object):
         option
             Type of creep analysis. Valid for Lab = CRPLIMIT only.
 
-            IMPRATIO  - Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
+            IMPRATIO  - Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
                         no creep limit control) and any positive value is
                         valid. (See Implicit Creep Procedure in the Structural
                         Analysis Guide for information on how to define
                         implicit creep.)
 
-            EXPRATIO   - Set the maximum creep ratio value for explicit creep. The default value is 0.1
+            EXPRATIO   - Set the maximum creep ratio value for explicit creep. The default value is 0.1
                          and any positive value up to 0.25 is allowed. (See
                          Explicit Creep Procedure in the Structural Analysis
                          Guide for information on how to define explicit
                          creep.)
 
-            STSLIMIT   - Stress threshold for calculating the creep ratio. For integration points with
+            STSLIMIT   - Stress threshold for calculating the creep ratio. For integration points with
                          effective stress below this threshold, the creep ratio
                          does not cause cutback. The default value is 0.0 and
                          any positive value is valid.
 
-            STNLIMIT   - Elastic strain threshold for calculating the creep ratio. For integration
+            STNLIMIT   - Elastic strain threshold for calculating the creep ratio. For integration
                          points with effective elastic strain below this
                          threshold, the creep ratio does not cause cutback. The
                          default value is 0.0 and any positive value is valid.
@@ -53716,7 +53716,7 @@ class _MapdlCommands(object):
             Number of divisions in an axisymmetric model.  Used only with K2D =
             1.  Defaults to 0 (2-D plane).  The 2-D model is internally
             expanded to a 3-D model based on the number of divisions specified
-            (6   NDIV   90).  For example, NDIV of 6 is internally represented
+            (6   NDIV   90).  For example, NDIV of 6 is internally represented
             by six 60° sections.
         """
         command = "GEOM,%s,%s" % (str(k2d), str(ndiv))
@@ -53731,7 +53731,7 @@ class _MapdlCommands(object):
         Parameters
         ----------
         nvert
-            Number of vertices of polygon (3  NVERT   8).  Use /PMORE for
+            Number of vertices of polygon (3  NVERT   8).  Use /PMORE for
             polygons with more than 4 vertices.
 
         x1
@@ -54263,12 +54263,12 @@ class _MapdlCommands(object):
         nrefine
             Refinement level.
 
-            For SurfType = CPLANE -  The refinement level of the surface "mesh". This will be an integer between 0
+            For SurfType = CPLANE -  The refinement level of the surface "mesh". This will be an integer between 0
                               and 3 (default = 0). See Notes below.
 
-            For SurfType = SPHERE - The number of divisions along a 90° arc (minimum = 9). The default is 9.
+            For SurfType = SPHERE - The number of divisions along a 90° arc (minimum = 9). The default is 9.
 
-            For SurfType = INFC - The number of divisions along a 90° arc (minimum = 9). The default is 9.
+            For SurfType = INFC - The number of divisions along a 90° arc (minimum = 9). The default is 9.
 
         radius
             Appropriate radius value (for INFC or SPHERE).
@@ -54386,11 +54386,11 @@ class _MapdlCommands(object):
 
         item
             Label identifying results.  Valid item labels are shown in
-            Table 129: DESOL - Valid Item and Component Labels below.  Some
+            Table 129: DESOL - Valid Item and Component Labels below.  Some
             items also require a component label (Comp).
 
         comp
-            Component of the item (if required); see Table 129: DESOL - Valid
+            Component of the item (if required); see Table 129: DESOL - Valid
             Item and Component Labels.
 
         v1
@@ -54560,12 +54560,12 @@ class _MapdlCommands(object):
         ----------
         item
             Label identifying the item.  Valid item labels are shown in
-            Table 224: PRESOL - Valid Item and Component Labels for Element
+            Table 224: PRESOL - Valid Item and Component Labels for Element
             Results below.  Some items also require a component label.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in Table 224: PRESOL - Valid Item and Component Labels for
+            shown in Table 224: PRESOL - Valid Item and Component Labels for
             Element Results below.
 
         Notes
@@ -54722,14 +54722,14 @@ class _MapdlCommands(object):
         Parameters
         ----------
         item
-            Predefined vector item (from Table 223: PLVECT - Valid Item Labels
+            Predefined vector item (from Table 223: PLVECT - Valid Item Labels
             below) or a label identifying the i-component of a user-defined
             vector.
 
         lab2
             Label identifying the j-component of a user-defined vector. In most
             cases, this value must be blank if Item is selected from
-            Table 223: PLVECT - Valid Item Labels. Individual principal
+            Table 223: PLVECT - Valid Item Labels. Individual principal
             stresses (Item = S) or principal strains (Item = EPxx) may be
             plotted by specifying the value as 1, 2, or 3.
 
@@ -56025,7 +56025,7 @@ class _MapdlCommands(object):
         base
             "Go to" action:
 
-            A user-defined label (beginning with a colon (:), 8 characters maximum).  The command reader will skip (and wrap to the beginning of the file, if necessary) to the first line that begins with the matching :label.   - Caution:   This label option may not be mixed with do-loop or if-then-else
+            A user-defined label (beginning with a colon (:), 8 characters maximum).  The command reader will skip (and wrap to the beginning of the file, if necessary) to the first line that begins with the matching :label.   - Caution:   This label option may not be mixed with do-loop or if-then-else
                               constructs.
 
         Notes
@@ -56088,12 +56088,12 @@ class _MapdlCommands(object):
         ----------
         item
             Label identifying the item.  Valid item labels are shown in
-            Table 225: PRNSOL - Valid Item and Component Labels below.  Some
+            Table 225: PRNSOL - Valid Item and Component Labels below.  Some
             items also require a component label.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in Table 225: PRNSOL - Valid Item and Component Labels below.
+            shown in Table 225: PRNSOL - Valid Item and Component Labels below.
             Defaults to COMP.
 
         Notes
@@ -57092,7 +57092,7 @@ class _MapdlCommands(object):
 
             Value1 - The component pair ID number.
 
-            Value2, Value3, Value4,  . . . ,  Value7 - The constraint-equation/-coupling degree of freedom (DOF) for this pair. Repeat
+            Value2, Value3, Value4,  . . . ,  Value7 - The constraint-equation/-coupling degree of freedom (DOF) for this pair. Repeat
                               the command to add other DOFs. The default is
                               constraint-equation/-coupling all applicable
                               DOFs.
@@ -57107,7 +57107,7 @@ class _MapdlCommands(object):
 
             The face tolerance applies only to auto detection from node/element models (already meshed and no solid model), and it defaults to 15°.   - HINDEX
 
-            The harmonic index solution ranges for modal or buckling cyclic symmetry analyses. The SOLVE command initiates a cyclic symmetry solution sequence at the harmonic indices specified. (By default, the SOLVE command solves for all available harmonic indices.) Static and harmonic cyclic symmetry solutions always use all harmonic indices required for the applied loads. - EVEN / ODD
+            The harmonic index solution ranges for modal or buckling cyclic symmetry analyses. The SOLVE command initiates a cyclic symmetry solution sequence at the harmonic indices specified. (By default, the SOLVE command solves for all available harmonic indices.) Static and harmonic cyclic symmetry solutions always use all harmonic indices required for the applied loads. - EVEN / ODD
 
             For low-frequency electromagnetic analysis only, EVEN specifies a symmetric solution and ODD specifies an antisymmetric solution.  - The value you specify is based on the harmonic index: EVEN (default) indicates
                               harmonic index = 0, and ODD indicates harmonic
@@ -57117,9 +57117,9 @@ class _MapdlCommands(object):
 
             The CYCOPT command with this HINDEX option is cumulative. To remove an option (for example, EVEN), issue this command: CYCOPT,HINDEX,EVEN,,,-1 - ALL
 
-            Solve all applicable harmonic indices. - Note:  Value2 must be blank.
+            Solve all applicable harmonic indices. - Note:  Value2 must be blank.
 
-            Value1, Value2, Value3 - Solve harmonic indices in range Value1 through Value2 in steps of Value3.
+            Value1, Value2, Value3 - Solve harmonic indices in range Value1 through Value2 in steps of Value3.
                               Repeat the command to add other ranges. The
                               default solves all applicable harmonic indices.
 
@@ -57275,9 +57275,9 @@ class _MapdlCommands(object):
             high aspect ratios or material type discontinuities) the multiplier
             may be used to increase the maximum number of iterations used to
             achieve convergence.  The recommended range for the multiplier is
-            1.0 MULT 3.0.  Normally, a value greater than 3.0 adds no further
+            1.0 MULT 3.0.  Normally, a value greater than 3.0 adds no further
             benefit toward convergence, and merely increases time requirements.
-            If the solution does not converge with 1.0 MULT 3.0, or in less
+            If the solution does not converge with 1.0 MULT 3.0, or in less
             than 10,000 iterations, then convergence is highly unlikely and
             further examination of the model is recommended. Rather than
             increasing the default value of MULT, consider increasing the level
@@ -57308,7 +57308,7 @@ class _MapdlCommands(object):
         ldstep
             Specifies the load step number from the modal analysis
             (MODCONT,ON). It corresponds to the load vector number. Defaults to
-            1. The maximum value is 240.
+            1. The maximum value is 240.
 
         Notes
         -----
@@ -58454,12 +58454,12 @@ class _MapdlCommands(object):
             GUI).  A component name may also be substituted for NODE.
 
         item
-            Label identifying results, see Table 131: DNSOL - Valid Item and
+            Label identifying results, see Table 131: DNSOL - Valid Item and
             Component Labels.   Items also require a component label.
 
         comp
             Component of the item.  Valid component labels are shown
-            Table 131: DNSOL - Valid Item and Component Labels below.
+            Table 131: DNSOL - Valid Item and Component Labels below.
 
         v1, v2, v3, . . . , v6
             Value assigned to result.  If zero, a zero value will be assigned.
@@ -58785,11 +58785,11 @@ class _MapdlCommands(object):
     #         Operation label.  A tolerance of 1.0E-10 is used for comparisons
     #         between real numbers:
 
-    #         Equal (for VAL1 = VAL2). - Not equal (for VAL1 ≠ VAL2).
+    #         Equal (for VAL1 = VAL2). - Not equal (for VAL1 ≠ VAL2).
 
     #         Less than (for VAL1 < VAL2). - Greater than (for VAL1 > VAL2).
 
-    #         Less than or equal (for VAL1   VAL2). - Greater than or equal (for VAL1   VAL2).
+    #         Less than or equal (for VAL1   VAL2). - Greater than or equal (for VAL1   VAL2).
 
     #         Absolute values of VAL1 and VAL2 before < operation. - Absolute values of VAL1 and VAL2 before > operation.
 
@@ -58804,7 +58804,7 @@ class _MapdlCommands(object):
     #         following constructs (through Base1 = THEN) cause all subsequent
     #         fields to be ignored:
 
-    #         A user-defined label (beginning with a colon (:), 8 characters maximum).  The command reader will skip (and wrap to the beginning of the file, if necessary) to the first line that begins with the matching :label. - Caution:   This label option may not be mixed with do-loop or if-then-else
+    #         A user-defined label (beginning with a colon (:), 8 characters maximum).  The command reader will skip (and wrap to the beginning of the file, if necessary) to the first line that begins with the matching :label. - Caution:   This label option may not be mixed with do-loop or if-then-else
     #                           constructs.
 
     #         This action will cause an exit from the ANSYS program at this line, unless running in interactive mode. In interactive mode, the program will not stop. - Exit the current do-loop [*EXIT].
@@ -59078,7 +59078,7 @@ class _MapdlCommands(object):
 
             41,42,...50 - T1, T2, ... T10
 
-            51,52,...60 - Sm1, Sm2, ... Sm10
+            51,52,...60 - Sm1, Sm2, ... Sm10
 
             61 - M (first elastic-plastic material parameter)
 
@@ -59303,7 +59303,7 @@ class _MapdlCommands(object):
             Label specifying the type of units:
 
             MKS - Rationalized MKS system of units (meters, amperes, henries, webers, etc.).
-                  Free-space permeability is set to 4 πe-7 henries/meter. Free-
+                  Free-space permeability is set to 4 πe-7 henries/meter. Free-
                   space permittivity is set to 8.85 e-12 F/m.
 
             MUZRO - User defined system of units. Free-space permeability is set to the value input
@@ -60197,12 +60197,12 @@ class _MapdlCommands(object):
         ----------
         item
             Label identifying the item.  Valid item labels are shown in
-            Table 220: PLNSOL - Valid Item and Component Labels below.  Some
+            Table 220: PLNSOL - Valid Item and Component Labels below.  Some
             items also require a component label.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in  Table 220: PLNSOL - Valid Item and Component Labels
+            shown in  Table 220: PLNSOL - Valid Item and Component Labels
             below.
 
         kund
@@ -60826,12 +60826,12 @@ class _MapdlCommands(object):
         key
             Switch:
 
-            OFF or 0 - Do not apply this display item. For Label = DATE, no time or date are
+            OFF or 0 - Do not apply this display item. For Label = DATE, no time or date are
                        displayed.
 
-            ON or 1 - Apply this display item. For Label = DATE, show only the date.
+            ON or 1 - Apply this display item. For Label = DATE, show only the date.
 
-            AUTO or 2 - For Label = INFO, initiate Auto-legend mode.  If the display has contours, the
+            AUTO or 2 - For Label = INFO, initiate Auto-legend mode.  If the display has contours, the
                         legend is ON; if the display has no contours, the
                         legend is OFF. For Label = DATE, display both the date
                         and time.
@@ -61795,7 +61795,7 @@ class _MapdlCommands(object):
             Input one or two values defining the location of the node in this
             coordinate system.  Input "U" for unknown value(s) to be calculated
             and input "E" to use an existing coordinate value.  Fields are R1,
-            θ1, Z1 for cylindrical, or R1, θ1, Φ1 for spherical or toroidal.
+            θ1, Z1 for cylindrical, or R1, θ1, Φ1 for spherical or toroidal.
 
         kc2
             Second coordinate system number.
@@ -61803,8 +61803,8 @@ class _MapdlCommands(object):
         x2, y2, z2
             Input two or one value(s) defining the location of the node in this
             coordinate system.  Input "U" for unknown value(s) to be calculated
-            and input "E" to use an existing coordinate value.  Fields are R2, 
-            θ2, Z2 for cylindrical, or R2,  θ2, Φ2 for spherical or toroidal.
+            and input "E" to use an existing coordinate value.  Fields are R2, 
+            θ2, Z2 for cylindrical, or R2,  θ2, Φ2 for spherical or toroidal.
 
         Notes
         -----
@@ -61864,12 +61864,12 @@ class _MapdlCommands(object):
 
         item
             Label identifying the item. General item labels are shown in
-            Table 126: ANSOL - General Item and Component Labels below. Some
+            Table 126: ANSOL - General Item and Component Labels below. Some
             items also require a component label.
 
         comp
             Component of the item (if required). General component labels are
-            shown in Table 126: ANSOL - General Item and Component Labels
+            shown in Table 126: ANSOL - General Item and Component Labels
             below.
 
         name
@@ -62122,7 +62122,7 @@ class _MapdlCommands(object):
 
             KEY = 3 - The command controls the ANNOTATION/GRAPH font.
 
-            Linux: Values 1 through 4 are used to find a match in the X11 database of font strings.  Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
+            Linux: Values 1 through 4 are used to find a match in the X11 database of font strings.  Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
 
             Family name (e.g., Courier*New). Substitute an asterisk (*) for any blank character that appears in a family name. If Val1 = MENU, all other values are ignored, and a font selection menu appears (GUI must be active).  - Val2
 
@@ -62134,7 +62134,7 @@ class _MapdlCommands(object):
 
             unused - Val6
 
-            unused - PC: The values are encoded in a PC logical font structure.  Value 1 is a
+            unused - PC: The values are encoded in a PC logical font structure.  Value 1 is a
                      character string, and the remaining values are integers:
 
             Val1 - Family name (e.g., Courier*New) Substitute an asterisk (*) for any blank
@@ -63216,7 +63216,7 @@ class _MapdlCommands(object):
         kcsym
             Symmetry key:
 
-            0 or 1  - Half-crack model with symmetry boundary conditions [DSYM] in the crack-tip
+            0 or 1  - Half-crack model with symmetry boundary conditions [DSYM] in the crack-tip
                       coordinate system.  KII = KIII = 0.  Three nodes are
                       required on the path.
 
@@ -63583,7 +63583,7 @@ class _MapdlCommands(object):
         n
             X variable number:
 
-            0 or 1 - Display PLVAR values vs. time (or frequency).
+            0 or 1 - Display PLVAR values vs. time (or frequency).
 
             n - Display PLVAR values vs. variable n (2 to NV [NUMVAR]).
 
@@ -64083,12 +64083,12 @@ class _MapdlCommands(object):
         ----------
         item
             Label identifying the item to be processed.  Valid item labels are
-            shown in Table 221: PLSECT - Valid Item and Component Labels below.
+            shown in Table 221: PLSECT - Valid Item and Component Labels below.
             Items also require a component label.
 
         comp
             Component of the item.  Valid component labels are shown in
-            Table 221: PLSECT - Valid Item and Component Labels below.
+            Table 221: PLSECT - Valid Item and Component Labels below.
 
         rho
             In-plane (X-Y) average radius of curvature of the inside and
@@ -64099,7 +64099,7 @@ class _MapdlCommands(object):
 
         kbr
             Through-thickness bending stresses key for an axisymmetric analysis
-            (RHO ≠ 0):
+            (RHO ≠ 0):
 
             0 - Include the thickness-direction bending stresses.
 
@@ -64816,18 +64816,18 @@ class _MapdlCommands(object):
         lab
             Default/status key:
 
-            DEFA  - Resets settings to default values.
+            DEFA  - Resets settings to default values.
 
-            STAT  - Lists status of present settings.
+            STAT  - Lists status of present settings.
 
         value
             Option settings if Lab = KEEP:
 
-            NO  - Delete entities used as input with a Boolean operation (default).  Entities
+            NO  - Delete entities used as input with a Boolean operation (default).  Entities
                   will not be deleted if meshed or if attached to a higher
                   entity.
 
-            YES  - Keep input solid modeling entities.
+            YES  - Keep input solid modeling entities.
 
         Notes
         -----
@@ -65632,7 +65632,7 @@ class _MapdlCommands(object):
 
             2 - Curve is the least square average of all of the data points.
 
-            3 or more - Curve is a polynomial of the order (n-1), where n is the number of data fitting
+            3 or more - Curve is a polynomial of the order (n-1), where n is the number of data fitting
                         order points.
 
         vect3
@@ -66066,7 +66066,7 @@ class _MapdlCommands(object):
         ----------
         item, comp
             Labels identifying the surface load to be shown; see
-            Table 227: /PSF - Valid Item and Component Labels.
+            Table 227: /PSF - Valid Item and Component Labels.
 
         key
             Key to turn surface load symbols on or off:
@@ -66719,7 +66719,7 @@ class _MapdlCommands(object):
         ----------
         stloc
             Starting location in table for entering data.  For example, if
-            STLOC = 1, data input in the C1 field applies to the first table
+            STLOC = 1, data input in the C1 field applies to the first table
             constant, C2 applies to the second table constant, etc.  If
             STLOC=5, data input in the C1 field applies to the fifth table
             constant, etc.  Defaults to the last location filled + 1.  The last
@@ -67033,13 +67033,13 @@ class _MapdlCommands(object):
 
         item
             Label identifying the item to be contoured.  Valid item labels are
-            shown in Table 222: PLTRAC - Valid Item and Component Labels
+            shown in Table 222: PLTRAC - Valid Item and Component Labels
             below.  Some items also require a component label.  If Item is
             blank, display only the path trajectory.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in Table 222: PLTRAC - Valid Item and Component Labels below.
+            shown in Table 222: PLTRAC - Valid Item and Component Labels below.
 
         trpnum
             Trace point number for storing trajectory data for use with PATH
@@ -68172,13 +68172,13 @@ class _MapdlCommands(object):
         btime
             Birth time, or time when imposed motion is activated. The default
             is 0.0. Some load types do not support birth and death time; see
-            Table 132: Birth Time, Death Time, and CID Support in the Notes
+            Table 132: Birth Time, Death Time, and CID Support in the Notes
             section for more information.
 
         dtime
             Death time, or time when imposed motion is removed. The default is
             1 x 1038. Some load types do not support birth and death time; see
-            Table 132: Birth Time, Death Time, and CID Support in the Notes
+            Table 132: Birth Time, Death Time, and CID Support in the Notes
             section for more information.
 
         Notes
@@ -68762,31 +68762,31 @@ class _MapdlCommands(object):
             Display type.  Defaults to ZBUF for raster mode displays or BASIC
             for vector mode displays:
 
-            BASIC or 0 - Basic display (no hidden or section operations).
+            BASIC or 0 - Basic display (no hidden or section operations).
 
-            SECT or 1 - Section display (plane view).  Use the /CPLANE command to define the cutting
+            SECT or 1 - Section display (plane view).  Use the /CPLANE command to define the cutting
                         plane.
 
-            HIDC or 2 - Centroid hidden display (based on item centroid sort).
+            HIDC or 2 - Centroid hidden display (based on item centroid sort).
 
-            HIDD or 3 - Face hidden display (based on face centroid sort).
+            HIDD or 3 - Face hidden display (based on face centroid sort).
 
-            HIDP or 4 - Precise hidden display (like HIDD but with more precise checking). Because all
+            HIDP or 4 - Precise hidden display (like HIDD but with more precise checking). Because all
                         facets are sorted, this mode can be extremely slow,
                         especially for large models.
 
-            CAP or 5 - Capped hidden display (same as combined SECT and HIDD with model in front of
+            CAP or 5 - Capped hidden display (same as combined SECT and HIDD with model in front of
                        section plane removed).
 
-            ZBUF or 6 - Z-buffered display (like HIDD but using software Z-buffering).
+            ZBUF or 6 - Z-buffered display (like HIDD but using software Z-buffering).
 
-            ZCAP or 7 - Capped Z-buffered display (same as combined SECT and ZBUF with model in front
+            ZCAP or 7 - Capped Z-buffered display (same as combined SECT and ZBUF with model in front
                         of section plane removed).
 
-            ZQSL or 8 - QSLICE Z-buffered display (same as SECT but the edge lines of the remaining 3-D
+            ZQSL or 8 - QSLICE Z-buffered display (same as SECT but the edge lines of the remaining 3-D
                         model are shown).
 
-            HQSL or 9 - QSLICE precise hidden display (like ZQSL but using precise hidden).
+            HQSL or 9 - QSLICE precise hidden display (like ZQSL but using precise hidden).
 
         Notes
         -----
@@ -69006,14 +69006,14 @@ class _MapdlCommands(object):
         Parameters
         ----------
         item
-            Predefined vector item (from Table 226: PRVECT - Valid Item and
+            Predefined vector item (from Table 226: PRVECT - Valid Item and
             Component Labels below) or a label identifying the i-component of a
             user-defined vector.
 
         lab2
             Label identifying the j-component of a user-defined vector. In most
             cases, this value must be blank if Item is selected from
-            Table 226: PRVECT - Valid Item and Component Labels. Individual
+            Table 226: PRVECT - Valid Item and Component Labels. Individual
             principal stresses (Item = S) or principal strains (Item = EPxx)
             may be printed by specifying the value as 1, 2, or 3.
 
@@ -69889,7 +69889,7 @@ class _MapdlCommands(object):
 
             Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = νyx, as described in Stress-Strain Relationships in the Mechanical APDL Theory Reference) - PERX
 
-            Electric relative permittivities (also PERY, PERZ) - Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or
+            Electric relative permittivities (also PERY, PERZ) - Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or
                               SOLID98, the program interprets the values as
                               absolute permittivity. Values input for PLANE223,
                               SOLID226, or SOLID227 are always interpreted as

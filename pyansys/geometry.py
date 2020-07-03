@@ -1,13 +1,11 @@
 """Module for common class between gRPC, Archive, and Result geometry"""
 import warnings
-from functools import wraps
 
 import pyvista as pv
 import vtk
 import numpy as np
 
 from pyansys import _relaxmidside, _reader
-from pyansys.misc import vtk_cell_info
 from pyansys.elements import ETYPE_MAP
 
 
@@ -501,11 +499,6 @@ class Geometry():
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)
         return txt
-
-    @wraps(pv.plot)
-    def plot(self, *args, **kwargs):
-        """Plot the ANSYS grid"""
-        self.grid.plot(*args, **kwargs)
 
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):

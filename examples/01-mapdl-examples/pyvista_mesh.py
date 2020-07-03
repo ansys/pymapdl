@@ -4,21 +4,24 @@
 PyVista Mesh Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Run a modal analysis from a mesh generated from pyvista within MAPDL
+Run a modal analysis on a mesh generated from pyvista within MAPDL.
 
 """
+# sphinx_gallery_thumbnail_number = 2
+
 import os
 import pyvista as pv
 import pyansys
 
 # launch MAPDL and run a modal analysis
+os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary for Ubuntu
 mapdl = pyansys.launch_mapdl(loglevel='WARNING', override=True)
 
 # Create a simple plane mesh centered at (0, 0, 0) on the XY plane
 mesh = pv.Plane(i_resolution=100, j_resolution=100)
 
 mesh.plot(color='w', show_edges=True)
- 
+
 ###############################################################################
 # Write the mesh to an archive file
 archive_filename = os.path.join(mapdl.path, 'tmp.cdb')
@@ -48,10 +51,16 @@ mapdl.mp('NUXY', 1, 0.3)  # Poissons Ratio
 mapdl.emodif('ALL', 'MAT', 1)
 
 # Run an unconstrained modal analysis
-mapdl.run('/SOLU')
-mapdl.antype('MODAL')  # default NEW
-mapdl.modopt('LANB', 20, 1)  # First 6 modes above 1 Hz
-mapdl.solve()
+# for the first 20 modes above 1 Hz
+mapdl.modal_analysis(nmode=20, freqb=1)
+
+# you could have also run:
+# mapdl.run('/SOLU')
+# mapdl.antype('MODAL')  # default NEW
+# mapdl.modopt('LANB', 20, 1)
+# mapdl.solve()
+
+mapdl.exit()
 
 ###############################################################################
 # Load the result file within pyansys
@@ -74,4 +83,3 @@ result.animate_nodal_displacement(18, loop=False, add_text=False,
 
 # Get a smoother plot by disabling movie_filename and increasing `nangles`
 # also, enable a continous plot with `loop=True`
-

@@ -477,6 +477,8 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
     case 5: // tetrahedral
       add_tet10(build_offset, &elem[off], nnode_elem);
       break;
+    case 6:  // linear line
+      add_line(build_offset, &elem[off], false);
     // should never reach here
     } // end of switch
   }  // end of loop

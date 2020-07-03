@@ -2,6 +2,7 @@
 import os
 import sys
 import logging
+from functools import wraps
 
 import numpy as np
 from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
@@ -182,6 +183,11 @@ class Archive(Geometry):
             raise AttributeError('Archive must be parsed as a vtk grid.\n'
                                  'Set `parse_vtk=True`')
         return quality(self._grid)
+
+    @wraps(pv.plot)
+    def plot(self, *args, **kwargs):
+        """Plot the ANSYS archive file"""
+        self.grid.plot(*args, **kwargs)
 
 
 def chunks(l, n):

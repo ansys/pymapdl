@@ -343,6 +343,53 @@ def test_logging(mapdl, tmpdir):
     assert 'K,4,0,1,0' in out[-1]
 
 
+def test_nodes(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(11, 10, 0, 0)
+    mapdl.fill(1, 11, 9)
+    expected = np.zeros((11, 3))
+    expected[:, 0] = range(0, 11)
+    assert np.allclose(mapdl.nodes, expected)
+
+
+def test_nnum(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(11, 10, 0, 0)
+    mapdl.fill(1, 11, 9)
+    assert mapdl._nblock_cache is None
+    assert np.allclose(mapdl.nnum, range(1, 12))
+    assert mapdl._nblock_cache is not None
+
+
+@pytest.mark.parametrize("knum", [True, False])
+def test_nplot_vtk(cleared, mapdl, knum):
+    mapdl.enable_interactive_plotting()
+    mapdl.prep7()
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(11, 10, 0, 0)
+    mapdl.fill(1, 11, 9)
+    mapdl.nplot(vtk=True, knum=knum, background='w', color='k', off_screen=True)
+
+
+def test_elements(cleared, mapdl):
+    mapdl.et(1, 188)
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.n(3, 2, 0, 0)
+    mapdl.n(4, 3, 0, 0)
+    mapdl.e(1, 2)
+    mapdl.e(2, 3)
+    mapdl.e(3, 4)
+
+    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2],
+                         [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3],
+                         [1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4]])
+
+    assert np.allclose(np.array(mapdl.elements), expected)
+
+
 # must be at end as this uses a scoped fixture
 @pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_exit(mapdl):

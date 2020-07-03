@@ -1,3 +1,37 @@
+"""
+Sample result file generated with 
+
+import os
+from pyansys import examples
+import pyansys
+
+os.environ['I_MPI_SHM_LMT'] = 'shm'
+mapdl = pyansys.launch_mapdl(override=True)
+
+mapdl.cdread('db', examples.hexarchivefile)
+mapdl.esel('s', 'ELEM', vmin=5, vmax=20)
+mapdl.cm('ELEM_COMP', 'ELEM')
+mapdl.nsel('s', 'NODE', vmin=5, vmax=20)
+mapdl.cm('NODE_COMP', 'NODE')
+
+# boundary conditions
+mapdl.allsel()
+
+# dummy steel properties
+mapdl.prep7()
+mapdl.mp('EX', 1, 200E9)  # Elastic moduli in Pa (kg/(m*s**2))
+mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
+mapdl.mp('NUXY', 1, 0.3)  # Poissons Ratio
+mapdl.emodif('ALL', 'MAT', 1)
+
+# fix one end of the beam
+mapdl.nsel('S', 'LOC', 'Z')
+mapdl.d('all', 'all')
+mapdl.allsel()
+
+mapdl.modal_analysis(nmode=1)
+
+"""
 import os
 
 import numpy as np
@@ -29,23 +63,24 @@ except:
     pontoon = None
 
 
-try:
-    __file__
-except:  # for testing
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_rst.py'
-
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 is16_filename = os.path.join(testfiles_path, 'is16.rst')
 is16_known_result = os.path.join(testfiles_path, 'is16.npz')
 if os.path.isfile(is16_filename):
+
     is16 = pyansys.read_binary(is16_filename)
 else:
     is16 = None
 
 temperature_rst = os.path.join(testfiles_path, 'temp_v13.rst')
 temperature_known_result = os.path.join(testfiles_path, 'temp_v13.npz')
+
+@pytest.fixture(scope='module')
+def hex_rst():
+    filename = os.path.join(testfiles_path, 'hex_201.rst')
+    return pyansys.read_binary(filename)
 
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
@@ -189,3 +224,16 @@ def test_read_temperature():
 def test_plot_nodal_temperature():
     temp_rst = pyansys.read_binary(temperature_rst)
     temp_rst.plot_nodal_temperature(0, off_screen=True)
+
+
+def test_rst_node_components(hex_rst):
+    assert 'ELEM_COMP' not in hex_rst.node_components
+    np.allclose(hex_rst.node_components['NODE_COMP'].nonzero()[0],
+                np.arange(4, 20))
+
+
+def test_rst_node_components(hex_rst):
+    assert 'NODE_COMP' not in hex_rst.element_components
+    np.allclose(hex_rst.element_components['ELEM_COMP'].nonzero()[0],
+                np.arange(4, 20))
+

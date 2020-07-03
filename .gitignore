@@ -26,7 +26,6 @@ wheelhouse
 _build/
 pyansys/Interface.py
 *.bat
-docs/examples/*
 run_tests.sh
 
 # Testing
@@ -46,3 +45,7 @@ test-output.xml
 
 # ignore certain result files
 tests/testfiles/is16.rst
+
+# docs
+docs/examples/*
+docs/images/auto-generated/*

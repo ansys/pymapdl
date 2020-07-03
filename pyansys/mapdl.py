@@ -6,7 +6,6 @@ This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.
 
 """
-import time
 import glob
 import string
 import re
@@ -19,6 +18,7 @@ from shutil import copyfile, rmtree
 
 import appdirs
 import numpy as np
+import pyvista as pv
 
 import pyansys
 from pyansys.geometry_commands import geometry_commands
@@ -192,13 +192,27 @@ def get_ansys_path(allow_input=True):
 
 
 def change_default_ansys_path(exe_loc):
-    """
-    Change your default ansys path
+    """Change your default ansys path.
 
     Parameters
     ----------
     exe_loc : str
-        Ansys executable.  Must be a full path.
+        Ansys executable path.  Must be a full path.
+
+    Examples
+    --------
+    Change default ansys location on Linux
+
+    >>> import pyansys
+    >>> pyansys.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
+    >>> pyansys.mapdl.get_ansys_path()
+    '/ansys_inc/v201/ansys/bin/ansys201'
+
+    Change default ansys location on Windows
+    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
+    >>> pyansys.change_default_ansys_path(ans_pth)
+    >>> pyansys.mapdl.check_valid_ansys()
+    True
 
     """
     if os.path.isfile(exe_loc):
@@ -869,6 +883,9 @@ class _Mapdl(_MapdlCommands):
         self.response = None
         self._outfile = None
         self._show_matplotlib_figures = True
+        self._nblock_cache = None
+        self._archive_cache = None
+        self._vtk_grid_cache = None
 
         self._log = setup_logger(loglevel.upper())
         self.non_interactive = self._non_interactive(self)
@@ -885,6 +902,12 @@ class _Mapdl(_MapdlCommands):
         # setup plotting for PNG
         if self._interactive_plotting:
             self.enable_interactive_plotting()
+
+    def _reset_cache(self):
+        """Reset cached NBLOCK and other items"""
+        self._nblock_cache = None
+        self._archive_cache = None
+        self._grid_cache = None
 
     @property
     def _lockfile(self):
@@ -947,6 +970,209 @@ class _Mapdl(_MapdlCommands):
             self._apdl_log.close()
         self._apdl_log = None
 
+    def nplot(self, knum="", vtk=False, **kwargs):
+        """APDL Command: NPLOT
+
+        Displays nodes.
+
+        Parameters
+        ----------
+        knum : int, optional
+            Node number key:
+
+            - 0 : No node numbers on display (default).
+            - 1 : Include node numbers on display.  See also /PNUM command.
+
+        vtk : bool, optional
+           Display nodes using VTK.
+
+        Examples
+        --------
+        Plot using VTK while showing labels and changing the background
+
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(11, 10, 0, 0)
+        >>> mapdl.fill(1, 11, 9)
+        >>> mapdl.nplot(vtk=True, knum=True, background='w', color='k',
+                        off_screen=True, show_bounds=True)
+
+        Plot without using VTK
+
+        >>> mapdl.enable_interactive_plotting()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(11, 10, 0, 0)
+        >>> mapdl.fill(1, 11, 9)
+        >>> mapdl.nplot()
+
+        Notes
+        -----
+        Only selected nodes [NSEL] are displayed.  Elements need not
+        be defined.  See the DSYS command for display coordinate
+        system.
+
+        This command is valid in any processor.
+        """
+        if vtk:
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+            pl.add_points(self.nodes, color=kwargs.pop('color', 'w'))
+            pl.show_axes()
+            if 'background' in kwargs:
+                pl.set_background(kwargs['background'])
+            if knum:
+                pl.add_point_labels(self.nodes, self.nnum)
+
+            if 'cpos' in kwargs:
+                pl.camera_position = kwargs['cpos']
+
+            if 'show_bounds' in kwargs:
+                if kwargs['show_bounds']:
+                    pl.show_bounds()
+
+            return pl.show()
+        else:
+            return super().nplot(knum, **kwargs)
+
+    @property
+    def nodes(self):
+        """The coordinates of the active selected nodes as an array.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(10, 10, 0, 0)
+        >>> mapdl.fill(1, 10, 9)
+        >>> mapdl.nodes
+        array([[ 1.,  0.,  0.],
+               [ 2.,  0.,  0.],
+               [ 3.,  0.,  0.],
+               [ 4.,  0.,  0.],
+               [ 5.,  0.,  0.],
+               [ 6.,  0.,  0.],
+               [ 7.,  0.,  0.],
+               [ 8.,  0.,  0.],
+               [ 9.,  0.,  0.],
+               [10.,  0.,  0.]])
+        """
+        return self._nblock.nodes
+
+    @property
+    def nnum(self):
+        """The node numbers of the selected nodes
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(10, 10, 0, 0)
+        >>> mapdl.fill(1, 10, 9)
+        >>> mapdl.nnum
+        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
+        """
+        return self._nblock.nnum
+
+    # consider caching this
+    @property
+    def _nblock(self):
+        """Write the NBLOCK and read it in as a pyansys.Archive """
+        if self._archive_cache is not None:
+            return self._archive_cache
+
+        elif self._nblock_cache is None:
+            # temporarily disable log
+            prior_log_level = self._log.level
+            self._log.setLevel('CRITICAL')
+
+            # create a temporary ELEM component so elements can be unselected
+            cname = '__tmp_elem__'
+            self.cm(cname, 'ELEM')
+            self.esel('NONE')
+
+            arch_filename = os.path.join(self.path, 'tmp.cdb')
+            self.cdwrite('db', arch_filename)
+            self.cmsel('S', cname, 'ELEM')
+
+            # resume log
+            self._log.setLevel(prior_log_level)
+
+            # read in tmp archive file
+            self._nblock_cache = pyansys.Archive(arch_filename, parse_vtk=False)
+
+        return self._nblock_cache
+
+    @property
+    def _archive(self):
+        """Write entire archive to ASCII and read it in as a pyansys.Archive """
+        if self._archive_cache is None:
+            # temporarily disable log
+            prior_log_level = self._log.level
+            self._log.setLevel('CRITICAL')
+
+            # write database to an archive file
+            arch_filename = os.path.join(self.path, 'tmp.cdb')
+            self.cdwrite('db', arch_filename)
+            self._archive_cache = pyansys.Archive(arch_filename, parse_vtk=False)
+            self._log.setLevel(prior_log_level)
+        return self._archive_cache
+
+    @property
+    def _vtk_grid(self):
+        """Current vtk unstructured grid"""
+        if self._vtk_grid_cache is None:
+            quadgrid = self._archive._parse_vtk()
+            self._vtk_grid_cache = quadgrid.linear_copy()
+        return self._vtk_grid_cache
+
+    # def _vtk_mesh(self):
+    #     if self._vtk_mesh_cache is None:
+    #         self.
+
+    @property
+    def elements(self):
+        """List of elements containing raw ansys information.
+
+        Each element contains 10 items plus the nodes belonging to the
+        element.  The first 10 items are:
+
+        - FIELD 0 : material reference number
+        - FIELD 1 : element type number
+        - FIELD 2 : real constant reference number
+        - FIELD 3 : section number
+        - FIELD 4 : element coordinate system
+        - FIELD 5 : death flag (0 - alive, 1 - dead)
+        - FIELD 6 : solid model reference
+        - FIELD 7 : coded shape key
+        - FIELD 8 : element number
+        - FIELD 9 : base element number (applicable to reinforcing elements only)
+        - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> mapdl = pyansys.launch_mapdl(override=True, loglevel='WARNING')
+        >>> mapdl.et(1, 188)
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(2, 1, 0, 0)
+        >>> mapdl.n(3, 2, 0, 0)
+        >>> mapdl.n(4, 3, 0, 0)
+        >>> mapdl.e(1, 2)
+        >>> mapdl.e(2, 3)
+        >>> mapdl.e(3, 4)
+        >>> mapdl.elements
+        [array([1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4], dtype=int32),
+         array([1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 4, 5], dtype=int32)]
+
+        """
+        return self._archive.elem
+
     def enable_interactive_plotting(self, pixel_res=1600):
         """Enables interactive plotting.  Requires matplotlib
 
@@ -960,7 +1186,7 @@ class _Mapdl(_MapdlCommands):
         """
         if MATPLOTLIB_LOADED:
             self.show('PNG')
-            self.gfile(1200)
+            self.gfile(pixel_res)
             self._interactive_plotting = True
         else:
             raise ImportError('Install matplotlib to use enable interactive plotting\n' +
@@ -1059,6 +1285,51 @@ class _Mapdl(_MapdlCommands):
             self._log.info(self.response)
         else:
             raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
+
+    def eplot(self, vtk=False, **kwargs):
+        """APDL Command: EPLOT
+
+        Produces an element display.
+
+        Parameters
+        ----------
+        vtk : bool, optional
+            Plot the currently selected elements using ``pyvista``.
+
+        **kwargs
+            See ``help(pyvista.plot)`` for more keyword arguments
+            related to visualizing using ``vtk``.
+
+        Notes
+        -----
+        Produces an element display of the selected elements. In full
+        graphics, only those elements faces with all of their
+        corresponding nodes selected are plotted. In PowerGraphics,
+        all element faces of the selected element set are plotted
+        irrespective of the nodes selected.  However, for both full
+        graphics and PowerGraphics, adjacent or otherwise duplicated
+        faces of 3-D solid elements will not be displayed in an
+        attempt to eliminate plotting of interior facets. See the DSYS
+        command for display coordinate system issues.
+
+        This command will display curvature in midside node elements
+        when PowerGraphics is activated [/GRAPHICS,POWER] and
+        /EFACET,2 or /EFACET,4 are enabled.  (To display curvature,
+        two facets per edge is recommended [/EFACET,2]).  When you
+        specify /EFACET,1, PowerGraphics does not display midside
+        nodes. /EFACET has no effect on EPLOT for non-midside node
+        elements.
+
+        This command is valid in any processor.
+        """
+        if vtk:
+            # default kwargs
+            kwargs.setdefault('color', 'w')
+            kwargs.setdefault('show_axes', True)
+            kwargs.setdefault('show_edges', True)
+            return self._vtk_grid.plot(**kwargs)
+        else:
+            return super().eplot(**kwargs)
 
     @property
     def processor(self):
@@ -1178,6 +1449,10 @@ class _Mapdl(_MapdlCommands):
             result_path = os.path.join(self.path, '%s.rst' % self._jobname)
         elif not os.path.dirname(result_path):
             result_path = os.path.join(self.path, '%s.rst' % result_path)
+
+        # there may be multiple result files at this location (if not
+        # combining results)
+        
 
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
@@ -1606,6 +1881,144 @@ class _Mapdl(_MapdlCommands):
         """Depreciated"""
         raise NotImplementedError('\nCommand "Run" decpreciated.  \n'
                                   'Please use "run" instead')
+
+    def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
+                       nrmkey='', modtype='', memory_option=''):
+        """Run a modal with basic settings analysis
+
+        Parameters
+        ----------
+        method : str
+            Mode-extraction method to be used for the modal analysis.
+            Defaults to lanb (block lanczos).  Must be one of the following:
+
+            - LANB : Block Lanczos
+            - LANPCG : PCG Lanczos
+            - SNODE : Supernode modal solver
+            - SUBSP : Subspace algorithm
+            - UNSYM : Unsymmetric matrix
+            - DAMP : Damped system
+            - QRDAMP : Damped system using QR algorithm
+            - VT : Variational Technology
+
+        nmode : int, optional
+            The number of modes to extract. The value can depend on
+            the value supplied for Method. NMODE has no default and
+            must be specified. If Method = LANB, LANPCG, or SNODE, the
+            number of modes that can be extracted can equal the DOFs
+            in the model after the application of all boundary
+            conditions.
+
+        freqb : float, optional
+            The beginning, or lower end, of the frequency range of
+            interest.
+    
+        freqe : float, optional
+            The ending, or upper end, of the frequency range of
+            interest (in Hz). The default for Method = SNODE is
+            described below. The default for all other methods is to
+            calculate all modes, regardless of their maximum
+            frequency.
+
+        cpxmod : str, optional
+            Complex eigenmode key. Valid only when ``method='QRDAMP'``
+            or ``method='unsym'``
+
+            - AUTO : Determine automatically if the eigensolutions are
+              real or complex and output them accordingly. This is
+              the default for ``method='UNSYM'``.  Not supported for
+              Method = QRDAMP.
+            - ON or CPLX : Calculate and output complex eigenmode
+              shapes.
+            - OFF or REAL : Do not calculate complex eigenmode
+              shapes. This is required if a mode-
+              superposition analysis is intended after the
+              modal analysis for Method = QRDAMP. This is the
+              default for this method.
+
+        nrmkey : bool, optional
+            Mode shape normalization key.  When ``True`` (default),
+            normalize the mode shapes to the mass matrix.  When False,
+            Normalize the mode shapes to unity instead of to the mass
+            matrix.  If a subsequent spectrum or mode-superposition
+            analysis is planned, the mode shapes should be normalized
+            to the mass matrix.
+
+        modtype : str, optional
+            Type of modes calculated by the eigensolver. Only
+            applicable to the unsymmetric eigensolver.
+
+            - Blank : Right eigenmodes. This value is the default.
+            - BOTH : Right and left eigenmodes. The left eigenmodes are
+              written to Jobname.LMODE.  This option must be
+              activated if a mode-superposition analysis is intended.
+
+        memory_option : str, optional
+            Memory allocation option:
+
+            - DEFAULT : Use the default memory allocation strategy for
+                      the sparse solver. The default strategy attempts
+                      to run in the INCORE memory mode. If there is
+                      not enough available physical memory when the
+                      solver starts to run in the INCORE memory mode,
+                      the solver will then attempt to run in the
+                      OUTOFCORE memory mode.
+            - INCORE : Use a memory allocation strategy in the sparse
+                     solver that will attempt to obtain enough memory
+                     to run with the entire factorized matrix in
+                     memory. This option uses the most amount of
+                     memory and should avoid doing any I/O. By
+                     avoiding I/O, this option achieves optimal solver
+                     performance. However, a significant amount of
+                     memory is required to run in this mode, and it is
+                     only recommended on machines with a large amount
+                     of memory. If the allocation for in-core memory
+                     fails, the solver will automatically revert to
+                     out-of-core memory mode.
+            - OUTOFCORE : Use a memory allocation strategy in the
+                        sparse solver that will attempt to allocate
+                        only enough work space to factor each
+                        individual frontal matrix in memory, but will
+                        store the entire factorized matrix on
+                        disk. Typically, this memory mode results in
+                        poor performance due to the potential
+                        bottleneck caused by the I/O to the various
+                        files written by the solver.
+
+        Examples
+        --------
+        >>> 
+
+        notes
+        -----
+        For models that involve a non-symmetric element stiffness
+        matrix, as in the case of a contact element with frictional
+        contact, the QRDAMP eigensolver (MODOPT, QRDAMP) extracts
+        modes in the modal subspace formed by the eigenmodes from the
+        symmetrized eigenproblem. The QRDAMP eigensolver symmetrizes
+        the element stiffness matrix on the first pass of the
+        eigensolution, and in the second pass, eigenmodes are
+        extracted in the modal subspace of the first eigensolution
+        pass. For such non- symmetric eigenproblems, you should verify
+        the eigenvalue and eigenmode results using the non-symmetric
+        matrix eigensolver (MODOPT,UNSYM).
+
+        The DAMP and QRDAMP options cannot be followed by a subsequent
+        spectrum analysis. The UNSYM method supports spectrum analysis
+        when eigensolutions are real.
+
+        """
+        if nrmkey:
+            if nrmkey.lower() != 'off':
+                nrmkey = 'ON'
+        nrmkey = 'OFF'
+
+        self.slashsolu()
+        self.antype(2, 'new')
+        self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
+        self.bcsoption(memory_option)
+        self.solve()
+        self.finish()
 
 
 # TODO: Speed this up with:

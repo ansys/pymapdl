@@ -154,7 +154,7 @@ def test_file_close(tmpdir):
 def test_animate_nodal_solution(tmpdir, result):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
-                                  off_screen=True)
+                                  loop=False, off_screen=True)
     assert np.any(result.grid.points)
     assert os.path.isfile(temp_movie)
 
