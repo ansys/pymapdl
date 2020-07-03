@@ -1,10 +1,13 @@
 import glob
 import os
+import sys
 
 import pytest
 import numpy as np
 import pyansys
-from pyansys.mapdl_corba import MapdlCorba
+
+if sys.platform != 'darwin':
+    from pyansys.mapdl_corba import MapdlCorba
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -321,6 +324,7 @@ def test_al(cleared, mapdl):
     assert 'WRITTEN TO FILE' in response
 
 
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
     with pytest.raises(RuntimeError):
@@ -387,6 +391,7 @@ def test_elements(cleared, mapdl):
 
 
 # must be at end as this uses a scoped fixture
+@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 def test_exit(mapdl):
     mapdl.exit()
     with pytest.raises(RuntimeError):

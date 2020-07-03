@@ -34,7 +34,7 @@ struct VtkData vtk_data;
 
 
 // Populate offset, cell type, and prepare the cell array for a cell
-__inline void add_cell(bool build_offset, int n_points, uint8_t celltype){
+static inline void add_cell(bool build_offset, int n_points, uint8_t celltype){
   if (build_offset){
     vtk_data.offset[0] = vtk_data.loc;
     vtk_data.offset++;
@@ -77,7 +77,7 @@ __inline void add_cell(bool build_offset, int n_points, uint8_t celltype){
  * 18        (2, 6)
  * 19        (3, 7)
  */
-__inline void add_hex(bool build_offset, int *elem, int nnode){
+static inline void add_hex(bool build_offset, int *elem, int nnode){
   int i;
   bool quad = nnode > 8;
   if (quad){
@@ -132,7 +132,7 @@ midedge nodes (6-14). Note that these midedge nodes correspond lie
 on the edges defined by : 
 (0,1), (1,2), (2,0), (3,4), (4,5), (5,3), (0,3), (1,4), (2,5)
 */
-__inline void add_wedge(bool build_offset, int *elem, int nnode){
+static inline void add_wedge(bool build_offset, int *elem, int nnode){
   bool quad = nnode > 8;
   if (quad){
     add_cell(build_offset, 15, VTK_QUADRATIC_WEDGE);
@@ -164,7 +164,7 @@ __inline void add_wedge(bool build_offset, int *elem, int nnode){
 }
 
 
-__inline void add_pyr(bool build_offset, int *elem, int nnode){
+static inline void add_pyr(bool build_offset, int *elem, int nnode){
   int i;  // counter
   bool quad = nnode > 8;
   if (quad){
@@ -210,7 +210,7 @@ __inline void add_pyr(bool build_offset, int *elem, int nnode){
  * point ids 4-9 are the midedge nodes between:
  * (0,1), (1,2), (2,0), (0,3), (1,3), and (2,3)
 ============================================================================ */
-__inline void add_tet(bool build_offset, int *elem, int nnode){
+static inline void add_tet(bool build_offset, int *elem, int nnode){
   bool quad = nnode > 8;
   if (quad){
     add_cell(build_offset, 10, VTK_QUADRATIC_TETRA);
@@ -239,7 +239,7 @@ __inline void add_tet(bool build_offset, int *elem, int nnode){
 
 
 // ANSYS Tetrahedral style [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-__inline void add_tet10(bool build_offset, int *elem, int nnode){
+static inline void add_tet10(bool build_offset, int *elem, int nnode){
   int i;  // counter
   bool quad = nnode > 4;
   if (quad){
@@ -269,7 +269,7 @@ __inline void add_tet10(bool build_offset, int *elem, int nnode){
 }
 
 
-__inline void add_quad(bool build_offset, int *elem, bool is_quad){
+static inline void add_quad(bool build_offset, int *elem, bool is_quad){
   int i;
   int n_points;
   if (is_quad){
@@ -288,7 +288,7 @@ __inline void add_quad(bool build_offset, int *elem, bool is_quad){
   return;
 }
 
-__inline void add_tri(bool build_offset, int *elem, bool quad){
+void add_tri(bool build_offset, int *elem, bool quad){
   if (quad){
     add_cell(build_offset, 6, VTK_QUADRATIC_TRIANGLE);
   } else {
@@ -310,7 +310,7 @@ __inline void add_tri(bool build_offset, int *elem, bool quad){
 }
 
 
-__inline void add_line(bool build_offset, int *elem, bool quad){
+static inline void add_line(bool build_offset, int *elem, bool quad){
   if (quad){
     add_cell(build_offset, 3, VTK_QUADRATIC_EDGE);
   } else {
@@ -328,7 +328,7 @@ __inline void add_line(bool build_offset, int *elem, bool quad){
 }
 
 
-__inline void add_point(bool build_offset, int *elem){
+static inline void add_point(bool build_offset, int *elem){
   add_cell(build_offset, 1, VTK_VERTEX);
   vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
   return;
@@ -400,6 +400,7 @@ on the edges defined by :
  *
  * nnum : ANSYS Node numbering
  * 
+ * build_offset: Enable, disable populating offset array
  * 
  * Returns (Given as as parameters)
  * -------
@@ -409,11 +410,12 @@ on the edges defined by :
  * 
  * celltypes: VTK cell types
  * 
- * build_offset: Enable, disable populating offset array
+
  * ==========================================================================*/
-int ans_to_vtk(int nelem, int *elem, int *elem_off, int *type_ref, int nnode,
-	       int *nnum, int64_t *offset, int64_t *cells, uint8_t *celltypes,
-	       int build_offset){
+int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
+	       const int *type_ref, const int nnode, const int* nnum,
+	       int64_t *offset, int64_t *cells, uint8_t *celltypes,
+	       const int build_offset){
   bool is_quad;
   int i;  // counter
   int nnode_elem;  // number of nodes belonging to the element
