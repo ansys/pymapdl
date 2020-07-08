@@ -50,3 +50,6 @@ def configure_pyvista():
 
 
 configure_pyvista()
+
+
+from pyansys.misc import Report

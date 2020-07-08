@@ -26,3 +26,8 @@ def test_quality_struct():
 def test_quality_type_error():
     with pytest.raises(TypeError):
         pyansys.quality(pv.PolyData())
+
+
+def test_report():
+    report = pyansys.Report()
+    assert 'pyansys' in str(report)
