@@ -237,3 +237,17 @@ def test_rst_node_components(hex_rst):
     np.allclose(hex_rst.element_components['ELEM_COMP'].nonzero()[0],
                 np.arange(4, 20))
 
+
+
+def test_rst_beam4_shell63():
+    filename = os.path.join(testfiles_path, 'shell63_beam4.rst')
+
+    # check geometry can load
+    rst = pyansys.read_binary(filename)
+    assert isinstance(rst.grid.points, np.ndarray)
+    assert isinstance(rst.grid.cells, np.ndarray)
+    assert (rst.grid.cells >= 0).all()
+    assert (rst.grid.cells <= 50).all()
+
+    # not a great test, but verifies results load
+    assert np.any(rst.nodal_displacement(0)[1] > 0)

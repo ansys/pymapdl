@@ -77,7 +77,7 @@ static inline void add_cell(bool build_offset, int n_points, uint8_t celltype){
  * 18        (2, 6)
  * 19        (3, 7)
  */
-static inline void add_hex(bool build_offset, int *elem, int nnode){
+static inline void add_hex(bool build_offset, const int *elem, int nnode){
   int i;
   bool quad = nnode > 8;
   if (quad){
@@ -132,7 +132,7 @@ midedge nodes (6-14). Note that these midedge nodes correspond lie
 on the edges defined by : 
 (0,1), (1,2), (2,0), (3,4), (4,5), (5,3), (0,3), (1,4), (2,5)
 */
-static inline void add_wedge(bool build_offset, int *elem, int nnode){
+static inline void add_wedge(bool build_offset, const int *elem, int nnode){
   bool quad = nnode > 8;
   if (quad){
     add_cell(build_offset, 15, VTK_QUADRATIC_WEDGE);
@@ -164,7 +164,7 @@ static inline void add_wedge(bool build_offset, int *elem, int nnode){
 }
 
 
-static inline void add_pyr(bool build_offset, int *elem, int nnode){
+static inline void add_pyr(bool build_offset, const int *elem, int nnode){
   int i;  // counter
   bool quad = nnode > 8;
   if (quad){
@@ -210,7 +210,7 @@ static inline void add_pyr(bool build_offset, int *elem, int nnode){
  * point ids 4-9 are the midedge nodes between:
  * (0,1), (1,2), (2,0), (0,3), (1,3), and (2,3)
 ============================================================================ */
-static inline void add_tet(bool build_offset, int *elem, int nnode){
+static inline void add_tet(bool build_offset, const int *elem, int nnode){
   bool quad = nnode > 8;
   if (quad){
     add_cell(build_offset, 10, VTK_QUADRATIC_TETRA);
@@ -239,7 +239,7 @@ static inline void add_tet(bool build_offset, int *elem, int nnode){
 
 
 // ANSYS Tetrahedral style [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-static inline void add_tet10(bool build_offset, int *elem, int nnode){
+static inline void add_tet10(bool build_offset, const int *elem, int nnode){
   int i;  // counter
   bool quad = nnode > 4;
   if (quad){
@@ -269,7 +269,7 @@ static inline void add_tet10(bool build_offset, int *elem, int nnode){
 }
 
 
-static inline void add_quad(bool build_offset, int *elem, bool is_quad){
+static inline void add_quad(bool build_offset, const int *elem, bool is_quad){
   int i;
   int n_points;
   if (is_quad){
@@ -283,12 +283,14 @@ static inline void add_quad(bool build_offset, int *elem, bool is_quad){
   // translate connectivity
   for (i=0; i<n_points; i++){
     vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
+    /* printf(", %i", vtk_data.nref[elem[i]]); */
   }
+  /* printf("\n"); */
 
   return;
 }
 
-void add_tri(bool build_offset, int *elem, bool quad){
+void add_tri(bool build_offset, const int *elem, bool quad){
   if (quad){
     add_cell(build_offset, 6, VTK_QUADRATIC_TRIANGLE);
   } else {
@@ -310,8 +312,16 @@ void add_tri(bool build_offset, int *elem, bool quad){
 }
 
 
-static inline void add_line(bool build_offset, int *elem, bool quad){
-  if (quad){
+static inline void add_line(bool build_offset, const int *elem, int nnode){
+  bool is_quad;
+  if (nnode > 2){
+    is_quad = elem[2] > 0;
+  } else {
+    is_quad = false;
+  }
+
+  /* printf("is_quad, %i\n", is_quad); */
+  if (is_quad){
     add_cell(build_offset, 3, VTK_QUADRATIC_EDGE);
   } else {
     add_cell(build_offset, 2, VTK_LINE);
@@ -320,7 +330,7 @@ static inline void add_line(bool build_offset, int *elem, bool quad){
   // edge nodes
   vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
   vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[1]];
-  if (quad){
+  if (is_quad){
     vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[2]];
   }
 
@@ -328,7 +338,7 @@ static inline void add_line(bool build_offset, int *elem, bool quad){
 }
 
 
-static inline void add_point(bool build_offset, int *elem){
+static inline void add_point(bool build_offset, const int *elem){
   add_cell(build_offset, 1, VTK_VERTEX);
   vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[0]];
   return;
@@ -453,28 +463,39 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
       add_point(build_offset, &elem[off]);
       break;
     case 2: // line
-      add_line(build_offset, &elem[off], nnode_elem > 2);
+      add_line(build_offset, &elem[off], nnode_elem);
       break;
     case 3:  // shell
-      is_quad = nnode_elem > 4;
+      /* printf("Adding shell"); */
+      /* printf("nnode_elem %d: \n", nnode_elem); */
+      is_quad = nnode_elem > 4; // this is insufficient as the last node might be 0
+      /* printf("is_quad %d: \n", is_quad); */
       if (elem[off + 2] == elem[off + 3]){
+	/* printf(" subtype tri\n"); */
   	add_tri(build_offset, &elem[off], is_quad);
       } else {  // is quadrilateral
+	/* printf(" subtype quad\n"); */
   	add_quad(build_offset, &elem[off], is_quad);
       }
       break;
     case 4: // solid
+      /* printf("Adding solid "); */
       if (elem[off + 6] != elem[off + 7]){ // hexahedral
+	/* printf(" subtype hexahedral\n"); */
   	add_hex(build_offset, &elem[off], nnode_elem);
       } else if (elem[off + 5] != elem[off + 6]){ // wedge
+	/* printf(" subtype wedge\n"); */
   	add_wedge(build_offset, &elem[off], nnode_elem);
       } else if (elem[off + 2] != elem[off + 3]) { // pyramid
+	/* printf(" subtype pyramid\n"); */
   	add_pyr(build_offset, &elem[off], nnode_elem);
       } else { // tetrahedral
+	/* printf(" subtype tetrahedral\n"); */
   	add_tet(build_offset, &elem[off], nnode_elem);
       }
       break;
     case 5: // tetrahedral
+      /* printf("Adding tetrahedral\n"); */
       add_tet10(build_offset, &elem[off], nnode_elem);
       break;
     case 6:  // linear line
