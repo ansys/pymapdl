@@ -63,6 +63,9 @@ jobs:
       inputs:
         versionSpec: $(python.version)
         addToPath: true
+    - powershell: |
+        powershell .ci/install_opengl.ps1
+      displayName: 'Install OpenGL'
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
 
