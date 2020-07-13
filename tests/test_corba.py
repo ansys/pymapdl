@@ -351,6 +351,7 @@ def test_nodes(cleared, mapdl):
     mapdl.prep7()
     mapdl.cdread('db', pyansys.examples.sector_archive_file)
     archive = pyansys.Archive(pyansys.examples.sector_archive_file, parse_vtk=False)
+    assert mapdl.n_node
     mapdl.nwrite('/tmp/ansys/tmp.nodes')
     assert np.allclose(mapdl.nodes, archive.nodes)
 
@@ -399,7 +400,10 @@ def test_elements(cleared, mapdl):
 def test_load_array(cleared, mapdl, arr):
     mapdl.load_array(arr, 'MYARR')
     parm, mapdl_arrays = mapdl.load_parameters()
-    assert np.allclose(mapdl_arrays['MYARR'], arr)
+    try:
+        assert np.allclose(mapdl_arrays['MYARR'], arr)
+    except:
+        breakpoint()
 
 
 def test_load_array_err(cleared, mapdl):

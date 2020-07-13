@@ -3,7 +3,7 @@
 variables:
   ALLOW_PLOTTING: true
   package_name: pyansys
-
+  SHELLOPTS: 'errexit:pipefail'
 
 trigger:
   branches:
@@ -82,6 +82,7 @@ jobs:
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
 
+# docs are built locally (for now) due to MAPDL requirement
 # - job: build_docs
 #   variables:
 #     gh_user: akaszynski
