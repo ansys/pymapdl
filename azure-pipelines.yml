@@ -5,6 +5,7 @@ variables:
   package_name: pyansys
   SHELLOPTS: 'errexit:pipefail'
 
+
 trigger:
   branches:
     include:
@@ -29,6 +30,9 @@ jobs:
         python.version: '3.8'
   pool:
     vmImage: 'ubuntu-16.04'
+  variables:
+    DISPLAY: ':99.0'
+    PYVISTA_OFF_SCREEN: 'True'
   steps:
     - task: UsePythonVersion@0
       inputs:
