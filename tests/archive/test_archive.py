@@ -84,7 +84,6 @@ def test_write_angle(tmpdir, hex_archive):
     assert np.allclose(archive.nodes, hex_archive.nodes)
 
 
-@pytest.mark.skipif(os.name == 'nt', reason="TODO: Unexplained behavior")
 def test_missing_midside():
     allowable_types = [45, 95, 185, 186, 92, 187]
     archive_file = os.path.join(testfiles_path, 'mixed_missing_midside.cdb')

@@ -42,6 +42,7 @@ tests/cyclic/htmlcov
 *,cover
 flycheck*
 test-output.xml
+coverage.xml
 
 # ignore certain result files
 tests/testfiles/is16.rst

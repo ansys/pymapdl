@@ -107,7 +107,7 @@ class Geometry():
                                                            self._elem_off,
                                                            type_ref,
                                                            self.nnum,
-                                                           not VTK9)
+                                                           True)  # for reset_midside
         nodes, angles, nnum = self.nodes, self.node_angles, self.nnum
 
         # fix missing midside
@@ -506,8 +506,9 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
     ANSYS sometimes does not add midside nodes, and this is denoted in
     the element array with a ``0``.  When translated to VTK, this is
-    saved as a ``-1``.  If this is not corrected, VTK will segfault,
-    and this function creates missing midside nodes for the quadratic
+    saved as a ``-1``.  If this is not corrected, VTK will segfault.
+
+    This function creates missing midside nodes for the quadratic
     elements.
     """
     # Check for missing midside nodes
