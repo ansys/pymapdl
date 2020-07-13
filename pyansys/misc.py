@@ -1,4 +1,6 @@
 """Module for miscellaneous functions and methods"""
+import sys
+
 from pyvista.utilities.errors import GPUInfo
 import scooby
 
@@ -90,8 +92,11 @@ class Report(scooby.Report):
 
         """
         # Mandatory packages.
-        core = ['pyansys', 'pyvista', 'vtk', 'numpy', 'ansys_corba',
+        core = ['pyansys', 'pyvista', 'vtk', 'numpy',
                 'appdirs', 'psutil', 'pexpect']
+
+        if sys.platform != 'darwin':
+            core.append('pyansys')
 
         # Optional packages.
         optional = ['scipy', 'matplotlib']
