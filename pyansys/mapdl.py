@@ -27,11 +27,14 @@ from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.convert import is_float
 from pyansys import _reader
 
+
 MATPLOTLIB_LOADED = True
 try:
+    import matplotlib
+    matplotlib.use('tkagg')  # for windows
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-except ImportError:
+except:
     MATPLOTLIB_LOADED = False
 
 

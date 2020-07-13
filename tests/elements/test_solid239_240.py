@@ -12,6 +12,6 @@ except:
     result = None
 
 @pytest.mark.skipif(result is None, reason="Requires example files")
-def test_load(result):
+def test_load():
     assert np.any(result.grid.cells)
     assert np.any(result.grid.points)
