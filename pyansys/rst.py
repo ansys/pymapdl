@@ -1419,19 +1419,44 @@ class ResultFile(AnsysBinary):
 
         Notes
         -----
-        See ANSYS element documentation for available items for each element type.
+        See ANSYS element documentation for available items for each
+        element type.  See:
 
-        ENG - Element volume and energies.
-            volume: Element volume
-            senergy: Element energy associated with the stiffness matrix
-            aenergy: Artificial hourglass energy
-            kenergy: Kinetic energy
-            coenergy: Co-energy (magnetics)
-            incenergy: Position not used
-            position not used
-            thenergy: Thermal dissipation energy (see ThermMat, shell131/132 only)
-            position not used
-            position not used
+        https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_elem/
+
+        Examples
+        --------
+        Retreive "LS" solution results from PIPE59 elements for result set 1
+
+        >>> enum, edata, enode = result.element_solution_data(0, datatype='ENS')
+        >>> enum[0]  # first element number
+        >>> enode[0]  # nodes belonging to element 1
+        >>> edata[0]  # data belonging to element 1
+        array([ -4266.19   ,   -376.18857,  -8161.785  , -64706.766  ,
+                -4266.19   ,   -376.18857,  -8161.785  , -45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,      0.     ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  64706.766  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,      0.     ,
+                -4266.19   ,   -376.18857,  -8161.785  , -45754.594  ,
+                -4274.038  ,   -376.62527,  -8171.2603 ,   2202.7085 ,
+               -29566.24   ,   -376.62527,  -8171.2603 ,   1557.55   ,
+               -40042.613  ,   -376.62527,  -8171.2603 ,      0.     ,
+               -29566.24   ,   -376.62527,  -8171.2603 ,  -1557.55   ,
+                -4274.038  ,   -376.62527,  -8171.2603 ,  -2202.7085 ,
+                21018.164  ,   -376.62527,  -8171.2603 ,  -1557.55   ,
+                31494.537  ,   -376.62527,  -8171.2603 ,      0.     ,
+                21018.164  ,   -376.62527,  -8171.2603 ,   1557.55   ],
+              dtype=float32)
+
+        This data corresponds to the results you would obtain directly
+        from MAPDL with ESOL commands:
+
+        >>> ansys.esol(nvar='2', elem=enum[0], node=enode[0][0], item='LS', comp=1)
+        >>> ansys.vget(par='SD_LOC1', ir='2', tstrt='1') # store in a variable
+        >>> ansys.read_float_parameter('SD_LOC1(1)')
+        -4266.19
         """
         table_ptr = datatype.upper()
         if table_ptr not in ELEMENT_INDEX_TABLE_KEYS:
