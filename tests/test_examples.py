@@ -17,7 +17,10 @@ except:
     shaft = None
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+skip_plotting = pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+skip_no_shaft = pytest.mark.skipif(shaft is None, reason="Requires example file")
+
+@skip_plotting
 def test_show_hex_archive():
     examples.show_hex_archive(off_screen=True)
 
@@ -26,12 +29,12 @@ def test_load_result():
     examples.load_result()
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
 def test_show_displacement():
     examples.show_displacement(off_screen=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
 def test_show_stress():
     examples.show_stress(off_screen=True)
 
@@ -40,28 +43,28 @@ def test_load_km():
     examples.load_km()
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
 def test_show_cell_qual():
     examples.show_cell_qual(meshtype='tet', off_screen=True)
     examples.show_cell_qual(meshtype='hex', off_screen=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
 def test_cylinderansys_182():
     exec_file = '/usr/ansys_inc/v182/ansys/bin/ansys182'
     if os.path.isfile(exec_file):
         assert examples.ansys_cylinder_demo(as_test=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
 def test_cylinderansys_150():
     exec_file = '/usr/ansys_inc/v150/ansys/bin/ansys150'
     if os.path.isfile(exec_file):
         assert examples.ansys_cylinder_demo(exec_file, as_test=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
-@pytest.mark.skipif(shaft is None, reason="Requires example file")
+@skip_plotting
+@skip_no_shaft
 @pytest.mark.skipif(not HAS_IMAGEIO, reason='Requires imageio_ffmpeg')
 def test_shaft_animate(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
@@ -71,14 +74,15 @@ def test_shaft_animate(tmpdir):
                                  off_screen=True,
                                  movie_filename=filename)
 
-@pytest.mark.skipif(shaft is None, reason="Requires example file")
+@skip_no_shaft
 def test_shaft_nodal_solution_ncomp(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     shaft.plot_nodal_solution(5, node_components='N_AREA_BC1', sel_type_all=False,
                               off_screen=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_plotting
+@skip_no_shaft
 def test_shaft_plot_screenshot(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     shaft.plot_nodal_solution(0, off_screen=True, screenshot=filename)

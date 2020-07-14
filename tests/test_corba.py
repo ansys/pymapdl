@@ -30,6 +30,7 @@ else:
 
 RSETS = list(zip(range(1, 9), [1]*8))
 
+skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 
 @pytest.fixture(scope='module')
 def mapdl():
@@ -81,6 +82,7 @@ def cleared(mapdl):
     yield
 
 
+@skip_no_ansys
 def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
 
@@ -89,7 +91,7 @@ def test_str(mapdl):
 # Testing binary reader
 ###############################################################################
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_prnsol_u(mapdl, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
@@ -112,7 +114,7 @@ def test_prnsol_u(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_presol_s(mapdl, rset):
     mapdl.set(*rset)
 
@@ -139,7 +141,7 @@ def test_presol_s(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_prnsol_s(mapdl, rset):
     mapdl.set(*rset)
 
@@ -165,7 +167,7 @@ def test_prnsol_s(mapdl, rset):
 
 
 @pytest.mark.parametrize("rset", RSETS)
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_prnsol_prin(mapdl, rset):
     mapdl.set(*rset)
 
@@ -201,7 +203,7 @@ def test_read_para():
 ###############################################################################
 # Building elements
 ###############################################################################
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_e(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)
@@ -215,7 +217,7 @@ def test_e(mapdl, cleared):
     assert e1 == 2
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_et(mapdl, cleared):
     n_plane183 = mapdl.et("", "PLANE183")
     assert n_plane183 == 1
@@ -229,7 +231,7 @@ def test_et(mapdl, cleared):
 ###############################################################################
 # Building geometry
 ###############################################################################
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     assert k0 == 1
@@ -237,7 +239,7 @@ def test_k(cleared, mapdl):
     assert k1 == 2
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_l(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -245,7 +247,7 @@ def test_l(cleared, mapdl):
     assert l0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_a(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -254,7 +256,7 @@ def test_a(cleared, mapdl):
     assert a0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_v(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -264,7 +266,7 @@ def test_v(cleared, mapdl):
     assert v0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_n(cleared, mapdl):
     n0 = mapdl.n("", 0, 0, 0)
     assert n0 == 1
@@ -272,7 +274,7 @@ def test_n(cleared, mapdl):
     assert n1 == 2
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_bsplin(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -281,7 +283,7 @@ def test_bsplin(cleared, mapdl):
     assert l0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_a(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -291,7 +293,7 @@ def test_a(cleared, mapdl):
     assert a0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_al(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -305,13 +307,13 @@ def test_al(cleared, mapdl):
     assert a0 == 1
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_invalid():
     with pytest.raises(Exception):
         mapdl.a(0, 0, 0, 0)
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_al(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -328,7 +330,8 @@ def test_al(cleared, mapdl):
     assert 'WRITTEN TO FILE' in response
 
 
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
+@skip_no_ansys
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
     with pytest.raises(RuntimeError):
@@ -347,14 +350,17 @@ def test_logging(mapdl, tmpdir):
     assert 'K,4,0,1,0' in out[-1]
 
 
+@skip_no_ansys
 def test_nodes(cleared, mapdl):
     mapdl.prep7()
     mapdl.cdread('db', pyansys.examples.sector_archive_file)
     archive = pyansys.Archive(pyansys.examples.sector_archive_file, parse_vtk=False)
+    assert mapdl.n_node
     mapdl.nwrite('/tmp/ansys/tmp.nodes')
     assert np.allclose(mapdl.nodes, archive.nodes)
 
 
+@skip_no_ansys
 def test_nnum(cleared, mapdl):
     mapdl.prep7()
     mapdl.n(1, 0, 0, 0)
@@ -366,6 +372,7 @@ def test_nnum(cleared, mapdl):
 
 
 @pytest.mark.parametrize("knum", [True, False])
+@skip_no_ansys
 def test_nplot_vtk(cleared, mapdl, knum):
     mapdl.enable_interactive_plotting()
     mapdl.prep7()
@@ -375,6 +382,7 @@ def test_nplot_vtk(cleared, mapdl, knum):
     mapdl.nplot(vtk=True, knum=knum, background='w', color='k', off_screen=True)
 
 
+@skip_no_ansys
 def test_elements(cleared, mapdl):
     mapdl.et(1, 188)
     mapdl.n(1, 0, 0, 0)
@@ -396,12 +404,17 @@ def test_elements(cleared, mapdl):
                                  np.random.random((10)),
                                  np.random.random((10, 3)),
                                  np.random.random((10, 3, 3))))
+@skip_no_ansys
 def test_load_array(cleared, mapdl, arr):
     mapdl.load_array(arr, 'MYARR')
     parm, mapdl_arrays = mapdl.load_parameters()
-    assert np.allclose(mapdl_arrays['MYARR'], arr)
+    try:
+        assert np.allclose(mapdl_arrays['MYARR'], arr)
+    except:
+        breakpoint()
 
 
+@skip_no_ansys
 def test_load_array_err(cleared, mapdl):
     with pytest.raises(TypeError):
         mapdl.load_array(['apple'], 'MYARR')
@@ -411,7 +424,7 @@ def test_load_array_err(cleared, mapdl):
 
 
 # must be at end as this uses a scoped fixture
-@pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+@skip_no_ansys
 def test_exit(mapdl):
     mapdl.exit()
     with pytest.raises(RuntimeError):

@@ -27,11 +27,14 @@ from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.convert import is_float
 from pyansys import _reader
 
+
 MATPLOTLIB_LOADED = True
 try:
+    import matplotlib
+    matplotlib.use('tkagg')  # for windows
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-except ImportError:
+except:
     MATPLOTLIB_LOADED = False
 
 
@@ -184,7 +187,6 @@ def get_ansys_path(allow_input=True):
             exe_loc = f.read()
         # verify
         if not os.path.isfile(exe_loc) and allow_input:
-            print('Cached ANSYS executable %s not found' % exe_loc)
             exe_loc = save_ansys_path()
     elif allow_input:  # create configuration file
         exe_loc = save_ansys_path()
@@ -225,7 +227,10 @@ def change_default_ansys_path(exe_loc):
 
 def save_ansys_path(exe_loc=''):
     """ Find ANSYS path or query user """
-    print('Cached ANSYS executable %s not found' % exe_loc)
+    if exe_loc.strip():
+        print('Cached ANSYS executable %s not found' % exe_loc)
+    else:
+        print('Cached ANSYS executable not found')
     exe_loc, ver = find_ansys()
     if os.path.isfile(exe_loc):
         print('Found ANSYS at %s' % exe_loc)

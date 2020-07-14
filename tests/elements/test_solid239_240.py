@@ -1,6 +1,3 @@
-"""
-
-"""
 import os
 
 import pytest
@@ -9,11 +6,12 @@ import pyansys
 from pyansys import examples
 
 
-@pytest.fixture(scope='module')
-def result():
-    return pyansys.examples.downloads._download_solid239_240()
+try:
+    result = pyansys.examples.downloads._download_solid239_240()
+except:
+    result = None
 
-
-def test_load(result):
+@pytest.mark.skipif(result is None, reason="Requires example files")
+def test_load():
     assert np.any(result.grid.cells)
     assert np.any(result.grid.points)

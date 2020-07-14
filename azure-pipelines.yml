@@ -3,6 +3,7 @@
 variables:
   ALLOW_PLOTTING: true
   package_name: pyansys
+  SHELLOPTS: 'errexit:pipefail'
 
 
 trigger:
@@ -29,6 +30,9 @@ jobs:
         python.version: '3.8'
   pool:
     vmImage: 'ubuntu-16.04'
+  variables:
+    DISPLAY: ':99.0'
+    PYVISTA_OFF_SCREEN: 'True'
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -39,8 +43,11 @@ jobs:
         docker pull quay.io/pypa/manylinux2010_x86_64
         docker run -e package_name=$(package_name) --rm -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/.ci/build_wheels.sh $(python.version)
       displayName: Build wheels using manylinux2010
-    - template: .ci/azure-steps.yml      
+    - script: |
+        .ci/setup_headless_display.sh
+    - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
+
 
 - job: Windows
   strategy:
@@ -60,8 +67,12 @@ jobs:
       inputs:
         versionSpec: $(python.version)
         addToPath: true
+    - powershell: |
+        powershell .ci/install_opengl.ps1
+      displayName: 'Install OpenGL'
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
+
 
 - job: macOS
   variables:
@@ -82,6 +93,7 @@ jobs:
     - template: .ci/azure-steps.yml
     - template: .ci/azure-publish-dist.yml
 
+# docs are built locally (for now) due to MAPDL requirement
 # - job: build_docs
 #   variables:
 #     gh_user: akaszynski

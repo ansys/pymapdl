@@ -29,6 +29,8 @@ class Archive(Geometry):
 
     Reads a blocked CDB file and optionally parses it to a vtk grid.
 
+    Write the archive file using ``CDWRITE, DB, archive.cdb``
+
     Parameters
     ----------
     filename : string
