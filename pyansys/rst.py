@@ -1413,6 +1413,10 @@ class ResultFile(AnsysBinary):
         element_data : list
             List with one data item for each element.
 
+        enode : list
+            Node numbers corresponding to each element.
+            results.  One list entry for each element.
+
         Notes
         -----
         See ANSYS element documentation for available items for each element type.
@@ -1442,7 +1446,7 @@ class ResultFile(AnsysBinary):
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
 
         rnum = self.parse_step_substep(rnum)
-        ele_ind_table, _, _, ptr_off = self._element_solution_header(rnum)
+        ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         # read element data
         element_data = []
@@ -1464,7 +1468,13 @@ class ResultFile(AnsysBinary):
             enum = enum[sidx]
             element_data = [element_data[i] for i in sidx]
 
-        return enum, element_data
+        # include the nodes corresponding to each element
+        enode = []
+        nnode = nodstr[etype]
+        for i in sidx:
+            enode.append(self.geometry.elem[i][10:10+nnode[i]])
+
+        return enum, element_data, enode
 
     def principal_nodal_stress(self, rnum):
         """Computes the principal component stresses for each node in
