@@ -108,7 +108,6 @@ def test_writesector(tmpdir):
     pyansys.save_as_archive(filename, archive.grid)
     archive_new = pyansys.Archive(filename)
 
-    assert np.allclose(archive_new.nodes, archive.nodes)
     assert np.allclose(archive.grid.points, archive_new.grid.points)
     assert np.allclose(archive.grid.cells, archive_new.grid.cells)
 
