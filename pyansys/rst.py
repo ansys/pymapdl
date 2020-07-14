@@ -1373,8 +1373,8 @@ class ResultFile(AnsysBinary):
         Parameters
         ----------
         rnum : int or list
-            Cumulative result number with zero based indexing, or a list containing
-            (step, substep) of the requested result.
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         datatype : str
             Element data type to retreive.
@@ -1426,7 +1426,7 @@ class ResultFile(AnsysBinary):
 
         Examples
         --------
-        Retreive "LS" solution results from PIPE59 elements for result set 1
+        Retreive "LS" solution results from an PIPE59 element for result set 1
 
         >>> enum, edata, enode = result.element_solution_data(0, datatype='ENS')
         >>> enum[0]  # first element number
