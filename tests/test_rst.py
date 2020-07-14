@@ -101,7 +101,7 @@ def test_nodal_displacement():
 def test_read_volume():
     rst_file = os.path.join(testfiles_path, 'vol_test.rst')
     rst = pyansys.read_binary(rst_file)
-    enum, edata = rst.element_solution_data(0, datatype='ENG')
+    enum, edata, enode = rst.element_solution_data(0, datatype='ENG')
     edata = np.asarray(edata)
     volume = edata[:, 0]
 
