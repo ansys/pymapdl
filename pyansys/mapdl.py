@@ -1,6 +1,4 @@
 """Module to control interaction with an ANSYS shell instance.
-Built using ANSYS documentation from
-https://www.sharcnet.ca/Software/Ansys/
 
 This module makes no claim to own any rights to ANSYS.  It's merely an
 interface to software owned by ANSYS.

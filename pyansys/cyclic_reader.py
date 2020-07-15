@@ -454,7 +454,7 @@ class CyclicResult(ResultFile):
 
     @property
     def mode_table(self):
-        """ unique modes for cyclic results """
+        """Unique modes for cyclic results"""
         hindex_table = self._resultheader['hindex']
         diff = np.diff(np.abs(hindex_table))
         freqs = self.time_values
@@ -470,6 +470,22 @@ class CyclicResult(ResultFile):
                 c += 1
                 mode_table.append(c)
         return np.asarray(mode_table)
+
+    @property
+    def harmonic_indices(self):
+        """Harmonic indices of the result file.
+
+        Harmonic index is simply the Nodal Diameter of the mode.  This
+        is defined as the number of complete sine waves that pass
+        through the circumference.
+
+        Examples
+        --------
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> rst.harmonic_indices
+        array([ 0,  0,  0,  0,  0,  0, -1,  1, -1,  1,  1, -1,
+               -2,  2, -2,  2, -2,  2,  3,  3,  3,  3,  3,  3], dtype=int32)
+        """
 
     def nodal_stress(self, rnum, phase=0, as_complex=False, full_rotor=False):
         """Retrieves the component stresses for each node in the
@@ -981,13 +997,11 @@ class CyclicResult(ResultFile):
             See help(pyvista.plot) for additional keyword arguments.
 
         """
-        if kwargs.pop('smooth_shading', False):
-            raise Exception('"smooth_shading" is not yet supported')
-
-        # interactive = kwargs.pop('interactive', None)
+        # if kwargs.pop('smooth_shading', False):
+        #     raise Exception('"smooth_shading" is not yet supported')
 
         # normalize nodal solution
-        nnum, complex_disp = self.nodal_solution(rnum, as_complex=True,
+        _, complex_disp = self.nodal_solution(rnum, as_complex=True,
                                                  full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
         complex_disp = complex_disp.reshape(-1, 3)
@@ -1001,22 +1015,30 @@ class CyclicResult(ResultFile):
         else:
             axis = None
 
+        if show_result_info:
+            result_info = self.text_result_table(rnum)
+
+        # need only the surface of the full rotor
+        full_rotor = self._gen_full_rotor()
+        plot_mesh = full_rotor.extract_surface()
+        orig_pt = plot_mesh.points
+
+        # reduce the complex displacement to just the surface points
+        ind = plot_mesh.point_arrays['vtkOriginalPointIds']
+        complex_disp = np.take(complex_disp, ind, axis=0)
+
         if axis is not None:
             scalars = complex_disp[:, axis]
         else:
             scalars = (complex_disp*complex_disp).sum(1)**0.5
 
-        full_rotor = self._gen_full_rotor()
-        orig_pt = full_rotor.points
-
-        if show_result_info:
-            result_info = self.text_result_table(rnum)
-
-        plot_mesh = full_rotor.copy()
         plotter = pv.Plotter(off_screen=off_screen)
+
+        if kwargs.pop('show_axes', True):
+            plotter.add_axes()
+
         plotter.add_mesh(plot_mesh, scalars=np.real(scalars),
                          interpolate_before_map=interpolate_before_map, **kwargs)
-        # plotter.update_coordinates(orig_pt + np.real(complex_disp), render=False)
 
         # setup text
         plotter.add_text(' ', font_size=20, position=[0, 0])
@@ -1079,7 +1101,12 @@ class CyclicResult(ResultFile):
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             grid.transform(matrix)
 
+        # consider forcing low and high to be exact
+        # self.mas_grid.point_arrays['CYCLIC_M01H'] --> rotate and match
+
         vtkappend = vtk.vtkAppendFilter()
+        # vtkappend.MergePointsOn()
+        # vtkappend.SetTolerance  # not available until vtk 9+
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
             # Transform mesh
