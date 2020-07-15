@@ -1,3 +1,4 @@
+import time
 import glob
 import os
 import sys
@@ -351,13 +352,15 @@ def test_logging(mapdl, tmpdir):
 
 
 @skip_no_ansys
-def test_nodes(cleared, mapdl):
+def test_nodes(tmpdir, cleared, mapdl):
     mapdl.prep7()
-    mapdl.cdread('db', pyansys.examples.sector_archive_file)
-    archive = pyansys.Archive(pyansys.examples.sector_archive_file, parse_vtk=False)
-    assert mapdl.n_node
-    mapdl.nwrite('/tmp/ansys/tmp.nodes')
-    assert np.allclose(mapdl.nodes, archive.nodes)
+    mapdl.n(1, 1, 1, 1)
+    mapdl.n(11, 10, 1, 1)
+    mapdl.fill(1, 11, 9)
+
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.nodes'))
+    mapdl.nwrite(filename)
+    assert np.allclose(mapdl.nodes, np.loadtxt(filename)[:, 1:])
 
 
 @skip_no_ansys
@@ -406,12 +409,13 @@ def test_elements(cleared, mapdl):
                                  np.random.random((10, 3, 3))))
 @skip_no_ansys
 def test_load_array(cleared, mapdl, arr):
+    try:
+        mapdl.load_array(arr, 'MYARR')
+    except:  # flush for CORBA
+        pass
     mapdl.load_array(arr, 'MYARR')
     parm, mapdl_arrays = mapdl.load_parameters()
-    try:
-        assert np.allclose(mapdl_arrays['MYARR'], arr)
-    except:
-        breakpoint()
+    assert np.allclose(mapdl_arrays['MYARR'], arr)
 
 
 @skip_no_ansys

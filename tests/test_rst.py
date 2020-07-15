@@ -78,6 +78,12 @@ temperature_rst = os.path.join(testfiles_path, 'temp_v13.rst')
 temperature_known_result = os.path.join(testfiles_path, 'temp_v13.npz')
 
 @pytest.fixture(scope='module')
+def hex_pipe_corner():
+    filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
+    return pyansys.read_binary(filename)
+
+
+@pytest.fixture(scope='module')
 def hex_rst():
     filename = os.path.join(testfiles_path, 'hex_201.rst')
     return pyansys.read_binary(filename)
@@ -252,7 +258,7 @@ def test_rst_beam4_shell63():
     assert np.any(rst.nodal_displacement(0)[1] > 0)
 
 
-def test_cyl_stress():
+def test_cyl_stress(hex_pipe_corner):
     # ANSYS results generated with
     # RSYS, 0
     # PRNSOL, S
@@ -260,8 +266,19 @@ def test_cyl_stress():
     # PRNSOL, S
 
     filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
-    rst = pyansys.read_binary(filename)
-    nnum, my_stress = rst.cyclic_nodal_stress(0)
+    nnum, my_stress = hex_pipe_corner.cyclic_nodal_stress(0)
 
     ans_stress = np.load(os.path.join(testfiles_path, 'rst', 'cyc_stress.npy'))
     assert np.allclose(my_stress[-114:], ans_stress, atol=1E-7)
+
+
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+def test_plot_cyl_stress(hex_pipe_corner):
+    # ANSYS results generated with
+    # RSYS, 0
+    # PRNSOL, S
+    # RSYS, 1
+    # PRNSOL, S
+
+    cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, off_screen=True)
+    assert cpos
