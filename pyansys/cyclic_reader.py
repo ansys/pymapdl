@@ -1,5 +1,6 @@
 """Supports reading cyclic structural result files from ANSYS"""
 import logging
+from functools import wraps
 
 import vtk
 import numpy as np
@@ -163,7 +164,7 @@ class CyclicResult(ResultFile):
         self.dup_ind = np.nonzero(~node_mask)[0]
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
-                       in_nodal_coord_sys=False):
+                       in_nodal_coord_sys=False, force_duplicate=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system.
 
@@ -224,7 +225,8 @@ class CyclicResult(ResultFile):
             hindex = hindex_table[rnum]
 
             # if repeated mode
-            last_index = hindex == int(self._resultheader['nSector']/2)
+            # last_index = hindex == int(self._resultheader['nSector']/2)
+            last_index = False
             if hindex == 0 or last_index:
                 result_dup = np.zeros_like(result)
             else:  # otherwise, use the harmonic pair
@@ -256,6 +258,11 @@ class CyclicResult(ResultFile):
             expanded_result = self.expand_cyclic_static(result)
 
         return nnum, expanded_result
+
+    @wraps(nodal_solution)
+    def nodal_displacement(self, *args, **kwargs):
+        """wraps plot_nodal_solution"""
+        return self.nodal_solution(*args, **kwargs)
 
     def expand_cyclic_static(self, result, tensor=False):
         """ expands cyclic static results """

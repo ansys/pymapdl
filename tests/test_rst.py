@@ -1,5 +1,5 @@
 """
-Sample result file generated with 
+Sample result file generated with
 
 import os
 from pyansys import examples
@@ -69,7 +69,6 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 is16_filename = os.path.join(testfiles_path, 'is16.rst')
 is16_known_result = os.path.join(testfiles_path, 'is16.npz')
 if os.path.isfile(is16_filename):
-
     is16 = pyansys.read_binary(is16_filename)
 else:
     is16 = None
