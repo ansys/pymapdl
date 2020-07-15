@@ -101,3 +101,8 @@ def _download_plane238():
 def _download_shell181():
     """SHELL181 result for unit testing"""
     return _download_and_read('shell181.rst')
+
+
+def download_corner_pipe():
+    """Corner pipe result for unit testing and basic demo"""
+    return _download_and_read('cyc_stress.rst')

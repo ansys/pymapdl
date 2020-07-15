@@ -291,8 +291,8 @@ _etype_map = [0, 2,  # LINK1
 	      0,  # UNUSED56
 	      3,  # SHELL57
 	      0,  # UNUSED58
-	      0,  # PIPE59
-	      0,  # PIPE60
+	      2,  # PIPE59
+	      2,  # PIPE60
 	      2,  # SHELL61
 	      4,  # SOLID62
 	      3,  # SHELL63

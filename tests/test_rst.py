@@ -78,6 +78,12 @@ temperature_rst = os.path.join(testfiles_path, 'temp_v13.rst')
 temperature_known_result = os.path.join(testfiles_path, 'temp_v13.npz')
 
 @pytest.fixture(scope='module')
+def hex_pipe_corner():
+    filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
+    return pyansys.read_binary(filename)
+
+
+@pytest.fixture(scope='module')
 def hex_rst():
     filename = os.path.join(testfiles_path, 'hex_201.rst')
     return pyansys.read_binary(filename)
@@ -101,7 +107,7 @@ def test_nodal_displacement():
 def test_read_volume():
     rst_file = os.path.join(testfiles_path, 'vol_test.rst')
     rst = pyansys.read_binary(rst_file)
-    enum, edata = rst.element_solution_data(0, datatype='ENG')
+    enum, edata, enode = rst.element_solution_data(0, datatype='ENG')
     edata = np.asarray(edata)
     volume = edata[:, 0]
 
@@ -238,7 +244,6 @@ def test_rst_node_components(hex_rst):
                 np.arange(4, 20))
 
 
-
 def test_rst_beam4_shell63():
     filename = os.path.join(testfiles_path, 'shell63_beam4.rst')
 
@@ -251,3 +256,34 @@ def test_rst_beam4_shell63():
 
     # not a great test, but verifies results load
     assert np.any(rst.nodal_displacement(0)[1] > 0)
+
+
+def test_cyl_stress(hex_pipe_corner):
+    # ANSYS results generated with
+    # RSYS, 0
+    # PRNSOL, S
+    # RSYS, 1
+    # PRNSOL, S
+
+    filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
+    nnum, my_stress = hex_pipe_corner.cylindrical_nodal_stress(0)
+
+    ans_stress = np.load(os.path.join(testfiles_path, 'rst', 'cyc_stress.npy'))
+    assert np.allclose(my_stress[-114:], ans_stress, atol=1E-7)
+
+
+@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+def test_plot_cyl_stress(hex_pipe_corner):
+    # ANSYS results generated with
+    # RSYS, 0
+    # PRNSOL, S
+    # RSYS, 1
+    # PRNSOL, S
+
+    with pytest.raises(ValueError):
+        cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, off_screen=True)
+    with pytest.raises(ValueError):
+        cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, comp='X',
+                                                             off_screen=True)    
+    cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, comp='R', off_screen=True)
+    assert cpos

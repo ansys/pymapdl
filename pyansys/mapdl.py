@@ -1976,14 +1976,17 @@ class _Mapdl(_MapdlCommands):
         memory_option : str, optional
             Memory allocation option:
 
-            - DEFAULT : Use the default memory allocation strategy for
+            * ``DEFAULT`` - Default Memory mode
+                      Use the default memory allocation strategy for
                       the sparse solver. The default strategy attempts
                       to run in the INCORE memory mode. If there is
                       not enough available physical memory when the
-                      solver starts to run in the INCORE memory mode,
-                      the solver will then attempt to run in the
-                      OUTOFCORE memory mode.
-            - INCORE : Use a memory allocation strategy in the sparse
+                      solver starts to run in the ``INCORE`` memory
+                      mode, the solver will then attempt to run in the
+                      ``OUTOFCORE`` memory mode.
+
+            * ``INCORE`` - In-core memory mode
+                     Use a memory allocation strategy in the sparse
                      solver that will attempt to obtain enough memory
                      to run with the entire factorized matrix in
                      memory. This option uses the most amount of
@@ -1995,21 +1998,25 @@ class _Mapdl(_MapdlCommands):
                      of memory. If the allocation for in-core memory
                      fails, the solver will automatically revert to
                      out-of-core memory mode.
-            - OUTOFCORE : Use a memory allocation strategy in the
-                        sparse solver that will attempt to allocate
-                        only enough work space to factor each
-                        individual frontal matrix in memory, but will
-                        store the entire factorized matrix on
-                        disk. Typically, this memory mode results in
-                        poor performance due to the potential
-                        bottleneck caused by the I/O to the various
-                        files written by the solver.
+
+            * ``OUTOFCORE`` - Out of core memory mode.
+                        Use a memory allocation strategy in the sparse
+                        solver that will attempt to allocate only
+                        enough work space to factor each individual
+                        frontal matrix in memory, but will store the
+                        entire factorized matrix on disk. Typically,
+                        this memory mode results in poor performance
+                        due to the potential bottleneck caused by the
+                        I/O to the various files written by the
+                        solver.
 
         Examples
         --------
-        >>> 
+        Modal analysis using default parameters for the first 6 modes
 
-        notes
+        >>> mapdl.modal_analysis(nmode=6)
+
+        Notes
         -----
         For models that involve a non-symmetric element stiffness
         matrix, as in the case of a contact element with frictional

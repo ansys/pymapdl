@@ -149,12 +149,21 @@ static inline double ans_strtod2(char *raw, int fltsz){
 
   // next value is always a number
   double val = *raw++ - '0'; i++;
-
-  // next value is always a "."
-  raw++; i++;
+  double k = 10;
+  for (; i<fltsz; i++){
+    if (*raw == '.'){
+      raw++;
+      break;
+    }
+    else {
+      val *= k;
+      val += (*raw++ - '0');
+      k *= 10; 
+    }
+  }
 
   // Read through the rest of the number
-  double k = 0.1;
+  k = 0.1;
   for (; i<fltsz; i++){
     if (*raw == 'E'){
       break;
