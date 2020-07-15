@@ -238,7 +238,6 @@ def test_rst_node_components(hex_rst):
                 np.arange(4, 20))
 
 
-
 def test_rst_beam4_shell63():
     filename = os.path.join(testfiles_path, 'shell63_beam4.rst')
 
@@ -251,3 +250,18 @@ def test_rst_beam4_shell63():
 
     # not a great test, but verifies results load
     assert np.any(rst.nodal_displacement(0)[1] > 0)
+
+
+def test_cyl_stress():
+    # ANSYS results generated with
+    # RSYS, 0
+    # PRNSOL, S
+    # RSYS, 1
+    # PRNSOL, S
+
+    filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
+    rst = pyansys.read_binary(filename)
+    nnum, my_stress = rst.cyclic_nodal_stress(0)
+
+    ans_stress = np.load(os.path.join(testfiles_path, 'rst', 'cyc_stress.npy'))
+    assert np.allclose(my_stress[-114:], ans_stress, atol=1E-7)

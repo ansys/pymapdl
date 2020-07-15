@@ -1944,7 +1944,7 @@ class ResultFile(AnsysBinary):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Thermal strain component to display.  Available options:
+            Stress component to display.  Available options:
             - ``"X"``
             - ``"Y"``
             - ``"Z"``
@@ -2293,7 +2293,7 @@ class ResultFile(AnsysBinary):
             Node numbers of the result.
 
         stress : numpy.ndarray
-            Stresses at X, Y, Z, XY, YZ, and XZ Sxz averaged at each corner
+            Stresses at X, Y, Z, XY, YZ, and XZ averaged at each corner
             node.
 
         Examples
@@ -2308,6 +2308,62 @@ class ResultFile(AnsysBinary):
         Equivalent ANSYS command: PRNSOL, S
         """
         return self._nodal_result(rnum, 'ENS')
+
+    def cylindrical_nodal_stress(self, rnum):
+        """Retrieves the stresses for each node in the solution in the
+        cylindrical coordinate system as the following values:
+
+        ``R``, ``THETA``, ``Z``, ``RTHETA``, ``THETAZ``, and ``RZ``
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        Computes the nodal stress by averaging the stress for each
+        element at each node.  Due to the discontinuities across
+        elements, stresses will vary based on the element they are
+        evaluated from.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : numpy.ndarray
+            Node numbers of the result.
+
+        stress : numpy.ndarray
+            Stresses at R, THETA, Z, RTHETA, THETAZ, and RZ averaged
+            at each corner node where R is radial.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.cylindrical_nodal_stress(0)
+
+        Notes
+        -----
+        Nodes without a stress value will be NAN.
+        Equivalent ANSYS commands:
+        RSYS, 1
+        PRNSOL, S
+        """
+        nnum, stress = self._nodal_result(rnum, 'ENS')
+
+        # angles relative to the XZ plane
+        if nnum.size != self.geometry.nodes.shape[0]:
+            mask = np.in1d(nnum, self.geometry.nnum)
+            angle = np.arctan2(self.geometry.nodes[mask, 1],
+                               self.geometry.nodes[mask, 0])
+        else:
+            angle = np.arctan2(self.geometry.nodes[:, 1],
+                               self.geometry.nodes[:, 0])
+
+        _binary_reader.euler_cart_to_cyl(stress, angle)  # mod stress inplace
+        return nnum, stress
 
     def nodal_temperature(self, rnum):
         """Retrieves the temperature for each node in the
@@ -2341,6 +2397,84 @@ class ResultFile(AnsysBinary):
         nnum, temp = self._nodal_result(rnum, 'EPT')
         temp = temp.ravel()
         return nnum, temp
+
+    def plot_cylindrical_nodal_stress(self, rnum, comp=None, show_displacement=False,
+                                      displacement_factor=1, node_components=None,
+                                      element_components=None, sel_type_all=True,
+                                      **kwargs):
+        """Plot nodal_stress in the cylindrical coordinate system.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number
+
+        comp : str, optional
+            Stress component to display.  Available options:
+            - ``"R"``
+            - ``"THETA"``
+            - ``"Z"``
+            - ``"RTHETA"``
+            - ``"THETAZ"``
+            - ``"RZ"``
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        **kwargs : keyword arguments
+            Optional keyword arguments.  See help(pyvista.plot)
+
+        Examples
+        --------
+        Plot nodal stress in the radial direction
+
+        >>> import pyansys
+        >>> result = pyansys.read_binary('file.rst')
+        >>> result.plot_cylindrical_nodal_stress(0, 'R')
+        """
+        available_comps = ['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']
+
+        if comp is None:
+            raise ValueError('Missing "comp" parameter.  Please select'
+                             ' from the following:\n%s' % available_comps)
+        comp = comp.upper()
+        if comp not in available_comps:
+            raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
+                             ' from the following:\n%s' % available_comps)
+
+        _, scalars = self.cylindrical_nodal_stress(rnum)
+        scalars = scalars[:, available_comps.index(comp)]
+        grid = self.grid
+
+        if node_components:
+            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            scalars = scalars[ind]
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
+            scalars = scalars[ind]
+
+        kwargs.setdefault('stitle', '%s Cylindrical\nNodal Stress' % comp)
+        return self._plot_point_scalars(scalars, grid=grid, rnum=rnum,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
+                                        **kwargs)
 
     def plot_nodal_temperature(self, rnum, show_displacement=False,
                                displacement_factor=1, node_components=None,
@@ -2378,7 +2512,7 @@ class ResultFile(AnsysBinary):
 
         Examples
         --------
-        Plot thermal strain of a sample file
+        Plot temperature of a result
 
         >>> import pyansys
         >>> result = pyansys.read_binary('file.rst')

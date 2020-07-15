@@ -1261,3 +1261,79 @@ def midside_mask(uint8 [::1] celltypes, index_type [::1] cells,
 
     # return as a bool array without copying
     return np.asarray(mask).view(np.bool)
+
+
+def euler_cart_to_cyl(double [:, ::1] stress, double [::1] angles):
+    """Convert stress tensors from cartesian to cyclindrical.
+
+    Equations from
+    https://github.com/jrwrigh/cart2cyl_notes/blob/master/main.pdf
+
+    Parameters
+    ----------
+    stress : np.ndarray (np.double)
+        ``n x 6`` stress tensor array of values
+        s_xx, s_xy, s_yy, s_xz, s_yz, s_zz
+
+    angles : np.ndarray
+        Rotation angles.  Effectively arctan(y/x)
+
+    Notes
+    -----
+    # used sympy to generate these equations
+    >>> from sympy import Matrix, symbols
+    >>> c, s = symbols('c s')
+    >>> s_xx, s_xy, s_yy, s_xz, s_yz, s_zz = symbols('s_xx s_xy s_yy s_xz s_yz s_zz')
+    >>> tensor = np.matrix([[s_xx, s_xy, s_xz],
+                            [s_xy, s_yy, s_yz],
+                            [s_xz, s_yz, s_zz]])
+    >>> r1 = Matrix([[c, s, 0],
+                     [-s, c, 0],
+                     [0, 0, 1]])
+    >>> r2 = Matrix([[c, -s, 0],
+                     [s, c, 0],
+                     [0, 0, 1]])
+    >>> r1*tensor*r2
+    """
+    cdef double s_xx, s_xy, s_yy, s_xz, s_yz, s_zz  # stress tensors
+    cdef double c_th, s_th
+    cdef int i
+    cdef int n_node = stress.shape[0]
+
+    # check to prevent a segfault
+    if angles.size != n_node:
+        raise ValueError('Number of angles must match the number of stress values')
+
+    for i in range(n_node):
+        c_th = cos(angles[i])
+        s_th = sin(angles[i])
+
+        # grab the node component stresses
+        s_xx = stress[i, 0]
+        s_yy = stress[i, 1]
+        s_zz = stress[i, 2]
+        s_xy = stress[i, 3]
+        s_yz = stress[i, 4]
+        s_xz = stress[i, 5]
+
+        # store rotated component stresses 
+        # RR (was XX)
+        stress[i, 0] = c_th**2*s_xx + 2*c_th*s_th*s_xy + s_th**2*s_yy
+
+        # THETATHETA (was YY)
+        stress[i, 1] = s_th**2*s_xx - 2*c_th*s_th*s_xy + c_th**2*s_yy
+        
+
+        # ZZ (same)
+        # stress[i, 2] =
+        # 
+
+        # RTHETA (was XY)
+        stress[i, 3] = c_th*s_th*(s_yy - s_xx) + (c_th**2 - s_th**2)*s_xy
+        
+
+        # THETAZ (was YZ)
+        stress[i, 4] = -s_th*s_xz + c_th*s_yz
+
+        # RZ (was XZ)
+        stress[i, 5] = c_th*s_xz + s_th*s_yz
