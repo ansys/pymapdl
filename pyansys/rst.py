@@ -1029,8 +1029,7 @@ class ResultFile(AnsysBinary):
         for _ in range(ncomp):
             table, sz = self.read_record(file_ptr, True)
             file_ptr += sz  # increment file_pointer
-
-            name = table[1:9].tobytes().split(b'\x00')[0].decode('utf')
+            name = table[1:9].tobytes().split(b'\x00')[0].decode('latin')
             name = name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
                    name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
                    name[24:28][::-1] + name[28:32][::-1]
@@ -1057,7 +1056,6 @@ class ResultFile(AnsysBinary):
         nodes = np.empty((nnod, 6), np.float)
         _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
                                   nnod, nodes, nnum)
-
         # Element information
         nelm = geometry_header['nelm']
         maxety = geometry_header['maxety']

@@ -556,7 +556,7 @@ def launch_mapdl(exec_file=None, run_location=None,
                                     'pyansys.Mapdl(exec_file=...)')
     else:  # verify ansys exists at this location
         if not os.path.isfile(exec_file):
-            raise FileNotFoundError('Invalid ANSYS executable at "%s"'
+            raise FileNotFoundError('Invalid ANSYS executable at "%s"\n'
                                     % exec_file + 'Enter one manually using '
                                     'pyansys.Mapdl(exec_file=)')
 
@@ -889,7 +889,6 @@ class _Mapdl(_MapdlCommands):
         self.response = None
         self._outfile = None
         self._show_matplotlib_figures = True
-        self._nblock_cache = None
         self._archive_cache = None
         self._vtk_grid_cache = None
 
@@ -911,7 +910,6 @@ class _Mapdl(_MapdlCommands):
 
     def _reset_cache(self):
         """Reset cached NBLOCK and other items"""
-        self._nblock_cache = None
         self._archive_cache = None
         self._grid_cache = None
 
@@ -1064,7 +1062,7 @@ class _Mapdl(_MapdlCommands):
                [ 9.,  0.,  0.],
                [10.,  0.,  0.]])
         """
-        return self._nblock.nodes
+        return self._archive.nodes
 
     @property
     def nnum(self):
@@ -1081,39 +1079,7 @@ class _Mapdl(_MapdlCommands):
         >>> mapdl.nnum
         array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
         """
-        return self._nblock.nnum
-
-    # consider caching this
-    @property
-    def _nblock(self):
-        """Write the NBLOCK and read it in as a pyansys.Archive """
-        if self._archive_cache is not None:
-            return self._archive_cache
-
-        elif self._nblock_cache is None:
-            # temporarily disable log
-            prior_log_level = self._log.level
-            self._log.setLevel('CRITICAL')
-
-            # # create a temporary ELEM component so elements can be unselected
-            # cname = '__tmp_elem__'
-            # self.cm(cname, 'ELEM')
-            # self.esel('NONE')
-
-            nblock_filename = os.path.join(self.path, 'tmp.nodes')
-            self.nwrite(nblock_filename)
-            # self.cdwrite('db', arch_filename)
-            # self.cmsel('S', cname, 'ELEM')
-
-            # resume log
-            self._log.setLevel(prior_log_level)
-
-            # read in tmp archive file
-            nnum, nodes = _reader.read_from_nwrite(nblock_filename.encode(),
-                                                   self.n_node)
-            self._nblock_cache = pyansys.geometry.Geometry(nnum, nodes)
-
-        return self._nblock_cache
+        return self._archive.nnum
 
     @property
     def n_node(self):
@@ -1148,10 +1114,6 @@ class _Mapdl(_MapdlCommands):
             quadgrid = self._archive._parse_vtk()
             self._vtk_grid_cache = quadgrid.linear_copy()
         return self._vtk_grid_cache
-
-    # def _vtk_mesh(self):
-    #     if self._vtk_mesh_cache is None:
-    #         self.
 
     @property
     def elements(self):

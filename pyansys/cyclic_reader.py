@@ -164,7 +164,7 @@ class CyclicResult(ResultFile):
         self.dup_ind = np.nonzero(~node_mask)[0]
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
-                       in_nodal_coord_sys=False, force_duplicate=False):
+                       in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system.
 
