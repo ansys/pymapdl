@@ -302,6 +302,12 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading CMBLOCK')
 
+                try:
+                    line.decode()
+                except:
+                    print('Poor formatting of CMBLOCK: %s' % line)
+                    continue
+
                 split_line = line.split(b',')
                 if len(split_line) < 3:
                     print('Poor formatting of CMBLOCK: %s' % line)
