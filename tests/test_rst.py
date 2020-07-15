@@ -266,7 +266,7 @@ def test_cyl_stress(hex_pipe_corner):
     # PRNSOL, S
 
     filename = os.path.join(testfiles_path, 'rst', 'cyc_stress.rst')
-    nnum, my_stress = hex_pipe_corner.cyclic_nodal_stress(0)
+    nnum, my_stress = hex_pipe_corner.cylindrical_nodal_stress(0)
 
     ans_stress = np.load(os.path.join(testfiles_path, 'rst', 'cyc_stress.npy'))
     assert np.allclose(my_stress[-114:], ans_stress, atol=1E-7)
@@ -280,5 +280,10 @@ def test_plot_cyl_stress(hex_pipe_corner):
     # RSYS, 1
     # PRNSOL, S
 
-    cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, off_screen=True)
+    with pytest.raises(ValueError):
+        cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, off_screen=True)
+    with pytest.raises(ValueError):
+        cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, comp='X',
+                                                             off_screen=True)    
+    cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, comp='R', off_screen=True)
     assert cpos
