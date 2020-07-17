@@ -1091,7 +1091,9 @@ class CyclicResult(ResultFile):
         The order of the results corresponds to the sorted node
         numbering.
 
-        Equivalent MAPDL command: PRNSOL, TEMP
+        Equivalent MAPDL commands:
+        PRNSOL, TEMP
+        PRNSOL, BFE
 
         Parameters
         ----------
@@ -1115,6 +1117,11 @@ class CyclicResult(ResultFile):
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_temperature(0)
+
+        Notes
+        -----
+        If there are multiple material types for each node, this will
+        output the last material value. 
         """
         nnum, temp = super()._nodal_result(rnum, 'EPT')
         nnum = nnum[self._mas_ind]
