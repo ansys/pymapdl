@@ -25,7 +25,7 @@ from pyansys._mp_keys import mp_keys
 from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, rotate_to_global,
                             PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
-                            STRAIN_TYPES)
+                            STRAIN_TYPES, THERMAL_STRAIN_TYPES)
 from pyansys.misc import vtk_cell_info
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
@@ -2534,10 +2534,14 @@ class ResultFile(AnsysBinary):
                                         **kwargs)
 
     def nodal_thermal_strain(self, rnum):
-        """Nodal component plastic strains.  This record contains
-        strains in the order X, Y, Z, XY, YZ, XZ, EQV, and eswell
-        (element swelling strain).  Plastic strains are always values
-        at the integration points moved to the nodes.
+        """Nodal component thermal strain.
+
+        This record contains strains in the order X, Y, Z, XY, YZ, XZ,
+        EQV, and eswell (element swelling strain).  Thermal strains
+        are always values at the integration points moved to the
+        nodes.
+
+        Equivalent MAPDL command: PRNSOL, EPTH, COMP
 
         Parameters
         ----------
@@ -2564,14 +2568,17 @@ class ResultFile(AnsysBinary):
         """
         return self._nodal_result(rnum, 'ETH')
 
-    def plot_nodal_thermal_strain(self, rnum, comp,
+    def plot_nodal_thermal_strain(self, rnum,
+                                  comp=None,
                                   stitle='Nodal Thermal Strain',
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
                                   element_components=None,
                                   sel_type_all=True, **kwargs):
-        """Plot nodal component plastic strains.
+        """Plot nodal component thermal strains.
+
+        Equivalent MAPDL command: PLNSOL, EPTH, COMP
 
         Parameters
         ----------
@@ -2620,8 +2627,7 @@ class ResultFile(AnsysBinary):
         >>> result = pyansys.download_verification_result(33)
         >>> result.plot_nodal_thermal_strain(0)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV', 'ESWELL']
-        return self._plot_nodal_result(rnum, 'ETH', comp, available_comps,
+        return self._plot_nodal_result(rnum, 'ETH', comp, THERMAL_STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,

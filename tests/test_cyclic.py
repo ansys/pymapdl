@@ -339,3 +339,23 @@ def test_nodal_temperature(result_x):
 @skip_with_no_xserver
 def test_plot_nodal_nodal_temperature(result_x):
     result_x.plot_nodal_temperature(0, off_screen=True)
+
+
+def test_nodal_thermal_strain_cyclic(result_x):
+    from_mapdl = np.load(os.path.join(cys12_path, 'RSYS0_ROTOR_PRNSOL_EPTH_COMP.npz'))
+    nnum_ans = from_mapdl['nnum']
+    strain_ans = from_mapdl['strain']
+
+    nnum, strain = result_x.nodal_thermal_strain(0)
+
+    # include only common values
+    mask = np.in1d(nnum, nnum_ans)
+    strain = strain[:, mask, :6]  # strain includes eqv
+    nnum = nnum[mask]
+    assert np.allclose(nnum, nnum_ans)
+    assert np.allclose(strain, strain_ans)
+
+
+@skip_with_no_xserver
+def test_plot_nodal_thermal_strain(result_x):
+    result_x.plot_nodal_thermal_strain(0, 'X', off_screen=True)
