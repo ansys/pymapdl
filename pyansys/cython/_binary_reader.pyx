@@ -160,6 +160,7 @@ cdef class ArrayWrapper:
 ###############################################################################
 # element result location pointers
 cdef int PTR_ENS_IDX = 2
+cdef int PTR_EEL_IDX = 5
 cdef int PTR_EUL_IDX = 9
 
 
@@ -394,7 +395,7 @@ cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                 arr[i] = (<double*>tmp_data_buffer)[i]
 
         # rotate out of element coordinate system
-        if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:
+        if as_global and eul_ptr > 0 and result_index == PTR_ENS_IDX:  # or PTR_EEL_IDX
             # read in euler angles
             read_record_stream(binfile, ele_table + eul_ptr,
                                <void*>tmp_data_buffer, &prec_flag, &type_flag, &size)
@@ -973,6 +974,79 @@ def tensor_arbitrary(double [:, ::1] stress, double [:, :] trans):
         stress[i, 3] = r1
         stress[i, 4] = r5
         stress[i, 5] = r6
+
+    return np.asarray(isnan, np.bool)
+
+
+def tensor_strain_arbitrary(double [:, ::1] stress, double [:, :] trans):
+    """Rotates a 3D strain tensor using an arbitrary transformation matrix
+
+    Notes:
+    -----
+    Used
+    from sympy import Matrix, symbols
+    s_xx, s_yy, s_zz, s_xy, s_yz, s_xz = symbols('s_xx s_yy s_zz s_xy s_yz s_xz')
+    c0, c1, c2, c3, c4, c5, c6, c7, c8 = symbols('c0 c1 c2 c3 c4 c5 c6 c7 c8')
+    
+    R = Matrix([[c0, c1, c2], [c3, c4, c5], [c6, c7, c8]])
+    tensor = Matrix([[s_xx, s_xy, s_xz], [s_xy, s_yy, s_yz], [s_xz, s_yz, s_zz]])
+    R*tensor*R.T
+
+    Additional note:
+    Shear components must be pre multiplied by 0.5 and then
+    post-multiplied by 2 due to the classical definition of shear
+    strain being half of tonsorial shear strain.
+
+    See:
+    http://web.mit.edu/course/3/3.11/www/modules/trans.pdf
+
+    """
+    cdef int nnode = stress.shape[0]
+    cdef int i
+
+    cdef uint8 [::1] isnan = np.zeros(nnode, np.uint8)
+    cdef double s_xx, s_yy, s_zz, s_xy, s_yz, s_xz
+    cdef double c0 = trans[0, 0]
+    cdef double c1 = trans[0, 1]
+    cdef double c2 = trans[0, 2]
+    cdef double c3 = trans[1, 0]
+    cdef double c4 = trans[1, 1]
+    cdef double c5 = trans[1, 2]
+    cdef double c6 = trans[2, 0]
+    cdef double c7 = trans[2, 1]
+    cdef double c8 = trans[2, 2]
+
+    cdef double r0, r1, r2, r3, r4, r5, r6, r7, r8
+
+    for i in range(nnode):
+        s_xx = stress[i, 0]
+        if npy_isnan(s_xx):  # skip
+            isnan[i] = 1
+        else:
+            s_yy = stress[i, 1]
+            s_zz = stress[i, 2]
+            s_xy = stress[i, 3]*0.5
+            s_yz = stress[i, 4]*0.5
+            s_xz = stress[i, 5]*0.5
+
+        r0 = c0*(c0*s_xx + c1*s_xy + c2*s_xz) + c1*(c0*s_xy + c1*s_yy + c2*s_yz) + c2*(c0*s_xz + c1*s_yz + c2*s_zz)
+
+        r1 = c3*(c0*s_xx + c1*s_xy + c2*s_xz) + c4*(c0*s_xy + c1*s_yy + c2*s_yz) + c5*(c0*s_xz + c1*s_yz + c2*s_zz)
+
+        r4 = c3*(c3*s_xx + c4*s_xy + c5*s_xz) + c4*(c3*s_xy + c4*s_yy + c5*s_yz) + c5*(c3*s_xz + c4*s_yz + c5*s_zz)
+
+        r5 = c6*(c3*s_xx + c4*s_xy + c5*s_xz) + c7*(c3*s_xy + c4*s_yy + c5*s_yz) + c8*(c3*s_xz + c4*s_yz + c5*s_zz)
+
+        r6 = c0*(c6*s_xx + c7*s_xy + c8*s_xz) + c1*(c6*s_xy + c7*s_yy + c8*s_yz) + c2*(c6*s_xz + c7*s_yz + c8*s_zz)
+
+        r8 = c6*(c6*s_xx + c7*s_xy + c8*s_xz) + c7*(c6*s_xy + c7*s_yy + c8*s_yz) + c8*(c6*s_xz + c7*s_yz + c8*s_zz)
+
+        stress[i, 0] = r0
+        stress[i, 1] = r4
+        stress[i, 2] = r8
+        stress[i, 3] = r1*2
+        stress[i, 4] = r5*2
+        stress[i, 5] = r6*2
 
     return np.asarray(isnan, np.bool)
 

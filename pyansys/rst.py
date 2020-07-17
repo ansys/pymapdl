@@ -2653,15 +2653,20 @@ class ResultFile(AnsysBinary):
 
         elastic_strain : np.ndarray
             Nodal component elastic strains.  Array is in the order
-            X, Y, Z, XY, YZ, XZ, EEL.
+            X, Y, Z, XY, YZ, XZ, EQV.
 
         Examples
         --------
-        Load the nodal elastic strain for the first solution.
+        Load the nodal elastic strain for the first result.
 
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, elastic_strain = rst.nodal_elastic_strain(0)
+
+        Notes
+        -----
+        Nodes without a strain will be NAN.
+
         """
         return self._nodal_result(rnum, 'EEL')
 
@@ -2680,7 +2685,7 @@ class ResultFile(AnsysBinary):
             Result number
 
         comp : str, optional
-            Thermal strain component to display.  Available options:
+            Elastic strain component to display.  Available options:
             - ``"X"``
             - ``"Y"``
             - ``"Z"``
@@ -2714,7 +2719,7 @@ class ResultFile(AnsysBinary):
 
         Examples
         --------
-        Plot thermal strain for a static pontoon model
+        Plot nodal elastic strain for a static pontoon model
 
         >>> import pyansys
         >>> result = pyansys.download_pontoon()
@@ -2735,7 +2740,7 @@ class ResultFile(AnsysBinary):
 
     def nodal_plastic_strain(self, rnum):
         """Nodal component plastic strains.  This record contains
-        strains in the order X, Y, Z, XY, YZ, XZ, EQV.  
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.
 
         Plastic strains are always values at the integration points
         moved to the nodes.
@@ -2772,7 +2777,7 @@ class ResultFile(AnsysBinary):
                                   node_components=None,
                                   element_components=None,
                                   sel_type_all=True, **kwargs):
-        """Plot nodal component plastic strains.
+        """Plot nodal component plastic strain.
 
         Parameters
         ----------
@@ -2780,7 +2785,7 @@ class ResultFile(AnsysBinary):
             Result number
 
         comp : str, optional
-            Thermal strain component to display.  Available options:
+            Plastic strain component to display.  Available options:
             - ``"X"``
             - ``"Y"``
             - ``"Z"``
@@ -2829,6 +2834,7 @@ class ResultFile(AnsysBinary):
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
+                                       element_components=element_components,
                                        sel_type_all=sel_type_all,
                                        stitle=stitle,
                                        **kwargs)
@@ -2986,3 +2992,33 @@ def merge_two_dicts(x, y):
     merged = x.copy()   # start with x's keys and values
     merged.update(y)    # modifies z with y's keys and values & returns None
     return merged
+
+
+def check_comp(available_comps, comp):
+    """Check if a component is in available components and return a
+    helpful error message
+
+    Parameters
+    ----------
+    available_comps : list
+        List of available components.  For example:
+        ``['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']``
+        Case should be all caps
+
+    comp : str
+        Component to check.  Any case.
+
+    Returns
+    -------
+    idx : int
+        Index in ``available_comps``.
+
+    """
+    if comp is None:
+        raise ValueError('Missing "comp" parameter.  Please select'
+                         ' from the following:\n%s' % available_comps)
+    comp = comp.upper()
+    if comp not in available_comps:
+        raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
+                         ' from the following:\n%s' % available_comps)
+    return available_comps.index(comp)

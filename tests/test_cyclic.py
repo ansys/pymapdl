@@ -9,11 +9,6 @@ from pyvista.plotting.renderer import CameraPosition
 import pyansys
 from pyansys.examples import rstfile
 
-try:
-    __file__
-except:
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_cyclic.py'
-
 HAS_FFMPEG = True
 try:
     import imageio_ffmpeg
@@ -21,11 +16,10 @@ except:
     HAS_FFMPEG = False
 
 
-is_python2 = sys.version_info.major == 2
-
 path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
+cys12_path = os.path.join(testfiles_path, 'cyc12')
 
 # modal result z axis
 try:
@@ -271,7 +265,6 @@ def test_animate_nodal_solution(tmpdir):
     assert os.path.isfile(temp_movie)
 
 
-@pytest.mark.skipif(is_python2, reason="Python 2.7 has a bug when loading displacements")
 @pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_cyclic_z_harmonic_displacement():
     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
@@ -303,34 +296,22 @@ def test_plot_nodal_stress(result_x):
     result_x.plot_nodal_stress(0, 'z', off_screen=True, full_rotor=False)
 
 
-
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress(result_x):
     result_x.plot_principal_nodal_stress(0, 'eqv', off_screen=True)
 
 
-# def test_full_z_nodal_stress():
-#     """ need to open gui to output full rotor results """
-#     from_ansys = np.load(os.path.join(cyclic_testfiles_path,
-#                       'prnsol_s_cyclic_z_full_v182_set_1_1.npz'))
-#     ansys_nnum = from_ansys['nnum']
-#     ansys_stress = from_ansys['stress']
+def test_nodal_elastic_strain_cyclic(result_x):
+    from_mapdl = np.load(os.path.join(cys12_path, 'RSYS0_ROTOR_PRNSOL_EPEL.npz'))
+    nnum_ans = from_mapdl['nnum']
+    stress_ans = from_mapdl['stress']
 
-#     rnum = 0
-#     phase = 0
+    # get EPEL
+    nnum, stress = result_x.nodal_elastic_strain(0)
 
-#     unod, count = np.unique(ansys_nnum, return_counts=True)
-#     unod = np.setdiff1d(unod[count == result_z.n_sector], 32)
-#     mask = np.in1d(ansys_nnum, unod)
-#     ansys_nnum = ansys_nnum[mask]
-#     ansys_stress = ansys_stress[mask]
-
-#     nnum, stress = result_z.nodal_stress(rnum, phase, full_rotor=True)
-#     mask = np.in1d(nnum, ansys_nnum)
-#     n = mask.sum()
-#     tmp = ansys_stress.reshape(stress.shape[0], n, ansys_stress.shape[1])
-#     assert np.allclose(stress[:, mask], tmp, atol=1E-5)
-
-
-# if __name__ == '__main__':
-#     test_element_stress_v182_non_cyclic()
+    # include only common values
+    mask = np.in1d(nnum, nnum_ans[0])
+    stress = stress[:, mask, :6]  # stress includes eqv
+    nnum = nnum[mask]
+    assert np.allclose(nnum, nnum_ans)
+    assert np.allclose(stress, stress_ans)
