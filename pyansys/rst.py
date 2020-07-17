@@ -1730,7 +1730,6 @@ class ResultFile(AnsysBinary):
         color = kwargs.pop('color', 'w')
         interpolate_before_map = kwargs.pop('interpolate_before_map', True)
         interactive = kwargs.pop('interactive', True)
-        stitle = kwargs.pop('stitle', None)
 
         # coordinate transformation for cyclic replication
         cs_cord = self._resultheader['csCord']
@@ -1791,7 +1790,6 @@ class ResultFile(AnsysBinary):
                                      rng=rng,
                                      smooth_shading=smooth_shading,
                                      interpolate_before_map=interpolate_before_map,
-                                     stitle=stitle,
                                      cmap=cmap,
                                      **kwargs)
 

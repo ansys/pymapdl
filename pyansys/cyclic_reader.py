@@ -1,9 +1,8 @@
 """Supports reading cyclic structural result files from ANSYS"""
-from math import pi
 import logging
 from functools import wraps
 
-import vtk
+from vtk import vtkMatrix4x4, vtkTransform, vtkAppendFilter
 import numpy as np
 from pyvista.core.common import axis_rotation
 import pyvista as pv
@@ -13,8 +12,8 @@ from pyansys import _binary_reader
 
 
 # Create logger
-log = logging.getLogger(__name__)
-log.setLevel('DEBUG')
+# log = logging.getLogger(__name__)
+# log.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -33,6 +32,7 @@ class CyclicResult(ResultFile):
         self._animating = False
         self._add_cyclic_properties()
         self._positive_cyclic_dir = False
+        self._rotor_cache = None
 
     @property
     def positive_cyclic_dir(self):
@@ -111,8 +111,8 @@ class CyclicResult(ResultFile):
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix.Invert()
         else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+            matrix = vtkMatrix4x4()
+            i_matrix = vtkMatrix4x4()
 
         off_screen = kwargs.pop('off_screen', None)
         window_size = kwargs.pop('window_size', None)
@@ -125,13 +125,13 @@ class CyclicResult(ResultFile):
 
             # transform to standard position, rotate about Z axis,
             # transform back
-            transform = vtk.vtkTransform()
+            transform = vtkTransform()
             transform.RotateZ(rang*i)
             transform.Update()
             rot_matrix = transform.GetMatrix()
 
             if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
+                temp_matrix = vtkMatrix4x4()
                 rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
                 transform.SetMatrix(rot_matrix)
@@ -273,8 +273,8 @@ class CyclicResult(ResultFile):
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix.Invert()
         else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+            matrix = vtkMatrix4x4()
+            i_matrix = vtkMatrix4x4()
 
         shp = (self.n_sector, result.shape[0], result.shape[1])
         full_result = np.empty(shp)
@@ -284,13 +284,13 @@ class CyclicResult(ResultFile):
         for i in range(self.n_sector):
             # transform to standard position, rotate about Z axis,
             # transform back
-            transform = vtk.vtkTransform()
+            transform = vtkTransform()
             transform.RotateZ(rang*i)
             transform.Update()
             rot_matrix = transform.GetMatrix()
 
             if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
+                temp_matrix = vtkMatrix4x4()
                 rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
 
@@ -384,8 +384,8 @@ class CyclicResult(ResultFile):
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix.Invert()
         else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+            matrix = vtkMatrix4x4()
+            i_matrix = vtkMatrix4x4()
 
         shp = (self.n_sector, result.shape[0], result.shape[1])
         full_result = np.empty(shp)
@@ -395,13 +395,13 @@ class CyclicResult(ResultFile):
         for i in range(self.n_sector):
             # transform to standard position, rotate about Z axis,
             # transform back
-            transform = vtk.vtkTransform()
+            transform = vtkTransform()
             transform.RotateZ(rang*i)
             transform.Update()
             rot_matrix = transform.GetMatrix()
 
             if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
+                temp_matrix = vtkMatrix4x4()
                 rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
 
@@ -488,6 +488,7 @@ class CyclicResult(ResultFile):
         array([ 0,  0,  0,  0,  0,  0, -1,  1, -1,  1,  1, -1,
                -2,  2, -2,  2, -2,  2,  3,  3,  3,  3,  3,  3], dtype=int32)
         """
+        return self._resultheader['hindex']
 
     def nodal_stress(self, rnum, phase=0, as_complex=False, full_rotor=False):
         """Retrieves the component stresses for each node in the
@@ -664,12 +665,17 @@ class CyclicResult(ResultFile):
 
         return nnum, expanded_result
 
-    def plot_nodal_elastic_strain(self, rnum, comp=None, phase=0, full_rotor=True,
+    def plot_nodal_elastic_strain(self, rnum,
+                                  comp=None, phase=0,
+                                  full_rotor=True,
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
                                   element_components=None,
-                                  sel_type_all=True, **kwargs):
+                                  sel_type_all=True,
+                                  add_text=True,
+                                  overlay_wireframe=False,
+                                  **kwargs):
         """Plot nodal elastic strain.
 
         Parameters
@@ -745,11 +751,21 @@ class CyclicResult(ResultFile):
         #     grid, ind = self._extract_element_components(element_components)
         #     scalars = scalars[ind]
 
-        # kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
-        stitle = '%s Nodal Elastic Strain' % comp
-        return self._plot_point_scalars(scalars, rnum, stitle, False,
-                                        None, None, False, grid,
-                                        **kwargs)
+        kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
+
+
+
 
     # def cylindrical_nodal_stress(self, rnum, phase=0, as_complex=False,
     #                              full_rotor=False):
@@ -799,7 +815,7 @@ class CyclicResult(ResultFile):
     #     #     scalars = scalars[ind]
 
     #     kwargs.setdefault('stitle', '%s Cylindrical\nNodal Stress' % comp)
-    #     return self._plot_point_scalars(scalars, grid=grid, rnum=rnum,
+    #     return self._plot_cyclic_point_scalars(scalars, grid=grid, rnum=rnum,
     #                                     # show_displacement=show_displacement,
     #                                     # displacement_factor=displacement_factor,
     #                                     **kwargs)
@@ -874,13 +890,18 @@ class CyclicResult(ResultFile):
             pstress[isnan] = np.nan
             return nnum, pstress
 
-    def plot_nodal_solution(self, rnum, comp='norm', label='',
-                            flip_scalars=None, cpos=None,
-                            screenshot=None, off_screen=None,
-                            full_rotor=True, phase=0,
-                            node_components=None, sel_type_all=True,
+    def plot_nodal_solution(self, rnum, comp='norm',
+                            full_rotor=True,
+                            phase=0,
+                            show_displacement=False,
+                            displacement_factor=1.0,
+                            node_components=None,
+                            overlay_wireframe=False,
+                            add_text=True,
+                            element_components=None,
+                            sel_type_all=True,
                             **kwargs):
-        """Plots a nodal result.
+        """Plot the nodal solution (generally displacement).
 
         Parameters
         ----------
@@ -891,27 +912,8 @@ class CyclicResult(ResultFile):
         comp : str, optional
             Display component to display.  Options are 'x', 'y', 'z',
             and 'norm', corresponding to the x directin, y direction,
-            z direction, and the combined direction (x**2 + y**2 +
-            z**2)**0.5
-
-        label : str, optional
-            Annotation string to add to scalar bar in plot.
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.
-
-        interactive : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
+            z direction, and the normalized direction:
+            ``(x**2 + y**2 + z**2)**0.5``
 
         full_rotor : bool, optional
             Expand sector solution to full rotor.
@@ -922,116 +924,12 @@ class CyclicResult(ResultFile):
 
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
-        Returns
-        -------
-        cpos : list
-            Camera position from vtk render window.
-
-        """
-
-        # Load result from file
-        if not full_rotor:
-            return super().plot_nodal_solution(rnum,
-                                               comp,
-                                               flip_scalars=flip_scalars,
-                                               cpos=cpos,
-                                               screenshot=screenshot,
-                                               off_screen=off_screen,
-                                               node_components=node_components,
-                                               sel_type_all=sel_type_all,
-                                               **kwargs)
-
-        rnum = self.parse_step_substep(rnum)
-        nnum, result = self.nodal_solution(rnum, phase, full_rotor, as_complex=False)
-
-        # Process result
-        if label == '':
-            label = 'Cyclic Rotor\nDisplacement'
-
-        if comp == 'x':
-            d = result[:, :, 0]
-            stitle = 'X {:s}\n'.format(label)
-        elif comp == 'y':
-            d = result[:, :, 1]
-            stitle = 'Y {:s}\n'.format(label)
-        elif comp == 'z':
-            d = result[:, :, 2]
-            stitle = 'Z {:s}\n'.format(label)
-        else:
-            # Normalize displacement
-            d = (result*result).sum(2)**0.5
-            stitle = 'Normalized\n%s\n' % label
-        scalars = d
-
-        # sometimes there are less nodes in the result than in the geometry
-        # npoints = self.grid.number_of_points
-        # grid = self.grid
-        # if nnum.size != npoints:
-        #     scalars = np.empty_like((self.n_sector, npoints))
-        #     scalars[:] = np.nan
-        #     nnum_grid = self.grid.point_arrays['ansys_node_num']
-        #     mask = np.in1d(nnum_grid, nnum)
-        #     scalars[:, mask] = d
-        #     d = scalars
-
-        grid = self._mas_grid
-        if node_components:
-            grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
-            scalars = scalars[:, ind]
-
-        return self._plot_point_scalars(scalars, rnum, stitle, flip_scalars,
-                                       screenshot, cpos, off_screen, grid,
-                                       **kwargs)
-
-    def plot_nodal_stress(self, rnum, stype, label='',
-                          flip_scalars=None, cpos=None, screenshot=None,
-                          off_screen=None, full_rotor=True, phase=0,
-                          node_components=None, sel_type_all=True,
-                          **kwargs):
-        """Plot nodal stress of a given component
-
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
-
-        stype : string
-            Stress type from the following list: [Sx Sy Sz Sxy Syz Sxz]
-
-        label : str, optional
-            Annotation string to add to scalar bar in plot.
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.
-
-        off_screen : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
-
-        full_rotor : bool, optional
-            Expand sector solution to full rotor.
-
-        phase : float, optional
-            Phase angle of the modal result in radians.  Only valid
-            when full_rotor is True.  Default 0
-
-        node_components : list, optional
-            Accepts either a string or a list strings of node
-            components to plot.  For example: 
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -1044,39 +942,126 @@ class CyclicResult(ResultFile):
             Camera position from vtk render window.
 
         """
+
+        # Load result from file
+        if not full_rotor:
+            return super().plot_nodal_solution(rnum,
+                                               comp,
+                                               show_displacement=show_displacement,
+                                               displacement_factor=displacement_factor,
+                                               node_components=node_components,
+                                               element_components=element_components,
+                                               sel_type_all=sel_type_all,
+                                               **kwargs)
+
         rnum = self.parse_step_substep(rnum)
-        stress_types = ['x', 'y', 'z', 'xy', 'yz', 'xz']
-        stype = stype.lower()
-        if stype not in stress_types:
-            raise Exception('Stress type not in: \n' + str(stress_types))
+        _, result = self.nodal_solution(rnum, phase, full_rotor, as_complex=False)
+
+        # Process result
+        label = 'Cyclic Rotor\nDisplacement'
+        if comp == 'x':
+            scalars = result[:, :, 0]
+            stitle = 'X {:s}\n'.format(label)
+        elif comp == 'y':
+            scalars = result[:, :, 1]
+            stitle = 'Y {:s}\n'.format(label)
+        elif comp == 'z':
+            scalars = result[:, :, 2]
+            stitle = 'Z {:s}\n'.format(label)
+        else:
+            # Normalize displacement
+            scalars = (result*result).sum(2)**0.5
+            stitle = 'Normalized\n%s\n' % label
+        kwargs.setdefault('stitle', stitle)
+
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
+
+    def plot_nodal_stress(self, rnum,
+                          comp=None, phase=0,
+                          full_rotor=True,
+                          show_displacement=False,
+                          displacement_factor=1,
+                          node_components=None,
+                          element_components=None,
+                          sel_type_all=True, **kwargs):
+        """Plot nodal stress of a given component
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        comp : str, optional
+            Stress component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        full_rotor : bool, optional
+            Expand the sector solution to the full rotor.
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+
+        """
+        if not full_rotor:
+            super().plot_nodal_stress(rnum, comp,
+                                      show_displacement,
+                                      displacement_factor,
+                                      node_components,
+                                      element_components,
+                                      sel_type_all, **kwargs)
+
+        stress_types = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
+        idx = check_comp(stress_types, comp)
 
         _, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
-        stress = stress[:, self.mas_ind]
-        sidx = stress_types.index(stype)
-        scalars = stress[:, :, sidx]
-        grid = self._mas_grid
+        scalars = stress[:, :, idx]
 
-        if node_components:
-            grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all)
-            scalars = scalars[ind]
-
-        # scalars[np.isnan(scalars)] = 0
-        stitle = 'Cyclic Rotor\nNodal Stress\n%s\n' % stype.capitalize()
-        if full_rotor:
-            return self._plot_point_scalars(scalars, rnum, stitle, flip_scalars,
-                                           screenshot, cpos, off_screen, grid,
-                                           **kwargs)
-
-        return super(CyclicResult, self)._plot_point_scalars(scalars[0],
-                                                             rnum,
-                                                             stitle=stitle,
-                                                             flip_scalars=flip_scalars,
-                                                             screenshot=screenshot,
-                                                             cpos=cpos,
-                                                             off_screen=off_screen,
-                                                             grid=grid,
-                                                             **kwargs)
+        kwargs.setdefault('stitle', 'Cyclic Rotor\nNodal Stress\n%s\n' % comp)
+        return self._plot_cyclic_point_scalars(scalars,
+                                               rnum,
+                                               **kwargs)
 
     def plot_principal_nodal_stress(self, rnum, stype,
                                     flip_scalars=None, cpos=None,
@@ -1170,9 +1155,9 @@ class CyclicResult(ResultFile):
                                                       sel_type_all, self._mas_grid)
             scalars = scalars[ind]
 
-        return self._plot_point_scalars(scalars, rnum, stitle,
-                                        flip_scalars, screenshot, cpos,
-                                        off_screen, grid, **kwargs)
+        return self._plot_cyclic_point_scalars(scalars, rnum, stitle,
+                                               flip_scalars, screenshot, cpos,
+                                               off_screen, grid, **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,
@@ -1229,7 +1214,7 @@ class CyclicResult(ResultFile):
 
         # normalize nodal solution
         _, complex_disp = self.nodal_solution(rnum, as_complex=True,
-                                                 full_rotor=True)
+                                              full_rotor=True)
         complex_disp /= (np.abs(complex_disp).max()/max_disp)
         complex_disp = complex_disp.reshape(-1, 3)
 
@@ -1246,7 +1231,7 @@ class CyclicResult(ResultFile):
             result_info = self.text_result_table(rnum)
 
         # need only the surface of the full rotor
-        full_rotor = self._gen_full_rotor()
+        full_rotor = self.full_rotor
         plot_mesh = full_rotor.extract_surface()
         orig_pt = plot_mesh.points
 
@@ -1331,7 +1316,7 @@ class CyclicResult(ResultFile):
         # consider forcing low and high to be exact
         # self._mas_grid.point_arrays['CYCLIC_M01H'] --> rotate and match
 
-        vtkappend = vtk.vtkAppendFilter()
+        vtkappend = vtkAppendFilter()
         # vtkappend.MergePointsOn()
         # vtkappend.SetTolerance  # not available until vtk 9+
         rang = 360.0 / self.n_sector
@@ -1350,9 +1335,23 @@ class CyclicResult(ResultFile):
 
         return full_rotor
 
-    def _plot_point_scalars(self, scalars, rnum=None, stitle='',
-                            flip_scalars=None, screenshot=None, cpos=None,
-                            off_screen=None, grid=None, add_text=True, **kwargs):
+    @property
+    def full_rotor(self):
+        """UnstructuredGrid of the full replicated rotor"""
+        if self._rotor_cache is None:
+            self._rotor_cache = self._gen_full_rotor()
+        return self._rotor_cache
+
+    def _plot_cyclic_point_scalars(self, scalars, rnum,
+                                   show_displacement=False,
+                                   displacement_factor=1,
+                                   overlay_wireframe=False,
+                                   add_text=True,
+                                   node_components=None,
+                                   element_components=None,
+                                   sel_type_all=True,
+                                   phase=None,
+                                   **kwargs):
         """Plot point scalars on active mesh.
 
         Parameters
@@ -1364,32 +1363,24 @@ class CyclicResult(ResultFile):
             Cumulative result number.  Used for adding informative
             text.
 
-        stitle : str, optional
-            Title of the scalar bar.
-
-        flip_scalars : bool, optional
-            Reverses the direction of the cmap.
-
-        screenshot : str, optional
-            When a filename, saves screenshot to disk.
-
-        cpos : list, optional
-            3x3 list describing the camera position.  Obtain it by
-            getting the output of plot_point_scalars first.
-
-        interactive : bool, optional
-            Allows user to interact with the plot when True.  Default
-            True.
-
         grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
             Uses self.grid by default.  When specified, uses this grid
             instead.
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        overlay_wireframe : bool, optional
+            Overlay a wireframe of the original undeformed mesh.
 
         add_text : bool, optional
             Adds information about the result when rnum is given.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
@@ -1397,22 +1388,33 @@ class CyclicResult(ResultFile):
             Camera position.
 
         """
-        if grid is None:
-            grid = self._mas_grid
+        # extract a sub-component of the grid if requested
+        grid = self._mas_grid
+        if node_components:
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
+            scalars = scalars[:, ind]
 
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
+            scalars = scalars[:, ind]
+
+        # must be removed before add_mesh **kwargs
         window_size = kwargs.pop('window_size', None)
         full_screen = kwargs.pop('full_screen', False)
-        cmap = kwargs.pop('cmap', 'jet')
+        screenshot = kwargs.pop('screenshot', None)
+        kwargs.setdefault('cmap', 'jet')
+        kwargs.setdefault('rng', [np.nanmin(scalars), np.nanmax(scalars)])
 
         # Plot off screen when not interactive
+        off_screen = kwargs.pop('off_screen', None)
         plotter = pv.Plotter(off_screen=off_screen)
-        if 'show_axes' in kwargs:
+
+        # various plotting properties that must be removed before add_mesh
+        if kwargs.pop('show_axes', True):
             plotter.add_axes()
-
-        # set background
         plotter.background_color = kwargs.pop('background', None)
-
-        rng = [np.nanmin(scalars), np.nanmax(scalars)]
+        plotter.camera_position = kwargs.pop('cpos', None)
 
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
@@ -1420,44 +1422,91 @@ class CyclicResult(ResultFile):
             i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
             i_matrix.Invert()
         else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+            matrix = vtkMatrix4x4()
+            i_matrix = vtkMatrix4x4()
 
-        rang = 360.0 / self.n_sector
-        for i in range(self.n_sector):
+        if overlay_wireframe:
+            rang = 360.0 / self.n_sector
+            for i in range(self.n_sector):
+                actor = plotter.add_mesh(grid.copy(False), color='w',
+                                         style='wireframe',
+                                         opacity=0.5, **kwargs)
 
-            actor = plotter.add_mesh(grid.copy(False),
-                                     scalars=scalars[i], stitle=stitle,
-                                     cmap=cmap, flip_scalars=flip_scalars,
-                                     interpolate_before_map=True, rng=rng,
+                # actor = plotter.add_mesh(grid.copy(False),
+                #                          scalars=scalars[i],
+                #                          **kwargs)
+
+                # for transparency issues
+                # plotter.renderers[0].SetUseDepthPeeling(1)
+
+                # NAN/missing data are white
+                plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
+
+                # transform to standard position, rotate about Z axis,
+                # transform back
+                transform = vtkTransform()
+                transform.RotateZ(rang*i)
+                transform.Update()
+                rot_matrix = transform.GetMatrix()
+
+                if cs_cord > 1:
+                    temp_matrix = vtkMatrix4x4()
+                    rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                    rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+                    transform.SetMatrix(rot_matrix)
+
+                actor.SetUserTransform(transform)
+
+        # add main mesh
+        if show_displacement:
+            _, disp = self.nodal_solution(rnum, phase, full_rotor=True)
+            disp *= displacement_factor
+            if node_components:
+                _, ind = self._extract_node_components(node_components, sel_type_all)
+                disp = disp[:, ind]
+            elif element_components:
+                _, ind = self._extract_element_components(element_components)
+                disp = disp[:, ind]
+
+            disp = disp.reshape(-1, 3)
+
+            rotor = self.full_rotor.copy()
+            rotor.points += disp
+            actor = plotter.add_mesh(rotor,
+                                     scalars=scalars.reshape(-1, 3),
                                      **kwargs)
 
-            # for transparency issues
-            # plotter.renderers[0].SetUseDepthPeeling(1)
+        else:
+            rang = 360.0 / self.n_sector
+            for i in range(self.n_sector):
+                actor = plotter.add_mesh(grid.copy(False),
+                                         scalars=scalars[i],
+                                         **kwargs)
 
-            # NAN/missing data are white
-            plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
+                # for transparency issues
+                # plotter.renderers[0].SetUseDepthPeeling(1)
 
-            # transform to standard position, rotate about Z axis,
-            # transform back
-            transform = vtk.vtkTransform()
-            transform.RotateZ(rang*i)
-            transform.Update()
-            rot_matrix = transform.GetMatrix()
+                # NAN/missing data are white
+                plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
 
-            if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
-                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
-                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
-                transform.SetMatrix(rot_matrix)
+                # transform to standard position, rotate about Z axis,
+                # transform back
+                transform = vtkTransform()
+                transform.RotateZ(rang*i)
+                transform.Update()
+                rot_matrix = transform.GetMatrix()
 
-            actor.SetUserTransform(transform)
+                if cs_cord > 1:
+                    temp_matrix = vtkMatrix4x4()
+                    rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
+                    rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
+                    transform.SetMatrix(rot_matrix)
 
-        if cpos:
-            plotter.camera_position = cpos
+                actor.SetUserTransform(transform)
 
         # add table
         if add_text and rnum is not None:
+            rnum = self.parse_step_substep(rnum)
             plotter.add_text(self.text_result_table(rnum), font_size=20,
                              position=[0, 0])
 
