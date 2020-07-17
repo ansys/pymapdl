@@ -1541,11 +1541,13 @@ class ResultFile(AnsysBinary):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def plot_principal_nodal_stress(self, rnum, stype=None,
+    def plot_principal_nodal_stress(self, rnum, comp=None,
+                                    show_displacement=False,
+                                    displacement_factor=1.0,
                                     node_components=None,
                                     element_components=None,
                                     sel_type_all=True, **kwargs):
-        """Plot the principal stress at each node in the solution.
+        """Plot the principal stress.
 
         Parameters
         ----------
@@ -1553,13 +1555,18 @@ class ResultFile(AnsysBinary):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        stype : string
-            Stress type to plot.  S1, S2, S3 principal stresses, SINT
+        comp : string
+            Stress component to plot.  S1, S2, S3 principal stresses, SINT
             stress intensity, and SEQV equivalent stress.
 
             Stress type must be a string from the following list:
+            ``['S1', 'S2', 'S3', 'SINT', 'SEQV']``
 
-            ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -1576,23 +1583,24 @@ class ResultFile(AnsysBinary):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             VTK camera position.
 
-        stress : np.ndarray
-            Array used to plot stress.
-        """
-        if stype is None:
-            raise Exception("Stress type must be a string from the following list:\n" +
-                            "['1', '2', '3', 'INT', 'EQV']")
-        stype = stype.upper()
+        Examples
+        --------
+        Plot the equivalent von mises stress
 
-        rnum = self.parse_step_substep(rnum)
-        stress = self.principle_stress_for_plotting(rnum, stype)
+        >>> rst.plot_principal_nodal_stress(0, comp='SEQV')
+
+        """
+        # get the correct component of the principal stress
+        available_comps = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        idx = check_comp(available_comps, comp)
+        stress = self.principal_nodal_stress(rnum)[1][:, idx]
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
@@ -1603,17 +1611,20 @@ class ResultFile(AnsysBinary):
         else:
             grid = self.grid
 
-        if 'stitle' not in kwargs:
-            stype_stitle_map = {'1': 'Principal Stress 1',
-                                '2': 'Principal Stress 2',
-                                '3': 'Principal Stress 3',
-                                'INT': 'Stress Intensity',
-                                'EQV': 'von Mises Stress'}
-            kwargs['stitle'] = stype_stitle_map[stype]
+        stype_stitle_map = {'S1': 'Principal Stress 1',
+                            'S2': 'Principal Stress 2',
+                            'S3': 'Principal Stress 3',
+                            'SINT': 'Stress Intensity',
+                            'SEQV': 'von Mises Stress'}
+        kwargs.setdefault('stitle', stype_stitle_map[comp])
 
-        return self._plot_point_scalars(stress, rnum=rnum, grid=grid, **kwargs)
+        return self._plot_point_scalars(stress, grid=grid, rnum=rnum,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
+                                        **kwargs)
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+
         """ return a 4x4 transformation array for a given coordinate system """
         # assemble 4 x 4 matrix
         csys = self._c_systems[cs_cord]
@@ -1911,19 +1922,19 @@ class ResultFile(AnsysBinary):
 
         return text
 
-    def principle_stress_for_plotting(self, rnum, stype):
-        """
-        returns stress used to plot
+    # def principle_stress_for_plotting(self, rnum, stype):
+    #     """
+    #     returns stress used to plot
 
-        """
-        stress_types = ['1', '2', '3', 'INT', 'EQV']
-        if stype.upper() not in stress_types:
-            raise Exception('Stress type not in \n' + str(stress_types))
+    #     """
+    #     stress_types = ['1', '2', '3', 'INT', 'EQV']
+    #     if stype.upper() not in stress_types:
+    #         raise Exception('Stress type not in \n' + str(stress_types))
 
-        sidx = stress_types.index(stype)
+    #     sidx = stress_types.index(stype)
 
-        _, stress = self.principal_nodal_stress(rnum)
-        return stress[:, sidx]
+    #     _, stress = self.principal_nodal_stress(rnum)
+    #     return stress[:, sidx]
 
     def plot_nodal_stress(self, rnum, comp=None,
                           show_displacement=False,

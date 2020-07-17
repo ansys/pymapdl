@@ -336,7 +336,7 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
                                    off_screen=as_test, screenshot=as_test)
         result.plot_nodal_stress(0, 'x', cpos=cpos, cmap='bwr',
                                  off_screen=as_test, screenshot=as_test)
-        result.plot_principal_nodal_stress(0, 'EQV', cpos=cpos,
+        result.plot_principal_nodal_stress(0, 'SEQV', cpos=cpos,
                                            cmap='bwr', off_screen=as_test, screenshot=as_test)
 
     return True

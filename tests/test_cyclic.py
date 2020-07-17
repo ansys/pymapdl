@@ -287,18 +287,17 @@ def test_cyclic_z_harmonic_displacement():
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress(result_x):
-    result_x.plot_nodal_stress(0, 'z', off_screen=True)
     result_x.plot_nodal_stress(0, 'z', off_screen=False)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_nodal_stress(result_x):
-    result_x.plot_nodal_stress(0, 'z', off_screen=True, full_rotor=False)
+    result_x.plot_nodal_stress(0, 'z', off_screen=True)
 
 
 @pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 def test_plot_principal_nodal_stress(result_x):
-    result_x.plot_principal_nodal_stress(0, 'eqv', off_screen=True)
+    result_x.plot_principal_nodal_stress(0, 'seqv', off_screen=True)
 
 
 def test_nodal_elastic_strain_cyclic(result_x):

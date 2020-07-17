@@ -742,15 +742,6 @@ class CyclicResult(ResultFile):
         scalars = strain[:, :, idx]
         grid = self._mas_grid
 
-        # if node_components:
-        #     grid, ind = self._extract_node_components(node_components,
-        #                                               sel_type_all)
-        #     scalars = scalars[ind]
-
-        # elif element_components:
-        #     grid, ind = self._extract_element_components(element_components)
-        #     scalars = scalars[ind]
-
         kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
         kwargs['node_components'] = node_components
         kwargs['element_components'] = element_components
@@ -860,7 +851,7 @@ class CyclicResult(ResultFile):
         equivalent stress.
         """
         if as_complex and full_rotor:
-            raise Exception('complex and full_rotor cannot both be True')
+            raise ValueError('complex and full_rotor cannot both be True')
 
         # get component stress
         nnum, stress = self.nodal_stress(rnum, phase, as_complex, full_rotor)
@@ -878,7 +869,7 @@ class CyclicResult(ResultFile):
             return nnum, pstress + 1j*pstress_r
 
         elif full_rotor:
-            # compute principle stress
+            # compute principle stress for each sector
             pstress = np.empty((self.n_sector, stress.shape[1], 5), np.float64)
             for i in range(stress.shape[0]):
                 pstress[i], isnan = _binary_reader.compute_principal_stress(stress[i])
@@ -1063,14 +1054,19 @@ class CyclicResult(ResultFile):
                                                rnum,
                                                **kwargs)
 
-    def plot_principal_nodal_stress(self, rnum, stype,
-                                    flip_scalars=None, cpos=None,
-                                    screenshot=None, off_screen=None,
-                                    full_rotor=True, phase=0,
+    def plot_principal_nodal_stress(self, rnum,
+                                    comp=None,
+                                    phase=0,
+                                    full_rotor=True,
+                                    show_displacement=False,
+                                    displacement_factor=1,
                                     node_components=None,
-                                    sel_type_all=True, **kwargs):
-        """
-        Plot the principal stress at each node in the solution.
+                                    element_components=None,
+                                    sel_type_all=True,
+                                    add_text=True,
+                                    overlay_wireframe=False,
+                                    **kwargs):
+        """Plot the nodal principal stress.
 
         Parameters
         ----------
@@ -1078,40 +1074,29 @@ class CyclicResult(ResultFile):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        stype : string
-            Stress type to plot.  S1, S2, S3 principal stresses, SINT
+        comp : string
+            Stress component to plot.  S1, S2, S3 principal stresses, SINT
             stress intensity, and SEQV equivalent stress.
 
             Stress type must be a string from the following list:
-
-            ['1', '2', '3', 'INT', 'EQV']
-
-        flip_scalars : bool, optional
-            Flip direction of cmap.
-
-        cpos : list, optional
-            List of camera position, focal point, and view up.  Plot
-            first, then output the camera position and save it.
-
-        screenshot : str, optional
-            Setting this to a filename will save a screenshot of the
-            plot before closing the figure.  Default None.
-
-        off_screen : bool, optional
-            Default True.  Setting this to False makes the plot
-            generate in the background.  Useful when generating plots
-            in a batch mode automatically.
-
-        full_rotor : bool, optional
-            Expand sector solution to full rotor.
+            ``['S1', 'S2', 'S3', 'SINT', 'SEQV']``
 
         phase : float, optional
             Phase angle of the modal result in radians.  Only valid
             when full_rotor is True.  Default 0
 
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
         node_components : list, optional
             Accepts either a string or a list strings of node
-            components to plot.  For example: 
+            components to plot.  For example:
             ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
 
         sel_type_all : bool, optional
@@ -1119,45 +1104,41 @@ class CyclicResult(ResultFile):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             VTK camera position.
 
-        stress : np.ndarray
-            Array used to plot stress.
-
         """
-        stype = stype.upper()
-        if not full_rotor:  # Plot sector
-            return super(CyclicResult, self).plot_principal_nodal_stress(rnum, stype)
+        if not full_rotor:
+            return super().plot_principal_nodal_stress(rnum, comp,
+                                                       show_displacement,
+                                                       displacement_factor,
+                                                       node_components,
+                                                       element_components,
+                                                       sel_type_all, **kwargs)
 
-        # check inputs
-        stress_types = ['1', '2', '3', 'INT', 'EQV']
-        if stype not in stress_types:
-            raise Exception('Stress type not in \n' + str(stress_types))
-        sidx = stress_types.index(stype)
-        rnum = self.parse_step_substep(rnum)
-
-        # full rotor component stress
+        # get the correct component of the principal stress for the rotor
+        available_comps = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        idx = check_comp(available_comps, comp)
         _, pstress = self.principal_nodal_stress(rnum, phase, full_rotor=True)
-        pstress = pstress[:, self.mas_ind]
+        scalars = pstress[:, :, idx]
+        kwargs.setdefault('stitle',
+                          'Cyclic Rotor\nPrincipal Nodal Stress\n%s\n' % comp)
 
-        scalars = pstress[:, :, sidx]
-        stitle = 'Cyclic Rotor\nPrincipal Nodal Stress\n' +\
-                 '%s\n' % stype.capitalize()
-        grid = self._mas_grid
-
-        if node_components:
-            grid, ind = self._extract_node_components(node_components,
-                                                      sel_type_all, self._mas_grid)
-            scalars = scalars[ind]
-
-        return self._plot_cyclic_point_scalars(scalars, rnum, stitle,
-                                               flip_scalars, screenshot, cpos,
-                                               off_screen, grid, **kwargs)
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,
@@ -1432,16 +1413,6 @@ class CyclicResult(ResultFile):
                                          style='wireframe',
                                          opacity=0.5, **kwargs)
 
-                # actor = plotter.add_mesh(grid.copy(False),
-                #                          scalars=scalars[i],
-                #                          **kwargs)
-
-                # for transparency issues
-                # plotter.renderers[0].SetUseDepthPeeling(1)
-
-                # NAN/missing data are white
-                plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
-
                 # transform to standard position, rotate about Z axis,
                 # transform back
                 transform = vtkTransform()
@@ -1482,9 +1453,6 @@ class CyclicResult(ResultFile):
                 actor = plotter.add_mesh(grid.copy(False),
                                          scalars=scalars[i],
                                          **kwargs)
-
-                # for transparency issues
-                # plotter.renderers[0].SetUseDepthPeeling(1)
 
                 # NAN/missing data are white
                 plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
