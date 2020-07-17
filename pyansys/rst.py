@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from itertools import compress
 import time
 import warnings
-import logging
+# import logging
 from threading import Thread
 from functools import wraps
 
@@ -23,14 +23,16 @@ from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                result_header_keys)
 from pyansys._mp_keys import mp_keys
 from pyansys.common import (read_table, parse_header, AnsysBinary,
-                            read_standard_header, rotate_to_global)
+                            read_standard_header, rotate_to_global,
+                            PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
+                            STRAIN_TYPES)
 from pyansys.misc import vtk_cell_info
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
-# Create logger
-LOG = logging.getLogger(__name__)
-LOG.setLevel('DEBUG')
+# # Create logger
+# LOG = logging.getLogger(__name__)
+# LOG.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -84,7 +86,7 @@ class ResultFile(AnsysBinary):
 
         # Get the total number of results and log it
         self.nsets = len(self._resultheader['rpointers'])
-        LOG.debug('There are %d result(s) in this file', self.nsets)
+        # LOG.debug('There are %d result(s) in this file', self.nsets)
 
         # Get indices to resort nodal and element results
         self._sidx = np.argsort(self._resultheader['neqv'])
@@ -792,7 +794,7 @@ class ResultFile(AnsysBinary):
     @wraps(animate_nodal_solution)
     def animate_nodal_displacement(self, *args, **kwargs):
         """wraps animate_nodal_solution"""
-        self.animate_nodal_solution(*args, **kwargs)
+        return self.animate_nodal_solution(*args, **kwargs)
 
     def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
@@ -1598,8 +1600,7 @@ class ResultFile(AnsysBinary):
 
         """
         # get the correct component of the principal stress
-        available_comps = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
-        idx = check_comp(available_comps, comp)
+        idx = check_comp(PRINCIPAL_STRESS_TYPES, comp)
         stress = self.principal_nodal_stress(rnum)[1][:, idx]
 
         if node_components:
@@ -1987,13 +1988,8 @@ class ResultFile(AnsysBinary):
 
         >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
-
-        if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select'
-                             ' from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
-        self._plot_nodal_result(rnum, 'ENS', comp, available_comps,
+        self._plot_nodal_result(rnum, 'ENS', comp, STRESS_TYPES,
                                 show_displacement,
                                 displacement_factor, node_components,
                                 element_components,
@@ -2457,17 +2453,9 @@ class ResultFile(AnsysBinary):
         >>> result.plot_cylindrical_nodal_stress(0, 'R')
         """
         available_comps = ['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']
-
-        if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select'
-                             ' from the following:\n%s' % available_comps)
-        comp = comp.upper()
-        if comp not in available_comps:
-            raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
-                             ' from the following:\n%s' % available_comps)
-
+        idx = check_comp(available_comps, comp)
         _, scalars = self.cylindrical_nodal_stress(rnum)
-        scalars = scalars[:, available_comps.index(comp)]
+        scalars = scalars[:, idx]
         grid = self.grid
 
         if node_components:
@@ -2637,6 +2625,7 @@ class ResultFile(AnsysBinary):
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
+                                       element_components=element_components,
                                        sel_type_all=sel_type_all,
                                        stitle=stitle,
                                        **kwargs)
@@ -2734,11 +2723,10 @@ class ResultFile(AnsysBinary):
         >>> result = pyansys.download_pontoon()
         >>> result.plot_nodal_elastic_strain(0)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
         stitle = ' '.join([comp.upper(), stitle])
         return self._plot_nodal_result(rnum, 'EEL',
                                        comp,
-                                       available_comps,
+                                       STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
@@ -2835,11 +2823,10 @@ class ResultFile(AnsysBinary):
         >>> result.plot_nodal_plastic_strain(0)
 
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
         stitle = ' '.join([comp.upper(), stitle])
         return self._plot_nodal_result(rnum, 'EPL',
                                        comp,
-                                       available_comps,
+                                       STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
@@ -2852,13 +2839,8 @@ class ResultFile(AnsysBinary):
                            show_displacement=False, displacement_factor=1,
                            node_components=None, element_components=None,
                            sel_type_all=True, **kwargs):
-        """Plot nodal results"""
-        comp = comp.upper()
-        if comp not in available_comps:
-            raise ValueError('Invalid component.  Pick one of the following: %s' %
-                             str(available_comps))
-        component_index = available_comps.index(comp)
-
+        """Plot nodal result"""
+        component_index = check_comp(available_comps, comp)
         _, result = self._nodal_result(rnum, result_type)
         scalars = result[:, component_index]
 

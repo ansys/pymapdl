@@ -1,5 +1,4 @@
 """Supports reading cyclic structural result files from ANSYS"""
-import logging
 from functools import wraps
 
 from vtk import vtkMatrix4x4, vtkTransform, vtkAppendFilter
@@ -7,13 +6,9 @@ import numpy as np
 from pyvista.core.common import axis_rotation
 import pyvista as pv
 
+from pyansys.common import STRESS_TYPES, PRINCIPAL_STRESS_TYPES
 from pyansys.rst import ResultFile, trans_to_matrix, check_comp
 from pyansys import _binary_reader
-
-
-# Create logger
-# log = logging.getLogger(__name__)
-# log.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -23,7 +18,7 @@ class CyclicResult(ResultFile):
 
     def __init__(self, filename):
         """ Initializes object """
-        super(CyclicResult, self).__init__(filename)
+        super().__init__(filename)
 
         # sanity check
         if self.n_sector == 1:
@@ -161,8 +156,8 @@ class CyclicResult(ResultFile):
         # NOTE: number of nodes in sector may not match number of
         # nodes in geometry
         node_mask = self._neqv[self._sidx] <= self._resultheader['csNds']
-        self.mas_ind = np.nonzero(node_mask)[0]
-        self.dup_ind = np.nonzero(~node_mask)[0]
+        self._mas_ind = np.nonzero(node_mask)[0]
+        self._dup_ind = np.nonzero(~node_mask)[0]
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):
@@ -192,10 +187,10 @@ class CyclicResult(ResultFile):
 
         Returns
         -------
-        nnum : np.ndarray
+        nnum : numpy.ndarray
             Node numbers of master sector.
 
-        result : np.ndarray
+        result : numpy.ndarray
             Result is (nnod x numdof), nnod is the number of nodes in
             a sector and numdof is the number of degrees of freedom.
             When full_rotor is True the array will be (nSector x nnod
@@ -212,12 +207,12 @@ class CyclicResult(ResultFile):
         """
         # get the nodal result
         rnum = self.parse_step_substep(rnum)
-        full_nnum, full_result = super(CyclicResult, self).nodal_solution(rnum,
-                                                                in_nodal_coord_sys)
+        full_nnum, full_result = super().nodal_solution(rnum,
+                                                        in_nodal_coord_sys)
 
         # only concerned with the master sector
-        result = full_result[self.mas_ind]
-        nnum = full_nnum[self.mas_ind]
+        result = full_result[self._mas_ind]
+        nnum = full_nnum[self._mas_ind]
 
         # combine or expand result if not modal
         if self._resultheader['kan'] == 2:  # modal analysis
@@ -236,7 +231,7 @@ class CyclicResult(ResultFile):
 
                 if hmatch.size % 2:
                     # combine the matching sector
-                    result_dup = full_result[self.dup_ind]
+                    result_dup = full_result[self._dup_ind]
                 else:
                     match_loc = np.where(hmatch == rnum)[0][0]
 
@@ -246,8 +241,8 @@ class CyclicResult(ResultFile):
                         rnum_dup = rnum + 1
 
                     # get repeated result and combine
-                    _, full_result_dup = super(CyclicResult, self).nodal_solution(rnum_dup)
-                    result_dup = full_result_dup[self.mas_ind]
+                    _, full_result_dup = super().nodal_solution(rnum_dup)
+                    result_dup = full_result_dup[self._mas_ind]
 
             expanded_result = self._expand_cyclic_modal(result,
                                                         result_dup,
@@ -256,7 +251,7 @@ class CyclicResult(ResultFile):
                                                         full_rotor)
 
         if self._resultheader['kan'] == 0:  # static analysis
-            expanded_result = self.expand_cyclic_static(result)
+            expanded_result = self._expand_cyclic_static(result)
 
         return nnum, expanded_result
 
@@ -265,7 +260,7 @@ class CyclicResult(ResultFile):
         """wraps nodal_solution"""
         return self.nodal_solution(*args, **kwargs)
 
-    def expand_cyclic_static(self, result, tensor=False, stress=True):
+    def _expand_cyclic_static(self, result, tensor=False, stress=True):
         """ expands cyclic static results """
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
@@ -543,12 +538,12 @@ class CyclicResult(ResultFile):
 
         """
         rnum = self.parse_step_substep(rnum)
-        nnum, stress = super(CyclicResult, self).nodal_stress(rnum)
-        nnum = nnum[self.mas_ind]
-        stress = stress[self.mas_ind]
+        nnum, stress = super().nodal_stress(rnum)
+        nnum = nnum[self._mas_ind]
+        stress = stress[self._mas_ind]
 
         if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self.expand_cyclic_static(stress, tensor=True)
+            expanded_result = self._expand_cyclic_static(stress, tensor=True)
         elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
             hindex_table = self._resultheader['hindex']
@@ -562,7 +557,7 @@ class CyclicResult(ResultFile):
                     rnum_r = rnum + 1
 
                 # get repeated result and combine
-                _, stress_r = super(CyclicResult, self).nodal_stress(rnum_r)
+                _, stress_r = super().nodal_stress(rnum_r)
 
             else:
                 stress_r = np.zeros_like(stress)
@@ -610,7 +605,7 @@ class CyclicResult(ResultFile):
         nodenum : numpy.ndarray
             Node numbers of the result.
 
-        elastic_strain : np.ndarray
+        elastic_strain : numpy.ndarray
             Nodal component elastic strains.  Array is in the order
             X, Y, Z, XY, YZ, XZ, EEL.
 
@@ -629,11 +624,11 @@ class CyclicResult(ResultFile):
         """
         rnum = self.parse_step_substep(rnum)
         nnum, stress = super().nodal_elastic_strain(rnum)
-        nnum = nnum[self.mas_ind]
-        stress = stress[self.mas_ind]
+        nnum = nnum[self._mas_ind]
+        stress = stress[self._mas_ind]
 
         if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self.expand_cyclic_static(stress, tensor=True,
+            expanded_result = self._expand_cyclic_static(stress, tensor=True,
                                                         stress=False)
         elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
@@ -648,7 +643,7 @@ class CyclicResult(ResultFile):
                     rnum_r = rnum + 1
 
                 # get repeated result and combine
-                _, stress_r = super(CyclicResult, self).nodal_elastic_strain(rnum_r)
+                _, stress_r = super().nodal_elastic_strain(rnum_r)
 
             else:
                 stress_r = np.zeros_like(stress)
@@ -735,12 +730,9 @@ class CyclicResult(ResultFile):
         >>> result.plot_nodal_elastic_strain(0)
 
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
-        idx = check_comp(available_comps, comp)
-
+        idx = check_comp(STRESS_TYPES, comp)
         _, strain = self.nodal_elastic_strain(rnum, phase, False, full_rotor)
         scalars = strain[:, :, idx]
-        grid = self._mas_grid
 
         kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
         kwargs['node_components'] = node_components
@@ -753,63 +745,7 @@ class CyclicResult(ResultFile):
         kwargs['element_components'] = element_components
         kwargs['sel_type_all'] = sel_type_all
         kwargs['phase'] = phase
-        self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
-
-
-
-
-    # def cylindrical_nodal_stress(self, rnum, phase=0, as_complex=False,
-    #                              full_rotor=False):
-    #     if not full_rotor:
-    #         raise NotImplementedError
-
-    #     nnum, result = self.nodal_stress(rnum, phase, as_complex, full_rotor)
-
-    #     # angles relative to the XZ plane
-    #     angles = np.arctan2(self._mas_grid.points[:, 1],
-    #                         self._mas_grid.points[:, 0])
-
-    #     # rang = 2*pi / self.n_sector  # sector rot in radians
-    #     # for i in range(self.n_sector):
-    #     #     angle = angles - i*rang
-    #     #     # mod stress inplace
-    #     #     _binary_reader.euler_cart_to_cyl(result[i], angle)
-
-    #     return nnum, result
-
-    # def plot_cylindrical_nodal_stress(self, rnum, comp=None, label='',
-    #                                   flip_scalars=None, cpos=None,
-    #                                   screenshot=None, off_screen=None,
-    #                                   full_rotor=True, phase=0,
-    #                                   node_components=None, sel_type_all=True,
-    #                                   **kwargs):
-
-    #     available_comps = ['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']
-
-    #     if comp is None:
-    #         raise ValueError('Missing "comp" parameter.  Please select'
-    #                          ' from the following:\n%s' % available_comps)
-    #     comp = comp.upper()
-    #     if comp not in available_comps:
-    #         raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
-    #                          ' from the following:\n%s' % available_comps)
-
-    #     _, scalars = self.cylindrical_nodal_stress(rnum, phase, False, full_rotor)
-    #     scalars = scalars[:, :, available_comps.index(comp)]
-    #     grid = self._mas_grid
-
-    #     # if node_components:
-    #     #     grid, ind = self._extract_node_components(node_components, sel_type_all)
-    #     #     scalars = scalars[ind]
-    #     # elif element_components:
-    #     #     grid, ind = self._extract_element_components(element_components)
-    #     #     scalars = scalars[ind]
-
-    #     kwargs.setdefault('stitle', '%s Cylindrical\nNodal Stress' % comp)
-    #     return self._plot_cyclic_point_scalars(scalars, grid=grid, rnum=rnum,
-    #                                     # show_displacement=show_displacement,
-    #                                     # displacement_factor=displacement_factor,
-    #                                     **kwargs)
+        return self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
     def principal_nodal_stress(self, rnum, phase=0, as_complex=False,
                                full_rotor=False):
@@ -882,14 +818,14 @@ class CyclicResult(ResultFile):
             return nnum, pstress
 
     def plot_nodal_solution(self, rnum, comp='norm',
-                            full_rotor=True,
                             phase=0,
+                            full_rotor=True,
                             show_displacement=False,
                             displacement_factor=1.0,
                             node_components=None,
+                            element_components=None,
                             overlay_wireframe=False,
                             add_text=True,
-                            element_components=None,
                             sel_type_all=True,
                             **kwargs):
         """Plot the nodal solution (generally displacement).
@@ -975,15 +911,18 @@ class CyclicResult(ResultFile):
         kwargs['element_components'] = element_components
         kwargs['sel_type_all'] = sel_type_all
         kwargs['phase'] = phase
-        self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
+        return self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
     def plot_nodal_stress(self, rnum,
-                          comp=None, phase=0,
+                          comp=None,
+                          phase=0,
                           full_rotor=True,
                           show_displacement=False,
                           displacement_factor=1,
                           node_components=None,
                           element_components=None,
+                          overlay_wireframe=False,
+                          add_text=True,
                           sel_type_all=True, **kwargs):
         """Plot nodal stress of a given component
 
@@ -1043,16 +982,22 @@ class CyclicResult(ResultFile):
                                       element_components,
                                       sel_type_all, **kwargs)
 
-        stress_types = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
-        idx = check_comp(stress_types, comp)
-
+        idx = check_comp(STRESS_TYPES, comp)
         _, stress = self.nodal_stress(rnum, phase, False, full_rotor=True)
         scalars = stress[:, :, idx]
 
         kwargs.setdefault('stitle', 'Cyclic Rotor\nNodal Stress\n%s\n' % comp)
-        return self._plot_cyclic_point_scalars(scalars,
-                                               rnum,
-                                               **kwargs)
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        return self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
     def plot_principal_nodal_stress(self, rnum,
                                     comp=None,
@@ -1121,13 +1066,12 @@ class CyclicResult(ResultFile):
                                                        sel_type_all, **kwargs)
 
         # get the correct component of the principal stress for the rotor
-        available_comps = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
-        idx = check_comp(available_comps, comp)
+        idx = check_comp(PRINCIPAL_STRESS_TYPES, comp)
         _, pstress = self.principal_nodal_stress(rnum, phase, full_rotor=True)
         scalars = pstress[:, :, idx]
+
         kwargs.setdefault('stitle',
                           'Cyclic Rotor\nPrincipal Nodal Stress\n%s\n' % comp)
-
         kwargs['node_components'] = node_components
         kwargs['element_components'] = element_components
         kwargs['show_displacement'] = show_displacement
@@ -1140,9 +1084,120 @@ class CyclicResult(ResultFile):
         kwargs['phase'] = phase
         self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
+    def nodal_temperature(self, rnum, full_rotor=True):
+        """Retrieves the temperature for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        Equivalent MAPDL command: PRNSOL, TEMP
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        full_rotor : bool, optional
+            Expand sector solution to full rotor.
+
+        Returns
+        -------
+        nnum : numpy.ndarray
+            Node numbers of the result.
+
+        temperature : numpy.ndarray
+            Tempature at each node.
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, stress = rst.nodal_temperature(0)
+        """
+        nnum, temp = super()._nodal_result(rnum, 'EPT')
+        nnum = nnum[self._mas_ind]
+        temp = temp[self._mas_ind]
+        if not full_rotor:  # return only the master sector
+            return nnum, temp.ravel()
+
+        # otherwise, duplicate and repeat as temperature is constant across sectors
+        return nnum, temp.T.repeat(self.n_sector, axis=0)
+
+    def plot_nodal_temperature(self, rnum,
+                               phase=0,
+                               full_rotor=True,
+                               show_displacement=False,
+                               displacement_factor=1.0,
+                               node_components=None,
+                               overlay_wireframe=False,
+                               add_text=True,
+                               element_components=None,
+                               sel_type_all=True,
+                               **kwargs):
+        """Plot the nodal temperature.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        full_rotor : bool, optional
+            Expand the sector solution and plot the full rotor.
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+
+        """
+        # Load result from file
+        if not full_rotor:
+            return super().plot_nodal_temperature(rnum,
+                                                  show_displacement=show_displacement,
+                                                  displacement_factor=displacement_factor,
+                                                  node_components=node_components,
+                                                  element_components=element_components,
+                                                  sel_type_all=sel_type_all,
+                                                  **kwargs)
+
+        _, temp = self.nodal_temperature(rnum, True)
+
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        return self._plot_cyclic_point_scalars(temp, rnum, **kwargs)
+
     def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
                                nangles=180, show_phase=True,
-                               show_result_info=True, loop=True,
+                               add_text=True, loop=True,
                                interpolate_before_map=True, cpos=None,
                                movie_filename=None, off_screen=None,
                                **kwargs):
@@ -1167,9 +1222,9 @@ class CyclicResult(ResultFile):
         show_phase : bool, optional
             Shows the phase at each frame.
 
-        show_result_info : bool, optional
-            Includes result information at the bottom left-hand corner of the
-            plot.
+        add_text : bool, optional
+            Includes result information at the bottom left-hand corner
+            of the plot.
 
         interpolate_before_map : bool, optional
             Leaving this at default generally results in a better plot.
@@ -1208,7 +1263,8 @@ class CyclicResult(ResultFile):
         else:
             axis = None
 
-        if show_result_info:
+        result_info = ''
+        if add_text:
             result_info = self.text_result_table(rnum)
 
         # need only the surface of the full rotor
@@ -1267,8 +1323,9 @@ class CyclicResult(ResultFile):
                 plot_mesh.points[:] = orig_pt + complex_disp_adj
 
                 if show_phase:
-                    plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                               (result_info, (angle*180/np.pi)))
+                    if add_text:
+                        plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                                                   (result_info, (angle*180/np.pi)))
 
                 plotter.update(1, force_redraw=True)
 
@@ -1283,7 +1340,8 @@ class CyclicResult(ResultFile):
             if not loop:
                 break
 
-        return plotter.close()
+        plotter.close()
+        return plotter.camera_position
 
     def _gen_full_rotor(self):
         """ Create full rotor vtk unstructured grid """
@@ -1337,7 +1395,7 @@ class CyclicResult(ResultFile):
 
         Parameters
         ----------
-        scalars : np.ndarray
+        scalars : numpy.ndarray
             Node scalars to plot.
 
         rnum : int, optional
