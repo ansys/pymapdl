@@ -7,7 +7,6 @@ from collections.abc import Iterable
 from itertools import compress
 import time
 import warnings
-# import logging
 from threading import Thread
 from functools import wraps
 
@@ -27,6 +26,7 @@ from pyansys.common import (read_table, parse_header, AnsysBinary,
                             PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
                             STRAIN_TYPES, THERMAL_STRAIN_TYPES)
 from pyansys.misc import vtk_cell_info
+from pyansys.rst_avail import AvailableResults
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -105,6 +105,7 @@ class ResultFile(AnsysBinary):
         self._geometry_header = {}
         self._materials = None
         self._section_data = None
+        self._available_results = AvailableResults(self._resultheader['AvailData'])
 
     @property
     def n_sector(self):
@@ -1464,8 +1465,12 @@ class ResultFile(AnsysBinary):
             err_str += '\nAvailable types:\n'
             for key in ELEMENT_INDEX_TABLE_KEYS:
                 err_str += '\t%s: %s\n' % (key, element_index_table_info[key])
-
             raise ValueError(err_str)
+
+        if table_ptr in self.available_results._parsed_bits:
+            if table_ptr not in self.available_results:
+                raise ValueError('Result %s is not available in this result file'
+                                 % table_ptr)
 
         # location of data pointer within each element result table
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
@@ -2095,10 +2100,11 @@ class ResultFile(AnsysBinary):
             grid.point_arrays['Nodal Solution {:d}'.format(i)] = val
 
             # Nodal results
-            for rtype, rtype_desc in self.available_results.items():
+            for rtype in self.available_results:
                 if rtype in result_types:
                     _, values = self._nodal_result(i, rtype)
-                    grid.point_arrays['{:s} {:d}'.format(rtype_desc, i)] = values
+                    desc = element_index_table_info[rtype]
+                    grid.point_arrays['{:s} {:d}'.format(desc, i)] = values
 
             if pbar is not None:
                 pbar.update(1)
@@ -2159,7 +2165,7 @@ class ResultFile(AnsysBinary):
         else:
             raise Exception('Input must be either an int or a list')
 
-    def __str__(self):
+    def __repr__(self):
         rst_info = ['PyANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
@@ -2182,10 +2188,8 @@ class ResultFile(AnsysBinary):
         value = self._resultheader['nelm']
         rst_info.append('{:<12s}: {:d}'.format('Elements', value))
 
-        rst_info.append('\nAvailable Results:')
-        for key, value in self.available_results.items():
-            rst_info.append('{:<4s}: {:s}'.format(key, value))
-
+        rst_info.append('\n')
+        rst_info.append(str(self.available_results))
         return '\n'.join(rst_info)
 
     def _nodal_result(self, rnum, result_type):
@@ -2231,6 +2235,11 @@ class ResultFile(AnsysBinary):
         result : np.ndarray
             Array of result data
         """
+        # check result exists
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
         # element header
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
@@ -2761,7 +2770,7 @@ class ResultFile(AnsysBinary):
 
         plastic_strain : np.ndarray
             Nodal component plastic strains.  Array is in the order
-            X, Y, Z, XY, YZ, XZ, EEL.
+            X, Y, Z, XY, YZ, XZ, EQV.
 
         Examples
         --------
@@ -2928,17 +2937,24 @@ class ResultFile(AnsysBinary):
 
     @property
     def available_results(self):
-        """Prints available element result types and returns those keys"""
-        try:
-            ele_ind_table, _, _, ptr_off = self._element_solution_header(0)
-        except ValueError:
-            return {}
+        """Available result types.
 
-        # get the keys from the first element (not perfect...)
-        n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
-        mask = self.read_record(ele_ind_table[0] + ptr_off)[:n_rec] > 0
-        keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
-        return {key: element_index_table_info[key] for key in keys}
+        Examples
+        --------
+        >>> rst.available_results
+        Available Results:
+        ENS : Nodal stresses
+        ENG : Element energies and volume
+        EEL : Nodal elastic strains
+        EPL : Nodal plastic strains
+        ETH : Nodal thermal strains (includes swelling strains)
+        EUL : Element euler angles
+        ENL : Nodal nonlinear items, e.g. equivalent plastic strains
+        EPT : Nodal temperatures
+        NSL : Nodal displacements
+        RF  : Nodal reaction forces
+        """
+        return self._available_results
 
 
 def pol2cart(rho, phi):

@@ -184,9 +184,13 @@ def test_repr():
     assert 'Title' in str(pontoon)
 
 
-@pytest.mark.skipif(pontoon is None, reason="Requires example files")
+@pytest.mark.skipif(is16 is None, reason="Requires example files")
 def test_available_results():
-    assert 'ENS' in pontoon.available_results
+    for etype in vm33.available_results:
+        if etype in ['NSL', 'VSL', 'ASL', 'RF']:  # skip nodal records
+            continue
+        _, edata, _ = vm33.element_solution_data(0, etype)
+        assert edata[0] is not None
 
 
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")

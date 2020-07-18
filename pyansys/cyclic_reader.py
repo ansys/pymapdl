@@ -751,7 +751,8 @@ class CyclicResult(ResultFile):
         kwargs['phase'] = phase
         return self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
 
-    def nodal_elastic_strain(self, rnum, phase=0, as_complex=False, full_rotor=False):
+    def nodal_elastic_strain(self, rnum, phase=0, as_complex=False,
+                             full_rotor=False):
         """Nodal component elastic strains.  This record contains
         strains in the order X, Y, Z, XY, YZ, XZ, EQV.
 
@@ -785,7 +786,7 @@ class CyclicResult(ResultFile):
 
         elastic_strain : numpy.ndarray
             Nodal component elastic strains.  Array is in the order
-            X, Y, Z, XY, YZ, XZ, EEL.
+            X, Y, Z, XY, YZ, XZ, EQV.
 
         Examples
         --------
@@ -913,6 +914,181 @@ class CyclicResult(ResultFile):
         scalars = strain[:, :, idx]
 
         kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['show_displacement'] = show_displacement
+        kwargs['displacement_factor'] = displacement_factor
+        kwargs['overlay_wireframe'] = overlay_wireframe
+        kwargs['add_text'] = add_text
+        kwargs['node_components'] = node_components
+        kwargs['element_components'] = element_components
+        kwargs['sel_type_all'] = sel_type_all
+        kwargs['phase'] = phase
+        return self._plot_cyclic_point_scalars(scalars, rnum, **kwargs)
+
+    def nodal_plastic_strain(self, rnum, phase=0, as_complex=False,
+                             full_rotor=False):
+        """Nodal component plastic strains.  This record contains
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.
+
+        Plastic strains can be can be nodal values extrapolated from
+        the integration points or values at the integration points
+        moved to the nodes.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        phase : float
+            Phase adjustment of the stress in degrees.
+
+        as_complex : bool, optional
+            Reports stress as a complex result.  Real and imaginary
+            stresses correspond to the stress of the main and repeated
+            sector.  Stress can be "rotated" using the phase
+            parameter.
+
+        full_rotor : bool, optional
+            Expands the results to the full rotor when True.  Default
+            False.
+
+        Returns
+        -------
+        nodenum : numpy.ndarray
+            Node numbers of the result.
+
+        plastic_strain : numpy.ndarray
+            Nodal component plastic strains.  Array is in the order
+            X, Y, Z, XY, YZ, XZ, EQV.
+
+        Examples
+        --------
+        Load the nodal plastic strain for the first result.
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, plastic_strain = rst.nodal_stress(0)
+
+        Notes
+        -----
+        Nodes without a strain will be NAN.
+
+        """
+        rnum = self.parse_step_substep(rnum)
+        nnum, stress = super().nodal_plastic_strain(rnum)
+        nnum = nnum[self._mas_ind]
+        stress = stress[self._mas_ind]
+
+        if self._resultheader['kan'] == 0:  # static result
+            expanded_result = self._expand_cyclic_static(stress, tensor=True,
+                                                         stress=False)
+        elif self._resultheader['kan'] == 2:  # modal analysis
+            # combine modal solution results
+            hindex_table = self._resultheader['hindex']
+            hindex = hindex_table[rnum]
+
+            # if repeated mode
+            if hindex != 0 and -hindex in hindex_table:
+                if hindex < 0:
+                    rnum_r = rnum - 1
+                else:
+                    rnum_r = rnum + 1
+
+                # get repeated result and combine
+                _, stress_r = super().nodal_plastic_strain(rnum_r)
+
+            else:
+                stress_r = np.zeros_like(stress)
+
+            expanded_result = self._expand_cyclic_modal_tensor(stress,
+                                                               stress_r,
+                                                               hindex,
+                                                               phase,
+                                                               as_complex,
+                                                               full_rotor,
+                                                               stress=False)
+        else:
+            raise RuntimeError('Unsupported analysis type')
+
+        return nnum, expanded_result
+
+    def plot_nodal_plastic_strain(self, rnum,
+                                  comp=None, phase=0,
+                                  full_rotor=True,
+                                  show_displacement=False,
+                                  displacement_factor=1,
+                                  node_components=None,
+                                  element_components=None,
+                                  sel_type_all=True,
+                                  add_text=True,
+                                  overlay_wireframe=False,
+                                  **kwargs):
+        """Plot nodal plastic strain.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        comp : str, optional
+            Plastic strain component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+            - ``"EQV"``
+
+        phase : float, optional
+            Phase angle of the modal result in radians.  Only valid
+            when full_rotor is True.  Default 0
+
+        full_rotor : bool, optional
+            Expand the sector solution to the full rotor.
+
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        Returns
+        -------
+        cpos : list
+            Camera position from vtk render window.
+
+        Examples
+        --------
+        Plot nodal plastic strain for an academic rotor
+
+        >>> import pyansys
+        >>> result = pyansys.download_academic_rotor()
+        >>> result.plot_nodal_plastic_strain(0)
+
+        """
+        idx = check_comp(STRESS_TYPES, comp)
+        _, strain = self.nodal_plastic_strain(rnum, phase, False, full_rotor)
+        scalars = strain[:, :, idx]
+
+        kwargs.setdefault('stitle', '%s Nodal Plastic Strain' % comp)
         kwargs['node_components'] = node_components
         kwargs['element_components'] = element_components
         kwargs['show_displacement'] = show_displacement
