@@ -29,7 +29,7 @@ except:
     result_z = None
 
 skip_with_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
-                                   reason="Requires active X Server")
+                                          reason="Requires active X Server")
 
 
 # static result x axis

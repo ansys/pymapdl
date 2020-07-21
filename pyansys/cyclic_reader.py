@@ -236,13 +236,13 @@ class CyclicResult(ResultFile):
             hindex_table = self._resultheader['hindex']
             hindex = hindex_table[rnum]
 
-            if self._has_duplicate_sector:
-                # simply use the duplicate sector
-                result_dup = full_result[self._dup_ind]
-            elif self._is_repeated_mode[rnum]:
+            if self._is_repeated_mode[rnum]:
                 # get repeated result and combine
                 _, full_result_dup = super().nodal_solution(self._repeated_index[rnum])
                 result_dup = full_result_dup[self._mas_ind]
+            elif self._has_duplicate_sector:
+                # use the duplicate sector
+                result_dup = full_result[self._dup_ind]
             else:
                 # otherwise, a standing wave (no complex component)
                 result_dup = np.zeros_like(result)
@@ -1679,11 +1679,10 @@ class CyclicResult(ResultFile):
         # run until q is pressed
         plotter.show(interactive=False, auto_close=False,
                      interactive_update=True)
+
         first_loop = True
-        values = []
         while self._animating:
-            _ind = np.where(plot_mesh.point_arrays['ansys_node_num'] == 727)[0]
-            _idx = _ind[0]
+
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -1695,10 +1694,6 @@ class CyclicResult(ResultFile):
 
                 plotter.update_scalars(scalars, render=False)
                 plot_mesh.points[:] = orig_pt + complex_disp_adj
-                # print('%8.5f' % angle,
-                #       '%8.5f' % complex_disp_adj[_idx, 2],
-                #       '%8.5f' % plot_mesh.points[_idx, 2])
-                values.append([complex_disp_adj[_idx, 2], plot_mesh.points[_idx, 2]])
 
                 if add_text:
                     plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
