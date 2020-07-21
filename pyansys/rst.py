@@ -691,8 +691,9 @@ class ResultFile(AnsysBinary):
                                node_components=None,
                                element_components=None,
                                sel_type_all=True, add_text=True,
-                               max_disp=0.1, nangles=100, loop=True,
-                               movie_filename=None, **kwargs):
+                               displacement_factor=0.1, nangles=100,
+                               loop=True, movie_filename=None,
+                               **kwargs):
         """Animate nodal solution.  Assumes nodal solution is a
         displacement array from a modal solution.
 
@@ -721,9 +722,8 @@ class ResultFile(AnsysBinary):
         add_text : bool, optional
             Adds information about the result when rnum is given.
 
-        max_disp : float, optional
-            Maximum displacement in the units of the model.  Default
-            0.1
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         nangles : int, optional
             Number of "frames" between each full cycle.
@@ -789,8 +789,9 @@ class ResultFile(AnsysBinary):
                                         element_components=element_components,
                                         sel_type_all=sel_type_all,
                                         nangles=nangles,
+                                        # displacement_factor=displacement_factor,
                                         movie_filename=movie_filename,
-                                        max_disp=max_disp, loop=loop, **kwargs)
+                                        loop=loop, **kwargs)
 
     @wraps(animate_nodal_solution)
     def animate_nodal_displacement(self, *args, **kwargs):
@@ -1649,7 +1650,7 @@ class ResultFile(AnsysBinary):
                             overlay_wireframe=False, node_components=None,
                             element_components=None,
                             sel_type_all=True, movie_filename=None,
-                            max_disp=0.1, **kwargs):
+                            **kwargs):
         """Plot point scalars on active mesh.
 
         Parameters
@@ -1719,8 +1720,8 @@ class ResultFile(AnsysBinary):
             else:
                 disp = disp[ind]
 
-            if animate:  # scale for max displacement
-                disp /= (np.abs(disp).max()/max_disp)
+            # if animate:  # scale for max displacement
+            #     disp /= (np.abs(disp).max()/displacement_factor)
 
         if scalars is not None:
             if scalars.ndim == 2:

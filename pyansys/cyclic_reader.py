@@ -26,9 +26,13 @@ class CyclicResult(ResultFile):
             raise RuntimeError('Result is not a cyclic model')
 
         self._animating = False
-        self._add_cyclic_properties()
-        self._positive_cyclic_dir = False
+        self._positive_cyclic_dir = False    # TODO: this needs to be figured out
         self._rotor_cache = None
+        self._has_duplicate_sector = None
+        self._is_repeated_mode = np.empty(0)
+        self._repeated_index = np.empty(0)
+
+        self._add_cyclic_properties()
 
     @property
     def positive_cyclic_dir(self):
@@ -159,6 +163,17 @@ class CyclicResult(ResultFile):
         node_mask = self._neqv[self._sidx] <= self._resultheader['csNds']
         self._mas_ind = np.nonzero(node_mask)[0]
         self._dup_ind = np.nonzero(~node_mask)[0]
+        self._has_duplicate_sector = np.any(self._dup_ind)
+
+        # determine repeated modes
+        mask_a = np.isclose(self.time_values, np.roll(self.time_values, 1))
+        mask_b = np.isclose(self.time_values, np.roll(self.time_values, -1))
+        self._is_repeated_mode = np.logical_or(mask_a, mask_b)
+        self._repeated_index = np.empty(self._is_repeated_mode.size, np.int)
+        self._repeated_index[:] = -1
+        if np.any(self._is_repeated_mode):
+            self._repeated_index[mask_a] = np.nonzero(mask_b)[0]
+            self._repeated_index[mask_b] = np.nonzero(mask_a)[0]
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):
@@ -171,7 +186,7 @@ class CyclicResult(ResultFile):
             Cumulative result number.  Zero based indexing.
 
         phase : float, optional
-            Phase to rotate sector result.
+            Phase to rotate sector result in radians.
 
         full_rotor : bool, optional
             Expands the single sector solution for the full rotor.
@@ -221,29 +236,16 @@ class CyclicResult(ResultFile):
             hindex_table = self._resultheader['hindex']
             hindex = hindex_table[rnum]
 
-            # if repeated mode
-            # last_index = hindex == int(self._resultheader['nSector']/2)
-            last_index = False
-            if hindex == 0 or last_index:
+            if self._has_duplicate_sector:
+                # simply use the duplicate sector
+                result_dup = full_result[self._dup_ind]
+            elif self._is_repeated_mode[rnum]:
+                # get repeated result and combine
+                _, full_result_dup = super().nodal_solution(self._repeated_index[rnum])
+                result_dup = full_result_dup[self._mas_ind]
+            else:
+                # otherwise, a standing wave (no complex component)
                 result_dup = np.zeros_like(result)
-            else:  # otherwise, use the harmonic pair
-                hmask = np.abs(hindex_table) == abs(hindex)
-                hmatch = np.nonzero(hmask)[0]
-
-                if hmatch.size % 2:
-                    # combine the matching sector
-                    result_dup = full_result[self._dup_ind]
-                else:
-                    match_loc = np.where(hmatch == rnum)[0][0]
-
-                    if match_loc % 2:
-                        rnum_dup = rnum - 1
-                    else:
-                        rnum_dup = rnum + 1
-
-                    # get repeated result and combine
-                    _, full_result_dup = super().nodal_solution(rnum_dup)
-                    result_dup = full_result_dup[self._mas_ind]
 
             expanded_result = self._expand_cyclic_modal(result,
                                                         result_dup,
@@ -1552,11 +1554,11 @@ class CyclicResult(ResultFile):
         kwargs['phase'] = phase
         return self._plot_cyclic_point_scalars(temp, rnum, **kwargs)
 
-    def animate_nodal_solution(self, rnum, comp='norm', max_disp=0.1,
-                               nangles=180, show_phase=True,
+    def animate_nodal_solution(self, rnum, comp='norm', full_rotor=True,
+                               displacement_factor=0.1,
+                               nangles=180,
                                add_text=True, loop=True,
-                               interpolate_before_map=True, cpos=None,
-                               movie_filename=None, off_screen=None,
+                               movie_filename=None,
                                **kwargs):
         """Animate nodal solution.  Assumes nodal solution is a
         displacement array from a modal solution.
@@ -1570,8 +1572,13 @@ class CyclicResult(ResultFile):
             'norm', corresponding to the x directin, y direction, z direction,
             and the combined direction (x**2 + y**2 + z**2)**0.5
 
-        max_disp : float, optional
-            Maximum displacement in the units of the model.  Default 0.1
+        full_rotor : bool, optional
+            Expands the single sector solution for the full rotor.
+            Sectors are rotated counter-clockwise about the axis of
+            rotation.  Default True.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         nangles : int, optional
             Number of "frames" between each full cycle.
@@ -1586,29 +1593,31 @@ class CyclicResult(ResultFile):
         interpolate_before_map : bool, optional
             Leaving this at default generally results in a better plot.
 
-        cpos : list, optional
-            List of camera position, focal point, and view up.
-
         movie_filename : str, optional
             Filename of the movie to open.  Filename should end in mp4,
             but other filetypes may be supported.  See "imagio.get_writer".
             A single loop of the mode will be recorded.
 
-        off_screen : bool, optional
-            Can be used in conjunction with movie_filename to generate a
-            movie non-interactively.
-
         kwargs : optional keyword arguments, optional
             See help(pyvista.plot) for additional keyword arguments.
 
         """
-        # if kwargs.pop('smooth_shading', False):
-        #     raise Exception('"smooth_shading" is not yet supported')
+        if not full_rotor:
+            return super().animate_nodal_solution(rnum,
+                                                  comp=comp,
+                                                  displacement_factor=displacement_factor,
+                                                  nangles=nangles,
+                                                  # show_phase=show_phase,
+                                                  add_text=add_text,
+                                                  loop=loop,
+                                                  movie_filename=movie_filename,
+                                                  **kwargs)
 
         # normalize nodal solution
         _, complex_disp = self.nodal_solution(rnum, as_complex=True,
                                               full_rotor=True)
-        complex_disp /= (np.abs(complex_disp).max()/max_disp)
+        # complex_disp *= np.abs(complex_disp).max()/displacement_factor
+        complex_disp *= displacement_factor
         complex_disp = complex_disp.reshape(-1, 3)
 
         if comp == 'x':
@@ -1625,9 +1634,8 @@ class CyclicResult(ResultFile):
             result_info = self.text_result_table(rnum)
 
         # need only the surface of the full rotor
-        full_rotor = self.full_rotor
-        plot_mesh = full_rotor.extract_surface()
-        orig_pt = plot_mesh.points
+        plot_mesh = self.full_rotor.extract_surface()
+        orig_pt = plot_mesh.points.copy()
 
         # reduce the complex displacement to just the surface points
         ind = plot_mesh.point_arrays['vtkOriginalPointIds']
@@ -1638,13 +1646,19 @@ class CyclicResult(ResultFile):
         else:
             scalars = (complex_disp*complex_disp).sum(1)**0.5
 
-        plotter = pv.Plotter(off_screen=off_screen)
-
+        # intialize plotter
+        cpos = kwargs.pop('cpos', None)
+        plotter = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
         if kwargs.pop('show_axes', True):
             plotter.add_axes()
 
-        plotter.add_mesh(plot_mesh, scalars=np.real(scalars),
-                         interpolate_before_map=interpolate_before_map, **kwargs)
+        smax = np.abs(scalars).max()
+        rng = [-smax, smax]
+
+        plotter.add_mesh(plot_mesh,
+                         scalars=np.real(scalars),
+                         rng=rng,
+                         **kwargs)
 
         # setup text
         plotter.add_text(' ', font_size=20, position=[0, 0])
@@ -1666,7 +1680,10 @@ class CyclicResult(ResultFile):
         plotter.show(interactive=False, auto_close=False,
                      interactive_update=True)
         first_loop = True
+        values = []
         while self._animating:
+            _ind = np.where(plot_mesh.point_arrays['ansys_node_num'] == 727)[0]
+            _idx = _ind[0]
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -1678,11 +1695,14 @@ class CyclicResult(ResultFile):
 
                 plotter.update_scalars(scalars, render=False)
                 plot_mesh.points[:] = orig_pt + complex_disp_adj
+                # print('%8.5f' % angle,
+                #       '%8.5f' % complex_disp_adj[_idx, 2],
+                #       '%8.5f' % plot_mesh.points[_idx, 2])
+                values.append([complex_disp_adj[_idx, 2], plot_mesh.points[_idx, 2]])
 
-                if show_phase:
-                    if add_text:
-                        plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
-                                                   (result_info, (angle*180/np.pi)))
+                if add_text:
+                    plotter.textActor.SetInput('%s\nPhase %.1f Degrees' %
+                                               (result_info, (angle*180/np.pi)))
 
                 plotter.update(1, force_redraw=True)
 
@@ -1719,6 +1739,9 @@ class CyclicResult(ResultFile):
         for i in range(self.n_sector):
             # Transform mesh
             sector = grid.copy()
+            sector_id = np.empty(grid.n_points)
+            sector_id[:] = i
+            sector.point_arrays['sector_id'] = sector_id
             sector.rotate_z(rang * i)
             vtkappend.AddInputData(sector)
 
@@ -1810,7 +1833,7 @@ class CyclicResult(ResultFile):
         if kwargs.pop('show_axes', True):
             plotter.add_axes()
         plotter.background_color = kwargs.pop('background', None)
-        plotter.camera_position = kwargs.pop('cpos', None)
+        cpos = kwargs.pop('cpos', None)
 
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
@@ -1892,6 +1915,10 @@ class CyclicResult(ResultFile):
             rnum = self.parse_step_substep(rnum)
             plotter.add_text(self.text_result_table(rnum), font_size=20,
                              position=[0, 0])
+
+        # must set camera position at the ended
+        if cpos is not None:
+            plotter.camera_position = cpos
 
         if screenshot:
             cpos = plotter.show(auto_close=False,
