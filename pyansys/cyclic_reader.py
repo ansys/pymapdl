@@ -159,6 +159,7 @@ class CyclicResult(ResultFile):
         node_mask = self._neqv[self._sidx] <= self._resultheader['csNds']
         self._mas_ind = np.nonzero(node_mask)[0]
         self._dup_ind = np.nonzero(~node_mask)[0]
+        self._has_duplicate_sector = np.any(self._dup_ind)
 
     def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
                        in_nodal_coord_sys=False):
@@ -223,8 +224,7 @@ class CyclicResult(ResultFile):
 
             # if repeated mode
             # last_index = hindex == int(self._resultheader['nSector']/2)
-            last_index = False
-            if hindex == 0 or last_index:
+            if hindex == 0:
                 result_dup = np.zeros_like(result)
             else:  # otherwise, use the harmonic pair
                 hmask = np.abs(hindex_table) == abs(hindex)
