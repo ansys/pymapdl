@@ -1652,12 +1652,12 @@ class CyclicResult(ResultFile):
         if kwargs.pop('show_axes', True):
             plotter.add_axes()
 
-        smax = np.abs(scalars).max()
-        rng = [-smax, smax]
+        if 'rng' not in kwargs:
+            smax = np.abs(scalars).max()
+            kwargs['rng'] = [-smax, smax]
 
         plotter.add_mesh(plot_mesh,
                          scalars=np.real(scalars),
-                         rng=rng,
                          **kwargs)
 
         # setup text
