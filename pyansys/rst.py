@@ -112,6 +112,11 @@ class ResultFile(AnsysBinary):
         """Number of sectors"""
         return self._resultheader['nSector']
 
+    @property
+    def n_results(self):
+        """Number of results"""
+        return len(self.time_values)
+
     def _read_result_header(self):
         """Returns pointers used to access results from an ANSYS result file.
 

@@ -1654,7 +1654,10 @@ class CyclicResult(ResultFile):
 
         if 'rng' not in kwargs:
             smax = np.abs(scalars).max()
-            kwargs['rng'] = [-smax, smax]
+            if comp == 'norm':
+                kwargs['rng'] = [0, smax]
+            else:
+                kwargs['rng'] = [-smax, smax]
 
         plotter.add_mesh(plot_mesh,
                          scalars=np.real(scalars),
@@ -1817,6 +1820,7 @@ class CyclicResult(ResultFile):
         window_size = kwargs.pop('window_size', None)
         full_screen = kwargs.pop('full_screen', False)
         screenshot = kwargs.pop('screenshot', None)
+        text_color = kwargs.pop('text_color', None)
         kwargs.setdefault('cmap', 'jet')
         kwargs.setdefault('rng', [np.nanmin(scalars), np.nanmax(scalars)])
 
@@ -1906,10 +1910,13 @@ class CyclicResult(ResultFile):
                 actor.SetUserTransform(transform)
 
         # add table
-        if add_text and rnum is not None:
+        if isinstance(add_text, str):
+            plotter.add_text(add_text, font_size=20, position=[0, 0],
+                             color=text_color)
+        elif add_text:
             rnum = self.parse_step_substep(rnum)
             plotter.add_text(self.text_result_table(rnum), font_size=20,
-                             position=[0, 0])
+                             position=[0, 0], color=text_color)
 
         # must set camera position at the ended
         if cpos is not None:
