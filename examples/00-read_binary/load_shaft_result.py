@@ -57,20 +57,24 @@ shaft.plot(lighting=False, show_edges=True, color='cyan')
 ###############################################################################
 # plot a mode shape without contours
 shaft.plot_nodal_solution(1, element_components=['SHAFT_MESH'],
-                          show_displacement=True, max_disp=10, overlay_wireframe=True,
-                          cpos=cpos)
+                          show_displacement=True,
+                          displacement_factor=10,
+                          overlay_wireframe=True, cpos=cpos)
 
 ###############################################################################
 # plot a mode shape with contours
-shaft.plot_nodal_solution(1, element_components=['SHAFT_MESH'], n_colors=10,
-                          show_displacement=True, max_disp=10, overlay_wireframe=True,
-                          cpos=cpos)
+shaft.plot_nodal_solution(1, element_components=['SHAFT_MESH'],
+                          n_colors=10, show_displacement=True,
+                          displacement_factor=10,
+                          overlay_wireframe=True, cpos=cpos)
 
 ###############################################################################
 # Animate a mode of a component the shaft
-shaft.animate_nodal_solution(5, element_components='SHAFT_MESH', comp='norm',
-                             max_disp=10, show_edges=True, cmap='bwr', cpos=cpos,
-                             loop=False, movie_filename='demo.gif', nangles=30)
+shaft.animate_nodal_solution(5, element_components='SHAFT_MESH',
+                             comp='norm', displacement_factor=10,
+                             show_edges=True, cmap='bwr', cpos=cpos,
+                             loop=False, movie_filename='demo.gif',
+                             nangles=30)
 
 # set loop to True to plot continiously
 # Disable movie_filename and increase nangles for a smoother plot

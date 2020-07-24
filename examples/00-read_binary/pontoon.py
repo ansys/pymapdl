@@ -16,8 +16,7 @@ print(pontoon)
 
 ###############################################################################
 # Plot the nodal displacement
-pontoon.plot_nodal_solution(0, show_displacement=True, max_disp=10,
-                            overlay_wireframe=True)
+pontoon.plot_nodal_solution(0, show_displacement=True, overlay_wireframe=True)
 
 
 ###############################################################################

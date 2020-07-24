@@ -794,7 +794,7 @@ class ResultFile(AnsysBinary):
                                         element_components=element_components,
                                         sel_type_all=sel_type_all,
                                         nangles=nangles,
-                                        # displacement_factor=displacement_factor,
+                                        displacement_factor=displacement_factor,
                                         movie_filename=movie_filename,
                                         loop=loop, **kwargs)
 
@@ -1547,6 +1547,14 @@ class ResultFile(AnsysBinary):
         which returns:
         S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
         equivalent stress.
+
+        Internal averaging algorthim averages the component values
+        from the elements at a common node and then calculates the
+        principal using the averaged value.
+
+        See the MAPDL ``AVPRIN`` command for more details.
+        ``pyansys`` uses the default ``AVPRIN, 0`` option.
+
         """
         # get component stress
         nodenum, stress = self.nodal_stress(rnum)
@@ -1691,6 +1699,8 @@ class ResultFile(AnsysBinary):
         cpos : list
             Camera position.
         """
+        if rnum:
+            rnum = self.parse_step_substep(rnum)
         loop = kwargs.pop('loop', False)
 
         if grid is None:
@@ -1710,7 +1720,7 @@ class ResultFile(AnsysBinary):
             grid.points = new_points
 
         elif animate:
-            disp = self.nodal_solution(rnum)[1][:, :3]
+            disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
 
         # extract mesh surface
         mapped_indices = None

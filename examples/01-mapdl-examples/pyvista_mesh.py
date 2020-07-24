@@ -77,8 +77,8 @@ result.plot_nodal_displacement(0, show_displacement=True,
 ###############################################################################
 # Animate a high frequency mode
 result.animate_nodal_displacement(18, loop=False, add_text=False,
-                                  nangles=30, max_disp=0.2, show_axes=False,
-                                  background='w',
+                                  nangles=30, displacement_factor=0.4,
+                                  show_axes=False, background='w',
                                   movie_filename='plane_vib.gif')
 
 # Get a smoother plot by disabling movie_filename and increasing `nangles`

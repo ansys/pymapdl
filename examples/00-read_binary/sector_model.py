@@ -4,7 +4,7 @@
 Cyclic Model Visualization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Visualize a full cyclic model
+Visualize and animate a full cyclic model
 
 """
 # sphinx_gallery_thumbnail_number = 2

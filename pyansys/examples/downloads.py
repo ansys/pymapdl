@@ -120,3 +120,8 @@ def download_academic_rotor_result():
 def download_academic_rotor_archive():
     """Cyclic academic rotor archive file"""
     return _download_and_read('academic_rotor.cdb')
+
+
+def download_academic_rotor_4blade_result():
+    """Cyclic academic rotor result file"""
+    return _download_and_read('academic_rotor_4_blade.rst')

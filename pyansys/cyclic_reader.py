@@ -258,10 +258,10 @@ class CyclicResult(ResultFile):
         """ Combines repeated results from ANSYS """
         if as_complex or full_rotor:
             # Matches ansys direction
-            if self._positive_cyclic_dir:
-                result_combined = result + result_r*1j
-            else:
-                result_combined = result - result_r*1j
+            # if self._positive_cyclic_dir:
+            result_combined = result + result_r*1j
+            # else:
+                # result_combined = result - result_r*1j
             if phase:
                 result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
         else:  # convert to real
@@ -1709,7 +1709,7 @@ class CyclicResult(ResultFile):
 
         vtkappend = vtkAppendFilter()
         # vtkappend.MergePointsOn()
-        # vtkappend.SetTolerance  # not available until vtk 9+
+        # vtkappend.SetTolerance(1E-3)  # not available until vtk 9+
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
             # Transform mesh
@@ -1865,14 +1865,16 @@ class CyclicResult(ResultFile):
                                      **kwargs)
 
         else:
+            surf_sector = grid.extract_surface()
+            ind = surf_sector.point_arrays['vtkOriginalPointIds']
             rang = 360.0 / self.n_sector
             for i in range(self.n_sector):
                 if scalars is not None:
-                    sector_scalars = scalars[i]
+                    sector_scalars = scalars[i, ind]
                 else:
                     sector_scalars = None
 
-                actor = plotter.add_mesh(grid.copy(False),
+                actor = plotter.add_mesh(surf_sector.copy(False),
                                          scalars=sector_scalars,
                                          **kwargs)
 

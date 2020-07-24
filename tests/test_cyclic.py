@@ -58,8 +58,9 @@ def cyclic_v182_z_with_comp():
 
 
 def test_non_cyclic():
+    from pyansys.cyclic_reader import CyclicResult
     with pytest.raises(TypeError):
-        pyansys.cyclic_reader.CyclicResult(rstfile)
+        CyclicResult(rstfile)
 
 
 @skip_with_no_xserver
