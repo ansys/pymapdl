@@ -1863,7 +1863,7 @@ class _Mapdl(_MapdlCommands):
                                   'Please use "run" instead')
 
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
-                       nrmkey='', modtype='', memory_option=''):
+                       nrmkey='', modtype='', memory_option='', elcalc=False):
         """Run a modal with basic settings analysis
 
         Parameters
@@ -1970,6 +1970,10 @@ class _Mapdl(_MapdlCommands):
                         I/O to the various files written by the
                         solver.
 
+        elcalc : bool, optional
+            Calculate element results, reaction forces, energies, and
+            the nodal degree of freedom solution.  Default ``False``.
+
         Examples
         --------
         Modal analysis using default parameters for the first 6 modes
@@ -2004,6 +2008,10 @@ class _Mapdl(_MapdlCommands):
         self.antype(2, 'new')
         self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
         self.bcsoption(memory_option)
+
+        if elcalc:
+            self.mxpand(elcalc='YES')
+
         self.solve()
         self.finish()
 

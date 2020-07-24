@@ -2659,6 +2659,8 @@ class ResultFile(AnsysBinary):
         the integration points or values at the integration points
         moved to the nodes.
 
+        Equivalent MAPDL command: ``PRNSOL, EPEL``
+
         Parameters
         ----------
         rnum : int or list

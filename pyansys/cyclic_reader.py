@@ -23,7 +23,7 @@ class CyclicResult(ResultFile):
 
         # sanity check
         if self.n_sector == 1:
-            raise RuntimeError('Result is not a cyclic model')
+            raise TypeError('Result is not a cyclic model')
 
         self._animating = False
         self._positive_cyclic_dir = False    # TODO: this needs to be figured out
@@ -36,7 +36,7 @@ class CyclicResult(ResultFile):
 
     @property
     def positive_cyclic_dir(self):
-        """Rotor results are default anit-clockwise.  Set this to
+        """Rotor results are default anti-clockwise.  Set this to
         `True` if cyclic results to not look correct.
         """
         return self._positive_cyclic_dir
@@ -45,108 +45,58 @@ class CyclicResult(ResultFile):
     def positive_cyclic_dir(self, value):
         self._positive_cyclic_dir = bool(value)
 
-    def plot(self, color='w', show_edges=True, **kwargs):
+    def plot_sectors(self, **kwargs):
+        """Plot the full rotor and individually color the sectors.
+
+        Parameters
+        ----------
+        kwargs : keyword arguments
+            Additional keyword arguments.  See ``help(pyvista.plot)``
+
+        Examples
+        --------
+        >>> from pyansys import examples
+        >>> rst = examples.download_academic_rotor()
+        >>> rst.plot_sectors()
+
+        Save a screenshot of the sectors
+
+        >>> rst.plot_sectors(screenshot='sectors.png')
+
+        """
+        scalars = np.empty((self.n_sector, self._mas_grid.n_points))
+        scalars[:] = np.arange(self.n_sector).reshape(-1, 1)
+        kwargs.setdefault('show_edges', True)
+        kwargs.setdefault('n_colors', self.n_sector)
+        return self._plot_cyclic_point_scalars(scalars, None, add_text=False, **kwargs)
+
+    def plot(self, **kwargs):
         """Plot the full rotor geometry.
 
         Parameters
         ----------
-        color : string or 3 item list, optional, defaults to white
-            Either a string, rgb list, or hex color string.  For
-            example:
-
-            - ``color='white'``
-            - ``color='w'``
-            - ``color=[1, 1, 1]``
-            - ``color='#FFFFFF'``
-
-            Color will be overridden when scalars are input.
-
-        show_edges : bool, optional
-            Shows the edges of a mesh.  Does not apply to a wireframe
-            representation.
-
-        style : string, optional
-            Visualization style of the vtk mesh.  One for the
-            following:
-
-            - ``style='surface'``
-            - ``style='wireframe'``
-            - ``style='points'``
-
-            Defaults to ``'surface'``
-
-        off_screen : bool
-            Plots off screen when True.  Helpful for saving
-            screenshots without a window popping up.
-
-        full_screen : bool, optional
-            Opens window in full screen.  When enabled, ignores
-            window_size.  Default False.
-
-        screenshot : str or bool, optional
-            Saves screenshot to file when enabled.  See:
-            ``help(pyvista.Plotter.screenshot)``.  Default disabled.
-
-            When True, takes screenshot and returns numpy array of
-            image.
-
-        window_size : list, optional
-            Window size in pixels.  Defaults to [1024, 768]
-
-        show_bounds : bool, optional
-            Shows mesh bounds when True.  Default False. Alias
-            ``show_grid`` also accepted.
-
-        show_axes : bool, optional
-            Shows a vtk axes widget.  Enabled by default.
+        kwargs : keyword arguments
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             List of camera position, focal point, and view up.
+
+        Examples
+        --------
+        >>> from pyansys import examples
+        >>> rst = examples.download_academic_rotor()
+        >>> rst.plot()
+
+        Save a screenshot of the rotor
+
+        >>> rst.plot(screenshot='rotor.png')
+
         """
-        cs_cord = self._resultheader['csCord']
-        if cs_cord > 1:
-            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix.Invert()
-        else:
-            matrix = vtkMatrix4x4()
-            i_matrix = vtkMatrix4x4()
-
-        off_screen = kwargs.pop('off_screen', None)
-        window_size = kwargs.pop('window_size', None)
-        plotter = pv.Plotter(off_screen, window_size)
-        rang = 360.0 / self.n_sector
-        for i in range(self.n_sector):
-            actor = plotter.add_mesh(self.grid.copy(False),
-                                     color=color,
-                                     show_edges=show_edges, **kwargs)
-
-            # transform to standard position, rotate about Z axis,
-            # transform back
-            transform = vtkTransform()
-            transform.RotateZ(rang*i)
-            transform.Update()
-            rot_matrix = transform.GetMatrix()
-
-            if cs_cord > 1:
-                temp_matrix = vtkMatrix4x4()
-                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
-                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
-                transform.SetMatrix(rot_matrix)
-
-            actor.SetUserTransform(transform)
-
-        cpos = kwargs.pop('cpos', None)
-        if cpos is None:
-            cpos = plotter.get_default_cam_pos()
-            plotter.camera_position = cpos
-            plotter.camera_set = False
-        else:
-            plotter.camera_position = cpos
-
-        return plotter.show()
+        kwargs.setdefault('color', 'w')
+        kwargs.setdefault('show_edges', True)
+        return self._plot_cyclic_point_scalars(None, None, add_text=False, **kwargs)
 
     def _add_cyclic_properties(self):
         """Add cyclic properties"""
@@ -354,27 +304,48 @@ class CyclicResult(ResultFile):
                                     phase, as_complex, full_rotor, stress=True):
         """Combines repeated results from ANSYS and optionally
         duplicates/rotates it around the axis of rotation"""
+
+        # must scale value
+
         if as_complex or full_rotor:
-            result_combined = result + result_r*1j
+            if self._positive_cyclic_dir:
+                result_combined = result + result_r*1j
+            else:
+                result_combined = result - result_r*1j
+
             if phase:
                 result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
+
         else:  # convert to real
             result_combined = result*np.cos(phase) - result_r*np.sin(phase)
+
+        # TODO: can probably make this more efficient
+        # result_combined *= self.n_sector**(-1/2)
 
         # just return single sector
         if not full_rotor:
             return result_combined
 
         # Generate full rotor solution
-        result_expanded = np.empty((self.n_sector, result.shape[0], result.shape[1]),
-                                   np.complex128)
+        shp = (self.n_sector, result.shape[0], result.shape[1])
+        result_expanded = np.empty(shp,np.complex128)
         result_expanded[:] = result_combined
 
+        # convert hindex to nodal content
         f_arr = np.zeros(self.n_sector)
-        f_arr[hindex] = 1
-        jang = np.fft.ifft(f_arr)[:self.n_sector]*self.n_sector
-        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
-        full_result = np.real(result_expanded*cjang.reshape(-1, 1, 1))
+        f_arr[hindex] = self.n_sector
+
+        jang = np.fft.ifft(f_arr)[:self.n_sector]
+        jang *= 2*(2*self.n_sector)**(-1/2)  # must be adjusted of to expand
+
+        if self._positive_cyclic_dir:
+            cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
+        else:
+            cjang = jang * (np.cos(phase) + np.sin(phase) * 1j)
+
+        full_result = np.empty(shp)
+        full_result[:] = np.real(result_expanded*cjang.reshape(-1, 1, 1))
+        # full_result = np.ascontiguousarray(full_result)
 
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
@@ -385,9 +356,9 @@ class CyclicResult(ResultFile):
             matrix = vtkMatrix4x4()
             i_matrix = vtkMatrix4x4()
 
-        shp = (self.n_sector, result.shape[0], result.shape[1])
-        full_result = np.empty(shp)
-        full_result[:] = result
+        # shp = (self.n_sector, result.shape[0], result.shape[1])
+        # full_result = np.empty(shp)
+        # full_result[:] = full_result
 
         rang = 360.0 / self.n_sector
         for i in range(self.n_sector):
@@ -769,7 +740,7 @@ class CyclicResult(ResultFile):
             list containing (step, substep) of the requested result.
 
         phase : float
-            Phase adjustment of the stress in degrees.
+            Phase adjustment of the stress in radians.
 
         as_complex : bool, optional
             Reports stress as a complex result.  Real and imaginary
@@ -810,7 +781,7 @@ class CyclicResult(ResultFile):
 
         if self._resultheader['kan'] == 0:  # static result
             expanded_result = self._expand_cyclic_static(stress, tensor=True,
-                                                        stress=False)
+                                                         stress=False)
         elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
             hindex_table = self._resultheader['hindex']
@@ -1602,6 +1573,7 @@ class CyclicResult(ResultFile):
             See help(pyvista.plot) for additional keyword arguments.
 
         """
+        rnum = self.parse_step_substep(rnum)  # need cumulative
         if not full_rotor:
             return super().animate_nodal_solution(rnum,
                                                   comp=comp,
@@ -1718,6 +1690,11 @@ class CyclicResult(ResultFile):
         plotter.close()
         return plotter.camera_position
 
+    @wraps(animate_nodal_solution)
+    def animate_nodal_displacement(self, *args, **kwargs):
+        """wraps animate_nodal_solution"""
+        return self.animate_nodal_solution(*args, **kwargs)
+
     def _gen_full_rotor(self):
         """ Create full rotor vtk unstructured grid """
         grid = self._mas_grid.copy()
@@ -1810,11 +1787,13 @@ class CyclicResult(ResultFile):
         if node_components:
             grid, ind = self._extract_node_components(node_components,
                                                       sel_type_all)
-            scalars = scalars[:, ind]
+            if scalars is not None:
+                scalars = scalars[:, ind]
 
         elif element_components:
             grid, ind = self._extract_element_components(element_components)
-            scalars = scalars[:, ind]
+            if scalars is not None:
+                scalars = scalars[:, ind]
 
         # must be removed before add_mesh **kwargs
         window_size = kwargs.pop('window_size', None)
@@ -1822,7 +1801,8 @@ class CyclicResult(ResultFile):
         screenshot = kwargs.pop('screenshot', None)
         text_color = kwargs.pop('text_color', None)
         kwargs.setdefault('cmap', 'jet')
-        kwargs.setdefault('rng', [np.nanmin(scalars), np.nanmax(scalars)])
+        if scalars is not None:
+            kwargs.setdefault('rng', [np.nanmin(scalars), np.nanmax(scalars)])
 
         # Plot off screen when not interactive
         off_screen = kwargs.pop('off_screen', None)
@@ -1887,8 +1867,13 @@ class CyclicResult(ResultFile):
         else:
             rang = 360.0 / self.n_sector
             for i in range(self.n_sector):
+                if scalars is not None:
+                    sector_scalars = scalars[i]
+                else:
+                    sector_scalars = None
+
                 actor = plotter.add_mesh(grid.copy(False),
-                                         scalars=scalars[i],
+                                         scalars=sector_scalars,
                                          **kwargs)
 
                 # NAN/missing data are white
@@ -1926,15 +1911,9 @@ class CyclicResult(ResultFile):
             cpos = plotter.show(auto_close=False,
                                 window_size=window_size,
                                 full_screen=full_screen)
-            if screenshot is True:
-                img = plotter.screenshot()
-            else:
-                plotter.screenshot(screenshot)
+            plotter.screenshot(screenshot)
             plotter.close()
         else:
             cpos = plotter.show(window_size=window_size, full_screen=full_screen)
 
-        if screenshot is True:
-            return cpos, img
-        else:
-            return cpos
+        return cpos

@@ -20,6 +20,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(path, 'testfiles')
 cyclic_testfiles_path = os.path.join(path, 'cyclic_reader')
 cys12_path = os.path.join(testfiles_path, 'cyc12')
+academic_path = os.path.join(cyclic_testfiles_path, 'academic_rotor')
 
 # modal result z axis
 try:
@@ -36,14 +37,17 @@ skip_with_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
 @pytest.fixture(scope='module')
 def result_x():
     filename = os.path.join(testfiles_path, 'cyc12.rst')
-    return pyansys.read_binary(filename)
+    rst = pyansys.read_binary(filename)
+    return rst
 
 
 @pytest.fixture(scope='module')
 def cyclic_v182_z():
     # static result z axis
     filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    return pyansys.read_binary(filename)
+    rst = pyansys.read_binary(filename)
+    rst.positive_cyclic_dir = True
+    return rst
 
 
 @pytest.fixture(scope='module')
@@ -54,8 +58,24 @@ def cyclic_v182_z_with_comp():
 
 
 def test_non_cyclic():
-    with pytest.raises(Exception):
-        pyansys.CyclicResult(rstfile)
+    with pytest.raises(TypeError):
+        pyansys.cyclic_reader.CyclicResult(rstfile)
+
+
+@skip_with_no_xserver
+@pytest.mark.skipif(result_z is None, reason="Requires result file")
+def test_plot_sectors(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    cpos = result_z.plot_sectors(off_screen=True, screenshot=filename)
+    assert isinstance(cpos, CameraPosition)
+    assert os.path.isfile(filename)
+
+
+@skip_with_no_xserver
+def test_plot_sectors_x(result_x):
+    cpos = result_x.plot_sectors(off_screen=True)
+    assert isinstance(cpos, CameraPosition)
+
 
 
 @skip_with_no_xserver
@@ -153,9 +173,7 @@ def test_full_x_nodal_solution(result_x):
 
     # self = pyansys.read_binary(cyclic_x_filename)
     rnum = 0
-    phase = 0
-    full_rotor = True
-    nnum, disp = result_x.nodal_solution(rnum, phase, full_rotor=True,
+    nnum, disp = result_x.nodal_solution(rnum, phase=0, full_rotor=True,
                                          as_complex=False,
                                          in_nodal_coord_sys=False)
 
@@ -166,6 +184,14 @@ def test_full_x_nodal_solution(result_x):
     tmp = ansys_disp.reshape(disp.shape[0], n, 3)
     assert np.allclose(nnum[mask], ansys_nnum[:n])
     assert np.allclose(disp[:, mask], tmp)
+
+    nnum_alt, disp_alt = result_x.nodal_displacement(rnum, phase=0,
+                                                     full_rotor=True,
+                                                     as_complex=False,
+                                                     in_nodal_coord_sys=False)
+
+    assert np.allclose(nnum_alt, nnum)
+    assert np.allclose(disp_alt, disp)
 
 
 def test_full_z_nodal_solution(cyclic_v182_z):
@@ -182,6 +208,25 @@ def test_full_z_nodal_solution(cyclic_v182_z):
                                               full_rotor=True,
                                               as_complex=False,
                                               in_nodal_coord_sys=False)
+
+    mask = np.in1d(nnum, ansys_nnum)
+    n = mask.sum()
+    tmp = ansys_disp.reshape(disp.shape[0], n, 3)
+    assert np.allclose(disp[:, mask], tmp)
+
+
+def test_full_z_nodal_solution_phase(cyclic_v182_z):
+    """ need to open gui to output full rotor results """
+    from_ansys = np.load(os.path.join(cyclic_testfiles_path,
+                                      'prnsol_d_cyclic_z_full_v182.npz'))
+
+    ansys_nnum = from_ansys['nnum']
+    ansys_disp = from_ansys['disp']
+
+    rnum = 0
+    phase = 0
+    nnum, disp = cyclic_v182_z.nodal_solution(rnum, phase, full_rotor=True,
+                                              as_complex=True)
 
     mask = np.in1d(nnum, ansys_nnum)
     n = mask.sum()
@@ -284,7 +329,6 @@ def test_cyclic_z_harmonic_displacement():
     nnum, disp = result_z.nodal_solution((4, 2), full_rotor=True)
     mask = np.in1d(nnum, ansys_nnum)
     tmp = ansys_disp.reshape(disp.shape[0], mask.sum(), 3)
-
     assert np.allclose(disp[:, mask], tmp, atol=1E-5)
 
 
@@ -354,6 +398,21 @@ def test_nodal_thermal_strain_cyclic(result_x):
     nnum = nnum[mask]
     assert np.allclose(nnum, nnum_ans)
     assert np.allclose(strain, strain_ans)
+
+
+# def test_nodal_strain_cyclic_modal(academic):
+#     from_mapdl = np.load(os.path.join(academic_path, 'RSYS0_ROTOR_PRNSOL_EPTH_COMP.npz'))
+#     nnum_ans = from_mapdl['nnum']
+#     strain_ans = from_mapdl['strain']
+
+#     nnum, strain = result_x.nodal_thermal_strain(0)
+
+#     # include only common values
+#     mask = np.in1d(nnum, nnum_ans)
+#     strain = strain[:, mask, :6]  # strain includes eqv
+#     nnum = nnum[mask]
+#     assert np.allclose(nnum, nnum_ans)
+#     assert np.allclose(strain, strain_ans)
 
 
 @skip_with_no_xserver
