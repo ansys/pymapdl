@@ -26,7 +26,7 @@ class CyclicResult(ResultFile):
             raise TypeError('Result is not a cyclic model')
 
         self._animating = False
-        self._positive_cyclic_dir = False    # TODO: this needs to be figured out
+        # self._positive_cyclic_dir = True    # TODO: this needs to be figured out
         self._rotor_cache = None
         self._has_duplicate_sector = None
         self._is_repeated_mode = np.empty(0)
@@ -34,16 +34,16 @@ class CyclicResult(ResultFile):
 
         self._add_cyclic_properties()
 
-    @property
-    def positive_cyclic_dir(self):
-        """Rotor results are default anti-clockwise.  Set this to
-        `True` if cyclic results to not look correct.
-        """
-        return self._positive_cyclic_dir
+    # @property
+    # def positive_cyclic_dir(self):
+    #     """Rotor results are default anti-clockwise.  Set this to
+    #     `True` if cyclic results to not look correct.
+    #     """
+    #     return self._positive_cyclic_dir
 
-    @positive_cyclic_dir.setter
-    def positive_cyclic_dir(self, value):
-        self._positive_cyclic_dir = bool(value)
+    # @positive_cyclic_dir.setter
+    # def positive_cyclic_dir(self, value):
+    #     self._positive_cyclic_dir = bool(value)
 
     def plot_sectors(self, **kwargs):
         """Plot the full rotor and individually color the sectors.
@@ -125,15 +125,15 @@ class CyclicResult(ResultFile):
             self._repeated_index[mask_a] = np.nonzero(mask_b)[0]
             self._repeated_index[mask_b] = np.nonzero(mask_a)[0]
 
-    def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False,
-                       in_nodal_coord_sys=False):
+    def nodal_solution(self, rnum, phase=0, full_rotor=False, as_complex=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system.
 
         Parameters
         ----------
-        rnum : interger
-            Cumulative result number.  Zero based indexing.
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         phase : float, optional
             Phase to rotate sector result in radians.
@@ -147,10 +147,6 @@ class CyclicResult(ResultFile):
             Returns result as a complex number, otherwise as the real
             part rotated by phase.  Default False.
 
-        in_nodal_coord_sys : bool, optional
-            When True, returns results in the nodal coordinate system.
-            Default False.
-
         Returns
         -------
         nnum : numpy.ndarray
@@ -162,51 +158,29 @@ class CyclicResult(ResultFile):
             When full_rotor is True the array will be (nSector x nnod
             x numdof).
 
+        Examples
+        --------
+        Visualize the 1st nodal diameter mode.
+
+        >>> import pyansys
+        >>> result = pyansys.download_academic_rotor()
+        >>> result.nodal_solution((2, 1))
+
+        Same result but uses Python (zero based) cumulative indexing
+
+        >>> result.nodal_solution(2)
+
         Notes
         -----
         Somewhere between v15.0 and v18.2 ANSYS stopped writing the
-        duplicate sector to the result file and instead results in
-        pairs (i.e. harmonic index 1, -1).  This decreases their
-        result file size since harmonic pairs contain the same
-        information as the duplicate sector.
+        duplicate sector to the result file and instead records results in
+        pairs (i.e. harmonic index 1, -1).
 
         """
-        # get the nodal result
-        rnum = self.parse_step_substep(rnum)
-        full_nnum, full_result = super().nodal_solution(rnum,
-                                                        in_nodal_coord_sys)
 
-        # only concerned with the master sector
-        result = full_result[self._mas_ind]
-        nnum = full_nnum[self._mas_ind]
-
-        # combine or expand result if not modal
-        if self._resultheader['kan'] == 2:  # modal analysis
-            # combine modal solution results
-            hindex_table = self._resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            if self._is_repeated_mode[rnum]:
-                # get repeated result and combine
-                _, full_result_dup = super().nodal_solution(self._repeated_index[rnum])
-                result_dup = full_result_dup[self._mas_ind]
-            elif self._has_duplicate_sector:
-                # use the duplicate sector
-                result_dup = full_result[self._dup_ind]
-            else:
-                # otherwise, a standing wave (no complex component)
-                result_dup = np.zeros_like(result)
-
-            expanded_result = self._expand_cyclic_modal(result,
-                                                        result_dup,
-                                                        hindex, phase,
-                                                        as_complex,
-                                                        full_rotor)
-
-        if self._resultheader['kan'] == 0:  # static analysis
-            expanded_result = self._expand_cyclic_static(result)
-
-        return nnum, expanded_result
+        func = super().nodal_solution
+        return self._get_full_result(rnum, func, phase, full_rotor, as_complex,
+                                     tensor=False)
 
     @wraps(nodal_solution)
     def nodal_displacement(self, *args, **kwargs):
@@ -229,7 +203,7 @@ class CyclicResult(ResultFile):
         full_result[:] = result
 
         rang = 360.0 / self.n_sector
-        for i in range(self.n_sector):
+        for i in range(1, self.n_sector):
             # transform to standard position, rotate about Z axis,
             # transform back
             transform = vtkTransform()
@@ -292,7 +266,7 @@ class CyclicResult(ResultFile):
         f_arr = np.zeros(self.n_sector)
         f_arr[hindex] = 1
         jang = np.fft.ifft(f_arr)[:self.n_sector]*self.n_sector
-        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
+        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)  # 14-233
 
         result_expanded *= cjang.reshape(-1, 1, 1)
         if as_complex:
@@ -308,19 +282,16 @@ class CyclicResult(ResultFile):
         # must scale value
 
         if as_complex or full_rotor:
-            if self._positive_cyclic_dir:
-                result_combined = result + result_r*1j
-            else:
-                result_combined = result - result_r*1j
+            # if self._positive_cyclic_dir:
+            result_combined = result + result_r*1j
+            # else:
+                # result_combined = result - result_r*1j
 
             if phase:
                 result_combined *= 1*np.cos(phase) - 1j*np.sin(phase)
 
         else:  # convert to real
             result_combined = result*np.cos(phase) - result_r*np.sin(phase)
-
-        # TODO: can probably make this more efficient
-        # result_combined *= self.n_sector**(-1/2)
 
         # just return single sector
         if not full_rotor:
@@ -336,16 +307,17 @@ class CyclicResult(ResultFile):
         f_arr[hindex] = self.n_sector
 
         jang = np.fft.ifft(f_arr)[:self.n_sector]
-        jang *= 2*(2*self.n_sector)**(-1/2)  # must be adjusted of to expand
 
-        if self._positive_cyclic_dir:
-            cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
+        # must be adjusted of to expand
+        if hindex == 0 or hindex == self.n_sector/2:
+            jang *= self.n_sector**(-1/2)
         else:
-            cjang = jang * (np.cos(phase) + np.sin(phase) * 1j)
+            jang *= 2*(2*self.n_sector)**(-1/2)
+
+        cjang = jang * (np.cos(phase) - np.sin(phase) * 1j)
 
         full_result = np.empty(shp)
         full_result[:] = np.real(result_expanded*cjang.reshape(-1, 1, 1))
-        # full_result = np.ascontiguousarray(full_result)
 
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
@@ -356,12 +328,8 @@ class CyclicResult(ResultFile):
             matrix = vtkMatrix4x4()
             i_matrix = vtkMatrix4x4()
 
-        # shp = (self.n_sector, result.shape[0], result.shape[1])
-        # full_result = np.empty(shp)
-        # full_result[:] = full_result
-
         rang = 360.0 / self.n_sector
-        for i in range(self.n_sector):
+        for i in range(1, self.n_sector):
             # transform to standard position, rotate about Z axis,
             # transform back
             transform = vtkTransform()
@@ -375,7 +343,7 @@ class CyclicResult(ResultFile):
                 rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
 
             trans = pv.trans_from_matrix(rot_matrix)
-            if stress:  # transformation different for strain/stress
+            if stress:
                 _binary_reader.tensor_arbitrary(full_result[i], trans)
             else:
                 _binary_reader.tensor_strain_arbitrary(full_result[i], trans)
@@ -511,41 +479,113 @@ class CyclicResult(ResultFile):
         Nodes without a stress value will be NAN.
 
         """
+        func = super().nodal_stress
+        return self._get_full_result(rnum, func, phase, full_rotor, as_complex,
+                                     tensor=True, stress=True)
+
+    def _get_full_result(self, rnum, func, phase, full_rotor, as_complex,
+                         tensor=True, stress=False):
+        """Return the full rotor result or the complex result for a cyclic model.
+
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        phase : float
+            Phase adjustment of the stress in radians.
+
+        tensor : bool
+            True when the result is a stress/strain tensor.  False
+            when a scalar or displacement value.
+
+        stress : bool
+            True when tensor is a stress.  False when tensor is a
+            strain.  Ignored when not a tensor.
+
+        """
         rnum = self.parse_step_substep(rnum)
-        nnum, stress = super().nodal_stress(rnum)
-        nnum = nnum[self._mas_ind]
-        stress = stress[self._mas_ind]
+        nnum, full_result = func(rnum)
+
+        # full result may or may not contain the duplicate sector
+        if self._has_duplicate_sector:
+            result = full_result[self._mas_ind]
+            nnum = nnum[self._mas_ind]
+        else:
+            result = full_result
 
         if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self._expand_cyclic_static(stress, tensor=True)
+            expanded_result = self._expand_cyclic_static(result, tensor=tensor,
+                                                         stress=stress)
         elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
             hindex_table = self._resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
-                    rnum_r = rnum - 1
-                else:
-                    rnum_r = rnum + 1
-
-                # get repeated result and combine
-                _, stress_r = super().nodal_stress(rnum_r)
-
+            hindex = hindex_table[rnum]  # move this to expand_modal_tensor
+            result_r = self._get_complex_result(func, rnum, result)
+            if tensor:
+                expanded_result = self._expand_cyclic_modal_tensor(result,
+                                                                   result_r,
+                                                                   hindex,
+                                                                   phase,
+                                                                   as_complex,
+                                                                   full_rotor,
+                                                                   stress=stress)
             else:
-                stress_r = np.zeros_like(stress)
-
-            expanded_result = self._expand_cyclic_modal_tensor(stress,
-                                                               stress_r,
-                                                               hindex,
-                                                               phase,
-                                                               as_complex,
-                                                               full_rotor)
+                try:
+                    assert result.shape == result_r.shape
+                except:
+                    breakpoint()
+                expanded_result = self._expand_cyclic_modal(result,
+                                                            result_r,
+                                                            hindex,
+                                                            phase,
+                                                            as_complex,
+                                                            full_rotor)
         else:
             raise RuntimeError('Unsupported analysis type')
 
         return nnum, expanded_result
+
+    def _get_complex_result(self, func, rnum, full_result):
+        """Acquire the duplicate sector or repeated result.
+
+        Depending on the version of MAPDL, this may mean using the
+        result from the duplicate sector or the mode pair when there
+        are duplicate modes.
+
+        When there is no repeated mode or duplicate sector, returns an
+        all zero array.
+
+        Parameters
+        ----------
+        func : function
+            Function to acquire the sector only result.
+
+        rnum : int
+            Cumulative result number.
+
+        full_result : np.ndarray
+            Full result (may include duplicate sector).
+
+        Returns
+        --------
+        result_r : np.ndarray
+            Repeated result
+        """
+        has_dup_result = False
+        if self._has_duplicate_sector:
+            has_dup_result = self._dup_ind[-1] <= full_result.shape[0] - 1
+
+        if self._is_repeated_mode[rnum]:  # get mode pair result
+            _, result_r = func(self._repeated_index[rnum])
+            if result_r.shape[0] != self._mas_ind.size:
+                result_r = result_r[self._mas_ind]
+        elif has_dup_result:  # use the duplicate sector
+            result_r = full_result[self._dup_ind]
+        else:  # otherwise, a standing wave (no complex component)            
+            result_r = np.zeros((self._mas_ind.size, full_result.shape[1]),
+                                dtype=full_result.dtype)
+
+        return result_r
 
     def nodal_thermal_strain(self, rnum, phase=0, as_complex=False, full_rotor=False):
         """Nodal component thermal strains.  This record contains
@@ -594,43 +634,9 @@ class CyclicResult(ResultFile):
         Nodes without a strain will be NAN.
 
         """
-        rnum = self.parse_step_substep(rnum)
-        nnum, strain = super().nodal_thermal_strain(rnum)
-        nnum = nnum[self._mas_ind]
-        strain = strain[self._mas_ind]
-
-        if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self._expand_cyclic_static(strain, tensor=True,
-                                                         stress=False)
-        elif self._resultheader['kan'] == 2:  # modal analysis
-            # combine modal solution results
-            hindex_table = self._resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
-                    rnum_r = rnum - 1
-                else:
-                    rnum_r = rnum + 1
-
-                # get repeated result and combine
-                _, strain_r = super().nodal_elastic_strain(rnum_r)
-
-            else:
-                strain_r = np.zeros_like(strain)
-
-            expanded_result = self._expand_cyclic_modal_tensor(strain,
-                                                               strain_r,
-                                                               hindex,
-                                                               phase,
-                                                               as_complex,
-                                                               full_rotor,
-                                                               stress=False)
-        else:
-            raise RuntimeError('Unsupported analysis type')
-
-        return nnum, expanded_result
+        func = super().nodal_thermal_strain
+        return self._get_full_result(rnum, func, phase, full_rotor, as_complex,
+                                     tensor=True, stress=False)
 
     def plot_nodal_thermal_strain(self, rnum,
                                   comp=None,
@@ -774,43 +780,9 @@ class CyclicResult(ResultFile):
         Nodes without a strain will be NAN.
 
         """
-        rnum = self.parse_step_substep(rnum)
-        nnum, stress = super().nodal_elastic_strain(rnum)
-        nnum = nnum[self._mas_ind]
-        stress = stress[self._mas_ind]
-
-        if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self._expand_cyclic_static(stress, tensor=True,
-                                                         stress=False)
-        elif self._resultheader['kan'] == 2:  # modal analysis
-            # combine modal solution results
-            hindex_table = self._resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
-                    rnum_r = rnum - 1
-                else:
-                    rnum_r = rnum + 1
-
-                # get repeated result and combine
-                _, stress_r = super().nodal_elastic_strain(rnum_r)
-
-            else:
-                stress_r = np.zeros_like(stress)
-
-            expanded_result = self._expand_cyclic_modal_tensor(stress,
-                                                               stress_r,
-                                                               hindex,
-                                                               phase,
-                                                               as_complex,
-                                                               full_rotor,
-                                                               stress=False)
-        else:
-            raise RuntimeError('Unsupported analysis type')
-
-        return nnum, expanded_result
+        func = super().nodal_elastic_strain
+        return self._get_full_result(rnum, func, phase, full_rotor, as_complex,
+                                     tensor=True, stress=False)
 
     def plot_nodal_elastic_strain(self, rnum,
                                   comp=None, phase=0,
@@ -949,43 +921,9 @@ class CyclicResult(ResultFile):
         Nodes without a strain will be NAN.
 
         """
-        rnum = self.parse_step_substep(rnum)
-        nnum, stress = super().nodal_plastic_strain(rnum)
-        nnum = nnum[self._mas_ind]
-        stress = stress[self._mas_ind]
-
-        if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self._expand_cyclic_static(stress, tensor=True,
-                                                         stress=False)
-        elif self._resultheader['kan'] == 2:  # modal analysis
-            # combine modal solution results
-            hindex_table = self._resultheader['hindex']
-            hindex = hindex_table[rnum]
-
-            # if repeated mode
-            if hindex != 0 and -hindex in hindex_table:
-                if hindex < 0:
-                    rnum_r = rnum - 1
-                else:
-                    rnum_r = rnum + 1
-
-                # get repeated result and combine
-                _, stress_r = super().nodal_plastic_strain(rnum_r)
-
-            else:
-                stress_r = np.zeros_like(stress)
-
-            expanded_result = self._expand_cyclic_modal_tensor(stress,
-                                                               stress_r,
-                                                               hindex,
-                                                               phase,
-                                                               as_complex,
-                                                               full_rotor,
-                                                               stress=False)
-        else:
-            raise RuntimeError('Unsupported analysis type')
-
-        return nnum, expanded_result
+        func = super().nodal_plastic_strain
+        return self._get_full_result(rnum, func, phase, full_rotor, as_complex,
+                                     tensor=True, stress=False)
 
     def plot_nodal_plastic_strain(self, rnum,
                                   comp=None, phase=0,

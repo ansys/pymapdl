@@ -1,4 +1,3 @@
-import sys
 import os
 
 import numpy as np
@@ -35,19 +34,24 @@ skip_with_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
 
 # static result x axis
 @pytest.fixture(scope='module')
+def academic_rotor():
+    from pyansys.cyclic_reader import CyclicResult
+    filename = os.path.join(academic_path, 'academic_rotor.rst')
+    return CyclicResult(filename)
+
+
+# static result x axis
+@pytest.fixture(scope='module')
 def result_x():
     filename = os.path.join(testfiles_path, 'cyc12.rst')
-    rst = pyansys.read_binary(filename)
-    return rst
+    return pyansys.read_binary(filename)
 
 
 @pytest.fixture(scope='module')
 def cyclic_v182_z():
     # static result z axis
     filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    rst = pyansys.read_binary(filename)
-    rst.positive_cyclic_dir = True
-    return rst
+    return pyansys.read_binary(filename)
 
 
 @pytest.fixture(scope='module')
@@ -55,6 +59,42 @@ def cyclic_v182_z_with_comp():
     # cyclic modal with component
     filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182_w_comp.rst')
     return pyansys.read_binary(filename)
+
+
+@pytest.mark.parametrize("rtype", ['S', 'EPEL'])
+@pytest.mark.parametrize("load_step", [1, 2, 5, 13])  # fortran indexing
+@pytest.mark.parametrize("sub_step", [1, 2])  # fortran indexing
+def test_nodal_stress_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
+    rnum = (load_step, sub_step)
+    filename = 'SET%d,%d_RSYS0_%s.npz' % (rnum[0], rnum[1], rtype)
+    ans = np.load(os.path.join(academic_path, filename))
+    nnum_ans = ans['nnum']
+    stress_ans = ans['data']
+
+    if rtype == 'S':
+        nnum, stress = academic_rotor.nodal_stress(rnum, full_rotor=True)
+    elif rtype == 'EPEL':
+        nnum, stress = academic_rotor.nodal_elastic_strain(rnum, full_rotor=True)
+    else:
+        raise ValueError('rtype %s not configured in test' % rtype)
+
+    # ANSYS doesn't include results for all nodes (i.e. sector nodes)
+    mask = np.in1d(nnum, nnum_ans)
+    stress = stress[:, mask, :6]  # pyansys strain includes eqv
+    nnum = nnum[mask]
+    assert np.allclose(nnum, nnum_ans)
+
+    # ANSYS will not average across geometric discontinuities, pyansys
+    # always does.  These 10 nodes are along the blade/sector interface
+    dmask = np.ones(stress[0].shape[0], np.bool)
+    dmask[[99, 111, 115, 116, 117, 135, 142, 146, 147, 148]] = False
+
+    # large atol due to the float32 encoding of the stress
+    assert np.allclose(stress[:, dmask], stress_ans[:, dmask], atol=1)
+
+    # pdiff = (strain[:, dmask] - strain_ans[:, dmask])/strain[:, dmask]
+    # np.abs(pdiff).max()
+    # this number is small (aprox 0.0002%)
 
 
 def test_non_cyclic():
@@ -175,8 +215,7 @@ def test_full_x_nodal_solution(result_x):
     # self = pyansys.read_binary(cyclic_x_filename)
     rnum = 0
     nnum, disp = result_x.nodal_solution(rnum, phase=0, full_rotor=True,
-                                         as_complex=False,
-                                         in_nodal_coord_sys=False)
+                                         as_complex=False)
 
     assert np.allclose(np.sort(nnum), nnum), 'nnum must be sorted'
 
@@ -188,8 +227,7 @@ def test_full_x_nodal_solution(result_x):
 
     nnum_alt, disp_alt = result_x.nodal_displacement(rnum, phase=0,
                                                      full_rotor=True,
-                                                     as_complex=False,
-                                                     in_nodal_coord_sys=False)
+                                                     as_complex=False)
 
     assert np.allclose(nnum_alt, nnum)
     assert np.allclose(disp_alt, disp)
@@ -207,8 +245,7 @@ def test_full_z_nodal_solution(cyclic_v182_z):
     phase = 0
     nnum, disp = cyclic_v182_z.nodal_solution(rnum, phase,
                                               full_rotor=True,
-                                              as_complex=False,
-                                              in_nodal_coord_sys=False)
+                                              as_complex=False)
 
     mask = np.in1d(nnum, ansys_nnum)
     n = mask.sum()
@@ -401,21 +438,8 @@ def test_nodal_thermal_strain_cyclic(result_x):
     assert np.allclose(strain, strain_ans)
 
 
-# def test_nodal_strain_cyclic_modal(academic):
-#     from_mapdl = np.load(os.path.join(academic_path, 'RSYS0_ROTOR_PRNSOL_EPTH_COMP.npz'))
-#     nnum_ans = from_mapdl['nnum']
-#     strain_ans = from_mapdl['strain']
-
-#     nnum, strain = result_x.nodal_thermal_strain(0)
-
-#     # include only common values
-#     mask = np.in1d(nnum, nnum_ans)
-#     strain = strain[:, mask, :6]  # strain includes eqv
-#     nnum = nnum[mask]
-#     assert np.allclose(nnum, nnum_ans)
-#     assert np.allclose(strain, strain_ans)
-
-
 @skip_with_no_xserver
 def test_plot_nodal_thermal_strain(result_x):
     result_x.plot_nodal_thermal_strain(0, 'X', off_screen=True)
+
+
