@@ -812,7 +812,6 @@ class CyclicResult(ResultFile):
             - ``"XY"``
             - ``"YZ"``
             - ``"XZ"``
-            - ``"EQV"``
 
         phase : float, optional
             Phase angle of the modal result in radians.  Only valid
@@ -852,10 +851,10 @@ class CyclicResult(ResultFile):
 
         >>> import pyansys
         >>> result = pyansys.download_academic_rotor()
-        >>> result.plot_nodal_elastic_strain(0)
+        >>> result.plot_nodal_elastic_strain(0, 'X')
 
         """
-        idx = check_comp(STRAIN_TYPES, comp)
+        idx = check_comp(STRAIN_TYPES[:-1], comp)
         _, strain = self.nodal_elastic_strain(rnum, phase, False, full_rotor)
         scalars = strain[:, :, idx]
 
@@ -953,7 +952,6 @@ class CyclicResult(ResultFile):
             - ``"XY"``
             - ``"YZ"``
             - ``"XZ"``
-            - ``"EQV"``
 
         phase : float, optional
             Phase angle of the modal result in radians.  Only valid
@@ -996,7 +994,7 @@ class CyclicResult(ResultFile):
         >>> result.plot_nodal_plastic_strain(0)
 
         """
-        idx = check_comp(STRAIN_TYPES, comp)
+        idx = check_comp(STRAIN_TYPES[:-1], comp)
         _, strain = self.nodal_plastic_strain(rnum, phase, False, full_rotor)
         scalars = strain[:, :, idx]
 
@@ -1510,21 +1508,10 @@ class CyclicResult(ResultFile):
         rnum = self.parse_step_substep(rnum)  # need cumulative
         if 'full_rotor' in kwargs:
             raise NotImplementedError('``full_rotor`` keyword argument not supported')
-        # if not full_rotor:
-            # return super().animate_nodal_solution(rnum,
-            #                                       grid=self._mas_grid,
-            #                                       comp=comp,
-            #                                       displacement_factor=displacement_factor,
-            #                                       nangles=nangles,
-            #                                       add_text=add_text,
-            #                                       loop=loop,
-            #                                       movie_filename=movie_filename,
-            #                                       **kwargs)
 
         # normalize nodal solution
         _, complex_disp = self.nodal_solution(rnum, as_complex=True,
                                               full_rotor=True)
-        # complex_disp *= np.abs(complex_disp).max()/displacement_factor
         complex_disp *= displacement_factor
         complex_disp = complex_disp.reshape(-1, 3)
 
