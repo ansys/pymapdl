@@ -6,7 +6,8 @@ import numpy as np
 from pyvista.core.common import axis_rotation
 import pyvista as pv
 
-from pyansys.common import (STRESS_TYPES, PRINCIPAL_STRESS_TYPES,
+from pyansys.common import (STRESS_TYPES, STRAIN_TYPES,
+                            PRINCIPAL_STRESS_TYPES,
                             THERMAL_STRAIN_TYPES)
 from pyansys.rst import ResultFile, trans_to_matrix, check_comp
 from pyansys import _binary_reader
@@ -854,11 +855,11 @@ class CyclicResult(ResultFile):
         >>> result.plot_nodal_elastic_strain(0)
 
         """
-        idx = check_comp(STRESS_TYPES, comp)
+        idx = check_comp(STRAIN_TYPES, comp)
         _, strain = self.nodal_elastic_strain(rnum, phase, False, full_rotor)
         scalars = strain[:, :, idx]
 
-        kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp)
+        kwargs.setdefault('stitle', '%s Nodal Elastic Strain' % comp.upper())
         kwargs['node_components'] = node_components
         kwargs['element_components'] = element_components
         kwargs['show_displacement'] = show_displacement
@@ -995,7 +996,7 @@ class CyclicResult(ResultFile):
         >>> result.plot_nodal_plastic_strain(0)
 
         """
-        idx = check_comp(STRESS_TYPES, comp)
+        idx = check_comp(STRAIN_TYPES, comp)
         _, strain = self.nodal_plastic_strain(rnum, phase, False, full_rotor)
         scalars = strain[:, :, idx]
 
@@ -1375,7 +1376,7 @@ class CyclicResult(ResultFile):
             Node numbers of the result.
 
         temperature : numpy.ndarray
-            Tempature at each node.
+            Temperature at each node.
 
         Examples
         --------
@@ -1463,7 +1464,7 @@ class CyclicResult(ResultFile):
         kwargs['phase'] = phase
         return self._plot_cyclic_point_scalars(temp, rnum, **kwargs)
 
-    def animate_nodal_solution(self, rnum, comp='norm', full_rotor=True,
+    def animate_nodal_solution(self, rnum, comp='norm',
                                displacement_factor=0.1,
                                nangles=180,
                                add_text=True, loop=True,
@@ -1477,14 +1478,9 @@ class CyclicResult(ResultFile):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are 'x', 'y', 'z', and
-            'norm', corresponding to the x directin, y direction, z direction,
-            and the combined direction (x**2 + y**2 + z**2)**0.5
-
-        full_rotor : bool, optional
-            Expands the single sector solution for the full rotor.
-            Sectors are rotated counter-clockwise about the axis of
-            rotation.  Default True.
+            Component of displacement to display.  Options are 'x',
+            'y', 'z', or 'norm', which correspond to the x , y, z, or
+            the normalized direction ``(x**2 + y**2 + z**2)**0.5``
 
         displacement_factor : float, optional
             Increases or decreases displacement by a factor.
@@ -1504,7 +1500,7 @@ class CyclicResult(ResultFile):
 
         movie_filename : str, optional
             Filename of the movie to open.  Filename should end in mp4,
-            but other filetypes may be supported.  See "imagio.get_writer".
+            but other filetypes may be supported.  See ``imagio.get_writer``.
             A single loop of the mode will be recorded.
 
         kwargs : optional keyword arguments, optional
@@ -1512,16 +1508,18 @@ class CyclicResult(ResultFile):
 
         """
         rnum = self.parse_step_substep(rnum)  # need cumulative
-        if not full_rotor:
-            return super().animate_nodal_solution(rnum,
-                                                  comp=comp,
-                                                  displacement_factor=displacement_factor,
-                                                  nangles=nangles,
-                                                  # show_phase=show_phase,
-                                                  add_text=add_text,
-                                                  loop=loop,
-                                                  movie_filename=movie_filename,
-                                                  **kwargs)
+        if 'full_rotor' in kwargs:
+            raise NotImplementedError('``full_rotor`` keyword argument not supported')
+        # if not full_rotor:
+            # return super().animate_nodal_solution(rnum,
+            #                                       grid=self._mas_grid,
+            #                                       comp=comp,
+            #                                       displacement_factor=displacement_factor,
+            #                                       nangles=nangles,
+            #                                       add_text=add_text,
+            #                                       loop=loop,
+            #                                       movie_filename=movie_filename,
+            #                                       **kwargs)
 
         # normalize nodal solution
         _, complex_disp = self.nodal_solution(rnum, as_complex=True,
@@ -1557,8 +1555,10 @@ class CyclicResult(ResultFile):
             scalars = (complex_disp*complex_disp).sum(1)**0.5
 
         # intialize plotter
+        text_color = kwargs.pop('text_color', None)
         cpos = kwargs.pop('cpos', None)
-        plotter = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+        off_screen = kwargs.pop('off_screen', None)
+        plotter = pv.Plotter(off_screen=off_screen)
         if kwargs.pop('show_axes', True):
             plotter.add_axes()
 
@@ -1569,18 +1569,25 @@ class CyclicResult(ResultFile):
             else:
                 kwargs['rng'] = [-smax, smax]
 
+        background = kwargs.pop('background', None)
+        if background:
+            plotter.set_background(background)
+
         plotter.add_mesh(plot_mesh,
                          scalars=np.real(scalars),
                          **kwargs)
 
         # setup text
-        plotter.add_text(' ', font_size=20, position=[0, 0])
+        plotter.add_text(' ', font_size=20, position=[0, 0], color=text_color)
 
         if cpos:
             plotter.camera_position = cpos
 
         if movie_filename:
-            plotter.open_movie(movie_filename)
+            if movie_filename.strip()[-3:] == 'gif':
+                plotter.open_gif(movie_filename)
+            else:
+                plotter.open_movie(movie_filename)
 
         self._animating = True
         def q_callback():
@@ -1591,11 +1598,10 @@ class CyclicResult(ResultFile):
 
         # run until q is pressed
         plotter.show(interactive=False, auto_close=False,
-                     interactive_update=True)
+                     interactive_update=not off_screen)
 
         first_loop = True
         while self._animating:
-
             for angle in np.linspace(0, np.pi*2, nangles):
                 padj = 1*np.cos(angle) - 1j*np.sin(angle)
                 complex_disp_adj = np.real(complex_disp*padj)
@@ -1613,20 +1619,19 @@ class CyclicResult(ResultFile):
                                                (result_info, (angle*180/np.pi)))
 
                 plotter.update(1, force_redraw=True)
+                if not self._animating:
+                    break
 
                 if movie_filename and first_loop:
                     plotter.write_frame()
 
-                if not self._animating:
-                    break
-
             first_loop = False
-
             if not loop:
                 break
 
+        cpos = plotter.camera_position
         plotter.close()
-        return plotter.camera_position
+        return cpos
 
     @wraps(animate_nodal_solution)
     def animate_nodal_displacement(self, *args, **kwargs):
@@ -1841,7 +1846,7 @@ class CyclicResult(ResultFile):
         elif add_text:
             rnum = self.parse_step_substep(rnum)
             plotter.add_text(self.text_result_table(rnum), font_size=20,
-                             position=[0, 0], color=text_color)
+                             color=text_color)
 
         # must set camera position at the ended
         if cpos is not None:

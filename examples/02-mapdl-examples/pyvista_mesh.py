@@ -63,10 +63,10 @@ mapdl.modal_analysis(nmode=20, freqb=1)
 mapdl.exit()
 
 ###############################################################################
-# Load the result file within pyansys
+# Load the result file within ``pyansys`` and plot the 8th mode.
 result = mapdl.result
+print(result)
 
-# Plot the 8th mode
 result.plot_nodal_displacement(7, show_displacement=True, displacement_factor=0.4)
 
 ###############################################################################
@@ -76,10 +76,11 @@ result.plot_nodal_displacement(0, show_displacement=True,
 
 ###############################################################################
 # Animate a high frequency mode
+#
+# Get a smoother plot by disabling movie_filename and increasing ``nangles``.
+# Enable a continous plot looping with ```loop=True```.
+
 result.animate_nodal_displacement(18, loop=False, add_text=False,
                                   nangles=30, displacement_factor=0.4,
                                   show_axes=False, background='w',
                                   movie_filename='plane_vib.gif')
-
-# Get a smoother plot by disabling movie_filename and increasing `nangles`
-# also, enable a continous plot with `loop=True`

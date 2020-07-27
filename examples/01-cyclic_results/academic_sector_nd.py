@@ -4,7 +4,7 @@
 Understanding Nodal Diameters from a Cyclic Model Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows how to interpert modes from a cyclic analysis from
+This example shows how to interpret modes from a cyclic analysis from
 MAPDL result file from both single bladed sectors as well as
 multi-bladed sectors from a modal analysis.
 
@@ -179,7 +179,7 @@ _ = multi_blade_rotor.plot_sectors(cpos='xy', stitle='Sector',
 print(multi_blade_rotor.harmonic_indices)
 
 hi_1 = np.nonzero(multi_blade_rotor.harmonic_indices == 1)[0]
-print('Cumlative indices matching harmonic index 1:', hi_1)
+print('Cumulative indices matching harmonic index 1:', hi_1)
 
 ###############################################################################
 # Cumulative result 8 and harmonic index 1
@@ -220,3 +220,32 @@ _ = multi_blade_rotor.plot_nodal_displacement(rnum, comp='z',
                                               add_text=text, stitle=None,
                                               cmap='bwr')
 
+
+###############################################################################
+# Traveling Wave Animation
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# You can animate the traveling wave for a cyclic result using
+# ``animate_nodal_displacement``.  For a modal result, be sure to
+# modify ``displacement_factor`` to a value that properly scales the
+# modal solution.  Recall that solutions to a modal analysis from
+# MAPDL may or may not be scaled to unity or the mass matrix depending
+# on the settings within the modal analysis.
+#
+# Set ``loop=True`` to allow for a continuous plot, and modify
+# ``nangles`` to allow for a smoother or faster plot.  See
+# ``help(pyvista.plot)`` for additional keyword arguments.
+#
+_ = rotor.animate_nodal_displacement((3, 1), displacement_factor=0.03,
+                                     nangles=30, show_axes=False, background='w',
+                                     loop=False, add_text=False,
+                                     movie_filename='EO3_Mode1.gif')
+
+
+###############################################################################
+# Note how you can plot the backwards traveling wave by selecting the
+# second mode in the mode pair ``(3, 2)`` instead of ``(3, 1)``.
+#
+_ = rotor.animate_nodal_displacement((3, 2), displacement_factor=0.03,
+                                     nangles=30, show_axes=False, background='w',
+                                     loop=False, add_text=False,
+                                     movie_filename='EO3_Mode1.gif')

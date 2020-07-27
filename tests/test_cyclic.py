@@ -61,10 +61,10 @@ def cyclic_v182_z_with_comp():
     return pyansys.read_binary(filename)
 
 
-@pytest.mark.parametrize("rtype", ['S', 'EPEL'])
+@pytest.mark.parametrize("rtype", ['S', 'EPEL', 'S,PRIN'])
 @pytest.mark.parametrize("load_step", [1, 2, 5, 13])  # fortran indexing
 @pytest.mark.parametrize("sub_step", [1, 2])  # fortran indexing
-def test_nodal_stress_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
+def test_nodal_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
     rnum = (load_step, sub_step)
     filename = 'SET%d,%d_RSYS0_%s.npz' % (rnum[0], rnum[1], rtype)
     ans = np.load(os.path.join(academic_path, filename))
@@ -75,6 +75,8 @@ def test_nodal_stress_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
         nnum, stress = academic_rotor.nodal_stress(rnum, full_rotor=True)
     elif rtype == 'EPEL':
         nnum, stress = academic_rotor.nodal_elastic_strain(rnum, full_rotor=True)
+    elif rtype == 'S,PRIN':
+        nnum, stress = academic_rotor.principal_nodal_stress(rnum, full_rotor=True)
     else:
         raise ValueError('rtype %s not configured in test' % rtype)
 

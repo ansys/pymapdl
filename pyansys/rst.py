@@ -4,7 +4,6 @@ Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
 """
 from collections.abc import Iterable
-from itertools import compress
 import time
 import warnings
 from threading import Thread
@@ -539,6 +538,7 @@ class ResultFile(AnsysBinary):
             scalars = (scalars*scalars).sum(1)**0.5
 
             stitle = 'Normalized\n%s\n' % label
+        kwargs.setdefault('stitle', stitle)
 
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
@@ -561,7 +561,6 @@ class ResultFile(AnsysBinary):
             grid = self.grid
 
         return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
-                                        stitle=stitle,
                                         show_displacement=show_displacement,
                                         displacement_factor=displacement_factor,
                                         node_components=node_components,
@@ -777,7 +776,8 @@ class ResultFile(AnsysBinary):
                 scalars = (disp*disp).sum(1)**0.5
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
             if comp:
                 scalars = scalars[ind]
         elif element_components:
@@ -1507,8 +1507,12 @@ class ResultFile(AnsysBinary):
         # include the nodes corresponding to each element
         enode = []
         nnode = nodstr[etype]
-        for i in sidx:
-            enode.append(self.geometry.elem[i][10:10+nnode[i]])
+        if sort:
+            for i in sidx:
+                enode.append(self.geometry.elem[i][10:10+nnode[i]])
+        else:
+            for i in range(enum.size):
+                enode.append(self.geometry.elem[i][10:10+nnode[i]])
 
         return enum, element_data, enode
 
@@ -1735,9 +1739,6 @@ class ResultFile(AnsysBinary):
             else:
                 disp = disp[ind]
 
-            # if animate:  # scale for max displacement
-            #     disp /= (np.abs(disp).max()/displacement_factor)
-
         if scalars is not None:
             if scalars.ndim == 2:
                 scalars = scalars[:, ind]
@@ -1753,26 +1754,17 @@ class ResultFile(AnsysBinary):
             rng = kwargs.pop('rng', None)
 
         cmap = kwargs.pop('cmap', 'jet')
-        smooth_shading = kwargs.pop('smooth_shading', True)
         window_size = kwargs.pop('window_size', [1024, 768])
         full_screen = kwargs.pop('full_screen', False)
         notebook = kwargs.pop('notebook', False)
         off_screen = kwargs.pop('off_screen', None)
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
-        color = kwargs.pop('color', 'w')
-        interpolate_before_map = kwargs.pop('interpolate_before_map', True)
         interactive = kwargs.pop('interactive', True)
 
-        # coordinate transformation for cyclic replication
-        cs_cord = self._resultheader['csCord']
-        if cs_cord > 1:
-            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix.Invert()
-        else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+        kwargs.setdefault('smooth_shading', True)
+        kwargs.setdefault('color', 'w')
+        kwargs.setdefault('interpolate_before_map', True)
 
         plotter = pv.Plotter(off_screen=off_screen, notebook=notebook)
 
@@ -1783,65 +1775,20 @@ class ResultFile(AnsysBinary):
         # set background
         plotter.background_color = kwargs.pop('background', None)
 
-        n_sector = 1
-        if np.any(scalars):
-            if self.n_sector > 1:
-                if scalars.ndim != 2:
-                    n_sector = 1
-                    scalars = [scalars]
-                elif scalars.ndim == 1:
-                    scalars = [scalars]
-                else:
-                    n_sector = self.n_sector
-            elif scalars.ndim == 1:
-                scalars = [scalars]
-        else:
-            if self.n_sector > 1:
-                if kwargs.pop('full_rotor', True):
-                    n_sector = self.n_sector
-                    scalars = [None]*n_sector
-                else:
-                    scalars = [None]
-            else:
-                scalars = [None]
-
-        rang = 360.0 / self.n_sector
-
         # remove extra keyword args
         kwargs.pop('node_components', None)
         kwargs.pop('sel_type_all', None)
 
         if overlay_wireframe:
-            plotter.add_mesh(self.grid, color='w', style='wireframe',
-                             opacity=0.5, **kwargs)
+            plotter.add_mesh(self.grid, style='wireframe', color='w',
+                             opacity=0.5)
 
-        for i in range(n_sector):
-            copied_mesh = mesh.copy(False)
-            actor = plotter.add_mesh(copied_mesh,
-                                     color=color,
-                                     scalars=scalars[i],
-                                     rng=rng,
-                                     smooth_shading=smooth_shading,
-                                     interpolate_before_map=interpolate_before_map,
-                                     cmap=cmap,
-                                     **kwargs)
-
-            # transform to standard position, rotate about Z axis,
-            # transform back
-            vtk_transform = vtk.vtkTransform()
-            vtk_transform.RotateZ(rang*i)
-            vtk_transform.Update()
-            rot_matrix = vtk_transform.GetMatrix()
-
-            if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
-                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
-                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
-                vtk_transform.SetMatrix(rot_matrix)
-
-            actor.SetUserTransform(vtk_transform)
-
-        # plotter.add_scalar_bar()
+        copied_mesh = mesh.copy()
+        plotter.add_mesh(copied_mesh,
+                         scalars=scalars,
+                         rng=rng,
+                         cmap=cmap,
+                         **kwargs)
 
         # NAN/missing data are white
         # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
@@ -1859,7 +1806,7 @@ class ResultFile(AnsysBinary):
         # add table
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
-            actor = plotter.add_text(result_text, font_size=20)
+            plotter.add_text(result_text, font_size=20)
 
         if animate:
             orig_pts = copied_mesh.points.copy()
@@ -1867,7 +1814,6 @@ class ResultFile(AnsysBinary):
                          interactive_update=not off_screen)
 
             self._animating = True
-
             def q_callback():
                 """exit when user wants to leave"""
                 self._animating = False
@@ -1879,13 +1825,12 @@ class ResultFile(AnsysBinary):
             while self._animating:
                 for j, angle in enumerate(np.linspace(0, np.pi*2, nangles + 1)[:-1]):
                     mag_adj = np.sin(angle)
-                    if scalars[0] is not None:
-                        copied_mesh.active_scalars[:] = scalars[0]*mag_adj
-
+                    if scalars is not None:
+                        copied_mesh.active_scalars[:] = scalars*mag_adj
                     copied_mesh.points[:] = orig_pts + disp*mag_adj
 
                     # normals have to be updated on the fly
-                    if smooth_shading:
+                    if kwargs['smooth_shading']:
                         if cached_normals[j] is None:
                             copied_mesh.compute_normals(cell_normals=False,
                                                         inplace=True)
@@ -1909,7 +1854,9 @@ class ResultFile(AnsysBinary):
                 first_loop = False
                 if not loop:
                     break
+
             plotter.close()
+            cpos = plotter.camera_position
 
         elif screenshot:
             cpos = plotter.show(auto_close=False, interactive=interactive,
@@ -1920,6 +1867,7 @@ class ResultFile(AnsysBinary):
             else:
                 plotter.screenshot(screenshot)
             plotter.close()
+
         else:
             cpos = plotter.show(interactive=interactive,
                                 window_size=window_size,
@@ -2414,7 +2362,7 @@ class ResultFile(AnsysBinary):
             Node numbers of the result.
 
         temperature : numpy.ndarray
-            Tempature at each node.
+            Temperature at each node.
 
         Examples
         --------
