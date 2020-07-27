@@ -1,0 +1,5 @@
+steps:
+- script: |
+    python -m pip install -r requirements_build.txt
+    python setup.py bdist_wheel
+  displayName: 'Build wheel'

@@ -1,0 +1,6 @@
+steps:
+- script: |
+    cd dist
+    python -m pip install $(package_name) -f .
+    cd ..
+  displayName: 'Install pyansys'

@@ -45,7 +45,8 @@ jobs:
       displayName: Build wheels using manylinux2010
     - script: |
         .ci/setup_headless_display.sh
-    - template: .ci/azure-steps.yml
+    - template: .ci/install_pyansys.yml
+    - template: .ci/unit_testing.yml
     - template: .ci/azure-publish-dist.yml
 
 
@@ -70,7 +71,9 @@ jobs:
     - powershell: |
         powershell .ci/install_opengl.ps1
       displayName: 'Install OpenGL'
-    - template: .ci/azure-steps.yml
+    - template: .ci/build_wheel.yml
+    - template: .ci/install_pyansys.yml
+    - template: .ci/unit_testing.yml
     - template: .ci/azure-publish-dist.yml
 
 
@@ -90,7 +93,9 @@ jobs:
   steps:
     - script: .ci/macos-install-python.sh '$(python.version)'
       displayName: Install Python
-    - template: .ci/azure-steps.yml
+    - template: .ci/build_wheel.yml
+    - template: .ci/install_pyansys.yml
+    - template: .ci/unit_testing_allow_error.yml
     - template: .ci/azure-publish-dist.yml
 
 # docs are built locally (for now) due to MAPDL requirement
