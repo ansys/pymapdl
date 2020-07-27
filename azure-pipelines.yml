@@ -78,8 +78,6 @@ jobs:
 
 
 - job: macOS
-  variables:
-    python.architecture: 'x64'
   strategy:
     matrix:
       Python36:

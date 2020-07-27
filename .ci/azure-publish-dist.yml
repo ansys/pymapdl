@@ -1,7 +1,7 @@
 steps:
 - task: PublishPipelineArtifact@0
   inputs:
-    artifactName: 'artifact_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+    artifactName: 'artifact_$(Agent.OS)_$(Agent.JobName)'
     targetPath: 'dist'
 
 - script: |
