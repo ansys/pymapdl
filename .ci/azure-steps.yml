@@ -17,4 +17,5 @@ steps:
     cd tests
     python -m pytest -v --cov pyvista --cov-report xml
     cd ..
+  continueOnError: eq(variables['Agent.OS'], 'Darwin')
   displayName: 'Unit Testing'
