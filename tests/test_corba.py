@@ -369,9 +369,7 @@ def test_nnum(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    assert mapdl._nblock_cache is None
     assert np.allclose(mapdl.nnum, range(1, 12))
-    assert mapdl._nblock_cache is not None
 
 
 @pytest.mark.parametrize("knum", [True, False])

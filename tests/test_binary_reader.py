@@ -19,12 +19,6 @@ except ImportError:
     HAS_FFMPEG = False
 
 
-try:
-    __file__
-except:
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_binary_reader.py'
-
-
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
@@ -137,7 +131,7 @@ def test_plot_component():
     result.plot_nodal_solution(0, node_components=components,
                                off_screen=True, sel_type_all=False)
     result.plot_nodal_stress(0, 'x', node_components=components, off_screen=True)
-    result.plot_principal_nodal_stress(0, 'EQV',
+    result.plot_principal_nodal_stress(0, 'SEQV',
                                        node_components=components, off_screen=True)
 
 

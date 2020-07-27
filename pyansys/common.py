@@ -13,6 +13,11 @@ import pyvista as pv
 from pyansys._binary_reader import c_read_record
 from pyansys import _binary_reader
 
+STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
+PRINCIPAL_STRESS_TYPES = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+STRAIN_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
+THERMAL_STRAIN_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV', 'ESWELL']
+
 ANSYS_BINARY_FILE_TYPES = {2: 'Element Matrix File',
                            3: 'Element Save Data file',
                            4: 'Full stiffness-mass matrix File',

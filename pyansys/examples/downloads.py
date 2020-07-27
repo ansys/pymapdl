@@ -57,6 +57,7 @@ def _retrieve_file(url, filename):
 def download_file(filename):
     return _download_file(filename)
 
+
 def _download_file(filename):
     url = _get_vtk_file_url(filename)
     return _retrieve_file(url, filename)
@@ -64,7 +65,10 @@ def _download_file(filename):
 
 def _download_and_read(filename):
     saved_file, _ = _download_file(filename)
-    return pyansys.read_binary(saved_file)
+    if saved_file[-3:] == 'cdb':
+        return pyansys.Archive(saved_file)
+    else:
+        return pyansys.read_binary(saved_file)
 
 
 ###############################################################################
@@ -106,3 +110,18 @@ def _download_shell181():
 def download_corner_pipe():
     """Corner pipe result for unit testing and basic demo"""
     return _download_and_read('cyc_stress.rst')
+
+
+def download_academic_rotor_result():
+    """Cyclic academic rotor result file"""
+    return _download_and_read('academic_rotor.rst')
+
+
+def download_academic_rotor_archive():
+    """Cyclic academic rotor archive file"""
+    return _download_and_read('academic_rotor.cdb')
+
+
+def download_academic_rotor_4blade_result():
+    """Cyclic academic rotor result file"""
+    return _download_and_read('academic_rotor_4_blade.rst')

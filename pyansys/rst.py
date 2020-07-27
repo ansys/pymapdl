@@ -4,10 +4,8 @@ Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
 """
 from collections.abc import Iterable
-from itertools import compress
 import time
 import warnings
-import logging
 from threading import Thread
 from functools import wraps
 
@@ -23,14 +21,17 @@ from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                result_header_keys)
 from pyansys._mp_keys import mp_keys
 from pyansys.common import (read_table, parse_header, AnsysBinary,
-                            read_standard_header, rotate_to_global)
+                            read_standard_header, rotate_to_global,
+                            PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
+                            STRAIN_TYPES, THERMAL_STRAIN_TYPES)
 from pyansys.misc import vtk_cell_info
+from pyansys.rst_avail import AvailableResults
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
-# Create logger
-LOG = logging.getLogger(__name__)
-LOG.setLevel('DEBUG')
+# # Create logger
+# LOG = logging.getLogger(__name__)
+# LOG.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -84,7 +85,7 @@ class ResultFile(AnsysBinary):
 
         # Get the total number of results and log it
         self.nsets = len(self._resultheader['rpointers'])
-        LOG.debug('There are %d result(s) in this file', self.nsets)
+        # LOG.debug('There are %d result(s) in this file', self.nsets)
 
         # Get indices to resort nodal and element results
         self._sidx = np.argsort(self._resultheader['neqv'])
@@ -103,11 +104,17 @@ class ResultFile(AnsysBinary):
         self._geometry_header = {}
         self._materials = None
         self._section_data = None
+        self._available_results = AvailableResults(self._resultheader['AvailData'])
 
     @property
     def n_sector(self):
         """Number of sectors"""
         return self._resultheader['nSector']
+
+    @property
+    def n_results(self):
+        """Number of results"""
+        return len(self.time_values)
 
     def _read_result_header(self):
         """Returns pointers used to access results from an ANSYS result file.
@@ -531,6 +538,7 @@ class ResultFile(AnsysBinary):
             scalars = (scalars*scalars).sum(1)**0.5
 
             stitle = 'Normalized\n%s\n' % label
+        kwargs.setdefault('stitle', stitle)
 
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
@@ -553,7 +561,6 @@ class ResultFile(AnsysBinary):
             grid = self.grid
 
         return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
-                                        stitle=stitle,
                                         show_displacement=show_displacement,
                                         displacement_factor=displacement_factor,
                                         node_components=node_components,
@@ -688,8 +695,9 @@ class ResultFile(AnsysBinary):
                                node_components=None,
                                element_components=None,
                                sel_type_all=True, add_text=True,
-                               max_disp=0.1, nangles=100, loop=True,
-                               movie_filename=None, **kwargs):
+                               displacement_factor=0.1, nangles=100,
+                               loop=True, movie_filename=None,
+                               **kwargs):
         """Animate nodal solution.  Assumes nodal solution is a
         displacement array from a modal solution.
 
@@ -718,9 +726,8 @@ class ResultFile(AnsysBinary):
         add_text : bool, optional
             Adds information about the result when rnum is given.
 
-        max_disp : float, optional
-            Maximum displacement in the units of the model.  Default
-            0.1
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         nangles : int, optional
             Number of "frames" between each full cycle.
@@ -769,7 +776,8 @@ class ResultFile(AnsysBinary):
                 scalars = (disp*disp).sum(1)**0.5
 
         if node_components:
-            grid, ind = self._extract_node_components(node_components, sel_type_all)
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
             if comp:
                 scalars = scalars[ind]
         elif element_components:
@@ -786,13 +794,14 @@ class ResultFile(AnsysBinary):
                                         element_components=element_components,
                                         sel_type_all=sel_type_all,
                                         nangles=nangles,
+                                        displacement_factor=displacement_factor,
                                         movie_filename=movie_filename,
-                                        max_disp=max_disp, loop=loop, **kwargs)
+                                        loop=loop, **kwargs)
 
     @wraps(animate_nodal_solution)
     def animate_nodal_displacement(self, *args, **kwargs):
         """wraps animate_nodal_solution"""
-        self.animate_nodal_solution(*args, **kwargs)
+        return self.animate_nodal_solution(*args, **kwargs)
 
     def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
@@ -1029,8 +1038,7 @@ class ResultFile(AnsysBinary):
         for _ in range(ncomp):
             table, sz = self.read_record(file_ptr, True)
             file_ptr += sz  # increment file_pointer
-
-            name = table[1:9].tobytes().split(b'\x00')[0].decode('utf')
+            name = table[1:9].tobytes().split(b'\x00')[0].decode('latin')
             name = name[:4][::-1] + name[4:8][::-1] + name[8:12][::-1] +\
                    name[12:16][::-1] + name[16:20][::-1] + name[20:24][::-1] +\
                    name[24:28][::-1] + name[28:32][::-1]
@@ -1057,7 +1065,6 @@ class ResultFile(AnsysBinary):
         nodes = np.empty((nnod, 6), np.float)
         _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
                                   nnod, nodes, nnum)
-
         # Element information
         nelm = geometry_header['nelm']
         maxety = geometry_header['maxety']
@@ -1464,8 +1471,12 @@ class ResultFile(AnsysBinary):
             err_str += '\nAvailable types:\n'
             for key in ELEMENT_INDEX_TABLE_KEYS:
                 err_str += '\t%s: %s\n' % (key, element_index_table_info[key])
-
             raise ValueError(err_str)
+
+        if table_ptr in self.available_results._parsed_bits:
+            if table_ptr not in self.available_results:
+                raise ValueError('Result %s is not available in this result file'
+                                 % table_ptr)
 
         # location of data pointer within each element result table
         table_index = ELEMENT_INDEX_TABLE_KEYS.index(table_ptr)
@@ -1496,8 +1507,12 @@ class ResultFile(AnsysBinary):
         # include the nodes corresponding to each element
         enode = []
         nnode = nodstr[etype]
-        for i in sidx:
-            enode.append(self.geometry.elem[i][10:10+nnode[i]])
+        if sort:
+            for i in sidx:
+                enode.append(self.geometry.elem[i][10:10+nnode[i]])
+        else:
+            for i in range(enum.size):
+                enode.append(self.geometry.elem[i][10:10+nnode[i]])
 
         return enum, element_data, enode
 
@@ -1536,6 +1551,14 @@ class ResultFile(AnsysBinary):
         which returns:
         S1, S2, S3 principal stresses, SINT stress intensity, and SEQV
         equivalent stress.
+
+        Internal averaging algorthim averages the component values
+        from the elements at a common node and then calculates the
+        principal using the averaged value.
+
+        See the MAPDL ``AVPRIN`` command for more details.
+        ``pyansys`` uses the default ``AVPRIN, 0`` option.
+
         """
         # get component stress
         nodenum, stress = self.nodal_stress(rnum)
@@ -1543,11 +1566,13 @@ class ResultFile(AnsysBinary):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    def plot_principal_nodal_stress(self, rnum, stype=None,
+    def plot_principal_nodal_stress(self, rnum, comp=None,
+                                    show_displacement=False,
+                                    displacement_factor=1.0,
                                     node_components=None,
                                     element_components=None,
                                     sel_type_all=True, **kwargs):
-        """Plot the principal stress at each node in the solution.
+        """Plot the principal stress.
 
         Parameters
         ----------
@@ -1555,13 +1580,18 @@ class ResultFile(AnsysBinary):
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        stype : string
-            Stress type to plot.  S1, S2, S3 principal stresses, SINT
+        comp : string
+            Stress component to plot.  S1, S2, S3 principal stresses, SINT
             stress intensity, and SEQV equivalent stress.
 
             Stress type must be a string from the following list:
+            ``['S1', 'S2', 'S3', 'SINT', 'SEQV']``
 
-            ['S1', 'S2', 'S3', 'SINT', 'SEQV']
+        show_displacement : bool, optional
+            Deforms mesh according to the result.
+
+        displacement_factor : float, optional
+            Increases or decreases displacement by a factor.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -1578,23 +1608,23 @@ class ResultFile(AnsysBinary):
             containing all nodes of the component.  Default True.
 
         kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+            Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
         -------
         cpos : list
             VTK camera position.
 
-        stress : np.ndarray
-            Array used to plot stress.
-        """
-        if stype is None:
-            raise Exception("Stress type must be a string from the following list:\n" +
-                            "['1', '2', '3', 'INT', 'EQV']")
-        stype = stype.upper()
+        Examples
+        --------
+        Plot the equivalent von mises stress
 
-        rnum = self.parse_step_substep(rnum)
-        stress = self.principle_stress_for_plotting(rnum, stype)
+        >>> rst.plot_principal_nodal_stress(0, comp='SEQV')
+
+        """
+        # get the correct component of the principal stress
+        idx = check_comp(PRINCIPAL_STRESS_TYPES, comp)
+        stress = self.principal_nodal_stress(rnum)[1][:, idx]
 
         if node_components:
             grid, ind = self._extract_node_components(node_components, sel_type_all)
@@ -1605,17 +1635,20 @@ class ResultFile(AnsysBinary):
         else:
             grid = self.grid
 
-        if 'stitle' not in kwargs:
-            stype_stitle_map = {'1': 'Principal Stress 1',
-                                '2': 'Principal Stress 2',
-                                '3': 'Principal Stress 3',
-                                'INT': 'Stress Intensity',
-                                'EQV': 'von Mises Stress'}
-            kwargs['stitle'] = stype_stitle_map[stype]
+        stype_stitle_map = {'S1': 'Principal Stress 1',
+                            'S2': 'Principal Stress 2',
+                            'S3': 'Principal Stress 3',
+                            'SINT': 'Stress Intensity',
+                            'SEQV': 'von Mises Stress'}
+        kwargs.setdefault('stitle', stype_stitle_map[comp])
 
-        return self._plot_point_scalars(stress, rnum=rnum, grid=grid, **kwargs)
+        return self._plot_point_scalars(stress, grid=grid, rnum=rnum,
+                                        show_displacement=show_displacement,
+                                        displacement_factor=displacement_factor,
+                                        **kwargs)
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+
         """ return a 4x4 transformation array for a given coordinate system """
         # assemble 4 x 4 matrix
         csys = self._c_systems[cs_cord]
@@ -1634,7 +1667,7 @@ class ResultFile(AnsysBinary):
                             overlay_wireframe=False, node_components=None,
                             element_components=None,
                             sel_type_all=True, movie_filename=None,
-                            max_disp=0.1, **kwargs):
+                            **kwargs):
         """Plot point scalars on active mesh.
 
         Parameters
@@ -1670,6 +1703,8 @@ class ResultFile(AnsysBinary):
         cpos : list
             Camera position.
         """
+        if rnum:
+            rnum = self.parse_step_substep(rnum)
         loop = kwargs.pop('loop', False)
 
         if grid is None:
@@ -1689,7 +1724,7 @@ class ResultFile(AnsysBinary):
             grid.points = new_points
 
         elif animate:
-            disp = self.nodal_solution(rnum)[1][:, :3]
+            disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
 
         # extract mesh surface
         mapped_indices = None
@@ -1703,9 +1738,6 @@ class ResultFile(AnsysBinary):
                 disp = disp[mapped_indices][ind]
             else:
                 disp = disp[ind]
-
-            if animate:  # scale for max displacement
-                disp /= (np.abs(disp).max()/max_disp)
 
         if scalars is not None:
             if scalars.ndim == 2:
@@ -1722,27 +1754,17 @@ class ResultFile(AnsysBinary):
             rng = kwargs.pop('rng', None)
 
         cmap = kwargs.pop('cmap', 'jet')
-        smooth_shading = kwargs.pop('smooth_shading', True)
         window_size = kwargs.pop('window_size', [1024, 768])
         full_screen = kwargs.pop('full_screen', False)
         notebook = kwargs.pop('notebook', False)
         off_screen = kwargs.pop('off_screen', None)
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
-        color = kwargs.pop('color', 'w')
-        interpolate_before_map = kwargs.pop('interpolate_before_map', True)
         interactive = kwargs.pop('interactive', True)
-        stitle = kwargs.pop('stitle', None)
 
-        # coordinate transformation for cyclic replication
-        cs_cord = self._resultheader['csCord']
-        if cs_cord > 1:
-            matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
-            i_matrix.Invert()
-        else:
-            matrix = vtk.vtkMatrix4x4()
-            i_matrix = vtk.vtkMatrix4x4()
+        kwargs.setdefault('smooth_shading', True)
+        kwargs.setdefault('color', 'w')
+        kwargs.setdefault('interpolate_before_map', True)
 
         plotter = pv.Plotter(off_screen=off_screen, notebook=notebook)
 
@@ -1753,66 +1775,20 @@ class ResultFile(AnsysBinary):
         # set background
         plotter.background_color = kwargs.pop('background', None)
 
-        n_sector = 1
-        if np.any(scalars):
-            if self.n_sector > 1:
-                if scalars.ndim != 2:
-                    n_sector = 1
-                    scalars = [scalars]
-                elif scalars.ndim == 1:
-                    scalars = [scalars]
-                else:
-                    n_sector = self.n_sector
-            elif scalars.ndim == 1:
-                scalars = [scalars]
-        else:
-            if self.n_sector > 1:
-                if kwargs.pop('full_rotor', True):
-                    n_sector = self.n_sector
-                    scalars = [None]*n_sector
-                else:
-                    scalars = [None]
-            else:
-                scalars = [None]
-
-        rang = 360.0 / self.n_sector
-
         # remove extra keyword args
         kwargs.pop('node_components', None)
         kwargs.pop('sel_type_all', None)
 
         if overlay_wireframe:
-            plotter.add_mesh(self.grid, color='w', style='wireframe',
-                             opacity=0.5, **kwargs)
+            plotter.add_mesh(self.grid, style='wireframe', color='w',
+                             opacity=0.5)
 
-        for i in range(n_sector):
-            copied_mesh = mesh.copy(False)
-            actor = plotter.add_mesh(copied_mesh,
-                                     color=color,
-                                     scalars=scalars[i],
-                                     rng=rng,
-                                     smooth_shading=smooth_shading,
-                                     interpolate_before_map=interpolate_before_map,
-                                     stitle=stitle,
-                                     cmap=cmap,
-                                     **kwargs)
-
-            # transform to standard position, rotate about Z axis,
-            # transform back
-            vtk_transform = vtk.vtkTransform()
-            vtk_transform.RotateZ(rang*i)
-            vtk_transform.Update()
-            rot_matrix = vtk_transform.GetMatrix()
-
-            if cs_cord > 1:
-                temp_matrix = vtk.vtkMatrix4x4()
-                rot_matrix.Multiply4x4(i_matrix, rot_matrix, temp_matrix)
-                rot_matrix.Multiply4x4(temp_matrix, matrix, rot_matrix)
-                vtk_transform.SetMatrix(rot_matrix)
-
-            actor.SetUserTransform(vtk_transform)
-
-        # plotter.add_scalar_bar()
+        copied_mesh = mesh.copy()
+        plotter.add_mesh(copied_mesh,
+                         scalars=scalars,
+                         rng=rng,
+                         cmap=cmap,
+                         **kwargs)
 
         # NAN/missing data are white
         # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
@@ -1830,7 +1806,7 @@ class ResultFile(AnsysBinary):
         # add table
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
-            actor = plotter.add_text(result_text, font_size=20)
+            plotter.add_text(result_text, font_size=20)
 
         if animate:
             orig_pts = copied_mesh.points.copy()
@@ -1838,7 +1814,6 @@ class ResultFile(AnsysBinary):
                          interactive_update=not off_screen)
 
             self._animating = True
-
             def q_callback():
                 """exit when user wants to leave"""
                 self._animating = False
@@ -1850,13 +1825,12 @@ class ResultFile(AnsysBinary):
             while self._animating:
                 for j, angle in enumerate(np.linspace(0, np.pi*2, nangles + 1)[:-1]):
                     mag_adj = np.sin(angle)
-                    if scalars[0] is not None:
-                        copied_mesh.active_scalars[:] = scalars[0]*mag_adj
-
+                    if scalars is not None:
+                        copied_mesh.active_scalars[:] = scalars*mag_adj
                     copied_mesh.points[:] = orig_pts + disp*mag_adj
 
                     # normals have to be updated on the fly
-                    if smooth_shading:
+                    if kwargs['smooth_shading']:
                         if cached_normals[j] is None:
                             copied_mesh.compute_normals(cell_normals=False,
                                                         inplace=True)
@@ -1880,7 +1854,9 @@ class ResultFile(AnsysBinary):
                 first_loop = False
                 if not loop:
                     break
+
             plotter.close()
+            cpos = plotter.camera_position
 
         elif screenshot:
             cpos = plotter.show(auto_close=False, interactive=interactive,
@@ -1891,6 +1867,7 @@ class ResultFile(AnsysBinary):
             else:
                 plotter.screenshot(screenshot)
             plotter.close()
+
         else:
             cpos = plotter.show(interactive=interactive,
                                 window_size=window_size,
@@ -1915,19 +1892,19 @@ class ResultFile(AnsysBinary):
 
         return text
 
-    def principle_stress_for_plotting(self, rnum, stype):
-        """
-        returns stress used to plot
+    # def principle_stress_for_plotting(self, rnum, stype):
+    #     """
+    #     returns stress used to plot
 
-        """
-        stress_types = ['1', '2', '3', 'INT', 'EQV']
-        if stype.upper() not in stress_types:
-            raise Exception('Stress type not in \n' + str(stress_types))
+    #     """
+    #     stress_types = ['1', '2', '3', 'INT', 'EQV']
+    #     if stype.upper() not in stress_types:
+    #         raise Exception('Stress type not in \n' + str(stress_types))
 
-        sidx = stress_types.index(stype)
+    #     sidx = stress_types.index(stype)
 
-        _, stress = self.principal_nodal_stress(rnum)
-        return stress[:, sidx]
+    #     _, stress = self.principal_nodal_stress(rnum)
+    #     return stress[:, sidx]
 
     def plot_nodal_stress(self, rnum, comp=None,
                           show_displacement=False,
@@ -1980,13 +1957,8 @@ class ResultFile(AnsysBinary):
 
         >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
-
-        if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select'
-                             ' from the following:\n%s' % available_comps)
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
-        self._plot_nodal_result(rnum, 'ENS', comp, available_comps,
+        self._plot_nodal_result(rnum, 'ENS', comp, STRESS_TYPES,
                                 show_displacement,
                                 displacement_factor, node_components,
                                 element_components,
@@ -2092,10 +2064,11 @@ class ResultFile(AnsysBinary):
             grid.point_arrays['Nodal Solution {:d}'.format(i)] = val
 
             # Nodal results
-            for rtype, rtype_desc in self.available_results.items():
+            for rtype in self.available_results:
                 if rtype in result_types:
                     _, values = self._nodal_result(i, rtype)
-                    grid.point_arrays['{:s} {:d}'.format(rtype_desc, i)] = values
+                    desc = element_index_table_info[rtype]
+                    grid.point_arrays['{:s} {:d}'.format(desc, i)] = values
 
             if pbar is not None:
                 pbar.update(1)
@@ -2156,7 +2129,7 @@ class ResultFile(AnsysBinary):
         else:
             raise Exception('Input must be either an int or a list')
 
-    def __str__(self):
+    def __repr__(self):
         rst_info = ['PyANSYS MAPDL Result file object']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
@@ -2179,10 +2152,8 @@ class ResultFile(AnsysBinary):
         value = self._resultheader['nelm']
         rst_info.append('{:<12s}: {:d}'.format('Elements', value))
 
-        rst_info.append('\nAvailable Results:')
-        for key, value in self.available_results.items():
-            rst_info.append('{:<4s}: {:s}'.format(key, value))
-
+        rst_info.append('\n')
+        rst_info.append(str(self.available_results))
         return '\n'.join(rst_info)
 
     def _nodal_result(self, rnum, result_type):
@@ -2228,6 +2199,11 @@ class ResultFile(AnsysBinary):
         result : np.ndarray
             Array of result data
         """
+        # check result exists
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
         # element header
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
@@ -2386,7 +2362,7 @@ class ResultFile(AnsysBinary):
             Node numbers of the result.
 
         temperature : numpy.ndarray
-            Tempature at each node.
+            Temperature at each node.
 
         Examples
         --------
@@ -2450,17 +2426,9 @@ class ResultFile(AnsysBinary):
         >>> result.plot_cylindrical_nodal_stress(0, 'R')
         """
         available_comps = ['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']
-
-        if comp is None:
-            raise ValueError('Missing "comp" parameter.  Please select'
-                             ' from the following:\n%s' % available_comps)
-        comp = comp.upper()
-        if comp not in available_comps:
-            raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
-                             ' from the following:\n%s' % available_comps)
-
+        idx = check_comp(available_comps, comp)
         _, scalars = self.cylindrical_nodal_stress(rnum)
-        scalars = scalars[:, available_comps.index(comp)]
+        scalars = scalars[:, idx]
         grid = self.grid
 
         if node_components:
@@ -2539,10 +2507,14 @@ class ResultFile(AnsysBinary):
                                         **kwargs)
 
     def nodal_thermal_strain(self, rnum):
-        """Nodal component plastic strains.  This record contains
-        strains in the order X, Y, Z, XY, YZ, XZ, EQV, and eswell
-        (element swelling strain).  Plastic strains are always values
-        at the integration points moved to the nodes.
+        """Nodal component thermal strain.
+
+        This record contains strains in the order X, Y, Z, XY, YZ, XZ,
+        EQV, and eswell (element swelling strain).  Thermal strains
+        are always values at the integration points moved to the
+        nodes.
+
+        Equivalent MAPDL command: PRNSOL, EPTH, COMP
 
         Parameters
         ----------
@@ -2569,14 +2541,17 @@ class ResultFile(AnsysBinary):
         """
         return self._nodal_result(rnum, 'ETH')
 
-    def plot_nodal_thermal_strain(self, rnum, comp,
+    def plot_nodal_thermal_strain(self, rnum,
+                                  comp=None,
                                   stitle='Nodal Thermal Strain',
                                   show_displacement=False,
                                   displacement_factor=1,
                                   node_components=None,
                                   element_components=None,
                                   sel_type_all=True, **kwargs):
-        """Plot nodal component plastic strains.
+        """Plot nodal component thermal strains.
+
+        Equivalent MAPDL command: PLNSOL, EPTH, COMP
 
         Parameters
         ----------
@@ -2625,11 +2600,11 @@ class ResultFile(AnsysBinary):
         >>> result = pyansys.download_verification_result(33)
         >>> result.plot_nodal_thermal_strain(0)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV', 'ESWELL']
-        return self._plot_nodal_result(rnum, 'ETH', comp, available_comps,
+        return self._plot_nodal_result(rnum, 'ETH', comp, THERMAL_STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
+                                       element_components=element_components,
                                        sel_type_all=sel_type_all,
                                        stitle=stitle,
                                        **kwargs)
@@ -2641,6 +2616,8 @@ class ResultFile(AnsysBinary):
         Elastic strains can be can be nodal values extrapolated from
         the integration points or values at the integration points
         moved to the nodes.
+
+        Equivalent MAPDL command: ``PRNSOL, EPEL``
 
         Parameters
         ----------
@@ -2655,15 +2632,20 @@ class ResultFile(AnsysBinary):
 
         elastic_strain : np.ndarray
             Nodal component elastic strains.  Array is in the order
-            X, Y, Z, XY, YZ, XZ, EEL.
+            X, Y, Z, XY, YZ, XZ, EQV.
 
         Examples
         --------
-        Load the nodal elastic strain for the first solution.
+        Load the nodal elastic strain for the first result.
 
         >>> import pyansys
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, elastic_strain = rst.nodal_elastic_strain(0)
+
+        Notes
+        -----
+        Nodes without a strain will be NAN.
+
         """
         return self._nodal_result(rnum, 'EEL')
 
@@ -2682,7 +2664,7 @@ class ResultFile(AnsysBinary):
             Result number
 
         comp : str, optional
-            Thermal strain component to display.  Available options:
+            Elastic strain component to display.  Available options:
             - ``"X"``
             - ``"Y"``
             - ``"Z"``
@@ -2716,17 +2698,16 @@ class ResultFile(AnsysBinary):
 
         Examples
         --------
-        Plot thermal strain for a static pontoon model
+        Plot nodal elastic strain for a static pontoon model
 
         >>> import pyansys
         >>> result = pyansys.download_pontoon()
         >>> result.plot_nodal_elastic_strain(0)
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
         stitle = ' '.join([comp.upper(), stitle])
         return self._plot_nodal_result(rnum, 'EEL',
                                        comp,
-                                       available_comps,
+                                       STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
@@ -2737,7 +2718,7 @@ class ResultFile(AnsysBinary):
 
     def nodal_plastic_strain(self, rnum):
         """Nodal component plastic strains.  This record contains
-        strains in the order X, Y, Z, XY, YZ, XZ, EQV.  
+        strains in the order X, Y, Z, XY, YZ, XZ, EQV.
 
         Plastic strains are always values at the integration points
         moved to the nodes.
@@ -2755,7 +2736,7 @@ class ResultFile(AnsysBinary):
 
         plastic_strain : np.ndarray
             Nodal component plastic strains.  Array is in the order
-            X, Y, Z, XY, YZ, XZ, EEL.
+            X, Y, Z, XY, YZ, XZ, EQV.
 
         Examples
         --------
@@ -2774,7 +2755,7 @@ class ResultFile(AnsysBinary):
                                   node_components=None,
                                   element_components=None,
                                   sel_type_all=True, **kwargs):
-        """Plot nodal component plastic strains.
+        """Plot nodal component plastic strain.
 
         Parameters
         ----------
@@ -2782,7 +2763,7 @@ class ResultFile(AnsysBinary):
             Result number
 
         comp : str, optional
-            Thermal strain component to display.  Available options:
+            Plastic strain component to display.  Available options:
             - ``"X"``
             - ``"Y"``
             - ``"Z"``
@@ -2823,14 +2804,14 @@ class ResultFile(AnsysBinary):
         >>> result.plot_nodal_plastic_strain(0)
 
         """
-        available_comps = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', 'EQV']
         stitle = ' '.join([comp.upper(), stitle])
         return self._plot_nodal_result(rnum, 'EPL',
                                        comp,
-                                       available_comps,
+                                       STRAIN_TYPES,
                                        show_displacement=show_displacement,
                                        displacement_factor=displacement_factor,
                                        node_components=node_components,
+                                       element_components=element_components,
                                        sel_type_all=sel_type_all,
                                        stitle=stitle,
                                        **kwargs)
@@ -2839,13 +2820,8 @@ class ResultFile(AnsysBinary):
                            show_displacement=False, displacement_factor=1,
                            node_components=None, element_components=None,
                            sel_type_all=True, **kwargs):
-        """Plot nodal results"""
-        comp = comp.upper()
-        if comp not in available_comps:
-            raise ValueError('Invalid component.  Pick one of the following: %s' %
-                             str(available_comps))
-        component_index = available_comps.index(comp)
-
+        """Plot nodal result"""
+        component_index = check_comp(available_comps, comp)
         _, result = self._nodal_result(rnum, result_type)
         scalars = result[:, component_index]
 
@@ -2927,17 +2903,24 @@ class ResultFile(AnsysBinary):
 
     @property
     def available_results(self):
-        """Prints available element result types and returns those keys"""
-        try:
-            ele_ind_table, _, _, ptr_off = self._element_solution_header(0)
-        except ValueError:
-            return {}
+        """Available result types.
 
-        # get the keys from the first element (not perfect...)
-        n_rec = len(ELEMENT_INDEX_TABLE_KEYS)
-        mask = self.read_record(ele_ind_table[0] + ptr_off)[:n_rec] > 0
-        keys = list(compress(ELEMENT_INDEX_TABLE_KEYS, mask))
-        return {key: element_index_table_info[key] for key in keys}
+        Examples
+        --------
+        >>> rst.available_results
+        Available Results:
+        ENS : Nodal stresses
+        ENG : Element energies and volume
+        EEL : Nodal elastic strains
+        EPL : Nodal plastic strains
+        ETH : Nodal thermal strains (includes swelling strains)
+        EUL : Element euler angles
+        ENL : Nodal nonlinear items, e.g. equivalent plastic strains
+        EPT : Nodal temperatures
+        NSL : Nodal displacements
+        RF  : Nodal reaction forces
+        """
+        return self._available_results
 
 
 def pol2cart(rho, phi):
@@ -2988,3 +2971,33 @@ def merge_two_dicts(x, y):
     merged = x.copy()   # start with x's keys and values
     merged.update(y)    # modifies z with y's keys and values & returns None
     return merged
+
+
+def check_comp(available_comps, comp):
+    """Check if a component is in available components and return a
+    helpful error message
+
+    Parameters
+    ----------
+    available_comps : list
+        List of available components.  For example:
+        ``['R', 'THETA', 'Z', 'RTHETA', 'THETAZ', 'RZ']``
+        Case should be all caps
+
+    comp : str
+        Component to check.  Any case.
+
+    Returns
+    -------
+    idx : int
+        Index in ``available_comps``.
+
+    """
+    if comp is None:
+        raise ValueError('Missing "comp" parameter.  Please select'
+                         ' from the following:\n%s' % available_comps)
+    comp = comp.upper()
+    if comp not in available_comps:
+        raise ValueError('Invalid "comp" parameter %s.  Please select' % comp +
+                         ' from the following:\n%s' % available_comps)
+    return available_comps.index(comp)

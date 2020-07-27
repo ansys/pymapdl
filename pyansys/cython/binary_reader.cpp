@@ -37,52 +37,6 @@ static int NbBitsOn( int iVal)
 }
 
 
-// populate a node given a record using the bsparse algorithm
-void populate_node_bsparse(int *buffer, int n, int *nnum, double *nodes){
-
-  int size = *buffer++;
-  int bitcod = *buffer++;
-  double *tbuf = (double*)buffer;
-
-  int iloc = -1;
-  while (++iloc < size){
-    if (IS_ON(bitcod, iloc)){
-
-      // store node number
-      if (iloc == 0){
-        nnum[n] = *tbuf++;
-      } else{  // otherwise, store node values
-        nodes[n*6 + iloc - 1] = *tbuf++;
-      }
-
-    } else{  // set value to zero
-      nodes[n*6 + iloc - 1] = 0;
-    }
-  }
-
-  // printf("%d, %f, %f, %f, %f, %f, %f\n", nnum[n],
-  // 	 nodes[n*6 + 0],
-  // 	 nodes[n*6 + 1],
-  // 	 nodes[n*6 + 2],
-  // 	 nodes[n*6 + 3],
-  // 	 nodes[n*6 + 4],
-  // 	 nodes[n*6 + 5]);
-
-}
-
-void populate_node(double *buffer, int n, int *nnum, double *nodes){
-  nnum[n] = buffer[0];
-
-  // is it safe to unwrap?
-  nodes[n*6 + 0] = buffer[1];
-  nodes[n*6 + 1] = buffer[2];
-  nodes[n*6 + 2] = buffer[3];
-  nodes[n*6 + 3] = buffer[4];
-  nodes[n*6 + 4] = buffer[5];
-  nodes[n*6 + 5] = buffer[6];
-}
-
-
 // Read in record and determine size
 // bsparse_flag true when record uses binary compression
 // type_flag true when using integers
@@ -93,7 +47,6 @@ int read_header(ifstream* binFile, int* bsparse_flag, int* wsparse_flag,
   char *raw = new char[8];
 
   // read the first 8 bytes, includes total buffer size and flags
-  // printf("preparing to read\n");
   binFile->read(raw, 8);
   int bufsize = *(int*)&raw[0];
 
@@ -106,46 +59,6 @@ int read_header(ifstream* binFile, int* bsparse_flag, int* wsparse_flag,
 
   delete[] raw;
   return bufsize;
-}
-
-
-void read_nodes(const char* filename, int64_t ptrLOC, int nrec, int *nnum,
-		double *nodes){
-
-  // max buf size
-  char *raw = new char[68*4];
-  ifstream binFile (filename, ios::in | ios::binary);
-  binFile.seekg(ptrLOC*4);
-
-  // read remainder of buffer excluding initial bytes and last bytes
-  int bufsize, n;
-  int bsparse_flag, wsparse_flag, zlib_flag, prec_flag, type_flag;
-
-  for (n=0; n<nrec; n++){
-    bufsize = read_header(&binFile, &bsparse_flag, &wsparse_flag,
-			  &zlib_flag, &prec_flag, &type_flag);
-    binFile.read(raw, 4*bufsize);
-    // printf("%d, %d\n", n, bufsize);
-
-    if (bsparse_flag){
-      populate_node_bsparse((int*)raw, n, nnum, nodes);
-    } else { // standard read in
-      populate_node((double*)raw, n, nnum, nodes);
-    }
-
-    // skip footer
-    binFile.seekg(4, ios_base::cur);
-  }
-
-  // flags
-  // int i, flag;
-  // for (i=0; i<8; i++){
-  //   flag = (buffer[7] >> i) & 1;
-  //   printf("%d, %d\n", i, flag);
-  // }
-
-  delete[] raw;
-
 }
 
 
@@ -577,4 +490,36 @@ void read_record_stream(ifstream* file, int64_t loc, void* arr, int* prec_flag,
 
   delete[] raw;
   
+}
+
+
+void read_nodes(const char* filename, int64_t ptrLOC, int nrec, int *nnum,
+		double *nodes){
+
+  // max buf size
+  char *raw = new char[68*4];
+  ifstream binFile (filename, ios::in | ios::binary);
+  binFile.seekg(ptrLOC*4);
+
+  // read remainder of buffer excluding initial bytes and last bytes
+  int bufsize, n;
+  int prec_flag, type_flag;
+
+  for (n=0; n<nrec; n++){
+    read_record_stream(&binFile, -1,
+		       raw, &prec_flag, &type_flag, &bufsize);
+    binFile.seekg(4, ios_base::cur);  // skip footer
+
+    nnum[n] = *((double*) raw);
+    nodes[n*6 + 0] = *((double*) &raw[8]);
+    nodes[n*6 + 1] = *((double*) &raw[16]);
+    nodes[n*6 + 2] = *((double*) &raw[24]);
+    nodes[n*6 + 3] = *((double*) &raw[32]);
+    nodes[n*6 + 4] = *((double*) &raw[40]);
+    nodes[n*6 + 5] = *((double*) &raw[48]);    
+
+  }
+
+  delete[] raw;
+
 }

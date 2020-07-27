@@ -302,7 +302,17 @@ def read(filename, read_parameters=False, debug=False):
                 if debug:
                     print('reading CMBLOCK')
 
-                line_comp_type = line.split(b',')[2]
+                try:
+                    line.decode()
+                except:
+                    print('Poor formatting of CMBLOCK: %s' % line)
+                    continue
+
+                split_line = line.split(b',')
+                if len(split_line) < 3:
+                    print('Poor formatting of CMBLOCK: %s' % line)
+                    continue
+                line_comp_type = split_line[2]
                 # Get Component name
                 ind1 = line.find(b',') + 1
                 ind2 = line.find(b',', ind1)

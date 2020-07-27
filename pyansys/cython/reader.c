@@ -441,3 +441,9 @@ int write_array_ascii(const char* filename, const double *arr,
 
   return 0;
 }
+
+
+/* int main(){ */
+/*   const char* filename = "/tmp/ */
+/*   read_nblock_from_nwrite( filename, int *nnum, double *nodes, */
+/* 			  int nnodes){ */
