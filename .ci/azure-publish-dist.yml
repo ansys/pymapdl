@@ -5,7 +5,7 @@ steps:
     targetPath: 'dist'
 
 - script: |
-    python -m pip pip install -r requirements_build.txt
+    python -m pip install -r requirements_build.txt
     python setup.py sdist
     python -m pip install twine
     python -m twine upload dist/* --skip-existing -p $(TWINE_PASSWORD) -u $(TWINE_USERNAME)
