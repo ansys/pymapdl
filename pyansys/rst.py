@@ -15,7 +15,8 @@ import pyvista as pv
 
 from pyansys import _binary_reader, _reader
 from pyansys.geometry import Geometry
-from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
+from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes,
+                                    populate_surface_element_result)
 from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                solution_data_header_keys, solution_header_keys_dp,
                                result_header_keys)
@@ -24,7 +25,7 @@ from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, rotate_to_global,
                             PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
                             STRAIN_TYPES, THERMAL_STRAIN_TYPES)
-from pyansys.misc import vtk_cell_info
+from pyansys.misc import vtk_cell_info, break_apart_surface
 from pyansys.rst_avail import AvailableResults
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
@@ -834,12 +835,9 @@ class ResultFile(AnsysBinary):
         rpointers = self._resultheader['rpointers']
         nsets = self.nsets
 
-        # Read a result
-        # with open(self.filename, 'rb') as f:
-        # get first solution header and assume, following solution
+        # get first solution header and assume following solution
         # headers are equal
-        record = self.read_record(rpointers[0])
-        solution_header = parse_header(record, solution_data_header_keys)
+        solution_header = self._result_solution_header(0)
 
         mask = solution_header['mask']
         # PDBN = bool(mask & 0b1<<10)
@@ -861,18 +859,12 @@ class ResultFile(AnsysBinary):
         nfldof = solution_header['nfldof']
         sumdof = numdof + nfldof
 
-        #numvdof = solution_header['numvdof'] # does not seem to be set in transient analysis
-        #if not numvdof: numvodf = sumdof 
-        #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
-        #if not numadof: numadof = sumdof 
-
         # iterate over all loadsteps
         results = np.zeros((nsets, nnod, sumdof))
         for rnum in range(self.nsets):
             # Seek to result table and to get pointer to DOF
             # results of result table
-            rsol_header = parse_header(self.read_record(rpointers[rnum]),
-                                       solution_data_header_keys)
+            rsol_header = self._result_solution_header(rnum)
             if solution_type == 'NSL':  # Nodal Displacements
                 ptr_sl = rsol_header['ptrNSL']
             elif solution_type == 'VEL':  # Nodal Velocities
@@ -955,8 +947,7 @@ class ResultFile(AnsysBinary):
 
         # result pointer
         ptr_rst = self._resultheader['rpointers'][rnum]
-        result_solution_header = parse_header(self.read_record(ptr_rst),
-                                              solution_data_header_keys)
+        result_solution_header = self._result_solution_header(rnum)
 
         nnod = result_solution_header['nnod']
         numdof = result_solution_header['numdof']
@@ -1239,8 +1230,7 @@ class ResultFile(AnsysBinary):
         nodstr = self.element_table['nodstr']
 
         # read result solution header
-        record = self.read_record(rpointers[rnum])
-        solution_header = parse_header(record, solution_data_header_keys)
+        solution_header = self._result_solution_header(rnum)
 
         # key to extrapolate integration
         # = 0 - move
@@ -2244,6 +2234,133 @@ class ResultFile(AnsysBinary):
         # average across nodes
         result = data/ncount.reshape(-1, 1)
         return nnum, result
+
+    def plot_element_result(self, rnum, result_type, item_index,
+                            in_element_coord_sys=False, **kwargs):
+        """Plot an element result.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        result_type : str
+            Element data type to retreive.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        item_index : int
+            Index of the data item for each node within the element.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system.
+            Default False and will return the results in the global
+            coordinate system.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers
+
+        result : np.ndarray
+            Array of result data
+        """
+        # check result exists
+        result_type = result_type.upper()
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
+        if result_type not in ELEMENT_INDEX_TABLE_KEYS:
+            raise ValueError('Result "%s" is not an element result' % result_type)
+
+        # element header
+        rnum = self.parse_step_substep(rnum)
+        ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
+
+        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
+            nitem = 11
+        elif result_type == 'ENF':
+            # number of items is nodfor*NDOF*M where:
+            # NDOF is the number of DOFs/node for this element, nodfor
+            # is the number of nodes per element having nodal forces
+            # (defined in element type description record), and M may
+            # be 1, 2, or 3.  For a static analysis, M=1 only.  For a
+            # transient analysis, M can be 1, 2, or 3.
+            nodfor = self.element_table['nodfor'][etype]
+
+        elif result_type in ELEMENT_RESULT_NCOMP:
+            nitem = ELEMENT_RESULT_NCOMP[result_type]
+        else:
+            nitem = 1
+
+        if item_index > nitem - 1:
+            raise ValueError('Item index greater than the number of items in '
+                             'this result type %s' % result_type)
+
+        # extract the surface and separate the surface faces
+        # TODO: add element/node components
+        surf = self.grid.extract_surface()
+        bsurf = break_apart_surface(surf)
+        nnum_surf = surf.point_arrays['ansys_node_num'][bsurf['orig_ind']]
+        faces = bsurf.faces
+        if faces.dtype != np.int64:
+            faces = faces.astype(np.int64)
+
+        elem_ind = surf.cell_arrays['vtkOriginalCellIds']
+
+        # index within the element table pointing to the data of interest
+        result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
+
+        data = populate_surface_element_result(self.filename,
+                                               ele_ind_table,
+                                               nodstr,
+                                               etype,
+                                               nitem,
+                                               ptr_off,  # start of result data
+                                               result_index,
+                                               bsurf.n_points,
+                                               faces,
+                                               bsurf.n_faces,
+                                               nnum_surf,
+                                               elem_ind,
+                                               self.geometry._elem,
+                                               self.geometry._elem_off,
+                                               item_index,
+                                               as_global=not in_element_coord_sys)
+
+        desc = self.available_results.description[result_type].capitalize()
+        kwargs.setdefault('stitle', desc)
+        return bsurf.plot(scalars=data, **kwargs)
+
+    def _result_solution_header(self, rnum):
+        """Return the solution header for a given cumulative result index"""
+        ptr = self._resultheader['rpointers'][rnum]
+        return parse_header(self.read_record(ptr), solution_data_header_keys)
 
     def nodal_stress(self, rnum):
         """Retrieves the component stresses for each node in the

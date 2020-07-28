@@ -3,6 +3,8 @@ import sys
 
 from pyvista.utilities.errors import GPUInfo
 import scooby
+import pyvista
+from pyansys import _binary_reader
 
 import numpy as np
 import vtk
@@ -115,3 +117,32 @@ class Report(scooby.Report):
                                optional=optional, ncol=ncol,
                                text_width=text_width, sort=sort,
                                extra_meta=extra_meta)
+
+
+def break_apart_surface(surf):
+    """Break apart the faces of a vtk PolyData such that the points
+    for each face are unique and each point is used only by one face.
+    This leads to duplicate points, but allows multiple scalars per
+    face.
+
+    Parameters
+    ----------
+    surf : pyvista.PolyData
+        Surface to break apart.
+
+    Returns
+    -------
+    bsurf : pyvista.PolyData
+        Surface with unique points for each face.  Contains the
+        original indices in point_arrays "orig_ind".
+
+    """
+    faces = surf.faces
+    if faces.dtype != np.int64:
+        faces = faces.astype(np.int64)
+
+    b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points, faces,
+                                                                surf.n_faces)
+    bsurf = pyvista.PolyData(b_points, b_faces)
+    bsurf.point_arrays['orig_ind'] = idx
+    return bsurf
