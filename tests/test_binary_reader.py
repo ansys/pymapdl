@@ -157,3 +157,10 @@ def test_loadbeam():
     linkresult_path = os.path.join(testfiles_path, 'link1.rst')
     linkresult = pyansys.read_binary(linkresult_path)
     assert np.any(linkresult.grid.cells)
+
+
+def test_reaction_forces():
+    rst = pyansys.read_binary(os.path.join(testfiles_path, 'vm1.rst'))
+    nnum, forces = rst.nodal_static_forces(0)
+    assert np.allclose(nnum, [1, 2, 3, 4])
+    assert np.allclose(forces[:, 1], [-600, 250, 500, -900])

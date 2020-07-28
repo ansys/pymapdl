@@ -1,4 +1,4 @@
-"""Read ANSYS binary result files *.rst
+"""Read ANSYS binary result files (*.rst)
 
 Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
@@ -29,10 +29,6 @@ from pyansys.misc import vtk_cell_info, break_apart_surface
 from pyansys.rst_avail import AvailableResults
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
-
-# # Create logger
-# LOG = logging.getLogger(__name__)
-# LOG.setLevel('DEBUG')
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1638,7 +1634,6 @@ class ResultFile(AnsysBinary):
                                         **kwargs)
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
-
         """ return a 4x4 transformation array for a given coordinate system """
         # assemble 4 x 4 matrix
         csys = self._c_systems[cs_cord]
@@ -1882,20 +1877,6 @@ class ResultFile(AnsysBinary):
 
         return text
 
-    # def principle_stress_for_plotting(self, rnum, stype):
-    #     """
-    #     returns stress used to plot
-
-    #     """
-    #     stress_types = ['1', '2', '3', 'INT', 'EQV']
-    #     if stype.upper() not in stress_types:
-    #         raise Exception('Stress type not in \n' + str(stress_types))
-
-    #     sidx = stress_types.index(stype)
-
-    #     _, stress = self.principal_nodal_stress(rnum)
-    #     return stress[:, sidx]
-
     def plot_nodal_stress(self, rnum, comp=None,
                           show_displacement=False,
                           displacement_factor=1,
@@ -2097,27 +2078,27 @@ class ResultFile(AnsysBinary):
         if is_int(user_input):
             # check if result exists
             if user_input > self.nsets - 1:
-                raise Exception('Only %d result(s) in the result file.' % self.nsets)
+                raise ValueError('Only %d result(s) in the result file.' % self.nsets)
             return user_input
 
         elif isinstance(user_input, (list, tuple)):
             if len(user_input) != 2:
-                raise Exception('Input must contain (step, loadstep) using  ' +
-                                '1 based indexing (e.g. (1, 1)).')
+                raise ValueError('Input must contain (step, loadstep) using  ' +
+                                 '1 based indexing (e.g. (1, 1)).')
             ls_table = self._resultheader['ls_table']
             step, substep = user_input
             mask = np.logical_and(ls_table[:, 0] == step,
                                   ls_table[:, 1] == substep)
 
             if not np.any(mask):
-                raise Exception('Load step table does not contain ' +
-                                'step %d and substep %d' % tuple(user_input))
+                raise ValueError('Load step table does not contain ' +
+                                 'step %d and substep %d' % tuple(user_input))
 
             index = mask.nonzero()[0]
             assert index.size == 1, 'Multiple cumulative index matches'
             return index[0]
         else:
-            raise Exception('Input must be either an int or a list')
+            raise TypeError('Input must be either an int or a list')
 
     def __repr__(self):
         rst_info = ['PyANSYS MAPDL Result file object']
@@ -2199,13 +2180,7 @@ class ResultFile(AnsysBinary):
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         result_type = result_type.upper()
-        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
-            nitem = 11
-        elif result_type in ELEMENT_RESULT_NCOMP:
-            nitem = ELEMENT_RESULT_NCOMP[result_type]
-        else:
-            nitem = 1
-
+        nitem = self._result_nitem(rnum, result_type)
         result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
 
         # Element types for nodal averaging
@@ -2234,6 +2209,26 @@ class ResultFile(AnsysBinary):
         # average across nodes
         result = data/ncount.reshape(-1, 1)
         return nnum, result
+
+    def _result_nitem(self, rnum, result_type):
+        """Return the number of items for a given result type"""
+        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
+            nitem = 11
+        elif result_type == 'ENF':
+            # number of items is nodfor*NDOF*M where:
+            # NDOF is the number of DOFs/node for this element, nodfor
+            # is the number of nodes per element having nodal forces
+            # (defined in element type description record), and M may
+            # be 1, 2, or 3.  For a static analysis, M=1 only.  For a
+            # transient analysis, M can be 1, 2, or 3.
+
+            solution_header = self._result_solution_header(rnum)
+            numdof = solution_header['numdof']
+            nitem = numdof*1  # m = 1  for static, 1, 2 or 3 for transient
+
+        else:
+            nitem = ELEMENT_RESULT_NCOMP.get(result_type, 1)
+        return nitem
 
     def plot_element_result(self, rnum, result_type, item_index,
                             in_element_coord_sys=False, **kwargs):
@@ -2302,22 +2297,8 @@ class ResultFile(AnsysBinary):
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
-        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
-            nitem = 11
-        elif result_type == 'ENF':
-            # number of items is nodfor*NDOF*M where:
-            # NDOF is the number of DOFs/node for this element, nodfor
-            # is the number of nodes per element having nodal forces
-            # (defined in element type description record), and M may
-            # be 1, 2, or 3.  For a static analysis, M=1 only.  For a
-            # transient analysis, M can be 1, 2, or 3.
-            nodfor = self.element_table['nodfor'][etype]
-
-        elif result_type in ELEMENT_RESULT_NCOMP:
-            nitem = ELEMENT_RESULT_NCOMP[result_type]
-        else:
-            nitem = 1
-
+        # the number of items per node
+        nitem = self._result_nitem(rnum, result_type)
         if item_index > nitem - 1:
             raise ValueError('Item index greater than the number of items in '
                              'this result type %s' % result_type)
@@ -2876,8 +2857,9 @@ class ResultFile(AnsysBinary):
 
         Parameters
         ----------
-        rnum : int
-            Result number
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
             Plastic strain component to display.  Available options:
@@ -3039,6 +3021,45 @@ class ResultFile(AnsysBinary):
         """
         return self._available_results
 
+    def nodal_static_forces(self, rnum):
+        """Return the nodal forces averaged at the nodes
+
+        Nodal forces are computed on an element by element basis, and
+        this method averages the nodal forces for each element for
+        each node.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers.
+
+        forces : np.ndarray
+           Averaged nodal forces.  Array is sized ``[nnod x numdof]``
+           where ``nnod`` is the number of nodes and ``numdof`` is the
+           number of degrees of freedom for this solution.
+
+        Examples
+        --------
+        Load the nodal static forces for the first result using the
+        example hexahedral result file.
+
+        >>> import pyansys
+        >>> from pyansys import examples
+        >>> rst = pyansys.read_binary(examples.rstfile)
+        >>> nnum, forces = rst.nodal_static_forces(0)
+
+        Notes
+        -----
+        Nodes without a a nodal will be NAN.  These are generally
+        midside (quadratic) nodes.
+        """
+        return self._nodal_result(rnum, 'ENF')
 
 def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """
