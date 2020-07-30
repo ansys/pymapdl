@@ -17,6 +17,8 @@ from shutil import copyfile, rmtree
 import appdirs
 import numpy as np
 import pyvista as pv
+import pyiges
+from vtk import vtkAppendPolyData
 
 import pyansys
 from pyansys.geometry_commands import geometry_commands
@@ -887,8 +889,12 @@ class _Mapdl(_MapdlCommands):
         self.response = None
         self._outfile = None
         self._show_matplotlib_figures = True
+
+        # cached values
         self._archive_cache = None
         self._vtk_grid_cache = None
+        self._keypoints = None
+        self._lines = None
 
         self._log = setup_logger(loglevel.upper())
         self.non_interactive = self._non_interactive(self)
@@ -909,7 +915,9 @@ class _Mapdl(_MapdlCommands):
     def _reset_cache(self):
         """Reset cached NBLOCK and other items"""
         self._archive_cache = None
-        self._grid_cache = None
+        self._vtk_grid_cache = None
+        self._keypoints = None
+        self._lines = None
 
     @property
     def _lockfile(self):
@@ -1109,9 +1117,124 @@ class _Mapdl(_MapdlCommands):
     def _vtk_grid(self):
         """Current vtk unstructured grid"""
         if self._vtk_grid_cache is None:
-            quadgrid = self._archive._parse_vtk()
+            quadgrid = self._archive._parse_vtk(fix_midside=False,
+                                                additional_checking=True)
             self._vtk_grid_cache = quadgrid.linear_copy()
         return self._vtk_grid_cache
+
+    def _load_keypoints(self):
+        """Load keypoints from MAPDL using IGES"""
+        prior_log_level = self._log.level
+        self._log.setLevel('CRITICAL')
+
+        # write database to an archive file
+        filename = os.path.join(self.path, 'tmp.iges')
+
+        # write only keypoints
+        self.cm('__tmp_volu__', 'VOLU')
+        self.cm('__tmp_area__', 'AREA')
+        self.cm('__tmp_line__', 'LINE')
+        self.vsel('NONE')
+        self.asel('NONE')
+        self.lsel('NONE')
+
+        prior_processor = self.processor
+        self.prep7()
+        self.igesout(filename, att=1)
+        self.run('/%s' % prior_processor)
+
+        self.cmsel('S', '__tmp_volu__', 'VOLU')
+        self.cmsel('S', '__tmp_area__', 'AREA')
+        self.cmsel('S', '__tmp_line__', 'LINE')
+
+        iges = pyiges.read(filename)
+
+        keypoints = []
+        kp_num = []
+        for kp in iges.points():
+            keypoints.append([kp.x, kp.y, kp.z])
+            kp_num.append(int(kp.d['entity_subs_num']))
+
+        # self._kp_num = np.array(self._kp_num)
+        self._keypoints = pv.PolyData(keypoints)
+        self._keypoints['entity_num'] = kp_num
+
+        self._log.setLevel(prior_log_level)
+
+    @property
+    def keypoints(self):
+        """Keypoint coordinates"""
+        if self._keypoints is None:
+            self._load_keypoints()
+        return np.asarray(self._keypoints.points)
+
+    @property
+    def knum(self):
+        """Keypoint numbers"""
+        if self._keypoints is None:
+            self._load_keypoints()
+        return self._keypoints['entity_num']
+
+    @property
+    def lines(self):
+        """Active lines as a pyvista.PolyData"""
+        if self._lines is None:
+            self._load_lines()
+        return self._lines
+
+    @property
+    def lnum(self):
+        """Active lines as a pyvista.PolyData"""
+        if self._lines is None:
+            self._load_lines()
+        return self._lines['entity_num'].astype(np.int32)
+
+    def _load_lines(self):
+        """Load lines from MAPDL using IGES"""
+        prior_log_level = self._log.level
+        self._log.setLevel('CRITICAL')
+
+        # write database to an archive file
+        filename = os.path.join(self.path, 'tmp.iges')
+
+        # ignore volumes
+        self.cm('__tmp_volu__', 'VOLU')
+        self.vsel('NONE')
+
+        prior_processor = self.processor
+        self.prep7()
+        self.igesout(filename, att=1)
+        self.run('/%s' % prior_processor)
+
+        self.cmsel('S', '__tmp_volu__', 'VOLU')
+
+        iges = pyiges.read(filename)
+
+        lines = []
+        for bspline in iges.bsplines():
+            # allow only 10001 as others appear to be construction entities
+            if bspline.d['status_number'] == 10001:
+                line = bspline.to_vtk()
+                line.cell_arrays['entity_num'] = int(bspline.d['entity_subs_num'])
+                lines.append(line)
+
+        entites = iges.lines() + iges.circular_arcs()
+        for line in entites:
+            if line.d['status_number'] == 1:
+                line_num = int(line.d['entity_subs_num'])
+                line = line.to_vtk(resolution=100)
+                line.cell_arrays['entity_num'] = line_num
+                lines.append(line)
+
+        if lines:
+            afilter = vtkAppendPolyData()
+            [afilter.AddInputData(line) for line in lines]
+            afilter.Update()
+            self._lines = pv.wrap(afilter.GetOutput())
+        else:
+            lines = pv.PolyData()
+
+        self._log.setLevel(prior_log_level)
 
     @property
     def elements(self):
@@ -1204,6 +1327,9 @@ class _Mapdl(_MapdlCommands):
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         """
+        # always reset the cache
+        self._reset_cache()
+
         if self._store_commands:
             self._stored_commands.append(command)
             return
@@ -1310,6 +1436,136 @@ class _Mapdl(_MapdlCommands):
             return self._vtk_grid.plot(**kwargs)
         else:
             return super().eplot(**kwargs)
+
+    def lplot(self, nl1="", nl2="", ninc="", vtk=False, show_keypoints=False,
+              show_numbering=True, random_color=False, **kwargs):
+        """APDL Command: LPLOT
+
+        Displays the selected lines.
+
+        Parameters
+        ----------
+        nl1, nl2, ninc
+            Display lines from NL1 to NL2 (defaults to NL1) in steps of NINC
+            (defaults to 1).  If NL1 = ALL (default), NL2 and NINC are ignored
+            and display all selected lines [LSEL].
+
+        vtk : bool, optional
+            Plot the currently selected lines using ``pyvista``.
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        show_keypoints : bool, optional
+            Display currently selected keypoints.  Only valid with ``vtk=True``.
+
+        **kwargs
+            See ``help(pyvista.plot)`` for more keyword arguments
+            related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
+
+        Notes
+        -----
+        Mesh divisions on plotted lines are controlled by the LDIV option of
+        the /PSYMB command.
+
+        This command is valid in any processor.
+        """
+        if vtk:
+            if not self.lines.n_cells:
+                raise ValueError('Either no lines have been selected or there '
+                                 'is nothing to plot')
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+            pl.set_background(kwargs.pop('background', None))
+
+            if kwargs.pop('show_axes', False):
+                pl.add_axes()
+
+            cpos = kwargs.pop('cpos', None)
+
+            kwargs.setdefault('color', 'w')
+            lines = self.lines
+            lnum = self.lnum
+            # TODO: partially select lines
+
+            font_size = kwargs.pop('font_size', None)
+            if show_numbering:
+                pl.add_point_labels(lines.points[50::101], lnum, font_size=font_size)
+                                    
+            if show_keypoints:
+                pl.add_points(self.keypoints)
+                if show_numbering:
+                    pl.add_point_labels(self.keypoints, self.knum, font_size=font_size)
+
+            if random_color:
+                kwargs['scalars'] = np.random.random(lines.n_cells)
+
+            pl.add_mesh(lines, **kwargs)
+
+
+            pl.camera_position = cpos
+            return pl.show()
+        else:
+            return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc)
+
+    def kplot(self, np1="", np2="", ninc="", lab="", vtk=False,
+              show_numbering=True, **kwargs):
+        """Displays the selected keypoints.
+
+        APDL Command: KPLOT
+
+        Parameters
+        ----------
+        np1, np2, ninc
+            Display keypoints from NP1 to NP2 (defaults to NP1) in
+            steps of NINC (defaults to 1).  If NP1 = ALL (default),
+            NP2 and NINC are ignored and all selected keypoints [KSEL]
+            are displayed.
+
+        lab
+            Determines what keypoints are plotted (one of the following):
+
+            (blank) - Plots all keypoints.
+
+            HPT - Plots only those keypoints that are hard points.
+
+        vtk : bool, optional
+            Plot the currently selected lines using ``pyvista``.
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        Notes
+        -----
+        This command is valid in any processor.
+        """
+        if vtk:
+            if not self.keypoints.shape[0]:
+                raise ValueError('Either no keypoints have been selected or there '
+                                 'is nothing to plot')
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+
+            if kwargs.pop('show_axes', False):
+                pl.add_axes()
+
+            cpos = kwargs.pop('cpos', None)
+
+            kwargs.setdefault('color', 'w')
+            keypoints = self.keypoints
+            knum = self.knum
+            # TODO: partially select keypoints
+
+            pl.add_points(keypoints, **kwargs)
+            if show_numbering:
+                pl.add_point_labels(keypoints, knum)
+
+            pl.camera_position = cpos
+            return pl.show()
+        else:
+            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
 
     @property
     def processor(self):

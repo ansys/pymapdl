@@ -22,6 +22,10 @@ except ImportError:
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
+
+skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
+                                     reason="Requires active X Server")
+
 @pytest.fixture(scope='module')
 def result():
     return pyansys.read_binary(examples.rstfile)
@@ -90,7 +94,7 @@ def test_save_as_vtk(tmpdir, result, result_type):
         assert np.allclose(arr, rst_arr, atol=1E-5, equal_nan=True)
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_no_xserver
 def test_plot_component():
     """
     # create example file for component plotting
@@ -136,14 +140,14 @@ def test_plot_component():
 
 
 def test_file_close(tmpdir):
-    tmpfile = str(tmpdir.mkdir("tmpdir").join('tmp.vtk'))
+    tmpfile = str(tmpdir.mkdir("tmpdir").join('tmp.rst'))
     shutil.copy(examples.rstfile, tmpfile)
     rst = pyansys.read_binary(tmpfile)
     nnum, stress = rst.nodal_stress(0)
-    os.remove(tmpfile)
+    os.remove(tmpfile)  # tests file has been correctly closed
 
 
-@pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
+@skip_no_xserver
 @pytest.mark.skipif(not HAS_FFMPEG, reason="requires imageio_ffmpeg")
 def test_animate_nodal_solution(tmpdir, result):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))

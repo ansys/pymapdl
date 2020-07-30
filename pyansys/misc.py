@@ -119,7 +119,7 @@ class Report(scooby.Report):
                                extra_meta=extra_meta)
 
 
-def break_apart_surface(surf):
+def break_apart_surface(surf, force_linear=True):
     """Break apart the faces of a vtk PolyData such that the points
     for each face are unique and each point is used only by one face.
     This leads to duplicate points, but allows multiple scalars per
@@ -129,6 +129,9 @@ def break_apart_surface(surf):
     ----------
     surf : pyvista.PolyData
         Surface to break apart.
+
+    force_linear : bool, optional
+        When ``True``, converts quadratic faces to their linear counterparts.
 
     Returns
     -------
@@ -141,8 +144,10 @@ def break_apart_surface(surf):
     if faces.dtype != np.int64:
         faces = faces.astype(np.int64)
 
-    b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points, faces,
-                                                                surf.n_faces)
+    b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points,
+                                                                faces,
+                                                                surf.n_faces,
+                                                                force_linear)
     bsurf = pyvista.PolyData(b_points, b_faces)
     bsurf.point_arrays['orig_ind'] = idx
     return bsurf

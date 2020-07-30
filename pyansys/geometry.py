@@ -59,7 +59,7 @@ class Geometry():
         self._keyopt = keyopt
 
     def _parse_vtk(self, allowable_types=None, force_linear=False,
-                   null_unallowed=False, fix_midside=True):
+                   null_unallowed=False, fix_midside=True, additional_checking=False):
         """Convert raw ANSYS nodes and elements to a VTK UnstructuredGrid
 
         Parameters
@@ -108,6 +108,7 @@ class Geometry():
                                                            type_ref,
                                                            self.nnum,
                                                            True)  # for reset_midside
+
         nodes, angles, nnum = self.nodes, self.node_angles, self.nnum
 
         # fix missing midside
@@ -118,6 +119,10 @@ class Geometry():
             else:
                 cells[cells == -1] = 0
 
+        if additional_checking:
+            cells[cells < 0] = 0
+            cells[cells >= nodes.shape[0]] = 0
+        
         if VTK9:
             grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)
         else:

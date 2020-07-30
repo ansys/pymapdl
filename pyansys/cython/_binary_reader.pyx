@@ -1547,7 +1547,8 @@ def euler_cart_to_cyl(double [:, ::1] stress, double [::1] angles):
         stress[i, 5] = c_th*s_xz + s_th*s_yz
 
 
-def break_apart_surface(double [:, ::1] points, int64_t [::1] faces, int n_faces):
+def break_apart_surface(double [:, ::1] points, int64_t [::1] faces, int n_faces,
+                        int force_linear=True):
     """Break apart the faces of a vtk PolyData such that the points
     for each face are unique and each point is used only by one face.
     This leads to duplicate points, but allows multiple scalars per
@@ -1559,10 +1560,13 @@ def break_apart_surface(double [:, ::1] points, int64_t [::1] faces, int n_faces
         Points from a pyvista.PolyData
 
     faces : int64 [::1] np.ndarray
-        Faces from a pyvista.PolyData
+        Faces from a ``pyvista.PolyData``.  Maximum of 8 points per face.
 
     n_faces : int
         Number of faces
+
+    force_linear : bool, optional
+        When ``True``, converts quadratic faces to their linear counterparts.
 
     Returns
     -------
@@ -1576,26 +1580,43 @@ def break_apart_surface(double [:, ::1] points, int64_t [::1] faces, int n_faces
         Relates indices of the new points to the original surface.
 
     """
-
-    cdef double [:, ::1] new_points = np.empty((n_faces*4, 3))
+    cdef double [:, ::1] new_points = np.empty((n_faces*8, 3))
     cdef int64_t [::1] new_faces = np.empty(faces.size, np.int64)
-    cdef int32_t [::1] orig_idx = np.empty(n_faces*4, np.int32)
+    cdef int32_t [::1] orig_idx = np.empty(n_faces*8, np.int32)
 
     cdef int face_arr_sz = faces.size
     cdef int i = 0
     cdef int c = 0
-    cdef int j, face_sz
+    cdef int cj = 0
+    cdef int j, face_sz, c_add
+    cdef int face = 0
     while i < face_arr_sz:
+        face += 1
         face_sz = faces[i]
-        new_faces[i] = face_sz
-        i += 1
+
+        c_add = 0  # additional counter if face_sz is less than actual face size
+        if face_sz > 8:
+            raise Exception
+        if face_sz > 4 and force_linear:
+            if face_sz == 6:
+                face_sz = 3
+                c_add = 3
+            elif face_sz == 8:
+                face_sz = 4
+                c_add = 4
+
+        new_faces[cj] = face_sz
+        i += 1  # counter for faces
+        cj += 1  # counter for new_faces
         for j in range(face_sz):
             f_idx = faces[i]
-            new_faces[i] = c
+            new_faces[cj] = c
             new_points[c] = points[f_idx]
             orig_idx[c] = f_idx
             c += 1
+            cj += 1
             i += 1
+        i += c_add  # extra increment because we're not recording all faces
 
-    return np.array(new_points[:c]), np.array(new_faces), np.array(orig_idx[:c])
+    return np.array(new_points[:c]), np.array(new_faces[:cj]), np.array(orig_idx[:c])
 

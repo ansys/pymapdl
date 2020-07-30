@@ -44,7 +44,7 @@ Installation through pip::
 
 .. toctree::
    :maxdepth: 2
-   :caption: Examples Gallery
+   :caption: Examples
    :hidden:
 
    examples/index

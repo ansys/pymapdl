@@ -1609,6 +1609,7 @@ class ResultFile(AnsysBinary):
 
         """
         # get the correct component of the principal stress
+        comp = comp.upper()
         idx = check_comp(PRINCIPAL_STRESS_TYPES, comp)
         stress = self.principal_nodal_stress(rnum)[1][:, idx]
 
@@ -1746,6 +1747,7 @@ class ResultFile(AnsysBinary):
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
         interactive = kwargs.pop('interactive', True)
+        text_color = kwargs.pop('text_color', None)
 
         kwargs.setdefault('smooth_shading', True)
         kwargs.setdefault('color', 'w')
@@ -1774,6 +1776,14 @@ class ResultFile(AnsysBinary):
                          rng=rng,
                          cmap=cmap,
                          **kwargs)
+        
+        # set scalar bar text colors
+        if text_color:
+            from pyvista.plotting.theme import parse_color
+            text_color = parse_color(text_color)
+            plotter.scalar_bar.GetLabelTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetAnnotationTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetTitleTextProperty().SetColor(text_color)
 
         # NAN/missing data are white
         # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
@@ -1791,7 +1801,7 @@ class ResultFile(AnsysBinary):
         # add table
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
-            plotter.add_text(result_text, font_size=20)
+            plotter.add_text(result_text, font_size=20, color=text_color)
 
         if animate:
             orig_pts = copied_mesh.points.copy()
@@ -2306,14 +2316,13 @@ class ResultFile(AnsysBinary):
         # extract the surface and separate the surface faces
         # TODO: add element/node components
         surf = self.grid.extract_surface()
-        bsurf = break_apart_surface(surf)
+        bsurf = break_apart_surface(surf, force_linear=True)
         nnum_surf = surf.point_arrays['ansys_node_num'][bsurf['orig_ind']]
         faces = bsurf.faces
         if faces.dtype != np.int64:
             faces = faces.astype(np.int64)
 
         elem_ind = surf.cell_arrays['vtkOriginalCellIds']
-
         # index within the element table pointing to the data of interest
         result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
 
