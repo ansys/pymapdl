@@ -43,25 +43,25 @@ width = 0.1
 # diameter = width*ratio
 # radius = diameter*0.5
 
-notch_depth = 0.01
-notch_radius = 0.02
+notch_depth = 0.04
+notch_radius = 0.04
 
 # create the half arcs
 mapdl.prep7()
 
-k_num = mapdl.k(x=length/2, y=width + notch_radius)
-circ_line_num = mapdl.circle(k_num, notch_radius)
+circ0_kp = mapdl.k(x=length/2, y=width + notch_radius)
+circ_line_num = mapdl.circle(circ0_kp, notch_radius)
 circ_line_num = circ_line_num[2:]  # only concerned with the bottom arcs
 
 # create a line whereby the top circle will be dragged down
-k0 = mapdl.k(x=0, y=0)
+circ0_kp = mapdl.k(x=0, y=0)
 k1 = mapdl.k(x=0, y=-notch_depth)
 l0 = mapdl.l(k0, k1)
 mapdl.adrag(*circ_line_num, nlp1=l0)
 
 # same thing for the bottom notch
-k_num = mapdl.k(x=length/2, y=-notch_radius)
-circ_line_num = mapdl.circle(k_num, notch_radius)
+circ1_kp = mapdl.k(x=length/2, y=-notch_radius)
+circ_line_num = mapdl.circle(circ1_kp, notch_radius)
 circ_line_num = circ_line_num[:2]  # only concerned with the top arcs
 
 # create a line whereby the top circle will be dragged up
@@ -72,188 +72,198 @@ mapdl.adrag(*circ_line_num, nlp1=l0)
 
 rect_anum = mapdl.blc4(width=length, height=width)
 
+
 # Note how pyansys parses the output and returns the area numbers
 # created by each command.  This can be used to execute a boolean
 # operation on these areas to cut the circle out of the rectangle.
 # plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 cut_area = mapdl.asba(rect_anum, 'ALL')  # cut all areas except the plate
 
-
-# Area plotting is not yet supported by pyansys and relies on MAPDL
-# plotting
-mapdl.enable_interactive_plotting()
-mapdl.aplot()
+# mapdl.aplot(vtk=True, show_line_numbering=True)
+mapdl.lplot(vtk=True, show_keypoint_numbering=True)
 
 
-# ###############################################################################
-# Finally, plot the lines of the plate so we can see which parts of
-# the mesh should be refined
-mapdl.lsla('S')
-_ = mapdl.lplot(vtk=True, cpos='xy', line_width=10, font_size=26,
-                random_color=True, background='w')
-mapdl.lsel('all')
 
-
-mapdl.et(999, 'MESH200', 4)
-mapdl.aclear('all')
-mapdl.amesh('all')
-mapdl.eplot(vtk=True)
+# plot the area using vtk/pyvista
+# mapdl.aplot(vtk=True, show_numbering=True, show_edges=True, cpos='xy')
 
 # ###############################################################################
-# # Element Type and Material Properties
-# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # This example will use PLANE183 elements as a thin plate can be
-# # modeled with plane elements provided that KEYOPTION 3 is set to 3
-# # and a thickness is provided.
-# # 
-# # This example will use SI units.
+# Next, extrude the area to create volume
+thickness = 0.01
+mapdl.vext(cut_area, dz=thickness)
 
-# mapdl.units('SI')  # SI - International system (m, kg, s, K).
+mapdl.vplot(vtk=True, show_numbering=False, show_edges=True, show_axes=True,
+            smooth_shading=True)
 
-# # define a PLANE183 element type with thickness
-# mapdl.et(1, "SOLID186")
-# mapdl.r(1, 0.001)  # thickness of 0.001 meters)
+###############################################################################
+# Meshing
+# ~~~~~~~
+# This example will use PLANE183 elements as a thin plate can be
+# modeled with plane elements provided that KEYOPTION 3 is set to 3
+# and a thickness is provided.
+#
+# Mesh the plate using a higher density near the hole and a lower
+# density for the remainder of the plate by setting ``LESIZE`` for the
+# lines nearby the hole and ``ESIZE`` for the mesh global size.
+#
+# Line numbers can be identified through inspection using ``lplot``
 
-# # Define a material (nominal steel in SI)
-# mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-# mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-# mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
-
-# # list currently defined material properties
-# print(mapdl.mplist())
-
-
-# ###############################################################################
-# # Meshing
-# # ~~~~~~~
-# # Mesh the plate using a higher density near the hole and a lower
-# # density for the remainder of the plate by setting ``LESIZE`` for the
-# # lines nearby the hole and ``ESIZE`` for the mesh global size.
-# #
-# # Line numbers can be identified through inspection using ``lplot``
-
-# # ensure there are at 50 elements around the hole
-# hole_esize = np.pi*diameter/50  # 0.0002
-# plate_esize = 0.01
-
-# # increased the density of the mesh at the center
-# mapdl.lsel('S', 'LINE', vmin=5, vmax=8)
-# mapdl.lesize('ALL', hole_esize, kforc=1)
-# mapdl.lsel('ALL')
-
-# # Decrease the area mesh expansion.  This ensures that the mesh
-# # remains fine nearby the hole
-# mapdl.mopt('EXPND', 0.7)  # default 1
-
-# mapdl.esize(plate_esize)
-# mapdl.amesh(plate_with_hole_anum)
-# _ = mapdl.eplot(vtk=True, cpos='xy', show_axes=False, line_width=2, background='w')
-
-# ###############################################################################
-# # Boundary Conditions
-# # ~~~~~~~~~~~~~~~~~~~
-# # Fix the left-hand side of the plate in the X direction and set a
-# # force of 1 kN in the positive X direction.
-# #
-
-# # Fix the left-hand side.
-# mapdl.nsel('S', 'LOC', 'X', 0)
-# mapdl.d('ALL', 'UX')
-
-# # Fix a single node on the left-hand side of the plate in the Y
-# # direction.  Otherwise, the mesh would be allowed to move in the y
-# # direction and would be an improperly constrained mesh.
-# mapdl.nsel('R', 'LOC', 'Y', width/2)
-# assert mapdl.n_node == 1
-# mapdl.d('ALL', 'UY')
-
-# # Apply a force on the right-hand side of the plate.  For this
-# # example, we select the nodes at the right-most side of the plate.
-# mapdl.nsel('S', 'LOC', 'X', length)
-
-# # Verify that only the nodes at length have been selected:
-# assert np.unique(mapdl.nodes[:, 0]) == length
-
-# # Next, couple the DOF for these nodes.  This lets us provide a force
-# # to one node that will be spread throughout all nodes in this coupled
-# # set.
-# mapdl.cp(5, 'UX', 'ALL')
-
-# # Select a single node in this set and apply a force to it
-# # We use "R" to re-select from the current node group
-# mapdl.nsel('R', 'LOC', 'Y', width/2)
-# mapdl.f('ALL', 'FX', 1000)
-
-# # finally, be sure to select all nodes again to solve the entire solution
-# _ = mapdl.allsel()
+# define a PLANE183 element type with thickness
 
 
-# ###############################################################################
-# # Solve the Static Problem
-# # ~~~~~~~~~~~~~~~~~~~~~~~~
-# # Solve the static analysis
-# mapdl.run('/SOLU')
-# mapdl.antype('STATIC')
-# mapdl.solve()
+# ensure there are at 25 elements around the hole
+notch_esize = np.pi*notch_radius*2/50
+plate_esize = 0.01
 
-# ###############################################################################
-# # Post-Processing
-# # ~~~~~~~~~~~~~~~
-# # The static result can be post-processed both within MAPDL and
-# # outside of MAPDL using ``pyansys``.  This example shows how to
-# # extract the von Mises stress and plot it using the ``pyansys``
-# # result reader.
+# increased the density of the mesh at the notch
+# line and area numbers identified using aplot
 
-# # grab the result from the ``mapdl`` instance
-# result = mapdl.result
-# result.plot_principal_nodal_stress(0, 'SEQV', lighting=False,
-#                                    cpos='xy', background='w',
-#                                    text_color='k', add_text=False)
 
-# nnum, stress = result.principal_nodal_stress(0)
-# von_mises = stress[:, -1]  # von-Mises stress is the right most column
+mapdl.asel('S', 'AREA', vmin=1, vmax=1)
+mapdl.aplot(vtk=True, show_line_numbering=True, show_numbering=True)
 
-# # Must use nanmax as stress is not computed at mid-side nodes
-# max_stress = np.nanmax(von_mises)
 
-# ###############################################################################
-# # Compute the Stress Concentration
-# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # The stress concentration :math:`K_t` is the ratio of the maximum
-# # stress at the hole to the far-field stress, or the mean cross
-# # sectional stress at a point far from the hole.  Analytically, this
-# # can be computed with:
-# # 
-# # :math:`\sigma_{nom} = \frac{F}{wt}`
-# #
-# # Where
-# #
-# # - :math:`F` is the force
-# # - :math:`w` is the width of the plate
-# # - :math:`t` is the thickness of the plate.
-# #
-# # Experimentally, this is computed by taking the mean of the nodes at
-# # the right-most side of the plate.
+acenter = mapdl.areas(7)[0].center
 
-# # We use nanmean here because mid-side nodes have no stress
-# mask = result.geometry.nodes[:, 0] == length
-# far_field_stress = np.nanmean(von_mises[mask])
-# print('Far field von mises stress: %e' % far_field_stress)
-# # Which almost exactly equals the analytical value of 10000000.0 Pa
+mapdl.lsel('NONE')
+for line in [7, 8, 20, 21]:
+    mapdl.lsel('A', 'LINE', vmin=line, vmax=line)
+mapdl.lesize('ALL', notch_esize, kforc=1)
+mapdl.lsel('ALL')
 
-# ###############################################################################
-# # Since the expected nominal stress across the cross section of the
-# # hole will increase as the size of the hole increases, regardless of
-# # the stress concentration, the stress must be adjusted to arrive at
-# # the correct stress.  This stress is adjusted by the ratio of the
-# # width over the modified cross section width.
-# adj = width/(width - diameter)
-# stress_adj = far_field_stress*adj
+# Decrease the area mesh expansion.  This ensures that the mesh
+# remains fine nearby the hole
+mapdl.mopt('EXPND', 0.7)  # default 1
 
-# # The stress concentration is then simply the maximum stress divided
-# # by the adjusted far-field stress.
-# stress_con = (max_stress/stress_adj)
-# print('Stress Concentration: %.2f' % stress_con)
+# mesh several elements through the plate
+esize = notch_esize*5
+if esize > thickness/2:
+    esize = thickness/2  # minimum of two elements through
+
+mapdl.esize()  # this is tough to automate
+mapdl.et(1, "SOLID186")
+mapdl.vsweep('all')
+_ = mapdl.eplot(vtk=True, show_axes=False, line_width=2, background='w')
+
+
+###############################################################################
+# Material Properties and Boundary Conditions
+# ~~~~~~~~~~~~~~~~~~~
+# Fix the left-hand side of the plate in the X direction and set a
+# force of 1 kN in the positive X direction.
+#
+
+# This example will use SI units.
+mapdl.units('SI')  # SI - International system (m, kg, s, K).
+
+# Define a material (nominal steel in SI)
+mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
+mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
+mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+
+# Fix the left-hand side.
+mapdl.nsel('S', 'LOC', 'X', 0)
+mapdl.d('ALL', 'UX')
+
+# Fix a few nodes on the left-hand side of the plate in the Y and Z
+# direction.  Otherwise, the mesh would be allowed to move in the y
+# direction and would be an improperly constrained mesh.
+mapdl.nsel('R', 'LOC', 'Y', width/2)
+mapdl.d('ALL', 'UY')
+mapdl.d('ALL', 'UZ')
+
+# Apply a force on the right-hand side of the plate.  For this
+# example, we select the nodes at the right-most side of the plate.
+mapdl.nsel('S', 'LOC', 'X', length)
+
+# Verify that only the nodes at length have been selected:
+assert np.unique(mapdl.nodes[:, 0]) == length
+
+# Next, couple the DOF for these nodes.  This lets us provide a force
+# to one node that will be spread throughout all nodes in this coupled
+# set.
+mapdl.cp(5, 'UX', 'ALL')
+
+# Select a single node in this set and apply a force to it
+# We use "R" to re-select from the current node group
+mapdl.nsel('R', 'LOC', 'Y', width/2)  # selects more than one
+single_node = mapdl.nnum[0]
+mapdl.nsel('S', 'NODE', vmin=single_node, vmax=single_node)
+mapdl.f('ALL', 'FX', 1000)
+
+# finally, be sure to select all nodes again to solve the entire solution
+_ = mapdl.allsel()
+
+
+###############################################################################
+# Solve the Static Problem
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# Solve the static analysis
+mapdl.run('/SOLU')
+mapdl.antype('STATIC')
+mapdl.solve()
+mapdl.finish()
+
+###############################################################################
+# Post-Processing
+# ~~~~~~~~~~~~~~~
+# The static result can be post-processed both within MAPDL and
+# outside of MAPDL using ``pyansys``.  This example shows how to
+# extract the von Mises stress and plot it using the ``pyansys``
+# result reader.
+
+# grab the result from the ``mapdl`` instance
+result = mapdl.result
+result.plot_principal_nodal_stress(0, 'SEQV', lighting=False,
+                                   background='w', show_edges=True,
+                                   text_color='k', add_text=False)
+
+nnum, stress = result.principal_nodal_stress(0)
+von_mises = stress[:, -1]  # von-Mises stress is the right most column
+
+# Must use nanmax as stress is not computed at mid-side nodes
+max_stress = np.nanmax(von_mises)
+
+###############################################################################
+# Compute the Stress Concentration
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The stress concentration :math:`K_t` is the ratio of the maximum
+# stress at the hole to the far-field stress, or the mean cross
+# sectional stress at a point far from the hole.  Analytically, this
+# can be computed with:
+# 
+# :math:`\sigma_{nom} = \frac{F}{wt}`
+#
+# Where
+#
+# - :math:`F` is the force
+# - :math:`w` is the width of the plate
+# - :math:`t` is the thickness of the plate.
+#
+# Experimentally, this is computed by taking the mean of the nodes at
+# the right-most side of the plate.
+
+# We use nanmean here because mid-side nodes have no stress
+mask = result.geometry.nodes[:, 0] == length
+far_field_stress = np.nanmean(von_mises[mask])
+print('Far field von mises stress: %e' % far_field_stress)
+# Which almost exactly equals the analytical value of 10000000.0 Pa
+
+# result.plot_element_result(0, 'ENS', 0)
+
+###############################################################################
+# Since the expected nominal stress across the cross section of the
+# hole will increase as the size of the hole increases, regardless of
+# the stress concentration, the stress must be adjusted to arrive at
+# the correct stress.  This stress is adjusted by the ratio of the
+# width over the modified cross section width.
+adj = width/(width - notch_depth*2)
+stress_adj = far_field_stress*adj
+
+# The stress concentration is then simply the maximum stress divided
+# by the adjusted far-field stress.
+stress_con = (max_stress/stress_adj)
+print('Stress Concentration: %.2f' % stress_con)
 
 
 # ###############################################################################
@@ -263,116 +273,6 @@ mapdl.eplot(vtk=True)
 # # stress concentration for a variety of hole diameters.  For each
 # # batch, MAPDL is reset and the geometry is generated from scratch.
 
-# def compute_stress_con(ratio):
-#     """Compute the stress concentration for plate with a hole loaded
-#     with a uniaxial force.
-#     """
-#     mapdl.clear('NOSTART')
-#     mapdl.prep7()
-#     mapdl.units('SI')  # SI - International system (m, kg, s, K).
-
-#     # define a PLANE183 element type with thickness
-#     mapdl.et(1, "PLANE183", kop3=3)
-#     mapdl.r(1, 0.001)  # thickness of 0.001 meters)
-
-#     # Define a material (nominal steel in SI)
-#     mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-#     mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-#     mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
-#     mapdl.emodif('ALL', 'MAT', 1)
-
-#     # Geometry
-#     # ~~~~~~~~
-#     # Create a rectangular area with the hole in the middle
-#     diameter = width*ratio
-#     radius = diameter*0.5
-
-#     # create the rectangle
-#     rect_anum = mapdl.blc4(width=length, height=width)
-
-#     # create a circle in the middle of the rectangle
-#     circ_anum = mapdl.cyl4(length/2, width/2, radius)
-
-#     # Note how pyansys parses the output and returns the area numbers
-#     # created by each command.  This can be used to execute a boolean
-#     # operation on these areas to cut the circle out of the rectangle.
-#     plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
-
-#     # Meshing
-#     # ~~~~~~~
-#     # Mesh the plate using a higher density near the hole and a lower
-#     # density for the remainder of the plate
-
-#     mapdl.aclear('all')
-
-#     # ensure there are at least 100 elements around the hole
-#     hole_esize = np.pi*diameter/100  # 0.0002
-#     plate_esize = 0.01
-
-#     # increased the density of the mesh at the center
-#     mapdl.lsel('S', 'LINE', vmin=5, vmax=8)
-#     mapdl.lesize('ALL', hole_esize, kforc=1)
-#     mapdl.lsel('ALL')
-
-#     # Decrease the area mesh expansion.  This ensures that the mesh
-#     # remains fine nearby the hole
-#     mapdl.mopt('EXPND', 0.7)  # default 1
-
-#     mapdl.esize(plate_esize)
-#     mapdl.amesh(plate_with_hole_anum)
-
-#     ###############################################################################
-#     # Boundary Conditions
-#     # ~~~~~~~~~~~~~~~~~~~
-#     # Fix the left-hand side of the plate in the X direction
-#     mapdl.nsel('S', 'LOC', 'X', 0)
-#     mapdl.d('ALL', 'UX')
-
-#     # Fix a single node on the left-hand side of the plate in the Y direction
-#     mapdl.nsel('R', 'LOC', 'Y', width/2)
-#     assert mapdl.n_node == 1
-#     mapdl.d('ALL', 'UY')
-
-#     # Apply a force on the right-hand side of the plate.  For this
-#     # example, we select the right-hand side of the plate.
-#     mapdl.nsel('S', 'LOC', 'X', length)
-
-#     # Next, couple the DOF for these nodes
-#     mapdl.cp(5, 'UX', 'ALL')
-
-#     # Again, select a single node in this set and apply a force to it
-#     mapdl.nsel('r', 'loc', 'y', width/2)
-#     mapdl.f('ALL', 'FX', 1000)
-
-#     # finally, be sure to select all nodes again to solve the entire solution
-#     mapdl.allsel()
-
-#     # Solve the Static Problem
-#     # ~~~~~~~~~~~~~~~~~~~~~~~~
-#     mapdl.run('/SOLU')
-#     mapdl.antype('STATIC')
-#     mapdl.solve()
-
-
-#     # Post-Processing
-#     # ~~~~~~~~~~~~~~~
-#     # grab the stress from the result
-#     result = mapdl.result
-#     nnum, stress = result.principal_nodal_stress(0)
-#     von_mises = stress[:, -1]
-#     max_stress = np.nanmax(von_mises)
-
-#     # compare to the "far field" stress by getting the mean value of the
-#     # stress at the wall
-#     mask = result.geometry.nodes[:, 0] == length
-#     far_field_stress = np.nanmean(von_mises[mask])
-
-#     # adjust by the cross sectional area at the hole
-#     adj = width/(width - diameter)
-#     stress_adj = far_field_stress*adj
-
-#     # finally, compute the stress concentration
-#     return max_stress/stress_adj
 
 
 # ###############################################################################
