@@ -5,8 +5,11 @@ steps:
     targetPath: 'dist'
 
 - script: |
-    python -m pip install -r requirements_build.txt
     python setup.py sdist
+  condition: and(startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq(variables['Agent.OS'], 'Windows_NT'))
+
+- script: |
+    python -m pip install -r requirements_build.txt
     python -m pip install twine
     python -m twine upload dist/* --skip-existing -p $(TWINE_PASSWORD) -u $(TWINE_USERNAME)
   displayName: 'Upload Artifacts'
