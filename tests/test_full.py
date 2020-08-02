@@ -63,3 +63,7 @@ def test_full_load_km(sparse_full):
 
     # make sure internal values are not overwritten
     assert (np.diff(sparse_full.dof_ref[:, 0]) >= 0).all()
+
+
+def test_load_vector(sparse_full):
+    assert not sparse_full.load_vector.any()

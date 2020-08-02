@@ -236,9 +236,6 @@ class FullFile(AnsysBinary):
                 raise ImportError('Unable to load scipy, use ``load_km`` with '
                                   '``as_sparse=False``')
 
-        # Get header details
-        neqn = self._header['neqn']  # Number of equations
-
         # number of terms in stiffness matrix
         ntermK = two_ints_to_long(self._header['ntermKl'], self._header['ntermKh'])
 
@@ -272,7 +269,7 @@ class FullFile(AnsysBinary):
             krow, kcol, kdata = _binary_reader.read_array(self.filename,
                                                           ptrSTF,
                                                           ntermK,
-                                                          neqn,
+                                                          self.neqn,
                                                           const)
         else:
             warnings.warn('Missing stiffness matrix')
@@ -282,7 +279,7 @@ class FullFile(AnsysBinary):
             mrow, mcol, mdata = _binary_reader.read_array(self.filename,
                                                           ptrMAS,
                                                           ntermM,
-                                                          neqn,
+                                                          self.neqn,
                                                           const)
         else:
             warnings.warn('Missing mass matrix')
@@ -305,7 +302,8 @@ class FullFile(AnsysBinary):
 
 
         # sort nodal equivalence
-        dof_ref, index, nref, dref = _binary_reader.sort_nodal_eqlv(neqn, neqv, ndof)
+        dof_ref, index, nref, dref = _binary_reader.sort_nodal_eqlv(self.neqn,
+                                                                    neqv, ndof)
 
         # store constrained dof information
         unsort_dof_ref = np.vstack((nref, dref)).T
@@ -339,7 +337,7 @@ class FullFile(AnsysBinary):
         if as_sparse:
 
             if kdata is not None:
-                k = coo_matrix((neqn,) * 2)
+                k = coo_matrix((self.neqn,) * 2)
                 k.data = kdata  # data has to be set first
                 k.row = krow
                 k.col = kcol
@@ -350,7 +348,7 @@ class FullFile(AnsysBinary):
                 k = None
 
             if mdata is not None:
-                m = coo_matrix((neqn,) * 2)
+                m = coo_matrix((self.neqn,) * 2)
                 m.data = mdata
                 m.row = mrow
                 m.col = mcol
@@ -362,18 +360,40 @@ class FullFile(AnsysBinary):
 
         else:
             if kdata is not None:
-                k = np.zeros((neqn,) * 2)
+                k = np.zeros((self.neqn,) * 2)
                 k[krow, kcol] = kdata
             else:
                 k = None
 
             if mdata is not None:
-                m = np.zeros((neqn,) * 2)
+                m = np.zeros((self.neqn,) * 2)
                 m[mrow, mcol] = mdata
             else:
                 m = None
 
         return dof_ref, k, m
+
+    @property
+    def neqn(self):
+        """Number of equations
+
+        Examples
+        --------
+        >>> full.neqn
+        963
+        """
+        return self._header['neqn']
+
+    @property
+    def load_vector(self):
+        """The load vector
+
+        Examples
+        --------
+        >>> full.load_vector
+        array([0., 0., 0., ..., 0., 0., 0.])
+        """
+        return self.read_record(self._header['ptrRHS'])[:self.neqn]
 
     def _load_km(self):
         """Loads the matrices with sorted DOF"""

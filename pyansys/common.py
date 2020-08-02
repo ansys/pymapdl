@@ -79,7 +79,7 @@ class AnsysBinary():
         Parameters
         ----------
         pointer : int
-            ANSYS file position (n words from start of file.  A word
+            ANSYS file position (n words from start of file).  A word
             is four bytes.
 
         return_bufsize : bool, optional
