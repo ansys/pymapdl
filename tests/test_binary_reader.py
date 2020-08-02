@@ -27,6 +27,12 @@ def result():
     return pyansys.read_binary(examples.rstfile)
 
 
+@pytest.fixture(scope='module')
+def static_canteliver_bc():
+    filename = os.path.join(testfiles_path, 'rst', 'beam_static_bc.rst')
+    return pyansys.read_binary(filename)
+
+
 def test_loadresult(result):
     # check result is loaded
     assert result.nsets
@@ -65,6 +71,23 @@ def test_loadresult(result):
     assert enum.size
     assert enode[0].size
 
+
+def test_boundary_conditions(static_canteliver_bc):
+    nnum, dof, bc = static_canteliver_bc.nodal_boundary_conditions(0)
+    assert np.allclose(nnum, np.array([3, 3, 3, 25, 26, 27]))
+    assert np.allclose(dof, np.array([1, 2, 3, 1, 2, 3]))
+    assert np.allclose(bc, np.array([0., 0., 0., 0.001, 0.0011, 0.0012]))
+
+
+def test_force(static_canteliver_bc):
+    nnum, dof, force = static_canteliver_bc.nodal_input_force(0)
+    assert np.allclose(nnum, np.array([71, 52, 127]))
+    assert np.allclose(dof, np.array([2, 1, 3]))
+    assert np.allclose(force, np.array([30., 20., 40.]))
+
+
+def test_dof(result):
+    assert result.result_dof(0) == ['UX', 'UY', 'UZ']
 
 
 result_types = ['ENS', 'EPT', 'ETH', 'EEL', 'ENG']# 'ENF']

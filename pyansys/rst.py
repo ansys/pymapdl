@@ -18,7 +18,8 @@ from pyansys.geometry import Geometry
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
 from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                solution_data_header_keys, solution_header_keys_dp,
-                               result_header_keys)
+                               result_header_keys, boundary_condition_index_table,
+                               DOF_REF)
 from pyansys._mp_keys import mp_keys
 from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, rotate_to_global,
@@ -32,6 +33,11 @@ VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 # # Create logger
 # LOG = logging.getLogger(__name__)
 # LOG.setLevel('DEBUG')
+
+EMAIL_ME = """Please raise an issue at:
+https://github.com/akaszynski/pyansys/issues
+Or email the developer at alexander.kaszynski@ansys.com
+"""
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1261,14 +1267,182 @@ class ResultFile(AnsysBinary):
         ele_ind_table = self.read_record(element_rst_ptr).view(np.int64)
         # ele_ind_table += element_rst_ptr
 
-        # boundary conditions
-        # bc = self.read_record(rpointers[rnum] + solution_header['ptrBC'])
-
         return ele_ind_table, nodstr, self.geometry._ans_etype, element_rst_ptr
+
+    def result_dof(self, rnum):
+        """Return a list of degrees of freedom for a given result number.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        dof : list
+            List of degrees of freedom.
+
+        Examples
+        --------
+        >>> rst.result_dof(0)
+        ['UX', 'UY', 'UZ']
+        """
+        rnum = self.parse_step_substep(rnum)
+        return [DOF_REF[dof_idx] for dof_idx in self._solution_header(rnum)['DOFS']]
+
+    def nodal_boundary_conditions(self, rnum):
+        """Nodal boundary conditions for a given result number.
+
+        These nodal boundary conditions are generally set with the
+        APDL command ``D``.  For example, ``D, 25, UX, 0.001``
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            Node numbers of the nodes with boundary conditions.
+
+        dof : np.ndarray
+            Array of indices of the degrees of freedom of the nodes
+            with boundary conditions.  See ``rst.result_dof`` for the
+            degrees of freedom associated with each index.
+
+        bc : np.ndarray
+            Boundary conditions.
+
+        Examples
+        --------
+        Print the boundary conditions where:
+        - Node 3 is fixed
+        - Node 25 has UX=0.001
+        - Node 26 has UY=0.0011
+        - Node 27 has UZ=0.0012
+
+        >>> rst.nodal_boundary_conditions(0)
+        (array([ 3,  3,  3, 25, 26, 27], dtype=int32),
+        array([1, 2, 3, 1, 2, 3], dtype=int32),
+        array([0.    , 0.    , 0.    , 0.001 , 0.0011, 0.0012]))
+        """
+        bc_ptr, bc_header = self._bc_header(rnum)
+
+        if not bc_header['ptrDIX']:
+            raise IndexError('This result contains no nodal input forces')
+
+        # nodes with boundary conditions
+        ptr_dix = bc_ptr + bc_header['ptrDIX']
+        bc_nnum, sz = self.read_record(ptr_dix, return_bufsize=True)
+        if bc_header['format']:
+            # there is a record immediately following containing the DOF data
+            dof = self.read_record(ptr_dix + sz)
+        else:
+            raise NotImplementedError('Format "0" is unhandled.\n%s' % EMAIL_ME)
+
+        # RECORD : DIS     dp       1    4*numdis
+        # Nodal constraints.  This record contains present and
+        # previous values (real and imaginary) of the nodal
+        # constraints at each DOF.
+        #
+        # Repeated 4 times for real/imag for present/prior
+        # numdis : number of nodal constraints
+        bc_record = self.read_record(bc_ptr + bc_header['ptrDIS'])
+        bc = bc_record.reshape(bc_nnum.size, -1)[:, 0]  # use only present values
+
+        return bc_nnum, dof, bc
+
+    def nodal_input_force(self, rnum):
+        """Nodal input force for a given result number.
+
+        Nodal input force is generally set with the APDL command
+        ``F``.  For example, ``F, 25, FX, 0.001``
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            Node numbers of the nodes with nodal forces.
+
+        dof : np.ndarray
+            Array of indices of the degrees of freedom of the nodes
+            with input force.  See ``rst.result_dof`` for the degrees
+            of freedom associated with each index.
+
+        force : np.ndarray
+            Nodal input force.
+
+        Examples
+        --------
+        Print the nodal input force where:
+        - Node 25 has FX=20
+        - Node 26 has FY=30
+        - Node 27 has FZ=40
+
+        >>> rst.nodal_input_force(0)
+        (array([ 71,  52, 127], dtype=int32),
+         array([2, 1, 3], dtype=int32),
+         array([30., 20., 40.]))
+        """
+        bc_ptr, bc_header = self._bc_header(rnum)
+
+        if not bc_header['ptrFIX']:
+            raise IndexError('This result contains no nodal input forces')
+
+        # nodes with input force
+        ptr_fix = bc_ptr + bc_header['ptrFIX']
+        f_nnum, sz = self.read_record(ptr_fix, return_bufsize=True)
+        if bc_header['format']:
+            # there is a record immediately following containing the DOF data
+            dof = self.read_record(ptr_fix + sz)
+        else:
+            raise NotImplementedError('Format "0" is unhandled.\n%s' % EMAIL_ME)
+
+        # Repeated 4 times for real/imag for present/prior
+        # numdis : number of nodal constraints
+        f_record = self.read_record(bc_ptr + bc_header['ptrFOR'])
+        force = f_record.reshape(f_nnum.size, -1)[:, 0]  # use only present values
+        return f_nnum, dof, force
+
+    def _bc_header(self, rnum):
+        """Return the boundary conditions ptr and header for a given result number"""
+        rnum = self.parse_step_substep(rnum)
+        rptr = self._result_pointers[rnum]
+
+        # read bc_header
+        bc_ptr = rptr + self._solution_header(rnum)['ptrBC']
+        bc_header = parse_header(self.read_record(bc_ptr),
+                                 boundary_condition_index_table)
+
+        return bc_ptr, bc_header
+
+    def _solution_header(self, rnum):
+        """The solution header for a given cumulative result"""
+        record = self.read_record(self._result_pointers[rnum])
+        return parse_header(record, solution_data_header_keys)
+
+    @property
+    def _result_pointers(self):
+        """Array of result pointers (position within file)"""
+        return self._resultheader['rpointers']
 
     @property
     def version(self):
-        """ The version of ANSYS used to generate this result file """
+        """The version of MAPDL used to generate this result file.
+
+        Examples
+        --------
+        >>> rst.version
+        20.1
+        """
         return float(self._resultheader['verstring'])
 
     def element_stress(self, rnum, principal=False, in_element_coord_sys=False):

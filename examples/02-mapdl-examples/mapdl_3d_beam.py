@@ -15,7 +15,7 @@ from pyansys import examples
 import pyansys
 
 os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
-mapdl = pyansys.launch_mapdl(override=True)
+mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp')
 
 mapdl.cdread('db', examples.hexarchivefile)
 mapdl.esel('s', 'ELEM', vmin=5, vmax=20)
@@ -44,5 +44,5 @@ mapdl.exit()
 
 # view the results using pyansys's result viewer
 result = mapdl.result
-result.animate_nodal_solution(0, show_edges=True, loop=False,
+result.animate_nodal_solution(0, show_edges=True, loop=False, displacement_factor=10,
                               movie_filename='demo.gif')

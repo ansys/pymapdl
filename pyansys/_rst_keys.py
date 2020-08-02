@@ -175,3 +175,84 @@ result_header_keys = ['fun12', 'maxn', 'nnod', 'resmax', 'numdof',
                       'ptrGEOh', 'ptrTRANh', 'Glbnnod', 'ptrGNODl',
                       'ptrGNODh', 'qrDmpKy', 'MSUPkey', 'PSDkey',
                       'cycMSUPkey', 'XfemCrkPropTech']
+
+boundary_condition_index_table = [
+    'numdis',  # number of nodal constraints
+    'ptrDIX',  # pointer to the table of nodes having nodal constraints
+    'ptrDIS',  # pointer to nodal constraint values
+    'numfor',  # number of nodal input force loadings
+    'ptrFIX',  # pointer to the table of nodes having nodal forces
+    'ptrFOR',  # pointer to nodal force values
+    'format'  # key (0 or 1) denoting which format is used for DIX/FIX data (see below)
+]
+# if format == 0 --> Nodal constraint DOF.
+# This index is calculated as N*32+DOF, where N is the node number and
+# DOF is the DOF reference number.  Values are in the same order as
+# the DOF number reference table.
+# if format == 1 --> Nodal constraint node
+# numbers.
+
+# Degrees of freedom per node DOF reference numbers are
+DOF_REF = {
+    1: 'UX',
+    2: 'UY',
+    3: 'UZ',
+    4: 'ROTX',
+    5: 'ROTY',
+    6: 'ROTZ',
+    7: 'AX',
+    8: 'AY',
+    9: 'AZ',
+    10: 'VX',
+    11: 'VY',
+    12: 'VZ',
+    16: 'WARP',
+    17: 'CONC',
+    18: 'HDSP',
+    19: 'PRES',
+    20: 'TEMP',
+    21: 'VOLT',
+    22: 'MAG',
+    23: 'ENKE',
+    24: 'ENDS',
+    25: 'EMF',
+    26: 'CURR',
+    27: 'SP01',
+    28: 'SP02',
+    29: 'SP03',
+    30: 'SP04',
+    31: 'SP05',
+    32: 'SP06',
+    33: 'TBOT',
+    34: 'TE2',
+    35: 'TE3',
+    36: 'TE4',
+    37: 'TE5',
+    38: 'TE6',
+    39: 'TE7',
+    40: 'TE8',
+    41: 'TE9',
+    42: 'TE10',
+    43: 'TE11',
+    44: 'TE12',
+    45: 'TE13',
+    46: 'TE14',
+    47: 'TE15',
+    48: 'TE16',
+    49: 'TE17',
+    50: 'TE18',
+    51: 'TE19',
+    52: 'TE20',
+    53: 'TE21',
+    54: 'TE22',
+    55: 'TE23',
+    56: 'TE24',
+    57: 'TE25',
+    58: 'TE26',
+    59: 'TE27',
+    60: 'TE28',
+    61: 'TE29',
+    62: 'TE30',
+    63: 'TE31',
+    64: 'TTOP'
+}
