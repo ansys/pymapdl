@@ -44,7 +44,7 @@ width = 0.1
 # radius = diameter*0.5
 
 notch_depth = 0.04
-notch_radius = 0.04
+notch_radius = 0.002
 
 # create the half arcs
 mapdl.prep7()
@@ -56,7 +56,7 @@ circ_line_num = circ_line_num[2:]  # only concerned with the bottom arcs
 # create a line whereby the top circle will be dragged down
 circ0_kp = mapdl.k(x=0, y=0)
 k1 = mapdl.k(x=0, y=-notch_depth)
-l0 = mapdl.l(k0, k1)
+l0 = mapdl.l(circ0_kp, k1)
 mapdl.adrag(*circ_line_num, nlp1=l0)
 
 # same thing for the bottom notch
@@ -80,8 +80,9 @@ rect_anum = mapdl.blc4(width=length, height=width)
 cut_area = mapdl.asba(rect_anum, 'ALL')  # cut all areas except the plate
 
 # mapdl.aplot(vtk=True, show_line_numbering=True)
+mapdl.lsla('S')
 mapdl.lplot(vtk=True, show_keypoint_numbering=True)
-
+mapdl.lsel('all')
 
 
 # plot the area using vtk/pyvista
