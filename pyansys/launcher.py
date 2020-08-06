@@ -1,15 +1,18 @@
-"""
-Functions for launching MAPDL locally using the older (non gRPC)
+"""Functions for launching MAPDL locally
 interface.
-
 """
 import re
 import warnings
 import os
 import appdirs
 import tempfile
+import socket
+import pexpect
+from pexpect import popen_spawn
+
 
 from pyansys.misc import is_float
+from pyansys.errors import LockFileException
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('pyansys')
@@ -22,6 +25,15 @@ if not os.path.isdir(SETTINGS_DIR):
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
 ALLOWABLE_MODES = ['grpc', 'corba', 'console']
+
+LOCALHOST = '127.0.0.1'
+MAPDL_DEFAULT_PORT = 50052
+
+
+def port_in_use(port, ip='localhost'):
+    """Returns True when a port is in use at the given ip"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex((ip, port)) == 0
 
 
 def find_ansys():
@@ -171,11 +183,10 @@ def check_lock_file(path, jobname, override):
     lockfile = os.path.join(path, jobname + '.lock')
     if os.path.isfile(lockfile):
         if not override:
-            raise FileExistsError('Lock file exists for jobname %s \n'
-                                  % jobname +
-                                  ' at %s\n' % lockfile +
-                                  'Set ``override=True`` to delete lock '
-                                  'and start MAPDL')
+            raise FileExistsError('\nLock file exists for jobname "%s"' % jobname +
+                                  ' at\n"%s"\n\n' % lockfile +
+                                  'Set ``override=True`` to or delete the lock file '
+                                  'to start MAPDL')
         else:
             try:
                 os.remove(lockfile)
@@ -188,15 +199,15 @@ def check_lock_file(path, jobname, override):
 def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                  nproc=2, override=False, loglevel='INFO',
                  additional_switches='', start_timeout=120,
-                 log_broadcast=False, log_apdl='w', **kwargs):
-    """This class opens MAPDL in the background and allows commands to
-    be passed to a persistent session.
+                 log_apdl='w', **kwargs):
+    """This class launches a local instance of MAPDL in the background
+    and allows commands to be passed to a persistent session.
 
     Parameters
     ----------
     exec_file : str, optional
         The location of the MAPDL executable.  Will use the cached
-        location when left at the default None.
+        location when left at the default ``None``.
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
@@ -214,6 +225,10 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     nproc : int, optional
         Number of processors.  Defaults to 2.
+
+    ram : int, optional
+        RAM to allocate for the process.  Default None (unlimited).
+        Only valid when creating a gRPC process.
 
     override : bool, optional
         Attempts to delete the lock file at the run_location.
@@ -242,17 +257,19 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         section for additional details.
 
     start_timeout : float, optional
-        Time to wait before raising error that MAPDL is unable to
+        Time to wait before raising an error that MAPDL is unable to
         start.
 
     log_broadcast : bool, optional
         Additional logging for ansys solution progress.  Default True
-        and visible at log level 'INFO'.  Only applicable when using
-        CORBA.
+        and visible at log level 'INFO'.  Only applicable when ``mode=corba``
 
     log_apdl : str, optional
         Opens an APDL log file in the current MAPDL working directory.
         Default 'w'.  Set to 'a' to append to an existing log.
+
+    port : int, optional
+        Port to open the gRPC server on.  Only applicable when ``mode='grpc'``
 
     Examples
     --------
@@ -478,9 +495,8 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     check_lock_file(run_location, jobname, override)
 
-
     # NOTE: version may or may not be within the full exec_path
-    version = int(re.findall(r'\d\d\d', exec_file))
+    version = int(re.findall(r'\d\d\d', exec_file)[0])
     mode = check_mode(mode, version)
 
     if mode == 'console':
@@ -505,10 +521,104 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                           additional_switches=additional_switches,
                           start_timeout=start_timeout,
                           log_apdl=log_apdl,
-                          log_broadcast=log_broadcast)
+                          **kwargs)
     elif mode == 'grpc':
-        from pyansys.mapdl_grpc import mapdl_grpc
-        
+        # check if grpc package is available
+        try:
+            import ansys.grpc.mapdl
+        except ImportError:
+            raise ImportError('Please install ``ansys.grpc.mapdl`` for this feature')
+
+        process = launch_grpc(exec_path, jobname, nproc, ram=kwargs.pop('ram', None),
+                              run_location=run_location, port=MAPDL_DEFAULT_PORT,
+                              additional_switches=additional_switches,
+                              override=True, timeout=start_timeout)
+
+        # from pyansys.mapdl_grpc import MapdlgRPC
+        # MapdlgRPC()
+
+
+def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
+                port=MAPDL_DEFAULT_PORT, additional_switches='',
+                override=True, timeout=10):
+    """Start MAPDL in gRPC mode locally"""
+    if run_location is None:
+        run_location = os.getcwd()
+    elif not os.path.isdir(run_location):
+        raise RuntimeError('Directory %s does not exist' % run_location)
+
+    if not os.access(run_location, os.W_OK):
+        raise IOError('Unable to write to run_location "%s"' % run_location)
+
+    # verify lock file does not exist
+    lock_file = os.path.join(run_location, '%s.lock' % jobname)
+    if os.path.isfile(lock_file):
+        if override:
+            os.remove(lock_file)
+        else:
+            raise LockFileException
+
+    # get the next available port
+    while port_in_use(port, LOCALHOST):
+        port += 1
+
+    # different treatment for windows vs. linux due to v202 build issues
+    # if ram_str:
+    cpu_sw = '-np %d' % n_cpu
+    if ram:
+        ram_sw = '-m %d' % int(1024*ram)
+    else:
+        ram_sw = ''
+
+    custom_sw = ''
+    if os.name != 'nt':
+        custom_sw = '-custom /mnt/ansys_inc/grpc/ansys.e201t.DEBUG'
+
+    job_sw = '-j %s' % jobname
+    port_sw = '-port %d' % port
+    grpc_sw = '-grpc'
+    exec_path = '"%s"' % exec_path
+
+    command = ' '.join([exec_path, custom_sw, job_sw, cpu_sw, ram_sw,
+                        additional_switches, port_sw, grpc_sw])
+
+    # if os.name == 'nt':
+    #     # Start in a hidden window
+    #     breakpoint()
+    #     command = 'START /B "MAPDL" %s' % command
+
+    # self._log.debug('Starting MAPDL in gRPC mode with:\n"%s"', command)
+
+    # Windows will spawn a new window, only linux will let you use pexpect...
+
+    process = popen_spawn.PopenSpawn(command,
+                                     timeout=timeout,
+                                     cwd=run_location)
+    # if os.name == 'nt':
+
+    try:
+        idx = process.expect(['Server listening',
+                              'Another ANSYS job with the same job name',
+                              'PRESS <CR> OR <ENTER> TO CONTINUE',
+                              'ERROR'])
+
+        if idx == 1:
+            raise LockFileException()
+        if idx == 2:
+            process.sendline('')  # enter to continue
+            process.expect('Server listening', timeout=1)
+        elif idx > 2:
+            msg = process.before
+            raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+    except pexpect.EOF:
+        msg = process.before
+        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+    except pexpect.TIMEOUT:
+        msg = process.before
+        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+
+    # self._log.info('Local MAPDL GRPC server listening on localhost:%d', port)
+    return process
 
 
 def check_mode(mode, version):

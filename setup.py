@@ -164,5 +164,6 @@ setup(
                       'appdirs',
                       'psutil>=5.0.0',
                       'pexpect',
+                      'tqdm',
     ]
 )

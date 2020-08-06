@@ -1,33 +1,29 @@
 """Module to control interaction with grpc mapdl server"""
 import tempfile
-import weakref
+# import weakref
 import re
 import os
 import threading
-import socket
+
 from threading import Timer
 import time
 
-import pexpect
-from pexpect import popen_spawn
 import numpy as np
 import pyvista as pv
 import scooby
 from pyansys.geometry import Geometry
 from pyansys.mapdl import _MapdlCore
-from pyansys.misc import is_float, random_string
+from pyansys.misc import is_float, threaded
+
 
 # from ansys.mapdl import __version__
-# from ansys.mapdl.mapdl_grpc.client import MapdlGrpc
+
 # from ansys.mapdl.misc import get_ip, check_itk
 # from ansys.mapdl.common import threaded
 
+LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
 
-
-
-REMOVE_LOCK_MSG = 'Another ANSYS job with the same job name is already running in this directory'
-              ' or the lock file has not been deleted from an abnormally terminated ANSYS run'
 
 VGET_ENTITY_TYPES = ['NODE', 'ELEM', 'KP', 'LINE', 'AREA', 'VOLU',
                      'CDSY', 'RCON', 'TLAB']
@@ -66,75 +62,6 @@ ITK_PLOTTING = hasattr(pv, 'PlotterITK') and scooby.knowledge.in_ipykernel()
 def parse_fortran_index(i=1, j=1, k=1):
     return int(i), int(j), int(k)
 
-
-class MapdlException(Exception):
-    """Raised when MAPDL passes an error"""
-    pass
-
-
-def start_mapdl_local(jobname):
-    """Start MAPDL in gRPC mode locally"""
-    # get ip of this computer and next available port
-
-    port = MAPDL_DEFAULT_PORT
-    while port_in_use(port, ip):
-        port += 1
-
-    # launch MAPDL locally
-    ram_mb = int(1024*ram)
-    if ram_mb:
-        self.log.info('Creating local instance with %d MB RAM and %d CPUs', ram_mb, n_cpu)
-    else:
-        self.log.info('Creating local instance with and %d CPUs', n_cpu)
-
-    # different treatment for windows vs. linux due to v202 build issues
-    cmd = '%s -custom /mnt/ansys_inc/grpc/ansys.e201t.DEBUG -m -%d -np %d -smp -port %d -grpc' % (ram_mb, n_cpu, port)
-    self.log.debug('Running "%s"', cmd)
-
-    if run_location is None:
-        run_location = os.getcwd()
-
-    if not os.access(run_location, os.W_OK):
-        raise IOError('Unable to write to run_location "%s"' % run_location)
-
-    # verify lock file does not exist
-    lock_file = os.path.join(run_location, 'file.lock')
-    if os.path.isfile(lock_file):
-        if ignore_lock:
-            os.remove(lock_file)
-        else:
-            raise Exception('Please remove the lock file at "%s"' % run_location
- or pass ignore_lock=True' %
-                            run_location)
-
-
-    self._process = popen_spawn.PopenSpawn(cmd, timeout=10, cwd=run_location)
-    self._run_location = run_location
-
-    try:
-        idx = self._process.expect(['Server listening',
-                                    'Another ANSYS job with the same job name',
-                                    'PRESS <CR> OR <ENTER> TO CONTINUE',
-                                    'ERROR'])
-
-        if idx == 1:
-            raise Exception('\n%s.  Please remove the lock file at the run location' % REMOVE_LOCK)
-        if idx == 2:
-            self._process.sendline('')  # enter to continue
-            self._process.expect('Server listening', timeout=1)
-        elif idx > 2:
-            msg = self._process.before
-            raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
-    except pexpect.EOF:
-        msg = self._process.before
-        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
-    except pexpect.TIMEOUT:
-        msg = self._process.before
-        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
-
-    self.log.info('Local MAPDL GRPC server listening on localhost:%d', port)
-
-    
 
 class RepeatingTimer(Timer):
     def run(self):
@@ -196,19 +123,21 @@ class MapdlgRPC(_MapdlCore):
     >>> mapdl = ansys.Mapdl(local=True)
     """
 
-    def __init__(self, exec_file=None, run_location=None,
+    def __init__(self, exec_file, run_location=None,
                  jobname='file', nproc=2, ram=None, override=False,
                  loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False,
+                 start_timeout=120, port=MAPDL_DEFAULT_PORT,
                  log_apdl='w'):
         """Initialize connection with mapdl"""
         super().__init__(loglevel)
 
-        
+        # start the ANSYS process
+        self._launch(exec_file, jobname, nproc, ram, run_location,
+                     port, additional_switches, override, start_timeout)
+        breakpoint()
+        # INSTANCES.append(self)
 
-        INSTANCES.append(self)
-
-        # self.log = setup_logger(loglevel.upper())
+        # self._log = setup_logger(loglevel.upper())
         # self.jobname = 'file'
         # self._quad_grid = None
         # self._grid = None
@@ -250,9 +179,9 @@ class MapdlgRPC(_MapdlCore):
 
         #     # launch MAPDL locally
         #     ram_mb = int(1024*ram)
-        #     self.log.info('Creating local instance with %d MB RAM and %d CPUs', ram_mb, n_cpu)
+        #     self._log.info('Creating local instance with %d MB RAM and %d CPUs', ram_mb, n_cpu)
         #     cmd = '/mnt/ansys_inc/v201/ansys/bin/ansys201 -custom /mnt/ansys_inc/grpc/ansys.e201t.DEBUG -m -%d -np %d -smp -port %d -grpc' % (ram_mb, n_cpu, port)
-        #     self.log.debug('Running "%s"', cmd)
+        #     self._log.debug('Running "%s"', cmd)
 
         #     if run_location is None:
         #         run_location = os.getcwd()
@@ -294,7 +223,7 @@ class MapdlgRPC(_MapdlCore):
         #         msg = self._process.before
         #         raise Exception('Failed to start local mapdl instance: "%s"' % msg)
 
-        #     self.log.info('Local MAPDL GRPC server listening on localhost:%d', port)
+        #     self._log.info('Local MAPDL GRPC server listening on localhost:%d', port)
 
 
         # if request_instance:
@@ -320,7 +249,7 @@ class MapdlgRPC(_MapdlCore):
         #                                        instance_timeout=instance_timeout,
         #                                        permit_pending=allow_new_nodes,
         #                                        use_netapp=use_netapp,
-        #                                        log=self.log)
+        #                                        log=self._log)
 
         # elif ip is None:
         #     raise ValueError('Must specify an IP and port when request_instance=False')
@@ -348,16 +277,16 @@ class MapdlgRPC(_MapdlCore):
         # socket.inet_aton(ip)
 
         # # open a connection to the mapdl server
-        # self.log.debug(f'Connecting to MAPDL server at {ip}:{port}')
+        # self._log.debug(f'Connecting to MAPDL server at {ip}:{port}')
         # server = None
         # for n_attempt in range(10):
         #     try:
         #         server = MapdlGrpc(ip, port)
         #         response = server.send_command('/INQUIRE, , JOBNAME')
         #         job_name = response.split('=')[1].strip()
-        #         self.log.info(f'Connected to MAPDL instance with jobname "{job_name}"')
+        #         self._log.info(f'Connected to MAPDL instance with jobname "{job_name}"')
         #     except Exception as exception:
-        #         self.log.debug('Connection attempt %d', n_attempt)
+        #         self._log.debug('Connection attempt %d', n_attempt)
         #         time.sleep(0.1)
         #         continue
 
@@ -369,7 +298,7 @@ class MapdlgRPC(_MapdlCore):
         # self.server = server
         # self.ip = ip
         # self.port = port
-        # self.log.debug('Connected to MAPDL server')
+        # self._log.debug('Connected to MAPDL server')
         # self._reader = None
 
         # # keeps mapdl session alive
@@ -395,6 +324,7 @@ class MapdlgRPC(_MapdlCore):
         #         print('Acquired remote instance with %d CPUs and %.f GB RAM\n' %
         #               (n_cpu, ram))
         #     print(self)
+
 
     @property
     def path(self):
@@ -520,17 +450,17 @@ class MapdlgRPC(_MapdlCore):
                 raise MapdlException(text)
 
         elif '*** ERROR ***' in text:  # flag error
-            self.log.error(text)
+            self._log.error(text)
             if not self.continue_on_error:
                 raise MapdlException(text)
             elif ignored.search(text):  # flag ignored command
                 if not self.allow_ignore:
-                    self.log.error(text)
+                    self._log.error(text)
                     raise MapdlException(text)
                 else:
-                    self.log.warning(text)
+                    self._log.warning(text)
             else:
-                self.log.info(text)
+                self._log.info(text)
 
     @property
     def processor(self):
@@ -994,7 +924,7 @@ class MapdlgRPC(_MapdlCore):
         if itnum is None:
             itnum = ""
 
-        # self.log.debug('Sending %s', f'*VGET, {entity}, , {item}, {itnum}')
+        # self._log.debug('Sending %s', f'*VGET, {entity}, , {item}, {itnum}')
         return self.server.vget(f'{entity}, , {item}, {itnum}')
 
     @property
@@ -1361,7 +1291,7 @@ class MapdlgRPC(_MapdlCore):
             raise FileNotFoundError(f"Local file '{filename}' not found")
 
         self._busy = True
-        self.log.info('Running input file %s', filename)
+        self._log.info('Running input file %s', filename)
 
         response = self.server.input_file(filename, verbose, progress_bar, mute)
 
@@ -1418,7 +1348,7 @@ class MapdlgRPC(_MapdlCore):
     def _exit(self):
         """Send exit command"""
         if self.server:
-            # self.log.debug('Sending grpc exit command')
+            # self._log.debug('Sending grpc exit command')
             self.server.ctrl('EXIT')
 
     def upload(self, filename, progress_bar=True):
@@ -1660,7 +1590,7 @@ class MapdlgRPC(_MapdlCore):
             self.inquire('JOBNAME')
             self._check_flag = True
         except Exception as e:
-            self.log.error('Instance unavailable', exc_info=True)
+            self._log.error('Instance unavailable', exc_info=True)
             self._exited = True
 
     def retrieve_parameter(self, parameter):

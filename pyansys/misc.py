@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+from threading import Thread
 import sys
 import random
 import string
@@ -10,6 +11,7 @@ import numpy as np
 import vtk
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
+
 
 def vtk_cell_info(grid):
     """Returns version consistent connectivity and cell offset arrays.
@@ -175,4 +177,13 @@ def supress_logging(func):
 
         return out
 
+    return wrapper
+
+
+def threaded(fn):
+    """ calls a function using a thread """
+    def wrapper(*args, **kwargs):
+        thread = Thread(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
     return wrapper

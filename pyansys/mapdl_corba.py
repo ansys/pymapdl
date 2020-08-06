@@ -108,20 +108,20 @@ class MapdlCorba(_MapdlOld):
         if os.path.isfile(self._broadcast_file):
             os.remove(self._broadcast_file)
 
-        # add run location to command
-        self._log.debug('Spawning shell process with: "%s"', command)
-        self._log.debug('At "%s"', self.path)
-
         # after v19, this is the only way this will work...
         if os.name == 'nt':
             command = 'START /B "MAPDL" %s' % command
 
+        # add run location to command
+        self._log.debug('Spawning shell process with: "%s"', command)
+        self._log.debug('At "%s"', self.path)
+
         # set stdout
         if self._log.level < 20:  # < INFO            
-            self._process = subprocess.Popen(command, shell=True, 
+            self._process = subprocess.Popen(command, shell=True,
                                              cwd=self.path)
         else:
-            self._process = subprocess.Popen(command, shell=True, 
+            self._process = subprocess.Popen(command, shell=True,
                                              cwd=self.path,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE)
