@@ -6,7 +6,7 @@ import re
 import os
 import subprocess
 
-from pyansys.mapdl import _Mapdl
+from pyansys.mapdl_old import _MapdlOld
 from pyansys.misc import kill_process
 
 try:
@@ -57,19 +57,19 @@ def tail(filename, nlines):
         return qfile.read()
 
 
-class MapdlCorba(_Mapdl):
+class MapdlCorba(_MapdlOld):
     """CORBA implementation of the MAPDL interface"""
 
     def __init__(self, exec_file, run_location,
                  jobname='file', nproc=2, override=False,
                  loglevel='INFO', additional_switches='',
                  start_timeout=120, interactive_plotting=False,
-                 check_version=True,
                  prefer_pexpect=True, log_apdl='w',
                  log_broadcast=False):
         self._broadcast_logger = None
         self._server = None
         self._log_broadcast = log_broadcast
+        self._outfile = None
 
         # CORBA/AAS was introduced in v17
         version = int(re.findall(r'\d\d\d', exec_file)[0])
@@ -92,7 +92,7 @@ class MapdlCorba(_Mapdl):
         """Open a connection to ANSYS via a CORBA interface"""
         # Using stored parameters so launch command can be run from a
         # cached state (when launching the GUI)
-        self._log.info('Connecting to ANSYS via CORBA')
+        self._log.info('Connecting to MAPDL via CORBA')
 
         # create a dummy input file for getting NON-INTERACTIVE without
         # running /BATCH
@@ -312,32 +312,29 @@ class MapdlCorba(_Mapdl):
         text = ''
         additional_text = ''
 
-        self._log.debug('Running command %s' % command)
+        self._log.debug('Running command %s', command)
         text = self._server.executeCommandToString(command)
 
         # print supressed output
         additional_text = self._server.executeCommandToString('/GO')
 
-        if 'is not a recognized' in text:
-            if not self.allow_ignore:
-                text = text.replace('This command will be ignored.', '')
-                text += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(text)
+        # if 'is not a recognized' in text:
+        #     if not self.allow_ignore:
+        #         text = text.replace('This command will be ignored.', '')
+        #         text += '\n\nIgnore these messages by setting allow_ignore=True'
+        #         raise Exception(text)
 
-        if text:
-            text = text.replace('\\n', '\n')
-            if '*** ERROR ***' in text:
-                self._log.error(text)
-                raise Exception(text)
+        # if text:
+        #     text = text.replace('\\n', '\n')
+        #     if '*** ERROR ***' in text:
+        #         self._log.error(text)
+        #         raise Exception(text)
 
-        if additional_text:
-            additional_text = additional_text.replace('\\n', '\n')
-            if '*** ERROR ***' in additional_text:
-                self._log.error(additional_text)
-                raise Exception(additional_text)
-
-        if self._interactive_plotting:
-            self._display_plot('%s\n%s' % (text, additional_text))
+        # if additional_text:
+        #     additional_text = additional_text.replace('\\n', '\n')
+        #     if '*** ERROR ***' in additional_text:
+        #         self._log.error(additional_text)
+        #         raise Exception(additional_text)
 
         # return text, additional_text
         if text == additional_text:

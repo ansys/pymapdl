@@ -71,7 +71,7 @@ class Geometry():
 
         """
         if not len(self._nodes) or not len(self._elem):
-            warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
+            # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
             return
 
         etype_map = ETYPE_MAP
@@ -499,6 +499,49 @@ class Geometry():
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)
         return txt
+
+    def save(self, filename, binary=True, force_linear=False, allowable_types=[],
+             null_unallowed=False):
+        """Save the geometry as a vtk file
+
+        Parameters
+        ----------
+        filename : str
+            Filename of output file. Writer type is inferred from
+            the extension of the filename.
+
+        binary : bool, optional
+            If ``True``, write as binary, else ASCII.
+
+        force_linear : bool, optional
+            This parser creates quadratic elements if available.  Set
+            this to True to always create linear elements.  Defaults
+            to False.
+
+        allowable_types : list, optional
+            Allowable element types.  Defaults to all valid element
+            types in ``pyansys.elements.valid_types``
+
+            See ``help(pyansys.elements)`` for available element types.
+
+        null_unallowed : bool, optional
+            Elements types not matching element types will be stored
+            as empty (null) elements.  Useful for debug or tracking
+            element numbers.  Default False.
+
+        Examples
+        --------
+        >>> geom.save('mesh.vtk')
+
+        Notes
+        -----
+        Binary files write much faster than ASCII and have a smaller
+        file size.
+        """
+        grid = self._parse_vtk(allowable_types=allowable_types,
+                               force_linear=force_linear,
+                               null_unallowed=null_unallowed)
+        return grid.save(filename, binary=binary)
 
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):

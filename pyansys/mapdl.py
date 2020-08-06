@@ -1,29 +1,16 @@
-"""Module to control interaction with an ANSYS shell instance.
-
-This module makes no claim to own any rights to ANSYS.  It's merely an
-interface to software owned by ANSYS.
-
-"""
-import glob
-import string
+"""Module to control interaction with MAPDL through Python"""
 import re
 import os
-import tempfile
-import warnings
 import logging
-import random
-from shutil import copyfile, rmtree
 
 import appdirs
-import numpy as np
 import pyvista as pv
 
 import pyansys
+from pyansys.mapdl_functions import _MapdlCommands
+from pyansys.misc import random_string, supress_logging
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
-from pyansys.mapdl_functions import _MapdlCommands
-from pyansys.convert import is_float
-from pyansys import _reader
 
 
 MATPLOTLIB_LOADED = True
@@ -36,115 +23,36 @@ except:
     MATPLOTLIB_LOADED = False
 
 
-def random_string(stringLength=10):
-    """Generate a random string of fixed length """
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
-
-
-def find_ansys():
-    """Searches for ansys path within environmental variables.
-
-    Reutrns
-    -------
-    ansys_exe_path : str
-        Full path to ANSYS executable
-
-    version : float
-        Version of ANSYS
-    """
-    ansys_sysdir_var = 'ANSYS_SYSDIR'
-    paths = {}
-    for var in os.environ:
-        if 'ANSYS' in var and '_DIR' in var:
-            # add path if valid
-            path = os.environ[var]
-            if os.path.isdir(path):
-
-                # add path if version number is in path
-                version_str = var[5:8]
-                if is_float(version_str):
-                    paths[int(version_str)] = path
-
-    if not paths:
-        return '', ''
-
-    # check through all available paths and return the latest version
-    while paths:
-        version = max(paths.keys())
-        ansys_path = paths[version]
-
-        if ansys_sysdir_var in os.environ:
-            sysdir = os.environ[ansys_sysdir_var]
-            ansys_bin_path = os.path.join(ansys_path, 'bin', sysdir)
-            if 'win' in sysdir:
-                ansys_exe = 'ansys%d.exe' % version
-            else:
-                ansys_exe = 'ansys%d' % version
-        else:
-            ansys_bin_path = os.path.join(ansys_path, 'bin')
-            ansys_exe = 'ansys%d' % version
-
-        ansys_exe_path = os.path.join(ansys_bin_path, ansys_exe)
-        if os.path.isfile(ansys_exe_path):
-            break
-        else:
-            paths.pop(version)
-            paths.remove(ansys_path)
-
-    version_float = float(version)/10.0
-    return ansys_exe_path, version_float
-
-
-# settings directory
-settings_dir = appdirs.user_data_dir('pyansys')
-if not os.path.isdir(settings_dir):
-    try:
-        os.makedirs(settings_dir)
-    except:
-        warnings.warn('Unable to create settings directory.\n' +
-                      'Will be unable to cache ANSYS executable location')
-
-CONFIG_FILE = os.path.join(settings_dir, 'config.txt')
-
-# specific to pexpect process
-###############################################################################
-
-# processors = ['/PREP7',
-#               '/POST1',
-#               '/SOLUTION',
-#               '/POST26',
-#               '/AUX2',
-#               '/AUX3',
-#               '/AUX12',
-#               '/AUX15',
-#               '/MAP',]
-
-
-###############################################################################
-
-# test for png file
-PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
-
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
                   '*CRE': 'Create a function within python or run as non_interactive',
                   '*END': 'Create a function within python or run as non_interactive',
                   '*IF': 'Use a python if or run as non_interactive'}
 
+PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
 
-def check_valid_ansys():
-    """ Checks if a valid version of ANSYS is installed and preconfigured """
-    ansys_bin = get_ansys_path(allow_input=False)
-    if ansys_bin is not None:
-        version = int(re.findall(r'\d\d\d', ansys_bin)[0])
-        return not(version < 170 and os.name != 'posix')
 
-    return False
+def parse_to_short_cmd(command):
+    """Takes any MAPDL command and returns the first 4 characters of
+    the command
+
+    Examples
+    --------
+    >>> parse_to_short_cmd('K,,1,0,0,')
+    'K'
+
+    >>> parse_to_short_cmd('VPLOT, ALL')
+    'VPLO'
+    """
+    try:
+        short_cmd = command.split(',')[0]
+        return short_cmd[:4].upper()
+    except:
+        return
 
 
 def setup_logger(loglevel='INFO'):
-    """ Setup logger """
+    """Setup logger"""
 
     # return existing log if this function has already been called
     if hasattr(setup_logger, 'log'):
@@ -177,744 +85,121 @@ def setup_logger(loglevel='INFO'):
     return log
 
 
-def get_ansys_path(allow_input=True):
-    """ Acquires ANSYS Path from a cached file or user input """
-    exe_loc = None
-    if os.path.isfile(CONFIG_FILE):
-        with open(CONFIG_FILE) as f:
-            exe_loc = f.read()
-        # verify
-        if not os.path.isfile(exe_loc) and allow_input:
-            exe_loc = save_ansys_path()
-    elif allow_input:  # create configuration file
-        exe_loc = save_ansys_path()
-
-    return exe_loc
-
-
-def change_default_ansys_path(exe_loc):
-    """Change your default ansys path.
-
-    Parameters
-    ----------
-    exe_loc : str
-        Ansys executable path.  Must be a full path.
-
-    Examples
-    --------
-    Change default ansys location on Linux
-
-    >>> import pyansys
-    >>> pyansys.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
-    >>> pyansys.mapdl.get_ansys_path()
-    '/ansys_inc/v201/ansys/bin/ansys201'
-
-    Change default ansys location on Windows
-    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
-    >>> pyansys.change_default_ansys_path(ans_pth)
-    >>> pyansys.mapdl.check_valid_ansys()
-    True
-
-    """
-    if os.path.isfile(exe_loc):
-        with open(CONFIG_FILE, 'w') as f:
-            f.write(exe_loc)
-    else:
-        raise FileNotFoundError('File %s is invalid or does not exist' % exe_loc)
-
-
-def save_ansys_path(exe_loc=''):
-    """ Find ANSYS path or query user """
-    if exe_loc.strip():
-        print('Cached ANSYS executable %s not found' % exe_loc)
-    else:
-        print('Cached ANSYS executable not found')
-    exe_loc, ver = find_ansys()
-    if os.path.isfile(exe_loc):
-        print('Found ANSYS at %s' % exe_loc)
-        resp = input('Use this location?  [Y/n]')
-        if resp != 'n':
-            change_default_ansys_path(exe_loc)
-            return exe_loc
-
-    if exe_loc is not None:
-        if os.path.isfile(exe_loc):
-            return exe_loc
-
-    # otherwise, query user for the location
-    with open(CONFIG_FILE, 'w') as f:
-        try:
-            exe_loc = raw_input('Enter location of ANSYS executable: ')
-        except NameError:
-            exe_loc = input('Enter location of ANSYS executable: ')
-        if not os.path.isfile(exe_loc):
-            raise FileNotFoundError('ANSYS executable not found at this location:\n%s' % exe_loc)
-
-        f.write(exe_loc)
-
-    return exe_loc
-
-
-def check_lock_file(path, jobname, override):
-    # Check for lock file
-    lockfile = os.path.join(path, jobname + '.lock')
-    if os.path.isfile(lockfile):
-        if not override:
-            raise FileExistsError('Lock file exists for jobname %s \n'
-                                  % jobname +
-                                  ' at %s\n' % lockfile +
-                                  'Set ``override=True`` to delete lock '
-                                  'and start ANSYS')
-        else:
-            try:
-                os.remove(lockfile)
-            except PermissionError:
-                raise PermissionError('Unable to remove lock file.  '
-                                      'Another instance of ANSYS might be '
-                                      'running at "%s"' % path)
-
-
-def launch_mapdl(exec_file=None, run_location=None,
-                 jobname='file', nproc=2, override=False,
-                 loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False,
-                 log_broadcast=False, check_version=True,
-                 prefer_pexpect=True, log_apdl='w'):
-    """This class opens ANSYS in the background and allows commands to
-    be passed to a persistent session.
-
-    Parameters
-    ----------
-    exec_file : str, optional
-        The location of the ANSYS executable.  Will use the cached
-        location when left at the default None.
-
-    run_location : str, optional
-        ANSYS working directory.  Defaults to a temporary working
-        directory.
-
-    jobname : str, optional
-        ANSYS jobname.  Defaults to ``'file'``.
-
-    nproc : int, optional
-        Number of processors.  Defaults to 2.
-
-    override : bool, optional
-        Attempts to delete the lock file at the run_location.
-        Useful when a prior ANSYS session has exited prematurely and
-        the lock file has not been deleted.
-
-    wait : bool, optional
-        When True, waits until ANSYS has been initialized before
-        initializing the python ansys object.  Set this to False for
-        debugging.
-
-    loglevel : str, optional
-        Sets which messages are printed to the console.  Default
-        'INFO' prints out all ANSYS messages, 'WARNING` prints only
-        messages containing ANSYS warnings, and 'ERROR' prints only
-        error messages.
-
-    additional_switches : str, optional
-        Additional switches for ANSYS, for example aa_r, and academic
-        research license, would be added with:
-
-        - additional_switches="-aa_r"
-
-        Avoid adding switches like -i -o or -b as these are already
-        included to start up the ANSYS MAPDL server.  See the notes
-        section for additional details.
-
-    start_timeout : float, optional
-        Time to wait before raising error that ANSYS is unable to
-        start.
-
-    interactive_plotting : bool, optional
-        Enables interactive plotting using ``matplotlib``.  Default
-        False.
-
-    log_broadcast : bool, optional
-        Additional logging for ansys solution progress.  Default True
-        and visible at log level 'INFO'.  Only applicable when using
-        CORBA.
-
-    check_version : bool, optional
-        Check version of binary file and raise exception when invalid.
-
-    prefer_pexpect : bool, optional
-        When enabled, will avoid using ansys APDL in CORBA server mode
-        and will spawn a process and control it using pexpect.
-        Default False.
-
-    log_apdl : str, optional
-        Opens an APDL log file in the current ANSYS working directory.
-        Default 'w'.  Set to 'a' to append to an existing log.
-
-    Examples
-    --------
-    >>> import pyansys
-    >>> mapdl = pyansys.Mapdl()
-
-    Run MAPDL with the smp switch and specify the location of the
-    ansys binary
-
-    >>> import pyansys
-    >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              additional_switches='-smp')
-
-    Notes
-    -----
-    ANSYS MAPDL has the following command line options as of v20.1
-
-    -aas : Enables server mode
-     When enabling server mode, a custom name for the keyfile can be
-     specified using the ``-iorFile`` option.  This is the CORBA that
-     pyansys uses for Windows (and linux when
-     ``prefer_pexpect=False``).
-
-    -acc <device> : Enables the use of GPU hardware.  Enables the use of
-     GPU hardware to accelerate the analysis. See GPU Accelerator
-     Capability in the Parallel Processing Guide for more information.
-
-    -amfg : Enables the additive manufacturing capability.
-     Requires an additive manufacturing license. For general
-     information about this feature, see AM Process Simulation in
-     ANSYS Workbench.
-
-    -ansexe <executable> :  activates a custom mechanical APDL executable.
-     In the ANSYS Workbench environment, activates a custom
-     Mechanical APDL executable.
-
-    -b <list or nolist> : Activates batch mode
-     The options ``-b`` list or ``-b`` by itself cause the input
-     listing to be included in the output. The ``-b`` nolist option
-     causes the input listing not to be included. For more information
-     about running Mechanical APDL in batch mode, see Batch Mode.
-
-    -custom <executable> : Calls a custom Mechanical APDL executable
-     See Running Your Custom Executable in the Programmer's Reference
-     for more information.
-
-    -d <device> : Specifies the type of graphics device
-     This option applies only to interactive mode. For Linux systems,
-     graphics device choices are X11, X11C, or 3D. For Windows
-     systems, graphics device options are WIN32 or WIN32C, or 3D.
-
-    -db value : Initial memory allocation
-     Defines the portion of workspace (memory) to be used as the
-     initial allocation for the database. The default is 1024
-     MB. Specify a negative number to force a fixed size throughout
-     the run; useful on small memory systems.
-
-    -dir <path> : Defines the initial working directory
-     Using the ``-dir`` option overrides the
-     ``ANSYS201_WORKING_DIRECTORY`` environment variable.
-
-    -dis : Enables Distributed ANSYS
-     See the Parallel Processing Guide for more information.
-
-    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
-     Requires DesignXplorer.
-
-    -g : Launches the Mechanical APDL program with the GUI
-     Graphical User Interface (GUI) on. If you select this option, an
-     X11 graphics device is assumed for Linux unless the ``-d`` option
-     specifies a different device. This option is not used on Windows
-     systems. To activate the GUI after Mechanical APDL has started,
-     enter two commands in the input window: /SHOW to define the
-     graphics device, and /MENU,ON to activate the GUI. The ``-g`` option
-     is valid only for interactive mode.  Note: If you start
-     Mechanical APDL via the ``-g`` option, the program ignores any /SHOW
-     command in the start.ans file and displays a splash screen
-     briefly before opening the GUI windows.
-
-    -i <inputname> : Specifies the name of the file to read
-     Inputs an input file into Mechanical APDL for batch
-     processing.
-
-    -iorFile <keyfile_name> : Specifies the name of the server keyfile
-     Name of the server keyfile when enabling server mode. If this
-     option is not supplied, the default name of the keyfile is
-     ``aas_MapdlID.txt``. For more information, see Mechanical APDL as
-     a Server Keyfile in the Mechanical APDL as a Server User's Guide.
-
-    -j <Jobname> : Specifies the initial jobname
-     A name assigned to all files generated by the program for a
-     specific model. If you omit the ``-j`` option, the jobname is assumed
-     to be file.
-
-    -l <language> : Specifies a language file to use other than English
-     This option is valid only if you have a translated message file
-     in an appropriately named subdirectory in
-     ``/ansys_inc/v201/ansys/docu`` or
-     ``Program Files\ANSYS\Inc\V201\ANSYS\docu``
-
-    -m <workspace> : Specifies the total size of the workspace
-     Workspace (memory) in megabytes used for the initial
-     allocation. If you omit the ``-m`` option, the default is 2 GB
-     (2048 MB). Specify a negative number to force a fixed size
-     throughout the run.
-
-    -machines <IP> : Specifies the distributed machines
-     Machines on which to run a Distributed ANSYS analysis. See
-     Starting Distributed ANSYS in the Parallel Processing Guide for
-     more information.
-
-    -mpi <value> : Specifies the type of MPI to use.
-     See the Parallel Processing Guide for more information.
-
-    -mpifile <appfile> : Specifies an existing MPI file
-     Specifies an existing MPI file (appfile) to be used in a
-     Distributed ANSYS run. See Using MPI Files in the Parallel
-     Processing Guide for more information.
-
-    -na <value>: Specifies the number of GPU accelerator devices
-     Nubmer of GPU devices per machine or compute node when running
-     with the GPU accelerator feature. See GPU Accelerator Capability
-     in the Parallel Processing Guide for more information.
-
-    -name <value> : Defines Mechanical APDL parameters
-     Set mechanical APDL parameters at program start-up. The parameter
-     name must be at least two characters long. For details about
-     parameters, see the ANSYS Parametric Design Language Guide.
-
-    -np <value> : Specifies the number of processors
-     Number of processors to use when running Distributed ANSYS or
-     Shared-memory ANSYS. See the Parallel Processing Guide for more
-     information.
-
-    -o <outputname> : Output file
-     Specifies the name of the file to store the output from a batch
-     execution of Mechanical APDL
-
-    -p <productname> : ANSYS session product
-     Defines the ANSYS session product that will run during the
-     session. For more detailed information about the ``-p`` option,
-     see Selecting an ANSYS Product via the Command Line.
-
-    -ppf <license feature name> : HPC license
-     Specifies which HPC license to use during a parallel processing
-     run. See HPC Licensing in the Parallel Processing Guide for more
-     information.
-
-    -rcopy <path> : Path to remote copy of files
-     On a Linux cluster, specifies the full path to the program used
-     to perform remote copy of files. The default value is
-     ``/usr/bin/scp``.
-
-    -s <read or noread> : Read startup file
-     Specifies whether the program reads the ``start.ans`` file at
-     start-up. If you omit the ``-s`` option, Mechanical APDL reads the
-     start.ans file in interactive mode and not in batch mode.
-
-    -schost <host>: Coupling service host
-     Specifies the host machine on which the coupling service is
-     running (to which the co-simulation participant/solver must
-     connect) in a System Coupling analysis.
-
-    -scid <value> : System Coupling analysis licensing ID
-     Specifies the licensing ID of the System Coupling analysis.
-
-    -sclic <port@host> : System Coupling analysis host
-     Specifies the licensing port and host to use for the System
-     Coupling analysis.
-
-    -scname <solver> : Name of the co-simulation participant
-     Specifies the unique name used by the co-simulation participant
-     to identify itself to the coupling service in a System Coupling
-     analysis. For Linux systems, you need to quote the name to have
-     the name recognized if it contains a space: (e.g.
-     ``-scname "Solution 1"``)
-
-    -scport <port> : Coupling service port
-     Specifies the port on the host machine upon which the coupling
-     service is listening for connections from co-simulation
-     participants in a System Coupling analysis.
-
-    -smp : Enables shared-memory parallelism.
-     See the Parallel Processing Guide for more information.
-
-    -usersh : Enable MPI remote shell.
-     Directs the MPI software (used by Distributed ANSYS) to use the
-     remote shell (rsh) protocol instead of the default secure shell
-     (ssh) protocol. See Configuring Distributed ANSYS in the Parallel
-     Processing Guide for more information.
-
-    -v : Return version info
-     Returns the Mechanical APDL release number, update number,
-     copyright date, customer number, and license manager version
-     number.
-    """
-    if exec_file is None:
-        # Load cached path
-        exec_file = get_ansys_path()
-        if exec_file is None:
-            raise FileNotFoundError('Invalid or path or cannot load cached '
-                                    'ansys path.  Enter one manually using '
-                                    'pyansys.Mapdl(exec_file=...)')
-    else:  # verify ansys exists at this location
-        if not os.path.isfile(exec_file):
-            raise FileNotFoundError('Invalid ANSYS executable at "%s"\n'
-                                    % exec_file + 'Enter one manually using '
-                                    'pyansys.Mapdl(exec_file=)')
-
-    if run_location is None:
-        temp_dir = tempfile.gettempdir()
-        run_location = os.path.join(temp_dir, 'ansys')
-        if not os.path.isdir(run_location):
-            try:
-                os.mkdir(run_location)
-            except:
-                raise RuntimeError('Unable to create temporary working '
-                                   'directory %s\n' % run_location +
-                                   'Please specify run_location=')
-    else:
-        if not os.path.isdir(run_location):
-            raise FileNotFoundError('"%s" is not a valid directory' % run_location)
-
-    check_lock_file(run_location, jobname, override)
-
-    if os.name != 'posix':
-        prefer_pexpect = False
-
-    if prefer_pexpect:
-        from pyansys.mapdl_console import MapdlConsole
-        return MapdlConsole(exec_file,
-                            run_location,
-                            jobname=jobname,
-                            nproc=nproc,
-                            override=override,
-                            loglevel=loglevel,
-                            additional_switches=additional_switches,
-                            start_timeout=start_timeout,
-                            interactive_plotting=interactive_plotting,
-                            log_apdl=log_apdl)
-    else:
-        from pyansys.mapdl_corba import MapdlCorba
-        return MapdlCorba(exec_file,
-                          run_location,
-                          jobname=jobname,
-                          nproc=nproc,
-                          override=override,
-                          loglevel=loglevel,
-                          additional_switches=additional_switches,
-                          start_timeout=start_timeout,
-                          interactive_plotting=interactive_plotting,
-                          log_apdl=log_apdl,
-                          log_broadcast=log_broadcast)
-
-
-class _Mapdl(_MapdlCommands):
-    """This class opens ANSYS in the background and allows commands to
-    be passed to a persistent session.
-
-    Parameters
-    ----------
-    exec_file : str, optional
-        The location of the ANSYS executable.  Will use the cached
-        location when left at the default None.
-
-    run_location : str, optional
-        ANSYS working directory.  Defaults to a temporary working
-        directory.
-
-    jobname : str, optional
-        ANSYS jobname.  Defaults to ``'file'``.
-
-    nproc : int, optional
-        Number of processors.  Defaults to 2.
-
-    override : bool, optional
-        Attempts to delete the lock file at the run_location.
-        Useful when a prior ANSYS session has exited prematurely and
-        the lock file has not been deleted.
-
-    wait : bool, optional
-        When True, waits until ANSYS has been initialized before
-        initializing the python ansys object.  Set this to False for
-        debugging.
-
-    loglevel : str, optional
-        Sets which messages are printed to the console.  Default
-        'INFO' prints out all ANSYS messages, 'WARNING` prints only
-        messages containing ANSYS warnings, and 'ERROR' prints only
-        error messages.
-
-    additional_switches : str, optional
-        Additional switches for ANSYS, for example aa_r, and academic
-        research license, would be added with:
-
-        - additional_switches="-aa_r"
-
-        Avoid adding switches like -i -o or -b as these are already
-        included to start up the ANSYS MAPDL server.  See the notes
-        section for additional details.
-
-    start_timeout : float, optional
-        Time to wait before raising error that ANSYS is unable to
-        start.
-
-    interactive_plotting : bool, optional
-        Enables interactive plotting using ``matplotlib``.  Default
-        False.
-
-    check_version : bool, optional
-        Check version of binary file and raise exception when invalid.
-
-    prefer_pexpect : bool, optional
-        When enabled, will avoid using ansys APDL in CORBA server mode
-        and will spawn a process and control it using pexpect.
-        Default False.
-
-    log_apdl : str, optional
-        Opens an APDL log file in the current ANSYS working directory.
-        Default 'w'.  Set to 'a' to append to an existing log.
-
-    Examples
-    --------
-    >>> import pyansys
-    >>> mapdl = pyansys.Mapdl()
-
-    Run MAPDL with the smp switch and specify the location of the
-    ansys binary
-
-    >>> import pyansys
-    >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              additional_switches='-smp')
-
-    Notes
-    -----
-    ANSYS MAPDL has the following command line options as of v20.1
-
-    -aas : Enables server mode
-     When enabling server mode, a custom name for the keyfile can be
-     specified using the ``-iorFile`` option.  This is the CORBA that
-     pyansys uses for Windows (and linux when
-     ``prefer_pexpect=False``).
-
-    -acc <device> : Enables the use of GPU hardware.  Enables the use of
-     GPU hardware to accelerate the analysis. See GPU Accelerator
-     Capability in the Parallel Processing Guide for more information.
-
-    -amfg : Enables the additive manufacturing capability.
-     Requires an additive manufacturing license. For general
-     information about this feature, see AM Process Simulation in
-     ANSYS Workbench.
-
-    -ansexe <executable> :  activates a custom mechanical APDL executable.
-     In the ANSYS Workbench environment, activates a custom
-     Mechanical APDL executable.
-
-    -b <list or nolist> : Activates batch mode
-     The options ``-b`` list or ``-b`` by itself cause the input
-     listing to be included in the output. The ``-b`` nolist option
-     causes the input listing not to be included. For more information
-     about running Mechanical APDL in batch mode, see Batch Mode.
-
-    -custom <executable> : Calls a custom Mechanical APDL executable
-     See Running Your Custom Executable in the Programmer's Reference
-     for more information.
-
-    -d <device> : Specifies the type of graphics device
-     This option applies only to interactive mode. For Linux systems,
-     graphics device choices are X11, X11C, or 3D. For Windows
-     systems, graphics device options are WIN32 or WIN32C, or 3D.
-
-    -db value : Initial memory allocation
-     Defines the portion of workspace (memory) to be used as the
-     initial allocation for the database. The default is 1024
-     MB. Specify a negative number to force a fixed size throughout
-     the run; useful on small memory systems.
-
-    -dir <path> : Defines the initial working directory
-     Using the ``-dir`` option overrides the
-     ``ANSYS201_WORKING_DIRECTORY`` environment variable.
-
-    -dis : Enables Distributed ANSYS
-     See the Parallel Processing Guide for more information.
-
-    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
-     Requires DesignXplorer.
-
-    -g : Launches the Mechanical APDL program with the GUI
-     Graphical User Interface (GUI) on. If you select this option, an
-     X11 graphics device is assumed for Linux unless the ``-d`` option
-     specifies a different device. This option is not used on Windows
-     systems. To activate the GUI after Mechanical APDL has started,
-     enter two commands in the input window: /SHOW to define the
-     graphics device, and /MENU,ON to activate the GUI. The ``-g`` option
-     is valid only for interactive mode.  Note: If you start
-     Mechanical APDL via the ``-g`` option, the program ignores any /SHOW
-     command in the start.ans file and displays a splash screen
-     briefly before opening the GUI windows.
-
-    -i <inputname> : Specifies the name of the file to read
-     Inputs an input file into Mechanical APDL for batch
-     processing.
-
-    -iorFile <keyfile_name> : Specifies the name of the server keyfile
-     Name of the server keyfile when enabling server mode. If this
-     option is not supplied, the default name of the keyfile is
-     ``aas_MapdlID.txt``. For more information, see Mechanical APDL as
-     a Server Keyfile in the Mechanical APDL as a Server User's Guide.
-
-    -j <Jobname> : Specifies the initial jobname
-     A name assigned to all files generated by the program for a
-     specific model. If you omit the ``-j`` option, the jobname is assumed
-     to be file.
-
-    -l <language> : Specifies a language file to use other than English
-     This option is valid only if you have a translated message file
-     in an appropriately named subdirectory in
-     ``/ansys_inc/v201/ansys/docu`` or
-     ``Program Files\ANSYS\Inc\V201\ANSYS\docu``
-
-    -m <workspace> : Specifies the total size of the workspace
-     Workspace (memory) in megabytes used for the initial
-     allocation. If you omit the ``-m`` option, the default is 2 GB
-     (2048 MB). Specify a negative number to force a fixed size
-     throughout the run.
-
-    -machines <IP> : Specifies the distributed machines
-     Machines on which to run a Distributed ANSYS analysis. See
-     Starting Distributed ANSYS in the Parallel Processing Guide for
-     more information.
-
-    -mpi <value> : Specifies the type of MPI to use.
-     See the Parallel Processing Guide for more information.
-
-    -mpifile <appfile> : Specifies an existing MPI file
-     Specifies an existing MPI file (appfile) to be used in a
-     Distributed ANSYS run. See Using MPI Files in the Parallel
-     Processing Guide for more information.
-
-    -na <value>: Specifies the number of GPU accelerator devices
-     Nubmer of GPU devices per machine or compute node when running
-     with the GPU accelerator feature. See GPU Accelerator Capability
-     in the Parallel Processing Guide for more information.
-
-    -name <value> : Defines Mechanical APDL parameters
-     Set mechanical APDL parameters at program start-up. The parameter
-     name must be at least two characters long. For details about
-     parameters, see the ANSYS Parametric Design Language Guide.
-
-    -np <value> : Specifies the number of processors
-     Number of processors to use when running Distributed ANSYS or
-     Shared-memory ANSYS. See the Parallel Processing Guide for more
-     information.
-
-    -o <outputname> : Output file
-     Specifies the name of the file to store the output from a batch
-     execution of Mechanical APDL
-
-    -p <productname> : ANSYS session product
-     Defines the ANSYS session product that will run during the
-     session. For more detailed information about the ``-p`` option,
-     see Selecting an ANSYS Product via the Command Line.
-
-    -ppf <license feature name> : HPC license
-     Specifies which HPC license to use during a parallel processing
-     run. See HPC Licensing in the Parallel Processing Guide for more
-     information.
-
-    -rcopy <path> : Path to remote copy of files
-     On a Linux cluster, specifies the full path to the program used
-     to perform remote copy of files. The default value is
-     ``/usr/bin/scp``.
-
-    -s <read or noread> : Read startup file
-     Specifies whether the program reads the ``start.ans`` file at
-     start-up. If you omit the ``-s`` option, Mechanical APDL reads the
-     start.ans file in interactive mode and not in batch mode.
-
-    -schost <host>: Coupling service host
-     Specifies the host machine on which the coupling service is
-     running (to which the co-simulation participant/solver must
-     connect) in a System Coupling analysis.
-
-    -scid <value> : System Coupling analysis licensing ID
-     Specifies the licensing ID of the System Coupling analysis.
-
-    -sclic <port@host> : System Coupling analysis host
-     Specifies the licensing port and host to use for the System
-     Coupling analysis.
-
-    -scname <solver> : Name of the co-simulation participant
-     Specifies the unique name used by the co-simulation participant
-     to identify itself to the coupling service in a System Coupling
-     analysis. For Linux systems, you need to quote the name to have
-     the name recognized if it contains a space: (e.g. 
-     ``-scname "Solution 1"``)
-
-    -scport <port> : Coupling service port
-     Specifies the port on the host machine upon which the coupling
-     service is listening for connections from co-simulation
-     participants in a System Coupling analysis.
-
-    -smp : Enables shared-memory parallelism.
-     See the Parallel Processing Guide for more information.
-
-    -usersh : Enable MPI remote shell.
-     Directs the MPI software (used by Distributed ANSYS) to use the
-     remote shell (rsh) protocol instead of the default secure shell
-     (ssh) protocol. See Configuring Distributed ANSYS in the Parallel
-     Processing Guide for more information.
-
-    -v : Return version info
-     Returns the Mechanical APDL release number, update number,
-     copyright date, customer number, and license manager version
-     number.
-
+class _MapdlCore(_MapdlCommands):
+    """Contains methods in common between all Mapdl subclasses
     """
 
-    def __init__(self, exec_file, run_location,
-                 jobname, nproc, override,
-                 loglevel, additional_switches,
-                 start_timeout, interactive_plotting,
-                 log_apdl):
+    def __init__(self, loglevel='DEBUG', use_vtk=True):
         """ Initialize connection with ANSYS program """
-        self.path = run_location
-        self._exec_file = exec_file
-        self._jobname = jobname
-        self._start_timeout = start_timeout
-        self._nproc = nproc
-        self._additional_switches = additional_switches
+        self._show_matplotlib_figures = True  # for testing
+        self._exited = False
         self._allow_ignore = False
-        self._interactive_plotting = interactive_plotting
         self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
         self.response = None
-        self._outfile = None
-        self._show_matplotlib_figures = True
-        self._archive_cache = None
-        self._vtk_grid_cache = None
+        self._use_vtk = use_vtk
+        self._log_filehandler = None
 
         self._log = setup_logger(loglevel.upper())
         self.non_interactive = self._non_interactive(self)
-        self._redirected_commands = {'*LIS': self._list}
-        self.version = re.findall(r'\d\d\d', self._exec_file)[0]
 
-        # launch MAPDL
-        self._launch()
+    class _non_interactive:
+        """Allows user to enter commands that need to run
+        non-interactively.
 
-        if log_apdl:
-            filename = os.path.join(self.path, 'log.inp')
-            self.open_apdl_log(filename, mode=log_apdl)
+        Examples
+        --------
+        To use an non-interactive command like *VWRITE, use:
 
-        # setup plotting for PNG
-        if self._interactive_plotting:
-            self.enable_interactive_plotting()
+        >>> with ansys.non_interactive:
+                ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+                ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
 
-    def _reset_cache(self):
-        """Reset cached NBLOCK and other items"""
-        self._archive_cache = None
-        self._grid_cache = None
+        """
+        def __init__(self, parent):
+            self.parent = parent
+
+        def __enter__(self):
+            self.parent._log.debug('entering non-interactive mode')
+            self.parent._store_commands = True
+
+        def __exit__(self, type, value, traceback):
+            self.parent._log.debug('entering non-interactive mode')
+            self.parent._flush_stored()
+
+    def __str__(self):
+        try:
+            if self._exited:
+                return 'MAPDL exited'
+            stats = self.slashstatus()
+        except:
+            return 'MAPDL exited'
+
+        st = stats.find('*** YOU ARE IN')
+        en = stats.find('INITIAL', st)
+
+        version_str = '\n'.join(stats[st:en].splitlines()[1:])
+        version_str = version_str.split('CUSTOMER')[0].strip() + '\n\n'
+
+        st = stats.find('Current routine')
+        en = stats.find('Active options for this analysis type')
+
+        routine_str = ' ' + stats[st:en].strip()
+
+        pyansys_version_str = '\n\n pyansys version: %s' % pyansys.__version__
+        return version_str + routine_str + pyansys_version_str
 
     @property
-    def _lockfile(self):
-        """lockfile path"""
-        return os.path.join(self.path, self.jobname + '.lock')
+    def mesh(self):
+        """Mesh information
+
+        Examples
+        --------
+        Return an array of the active nodes
+
+        >>> mapdl.mesh.nodes
+        array([[ 1.,  0.,  0.],
+               [ 2.,  0.,  0.],
+               [ 3.,  0.,  0.],
+               [ 4.,  0.,  0.],
+               [ 5.,  0.,  0.],
+               [ 6.,  0.,  0.],
+               [ 7.,  0.,  0.],
+               [ 8.,  0.,  0.],
+               [ 9.,  0.,  0.],
+               [10.,  0.,  0.]])
+
+        Return an array of the node numbers of the active nodes
+
+        >>> mapdl.mesh.nnum
+        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
+
+        Simply query and print the geometry
+
+        >>> print(mapdl.mesh)
+          ANSYS Mapdl Mesh
+          Number of Nodes:              321
+          Number of Elements:           40
+          Number of Element Types:      1
+          Number of Node Components:    2
+          Number of Element Components: 2
+
+        Access the geometry as a VTK object
+
+        >>> mapdl.mesh.grid
+
+        """
+        return self._mesh
+
+    @property
+    def _mesh(self):
+        """Implemented by subclass"""
+        raise NotImplementedError('Implemented by subclass')
+
+    def _reset_cache(self):
+        """Reset cached items and other items"""
+        raise NotImplementedError('Implemented by subclass')
 
     @property
     def allow_ignore(self):
@@ -958,7 +243,7 @@ class _Mapdl(_MapdlCommands):
             Filename of the log.
         """
         if self._apdl_log is not None:
-            raise RuntimeError('APDL command logging already enabled.\n')
+            raise RuntimeError('APDL command logging already enabled')
 
         self._log.debug('Opening ANSYS log file at %s', filename)
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
@@ -972,14 +257,14 @@ class _Mapdl(_MapdlCommands):
             self._apdl_log.close()
         self._apdl_log = None
 
-    def nplot(self, knum="", vtk=False, **kwargs):
+    def nplot(self, knum="", vtk=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
 
         Parameters
         ----------
-        knum : int, optional
+        knum : bool, int, optional
             Node number key:
 
             - 0 : No node numbers on display (default).
@@ -996,17 +281,16 @@ class _Mapdl(_MapdlCommands):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(vtk=True, knum=True, background='w', color='k',
-                        off_screen=True, show_bounds=True)
+        >>> mapdl.nplot(knum=True, background='w', color='k',
+                        show_bounds=True)
 
         Plot without using VTK
 
-        >>> mapdl.enable_interactive_plotting()
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot()
+        >>> mapdl.nplot(vtk=False)
 
         Notes
         -----
@@ -1016,144 +300,48 @@ class _Mapdl(_MapdlCommands):
 
         This command is valid in any processor.
         """
+        if vtk is None:
+            vtk = self._use_vtk
+        elif not vtk:
+            self._enable_interactive_plotting()
+
         if vtk:
+            if not self.mesh.nodes.size:
+                raise RuntimeError('There are no nodes to plot.')
+
+            kwargs.setdefault('color', 'w')
+            cpos = kwargs.pop('cpos', None)
+            show_bounds = kwargs.pop('show_bounds', False)
+            show_axes = kwargs.pop('show_axes', False)
+
             pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
-            pl.add_points(self.nodes, color=kwargs.pop('color', 'w'))
+            pl.add_points(self.mesh.nodes, **kwargs)
             pl.show_axes()
             if 'background' in kwargs:
                 pl.set_background(kwargs['background'])
+
+            if isinstance(knum, str):
+                knum = knum == '1'
+
             if knum:
-                pl.add_point_labels(self.nodes, self.nnum)
+                pl.add_point_labels(self.mesh.nodes, self.mesh.nnum)
 
-            if 'cpos' in kwargs:
-                pl.camera_position = kwargs['cpos']
+            if cpos:
+                pl.camera_position = cpos
 
-            if 'show_bounds' in kwargs:
-                if kwargs['show_bounds']:
-                    pl.show_bounds()
+            if show_bounds:
+                pl.show_bounds()
+
+            if show_axes:
+                pl.show_axes()
 
             return pl.show()
-        else:
-            return super().nplot(knum, **kwargs)
 
-    @property
-    def nodes(self):
-        """The coordinates of the active selected nodes as an array.
+        # otherwise, use the built-in nplot
+        return super().nplot(knum, **kwargs)
 
-        Examples
-        --------
-        >>> import pyansys
-        >>> mapdl = pyansys.launch_mapdl()
-        >>> mapdl.prep7()
-        >>> mapdl.n(1, 0, 0, 0)
-        >>> mapdl.n(10, 10, 0, 0)
-        >>> mapdl.fill(1, 10, 9)
-        >>> mapdl.nodes
-        array([[ 1.,  0.,  0.],
-               [ 2.,  0.,  0.],
-               [ 3.,  0.,  0.],
-               [ 4.,  0.,  0.],
-               [ 5.,  0.,  0.],
-               [ 6.,  0.,  0.],
-               [ 7.,  0.,  0.],
-               [ 8.,  0.,  0.],
-               [ 9.,  0.,  0.],
-               [10.,  0.,  0.]])
-        """
-        return self._archive.nodes
-
-    @property
-    def nnum(self):
-        """The node numbers of the selected nodes
-
-        Examples
-        --------
-        >>> import pyansys
-        >>> mapdl = pyansys.launch_mapdl()
-        >>> mapdl.prep7()
-        >>> mapdl.n(1, 0, 0, 0)
-        >>> mapdl.n(10, 10, 0, 0)
-        >>> mapdl.fill(1, 10, 9)
-        >>> mapdl.nnum
-        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
-        """
-        return self._archive.nnum
-
-    @property
-    def n_node(self):
-        """Number of nodes currently selected
-
-        Examples
-        --------
-        >>> mapdl.n_node
-        665
-        """
-        return int(self.get(entity='NODE', item1='COUNT'))
-
-    @property
-    def _archive(self):
-        """Write entire archive to ASCII and read it in as a pyansys.Archive """
-        if self._archive_cache is None:
-            # temporarily disable log
-            prior_log_level = self._log.level
-            self._log.setLevel('CRITICAL')
-
-            # write database to an archive file
-            arch_filename = os.path.join(self.path, 'tmp.cdb')
-            self.cdwrite('db', arch_filename)
-            self._archive_cache = pyansys.Archive(arch_filename, parse_vtk=False)
-            self._log.setLevel(prior_log_level)
-        return self._archive_cache
-
-    @property
-    def _vtk_grid(self):
-        """Current vtk unstructured grid"""
-        if self._vtk_grid_cache is None:
-            quadgrid = self._archive._parse_vtk()
-            self._vtk_grid_cache = quadgrid.linear_copy()
-        return self._vtk_grid_cache
-
-    @property
-    def elements(self):
-        """List of elements containing raw ansys information.
-
-        Each element contains 10 items plus the nodes belonging to the
-        element.  The first 10 items are:
-
-        - FIELD 0 : material reference number
-        - FIELD 1 : element type number
-        - FIELD 2 : real constant reference number
-        - FIELD 3 : section number
-        - FIELD 4 : element coordinate system
-        - FIELD 5 : death flag (0 - alive, 1 - dead)
-        - FIELD 6 : solid model reference
-        - FIELD 7 : coded shape key
-        - FIELD 8 : element number
-        - FIELD 9 : base element number (applicable to reinforcing elements only)
-        - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
-
-        Examples
-        --------
-        >>> import pyansys
-        >>> mapdl = pyansys.launch_mapdl(override=True, loglevel='WARNING')
-        >>> mapdl.et(1, 188)
-        >>> mapdl.n(1, 0, 0, 0)
-        >>> mapdl.n(2, 1, 0, 0)
-        >>> mapdl.n(3, 2, 0, 0)
-        >>> mapdl.n(4, 3, 0, 0)
-        >>> mapdl.e(1, 2)
-        >>> mapdl.e(2, 3)
-        >>> mapdl.e(3, 4)
-        >>> mapdl.elements
-        [array([1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2], dtype=int32),
-         array([1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3], dtype=int32),
-         array([1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4], dtype=int32),
-         array([1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 4, 5], dtype=int32)]
-
-        """
-        return self._archive.elem
-
-    def enable_interactive_plotting(self, pixel_res=1600):
+    @supress_logging
+    def _enable_interactive_plotting(self, pixel_res=1600):
         """Enables interactive plotting.  Requires matplotlib
 
         Parameters
@@ -1165,96 +353,48 @@ class _Mapdl(_MapdlCommands):
             takes longer to render.
         """
         if MATPLOTLIB_LOADED:
-            self.show('PNG')
-            self.gfile(pixel_res)
-            self._interactive_plotting = True
+            if not self._png_mode:
+                self.show('PNG')
+                self.gfile(pixel_res)
         else:
-            raise ImportError('Install matplotlib to use enable interactive plotting\n' +
-                              'or turn interactive plotting off with:\n' +
-                              'interactive_plotting=False')
+            raise ImportError('Install matplotlib to use enable interactive plotting,'
+                              ' or turn interactive plotting off with:\n'
+                              '``interactive_plotting=False``')
+
+    @property
+    def _png_mode(self):
+        """Returns True when MAPDL is writing plots as png to file."""
+        return 'PNG' in self.show()
 
     def set_log_level(self, loglevel):
-        """Sets log level"""
-        setup_logger(loglevel=loglevel.upper())
-
-    def run(self, command, write_to_log=True):
-        """Runs APDL command(s)
+        """Sets log level
 
         Parameters
         ----------
-        command : str
-            ANSYS APDL command.
+        loglevel : str, int
+            Log level.  Must be one of: ``'DEBUG', 'INFO', 'WARNING', 'ERROR'``.
 
-        write_to_log : bool, optional
-            Overrides APDL log writing.  Default True.  When set to
-            False, will not write command to log even if APDL
-            command logging is enabled.
+        Examples
+        --------
+        Set the log level to debug
 
-        Returns
-        -------
-        command_output : str
-            Command output from ANSYS.
+        >>> mapdl.set_log_level('DEBUG')
 
-        Notes
-        -----
-        When two or more commands need to be run non-interactively
-        (i.e. ``*VWRITE``) use
+        Set the log level to info
 
-        >>> with ansys.non_interactive:
-        >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-        >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>> mapdl.set_log_level('INFO')
+
+        Set the log level to warning
+
+        >>> mapdl.set_log_level('WARNING')
+
+        Set the log level to error
+
+        >>> mapdl.set_log_level('ERROR')
         """
-        if self._store_commands:
-            self._stored_commands.append(command)
-            return
-        elif command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
-                                     (command, INVAL_COMMANDS[command[:3]]))
-            raise exception
-        elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
-                                     (command, INVAL_COMMANDS[command[:4]]))
-            raise exception
-        elif write_to_log and self._apdl_log is not None:
-            if not self._apdl_log.closed:
-                self._apdl_log.write('%s\n' % command)
-
-        if command[:4] in self._redirected_commands:
-            function = self._redirected_commands[command[:4]]
-            return function(command)
-
-        text = self._run(command)
-        if text:
-            self.response = text.strip()
-        else:
-            self.response = ''
-
-        if self.response:
-            self._log.info(self.response)
-            if self._outfile:
-                self._outfile.write('%s\n' % self.response)
-
-        if '*** ERROR ***' in self.response:  # flag error
-            self._log.error(self.response)
-            # if not continue_on_error:
-            raise Exception(self.response)
-
-        # special returns for certain geometry commands
-        try:
-            short_cmd = command.split(',')[0]
-        except:
-            short_cmd = None
-
-        if short_cmd in geometry_commands:
-            return geometry_commands[short_cmd](self.response)
-
-        if short_cmd in element_commands:
-            return element_commands[short_cmd](self.response)
-
-        return self.response
-
-    def _run(self, command):
-        raise NotImplementedError('Implemented by child class')
+        if isinstance(loglevel, str):
+            loglevel = loglevel.upper()
+        setup_logger(loglevel=loglevel)
 
     def _list(self, command):
         """ Replaces *LIST command """
@@ -1312,8 +452,15 @@ class _Mapdl(_MapdlCommands):
             return super().eplot(**kwargs)
 
     @property
+    @supress_logging
     def processor(self):
-        """ Returns the current processor """
+        """The current MAPDL processor
+
+        Examples
+        --------
+        >>> mapdl.processor
+        'BEGIN level'
+        """
         msg = self.run('/Status')
         processor = None
         matched_line = [line for line in msg.split('\n') if "Current routine" in line]
@@ -1322,149 +469,49 @@ class _Mapdl(_MapdlCommands):
             processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
         return processor
 
-    def load_parameters(self):
-        """Loads and returns all current parameters
+    def add_file_handler(self, filepath, append=False, level='DEBUG'):
+        """Add a file handler to the mapdl log.  This allows you to
+        redirect the APDL logging to a file.
 
-        Returns
-        -------
-        parameters : dict
-            Dictionary of single value parameters.
+        Parameters
+        ----------
+        filepath : str
+            Filename of the log.
 
-        arrays : dict
-            Dictionary of MAPDL arrays.
+        append : bool
+            When ``True``, appends to an existing log file.  When
+            ``False``, overwrites the log file if it already exists.
+
+        level : str
+            Log level.  Must be one of: ``'DEBUG', 'INFO', 'WARNING', 'ERROR'``.
 
         Examples
         --------
-        >>> parameters, arrays = mapdl.load_parameters()
-        >>> print(parameters)
-        {'ANSINTER_': 2.0,
-        'CID': 3.0,
-        'TID': 4.0,
-        '_ASMDIAG': 5.363415510271,
-        '_MAXELEMNUM': 26357.0,
-        '_MAXELEMTYPE': 7.0,
-        '_MAXNODENUM': 40908.0,
-        '_MAXREALCONST': 1.0}
-        """
-        # load ansys parameters to python
-        filename = os.path.join(self.path, 'parameters.parm')
-        self.parsav('all', filename)
-        self.parameters, self.arrays = load_parameters(filename)
-        return self.parameters, self.arrays
+        Start writing the log to a new file named "mapdl.log"
 
-    def add_file_handler(self, filepath, append):
-        """ Adds a file handler to the log """
+        >>> mapdl.add_file_handler('mapdl.log')
+
+        """
         if append:
             mode = 'a'
         else:
             mode = 'w'
 
-        self.fileHandler = logging.FileHandler(filepath)
+        self._log_filehandler = logging.FileHandler(filepath)
         formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 
-        self.fileHandler = logging.FileHandler(filepath, mode=mode)
-        self.fileHandler.setFormatter(logging.Formatter(formatstr))
-        self.fileHandler.setLevel(logging.DEBUG)
-        self._log.addHandler(self.fileHandler)
-        self._log.info('Added file handler at %s' % filepath)
+        self._log_filehandler = logging.FileHandler(filepath, mode=mode)
+        self._log_filehandler.setFormatter(logging.Formatter(formatstr))
+        if isinstance(level, str):
+            level = level.uppder()
+        self._log_filehandler.setLevel(level)
+        self._log.addHandler(self._log_filehandler)
+        self._log.info('Added file handler at %s', filepath)
 
     def remove_file_handler(self):
         """Removes the filehander from the log"""
-        self._log.removeHandler(self.fileHandler)
+        self._log.removeHandler(self._log_filehandler)
         self._log.info('Removed file handler')
-
-    def _display_plot(self, text):
-        """Display the last generated plot from ANSYS"""
-        png_found = PNG_TEST.findall(text)
-        if png_found:
-            # flush graphics writer
-            self.show('CLOSE')
-            self.show('PNG')
-
-            # get last filename based on the current jobname
-            filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
-            filenames.sort()
-            filename = filenames[-1]
-
-            if os.path.isfile(filename):
-                img = mpimg.imread(filename)
-                plt.imshow(img)
-                plt.axis('off')
-                if self._show_matplotlib_figures:
-                    plt.show()  # consider in-line plotting
-            else:
-                self._log.error('Unable to find screenshot at %s' % filename)
-
-    def __del__(self):
-        """Clean up when complete"""
-        try:
-            self.exit()
-        except Exception as e:
-            if hasattr(self, '_log'):
-                self._log.error('exit: %s', str(e))
-
-        try:
-            self.kill()
-        except Exception as e:
-            if hasattr(self, '_log'):
-                self._log.error('kill: %s', str(e))
-
-    def _remove_lockfile(self):
-        """Removes lockfile"""
-        if os.path.isfile(self._lockfile):
-            try:
-                os.remove(self._lockfile)
-            except:
-                pass
-
-    @property
-    def result(self):
-        """Returns a binary interface to the result file."""
-        try:
-            result_path = self.inquire('RSTFILE')
-        except RuntimeError:
-            result_path = ''
-
-        if not result_path:
-            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
-        elif not os.path.dirname(result_path):
-            result_path = os.path.join(self.path, '%s.rst' % result_path)
-
-        # there may be multiple result files at this location (if not
-        # combining results)
-        
-
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError('No results found at %s' % result_path)
-        return pyansys.read_binary(result_path)
-
-    def __call__(self, command, **kwargs):  # pragma: no cover
-        raise NotImplementedError('\nDirectly calling the Mapdl class is depreciated'
-                                  'Please use ``run`` instead')
-
-    class _non_interactive:
-        """Allows user to enter commands that need to run
-        non-interactively.
-
-        Examples
-        --------
-        To use an non-interactive command like *VWRITE, use:
-
-        >>> with ansys.non_interactive:
-                ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-                ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
-
-        """
-        def __init__(self, parent):
-            self.parent = parent
-
-        def __enter__(self):
-            self.parent._log.debug('entering non-interactive mode')
-            self.parent._store_commands = True
-
-        def __exit__(self, type, value, traceback):
-            self.parent._log.debug('entering non-interactive mode')
-            self.parent._flush_stored()
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -1481,8 +528,8 @@ class _Mapdl(_MapdlCommands):
         # write to a temporary input file
         filename = os.path.join(appdirs.user_data_dir('pyansys'),
                                 'tmp_%s.inp' % random_string())
-        self._log.debug('Writing the following commands to a temporary ' +
-                       'apdl input file:\n%s' % commands)
+        self._log.debug('Writing the following commands to a temporary '
+                        'apdl input file:\n%s', commands)
 
         with open(filename, 'w') as f:
             f.writelines(commands)
@@ -1732,67 +779,6 @@ class _Mapdl(_MapdlCommands):
         self.run("__floatparameter__="+function_str)
         return self.read_float_parameter("__floatparameter__")
 
-    def open_gui(self, include_result=True):
-        """Saves existing database and opens up APDL GUI
-
-        Parameters
-        ----------
-        include_result : bool, optional
-            Allow the result file to be post processed in the GUI.
-        """
-
-        # specify a path for the temporary database
-        temp_dir = tempfile.gettempdir()
-        save_path = os.path.join(temp_dir, 'ansys_tmp')
-        if os.path.isdir(save_path):
-            rmtree(save_path)
-        os.mkdir(save_path)
-
-        name = 'tmp'
-        tmp_database = os.path.join(save_path, '%s.db' % name)
-        if os.path.isfile(tmp_database):
-            os.remove(tmp_database)
-
-        # get the state, close, and finish
-        prior_processor = self.processor
-        self.finish()
-        self.save(tmp_database)
-        self.exit(close_log=False)
-
-        # copy result file to temp directory
-        if include_result:
-            resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
-            if os.path.isfile(resultfile):
-                tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
-                copyfile(resultfile, tmp_resultfile)
-
-        # write temporary input file
-        start_file = os.path.join(save_path, 'start%s.ans' % self.version)
-        with open(start_file, 'w') as f:
-            f.write('RESUME\n')
-
-        # some versions of ANSYS just look for "start.ans" when starting
-        other_start_file = os.path.join(save_path, 'start.ans')
-        with open(other_start_file, 'w') as f:
-            f.write('RESUME\n')
-
-        # issue system command to run ansys in GUI mode
-        cwd = os.getcwd()
-        os.chdir(save_path)
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self._exec_file, name))
-        os.chdir(cwd)
-
-        # must remove the start file when finished
-        os.remove(start_file)
-        os.remove(other_start_file)
-
-        # reload database when finished
-        self._launch()
-        self.resume(tmp_database)
-        if prior_processor is not None:
-            if 'BEGIN' not in prior_processor:
-                self.run('/%s' % prior_processor)
-
     @property
     def jobname(self):
         """MAPDL job name.
@@ -1848,7 +834,7 @@ class _Mapdl(_MapdlCommands):
         Return the result file name
 
         >>> mapdl.inquire('RSTFILE')
-        file.rst
+        'file.rst'
         """
         response = ''
         try:
@@ -1856,11 +842,6 @@ class _Mapdl(_MapdlCommands):
             return response.split('=')[1].strip()
         except IndexError:
             raise RuntimeError('Cannot parse %s' % response)
-
-    def Run(self, command):  # pragma: no cover
-        """Depreciated"""
-        raise NotImplementedError('\nCommand "Run" decpreciated.  \n'
-                                  'Please use "run" instead')
 
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
                        nrmkey='', modtype='', memory_option='', elcalc=False):
@@ -1892,7 +873,7 @@ class _Mapdl(_MapdlCommands):
         freqb : float, optional
             The beginning, or lower end, of the frequency range of
             interest.
-    
+
         freqe : float, optional
             The ending, or upper end, of the frequency range of
             interest (in Hz). The default for Method = SNODE is
@@ -2000,7 +981,7 @@ class _Mapdl(_MapdlCommands):
 
         """
         if nrmkey:
-            if nrmkey.lower() != 'off':
+            if nrmkey.upper() != 'OFF':
                 nrmkey = 'ON'
         nrmkey = 'OFF'
 
@@ -2015,199 +996,110 @@ class _Mapdl(_MapdlCommands):
         self.solve()
         self.finish()
 
-    def __str__(self):
-        try:
-            stats = self.slashstatus()
-        except:
-            return 'MAPDL exited'
-
-        st = stats.find('*** YOU ARE IN')
-        en = stats.find('INITIAL', st)
-
-        version_str = '\n'.join(stats[st:en].splitlines()[1:])
-        version_str = version_str.split('CUSTOMER')[0].strip() + '\n\n'
-
-        st = stats.find('Current routine')
-        en = stats.find('Active options for this analysis type')
-
-        routine_str = ' ' + stats[st:en].strip()
-
-        pyansys_version_str = '\n\n pyansys version: %s' % pyansys.__version__
-        return version_str + routine_str + pyansys_version_str
-
-    def load_array(self, arr, name):
-        """Load a numpy array or python list directly to MAPDL
-
-        Writes the numpy array to disk and then reads it in within MAPDL
-        using *VREAD.
-
-        Parameters
-        ----------
-        arr : np.ndarray or List
-
-        name : str
-            Name of the array to write to within MAPDL.
+    @property
+    @supress_logging
+    def build(self):
+        """ANSYS build
 
         Examples
         --------
-        Load a 1D numpy array into MAPDL
-
-        >>> arr = np.array([10, 20, 30])
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., 20., 30.])
-
-        Load a 2D numpy array into MAPDL
-
-        >>> arr = np.random.random((5, 3))
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([[0.39806635, 0.15060953, 0.3990557 ],
-               [0.26837768, 0.02033222, 0.15655861],
-               [0.46110226, 0.06381489, 0.20068533],
-               [0.20122863, 0.5727896 , 0.85636037],
-               [0.68126612, 0.67460878, 0.3678797 ]])
-
-        Load a python list into MAPDL
-
-        >>> mapdl.load_array([10, -1, 8, 4, 10], 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., -1.,  8.,  4., 10.])
-
+        >>> print(mapdl.build)
+        20.1BETA  UPDATE 20191009
         """
-        # type checks
-        arr = np.array(arr)
-        if not np.issubdtype(arr.dtype, np.number):
-            raise TypeError('Only numerical arrays or lists are supported')
-        if arr.ndim > 3:
-            raise ValueError('MAPDL VREAD only supports a arrays with a'
-                             ' maximum of 3 dimensions.')
+        stats = self.slashstatus()
+        st = stats.find('BUILD') + 5
+        en = stats.find('CUSTOMER')
+        return stats[st:en].strip()
 
-        name = name.upper()
-        # disable logging for this function
-        prior_log_level = self._log.level
-        self._log.setLevel('CRITICAL')
+    def run(self, command, write_to_log=True):
+        """Runs APDL command
 
-        idim, jdim, kdim = arr.shape[0], 0, 0
-        if arr.ndim >= 2:
-            jdim = arr.shape[1]
-        if arr.ndim == 3:
-            kdim = arr.shape[2]
+        Parameters
+        ----------
+        command : str
+            ANSYS APDL command.
 
-        # write array from numpy to disk:
-        filename = os.path.join(self.path, '_tmp.dat')
-        if arr.dtype != np.double:
-            arr = arr.astype(np.double)
-        pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
+        write_to_log : bool, optional
+            Overrides APDL log writing.  Default True.  When set to
+            False, will not write command to log, even if APDL
+            command logging is enabled.
 
-        self.dim(name, imax=idim, jmax=jdim, kmax=kdim)
-        with self.non_interactive:
-            self.vread('%s(1, 1),%s,,,IJK, %d, %d, %d' % (name, filename,
-                                                          idim, jdim, kdim))
-            self.run('(1F20.12)')
+        Returns
+        -------
+        command_output : str
+            Command output from ANSYS.
 
-        self._log.setLevel(prior_log_level)
+        Examples
+        --------
+        >>> mapdl.run('/PREP7')
 
+        Equivalent Pythonic method:
 
-# TODO: Speed this up with:
-# https://tinodidriksen.com/2011/05/cpp-convert-string-to-double-speed/
-def load_parameters(filename):
-    """Load parameters from a file
+        >>> mapdl.prep7()
 
-    Parameters
-    ----------
-    filename : str
-        Name of the parameter file to read in.
+        Notes
+        -----
+        When two or more commands need to be run non-interactively
+        (i.e. ``*VWRITE``) use
 
-    Returns
-    -------
-    parameters : dict
-        Dictionary of single value parameters
+        >>> with ansys.non_interactive:
+        >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        """
+        if self._store_commands:
+            self._stored_commands.append(command)
+            return
+        elif command[:3].upper() in INVAL_COMMANDS:
+            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+                                     (command, INVAL_COMMANDS[command[:3]]))
+            raise exception
+        elif command[:4].upper() in INVAL_COMMANDS:
+            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+                                     (command, INVAL_COMMANDS[command[:4]]))
+            raise exception
+        elif write_to_log and self._apdl_log is not None:
+            if not self._apdl_log.closed:
+                self._apdl_log.write('%s\n' % command)
 
-    arrays : dict
-        Dictionary of arrays
-    """
-    parameters = {}
-    arrays = {}
+        if command[:4] in self._redirected_commands:
+            function = self._redirected_commands[command[:4]]
+            return function(command)
 
-    with open(filename) as f:
-        append_mode = False
-        append_text = []
-        for line in f.readlines():
-            if append_mode:
-                if 'END PREAD' in line:
-                    append_mode = False
-                    values = ''.join(append_text).split(' ')
-                    shp = arrays[append_varname].shape
-                    raw_parameters = np.genfromtxt(values)
+        text = self._run(command)
+        if text:
+            self.response = text.strip()
+        else:
+            self.response = ''
 
-                    n_entries = np.prod(shp)
-                    if n_entries != raw_parameters.size:
-                        paratmp = np.zeros(n_entries)
-                        paratmp[:raw_parameters.size] = raw_parameters
-                        paratmp = paratmp.reshape(shp)
-                    else:
-                        paratmp = raw_parameters.reshape(shp, order='F')
+        if self.response:
+            self._log.info(self.response)
 
-                    arrays[append_varname] = paratmp.squeeze()
-                    append_text.clear()
-                else:
-                    nosep_line = line.replace('\n', '').replace('\r', '')
-                    append_text.append(" " + re.sub(r"(?<=\d)-(?=\d)"," -", nosep_line))
+        if 'is not a recognized' in text:
+            if not self.allow_ignore:
+                text = text.replace('This command will be ignored.', '')
+                text += '\n\nIgnore these messages by setting allow_ignore=True'
+                raise Exception(text)
 
-            elif '*DIM' in line:
-                # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
-                split_line = line.split(',')
-                varname = split_line[1].strip()
-                arr_type = split_line[2]
-                imax = int(split_line[3])
-                jmax = int(split_line[4])
-                kmax = int(split_line[5])
+        if '*** ERROR ***' in self.response:  # flag error
+            self._log.error(self.response)
+            # if not continue_on_error:
+            raise Exception(self.response)
 
-                if arr_type == 'CHAR':
-                    arrays[varname] = np.empty((imax, jmax, kmax), dtype='<U8', order='F')
-                elif arr_type == 'ARRAY':
-                    arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
-                elif arr_type == 'TABLE':
-                    arrays[varname] = np.empty((imax+1, jmax+1, kmax), np.double, order='F')
-                elif arr_type == 'STRING':
-                    arrays[varname] = 'str'
-                else:
-                    arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
+        # special returns for certain geometry commands
+        short_cmd = parse_to_short_cmd(command)
 
-            elif '*SET' in line:
-                vals = line.split(',')
-                varname = vals[1] + ' '
-                varname = varname[:varname.find('(')].strip()
-                if varname in arrays:
-                    st = line.find('(') + 1
-                    en = line.find(')')
-                    ind = line[st:en].split(',')
-                    i = int(ind[0]) - 1
-                    j = int(ind[1]) - 1
-                    k = int(ind[2]) - 1
-                    value = line[en+2:].strip().replace("'", '').strip()
-                    if isinstance(arrays[varname], str):
-                        parameters[varname] = value
-                        del arrays[varname]
-                    else:
-                        arrays[varname][i, j, k] = value
-                else:
-                    value = vals[-1]
-                    if is_float(value):
-                        parameters[varname] = float(value)
-                    else:
-                        parameters[varname] = value
+        # command parsing
+        if short_cmd in geometry_commands:
+            return geometry_commands[short_cmd](self.response)
+        if short_cmd in element_commands:
+            return element_commands[short_cmd](self.response)
+        if short_cmd in PLOT_COMMANDS:
+            return self._display_plot(self.response)
 
-            elif '*PREAD' in line:
-                # read a series of values
-                split_line = line.split(',')
-                append_varname = split_line[1].strip()
-                append_mode = True
+        return self.response
 
-    for array_name in arrays:
-        arrays[array_name] = np.squeeze(arrays[array_name])
-    return parameters, arrays
+    def _display_plot(self, *args, **kwargs):
+        raise NotImplementedError('Implemented by child class')
+
+    def _run(self, *args, **kwargs):
+        raise NotImplementedError('Implemented by child class')

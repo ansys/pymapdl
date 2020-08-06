@@ -6,26 +6,27 @@ import time
 import re
 import pexpect
 
-from pyansys.mapdl import _Mapdl
 from pyansys.misc import kill_process
+from pyansys.mapdl_old import _MapdlOld
 
-ready_items = [rb'BEGIN:',
-               rb'PREP7:',
-               rb'SOLU_LS[0-9]+:',
-               rb'POST1:',
-               rb'POST26:',
-               rb'RUNSTAT:',
-               rb'AUX2:',
-               rb'AUX3:',
-               rb'AUX12:',
-               rb'AUX15:',
-               # continue
-               rb'YES,NO OR CONTINUOUS\)\=',
-               rb'executed\?',
-               # errors
-               rb'SHOULD INPUT PROCESSING BE SUSPENDED\?',
-               # prompts
-               rb'ENTER FORMAT for',
+ready_items = [
+    rb'BEGIN:',
+    rb'PREP7:',
+    rb'SOLU_LS[0-9]+:',
+    rb'POST1:',
+    rb'POST26:',
+    rb'RUNSTAT:',
+    rb'AUX2:',
+    rb'AUX3:',
+    rb'AUX12:',
+    rb'AUX15:',
+    # continue
+    rb'YES,NO OR CONTINUOUS\)\=',
+    rb'executed\?',
+    # errors
+    rb'SHOULD INPUT PROCESSING BE SUSPENDED\?',
+    # prompts
+    rb'ENTER FORMAT for',
 ]
 
 CONTINUE_IDX = ready_items.index(rb'YES,NO OR CONTINUOUS\)\=')
@@ -40,13 +41,17 @@ for item in ready_items:
 ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 
-class MapdlConsole(_Mapdl):
-    """Control interaction with an ANSYS shell instance."""
+class MapdlConsole(_MapdlOld):
+    """Control interaction with an ANSYS shell instance.
+
+    Only works on Linux.
+
+    """
 
     def __init__(self, exec_file=None, run_location=None,
                  jobname='file', nproc=2, override=False,
                  loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False,
+                 start_timeout=120,
                  log_apdl='w'):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
@@ -54,7 +59,7 @@ class MapdlConsole(_Mapdl):
         self._process = None
         super().__init__(exec_file, run_location, jobname, nproc,
                          override, loglevel, additional_switches,
-                         start_timeout, interactive_plotting,
+                         start_timeout,
                          log_apdl)
 
     def _launch(self):
@@ -142,36 +147,33 @@ class MapdlConsole(_Mapdl):
                 self._log.info(response + ready_items[i].decode('utf-8'))
                 # user_input = input('Response: ')
                 # self._process.sendline(user_input)
-                raise Exception('User input expected.  Try using non_interactive')
+                raise Exception('User input expected.  Try using ``non_interactive``')
 
             else:  # continue item
                 self._log.debug('continue index %i.  Matched %s',
                                 i, ready_items[i].decode('utf-8'))
                 break
 
-            # handle response
-            if '*** ERROR ***' in response:  # flag error
-                self._log.error(response)
-                if not self._continue_on_error:
-                    raise Exception(response)
-            elif ignored.search(response):  # flag ignored command
-                if not self.allow_ignore:
-                    self._log.error(response)
-                    raise Exception(response)
-                else:
-                    self._log.warning(response)
-            else:
-                self._log.info(response)
+        #     # handle response
+        #     if '*** ERROR ***' in response:  # flag error
+        #         self._log.error(response)
+        #         if not self._continue_on_error:
+        #             raise Exception(response)
+        #     elif ignored.search(response):  # flag ignored command
+        #         if not self.allow_ignore:
+        #             self._log.error(response)
+        #             raise Exception(response)
+        #         else:
+        #             self._log.warning(response)
+        #     else:
+        #         self._log.info(response)
 
-        if self._interactive_plotting:
-            self._display_plot(full_response)
-
-        if 'is not a recognized' in full_response:
-            if not self.allow_ignore:
-                full_response = full_response.replace('This command will be ignored.',
-                                                      '')
-                full_response += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(full_response)
+        # if 'is not a recognized' in full_response:
+        #     if not self.allow_ignore:
+        #         full_response = full_response.replace('This command will be ignored.',
+        #                                               '')
+        #         full_response += '\n\nIgnore these messages by setting allow_ignore=True'
+        #         raise Exception(full_response)
 
         # return last response and all preceding responses
         return full_response

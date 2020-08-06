@@ -1,5 +1,7 @@
 """Module for miscellaneous functions and methods"""
 import sys
+import random
+import string
 
 from pyvista.utilities.errors import GPUInfo
 import scooby
@@ -115,3 +117,62 @@ class Report(scooby.Report):
                                optional=optional, ncol=ncol,
                                text_width=text_width, sort=sort,
                                extra_meta=extra_meta)
+
+
+def is_float(string):
+    """Returns true when a string can be converted to a float"""
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+
+def random_string(stringLength=10):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+
+def _configure_pyvista():
+    """Configure PyVista's ``rcParams`` for pyansys"""
+    import pyvista as pv
+    pv.rcParams['interactive'] = True
+    pv.rcParams["cmap"] = "jet"
+    pv.rcParams["font"]["family"] = "courier"
+    pv.rcParams["title"] = "pyansys"
+    return
+
+
+def _check_has_ansys():
+    """Safely wraps check_valid_ansys
+
+    Returns
+    -------
+    has_ansys : bool
+        True when this local installation has ANSYS installed in a
+        standard location.
+    """
+    from pyansys.launcher import check_valid_ansys
+    try:
+        return check_valid_ansys()
+    except:
+        return False
+
+
+def supress_logging(func):
+    """Decorator to supress logging for a MAPDL instance"""
+    def wrapper(*args, **kwargs):
+        mapdl = args[0]
+        prior_log_level = mapdl._log.level
+        if prior_log_level != 'CRITICAL':
+            mapdl.set_log_level('CRITICAL')
+
+        out = func(*args, **kwargs)
+
+        if prior_log_level != 'CRITICAL':
+            mapdl.set_log_level(prior_log_level)
+
+        return out
+
+    return wrapper

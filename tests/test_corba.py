@@ -196,7 +196,7 @@ def test_prnsol_prin(mapdl, rset):
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
-    from pyansys.mapdl import load_parameters
+    from pyansys.mapdl_old import load_parameters
     for para_file in para_files:
         arr, parm = load_parameters(para_file)
 
@@ -360,7 +360,11 @@ def test_nodes(tmpdir, cleared, mapdl):
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.nodes'))
     mapdl.nwrite(filename)
-    assert np.allclose(mapdl.nodes, np.loadtxt(filename)[:, 1:])
+    assert np.allclose(mapdl.mesh.nodes, np.loadtxt(filename)[:, 1:])
+
+    # test clear mapdl
+    mapdl.clear()
+    assert not mapdl.mesh.nodes.size
 
 
 @skip_no_ansys
@@ -369,7 +373,7 @@ def test_nnum(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    assert np.allclose(mapdl.nnum, range(1, 12))
+    assert np.allclose(mapdl.mesh.nnum, range(1, 12))
 
 
 @pytest.mark.parametrize("knum", [True, False])
@@ -398,7 +402,8 @@ def test_elements(cleared, mapdl):
                          [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3],
                          [1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4]])
 
-    assert np.allclose(np.array(mapdl.elements), expected)
+    assert np.allclose(np.array(mapdl.mesh.elements), expected)
+
 
 @pytest.mark.parametrize("arr", ([1, 2, 3],
                                  [[1, 2, 3], [1, 2, 3]],

@@ -50,9 +50,9 @@ class Archive(Geometry):
 
     allowable_types : list, optional
         Allowable element types.  Defaults to all valid element
-        types in ``from pyansys.elements.valid_types``
+        types in ``pyansys.elements.valid_types``
 
-        See help(pyansys.elements) for available element types.
+        See ``help(pyansys.elements)`` for available element types.
 
     null_unallowed : bool, optional
         Elements types not matching element types will be stored
@@ -81,15 +81,16 @@ class Archive(Geometry):
            [0.75, 0.5 , 3.5 ],
            [0.75, 0.5 , 4.  ],
            [0.75, 0.5 , 4.5 ]])
-
     """
 
     def __init__(self, filename, read_parameters=False,
                  parse_vtk=True, force_linear=False,
-                 allowable_types=None, null_unallowed=False, verbose=False):
+                 allowable_types=None, null_unallowed=False,
+                 verbose=False, name=''):
         """Initializes an instance of the archive class."""
         self._read_parameters = read_parameters
         self._filename = filename
+        self._name = name
         self._raw = _reader.read(filename, read_parameters=read_parameters,
                                  debug=verbose)
         super().__init__(self._raw['nnum'],
@@ -103,8 +104,13 @@ class Archive(Geometry):
                          rnum=self._raw['rnum'],
                          keyopt=self._raw['keyopt'])
 
+        self._allowable_types = allowable_types
+        self._force_linear = force_linear
+        self._null_unallowed = null_unallowed
+
         if parse_vtk:
-            self._grid = self._parse_vtk(allowable_types, force_linear, null_unallowed)
+            self._grid = self._parse_vtk(allowable_types,
+                                         force_linear, null_unallowed)
 
     @property
     def raw(self):
@@ -134,8 +140,12 @@ class Archive(Geometry):
         return self._raw['parameters']
 
     def __repr__(self):
-        basename = os.path.basename(self._filename)
-        txt = 'ANSYS Archive File %s\n' % basename
+        if self._name:
+            txt = 'MAPDL %s\n' % self._name
+        else:
+            basename = os.path.basename(self._filename)
+            txt = 'ANSYS Archive File %s\n' % basename
+
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
         txt += '  Number of Elements:           %d\n' % len(self.enum)
         txt += '  Number of Element Types:      %d\n' % len(self.ekey)
@@ -145,7 +155,7 @@ class Archive(Geometry):
 
     @property
     def grid(self):
-        """VTK and pyvista grid of the archive file.
+        """``vtk.UnstructuredGrid`` of the archive file.
 
         Examples
         --------
@@ -160,9 +170,10 @@ class Archive(Geometry):
           Z Bounds:     0.000e+00, 5.000e+00
           N Arrays:     13
         """
-        if self._grid is None:
-            raise AttributeError('Archive must be parsed as a vtk grid.\n'
-                                 'Set `parse_vtk=True`')
+        if self._grid is None:  # parse the grid using the cached parameters
+            self._grid = self._parse_vtk(self._allowable_types,
+                                         self._force_linear,
+                                         self._null_unallowed)
         return self._grid
 
     @property
@@ -190,7 +201,6 @@ class Archive(Geometry):
     def plot(self, *args, **kwargs):
         """Plot the ANSYS archive file"""
         self.grid.plot(*args, **kwargs)
-
 
 def chunks(l, n):
     """ Yield successive n-sized chunks from l """
