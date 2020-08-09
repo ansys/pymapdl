@@ -6,6 +6,7 @@ from functools import wraps
 
 import appdirs
 import pyvista as pv
+import pyiges
 
 import pyansys
 from pyansys.mapdl_functions import _MapdlCommands
@@ -106,6 +107,10 @@ class _MapdlCore(_MapdlCommands):
         self._path = None
         self._jobname = None
         self._cleanup = True
+
+        # geometry cache
+        self._keypoints = None
+        self._lines = None
 
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
@@ -349,15 +354,13 @@ class _MapdlCore(_MapdlCommands):
             if isinstance(knum, str):
                 knum = knum == '1'
 
+
             if knum:
                 pl.add_point_labels(self.mesh.nodes, self.mesh.nnum)
-
             if cpos:
                 pl.camera_position = cpos
-
             if show_bounds:
                 pl.show_bounds()
-
             if show_axes:
                 pl.show_axes()
 
@@ -365,6 +368,354 @@ class _MapdlCore(_MapdlCommands):
 
         # otherwise, use the built-in nplot
         return super().nplot(knum, **kwargs)
+
+    @property
+    def n_area(self):
+        """Number of areas currently selected
+
+        Examples
+        --------
+        >>> mapdl.n_area
+        1
+        """
+        return int(self.get(entity='AREA', item1='COUNT'))
+
+
+    @property
+    @supress_logging
+    def anum(self):
+        """List of area numbers"""
+        anum = []
+        for line in self.alist().splitlines():
+            try:
+                anum.append(int(line.split()[0]))
+            except:
+                pass
+        return anum
+
+    @property
+    @supress_logging
+    def lnum(self):
+        """List of area numbers"""
+        lnum = []
+        for line in self.llist().splitlines():
+            try:
+                lnum.append(int(line.split()[0]))
+            except:
+                pass
+        return lnum
+
+    @supress_logging
+    def generate_surface(self, density=5, amin=None, amax=None, ninc=None):
+        """Generate an-triangular surface of the active surfaces.
+
+        Parameters
+        ----------
+        density : int, optional
+            APDL smart sizing option.  Ranges from 1 (worst) to 10
+            (best).
+
+        amin : int, optional
+            Minimum APDL numbered area to select.  See
+            ``mapdl.anum`` for available areas.
+
+        amax : int, optional
+            Maximum APDL numbered area to select.  See
+            ``mapdl.anum`` for available areas.
+
+        ninc : int, optional
+            Steps to 
+        """
+
+        # disable logging for this function (make this a fixture)
+        prior_log_level = self._log.level
+        self._log.setLevel('CRITICAL')
+
+        # store initially selected areas
+        self.cm('__tmp_area__', 'AREA')
+
+        # reselect from existing selection to mimic APDL behavior
+        if amin or amax:
+            if amax is None:
+                amax = amin
+            else:
+                amax = ''
+
+            if amin is None:  # amax is non-zero
+                amin = 1
+
+            if ninc is None:
+                ninc = ''
+
+            self.asel('R', 'AREA', vmin=amin, vmax=amax, vinc=ninc)
+
+        # duplicate areas to avoid affecting existing areas
+        anum_lst = self.anum
+        a_num = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
+        self.numstr('AREA', a_num)
+        self.agen(2, 'ALL', noelem=1)
+        a_max = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
+        self.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
+
+        # create a temporary etype
+        etype_tmp = int(self.get(entity='ETYP', item1='NUM', it1num='MAX'))
+
+        self.et(etype_tmp, 'MESH200', 4)
+
+        self.shpp('off')
+        self.smrtsize(density)
+        out = self.amesh('all')
+
+        # must know the number of elements in each area
+        reg = re.compile('Meshing of area (\d*) completed \*\* (\d*) elements')
+        groups = reg.findall(out)
+        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
+        self.esla('S')
+
+        archive = self._transfer_archive()
+
+        # delete all temporary meshes and clean up settings
+        self.aclear('ALL')
+        self.adele('ALL', kswp=1)
+        self.numstr('AREA', 1)
+        self.cmsel('S', '__tmp_area__', 'AREA')
+        self.etdele(etype_tmp)
+        self.shpp('ON')
+        self.smrtsize('OFF')
+
+        self.cmsel('S', '__tmp_area__', 'AREA')
+
+        filename = os.path.join(self.path, 'tmp.cdb')
+        self.cdwrite('DB', filename)
+
+        self._log.setLevel(prior_log_level)
+
+        grid = archive._parse_vtk(fix_midside=False, additional_checking=True)
+        if grid:
+            # add anum info
+            i = 0
+            area_num = np.empty(grid.n_cells, dtype=np.int32)
+            for anum, nelem in groups:
+                area_num[i:i+nelem] = anum
+                i+= nelem
+
+            grid['area_num'] = area_num
+            return grid
+
+    def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
+              vtk=False, quality=7, show_numbering=False,
+              random_colors=False, show_edges=True, edge_width=1,
+              **kwargs):
+        """APDL Command: VPLOT
+
+        Displays the selected volumes.
+
+        Parameters
+        ----------
+        nv1, nv2, ninc
+            Display volumes from NV1 to NV2 (defaults to NV1) in steps
+            of NINC (defaults to 1).  If NV1 = ALL (default), NV2 and
+            NINC are ignored and all selected volumes [VSEL] are
+            displayed.
+
+        degen
+            Degeneracy marker:
+
+            (blank) - No degeneracy marker is used (default).
+
+            DEGE - A red star is placed on keypoints at degeneracies (see the Modeling and Meshing
+                   Guide).  Not available if /FACET,WIRE is set.
+
+        scale
+            Scale factor for the size of the degeneracy-marker star.  The scale
+            is the size in window space (-1 to 1 in both directions) (defaults
+            to .075).
+
+        vtk : bool, optional
+            Plot the currently selected volumes using ``pyvista``.  As
+            this creates a temporary surface mesh, this may have a
+            long execution time for large meshes.
+
+        quality : int, optional
+            quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best).
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        Notes
+        -----
+        Displays selected volumes.  (Only volumes having areas within the
+        selected area set [ASEL] will be plotted.)  With PowerGraphics on
+        [/GRAPHICS,POWER], VPLOT will display only the currently selected
+        areas. This command is also a utility command, valid anywhere.  The
+        degree of tessellation used to plot the volumes is set through the
+        /FACET command.
+        """
+        if vtk:
+            cm_name = '__tmp_area2__'
+            self.cm(cm_name, 'AREA')
+            self.aslv('S')  # select areas attached to active volumes
+            self.aplot(vtk=True, random_colors=False, show_edges=True,
+                       edge_width=edge_width, **kwargs)
+            self.cmsel('S', cm_name, 'AREA')
+        else:
+            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
+
+    def aplot(self, na1="", na2="", ninc="", degen="", scale="",
+              vtk=False, quality=7, show_numbering=False, show_line_numbering=False,
+              random_colors=False, show_edges=True, edge_width=1, **kwargs):
+        """APDL Command: APLOT
+
+        Displays the selected areas.
+
+        Parameters
+        ----------
+        na1, na2, ninc
+            Displays areas from NA1 to NA2 (defaults to NA1) in steps of NINC
+            (defaults to 1).  If NA1 = ALL (default), NA2 and NINC are ignored
+            and all selected areas [ASEL] are displayed.
+
+        degen
+            Degeneracy marker.
+
+            (blank) - No degeneracy marker is used (default).
+
+            DEGE - A red star is placed on keypoints at degeneracies
+            (see the Modeling and Meshing Guide ).  Not available if
+            /FACET,WIRE is set.
+
+            This option is ignored when ``vtk=True``.
+
+        scale
+            Scale factor for the size of the degeneracy-marker star.
+            The scale is the size in window space (-1 to 1 in both
+            directions) (defaults to .075).
+
+            This option is ignored when ``vtk=True``.
+
+        vtk : bool, optional
+            Plot the currently selected areas using ``pyvista``.  As
+            this creates a temporary surface mesh, this may have a
+            long execution time for large meshes.
+
+        quality : int, optional
+            quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best).
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        Notes
+        -----
+        This command is valid in any processor.  The degree of tessellation
+        used to plot the selected areas is set through the /FACET command.
+        """
+        if vtk:
+            if quality > 10:
+                quality = 10
+            if quality < 1:
+                quality = 1
+            surf = self.generate_surface(11 - quality, na1, na2, ninc)
+
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+            pl.set_background(kwargs.pop('background', None))
+
+            if kwargs.pop('show_axes', False):
+                pl.add_axes()
+
+            cpos = kwargs.pop('cpos', None)
+            kwargs.setdefault('color', 'w')
+            font_size = kwargs.pop('font_size', None)
+
+            areas = []
+            anums = np.unique(surf['area_num'])
+            for anum in anums:
+                areas.append(surf.extract_cells(surf['area_num'] == anum))
+
+            centers = []
+            for area in areas:
+                if random_colors:
+                    kwargs['color'] = np.random.random(3)
+                pl.add_mesh(area, **kwargs)
+                centers.append(area.center)
+
+                if show_edges:
+                    pl.add_mesh(area.extract_feature_edges(),
+                                color=kwargs.get('edge_color', 'k'),
+                                line_width=edge_width)
+
+            if show_numbering:
+                pl.add_point_labels(centers, anums, font_size=font_size)
+
+            # allow only unique line numbers
+            if show_line_numbering:
+                self.cm('__tmp_line__', 'LINE')
+                self.lsla('S')
+                lnum = self._lnum
+                lines = self.lines
+                self.cmsel('S', '__tmp_line__', 'LINE')
+
+                font_size = kwargs.pop('font_size', None)
+                pl.add_point_labels(lines.points[50::101], lnum,
+                                    font_size=font_size)
+
+            pl.camera_position = cpos
+            return pl.show()
+        else:
+            return super().aplot(na1=na1, na2=na2, ninc=ninc)
+
+    def areas(self, quality=7):
+        """List of areas from MAPDL represented as ``pyvista.PolyData``.
+
+        Parameters
+        ----------
+        quality : int, optional
+            quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best).
+
+        Returns
+        -------
+        areas : list
+            List of ``pyvista.PolyData`` areas representing the active
+            surface areas selected by ``ASEL``.
+
+        """
+        surf = self.generate_surface(11 - quality)
+
+        areas = []
+        anums = np.unique(surf['area_num'])
+        for anum in anums:
+            areas.append(surf.extract_cells(surf['area_num'] == anum))
+        return areas
+
+    @property
+    def keypoints(self):
+        """Keypoint coordinates"""
+        if self._keypoints is None:
+            self._load_keypoints()
+        return np.asarray(self._keypoints.points)
+
+    @property
+    def knum(self):
+        """Keypoint numbers"""
+        if self._keypoints is None:
+            self._load_keypoints()
+        return self._keypoints['entity_num']
+
+    @property
+    def lines(self):
+        """Active lines as a pyvista.PolyData"""
+        if self._lines is None:
+            self._load_lines()
+        return self._lines
+
+    @property
+    def _lnum(self):
+        """Active lines as a pyvista.PolyData"""
+        if self._lines is None:
+            self._load_lines()
+        return self._lines['entity_num'].astype(np.int32)
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
@@ -473,9 +824,152 @@ class _MapdlCore(_MapdlCommands):
             kwargs.setdefault('color', 'w')
             kwargs.setdefault('show_axes', True)
             kwargs.setdefault('show_edges', True)
-            return self._vtk_grid.plot(**kwargs)
+            if self._vtk_grid:
+                self._vtk_grid.plot(**kwargs)
+            else:
+                raise RuntimeError('No elements selected to plot')
         else:
             return super().eplot(**kwargs)
+
+    def lplot(self, nl1="", nl2="", ninc="", vtk=False,
+              show_keypoints=False, show_numbering=True,
+              show_keypoint_numbering=False, random_color=False,
+              **kwargs):
+        """APDL Command: LPLOT
+
+        Displays the selected lines.
+
+        Parameters
+        ----------
+        nl1, nl2, ninc
+            Display lines from NL1 to NL2 (defaults to NL1) in steps
+            of NINC (defaults to 1).  If NL1 = ALL (default), NL2 and
+            NINC are ignored and display all selected lines [LSEL].
+
+        vtk : bool, optional
+            Plot the currently selected lines using ``pyvista``.
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        show_keypoints : bool, optional
+            Display keypoints associated with current lines.  Only
+            valid with ``vtk=True``.
+
+        show_keypoint_numbering : bool, optional
+            Number keypoints.  Only valid when show_keypoints is True
+
+        **kwargs
+            See ``help(pyvista.plot)`` for more keyword arguments
+            related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
+
+        Notes
+        -----
+        Mesh divisions on plotted lines are controlled by the LDIV option of
+        the /PSYMB command.
+
+        This command is valid in any processor.
+        """
+        if vtk:
+            if not self.lines.n_cells:
+                raise ValueError('Either no lines have been selected or there '
+                                 'is nothing to plot')
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+            pl.set_background(kwargs.pop('background', None))
+
+            if kwargs.pop('show_axes', False):
+                pl.add_axes()
+
+            cpos = kwargs.pop('cpos', None)
+
+            kwargs.setdefault('color', 'w')
+
+            # allow only unique line numbers
+            lnum, idx = np.unique(self._lnum, return_index=True)
+            lines = self.lines.extract_cells(idx)
+
+            # TODO: partially select lines
+
+            font_size = kwargs.pop('font_size', None)
+            if show_numbering:
+                pl.add_point_labels(lines.points[50::101], lnum, font_size=font_size)
+
+            
+
+            if show_keypoints:
+                pl.add_points(self.keypoints)
+                if show_numbering:
+                    pl.add_point_labels(self.keypoints, self.knum, font_size=font_size)
+
+            if random_color:
+                kwargs['scalars'] = np.random.random(lines.n_cells)
+
+            pl.add_mesh(lines, **kwargs)
+
+            pl.camera_position = cpos
+            return pl.show()
+        else:
+            return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc)
+
+    def kplot(self, np1="", np2="", ninc="", lab="", vtk=False,
+              show_numbering=True, **kwargs):
+        """Displays the selected keypoints.
+
+        APDL Command: KPLOT
+
+        Parameters
+        ----------
+        np1, np2, ninc
+            Display keypoints from NP1 to NP2 (defaults to NP1) in
+            steps of NINC (defaults to 1).  If NP1 = ALL (default),
+            NP2 and NINC are ignored and all selected keypoints [KSEL]
+            are displayed.
+
+        lab
+            Determines what keypoints are plotted (one of the following):
+
+            (blank) - Plots all keypoints.
+
+            HPT - Plots only those keypoints that are hard points.
+
+        vtk : bool, optional
+            Plot the currently selected lines using ``pyvista``.
+
+        show_numbering : bool, optional
+            Display line and keypoint numbers when ``vtk=True``.
+
+        Notes
+        -----
+        This command is valid in any processor.
+        """
+        if vtk:
+            if not self.keypoints.shape[0]:
+                raise ValueError('Either no keypoints have been selected or there '
+                                 'is nothing to plot')
+            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+
+            if kwargs.pop('show_axes', False):
+                pl.add_axes()
+
+            cpos = kwargs.pop('cpos', None)
+
+            kwargs.setdefault('color', 'w')
+            keypoints = self.keypoints
+            knum = self.knum
+            # TODO: partially select keypoints
+
+            pl.add_points(keypoints, **kwargs)
+            if show_numbering:
+                pl.add_point_labels(keypoints, knum)
+
+            pl.camera_position = cpos
+            return pl.show()
+        else:
+            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
 
     @property
     @supress_logging

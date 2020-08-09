@@ -1,4 +1,4 @@
-"""Read ANSYS binary result files *.rst
+"""Read ANSYS binary result files (*.rst)
 
 Used:
 /usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
@@ -15,7 +15,8 @@ import pyvista as pv
 
 from pyansys import _binary_reader, _reader
 from pyansys.geometry import Geometry
-from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes)
+from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes,
+                                    populate_surface_element_result)
 from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
                                solution_data_header_keys, solution_header_keys_dp,
                                result_header_keys, boundary_condition_index_table,
@@ -25,7 +26,7 @@ from pyansys.common import (read_table, parse_header, AnsysBinary,
                             read_standard_header, rotate_to_global,
                             PRINCIPAL_STRESS_TYPES, STRESS_TYPES,
                             STRAIN_TYPES, THERMAL_STRAIN_TYPES)
-from pyansys.misc import vtk_cell_info
+from pyansys.misc import vtk_cell_info, break_apart_surface
 from pyansys.rst_avail import AvailableResults
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
@@ -38,7 +39,6 @@ EMAIL_ME = """Please raise an issue at:
 https://github.com/akaszynski/pyansys/issues
 Or email the developer at alexander.kaszynski@ansys.com
 """
-
 np.seterr(divide='ignore', invalid='ignore')
 
 
@@ -840,12 +840,9 @@ class ResultFile(AnsysBinary):
         rpointers = self._resultheader['rpointers']
         nsets = self.nsets
 
-        # Read a result
-        # with open(self.filename, 'rb') as f:
-        # get first solution header and assume, following solution
+        # get first solution header and assume following solution
         # headers are equal
-        record = self.read_record(rpointers[0])
-        solution_header = parse_header(record, solution_data_header_keys)
+        solution_header = self._result_solution_header(0)
 
         mask = solution_header['mask']
         # PDBN = bool(mask & 0b1<<10)
@@ -867,18 +864,12 @@ class ResultFile(AnsysBinary):
         nfldof = solution_header['nfldof']
         sumdof = numdof + nfldof
 
-        #numvdof = solution_header['numvdof'] # does not seem to be set in transient analysis
-        #if not numvdof: numvodf = sumdof 
-        #numadof = solution_header['numadof'] # does not seem to be set in transient analysis
-        #if not numadof: numadof = sumdof 
-
         # iterate over all loadsteps
         results = np.zeros((nsets, nnod, sumdof))
         for rnum in range(self.nsets):
             # Seek to result table and to get pointer to DOF
             # results of result table
-            rsol_header = parse_header(self.read_record(rpointers[rnum]),
-                                       solution_data_header_keys)
+            rsol_header = self._result_solution_header(rnum)
             if solution_type == 'NSL':  # Nodal Displacements
                 ptr_sl = rsol_header['ptrNSL']
             elif solution_type == 'VEL':  # Nodal Velocities
@@ -961,8 +952,7 @@ class ResultFile(AnsysBinary):
 
         # result pointer
         ptr_rst = self._resultheader['rpointers'][rnum]
-        result_solution_header = parse_header(self.read_record(ptr_rst),
-                                              solution_data_header_keys)
+        result_solution_header = self._result_solution_header(rnum)
 
         nnod = result_solution_header['nnod']
         numdof = result_solution_header['numdof']
@@ -1245,8 +1235,7 @@ class ResultFile(AnsysBinary):
         nodstr = self.element_table['nodstr']
 
         # read result solution header
-        record = self.read_record(rpointers[rnum])
-        solution_header = parse_header(record, solution_data_header_keys)
+        solution_header = self._result_solution_header(rnum)
 
         # key to extrapolate integration
         # = 0 - move
@@ -1797,6 +1786,7 @@ class ResultFile(AnsysBinary):
 
         """
         # get the correct component of the principal stress
+        comp = comp.upper()
         idx = check_comp(PRINCIPAL_STRESS_TYPES, comp)
         stress = self.principal_nodal_stress(rnum)[1][:, idx]
 
@@ -1822,7 +1812,6 @@ class ResultFile(AnsysBinary):
                                         **kwargs)
 
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
-
         """ return a 4x4 transformation array for a given coordinate system """
         # assemble 4 x 4 matrix
         csys = self._c_systems[cs_cord]
@@ -1935,6 +1924,7 @@ class ResultFile(AnsysBinary):
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
         interactive = kwargs.pop('interactive', True)
+        text_color = kwargs.pop('text_color', None)
 
         kwargs.setdefault('smooth_shading', True)
         kwargs.setdefault('color', 'w')
@@ -1963,6 +1953,14 @@ class ResultFile(AnsysBinary):
                          rng=rng,
                          cmap=cmap,
                          **kwargs)
+        
+        # set scalar bar text colors
+        if text_color:
+            from pyvista.plotting.theme import parse_color
+            text_color = parse_color(text_color)
+            plotter.scalar_bar.GetLabelTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetAnnotationTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetTitleTextProperty().SetColor(text_color)
 
         # NAN/missing data are white
         # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
@@ -1980,7 +1978,7 @@ class ResultFile(AnsysBinary):
         # add table
         if add_text and rnum is not None:
             result_text = self.text_result_table(rnum)
-            plotter.add_text(result_text, font_size=20)
+            plotter.add_text(result_text, font_size=20, color=text_color)
 
         if animate:
             orig_pts = copied_mesh.points.copy()
@@ -2065,20 +2063,6 @@ class ResultFile(AnsysBinary):
         text += 'Time Value:     {:10.4f}'.format(timevalue)
 
         return text
-
-    # def principle_stress_for_plotting(self, rnum, stype):
-    #     """
-    #     returns stress used to plot
-
-    #     """
-    #     stress_types = ['1', '2', '3', 'INT', 'EQV']
-    #     if stype.upper() not in stress_types:
-    #         raise Exception('Stress type not in \n' + str(stress_types))
-
-    #     sidx = stress_types.index(stype)
-
-    #     _, stress = self.principal_nodal_stress(rnum)
-    #     return stress[:, sidx]
 
     def plot_nodal_stress(self, rnum, comp=None,
                           show_displacement=False,
@@ -2281,27 +2265,27 @@ class ResultFile(AnsysBinary):
         if is_int(user_input):
             # check if result exists
             if user_input > self.nsets - 1:
-                raise Exception('Only %d result(s) in the result file.' % self.nsets)
+                raise ValueError('Only %d result(s) in the result file.' % self.nsets)
             return user_input
 
         elif isinstance(user_input, (list, tuple)):
             if len(user_input) != 2:
-                raise Exception('Input must contain (step, loadstep) using  ' +
-                                '1 based indexing (e.g. (1, 1)).')
+                raise ValueError('Input must contain (step, loadstep) using  ' +
+                                 '1 based indexing (e.g. (1, 1)).')
             ls_table = self._resultheader['ls_table']
             step, substep = user_input
             mask = np.logical_and(ls_table[:, 0] == step,
                                   ls_table[:, 1] == substep)
 
             if not np.any(mask):
-                raise Exception('Load step table does not contain ' +
-                                'step %d and substep %d' % tuple(user_input))
+                raise ValueError('Load step table does not contain ' +
+                                 'step %d and substep %d' % tuple(user_input))
 
             index = mask.nonzero()[0]
             assert index.size == 1, 'Multiple cumulative index matches'
             return index[0]
         else:
-            raise Exception('Input must be either an int or a list')
+            raise TypeError('Input must be either an int or a list')
 
     def __repr__(self):
         rst_info = ['PyANSYS MAPDL Result file object']
@@ -2383,13 +2367,7 @@ class ResultFile(AnsysBinary):
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         result_type = result_type.upper()
-        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
-            nitem = 11
-        elif result_type in ELEMENT_RESULT_NCOMP:
-            nitem = ELEMENT_RESULT_NCOMP[result_type]
-        else:
-            nitem = 1
-
+        nitem = self._result_nitem(rnum, result_type)
         result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
 
         # Element types for nodal averaging
@@ -2418,6 +2396,138 @@ class ResultFile(AnsysBinary):
         # average across nodes
         result = data/ncount.reshape(-1, 1)
         return nnum, result
+
+    def _result_nitem(self, rnum, result_type):
+        """Return the number of items for a given result type"""
+        if self._resultheader['rstsprs'] == 0 and result_type == 'ENS':
+            nitem = 11
+        elif result_type == 'ENF':
+            # number of items is nodfor*NDOF*M where:
+            # NDOF is the number of DOFs/node for this element, nodfor
+            # is the number of nodes per element having nodal forces
+            # (defined in element type description record), and M may
+            # be 1, 2, or 3.  For a static analysis, M=1 only.  For a
+            # transient analysis, M can be 1, 2, or 3.
+
+            solution_header = self._result_solution_header(rnum)
+            numdof = solution_header['numdof']
+            nitem = numdof*1  # m = 1  for static, 1, 2 or 3 for transient
+
+        else:
+            nitem = ELEMENT_RESULT_NCOMP.get(result_type, 1)
+        return nitem
+
+    def plot_element_result(self, rnum, result_type, item_index,
+                            in_element_coord_sys=False, **kwargs):
+        """Plot an element result.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        result_type : str
+            Element data type to retreive.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        item_index : int
+            Index of the data item for each node within the element.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system.
+            Default False and will return the results in the global
+            coordinate system.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers
+
+        result : np.ndarray
+            Array of result data
+        """
+        # check result exists
+        result_type = result_type.upper()
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
+        if result_type not in ELEMENT_INDEX_TABLE_KEYS:
+            raise ValueError('Result "%s" is not an element result' % result_type)
+
+        # element header
+        rnum = self.parse_step_substep(rnum)
+        ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
+
+        # the number of items per node
+        nitem = self._result_nitem(rnum, result_type)
+        if item_index > nitem - 1:
+            raise ValueError('Item index greater than the number of items in '
+                             'this result type %s' % result_type)
+
+        # extract the surface and separate the surface faces
+        # TODO: add element/node components
+        surf = self.grid.extract_surface()
+        bsurf = break_apart_surface(surf, force_linear=True)
+        nnum_surf = surf.point_arrays['ansys_node_num'][bsurf['orig_ind']]
+        faces = bsurf.faces
+        if faces.dtype != np.int64:
+            faces = faces.astype(np.int64)
+
+        elem_ind = surf.cell_arrays['vtkOriginalCellIds']
+        # index within the element table pointing to the data of interest
+        result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
+
+        data = populate_surface_element_result(self.filename,
+                                               ele_ind_table,
+                                               nodstr,
+                                               etype,
+                                               nitem,
+                                               ptr_off,  # start of result data
+                                               result_index,
+                                               bsurf.n_points,
+                                               faces,
+                                               bsurf.n_faces,
+                                               nnum_surf,
+                                               elem_ind,
+                                               self.geometry._elem,
+                                               self.geometry._elem_off,
+                                               item_index,
+                                               as_global=not in_element_coord_sys)
+
+        desc = self.available_results.description[result_type].capitalize()
+        kwargs.setdefault('stitle', desc)
+        return bsurf.plot(scalars=data, **kwargs)
+
+    def _result_solution_header(self, rnum):
+        """Return the solution header for a given cumulative result index"""
+        ptr = self._resultheader['rpointers'][rnum]
+        return parse_header(self.read_record(ptr), solution_data_header_keys)
 
     def nodal_stress(self, rnum):
         """Retrieves the component stresses for each node in the
@@ -2933,8 +3043,9 @@ class ResultFile(AnsysBinary):
 
         Parameters
         ----------
-        rnum : int
-            Result number
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
 
         comp : str, optional
             Plastic strain component to display.  Available options:
@@ -3096,6 +3207,45 @@ class ResultFile(AnsysBinary):
         """
         return self._available_results
 
+    def nodal_static_forces(self, rnum):
+        """Return the nodal forces averaged at the nodes
+
+        Nodal forces are computed on an element by element basis, and
+        this method averages the nodal forces for each element for
+        each node.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers.
+
+        forces : np.ndarray
+           Averaged nodal forces.  Array is sized ``[nnod x numdof]``
+           where ``nnod`` is the number of nodes and ``numdof`` is the
+           number of degrees of freedom for this solution.
+
+        Examples
+        --------
+        Load the nodal static forces for the first result using the
+        example hexahedral result file.
+
+        >>> import pyansys
+        >>> from pyansys import examples
+        >>> rst = pyansys.read_binary(examples.rstfile)
+        >>> nnum, forces = rst.nodal_static_forces(0)
+
+        Notes
+        -----
+        Nodes without a a nodal will be NAN.  These are generally
+        midside (quadratic) nodes.
+        """
+        return self._nodal_result(rnum, 'ENF')
 
 def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """

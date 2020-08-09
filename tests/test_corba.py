@@ -5,6 +5,10 @@ import sys
 
 import pytest
 import numpy as np
+import pyvista
+from pyvista.plotting.renderer import CameraPosition
+from pyvista.plotting import system_supports_plotting
+
 import pyansys
 
 if sys.platform != 'darwin':
@@ -32,6 +36,8 @@ else:
 RSETS = list(zip(range(1, 9), [1]*8))
 
 skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
+                                     reason="Requires active X Server")
 
 @pytest.fixture(scope='module')
 def mapdl():
@@ -78,7 +84,7 @@ def mapdl():
 @pytest.fixture(scope='function')
 def cleared(mapdl):
     mapdl.finish()
-    mapdl.clear()
+    mapdl.clear('NOSTART')  # *MUST* be NOSTART.  With START fails after 20 calls...
     mapdl.prep7()
     yield
 
@@ -332,6 +338,81 @@ def test_al(cleared, mapdl):
 
 
 @skip_no_ansys
+def test_keypoints(cleared, mapdl):
+    kps = [[0, 0, 0],
+           [1, 0, 0],
+           [1, 1, 0],
+           [0, 1, 0]]
+
+    i = 2
+    knum = []
+    for x, y, z in kps:
+        mapdl.k(i, x, y, z)
+        knum.append(i)
+        i += 1
+
+    # l0 = mapdl.l(k0, k1)
+    # l1 = mapdl.l(k1, k2)
+    # l2 = mapdl.l(k2, k3)
+    # l3 = mapdl.l(k3, k0)
+    # a0 = mapdl.al(l0, l1, l2, l3)
+
+    assert np.allclose(kps, mapdl.keypoints)
+    assert np.allclose(knum, mapdl.knum)
+
+
+@skip_no_ansys
+def test_lines(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k1, k2)
+    l2 = mapdl.l(k2, k3)
+    l3 = mapdl.l(k3, k0)
+
+    lines = mapdl.lines
+    assert isinstance(lines, pyvista.PolyData)
+    assert np.allclose(mapdl.lnum, [l0, l1, l2, l3])
+
+
+@skip_no_ansys
+@skip_no_xserver
+def test_lplot(cleared, mapdl):
+    with pytest.raises(ValueError):
+        mapdl.lplot(vtk=True)
+
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    mapdl.l(k0, k1)
+    mapdl.l(k1, k2)
+    mapdl.l(k2, k3)
+    mapdl.l(k3, k0)
+
+    cpos = mapdl.lplot(vtk=True, show_keypoints=True, off_screen=True)
+    assert isinstance(cpos, CameraPosition)
+    mapdl.lplot()  # make sure legacy still works
+
+
+@skip_no_ansys
+@skip_no_xserver
+def test_kplot(cleared, mapdl):
+    with pytest.raises(ValueError):
+        mapdl.kplot(vtk=True)
+
+    mapdl.k("", 0, 0, 0)
+    mapdl.k("", 1, 0, 0)
+    mapdl.k("", 1, 1, 0)
+    mapdl.k("", 0, 1, 0)
+
+    cpos = mapdl.kplot(vtk=True, off_screen=True)
+    assert isinstance(cpos, CameraPosition)
+    mapdl.kplot()    # make sure legacy still works
+
+
 @skip_no_ansys
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))

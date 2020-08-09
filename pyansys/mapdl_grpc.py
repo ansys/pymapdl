@@ -352,8 +352,10 @@ class MapdlGrpc(_MapdlCore):
 
         # remove the lock file if local
         if self._local:
-            if os.path.isfile(self._lockfile):
-                os.remove(self._lockfile)
+            lockfile = self._lock_file
+            if lockfile:
+                if os.path.isfile(lockfile):
+                    os.remove(lockfile)
 
     def list_files(self):
         """List the files in the working directory of the remote mapdl

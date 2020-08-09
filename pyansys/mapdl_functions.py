@@ -17040,7 +17040,7 @@ class _MapdlCommands(object):
         command = "MAGSOLV,%s,%s,%s,%s,%s,%s,%s" % (str(opt), str(nramp), str(cnvcsg), str(cnvflux), str(neqit), str(biot), str(cnvtol))
         return self.run(command, **kwargs)
 
-    def clear(self, read="", **kwargs):
+    def clear(self, read="NOSTART", **kwargs):
         """APDL Command: /CLEAR
 
         Clears the database.
@@ -17050,9 +17050,9 @@ class _MapdlCommands(object):
         read
             File read option:
 
-            START - Reread start162.ans file.
+            START - Reread startXXX.ans file.
 
-            NOSTART - Do not reread start162.ans file  (default).
+            NOSTART - Do not reread startXXX.ans file (default).
 
         Notes
         -----
@@ -36980,7 +36980,7 @@ class _MapdlCommands(object):
         Model in the Modeling and Meshing Guide for more information about beam
         meshing.
         """
-        command = "IGESOUT,%s,%s,%s" % (str(fname), str(ext), str(att))
+        command = "IGESOUT,%s,%s,,%s" % (str(fname), str(ext), str(att))
         return self.run(command, **kwargs)
 
     def nsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",

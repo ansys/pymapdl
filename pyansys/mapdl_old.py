@@ -10,6 +10,8 @@ import re
 from shutil import rmtree, copyfile
 
 import numpy as np
+import pyvista as pv
+from vtk import vtkAppendPolyData
 
 from pyansys.mapdl import _MapdlCore
 import pyansys
@@ -33,6 +35,7 @@ def check_lock_file(path, jobname, override):
                 raise PermissionError('Unable to remove lock file.  '
                                       'Another instance of ANSYS might be '
                                       'running at "%s"' % path)
+
 
 # test for png file
 PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
@@ -334,6 +337,97 @@ class _MapdlOld(_MapdlCore):
         """Reset cached items"""
         self._archive_cache = None
 
+    @supress_logging
+    def _load_lines(self):
+        """Load lines from MAPDL using IGES"""
+        # write database to an archive file
+        filename = os.path.join(self.path, 'tmp.iges')
+
+        # ignore volumes
+        self.cm('__tmp_volu__', 'VOLU')
+        self.cm('__tmp_area__', 'AREA')
+        self.cm('__tmp_line__', 'LINE')
+        self.allsel()
+        self.vsel('NONE')
+
+        prior_processor = self.processor
+        self.prep7()
+        self.igesout(filename, att=1)
+        self.run('/%s' % prior_processor)
+
+        self.cmsel('S', '__tmp_volu__', 'VOLU')
+        self.cmsel('S', '__tmp_area__', 'AREA')
+        self.cmsel('S', '__tmp_line__', 'LINE')
+
+        iges = pyiges.read(filename)
+
+        selected_lnum = self.lnum
+        lines = []
+        entity_nums = []
+        for bspline in iges.bsplines():
+            # allow only 10001 as others appear to be construction entities
+            if bspline.d['status_number'] == 10001:
+                entity_num = int(bspline.d['entity_subs_num'])
+                if entity_num not in entity_nums and entity_num in selected_lnum:
+                    entity_nums.append(entity_num)
+                    line = bspline.to_vtk()
+                    line.cell_arrays['entity_num'] = entity_num
+                    lines.append(line)
+
+        entites = iges.lines() + iges.circular_arcs()
+        for line in entites:
+            if line.d['status_number'] == 1:
+                entity_num = int(line.d['entity_subs_num'])
+                if entity_num not in entity_nums and entity_num in selected_lnum:
+                    entity_nums.append(entity_num)
+                    line = line.to_vtk(resolution=100)
+                    line.cell_arrays['entity_num'] = entity_num
+                    lines.append(line)
+
+        if lines:
+            afilter = vtkAppendPolyData()
+            [afilter.AddInputData(line) for line in lines]
+            afilter.Update()
+            self._lines = pv.wrap(afilter.GetOutput())
+        else:
+            lines = pv.PolyData()
+
+    @supress_logging
+    def _load_keypoints(self):
+        """Load keypoints from MAPDL using IGES"""
+
+        # write database to an archive file
+        filename = os.path.join(self.path, 'tmp.iges')
+
+        # write only keypoints
+        self.cm('__tmp_volu__', 'VOLU')
+        self.cm('__tmp_area__', 'AREA')
+        self.cm('__tmp_line__', 'LINE')
+        self.vsel('NONE')
+        self.asel('NONE')
+        self.lsel('NONE')
+
+        prior_processor = self.processor
+        self.prep7()
+        self.igesout(filename, att=1)
+        self.run('/%s' % prior_processor)
+
+        self.cmsel('S', '__tmp_volu__', 'VOLU')
+        self.cmsel('S', '__tmp_area__', 'AREA')
+        self.cmsel('S', '__tmp_line__', 'LINE')
+
+        iges = pyiges.read(filename)
+
+        keypoints = []
+        kp_num = []
+        for kp in iges.points():
+            keypoints.append([kp.x, kp.y, kp.z])
+            kp_num.append(int(kp.d['entity_subs_num']))
+
+        # self._kp_num = np.array(self._kp_num)
+        self._keypoints = pv.PolyData(keypoints)
+        self._keypoints['entity_num'] = kp_num
+
     @property
     @supress_logging
     def _mesh(self):
@@ -341,11 +435,7 @@ class _MapdlOld(_MapdlCore):
         if self._archive_cache is None:
             # write database to an archive file
             arch_filename = os.path.join(self.path, 'tmp.cdb')
-
-            # def cdwrite(mapdl):
             self.cdwrite('db', arch_filename)
-
-            # cdwrite(self)
             self._archive_cache = pyansys.Archive(arch_filename, parse_vtk=True,
                                                   name='Mesh')
         return self._archive_cache
