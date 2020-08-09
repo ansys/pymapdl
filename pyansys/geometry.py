@@ -1,6 +1,4 @@
 """Module for common class between gRPC, Archive, and Result geometry"""
-import warnings
-
 import pyvista as pv
 import vtk
 import numpy as np
@@ -30,8 +28,9 @@ MESH200_MAP = {0: 2,  # line
 
 class Geometry():
 
-    def __init__(self, nnum, nodes, elem=None, elem_off=None, ekey=None,
-                 node_comps={}, elem_comps={}, rdat=[], rnum=[], keyopt={}):
+    def __init__(self, nnum=None, nodes=None, elem=None,
+                 elem_off=None, ekey=None, node_comps={},
+                 elem_comps={}, rdat=[], rnum=[], keyopt={}):
         self._etype = None  # internal element type reference
         self._grid = None  # VTK grid
         self._enum = None  # cached element numbering
@@ -44,7 +43,7 @@ class Geometry():
         self._secnum = None  # cached section number
         self._esys = None  # cached element coordinate system
 
-        # Set on init
+        # Always set on init
         self._nnum = nnum
         self._nodes = nodes
         self._elem = elem
@@ -58,6 +57,24 @@ class Geometry():
         self._rnum = rnum
         self._keyopt = keyopt
 
+    @property
+    def _has_nodes(self):
+        """Returns True when has nodes"""
+        # if isinstance(self._nodes, np.ndarray):
+            # return bool(self._nodes.size)
+        return len(self.nodes)
+
+    @property
+    def _has_elements(self):
+        """Returns True when geometry has elements"""
+        if self._elem is None:
+            return False
+
+        if isinstance(self._elem, np.ndarray):
+            return self._elem.size
+
+        return len(self._elem)
+
     def _parse_vtk(self, allowable_types=None, force_linear=False,
                    null_unallowed=False, fix_midside=True):
         """Convert raw ANSYS nodes and elements to a VTK UnstructuredGrid
@@ -70,7 +87,7 @@ class Geometry():
             first node.
 
         """
-        if not len(self._nodes) or not len(self._elem):
+        if not self._has_nodes or not self._has_elements:
             # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
             return
 
@@ -144,7 +161,8 @@ class Geometry():
             grid.point_arrays[key] = mask
 
         # store node angles
-        grid.point_arrays['angles'] = angles
+        if angles is not None:
+            grid.point_arrays['angles'] = angles
 
         if not null_unallowed:
             grid = grid.extract_cells(grid.celltypes != 0)
@@ -275,7 +293,7 @@ class Geometry():
         --------
         >>> import pyansys
         >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
-        >>> archive.ekey
+        >>> archive.etype
         array([ 45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,
                 45,  45,  45,  45,  45,  45,  45,  45,  92,  92,  92,
                 92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,
@@ -451,7 +469,7 @@ class Geometry():
 
     @property
     def nodes(self):
-        """Nodes from the archive file.
+        """Array of nodes.
 
         Examples
         --------
@@ -577,9 +595,12 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     nodes_new = nodes_new[:nnodes + nextra]
     nodes_new[nnodes:] = unique_nodes
 
-    new_angles = np.empty((nnodes + nextra, 3))
-    new_angles[:nnodes] = angles
-    new_angles[nnodes:] = 0
+    if angles is not None:
+        new_angles = np.empty((nnodes + nextra, 3))
+        new_angles[:nnodes] = angles
+        new_angles[nnodes:] = 0
+    else:
+        new_angles = None
 
     # Add extra node numbers
     nnum_new = np.empty(nnodes + nextra)

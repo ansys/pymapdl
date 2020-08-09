@@ -7,6 +7,7 @@ import glob
 import tempfile
 import os
 import re
+from shutil import rmtree, copyfile
 
 import numpy as np
 
@@ -304,8 +305,9 @@ class _MapdlOld(_MapdlCore):
                  log_apdl):
         """ Initialize connection with ANSYS program """
         super().__init__(loglevel)
-        self.path = run_location
+        self._path = run_location
 
+        self._local = True  # always local when using Console or CORBA
         self._exec_file = exec_file
         self._jobname = jobname
         self._archive_cache = None
@@ -319,7 +321,7 @@ class _MapdlOld(_MapdlCore):
         self._redirected_commands = {'*LIS': self._list}
 
         # perhaps directly from MAPDL...
-        self.version = re.findall(r'\d\d\d', self._exec_file)[0]
+        self._version = re.findall(r'\d\d\d', self._exec_file)[0]
 
         # start local instance of MAPDL
         self._launch()
@@ -329,69 +331,8 @@ class _MapdlOld(_MapdlCore):
             self.open_apdl_log(filename, mode=log_apdl)
 
     def _reset_cache(self):
-        """Reset cached items and other items"""
+        """Reset cached items"""
         self._archive_cache = None
-
-    @property
-    def _lockfile(self):
-        """lockfile path"""
-        return os.path.join(self.path, self.jobname + '.lock')
-
-    @property
-    def allow_ignore(self):
-        """Invalid commands will be ignored rather than exceptions
-
-        A command executed in the wrong processor will raise an
-        exception when ``allow_ignore=False``.  This is the default
-        behavior.
-
-        Examples
-        --------
-        >>> mapdl.post1()
-        >>> mapdl.k(1, 0, 0, 0)
-        Exception:  K is not a recognized POST1 command, abbreviation, or macro.
-
-        Ignore these messages by setting allow_ignore=True
-
-        >>> mapdl.allow_ignore = True
-        2020-06-08 21:39:58,094 [INFO] pyansys.mapdl: K is not a
-        recognized POST1 command, abbreviation, or macro.  This
-        command will be ignored.
-
-        *** WARNING *** CP = 0.372 TIME= 21:39:58
-        K is not a recognized POST1 command, abbreviation, or macro.
-        This command will be ignored.
-
-        """
-        return self._allow_ignore
-
-    @allow_ignore.setter
-    def allow_ignore(self, value):
-        """Set allow ignore"""
-        self._allow_ignore = bool(value)
-
-    def open_apdl_log(self, filename, mode='w'):
-        """Start writing all APDL commands to an ANSYS input file.
-
-        Parameters
-        ----------
-        filename : str
-            Filename of the log.
-        """
-        if self._apdl_log is not None:
-            raise RuntimeError('APDL command logging already enabled.\n')
-
-        self._log.debug('Opening ANSYS log file at %s', filename)
-        self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
-        if mode != 'w':
-            self._apdl_log.write('! APDL script generated using pyansys %s\n' %
-                                 pyansys.__version__)
-
-    def _close_apdl_log(self):
-        """ Closes APDL log """
-        if self._apdl_log is not None:
-            self._apdl_log.close()
-        self._apdl_log = None
 
     @property
     @supress_logging
@@ -518,28 +459,6 @@ class _MapdlOld(_MapdlCore):
                     plt.show()  # consider in-line plotting
             else:
                 self._log.error('Unable to find screenshot at %s' % filename)
-
-    def __del__(self):
-        """Clean up when complete"""
-        try:
-            self.exit()
-        except Exception as e:
-            if hasattr(self, '_log'):
-                self._log.error('exit: %s', str(e))
-
-        try:
-            self.kill()
-        except Exception as e:
-            if hasattr(self, '_log'):
-                self._log.error('kill: %s', str(e))
-
-    def _remove_lockfile(self):
-        """Removes lockfile"""
-        if os.path.isfile(self._lockfile):
-            try:
-                os.remove(self._lockfile)
-            except:
-                pass
 
     @property
     def result(self):

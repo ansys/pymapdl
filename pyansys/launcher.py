@@ -271,13 +271,17 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     port : int, optional
         Port to open the gRPC server on.  Only applicable when ``mode='grpc'``
 
+    cleanup_on_exit : bool, optional
+        Shutdown the server when the Python object is deleted or
+        Python exits.  Only applicable when ``mode='grpc'``.
+
     Examples
     --------
     >>> import pyansys
     >>> mapdl = pyansys.Mapdl()
 
     Run MAPDL with the smp switch and specify the location of the
-    ansys binary
+    ansys binary.
 
     >>> import pyansys
     >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
@@ -285,7 +289,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     Notes
     -----
-    MAPDL has the following command line options as of v20.1
+    MAPDL has the following command line options as of v20.1 (2020R1)
 
     -aas : Enables server mode
      When enabling server mode, a custom name for the keyfile can be
@@ -368,7 +372,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      This option is valid only if you have a translated message file
      in an appropriately named subdirectory in
      ``/ansys_inc/v201/ansys/docu`` or
-     ``Program Files\ANSYS\Inc\V201\ANSYS\docu``
+     ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
 
     -m <workspace> : Specifies the total size of the workspace
      Workspace (memory) in megabytes used for the initial
@@ -529,19 +533,29 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         except ImportError:
             raise ImportError('Please install ``ansys.grpc.mapdl`` for this feature')
 
-        process = launch_grpc(exec_path, jobname, nproc, ram=kwargs.pop('ram', None),
-                              run_location=run_location, port=MAPDL_DEFAULT_PORT,
-                              additional_switches=additional_switches,
-                              override=True, timeout=start_timeout)
+        port = launch_grpc(exec_file, jobname, nproc, ram=kwargs.pop('ram', None),
+                           run_location=run_location, port=MAPDL_DEFAULT_PORT,
+                           additional_switches=additional_switches,
+                           override=True, timeout=start_timeout)
 
-        # from pyansys.mapdl_grpc import MapdlgRPC
-        # MapdlgRPC()
+        # attempt to connect to the gRPC instance
+        from pyansys.mapdl_grpc import MapdlGrpc
+        kwargs['jobname'] = jobname
+        kwargs['run_location'] = run_location
+        return MapdlGrpc(LOCALHOST, port, loglevel=loglevel, **kwargs)
 
 
 def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
                 port=MAPDL_DEFAULT_PORT, additional_switches='',
                 override=True, timeout=10):
-    """Start MAPDL in gRPC mode locally"""
+    """Start MAPDL in gRPC mode locally
+
+    Returns
+    -------
+    port : int
+        Returns the port number that the gRPC instance started on.
+
+    """
     if run_location is None:
         run_location = os.getcwd()
     elif not os.path.isdir(run_location):
@@ -562,17 +576,27 @@ def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
     while port_in_use(port, LOCALHOST):
         port += 1
 
-    # different treatment for windows vs. linux due to v202 build issues
-    # if ram_str:
     cpu_sw = '-np %d' % n_cpu
     if ram:
         ram_sw = '-m %d' % int(1024*ram)
     else:
         ram_sw = ''
 
+    # different treatment for windows vs. linux due to v202 build issues
     custom_sw = ''
     if os.name != 'nt':
-        custom_sw = '-custom /mnt/ansys_inc/grpc/ansys.e201t.DEBUG'
+        try:
+            import ansys.mapdl_bin
+        except ImportError:
+            raise ImportError('Please install ``ansys.mapdl_bin`` to use the '
+                              'gRPC mode on Linux for 2020R2')
+
+        custom_bin = ansys.mapdl_bin.bin_path
+
+        if not os.path.isfile(custom_bin):
+            raise FileNotFoundError('Unable to locate the custom MAPDL executable')
+        
+        custom_sw = '-custom %s' % custom_bin
 
     job_sw = '-j %s' % jobname
     port_sw = '-port %d' % port
@@ -590,7 +614,6 @@ def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
     # self._log.debug('Starting MAPDL in gRPC mode with:\n"%s"', command)
 
     # Windows will spawn a new window, only linux will let you use pexpect...
-
     process = popen_spawn.PopenSpawn(command,
                                      timeout=timeout,
                                      cwd=run_location)
@@ -608,17 +631,17 @@ def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
             process.sendline('')  # enter to continue
             process.expect('Server listening', timeout=1)
         elif idx > 2:
-            msg = process.before
-            raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+            msg = process.read().decode()
+            raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
     except pexpect.EOF:
-        msg = process.before
-        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+        msg = process.read().decode()
+        raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
     except pexpect.TIMEOUT:
-        msg = process.before
-        raise RuntimeError('Failed to start local mapdl instance: "%s"' % msg)
+        msg = process.before.decode()
+        raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
 
     # self._log.info('Local MAPDL GRPC server listening on localhost:%d', port)
-    return process
+    return port
 
 
 def check_mode(mode, version):

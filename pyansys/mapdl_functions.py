@@ -17050,9 +17050,9 @@ class _MapdlCommands(object):
         read
             File read option:
 
-            START - Reread start162.ans file (default).
+            START - Reread start162.ans file.
 
-            NOSTART - Do not reread start162.ans file.
+            NOSTART - Do not reread start162.ans file  (default).
 
         Notes
         -----

@@ -2,6 +2,7 @@
 import re
 import os
 import logging
+from functools import wraps
 
 import appdirs
 import pyvista as pv
@@ -100,8 +101,14 @@ class _MapdlCore(_MapdlCommands):
         self.response = None
         self._use_vtk = use_vtk
         self._log_filehandler = None
+        self._version = None  # cached version
+        self._local = None
+        self._path = None
+        self._jobname = None
+        self._cleanup = True
 
         self._log = setup_logger(loglevel.upper())
+        self._log.debug('Logging set to %s', loglevel)
         self.non_interactive = self._non_interactive(self)
 
     class _non_interactive:
@@ -127,6 +134,25 @@ class _MapdlCore(_MapdlCommands):
         def __exit__(self, type, value, traceback):
             self.parent._log.debug('entering non-interactive mode')
             self.parent._flush_stored()
+
+    @wraps(_MapdlCommands.clear)
+    def clear(self, *args, **kwargs):
+        kwargs['read'] = 'NOSTART'
+        super().clear(**kwargs)
+
+    @property
+    @supress_logging
+    def _os(self):
+        """Operating system of system running MAPDL
+
+        Returns either 'nt' or 'posix' just like ``os.name``
+        """
+        status = self.slashstatus()
+        match = re.findall(r'Version=\s*(\w*)', status)[0]
+        if match == 'LINUX':
+            return 'posix'
+        else:
+            return 'nt'
 
     def __str__(self):
         try:
@@ -996,21 +1022,6 @@ class _MapdlCore(_MapdlCommands):
         self.solve()
         self.finish()
 
-    @property
-    @supress_logging
-    def build(self):
-        """ANSYS build
-
-        Examples
-        --------
-        >>> print(mapdl.build)
-        20.1BETA  UPDATE 20191009
-        """
-        stats = self.slashstatus()
-        st = stats.find('BUILD') + 5
-        en = stats.find('CUSTOMER')
-        return stats[st:en].strip()
-
     def run(self, command, write_to_log=True):
         """Runs APDL command
 
@@ -1103,3 +1114,60 @@ class _MapdlCore(_MapdlCommands):
 
     def _run(self, *args, **kwargs):
         raise NotImplementedError('Implemented by child class')
+
+    @property
+    @supress_logging
+    def version(self):
+        """Return MAPDL build version
+
+        Examples
+        --------
+        >>> mapdl.version
+        20.2
+        """
+        try:
+            status = self.slashstatus()
+            return float(re.findall(r'Build=\s*(\d*.\d*)', status)[0])
+        except:
+            return self._version
+
+    @property
+    @supress_logging
+    def path(self):
+        """Current MAPDL directory"""
+        try:
+            return self.inquire('DIRECTORY')
+        except:
+            return self._path
+
+    @property
+    def _lockfile(self):
+        """lockfile path"""
+        path = self.path
+        if path is not None:
+            return os.path.join(path, self.jobname + '.lock').replace('\\', '/')
+
+    def _remove_lockfile(self):
+        """Removes lockfile"""
+        if os.path.isfile(self._lockfile):
+            try:
+                os.remove(self._lockfile)
+            except:
+                pass
+
+    @property
+    def _result_file(self):
+        """Full path to the result file"""
+        return os.path.join(self.path, self.jobname).replace('\\', '/')
+
+    def exit(self):
+        """Exit from MAPDL"""
+        raise NotImplementedError('Implemented by child class')
+
+    def __del__(self):
+        """Clean up when complete"""
+        if self._cleanup:
+            try:
+                self.exit()
+            except Exception as e:
+                self._log.error('exit: %s', str(e))

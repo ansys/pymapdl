@@ -7,7 +7,7 @@ Disable this check by passing ``override=True``
 
 """
 
-class MapdlException(RuntimeError):
+class MapdlRuntimeError(RuntimeError):
     """Raised when MAPDL passes an error"""
     pass
 

@@ -1,66 +1,130 @@
-"""Module to control interaction with grpc mapdl server"""
-import tempfile
-# import weakref
-import re
-import os
+"""gRPC specific class and methods for the MAPDL gRPC client
+"""
 import threading
-
-from threading import Timer
+import weakref
+import io
 import time
+import logging
+import os
+import socket
+from threading import Timer
+from functools import wraps
 
+import grpc
 import numpy as np
-import pyvista as pv
-import scooby
-from pyansys.geometry import Geometry
+from tqdm import tqdm
+
 from pyansys.mapdl import _MapdlCore
-from pyansys.misc import is_float, threaded
+from pyansys.errors import MapdlRuntimeError
+from pyansys.common_grpc import (parse_chunks,
+                                 ANSYS_VALUE_TYPE,
+                                 DEFAULT_CHUNKSIZE,
+                                 DEFAULT_FILE_CHUNK_SIZE,
+                                 check_vget_input)
+
+from ansys.grpc.mapdl import mapdl_pb2 as pb_types
+from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
+from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+
+logger = logging.getLogger(__name__)
+
+VOID_REQUEST = anskernel.EmptyRequest()
+
+NP_VALUE_TYPE = {value: key for key, value in ANSYS_VALUE_TYPE.items()}
 
 
-# from ansys.mapdl import __version__
-
-# from ansys.mapdl.misc import get_ip, check_itk
-# from ansys.mapdl.common import threaded
-
-LOCALHOST = '127.0.0.1'
-MAPDL_DEFAULT_PORT = 50052
-
-
-VGET_ENTITY_TYPES = ['NODE', 'ELEM', 'KP', 'LINE', 'AREA', 'VOLU',
-                     'CDSY', 'RCON', 'TLAB']
-
-STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', '1', '2', '3', 'INT', 'EQV']
-COMP_TYPE = ['X', 'Y', 'Z', 'SUM']
-VGET_NODE_ENTITY_TYPES = {'U': ['X', 'Y', 'Z'],
-                          'S': STRESS_TYPES,
-                          'EPTO': STRESS_TYPES,
-                          'EPEL': STRESS_TYPES,
-                          'EPPL': STRESS_TYPES,
-                          'EPCR': STRESS_TYPES,
-                          'EPTH': STRESS_TYPES,
-                          'EPDI': STRESS_TYPES,
-                          'EPSW': [None],
-                          'NL': ['SEPL', 'SRAT', 'HPRES', 'EPEQ', 'PSV', 'PLWK'],
-                          'HS': ['X', 'Y', 'Z'],
-                          'BFE': ['TEMP'],
-                          'TG': COMP_TYPE,
-                          'TF': COMP_TYPE,
-                          'PG': COMP_TYPE,
-                          'EF': COMP_TYPE,
-                          'D': COMP_TYPE,
-                          'H': COMP_TYPE,
-                          'B': COMP_TYPE,
-                          'FMAG': COMP_TYPE,
-                          'NLIST': [None]}
+def chunk_raw(raw, save_as):
+    with io.BytesIO(raw) as f:
+        while True:
+            piece = f.read(DEFAULT_FILE_CHUNK_SIZE)
+            length = len(piece)
+            if length == 0:
+                return
+            yield pb_types.UploadFileRequest(file_name=os.path.basename(save_as),
+                                             chunk=anskernel.Chunk(payload=piece,
+                                                                   size=length))
 
 
-# these commands will be verbose and their response will be streamed by default
-STREAM_COMMANDS = []
+def get_file_chunks(filename, progress_bar=False):
+    """Serializes a file into chunks"""
+    pbar = None
+    if progress_bar:
+        n_bytes = os.path.getsize(filename)
 
-ITK_PLOTTING = hasattr(pv, 'PlotterITK') and scooby.knowledge.in_ipykernel()
+        base_name = os.path.basename(filename)
+        pbar = tqdm(total=n_bytes, desc='Uploading %s' % base_name,
+                    unit='B', unit_scale=True, unit_divisor=1024)
+
+    with open(filename, 'rb') as f:
+        while True:
+            piece = f.read(DEFAULT_FILE_CHUNK_SIZE)
+            length = len(piece)
+            if length == 0:
+                if pbar is not None:
+                    pbar.close()
+                return
+
+            if pbar is not None:
+                pbar.update(length)
+
+            chunk = anskernel.Chunk(payload=piece, size=length)
+            yield pb_types.UploadFileRequest(file_name=os.path.basename(filename),
+                                             chunk=chunk)
 
 
-def parse_fortran_index(i=1, j=1, k=1):
-    return int(i), int(j), int(k)
+def save_chunks_to_file(chunks, filename, progress_bar=True,
+                        file_size=None, target_name=''):
+    """Saves chunks to a local file"""
+    pbar = None
+    if progress_bar:
+        pbar = tqdm(total=file_size, desc='Downloading %s' % target_name,
+                    unit='B', unit_scale=True, unit_divisor=1024)
+
+    with open(filename, 'wb') as f:
+        for chunk in chunks:
+            f.write(chunk.payload)
+            if pbar is not None:
+                pbar.update(len(chunk.payload))
+
+    if pbar is not None:
+        pbar.close()
+
+
+def chunk_commands(l, n):
+    """Yield successive n-sized cmdrequests from iterator l"""
+    for i in range(0, len(l), n):
+        line_block = ''.join(l[i:i + n])
+        if '/EXIT' in line_block:
+            raise Exception('Invalid command "/EXIT" in input file')
+        yield pb_types.CmdRequest(command=line_block)
+
+
+def chunk_lines(lines, n):
+    for i in range(0, len(lines), n):
+        line_block = ''.join(lines[i:i + n])
+        if '/EXIT' in line_block:
+            raise Exception('Invalid command "/EXIT" in input file')
+        yield pb_types.CmdRequest(command=line_block)
+
+
+def chunk_by_lines(file_object, nlines):
+    """ Read in a file by line chunks
+
+    Parameters
+    ----------
+    file_object : Python file object
+        Python file object to chunk
+
+    nlines : int
+        Number of lines to read at a time.  Optimally between 10 and
+        100
+
+    Returns
+    -------
+    chunks : generator
+        Generator containing chunks of the file object.
+    """
+    return chunk_commands(file_object.readlines(), nlines)
 
 
 class RepeatingTimer(Timer):
@@ -70,284 +134,191 @@ class RepeatingTimer(Timer):
             self.finished.wait(self.interval)
 
 
-class MapdlgRPC(_MapdlCore):
+def get_nparray_chunks(name, nparray):
+    """Serializes a numpy array into chunks"""
+    vsize = nparray.size
+    dt = nparray.dtype
+    csize = DEFAULT_FILE_CHUNK_SIZE
+    itemsize = nparray.itemsize
+    nvals = int(csize/itemsize)
+    type = NP_VALUE_TYPE[dt.type]
+    first = 0
+    last = -1
+    while True:
+        first = last+1
+        last = min(vsize, first+nvals)
+        if first >= last:
+            return
+        piece = nparray[first:last]
+        length = len(piece)*itemsize
+        chunk = anskernel.Chunk(payload=piece.tobytes(), size=length)
+        yield pb_types.SetVecDataRequest(vname=name, stype=type, size=vsize,
+                                         chunk=chunk)
+
+
+def check_valid_ip(ip):
+    """Check for valid IP address"""
+    if ip != 'localhost':
+        ip = ip.replace('"', '').replace("'", '')
+        socket.inet_aton(ip)
+
+
+class MapdlGrpc(_MapdlCore):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
 
     Parameters
     ----------
+    ip : str, optional
+        IP address to connnect to the server.  Defaults to 'localhost'.
+
+    port : int, optional
+        Port to connect to the mapdl server.  Defaults to 50052.
+
+    timeout : float
+        Maximum allowable time to connect to the MAPDL server.
+
     loglevel : str, optional
         Sets which messages are printed to the console.  Default
         'INFO' prints out all ANSYS messages, 'WARNING` prints only
         messages containing ANSYS warnings, and 'ERROR' prints only
         error messages.
 
-    timeout : float, optional
-        Time to wait before raising error that ANSYS is unable to
-        start or connect to the remote instance.  Increase this if
-        there is heavy load on the cluster.
-
-    local : bool, optional
-        Start up a local instance rather than a remote (cluster)
-        instance.  Default False.
-
-    n_cpu : int, optional
-        CPUs requested in the mapdl instance.  Default 2
-
-    ram : float, optional
-        RAM requested for the mapdl instance in GB.  Default 8
-
-    ignore_lock : bool, optional
-        Ignores lock file if present and if running a local instance.
-
-    run_location : str, optional
-       Location to run a local instance of the mapdl grpc instance.
-
-    instance_timeout : float, optional
-        Remote instance timeout in seconds.  By default, this is 3600
-        seconds.  This can be increased up to 86400 seconds (one day).
-
-    print_version : bool, optional
-        Prints ANSYS and pyansys version on initialization.  Default
-        True.
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
 
     Examples
     --------
-    >>> import ansys
-    >>> mapdl = ansys.Mapdl()
+    Connect to an instance of MAPDL running on localhost
 
-    Request an instance with 4 CPUs and 64 GB of RAM
-    >>> mapdl = ansys.Mapdl(n_cpu=4, ram=64)
+    >>> from pyansys.mapdl_grpc import MapdlGrpc
+    >>> MapdlGrpc('127.0.0.1', port=50052)
 
-    Start a local instance of mapdl
-    >>> mapdl = ansys.Mapdl(local=True)
+    Connect to an instance of MAPDL running on the LAN
+
+    >>> from pyansys.mapdl_grpc import MapdlGrpc
+    >>> MapdlGrpc('192.168.1.101', port=50052)
+
     """
 
-    def __init__(self, exec_file, run_location=None,
-                 jobname='file', nproc=2, ram=None, override=False,
-                 loglevel='INFO', additional_switches='',
-                 start_timeout=120, port=MAPDL_DEFAULT_PORT,
-                 log_apdl='w'):
-        """Initialize connection with mapdl"""
+    def __init__(self, ip='127.0.0.1', port=50052, timeout=15, loglevel='INFO',
+                 cleanup_on_exit=True, **kwargs):
+        """Initialize connection to the mapdl server"""
         super().__init__(loglevel)
+        self._vget_lock = False
+        self._get_lock = False
 
-        # start the ANSYS process
-        self._launch(exec_file, jobname, nproc, ram, run_location,
-                     port, additional_switches, override, start_timeout)
-        breakpoint()
-        # INSTANCES.append(self)
+        self._stub = None
+        self._cleanup = cleanup_on_exit
+        self._jobname = kwargs.pop('jobname', 'file')
+        self._path = kwargs.pop('run_location', None)
 
-        # self._log = setup_logger(loglevel.upper())
-        # self.jobname = 'file'
-        # self._quad_grid = None
-        # self._grid = None
-        # self._solving = False
-        # self._busy = True
-        # self.port = None
-        # self.server = None
-        # self._process = None
-        # self._local = local
-        # self._run_location = None
+        check_valid_ip(ip)
+        self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
 
-        # # used by pool and threading
-        # self.locked = False
-        # self._check_flag = None
+        self._redirected_commands = {}
 
-        # keep_alive = kwargs.pop('keep_alive', True)
-        # ip = kwargs.pop('ip', None)
-        # if isinstance(ip, str):
-        #     # Check for valid IP address
-        #     ip = ip.replace('"', '').replace("'", '')
-        #     socket.inet_aton(ip)
+        self._channel_str = '%s:%d' % (ip, port)
+        self._log.debug('Opening insecure channel at %s', self._channel_str)
 
-        # port = kwargs.pop('port', None)
-        # allow_new_nodes = kwargs.pop('allow_new_nodes', True)
-        # use_netapp = kwargs.pop('use_netapp', False)
-        # custom_command = kwargs.pop('custom_command', None)
-        # self._cleanup = kwargs.pop('cleanup', True)
+        self.channel = grpc.insecure_channel(self._channel_str)
+        self._state = grpc.channel_ready_future(self.channel)
+        self._stub = mapdl_grpc.MapdlServiceStub(self.channel)
 
-        # # TODO: assert keyword args is empty
+        # verify connection
+        tstart = time.time()
+        while ((time.time() - tstart) < timeout) and not self._state._matured:
+            time.sleep(0.01)
 
-        # if local:
-        #     request_instance = False
+        if not self._state._matured:
+            raise IOError('Unable to connect to MAPDL gRPC instance at %s' %
+                          self._channel_str)
+        self._log.debug('Established connection to MAPDL gRPC')
 
-        #     # get ip of this computer and next available port
-        #     ip = get_ip()
-        #     port = MAPDL_DEFAULT_PORT
-        #     while port_in_use(port, ip):
-        #         port += 1
+        # keeps mapdl session alive
+        self._timer = None
+        if not self._local:
+            self._initialised = threading.Event()
+            self._t_trigger = time.time()
+            self._t_delay = 30
+            self._timer = threading.Thread(target=MapdlGrpc._threaded_heartbeat,
+                                           args=(weakref.proxy(self), ))
+            self._timer.daemon = True
+            self._timer.start()
 
-        #     # launch MAPDL locally
-        #     ram_mb = int(1024*ram)
-        #     self._log.info('Creating local instance with %d MB RAM and %d CPUs', ram_mb, n_cpu)
-        #     cmd = '/mnt/ansys_inc/v201/ansys/bin/ansys201 -custom /mnt/ansys_inc/grpc/ansys.e201t.DEBUG -m -%d -np %d -smp -port %d -grpc' % (ram_mb, n_cpu, port)
-        #     self._log.debug('Running "%s"', cmd)
+        # import needs to be here to avoid recursive import
+        from pyansys.geometry_grpc import GeometryGrpc
+        self._geometry = GeometryGrpc(self)
 
-        #     if run_location is None:
-        #         run_location = os.getcwd()
-
-        #     if not os.access(run_location, os.W_OK):
-        #         raise IOError('Unable to write to run_location "%s"' % run_location)
-
-        #     # verify lock file does not exist
-        #     lock_file = os.path.join(run_location, 'file.lock')
-        #     if os.path.isfile(lock_file):
-        #         if ignore_lock:
-        #             os.remove(lock_file)
-        #         else:
-        #             raise Exception('Please remove the lock file at "%s" or pass ignore_lock=True' %
-        #                             run_location)
-                              
-
-        #     self._process = popen_spawn.PopenSpawn(cmd, timeout=10, cwd=run_location)
-        #     self._run_location = run_location
-
-        #     try:
-        #         idx = self._process.expect(['Server listening',
-        #                                     'Another ANSYS job with the same job name',
-        #                                     'PRESS <CR> OR <ENTER> TO CONTINUE',
-        #                                     'ERROR'])
-                
-        #         if idx == 1:
-        #             raise Exception('\n%s.  Please remove the lock file at the run location' % REMOVE_LOCK)
-        #         if idx == 2:
-        #             self._process.sendline('')  # enter to continue
-        #             self._process.expect('Server listening', timeout=1)
-        #         elif idx > 2:
-        #             msg = self._process.before
-        #             raise Exception('Failed to start local mapdl instance: "%s"' % msg)
-        #     except pexpect.EOF:
-        #         msg = self._process.before
-        #         raise Exception('Failed to start local mapdl instance: "%s"' % msg)
-        #     except pexpect.TIMEOUT:
-        #         msg = self._process.before
-        #         raise Exception('Failed to start local mapdl instance: "%s"' % msg)
-
-        #     self._log.info('Local MAPDL GRPC server listening on localhost:%d', port)
-
-
-        # if request_instance:
-        #     scheduler_ip = ip
-        #     if scheduler_ip is None:
-        #         # if socket.gethostname() in JUPYTER_HOSTS:
-        #         scheduler_ip = INTERNAL_SCHEDULER_IP
-        #         # else:
-        #             # scheduler_ip = EXTERNAL_SCHEDULER_IP
-
-        #     # assign port when outside the cluster
-        #     # assign_port = IN_DEVELOPMENT
-
-        #     manager_port = port
-        #     if manager_port is None:
-        #         manager_port = MANAGER_PORT
-
-        #     ip, port = request_remote_instance(scheduler_ip,
-        #                                        manager_port,
-        #                                        n_cpu, ram,
-        #                                        custom_command,
-        #                                        request_timeout=timeout,
-        #                                        instance_timeout=instance_timeout,
-        #                                        permit_pending=allow_new_nodes,
-        #                                        use_netapp=use_netapp,
-        #                                        log=self._log)
-
-        # elif ip is None:
-        #     raise ValueError('Must specify an IP and port when request_instance=False')
-
-        # # user has not set a port for a local instance
-        # if port is None:
-        #     port = MAPDL_DEFAULT_PORT
-
-        # self._processor = 'BEGIN'
-        # self._lnum = None
-        # self._knum = None
-
-        # # default settings
-        # self.allow_ignore = False
-        # self._interactive_plotting = False
-        # self._store_commands = False
-        # self._stored_commands = []
-        # self._output = ''
-        # self._outfile = None
-        # self.continue_on_error = False
-
-        # # Check for valid IP address
-        # ip = ip.replace('"', '').replace("'", '')
-        
-        # socket.inet_aton(ip)
-
-        # # open a connection to the mapdl server
-        # self._log.debug(f'Connecting to MAPDL server at {ip}:{port}')
-        # server = None
-        # for n_attempt in range(10):
-        #     try:
-        #         server = MapdlGrpc(ip, port)
-        #         response = server.send_command('/INQUIRE, , JOBNAME')
-        #         job_name = response.split('=')[1].strip()
-        #         self._log.info(f'Connected to MAPDL instance with jobname "{job_name}"')
-        #     except Exception as exception:
-        #         self._log.debug('Connection attempt %d', n_attempt)
-        #         time.sleep(0.1)
-        #         continue
-
-        #     break
-
-        # if server is None:
-        #     server = MapdlGrpc(ip, port)
-
-        # self.server = server
-        # self.ip = ip
-        # self.port = port
-        # self._log.debug('Connected to MAPDL server')
-        # self._reader = None
-
-        # # keeps mapdl session alive
-        # self._timer = None
-        # if keep_alive and not local:
-        #     self.initialised = threading.Event()
-        #     self._t_trigger = time.time()
-        #     self._t_delay = 30
-        #     self._timer = threading.Thread(target=Mapdl._threaded_heartbeat,
-        #                                    args=(weakref.proxy(self), ))
-        #     self._timer.daemon = True
-        #     self._timer.start()
-
-        #     while not self.initialised.is_set():
-        #         # This loop is necessary to stop the main threading doing anything
-        #         # until the exception handler in threaded_func can deal with the
-        #         # object being deleted.
-        #         pass
-
-        # # print version when requested
-        # if print_version:
-        #     if request_instance:
-        #         print('Acquired remote instance with %d CPUs and %.f GB RAM\n' %
-        #               (n_cpu, ram))
-        #     print(self)
-
+    def _reset_cache(self):
+        """Reset cached items"""
+        self._geometry._reset_cache()
 
     @property
-    def path(self):
-        """Current MAPDL directory"""
-        return self.inquire('DIRECTORY')
+    def mesh(self):
+        """MAPDL geometry"""
+        return self._geometry
 
-    @property
-    def reader(self):
-        """Open mapdl file reader"""
-        # send a system command through mapdl to start the mapdl file manager
-        from mapdl_file_interface import MapdlFileReader
-        if self._reader is None:
-            reader_port = 50051
-            self.sys(f'/ansys_inc/file_reader/FileMgrReader --address 0.0.0.0 --port {reader_port} &')
-            # wait until open
-            for _ in range(3):
-                try:
-                    self._reader = MapdlFileReader(self.ip, reader_port)
-                    break
-                except:
-                    time.sleep(0.1)
+    def _run(self, cmd, stream=False, verbose=False, mute=False):
+        """Sends a command and returns the response as a string.
 
-        return self._reader
+        Parameters
+        ----------
+        cmd : str
+            Valid MAPDL command.
+
+        stream : bool, optional
+            Stream the response of a command.  Useful when sending
+            long running commands like ``"SOLVE"``.
+
+        verbose : bool, optional
+            Print the response of a command.  Best when combined with
+            ``stream=True`` to stream a command in real-time.
+
+        mute : bool, optional
+            Request that no output be generated from the gRPC server.
+        """
+        if self._exited:
+            raise MapdlException('MAPDL session ended')
+
+        if stream:
+            return self._send_command_stream(cmd, verbose)
+        return self._send_command(cmd, verbose, mute=mute)
+
+    def _send_command(self, cmd, verbose=False, mute=False):
+        """Send a MAPDL command and return the response as a string"""
+        opt = ''
+        if mute:
+            opt = 'MUTE'  # supress any output
+
+        request = pb_types.CmdRequest(command=cmd, opt=opt)
+        try:
+            cmd_response = self._stub.SendCommand(request)
+        except Exception as exception:
+            if 'status = StatusCode.UNAVAILABLE' in str(exception):
+                raise Exception('Server connection terminated')
+            else:
+                raise exception
+
+        response = cmd_response.response
+        if verbose:
+            print(response)
+        return response
+
+    def _send_command_stream(self, cmd, verbose=False):
+        """Send a command and expect a streaming response"""
+        request = pb_types.CmdRequest(command=cmd)
+        metadata = [('time_step_stream', '100')]
+        stream = self._stub.SendCommandS(request, metadata=metadata)
+        response = []
+        for item in stream:
+            cmdout = '\n'.join(item.cmdout)
+            if verbose:
+                print(cmdout)
+            response.append(cmdout)
+
+        return ''.join(response)
 
     def _threaded_heartbeat(self):
         """ to be called from a thread"""
@@ -364,6 +335,26 @@ class MapdlgRPC(_MapdlCore):
             except Exception:
                 continue
 
+    def exit(self):
+        """Exit MAPDL instance
+
+        Examples
+        --------
+        >>> mapdl.exit()
+        """
+        self._log.debug('Exiting MAPDL')
+        if not self._exited:
+            try:  # allow this to fail
+                self._ctrl('EXIT')
+            except:
+                pass
+            self._exited = True
+
+        # remove the lock file if local
+        if self._local:
+            if os.path.isfile(self._lockfile):
+                os.remove(self._lockfile)
+
     def list_files(self):
         """List the files in the working directory of the remote mapdl
         instance
@@ -373,485 +364,177 @@ class MapdlgRPC(_MapdlCore):
         >>> files = mapdl.list_files()
         """
         tmp_file = 'tmp_file'
-        self.sys('ls > %s' % tmp_file)
+        if self._os == 'nt':
+            cmd = 'ls'
+        else:
+            cmd = 'dir'
+        self.sys('ls > %s' % (cmd, tmp_file))
         return self.download_as_raw(tmp_file).decode().splitlines()
 
-    def run(self, command, stream=None, verbose=None):
-        """Run a MAPDL command
+    def _ctrl(self, cmd):
+        """Issue control command to the mapdl server
+
+        Available commands:
+
+        - 'EXIT'
+            Calls exit(0) on the server.
+
+        - 'set_verb'
+            Enables verbose mode on the server.
+
+        Unavailable/Flaky:
+
+        - 'time_stats'
+            Prints a table for time stats on the server.
+            This command appears to be disabled/broken.
+
+        - 'mem-stats'
+            To be added
+
+        """
+        self._log.debug('Issuing CtrlRequest "%s"', cmd)
+        request = anskernel.CtrlRequest(ctrl=cmd)
+
+        # handle socket closing upon exit
+        if cmd.lower() == 'exit':
+            try:
+                self._stub.Ctrl(request)
+            except:  # this always returns an error as the connection is closed
+                pass
+            return
+
+        # otherwise, simply send command
+        self._stub.Ctrl(request)
+
+    @wraps(_MapdlCore.cdread)
+    def cdread(self, *args, **kwargs):
+        """Wraps CDREAD"""
+        option = kwargs.get('option', args[0])
+        if option == 'ALL':
+            raise ValueError('Option "ALL" not supported in gRPC mode.  Please '
+                             'Input the geometry and mesh files separately '
+                             'with "\INPUT" or ``mapdl.input``')
+
+        fname = kwargs.get('fname', args[1])
+        kwargs.setdefault('verbose', False)
+        kwargs.setdefault('progress_bar', False)
+        self.input(fname, **kwargs)
+
+    def input(self, fname, verbose=True, progress_bar=True, mute=False):
+        """Stream a local input file to a remote mapdl instance.
+        Stream the response back and deserialize the output.
 
         Parameters
         ----------
-        command : str
-            Valid MAPDL command.
-
-        stream : bool, optional
-            Stream the response of a command.  Useful when sending
-            long running commands like ``"SOLVE"``.
-
-        verbose : bool, optional
-            Print the response of a command.  Best when combined with
-            ``stream=True`` to print the streamed response of a
-            command in real-time.
-
-        Examples
-        --------
-        >>> mapdl.run('/PREP7')
-
-        Equivalent Pythonic method:
-
-        >>> mapdl.prep7()
-
-        Stream a command
-
-        >>> mapdl.run('SOLVE', stream=True, verbose=True)
-        """
-        if self._exited:
-            raise RuntimeError('MAPDL session ended')
-
-        # TODO: Add command type checking
-        return self._run(command, stream=stream, verbose=verbose)
-
-    def _run(self, command, check_response=True, stream=None, verbose=None):
-        """Send text command to mapdl server"""
-        command_base = command[:4].upper()
-
-        if stream is None:
-            verbose = stream = command_base in STREAM_COMMANDS
-
-        self._busy = True
-        self._solving = command_base == 'SOLV'
-        response = self.server.send_command(command, stream, verbose)
-
-        self._busy = False
-        if self._solving:
-            self._solving = False
-
-        if check_response:
-            self._check_response(response)
-        return response
-
-    def _check_response(self, text):
-        """Checks test response from ansys and raises an exception or
-        warning if applicable
-        """
-        if 'is not a recognized' in text:
-            if not self.allow_ignore:
-                lines = text.splitlines()
-                for i, line in enumerate(lines):
-                    if '*** WARNING ***' in line:
-                        break
-                try:
-                    text = '\n'.join(lines[i+1:-1])
-                except:
-                    pass
-
-                # this seems more helpful than the default message
-                text += '\nThis command may be invalid or you may be in the incorrect processor.'
-                raise MapdlException(text)
-
-        elif '*** ERROR ***' in text:  # flag error
-            self._log.error(text)
-            if not self.continue_on_error:
-                raise MapdlException(text)
-            elif ignored.search(text):  # flag ignored command
-                if not self.allow_ignore:
-                    self._log.error(text)
-                    raise MapdlException(text)
-                else:
-                    self._log.warning(text)
-            else:
-                self._log.info(text)
-
-    @property
-    def processor(self):
-        """Returns the current processor
-
-        Examples
-        --------
-        >>> mapdl.processor
-        'SOLU'
-        """
-        msg = self.run('/Status')
-        processor = None
-        matched_line = [line for line in msg.split('\n') if "Current routine" in line]
-        if matched_line:
-            # get the processor
-            processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
-        return processor
-
-    def load_parameters(self):
-        """Loads and returns all current parameters
-
-        Examples
-        --------
-        >>> parameters, arrays = mapdl.load_parameters()
-        >>> print(parameters)
-        {'ANSINTER_': 2.0,
-        'CID': 3.0,
-        'TID': 4.0,
-        '_ASMDIAG': 5.363415510271,
-        '_MAXELEMNUM': 26357.0,
-        '_MAXELEMTYPE': 7.0,
-        '_MAXNODENUM': 40908.0,
-        '_MAXREALCONST': 1.0}
-
-        """
-        # load ansys parameters to python
-        self.parsav('all')  # saves to file.parm by default
-
-        fileobj = tempfile.NamedTemporaryFile()
-        fileobj.write(self.download_as_raw('file.parm'))
-        self.parameters, self.arrays = load_parameters(fileobj.name)
-        return self.parameters, self.arrays
-
-    def upload_raw(self, raw, save_as):
-        """Uploads a raw stream to a file"""
-        self.server.upload_raw(raw, save_as)
-
-    def __del__(self):
-        if hasattr(self, '_cleanup'):
-            if self._cleanup:
-                try:
-                    self.exit()
-                except:
-                    pass
-
-    def _heartbeat_tick(self):
-        """Short query to mapdl server to keep connection alive when
-        idle.
-
-        Should only be triggered from a thread.
-        """
-        # only query server when time delay has passed
-        if (time.time() - self._t_trigger) > self._t_delay:
-
-            # don't execute when busy
-            if self._busy:
-                return
-
-            self._t_trigger = time.time()
-            self.inquire('JOBNAME')
-
-    @property
-    def is_alive(self):
-        """True when there is an active connect to the gRPC server"""
-        if self._exited:
-            return False
-        return bool(self.inquire('JOBNAME'))
-
-    @property
-    def _result_file(self):
-        """Full path to the result file"""
-        path = self.inquire('DIRECTORY')
-        jobname = self.inquire('JOBNAME')
-        return os.path.join(path, f'{jobname}.rst').replace('\\', '/')
-
-    def inquire(self, func):
-        """Returns system information
-
-        Parameters
-        ----------
-        func : str
-           Specifies the type of system information returned.  See the
-           notes section for more information.
+        fname : str
+            MAPDL input file to stream to the MAPDL grpc server.
 
         Returns
         -------
-        value : str
-            Value of the inquired item.
+        response : str
+            Response from MAPDL.
 
         Notes
         -----
-        Allowable func entries
-        LOGIN - Returns the pathname of the login directory on Linux
-        systems or the pathname of the default directory (including
-        drive letter) on Windows systems.
+        RPC calls are
 
-        - ``DOCU`` - Pathname of the ANSYS docu directory.
-        - ``APDL`` - Pathname of the ANSYS APDL directory.
-        - ``PROG`` - Pathname of the ANSYS executable directory.
-        - ``AUTH`` - Pathname of the directory in which the license file resides.
-        - ``USER`` - Name of the user currently logged-in.
-        - ``DIRECTORY`` - Pathname of the current directory.
-        - ``JOBNAME`` - Current Jobname.
-        - ``RSTDIR`` - Result file directory
-        - ``RSTFILE`` - Result file name
-        - ``RSTEXT`` - Result file extension
-        - ``OUTPUT`` - Current output file name
+        rpc InputFile(  InputFileRequest) returns ( stream kernel.v0.Chunk);
+        rpc InputFileS( InputFileRequest) returns ( stream CmdOutput);
 
-        Examples
-        --------
-        Return the job name
-
-        >>> mapdl.inquire('JOBNAME')
-        'file'
-
-        Return the result file name
-
-        >>> mapdl.inquire('RSTFILE')
-        'file.rst'
         """
-        try:
-            response = self.run(f'/INQUIRE, , {func}')
-            return response.split('=')[1].strip()
-        except IndexError:
-            raise Exception(f'Cannot parse {response}')
-
-    def __call__(self, command, **kwargs):
-        return self.run(command, **kwargs)
-
-    @property
-    def keypoints(self):
-        """Array of keypoints
-
-        Notes
-        -----
-        This is directly parsed from the text output of mapdl and is
-        not efficient.
-
-        Examples
-        --------
-        >>> mapdl.k(1, 0, 0, 0)
-        >>> mapdl.k(2, 1, 0, 0)
-        >>> mapdl.k(3, 0, 1, 0)
-        >>> mapdl.k(4, 1, 1, 0)
-        >>> mapdl.keypoints
-        array([[0., 0., 0.],
-               [1., 0., 0.],
-               [0., 1., 0.],
-               [1., 1., 0.]])
-        """
-        self.prep7()
-        self.header('off', 'off', 'off', 'off', 'off', 'off')
-        self.page(10000000)
-
-        lines = self.klist().splitlines()
-        if 'No keypoints to list' in lines[2]:
-            return None
-
-        for i, line in enumerate(lines):
-            values = line.split()
-            if values:
-                if is_float(values[0]):
-                    break
-
-        array = np.genfromtxt(lines[i:], usecols=[0, 1, 2, 3])
-
-        if array.ndim > 1:
-            self._knum = array[:, 0].astype(np.int32)
-            return array[:, 1:]
+        if not self._local:
+            self.upload(fname, progress_bar=progress_bar)
+            filename = os.path.basename(fname)
         else:
-            self._knum = np.array([array[0].astype(np.int32)])
-            return array[1:]
+            # file is local then
+            if not os.path.dirname(fname):
+                filename = os.path.join(os.getcwd(), fname)
+            else:
+                filename = fname
 
-    @property
-    def knum(self):
-        """List keypoint numbers as an array
+        # opt = ''
+        # if mute:
+            # opt = 'MUTE'
+        request = pb_types.InputFileRequest(filename=filename)
+                                            # opt=opt)
+        metadata = [('time_step_stream', '200'), ('chunk_size', '512')]
 
-        Notes
-        -----
-        This is directly parsed from the text output of mapdl and is
-        not efficient.
+        # if mute:
+        #     cmd_output = self._stub.InputFile(request, metadata=metadata)
+        #     chunks = [chunk for chunk in cmd_output]
+        #     responses = [chunk.payload.decode('latin-1') for chunk in chunks]
+        # else:
 
-        Examples
-        --------
-        >>> mapdl.k(1, 0, 0, 0)
-        >>> mapdl.k(2, 1, 0, 0)
-        >>> mapdl.k(3, 0, 1, 0)
-        >>> mapdl.k(4, 1, 1, 0)
-        >>> mapdl.knum
-        array([1, 2, 3, 4], dtype=int32)
-        """
-        self.keypoints
-        return self._knum
+        strouts = self._stub.InputFileS(request, metadata=metadata)
+        response = []
+        responses = []
+        for strout in strouts:
+            cmdout = strout.cmdout
+            for line in cmdout:
+                response.append(line)
+                if verbose:  # print out input as it is being run
+                    print('\n'.join(response))
+            responses.extend(response)
 
-    def kplot(self, color='k'):
-        """Plot keypoints
+        response = '\n'.join(responses)
+        return response
 
-        Examples
-        --------
-        >>> mapdl.kplot()
-        """
-        keypoints = self.keypoints
-        if keypoints is None:
-            raise Exception('No keypoints to plot')
-        points = pv.PolyData(keypoints)
+    def _get(self, cmd):
+        """Sends gRPC get request
 
-        if ITK_PLOTTING:
-            pl = pv.PlotterITK()
-        else:
-            pl = pv.Plotter()
-            pl.add_point_labels(points, self.knum, font_size=18)
-
-        pl.add_points(points, color=color)
-        return pl.show()
-
-    @property
-    def lines(self):
-        """Return an array of lines
-
-        Notes
-        -----
-        This is directly parsed from the text output of mapdl and is
-        not efficient.
-
-        Examples
-        --------
-        >>> mapdl.k(1, 0, 0, 0)
-        >>> mapdl.k(2, 1, 0, 0)
-        >>> mapdl.k(3, 0, 1, 0)
-        >>> mapdl.k(4, 1, 1, 0)
-        >>> mapdl.l(1, 2)
-        >>> mapdl.l(2, 3)
-        >>> mapdl.l(3, 4)
-        >>> mapdl.l(4, 1)
-        >>> mapdl.knum
-        array([[1, 2],
-               [2, 3],
-               [3, 4],
-               [4, 1]], dtype=int32)
-        """
-        self.prep7()
-        self.header('off', 'off', 'off', 'off', 'off', 'off')
-        self.page(10000000)
-
-        raw = self.llist().splitlines()
-        for i, line in enumerate(raw):
-            values = line.split()
-            if values:
-                if is_float(values[0]):
-                    break
-
-        array = np.genfromtxt(raw[i:], usecols=[0, 1, 2], dtype=np.int32)
-        self._lnum = array[:, 0].astype(np.int32)
-        return array[:, 1:]
-
-    # @property
-    # def lnum(self):
-    #     if self._num is None:
-    #         self.keypoints()
-    #     return self._lnum
-
-    def lplot(self, keypoint_num=True, **kwargs):
-        """Plot lines
-
-        Examples
-        --------
-        >>> mapdl.lplot()
-        """
-        if self.knum is None:
-            raise Exception('No lines to plot')
-        ref_arr = np.empty(self.knum.max() + 1, np.int32)
-        ref_arr[self.knum] = np.arange(self.knum.size, dtype=np.int32)
-
-        ansys_lines = self.lines  # ansys line numbering
-        lines = np.empty((ansys_lines.shape[0], 3), np.int32)
-        lines[:, 0] = 2
-        lines[:, 1:] = ref_arr[self.lines]
-
-        points = self.keypoints
-        plines = pv.PolyData(points, lines)
-
-        if ITK_PLOTTING:
-            pl = pv.PlotterITK()
-            pl.add_mesh(plines)
-        else:
-            pl = pv.Plotter()
-            pl.show_axes()
-            pl.camera_position = 'xy'
-            if keypoint_num:
-                pl.add_point_labels(points, self.knum, font_size=18)
-            pl.add_mesh(plines, style='wireframe')
-
-        return pl.show()
-
-    @property
-    def nodes(self):
-        """Returns an array of selected nodes from mapdl.
-
-        Examples
-        --------
-        >>> mapdl.nodes
-        array([[3.00547952, 4.655     , 2.33184666],
-               [2.71478268, 4.655     , 2.24375556],
-               [2.93280531, 4.655     , 2.30982389],
-               ...,
-               [0.02401957, 3.93939353, 1.33490496],
-               [0.9570203 , 4.60965857, 0.70304662],
-               [1.09840106, 5.34088837, 1.19770979]])
-        """
-        if not self.n_node:
-            raise RuntimeError('No nodes in model or no nodes selected')
-
-        return self.server.load_nodes()
-
-    @property
-    def nnum(self):
-        """Array of node numbers from selected nodes in mapdl.
-
-        Examples
-        --------
-        >>> mapdl.nnum
-        array([    1,     2,     3, ..., 40906, 40907, 40908], dtype=int32)
+        WARNING: Not thread SAFE.
 
         """
-        return self.vget('NODE', 'NLIST').astype(np.int32)
+        while self._get_lock:
+            time.sleep(0.001)
 
-    @property
-    def nodal_eqv_stress(self):
-        """Return the nodal equivalent stress
+        self._get_lock = True
+        getresponse = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+        self._get_lock = False
 
-        Equilvanent command:
-        ``*VGET, TMPVAR, NODE, 1, S, EQV``
-        or
-        ``PRNSOL, S, EQV``
+        if (getresponse.type == 1):
+            return getresponse.dval
+        elif (getresponse.type == 2):
+            return getresponse.sval
 
-        Examples
-        --------
-        >>> mapdl.nodal_eqv_stress
-        array([0., 0., 0., ..., 0., 0., 0.])
 
-        Stress from result 2
+    ###########################################################################
 
-        >>> mapdl.post1()
-        >>> mapdl.set(2)
-        >>> mapdl.nodal_eqv_stress
-        array([0., 0., 0., ..., 0., 0., 0.])
-        """
-        return self.vget('NODE', 'S', 'EQV')
+    def Param(self, pname):
+        presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
+        return presponse.val
 
-    def plot_node_vget(self, item=None, itnum=None, **kwargs):
-        """Plot vector data from the MAPDL server.
+    def Var(self, num):
+        presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
+        return presponse.val
 
-        Please concult your ANSYS manual for the various VGET outputs.
+    def input_text(self, text, line_chunks=20, join=True):
+        """Stream a chunk of text to MAPDl and process the commands.
+
+        Stream the response back and deserialize the output.
 
         Parameters
         ----------
-        item : str
-            The name of a particular item for the given entity. Valid
-            items are as shown in the item columns of the tables
-            within the ``*VGET`` command reference in your ANSYS
-            manual.
+        fname : str
+            MAPDL input file to stream to the MAPDL grpc server.
 
-        itnum : str
-            The number (or label) for the specified item (if
-            any). Valid it1num values are as shown in the IT1NUM
-            columns of the tables in the command reference section for
-            the ``*VGET`` command in your ANSYS manual. Some Item1
-            labels do not require an IT1NUM value.
+        line_chunks : int
+            Number of lines to send at a time.
 
-        Examples
-        --------
-        Plot node averaged equivalent stress for a model
-
-        >>> mapdl.plot_node_vget('NODE', 'S', 'EQV')
-
-        # Plot displacements in the X direction
-
-        >>> mapdl.plot_node_vget('NODE', 'U', 'X')
+        Returns
+        -------
+        response : str
+            Response from MAPDL.
         """
-        values = self.vget('NODE', item, itnum)
-        return self._plot_point_scalars(values, **kwargs)
+        chunks = chunk_lines(text, line_chunks)
+        response = self._stub.InputFileLocal(chunks)
+
+        # deserialize and return test response
+        payloads = [chunk.payload for chunk in response]
+
+        if join:
+            return b''.join(payloads).decode('latin-1')
+        return [payload.decode('latin-1') for payload in payloads]
 
     def vget(self, entity, item=None, itnum=None):
         """Retrieve vector data from the MAPDL server and return a
@@ -896,757 +579,149 @@ class MapdlgRPC(_MapdlCore):
 
         >>> mapdl.vget('NODE', 'U', 'X')
         """
-        entity = entity.upper()
-        if item is not None:
-            item = item.upper()
+        cmd = check_vget_input(entity, item, itnum)
+        return self._vget(cmd)
 
-        if itnum is not None:
-            itnum = itnum.upper()
+    def _vget(self, cmd, dtype=None):
+        """gRPC VGET request.
 
-        if entity not in VGET_ENTITY_TYPES:
-            raise ValueError(f'Entity "{entity}" not allowed.  Allowed items:\n' +
-                             f'{VGET_ENTITY_TYPES}')
+        Send a vget request, receive a bytes stream, and return it as
+        a numpy array.
 
-        if entity == 'NODE':
-            if item not in VGET_NODE_ENTITY_TYPES:
-                allowed_types = list(VGET_NODE_ENTITY_TYPES.keys())
-                raise ValueError(f'item "{item}" for "NODE" not allowed.  ' +
-                                 f'Allowed items:\n{allowed_types}')
-
-            if itnum not in VGET_NODE_ENTITY_TYPES[item]:
-                allowed_types = VGET_NODE_ENTITY_TYPES[item]
-                raise ValueError(f'itnum "{itnum}" for item "{item}" not allowed.  ' +
-                                 f'Allowed items:\n{allowed_types}')
-
-        if item is None:
-            item = ""
-
-        if itnum is None:
-            itnum = ""
-
-        # self._log.debug('Sending %s', f'*VGET, {entity}, , {item}, {itnum}')
-        return self.server.vget(f'{entity}, , {item}, {itnum}')
-
-    @property
-    def enum(self):
-        """Returns the array of selected element numbers
-
-        Examples
-        --------
-        >>> mapdl.enum
-        array([    1,     2,     3, ..., 26355, 26356, 26357], dtype=int32)
-        """
-        return self.vget('ELEM', 'ELIST').astype(np.int32)
-
-    def plot_nodal_eqv_stress(self, **kwargs):
-        """Plot nodal equivalent stress
-
-        Examples
-        --------
-        >>> mapdl.plot_nodal_eqv_stress()
-        """
-        return self._plot_point_scalars(self.nodal_eqv_stress, **kwargs)
-
-    def nodal_displacement(self, component='NORM', **kwargs):
-        """Retrieve nodal displacment
+        WARNING: Not thread SAFE.
 
         Parameters
         ----------
-        component : str
-            Displacement component to plot.  Must be 'X', 'Y', 'Z', or
-            'NORM'.
+        cmd : str
+            VGET command formatted as: ``*VGET, {entity}, , {item}, {itnum}``
 
-        Examples
-        --------
-        >>> mapdl.nodal_displacement('X')
+            Where:
 
-        Displacement in all dimensions
+            entity : str
+                Entity keyword. Valid keywords are:
 
-        >>> mapdl.nodal_displacement('NORM')
-        """
-        if component.lower() == 'norm':
-            x = self.vget('node', 'U', 'x')
-            y = self.vget('node', 'U', 'y')
-            z = self.vget('node', 'U', 'z')
-            scalars = np.linalg.norm(np.vstack((x, y, z)), axis=0)
-        else:
-            scalars = self.vget('node', 'U', component)
+                - ``'NODE'``
+                - ``'ELEM'``
+                - ``'KP'``
+                - ``'LINE'``
+                - ``'AREA'``
+                - ``'VOLU'``
+                - ``'CDSY'``
+                - ``'RCON'``
+                - ``'TLAB'``
 
-        return scalars
+            item : str
+                The name of a particular item for the given entity. Valid
+                items are as shown in the item columns of the tables
+                within the *VGET command reference in your ANSYS manual.
 
-    def plot_nodal_displacement(self, component='NORM', **kwargs):
-        """Plot nodal displacment
+            itnum : str, int
+                The number (or label) for the specified item (if
+                any). Valid it1num values are as shown in the IT1NUM
+                columns of the tables in the command reference section for
+                the *VGET command in your ANSYS manual. Some Item1 labels
+                do not require an IT1NUM value.
 
-        Parameters
-        ----------
-        component : str
-            Displacement component to plot.  Must be 'X', 'Y', 'Z', or
-            'SUM'.
-
-        Examples
-        --------
-        >>> mapdl.plot_nodal_displacement('NORM')
-
-        """
-        # disp = self.vget('node', 'U', component)
-        return self._plot_point_scalars(self.nodal_displacement(component), **kwargs)
-
-    def _plot_point_scalars(self, scalars, grid=None,
-                            show_displacement=False,
-                            displacement_factor=1,
-                            rnum=None,
-                            # add_text=True,
-                            # animate=False,
-                            # nangles=100,
-                            # movie_filename=None,
-                            # max_disp=0.1,
-                            **kwargs):
-        """Plot point scalars on active mesh.
-
-        Parameters
-        ----------
-        scalars : np.ndarray
-            Node scalars to plot.
-
-        rnum : int, optional
-            Cumulative result number.  Used for adding informative
-            text.
-
-        grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
-            Uses self.grid by default.  When specified, uses this grid
-            instead.
-
-        show_displacement : bool, optional
-            Deforms mesh according to the result.
-
-        displacement_factor : float, optional
-            Increases or decreases displacement by a factor.
-
-        add_text : bool, optional
-            Adds information about the result when rnum is given.
-
-        kwargs : keyword arguments
-            Additional keyword arguments.  See help(pyvista.plot)
+        dtype : np.dtype, optional
+            ``numpy`` data type to parse to
 
         Returns
         -------
-        cpos : list
-            Camera position.
+        values : np.ndarray
+            Numpy 1D array containing the requested *VGET item and entity.
         """
-        if grid is None:
-            grid = self.grid
-
-        disp = None
-        if show_displacement:  # and not animate:
-            nsln = self.nodal_solution(rnum)[:, :3]*displacement_factor
-            # disp = self.nodal_solution(rnum)[:, :3]
-            new_points = grid.points.copy()
-            dofs = set(self.dofs(0))
-            if set(['UX', 'UY', 'UZ']).issubset(dofs):
-                new_points += nsln
-            elif set(['UX', 'UY']).issubset(dofs):
-                new_points[:, :2] += nsln[:, :2]
-            elif 'UX' in dofs:
-                new_points[:, 0] += nsln[:, 0]
-            grid = grid.copy()
-            grid.points = new_points
-        # elif animate:
-        #     disp = self.nodal_solution(rnum)[1][:, :3]
-
-        # extract mesh surface
-        mapped_indices = None
-        if 'vtkOriginalPointIds' in grid.point_arrays:
-            mapped_indices = grid.point_arrays['vtkOriginalPointIds']
-
-        mesh = grid.extract_surface()
-        ind = mesh.point_arrays['vtkOriginalPointIds']
-        if disp is not None:
-            if mapped_indices is not None:
-                disp = disp[mapped_indices][ind]
-            else:
-                disp = disp[ind]
-
-            # if animate:  # scale for max displacement
-            #     disp /= (np.abs(disp).max()/max_disp)
-
-        if scalars is not None:
-            if scalars.ndim == 2:
-                scalars = scalars[:, ind]
-            else:
-                scalars = scalars[ind]
-
-            rng = kwargs.pop('rng', [scalars.min(), scalars.max()])
-        else:
-            rng = kwargs.pop('rng', None)
-
-        # add_text = kwargs.pop('add_text', True)
-        cmap = kwargs.pop('cmap', 'jet')
-        smooth_shading = kwargs.pop('smooth_shading', True)
-        cpos = kwargs.pop('cpos', None)
-        interpolate_before_map = kwargs.pop('interpolate_before_map', True)
-        stitle = kwargs.pop('stitle', None)
-
-        if ITK_PLOTTING:
-            pl = pv.PlotterITK()
-        else:
-            pl = pv.Plotter()
-
-        if kwargs.pop('overlay_wireframe', False):
-            pl.add_mesh(self.grid,
-                        color='w',
-                        style='wireframe',
-                        opacity=0.5)
-
-        copied_mesh = mesh.copy(False)
-        copied_mesh.clear_arrays()
-        copied_mesh['stitle'] = scalars
-        if ITK_PLOTTING:
-            pl.add_mesh(copied_mesh)
-        else:
-            pl.add_mesh(copied_mesh,
-                        rng=rng,
-                        smooth_shading=smooth_shading,
-                        interpolate_before_map=interpolate_before_map,
-                        stitle=stitle,
-                        cmap=cmap,
-                        **kwargs)
-            # if cpos:
-
-        return pl.show()
-
-    def eplot(self, notebook=True, **kwargs):
-        """Plot elements
-
-        Parameters
-        ----------
-        notebook : bool, optional
-            When ``True`` plots within the notebook if within a jupyter
-            notebook.
-
-        **kwargs : various, optional
-            See ``help(pyvista.plot)`` for additional keyword arguments.
-
-        Examples
-        --------
-        >>> mapdl.eplot()
-        """
-        if ITK_PLOTTING and notebook:
-            check_itk()
-            pl = pv.PlotterITK()
-        else:
-            pl = pv.Plotter()
-
-        pl.add_mesh(self.grid, **kwargs)
-        return pl.show()
-
-        # show_edges = kwargs.pop('show_edges', True)
-
-        # if show_nodes:
-        #     pl.add_point_labels(self.nodes, self.nnum, font_size=18)
-        #     pl.add_mesh(self.grid, show_edges=show_edges, **kwargs)
-        #     pl.show()
-        # else:
-        #     pl.add_mesh(self.grid, show_edges=show_edges)
-        #     pl.show()
-
-    def nplot(self, color='k', notebook=True):
-        """Plot nodes
-
-        Parameters
-        ----------
-        color : str
-            Color string.  See `matplotlib` colors.
-
-        notebook : bool, optional
-            When `True` plots within the notebook if using juptyerlab.
-
-        Examples
-        --------
-        >>> mapdl.nplot()
-
-        Plot as blue points
-
-        >>> mapdl.nplot('b')
-        """
-        if ITK_PLOTTING and notebook:
-            pl = pv.PlotterITK()
-        else:
-            pl = pv.Plotter()
-
-        # if show_numbers:
-        #     pl.add_point_labels(self.nodes, self.nnum, font_size=18)
-        #     pl.plot()
-        # else:
-        pl.add_points(self.nodes, color=color)
-        return pl.show()
-
-    @property
-    def grid(self):
-        """VTK unstructured grid of MAPDL mesh"""
-        if not self.n_elem:
-            raise RuntimeError('No elements in model or no elements selected')
-
-        self._quad_grid = self._py_load_vtk_geometry()
-        self._grid = self._quad_grid.linear_copy(deep=False)
-
-        return self._grid
-
-    @property
-    def elements(self):
-        """List of mapdl elements
-
-        Returns
-        -------
-        elements : list
-            Each element contains 10 items plus the nodes belonging to the
-            element.  The first 10 items are:
-
-            - mat -  material reference number
-            - type - element type number
-            - real - real constant reference number
-            - secnum - section number
-            - esys - element coordinate system
-            - death - death flag (0 - alive, 1 - dead)
-            - solidm - solid model reference
-            - shape - coded shape key
-            - elnum - element number
-            - baseeid - base element number (applicable to reinforcing
-                        elements only) nodes - node numbers defining
-                        the element
-            - nodes - The nodes belonging to the element
-
-        """
-        return self.server.load_elements()
-
-    def _py_load_vtk_geometry(self):
-        """Convert raw MAPDL data into a VTK UnstructuredGrid"""
-        elem, elem_off = self.server.load_elements_offset()
-
-        edes = self.server.load_elementtypes()
-        ekey = np.vstack([einfo[:2] for einfo in edes]).astype(np.int32)
-        geometry = Geometry(self.nnum, self.nodes, elem, elem_off, ekey)
-        return geometry._parse_vtk()
-
-    def open_result(self, filename=None):
-        """Return a mapdl result file as a mapdl file reader object
-
-        Examples
-        --------
-        >>> result = mapdl.open_result()
-        """
-        # Check result file exists
-        if filename is None:
-            filename = self._result_file
-
-        self.reader.open_file(filename)
-        return self.reader
-
-    def _kill(self):
-        """Causes the mapdl server to exit"""
-        self.finish()
-
-        def target():
-            try:
-                self.run('exit')
-            except:
-                pass
-
-        thread = threading.Thread(target=target)
-        thread.start()
-
-    def input(self, filename, verbose=True, progress_bar=True, mute=False):
-        """Run a local input file on the mapdl server.
-
-        Parameters
-        ----------
-        filename : str
-            Local batch file to read.
-
-        verbose : bool, optional
-            Stream and print back the response of the input file while
-            it is being run.
-
-        progress_bar : bool, optional
-            Display a progress bar showing the progress of the file
-            upload.
-
-        Notes
-        -----
-        Avoid the /EXIT command when inputting an input file if you
-        would like to continue to interact with the mapdl instance.
-
-        Examples
-        --------
-        >>> output = mapdl.input(filename)
-
-        Disable printing output while streaming
-
-        >>> output = mapdl.input(filename, verbose=False)
-        """
-        # must use an absolute path when sending the file
-        if not os.path.isabs(filename):
-            filename = os.path.join(os.getcwd(), filename)
-
-        if not os.path.isfile(filename):
-            raise FileNotFoundError(f"Local file '{filename}' not found")
-
-        self._busy = True
-        self._log.info('Running input file %s', filename)
-
-        response = self.server.input_file(filename, verbose, progress_bar, mute)
-
-        self._busy = False
-
-        return response
-
-    def input_text(self, text, chunk_nlines=20, join=True):
-        """Run a series of mapdl commands separated by line breaks.
-
-        Parameters
-        ----------
-        text : str
-            MAPDL text commands.
-
-        Notes
-        -----
-        Avoid the /EXIT command if you would like to continue to
-        interact with the mapdl instance.
-
-        Examples
-        --------
-        >>> text = '/CLEAR\nPREP7\n'
-        >>> output = mapdl.input_text(text)
-
-        """
-        self._busy = True
-        response = self.server.input_text(text, chunk_nlines, join)
-        self._busy = False
-        return response
-
-    def exit(self):
-        """Exit MAPDL instance
-
-        Examples
-        --------
-        >>> mapdl.exit()
-        """
-        if hasattr(self, '_exited'):
-            if not self._exited:
-                self._exit()
-                self._exited = True
-
-        # remove the lock file if local
-        if hasattr(self, '_local'):
-            if self._local:
-                try:
-                    lock_file = os.path.join(self._run_location, 'file.lock')
-                    if os.path.isfile(lock_file):
-                        os.remove(lock_file)
-                except:
-                    pass
-
-    def _exit(self):
-        """Send exit command"""
-        if self.server:
-            # self._log.debug('Sending grpc exit command')
-            self.server.ctrl('EXIT')
-
-    def upload(self, filename, progress_bar=True):
-        """Upload a local file to the remote mapdl instance
-
-        Parameters
-        ----------
-        filename : str
-            Local file to upload.
-
-        progress_bar : bool, optional
-            Display a progress bar showing the progress of the file
-            upload.
-
-        Examples
-        --------
-        Load a local database by uploading it to the remote mapdl instance
-
-        >>> import ansys
-        >>> mapdl = ansys.Mapdl()
-        >>> mapdl.upload('my_database.db')
-        >>> mapdl.resume('my_database.db')
-        """
-        if not os.path.isfile(filename):
-            raise FileNotFoundError('Unable to find local file %s' % filename)
-        self.server.upload(filename, progress_bar=progress_bar)
-
-    def download(self, remote_filename, save_as=None, chsize=1024*64,
+        while self._vget_lock:
+            time.sleep(0.001)
+        self._vget_lock = True
+        chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+        values = parse_chunks(chunks, dtype)
+        self._vget_lock = False
+        return values
+
+    def upload(self, in_file_name, progress_bar=True):
+        """Upload a file to the grpc instance"""
+        chunks_generator = get_file_chunks(in_file_name, progress_bar=progress_bar)
+        response = self._stub.UploadFile(chunks_generator)
+
+        if not response.length:
+            raise IOError('File failed to upload')
+
+    def upload_raw(self, raw, save_as):
+        chunks = chunk_raw(raw, save_as)
+        response = self._stub.UploadFile(chunks)
+        if response.length != len(raw):
+            raise IOError('File failed to upload')
+
+    def download(self, target_name, out_file_name=None, chunk_size=1024*64,
                  progress_bar=True):
-        """Download a remote file
+        """Download a file from the grpc instance"""
+        if out_file_name is None:
+            out_file_name = target_name
 
-        Parameters
-        ----------
-        remote_filename : str
-            Remote file to upload
-
-        save_as : str, optional
-            Optionally specify the save name of the file.  If
-            unspecified, saves the file name as the same name as the
-            remote file.
-
-        chsize : int, optional
-            Size of the chunks sent from the gRPC server.
-
-        Examples
-        --------
-        >>> mapdl.download('file.rst')
-        """
-        saved_file = self.server.download(remote_filename, save_as, chsize,
-                                          progress_bar=progress_bar)
-
-        # failed downloads result in an empty file
-        if not os.path.getsize(saved_file):
-            os.remove(saved_file)
-            raise FileNotFoundError('File does not exist remotely, or file is empty')
+        request = pb_types.DownloadFileRequest(name=target_name)
+        metadata = [('time_step_stream', '200'), ('chunk_size', str(chunk_size))]
+        chunks = self._stub.DownloadFile(request, metadata=metadata)
+        save_chunks_to_file(chunks, out_file_name, progress_bar=progress_bar,
+                            target_name=target_name)
 
     def download_as_raw(self, target_name):
-        """Download a file from the grpc instance as a binary raw
-        string.
-
-        Parameters
-        ----------
-        remote_filename : str
-            Remote file to upload
-
-        Returns
-        raw_text : str
-            File as a binary stream.
-
-        Examples
-        --------
-        Send a command to the remote mapdl instance and download the response
-
-        >>> mapdl.sys('ls >> tmp.file')
-        >>> remote_files = mapdl.download_as_raw('tmp.file')
-        """
-        return self.server.download_as_raw(target_name)
-
-    def math(self):
-        """Returns a mapdl math object
-
-        Examples
-        --------
-        >>> from ansys import Mapdl
-        >>> mapdl = Mapdl()
-        >>> mm = mapdl.math()
-        """
-        from ansys.mapdl import MapdlMath
-        return MapdlMath(self)
-
-    def xpl(self):
-        """Returns an xpl object, to explore MAPDL Files
-
-        Examples
-        --------
-        >>> from ansys import Mapdl
-        >>> mapdl = Mapdl()
-        >>> xpl = mapdl.xpl()
-        """
-        from ansys.mapdl import ansXpl
-        return ansXpl(self)
+        """Download a file from the grpc instance as a binary
+        string"""
+        request = pb_types.DownloadFileRequest(name=target_name)
+        chunks = self._stub.DownloadFile(request)
+        return b''.join([chunk.payload for chunk in chunks])
 
     def scalar_param(self, pname):
-        """Return a scalar parameter
-
-        Notes
-        -----
-        List of all scalar parameters can be obtained from
-        ``mapdl.load_parameters``
-
-        Examples
-        --------
-        >>> mapdl.scalar_param('_WB_USERFILES_DIR')
-        'B:\\databases\\demo\\files\\'
-        """
-        return self.server.scalar_param(pname)
-
+        """Return a scalar parameter as a float"""
+        request = pb_types.ParameterRequest(name=pname, array=False)
+        presponse = self._stub.GetParameter(request)
+        return float(presponse.val[0])
+ 
     def data_info(self, pname):
-        """Return infos on an APDLMath Object
-
-        Parameters
-        ----------
-        pname : str
-            APDLMath parameter name
-
-        """
-        return self.server.data_info(pname)
+        """Returns the data type of a parameter"""
+        request = pb_types.ParameterRequest(name=pname)
+        return self._stub.GetDataInfo(request)
 
     def vec_data(self, pname):
-        """Return the values of an APDLMath Vector as a numpy array
+        """Downloads vector data from a parameter"""
+        presponse = self.data_info(pname)
+        type = ANSYS_VALUE_TYPE[presponse.stype]
+        request = pb_types.ParameterRequest(name=pname)
+        chunks = self._stub.GetVecData(request)
+        values = parse_chunks(chunks, type)
+        return values
 
-        Parameters
-        ----------
-        pname : str
-            APDLMath parameter name
-
-        """
-        return self.server.vec_data(pname)
-
-    def set_vec(self, vname, data):
-        """Push a numpy array or python list to the MAPDL Memory
-        Workspace.
-
-        Parameters
-        ----------
-        vname : str
-            APDLMath vector name
-
-        data : np.ndarray, list
-            Numpy array or Python list to push to MAPDL.  Must be 1
-            dimensional.
-
-        """
-        if isinstance(data, list):
-            array = np.array(data)
-        elif isinstance(data, np.ndarray):
-            array = data
-        else:
-            raise TypeError('``data`` must be np.ndarray or a list')
-
-        is_1d = sum([dim != 1 for dim in data.shape])
-        if not is_1d:
-            raise ValueError('``data`` must be a 1 dimensional vector')
-
-        self.server.set_vec(vname, array)
+    def set_vec(self, vname, nparray):
+        """Set a vector within the MAPDL server"""
+        chunks_generator = get_nparray_chunks(vname, nparray)
+        self._stub.SetVecData(chunks_generator)
 
     def mat_data(self, pname):
-        """Return the values of an APDLMath Matrix as a numpy array
-
-        Parameters
-        ----------
-        pname : str
-            APDLMath parameter name
-
-        """
-        return self.server.mat_data(pname)
-
-    @property
-    def version(self):
-        """Return ANSYS and pyansys versions
-
-        Examples
-        --------
-        >>> print(mapdl.version)
-        """
-        stats = self.slashstatus()
-        st = stats.find('BUILD') + 5
-        en = stats.find('CUSTOMER')
-        ansys_version = stats[st:en].strip()
-        return 'ANSYS version:   %s\npyansys version: %s' % (ansys_version, __version__)
-
-
-    @property
-    def n_node(self):
-        """Number of currently selected nodes"""
-        return int(self.server.Get('NODE, , COUNT'))
-
-    @property
-    def n_elem(self):
-        """Number of currently selected nodes"""
-        return int(self.server.Get('ELEM, , COUNT'))
-
-
-    def check_available(self, timeout=5):
-        """Check if the mapdl instance is available
-
-        Parameters
-        ----------
-        timeout : float
-            Timeout in seconds for the request.
-
-        Returns
-        -------
-        available : bool
-            True when the instance is available.  False when the
-            request takes longer than `timeout`.
-        """
-        # reset check flag
-        self._check_flag = False
-
-        # start available checking thread
-        self._check_available()
-        tstart = time.time()
-        while not self._check_flag and not self._exited:
-            time.sleep(0.05)
-
-            # exit early when timeout exceeded
-            telap = time.time() - tstart
-            if telap > timeout:
-                break
-
-        return self._check_flag
-
-    @threaded
-    def _check_available(self):
-        """Attempts to query jobname and verifying that there's a
-        connection open to the mapdl instance"""
+        """Downloads matrix data from a parameter"""
         try:
-            self.inquire('JOBNAME')
-            self._check_flag = True
-        except Exception as e:
-            self._log.error('Instance unavailable', exc_info=True)
-            self._exited = True
+            from scipy import sparse
+        except ImportError:
+            raise ImportError('Install ``scipy`` to use this feature')
 
-    def retrieve_parameter(self, parameter):
-        """TODO: Write grpc function to retrieve single parameters"""
-        response = self.starstatus(parameter)
+        presponse = self.data_info(pname)
+        stype = ANSYS_VALUE_TYPE[presponse.stype]
+        mtype = presponse.objtype
+        size1 = presponse.size1
+        size2 = presponse.size1
 
-        value = None
-        if response:
-            if 'LOCATION' in response:
-                return self._parse_array_parameter(parameter, response)
-
-            values = response.split('DIMENSIONS')[-1].split()
-            ptype = values[-1]
-
-            value = None
-            if len(values) > 2:
-                value = values[1]
-
-            if ptype == 'CHARACTER':
-                if value is None:
-                    value = ''
-            elif ptype == 'SCALAR':
-                value = float(value)
-
-        return value
-
-    def _parse_array_parameter(self, parameter, response):
-        lines = response.splitlines()
-        for i, line in enumerate(lines):
-            if 'LOCATION' in line:
-                i += 1
-                break
-
-        para_ind = re.findall(r'\((.*?)\)$', parameter)[0]
-        tgt_ind = parse_fortran_index(*para_ind.split(','))
-
-        # searching for a target index
-        if tgt_ind:
-            for line in lines[i:]:
-                # broken up as i_index, j_index, k_index, value, type
-                ind = parse_fortran_index(*line.split()[:3])
-                if ind == tgt_ind:
-                    break
-
-            if ind == tgt_ind:
-                items = line.split()[3:]
-                if len(items) == 1:
-                    value, ptype = None, items[0]
-                else:
-                    value, ptype = items
-
-                if ptype == '(Char)':
-                    if value is None:
-                        value = ''
-                    return value
-                else:
-                    raise NotImplementedError
-            else:
-                return
+        if mtype == 2:
+            request = pb_types.ParameterRequest(name=pname)
+            chunks = self._stub.GetMatData(request)
+            values = parse_chunks(chunks, stype)
+            return np.reshape(values, (size1, size2))
+        elif mtype == 3:
+            request = pb_types.ParameterRequest(name=pname + "::ROWS")
+            chunks = self._stub.GetVecData(request)
+            indptr = parse_chunks(chunks, np.int32)
+            request = pb_types.ParameterRequest(name=pname + "::COLS")
+            chunks = self._stub.GetVecData(request)
+            indices = parse_chunks(chunks, np.int32)
+            request = pb_types.ParameterRequest(name=pname + "::VALS")
+            chunks = self._stub.GetVecData(request)
+            vals = parse_chunks(chunks, np.float64)
+            return sparse.csr_matrix((vals, indices, indptr), shape=(size1, size2))
