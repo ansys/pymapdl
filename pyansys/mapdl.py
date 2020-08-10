@@ -3,11 +3,11 @@ import re
 import os
 import logging
 from functools import wraps
-# import warnings
+import tempfile
+from shutil import rmtree, copyfile
 
 import appdirs
 import pyvista as pv
-# import pyiges
 
 import pyansys
 from pyansys.mapdl_functions import _MapdlCommands
@@ -33,6 +33,7 @@ INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRI
                   '*IF': 'Use a python if or run as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
+MAX_COMMAND_LENGTH = 600
 
 
 def parse_to_short_cmd(command):
@@ -89,8 +90,7 @@ def setup_logger(loglevel='INFO'):
 
 
 class _MapdlCore(_MapdlCommands):
-    """Contains methods in common between all Mapdl subclasses
-    """
+    """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True):
         """ Initialize connection with ANSYS program """
@@ -119,6 +119,36 @@ class _MapdlCore(_MapdlCommands):
 
         from pyansys.parameters import Parameters
         self._parameters = Parameters(self)
+
+    @property
+    def chain_commands(self):
+        """Chain several mapdl commands."""
+        return self._chain_commands(self)
+
+    def _chain_stored(self):
+        """Send a series of commands to MAPDL"""
+        # appears to be an (arbitrary?) limit to 600 characters per command
+
+        # Create chained commamnds less than 600 characters each
+        c = 0
+        chained_commands = []
+        chunk = []
+        for command in self._stored_commands:
+            len_command = len(command) + 1  # include sep var
+            if len_command + c > MAX_COMMAND_LENGTH:
+                chained_commands.append('$'.join(chunk))
+                chunk = [command]
+                c = 0
+            else:
+                chunk.append(command)
+                c += len_command
+
+        # join the last
+        chained_commands.append('$'.join(chunk))
+        self._stored_commands = []
+
+        responses = [self._run(command) for command in chained_commands]
+        self._response = '\n'.join(responses)
 
     @property
     def parameters(self):
@@ -151,34 +181,46 @@ class _MapdlCore(_MapdlCommands):
 
         """
         def __init__(self, parent):
-            self.parent = parent
+            self._parent = parent
 
         def __enter__(self):
-            self.parent._log.debug('entering non-interactive mode')
-            self.parent._store_commands = True
+            self._parent._log.debug('entering non-interactive mode')
+            self._parent._store_commands = True
 
-        def __exit__(self, type, value, traceback):
-            self.parent._log.debug('entering non-interactive mode')
-            self.parent._flush_stored()
+        def __exit__(self, *args):
+            self._parent._log.debug('entering non-interactive mode')
+            self._parent._flush_stored()
+
+    class _chain_commands:
+        """Store MAPDL commands and send one chained command."""
+
+        def __init__(self, parent):
+            self._parent = parent
+
+        def __enter__(self):
+            self._parent._log.debug('entering chained command mode')
+            self._parent._store_commands = True
+
+        def __exit__(self, *args):
+            self._parent._log.debug('entering chained command mode')
+            self._parent._chain_stored()
+            self._parent._store_commands = False
+
+    @property
+    def last_response(self):
+        """Returns the last response from MAPDL.
+
+        Examples
+        --------
+        >>> mapdl.last_response()
+        'KEYPOINT      1   X,Y,Z=   1.00000       1.00000       1.00000'
+        """
+        return self._response
 
     @wraps(_MapdlCommands.clear)
     def clear(self, *args, **kwargs):
         kwargs['read'] = 'NOSTART'
         super().clear(**kwargs)
-
-    @property
-    @supress_logging
-    def _os(self):
-        """Operating system of system running MAPDL
-
-        Returns either 'nt' or 'posix' just like ``os.name``
-        """
-        status = self.slashstatus()
-        match = re.findall(r'Version=\s*(\w*)', status)[0]
-        if match == 'LINUX':
-            return 'posix'
-        else:
-            return 'nt'
 
     def __str__(self):
         try:
@@ -212,7 +254,8 @@ class _MapdlCore(_MapdlCommands):
     @property
     def _geometry(self):
         """Implemented by child class"""
-        raise NotImplementedError('Implemented by child class')
+        from pyansys.mapdl_geometry import Geometry
+        return Geometry(self)
 
     @property
     def mesh(self):
@@ -315,6 +358,81 @@ class _MapdlCore(_MapdlCommands):
             self._apdl_log.write('! APDL script generated using pyansys %s\n' %
                                  pyansys.__version__)
 
+    @supress_logging
+    def _generate_iges(self):
+        """Save IGES geometry representation to disk"""
+        tmp_name = '_tmp.iges'
+        filename = os.path.join(self.path, tmp_name)
+        prior_processor = self.parameters.routine
+        self.prep7()
+        self.igesout(filename, att=1)
+        self.run('/%s' % prior_processor)
+
+    def open_gui(self, include_result=True):
+        """Saves existing database and opens up APDL GUI
+
+        Parameters
+        ----------
+        include_result : bool, optional
+            Allow the result file to be post processed in the GUI.
+        """
+
+        if not self._local:
+            raise RuntimeError('``open_gui`` can only be called from a local '
+                               'MAPDL instance')
+
+        # specify a path for the temporary database
+        temp_dir = tempfile.gettempdir()
+        save_path = os.path.join(temp_dir, 'ansys_tmp')
+        if os.path.isdir(save_path):
+            rmtree(save_path)
+        os.mkdir(save_path)
+
+        name = 'tmp'
+        tmp_database = os.path.join(save_path, '%s.db' % name)
+        if os.path.isfile(tmp_database):
+            os.remove(tmp_database)
+
+        # get the state, close, and finish
+        prior_processor = self.processor
+        self.finish()
+        self.save(tmp_database)
+        self.exit(close_log=False)
+
+        # copy result file to temp directory
+        if include_result:
+            resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
+            if os.path.isfile(resultfile):
+                tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
+                copyfile(resultfile, tmp_resultfile)
+
+        # write temporary input file
+        start_file = os.path.join(save_path, 'start%s.ans' % self.version)
+        with open(start_file, 'w') as f:
+            f.write('RESUME\n')
+
+        # some versions of ANSYS just look for "start.ans" when starting
+        other_start_file = os.path.join(save_path, 'start.ans')
+        with open(other_start_file, 'w') as f:
+            f.write('RESUME\n')
+
+        # issue system command to run ansys in GUI mode
+        cwd = os.getcwd()
+        os.chdir(save_path)
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self._exec_file, name))
+        os.chdir(cwd)
+
+        # must remove the start file when finished
+        os.remove(start_file)
+        os.remove(other_start_file)
+
+        # reload database when finished
+        self._launch()
+        self.resume(tmp_database)
+        if prior_processor is not None:
+            if 'BEGIN' not in prior_processor:
+                self.run('/%s' % prior_processor)
+
     def _close_apdl_log(self):
         """ Closes APDL log """
         if self._apdl_log is not None:
@@ -401,139 +519,6 @@ class _MapdlCore(_MapdlCommands):
 
         # otherwise, use the built-in nplot
         return super().nplot(knum, **kwargs)
-
-    @property
-    def n_area(self):
-        """Number of areas currently selected
-
-        Examples
-        --------
-        >>> mapdl.n_area
-        1
-        """
-        return int(self.get(entity='AREA', item1='COUNT'))
-
-
-    @property
-    @supress_logging
-    def anum(self):
-        """List of area numbers"""
-        anum = []
-        for line in self.alist().splitlines():
-            try:
-                anum.append(int(line.split()[0]))
-            except:
-                pass
-        return anum
-
-    @property
-    @supress_logging
-    def lnum(self):
-        """List of area numbers"""
-        lnum = []
-        for line in self.llist().splitlines():
-            try:
-                lnum.append(int(line.split()[0]))
-            except:
-                pass
-        return lnum
-
-    @supress_logging
-    def generate_surface(self, density=5, amin=None, amax=None, ninc=None):
-        """Generate an-triangular surface of the active surfaces.
-
-        Parameters
-        ----------
-        density : int, optional
-            APDL smart sizing option.  Ranges from 1 (worst) to 10
-            (best).
-
-        amin : int, optional
-            Minimum APDL numbered area to select.  See
-            ``mapdl.anum`` for available areas.
-
-        amax : int, optional
-            Maximum APDL numbered area to select.  See
-            ``mapdl.anum`` for available areas.
-
-        ninc : int, optional
-            Steps to 
-        """
-
-        # disable logging for this function (make this a fixture)
-        prior_log_level = self._log.level
-        self._log.setLevel('CRITICAL')
-
-        # store initially selected areas
-        self.cm('__tmp_area__', 'AREA')
-
-        # reselect from existing selection to mimic APDL behavior
-        if amin or amax:
-            if amax is None:
-                amax = amin
-            else:
-                amax = ''
-
-            if amin is None:  # amax is non-zero
-                amin = 1
-
-            if ninc is None:
-                ninc = ''
-
-            self.asel('R', 'AREA', vmin=amin, vmax=amax, vinc=ninc)
-
-        # duplicate areas to avoid affecting existing areas
-        anum_lst = self.anum
-        a_num = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self.numstr('AREA', a_num)
-        self.agen(2, 'ALL', noelem=1)
-        a_max = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
-
-        # create a temporary etype
-        etype_tmp = int(self.get(entity='ETYP', item1='NUM', it1num='MAX'))
-
-        self.et(etype_tmp, 'MESH200', 4)
-
-        self.shpp('off')
-        self.smrtsize(density)
-        out = self.amesh('all')
-
-        # must know the number of elements in each area
-        reg = re.compile('Meshing of area (\d*) completed \*\* (\d*) elements')
-        groups = reg.findall(out)
-        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
-        self.esla('S')
-
-        archive = self._transfer_archive()
-
-        # delete all temporary meshes and clean up settings
-        self.aclear('ALL')
-        self.adele('ALL', kswp=1)
-        self.numstr('AREA', 1)
-        self.cmsel('S', '__tmp_area__', 'AREA')
-        self.etdele(etype_tmp)
-        self.shpp('ON')
-        self.smrtsize('OFF')
-
-        self.cmsel('S', '__tmp_area__', 'AREA')
-
-        filename = os.path.join(self.path, 'tmp.cdb')
-        self.cdwrite('DB', filename)
-
-        self._log.setLevel(prior_log_level)
-
-        grid = archive._parse_vtk(fix_midside=False, additional_checking=True)
-        if grid:
-            # add anum info
-            i = 0
-            area_num = np.empty(grid.n_cells, dtype=np.int32)
-            for anum, nelem in groups:
-                area_num[i:i+nelem] = anum
-                i+= nelem
-
-            grid['area_num'] = area_num
-            return grid
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
               vtk=False, quality=7, show_numbering=False,
@@ -697,58 +682,6 @@ class _MapdlCore(_MapdlCommands):
             return pl.show()
         else:
             return super().aplot(na1=na1, na2=na2, ninc=ninc)
-
-    def areas(self, quality=7):
-        """List of areas from MAPDL represented as ``pyvista.PolyData``.
-
-        Parameters
-        ----------
-        quality : int, optional
-            quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).
-
-        Returns
-        -------
-        areas : list
-            List of ``pyvista.PolyData`` areas representing the active
-            surface areas selected by ``ASEL``.
-
-        """
-        surf = self.generate_surface(11 - quality)
-
-        areas = []
-        anums = np.unique(surf['area_num'])
-        for anum in anums:
-            areas.append(surf.extract_cells(surf['area_num'] == anum))
-        return areas
-
-    @property
-    def keypoints(self):
-        """Keypoint coordinates"""
-        if self._keypoints is None:
-            self._load_keypoints()
-        return np.asarray(self._keypoints.points)
-
-    @property
-    def knum(self):
-        """Keypoint numbers"""
-        if self._keypoints is None:
-            self._load_keypoints()
-        return self._keypoints['entity_num']
-
-    @property
-    def lines(self):
-        """Active lines as a pyvista.PolyData"""
-        if self._lines is None:
-            self._load_lines()
-        return self._lines
-
-    @property
-    def _lnum(self):
-        """Active lines as a pyvista.PolyData"""
-        if self._lines is None:
-            self._load_lines()
-        return self._lines['entity_num'].astype(np.int32)
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
@@ -1004,32 +937,6 @@ class _MapdlCore(_MapdlCommands):
         else:
             return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
 
-    @property
-    @supress_logging
-    def processor(self):
-        """The current MAPDL processor as a string
-
-        Examples
-        --------
-        >>> mapdl.processor
-        'BEGIN level'
-        """
-        return
-        # self._get('ACTIVE, 0, ROUT')
-        # self._get_float('
-        # Current routine: 
-        # processors = {'0 = Begin level, 17 = PREP7, 21 = SOLUTION, 31 = POST1, 36 = POST26, 52 = AUX2, 53 = AUX3, 62 = AUX12, 65 = AUX15}'
-        # self.get('ROUT')
-                      
-
-        # msg = self.run('/Status')
-        # processor = None
-        # matched_line = [line for line in msg.split('\n') if "Current routine" in line]
-        # if matched_line:
-        #     # get the processor
-        #     processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
-        # return processor
-
     def _get(self, *args, **kwargs):
         raise NotImplementedError('Implemented by child class')
 
@@ -1273,7 +1180,11 @@ class _MapdlCore(_MapdlCommands):
                                                  str(item2),
                                                  str(it2num))
         response = self.run(command, **kwargs)
-        return response.split('=')
+        value = response.split('=')[-1].strip()
+        try:  # always either a float or string
+            return float(value)
+        except:
+            return value
 
     def read_float_parameter(self, parameter_name):
         """Read out the value of a ANSYS parameter to use in python.

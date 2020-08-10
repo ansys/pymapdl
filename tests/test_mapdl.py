@@ -199,6 +199,15 @@ def test_prnsol_prin(mapdl, rset):
     assert np.allclose(stress, ansys_stress[:arr_sz], atol=1E-5, rtol=1E-3)
 
 
+def test_chaining(mapdl, cleared):
+    mapdl.prep7()
+    n_kp = 1000
+    with mapdl.chain_commands:
+        for i in range(1, 1 + n_kp):
+            mapdl.k(i, i, i, i)
+    assert mapdl.geometry.n_keypoint == 1000
+
+
 def test_read_para():
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))

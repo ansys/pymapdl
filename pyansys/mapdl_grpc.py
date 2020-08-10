@@ -1,5 +1,4 @@
-"""gRPC specific class and methods for the MAPDL gRPC client
-"""
+"""gRPC specific class and methods for the MAPDL gRPC client """
 import threading
 import weakref
 import io
@@ -9,18 +8,20 @@ import os
 import socket
 from threading import Timer
 from functools import wraps
+import tempfile
 
 import grpc
 import numpy as np
 from tqdm import tqdm
 
 from pyansys.mapdl import _MapdlCore
-from pyansys.errors import MapdlRuntimeError
+from pyansys.errors import MapdlExitedError, MapdlRuntimeError
 from pyansys.common_grpc import (parse_chunks,
                                  ANSYS_VALUE_TYPE,
                                  DEFAULT_CHUNKSIZE,
                                  DEFAULT_FILE_CHUNK_SIZE,
                                  check_vget_input)
+from pyansys.misc import supress_logging
 
 from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
@@ -29,7 +30,6 @@ from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
-
 NP_VALUE_TYPE = {value: key for key, value in ANSYS_VALUE_TYPE.items()}
 
 
@@ -247,18 +247,22 @@ class MapdlGrpc(_MapdlCore):
             self._timer.daemon = True
             self._timer.start()
 
-        # import needs to be here to avoid recursive import
-        from pyansys.mesh_grpc import MeshGrpc
-        self._geometry = MeshGrpc(self)
+        # housekeeping
+        self.nerr(1000000)  # otherwise, just segfaults without telling why
 
     def _reset_cache(self):
         """Reset cached items"""
-        self._geometry._reset_cache()
+        self._mesh._reset_cache()
+
+    @property
+    def _mesh(self):
+        from pyansys.mesh_grpc import MeshGrpc
+        return MeshGrpc(self)
 
     @property
     def mesh(self):
-        """MAPDL geometry"""
-        return self._geometry
+        """MAPDL FEM Mesh"""
+        return self._mesh
 
     def _run(self, cmd, stream=False, verbose=False, mute=False):
         """Sends a command and returns the response as a string.
@@ -280,7 +284,7 @@ class MapdlGrpc(_MapdlCore):
             Request that no output be generated from the gRPC server.
         """
         if self._exited:
-            raise MapdlException('MAPDL session ended')
+            raise MapdlExitedError
 
         if stream:
             return self._send_command_stream(cmd, verbose)
@@ -297,7 +301,7 @@ class MapdlGrpc(_MapdlCore):
             cmd_response = self._stub.SendCommand(request)
         except Exception as exception:
             if 'status = StatusCode.UNAVAILABLE' in str(exception):
-                raise Exception('Server connection terminated')
+                raise MapdlExitedError('Server connection terminated')
             else:
                 raise exception
 
@@ -503,6 +507,51 @@ class MapdlGrpc(_MapdlCore):
         elif (getresponse.type == 2):
             return getresponse.sval
 
+    @supress_logging
+    def _generate_iges(self):
+        """Save IGES geometry representation to disk"""
+        filepath = super()._generate_iges()
+
+        if self._local:
+            return filepath
+        else:
+            filename = os.path.basename(filepath)
+            temp_dir = tempfile.gettempdir()
+            save_path = os.path.join(temp_dir, 'ansys_tmp')
+            if not os.path.isdir(save_path):
+                os.mkdir(save_path)
+
+            self.download(filename, os.path.join(save_path, filename))
+            return save_path
+
+    # def _input_text(self, text, line_chunks=20, join=True):
+    #     """Stream a chunk of text to MAPDl and process the commands.
+
+    #     Stream the response back and deserialize the output.
+
+    #     Parameters
+    #     ----------
+    #     fname : str
+    #         MAPDL input file to stream to the MAPDL grpc server.
+
+    #     line_chunks : int
+    #         Number of lines to send at a time.
+
+    #     Returns
+    #     -------
+    #     response : str
+    #         Response from MAPDL.
+    #     """
+    #     chunks = chunk_lines(text, line_chunks)
+    #     response = self._stub.InputFileLocal(chunks)
+
+    #     # deserialize and return test response
+    #     payloads = [chunk.payload for chunk in response]
+
+    #     if join:
+    #         return b''.join(payloads).decode('latin-1')
+    #     return [payload.decode('latin-1') for payload in payloads]
+
     ###########################################################################
 
     def Param(self, pname):
@@ -512,34 +561,6 @@ class MapdlGrpc(_MapdlCore):
     def Var(self, num):
         presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
         return presponse.val
-
-    def input_text(self, text, line_chunks=20, join=True):
-        """Stream a chunk of text to MAPDl and process the commands.
-
-        Stream the response back and deserialize the output.
-
-        Parameters
-        ----------
-        fname : str
-            MAPDL input file to stream to the MAPDL grpc server.
-
-        line_chunks : int
-            Number of lines to send at a time.
-
-        Returns
-        -------
-        response : str
-            Response from MAPDL.
-        """
-        chunks = chunk_lines(text, line_chunks)
-        response = self._stub.InputFileLocal(chunks)
-
-        # deserialize and return test response
-        payloads = [chunk.payload for chunk in response]
-
-        if join:
-            return b''.join(payloads).decode('latin-1')
-        return [payload.decode('latin-1') for payload in payloads]
 
     def vget(self, entity, item=None, itnum=None):
         """Retrieve vector data from the MAPDL server and return a

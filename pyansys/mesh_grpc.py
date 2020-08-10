@@ -1,8 +1,8 @@
-"""Module to manage downloading and parsing geometry from the MAPDL grpc server"""
+"""Module to manage downloading and parsing the FEM from the MAPDL grpc server"""
 import numpy as np
 
 from pyansys.misc import threaded
-from pyansys.geometry import Geometry
+from pyansys.mesh import Mesh
 from pyansys.mapdl_grpc import MapdlGrpc
 from pyansys.common_grpc import (parse_chunks,
                                  ANSYS_VALUE_TYPE,
@@ -14,7 +14,7 @@ from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 
-class MeshGrpc(Geometry):
+class MeshGrpc(Mesh):
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""

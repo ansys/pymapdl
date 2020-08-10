@@ -224,3 +224,8 @@ def break_apart_surface(surf, force_linear=True):
     bsurf.point_arrays['orig_ind'] = idx
     return bsurf
 
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l """
+    for i in range(0, len(l), n):
+        yield l[i:i + n]

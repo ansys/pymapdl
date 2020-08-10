@@ -13,7 +13,7 @@ import vtk
 import pyvista as pv
 
 from pyansys import _reader
-from pyansys.misc import vtk_cell_info
+from pyansys.misc import vtk_cell_info, chunks
 from pyansys.mesh import Mesh
 from pyansys.cell_quality import quality
 
@@ -201,11 +201,6 @@ class Archive(Mesh):
     def plot(self, *args, **kwargs):
         """Plot the ANSYS archive file"""
         self.grid.plot(*args, **kwargs)
-
-def chunks(l, n):
-    """ Yield successive n-sized chunks from l """
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
 
 
 def save_as_archive(filename, grid, mtype_start=1, etype_start=1,

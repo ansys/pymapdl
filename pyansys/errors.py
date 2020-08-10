@@ -12,6 +12,13 @@ class MapdlRuntimeError(RuntimeError):
     pass
 
 
+class MapdlExitedError(RuntimeError):
+    """Raised when MAPDL has exited"""
+
+    def __init__(self, msg='MAPDL has exited'):
+        RuntimeError.__init__(self, msg)
+
+
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
     def __init__(self, msg=LOCKFILE_MSG):
