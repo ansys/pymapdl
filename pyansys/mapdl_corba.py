@@ -80,8 +80,7 @@ class MapdlCorba(_MapdlOld):
         # this will launch MAPDL
         super().__init__(exec_file, run_location, jobname, nproc,
                          override, loglevel, additional_switches,
-                         start_timeout, interactive_plotting,
-                         log_apdl)
+                         start_timeout, log_apdl)
         INSTANCES.append(self)
 
     @property
@@ -259,7 +258,8 @@ class MapdlCorba(_MapdlOld):
 
         if command[:4].lower() == 'cdre':
             with self.non_interactive:
-                return self.run(command)
+                self.run(command)
+            return self._response
 
         if command[:4].lower() == '/com':
             split_command = command.split(',')

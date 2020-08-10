@@ -248,8 +248,8 @@ class MapdlGrpc(_MapdlCore):
             self._timer.start()
 
         # import needs to be here to avoid recursive import
-        from pyansys.geometry_grpc import GeometryGrpc
-        self._geometry = GeometryGrpc(self)
+        from pyansys.mesh_grpc import MeshGrpc
+        self._geometry = MeshGrpc(self)
 
     def _reset_cache(self):
         """Reset cached items"""
@@ -352,7 +352,7 @@ class MapdlGrpc(_MapdlCore):
 
         # remove the lock file if local
         if self._local:
-            lockfile = self._lock_file
+            lockfile = self._lockfile
             if lockfile:
                 if os.path.isfile(lockfile):
                     os.remove(lockfile)
@@ -481,12 +481,16 @@ class MapdlGrpc(_MapdlCore):
         response = '\n'.join(responses)
         return response
 
-    def _get(self, cmd):
+    def _get(self, entity, entnum, item1, it1num, item2, it2num):
         """Sends gRPC get request
 
         WARNING: Not thread SAFE.
 
         """
+        cmd = ','.join([str(entity), str(entnum), str(item1),
+                        str(it1num), str(item2), str(it2num)])
+
+        # not threadsafe; don't allow multiple get commands
         while self._get_lock:
             time.sleep(0.001)
 
@@ -498,7 +502,6 @@ class MapdlGrpc(_MapdlCore):
             return getresponse.dval
         elif (getresponse.type == 2):
             return getresponse.sval
-
 
     ###########################################################################
 

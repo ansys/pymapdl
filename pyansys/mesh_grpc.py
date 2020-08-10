@@ -14,7 +14,7 @@ from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 
-class GeometryGrpc(Geometry):
+class MeshGrpc(Geometry):
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""

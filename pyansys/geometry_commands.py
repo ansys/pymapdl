@@ -98,6 +98,6 @@ geometry_commands = {'K': parse_k,
                      'BLC4': parse_output_area,
                      'CYL4': parse_output_area,
                      'ASBA': parse_output_areas,
-                     'BSPLIN': parse_bsplin,
-                     'CIRCLE': parse_circle,
+                     'BSPL': parse_bsplin,
+                     'CIRC': parse_circle,
 }

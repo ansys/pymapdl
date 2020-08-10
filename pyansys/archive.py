@@ -14,7 +14,7 @@ import pyvista as pv
 
 from pyansys import _reader
 from pyansys.misc import vtk_cell_info
-from pyansys.geometry import Geometry
+from pyansys.mesh import Mesh
 from pyansys.cell_quality import quality
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
@@ -24,7 +24,7 @@ log.setLevel('CRITICAL')
 
 
 
-class Archive(Geometry):
+class Archive(Mesh):
     """Read a blocked ANSYS archive file.
 
     Reads a blocked CDB file and optionally parses it to a vtk grid.

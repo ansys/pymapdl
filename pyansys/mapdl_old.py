@@ -304,8 +304,7 @@ class _MapdlOld(_MapdlCore):
     def __init__(self, exec_file, run_location,
                  jobname, nproc, override,
                  loglevel, additional_switches,
-                 start_timeout, interactive_plotting,
-                 log_apdl):
+                 start_timeout, log_apdl):
         """ Initialize connection with ANSYS program """
         super().__init__(loglevel)
         self._path = run_location
@@ -440,15 +439,15 @@ class _MapdlOld(_MapdlCore):
                                                   name='Mesh')
         return self._archive_cache
 
-    def _list(self, command):
-        """ Replaces *LIST command """
-        items = command.split(',')
-        filename = os.path.join(self.path, '.'.join(items[1:]))
-        if os.path.isfile(filename):
-            self.response = open(filename).read()
-            self._log.info(self.response)
-        else:
-            raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
+    # def _list(self, command):
+    #     """ Replaces *LIST command """
+    #     items = command.split(',')
+    #     filename = os.path.join(self.path, '.'.join(items[1:]))
+    #     if os.path.isfile(filename):
+    #         self._response = open(filename).read()
+    #         self._log.info(self._response)
+    #     else:
+    #         raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
 
     def eplot(self, vtk=False, **kwargs):
         """APDL Command: EPLOT
@@ -569,58 +568,9 @@ class _MapdlOld(_MapdlCore):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
-    def get_float(self, entity="", entnum="", item1="", it1num="",
-                  item2="", it2num="", **kwargs):
-        """Runs the *GET command with a default parameter
-
-        See `help(get)` for more details.
-
-        Parameters
-        ----------
-        entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc., as shown for Entity = in the tables below.
-
-        entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
-
-        item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
-
-        it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
-
-        item2, it2num
-            A second set of item labels and numbers to further qualify the item
-            for which data are to be retrieved. Most items do not require this
-            level of information.
-
-        Returns
-        -------
-        par : float
-            Floating point value of the parameter.
-
-        Examples
-        --------
-        Retreive the number of nodes.
-
-        >>> value = ansys.get('node', '', 'count')
-        >>> value
-        3003
-
-        Retreive the number of nodes using keywords.
-
-        >>> value = ansys.get(entity='node', item1='count')
-        >>> value
-        3003
-        """
-        return self.get(entity=entity, entnum=entnum, item1=item1, it1num=it1num,
-                        item2=item2, it2num=it2num, **kwargs)
+    def _get(self, *args, **kwargs):
+        """Simply use the default get method"""
+        return self.get(*args, **kwargs)
 
     def get(self, par="__floatparameter__", entity="", entnum="",
             item1="", it1num="", item2="", it2num="", **kwargs):

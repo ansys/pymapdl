@@ -3,10 +3,11 @@ import re
 import os
 import logging
 from functools import wraps
+# import warnings
 
 import appdirs
 import pyvista as pv
-import pyiges
+# import pyiges
 
 import pyansys
 from pyansys.mapdl_functions import _MapdlCommands
@@ -99,7 +100,7 @@ class _MapdlCore(_MapdlCommands):
         self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
-        self.response = None
+        self._response = None
         self._use_vtk = use_vtk
         self._log_filehandler = None
         self._version = None  # cached version
@@ -115,6 +116,26 @@ class _MapdlCore(_MapdlCommands):
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
         self.non_interactive = self._non_interactive(self)
+
+        from pyansys.parameters import Parameters
+        self._parameters = Parameters(self)
+
+    @property
+    def parameters(self):
+        """Collection of MAPDL parameters obtainable from the *GET command
+
+        Examples
+        --------
+        >>> mapdl.parameters.routine
+        'PREP7'
+
+        >>> mapdl.parameters.units
+        'SI'
+
+        >>> mapdl.parameters.csys
+        0
+        """
+        return self._parameters
 
     class _non_interactive:
         """Allows user to enter commands that need to run
@@ -163,27 +184,39 @@ class _MapdlCore(_MapdlCommands):
         try:
             if self._exited:
                 return 'MAPDL exited'
-            stats = self.slashstatus()
+            stats = self.slashstatus('PROD')
         except:
             return 'MAPDL exited'
 
-        st = stats.find('*** YOU ARE IN')
+        st = stats.find('*** Products ***')
+        en = stats.find('*** PrePro')
+        product = '\n'.join(stats[st:en].splitlines()[1:]).strip()
+
+        # get product version
+        stats = self.slashstatus('TITLE')
+        st = stats.find('RELEASE')
         en = stats.find('INITIAL', st)
+        mapdl_version = stats[st:en].split('CUSTOMER')[0].strip()
 
-        version_str = '\n'.join(stats[st:en].splitlines()[1:])
-        version_str = version_str.split('CUSTOMER')[0].strip() + '\n\n'
+        info = 'Product:          %s\n' % product
+        info += 'MAPDL Version:   %s\n' % mapdl_version
+        info += 'PyANSYS Version: %s\n' % pyansys.__version__
 
-        st = stats.find('Current routine')
-        en = stats.find('Active options for this analysis type')
+        return info
 
-        routine_str = ' ' + stats[st:en].strip()
+    @property
+    def geometry(self):
+        """Geometry (CAD) information."""
+        return self._geometry
 
-        pyansys_version_str = '\n\n pyansys version: %s' % pyansys.__version__
-        return version_str + routine_str + pyansys_version_str
+    @property
+    def _geometry(self):
+        """Implemented by child class"""
+        raise NotImplementedError('Implemented by child class')
 
     @property
     def mesh(self):
-        """Mesh information
+        """Mesh information.
 
         Examples
         --------
@@ -225,12 +258,12 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def _mesh(self):
-        """Implemented by subclass"""
-        raise NotImplementedError('Implemented by subclass')
+        """Implemented by child class"""
+        raise NotImplementedError('Implemented by child class')
 
     def _reset_cache(self):
         """Reset cached items and other items"""
-        raise NotImplementedError('Implemented by subclass')
+        raise NotImplementedError('Implemented by child class')
 
     @property
     def allow_ignore(self):
@@ -778,8 +811,8 @@ class _MapdlCore(_MapdlCommands):
         items = command.split(',')
         filename = os.path.join(self.path, '.'.join(items[1:]))
         if os.path.isfile(filename):
-            self.response = open(filename).read()
-            self._log.info(self.response)
+            self._response = open(filename).read()
+            self._log.info(self._response)
         else:
             raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
 
@@ -974,20 +1007,31 @@ class _MapdlCore(_MapdlCommands):
     @property
     @supress_logging
     def processor(self):
-        """The current MAPDL processor
+        """The current MAPDL processor as a string
 
         Examples
         --------
         >>> mapdl.processor
         'BEGIN level'
         """
-        msg = self.run('/Status')
-        processor = None
-        matched_line = [line for line in msg.split('\n') if "Current routine" in line]
-        if matched_line:
-            # get the processor
-            processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
-        return processor
+        return
+        # self._get('ACTIVE, 0, ROUT')
+        # self._get_float('
+        # Current routine: 
+        # processors = {'0 = Begin level, 17 = PREP7, 21 = SOLUTION, 31 = POST1, 36 = POST26, 52 = AUX2, 53 = AUX3, 62 = AUX12, 65 = AUX15}'
+        # self.get('ROUT')
+                      
+
+        # msg = self.run('/Status')
+        # processor = None
+        # matched_line = [line for line in msg.split('\n') if "Current routine" in line]
+        # if matched_line:
+        #     # get the processor
+        #     processor = re.findall(r'\(([^)]+)\)', matched_line[0])[0]
+        # return processor
+
+    def _get(self, *args, **kwargs):
+        raise NotImplementedError('Implemented by child class')
 
     def add_file_handler(self, filepath, append=False, level='DEBUG'):
         """Add a file handler to the mapdl log.  This allows you to
@@ -1058,16 +1102,19 @@ class _MapdlCore(_MapdlCommands):
         self._stored_commands = []
         self.run("/INPUT, '%s'" % filename, write_to_log=False)
         if os.path.isfile(tmp_out):
-            self.response = '\n' + open(tmp_out).read()
+            self._response = '\n' + open(tmp_out).read()
 
-        if self.response is None:
+        if self._response is None:
             self._log.warning('Unable to read response from flushed commands')
         else:
-            self._log.info(self.response)
+            self._log.info(self._response)
 
-    def get_float(self, entity="", entnum="", item1="", it1num="",
+    def get_float(self, *args, **kwargs):
+        raise NotImplementedError('Please use ``get_value`` instead')
+
+    def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the *GET command with a default parameter
+        """Runs the *GET command and returns a Python value.
 
         See `help(get)` for more details.
 
@@ -1115,8 +1162,8 @@ class _MapdlCore(_MapdlCommands):
         >>> value
         3003
         """
-        return self.get(entity=entity, entnum=entnum, item1=item1, it1num=it1num,
-                        item2=item2, it2num=it2num, **kwargs)
+        return self._get(entity=entity, entnum=entnum, item1=item1, it1num=it1num,
+                         item2=item2, it2num=it2num, **kwargs)
 
     def get(self, par="__floatparameter__", entity="", entnum="",
             item1="", it1num="", item2="", it2num="", **kwargs):
@@ -1226,10 +1273,7 @@ class _MapdlCore(_MapdlCommands):
                                                  str(item2),
                                                  str(it2num))
         response = self.run(command, **kwargs)
-        try:
-            return float(response.split('=')[-1])
-        except:
-            return None
+        return response.split('=')
 
     def read_float_parameter(self, parameter_name):
         """Read out the value of a ANSYS parameter to use in python.
@@ -1572,12 +1616,12 @@ class _MapdlCore(_MapdlCommands):
 
         text = self._run(command)
         if text:
-            self.response = text.strip()
+            self._response = text.strip()
         else:
-            self.response = ''
+            self._response = ''
 
-        if self.response:
-            self._log.info(self.response)
+        if self._response:
+            self._log.info(self._response)
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:
@@ -1585,23 +1629,24 @@ class _MapdlCore(_MapdlCommands):
                 text += '\n\nIgnore these messages by setting allow_ignore=True'
                 raise Exception(text)
 
-        if '*** ERROR ***' in self.response:  # flag error
-            self._log.error(self.response)
+        if '*** ERROR ***' in self._response:  # flag error
+            self._log.error(self._response)
             # if not continue_on_error:
-            raise Exception(self.response)
+            raise Exception(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
 
         # command parsing
         if short_cmd in geometry_commands:
-            return geometry_commands[short_cmd](self.response)
+            return geometry_commands[short_cmd](self._response)
         if short_cmd in element_commands:
-            return element_commands[short_cmd](self.response)
+            return element_commands[short_cmd](self._response)
         if short_cmd in PLOT_COMMANDS:
-            return self._display_plot(self.response)
+            return self._display_plot(self._response)
 
-        return self.response
+        self._response = self._response.replace('\\r\\n', '\n').replace('\\n', '\n')
+        return self._response
 
     def _display_plot(self, *args, **kwargs):
         raise NotImplementedError('Implemented by child class')

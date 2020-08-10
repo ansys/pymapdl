@@ -14,7 +14,7 @@ import numpy as np
 import pyvista as pv
 
 from pyansys import _binary_reader, _reader
-from pyansys.geometry import Geometry
+from pyansys.mesh import Mesh
 from pyansys._binary_reader import (cells_with_any_nodes, cells_with_all_nodes,
                                     populate_surface_element_result)
 from pyansys._rst_keys import (geometry_header_keys, element_index_table_info,
@@ -1142,14 +1142,14 @@ class ResultFile(AnsysBinary):
 
         # Store geometry and parse to VTK quadradic and null unallowed
         ncomp, ecomp = self._read_components()
-        self.geometry = Geometry(nnum, nodes, elem, elem_off, np.array(ekey),
-                                 node_comps=ncomp, elem_comps=ecomp)
-        self.quadgrid = self.geometry._parse_vtk(null_unallowed=True,
+        self.mesh = Mesh(nnum, nodes, elem, elem_off, np.array(ekey),
+                         node_comps=ncomp, elem_comps=ecomp)
+        self.quadgrid = self.mesh._parse_vtk(null_unallowed=True,
                                                  fix_midside=False)
         self.grid = self.quadgrid.linear_copy()
 
         # identify nodes that are actually in the solution
-        self._insolution = np.in1d(self.geometry.nnum, self._resultheader['neqv'],
+        self._insolution = np.in1d(self.mesh.nnum, self._resultheader['neqv'],
                                    assume_unique=True)
 
     def solution_info(self, rnum):
@@ -1256,7 +1256,7 @@ class ResultFile(AnsysBinary):
         ele_ind_table = self.read_record(element_rst_ptr).view(np.int64)
         # ele_ind_table += element_rst_ptr
 
-        return ele_ind_table, nodstr, self.geometry._ans_etype, element_rst_ptr
+        return ele_ind_table, nodstr, self.mesh._ans_etype, element_rst_ptr
 
     def result_dof(self, rnum):
         """Return a list of degrees of freedom for a given result number.
@@ -1478,7 +1478,7 @@ class ResultFile(AnsysBinary):
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
 
         # certain element types do not output stress
-        elemtype = self.geometry.etype
+        elemtype = self.mesh.etype
 
         # load in raw results
         nnode = nodstr[etype]
@@ -1531,7 +1531,7 @@ class ResultFile(AnsysBinary):
 
         enode = []
         for i in sidx:
-            enode.append(self.geometry.elem[i][10:10+nnode[i]])
+            enode.append(self.mesh.elem[i][10:10+nnode[i]])
 
         # Get element numbers
         elemnum = self._eeqv[self._sidx_elem]
@@ -1672,10 +1672,10 @@ class ResultFile(AnsysBinary):
         nnode = nodstr[etype]
         if sort:
             for i in sidx:
-                enode.append(self.geometry.elem[i][10:10+nnode[i]])
+                enode.append(self.mesh.elem[i][10:10+nnode[i]])
         else:
             for i in range(enum.size):
-                enode.append(self.geometry.elem[i][10:10+nnode[i]])
+                enode.append(self.mesh.elem[i][10:10+nnode[i]])
 
         return enum, element_data, enode
 
@@ -2381,7 +2381,7 @@ class ResultFile(AnsysBinary):
                                                         self.grid.number_of_points,
                                                         nodstr,
                                                         etype,
-                                                        self.geometry.etype,
+                                                        self.mesh.etype,
                                                         result_index,
                                                         ptr_off)
 
@@ -2515,8 +2515,8 @@ class ResultFile(AnsysBinary):
                                                bsurf.n_faces,
                                                nnum_surf,
                                                elem_ind,
-                                               self.geometry._elem,
-                                               self.geometry._elem_off,
+                                               self.mesh._elem,
+                                               self.mesh._elem_off,
                                                item_index,
                                                as_global=not in_element_coord_sys)
 
@@ -2614,13 +2614,13 @@ class ResultFile(AnsysBinary):
         nnum, stress = self._nodal_result(rnum, 'ENS')
 
         # angles relative to the XZ plane
-        if nnum.size != self.geometry.nodes.shape[0]:
-            mask = np.in1d(nnum, self.geometry.nnum)
-            angle = np.arctan2(self.geometry.nodes[mask, 1],
-                               self.geometry.nodes[mask, 0])
+        if nnum.size != self.mesh.nodes.shape[0]:
+            mask = np.in1d(nnum, self.mesh.nnum)
+            angle = np.arctan2(self.mesh.nodes[mask, 1],
+                               self.mesh.nodes[mask, 0])
         else:
-            angle = np.arctan2(self.geometry.nodes[:, 1],
-                               self.geometry.nodes[:, 0])
+            angle = np.arctan2(self.mesh.nodes[:, 1],
+                               self.mesh.nodes[:, 0])
 
         _binary_reader.euler_cart_to_cyl(stress, angle)  # mod stress inplace
         return nnum, stress

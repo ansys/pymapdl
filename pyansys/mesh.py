@@ -1,4 +1,4 @@
-"""Module for common class between gRPC, Archive, and Result geometry"""
+"""Module for common class between gRPC, Archive, and Result mesh"""
 import pyvista as pv
 import vtk
 import numpy as np
@@ -26,7 +26,7 @@ MESH200_MAP = {0: 2,  # line
                11: 4}  # hex with 8 nodes
 
 
-class Geometry():
+class Mesh():
 
     def __init__(self, nnum=None, nodes=None, elem=None,
                  elem_off=None, ekey=None, node_comps={},

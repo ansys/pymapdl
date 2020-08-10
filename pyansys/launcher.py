@@ -294,8 +294,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     -aas : Enables server mode
      When enabling server mode, a custom name for the keyfile can be
      specified using the ``-iorFile`` option.  This is the CORBA that
-     pyansys uses for Windows (and linux when
-     ``prefer_pexpect=False``).
+     pyansys uses for ``mode='corba'``.
 
     -acc <device> : Enables the use of GPU hardware.  Enables the use of
      GPU hardware to accelerate the analysis. See GPU Accelerator
@@ -470,6 +469,11 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      copyright date, customer number, and license manager version
      number.
     """
+    # depreciated options
+    if 'prefer_pexpect' in kwargs:
+        raise NotImplementedError('"prefer_pexpect" is depreciated.  '
+                                  'Please use: ``mode="console"``')
+
     if exec_file is None:
         # Load cached path
         exec_file = get_ansys_path()
@@ -662,7 +666,7 @@ def check_mode(mode, version):
             if version < 202:
                 raise ValueError('gRPC mode requires MAPDL 2020R2 or newer.')
         elif mode == 'corba':
-            if version < 202:
+            if version < 170:
                 raise ValueError('CORBA AAS mode requires MAPDL v17.0 or newer.')
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')

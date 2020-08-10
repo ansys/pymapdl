@@ -59,8 +59,7 @@ class MapdlConsole(_MapdlOld):
         self._process = None
         super().__init__(exec_file, run_location, jobname, nproc,
                          override, loglevel, additional_switches,
-                         start_timeout,
-                         log_apdl)
+                         start_timeout, log_apdl)
 
     def _launch(self):
         command = '%s -j %s -np %d %s' % (self._exec_file,

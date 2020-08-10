@@ -1,4 +1,4 @@
-import time
+"""Test MAPDL Console, CORBA, and gRPC interface"""
 import glob
 import os
 import sys
@@ -17,7 +17,7 @@ if sys.platform != 'darwin':
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-rver = '194'
+rver = '202'
 if os.name == 'nt':
     ans_root = 'c:/Program Files/ANSYS Inc/'
     MAPDLBIN = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
@@ -39,12 +39,12 @@ skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS install
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-@pytest.fixture(scope='module')
-def mapdl():
+@pytest.fixture(scope="module", params=['console', 'corba'])
+def mapdl(request):
+    os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
     mapdl = pyansys.launch_mapdl(MAPDLBIN,
                                  override=True,
-                                 additional_switches='-smp',  # for Linux
-                                 prefer_pexpect=False)
+                                 mode=request.param)
 
     # build the cyclic model
     mapdl.prep7()
@@ -228,11 +228,10 @@ def test_e(mapdl, cleared):
 def test_et(mapdl, cleared):
     n_plane183 = mapdl.et("", "PLANE183")
     assert n_plane183 == 1
-    n_compare = int(mapdl.get_float("ETYP", 0, "NUM", "MAX"))
+    n_compare = int(mapdl.get_value("ETYP", item1="NUM", it1num="MAX"))
     assert n_plane183 == n_compare
     n_plane183 = mapdl.et(17, "PLANE183")
     assert n_plane183 == 17
-
 
 
 ###############################################################################
@@ -320,21 +319,20 @@ def test_invalid():
         mapdl.a(0, 0, 0, 0)
 
 
-@skip_no_ansys
-def test_al(cleared, mapdl):
-    k0 = mapdl.k("", 0, 0, 0)
-    k1 = mapdl.k("", 1, 0, 0)
-    k2 = mapdl.k("", 1, 1, 0)
-    k3 = mapdl.k("", 0, 1, 0)
-    l0 = mapdl.l(k0, k1)
-    l1 = mapdl.l(k1, k2)
-    l2 = mapdl.l(k2, k3)
-    l3 = mapdl.l(k3, k0)
-    a0 = mapdl.al(l0, l1, l2, l3)
-    mapdl.enable_interactive_plotting()
-    mapdl._show_matplotlib_figures = False
-    response = mapdl.aplot()
-    assert 'WRITTEN TO FILE' in response
+# @skip_no_ansys
+# def test_aplot(cleared, mapdl):
+#     k0 = mapdl.k("", 0, 0, 0)
+#     k1 = mapdl.k("", 1, 0, 0)
+#     k2 = mapdl.k("", 1, 1, 0)
+#     k3 = mapdl.k("", 0, 1, 0)
+#     l0 = mapdl.l(k0, k1)
+#     l1 = mapdl.l(k1, k2)
+#     l2 = mapdl.l(k2, k3)
+#     l3 = mapdl.l(k3, k0)
+#     a0 = mapdl.al(l0, l1, l2, l3)
+#     mapdl._show_matplotlib_figures = False
+#     response = mapdl.aplot()
+#     assert 'WRITTEN TO FILE' in response
 
 
 @skip_no_ansys
@@ -351,12 +349,7 @@ def test_keypoints(cleared, mapdl):
         knum.append(i)
         i += 1
 
-    # l0 = mapdl.l(k0, k1)
-    # l1 = mapdl.l(k1, k2)
-    # l2 = mapdl.l(k2, k3)
-    # l3 = mapdl.l(k3, k0)
-    # a0 = mapdl.al(l0, l1, l2, l3)
-
+    breakpoint()
     assert np.allclose(kps, mapdl.keypoints)
     assert np.allclose(knum, mapdl.knum)
 
