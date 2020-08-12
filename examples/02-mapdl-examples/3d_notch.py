@@ -24,7 +24,7 @@ try:
     mapdl
 except:
     mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp',
-                                 loglevel='ERROR')
+                                 loglevel='INFO')
 mapdl.clear()
 
 

@@ -798,6 +798,40 @@ This is the result from the script:
     Element size 0.150000: 412324 nodes and maximum vom Mises stress 144.275406
 
 
+Chaining Commands in MAPDL
+--------------------------
+MAPDL permits several commands on one line by using the separation
+character ``"$"``.  This can be utilized within ``pyansys`` to
+effectively chain several commands together rather and send them to
+MAPDL for execution rather than executing them individually.  This can
+be helpful when you need to execute thousands of commands in a python
+loop and don't need the individual results for each command.  For
+example, if you wish to create a 1000 keypoints along the X axis you
+would run:
+
+.. code:: python
+
+    xloc = np.linspace(0, 1, 1000)
+    for x in xloc:
+        mapdl.k(x=x)
+
+
+However, since each command executes individually and returns a
+response, it is much faster to send the commands to be executed by
+MAPDL in groups and have ``pyansys`` handle grouping the commands by
+running ``with mmapdl.chain_commands``:
+
+.. code:: python
+
+    xloc = np.linspace(0, 1, 1000)
+    with mapdl.chain_commands:
+        for x in xloc:
+            mapdl.k(x=x)
+
+The execution time on this generally 4 to 10 times faster than running each command
+individually.
+
+
 Sending Arrays to MAPDL
 -----------------------
 You can send ``numpy`` arrays or Python lists directly to MAPDL using

@@ -151,8 +151,8 @@ def read_binary(filename, **kwargs):
         return FullFile(filename, **kwargs)
     elif file_format == 12:
         from pyansys.rst import ResultFile
-        read_geometry = kwargs.pop('read_geometry', True)
-        result = ResultFile(filename, read_geometry=False, **kwargs)
+        read_mesh = kwargs.pop('read_mesh', True)
+        result = ResultFile(filename, read_mesh=False, **kwargs)
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
@@ -160,8 +160,8 @@ def read_binary(filename, **kwargs):
             from pyansys.cyclic_reader import CyclicResult
             return CyclicResult(filename)
 
-        if read_geometry:
-            result._store_geometry()
+        if read_mesh:
+            result._store_mesh()
 
         return result
 

@@ -144,35 +144,12 @@ class MapdlConsole(_MapdlOld):
                 self._log.debug('Prompt index %i.  Matched %s',
                                 i, ready_items[i].decode('utf-8'))
                 self._log.info(response + ready_items[i].decode('utf-8'))
-                # user_input = input('Response: ')
-                # self._process.sendline(user_input)
-                raise Exception('User input expected.  Try using ``non_interactive``')
-
+                raise RuntimeError('User input expected.  '
+                                   'Try using ``with mapdl.non_interactive``')
             else:  # continue item
                 self._log.debug('continue index %i.  Matched %s',
                                 i, ready_items[i].decode('utf-8'))
                 break
-
-        #     # handle response
-        #     if '*** ERROR ***' in response:  # flag error
-        #         self._log.error(response)
-        #         if not self._continue_on_error:
-        #             raise Exception(response)
-        #     elif ignored.search(response):  # flag ignored command
-        #         if not self.allow_ignore:
-        #             self._log.error(response)
-        #             raise Exception(response)
-        #         else:
-        #             self._log.warning(response)
-        #     else:
-        #         self._log.info(response)
-
-        # if 'is not a recognized' in full_response:
-        #     if not self.allow_ignore:
-        #         full_response = full_response.replace('This command will be ignored.',
-        #                                               '')
-        #         full_response += '\n\nIgnore these messages by setting allow_ignore=True'
-        #         raise Exception(full_response)
 
         # return last response and all preceding responses
         return full_response
@@ -183,8 +160,8 @@ class MapdlConsole(_MapdlOld):
         Parameters
         ----------
         timeout : float
-            Maximum time to wait for MAPDL to exit.  Set to 0 or None
-            to not wait until MAPDL stops.
+            Maximum time to wait for MAPDL to exit.  Set to 0 or
+            ``None`` to not wait until MAPDL stops.
         """
         self._log.debug('Exiting ANSYS')
         if self._process is not None:

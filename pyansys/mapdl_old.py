@@ -3,7 +3,6 @@ Contains the _MapdlOld class and dependent functions.  To be inherited
 by MapdlCorba and MapdlConsole for interfacing with MAPDL without the
 use of gRPC.
 """
-import glob
 import os
 import re
 
@@ -11,7 +10,7 @@ import numpy as np
 
 from pyansys.mapdl import _MapdlCore
 import pyansys
-from pyansys.misc import is_float, supress_logging, chunks
+from pyansys.misc import is_float, supress_logging
 
 
 def check_lock_file(path, jobname, override):
@@ -31,10 +30,6 @@ def check_lock_file(path, jobname, override):
                 raise PermissionError('Unable to remove lock file.  '
                                       'Another instance of ANSYS might be '
                                       'running at "%s"' % path)
-
-
-# test for png file
-PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
 
 
 class _MapdlOld(_MapdlCore):
@@ -294,7 +289,6 @@ class _MapdlOld(_MapdlCore):
      Returns the Mechanical APDL release number, update number,
      copyright date, customer number, and license manager version
      number.
-
     """
 
     def __init__(self, exec_file, run_location,
@@ -302,20 +296,20 @@ class _MapdlOld(_MapdlCore):
                  loglevel, additional_switches,
                  start_timeout, log_apdl):
         """ Initialize connection with ANSYS program """
-        super().__init__(loglevel)
+        super().__init__(loglevel, log_apdl=log_apdl)
         self._path = run_location
 
         self._local = True  # always local when using Console or CORBA
         self._exec_file = exec_file
         self._jobname = jobname
         self._archive_cache = None
+        self._vget_arr_counter = 0
 
         # these are stored internally for open_gui and launch
         self._start_timeout = start_timeout
         self._nproc = nproc
         self._additional_switches = additional_switches
 
-        self.non_interactive = self._non_interactive(self)
         self._redirected_commands = {'*LIS': self._list}
 
         # perhaps directly from MAPDL...
@@ -323,10 +317,6 @@ class _MapdlOld(_MapdlCore):
 
         # start local instance of MAPDL
         self._launch()
-
-        if log_apdl:
-            filename = os.path.join(self.path, 'log.inp')
-            self.open_apdl_log(filename, mode=log_apdl)
 
     def _reset_cache(self):
         """Reset cached items"""
@@ -371,132 +361,11 @@ class _MapdlOld(_MapdlCore):
         # load ansys parameters to python
         filename = os.path.join(self.path, 'parameters.parm')
         self.parsav('all', filename)
-        self.parameters, self.arrays = load_parameters(filename)
-        return self.parameters, self.arrays
-
-    def _display_plot(self, text):
-        """Display the last generated plot (*.png) from MAPDL"""
-        png_found = PNG_TEST.findall(text)
-        if png_found:
-            # flush graphics writer
-            self.show('CLOSE')
-            self.show('PNG')
-
-            # get last filename based on the current jobname
-            filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
-            filenames.sort()
-            filename = filenames[-1]
-
-            import matplotlib.pyplot as plt
-            import matplotlib.image as mpimg
-
-            if os.path.isfile(filename):
-                img = mpimg.imread(filename)
-                plt.imshow(img)
-                plt.axis('off')
-                if self._show_matplotlib_figures:
-                    plt.show()  # consider in-line plotting
-            else:
-                self._log.error('Unable to find screenshot at %s' % filename)
-
-    @property
-    def result(self):
-        """Returns a binary interface to the result file."""
-        try:
-            result_path = self.inquire('RSTFILE')
-        except RuntimeError:
-            result_path = ''
-
-        if not result_path:
-            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
-        elif not os.path.dirname(result_path):
-            result_path = os.path.join(self.path, '%s.rst' % result_path)
-
-        # there may be multiple result files at this location (if not
-        # combining results)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError('No results found at %s' % result_path)
-        return pyansys.read_binary(result_path)
+        return load_parameters(filename)
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
-
-    def load_array(self, arr, name):
-        """Load a numpy array or python list directly to MAPDL
-
-        Writes the numpy array to disk and then reads it in within MAPDL
-        using *VREAD.
-
-        Parameters
-        ----------
-        arr : np.ndarray or List
-
-        name : str
-            Name of the array to write to within MAPDL.
-
-        Examples
-        --------
-        Load a 1D numpy array into MAPDL
-
-        >>> arr = np.array([10, 20, 30])
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., 20., 30.])
-
-        Load a 2D numpy array into MAPDL
-
-        >>> arr = np.random.random((5, 3))
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([[0.39806635, 0.15060953, 0.3990557 ],
-               [0.26837768, 0.02033222, 0.15655861],
-               [0.46110226, 0.06381489, 0.20068533],
-               [0.20122863, 0.5727896 , 0.85636037],
-               [0.68126612, 0.67460878, 0.3678797 ]])
-
-        Load a python list into MAPDL
-
-        >>> mapdl.load_array([10, -1, 8, 4, 10], 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., -1.,  8.,  4., 10.])
-
-        """
-        # type checks
-        arr = np.array(arr)
-        if not np.issubdtype(arr.dtype, np.number):
-            raise TypeError('Only numerical arrays or lists are supported')
-        if arr.ndim > 3:
-            raise ValueError('MAPDL VREAD only supports a arrays with a'
-                             ' maximum of 3 dimensions.')
-
-        name = name.upper()
-        # disable logging for this function
-        prior_log_level = self._log.level
-        self._log.setLevel('CRITICAL')
-
-        idim, jdim, kdim = arr.shape[0], 0, 0
-        if arr.ndim >= 2:
-            jdim = arr.shape[1]
-        if arr.ndim == 3:
-            kdim = arr.shape[2]
-
-        # write array from numpy to disk:
-        filename = os.path.join(self.path, '_tmp.dat')
-        if arr.dtype != np.double:
-            arr = arr.astype(np.double)
-        pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
-
-        self.dim(name, imax=idim, jmax=jdim, kmax=kdim)
-        with self.non_interactive:
-            self.vread('%s(1, 1),%s,,,IJK, %d, %d, %d' % (name, filename,
-                                                          idim, jdim, kdim))
-            self.run('(1F20.12)')
-
-        self._log.setLevel(prior_log_level)
 
     @supress_logging
     def load_array(self, arr, name):
@@ -570,7 +439,31 @@ class _MapdlOld(_MapdlCore):
                                                           idim, jdim, kdim))
             self.run('(1F20.12)')
 
-    # TODO: path needs to be a dynamic property
+    def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
+                   it2num='', kloop='', dtype=None, **kwargs):
+        """Uses the VGET command to get an array from ANSYS"""
+        parm_name = kwargs.pop('parm', None)
+
+        if parm_name is None:
+            parm_name = '__vget_tmp_%d__' % self._vget_arr_counter
+            self._vget_arr_counter += 1
+
+        out = self.starvget(parm_name, entity, entnum, item1, it1num, item2,
+                            it2num, kloop)
+
+        # check if empty array
+        if 'the dimension number 1 is 0' in out:
+            return np.empty(0)
+
+        with self.non_interactive:
+            self.vwrite('%s(1)' % parm_name)
+            self.run('(F20.12)')
+
+        array = np.fromstring(self.last_response, sep='\n')
+        if dtype:
+            return array.astype(dtype)
+        else:
+            return array
 
 
 # TODO: Speed this up with:

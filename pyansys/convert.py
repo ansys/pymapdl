@@ -1,11 +1,12 @@
 import os
+
 import pyansys
 from pyansys import mapdl_functions
+from pyansys.misc import is_float
 
 VALID_COMMANDS = dir(mapdl_functions._MapdlCommands)
 
 NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
-
 
 
 

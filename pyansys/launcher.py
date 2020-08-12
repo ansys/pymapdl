@@ -199,7 +199,7 @@ def check_lock_file(path, jobname, override):
 def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                  nproc=2, override=False, loglevel='INFO',
                  additional_switches='', start_timeout=120,
-                 log_apdl='w', **kwargs):
+                 log_apdl=False, **kwargs):
     """This class launches a local instance of MAPDL in the background
     and allows commands to be passed to a persistent session.
 
@@ -265,8 +265,9 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         and visible at log level 'INFO'.  Only applicable when ``mode=corba``
 
     log_apdl : str, optional
-        Opens an APDL log file in the current MAPDL working directory.
-        Default 'w'.  Set to 'a' to append to an existing log.
+        Opens an APDL log file in the current MAPDL working directory
+        to log all MAPDL commands to file.  Default False.  Set to 'a'
+        to append to an existing log or 'w' to write a new log.
 
     port : int, optional
         Port to open the gRPC server on.  Only applicable when ``mode='grpc'``
@@ -546,7 +547,8 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         from pyansys.mapdl_grpc import MapdlGrpc
         kwargs['jobname'] = jobname
         kwargs['run_location'] = run_location
-        return MapdlGrpc(LOCALHOST, port, loglevel=loglevel, **kwargs)
+        return MapdlGrpc(LOCALHOST, port, loglevel=loglevel,
+                         log_apdl=log_apdl, **kwargs)
 
 
 def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
@@ -668,6 +670,8 @@ def check_mode(mode, version):
         elif mode == 'corba':
             if version < 170:
                 raise ValueError('CORBA AAS mode requires MAPDL v17.0 or newer.')
+            elif version > 200 and os.name == 'posix':
+                raise ValueError('CORBA AAS mode requires MAPDL v19.4 or earlier.')
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')
 

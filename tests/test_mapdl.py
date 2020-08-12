@@ -9,6 +9,7 @@ import pyvista
 from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
 
+from pyansys.errors import MapdlRuntimeError
 import pyansys
 
 if sys.platform != 'darwin':
@@ -17,68 +18,47 @@ if sys.platform != 'darwin':
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-rver = '202'
-if os.name == 'nt':
-    ans_root = 'c:/Program Files/ANSYS Inc/'
-    MAPDLBIN = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
-                            'ANSYS%s.exe' % rver)
-else:
-    ans_root = '/usr/ansys_inc'
-    MAPDLBIN = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
-                            'ansys%s' % rver)
+def get_ansys_bin(rver):
+    if os.name == 'nt':
+        ans_root = 'c:/Program Files/ANSYS Inc/'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
+                                'ANSYS%s.exe' % rver)
+    else:
+        ans_root = '/usr/ansys_inc'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
+                                'ansys%s' % rver)
+
+    return mapdlbin
+
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
-    HAS_ANSYS = os.path.isfile(MAPDLBIN)
+    HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
 
 
-RSETS = list(zip(range(1, 9), [1]*8))
 
 skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-@pytest.fixture(scope="module", params=['console', 'corba'])
+@pytest.fixture(scope="module", params=['grpc', 'console', 'corba'])
 def mapdl(request):
     os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
-    mapdl = pyansys.launch_mapdl(MAPDLBIN,
-                                 override=True,
-                                 mode=request.param)
 
-    # build the cyclic model
-    mapdl.prep7()
-    mapdl.shpp('off')
-    mapdl.cdread('db', pyansys.examples.sector_archive_file)
-    mapdl.prep7()
-    mapdl.cyclic()
+    mode = request.param
+    if mode == 'corba':
+        # v200 and newer don't work
+        # v194 has issues exiting
+        rver = '182'
+    else:
+        rver = '202'
 
-    # set material properties
-    mapdl.mp('NUXY', 1, 0.31)
-    mapdl.mp('DENS', 1, 4.1408E-04)
-    mapdl.mp('EX', 1, 16900000)
-    mapdl.emodif('ALL', 'MAT', 1)
-
-    # setup and solve
-    mapdl.run('/SOLU')
-    mapdl.antype(2, 'new')
-    mapdl.modopt('lanb', 1, 1, 100000)
-    mapdl.eqslv('SPARSE')
-    mapdl.lumpm(0)
-    mapdl.pstres(0)
-    mapdl.bcsoption('INCORE')
-    mapdl.mxpand(elcalc='YES')
-    mapdl.solve()
-    mapdl.finish()
-
-    # setup ansys for output without line breaks
-    mapdl.post1()
-    mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-    nsigfig = 10
-    mapdl.format('', 'E', nsigfig + 9, nsigfig)
-    mapdl.page(1E9, '', -1, 240)
-
-    return mapdl
+    # if mode == 'grpc':
+    #     from pyansys.mapdl_grpc import MapdlGrpc
+    #     mapdl = MapdlGrpc(cleanup_on_exit=False)
+    # else:
+    return pyansys.launch_mapdl(get_ansys_bin(rver), override=True, mode=mode)
 
 
 @pytest.fixture(scope='function')
@@ -94,117 +74,13 @@ def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
 
 
-###############################################################################
-# Testing binary reader
-###############################################################################
-@pytest.mark.parametrize("rset", RSETS)
-@skip_no_ansys
-def test_prnsol_u(mapdl, rset):
-    mapdl.set(*rset)
-    # verify cyclic displacements
-    table = mapdl.prnsol('u').splitlines()
-    if isinstance(mapdl, MapdlCorba):
-        array = np.genfromtxt(table[8:])
-    else:
-        array = np.genfromtxt(table[9:])
-    ansys_nnum = array[:, 0].astype(np.int)
-    ansys_disp = array[:, 1:-1]
-
-    nnum, disp = mapdl.result.nodal_solution(rset)
-
-    # cyclic model will only output the master sector
-    ansys_nnum = ansys_nnum[:nnum.size]
-    ansys_disp = ansys_disp[:nnum.size]
-
-    assert np.allclose(ansys_nnum, nnum)
-    assert np.allclose(ansys_disp, disp)
-
-
-@pytest.mark.parametrize("rset", RSETS)
-@skip_no_ansys
-def test_presol_s(mapdl, rset):
-    mapdl.set(*rset)
-
-    # verify element stress
-    element_stress, _, enode = mapdl.result.element_stress(rset)
-    element_stress = np.vstack(element_stress)
-    enode = np.hstack(enode)
-
-    # parse ansys result
-    table = mapdl.presol('S').splitlines()
-    ansys_element_stress = []
-    line_length = len(table[15])
-    for line in table:
-        if len(line) == line_length:
-            ansys_element_stress.append(line)
-
-    ansys_element_stress = np.genfromtxt(ansys_element_stress)
-    ansys_enode = ansys_element_stress[:, 0].astype(np.int)
-    ansys_element_stress = ansys_element_stress[:, 1:]
-
-    arr_sz = element_stress.shape[0]
-    assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
-    assert np.allclose(enode, ansys_enode[:arr_sz])
-
-
-@pytest.mark.parametrize("rset", RSETS)
-@skip_no_ansys
-def test_prnsol_s(mapdl, rset):
-    mapdl.set(*rset)
-
-    # verify cyclic displacements
-    table = mapdl.prnsol('s').splitlines()
-    if isinstance(mapdl, MapdlCorba):
-        array = np.genfromtxt(table[8:])
-    else:
-        array = np.genfromtxt(table[10:])
-    ansys_nnum = array[:, 0].astype(np.int)
-    ansys_stress = array[:, 1:]
-
-    nnum, stress = mapdl.result.nodal_stress(rset)
-
-    # v150 includes nodes in the geometry that aren't in the result
-    mask = np.in1d(nnum, ansys_nnum)
-    nnum = nnum[mask]
-    stress = stress[mask]
-
-    arr_sz = nnum.shape[0]
-    assert np.allclose(nnum, ansys_nnum[:arr_sz])
-    assert np.allclose(stress, ansys_stress[:arr_sz])
-
-
-@pytest.mark.parametrize("rset", RSETS)
-@skip_no_ansys
-def test_prnsol_prin(mapdl, rset):
-    mapdl.set(*rset)
-
-    # verify principal stress
-    table = mapdl.prnsol('prin').splitlines()
-    if isinstance(mapdl, MapdlCorba):
-        array = np.genfromtxt(table[8:])
-    else:
-        array = np.genfromtxt(table[10:])
-    ansys_nnum = array[:, 0].astype(np.int)
-    ansys_stress = array[:, 1:]
-
-    nnum, stress = mapdl.result.principal_nodal_stress(rset)
-
-    # v150 includes nodes in the geometry that aren't in the result
-    mask = np.in1d(nnum, ansys_nnum)
-    nnum = nnum[mask]
-    stress = stress[mask]
-
-    arr_sz = nnum.shape[0]
-    assert np.allclose(nnum, ansys_nnum[:arr_sz])
-    assert np.allclose(stress, ansys_stress[:arr_sz], atol=1E-5, rtol=1E-3)
-
-
 def test_chaining(mapdl, cleared):
     mapdl.prep7()
     n_kp = 1000
     with mapdl.chain_commands:
         for i in range(1, 1 + n_kp):
             mapdl.k(i, i, i, i)
+
     assert mapdl.geometry.n_keypoint == 1000
 
 
@@ -346,25 +222,45 @@ def test_invalid():
 
 @skip_no_ansys
 def test_keypoints(cleared, mapdl):
+    assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0],
            [1, 0, 0],
            [1, 1, 0],
            [0, 1, 0]]
 
-    i = 2
+    i = 1
     knum = []
     for x, y, z in kps:
         mapdl.k(i, x, y, z)
         knum.append(i)
         i += 1
 
-    breakpoint()
-    assert np.allclose(kps, mapdl.keypoints)
-    assert np.allclose(knum, mapdl.knum)
+    assert mapdl.geometry.n_keypoint == 4
+    assert np.allclose(kps, mapdl.geometry.keypoints)
+    assert np.allclose(knum, mapdl.geometry.knum)
+
+
+@skip_no_ansys
+@skip_no_xserver
+def test_kplot(cleared, mapdl):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.kplot(vtk=True)
+
+    mapdl.k("", 0, 0, 0)
+    mapdl.k("", 1, 0, 0)
+    mapdl.k("", 1, 1, 0)
+    mapdl.k("", 0, 1, 0)
+
+    cpos = mapdl.kplot(vtk=True, off_screen=True)
+    assert isinstance(cpos, CameraPosition)
+    mapdl.kplot()    # make sure legacy still works
+
 
 
 @skip_no_ansys
 def test_lines(cleared, mapdl):
+    assert mapdl.geometry.n_line == 0
+
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -374,15 +270,16 @@ def test_lines(cleared, mapdl):
     l2 = mapdl.l(k2, k3)
     l3 = mapdl.l(k3, k0)
 
-    lines = mapdl.lines
+    lines = mapdl.geometry.lines
     assert isinstance(lines, pyvista.PolyData)
-    assert np.allclose(mapdl.lnum, [l0, l1, l2, l3])
+    assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
+    assert mapdl.geometry.n_line == 4
 
 
 @skip_no_ansys
 @skip_no_xserver
 def test_lplot(cleared, mapdl):
-    with pytest.raises(ValueError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.lplot(vtk=True)
 
     k0 = mapdl.k("", 0, 0, 0)
@@ -400,26 +297,9 @@ def test_lplot(cleared, mapdl):
 
 
 @skip_no_ansys
-@skip_no_xserver
-def test_kplot(cleared, mapdl):
-    with pytest.raises(ValueError):
-        mapdl.kplot(vtk=True)
-
-    mapdl.k("", 0, 0, 0)
-    mapdl.k("", 1, 0, 0)
-    mapdl.k("", 1, 1, 0)
-    mapdl.k("", 0, 1, 0)
-
-    cpos = mapdl.kplot(vtk=True, off_screen=True)
-    assert isinstance(cpos, CameraPosition)
-    mapdl.kplot()    # make sure legacy still works
-
-
-@skip_no_ansys
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
-    with pytest.raises(RuntimeError):
-        mapdl.open_apdl_log(filename, mode='w')
+    mapdl.open_apdl_log(filename, mode='w')
 
     mapdl.prep7()
     mapdl.k(1, 0, 0, 0)
@@ -436,7 +316,6 @@ def test_logging(mapdl, tmpdir):
 
 @skip_no_ansys
 def test_nodes(tmpdir, cleared, mapdl):
-    mapdl.prep7()
     mapdl.n(1, 1, 1, 1)
     mapdl.n(11, 10, 1, 1)
     mapdl.fill(1, 11, 9)
@@ -458,11 +337,9 @@ def test_nnum(cleared, mapdl):
     mapdl.fill(1, 11, 9)
     assert np.allclose(mapdl.mesh.nnum, range(1, 12))
 
-
 @pytest.mark.parametrize("knum", [True, False])
 @skip_no_ansys
 def test_nplot_vtk(cleared, mapdl, knum):
-    mapdl.enable_interactive_plotting()
     mapdl.prep7()
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
@@ -472,20 +349,37 @@ def test_nplot_vtk(cleared, mapdl, knum):
 
 @skip_no_ansys
 def test_elements(cleared, mapdl):
-    mapdl.et(1, 188)
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(2, 1, 0, 0)
-    mapdl.n(3, 2, 0, 0)
-    mapdl.n(4, 3, 0, 0)
-    mapdl.e(1, 2)
-    mapdl.e(2, 3)
-    mapdl.e(3, 4)
+    mapdl.et(1, 185)
 
-    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2],
-                         [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 2, 3],
-                         [1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 3, 4]])
+    # two basic cells
+    cell1 = [[0, 0, 0],
+             [1, 0, 0],
+             [1, 1, 0],
+             [0, 1, 0],
+             [0, 0, 1],
+             [1, 0, 1],
+             [1, 1, 1],
+             [0, 1, 1]]
 
-    assert np.allclose(np.array(mapdl.mesh.elements), expected)
+    cell2 = [[0, 0, 2],
+             [1, 0, 2],
+             [1, 1, 2],
+             [0, 1, 2],
+             [0, 0, 3],
+             [1, 0, 3],
+             [1, 1, 3],
+             [0, 1, 3]]
+
+    with mapdl.chain_commands:
+        for cell in [cell1, cell2]:
+            for x, y, z in cell:
+                mapdl.n(x=x, y=y, z=z)
+
+    mapdl.e(*list(range(1, 9)))
+    mapdl.e(*list(range(9, 17)))
+    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+                         [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
+    assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
 
 @pytest.mark.parametrize("arr", ([1, 2, 3],
@@ -511,6 +405,16 @@ def test_load_array_err(cleared, mapdl):
 
     with pytest.raises(ValueError):
         mapdl.load_array(np.empty((1, 1, 1, 1)), 'MYARR')
+
+
+def test_get_array(cleared, mapdl):
+    # start with an empty array
+    array = mapdl.get_array('NODE', item1='NLIST')
+    assert array.size == 0
+
+    mapdl.cdread('db', pyansys.examples.hexarchivefile)
+    array = mapdl.get_array('NODE', item1='NLIST')
+    assert np.allclose(array, np.arange(1, 322))
 
 
 # must be at end as this uses a scoped fixture

@@ -1,7 +1,8 @@
 """Module to support MAPDL CAD geometry"""
 import os
+import re
 
-import pyiges
+from pyiges import Iges
 import numpy as np
 import pyvista as pv
 from vtk import vtkAppendPolyData
@@ -18,38 +19,51 @@ class Geometry():
             raise TypeError('Must be initialized using a MAPDL class')
 
         self._mapdl = mapdl
+        self._keypoints_cache = None
+        self._lines_cache = None
+        self._log = self._mapdl._log
+        self.set_log_level = self._mapdl.set_log_level
 
     def _load_iges(self):
         """Loads the iges file from MAPDL as a pyiges class"""
-        return pyiges(self._generate_iges())
+        return Iges(self._mapdl._generate_iges())
+
+    def _clear_cache(self):
+        self._keypoints_cache = None
+
+    @property
+    def _keypoints(self):
+        """Returns keypoints cache"""
+        if self._keypoints_cache is None:
+            self._keypoints_cache = self._load_keypoints()
+        return self._keypoints_cache
 
     @property
     def keypoints(self):
         """Keypoint coordinates"""
-        if self._keypoints is None:
-            self._load_keypoints()
         return np.asarray(self._keypoints.points)
 
     @property
     def knum(self):
         """Keypoint numbers"""
-        if self._keypoints is None:
-            self._load_keypoints()
         return self._keypoints['entity_num']
+
+    @property
+    def _lines(self):
+        """Returns lines cache"""
+        if self._lines_cache is None:
+            self._lines_cache = self._load_lines()
+        return self._lines_cache
 
     @property
     def lines(self):
         """Active lines as a pyvista.PolyData"""
-        if self._lines is None:
-            self._load_lines()
         return self._lines
 
     @property
-    def _lnum(self):
-        """Active lines as a pyvista.PolyData"""
-        if self._lines is None:
-            self._load_lines()
-        return self._lines['entity_num'].astype(np.int32)
+    def lnum(self):
+        """Line numbers of all selected lines"""
+        return self._lines['entity_num']  # .astype(np.int32)
 
     def areas(self, quality=7):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
@@ -167,10 +181,21 @@ class Geometry():
             area_num = np.empty(grid.n_cells, dtype=np.int32)
             for anum, nelem in groups:
                 area_num[i:i+nelem] = anum
-                i+= nelem
+                i += nelem
 
             grid['area_num'] = area_num
             return grid
+
+    @property
+    def n_volu(self):
+        """Number of volumes currently selected
+
+        Examples
+        --------
+        >>> mapdl.n_area
+        1
+        """
+        return self._item_count('VOLU')
 
     @property
     def n_area(self):
@@ -181,7 +206,18 @@ class Geometry():
         >>> mapdl.n_area
         1
         """
-        return int(self._mapdl.get(entity='AREA', item1='COUNT'))
+        return self._item_count('AREA')
+
+    @property
+    def n_line(self):
+        """Number of lines currently selected
+
+        Examples
+        --------
+        >>> mapdl.n_line
+        1
+        """
+        return self._item_count('LINE')
 
     @property
     def n_keypoint(self):
@@ -192,47 +228,77 @@ class Geometry():
         >>> mapdl.n_keypoint
         1
         """
-        return int(self._mapdl.get(entity='KP', item1='COUNT'))
+        return self._item_count('KP')
+
+    @supress_logging
+    def _item_count(self, entity):
+        """Return item count for a given entity"""
+        return int(self._mapdl.get(entity=entity, item1='COUNT'))
 
     @property
-    @supress_logging
-    def anum(self):
-        """List of area numbers"""
-        anum = []
-        for line in self.alist().splitlines():
-            try:
-                anum.append(int(line.split()[0]))
-            except:
-                pass
-        return anum
+    def knum(self):
+        """Array of keypoint numbers.
+
+        Examples
+        --------
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.knum
+        array([1, 2, 3, 4, 5, 6, 7, 8], dtype=int32)
+        """
+        return self._mapdl.get_array('KP', item1='KLIST').astype(np.int32)    
 
     @property
-    @supress_logging
     def lnum(self):
-        """List of area numbers"""
-        lnum = []
-        for line in self.llist().splitlines():
-            try:
-                lnum.append(int(line.split()[0]))
-            except:
-                pass
-        return lnum
+        """Array of line numbers.
+
+        Examples
+        --------
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.lnum
+        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12], dtype=int32)
+        """
+        return self._mapdl.get_array('LINE', item1='LLIST').astype(np.int32)
+
+    @property
+    def anum(self):
+        """Array of area numbers.
+        Examples
+        --------
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.anum
+        array([1, 2, 3, 4, 5, 6], dtype=int32)
+        """
+        return self._mapdl.get_array('AREA', item1='ALIST').astype(np.int32)
+
+    @property
+    def vnum(self):
+        """Array of volume numbers.
+
+        Examples
+        --------
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.vnum
+        array([1], dtype=int32)
+        """
+        return self._mapdl.get_array('VOLU', item1='VLIST').astype(np.int32)
 
     @supress_logging
     def _load_lines(self):
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        self.cm('__tmp_volu__', 'VOLU')
-        self.cm('__tmp_area__', 'AREA')
-        self.cm('__tmp_keyp__', 'KP')
-        self.asel('S', 'ALL')
-        self.ksel('S', 'ALL')
-        self.vsel('NONE')
+        with self._mapdl.chain_commands:
+            self._mapdl.cm('__tmp_volu__', 'VOLU')
+            self._mapdl.cm('__tmp_area__', 'AREA')
+            self._mapdl.cm('__tmp_keyp__', 'KP')
+            self._mapdl.asel('S', 'ALL')
+            self._mapdl.ksel('S', 'ALL')
+            self._mapdl.vsel('NONE')
         iges = self._load_iges()
 
-        self.cmsel('S', '__tmp_volu__', 'VOLU')
-        self.cmsel('S', '__tmp_area__', 'AREA')
-        self.cmsel('S', '__tmp_keyp__', 'KP')
+        with self._mapdl.chain_commands:
+            self._mapdl.cmsel('S', '__tmp_volu__', 'VOLU')
+            self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
+            self._mapdl.cmsel('S', '__tmp_keyp__', 'KP')
 
         selected_lnum = self.lnum
         lines = []
@@ -259,11 +325,16 @@ class Geometry():
 
         if lines:
             afilter = vtkAppendPolyData()
-            [afilter.AddInputData(line) for line in lines]
+            for line in lines:
+                afilter.AddInputData(line)
             afilter.Update()
-            self._lines = pv.wrap(afilter.GetOutput())
+            lines = pv.wrap(afilter.GetOutput())
         else:
             lines = pv.PolyData()
+
+        # TODO: verify line numbering is unique
+
+        return lines
 
     def _load_keypoints(self):
         """Load keypoints from MAPDL using IGES"""
@@ -276,11 +347,12 @@ class Geometry():
             self._mapdl.asel('NONE')
             self._mapdl.lsel('NONE')
 
-        iges = self._mapdl._load_iges()
+        iges = self._load_iges()
 
-        self.cmsel('S', '__tmp_volu__', 'VOLU')
-        self.cmsel('S', '__tmp_area__', 'AREA')
-        self.cmsel('S', '__tmp_line__', 'LINE')
+        with self._mapdl.chain_commands:
+            self._mapdl.cmsel('S', '__tmp_volu__', 'VOLU')
+            self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
+            self._mapdl.cmsel('S', '__tmp_line__', 'LINE')
 
         keypoints = []
         kp_num = []
@@ -289,9 +361,15 @@ class Geometry():
             kp_num.append(int(kp.d['entity_subs_num']))
 
         # self._kp_num = np.array(self._kp_num)
-        self._keypoints = pv.PolyData(keypoints)
-        self._keypoints['entity_num'] = kp_num
+        keypoints_pd = pv.PolyData(keypoints)
+        keypoints_pd['entity_num'] = kp_num
+        return keypoints_pd
 
-
-# geom = Geometry(mapdl)
-# geom._load_keypoints()
+    def __str__(self):
+        """Current geometry info"""
+        info = 'MAPDL Selected Geometry\n'
+        info += 'Keypoints:  %d\n' % self.n_keypoint
+        info += 'Lines:      %d\n' % self.n_line
+        info += 'Areas:      %d\n' % self.n_area
+        info += 'Volumes:    %d\n' % self.n_volu
+        return info

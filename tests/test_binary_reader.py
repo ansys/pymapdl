@@ -22,9 +22,30 @@ except ImportError:
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
+def get_ansys_bin(rver):
+    if os.name == 'nt':
+        ans_root = 'c:/Program Files/ANSYS Inc/'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
+                                'ANSYS%s.exe' % rver)
+    else:
+        ans_root = '/usr/ansys_inc'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
+                                'ansys%s' % rver)
 
+    return mapdlbin
+
+
+if 'PYANSYS_IGNORE_ANSYS' in os.environ:
+    HAS_ANSYS = False
+else:
+    HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
+
+RSETS = list(zip(range(1, 9), [1]*8))
+
+skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
+
 
 @pytest.fixture(scope='module')
 def result():
@@ -37,10 +58,165 @@ def static_canteliver_bc():
     return pyansys.read_binary(filename)
 
 
+@pytest.fixture(scope="module")
+def mapdl():
+    os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
+
+    # mode = request.param
+    mode = 'corba'
+    if mode == 'corba':
+        # v200 and newer don't work
+        # v194 has issues exiting
+        rver = '182'
+    else:
+        rver = '202'
+
+    mapdl = pyansys.launch_mapdl(get_ansys_bin(rver), override=True,
+                                 mode=mode)
+
+    # build the cyclic model
+    mapdl.prep7()
+    mapdl.shpp('off')
+    mapdl.cdread('db', pyansys.examples.sector_archive_file)
+    mapdl.prep7()
+    mapdl.cyclic()
+
+    # set material properties
+    mapdl.mp('NUXY', 1, 0.31)
+    mapdl.mp('DENS', 1, 4.1408E-04)
+    mapdl.mp('EX', 1, 16900000)
+    mapdl.emodif('ALL', 'MAT', 1)
+
+    # setup and solve
+    mapdl.run('/SOLU')
+    mapdl.antype(2, 'new')
+    mapdl.modopt('lanb', 1, 1, 100000)
+    mapdl.eqslv('SPARSE')
+    mapdl.lumpm(0)
+    mapdl.pstres(0)
+    mapdl.bcsoption('INCORE')
+    mapdl.mxpand(elcalc='YES')
+    mapdl.solve()
+    mapdl.finish()
+
+    # setup ansys for output without line breaks
+    mapdl.post1()
+    mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+    nsigfig = 10
+    mapdl.format('', 'E', nsigfig + 9, nsigfig)
+    mapdl.page(1E9, '', -1, 240)
+
+    return mapdl
+
+
+@pytest.mark.parametrize("rset", RSETS)
+@skip_no_ansys
+def test_prnsol_u(mapdl, rset):
+    mapdl.set(*rset)
+    # verify cyclic displacements
+    table = mapdl.prnsol('u').splitlines()
+    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+        array = np.genfromtxt(table[8:])
+    elif isinstance(mapdl, pyansys.mapdl_console.MapdlConsole):
+        array = np.genfromtxt(table[9:])
+    else:
+        raise RuntimeError('Only MapdlCorba and MapdlConsole supported')
+    ansys_nnum = array[:, 0].astype(np.int)
+    ansys_disp = array[:, 1:-1]
+
+    nnum, disp = mapdl.result.nodal_solution(rset)
+
+    # cyclic model will only output the master sector
+    ansys_nnum = ansys_nnum[:nnum.size]
+    ansys_disp = ansys_disp[:nnum.size]
+
+    assert np.allclose(ansys_nnum, nnum)
+    assert np.allclose(ansys_disp, disp)
+
+
+@pytest.mark.parametrize("rset", RSETS)
+@skip_no_ansys
+def test_presol_s(mapdl, rset):
+    mapdl.set(*rset)
+
+    # verify element stress
+    element_stress, _, enode = mapdl.result.element_stress(rset)
+    element_stress = np.vstack(element_stress)
+    enode = np.hstack(enode)
+
+    # parse ansys result
+    table = mapdl.presol('S').splitlines()
+    ansys_element_stress = []
+    line_length = len(table[15])
+    for line in table:
+        if len(line) == line_length:
+            ansys_element_stress.append(line)
+
+    ansys_element_stress = np.genfromtxt(ansys_element_stress)
+    ansys_enode = ansys_element_stress[:, 0].astype(np.int)
+    ansys_element_stress = ansys_element_stress[:, 1:]
+
+    arr_sz = element_stress.shape[0]
+    assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
+    assert np.allclose(enode, ansys_enode[:arr_sz])
+
+
+@pytest.mark.parametrize("rset", RSETS)
+@skip_no_ansys
+def test_prnsol_s(mapdl, rset):
+    mapdl.set(*rset)
+
+    # verify cyclic displacements
+    table = mapdl.prnsol('s').splitlines()
+    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+        array = np.genfromtxt(table[8:])
+    else:
+        array = np.genfromtxt(table[10:])
+    ansys_nnum = array[:, 0].astype(np.int)
+    ansys_stress = array[:, 1:]
+
+    nnum, stress = mapdl.result.nodal_stress(rset)
+
+    # v150 includes nodes in the geometry that aren't in the result
+    mask = np.in1d(nnum, ansys_nnum)
+    nnum = nnum[mask]
+    stress = stress[mask]
+
+    arr_sz = nnum.shape[0]
+    assert np.allclose(nnum, ansys_nnum[:arr_sz])
+    assert np.allclose(stress, ansys_stress[:arr_sz])
+
+
+@pytest.mark.parametrize("rset", RSETS)
+@skip_no_ansys
+def test_prnsol_prin(mapdl, rset):
+    mapdl.set(*rset)
+
+    # verify principal stress
+    table = mapdl.prnsol('prin').splitlines()
+    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+        array = np.genfromtxt(table[8:])
+    else:
+        array = np.genfromtxt(table[10:])
+    ansys_nnum = array[:, 0].astype(np.int)
+    ansys_stress = array[:, 1:]
+
+    nnum, stress = mapdl.result.principal_nodal_stress(rset)
+
+    # v150 includes nodes in the geometry that aren't in the result
+    mask = np.in1d(nnum, ansys_nnum)
+    nnum = nnum[mask]
+    stress = stress[mask]
+
+    arr_sz = nnum.shape[0]
+    assert np.allclose(nnum, ansys_nnum[:arr_sz])
+    assert np.allclose(stress, ansys_stress[:arr_sz], atol=1E-5, rtol=1E-3)
+
+
 def test_loadresult(result):
     # check result is loaded
     assert result.nsets
-    assert result.geometry.nnum.size
+    assert result.mesh.nnum.size
 
     # check geometry is genreated
     grid = result.grid

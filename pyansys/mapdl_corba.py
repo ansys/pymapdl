@@ -116,7 +116,7 @@ class MapdlCorba(_MapdlOld):
         self._log.debug('At "%s"', self.path)
 
         # set stdout
-        if self._log.level < 20:  # < INFO            
+        if self._log.level < 20:  # < INFO
             self._process = subprocess.Popen(command, shell=True,
                                              cwd=self.path)
         else:

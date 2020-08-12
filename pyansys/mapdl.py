@@ -1,4 +1,5 @@
 """Module to control interaction with MAPDL through Python"""
+import glob
 import re
 import os
 import logging
@@ -8,12 +9,14 @@ from shutil import rmtree, copyfile
 
 import appdirs
 import pyvista as pv
+import numpy as np
 
 import pyansys
 from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.misc import random_string, supress_logging
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
+from pyansys.errors import MapdlRuntimeError
 
 
 MATPLOTLIB_LOADED = True
@@ -25,6 +28,8 @@ try:
 except:
     MATPLOTLIB_LOADED = False
 
+# test for png file
+PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
 
 INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
                   '*cfo': '',
@@ -33,7 +38,7 @@ INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRI
                   '*IF': 'Use a python if or run as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
-MAX_COMMAND_LENGTH = 600
+MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 
 def parse_to_short_cmd(command):
@@ -92,7 +97,7 @@ def setup_logger(loglevel='INFO'):
 class _MapdlCore(_MapdlCommands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True):
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False):
         """ Initialize connection with ANSYS program """
         self._show_matplotlib_figures = True  # for testing
         self._exited = False
@@ -109,16 +114,16 @@ class _MapdlCore(_MapdlCommands):
         self._jobname = None
         self._cleanup = True
 
-        # geometry cache
-        self._keypoints = None
-        self._lines = None
-
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
         self.non_interactive = self._non_interactive(self)
 
         from pyansys.parameters import Parameters
         self._parameters = Parameters(self)
+
+        if log_apdl:
+            filename = os.path.join(self.path, 'log.inp')
+            self.open_apdl_log(filename, mode=log_apdl)
 
     @property
     def chain_commands(self):
@@ -127,9 +132,9 @@ class _MapdlCore(_MapdlCommands):
 
     def _chain_stored(self):
         """Send a series of commands to MAPDL"""
-        # appears to be an (arbitrary?) limit to 600 characters per command
+        # appears to be an (arbitrary?) limit to 640 characters per command
 
-        # Create chained commamnds less than 600 characters each
+        # Create chained commamnds less than 640 characters each
         c = 0
         chained_commands = []
         chunk = []
@@ -367,6 +372,7 @@ class _MapdlCore(_MapdlCommands):
         self.prep7()
         self.igesout(filename, att=1)
         self.run('/%s' % prior_processor)
+        return filename
 
     def open_gui(self, include_result=True):
         """Saves existing database and opens up APDL GUI
@@ -495,16 +501,17 @@ class _MapdlCore(_MapdlCommands):
             cpos = kwargs.pop('cpos', None)
             show_bounds = kwargs.pop('show_bounds', False)
             show_axes = kwargs.pop('show_axes', False)
-
+            background = kwargs.pop('background', None)
             pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+
+            if background:
+                pl.set_background(background)
+
             pl.add_points(self.mesh.nodes, **kwargs)
             pl.show_axes()
-            if 'background' in kwargs:
-                pl.set_background(kwargs['background'])
 
             if isinstance(knum, str):
                 knum = knum == '1'
-
 
             if knum:
                 pl.add_point_labels(self.mesh.nodes, self.mesh.nnum)
@@ -841,9 +848,10 @@ class _MapdlCore(_MapdlCommands):
         This command is valid in any processor.
         """
         if vtk:
-            if not self.lines.n_cells:
-                raise ValueError('Either no lines have been selected or there '
-                                 'is nothing to plot')
+            if not self.geometry.n_line:
+                raise MapdlRuntimeError('Either no lines have been selected or there '
+                                        'is nothing to plot')
+
             pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
             pl.set_background(kwargs.pop('background', None))
 
@@ -851,25 +859,22 @@ class _MapdlCore(_MapdlCommands):
                 pl.add_axes()
 
             cpos = kwargs.pop('cpos', None)
-
             kwargs.setdefault('color', 'w')
 
             # allow only unique line numbers
-            lnum, idx = np.unique(self._lnum, return_index=True)
-            lines = self.lines.extract_cells(idx)
+            lines = self.geometry.lines
+            lnum = lines.cell_arrays['entity_num'].astype(np.int32)
 
             # TODO: partially select lines
-
             font_size = kwargs.pop('font_size', None)
             if show_numbering:
                 pl.add_point_labels(lines.points[50::101], lnum, font_size=font_size)
 
-            
-
             if show_keypoints:
-                pl.add_points(self.keypoints)
+                pl.add_points(self.geometry.keypoints)
                 if show_numbering:
-                    pl.add_point_labels(self.keypoints, self.knum, font_size=font_size)
+                    pl.add_point_labels(self.geometry.keypoints, self.geometry.knum,
+                                        font_size=font_size)
 
             if random_color:
                 kwargs['scalars'] = np.random.random(lines.n_cells)
@@ -913,9 +918,10 @@ class _MapdlCore(_MapdlCommands):
         This command is valid in any processor.
         """
         if vtk:
-            if not self.keypoints.shape[0]:
-                raise ValueError('Either no keypoints have been selected or there '
-                                 'is nothing to plot')
+            if not self.geometry.n_keypoint:
+                raise MapdlRuntimeError('Either no keypoints have been'
+                                        'selected or there is '
+                                        'nothing to plot')
             pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
 
             if kwargs.pop('show_axes', False):
@@ -924,18 +930,47 @@ class _MapdlCore(_MapdlCommands):
             cpos = kwargs.pop('cpos', None)
 
             kwargs.setdefault('color', 'w')
-            keypoints = self.keypoints
-            knum = self.knum
-            # TODO: partially select keypoints
-
+            keypoints = self.geometry.keypoints
             pl.add_points(keypoints, **kwargs)
+
             if show_numbering:
-                pl.add_point_labels(keypoints, knum)
+                pl.add_point_labels(keypoints, self.geometry.knum)
 
             pl.camera_position = cpos
             return pl.show()
         else:
             return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
+
+    @property
+    def result(self):
+        """Binary interface to the result file using ``pyansys.ResultFile``
+
+        Examples
+        --------
+        >>> mapdl.solve()
+        >>> mapdl.finish()
+        >>> result = mapdl.result
+        >>> print(result)
+
+        """
+        if not self._local:
+            raise RuntimeError('Binary interface only available when result is local.')
+
+        try:
+            result_path = self.inquire('RSTFILE')
+        except RuntimeError:
+            result_path = ''
+
+        if not result_path:
+            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
+        elif not os.path.dirname(result_path):
+            result_path = os.path.join(self.path, '%s.rst' % result_path)
+
+        # there may be multiple result files at this location (if not
+        # combining results)
+        if not os.path.isfile(result_path):
+            raise FileNotFoundError('No results found at %s' % result_path)
+        return pyansys.read_binary(result_path)
 
     def _get(self, *args, **kwargs):
         raise NotImplementedError('Implemented by child class')
@@ -1621,3 +1656,92 @@ class _MapdlCore(_MapdlCommands):
                 self.exit()
             except Exception as e:
                 self._log.error('exit: %s', str(e))
+
+    @supress_logging
+    def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
+                  it2num='', kloop='', **kwargs):
+        """Uses the VGET command to get an array from ANSYS
+
+        Parameters
+        ----------
+        entity
+            Entity keyword.  Valid keywords are NODE, ELEM, KP, LINE,
+            AREA, VOLU, etc
+
+        entnum
+            The number of the entity (as shown for ENTNUM = in the tables
+            below).
+
+        item1
+            The name of a particular item for the given entity.  Valid
+            items are as shown in the Item1 columns of the tables
+            below.
+
+        it1num
+            The number (or label) for the specified Item1 (if any).
+            Valid IT1NUM values are as shown in the IT1NUM columns of
+            the tables below.  Some Item1 labels do not require an
+            IT1NUM value.
+
+        item2, it2num
+            A second set of item labels and numbers to further qualify
+            the item for which data is to be retrieved.  Most items do
+            not require this level of information.
+
+        kloop
+            Field to be looped on:
+
+            - 0 or 2 : Loop on the ENTNUM field (default).
+            - 3 : Loop on the Item1 field.
+            - 4 : Loop on the IT1NUM field. Successive items are as shown with IT1NUM.
+            - 5 : Loop on the Item2 field.
+            - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
+
+        Examples
+        --------
+        List the current selected node numbers
+
+        >>> mapdl.get_array('NODE', item1='NLIST')
+        array([  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,
+              ...
+              314., 315., 316., 317., 318., 319., 320., 321.])
+
+        Notes
+        -----
+        Please reference your ANSYS help manual *VGET command tables
+        for all the available *VGET values
+
+        """
+        return self._get_array(entity, entnum, item1, it1num, item2,
+                               it2num, kloop)
+
+    def _get_array(self, *args, **kwargs):
+        """Implemented by child class"""
+        raise NotImplementedError('Implemented by child class')
+
+    def _display_plot(self, text):
+        """Display the last generated plot (*.png) from MAPDL"""
+        png_found = PNG_TEST.findall(text)
+        if png_found:
+            # flush graphics writer
+            self.show('CLOSE')
+            self.show('PNG')
+
+            import matplotlib.pyplot as plt
+            import matplotlib.image as mpimg
+            filename = self._screenshot_path()
+
+            if os.path.isfile(filename):
+                img = mpimg.imread(filename)
+                plt.imshow(img)
+                plt.axis('off')
+                if self._show_matplotlib_figures:
+                    plt.show()  # consider in-line plotting
+            else:
+                self._log.error('Unable to find screenshot at %s' % filename)
+
+    def _screenshot_path(self):
+        """Return last filename based on the current jobname"""
+        filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
+        filenames.sort()
+        return filenames[-1]
