@@ -12,7 +12,7 @@ from pexpect import popen_spawn
 
 
 from pyansys.misc import is_float
-from pyansys.errors import LockFileException
+from pyansys.errors import LockFileException, PrivateModuleImportError
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('pyansys')
@@ -534,9 +534,9 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     elif mode == 'grpc':
         # check if grpc package is available
         try:
-            import ansys.grpc.mapdl
+            from ansys.mapdl import MapdlGrpc
         except ImportError:
-            raise ImportError('Please install ``ansys.grpc.mapdl`` for this feature')
+            raise PrivateModuleImportError
 
         port = launch_grpc(exec_file, jobname, nproc, ram=kwargs.pop('ram', None),
                            run_location=run_location, port=MAPDL_DEFAULT_PORT,
