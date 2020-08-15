@@ -16,8 +16,8 @@ from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.misc import random_string, supress_logging
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
-from pyansys.errors import MapdlRuntimeError
-
+from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
+from pyansys.plotting import general_plotter
 
 MATPLOTLIB_LOADED = True
 try:
@@ -257,7 +257,7 @@ class _MapdlCore(_MapdlCommands):
             if self._exited:
                 return 'MAPDL exited'
             stats = self.slashstatus('PROD')
-        except:
+        except:  # pragma: no cover
             return 'MAPDL exited'
 
         st = stats.find('*** Products ***')
@@ -282,7 +282,7 @@ class _MapdlCore(_MapdlCommands):
         return self._geometry
 
     @property
-    def _geometry(self):
+    def _geometry(self):  # pragma: no cover
         """Implemented by child class"""
         from pyansys.mapdl_geometry import Geometry
         return Geometry(self)
@@ -330,11 +330,11 @@ class _MapdlCore(_MapdlCommands):
         return self._mesh
 
     @property
-    def _mesh(self):
+    def _mesh(self):  # pragma: no cover
         """Implemented by child class"""
         raise NotImplementedError('Implemented by child class')
 
-    def _reset_cache(self):
+    def _reset_cache(self):    # pragma: no cover
         """Reset cached items and other items"""
         raise NotImplementedError('Implemented by child class')
 
@@ -399,7 +399,7 @@ class _MapdlCore(_MapdlCommands):
         self.run('/%s' % prior_processor)
         return filename
 
-    def open_gui(self, include_result=True):
+    def open_gui(self, include_result=True):  # pragma: no cover
         """Saves existing database and opens up APDL GUI
 
         Parameters
@@ -465,7 +465,7 @@ class _MapdlCore(_MapdlCommands):
                 self.run('/%s' % prior_processor)
 
     def _close_apdl_log(self):
-        """ Closes APDL log """
+        """Closes the APDL log"""
         if self._apdl_log is not None:
             self._apdl_log.close()
         self._apdl_log = None
@@ -480,11 +480,13 @@ class _MapdlCore(_MapdlCommands):
         knum : bool, int, optional
             Node number key:
 
-            - 0 : No node numbers on display (default).
-            - 1 : Include node numbers on display.  See also /PNUM command.
+            - ``False`` : No node numbers on display (default).
+            - ``True`` : Include node numbers on display.
 
         vtk : bool, optional
-           Display nodes using VTK.
+            Plot the currently selected nodes using ``pyvista``.
+            Defaults to current ``use_vtk`` setting as set on the
+            initialization of MAPDL.
 
         Examples
         --------
@@ -494,7 +496,7 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(knum=True, background='w', color='k',
+        >>> mapdl.nplot(knum=True, vtk=True, background='w', color='k',
                         show_bounds=True)
 
         Plot without using VTK
@@ -508,49 +510,33 @@ class _MapdlCore(_MapdlCommands):
         Notes
         -----
         Only selected nodes [NSEL] are displayed.  Elements need not
-        be defined.  See the DSYS command for display coordinate
-        system.
-
-        This command is valid in any processor.
+        be defined.
         """
         if vtk is None:
             vtk = self._use_vtk
-        elif not vtk:
-            self._enable_interactive_plotting()
 
         if vtk:
-            if not self.mesh.nodes.size:
+            if not self.mesh.n_node:
                 raise RuntimeError('There are no nodes to plot.')
 
-            kwargs.setdefault('color', 'w')
-            cpos = kwargs.pop('cpos', None)
-            show_bounds = kwargs.pop('show_bounds', False)
-            show_axes = kwargs.pop('show_axes', False)
-            background = kwargs.pop('background', None)
-            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
-
-            if background:
-                pl.set_background(background)
-
-            pl.add_points(self.mesh.nodes, **kwargs)
-            pl.show_axes()
-
-            if isinstance(knum, str):
-                knum = knum == '1'
-
+            labels = []
             if knum:
-                pl.add_point_labels(self.mesh.nodes, self.mesh.nnum)
-            if cpos:
-                pl.camera_position = cpos
-            if show_bounds:
-                pl.show_bounds()
-            if show_axes:
-                pl.show_axes()
+                # must eliminate duplicate points or labeling fails miserably.
+                pcloud = pv.PolyData(self.mesh.nodes)
+                pcloud['labels'] = self.mesh.nnum
+                pcloud.clean(inplace=True)
 
-            return pl.show()
+                labels = [{'points': pcloud.points, 'labels': pcloud['labels']}]
+            points = [{'points': self.mesh.nodes}]
+            return general_plotter('MAPDL Node Plot', meshes, points,
+                                   labels, **kwargs)
 
         # otherwise, use the built-in nplot
-        return super().nplot(knum, **kwargs)
+        if isinstance(knum, bool):
+            knum = int(knum)
+
+        self._enable_interactive_plotting()
+        return super().nplot(knum)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
               vtk=False, quality=7, show_numbering=False,
@@ -738,7 +724,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def _png_mode(self):
-        """Returns True when MAPDL is writing plots as png to file."""
+        """Returns True when MAPDL is set to write plots as png to file."""
         return 'PNG' in self.show()
 
     def set_log_level(self, loglevel):
@@ -781,53 +767,67 @@ class _MapdlCore(_MapdlCommands):
         else:
             raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
 
-    def eplot(self, vtk=False, **kwargs):
-        """APDL Command: EPLOT
+    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+        """Plots the currently selected elements.
 
-        Produces an element display.
+        APDL Command: EPLOT
 
         Parameters
         ----------
         vtk : bool, optional
             Plot the currently selected elements using ``pyvista``.
+            Defaults to current ``use_vtk`` setting.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
 
         **kwargs
-            See ``help(pyvista.plot)`` for more keyword arguments
+            See ``help(pyansys.plotter.general_plotter)`` for more keyword arguments
             related to visualizing using ``vtk``.
 
-        Notes
-        -----
-        Produces an element display of the selected elements. In full
-        graphics, only those elements faces with all of their
-        corresponding nodes selected are plotted. In PowerGraphics,
-        all element faces of the selected element set are plotted
-        irrespective of the nodes selected.  However, for both full
-        graphics and PowerGraphics, adjacent or otherwise duplicated
-        faces of 3-D solid elements will not be displayed in an
-        attempt to eliminate plotting of interior facets. See the DSYS
-        command for display coordinate system issues.
+        Examples
+        --------
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.1)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.vgen(2, 'all')
+        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
+                        show_node_numbering=True)
 
-        This command will display curvature in midside node elements
-        when PowerGraphics is activated [/GRAPHICS,POWER] and
-        /EFACET,2 or /EFACET,4 are enabled.  (To display curvature,
-        two facets per edge is recommended [/EFACET,2]).  When you
-        specify /EFACET,1, PowerGraphics does not display midside
-        nodes. /EFACET has no effect on EPLOT for non-midside node
-        elements.
+        Save a screenshot to disk without showing the plot
 
-        This command is valid in any processor.
+        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                        window_size=[1920, 1080], screenshot='screenshot.png', 
+                        off_screen=True)
+
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
         if vtk:
-            # default kwargs
-            kwargs.setdefault('color', 'w')
-            kwargs.setdefault('show_axes', True)
-            kwargs.setdefault('show_edges', True)
-            if self._vtk_grid:
-                self._vtk_grid.plot(**kwargs)
-            else:
-                raise RuntimeError('No elements selected to plot')
-        else:
-            return super().eplot(**kwargs)
+            if not self._mesh.n_elem:
+                raise RuntimeError('There are no elements to plot.')
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{'points': esurf.points, 'labels': esurf['ansys_node_num']}]
+
+            return general_plotter('MAPDL Element Plot',
+                                   [{'mesh': esurf}],
+                                   [],
+                                   labels,
+                                   **kwargs)
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
+        return super().eplot()
 
     def lplot(self, nl1="", nl2="", ninc="", vtk=False,
               show_keypoints=False, show_numbering=True,
@@ -997,7 +997,7 @@ class _MapdlCore(_MapdlCommands):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
-    def _get(self, *args, **kwargs):
+    def _get(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')
 
     def add_file_handler(self, filepath, append=False, level='DEBUG'):
@@ -1247,70 +1247,32 @@ class _MapdlCore(_MapdlCommands):
         except:
             return value
 
-    def read_float_parameter(self, parameter_name):
-        """Read out the value of a ANSYS parameter to use in python.
-
-        Parameters
-        ----------
-        parameter_name : str
-            Name of the parameter inside ANSYS.
-
-        Returns
-        -------
-        float
-            Value of ANSYS parameter.
-
-        Examples
-        --------
-        >>> ansys.get('myparm', 'node', '', 'count')
-        >>> value = ansys.read_float_parameter('myparm')
-        >>> value
-        3003
-
-        Retreive the value in an array.  This example creates a block
-        of elements and stores the element numbers in an array.  Then
-        it retreives the first value of that array
-
-        >>> ansys.prep7()
-        >>> ansys.block(0,1,0,1,0,1)
-        >>> ansys.et(1, 186)
-        >>> ansys.vmesh('all')
-        >>> ansys.run('*VGET, ELEM_ARR, ELEM, , elist')
-        >>> ansys.read_float_parameter('ELEM_ARR(1)')
-        1.0
-
-        You could also retrieve ELEM_ARR with
-
-        >>> values, arrays = ansys.load_parameters()
-        >>> arrays
-        {'ELEM_ARR': array([1., 2., 3., 4., 5., 6., 7., 8.])}
-
-        """
-        try:
-            response = self.run(parameter_name + " = " + parameter_name)
-        except TypeError:
-            raise TypeError('Input variable `parameter_name` should be string')
-        return float(response.split('=')[-1])
+    def read_float_parameter(self, parameter_name):  # pragma: no cover
+        """Depreciated in favor of ``mapdl.parameters[parameter_name]``"""
+        raise NotImplementedError('The ``read_float_parameter`` Depreciated.  '
+                                  '\n\nInstead, please use:\n'
+                                  'mapdl.parameters["%s"]' % parameter_name)
 
     def read_float_from_inline_function(self, function_str):
         """Use a APDL inline function to get a float value from ANSYS.
-        Take note, that internally an APDL parameter __floatparameter__ is
-        created/overwritten.
+        Take note, that internally an APDL parameter
+        "__floatparameter__" is created/overwritten.
 
         Parameters
         ----------
         function_str : str
-            String containing an inline function as used in APDL..
+            String containing an inline function as used in APDL.
 
         Returns
         -------
         float
-            Value returned by inline function..
+            Value returned by inline function.
 
         Examples
         --------
-        >>> inline_function = "node({},{},{})".format(x, y, z)
+        >>> inline_function = "node({},{},{})".format(0, 1, 2)
         >>> node = apdl.read_float_from_inline_function(inline_function)
+        75.0
         """
         self.run("__floatparameter__="+function_str)
         return self.read_float_parameter("__floatparameter__")
@@ -1599,12 +1561,11 @@ class _MapdlCore(_MapdlCommands):
             if not self.allow_ignore:
                 text = text.replace('This command will be ignored.', '')
                 text += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(text)
+                raise MapdlInvalidRoutineError(text)
 
         if '*** ERROR ***' in self._response:  # flag error
             self._log.error(self._response)
-            # if not continue_on_error:
-            raise Exception(self._response)
+            raise MapdlRuntimeError(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -1620,10 +1581,10 @@ class _MapdlCore(_MapdlCommands):
         self._response = self._response.replace('\\r\\n', '\n').replace('\\n', '\n')
         return self._response
 
-    def _display_plot(self, *args, **kwargs):
+    def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')
 
-    def _run(self, *args, **kwargs):
+    def _run(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')
 
     @property
@@ -1671,7 +1632,7 @@ class _MapdlCore(_MapdlCommands):
         """Full path to the result file"""
         return os.path.join(self.path, self.jobname).replace('\\', '/')
 
-    def exit(self):
+    def exit(self):  # pragma: no cover
         """Exit from MAPDL"""
         raise NotImplementedError('Implemented by child class')
 
@@ -1736,12 +1697,11 @@ class _MapdlCore(_MapdlCommands):
         -----
         Please reference your ANSYS help manual *VGET command tables
         for all the available *VGET values
-
         """
         return self._get_array(entity, entnum, item1, it1num, item2,
                                it2num, kloop)
 
-    def _get_array(self, *args, **kwargs):
+    def _get_array(self, *args, **kwargs):  # pragma: no cover
         """Implemented by child class"""
         raise NotImplementedError('Implemented by child class')
 

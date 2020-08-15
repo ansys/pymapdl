@@ -1,35 +1,15 @@
-"""
-Contains the _MapdlOld class and dependent functions.  To be inherited
-by MapdlCorba and MapdlConsole for interfacing with MAPDL without the
-use of gRPC.
+"""Contains the _MapdlOld class and dependent functions.  To be
+inherited by MapdlCorba and MapdlConsole for interfacing with MAPDL
+without the use of gRPC.
 """
 import os
 import re
 
 import numpy as np
 
+from pyansys import Archive
 from pyansys.mapdl import _MapdlCore
-import pyansys
-from pyansys.misc import is_float, supress_logging
-
-
-def check_lock_file(path, jobname, override):
-    # Check for lock file
-    lockfile = os.path.join(path, jobname + '.lock')
-    if os.path.isfile(lockfile):
-        if not override:
-            raise FileExistsError('Lock file exists for jobname %s \n'
-                                  % jobname +
-                                  ' at %s\n' % lockfile +
-                                  'Set ``override=True`` to delete lock '
-                                  'and start ANSYS')
-        else:
-            try:
-                os.remove(lockfile)
-            except PermissionError:
-                raise PermissionError('Unable to remove lock file.  '
-                                      'Another instance of ANSYS might be '
-                                      'running at "%s"' % path)
+from pyansys.misc import supress_logging
 
 
 class _MapdlOld(_MapdlCore):
@@ -310,7 +290,7 @@ class _MapdlOld(_MapdlCore):
         self._nproc = nproc
         self._additional_switches = additional_switches
 
-        # perhaps directly from MAPDL...
+        # perhaps use self.parameters.revision
         self._version = re.findall(r'\d\d\d', self._exec_file)[0]
 
         # start local instance of MAPDL
@@ -328,38 +308,15 @@ class _MapdlOld(_MapdlCore):
             # write database to an archive file
             arch_filename = os.path.join(self.path, 'tmp.cdb')
             self.cdwrite('db', arch_filename)
-            self._archive_cache = pyansys.Archive(arch_filename, parse_vtk=True,
-                                                  name='Mesh')
+            self._archive_cache = Archive(arch_filename, parse_vtk=True,
+                                          name='Mesh')
         return self._archive_cache
 
-    def load_parameters(self):
-        """Loads and returns all current parameters
-
-        Returns
-        -------
-        parameters : dict
-            Dictionary of single value parameters.
-
-        arrays : dict
-            Dictionary of MAPDL arrays.
-
-        Examples
-        --------
-        >>> parameters, arrays = mapdl.load_parameters()
-        >>> print(parameters)
-        {'ANSINTER_': 2.0,
-        'CID': 3.0,
-        'TID': 4.0,
-        '_ASMDIAG': 5.363415510271,
-        '_MAXELEMNUM': 26357.0,
-        '_MAXELEMTYPE': 7.0,
-        '_MAXNODENUM': 40908.0,
-        '_MAXREALCONST': 1.0}
-        """
-        # load ansys parameters to python
-        filename = os.path.join(self.path, 'parameters.parm')
-        self.parsav('all', filename)
-        return load_parameters(filename)
+    def load_parameters(self):  # pragma: no cover
+        """Depreciated in favor of ``mapdl.parameters``"""
+        raise NotImplementedError('``load_parameters`` is  Depreciated.  '
+                                  '\n\nInstead, please use:\n'
+                                  '``mapdl.parameters``')
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
@@ -390,104 +347,3 @@ class _MapdlOld(_MapdlCore):
             return array.astype(dtype)
         else:
             return array
-
-
-# TODO: Speed this up with:
-# https://tinodidriksen.com/2011/05/cpp-convert-string-to-double-speed/
-def load_parameters(filename):
-    """Load parameters from a file
-
-    Parameters
-    ----------
-    filename : str
-        Name of the parameter file to read in.
-
-    Returns
-    -------
-    parameters : dict
-        Dictionary of single value parameters
-
-    arrays : dict
-        Dictionary of arrays
-    """
-    parameters = {}
-    arrays = {}
-
-    with open(filename) as f:
-        append_mode = False
-        append_text = []
-        for line in f.readlines():
-            if append_mode:
-                if 'END PREAD' in line:
-                    append_mode = False
-                    values = ''.join(append_text).split(' ')
-                    shp = arrays[append_varname].shape
-                    raw_parameters = np.genfromtxt(values)
-
-                    n_entries = np.prod(shp)
-                    if n_entries != raw_parameters.size:
-                        paratmp = np.zeros(n_entries)
-                        paratmp[:raw_parameters.size] = raw_parameters
-                        paratmp = paratmp.reshape(shp)
-                    else:
-                        paratmp = raw_parameters.reshape(shp, order='F')
-
-                    arrays[append_varname] = paratmp.squeeze()
-                    append_text.clear()
-                else:
-                    nosep_line = line.replace('\n', '').replace('\r', '')
-                    append_text.append(" " + re.sub(r"(?<=\d)-(?=\d)"," -", nosep_line))
-
-            elif '*DIM' in line:
-                # *DIM, Par, Type, IMAX, JMAX, KMAX, Var1, Var2, Var3, CSYSID
-                split_line = line.split(',')
-                varname = split_line[1].strip()
-                arr_type = split_line[2]
-                imax = int(split_line[3])
-                jmax = int(split_line[4])
-                kmax = int(split_line[5])
-
-                if arr_type == 'CHAR':
-                    arrays[varname] = np.empty((imax, jmax, kmax), dtype='<U8', order='F')
-                elif arr_type == 'ARRAY':
-                    arrays[varname] = np.empty((imax, jmax, kmax), np.double, order='F')
-                elif arr_type == 'TABLE':
-                    arrays[varname] = np.empty((imax+1, jmax+1, kmax), np.double, order='F')
-                elif arr_type == 'STRING':
-                    arrays[varname] = 'str'
-                else:
-                    arrays[varname] = np.empty((imax, jmax, kmax), np.object, order='F')
-
-            elif '*SET' in line:
-                vals = line.split(',')
-                varname = vals[1] + ' '
-                varname = varname[:varname.find('(')].strip()
-                if varname in arrays:
-                    st = line.find('(') + 1
-                    en = line.find(')')
-                    ind = line[st:en].split(',')
-                    i = int(ind[0]) - 1
-                    j = int(ind[1]) - 1
-                    k = int(ind[2]) - 1
-                    value = line[en+2:].strip().replace("'", '').strip()
-                    if isinstance(arrays[varname], str):
-                        parameters[varname] = value
-                        del arrays[varname]
-                    else:
-                        arrays[varname][i, j, k] = value
-                else:
-                    value = vals[-1]
-                    if is_float(value):
-                        parameters[varname] = float(value)
-                    else:
-                        parameters[varname] = value
-
-            elif '*PREAD' in line:
-                # read a series of values
-                split_line = line.split(',')
-                append_varname = split_line[1].strip()
-                append_mode = True
-
-    for array_name in arrays:
-        arrays[array_name] = np.squeeze(arrays[array_name])
-    return parameters, arrays

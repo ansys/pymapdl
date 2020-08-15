@@ -2,12 +2,14 @@
 Built using ansys documentation from
 https://www.sharcnet.ca/Software/Ansys/
 
+RIP sharcnet
+
 """
 
 # consider moving the docstrings into a different module
 
 
-class _MapdlCommands(object):
+class _MapdlCommands(object):  # pragma: no cover
     """ANSYS class containing MAPDl functions generated from ANSYS 16.2
 
     """

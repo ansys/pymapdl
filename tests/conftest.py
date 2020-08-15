@@ -42,7 +42,9 @@ def mapdl(request):
     #     from pyansys.mapdl_grpc import MapdlGrpc
     #     mapdl = MapdlGrpc(cleanup_on_exit=False)
     # else:
-    return pyansys.launch_mapdl(get_ansys_bin(rver), override=True, mode=mode)
+    mapdl = pyansys.launch_mapdl(get_ansys_bin(rver), override=True, mode=mode)
+    mapdl._show_matplotlib_figures = False
+    return mapdl
 
 
 @pytest.fixture(scope='function')

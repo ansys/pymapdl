@@ -19,6 +19,12 @@ class MapdlRuntimeError(RuntimeError):
     pass
 
 
+class MapdlInvalidRoutineError(RuntimeError):
+    """Raised when MAPDL is in the wrong routine"""
+    def __init__(self, msg=''):
+        RuntimeError.__init__(self, msg)
+
+
 class MapdlExitedError(RuntimeError):
     """Raised when MAPDL has exited"""
 
