@@ -976,7 +976,7 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.finish()
         >>> result = mapdl.result
         >>> print(result)
-
+        
         """
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')
@@ -1084,7 +1084,7 @@ class _MapdlCore(_MapdlCommands):
                   item2="", it2num="", **kwargs):
         """Runs the *GET command and returns a Python value.
 
-        See `help(get)` for more details.
+        See ``help(mapdl.starget)`` for more details.
 
         Parameters
         ----------
@@ -1120,13 +1120,13 @@ class _MapdlCore(_MapdlCommands):
         --------
         Retreive the number of nodes.
 
-        >>> value = ansys.get('node', '', 'count')
+        >>> value = ansys.get_value('node', '', 'count')
         >>> value
         3003
 
         Retreive the number of nodes using keywords.
 
-        >>> value = ansys.get(entity='node', item1='count')
+        >>> value = ansys.get_value(entity='node', item1='count')
         >>> value
         3003
         """
@@ -1289,6 +1289,7 @@ class _MapdlCore(_MapdlCommands):
             pass
         return self._jobname
 
+    @supress_logging
     def inquire(self, func):
         """Returns system information.
 
@@ -1647,7 +1648,8 @@ class _MapdlCore(_MapdlCommands):
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                   it2num='', kloop='', **kwargs):
-        """Uses the VGET command to get an array from ANSYS
+        """Uses the VGET command to Return an array from ANSYS as a
+        Python array.
 
         Parameters
         ----------
@@ -1733,10 +1735,9 @@ class _MapdlCore(_MapdlCommands):
         return filenames[-1]
 
     @property
-    def math(self):
+    def math(self):  # pragma: no cover
         """Return mapdl.math instance"""
-        from pyansys.mapdl_math import MapdlMath
-        return MapdlMath(self)
+        raise NotImplementedError("Requires gRPC interface")
 
     def _set_log_level(self, level):
         """alias for set_log_level"""

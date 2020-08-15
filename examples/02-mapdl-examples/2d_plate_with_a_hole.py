@@ -100,7 +100,8 @@ mapdl.mopt('EXPND', 0.7)  # default 1
 
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
-_ = mapdl.eplot(vtk=True, cpos='xy', show_axes=False, line_width=2, background='w')
+_ = mapdl.eplot(vtk=True, cpos='xy', show_edges=True, show_axes=False,
+                line_width=2, background='w')
 
 ###############################################################################
 # Boundary Conditions
@@ -117,7 +118,7 @@ mapdl.d('ALL', 'UX')
 # direction.  Otherwise, the mesh would be allowed to move in the y
 # direction and would be an improperly constrained mesh.
 mapdl.nsel('R', 'LOC', 'Y', width/2)
-assert mapdl.n_node == 1
+assert mapdl.mesh.n_node == 1
 mapdl.d('ALL', 'UY')
 
 # Apply a force on the right-hand side of the plate.  For this
@@ -125,7 +126,7 @@ mapdl.d('ALL', 'UY')
 mapdl.nsel('S', 'LOC', 'X', length)
 
 # Verify that only the nodes at length have been selected:
-assert np.unique(mapdl.nodes[:, 0]) == length
+assert np.unique(mapdl.mesh.nodes[:, 0]) == length
 
 # Next, couple the DOF for these nodes.  This lets us provide a force
 # to one node that will be spread throughout all nodes in this coupled
@@ -189,7 +190,7 @@ max_stress = np.nanmax(von_mises)
 # the right-most side of the plate.
 
 # We use nanmean here because mid-side nodes have no stress
-mask = result.geometry.nodes[:, 0] == length
+mask = result.mesh.nodes[:, 0] == length
 far_field_stress = np.nanmean(von_mises[mask])
 print('Far field von mises stress: %e' % far_field_stress)
 # Which almost exactly equals the analytical value of 10000000.0 Pa
@@ -283,7 +284,7 @@ def compute_stress_con(ratio):
 
     # Fix a single node on the left-hand side of the plate in the Y direction
     mapdl.nsel('R', 'LOC', 'Y', width/2)
-    assert mapdl.n_node == 1
+    assert mapdl.mesh.n_node == 1
     mapdl.d('ALL', 'UY')
 
     # Apply a force on the right-hand side of the plate.  For this
@@ -317,7 +318,7 @@ def compute_stress_con(ratio):
 
     # compare to the "far field" stress by getting the mean value of the
     # stress at the wall
-    mask = result.geometry.nodes[:, 0] == length
+    mask = result.mesh.nodes[:, 0] == length
     far_field_stress = np.nanmean(von_mises[mask])
 
     # adjust by the cross sectional area at the hole
@@ -366,4 +367,6 @@ k_t_anl = 3 - 3.14*ratios + 3.667*ratios**2 - 1.527*ratios**3
 plt.plot(ratios, k_t_anl, label=r'$K_t$ Analytical')
 plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
 plt.legend()
+plt.xlabel('Ratio of Hole Diameter to Width of Plate')
+plt.ylabel('Stress Concentration')
 plt.show()

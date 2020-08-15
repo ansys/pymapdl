@@ -235,8 +235,7 @@ def test_kplot(cleared, mapdl):
 
     cpos = mapdl.kplot(vtk=True, off_screen=True)
     assert isinstance(cpos, CameraPosition)
-    mapdl.kplot()    # make sure legacy still works
-
+    mapdl.kplot(vtk=False)    # make sure legacy still works
 
 
 @skip_no_ansys
@@ -462,7 +461,6 @@ def test_eplot_screenshot(mapdl, make_block, tmpdir):
                 window_size=[1920, 1080], screenshot=filename,
                 off_screen=True)
     assert os.path.isfile(filename)
-
 
 
 

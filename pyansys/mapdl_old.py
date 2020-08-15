@@ -303,13 +303,34 @@ class _MapdlOld(_MapdlCore):
     @property
     @supress_logging
     def _mesh(self):
-        """Write entire archive to ASCII and read it in as a pyansys.Archive """
+        """Write entire archive to ASCII and read it in as a ``pyansys.Archive``"""
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.path, 'tmp.cdb')
-            self.cdwrite('db', arch_filename)
-            self._archive_cache = Archive(arch_filename, parse_vtk=True,
+            arch_filename = os.path.join(self.path, '_tmp.cdb')
+            nblock_filename = os.path.join(self.path, 'nblock.cdb')
+            # must have all nodes elements are using selected
+            with self.chain_commands:
+                self.cm('__NODE__', 'NODE')
+                self.nsle('S')
+                self.cdwrite('db', arch_filename)
+                self.cmsel('S', '__NODE__', 'NODE')
+
+                self.cm('__ELEM__', 'ELEM')
+                self.esel('NONE')
+                self.cdwrite('db', nblock_filename)
+                self.cmsel('S', '__ELEM__', 'ELEM')
+
+            self._archive_cache = Archive(arch_filename, parse_vtk=False,
                                           name='Mesh')
+            grid = self._archive_cache._parse_vtk(additional_checking=True)
+            self._archive_cache._grid = grid
+
+            # overwrite nodes in archive
+            nblock = Archive(nblock_filename, parse_vtk=False)
+            self._archive_cache._nodes = nblock._nodes
+            self._archive_cache._nnum = nblock._nnum
+            self._archive_cache._node_coord = None
+
         return self._archive_cache
 
     def load_parameters(self):  # pragma: no cover
