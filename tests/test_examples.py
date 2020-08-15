@@ -53,7 +53,7 @@ def test_show_cell_qual():
 def test_cylinderansys_182():
     exec_file = '/usr/ansys_inc/v182/ansys/bin/ansys182'
     if os.path.isfile(exec_file):
-        assert examples.ansys_cylinder_demo(as_test=True)
+        assert examples.ansys_cylinder_demo(exec_file, as_test=True)
 
 
 @skip_plotting

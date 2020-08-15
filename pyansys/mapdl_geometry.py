@@ -22,7 +22,9 @@ class Geometry():
         self._keypoints_cache = None
         self._lines_cache = None
         self._log = self._mapdl._log
-        self.set_log_level = self._mapdl.set_log_level
+
+    def _set_log_level(self, level):
+        return self._mapdl.set_log_level(level)
 
     def _load_iges(self):
         """Loads the iges file from MAPDL as a pyiges class"""

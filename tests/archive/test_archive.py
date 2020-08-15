@@ -71,8 +71,7 @@ def test_invalid_archive(tmpdir, hex_archive):
                          hex_archive.nodes)
 
     archive = pyansys.Archive(nblock_filename)
-    with pytest.raises(AttributeError):
-        archive.grid
+    assert archive.grid is None
 
 
 def test_write_angle(tmpdir, hex_archive):
@@ -82,6 +81,7 @@ def test_write_angle(tmpdir, hex_archive):
 
     archive = pyansys.Archive(nblock_filename, parse_vtk=False)
     assert np.allclose(archive.nodes, hex_archive.nodes)
+
 
 @pytest.mark.xfail(True, reason='TODO: unexplained behavior')
 def test_missing_midside():

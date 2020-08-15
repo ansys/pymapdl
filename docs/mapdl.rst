@@ -109,12 +109,18 @@ example:
    Keypoint 1 is referenced by only one line.  Improperly connected line   
    set for AL command.                                                     
 
-This Exception was be caught immediately.  This means that you can write your MAPDL scripts in python, run them interactively and then as a batch without worrying if the script will run correctly if you had instead outputted it to a script file.
+This ``Exception`` was be caught immediately.  This means that you can
+write your MAPDL scripts in python, run them interactively and then as
+a batch without worrying if the script will run correctly if you had
+instead outputted it to a script file.
 
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-One advantage of writing scripts using ``pyansys`` is the ability to call MAPDL commands as python functions from the ``Mapdl`` class.  For example, instead of sending commands to MAPDL as in the area creation example, we can instead run:
+One advantage of writing scripts using ``pyansys`` is the ability to
+call MAPDL commands as python functions from the ``Mapdl`` class.  For
+example, instead of sending commands to MAPDL as in the area creation
+example, we can instead run:
 
 .. code:: python
 
@@ -134,7 +140,9 @@ One advantage of writing scripts using ``pyansys`` is the ability to call MAPDL 
     mapdl.l(4, 1)
     mapdl.al(1, 2, 3, 4)
 
-This approach has some obvious advantages, chiefly that it's a bit easier to script as ``pyansys`` takes care of the string formatting for you.  For example, inputting points from a numpy array:
+This approach has some obvious advantages, chiefly that it's a bit
+easier to script as ``pyansys`` takes care of the string formatting
+for you.  For example, inputting points from a numpy array:
 
 .. code:: python
 
@@ -145,7 +153,8 @@ This approach has some obvious advantages, chiefly that it's a bit easier to scr
    for i, (x, y, z) in enumerate(points):
        mapdl.k(i + 1, x, y, z)
 
-Additionally, each function with the MAPDL class has help associated within it.  For example:
+Additionally, each function with the MAPDL class has help associated
+within it.  For example:
 
 .. code:: python
 
@@ -305,36 +314,18 @@ For example, verification file vm1.dat:
     mapdl.run("*LIST,vm1,vrt")
     mapdl.exit()
 
-Some of the commands with ``/`` are not directly translated to functions and are instead run as commands.  Also, please note that the ``*VWRITE`` command requires a command immediately following it.  This normally locks CORBA, so it's implemented in the background as an input file using ``mapdl.non_interactive``.  See the following Caveats and Notes section for more details.
+Some of the commands with ``/`` are not directly translated to
+functions and are instead run as commands.  Also, please note that the
+``*VWRITE`` command requires a command immediately following it.  This
+normally locks CORBA, so it's implemented in the background as an
+input file using ``mapdl.non_interactive``.  See the following Caveats
+and Notes section for more details.
 
-Additional examples with more conversion options can be found in the APDL conversion page.
+Additional examples with more conversion options can be found in the
+APDL conversion page.
 
 
-Retreiving Parameters
----------------------
-APDL parameters can be retrieved using ``pyansys`` using the
-``load_parameters`` method.  For example, after using the ``*GET``
-command:
 
-.. code:: python
-
-   mapdl.get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
-   mapdl.load_parameters()
-
-The parameters are now accessible within the ``MAPDL`` object:
-
-.. code:: python
-
-    >>> mapdl.parameters
-    {'AAS_MAPD': 1.0,
-     'DEF_X': 8.631926066372,
-     'DEF_Y': 4.532094298033,
-     'ST_EN': 24.01187254488,
-     '_RETURN': 0.0,
-     '_STATUS': 1.0}
-
-    >>> mapdl.parameters['DEF_Y']
-    4.532094298033
 
 
 Caveats and Notes

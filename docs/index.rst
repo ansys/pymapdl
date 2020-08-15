@@ -19,7 +19,7 @@ feature.
    :caption: APDL Python Scripting
    :hidden:
 
-   ansys_control
+   mapdl/index.rst
    ansys_functions
    apdl_conversion
    ansys_examples

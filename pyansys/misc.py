@@ -170,12 +170,12 @@ def supress_logging(func):
         mapdl = args[0]
         prior_log_level = mapdl._log.level
         if prior_log_level != 'CRITICAL':
-            mapdl.set_log_level('CRITICAL')
+            mapdl._set_log_level('CRITICAL')
 
         out = func(*args, **kwargs)
 
         if prior_log_level != 'CRITICAL':
-            mapdl.set_log_level(prior_log_level)
+            mapdl._set_log_level(prior_log_level)
 
         return out
 

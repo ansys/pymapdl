@@ -121,6 +121,8 @@ class _MapdlCore(_MapdlCommands):
         from pyansys.parameters import Parameters
         self._parameters = Parameters(self)
 
+        self._redirected_commands = {'*LIS': self._list}
+
         if log_apdl:
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
@@ -157,10 +159,33 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the *GET command
+        """Collection of MAPDL parameters obtainable from the ``*GET``
+        command or ``GET`` command.
 
         Examples
         --------
+        Simply list all parameters except for MAPDL MATH parameters
+
+        >>> mapdl.parameters
+        ARR                              : ARRAY DIM (3, 1, 1)
+        PARM_FLOAT                       : 20.0
+        PARM_INT                         : 10.0
+        PARM_LONG_STR                    : "stringstringstringstringstringst"
+        PARM_STR                         : "string"
+        PORT                             : 50052.0
+
+        Get a parameter
+
+        >>> mapdl.parameters['PARM_FLOAT']
+        20.0
+
+        Get an array parameter
+
+        >>> mapdl.parameters['ARR']
+        array([1., 2., 3.])
+
+        Get the current routine
+
         >>> mapdl.parameters.routine
         'PREP7'
 
@@ -189,11 +214,11 @@ class _MapdlCore(_MapdlCommands):
             self._parent = parent
 
         def __enter__(self):
-            self._parent._log.debug('entering non-interactive mode')
+            self._parent._log.debug('Entering non-interactive mode')
             self._parent._store_commands = True
 
         def __exit__(self, *args):
-            self._parent._log.debug('entering non-interactive mode')
+            self._parent._log.debug('Entering non-interactive mode')
             self._parent._flush_stored()
 
     class _chain_commands:
@@ -203,11 +228,11 @@ class _MapdlCore(_MapdlCommands):
             self._parent = parent
 
         def __enter__(self):
-            self._parent._log.debug('entering chained command mode')
+            self._parent._log.debug('Entering chained command mode')
             self._parent._store_commands = True
 
         def __exit__(self, *args):
-            self._parent._log.debug('entering chained command mode')
+            self._parent._log.debug('Entering chained command mode')
             self._parent._chain_stored()
             self._parent._store_commands = False
 
@@ -1029,7 +1054,8 @@ class _MapdlCore(_MapdlCommands):
         self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
         self._stored_commands.append('/OUTPUT')
         commands = '\n'.join(self._stored_commands)
-        self._apdl_log.write(commands + '\n')
+        if self._apdl_log:
+            self._apdl_log.write(commands + '\n')
 
         # write to a temporary input file
         filename = os.path.join(appdirs.user_data_dir('pyansys'),
@@ -1042,7 +1068,7 @@ class _MapdlCore(_MapdlCommands):
 
         self._store_commands = False
         self._stored_commands = []
-        self.run("/INPUT, '%s'" % filename, write_to_log=False)
+        out = self.input(filename, write_to_log=False)
         if os.path.isfile(tmp_out):
             self._response = '\n' + open(tmp_out).read()
 
@@ -1745,3 +1771,13 @@ class _MapdlCore(_MapdlCommands):
         filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
         filenames.sort()
         return filenames[-1]
+
+    @property
+    def math(self):
+        """Return mapdl.math instance"""
+        from pyansys.mapdl_math import MapdlMath
+        return MapdlMath(self)
+
+    def _set_log_level(self, level):
+        """alias for set_log_level"""
+        self.set_log_level(level)

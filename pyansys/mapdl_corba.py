@@ -225,6 +225,8 @@ class MapdlCorba(_MapdlOld):
                 if telap > timeout:
                     return 1
 
+        self._exited = True
+
     def kill(self):
         """Forces ANSYS process to end and removes lock file"""
         try:

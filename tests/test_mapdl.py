@@ -12,11 +12,6 @@ from pyvista.plotting import system_supports_plotting
 from pyansys.errors import MapdlRuntimeError
 import pyansys
 
-if sys.platform != 'darwin':
-    from pyansys.mapdl_corba import MapdlCorba
-
-path = os.path.dirname(os.path.abspath(__file__))
-
 
 def get_ansys_bin(rver):
     if os.name == 'nt':
@@ -30,50 +25,31 @@ def get_ansys_bin(rver):
 
     return mapdlbin
 
-
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
     HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
 
-
-
 skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-@pytest.fixture(scope="module", params=['grpc', 'console', 'corba'])
-def mapdl(request):
-    os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
 
-    mode = request.param
-    if mode == 'corba':
-        # v200 and newer don't work
-        # v194 has issues exiting
-        rver = '182'
-    else:
-        rver = '202'
-
-    # if mode == 'grpc':
-    #     from pyansys.mapdl_grpc import MapdlGrpc
-    #     mapdl = MapdlGrpc(cleanup_on_exit=False)
-    # else:
-    return pyansys.launch_mapdl(get_ansys_bin(rver), override=True, mode=mode)
-
-
-@pytest.fixture(scope='function')
-def cleared(mapdl):
-    mapdl.finish()
-    mapdl.clear('NOSTART')  # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl.prep7()
-    yield
-
-
+###############################################################################
+# Shared with ansys.mapdl
+###############################################################################
 @skip_no_ansys
 def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
 
 
+@skip_no_ansys
+def test_basic_command(cleared, mapdl):
+    resp = mapdl.block(0, 1, 0, 1, 0, 1)
+    assert 'CREATE A HEXAHEDRAL VOLUME' in resp
+
+
+@skip_no_ansys
 def test_chaining(mapdl, cleared):
     mapdl.prep7()
     n_kp = 1000
@@ -85,6 +61,7 @@ def test_chaining(mapdl, cleared):
 
 
 def test_read_para():
+    path = os.path.dirname(os.path.abspath(__file__))
     para_path = os.path.join(path, 'testfiles', 'para')
     para_files = glob.glob(os.path.join(para_path, '*.txt'))
     from pyansys.mapdl_old import load_parameters
@@ -92,9 +69,6 @@ def test_read_para():
         arr, parm = load_parameters(para_file)
 
 
-###############################################################################
-# Building elements
-###############################################################################
 @skip_no_ansys
 def test_e(mapdl, cleared):
     mapdl.et("", 183)
@@ -119,9 +93,6 @@ def test_et(mapdl, cleared):
     assert n_plane183 == 17
 
 
-###############################################################################
-# Building geometry
-###############################################################################
 @skip_no_ansys
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
@@ -337,6 +308,7 @@ def test_nnum(cleared, mapdl):
     mapdl.fill(1, 11, 9)
     assert np.allclose(mapdl.mesh.nnum, range(1, 12))
 
+
 @pytest.mark.parametrize("knum", [True, False])
 @skip_no_ansys
 def test_nplot_vtk(cleared, mapdl, knum):
@@ -377,50 +349,78 @@ def test_elements(cleared, mapdl):
 
     mapdl.e(*list(range(1, 9)))
     mapdl.e(*list(range(9, 17)))
-    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8],
-                         [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
+    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+                         [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
+    if 'Grpc' in str(type(mapdl)):
+        # no element number in elements
+        expected[:, 8] = 0
+
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
 
-@pytest.mark.parametrize("arr", ([1, 2, 3],
-                                 [[1, 2, 3], [1, 2, 3]],
-                                 np.random.random((10)),
-                                 np.random.random((10, 3)),
-                                 np.random.random((10, 3, 3))))
+@pytest.mark.parametrize("parm", ('my_string',
+                                  1,
+                                  10.0,
+                                  [1, 2, 3],
+                                  [[1, 2, 3], [1, 2, 3]],
+                                  np.random.random((10000)),  # fails on gRPC at 100000
+                                  np.random.random((10, 3)),
+                                  np.random.random((10, 3, 3))))
 @skip_no_ansys
-def test_load_array(cleared, mapdl, arr):
-    try:
-        mapdl.load_array(arr, 'MYARR')
-    except:  # flush for CORBA
-        pass
-    mapdl.load_array(arr, 'MYARR')
-    parm, mapdl_arrays = mapdl.load_parameters()
-    assert np.allclose(mapdl_arrays['MYARR'], arr)
+def test_set_get_parameters(mapdl, parm):
+    parm_name = pyansys.misc.random_string(20)
+    mapdl.parameters[parm_name] = parm
+    if isinstance(parm, str):
+        assert mapdl.parameters[parm_name] == parm
+    else:
+        assert np.allclose(mapdl.parameters[parm_name], parm)
+
+@skip_no_ansys
+def test_set_parameters_arr_to_scalar(mapdl, cleared):
+    mapdl.parameters['PARM'] = np.arange(10)
+    mapdl.parameters['PARM'] = 2
 
 
 @skip_no_ansys
-def test_load_array_err(cleared, mapdl):
-    with pytest.raises(TypeError):
-        mapdl.load_array(['apple'], 'MYARR')
-
+def test_set_parameters_string_spaces(mapdl):
     with pytest.raises(ValueError):
-        mapdl.load_array(np.empty((1, 1, 1, 1)), 'MYARR')
+        mapdl.parameters['PARM'] = "string with spaces"
 
 
-def test_get_array(cleared, mapdl):
-    # start with an empty array
-    array = mapdl.get_array('NODE', item1='NLIST')
-    assert array.size == 0
+def test_builtin_parameters(mapdl, cleared):
+    mapdl.prep7()
+    assert mapdl.parameters.routine == "PREP7"
 
-    mapdl.cdread('db', pyansys.examples.hexarchivefile)
-    array = mapdl.get_array('NODE', item1='NLIST')
-    assert np.allclose(array, np.arange(1, 322))
+    mapdl.units("SI")
+    assert mapdl.parameters.units == "SI"
+
+    assert isinstance(mapdl.parameters.revision, float)
+
+    if os.name == 'posix':
+        assert 'LIN' in mapdl.parameters.platform
+
+    mapdl.csys(1)
+    assert mapdl.parameters.csys == 1
+
+    mapdl.dsys(1)
+    assert mapdl.parameters.dsys == 1
+
+    mapdl.esys(0)
+    assert mapdl.parameters.esys == 0
+    assert mapdl.parameters.material == 1
+    assert mapdl.parameters.section == 1
+    assert mapdl.parameters.real == 1
 
 
+
+###############################################################################
+# <end> Shared with ansys.mapdl
+###############################################################################
 # must be at end as this uses a scoped fixture
 @skip_no_ansys
 def test_exit(mapdl):
     mapdl.exit()
+    assert mapdl._exited
     with pytest.raises(RuntimeError):
         mapdl.prep7()
 

@@ -19,16 +19,16 @@ def archive():
 
 
 def test_geometry_elements(result, archive):
-    r_elem = np.array(result.geometry.elem)[result._sidx_elem]
+    r_elem = np.array(result.mesh.elem)[result._sidx_elem]
     assert np.allclose(r_elem, archive.elem)
 
 
 def test_geometry_nodes(result, archive):
-    assert np.allclose(result.geometry.nodes[:, :3], archive.nodes)
+    assert np.allclose(result.mesh.nodes[:, :3], archive.nodes)
 
 
 def test_geometry_nodenum(result, archive):
-    assert np.allclose(result.geometry.nnum, archive.nnum)
+    assert np.allclose(result.mesh.nnum, archive.nnum)
 
 
 def test_results_displacement(result):

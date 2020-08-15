@@ -20523,6 +20523,11 @@ class _MapdlCommands(object):
 
         This command is valid in any processor.
         """
+        # cannot be in interactive mode
+        if not self._store_commands:
+            raise RuntimeError('VWRTIE cannot run interactively.  \n\nPlease use '
+                               '``with mapdl.non_interactive:``')
+
         command = "*VWRITE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par1), str(par2), str(par3), str(par4), str(par5), str(par6), str(par7), str(par8), str(par9), str(par10), str(par11), str(par12), str(par13), str(par14), str(par15), str(par16), str(par17), str(par18), str(par19))
         return self.run(command, **kwargs)
 
@@ -22905,7 +22910,7 @@ class _MapdlCommands(object):
 
         This command is valid in any processor.
         """
-        command = "*MWRITE,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
+        command = "*MWRITE,%s,%s,%s,,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
         return self.run(command, **kwargs)
 
     def kwpave(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",

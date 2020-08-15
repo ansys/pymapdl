@@ -226,9 +226,7 @@ def show_cell_qual(meshtype='tet', off_screen=None):
 
 def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
                         plot_ansys=True, as_test=False):
-    """
-    Cylinder demo for ansys
-    """
+    """Cylinder demo for ansys"""
     # cylinder parameters
     # torque = 100
     radius = 2
@@ -243,6 +241,7 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
         loglevel = 'ERROR'
     else:
         loglevel = 'INFO'
+
     ansys = pyansys.launch_mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
@@ -333,10 +332,14 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
 
     if plot_vtk:
         result.plot_nodal_solution(0, cpos=cpos, cmap='bwr',
-                                   off_screen=as_test, screenshot=as_test)
+                                   off_screen=as_test,
+                                   screenshot=as_test)
         result.plot_nodal_stress(0, 'x', cpos=cpos, cmap='bwr',
-                                 off_screen=as_test, screenshot=as_test)
+                                 off_screen=as_test,
+                                 screenshot=as_test)
         result.plot_principal_nodal_stress(0, 'SEQV', cpos=cpos,
-                                           cmap='bwr', off_screen=as_test, screenshot=as_test)
+                                           cmap='bwr',
+                                           off_screen=as_test,
+                                           screenshot=as_test)
 
     return True

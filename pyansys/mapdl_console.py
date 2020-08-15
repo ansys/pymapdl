@@ -171,6 +171,8 @@ class MapdlConsole(_MapdlOld):
         if close_log:
             self._close_apdl_log()
 
+        self._exited = True
+
         # edge case: need to wait until process dies, otherwise future
         # commands might talk to a dead process...
         if timeout:
@@ -180,6 +182,7 @@ class MapdlConsole(_MapdlOld):
                 telap = tstart - time.time()
                 if telap > timeout:
                     return 1
+
         return 0
 
     def kill(self):

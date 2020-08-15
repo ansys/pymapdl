@@ -534,7 +534,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     elif mode == 'grpc':
         # check if grpc package is available
         try:
-            from ansys.mapdl import MapdlGrpc
+            from ansys.mapdl import Mapdl
         except ImportError:
             raise PrivateModuleImportError
 
@@ -544,11 +544,10 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                            override=True, timeout=start_timeout)
 
         # attempt to connect to the gRPC instance
-        from pyansys.mapdl_grpc import MapdlGrpc
         kwargs['jobname'] = jobname
         kwargs['run_location'] = run_location
-        return MapdlGrpc(LOCALHOST, port, loglevel=loglevel,
-                         log_apdl=log_apdl, **kwargs)
+        return Mapdl(LOCALHOST, port, loglevel=loglevel, log_apdl=log_apdl,
+                     **kwargs)
 
 
 def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,

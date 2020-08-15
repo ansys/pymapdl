@@ -310,8 +310,6 @@ class _MapdlOld(_MapdlCore):
         self._nproc = nproc
         self._additional_switches = additional_switches
 
-        self._redirected_commands = {'*LIS': self._list}
-
         # perhaps directly from MAPDL...
         self._version = re.findall(r'\d\d\d', self._exec_file)[0]
 
@@ -366,78 +364,6 @@ class _MapdlOld(_MapdlCore):
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
-
-    @supress_logging
-    def load_array(self, arr, name):
-        """Load a numpy array or python list directly to MAPDL
-
-        Writes the numpy array to disk and then reads it in within MAPDL
-        using *VREAD.
-
-        Parameters
-        ----------
-        arr : np.ndarray or List
-
-        name : str
-            Name of the array to write to within MAPDL.
-
-        Examples
-        --------
-        Load a 1D numpy array into MAPDL
-
-        >>> arr = np.array([10, 20, 30])
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., 20., 30.])
-
-        Load a 2D numpy array into MAPDL
-
-        >>> arr = np.random.random((5, 3))
-        >>> mapdl.load_array(arr, 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([[0.39806635, 0.15060953, 0.3990557 ],
-               [0.26837768, 0.02033222, 0.15655861],
-               [0.46110226, 0.06381489, 0.20068533],
-               [0.20122863, 0.5727896 , 0.85636037],
-               [0.68126612, 0.67460878, 0.3678797 ]])
-
-        Load a python list into MAPDL
-
-        >>> mapdl.load_array([10, -1, 8, 4, 10], 'MYARR')
-        >>> parm, mapdl_arrays = mapdl.load_parameters()
-        >>> mapdl_arrays['MYARR']
-        array([10., -1.,  8.,  4., 10.])
-
-        """
-        # type checks
-        arr = np.array(arr)
-        if not np.issubdtype(arr.dtype, np.number):
-            raise TypeError('Only numerical arrays or lists are supported')
-        if arr.ndim > 3:
-            raise ValueError('MAPDL VREAD only supports a arrays with a'
-                             ' maximum of 3 dimensions.')
-
-        name = name.upper()
-
-        idim, jdim, kdim = arr.shape[0], 0, 0
-        if arr.ndim >= 2:
-            jdim = arr.shape[1]
-        if arr.ndim == 3:
-            kdim = arr.shape[2]
-
-        # write array from numpy to disk:
-        filename = os.path.join(self.path, '_tmp.dat')
-        if arr.dtype != np.double:
-            arr = arr.astype(np.double)
-        pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
-
-        self.dim(name, imax=idim, jmax=jdim, kmax=kdim)
-        with self.non_interactive:
-            self.vread('%s(1, 1),%s,,,IJK, %d, %d, %d' % (name, filename,
-                                                          idim, jdim, kdim))
-            self.run('(1F20.12)')
 
     def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                    it2num='', kloop='', dtype=None, **kwargs):

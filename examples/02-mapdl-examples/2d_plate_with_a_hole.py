@@ -15,7 +15,6 @@ First, start MAPDL as a service and disable all but error messages.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyansys import examples
 import pyansys
 
 # os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu without "smp"
