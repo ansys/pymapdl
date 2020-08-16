@@ -27,7 +27,7 @@ UNITS_MAP = {-1: 'NONE',
 
 
 class Parameters():
-    """Collection of MAPDL parameters obtainable from the *GET command"""
+    """Collection of MAPDL parameters obtainable from the \*GET command"""
 
     def __init__(self, mapdl):
         if not isinstance(mapdl, _MapdlCore):
@@ -43,24 +43,24 @@ class Parameters():
 
     @property
     def routine(self):
-        """Current Routine string.
+        """Current routine string as a string.  For example ``"/PREP7"``
 
-        MAPDL Command: *GET, ACTIVE, 0, ROUT
+        MAPDL Command: \*GET, ACTIVE, 0, ROUT
 
         Returns
         -------
         routine : str
             Routine as a string.  One of:
 
-            - "Begin level"
-            - "PREP7"
-            - "SOLUTION"
-            - "POST1"
-            - "POST26"
-            - "AUX2"
-            - "AUX3"
-            - "AUX12"
-            - "AUX15"
+            - ``"Begin level"``
+            - ``"PREP7"``
+            - ``"SOLUTION"``
+            - ``"POST1"``
+            - ``"POST26"``
+            - ``"AUX2"``
+            - ``"AUX3"``
+            - ``"AUX12"``
+            - ``"AUX15"``
 
         Examples
         --------
@@ -247,7 +247,7 @@ class Parameters():
         """Load a numpy array or python list directly to MAPDL
 
         Writes the numpy array to disk and then reads it in within
-        MAPDL using *VREAD.
+        MAPDL using \*VREAD.
 
         Parameters
         ----------
@@ -328,7 +328,7 @@ class Parameters():
 
 
 def interp_star_status(status):
-    """Interperts *STATUS command output from MAPDL
+    """Interperts \*STATUS command output from MAPDL
 
     Parameters
     ----------

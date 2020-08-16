@@ -74,7 +74,7 @@ plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 
 # finally, plot the lines of the plate
 _ = mapdl.lplot(vtk=True, cpos='xy', line_width=10, font_size=26,
-                random_color=True, background='w')
+                color_lines=True, background='w')
 
 ###############################################################################
 # Meshing

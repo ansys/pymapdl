@@ -4,7 +4,7 @@ import pyvista as pv
 def general_plotter(title, meshes, points, labels,
                     cpos=None,
                     show_bounds=False, show_axes=False,
-                    background=None, off_screen=False,
+                    background=None, off_screen=None,
                     screenshot=False,
                     window_size=None,
                     # add_mesh kwargs:

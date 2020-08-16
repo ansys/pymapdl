@@ -26,8 +26,8 @@ using ``parameters`` with:
 
 
 You an also access some built-in paramaters normally accessed through
-the ``*GET`` command.  For example, instead of getting the current
-routine with ``*GET, ACTIVE, 0, ROUT``, you can access it with:
+the ``\*GET`` command.  For example, instead of getting the current
+routine with ``\*GET, ACTIVE, 0, ROUT``, you can access it with:
 
 .. code:: python
 

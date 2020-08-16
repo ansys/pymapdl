@@ -515,7 +515,7 @@ class Mesh():
         return self._node_angles
 
     def __repr__(self):
-        txt = 'ANSYS Geometry\n'
+        txt = 'ANSYS Mesh\n'
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
         txt += '  Number of Elements:           %d\n' % len(self.enum)
         txt += '  Number of Element Types:      %d\n' % len(self.ekey)

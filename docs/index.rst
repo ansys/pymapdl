@@ -1,10 +1,11 @@
 pyansys Documentation
 =====================
 This Python module allows you to:
- - Interactively control an instance of ANSYS v17.0 + using Python.
- - Extract data directly from binary ANSYS v14.5+ files and to display
-   or animate them.
- - Rapidly read in binary result ``(.rst)``, binary mass and stiffness
+ - Interactively control an instance of ANSYS v17.0 and newer using
+   Python.
+ - Extract data directly from binary ANSYS v14.5+ files and display or
+   animate them.
+ - Rapidly read in binary results (``.rst``, ``.rth``), binary mass and stiffness
    ``(.full)``, and ASCII block archive ``(.cdb)``, and element matrix
    ``(.emat)`` files.
 
@@ -16,27 +17,17 @@ feature.
 
 .. toctree::
    :maxdepth: 2
-   :caption: APDL Python Scripting
+   :caption: MAPDL Python Scripting and Interface
    :hidden:
 
-   mapdl/index.rst
-   ansys_functions
-   apdl_conversion
-   ansys_examples
-
-
-Installation
-------------
-Installation through pip::
-
-    pip install pyansys
+   mapdl/index
 
 .. toctree::
    :maxdepth: 2
-   :caption: File IO and Visualization
+   :caption: ANSYS File Support
    :hidden:
 
-   ansys_write_archive
+   archive
    loading_results
    examples
    loading_km
@@ -44,7 +35,7 @@ Installation through pip::
 
 .. toctree::
    :maxdepth: 2
-   :caption: Examples
+   :caption: Example Gallery
    :hidden:
 
    examples/index
@@ -56,6 +47,12 @@ Installation through pip::
 
    quality
 
+
+Installation
+------------
+Installation through pip::
+
+    pip install pyansys
 
 Quick Examples
 --------------

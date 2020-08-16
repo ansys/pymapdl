@@ -15,12 +15,12 @@ import pyansys
 shaft = pyansys.download_shaft_modal()
 
 ###############################################################################
-# Geometry is stored as a class
-print(shaft.geometry)
+# Mesh is stored within the result object
+print(shaft.mesh)
 
 ###############################################################################
-# ...as a VTK object
-print(shaft.grid)
+# ...and contains a VTK unstructured grid
+print(shaft.mesh._grid)
 
 ###############################################################################
 # Plot the shaft

@@ -8,7 +8,8 @@ Friggen cool stuff
    :caption: APDL Python Scripting
    :hidden:
 
-   mapdl/index.rst
-   ansys_functions
-   apdl_conversion
+   mapdl
+   parameters
    ansys_examples
+   apdl_conversion
+   ansys_functions

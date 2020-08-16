@@ -1,5 +1,5 @@
 """
-.. _ref_academic_sector:
+.. _ref_academic_sector_stress_strain:
 
 Stress and Strain from a Cyclic Modal Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -10,13 +10,11 @@ modal analysis.
 """
 # sphinx_gallery_thumbnail_number = 2
 
-import numpy as np
 import pyansys
 
 ###############################################################################
 # Download the academic modal analysis file
-# rotor = pyansys.download_academic_rotor_result()
-rotor = pyansys.read_binary('/tmp/ansys2/file.rst')
+rotor = pyansys.download_academic_rotor_result()
 print(rotor)
 
 

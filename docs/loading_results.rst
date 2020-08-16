@@ -124,21 +124,21 @@ The sorted node and element numbering of a result can be obtained with:
            19, 18, 20, 21, 23, 22, 24, 25, 27, 26, 28, 29, 31, 30, 32, 33, 35,
            34, 36, 37, 39, 38, 40], dtype=int32)
 
-Geometry
---------
-The geometry of the model can be found by querying the
-``pyansys.geometry.Geometry`` class.
+Mesh
+----
+The mesh of the result can be found by querying the ``mesh`` property
+of a result, which returns a ``pyansys.mesh.Mesh`` class.
 
 .. code:: python
 
     >>> import pyansys
     >>> from pyansys import examples
     >>> rst = pyansys.read_binary(examples.rstfile)
-    >>> print(rst.geometry)
+    >>> print(rst.mesh)
 
 .. code::
 
-    ANSYS Geometry
+    ANSYS Mesh
       Number of Nodes:              321
       Number of Elements:           40
       Number of Element Types:      1
@@ -148,7 +148,7 @@ The geometry of the model can be found by querying the
 
 Which contains the following attributes:
 
-.. autoclass:: pyansys.geometry.Geometry
+.. autoclass:: pyansys.mesh.Mesh
     :members:
 
 

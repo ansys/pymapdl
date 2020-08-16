@@ -139,7 +139,7 @@ _ = mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2,
 
 ###############################################################################
 # Material Properties and Boundary Conditions
-# ~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Fix the left-hand side of the plate in the X direction and set a
 # force of 1 kN in the positive X direction.
 #

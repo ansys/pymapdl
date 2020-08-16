@@ -44,30 +44,32 @@ mapdl.fill(1, 12, 10)
 mapdl.fill(12, 23, 10)
 
 # list the node coordinates
-print(mapdl.nodes)
+print(mapdl.mesh.nodes)
 
 # list the node numbers
-print(mapdl.nnum)
-
-# plot the nodes without using vtk
-mapdl.nplot(knum=True)
+print(mapdl.mesh.nnum)
 
 # plot the nodes using VTK
-mapdl.nplot(vtk=True, knum=True, cpos='xy', show_bounds=True)
+mapdl.nplot(vtk=True, knum=True, cpos='xy', show_bounds=True, point_size=10)
 
 ###############################################################################
 # create elements between the nodes
 # we can just manually create elements since we know that the elements
 # are sequential
-for node in mapdl.nnum[:-1]:
+for node in mapdl.mesh.nnum[:-1]:
     mapdl.e(node, node + 1)
 
 # print the elements from MAPDL
 print(mapdl.elist())
 
 ###############################################################################
-# also, access them as a list of arrays
-print(mapdl.elements)
+# Access them as a list of arrays
+# See the documentation on ``mapdl.mesh.elem`` for interperting the
+# individual elements
+for elem in mapdl.mesh.elem:
+    print(elem)
+
+
 
 ###############################################################################
 # Define the boundary conditions

@@ -17071,7 +17071,7 @@ class _MapdlCommands(object):  # pragma: no cover
         the $ separator) on the same line as the /CLEAR command.
 
         Use care when placing the /CLEAR command within branching constructs
-        (for example, those employing *DO or *IF commands).  The command
+        (for example, those employing \*DO or \*IF commands).  The command
         deletes all parameters including the looping parameter for do-loops.
         (You can preserve your iteration parameter by issuing a PARSAV command
         prior to the /CLEAR command, then following the /CLEAR command with a

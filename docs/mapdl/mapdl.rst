@@ -325,9 +325,6 @@ Additional examples with more conversion options can be found in the
 APDL conversion page.
 
 
-
-
-
 Caveats and Notes
 -----------------
 
@@ -832,6 +829,7 @@ behind the scenes and will be replaced with a faster interface in the
 future.
 
 .. code:: python
+
     import pyansys
     import numpy as np
     mapdl = pyansys.launch_mapdl()
@@ -852,8 +850,7 @@ first element.  Note that MAPDL uses fortran (1) based indexing.
    0.7960742456194109
 
 
-
 MAPDL Object Methods
 --------------------
-.. autoclass:: pyansys.mapdl._Mapdl
+.. autoclass:: pyansys.mapdl._MapdlCore
     :members:

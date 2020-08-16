@@ -721,9 +721,9 @@ class _MapdlCore(_MapdlCommands):
                 self.show('PNG')
                 self.gfile(pixel_res)
         else:
-            raise ImportError('Install matplotlib to use enable interactive plotting,'
-                              ' or turn interactive plotting off with:\n'
-                              '``interactive_plotting=False``')
+            raise ImportError('Install matplotlib to display plots from MAPDL ,'
+                              'from Python.  Otherwise, plot with vtk with:\n'
+                              '``vtk=True``')
 
     @property
     def _png_mode(self):
@@ -1094,7 +1094,7 @@ class _MapdlCore(_MapdlCommands):
 
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the *GET command and returns a Python value.
+        """Runs the \*GET command and returns a Python value.
 
         See ``help(mapdl.starget)`` for more details.
 
@@ -1147,15 +1147,15 @@ class _MapdlCore(_MapdlCommands):
 
     def get(self, par="__floatparameter__", entity="", entnum="",
             item1="", it1num="", item2="", it2num="", **kwargs):
-        """APDL Command: *GET
+        """APDL Command: \*GET
 
         Retrieves a value and stores it as a scalar parameter or part
         of an array parameter.
 
         Parameters
         ----------
-        par
-            The name of the resulting parameter. See *SET for name
+        par : str, optional
+            The name of the resulting parameter. See \*SET for name
             restrictions.
 
         entity
@@ -1203,47 +1203,47 @@ class _MapdlCore(_MapdlCommands):
 
         Notes
         -----
-        *GET retrieves a value for a specified item and stores the value as a
+        GET retrieves a value for a specified item and stores the value as a
         scalar parameter, or as a value in a user-named array parameter. An
         item is identified by various keyword, label, and number combinations.
-        Usage is similar to the *SET command except that the parameter values
+        Usage is similar to the SET command except that the parameter values
         are retrieved from previously input or calculated results. For example,
-        *GET,A,ELEM,5,CENT,X returns the centroid x-location of element 5 and
-        stores the result as parameter A. *GET command operations, along with
+        GET,A,ELEM,5,CENT,X returns the centroid x-location of element 5 and
+        stores the result as parameter A. GET command operations, along with
         the associated Get functions return values in the active coordinate
         system unless stated otherwise. A Get function is an alternative in-
-        line function that can be used to retrieve a value instead of the *GET
+        line function that can be used to retrieve a value instead of the GET
         command (see Using In-line Get Functions for more information).
 
-        Both *GET and *VGET retrieve information from the active data stored in
+        Both GET and VGET retrieve information from the active data stored in
         memory. The database is often the source, and sometimes the information
         is retrieved from common memory blocks that the program uses to
         manipulate information. Although POST1 and POST26 operations use a
-        *.rst file, *GET data is accessed from the database or from the common
-        blocks. Get operations do not access the *.rst file directly. For
+        .rst file, GET data is accessed from the database or from the common
+        blocks. Get operations do not access the .rst file directly. For
         repeated gets of sequential items, such as from a series of elements,
-        see the *VGET command.
+        see the VGET command.
 
         Most items are stored in the database after they are calculated and are
         available anytime thereafter. Items are grouped according to where they
         are usually first defined or calculated. Preprocessing data will often
         not reflect the calculated values generated from section data. Do not
-        use *GET to obtain data from elements that use calculated section data,
+        use GET to obtain data from elements that use calculated section data,
         such as beams or shells. Most of the general items listed below are
-        available from all modules. Each of the sections for accessing *GET
+        available from all modules. Each of the sections for accessing GET
         parameters are shown in the following order:
 
-        *GET General Entity Items
+        GET General Entity Items
 
-        *GET Preprocessing Entity Items
+        GET Preprocessing Entity Items
 
-        *GET Solution Entity Items
+        GET Solution Entity Items
 
-        *GET Postprocessing Entity Items
+        GET Postprocessing Entity Items
 
-        *GET Probabilistic Design Entity Items
+        GET Probabilistic Design Entity Items
 
-        The *GET command is valid in any processor.
+        The GET command is valid in any processor.
         """
         command = "*GET,%s,%s,%s,%s,%s,%s,%s" % (str(par),
                                                  str(entity),
