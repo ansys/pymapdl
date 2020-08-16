@@ -1,8 +1,8 @@
 """
 .. _ref_3d_plane_stress_concentration:
 
-3D Stress Concentration Analysis for a Notch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3D Stress Concentration Analysis for a Notched Plate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tutorial is the 3D corollary to the 2D plane example
 :ref:`ref_plane_stress_concentration`, but This example verifies the
@@ -13,28 +13,18 @@ First, start MAPDL as a service and disable all but error messages.
 """
 # sphinx_gallery_thumbnail_number = 3
 
-import matplotlib.pyplot as plt
 import numpy as np
-
-from pyansys import examples
 import pyansys
 
 # os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu without "smp"
-try:
-    mapdl
-except:
-    mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp',
-                                 loglevel='INFO')
-mapdl.clear()
+mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp',
+                             loglevel='ERROR')
 
 
 ###############################################################################
 # Geometry
 # ~~~~~~~~
-# Create a rectangular area with the hole in the middle.  To correctly
-# approximate an infinite plate, the maximum stress must occur far
-# away from the edges of the plate.  A length to width factor can
-# approximate this.
+# Create a rectangular area with two notches at the top and bottom.
 
 length = 0.4
 width = 0.1
@@ -44,7 +34,8 @@ width = 0.1
 # radius = diameter*0.5
 
 notch_depth = 0.04
-notch_radius = 0.002
+# notch_radius = 0.002
+notch_radius = 0.01
 
 # create the half arcs
 mapdl.prep7()
@@ -53,13 +44,13 @@ circ0_kp = mapdl.k(x=length/2, y=width + notch_radius)
 circ_line_num = mapdl.circle(circ0_kp, notch_radius)
 circ_line_num = circ_line_num[2:]  # only concerned with the bottom arcs
 
-# create a line whereby the top circle will be dragged down
+# create a line and drag the top circle downward
 circ0_kp = mapdl.k(x=0, y=0)
 k1 = mapdl.k(x=0, y=-notch_depth)
 l0 = mapdl.l(circ0_kp, k1)
 mapdl.adrag(*circ_line_num, nlp1=l0)
 
-# same thing for the bottom notch
+# same thing for the bottom notch (except upwards
 circ1_kp = mapdl.k(x=length/2, y=-notch_radius)
 circ_line_num = mapdl.circle(circ1_kp, notch_radius)
 circ_line_num = circ_line_num[:2]  # only concerned with the top arcs
@@ -86,14 +77,15 @@ mapdl.lsel('all')
 
 
 # plot the area using vtk/pyvista
-# mapdl.aplot(vtk=True, show_numbering=True, show_edges=True, cpos='xy')
+mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos='xy')
+
 
 # ###############################################################################
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
-mapdl.vplot(vtk=True, show_numbering=False, show_edges=True, show_axes=True,
+mapdl.vplot(vtk=True, show_lines=True, show_axes=True,
             smooth_shading=True)
 
 ###############################################################################
@@ -119,12 +111,9 @@ plate_esize = 0.01
 # increased the density of the mesh at the notch
 # line and area numbers identified using aplot
 
-
 mapdl.asel('S', 'AREA', vmin=1, vmax=1)
-mapdl.aplot(vtk=True, show_line_numbering=True, show_numbering=True)
+mapdl.aplot(vtk=True, show_line_numbering=True)
 
-
-acenter = mapdl.areas(7)[0].center
 
 mapdl.lsel('NONE')
 for line in [7, 8, 20, 21]:
@@ -144,7 +133,8 @@ if esize > thickness/2:
 mapdl.esize()  # this is tough to automate
 mapdl.et(1, "SOLID186")
 mapdl.vsweep('all')
-_ = mapdl.eplot(vtk=True, show_axes=False, line_width=2, background='w')
+_ = mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2,
+                background='w')
 
 
 ###############################################################################
@@ -178,7 +168,7 @@ mapdl.d('ALL', 'UZ')
 mapdl.nsel('S', 'LOC', 'X', length)
 
 # Verify that only the nodes at length have been selected:
-assert np.unique(mapdl.nodes[:, 0]) == length
+assert np.unique(mapdl.mesh.nodes[:, 0]) == length
 
 # Next, couple the DOF for these nodes.  This lets us provide a force
 # to one node that will be spread throughout all nodes in this coupled
@@ -188,7 +178,7 @@ mapdl.cp(5, 'UX', 'ALL')
 # Select a single node in this set and apply a force to it
 # We use "R" to re-select from the current node group
 mapdl.nsel('R', 'LOC', 'Y', width/2)  # selects more than one
-single_node = mapdl.nnum[0]
+single_node = mapdl.mesh.nnum[0]
 mapdl.nsel('S', 'NODE', vmin=single_node, vmax=single_node)
 mapdl.f('ALL', 'FX', 1000)
 
@@ -245,7 +235,7 @@ max_stress = np.nanmax(von_mises)
 # the right-most side of the plate.
 
 # We use nanmean here because mid-side nodes have no stress
-mask = result.geometry.nodes[:, 0] == length
+mask = result.mesh.nodes[:, 0] == length
 far_field_stress = np.nanmean(von_mises[mask])
 print('Far field von mises stress: %e' % far_field_stress)
 # Which almost exactly equals the analytical value of 10000000.0 Pa

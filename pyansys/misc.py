@@ -182,6 +182,27 @@ def supress_logging(func):
     return wrapper
 
 
+def run_as_prep7(func):
+    """Run a MAPDL method at PREP7 and always revert to the prior processor"""
+    def wrapper(*args, **kwargs):
+        mapdl = args[0]
+        if hasattr(mapdl, '_mapdl'):
+            mapdl = mapdl._mapdl
+        prior_processor = mapdl.parameters.routine
+        if prior_processor != 'PREP7':
+            mapdl.prep7()
+
+        out = func(*args, **kwargs)
+
+        if prior_processor == 'Begin level':
+            mapdl.finish()
+        elif prior_processor != 'PREP7':
+            mapdl.run('/%s' % prior_processor)
+
+        return out
+    return wrapper
+
+
 def threaded(fn):
     """ calls a function using a thread """
     def wrapper(*args, **kwargs):

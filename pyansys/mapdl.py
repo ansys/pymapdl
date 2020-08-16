@@ -6,14 +6,15 @@ import logging
 from functools import wraps
 import tempfile
 from shutil import rmtree, copyfile
+import random
 
+import numpy as np
 import appdirs
 import pyvista as pv
-import numpy as np
 
 import pyansys
 from pyansys.mapdl_functions import _MapdlCommands
-from pyansys.misc import random_string, supress_logging
+from pyansys.misc import random_string, supress_logging, run_as_prep7
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
@@ -283,7 +284,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def _geometry(self):  # pragma: no cover
-        """Implemented by child class"""
+        """Return geometry cache"""
         from pyansys.mapdl_geometry import Geometry
         return Geometry(self)
 
@@ -389,14 +390,11 @@ class _MapdlCore(_MapdlCommands):
                                  pyansys.__version__)
 
     @supress_logging
+    @run_as_prep7
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        tmp_name = '_tmp.iges'
-        filename = os.path.join(self.path, tmp_name)
-        prior_processor = self.parameters.routine
-        self.prep7()
+        filename = os.path.join(self.path, '_tmp.iges')
         self.igesout(filename, att=1)
-        self.run('/%s' % prior_processor)
         return filename
 
     def open_gui(self, include_result=True):  # pragma: no cover
@@ -528,7 +526,7 @@ class _MapdlCore(_MapdlCommands):
 
                 labels = [{'points': pcloud.points, 'labels': pcloud['labels']}]
             points = [{'points': self.mesh.nodes}]
-            return general_plotter('MAPDL Node Plot', meshes, points,
+            return general_plotter('MAPDL Node Plot', [], points,
                                    labels, **kwargs)
 
         # otherwise, use the built-in nplot
@@ -539,8 +537,9 @@ class _MapdlCore(_MapdlCommands):
         return super().nplot(knum)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
-              vtk=False, quality=7, show_numbering=False,
-              random_colors=False, show_edges=True, edge_width=1,
+              vtk=None, quality=7, show_area_numbering=False,
+              show_line_numbering=False,
+              color_areas=False, show_lines=True,
               **kwargs):
         """APDL Command: VPLOT
 
@@ -559,8 +558,9 @@ class _MapdlCore(_MapdlCommands):
 
             (blank) - No degeneracy marker is used (default).
 
-            DEGE - A red star is placed on keypoints at degeneracies (see the Modeling and Meshing
-                   Guide).  Not available if /FACET,WIRE is set.
+            DEGE - A red star is placed on keypoints at degeneracies
+                   (see the Modeling and Meshing Guide).  Not
+                   available if /FACET,WIRE is set.
 
         scale
             Scale factor for the size of the degeneracy-marker star.  The scale
@@ -588,19 +588,26 @@ class _MapdlCore(_MapdlCommands):
         degree of tessellation used to plot the volumes is set through the
         /FACET command.
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
         if vtk:
             cm_name = '__tmp_area2__'
             self.cm(cm_name, 'AREA')
             self.aslv('S')  # select areas attached to active volumes
-            self.aplot(vtk=True, random_colors=False, show_edges=True,
-                       edge_width=edge_width, **kwargs)
+            self.aplot(vtk=vtk, color_areas=color_areas, quality=quality,
+                       show_area_numbering=show_area_numbering,
+                       show_line_numbering=show_line_numbering,
+                       show_lines=show_lines, **kwargs)
             self.cmsel('S', cm_name, 'AREA')
         else:
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
 
+    @run_as_prep7
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
-              vtk=False, quality=7, show_numbering=False, show_line_numbering=False,
-              random_colors=False, show_edges=True, edge_width=1, **kwargs):
+              vtk=None, quality=7, show_area_numbering=False,
+              show_line_numbering=False, color_areas=False,
+              show_lines=True, **kwargs):
         """APDL Command: APLOT
 
         Displays the selected areas.
@@ -647,57 +654,53 @@ class _MapdlCore(_MapdlCommands):
         This command is valid in any processor.  The degree of tessellation
         used to plot the selected areas is set through the /FACET command.
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
         if vtk:
             if quality > 10:
                 quality = 10
             if quality < 1:
                 quality = 1
-            surf = self.generate_surface(11 - quality, na1, na2, ninc)
+            surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
 
-            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
-            pl.set_background(kwargs.pop('background', None))
+            meshes = []
+            labels = []
 
-            if kwargs.pop('show_axes', False):
-                pl.add_axes()
-
-            cpos = kwargs.pop('cpos', None)
-            kwargs.setdefault('color', 'w')
-            font_size = kwargs.pop('font_size', None)
-
-            areas = []
             anums = np.unique(surf['area_num'])
             for anum in anums:
-                areas.append(surf.extract_cells(surf['area_num'] == anum))
+                area = surf.extract_cells(surf['area_num'] == anum)
+                meshes.append({'mesh': pv.PolyData(area.points, area.cells)})
 
-            centers = []
-            for area in areas:
-                if random_colors:
-                    kwargs['color'] = np.random.random(3)
-                pl.add_mesh(area, **kwargs)
-                centers.append(area.center)
+            if show_area_numbering:
+                centers = []
+                for area in meshes:
+                    centers.append(area['mesh'].center)
+                labels.append({'points': np.array(centers), 'labels': anums})
 
-                if show_edges:
-                    pl.add_mesh(area.extract_feature_edges(),
-                                color=kwargs.get('edge_color', 'k'),
-                                line_width=edge_width)
+            if color_areas:
+                for area in meshes:
+                    area['color'] = {'color': [random.random() for _ in range(3)]}
 
-            if show_numbering:
-                pl.add_point_labels(centers, anums, font_size=font_size)
+            if show_lines:
+                lines = []
+                for area in meshes:
+                    lines.append({'mesh': area['mesh'].extract_feature_edges(),
+                                  'color': kwargs.get('edge_color', 'k')})
+                meshes.extend(lines)
 
             # allow only unique line numbers
             if show_line_numbering:
                 self.cm('__tmp_line__', 'LINE')
                 self.lsla('S')
-                lnum = self._lnum
-                lines = self.lines
+                lnum = self.geometry.lnum
+                lines = self.geometry.lines
                 self.cmsel('S', '__tmp_line__', 'LINE')
+                labels.append({'points': lines.points[50::101], 'labels': lnum})
 
-                font_size = kwargs.pop('font_size', None)
-                pl.add_point_labels(lines.points[50::101], lnum,
-                                    font_size=font_size)
+            return general_plotter('MAPDL Node Plot', meshes, [],
+                                   labels, **kwargs)
 
-            pl.camera_position = cpos
-            return pl.show()
         else:
             return super().aplot(na1=na1, na2=na2, ninc=ninc)
 
@@ -829,9 +832,9 @@ class _MapdlCore(_MapdlCommands):
         self._enable_interactive_plotting()
         return super().eplot()
 
-    def lplot(self, nl1="", nl2="", ninc="", vtk=False,
-              show_keypoints=False, show_numbering=True,
-              show_keypoint_numbering=False, random_color=False,
+    def lplot(self, nl1="", nl2="", ninc="", vtk=None,
+              show_line_numbering=True,
+              show_keypoint_numbering=False, color_lines=False,
               **kwargs):
         """APDL Command: LPLOT
 
@@ -872,47 +875,38 @@ class _MapdlCore(_MapdlCommands):
 
         This command is valid in any processor.
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
         if vtk:
             if not self.geometry.n_line:
                 raise MapdlRuntimeError('Either no lines have been selected or there '
                                         'is nothing to plot')
 
-            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
-            pl.set_background(kwargs.pop('background', None))
-
-            if kwargs.pop('show_axes', False):
-                pl.add_axes()
-
-            cpos = kwargs.pop('cpos', None)
-            kwargs.setdefault('color', 'w')
-
-            # allow only unique line numbers
             lines = self.geometry.lines
-            lnum = lines.cell_arrays['entity_num'].astype(np.int32)
+            meshes = [{'mesh': lines}]
+            if color_lines:
+                meshes[0]['scalars'] = np.random.random(lines.n_cells)
 
-            # TODO: partially select lines
-            font_size = kwargs.pop('font_size', None)
-            if show_numbering:
-                pl.add_point_labels(lines.points[50::101], lnum, font_size=font_size)
+            labels = []
+            if show_line_numbering:
+                labels.append({'points': lines.points[50::101],
+                               'labels': lines['entity_num']})
 
-            if show_keypoints:
-                pl.add_points(self.geometry.keypoints)
-                if show_numbering:
-                    pl.add_point_labels(self.geometry.keypoints, self.geometry.knum,
-                                        font_size=font_size)
+            if show_keypoint_numbering:
+                labels.append({'points': self.geometry.keypoints,
+                               'labels': self.geometry.knum})
 
-            if random_color:
-                kwargs['scalars'] = np.random.random(lines.n_cells)
-
-            pl.add_mesh(lines, **kwargs)
-
-            pl.camera_position = cpos
-            return pl.show()
+            return general_plotter('MAPDL Line Plot',
+                                   meshes,
+                                   [],
+                                   labels,
+                                   **kwargs)
         else:
             return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc)
 
-    def kplot(self, np1="", np2="", ninc="", lab="", vtk=False,
-              show_numbering=True, **kwargs):
+    def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
+              show_keypoint_numbering=True, **kwargs):
         """Displays the selected keypoints.
 
         APDL Command: KPLOT
@@ -935,36 +929,35 @@ class _MapdlCore(_MapdlCommands):
         vtk : bool, optional
             Plot the currently selected lines using ``pyvista``.
 
-        show_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+        show_keypoint_numbering : bool, optional
+            Display keypoint numbers when ``vtk=True``.
 
         Notes
         -----
         This command is valid in any processor.
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
         if vtk:
             if not self.geometry.n_keypoint:
-                raise MapdlRuntimeError('Either no keypoints have been'
-                                        'selected or there is '
-                                        'nothing to plot')
-            pl = pv.Plotter(off_screen=kwargs.pop('off_screen', None))
+                raise MapdlRuntimeError('Either no keypoints have been '
+                                        'selected or there are no keypoints in '
+                                        'the database.')
 
-            if kwargs.pop('show_axes', False):
-                pl.add_axes()
-
-            cpos = kwargs.pop('cpos', None)
-
-            kwargs.setdefault('color', 'w')
             keypoints = self.geometry.keypoints
-            pl.add_points(keypoints, **kwargs)
+            points = [{'points': keypoints}]
 
-            if show_numbering:
-                pl.add_point_labels(keypoints, self.geometry.knum)
+            labels = []
+            if show_keypoint_numbering:
+                labels.append({'points': keypoints,
+                               'labels': self.geometry.knum})
 
-            pl.camera_position = cpos
-            return pl.show()
-        else:
-            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
+            return general_plotter('MAPDL Node Plot', [], points,
+                                   labels, **kwargs)
+
+        # otherwise, use the legacy plotter
+        return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
 
     @property
     def result(self):
@@ -976,7 +969,26 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.finish()
         >>> result = mapdl.result
         >>> print(result)
-        
+        PyANSYS MAPDL Result file object
+        Units       : User Defined
+        Version     : 18.2
+        Cyclic      : False
+        Result Sets : 1
+        Nodes       : 3083
+        Elements    : 977
+
+        Available Results:
+        EMS : Miscellaneous summable items (normally includes face pressures)
+        ENF : Nodal forces
+        ENS : Nodal stresses
+        ENG : Element energies and volume
+        EEL : Nodal elastic strains
+        ETH : Nodal thermal strains (includes swelling strains)
+        EUL : Element euler angles
+        EMN : Miscellaneous nonsummable items
+        EPT : Nodal temperatures
+        NSL : Nodal displacements
+        RF  : Nodal reaction forces
         """
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')

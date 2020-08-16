@@ -224,7 +224,7 @@ def test_keypoints(cleared, mapdl):
 
 @skip_no_ansys
 @skip_no_xserver
-def test_kplot(cleared, mapdl):
+def test_kplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl.kplot(vtk=True)
 
@@ -233,8 +233,11 @@ def test_kplot(cleared, mapdl):
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
-    cpos = mapdl.kplot(vtk=True, off_screen=True)
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    cpos = mapdl.kplot(off_screen=True, screenshot=filename)
     assert isinstance(cpos, CameraPosition)
+    assert os.path.isfile(filename)
+
     mapdl.kplot(vtk=False)    # make sure legacy still works
 
 
@@ -259,7 +262,7 @@ def test_lines(cleared, mapdl):
 
 @skip_no_ansys
 @skip_no_xserver
-def test_lplot(cleared, mapdl, filename):
+def test_lplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl.lplot(vtk=True)
 
@@ -272,9 +275,12 @@ def test_lplot(cleared, mapdl, filename):
     mapdl.l(k2, k3)
     mapdl.l(k3, k0)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
-    cpos = mapdl.lplot(show_keypoints=True, off_screen=True, screenshot=filename)
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    cpos = mapdl.lplot(show_keypoint_numbering=True, off_screen=True,
+                       screenshot=filename)
     assert isinstance(cpos, CameraPosition)
+    assert os.path.isfile(filename)
+
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 

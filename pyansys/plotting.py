@@ -19,18 +19,16 @@ def general_plotter(title, meshes, points, labels,
                     # labels kwargs
                     font_size=None,
                     font_family=None,
-                    text_color=None,
-):
+                    text_color=None):
     """General APDL plotter"""
-    
     pl = pv.Plotter(off_screen=off_screen)
 
     if background:
         pl.set_background(background)
 
-    for points in points:
-        pl.add_points(points['points'],
-                      scalars=points.get('scalars', None),
+    for point in points:
+        pl.add_points(point['points'],
+                      scalars=point.get('scalars', None),
                       color=color,
                       show_edges=show_edges, edge_color=edge_color,
                       point_size=point_size, line_width=line_width,
@@ -43,7 +41,7 @@ def general_plotter(title, meshes, points, labels,
     for mesh in meshes:
         pl.add_mesh(mesh['mesh'],
                     scalars=mesh.get('scalars', None),
-                    color=color,
+                    color=mesh.get('color', color),
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
                     point_size=point_size, line_width=line_width,

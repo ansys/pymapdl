@@ -1,5 +1,4 @@
 """Module to support MAPDL CAD geometry"""
-import os
 import re
 
 from pyiges import Iges
@@ -7,7 +6,7 @@ import numpy as np
 import pyvista as pv
 from vtk import vtkAppendPolyData
 
-from pyansys.misc import supress_logging
+from pyansys.misc import supress_logging, run_as_prep7
 
 
 class Geometry():
@@ -32,6 +31,7 @@ class Geometry():
 
     def _clear_cache(self):
         self._keypoints_cache = None
+        self._lines_cache = None
 
     @property
     def _keypoints(self):
@@ -46,11 +46,6 @@ class Geometry():
         return np.asarray(self._keypoints.points)
 
     @property
-    def knum(self):
-        """Keypoint numbers"""
-        return self._keypoints['entity_num']
-
-    @property
     def _lines(self):
         """Returns lines cache"""
         if self._lines_cache is None:
@@ -62,10 +57,6 @@ class Geometry():
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-    @property
-    def lnum(self):
-        """Line numbers of all selected lines"""
-        return self._lines['entity_num']  # .astype(np.int32)
 
     def areas(self, quality=7):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
@@ -92,6 +83,7 @@ class Geometry():
         return areas
 
     @supress_logging
+    @run_as_prep7
     def generate_surface(self, density=5, amin=None, amax=None, ninc=None):
         """Generate an-triangular surface of the active surfaces.
 
@@ -110,15 +102,10 @@ class Geometry():
             ``mapdl.anum`` for available areas.
 
         ninc : int, optional
-            Steps to 
+            Steps to between amin and amax.
         """
-
-        # disable logging for this function (make this a fixture)
-        prior_log_level = self._log.level
-        self._log.setLevel('CRITICAL')
-
         # store initially selected areas
-        self.cm('__tmp_area__', 'AREA')
+        self._mapdl.cm('__tmp_area__', 'AREA')
 
         # reselect from existing selection to mimic APDL behavior
         if amin or amax:
@@ -133,60 +120,66 @@ class Geometry():
             if ninc is None:
                 ninc = ''
 
-            self.asel('R', 'AREA', vmin=amin, vmax=amax, vinc=ninc)
+            self._mapdl.asel('R', 'AREA', vmin=amin, vmax=amax, vinc=ninc)
 
         # duplicate areas to avoid affecting existing areas
-        anum_lst = self.anum
-        a_num = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self.numstr('AREA', a_num)
-        self.agen(2, 'ALL', noelem=1)
-        a_max = int(self.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
+        a_num = int(self._mapdl.get(entity='AREA', item1='NUM', it1num='MAXD'))
+        self._mapdl.numstr('AREA', a_num)
+        self._mapdl.agen(2, 'ALL', noelem=1)
+        a_max = int(self._mapdl.get(entity='AREA', item1='NUM', it1num='MAXD'))
+        self._mapdl.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
 
         # create a temporary etype
-        etype_tmp = int(self.get(entity='ETYP', item1='NUM', it1num='MAX'))
+        etype_orig = int(self._mapdl.get(entity='ETYP', item1='NUM', it1num='MAX'))
+        etype_tmp = etype_orig + 1
 
-        self.et(etype_tmp, 'MESH200', 4)
+        with self._mapdl.chain_commands:
+            self._mapdl.et(etype_tmp, 'MESH200', 4)
+            self._mapdl.shpp('off')
+            self._mapdl.smrtsize(density)
 
-        self.shpp('off')
-        self.smrtsize(density)
-        out = self.amesh('all')
+        if self._mapdl.parameters.routine != 'PREP7':
+            self._mapdl.prep7()
+
+        resp = self._mapdl.amesh('all')
 
         # must know the number of elements in each area
-        reg = re.compile('Meshing of area (\d*) completed \*\* (\d*) elements')
-        groups = reg.findall(out)
+        reg = re.compile(r'Meshing of area (\d*) completed \*\* (\d*) elements')
+        groups = reg.findall(resp)
+        if not groups:
+            reg = re.compile(r'AREA\s*(\d*).*?,\s*(\d*) TRIANGLES')
+            groups = reg.findall(resp)
         groups = [[int(anum), int(nelem)] for anum, nelem in groups]
-        self.esla('S')
+        self._mapdl.esla('S')
 
-        archive = self._transfer_archive()
+        grid = self._mapdl.mesh._grid
+        pd = pv.PolyData(grid.points, grid.cells)
+        pd['ansys_node_num'] = grid['ansys_node_num']
+        pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
+        # pd.clean(inplace=True)  # TODO: Consider
 
         # delete all temporary meshes and clean up settings
-        self.aclear('ALL')
-        self.adele('ALL', kswp=1)
-        self.numstr('AREA', 1)
-        self.cmsel('S', '__tmp_area__', 'AREA')
-        self.etdele(etype_tmp)
-        self.shpp('ON')
-        self.smrtsize('OFF')
+        with self._mapdl.chain_commands:
+            self._mapdl.aclear('ALL')
+            self._mapdl.adele('ALL', kswp=1)
+            self._mapdl.numstr('AREA', 1)
+            self._mapdl.etdele(etype_tmp)
+            self._mapdl.shpp('ON')
+            self._mapdl.smrtsize('OFF')
+            self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
 
-        self.cmsel('S', '__tmp_area__', 'AREA')
-
-        filename = os.path.join(self.path, 'tmp.cdb')
-        self.cdwrite('DB', filename)
-
-        self._log.setLevel(prior_log_level)
-
-        grid = archive._parse_vtk(fix_midside=False, additional_checking=True)
-        if grid:
+        area_num = np.empty(grid.n_cells, dtype=np.int32)
+        if grid and groups:
             # add anum info
             i = 0
-            area_num = np.empty(grid.n_cells, dtype=np.int32)
             for anum, nelem in groups:
                 area_num[i:i+nelem] = anum
                 i += nelem
+        else:
+            area_num[:] = 0
 
-            grid['area_num'] = area_num
-            return grid
+        grid['area_num'] = area_num
+        return grid
 
     @property
     def n_volu(self):
@@ -259,7 +252,12 @@ class Geometry():
         >>> mapdl.lnum
         array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12], dtype=int32)
         """
-        return self._mapdl.get_array('LINE', item1='LLIST').astype(np.int32)
+        # this (weirdly) sometimes fails
+        for _ in range(5):
+            lnum = self._mapdl.get_array('LINES', item1='LLIST')
+            if lnum.size == self.n_line:
+                break
+        return lnum.astype(np.int32)
 
     @property
     def anum(self):
@@ -335,7 +333,8 @@ class Geometry():
             lines = pv.PolyData()
 
         # TODO: verify line numbering is unique
-
+        if lines.n_cells == 0:
+            breakpoint()
         return lines
 
     def _load_keypoints(self):
