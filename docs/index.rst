@@ -15,17 +15,17 @@ issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_
 if you identity a bug or would like to request an additional method or
 feature.
 
+Take a look at the :ref:`sphx_glr_examples` gallery for several demos using ``pyansys``.
+
 .. toctree::
    :maxdepth: 2
-   :caption: MAPDL Python Scripting and Interface
-   :hidden:
+   :caption: MAPDL Python Interface
 
    mapdl/index
 
 .. toctree::
    :maxdepth: 2
    :caption: ANSYS File Support
-   :hidden:
 
    archive
    loading_results
@@ -36,14 +36,12 @@ feature.
 .. toctree::
    :maxdepth: 2
    :caption: Example Gallery
-   :hidden:
 
    examples/index
 
 .. toctree::
    :maxdepth: 2
    :caption: Miscellaneous
-   :hidden:
 
    quality
 

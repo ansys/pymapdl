@@ -331,14 +331,15 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
             (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
     if plot_vtk:
-        result.plot_nodal_solution(0, cpos=cpos, cmap='bwr',
-                                   off_screen=as_test,
+        result.plot_nodal_solution(0, cpos=cpos, smooth_shading=False,
+                                   off_screen=as_test, show_edges=True,
                                    screenshot=as_test)
-        result.plot_nodal_stress(0, 'x', cpos=cpos, cmap='bwr',
-                                 off_screen=as_test,
+        result.plot_nodal_stress(0, 'x', cpos=cpos, smooth_shading=False,
+                                 off_screen=as_test, show_edges=True,
                                  screenshot=as_test)
-        result.plot_principal_nodal_stress(0, 'SEQV', cpos=cpos,
-                                           cmap='bwr',
+        result.plot_principal_nodal_stress(0, 'SEQV',
+                                           smooth_shading=False,
+                                           show_edges=True,
                                            off_screen=as_test,
                                            screenshot=as_test)
 

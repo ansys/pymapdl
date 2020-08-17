@@ -130,13 +130,15 @@ class Geometry():
         self._mapdl.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
 
         # create a temporary etype
-        etype_orig = int(self._mapdl.get(entity='ETYP', item1='NUM', it1num='MAX'))
-        etype_tmp = etype_orig + 1
+        etype_max = int(self._mapdl.get(entity='ETYP', item1='NUM', it1num='MAX'))
+        etype_old = self._mapdl.parameters.type
+        etype_tmp = etype_max + 1
 
         with self._mapdl.chain_commands:
             self._mapdl.et(etype_tmp, 'MESH200', 4)
             self._mapdl.shpp('off')
             self._mapdl.smrtsize(density)
+            self._mapdl.type(etype_tmp)
 
         if self._mapdl.parameters.routine != 'PREP7':
             self._mapdl.prep7()
@@ -163,6 +165,7 @@ class Geometry():
             self._mapdl.aclear('ALL')
             self._mapdl.adele('ALL', kswp=1)
             self._mapdl.numstr('AREA', 1)
+            self._mapdl.type(etype_old)
             self._mapdl.etdele(etype_tmp)
             self._mapdl.shpp('ON')
             self._mapdl.smrtsize('OFF')

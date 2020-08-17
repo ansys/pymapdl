@@ -141,6 +141,11 @@ class Parameters():
         return int(self._mapdl.get_value("ACTIVE", item1="REAL"))
 
     @property
+    def type(self):
+        """Active element type"""
+        return int(self._mapdl.get_value("ACTIVE", item1="type"))
+
+    @property
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""

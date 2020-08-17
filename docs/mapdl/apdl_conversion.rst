@@ -1,9 +1,43 @@
-APDL Conversion Examples
-========================
-ANSYS APDL contains over 200 verification files used for ANSYS
-validation and demonstration.  These validation files are used here to
-demo the use of the ``pyansys`` file translator
-``pyansys.convert_script``.
+Translating Scripts
+-------------------
+The ``pyansys`` module contains a few basic functions to translate
+existing MAPDL scripts into ``pyansys`` scripts.  Ideally, all math
+and variable setting would take place within Python as much as
+possible as APDL math is much less transparent and more difficult to
+debug.  These examples only show an automatic translation of a
+verification file and not optimized code.  Should it be necessary to
+pull parameters or arrays from ansys, use the ``get_value`` command,
+which is quite similar to the MAPDL ``GET`` command:
+
+.. code:: python
+
+   >>> mapdl.get_value('NODE' , 2, 'U' ,'Y')
+   4.532094298033
+
+Alternatively, if a parameter is already defined, you can access it
+using ``mapdl.parameters`` with:
+
+.. code:: python
+
+    >>> mapdl.parameters
+    ARR                              : ARRAY DIM (3, 1, 1)
+    PARM_FLOAT                       : 20.0
+    PARM_INT                         : 10.0
+    PARM_LONG_STR                    : "stringstringstringstringstringst"
+    PARM_STR                         : "string"
+    DEF_Y                            : 4.532094298033
+
+    >>> mapdl.parameters['DEF_Y']
+    4.532094298033
+
+Existing ANSYS scripts can be translated using:
+
+.. code:: python
+
+    import pyansys
+    inputfile = 'ansys_inputfile.inp'
+    pyscript = 'pyscript.py'
+    pyansys.convert_script(inputfile, pyscript)
 
 Of particular note in the following examples is how most of the
 commands can be called as a method to the ansys object rather than
@@ -14,39 +48,15 @@ Also note that APDL macros that use ``*CREATE`` have been replaced
 with a python function.  This will make the code easier to debug
 should it be necessary to insert a break point in the code.
 
-Ideally, all math and variable setting would take place within Python
-as much as possible as APDL math is much less transparent and more
-difficult to debug.  These examples only show an automatic translation
-of a verification file and not optimized code.  Should it be necessary
-to pull parameters or arrays from ansys, use the ``*GET`` command in
-conjunction with ``mapdl.load_parameters``.  For example:
 
-.. code:: python
+Example: VM1 - Statically Indeterminate Reaction Force Analysis
+---------------------------------------------------------------
+ANSYS APDL contains over 200 verification files used for ANSYS
+validation and demonstration.  These validation files are used here to
+demo the use of the ``pyansys`` file translator ``pyansys.convert_script``.
 
-   mapdl.get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
-   mapdl.load_parameters()
-
-The parameters are now accessible within the ``ANSYS`` object:
-
-.. code:: python
-
-    >>> mapdl.parameters
-    {'AAS_MAPD': 1.0,
-     'DEF_X': 8.631926066372,
-     'DEF_Y': 4.532094298033,
-     'ST_EN': 24.01187254488,
-     '_RETURN': 0.0,
-     '_STATUS': 1.0}
-
-    >>> mapdl.parameters['DEF_Y']
-    4.532094298033
-
-
-VM1 - Statically Indeterminate Reaction Force Analysis
-------------------------------------------------------
-HTML overview `VM1 <https://www.sharcnet.ca/Software/Ansys/17.0/en-us/help/ans_vm/Hlp_V_VM1.html>`_
-
-ANSYS APDL code:
+This example translates the verification example ``"vm1.dat"``.
+First, the MAPDL code:
 
 .. code::
 
@@ -194,6 +204,13 @@ You can verify the reaction forces with:
     [   0.  250.    0.]
     [   0.  500.    0.]
     [   0. -900.    0.]]
+
+Note that some of the commands with ``/`` are not directly translated
+to functions and are instead run as commands.  Also, please note that
+the ``*VWRITE`` command requires a command immediately following it.
+This normally locks CORBA, so it's implemented in the background as an
+input file using ``mapdl.non_interactive``.  See the following Caveats
+and Notes section for more details.
 
 
 VM7 - Plastic Compression of a Pipe Assembly
@@ -385,12 +402,14 @@ ANSYS APDL code:
     /OUT
     *LIST,vm7,vrt
 
+Convert the verfication file with:
+
 .. code:: python
 
     import pyansys
     pyansys.convert_script('vm7.dat', 'vm7.py')
 
-Translated code:
+Here is the translated Python script:
 
 .. code:: python
 
