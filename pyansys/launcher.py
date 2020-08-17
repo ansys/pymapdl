@@ -589,7 +589,7 @@ def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
 
     # different treatment for windows vs. linux due to v202 build issues
     custom_sw = ''
-    if os.name != 'nt':
+    if os.name == 'posix':
         try:
             import ansys.mapdl_bin
         except ImportError:
@@ -645,7 +645,6 @@ def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
         msg = process.before.decode()
         raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
 
-    # self._log.info('Local MAPDL GRPC server listening on localhost:%d', port)
     return port
 
 
@@ -663,14 +662,15 @@ def check_mode(mode, version):
             raise ValueError('Invalid MAPDL server mode.  '
                              'Use one of the following:\n' + ALLOWABLE_MODES)
 
+        # There's no interface for 2020R1
         if mode == 'grpc':
             if version < 202:
                 raise ValueError('gRPC mode requires MAPDL 2020R2 or newer.')
         elif mode == 'corba':
             if version < 170:
                 raise ValueError('CORBA AAS mode requires MAPDL v17.0 or newer.')
-            elif version > 200 and os.name == 'posix':
-                raise ValueError('CORBA AAS mode requires MAPDL v19.4 or earlier.')
+            elif version > 199:
+                raise ValueError('CORBA AAS mode requires MAPDL < 2020R1.')
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')
 

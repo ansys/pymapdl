@@ -6,7 +6,6 @@ import logging
 from functools import wraps
 import tempfile
 from shutil import rmtree, copyfile
-import random
 
 import numpy as np
 import appdirs
@@ -19,6 +18,7 @@ from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from pyansys.plotting import general_plotter
+
 
 MATPLOTLIB_LOADED = True
 try:
@@ -541,9 +541,9 @@ class _MapdlCore(_MapdlCommands):
               show_line_numbering=False,
               color_areas=False, show_lines=True,
               **kwargs):
-        """APDL Command: VPLOT
+        """Plot the selected volumes.
 
-        Displays the selected volumes.
+        APDL Command: VPLOT
 
         Parameters
         ----------
@@ -551,21 +551,19 @@ class _MapdlCore(_MapdlCommands):
             Display volumes from NV1 to NV2 (defaults to NV1) in steps
             of NINC (defaults to 1).  If NV1 = ALL (default), NV2 and
             NINC are ignored and all selected volumes [VSEL] are
-            displayed.
+            displayed.  Ignored when ``vtk=True``.
 
         degen
-            Degeneracy marker:
-
-            (blank) - No degeneracy marker is used (default).
-
-            DEGE - A red star is placed on keypoints at degeneracies
-                   (see the Modeling and Meshing Guide).  Not
-                   available if /FACET,WIRE is set.
+            Degeneracy marker.  ``"blank"`` No degeneracy marker is
+            used (default), or ``"DEGE"``.  A red star is placed on
+            keypoints at degeneracies (see the Modeling and Meshing
+            Guide).  Not available if /FACET,WIRE is set.  Ignored
+            when ``vtk=True``.
 
         scale
             Scale factor for the size of the degeneracy-marker star.  The scale
             is the size in window space (-1 to 1 in both directions) (defaults
-            to .075).
+            to .075).  Ignored when ``vtk=True``.
 
         vtk : bool, optional
             Plot the currently selected volumes using ``pyvista``.  As
@@ -574,19 +572,16 @@ class _MapdlCore(_MapdlCommands):
 
         quality : int, optional
             quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).
+            to 10 (best).  Applicable when ``vtk=True``.
 
         show_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
 
-        Notes
-        -----
-        Displays selected volumes.  (Only volumes having areas within the
-        selected area set [ASEL] will be plotted.)  With PowerGraphics on
-        [/GRAPHICS,POWER], VPLOT will display only the currently selected
-        areas. This command is also a utility command, valid anywhere.  The
-        degree of tessellation used to plot the volumes is set through the
-        /FACET command.
+        Examples
+        --------
+        Plot while displaying area numbers
+
+        >>> mapdl.vplot(show_area_numbering=True)
         """
         if vtk is None:
             vtk = self._use_vtk
@@ -603,7 +598,6 @@ class _MapdlCore(_MapdlCommands):
         else:
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
 
-    @run_as_prep7
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
               vtk=None, quality=7, show_area_numbering=False,
               show_line_numbering=False, color_areas=False,
@@ -615,27 +609,19 @@ class _MapdlCore(_MapdlCommands):
         Parameters
         ----------
         na1, na2, ninc
-            Displays areas from NA1 to NA2 (defaults to NA1) in steps of NINC
-            (defaults to 1).  If NA1 = ALL (default), NA2 and NINC are ignored
-            and all selected areas [ASEL] are displayed.
+            Displays areas from NA1 to NA2 (defaults to NA1) in steps
+            of NINC (defaults to 1).  If NA1 = ALL (default), NA2 and
+            NINC are ignored and all selected areas [ASEL] are
+            displayed.  These options are ignored when ``vtk=True``.
 
         degen
-            Degeneracy marker.
-
-            (blank) - No degeneracy marker is used (default).
-
-            DEGE - A red star is placed on keypoints at degeneracies
-            (see the Modeling and Meshing Guide ).  Not available if
-            /FACET,WIRE is set.
-
-            This option is ignored when ``vtk=True``.
+            Degeneracy marker.  This option is ignored when ``vtk=True``.
 
         scale
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
-            directions) (defaults to .075).
-
-            This option is ignored when ``vtk=True``.
+            directions) (defaults to .075).  This option is ignored
+            when ``vtk=True``.
 
         vtk : bool, optional
             Plot the currently selected areas using ``pyvista``.  As
@@ -643,16 +629,11 @@ class _MapdlCore(_MapdlCommands):
             long execution time for large meshes.
 
         quality : int, optional
-            quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).
+            Quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best) when ``vtk=True``.
 
         show_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
-
-        Notes
-        -----
-        This command is valid in any processor.  The degree of tessellation
-        used to plot the selected areas is set through the /FACET command.
         """
         if vtk is None:
             vtk = self._use_vtk
@@ -667,36 +648,36 @@ class _MapdlCore(_MapdlCommands):
             meshes = []
             labels = []
 
-            anums = np.unique(surf['area_num'])
-            for anum in anums:
-                area = surf.extract_cells(surf['area_num'] == anum)
-                meshes.append({'mesh': pv.PolyData(area.points, area.cells)})
+            # individual surface isolation is quite slow...
+            if color_areas:
+                meshes.append({'mesh': surf})
+            else:
+                meshes.append({'mesh': surf})
 
             if show_area_numbering:
+                anums = np.unique(surf['area_num'])
                 centers = []
-                for area in meshes:
-                    centers.append(area['mesh'].center)
+                for anum in anums:
+                    area = surf.extract_cells(surf['area_num'] == anum)
+                    centers.append(area.center)
+
                 labels.append({'points': np.array(centers), 'labels': anums})
 
-            if color_areas:
-                for area in meshes:
-                    area['color'] = {'color': [random.random() for _ in range(3)]}
-
-            if show_lines:
-                lines = []
-                for area in meshes:
-                    lines.append({'mesh': area['mesh'].extract_feature_edges(),
-                                  'color': kwargs.get('edge_color', 'k')})
-                meshes.extend(lines)
-
-            # allow only unique line numbers
-            if show_line_numbering:
-                self.cm('__tmp_line__', 'LINE')
+            if show_lines or show_line_numbering:
+                kwargs.setdefault('line_width', 2)
+                # subselect lines belonging to the current areas
+                self.cm('__area__', 'AREA')
                 self.lsla('S')
-                lnum = self.geometry.lnum
+
                 lines = self.geometry.lines
-                self.cmsel('S', '__tmp_line__', 'LINE')
-                labels.append({'points': lines.points[50::101], 'labels': lnum})
+                self.cmsel('S', '__area__', 'AREA')
+
+                if show_lines:
+                    meshes.append({'mesh': lines,
+                                   'color': kwargs.get('edge_color', 'k')})
+                if show_line_numbering:
+                    labels.append({'points': lines.points[50::101],
+                                   'labels': lines['entity_num']})
 
             return general_plotter('MAPDL Node Plot', meshes, [],
                                    labels, **kwargs)
@@ -785,8 +766,8 @@ class _MapdlCore(_MapdlCommands):
             Plot the node numbers of surface nodes.
 
         **kwargs
-            See ``help(pyansys.plotter.general_plotter)`` for more keyword arguments
-            related to visualizing using ``vtk``.
+            See ``help(pyansys.plotter.general_plotter)`` for more
+            keyword arguments related to visualizing using ``vtk``.
 
         Examples
         --------
@@ -816,6 +797,7 @@ class _MapdlCore(_MapdlCommands):
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault('show_edges', True)
 
             # if show_node_numbering:
             labels = []
@@ -1542,6 +1524,9 @@ class _MapdlCore(_MapdlCommands):
         >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         """
+        # always reset the cache
+        self._reset_cache()
+
         if self._store_commands:
             self._stored_commands.append(command)
             return

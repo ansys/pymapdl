@@ -27,18 +27,19 @@ or these commands can be called using parameters:
 
     mapdl.esel('s', 'type', vmin=1)
 
-None of these restrictions apply to commands run with ``run``:
+None of these restrictions apply to commands run with ``run``, and it
+may be eaiser to run some of these commands (e.g. "/SOLU"):
 
 .. code:: python
 
     mapdl.run('/SOLU')
     mapdl.solve()
 
-Some commands can only be run non-interactively in a script.
-``pyansys`` gets around this restriction by writing the commands to a
-temporary input file and then reading the input file.  To run a group
-of commands that must be run non-interactively, set the ``MAPDL``
-object to run a series of commands as an input file by using
+Some commands can only be run non-interactively from within in a
+script.  ``pyansys`` gets around this restriction by writing the
+commands to a temporary input file and then reading the input file.
+To run a group of commands that must be run non-interactively, set the
+``MAPDL`` object to run a series of commands as an input file by using
 ``non_interactive`` as in this example:
 
 .. code:: python
@@ -53,8 +54,9 @@ a file) do not appear to run correctly.  For example, the macro
 
 .. code::
 
+    ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
     *CREATE,DISP
-    NSEL,R,LOC,Z,10                      ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
+    NSEL,R,LOC,Z,10
     D,ALL,UZ,ARG1
     NSEL,ALL
     /OUT,SCRATCH
@@ -85,14 +87,14 @@ Should be written as:
     DISP(-.1)
 
 If you have an existing input file with a macro, it can be converted
-using the ``convert_script`` function:
+using the ``convert_script`` function and setting
+``macros_as_functions=True``:
 
 .. code:: python
 
     pyansys.convert_script(apdl_inputfile, pyscript, macros_as_functions=True)
 
 See the ``vm7.dat`` example in the APDL Conversion Examples page.
-
 
 
 Conditional Statements and Loops
@@ -232,57 +234,12 @@ This allows for the translation of a Python script to an APDL script
 except for conditional statements, loops, or functions.
 
 
-Plotting Non-Interactively
---------------------------
-It is often useful to plot geometry and meshes as they are generated
-and for debugging (or scripting) purposes it can be useful to plot
-within ``pyansys`` as well.  To enable interactive plotting, set
-``interactive_plotting=True`` when starting ANSYS.  Plotting commands
-such as ``APLOT``, ``EPLOT``, and ``KPLOT`` will open up a
-``matploblib``.
-
-.. code:: python
-
-    import pyansys
-
-    # run ansys with interactive plotting enabled
-    mapdl = pyansys.launch_mapdl(interactive_plotting=True)
-
-    # create a square area using keypoints
-    mapdl.prep7()
-    mapdl.k(1, 0, 0, 0)
-    mapdl.k(2, 1, 0, 0)
-    mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)    
-    mapdl.l(1, 2)
-    mapdl.l(2, 3)
-    mapdl.l(3, 4)
-    mapdl.l(4, 1)
-    mapdl.al(1, 2, 3, 4)
-
-    # sets the view to "isometric"
-    mapdl.view(1, 1, 1, 1)
-    mapdl.pnum('kp', 1)  # enable keypoint numbering
-    mapdl.pnum('line', 1)  # enable line numbering
-
-    # each of these will create a matplotlib figure and pause execution
-    mapdl.aplot()
-    mapdl.lplot()
-    mapdl.kplot()
-
-.. figure:: ./images/aplot.png
-    :width: 300pt
-
-    Area Plot from ANSYS using ``pyansys``
-
-
 Interactive Breakpoint
 ----------------------
-In most circumstances it is not possible, especially when generating
-geometry, to go without opening up the APDL GUI.  Identifying geometry
-items can't be done easy using inline plotting, so ``pyansys`` has an
-``open_gui`` method that allows you to seamlessly open up the GUI
-without loosing work or having to restart your session.  For example:
+In most circumstances it is necessary or preferable to open up the
+MAPDL GUI.  The ``pyansys`` module has an ``open_gui`` method that
+allows you to seamlessly open up the GUI without losing work or
+having to restart your session.  For example:
 
 .. code:: python
 
@@ -414,7 +371,8 @@ with torsional loading.
         # result = pyansys.read_binary(result file)
 
         # Get maximum von Mises stress at result 1
-        nodenum, stress = result.principal_nodal_stress(0)  # 0 as it's zero based indexing
+        # Index 0 as it's zero based indexing
+        nodenum, stress = result.principal_nodal_stress(0)
 
         # von Mises stress is the last column
         # must be nanmax as the shell element stress is not recorded

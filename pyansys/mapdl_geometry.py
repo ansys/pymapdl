@@ -29,7 +29,7 @@ class Geometry():
         """Loads the iges file from MAPDL as a pyiges class"""
         return Iges(self._mapdl._generate_iges())
 
-    def _clear_cache(self):
+    def _reset_cache(self):
         self._keypoints_cache = None
         self._lines_cache = None
 
@@ -153,6 +153,10 @@ class Geometry():
             groups = reg.findall(resp)
         groups = [[int(anum), int(nelem)] for anum, nelem in groups]
         self._mapdl.esla('S')
+
+        # might have to manually set key_option
+        if not self._mapdl.mesh.key_option:
+            self._mapdl.mesh._keyopt = {etype_tmp: [[1, 4]]}
 
         grid = self._mapdl.mesh._grid
         pd = pv.PolyData(grid.points, grid.cells)
@@ -296,6 +300,7 @@ class Geometry():
             self._mapdl.asel('S', 'ALL')
             self._mapdl.ksel('S', 'ALL')
             self._mapdl.vsel('NONE')
+
         iges = self._load_iges()
 
         with self._mapdl.chain_commands:
@@ -332,12 +337,10 @@ class Geometry():
                 afilter.AddInputData(line)
             afilter.Update()
             lines = pv.wrap(afilter.GetOutput())
+            lines['entity_num'] = lines['entity_num'].astype(np.int32)
         else:
             lines = pv.PolyData()
 
-        # TODO: verify line numbering is unique
-        if lines.n_cells == 0:
-            breakpoint()
         return lines
 
     def _load_keypoints(self):

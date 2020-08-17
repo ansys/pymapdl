@@ -7,10 +7,10 @@ import string
 from pyvista.utilities.errors import GPUInfo
 import scooby
 import pyvista
-from pyansys import _binary_reader
-
 import numpy as np
 import vtk
+
+from pyansys import _binary_reader
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -250,3 +250,14 @@ def chunks(l, n):
     """ Yield successive n-sized chunks from l """
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+def unique_rows(a):
+    """ Returns unique rows of a and indices of those rows """
+    if not a.flags.c_contiguous:
+        a = np.ascontiguousarray(a)
+
+    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx, idx2 = np.unique(b, True, True)
+
+    return a[idx], idx, idx2

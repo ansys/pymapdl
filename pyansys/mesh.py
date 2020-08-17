@@ -4,6 +4,7 @@ import vtk
 import numpy as np
 
 from pyansys import _relaxmidside, _reader
+from pyansys.misc import unique_rows
 from pyansys.elements import ETYPE_MAP
 
 
@@ -34,7 +35,7 @@ class Mesh():
         self._etype = None  # internal element type reference
         self._grid = None  # VTK grid
         self._enum = None  # cached element numbering
-        self.__ans_etype = None  # cached ansys element type numbering
+        self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
         self._mtype = None  # cached ansys material type
         self._node_angles = None  # cached node angles
@@ -139,7 +140,7 @@ class Mesh():
         if additional_checking:
             cells[cells < 0] = 0
             cells[cells >= nodes.shape[0]] = 0
-        
+
         if VTK9:
             grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)
         else:
@@ -323,9 +324,9 @@ class Mesh():
     @property
     def _ans_etype(self):
         """FIELD 1 : element type number"""
-        if self.__ans_etype is None:
-            self.__ans_etype = self._elem[self._elem_off[:-1] + 1]
-        return self.__ans_etype
+        if self._etype_cache is None:
+            self._etype_cache = self._elem[self._elem_off[:-1] + 1]
+        return self._etype_cache
 
     @property
     def section(self):
@@ -627,14 +628,3 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     nnum_new[:nnodes] = nnum
     nnum_new[nnodes:] = -1
     return nodes_new, new_angles, nnum_new
-
-
-def unique_rows(a):
-    """ Returns unique rows of a and indices of those rows """
-    if not a.flags.c_contiguous:
-        a = np.ascontiguousarray(a)
-
-    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
-    _, idx, idx2 = np.unique(b, True, True)
-
-    return a[idx], idx, idx2

@@ -20,6 +20,17 @@ results are valid.  This module seeks to rectify that with:
 - Access MAPDL arrays as Python objects (e.g. nodes, elements,
   internal arrays, results from MAPDL post-processing)
 
+.. toctree::
+   :maxdepth: 1
+   :caption: APDL Python Scripting
+
+   ansys_functions
+   mapdl
+   plotting
+   parameters
+   ansys_examples
+   apdl_conversion
+
 
 PyANSYS MAPDL Basics
 --------------------
@@ -231,14 +242,3 @@ instance of ``mapdl`` and access the current nodes coordinates with:
     [0.75 0.5  3.5 ]
     [0.75 0.5  4.  ]
     [0.75 0.5  4.5 ]]
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: APDL Python Scripting
-
-   mapdl
-   parameters
-   ansys_examples
-   apdl_conversion
-   ansys_functions
