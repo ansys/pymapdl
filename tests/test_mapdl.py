@@ -42,7 +42,7 @@ def make_block(mapdl, cleared):
     mapdl.et(1, 186)
     mapdl.esize(0.25)
     mapdl.vmesh('ALL')
-    breakpoint()
+
 
 @skip_no_ansys
 def test_str(mapdl):

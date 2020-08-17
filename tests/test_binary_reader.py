@@ -282,7 +282,6 @@ def test_save_as_vtk(tmpdir, result, result_type):
         assert key in grid.point_arrays
         arr = grid.point_arrays[key]
         assert np.allclose(arr, result.nodal_solution(i)[1], atol=1E-5)
-        # breakpoint()
 
         key = '%s %d' % (element_index_table_info[result_type], i)
         assert key in grid.point_arrays
