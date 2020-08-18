@@ -110,7 +110,7 @@ class Mesh():
 
         # ANSYS element type to VTK map
         type_ref = np.empty(2 << 15, np.int32)  # 65536
-        type_ref[self._ekey[:, 0]] = etype_map[self._ekey[:, 1]]
+        type_ref[self._ekey[:, 0]] = etype_map[self._ekey[:, 1]]        
 
         # special treatment for MESH200
         if allowable_types is None or 200 in allowable_types:

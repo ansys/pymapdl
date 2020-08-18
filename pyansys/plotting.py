@@ -136,6 +136,7 @@ def general_plotter(title, meshes, points, labels,
     for mesh in meshes:
         pl.add_mesh(mesh['mesh'],
                     scalars=mesh.get('scalars', None),
+                    stitle=mesh.get('stitle', None),
                     color=mesh.get('color', color),
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,

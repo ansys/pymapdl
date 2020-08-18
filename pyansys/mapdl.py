@@ -26,7 +26,7 @@ try:
     matplotlib.use('tkagg')  # for windows
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
-except:
+except:  # pragma: no cover
     MATPLOTLIB_LOADED = False
 
 # test for png file
@@ -57,7 +57,7 @@ def parse_to_short_cmd(command):
     try:
         short_cmd = command.split(',')[0]
         return short_cmd[:4].upper()
-    except:
+    except:  # pragma: no cover
         return
 
 
@@ -601,20 +601,24 @@ class _MapdlCore(_MapdlCommands):
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
               vtk=None, quality=7, show_area_numbering=False,
               show_line_numbering=False, color_areas=False,
-              show_lines=True, **kwargs):
+              show_lines=False, **kwargs):
         """APDL Command: APLOT
 
-        Displays the selected areas.
+        Displays the selected areas from ``na1`` to ``na2`` in steps
+        of ``ninc``.
 
         Parameters
         ----------
-        na1, na2, ninc
-            Displays areas from NA1 to NA2 (defaults to NA1) in steps
-            of NINC (defaults to 1).  If NA1 = ALL (default), NA2 and
-            NINC are ignored and all selected areas [ASEL] are
-            displayed.  These options are ignored when ``vtk=True``.
+        na1 : int, optional
+            Minimum area to display.
 
-        degen
+        na2 : int, optional
+            Maximum area to display
+
+        ninc : int, optional
+            Increment between minimum and maximum area.
+
+        degen, str, optional
             Degeneracy marker.  This option is ignored when ``vtk=True``.
 
         scale
@@ -632,25 +636,53 @@ class _MapdlCore(_MapdlCommands):
             Quality of the mesh to display.  Varies between 1 (worst)
             to 10 (best) when ``vtk=True``.
 
-        show_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+        show_area_numbering : bool, optional
+            Display area numbers when ``vtk=True``.
+
+        show_line_numbering : bool, optional
+            Display line numbers when ``vtk=True``.
+
+        color_areas : bool, optional
+            Randomly color areas when ``True`` and ``vtk=True``.
+
+        show_lines : bool, optional
+            Plot lines and areas.  Change the thickness of the lines
+            with ``line_width=``
+
+        Examples
+        --------
+        Plot areas between 1 and 4 in increments of 2.
+
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.aplot(1, 4, 2)
+
+        Plot all areas and randomly color the areas.  Label center of
+        areas by their number.
+
+        >>> mapdl.aplot(show_area_numbering=True, color_areas=True)
+
+
         """
         if vtk is None:
             vtk = self._use_vtk
 
         if vtk:
+            kwargs.setdefault('stitle', None)
             if quality > 10:
                 quality = 10
             if quality < 1:
                 quality = 1
             surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
-
             meshes = []
             labels = []
 
-            # individual surface isolation is quite slow...
+            # individual surface isolation is quite slow, so just
+            # color individual areas
             if color_areas:
-                meshes.append({'mesh': surf})
+                anum = surf['entity_num']
+                rand = np.random.random(anum[-1] + 1)
+                area_color = rand[anum]
+                meshes.append({'mesh': surf, 'scalars': area_color})
             else:
                 meshes.append({'mesh': surf})
 

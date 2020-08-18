@@ -44,6 +44,12 @@ def make_block(mapdl, cleared):
     mapdl.vmesh('ALL')
 
 
+@pytest.mark.parametrize('vtk', [True, False])
+def test_vplot(mapdl, cleared, vtk):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.vplot(vtk=vtk, color_areas=True)
+
+
 @skip_no_ansys
 def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
@@ -186,20 +192,26 @@ def test_invalid():
         mapdl.a(0, 0, 0, 0)
 
 
-# @skip_no_ansys
-# def test_aplot(cleared, mapdl):
-#     k0 = mapdl.k("", 0, 0, 0)
-#     k1 = mapdl.k("", 1, 0, 0)
-#     k2 = mapdl.k("", 1, 1, 0)
-#     k3 = mapdl.k("", 0, 1, 0)
-#     l0 = mapdl.l(k0, k1)
-#     l1 = mapdl.l(k1, k2)
-#     l2 = mapdl.l(k2, k3)
-#     l3 = mapdl.l(k3, k0)
-#     a0 = mapdl.al(l0, l1, l2, l3)
-#     mapdl._show_matplotlib_figures = False
-#     response = mapdl.aplot()
-#     assert 'WRITTEN TO FILE' in response
+@skip_no_ansys
+def test_aplot(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k1, k2)
+    l2 = mapdl.l(k2, k3)
+    l3 = mapdl.l(k3, k0)
+    a0 = mapdl.al(l0, l1, l2, l3)
+    mapdl.aplot(off_screen=True, show_area_numbering=True)
+    mapdl.aplot(off_screen=True, color_areas=True, show_lines=True,
+                show_line_numbering=True)
+
+    mapdl.aplot(quality=100, off_screen=True)
+    mapdl.aplot(quality=-1, off_screen=True)
+
+    # and legacy as well
+    mapdl.aplot(vtk=False)
 
 
 @skip_no_ansys
@@ -238,7 +250,7 @@ def test_kplot(cleared, mapdl, tmpdir):
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl.kplot(vtk=False)    # make sure legacy still works
+    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
 
 
 @skip_no_ansys
@@ -455,8 +467,12 @@ def test_eplot_fail(mapdl):
 
 @skip_no_ansys
 @skip_no_xserver
-def test_mesh(mapdl, make_block):
+def test_eplot(mapdl, make_block):
+    init_elem = mapdl.mesh.n_elem
+    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background='w', color='b', off_screen=True)
+    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
+    assert mapdl.mesh.n_elem == init_elem
 
 
 @skip_no_ansys

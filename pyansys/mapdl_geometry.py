@@ -77,9 +77,9 @@ class Geometry():
         surf = self.generate_surface(11 - quality)
 
         areas = []
-        anums = np.unique(surf['area_num'])
+        anums = np.unique(surf['entity_num'])
         for anum in anums:
-            areas.append(surf.extract_cells(surf['area_num'] == anum))
+            areas.append(surf.extract_cells(surf['entity_num'] == anum))
         return areas
 
     @supress_logging
@@ -104,8 +104,9 @@ class Geometry():
         ninc : int, optional
             Steps to between amin and amax.
         """
-        # store initially selected areas
+        # store initially selected areas and elements
         self._mapdl.cm('__tmp_area__', 'AREA')
+        self._mapdl.cm('__tmp_elem__', 'ELEM')
 
         # reselect from existing selection to mimic APDL behavior
         if amin or amax:
@@ -154,12 +155,9 @@ class Geometry():
         groups = [[int(anum), int(nelem)] for anum, nelem in groups]
         self._mapdl.esla('S')
 
-        # might have to manually set key_option
-        if not self._mapdl.mesh.key_option:
-            self._mapdl.mesh._keyopt = {etype_tmp: [[1, 4]]}
-
         grid = self._mapdl.mesh._grid
         pd = pv.PolyData(grid.points, grid.cells)
+
         pd['ansys_node_num'] = grid['ansys_node_num']
         pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
         # pd.clean(inplace=True)  # TODO: Consider
@@ -174,18 +172,19 @@ class Geometry():
             self._mapdl.shpp('ON')
             self._mapdl.smrtsize('OFF')
             self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
+            self._mapdl.cmsel('S', '__tmp_elem__', 'ELEM')
 
-        area_num = np.empty(grid.n_cells, dtype=np.int32)
+        entity_num = np.empty(grid.n_cells, dtype=np.int32)
         if grid and groups:
             # add anum info
             i = 0
             for anum, nelem in groups:
-                area_num[i:i+nelem] = anum
+                entity_num[i:i+nelem] = anum
                 i += nelem
         else:
-            area_num[:] = 0
+            entity_num[:] = 0
 
-        grid['area_num'] = area_num
+        grid['entity_num'] = entity_num
         return grid
 
     @property
