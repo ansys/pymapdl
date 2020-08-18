@@ -28,7 +28,9 @@ if 'PYANSYS_IGNORE_ANSYS' in os.environ:
 else:
     HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
 
-skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+if not HAS_ANSYS:
+    pytestmark = pytest.mark.skip("Requires ANSYS installed")
+
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
@@ -44,24 +46,19 @@ def make_block(mapdl, cleared):
     mapdl.vmesh('ALL')
 
 
-@pytest.mark.parametrize('vtk', [True, False])
-def test_vplot(mapdl, cleared, vtk):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.vplot(vtk=vtk, color_areas=True)
-
-
-@skip_no_ansys
 def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
 
 
-@skip_no_ansys
+def test_version(mapdl):
+    assert isinstance(mapdl.version, float)
+
+
 def test_basic_command(cleared, mapdl):
     resp = mapdl.block(0, 1, 0, 1, 0, 1)
     assert 'CREATE A HEXAHEDRAL VOLUME' in resp
 
 
-@skip_no_ansys
 def test_allow_ignore(mapdl):
     mapdl.clear()
     assert mapdl.allow_ignore is False
@@ -75,7 +72,6 @@ def test_allow_ignore(mapdl):
     assert mapdl.geometry.n_keypoint is 0
 
 
-@skip_no_ansys
 def test_chaining(mapdl, cleared):
     mapdl.prep7()
     n_kp = 1000
@@ -86,7 +82,6 @@ def test_chaining(mapdl, cleared):
     assert mapdl.geometry.n_keypoint == 1000
 
 
-@skip_no_ansys
 def test_e(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)
@@ -100,7 +95,6 @@ def test_e(mapdl, cleared):
     assert e1 == 2
 
 
-@skip_no_ansys
 def test_et(mapdl, cleared):
     n_plane183 = mapdl.et("", "PLANE183")
     assert n_plane183 == 1
@@ -110,7 +104,6 @@ def test_et(mapdl, cleared):
     assert n_plane183 == 17
 
 
-@skip_no_ansys
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     assert k0 == 1
@@ -118,7 +111,6 @@ def test_k(cleared, mapdl):
     assert k1 == 2
 
 
-@skip_no_ansys
 def test_l(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -126,7 +118,6 @@ def test_l(cleared, mapdl):
     assert l0 == 1
 
 
-@skip_no_ansys
 def test_a(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -135,7 +126,6 @@ def test_a(cleared, mapdl):
     assert a0 == 1
 
 
-@skip_no_ansys
 def test_v(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -145,7 +135,6 @@ def test_v(cleared, mapdl):
     assert v0 == 1
 
 
-@skip_no_ansys
 def test_n(cleared, mapdl):
     n0 = mapdl.n("", 0, 0, 0)
     assert n0 == 1
@@ -153,7 +142,6 @@ def test_n(cleared, mapdl):
     assert n1 == 2
 
 
-@skip_no_ansys
 def test_bsplin(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -162,7 +150,6 @@ def test_bsplin(cleared, mapdl):
     assert l0 == 1
 
 
-@skip_no_ansys
 def test_a(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -172,7 +159,6 @@ def test_a(cleared, mapdl):
     assert a0 == 1
 
 
-@skip_no_ansys
 def test_al(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -186,13 +172,11 @@ def test_al(cleared, mapdl):
     assert a0 == 1
 
 
-@skip_no_ansys
-def test_invalid():
+def test_invalid_area():
     with pytest.raises(Exception):
         mapdl.a(0, 0, 0, 0)
 
 
-@skip_no_ansys
 def test_aplot(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -202,19 +186,24 @@ def test_aplot(cleared, mapdl):
     l1 = mapdl.l(k1, k2)
     l2 = mapdl.l(k2, k3)
     l3 = mapdl.l(k3, k0)
-    a0 = mapdl.al(l0, l1, l2, l3)
-    mapdl.aplot(off_screen=True, show_area_numbering=True)
-    mapdl.aplot(off_screen=True, color_areas=True, show_lines=True,
+    mapdl.al(l0, l1, l2, l3)
+    mapdl.aplot(show_area_numbering=True)
+    mapdl.aplot(color_areas=True, show_lines=True,
                 show_line_numbering=True)
 
-    mapdl.aplot(quality=100, off_screen=True)
-    mapdl.aplot(quality=-1, off_screen=True)
+    mapdl.aplot(quality=100)
+    mapdl.aplot(quality=-1)
 
     # and legacy as well
     mapdl.aplot(vtk=False)
 
 
-@skip_no_ansys
+@pytest.mark.parametrize('vtk', [True, False])
+def test_vplot(mapdl, cleared, vtk):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.vplot(vtk=vtk, color_areas=True)
+
+
 def test_keypoints(cleared, mapdl):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0],
@@ -234,7 +223,6 @@ def test_keypoints(cleared, mapdl):
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
-@skip_no_ansys
 @skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
@@ -246,14 +234,13 @@ def test_kplot(cleared, mapdl, tmpdir):
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.kplot(off_screen=True, screenshot=filename)
+    cpos = mapdl.kplot(screenshot=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
     mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
 
 
-@skip_no_ansys
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -272,7 +259,6 @@ def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 4
 
 
-@skip_no_ansys
 @skip_no_xserver
 def test_lplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
@@ -288,15 +274,13 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, off_screen=True,
-                       screenshot=filename)
+    cpos = mapdl.lplot(show_keypoint_numbering=True, screenshot=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 
-@skip_no_ansys
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
     mapdl.open_apdl_log(filename, mode='w')
@@ -322,7 +306,6 @@ def test_logging(mapdl, tmpdir):
     assert 'K,4,0,1,0' in out[-1]
 
 
-@skip_no_ansys
 def test_nodes(tmpdir, cleared, mapdl):
     mapdl.n(1, 1, 1, 1)
     mapdl.n(11, 10, 1, 1)
@@ -343,7 +326,6 @@ def test_nodes(tmpdir, cleared, mapdl):
 
 
 @pytest.mark.parametrize('knum', [True, False])
-@skip_no_ansys
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl, knum):
     with pytest.raises(RuntimeError):
@@ -352,19 +334,17 @@ def test_nplot_vtk(cleared, mapdl, knum):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=True, knum=knum, background='w', color='k', off_screen=True)
+    mapdl.nplot(vtk=True, knum=knum, background='w', color='k')
 
 
-@skip_no_ansys
 @skip_no_xserver
 def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False, background='w', color='k', off_screen=True)
+    mapdl.nplot(vtk=False, background='w', color='k')
 
 
-@skip_no_ansys
 def test_elements(cleared, mapdl):
     mapdl.et(1, 185)
 
@@ -411,7 +391,6 @@ def test_elements(cleared, mapdl):
                                   np.random.random((10000)),  # fails on gRPC at 100000
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
-@skip_no_ansys
 def test_set_get_parameters(mapdl, parm):
     parm_name = pyansys.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
@@ -420,19 +399,16 @@ def test_set_get_parameters(mapdl, parm):
     else:
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
-@skip_no_ansys
 def test_set_parameters_arr_to_scalar(mapdl, cleared):
     mapdl.parameters['PARM'] = np.arange(10)
     mapdl.parameters['PARM'] = 2
 
 
-@skip_no_ansys
 def test_set_parameters_string_spaces(mapdl):
     with pytest.raises(ValueError):
         mapdl.parameters['PARM'] = "string with spaces"
 
 
-@skip_no_ansys
 def test_builtin_parameters(mapdl, cleared):
     mapdl.prep7()
     assert mapdl.parameters.routine == "PREP7"
@@ -458,30 +434,26 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-@skip_no_ansys
 def test_eplot_fail(mapdl):
     # must fail with empty mesh
     with pytest.raises(RuntimeError):
         mapdl.eplot()
 
 
-@skip_no_ansys
 @skip_no_xserver
 def test_eplot(mapdl, make_block):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl.eplot(show_node_numbering=True, background='w', color='b', off_screen=True)
+    mapdl.eplot(show_node_numbering=True, background='w', color='b')
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
 
-@skip_no_ansys
 @skip_no_xserver
 def test_eplot_screenshot(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], screenshot=filename,
-                off_screen=True)
+                window_size=[1920, 1080], screenshot=filename)
     assert os.path.isfile(filename)
 
 
@@ -490,7 +462,6 @@ def test_eplot_screenshot(mapdl, make_block, tmpdir):
 # <end> Shared with ansys.mapdl
 ###############################################################################
 # must be at end as this uses a scoped fixture
-@skip_no_ansys
 def test_exit(mapdl):
     mapdl.exit()
     assert mapdl._exited

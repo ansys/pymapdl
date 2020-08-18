@@ -1618,25 +1618,33 @@ class _MapdlCore(_MapdlCommands):
         raise NotImplementedError('Implemented by child class')
 
     @property
-    @supress_logging
     def version(self):
-        """Return MAPDL build version
+        """MAPDL build version
 
         Examples
         --------
         >>> mapdl.version
         20.2
         """
-        try:
-            status = self.slashstatus()
-            return float(re.findall(r'Build=\s*(\d*.\d*)', status)[0])
-        except:
-            return self._version
+        return self.parameters.revision
 
     @property
     @supress_logging
     def path(self):
-        """Current MAPDL directory"""
+        """Current MAPDL directory
+
+        Examples
+        --------
+        Path on Linux
+
+        >>> mapdl.path
+        '/tmp/ansys'
+
+        Path on Windows
+
+        >>> mapdl.path
+
+        """
         try:
             return self.inquire('DIRECTORY')
         except:
@@ -1649,24 +1657,11 @@ class _MapdlCore(_MapdlCommands):
         if path is not None:
             return os.path.join(path, self.jobname + '.lock').replace('\\', '/')
 
-    def _remove_lockfile(self):
-        """Removes lockfile"""
-        if os.path.isfile(self._lockfile):
-            try:
-                os.remove(self._lockfile)
-            except:
-                pass
-
-    @property
-    def _result_file(self):
-        """Full path to the result file"""
-        return os.path.join(self.path, self.jobname).replace('\\', '/')
-
     def exit(self):  # pragma: no cover
         """Exit from MAPDL"""
         raise NotImplementedError('Implemented by child class')
 
-    def __del__(self):
+    def __del__(self):  # pragma: no cover
         """Clean up when complete"""
         if self._cleanup:
             try:
@@ -1752,9 +1747,9 @@ class _MapdlCore(_MapdlCommands):
                 img = mpimg.imread(filename)
                 plt.imshow(img)
                 plt.axis('off')
-                if self._show_matplotlib_figures:
+                if self._show_matplotlib_figures:  # pragma: no cover
                     plt.show()  # consider in-line plotting
-            else:
+            else:  # pragma: no cover
                 self._log.error('Unable to find screenshot at %s' % filename)
 
     def _screenshot_path(self):

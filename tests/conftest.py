@@ -1,7 +1,11 @@
 import os
 
 import pyansys
+import pyvista
 import pytest
+
+# ensure pyvista always plots off_screen
+pyvista.OFF_SCREEN = True
 
 
 def get_ansys_bin(rver):

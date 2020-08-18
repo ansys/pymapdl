@@ -247,6 +247,14 @@ class MapdlCorba(_MapdlOld):
         except:
             pass
 
+    def _remove_lockfile(self):
+        """Removes lockfile"""
+        if os.path.isfile(self._lockfile):
+            try:
+                os.remove(self._lockfile)
+            except:
+                pass
+
     def _run(self, command):
         """Sends a command to the mapdl server via the CORBA interface"""
         self._reset_cache()
