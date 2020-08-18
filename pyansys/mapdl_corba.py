@@ -122,8 +122,8 @@ class MapdlCorba(_MapdlOld):
         else:
             self._process = subprocess.Popen(command, shell=True,
                                              cwd=self.path,
-                                             stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE)
+                                             stdin=subprocess.DEVNULL,
+                                             stdout=subprocess.DEVNULL)
 
         # listen for broadcast file
         self._log.debug('Waiting for valid key in %s', self._broadcast_file)
