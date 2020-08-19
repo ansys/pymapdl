@@ -4,10 +4,9 @@ Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
 import time
 import re
-import pexpect
 
 from pyansys.misc import kill_process
-from pyansys.mapdl_old import _MapdlOld
+from pyansys.mapdl import _MapdlCore
 
 ready_items = [
     rb'BEGIN:',
@@ -41,48 +40,25 @@ for item in ready_items:
 ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 
-class MapdlConsole(_MapdlOld):
+class MapdlConsole(_MapdlCore):
     """Control interaction with an ANSYS shell instance.
 
     Only works on Linux.
 
+    Parameters
+    ----------
+    process : pexpect 
+
     """
 
-    def __init__(self, exec_file=None, run_location=None,
-                 jobname='file', nproc=2, override=False,
-                 loglevel='INFO', additional_switches='',
-                 start_timeout=120,
-                 log_apdl='w'):
+    def __init__(self, process, loglevel='INFO', log_apdl='w',
+                 use_vtk=True, **start_parm):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
         self._continue_on_error = False
-        self._process = None
-        super().__init__(exec_file, run_location, jobname, nproc,
-                         override, loglevel, additional_switches,
-                         start_timeout, log_apdl)
-
-    def _launch(self):
-        command = '%s -j %s -np %d %s' % (self._exec_file,
-                                          self._jobname, self._nproc,
-                                          self._additional_switches)
-        self._log.debug('Spawning shell process using pexpect')
-        self._log.debug('Command: "%s"', command)
-        self._log.debug('At "%s"', self.path)
-        self._process = pexpect.spawn(command, cwd=self.path)
-        self._process.delaybeforesend = None
-        self._log.debug('Waiting for ansys to start...')
-
-        try:
-            index = self._process.expect(['BEGIN:', 'CONTINUE'],
-                                         timeout=self._start_timeout)
-        except:  # capture failure
-            raise RuntimeError(self._process.before.decode('utf-8'))
-
-        if index:
-            self._process.sendline('')  # enter to continue
-            self._process.expect('BEGIN:', timeout=self._start_timeout)
-        self._log.debug('ANSYS Initialized')
-        self._log.debug(self._process.before.decode('utf-8'))
+        self._process = process
+        super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
+                         **start_parm)
 
     def _run(self, command):
         """Sends command and returns ANSYS's response"""
@@ -165,8 +141,11 @@ class MapdlConsole(_MapdlOld):
         """
         self._log.debug('Exiting ANSYS')
         if self._process is not None:
-            self._process.sendline('FINISH')
-            self._process.sendline('EXIT')
+            try:
+                self._process.sendline('FINISH')
+                self._process.sendline('EXIT')
+            except:
+                pass
 
         if close_log:
             self._close_apdl_log()

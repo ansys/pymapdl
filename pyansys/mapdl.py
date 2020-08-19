@@ -12,6 +12,7 @@ import appdirs
 import pyvista as pv
 
 import pyansys
+from pyansys import Archive
 from pyansys.mapdl_functions import _MapdlCommands
 from pyansys.misc import random_string, supress_logging, run_as_prep7
 from pyansys.geometry_commands import geometry_commands
@@ -98,7 +99,8 @@ def setup_logger(loglevel='INFO'):
 class _MapdlCore(_MapdlCommands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False):
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False, local=True,
+                 **start_parm):
         """ Initialize connection with ANSYS program """
         self._show_matplotlib_figures = True  # for testing
         self._exited = False
@@ -110,10 +112,12 @@ class _MapdlCore(_MapdlCommands):
         self._use_vtk = use_vtk
         self._log_filehandler = None
         self._version = None  # cached version
-        self._local = None
+        self._local = local
         self._path = None
         self._jobname = None
         self._cleanup = True
+        self._vget_arr_counter = 0
+        self._start_parm = start_parm
 
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
@@ -253,6 +257,7 @@ class _MapdlCore(_MapdlCommands):
         kwargs['read'] = 'NOSTART'
         super().clear(**kwargs)
 
+    @supress_logging
     def __str__(self):
         try:
             if self._exited:
@@ -271,7 +276,7 @@ class _MapdlCore(_MapdlCommands):
         en = stats.find('INITIAL', st)
         mapdl_version = stats[st:en].split('CUSTOMER')[0].strip()
 
-        info = 'Product:          %s\n' % product
+        info =  'Product:         %s\n' % product
         info += 'MAPDL Version:   %s\n' % mapdl_version
         info += 'PyANSYS Version: %s\n' % pyansys.__version__
 
@@ -330,14 +335,51 @@ class _MapdlCore(_MapdlCommands):
         """
         return self._mesh
 
-    @property
-    def _mesh(self):  # pragma: no cover
-        """Implemented by child class"""
-        raise NotImplementedError('Implemented by child class')
+    # @property
+    # def _mesh(self):  # pragma: no cover
+    #     """Implemented by child class"""
+    #     raise NotImplementedError('Implemented by child class')
 
-    def _reset_cache(self):    # pragma: no cover
-        """Reset cached items and other items"""
-        raise NotImplementedError('Implemented by child class')
+    @property
+    @supress_logging
+    def _mesh(self):
+        """Write entire archive to ASCII and read it in as a ``pyansys.Archive``"""
+        if self._archive_cache is None:
+            # write database to an archive file
+            arch_filename = os.path.join(self.path, '_tmp.cdb')
+            nblock_filename = os.path.join(self.path, 'nblock.cdb')
+            # must have all nodes elements are using selected
+            with self.chain_commands:
+                self.cm('__NODE__', 'NODE')
+                self.nsle('S')
+                self.cdwrite('db', arch_filename)
+                self.cmsel('S', '__NODE__', 'NODE')
+
+                self.cm('__ELEM__', 'ELEM')
+                self.esel('NONE')
+                self.cdwrite('db', nblock_filename)
+                self.cmsel('S', '__ELEM__', 'ELEM')
+
+            self._archive_cache = Archive(arch_filename, parse_vtk=False,
+                                          name='Mesh')
+            grid = self._archive_cache._parse_vtk(additional_checking=True)
+            self._archive_cache._grid = grid
+
+            # overwrite nodes in archive
+            nblock = Archive(nblock_filename, parse_vtk=False)
+            self._archive_cache._nodes = nblock._nodes
+            self._archive_cache._nnum = nblock._nnum
+            self._archive_cache._node_coord = None
+
+        return self._archive_cache
+
+    def _reset_cache(self):
+        """Reset cached items"""
+        self._archive_cache = None
+
+    # def _reset_cache(self):    # pragma: no cover
+    #     """Reset cached items and other items"""
+    #     raise NotImplementedError('Implemented by child class')
 
     @property
     def allow_ignore(self):
@@ -423,10 +465,11 @@ class _MapdlCore(_MapdlCommands):
             os.remove(tmp_database)
 
         # get the state, close, and finish
-        prior_processor = self.processor
+        prior_processor = self.parameters.routine
         self.finish()
         self.save(tmp_database)
-        self.exit(close_log=False)
+        # self.exit(close_log=False)
+        self.exit()
 
         # copy result file to temp directory
         if include_result:
@@ -448,7 +491,9 @@ class _MapdlCore(_MapdlCommands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, self._exec_file, name))
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path,
+                                                self._start_parm['exec_file'],
+                                                name))
         os.chdir(cwd)
 
         # must remove the start file when finished
@@ -456,7 +501,7 @@ class _MapdlCore(_MapdlCommands):
         os.remove(other_start_file)
 
         # reload database when finished
-        self._launch()
+        # self._launch()  # TODO
         self.resume(tmp_database)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
@@ -1023,8 +1068,14 @@ class _MapdlCore(_MapdlCommands):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
-    def _get(self, *args, **kwargs):  # pragma: no cover
-        raise NotImplementedError('Implemented by child class')
+    # def _get(self, *args, **kwargs):  # pragma: no cover
+    #     raise NotImplementedError('Implemented by child class')
+
+
+    def _get(self, *args, **kwargs):
+        """Simply use the default get method"""
+        return self.get(*args, **kwargs)
+
 
     def add_file_handler(self, filepath, append=False, level='DEBUG'):
         """Add a file handler to the mapdl log.  This allows you to
@@ -1645,10 +1696,12 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.path
 
         """
+        # always attempt to cache the path
         try:
-            return self.inquire('DIRECTORY')
+            self._path = self.inquire('DIRECTORY')
         except:
-            return self._path
+            pass
+        return self._path
 
     @property
     def _lockfile(self):
@@ -1727,9 +1780,41 @@ class _MapdlCore(_MapdlCommands):
         return self._get_array(entity, entnum, item1, it1num, item2,
                                it2num, kloop)
 
-    def _get_array(self, *args, **kwargs):  # pragma: no cover
-        """Implemented by child class"""
-        raise NotImplementedError('Implemented by child class')
+    # def _get_array(self, *args, **kwargs):  # pragma: no cover
+    #     """Implemented by child class"""
+    #     raise NotImplementedError('Implemented by child class')
+
+    def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
+                   it2num='', kloop='', dtype=None, **kwargs):
+        """Uses the VGET command to get an array from ANSYS"""
+        parm_name = kwargs.pop('parm', None)
+
+        if parm_name is None:
+            parm_name = '__vget_tmp_%d__' % self._vget_arr_counter
+            self._vget_arr_counter += 1
+
+        out = self.starvget(parm_name, entity, entnum, item1, it1num, item2,
+                            it2num, kloop)
+
+        # check if empty array
+        if 'the dimension number 1 is 0' in out:
+            return np.empty(0)
+
+        with self.non_interactive:
+            self.vwrite('%s(1)' % parm_name)
+            self.run('(F20.12)')
+
+        array = np.fromstring(self.last_response, sep='\n')
+        if dtype:
+            return array.astype(dtype)
+        else:
+            return array
+
+    def load_parameters(self):  # pragma: no cover
+        """Depreciated in favor of ``mapdl.parameters``"""
+        raise NotImplementedError('``load_parameters`` is  Depreciated.  '
+                                  '\n\nInstead, please use:\n'
+                                  '``mapdl.parameters``')
 
     def _display_plot(self, text):
         """Display the last generated plot (*.png) from MAPDL"""

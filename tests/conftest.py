@@ -21,16 +21,7 @@ def get_ansys_bin(rver):
     return mapdlbin
 
 
-# add grpc mode if available
-modes = ['console', 'corba']
-try:
-    import ansys.mapdl
-    modes.append('grpc')
-except:
-    pass
-
-
-@pytest.fixture(scope="module", params=modes)
+@pytest.fixture(scope="module", params=['console', 'corba'])
 def mapdl(request):
     os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
 

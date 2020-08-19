@@ -1,5 +1,6 @@
 """Module for launching MAPDL locally.
 """
+import time
 import subprocess
 import re
 import warnings
@@ -24,7 +25,7 @@ if not os.path.isdir(SETTINGS_DIR):
                       'Will be unable to cache ANSYS executable location')
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
-ALLOWABLE_MODES = ['grpc', 'corba', 'console']
+ALLOWABLE_MODES = ['corba', 'console']
 
 LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
@@ -196,6 +197,106 @@ def check_lock_file(path, jobname, override):
                                       'running at "%s"' % path)
 
 
+
+def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
+                 additional_switches='', start_timeout=60):
+    """Start MAPDL in AAS mode"""
+    # Using stored parameters so launch command can be run from a
+    # cached state (when launching the GUI)
+
+    # can't run /BATCH in windows, so we trick it using "-b"
+    if os.name == 'nt':
+        # create a dummy input file for getting NON-INTERACTIVE without
+        # running /BATCH
+        tmp_file = 'tmp.inp'
+        with open(os.path.join(run_location, tmp_file), 'w') as f:
+            f.write('FINISH')
+        additional_switches += '-b -i %s -o out.txt' % tmp_file
+
+    # command must include "aas" flag to start MAPDL server
+    command = '"%s" -aas -j %s -np %d %s' % (exec_file,
+                                             jobname,
+                                             nproc,
+                                             additional_switches)
+
+    broadcast_file = os.path.join(run_location, 'mapdl_broadcasts.txt')
+
+    # remove the broadcast file if it exists as the key will be
+    # output here when ansys server is available
+    if os.path.isfile(broadcast_file):
+        os.remove(broadcast_file)
+
+    # after v19, this is the only way this will work...
+        # command = 'START /B "MAPDL" %s' % command
+
+    # add run location to command
+    # self._log.debug('Spawning shell process with: "%s"', command)
+    # self._log.debug('At "%s"', self.path)
+
+    # set stdout
+    # if self._log.level < 20:  # < INFO
+        # self._process = subprocess.Popen(command, shell=True,
+                                         # cwd=self.path)
+    # else:
+    subprocess.Popen(command, shell=True, cwd=run_location,
+                     stdin=subprocess.DEVNULL,
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
+
+    # listen for broadcast file
+    # self._log.debug('Waiting for valid key in %s', self._broadcast_file)
+    telapsed = 0
+    tstart = time.time()
+    while telapsed < start_timeout:
+        try:
+            if os.path.isfile(broadcast_file):
+                with open(broadcast_file, 'r') as f:
+                    text = f.read()
+                    if 'visited:collaborativecosolverunitior' in text:
+                        # self._log.debug('Initialized ANSYS')
+                        break
+            time.sleep(0.1)
+            telapsed = time.time() - tstart
+
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+
+    # exit if timed out
+    if telapsed > start_timeout:
+        raise TimeoutError('Unable to start ANSYS within %.1f seconds'
+                           % start_timeout)
+
+    # return CORBA key
+    keyfile = os.path.join(run_location, 'aaS_MapdlId.txt')
+    with open(keyfile) as f:
+        corba_key = f.read()
+    return corba_key
+
+
+def launch_pexpect(exec_file=None, run_location=None, jobname=None, nproc=None,
+                   additional_switches='', start_timeout=60):
+    """Launch MAPDL as a pexpect process.
+
+    Limited to only a linux instance
+    """
+    command = '%s -j %s -np %d %s' % (exec_file, jobname, nproc,
+                                      additional_switches)
+    process = pexpect.spawn(command, cwd=run_location)
+    process.delaybeforesend = None
+
+    try:
+        index = process.expect(['BEGIN:', 'CONTINUE'],
+                               timeout=start_timeout)
+    except:  # capture failure
+        raise RuntimeError(process.before.decode('utf-8'))
+
+    if index:  # received ... press enter to continue
+        process.sendline('')
+        process.expect('BEGIN:', timeout=start_timeout)
+
+    return process
+
+
 def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                  nproc=2, override=False, loglevel='INFO',
                  additional_switches='', start_timeout=120,
@@ -216,7 +317,6 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
 
-        - ``'grpc'``
         - ``'corba'``
         - ``'console'``
 
@@ -508,151 +608,25 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     version = int(re.findall(r'\d\d\d', exec_file)[0])
     mode = check_mode(mode, version)
 
+    start_parm = {'exec_file': exec_file,
+                  'run_location': run_location,
+                  'jobname': jobname,
+                  'nproc': nproc,
+                  'additional_switches': additional_switches,
+                  'start_timeout': start_timeout}
+
     if mode == 'console':
         from pyansys.mapdl_console import MapdlConsole
-        return MapdlConsole(exec_file,
-                            run_location,
-                            jobname=jobname,
-                            nproc=nproc,
-                            override=override,
-                            loglevel=loglevel,
-                            additional_switches=additional_switches,
-                            start_timeout=start_timeout,
-                            log_apdl=log_apdl)
+        process = launch_pexpect(**start_parm)
+        return MapdlConsole(process, loglevel=loglevel,
+                            log_apdl=log_apdl, **start_parm)
     elif mode == 'corba':
         from pyansys.mapdl_corba import MapdlCorba
-        return MapdlCorba(exec_file,
-                          run_location,
-                          jobname=jobname,
-                          nproc=nproc,
-                          override=override,
-                          loglevel=loglevel,
-                          additional_switches=additional_switches,
-                          start_timeout=start_timeout,
-                          log_apdl=log_apdl,
-                          **kwargs)
-    elif mode == 'grpc':
-        # check if grpc package is available
-        try:
-            from ansys.mapdl import Mapdl
-        except ImportError:
-            raise PrivateModuleImportError
-
-        port = launch_grpc(exec_file, jobname, nproc, ram=kwargs.pop('ram', None),
-                           run_location=run_location, port=MAPDL_DEFAULT_PORT,
-                           additional_switches=additional_switches,
-                           override=True, timeout=start_timeout)
-
-        # attempt to connect to the gRPC instance
-        kwargs['jobname'] = jobname
-        kwargs['run_location'] = run_location
-        return Mapdl(LOCALHOST, port, loglevel=loglevel, log_apdl=log_apdl,
-                     **kwargs)
-
-
-def launch_grpc(exec_path, jobname, n_cpu, ram, run_location=None,
-                port=MAPDL_DEFAULT_PORT, additional_switches='',
-                override=True, timeout=10):
-    """Start MAPDL in gRPC mode locally
-
-    Returns
-    -------
-    port : int
-        Returns the port number that the gRPC instance started on.
-
-    """
-    if run_location is None:
-        run_location = os.getcwd()
-    elif not os.path.isdir(run_location):
-        raise RuntimeError('Directory %s does not exist' % run_location)
-
-    if not os.access(run_location, os.W_OK):
-        raise IOError('Unable to write to run_location "%s"' % run_location)
-
-    # verify lock file does not exist
-    lock_file = os.path.join(run_location, '%s.lock' % jobname)
-    if os.path.isfile(lock_file):
-        if override:
-            os.remove(lock_file)
-        else:
-            raise LockFileException
-
-    # get the next available port
-    while port_in_use(port, LOCALHOST):
-        port += 1
-
-    cpu_sw = '-np %d' % n_cpu
-    if ram:
-        ram_sw = '-m %d' % int(1024*ram)
+        corba_key = launch_corba(**start_parm)
+        return MapdlCorba(corba_key, loglevel=loglevel,
+                          log_apdl=log_apdl, **start_parm)
     else:
-        ram_sw = ''
-
-    # different treatment for windows vs. linux due to v202 build issues
-    custom_sw = ''
-    if os.name == 'posix':
-        try:
-            import ansys.mapdl_bin
-        except ImportError:
-            raise ImportError('Please install ``ansys.mapdl_bin`` to use the '
-                              'gRPC mode on Linux for 2020R2')
-
-        custom_bin = ansys.mapdl_bin.bin_path
-
-        if not os.path.isfile(custom_bin):
-            raise FileNotFoundError('Unable to locate the custom MAPDL executable')
-
-        custom_sw = '-custom %s' % custom_bin
-
-    job_sw = '-j %s' % jobname
-    port_sw = '-port %d' % port
-    grpc_sw = '-grpc'
-
-    # Windows will spawn a new window, only linux will let you use pexpect...
-    if os.name == 'nt':
-
-        tmp_inp = '__tmp__.inp'
-        with open(os.path.join(run_location, tmp_inp), 'w') as f:
-            f.write('FINISH\r\n')
-
-        command = [exec_path, custom_sw, job_sw, cpu_sw, ram_sw,
-                   additional_switches, port_sw, '-b', '-i', tmp_inp,
-                   '-o', '__tmp__.out', grpc_sw]
-
-        subprocess.Popen(command, shell=True, cwd=run_location,
-                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-
-    else:
-        command = ' '.join(['"%s"' % exec_path, custom_sw, job_sw,
-                            cpu_sw, ram_sw, additional_switches,
-                            port_sw, grpc_sw])
-
-        process = popen_spawn.PopenSpawn(command,
-                                         timeout=timeout,
-                                         cwd=run_location)
-
-        try:
-            idx = process.expect(['Server listening',
-                                  'Another ANSYS job with the same job name',
-                                  'PRESS <CR> OR <ENTER> TO CONTINUE',
-                                  'ERROR'])
-
-            if idx == 1:
-                raise LockFileException()
-            if idx == 2:
-                process.sendline('')  # enter to continue
-                process.expect('Server listening', timeout=1)
-            elif idx > 2:
-                msg = process.read().decode()
-                raise RuntimeError('Failed to start local mapdl instance:\n"%s"'
-                                   % msg)
-        except pexpect.EOF:
-            msg = process.read().decode()
-            raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
-        except pexpect.TIMEOUT:
-            msg = process.before.decode()
-            raise RuntimeError('Failed to start local mapdl instance:\n"%s"' % msg)
-
-    return port
+        raise ValueError('Invalid mode %s' % mode)
 
 
 def check_mode(mode, version):
@@ -667,30 +641,27 @@ def check_mode(mode, version):
         mode = mode.lower()
         if mode not in ALLOWABLE_MODES:
             raise ValueError('Invalid MAPDL server mode.  '
-                             'Use one of the following:\n' + ALLOWABLE_MODES)
+                             'Use one of the following:\n%s' % ALLOWABLE_MODES)
 
-        if mode == 'grpc':
-            if version < 202:
-                raise ValueError('gRPC mode requires MAPDL 2020R2 or newer.')
-        elif mode == 'corba':
+        if mode == 'corba':
             if version < 170:
                 raise ValueError('CORBA AAS mode requires MAPDL v17.0 or newer.')
-            elif version > 20.1 and os.name == 'nt':
-                raise ValueError('CORBA AAS mode on Windows requires MAPDL 2020R1'
-                                 ' or earlier.')
-            elif version >= 20.0 and os.name == 'posix':
-                raise ValueError('CORBA AAS mode on Linux requires MAPDL 2019R3'
-                                 ' or earlier.')
+            # elif version > 20.1 and os.name == 'nt':
+            #     raise ValueError('CORBA AAS mode on Windows requires MAPDL 2020R1'
+            #                      ' or earlier.')
+            # elif version >= 20.0 and os.name == 'posix':
+            #     raise ValueError('CORBA AAS mode on Linux requires MAPDL 2019R3'
+            #                      ' or earlier.')
 
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')
 
     else:  # auto-select based on best version
-        if version >= 202:  # handles all types
-            mode = 'grpc'
-        elif version == 20.1 and os.name == 'posix':
-            mode = 'console'
-        elif version >= 170:
+        # if version >= 202:  # handles all types
+            # mode = 'grpc'
+        # if version == 20.1 and os.name == 'posix':
+        #     mode = 'console'
+        if version >= 170:
             mode = 'corba'
         else:
             if os.name == 'nt':
