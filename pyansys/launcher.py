@@ -11,8 +11,7 @@ import socket
 import pexpect
 from pexpect import popen_spawn
 
-
-from pyansys.misc import is_float
+from pyansys.misc import is_float, random_string
 from pyansys.errors import LockFileException, PrivateModuleImportError
 
 # settings directory
@@ -216,7 +215,9 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
     # can't run /BATCH in windows, so we trick it using "-b" and
     # provide a dummy input file
     if os.name == 'nt':
-        tmp_file = 'tmp.inp'
+        # must be a random filename to avoid conflicts with other
+        # potential instances
+        tmp_file = '%s.inp' % random_string(10)
         with open(os.path.join(run_location, tmp_file), 'w') as f:
             f.write('FINISH')
         additional_switches += ' -b -i %s -o out.txt' % tmp_file
@@ -227,7 +228,7 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
                                              nproc,
                                              additional_switches)
 
-    # if os.name == 'nt':
+    # if os.name == 'nt':  # required after v190
     #     command = 'START /B "MAPDL" %s' % command
 
     # remove any broadcast files

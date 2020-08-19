@@ -17,12 +17,12 @@ except:
 
 INSTANCES = []
 
-# Windows has issues when closing
+# Ensure all instances close on exit
 @atexit.register
 def cleanup():
     if os.name == 'nt':
         for instance in INSTANCES:
-            instance.kill()
+            instance.exit()
 
 
 def threaded(fn):
@@ -103,6 +103,8 @@ class MapdlCorba(_MapdlCore):
         if self._log_broadcast:
             self._broadcast_logger = self._start_broadcast_logger()
 
+        INSTANCES.append(self)
+
     @property
     def _broadcast_file(self):
         return os.path.join(self.path, 'mapdl_broadcasts.txt')
@@ -168,27 +170,12 @@ class MapdlCorba(_MapdlCore):
                     if telap > timeout:
                         return 1
 
-        self._exited = True
-
-    def kill(self):
-        """Forces ANSYS process to end and removes lock file"""
-        try:
-            self.exit()
-        except:
-            pass
-
-        if self._process is not None and os.name == 'linux':
-            kill_process(self._process.pid)
-
-        try:
-            self._close_apdl_log()
-        except:
-            pass
-
         try:
             self._remove_lockfile()
         except:
             pass
+
+        self._exited = True
 
     def _remove_lockfile(self):
         """Removes lockfile"""

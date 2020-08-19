@@ -74,6 +74,7 @@ def test_shaft_animate(tmpdir):
                                  off_screen=True,
                                  movie_filename=filename)
 
+@skip_plotting
 @skip_no_shaft
 def test_shaft_nodal_solution_ncomp(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))

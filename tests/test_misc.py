@@ -1,9 +1,12 @@
 """Small or misc tests that don't fit in other test modules"""
 import numpy as np
 import pyvista as pv
-import pyansys
-from pyansys import examples
+
 import pytest
+
+import pyansys
+from pyvista.plotting import system_supports_plotting
+from pyansys import examples
 
 
 def test_quality():
@@ -29,5 +32,5 @@ def test_quality_type_error():
 
 
 def test_report():
-    report = pyansys.Report()
+    report = pyansys.Report(gpu=system_supports_plotting())
     assert 'pyansys' in str(report)

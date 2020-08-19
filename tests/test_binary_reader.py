@@ -1,3 +1,4 @@
+import socket
 import shutil
 import os
 
@@ -10,6 +11,7 @@ import pyvista as pv
 import pyansys
 from pyansys import examples
 from pyansys._rst_keys import element_index_table_info
+from pyansys.misc import get_ansys_bin
 
 
 HAS_FFMPEG = True
@@ -22,23 +24,19 @@ except ImportError:
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
-def get_ansys_bin(rver):
-    if os.name == 'nt':
-        ans_root = 'c:/Program Files/ANSYS Inc/'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
-                                'ANSYS%s.exe' % rver)
-    else:
-        ans_root = '/usr/ansys_inc'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
-                                'ansys%s' % rver)
 
-    return mapdlbin
+# check for a valid MAPDL install with CORBA
+valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
+EXEC_FILE = None
+for rver in valid_rver:
+    if os.path.isfile(get_ansys_bin(rver)):
+        EXEC_FILE = get_ansys_bin(rver)
 
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
-    HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
+    HAS_ANSYS = EXEC_FILE is not None
 
 RSETS = list(zip(range(1, 9), [1]*8))
 
@@ -58,21 +56,20 @@ def static_canteliver_bc():
     return pyansys.read_binary(filename)
 
 
+
 @pytest.fixture(scope="module")
 def mapdl():
-    os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
 
-    # mode = request.param
-    mode = 'corba'
-    if mode == 'corba':
-        # v200 and newer don't work
-        # v194 has issues exiting
-        rver = '182'
-    else:
-        rver = '202'
+    # launch in shared memory parallel for Windows VM
+    # configure shared memory parallel for VM
+    additional_switches = ''
+    if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
+        additional_switches = '-smp'
+    elif os.name == 'posix':
+        os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
 
-    mapdl = pyansys.launch_mapdl(get_ansys_bin(rver), override=True,
-                                 mode=mode)
+    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True, mode='corba',
+                                 additional_switches=additional_switches)
 
     # build the cyclic model
     mapdl.prep7()
@@ -366,3 +363,10 @@ def test_reaction_forces():
     nnum, forces = rst.nodal_static_forces(0)
     assert np.allclose(nnum, [1, 2, 3, 4])
     assert np.allclose(forces[:, 1], [-600, 250, 500, -900])
+
+
+@skip_no_ansys
+def test_exit(mapdl):
+    # must manually shutdown mapdl server
+    # Required on windows, not sure on other platforms
+    mapdl.exit()

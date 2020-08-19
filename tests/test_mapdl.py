@@ -1,4 +1,5 @@
 """Test MAPDL Console and CORBA interfaces"""
+import socket
 import os
 
 import pytest
@@ -11,11 +12,17 @@ from pyansys.misc import get_ansys_bin
 from pyansys.errors import MapdlRuntimeError
 import pyansys
 
+# check for a valid MAPDL install with CORBA
+valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
+EXEC_FILE = None
+for rver in valid_rver:
+    if os.path.isfile(get_ansys_bin(rver)):
+        EXEC_FILE = get_ansys_bin(rver)
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
-    HAS_ANSYS = os.path.isfile(get_ansys_bin('194'))
+    HAS_ANSYS = EXEC_FILE is not None
 
 if not HAS_ANSYS:
     pytestmark = pytest.mark.skip("Requires ANSYS installed")
@@ -23,14 +30,24 @@ if not HAS_ANSYS:
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-@pytest.fixture(scope="module", params=['console', 'corba'])
-def mapdl(request):
-    os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
+modes = ['corba']
+if os.name == 'posix':  # console only for linux
+    modes.append('console')
 
-    mode = request.param
-    rver = '202'
-    mapdl = pyansys.launch_mapdl(get_ansys_bin(rver), override=True, mode=mode)
-    mapdl._show_matplotlib_figures = False
+
+@pytest.fixture(scope="module", params=modes)
+def mapdl(request):
+
+    # configure shared memory parallel for VM
+    additional_switches = ''
+    if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
+        additional_switches = '-smp'
+    elif os.name == 'posix':
+        os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
+
+    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True, mode=request.param,
+                                 additional_switches=additional_switches)
+    mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
     return mapdl
 
 
@@ -182,6 +199,7 @@ def test_invalid_area():
         mapdl.a(0, 0, 0, 0)
 
 
+@skip_no_xserver
 def test_aplot(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -202,7 +220,7 @@ def test_aplot(cleared, mapdl):
     # and legacy as well
     mapdl.aplot(vtk=False)
 
-
+@skip_no_xserver
 @pytest.mark.parametrize('vtk', [True, False])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)

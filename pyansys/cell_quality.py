@@ -35,7 +35,7 @@ def quality(grid):
         flip = True
     elif not isinstance(grid, pv.UnstructuredGrid):
         grid = pv.wrap(grid)
-        if not isinstance(pv.UnstructuredGrid):
+        if not isinstance(grid, pv.UnstructuredGrid):
             raise TypeError('Input grid should be a pyvista or vtk UnstructuredGrid')
 
     celltypes = grid.celltypes
