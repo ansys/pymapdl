@@ -35,9 +35,6 @@ skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
 
-###############################################################################
-# Shared with ansys.mapdl
-###############################################################################
 @pytest.fixture(scope='function')
 def make_block(mapdl, cleared):
     mapdl.block(0, 1, 0, 1, 0, 1)
@@ -199,7 +196,7 @@ def test_aplot(cleared, mapdl):
 
 
 @pytest.mark.parametrize('vtk', [True, False])
-def test_vplot(mapdl, cleared, vtk):
+def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.vplot(vtk=vtk, color_areas=True)
 
