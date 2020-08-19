@@ -1,4 +1,4 @@
-"""Test MAPDL Console, CORBA, and gRPC interface"""
+"""Test MAPDL Console and CORBA interfaces"""
 import os
 
 import pytest
@@ -7,21 +7,10 @@ import pyvista
 from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
 
+from pyansys.misc import get_ansys_bin
 from pyansys.errors import MapdlRuntimeError
 import pyansys
 
-
-def get_ansys_bin(rver):
-    if os.name == 'nt':
-        ans_root = 'c:/Program Files/ANSYS Inc/'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
-                                'ANSYS%s.exe' % rver)
-    else:
-        ans_root = '/usr/ansys_inc'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
-                                'ansys%s' % rver)
-
-    return mapdlbin
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False

@@ -1,4 +1,4 @@
-ANSYS MAPDL Interactive Control
+]ANSYS MAPDL Interactive Control
 ===============================
 ANSYS MAPDL allows for the direct scripting of structural analysis
 problems through input files.  Unfortunately, MAPDL relies on an
@@ -20,16 +20,17 @@ results are valid.  This module seeks to rectify that with:
 - Access MAPDL arrays as Python objects (e.g. nodes, elements,
   internal arrays, results from MAPDL post-processing)
 
+
 .. toctree::
    :maxdepth: 1
-   :caption: APDL Python Scripting
+   :caption: Contents
 
-   ansys_functions
-   mapdl
-   plotting
-   parameters
-   ansys_examples
-   apdl_conversion
+   mapdl/mapdl
+   mapdl/plotting
+   mapdl/parameters
+   mapdl/conversion
+   mapdl/functions
+   mapdl/examples
 
 
 PyANSYS MAPDL Basics

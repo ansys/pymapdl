@@ -1,20 +1,9 @@
-"""Test launching the corba interface"""
-import re
+"""Test the mapdl launcher"""
 import os
 import pytest
+
 import pyansys
-
-def get_ansys_bin(rver):
-    if os.name == 'nt':
-        ans_root = 'c:/Program Files/ANSYS Inc/'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
-                                'ANSYS%s.exe' % rver)
-    else:
-        ans_root = '/usr/ansys_inc'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
-                                'ansys%s' % rver)
-
-    return mapdlbin
+from pyansys.misc import get_ansys_bin
 
 
 versions = ['182',
@@ -33,6 +22,9 @@ for version in versions:
         valid_versions.append(version)
 
 
+if not valid_versions:
+    pytestmark = pytest.mark.skip("Requires ANSYS installed")
+
 
 def test_invalid_mode():
     with pytest.raises(ValueError):
@@ -44,7 +36,6 @@ def test_old_version():
     exec_file = get_ansys_bin('150')
     with pytest.raises(ValueError):
         pyansys.launch_mapdl(exec_file, override=True, mode='corba')
-
 
 
 @pytest.mark.parametrize('version', valid_versions)

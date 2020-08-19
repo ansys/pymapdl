@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+import os
 from threading import Thread
 import sys
 import random
@@ -13,6 +14,20 @@ import vtk
 from pyansys import _binary_reader
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
+
+
+def get_ansys_bin(rver):
+    """Identify the ansys executable based on the release version (e.g. "201")"""
+    if os.name == 'nt':
+        ans_root = 'c:/Program Files/ANSYS Inc/'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
+                                'ANSYS%s.exe' % rver)
+    else:
+        ans_root = '/usr/ansys_inc'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
+                                'ansys%s' % rver)
+
+    return mapdlbin
 
 
 def vtk_cell_info(grid):
