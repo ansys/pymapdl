@@ -113,11 +113,11 @@ class _MapdlCore(_MapdlCommands):
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
-        self._path = None
-        self._jobname = None
+        self._jobname = start_parm.get('jobname', 'file')
         self._cleanup = True
         self._vget_arr_counter = 0
         self._start_parm = start_parm
+        self._path = start_parm.get('run_location', None)
 
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
@@ -139,9 +139,9 @@ class _MapdlCore(_MapdlCommands):
 
     def _chain_stored(self):
         """Send a series of commands to MAPDL"""
-        # appears to be an (arbitrary?) limit to 640 characters per command
-
-        # Create chained commamnds less than 640 characters each
+        # there's to be an limit to 640 characters per command, so
+        # when chaining commands they must be shorter than 640 (minus
+        # some overhead).
         c = 0
         chained_commands = []
         chunk = []
@@ -1068,14 +1068,9 @@ class _MapdlCore(_MapdlCommands):
             raise FileNotFoundError('No results found at %s' % result_path)
         return pyansys.read_binary(result_path)
 
-    # def _get(self, *args, **kwargs):  # pragma: no cover
-    #     raise NotImplementedError('Implemented by child class')
-
-
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
-
 
     def add_file_handler(self, filepath, append=False, level='DEBUG'):
         """Add a file handler to the mapdl log.  This allows you to
@@ -1363,7 +1358,7 @@ class _MapdlCore(_MapdlCommands):
         try:
             self._jobname = self.inquire('JOBNAME')
         except:
-            pass
+            self._jobname = 'file'
         return self._jobname
 
     @supress_logging

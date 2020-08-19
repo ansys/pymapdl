@@ -149,7 +149,10 @@ class MapdlCorba(_MapdlCore):
 
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
-            self._server.terminate()
+            try:
+                self._server.terminate()
+            except:
+                pass
             self._server = None
 
         if close_log:

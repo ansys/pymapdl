@@ -1,5 +1,5 @@
-"""Module for launching MAPDL locally.
-"""
+"""Module for launching MAPDL locally."""
+import platform
 import time
 import subprocess
 import re
@@ -200,18 +200,26 @@ def check_lock_file(path, jobname, override):
 
 def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
                  additional_switches='', start_timeout=60):
-    """Start MAPDL in AAS mode"""
+    """Start MAPDL in AAS mode
+
+
+    Notes
+    -----
+    The CORBA interface is likely to fail on computers with multiple
+    network adapters.  The ANSYS RPC isn't smart enough to determine
+    the right adapter and will likely try to communicate on the wrong
+    IP.
+    """
     # Using stored parameters so launch command can be run from a
     # cached state (when launching the GUI)
 
-    # can't run /BATCH in windows, so we trick it using "-b"
+    # can't run /BATCH in windows, so we trick it using "-b" and
+    # provide a dummy input file
     if os.name == 'nt':
-        # create a dummy input file for getting NON-INTERACTIVE without
-        # running /BATCH
         tmp_file = 'tmp.inp'
         with open(os.path.join(run_location, tmp_file), 'w') as f:
             f.write('FINISH')
-        additional_switches += '-b -i %s -o out.txt' % tmp_file
+        additional_switches += ' -b -i %s -o out.txt' % tmp_file
 
     # command must include "aas" flag to start MAPDL server
     command = '"%s" -aas -j %s -np %d %s' % (exec_file,
@@ -219,42 +227,39 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
                                              nproc,
                                              additional_switches)
 
-    broadcast_file = os.path.join(run_location, 'mapdl_broadcasts.txt')
+    # if os.name == 'nt':
+    #     command = 'START /B "MAPDL" %s' % command
 
-    # remove the broadcast file if it exists as the key will be
-    # output here when ansys server is available
+    # remove any broadcast files
+    broadcast_file = os.path.join(run_location, 'mapdl_broadcasts.txt')
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    # after v19, this is the only way this will work...
-        # command = 'START /B "MAPDL" %s' % command
-
-    # add run location to command
-    # self._log.debug('Spawning shell process with: "%s"', command)
-    # self._log.debug('At "%s"', self.path)
-
-    # set stdout
-    # if self._log.level < 20:  # < INFO
-        # self._process = subprocess.Popen(command, shell=True,
-                                         # cwd=self.path)
+    # windows 7 won't run this
+    # if os.name == 'nt' and platform.release() == '7':
+    #     cwd = os.getcwd()
+    #     os.chdir(run_location)
+    #     os.system('START /B "MAPDL" %s' % command)
+    #     os.chdir(cwd)
     # else:
-    subprocess.Popen(command, shell=True, cwd=run_location,
+    subprocess.Popen(command, shell=True,
+                     cwd=run_location,
                      stdin=subprocess.DEVNULL,
                      stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL)
 
     # listen for broadcast file
-    # self._log.debug('Waiting for valid key in %s', self._broadcast_file)
     telapsed = 0
     tstart = time.time()
-    while telapsed < start_timeout:
+    started_rpc = False
+    while telapsed < start_timeout and not started_rpc:
         try:
             if os.path.isfile(broadcast_file):
-                with open(broadcast_file, 'r') as f:
-                    text = f.read()
-                    if 'visited:collaborativecosolverunitior' in text:
-                        # self._log.debug('Initialized ANSYS')
-                        break
+                broadcast = open(broadcast_file).read()
+                # see if connection to RPC has been made
+                rpc_txt = 'visited:collaborativecosolverunitior-set:'
+                started_rpc = rpc_txt in broadcast
+
             time.sleep(0.1)
             telapsed = time.time() - tstart
 
@@ -262,15 +267,16 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
             raise KeyboardInterrupt
 
     # exit if timed out
-    if telapsed > start_timeout:
-        raise TimeoutError('Unable to start ANSYS within %.1f seconds'
-                           % start_timeout)
+    if not started_rpc:
+        err_str = 'Unable to start ANSYS within %.1f seconds' % start_timeout
+        if os.path.isfile(broadcast_file):
+            broadcast = open(broadcast_file).read()
+            err_str += '\n\nLast broadcast:\n%s' % broadcast
+        raise TimeoutError(err_str)
 
     # return CORBA key
     keyfile = os.path.join(run_location, 'aaS_MapdlId.txt')
-    with open(keyfile) as f:
-        corba_key = f.read()
-    return corba_key
+    return open(keyfile).read()
 
 
 def launch_pexpect(exec_file=None, run_location=None, jobname=None, nproc=None,
