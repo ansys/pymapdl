@@ -11,7 +11,7 @@ from libc.math cimport sqrt, fabs, sin, cos
 from libc.stdio cimport (fopen, FILE, fclose, fread, fseek, SEEK_CUR,
                          ftell, SEEK_SET)
 from libc.string cimport memcpy
-from libc.stdint cimport int64_t
+from libc.stdint cimport int64_t, int32_t
 from libc.stdlib cimport malloc, free
 
 # debug
@@ -340,14 +340,148 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
         if ele_ind_table[i] != 0:
             read_element_result(binfile, ele_ind_table[i] + ptr_off,
                                 PTR_ENS_IDX, nnode_elem, nitem,
-                                &ele_data_arr[c, 0], element_type[i], as_global)
+                                &ele_data_arr[c, 0], as_global)
             c += nnode_elem
-    
+
+
+def populate_surface_element_result(filename,
+                                    int64_t [::1] ele_ind_table, 
+                                    int [::1] nodstr,
+                                    int [::1] etype,
+                                    int nitem,
+                                    int64_t ptr_off,
+                                    int elem_result_index,
+                                    int n_points,
+                                    int64_t [::1] faces,
+                                    int n_faces,
+                                    int [::1] nnum_surf,
+                                    int64_t [::1] elem_ind,
+                                    int [::1] elem,
+                                    int [::1] elem_off,
+                                    int item_index,
+                                    int as_global=1):
+    """Read element results from ANSYS directly into a numpy array
+
+    filename : string
+        Filename of the result file.
+
+    ele_ind_table :  [::1] int64_t
+        Pointer to the result header of an element relative to the
+        result index.
+
+    nodstr : [::1] int
+        Number of elements per element.  Given on an element by element basis.
+
+    etype : [::1] int
+        Array containing the element type of each element.
+
+    nitem : int
+        Number of data items per node.
+
+    ptr_off : int
+        ``ele_ind_table`` offset from the file head.
+
+    elem_result_index  : int
+        Index within the element table pointing to the data of interest
+
+    n_points : int
+        Number of points in the surface.
+
+    faces : [::1] int64_t
+        VTK style face array containing the number of points per face
+        folled by the face connectivity.
+
+    n_faces : int
+        Number of faces in the surface.
+
+    nnum_surf : [::1] int
+        Node number of the point within a face.  Similar format to
+        ``faces`` but without the indices indicating the size of the
+        face.
+
+    elem_ind : [::1] int64_t
+        Index of the element within elem for each face.
+
+    elem : [::1] int
+        Element data array containing element type and connectivity.
+
+    elem_off : [::1] int
+        Array of offsets to the start of each individual element in ``elem``.
+
+    item_index : int
+        Index of the data item for each node within the element.
+
+    as_global : int, optional
+        Rotates stresses from the element coordinate system to the global
+        cartesian coordinate system.  Default True.
+
+    Returns
+    -------
+    data : [::1] double
+        Array of data to output.  One value of data for each point.
+
+
+    """
+    # open the result file
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+    # temp buffer for the element data
+    # best to keep this large as nitem might be wrong
+    cdef double [::1] data_buff = np.empty(4096)  # nitem*number_of_nodes
+    cdef double [::1] data = np.empty(n_points)
+
+    cdef int i, j, k, fsize, st, node_num, elem_nnum, nnode_elem
+    cdef int64_t elem_idx
+    cdef int c = 0   # includes face size increment
+    cdef int cj = 0   # does not include face size increment
+
+    # loop through each face
+    for i in range(n_faces):
+        elem_idx = elem_ind[i]  # index of the element this face references
+        data_off = ele_ind_table[elem_idx]  # offset from ptr_off
+        nnode_elem = nodstr[etype[elem_idx]]
+
+        # number of points in the face
+        fsize = faces[c]
+        c += fsize + 1
+
+        # read the element if the data exists
+        if data_off != 0:
+            read_element_result(binfile, data_off + ptr_off,
+                                elem_result_index, nnode_elem, nitem,
+                                &data_buff[0], as_global)
+
+            # start of the node numbers within the element data
+            st = elem_off[elem_idx] + 10
+
+            # populate dat array with the nodal data
+            for j in range(fsize):
+                # node number of this point on the face
+                node_num = nnum_surf[cj]
+
+                # loop through each node in the element until a match is found
+                for k in range(nnode_elem):
+                    elem_nnum = elem[st + k]
+                    if elem_nnum == node_num:
+                        data[cj] = data_buff[k*nitem + item_index]
+                        break
+
+                cj += 1
+
+        else:  # populate with zeros (though maybe NAN is better?)
+            for j in range(fsize):
+                data[cj] = 0
+                cj += 1
+
+    return np.array(data)
+
 
 cdef inline int read_element_result(ifstream *binfile, int64_t ele_table,
                                     int result_index,
                                     int nnode_elem, int nitem, double *arr,
-                                    int element_type, int as_global=1):
+                                    int as_global=1):
     """Populate array with results from a single element"""
     cdef int i, j, k, c, nitems
     cdef int [4096] pointers  # tmp array of pointers
@@ -638,7 +772,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         else:
             skip = read_element_result(binfile, ele_ind_table[i] + ptr_off,
                                        result_index, nnode_elem, nitems,
-                                       &bufferdata[0, 0], element_type[i])
+                                       &bufferdata[0, 0])
             if skip:
                 continue
 
@@ -1411,3 +1545,78 @@ def euler_cart_to_cyl(double [:, ::1] stress, double [::1] angles):
 
         # RZ (was XZ)
         stress[i, 5] = c_th*s_xz + s_th*s_yz
+
+
+def break_apart_surface(double [:, ::1] points, int64_t [::1] faces, int n_faces,
+                        int force_linear=True):
+    """Break apart the faces of a vtk PolyData such that the points
+    for each face are unique and each point is used only by one face.
+    This leads to duplicate points, but allows multiple scalars per
+    face.
+
+    Parameters
+    ----------
+    points : double [:, ::1] np.ndarray
+        Points from a pyvista.PolyData
+
+    faces : int64 [::1] np.ndarray
+        Faces from a ``pyvista.PolyData``.  Maximum of 8 points per face.
+
+    n_faces : int
+        Number of faces
+
+    force_linear : bool, optional
+        When ``True``, converts quadratic faces to their linear counterparts.
+
+    Returns
+    -------
+    new_points : double [:, ::1] np.ndarray
+        New points applicable for a pyvista.PolyData
+
+    new_faces : int64 [::1] np.ndarray
+        New faces from a pyvista.PolyData.  Same size as faces.
+
+    orig_idx : int32 [::1] np.ndarray
+        Relates indices of the new points to the original surface.
+
+    """
+    cdef double [:, ::1] new_points = np.empty((n_faces*8, 3))
+    cdef int64_t [::1] new_faces = np.empty(faces.size, np.int64)
+    cdef int32_t [::1] orig_idx = np.empty(n_faces*8, np.int32)
+
+    cdef int face_arr_sz = faces.size
+    cdef int i = 0
+    cdef int c = 0
+    cdef int cj = 0
+    cdef int j, face_sz, c_add
+    cdef int face = 0
+    while i < face_arr_sz:
+        face += 1
+        face_sz = faces[i]
+
+        c_add = 0  # additional counter if face_sz is less than actual face size
+        if face_sz > 8:
+            raise Exception
+        if face_sz > 4 and force_linear:
+            if face_sz == 6:
+                face_sz = 3
+                c_add = 3
+            elif face_sz == 8:
+                face_sz = 4
+                c_add = 4
+
+        new_faces[cj] = face_sz
+        i += 1  # counter for faces
+        cj += 1  # counter for new_faces
+        for j in range(face_sz):
+            f_idx = faces[i]
+            new_faces[cj] = c
+            new_points[c] = points[f_idx]
+            orig_idx[c] = f_idx
+            c += 1
+            cj += 1
+            i += 1
+        i += c_add  # extra increment because we're not recording all faces
+
+    return np.array(new_points[:c]), np.array(new_faces[:cj]), np.array(orig_idx[:c])
+

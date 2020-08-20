@@ -466,15 +466,18 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
       add_line(build_offset, &elem[off], nnode_elem);
       break;
     case 3:  // shell
-      /* printf("Adding shell"); */
+      /* printf("Adding shell\n"); */
       /* printf("nnode_elem %d: \n", nnode_elem); */
-      is_quad = nnode_elem > 4; // this is insufficient as the last node might be 0
-      /* printf("is_quad %d: \n", is_quad); */
-      if (elem[off + 2] == elem[off + 3]){
+      if (nnode_elem == 3){
 	/* printf(" subtype tri\n"); */
+	add_tri(build_offset, &elem[off], is_quad);
+      } else if (elem[off + 2] == elem[off + 3]){
+	/* printf(" subtype tri\n"); */
+	is_quad = nnode_elem > 4;
   	add_tri(build_offset, &elem[off], is_quad);
       } else {  // is quadrilateral
 	/* printf(" subtype quad\n"); */
+	is_quad = nnode_elem > 4;
   	add_quad(build_offset, &elem[off], is_quad);
       }
       break;

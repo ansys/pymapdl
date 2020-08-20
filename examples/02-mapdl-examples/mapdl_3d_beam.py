@@ -1,5 +1,5 @@
 """
-.. _ref_load_shaft_result:
+.. _ref_3d_beam:
 
 MAPDL 3D Beam Example
 ~~~~~~~~~~~~~~~~~~~~~

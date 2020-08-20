@@ -1,11 +1,10 @@
-"""Module for common class between gRPC, Archive, and Result geometry"""
-import warnings
-
+"""Module for common class between gRPC, Archive, and Result mesh"""
 import pyvista as pv
 import vtk
 import numpy as np
 
 from pyansys import _relaxmidside, _reader
+from pyansys.misc import unique_rows
 from pyansys.elements import ETYPE_MAP
 
 
@@ -28,14 +27,15 @@ MESH200_MAP = {0: 2,  # line
                11: 4}  # hex with 8 nodes
 
 
-class Geometry():
+class Mesh():
 
-    def __init__(self, nnum, nodes, elem=None, elem_off=None, ekey=None,
-                 node_comps={}, elem_comps={}, rdat=[], rnum=[], keyopt={}):
+    def __init__(self, nnum=None, nodes=None, elem=None,
+                 elem_off=None, ekey=None, node_comps={},
+                 elem_comps={}, rdat=[], rnum=[], keyopt={}):
         self._etype = None  # internal element type reference
         self._grid = None  # VTK grid
         self._enum = None  # cached element numbering
-        self.__ans_etype = None  # cached ansys element type numbering
+        self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
         self._mtype = None  # cached ansys material type
         self._node_angles = None  # cached node angles
@@ -44,7 +44,7 @@ class Geometry():
         self._secnum = None  # cached section number
         self._esys = None  # cached element coordinate system
 
-        # Set on init
+        # Always set on init
         self._nnum = nnum
         self._nodes = nodes
         self._elem = elem
@@ -58,8 +58,26 @@ class Geometry():
         self._rnum = rnum
         self._keyopt = keyopt
 
+    @property
+    def _has_nodes(self):
+        """Returns True when has nodes"""
+        # if isinstance(self._nodes, np.ndarray):
+            # return bool(self._nodes.size)
+        return len(self.nodes)
+
+    @property
+    def _has_elements(self):
+        """Returns True when geometry has elements"""
+        if self._elem is None:
+            return False
+
+        if isinstance(self._elem, np.ndarray):
+            return self._elem.size
+
+        return len(self._elem)
+
     def _parse_vtk(self, allowable_types=None, force_linear=False,
-                   null_unallowed=False, fix_midside=True):
+                   null_unallowed=False, fix_midside=True, additional_checking=False):
         """Convert raw ANSYS nodes and elements to a VTK UnstructuredGrid
 
         Parameters
@@ -70,8 +88,8 @@ class Geometry():
             first node.
 
         """
-        if not len(self._nodes) or not len(self._elem):
-            warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
+        if not self._has_nodes or not self._has_elements:
+            # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
             return
 
         etype_map = ETYPE_MAP
@@ -92,7 +110,7 @@ class Geometry():
 
         # ANSYS element type to VTK map
         type_ref = np.empty(2 << 15, np.int32)  # 65536
-        type_ref[self._ekey[:, 0]] = etype_map[self._ekey[:, 1]]
+        type_ref[self._ekey[:, 0]] = etype_map[self._ekey[:, 1]]        
 
         # special treatment for MESH200
         if allowable_types is None or 200 in allowable_types:
@@ -108,6 +126,7 @@ class Geometry():
                                                            type_ref,
                                                            self.nnum,
                                                            True)  # for reset_midside
+
         nodes, angles, nnum = self.nodes, self.node_angles, self.nnum
 
         # fix missing midside
@@ -117,6 +136,10 @@ class Geometry():
                                                           offset, angles, nnum)
             else:
                 cells[cells == -1] = 0
+
+        if additional_checking:
+            cells[cells < 0] = 0
+            cells[cells >= nodes.shape[0]] = 0
 
         if VTK9:
             grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)
@@ -144,7 +167,8 @@ class Geometry():
             grid.point_arrays[key] = mask
 
         # store node angles
-        grid.point_arrays['angles'] = angles
+        if angles is not None:
+            grid.point_arrays['angles'] = angles
 
         if not null_unallowed:
             grid = grid.extract_cells(grid.celltypes != 0)
@@ -275,7 +299,7 @@ class Geometry():
         --------
         >>> import pyansys
         >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile)
-        >>> archive.ekey
+        >>> archive.etype
         array([ 45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,
                 45,  45,  45,  45,  45,  45,  45,  45,  92,  92,  92,
                 92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,
@@ -300,9 +324,9 @@ class Geometry():
     @property
     def _ans_etype(self):
         """FIELD 1 : element type number"""
-        if self.__ans_etype is None:
-            self.__ans_etype = self._elem[self._elem_off[:-1] + 1]
-        return self.__ans_etype
+        if self._etype_cache is None:
+            self._etype_cache = self._elem[self._elem_off[:-1] + 1]
+        return self._etype_cache
 
     @property
     def section(self):
@@ -451,7 +475,7 @@ class Geometry():
 
     @property
     def nodes(self):
-        """Nodes from the archive file.
+        """Array of nodes.
 
         Examples
         --------
@@ -492,13 +516,71 @@ class Geometry():
         return self._node_angles
 
     def __repr__(self):
-        txt = 'ANSYS Geometry\n'
+        txt = 'ANSYS Mesh\n'
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
         txt += '  Number of Elements:           %d\n' % len(self.enum)
         txt += '  Number of Element Types:      %d\n' % len(self.ekey)
         txt += '  Number of Node Components:    %d\n' % len(self.node_components)
         txt += '  Number of Element Components: %d\n' % len(self.element_components)
         return txt
+
+    def save(self, filename, binary=True, force_linear=False, allowable_types=[],
+             null_unallowed=False):
+        """Save the geometry as a vtk file
+
+        Parameters
+        ----------
+        filename : str
+            Filename of output file. Writer type is inferred from
+            the extension of the filename.
+
+        binary : bool, optional
+            If ``True``, write as binary, else ASCII.
+
+        force_linear : bool, optional
+            This parser creates quadratic elements if available.  Set
+            this to True to always create linear elements.  Defaults
+            to False.
+
+        allowable_types : list, optional
+            Allowable element types.  Defaults to all valid element
+            types in ``pyansys.elements.valid_types``
+
+            See ``help(pyansys.elements)`` for available element types.
+
+        null_unallowed : bool, optional
+            Elements types not matching element types will be stored
+            as empty (null) elements.  Useful for debug or tracking
+            element numbers.  Default False.
+
+        Examples
+        --------
+        >>> geom.save('mesh.vtk')
+
+        Notes
+        -----
+        Binary files write much faster than ASCII and have a smaller
+        file size.
+        """
+        grid = self._parse_vtk(allowable_types=allowable_types,
+                               force_linear=force_linear,
+                               null_unallowed=null_unallowed)
+        return grid.save(filename, binary=binary)
+
+    @property
+    def n_node(self):
+        """Number of nodes"""
+        if not self._has_nodes:
+            return 0
+        return self.nodes.shape[0]
+
+    @property
+    def n_elem(self):
+        """Number of nodes"""
+        if not self._has_elements:
+            return 0
+            
+        return len(self.enum)
 
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
@@ -534,23 +616,15 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     nodes_new = nodes_new[:nnodes + nextra]
     nodes_new[nnodes:] = unique_nodes
 
-    new_angles = np.empty((nnodes + nextra, 3))
-    new_angles[:nnodes] = angles
-    new_angles[nnodes:] = 0
+    if angles is not None:
+        new_angles = np.empty((nnodes + nextra, 3))
+        new_angles[:nnodes] = angles
+        new_angles[nnodes:] = 0
+    else:
+        new_angles = None
 
     # Add extra node numbers
     nnum_new = np.empty(nnodes + nextra)
     nnum_new[:nnodes] = nnum
     nnum_new[nnodes:] = -1
     return nodes_new, new_angles, nnum_new
-
-
-def unique_rows(a):
-    """ Returns unique rows of a and indices of those rows """
-    if not a.flags.c_contiguous:
-        a = np.ascontiguousarray(a)
-
-    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
-    _, idx, idx2 = np.unique(b, True, True)
-
-    return a[idx], idx, idx2

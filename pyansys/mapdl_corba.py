@@ -1,13 +1,12 @@
 """CORBA implementation of the MAPDL interface"""
 import atexit
-from threading import Thread
 import time
 import re
 import os
-import subprocess
 
-from pyansys.mapdl import _Mapdl
-from pyansys.misc import kill_process
+from pyansys.mapdl import _MapdlCore
+from pyansys.misc import threaded
+from pyansys.errors import MapdlRuntimeError, MapdlExitedError
 
 try:
     from ansys_corba import CORBA
@@ -18,25 +17,16 @@ except:
 
 INSTANCES = []
 
-# Windows has issues when closing
+# Ensure all instances close on exit
 @atexit.register
-def cleanup():
+def cleanup():  # pragma: no cover
     if os.name == 'nt':
         for instance in INSTANCES:
-            instance.kill()
-
-
-def threaded(fn):
-    """ calls a function using a thread """
-    def wrapper(*args, **kwargs):
-        thread = Thread(target=fn, args=args, kwargs=kwargs)
-        thread.start()
-        return thread
-    return wrapper
+            instance.exit()
 
 
 def tail(filename, nlines):
-    """ Read the last nlines of a text file """
+    """Read the last nlines of a text file """
     with open(filename) as qfile:
         qfile.seek(0, os.SEEK_END)
         endf = position = qfile.tell()
@@ -57,132 +47,68 @@ def tail(filename, nlines):
         return qfile.read()
 
 
-class MapdlCorba(_Mapdl):
-    """CORBA implementation of the MAPDL interface"""
+class MapdlCorba(_MapdlCore):
+    """CORBA implementation of the MAPDL interface
 
-    def __init__(self, exec_file, run_location,
-                 jobname='file', nproc=2, override=False,
-                 loglevel='INFO', additional_switches='',
-                 start_timeout=120, interactive_plotting=False,
-                 check_version=True,
-                 prefer_pexpect=True, log_apdl='w',
-                 log_broadcast=False):
+    Parameters
+    ----------
+    corba_key : str
+        CORBA key used to start the corba interface
+
+    start : dict
+        Additional start parameters to be passed to launcher when
+        launching the gui interactively.
+
+        exec_file, run_location, jobname='file', nproc=2,
+        additional_switches='', timeout
+
+    """
+
+    def __init__(self, corba_key, loglevel='INFO', log_apdl='w',
+                 use_vtk=True, log_broadcast=False, **start_parm):
+        """Open a connection to MAPDL via a CORBA interface"""
+        super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
+                         log_broadcast=False, **start_parm)
         self._broadcast_logger = None
         self._server = None
-        self._log_broadcast = log_broadcast
+        self._outfile = None
 
-        # CORBA/AAS was introduced in v17
-        version = int(re.findall(r'\d\d\d', exec_file)[0])
-        if version < 170:
-            raise RuntimeError('MAPDL AAS CORBA server requires '
-                               'v17.0 or greater.')
+        orb = CORBA.ORB_init()
+        self._server = orb.string_to_object(corba_key)
 
-        # this will launch MAPDL
-        super().__init__(exec_file, run_location, jobname, nproc,
-                         override, loglevel, additional_switches,
-                         start_timeout, interactive_plotting,
-                         log_apdl)
+        # verify you can connect to MAPDL
+        try:
+            self._server.getComponentName()
+        except:
+            raise MapdlRuntimeError('Unable to connect to APDL server')
+
+        # must set to non-interactive in linux
+        if os.name == 'posix':
+            self.batch()
+
+        self._log.debug('Connected to ANSYS using CORBA interface with key %s',
+                        corba_key)
+
+        # separate logger for broadcast file
+        if log_broadcast:
+            self._broadcast_logger = self._start_broadcast_logger()
+
         INSTANCES.append(self)
 
     @property
     def _broadcast_file(self):
         return os.path.join(self.path, 'mapdl_broadcasts.txt')
 
-    def _launch(self):
-        """Open a connection to ANSYS via a CORBA interface"""
-        # Using stored parameters so launch command can be run from a
-        # cached state (when launching the GUI)
-        self._log.info('Connecting to ANSYS via CORBA')
-
-        # create a dummy input file for getting NON-INTERACTIVE without
-        # running /BATCH
-        tmp_inp = os.path.join(self.path, 'tmp.inp')
-        with open(tmp_inp, 'w') as f:
-            f.write('FINISH')
-
-        # command must include "aas" flag to start MAPDL server
-        command = '"%s" -aas -j %s -b -i tmp.inp -o out.txt -np %d %s' % (self._exec_file, self._jobname, self._nproc, self._additional_switches)
-
-        # remove the broadcast file if it exists as the key will be
-        # output here when ansys server is available
-        if os.path.isfile(self._broadcast_file):
-            os.remove(self._broadcast_file)
-
-        # add run location to command
-        self._log.debug('Spawning shell process with: "%s"', command)
-        self._log.debug('At "%s"', self.path)
-
-        # after v19, this is the only way this will work...
-        if os.name == 'nt':
-            command = 'START /B "MAPDL" %s' % command
-
-        # set stdout
-        if self._log.level < 20:  # < INFO            
-            self._process = subprocess.Popen(command, shell=True, 
-                                             cwd=self.path)
-        else:
-            self._process = subprocess.Popen(command, shell=True, 
-                                             cwd=self.path,
-                                             stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE)
-
-        # listen for broadcast file
-        self._log.debug('Waiting for valid key in %s', self._broadcast_file)
-        telapsed = 0
-        tstart = time.time()
-        while telapsed < self._start_timeout:
-            try:
-                if os.path.isfile(self._broadcast_file):
-                    with open(self._broadcast_file, 'r') as f:
-                        text = f.read()
-                        if 'visited:collaborativecosolverunitior' in text:
-                            self._log.debug('Initialized ANSYS')
-                            break
-                time.sleep(0.1)
-                telapsed = time.time() - tstart
-
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-
-        # exit if timed out
-        if telapsed > self._start_timeout:
-            err_msg = 'Unable to start ANSYS within %.1f seconds' % self._start_timeout
-            self._log.error(err_msg)
-            raise TimeoutError(err_msg)
-
-        # open server
-        keyfile = os.path.join(self.path, 'aaS_MapdlId.txt')
-        with open(keyfile) as f:
-            key = f.read()
-
-        orb = CORBA.ORB_init()
-        self._server = orb.string_to_object(key)
-
-        # set to non-interactive
-        # if os.name != 'nt':
-            # text = self._server.executeCommandToString('/BATCH')
-
-        try:
-            self._server.getComponentName()
-        except:
-            raise RuntimeError('Unable to connect to APDL server')
-
-        self._log.debug('Connected to ANSYS using CORBA interface with key %s', key)
-
-        # separate logger for broadcast file
-        if self._log_broadcast:
-            self._broadcast_logger = self._start_broadcast_logger()
-
     @threaded
     def _start_broadcast_logger(self, update_rate=1.0):
-        """ separate logger using broadcast_file """
+        """Separate logger using broadcast_file """
         # listen to broadcast file
         loadstep = 0
         overall_progress = 0
         try:
             old_tail = ''
             old_size = 0
-            while self.is_alive:
+            while not self._exited:
                 new_size = os.path.getsize(self._broadcast_file)
                 if new_size != old_size:
                     old_size = new_size
@@ -209,9 +135,16 @@ class MapdlCorba(_Mapdl):
 
     def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process"""
+        # cache final path and lockfile before exiting
+        path = self.path
+        lockfile = self._lockfile
+
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
-            self._server.terminate()
+            try:
+                self._server.terminate()
+            except:
+                pass
             self._server = None
 
         if close_log:
@@ -220,46 +153,43 @@ class MapdlCorba(_Mapdl):
         # wait for lockfile to be removed
         if timeout:
             tstart = time.time()
-            while os.path.isfile(self._lockfile):
-                time.sleep(0.05)
-                telap = tstart - time.time()
-                if telap > timeout:
-                    return 1
-
-    def kill(self):
-        """Forces ANSYS process to end and removes lock file"""
-        try:
-            self.exit()
-        except:
-            pass
-
-        if self._process is not None and os.name == 'linux':
-            kill_process(self._process.pid)
-
-        try:
-            self._close_apdl_log()
-        except:
-            pass
+            if lockfile is not None:
+                while os.path.isfile(lockfile):
+                    time.sleep(0.05)
+                    telap = tstart - time.time()
+                    if telap > timeout:
+                        return 1
 
         try:
             self._remove_lockfile()
         except:
             pass
 
+        self._exited = True
+
+    def _remove_lockfile(self):
+        """Removes lockfile"""
+        if os.path.isfile(self._lockfile):
+            try:
+                os.remove(self._lockfile)
+            except:
+                pass
+
     def _run(self, command):
         """Sends a command to the mapdl server via the CORBA interface"""
         self._reset_cache()
         if self._server is None:
-            raise RuntimeError('ANSYS exited')
+            raise MapdlExitedError('ANSYS exited')
 
         # cleanup command
         command = command.strip()
         if not command:
-            raise Exception('Empty command')
+            raise ValueError('Cannot run empty command')
 
         if command[:4].lower() == 'cdre':
             with self.non_interactive:
-                return self.run(command)
+                self.run(command)
+            return self._response
 
         if command[:4].lower() == '/com':
             split_command = command.split(',')
@@ -273,15 +203,6 @@ class MapdlCorba(_Mapdl):
 
         # /OUTPUT not redirected properly in corba
         if command[:4].lower() == '/out':
-            items = command.split(',')
-            if len(items) < 2:  # empty comment
-                return ''
-            elif not items[1]:  # empty comment
-                return ''
-            elif items[1]:
-                if not items[1].strip():    # empty comment
-                    return ''
-
             items = command.split(',')
             if len(items) > 1:  # redirect to file
                 if len(items) > 2:
@@ -301,45 +222,37 @@ class MapdlCorba(_Mapdl):
                             self._outfile = open(filename, 'a')
                     else:
                         self._outfile = open(filename, 'w')
+                else:
+                    self._close_output()
+
             else:
-                self._output = ''
-                if self._outfile:
-                    self._outfile.close()
-                self._outfile = None
+                self._close_output()
             return ''
 
         # include error checking
         text = ''
         additional_text = ''
 
-        self._log.debug('Running command %s' % command)
+        self._log.debug('Running command %s', command)
         text = self._server.executeCommandToString(command)
 
         # print supressed output
         additional_text = self._server.executeCommandToString('/GO')
 
-        if 'is not a recognized' in text:
-            if not self.allow_ignore:
-                text = text.replace('This command will be ignored.', '')
-                text += '\n\nIgnore these messages by setting allow_ignore=True'
-                raise Exception(text)
-
-        if text:
-            text = text.replace('\\n', '\n')
-            if '*** ERROR ***' in text:
-                self._log.error(text)
-                raise Exception(text)
-
-        if additional_text:
-            additional_text = additional_text.replace('\\n', '\n')
-            if '*** ERROR ***' in additional_text:
-                self._log.error(additional_text)
-                raise Exception(additional_text)
-
-        if self._interactive_plotting:
-            self._display_plot('%s\n%s' % (text, additional_text))
-
         # return text, additional_text
         if text == additional_text:
             additional_text = ''
-        return '%s\n%s' % (text, additional_text)
+
+        response = '%s\n%s' % (text, additional_text)
+
+        if self._outfile is not None:
+            self._outfile.write(response)
+
+        return response
+
+    def _close_output(self):
+        """closes the output file"""
+        self._output = ''
+        if self._outfile:
+            self._outfile.close()
+        self._outfile = None

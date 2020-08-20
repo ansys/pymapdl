@@ -58,9 +58,9 @@ def load_result():
     # Load result file
     result = pyansys.read_binary(rstfile)
     assert result.nsets == 6
-    assert len(result.geometry.nnum) == 321
+    assert len(result.mesh.nnum) == 321
     print('Loaded result file with {:d} result sets'.format(result.nsets))
-    print('Contains {:d} nodes'.format(len(result.geometry.nnum)))
+    print('Contains {:d} nodes'.format(len(result.mesh.nnum)))
 
     # display result
     nnum, disp = result.nodal_solution(0)
@@ -68,7 +68,7 @@ def load_result():
     print('Nodal displacement for nodes 30 to 40 is:')
 
     for i in range(29, 40):
-        node = result.geometry.nnum[i]
+        node = result.mesh.nnum[i]
         x = disp[i, 0]
         y = disp[i, 1]
         z = disp[i, 2]
@@ -226,9 +226,7 @@ def show_cell_qual(meshtype='tet', off_screen=None):
 
 def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
                         plot_ansys=True, as_test=False):
-    """
-    Cylinder demo for ansys
-    """
+    """Cylinder demo for ansys"""
     # cylinder parameters
     # torque = 100
     radius = 2
@@ -243,6 +241,7 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
         loglevel = 'ERROR'
     else:
         loglevel = 'INFO'
+
     ansys = pyansys.launch_mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
@@ -332,11 +331,16 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
             (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
     if plot_vtk:
-        result.plot_nodal_solution(0, cpos=cpos, cmap='bwr',
-                                   off_screen=as_test, screenshot=as_test)
-        result.plot_nodal_stress(0, 'x', cpos=cpos, cmap='bwr',
-                                 off_screen=as_test, screenshot=as_test)
-        result.plot_principal_nodal_stress(0, 'SEQV', cpos=cpos,
-                                           cmap='bwr', off_screen=as_test, screenshot=as_test)
+        result.plot_nodal_solution(0, cpos=cpos, smooth_shading=False,
+                                   off_screen=as_test, show_edges=True,
+                                   screenshot=as_test)
+        result.plot_nodal_stress(0, 'x', cpos=cpos, smooth_shading=False,
+                                 off_screen=as_test, show_edges=True,
+                                 screenshot=as_test)
+        result.plot_principal_nodal_stress(0, 'SEQV',
+                                           smooth_shading=False,
+                                           show_edges=True,
+                                           off_screen=as_test,
+                                           screenshot=as_test)
 
     return True

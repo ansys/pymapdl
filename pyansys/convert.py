@@ -1,19 +1,13 @@
 import os
+
 import pyansys
 from pyansys import mapdl_functions
+from pyansys.misc import is_float
 
 VALID_COMMANDS = dir(mapdl_functions._MapdlCommands)
 
 NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
 
-
-def is_float(string):
-    """Returns true when a string can be converted to a float"""
-    try:
-        float(string)
-        return True
-    except ValueError:
-        return False
 
 
 def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,

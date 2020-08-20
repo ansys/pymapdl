@@ -2,12 +2,14 @@
 Built using ansys documentation from
 https://www.sharcnet.ca/Software/Ansys/
 
+RIP sharcnet
+
 """
 
 # consider moving the docstrings into a different module
 
 
-class _MapdlCommands(object):
+class _MapdlCommands(object):  # pragma: no cover
     """ANSYS class containing MAPDl functions generated from ANSYS 16.2
 
     """
@@ -17040,7 +17042,7 @@ class _MapdlCommands(object):
         command = "MAGSOLV,%s,%s,%s,%s,%s,%s,%s" % (str(opt), str(nramp), str(cnvcsg), str(cnvflux), str(neqit), str(biot), str(cnvtol))
         return self.run(command, **kwargs)
 
-    def clear(self, read="", **kwargs):
+    def clear(self, read="NOSTART", **kwargs):
         """APDL Command: /CLEAR
 
         Clears the database.
@@ -17050,9 +17052,9 @@ class _MapdlCommands(object):
         read
             File read option:
 
-            START - Reread start162.ans file (default).
+            START - Reread startXXX.ans file.
 
-            NOSTART - Do not reread start162.ans file.
+            NOSTART - Do not reread startXXX.ans file (default).
 
         Notes
         -----
@@ -17069,7 +17071,7 @@ class _MapdlCommands(object):
         the $ separator) on the same line as the /CLEAR command.
 
         Use care when placing the /CLEAR command within branching constructs
-        (for example, those employing *DO or *IF commands).  The command
+        (for example, those employing \*DO or \*IF commands).  The command
         deletes all parameters including the looping parameter for do-loops.
         (You can preserve your iteration parameter by issuing a PARSAV command
         prior to the /CLEAR command, then following the /CLEAR command with a
@@ -20523,6 +20525,11 @@ class _MapdlCommands(object):
 
         This command is valid in any processor.
         """
+        # cannot be in interactive mode
+        if not self._store_commands:
+            raise RuntimeError('VWRTIE cannot run interactively.  \n\nPlease use '
+                               '``with mapdl.non_interactive:``')
+
         command = "*VWRITE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par1), str(par2), str(par3), str(par4), str(par5), str(par6), str(par7), str(par8), str(par9), str(par10), str(par11), str(par12), str(par13), str(par14), str(par15), str(par16), str(par17), str(par18), str(par19))
         return self.run(command, **kwargs)
 
@@ -22905,7 +22912,7 @@ class _MapdlCommands(object):
 
         This command is valid in any processor.
         """
-        command = "*MWRITE,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
+        command = "*MWRITE,%s,%s,%s,,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
         return self.run(command, **kwargs)
 
     def kwpave(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
@@ -36980,7 +36987,7 @@ class _MapdlCommands(object):
         Model in the Modeling and Meshing Guide for more information about beam
         meshing.
         """
-        command = "IGESOUT,%s,%s,%s" % (str(fname), str(ext), str(att))
+        command = "IGESOUT,%s,%s,,%s" % (str(fname), str(ext), str(att))
         return self.run(command, **kwargs)
 
     def nsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",

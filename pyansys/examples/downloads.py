@@ -2,7 +2,7 @@
 """
 import shutil
 import os
-import sys
+import urllib.request
 import zipfile
 
 import pyansys
@@ -37,16 +37,12 @@ def _retrieve_file(url, filename):
     local_path_no_zip = local_path.replace('.zip', '')
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip, None
+
     # grab the correct url retriever
-    if sys.version_info < (3,):
-        import urllib
-        urlretrieve = urllib.urlretrieve
-    else:
-        import urllib.request
-        urlretrieve = urllib.request.urlretrieve
+    urlretrieve = urllib.request.urlretrieve
+
     # Perfrom download
     saved_file, resp = urlretrieve(url)
-    # new_name = saved_file.replace(os.path.basename(saved_file), os.path.basename(filename))
     shutil.move(saved_file, local_path)
     if get_ext(local_path) in ['.zip']:
         _decompress(local_path)

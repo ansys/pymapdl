@@ -1,13 +1,34 @@
 """Module for miscellaneous functions and methods"""
+import os
+from threading import Thread
 import sys
+import random
+import string
 
 from pyvista.utilities.errors import GPUInfo
 import scooby
-
+import pyvista
 import numpy as np
 import vtk
 
+from pyansys import _binary_reader
+
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
+
+
+def get_ansys_bin(rver):
+    """Identify the ansys executable based on the release version (e.g. "201")"""
+    if os.name == 'nt':
+        ans_root = 'c:/Program Files/ANSYS Inc/'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
+                                'ANSYS%s.exe' % rver)
+    else:
+        ans_root = '/usr/ansys_inc'
+        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
+                                'ansys%s' % rver)
+
+    return mapdlbin
+
 
 def vtk_cell_info(grid):
     """Returns version consistent connectivity and cell offset arrays.
@@ -115,3 +136,143 @@ class Report(scooby.Report):
                                optional=optional, ncol=ncol,
                                text_width=text_width, sort=sort,
                                extra_meta=extra_meta)
+
+
+def is_float(string):
+    """Returns true when a string can be converted to a float"""
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+
+def random_string(stringLength=10):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+
+def _configure_pyvista():
+    """Configure PyVista's ``rcParams`` for pyansys"""
+    import pyvista as pv
+    pv.rcParams['interactive'] = True
+    pv.rcParams["cmap"] = "jet"
+    pv.rcParams["font"]["family"] = "courier"
+    pv.rcParams["title"] = "pyansys"
+    return
+
+
+def _check_has_ansys():
+    """Safely wraps check_valid_ansys
+
+    Returns
+    -------
+    has_ansys : bool
+        True when this local installation has ANSYS installed in a
+        standard location.
+    """
+    from pyansys.launcher import check_valid_ansys
+    try:
+        return check_valid_ansys()
+    except:
+        return False
+
+
+def supress_logging(func):
+    """Decorator to supress logging for a MAPDL instance"""
+    def wrapper(*args, **kwargs):
+        mapdl = args[0]
+        prior_log_level = mapdl._log.level
+        if prior_log_level != 'CRITICAL':
+            mapdl._set_log_level('CRITICAL')
+
+        out = func(*args, **kwargs)
+
+        if prior_log_level != 'CRITICAL':
+            mapdl._set_log_level(prior_log_level)
+
+        return out
+
+    return wrapper
+
+
+def run_as_prep7(func):
+    """Run a MAPDL method at PREP7 and always revert to the prior processor"""
+    def wrapper(*args, **kwargs):
+        mapdl = args[0]
+        if hasattr(mapdl, '_mapdl'):
+            mapdl = mapdl._mapdl
+        prior_processor = mapdl.parameters.routine
+        if prior_processor != 'PREP7':
+            mapdl.prep7()
+
+        out = func(*args, **kwargs)
+
+        if prior_processor == 'Begin level':
+            mapdl.finish()
+        elif prior_processor != 'PREP7':
+            mapdl.run('/%s' % prior_processor)
+
+        return out
+    return wrapper
+
+
+def threaded(fn):
+    """ calls a function using a thread """
+    def wrapper(*args, **kwargs):
+        thread = Thread(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+    return wrapper
+
+
+def break_apart_surface(surf, force_linear=True):
+    """Break apart the faces of a vtk PolyData such that the points
+    for each face are unique and each point is used only by one face.
+    This leads to duplicate points, but allows multiple scalars per
+    face.
+
+    Parameters
+    ----------
+    surf : pyvista.PolyData
+        Surface to break apart.
+
+    force_linear : bool, optional
+        When ``True``, converts quadratic faces to their linear counterparts.
+
+    Returns
+    -------
+    bsurf : pyvista.PolyData
+        Surface with unique points for each face.  Contains the
+        original indices in point_arrays "orig_ind".
+
+    """
+    faces = surf.faces
+    if faces.dtype != np.int64:
+        faces = faces.astype(np.int64)
+
+    b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points,
+                                                                faces,
+                                                                surf.n_faces,
+                                                                force_linear)
+    bsurf = pyvista.PolyData(b_points, b_faces)
+    bsurf.point_arrays['orig_ind'] = idx
+    return bsurf
+
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l """
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def unique_rows(a):
+    """ Returns unique rows of a and indices of those rows """
+    if not a.flags.c_contiguous:
+        a = np.ascontiguousarray(a)
+
+    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx, idx2 = np.unique(b, True, True)
+
+    return a[idx], idx, idx2

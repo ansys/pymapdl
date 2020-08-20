@@ -1,4 +1,13 @@
+"""Parse the entity numbers from various MAPDL geometry commands"""
+
 import re
+
+
+def parse_circle(msg):
+    """Parse the message from CIRCLE and return the line numbers"""
+    matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
+    if matches:
+        return [int(match) for match in matches]
 
 
 def parse_k(msg):
@@ -34,6 +43,20 @@ def parse_a(msg):
     else:
         result = None
     return result
+
+
+def parse_output_area(msg):
+    """Parse create area message and return area number"""
+    res = re.search(r"(OUTPUT AREA =\s*)([0-9]+)", msg)
+    if res is not None:
+        return int(res.group(2))
+
+
+def parse_output_areas(msg):
+    """Parse create area message and return area number"""
+    res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
+    if res is not None:
+        return int(res.group(2))
 
 
 def parse_v(msg):
@@ -72,5 +95,9 @@ geometry_commands = {'K': parse_k,
                      'V': parse_v,
                      'N': parse_n,
                      'AL': parse_al,
-                     'BSPLIN': parse_bsplin,
+                     'BLC4': parse_output_area,
+                     'CYL4': parse_output_area,
+                     'ASBA': parse_output_areas,
+                     'BSPL': parse_bsplin,
+                     'CIRC': parse_circle,
 }

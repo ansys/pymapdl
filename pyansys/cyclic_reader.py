@@ -531,10 +531,7 @@ class CyclicResult(ResultFile):
                                                                    full_rotor,
                                                                    stress=stress)
             else:
-                try:
-                    assert result.shape == result_r.shape
-                except:
-                    breakpoint()
+                assert result.shape == result_r.shape
                 expanded_result = self._expand_cyclic_modal(result,
                                                             result_r,
                                                             hindex,

@@ -1,12 +1,15 @@
 pyansys Documentation
 =====================
-This Python module allows you to:
- - Interactively control an instance of ANSYS v17.0 + using Python.
- - Extract data directly from binary ANSYS v14.5+ files and to display
-   or animate them.
- - Rapidly read in binary result ``(.rst)``, binary mass and stiffness
-   ``(.full)``, and ASCII block archive ``(.cdb)``, and element matrix
-   ``(.emat)`` files.
+The ``pyansys`` provides various pythonic interfaces to the MAPDL
+application and both ASCII and binary MAPDL files.  It allows you to:
+
+ - Interactively control an instance of ANSYS v17.0 on and newer using
+   Python on Windows or v13 and newer on Linux.
+ - Extract data directly from binary ANSYS v14.5+ files and display or
+   animate them.
+ - Rapidly read in binary results (``.rst``, ``.rth``), binary mass
+   and stiffness ``(.full)``, and ASCII block archive ``(.cdb)``, and
+   element matrix ``(.emat)`` files.
 
 This python module is a community driven work in progress with
 additional features regularly added based on user requests.  Open an
@@ -14,15 +17,7 @@ issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_
 if you identity a bug or would like to request an additional method or
 feature.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: APDL Python Scripting
-   :hidden:
-
-   ansys_control
-   ansys_functions
-   apdl_conversion
-   ansys_examples
+Take a look at the :ref:`sphx_glr_examples` gallery for several demos using ``pyansys``.
 
 
 Installation
@@ -31,30 +26,9 @@ Installation through pip::
 
     pip install pyansys
 
-.. toctree::
-   :maxdepth: 2
-   :caption: File IO and Visualization
-   :hidden:
+You can also visit `PyPi <http://pypi.python.org/pypi/pyansys>`_ or `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
 
-   ansys_write_archive
-   loading_results
-   examples
-   loading_km
-   loading_emat
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples Gallery
-   :hidden:
-
-   examples/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Miscellaneous
-   :hidden:
-
-   quality
+If you have any installation (or other) issues, please open an issue at `pyansys Issues <https://github.com/akaszynski/pyansys/issues>`_.
 
 
 Quick Examples
@@ -62,7 +36,10 @@ Quick Examples
 
 Interactive Control
 ~~~~~~~~~~~~~~~~~~~
-``pyansys`` lets you create an instance of ANSYS and send commands to it pythonically:
+You can create an interactive instance of MAPDL using ``pyansys`` to
+send commands to it Pythonically, plot meshes and geometry within
+python, and access underlying results directly through python.  Here's
+a sample code snippet.
 
 .. code:: python
 
@@ -120,32 +97,53 @@ plots results directly from an ANSYS result file using ``pyansys``:
 .. figure:: ./images/rotor.jpg
     :width: 500pt
 
+--------
 
+Contents
+========
+.. toctree::
+   :maxdepth: 1
+   :caption: Interactive MAPDL Python Interface
 
-Installation
-------------
-Installation through pip::
+   mapdl/index
 
-    pip install pyansys
+.. toctree::
+   :maxdepth: 1
+   :caption: ANSYS File Support
 
-You can also visit `PyPi <http://pypi.python.org/pypi/pyansys>`_ or `GitHub <https://github.com/akaszynski/pyansys>`_ to download the source.
+   archive
+   loading_results
+   examples
+   loading_km
+   loading_emat
 
-Dependencies:
+.. toctree::
+   :maxdepth: 1
+   :caption: Example Gallery
 
-- ``numpy``
-- ``cython``
-- ``pyvista``
-- ``pexpect``
-- ``appdirs``
-- ``vtk``
+   examples/index
 
-Dependencies are installed automatically through ``pip``, except for Python 2.7 in Windows, which will require some additional work to install ``VTK``.  See `installing pyvista <https://docs.pyvista.org/getting-started/installation.html>`_ for more information.
+.. toctree::
+   :maxdepth: 1
+   :caption: Miscellaneous
+   :hidden:
 
+   quality
+
+--------
 
 License and Acknowledgments
 ---------------------------
-``pyansys`` is licensed under the MIT license.
+The ``pyansys`` module is licensed under the MIT license.
 
-ANSYS documentation and functions build from html provided by `Sharcnet <https://www.sharcnet.ca/Software/Ansys/>`_.  Thanks!
+ANSYS documentation and functions build from html that was hosted on
+`Sharcnet <https://www.sharcnet.ca/Software/Ansys/>`_.  They've since
+taken down their documentation, but it was an excellent resource and I
+appreciate their work.
 
-This module, ``pyansys`` makes no commercial claim over ANSYS whatsoever.  This tool extends the functionality of ``ANSYS`` by adding a python interface in both file interface as well as interactive scripting without changing the core behavior or license of the original software.  The use of the interactive APDL control of ``pyansys`` requires a legally licensed local copy of ANSYS.
+This module, ``pyansys`` makes no commercial claim over ANSYS
+whatsoever.  This tool extends the functionality of MAPDL by adding a
+Python interface to both the core application and the binary files
+behavior or license of the original software.  The interactive use of
+MAPDL using ``pyansys`` requires a legally licensed local copy of
+ANSYS.

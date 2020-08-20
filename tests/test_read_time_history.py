@@ -16,6 +16,6 @@ def result():
 @pytest.mark.parametrize("time_hist_key", ['NSL', 'VEL', 'ACC'])
 def test_time_history(time_hist_key, result):
     nnum, values = result.nodal_time_history(time_hist_key)
-    assert np.allclose(nnum, result.geometry.nnum)
+    assert np.allclose(nnum, result.mesh.nnum)
     assert values.ndim == 3
     assert values.shape[1] == nnum.size
