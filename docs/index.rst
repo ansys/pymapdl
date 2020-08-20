@@ -106,12 +106,6 @@ Contents
    :caption: Interactive MAPDL Python Interface
 
    mapdl/index
-   mapdl/mapdl
-   mapdl/plotting
-   mapdl/parameters
-   mapdl/conversion
-   mapdl/functions
-   mapdl/examples
 
 .. toctree::
    :maxdepth: 1

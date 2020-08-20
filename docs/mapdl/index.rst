@@ -1,4 +1,4 @@
-]ANSYS MAPDL Interactive Control
+ANSYS MAPDL Interactive Control
 ===============================
 ANSYS MAPDL allows for the direct scripting of structural analysis
 problems through input files.  Unfortunately, MAPDL relies on an
@@ -23,14 +23,61 @@ results are valid.  This module seeks to rectify that with:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents
+   :caption: Basic Features
 
-   mapdl/mapdl
-   mapdl/plotting
-   mapdl/parameters
-   mapdl/conversion
-   mapdl/functions
-   mapdl/examples
+   functions
+   mesh_geometry
+   plotting
+   parameters
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Advanced Features
+
+   mapdl
+   conversion
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples
+
+   examples
+
+
+Initial Setup and Example
+-------------------------
+To run, ``pyansys`` needs to know the location of the MAPDL binary.
+When running for the first time, ``pyansys`` will request the location
+of the MAPDL executable.  You can test your installation ``pyansys``
+and set it up by running the following in python:
+
+.. code:: python
+
+    from pyansys import examples
+    examples.ansys_cylinder_demo()
+
+Python will automatically attempt to detect your MAPDL binary based on
+environmental variables.  If it is unable to find a copy of MAPDL, you
+will be prompted for the location of the MAPDL executable.  Here is a
+sample input for Linux and Windows:
+
+.. code::
+
+    Enter location of MAPDL executable: /usr/ansys_inc/v182/ansys/bin/ansys182
+
+.. code::
+
+    Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v182\ANSYS\bin\winx64\ansys182.exe
+
+The settings file is stored locally and you will not not need to enter
+the path again.  If you need to change the default ansys path
+(i.e. changing the default version of MAPDL), run the following:
+
+.. code:: python
+
+    import pyansys
+    new_path = 'C:\\Program Files\\ANSYS Inc\\v182\\ANSYS\\bin\\winx64\\ansys182.exe'
+    pyansys.change_default_ansys_path(new_path)
 
 
 PyANSYS MAPDL Basics
@@ -99,41 +146,6 @@ to MAPDL and includes higher level wrapping allowing for better
 scripting and interaction with MAPDL.  See the examples gallery for an
 overview of the various advanced methods to visualize, script, and
 interact with MAPDL.
-
-
-Initial Setup and Example
--------------------------
-To run, ``pyansys`` needs to know the location of the MAPDL binary.
-When running for the first time, ``pyansys`` will request the location
-of the MAPDL executable.  You can test your installation ``pyansys``
-and set it up by running the following in python:
-
-.. code:: python
-
-    from pyansys import examples
-    examples.ansys_cylinder_demo()
-
-Python will automatically attempt to detect your MAPDL binary based on
-environmental variables.  If it is unable to find a copy of MAPDL, you
-will be prompted for the location of the MAPDL executable.  Here is a
-sample input for Linux and Windows:
-
-.. code::
-
-    Enter location of MAPDL executable: /usr/ansys_inc/v182/ansys/bin/ansys182
-
-.. code::
-
-    Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v182\ANSYS\bin\winx64\ansys182.exe
-
-The settings file is stored locally and do not need to enter it again.
-If you need to change the default ansys path, run the following:
-
-.. code:: python
-
-    import pyansys
-    new_path = 'C:\\Program Files\\ANSYS Inc\\v182\\ANSYS\\bin\\winx64\\ansys182.exe'
-    pyansys.change_default_ansys_path(new_path)
 
 
 Calling MAPDL Pythonically
@@ -208,38 +220,5 @@ within it.  For example:
         a toroidal system is not recommended.
 
 
-Advanced Features
------------------
-The ``pyansys`` module allows you to directly control the MAPDL
-instance and access higher level parameters and methods through a more
-pythonic interface.  For example, to access the nodes and elements of
-a model, normally one would list the nodes within MAPDL ``NLIST``, but
-this generates a string and array access either requires cumbersome
-MAPDL GET commands, or requires the nodes be written to a archive file
-and then read in within other software.  For example:
-
-.. code::
-
-    NLIST
-
- LIST ALL SELECTED NODES.   DSYS=      0
-
-    NODE        X             Y             Z           THXY     THYZ     THZX
-        1   0.0000        0.0000        0.0000          0.00     0.00     0.00
-        2   1.0000        0.0000        0.0000          0.00     0.00     0.00
-        3   0.2500        0.0000        0.0000          0.00     0.00     0.00
-
-
-However, with ``pyansys``, it's possible to interface with a current
-instance of ``mapdl`` and access the current nodes coordinates with:
-
-.. code::
-
-   >>> mapdl.mesh.nodes
-   [[0.   0.   0.  ]
-    [1.   0.   0.  ]
-    [0.25 0.   0.  ]
-    ...,
-    [0.75 0.5  3.5 ]
-    [0.75 0.5  4.  ]
-    [0.75 0.5  4.5 ]]
+.. autofunction:: pyansys.launch_mapdl
+   

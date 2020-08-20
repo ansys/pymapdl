@@ -1,5 +1,4 @@
 """Module for launching MAPDL locally."""
-import platform
 import time
 import subprocess
 import re
@@ -9,10 +8,9 @@ import appdirs
 import tempfile
 import socket
 import pexpect
-from pexpect import popen_spawn
 
 from pyansys.misc import is_float, random_string
-from pyansys.errors import LockFileException, PrivateModuleImportError
+from pyansys.errors import LockFileException
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('pyansys')
@@ -183,17 +181,17 @@ def check_lock_file(path, jobname, override):
     lockfile = os.path.join(path, jobname + '.lock')
     if os.path.isfile(lockfile):
         if not override:
-            raise FileExistsError('\nLock file exists for jobname "%s"' % jobname +
-                                  ' at\n"%s"\n\n' % lockfile +
-                                  'Set ``override=True`` to or delete the lock file '
-                                  'to start MAPDL')
+            raise LockFileException('\nLock file exists for jobname "%s"' % jobname +
+                                    ' at\n"%s"\n\n' % lockfile +
+                                    'Set ``override=True`` to or delete the lock file '
+                                    'to start MAPDL')
         else:
             try:
                 os.remove(lockfile)
             except PermissionError:
-                raise PermissionError('Unable to remove lock file.  '
-                                      'Another instance of MAPDL might be '
-                                      'running at "%s"' % path)
+                raise LockFileException('Unable to remove lock file.  '
+                                        'Another instance of MAPDL might be '
+                                        'running at "%s"' % path)
 
 
 
@@ -308,7 +306,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                  nproc=2, override=False, loglevel='INFO',
                  additional_switches='', start_timeout=120,
                  log_apdl=False, **kwargs):
-    """This class launches a local instance of MAPDL in the background
+    """Launch a local instance of MAPDL in the background
     and allows commands to be passed to a persistent session.
 
     Parameters
@@ -332,10 +330,6 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     nproc : int, optional
         Number of processors.  Defaults to 2.
-
-    ram : int, optional
-        RAM to allocate for the process.  Default None (unlimited).
-        Only valid when creating a gRPC process.
 
     override : bool, optional
         Attempts to delete the lock file at the run_location.
@@ -376,28 +370,27 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         to log all MAPDL commands to file.  Default False.  Set to 'a'
         to append to an existing log or 'w' to write a new log.
 
-    port : int, optional
-        Port to open the gRPC server on.  Only applicable when ``mode='grpc'``
-
-    cleanup_on_exit : bool, optional
-        Shutdown the server when the Python object is deleted or
-        Python exits.  Only applicable when ``mode='grpc'``.
-
     Examples
     --------
+    Launch MAPDL using the default configuration.
+
     >>> import pyansys
     >>> mapdl = pyansys.Mapdl()
 
-    Run MAPDL with the smp switch and specify the location of the
-    ansys binary.
+    Run MAPDL with shared memory parallel and specify the location of
+    the ansys binary.
 
-    >>> import pyansys
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
+    >>> mapdl = pyansys.Mapdl(exec_file, additional_switches='-smp')
+
+    Run MAPDL using the console mode (only on linux).
+
     >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              additional_switches='-smp')
+                              mode='console')
 
     Notes
     -----
-    MAPDL has the following command line options as of v20.1 (2020R1)
+    MAPDL has the following command line options as of 2020R1
 
     -aas : Enables server mode
      When enabling server mode, a custom name for the keyfile can be
@@ -631,7 +624,9 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         from pyansys.mapdl_corba import MapdlCorba
         corba_key = launch_corba(**start_parm)
         return MapdlCorba(corba_key, loglevel=loglevel,
-                          log_apdl=log_apdl, **start_parm)
+                          log_apdl=log_apdl,
+                          log_broadcast=kwargs.get('log_broadcast', False),
+                          **start_parm)
     else:
         raise ValueError('Invalid mode %s' % mode)
 
@@ -664,10 +659,6 @@ def check_mode(mode, version):
             raise ValueError('Console mode requires Linux')
 
     else:  # auto-select based on best version
-        # if version >= 202:  # handles all types
-            # mode = 'grpc'
-        # if version == 20.1 and os.name == 'posix':
-        #     mode = 'console'
         if version >= 170:
             mode = 'corba'
         else:

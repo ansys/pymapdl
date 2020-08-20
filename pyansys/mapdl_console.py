@@ -7,6 +7,7 @@ import re
 
 from pyansys.misc import kill_process
 from pyansys.mapdl import _MapdlCore
+from pyansys.errors import MapdlExitedError
 
 ready_items = [
     rb'BEGIN:',
@@ -65,7 +66,11 @@ class MapdlConsole(_MapdlCore):
         self._reset_cache()
 
         if not self._process.isalive():
-            raise RuntimeError('ANSYS exited')
+            raise MapdlExitedError('ANSYS exited')
+
+        command = command.strip()
+        if not command:
+            raise ValueError('Cannot run empty command')
 
         if command[:4].lower() == '/out':
             items = command.split(',')

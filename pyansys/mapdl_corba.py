@@ -1,12 +1,12 @@
 """CORBA implementation of the MAPDL interface"""
 import atexit
-from threading import Thread
 import time
 import re
 import os
 
 from pyansys.mapdl import _MapdlCore
-from pyansys.misc import kill_process
+from pyansys.misc import threaded
+from pyansys.errors import MapdlRuntimeError, MapdlExitedError
 
 try:
     from ansys_corba import CORBA
@@ -19,23 +19,14 @@ INSTANCES = []
 
 # Ensure all instances close on exit
 @atexit.register
-def cleanup():
+def cleanup():  # pragma: no cover
     if os.name == 'nt':
         for instance in INSTANCES:
             instance.exit()
 
 
-def threaded(fn):
-    """ calls a function using a thread """
-    def wrapper(*args, **kwargs):
-        thread = Thread(target=fn, args=args, kwargs=kwargs)
-        thread.start()
-        return thread
-    return wrapper
-
-
 def tail(filename, nlines):
-    """ Read the last nlines of a text file """
+    """Read the last nlines of a text file """
     with open(filename) as qfile:
         qfile.seek(0, os.SEEK_END)
         endf = position = qfile.tell()
@@ -77,10 +68,9 @@ class MapdlCorba(_MapdlCore):
                  use_vtk=True, log_broadcast=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
-                         **start_parm)
+                         log_broadcast=False, **start_parm)
         self._broadcast_logger = None
         self._server = None
-        self._log_broadcast = log_broadcast
         self._outfile = None
 
         orb = CORBA.ORB_init()
@@ -90,7 +80,7 @@ class MapdlCorba(_MapdlCore):
         try:
             self._server.getComponentName()
         except:
-            raise RuntimeError('Unable to connect to APDL server')
+            raise MapdlRuntimeError('Unable to connect to APDL server')
 
         # must set to non-interactive in linux
         if os.name == 'posix':
@@ -100,7 +90,7 @@ class MapdlCorba(_MapdlCore):
                         corba_key)
 
         # separate logger for broadcast file
-        if self._log_broadcast:
+        if log_broadcast:
             self._broadcast_logger = self._start_broadcast_logger()
 
         INSTANCES.append(self)
@@ -111,14 +101,14 @@ class MapdlCorba(_MapdlCore):
 
     @threaded
     def _start_broadcast_logger(self, update_rate=1.0):
-        """ separate logger using broadcast_file """
+        """Separate logger using broadcast_file """
         # listen to broadcast file
         loadstep = 0
         overall_progress = 0
         try:
             old_tail = ''
             old_size = 0
-            while self.is_alive:
+            while not self._exited:
                 new_size = os.path.getsize(self._broadcast_file)
                 if new_size != old_size:
                     old_size = new_size
@@ -189,12 +179,12 @@ class MapdlCorba(_MapdlCore):
         """Sends a command to the mapdl server via the CORBA interface"""
         self._reset_cache()
         if self._server is None:
-            raise RuntimeError('ANSYS exited')
+            raise MapdlExitedError('ANSYS exited')
 
         # cleanup command
         command = command.strip()
         if not command:
-            raise Exception('Empty command')
+            raise ValueError('Cannot run empty command')
 
         if command[:4].lower() == 'cdre':
             with self.non_interactive:
@@ -214,15 +204,6 @@ class MapdlCorba(_MapdlCore):
         # /OUTPUT not redirected properly in corba
         if command[:4].lower() == '/out':
             items = command.split(',')
-            if len(items) < 2:  # empty comment
-                return ''
-            elif not items[1]:  # empty comment
-                return ''
-            elif items[1]:
-                if not items[1].strip():    # empty comment
-                    return ''
-
-            items = command.split(',')
             if len(items) > 1:  # redirect to file
                 if len(items) > 2:
                     if items[2].strip():
@@ -241,11 +222,11 @@ class MapdlCorba(_MapdlCore):
                             self._outfile = open(filename, 'a')
                     else:
                         self._outfile = open(filename, 'w')
+                else:
+                    self._close_output()
+
             else:
-                self._output = ''
-                if self._outfile:
-                    self._outfile.close()
-                self._outfile = None
+                self._close_output()
             return ''
 
         # include error checking
@@ -261,4 +242,17 @@ class MapdlCorba(_MapdlCore):
         # return text, additional_text
         if text == additional_text:
             additional_text = ''
-        return '%s\n%s' % (text, additional_text)
+
+        response = '%s\n%s' % (text, additional_text)
+
+        if self._outfile is not None:
+            self._outfile.write(response)
+
+        return response
+
+    def _close_output(self):
+        """closes the output file"""
+        self._output = ''
+        if self._outfile:
+            self._outfile.close()
+        self._outfile = None

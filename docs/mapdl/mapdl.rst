@@ -1,6 +1,3 @@
-Caveats and Notes
------------------
-
 Command Naming Conventions and Rules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When calling MAPDL commands as functions, each command has been

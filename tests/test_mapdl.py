@@ -9,7 +9,7 @@ from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
 
 from pyansys.misc import get_ansys_bin
-from pyansys.errors import MapdlRuntimeError
+from pyansys.errors import MapdlRuntimeError, MapdlExitedError
 import pyansys
 
 # check for a valid MAPDL install with CORBA
@@ -45,8 +45,10 @@ def mapdl(request):
     elif os.name == 'posix':
         os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
 
-    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True, mode=request.param,
-                                 additional_switches=additional_switches)
+    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True,
+                                 mode=request.param,
+                                 additional_switches=additional_switches,
+                                 log_broadcast=True)
     mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
     return mapdl
 
@@ -59,7 +61,6 @@ def cleared(mapdl):
     yield
 
 
-
 @pytest.fixture(scope='function')
 def make_block(mapdl, cleared):
     mapdl.block(0, 1, 0, 1, 0, 1)
@@ -68,12 +69,33 @@ def make_block(mapdl, cleared):
     mapdl.vmesh('ALL')
 
 
+def test_empty(mapdl):
+    with pytest.raises(ValueError):
+        mapdl.run('')
+
+
 def test_str(mapdl):
     assert 'ANSYS Mechanical' in str(mapdl)
 
 
 def test_version(mapdl):
     assert isinstance(mapdl.version, float)
+
+
+def test_comment(cleared, mapdl):
+    comment = 'Testing...'
+    resp = mapdl.com(comment)
+    assert comment in resp
+
+
+def test_output(cleared, mapdl):
+    tmp_file = 'tmp_redirect.txt'
+    resp = mapdl.output(tmp_file)
+    comment = 'Testing...'
+    resp = mapdl.com(comment)
+    mapdl.output()
+    output = open(os.path.join(mapdl.path, tmp_file)).read()
+    assert comment in output
 
 
 def test_basic_command(cleared, mapdl):
@@ -480,11 +502,29 @@ def test_eplot_screenshot(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
+def test_cyclic_solve(mapdl, cleared):
+    # build the cyclic model
+    mapdl.prep7()
+    mapdl.shpp('off')
+    mapdl.cdread('db', pyansys.examples.sector_archive_file)
+    mapdl.prep7()
+    mapdl.cyclic()
 
-###############################################################################
-# <end> Shared with ansys.mapdl
-###############################################################################
-# must be at end as this uses a scoped fixture
+    # set material properties
+    mapdl.mp('NUXY', 1, 0.31)
+    mapdl.mp('DENS', 1, 4.1408E-04)
+    mapdl.mp('EX', 1, 16900000)
+    mapdl.emodif('ALL', 'MAT', 1)
+
+    # setup and solve
+    mapdl.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl.finish()
+
+    # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
+    assert mapdl.result.nsets == 16
+
+
+# must be at end as this uses a module scoped fixture
 def test_exit(mapdl):
     mapdl.exit()
     assert mapdl._exited
@@ -493,3 +533,8 @@ def test_exit(mapdl):
 
     assert not os.path.isfile(mapdl._lockfile)
     assert 'MAPDL exited' in str(mapdl)
+
+
+def test_mapdl_exited_error(mapdl):
+    with pytest.raises(MapdlExitedError):
+        mapdl.prep7()
