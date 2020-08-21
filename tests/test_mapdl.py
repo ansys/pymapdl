@@ -421,9 +421,6 @@ def test_elements(cleared, mapdl):
     mapdl.e(*list(range(9, 17)))
     expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
                          [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
-    if 'Grpc' in str(type(mapdl)):
-        # no element number in elements
-        expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
@@ -433,7 +430,7 @@ def test_elements(cleared, mapdl):
                                   10.0,
                                   [1, 2, 3],
                                   [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
+                                  np.random.random((10000)),
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
 def test_set_get_parameters(mapdl, parm):

@@ -1838,11 +1838,6 @@ class _MapdlCore(_MapdlCommands):
         filenames.sort()
         return filenames[-1]
 
-    @property
-    def math(self):  # pragma: no cover
-        """Return mapdl.math instance"""
-        raise NotImplementedError("Requires gRPC interface")
-
     def _set_log_level(self, level):
         """alias for set_log_level"""
         self.set_log_level(level)

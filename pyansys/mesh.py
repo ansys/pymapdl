@@ -1,4 +1,4 @@
-"""Module for common class between gRPC, Archive, and Result mesh"""
+"""Module for common class between Archive, and Result mesh"""
 import pyvista as pv
 import vtk
 import numpy as np
