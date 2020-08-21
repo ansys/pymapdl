@@ -1,4 +1,6 @@
 """Module for launching MAPDL locally."""
+import pathlib
+from glob import glob
 import time
 import subprocess
 import re
@@ -57,6 +59,20 @@ def find_ansys():
                 version_str = var[5:8]
                 if is_float(version_str):
                     paths[int(version_str)] = path
+
+    # On Linux ansys is usually installed at the root directory at
+    # /usr/ansys_inc
+    # /ansys_inc
+    if not paths and os.name == 'posix':
+        for directory in ['/usr/ansys_inc/', '/ansys_inc/']:
+            if os.path.isdir(directory):
+                # construct ansys path
+                for subdirectory in glob('%s*/' % directory):
+                    ver = os.path.basename(os.path.normpath('/usr/ansys_inc/v202/'))
+                    groups = re.findall(r'v\d\d\d', ver)
+                    if groups:
+                        ver = int(groups[0][1:])
+                        paths[ver] = os.path.join(subdirectory, 'ansys')
 
     if not paths:
         return '', ''

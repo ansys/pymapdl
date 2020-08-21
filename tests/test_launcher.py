@@ -29,6 +29,16 @@ if not valid_versions:
     pytestmark = pytest.mark.skip("Requires MAPDL")
 
 
+@pytest.mark.skipif(os.name != 'posix', reason="Requires Linux")
+@pytest.mark.skipif(not versions, reason="Requires ANSYS install")
+def test_find_ansys_linux():
+    # assuming ansys is installed, should be able to find it on linux
+    # without env var
+    bin_file, ver = pyansys.launcher.find_ansys()
+    assert os.path.isfile(bin_file)
+    assert isinstance(ver, float)
+
+
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = get_ansys_bin(valid_versions[0])
