@@ -47,3 +47,8 @@ some commands require and will break the CORBA server connection.
 Also note that APDL macros that use ``*CREATE`` have been replaced
 with a python function.  This will make the code easier to debug
 should it be necessary to insert a break point in the code.
+
+
+Convert Script Description
+--------------------------
+.. autofunction:: pyansys.convert.convert_script

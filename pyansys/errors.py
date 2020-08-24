@@ -7,6 +7,12 @@ Disable this check by passing ``override=True``
 
 """
 
+class VersionError(ValueError):
+    """Raised when MAPDL is the wrong version"""
+
+    def __init__(self, msg='Invalid MAPDL version'):
+        ValueError.__init__(self, msg)
+
 class MapdlRuntimeError(RuntimeError):
     """Raised when MAPDL passes an error"""
     pass

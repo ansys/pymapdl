@@ -1,15 +1,29 @@
 Working with a ANSYS Full File (full)
 =====================================
-The ANSYS full file is a FORTRAN formatted binary file containing the mass and stiffness from an ANSYS analysis.  Using pyansys it can be loaded into memory as either a sparse or full matrix.
+The ANSYS full file is a FORTRAN formatted binary file containing the
+mass and stiffness from an ANSYS analysis.  Using pyansys it can be
+loaded into memory as either a sparse or full matrix.
 
 
 Reading a Full File
 -------------------
-This example reads in the mass and stiffness matrices associated with the above example.  ``load_km`` sorts degrees of freedom such that the nodes are ordered from minimum to maximum, and each degree of freedom (i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and ``m`` are sparse by default, but if ``scipy`` is not installed, or if the optional parameter ``as_sparse=False`` then they will be full numpy arrays.
+This example reads in the mass and stiffness matrices associated with
+the above example.  ``load_km`` sorts degrees of freedom such that the
+nodes are ordered from minimum to maximum, and each degree of freedom
+(i.e. X, Y, Z), are sorted within each node.  The matrices ``k`` and
+``m`` are sparse by default, but if ``scipy`` is not installed, or if
+the optional parameter ``as_sparse=False`` then they will be full
+numpy arrays.
 
-By default ``load_km`` outputs the upper triangle of both matrices.  The constrained nodes of the analysis can be identified by accessing ``fobj.const`` where the constrained degrees of freedom are True and all others are False.  This corresponds to the degrees of reference in ``dof_ref``.
+By default ``load_km`` outputs the upper triangle of both matrices.
+The constrained nodes of the analysis can be identified by accessing
+``fobj.const`` where the constrained degrees of freedom are True and
+all others are False.  This corresponds to the degrees of reference in
+``dof_ref``.
 
-By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It is enabled for this example to allow for plotting of the values later on.
+By default dof_ref is unsorted.  To sort these values, set
+``sort==True``.  It is enabled for this example to allow for plotting
+of the values later on.
 
 .. code:: python
 
@@ -22,14 +36,16 @@ By default dof_ref is unsorted.  To sort these values, set ``sort==True``.  It i
     dof_ref, k, m = full.load_km(sort=True)
 
 
-ANSYS only stores the upper triangular matrix in the full file.  To make the full matrix:
+ANSYS only stores the upper triangular matrix in the full file.  To
+make the full matrix:
 
 .. code:: python
 
     k += sparse.triu(k, 1).T
     m += sparse.triu(m, 1).T
 
-If you have ``scipy`` installed, you can solve solve for the natural frequencies and mode shapes of a system.  
+If you have ``scipy`` installed, you can solve solve for the natural
+frequencies and mode shapes of a system.
 
 .. code:: python
 

@@ -45355,9 +45355,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         form
             Specifies format of output matrix file:
 
@@ -45459,7 +45456,7 @@ class _MapdlCommands(object):  # pragma: no cover
         cannot be mapped directly to a node number or particular degree of
         freedom.
         """
-        command = "HBMAT,%s,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(form), str(matrx), str(rhs), str(mapping))
+        command = "HBMAT,%s,%s,,%s,%s,%s,%s" % (str(fname), str(ext), str(form), str(matrx), str(rhs), str(mapping))
         return self.run(command, **kwargs)
 
     def sfdele(self, nlist="", lab="", **kwargs):
@@ -59806,7 +59803,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "EDHGLS,%s" % (str(hgco))
         return self.run(command, **kwargs)
 
-    def smat(self, matrix="", type="", method="", val1="", val2="", val3="",
+    def smat(self, matrix="", type="", method="", val1="", val2="", val3="", val4="",
              **kwargs):
         """APDL Command: *SMAT
 
@@ -59827,9 +59824,10 @@ class _MapdlCommands(object):  # pragma: no cover
 
             Copy an existing matrix. - Import the matrix from a file.
 
-        val1, val2, val3
-            Additional input. The meaning of Val1 through Val3 will vary
-            depending on the specified Method. See details below.
+        val1, val2, val3, val4
+            Additional input. The meaning of Val1 through Val3 will
+            vary depending on the specified Method. See in your ansys
+            documentation.
 
         Notes
         -----
@@ -59845,7 +59843,7 @@ class _MapdlCommands(object):  # pragma: no cover
         For more information about .FULL file contents, see the HBMAT in the
         Command Reference.
         """
-        command = "*SMAT,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type), str(method), str(val1), str(val2), str(val3))
+        command = "*SMAT,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type), str(method), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
     def hpgl(self, kywrd="", opt1="", opt2="", **kwargs):

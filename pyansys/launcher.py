@@ -12,7 +12,7 @@ import socket
 import pexpect
 
 from pyansys.misc import is_float, random_string
-from pyansys.errors import LockFileException
+from pyansys.errors import LockFileException, VersionError
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('pyansys')
@@ -663,7 +663,7 @@ def check_mode(mode, version):
 
         if mode == 'corba':
             if version < 170:
-                raise ValueError('CORBA AAS mode requires MAPDL v17.0 or newer.')
+                raise VersionError('CORBA AAS mode requires MAPDL v17.0 or newer.')
             # elif version > 20.1 and os.name == 'nt':
             #     raise ValueError('CORBA AAS mode on Windows requires MAPDL 2020R1'
             #                      ' or earlier.')
@@ -679,7 +679,7 @@ def check_mode(mode, version):
             mode = 'corba'
         else:
             if os.name == 'nt':
-                raise RuntimeError('Running MAPDL as a service requires '
+                raise VersionError('Running MAPDL as a service requires '
                                    'v17.0 or greater on Windows.')
             mode = 'console'
 

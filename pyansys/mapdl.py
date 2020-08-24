@@ -335,11 +335,6 @@ class _MapdlCore(_MapdlCommands):
         """
         return self._mesh
 
-    # @property
-    # def _mesh(self):  # pragma: no cover
-    #     """Implemented by child class"""
-    #     raise NotImplementedError('Implemented by child class')
-
     @property
     @supress_logging
     def _mesh(self):
