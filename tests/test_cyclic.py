@@ -109,14 +109,14 @@ def test_non_cyclic():
 @pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_plot_sectors(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = result_z.plot_sectors(off_screen=True, screenshot=filename)
+    cpos = result_z.plot_sectors(screenshot=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
 
 @skip_with_no_xserver
 def test_plot_sectors_x(result_x):
-    cpos = result_x.plot_sectors(off_screen=True)
+    cpos = result_x.plot_sectors()
     assert isinstance(cpos, CameraPosition)
 
 
@@ -124,13 +124,13 @@ def test_plot_sectors_x(result_x):
 @skip_with_no_xserver
 @pytest.mark.skipif(result_z is None, reason="Requires result file")
 def test_plot_z_cyc():
-    cpos = result_z.plot(off_screen=True)
+    cpos = result_z.plot()
     assert isinstance(cpos, CameraPosition)
 
 
 @skip_with_no_xserver
 def test_plot_x_cyc(result_x):
-    cpos = result_x.plot(off_screen=True)
+    cpos = result_x.plot()
     assert isinstance(cpos, CameraPosition)
 
 
@@ -138,12 +138,11 @@ def test_plot_x_cyc(result_x):
 def test_plot_component_rotor(cyclic_v182_z_with_comp):
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=False,
                                                 node_components='REFINE',
-                                                sel_type_all=False,
-                                                off_screen=True)
+                                                sel_type_all=False)
 
     cyclic_v182_z_with_comp.plot_nodal_solution(0, full_rotor=True,
                                                 node_components='REFINE',
-                                                sel_type_all=False, off_screen=True)
+                                                sel_type_all=False)
 
     # result_z.plot_nodal_stress(20, 'Sx', node_components='REFINE',
     #                            sel_type_all=False, off_screen=True)
@@ -276,7 +275,7 @@ def test_full_z_nodal_solution_phase(cyclic_v182_z):
 
 @skip_with_no_xserver
 def test_full_x_nodal_solution_plot(result_x):
-    result_x.plot_nodal_solution(0, off_screen=True)
+    result_x.plot_nodal_solution(0)
 
 
 def test_full_x_nodal_stress(result_x):
@@ -349,7 +348,7 @@ def test_full_x_principal_nodal_stress(result_x):
 def test_animate_nodal_solution(tmpdir):
     temp_movie = str(tmpdir.mkdir("tmpdir").join('tmp.mp4'))
     result_z.animate_nodal_solution(0, nangles=20, movie_filename=temp_movie,
-                                    off_screen=True, loop=False)
+                                    loop=False)
     assert os.path.isfile(temp_movie)
 
 
@@ -374,17 +373,17 @@ def test_cyclic_z_harmonic_displacement():
 
 @skip_with_no_xserver
 def test_plot_nodal_stress(result_x):
-    result_x.plot_nodal_stress(0, 'z', off_screen=False)
+    result_x.plot_nodal_stress(0, 'z')
 
 
 @skip_with_no_xserver
 def test_plot_nodal_stress(result_x):
-    result_x.plot_nodal_stress(0, 'z', off_screen=True)
+    result_x.plot_nodal_stress(0, 'z')
 
 
 @skip_with_no_xserver
 def test_plot_principal_nodal_stress(result_x):
-    result_x.plot_principal_nodal_stress(0, 'seqv', off_screen=True)
+    result_x.plot_principal_nodal_stress(0, 'seqv')
 
 
 def test_nodal_elastic_strain_cyclic(result_x):
@@ -405,7 +404,7 @@ def test_nodal_elastic_strain_cyclic(result_x):
 
 @skip_with_no_xserver
 def test_plot_nodal_elastic_strain(result_x):
-    result_x.plot_nodal_elastic_strain(0, 'X', off_screen=True)
+    result_x.plot_nodal_elastic_strain(0, 'X')
 
 
 def test_nodal_temperature(result_x):
@@ -422,7 +421,7 @@ def test_nodal_temperature(result_x):
 
 @skip_with_no_xserver
 def test_plot_nodal_nodal_temperature(result_x):
-    result_x.plot_nodal_temperature(0, off_screen=True)
+    result_x.plot_nodal_temperature(0)
 
 
 def test_nodal_thermal_strain_cyclic(result_x):
@@ -442,6 +441,4 @@ def test_nodal_thermal_strain_cyclic(result_x):
 
 @skip_with_no_xserver
 def test_plot_nodal_thermal_strain(result_x):
-    result_x.plot_nodal_thermal_strain(0, 'X', off_screen=True)
-
-
+    result_x.plot_nodal_thermal_strain(0, 'X')
