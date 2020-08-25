@@ -1245,14 +1245,14 @@ class _MapdlCore(_MapdlCommands):
         --------
         Retreive the number of nodes
 
-        >>> value = ansys.get('val', 'node', '', 'count')
+        >>> value = mapdl.get('val', 'node', '', 'count')
         >>> value
         3003
 
         Retreive the number of nodes using keywords.  Note that the
         parameter name is optional.
 
-        >>> value = ansys.get(entity='node', item1='count')
+        >>> value = mapdl.get(entity='node', item1='count')
         >>> value
         3003
 
@@ -1521,6 +1521,11 @@ class _MapdlCore(_MapdlCommands):
             Calculate element results, reaction forces, energies, and
             the nodal degree of freedom solution.  Default ``False``.
 
+        Returns
+        -------
+        response : str
+            Output from MAPDL SOLVE command. 
+
         Examples
         --------
         Modal analysis using default parameters for the first 6 modes
@@ -1559,8 +1564,9 @@ class _MapdlCore(_MapdlCommands):
         if elcalc:
             self.mxpand(elcalc='YES')
 
-        self.solve()
+        out = self.solve()
         self.finish()
+        return out
 
     def run(self, command, write_to_log=True):
         """Runs APDL command
@@ -1761,6 +1767,15 @@ class _MapdlCore(_MapdlCommands):
         array([  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,
               ...
               314., 315., 316., 317., 318., 319., 320., 321.])
+
+        List the displacement in the X direction for the first result
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> disp_x = mapdl.get_array('NODE', item1='U', it1num='X')
+        array([ 0.01605306, -0.01605306,  0.00178402, -0.01605306,
+               ...
+               -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
         Notes
         -----

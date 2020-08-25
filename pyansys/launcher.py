@@ -1,5 +1,4 @@
 """Module for launching MAPDL locally."""
-import pathlib
 from glob import glob
 import time
 import subprocess

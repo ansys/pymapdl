@@ -27,7 +27,31 @@ UNITS_MAP = {-1: 'NONE',
 
 
 class Parameters():
-    """Collection of MAPDL parameters obtainable from the \*GET command"""
+    """Collection of MAPDL parameters obtainable from the \*GET command
+
+    Examples
+    --------
+    Simply list all parameters except for MAPDL MATH parameters
+
+    >>> mapdl.parameters
+    ARR                              : ARRAY DIM (3, 1, 1)
+    PARM_FLOAT                       : 20.0
+    PARM_INT                         : 10.0
+    PARM_LONG_STR                    : "stringstringstringstringstringst"
+    PARM_STR                         : "string"
+    PORT                             : 50052.0
+
+    Get a parameter
+
+    >>> mapdl.parameters['PARM_FLOAT']
+    20.0
+
+    Get an array parameter
+
+    >>> mapdl.parameters['ARR']
+    array([1., 2., 3.])
+
+    """
 
     def __init__(self, mapdl):
         if not isinstance(mapdl, _MapdlCore):
@@ -42,7 +66,7 @@ class Parameters():
         return self._mapdl._log
 
     @property
-    def routine(self):
+    def routine(self) -> str:
         """Current routine string as a string.  For example ``"/PREP7"``
 
         MAPDL Command: \*GET, ACTIVE, 0, ROUT
@@ -52,15 +76,15 @@ class Parameters():
         routine : str
             Routine as a string.  One of:
 
-            - ``"Begin level"``
-            - ``"PREP7"``
-            - ``"SOLUTION"``
-            - ``"POST1"``
-            - ``"POST26"``
-            - ``"AUX2"``
-            - ``"AUX3"``
-            - ``"AUX12"``
-            - ``"AUX15"``
+                - ``"Begin level"``
+                - ``"PREP7"``
+                - ``"SOLUTION"``
+                - ``"POST1"``
+                - ``"POST26"``
+                - ``"AUX2"``
+                - ``"AUX3"``
+                - ``"AUX12"``
+                - ``"AUX15"``
 
         Examples
         --------
@@ -71,78 +95,139 @@ class Parameters():
         return ROUTINE_MAP[int(value)]
 
     @property
-    def units(self):
+    def units(self) -> str:
         """Units specified by /UNITS command.
 
         Returns
         -------
         units : str
-            Active Units.  One of:- "USER"
-            - "SI"
-            - "CGS"
-            - "BFT"
-            - "BIN"
-            - "MKS
-            - "MPA"
-            - "uMKS
+            Active Units.  One of:
+                - ``"None"``
+                - ``"USER"``
+                - ``"SI"``
+                - ``"CGS"``
+                - ``"BFT"``
+                - ``"BIN"``
+                - ``"MKS``
+                - ``"MPA"``
+                - ``"uMKS"``
+
+        Examples
+        --------
+        >>> mapdl.parameters.units
+        'NONE'
         """
         value = self._mapdl.get_value("ACTIVE", item1="UNITS")
         return UNITS_MAP[int(value)]
 
     @property
-    def revision(self):
+    def revision(self) -> float:
         """MAPDL revision version.
 
-        MAPDL revision version as a float.  For example ``20.2``.
+        Examples
+        --------
+        >>> mapdl.parameters.revision
+        20.2
         """
         return float(self._mapdl.get_value("ACTIVE", item1="REV"))
 
     @property
-    def platform(self):
+    def platform(self) -> str:
         """The current platform.
 
-        Current platform.  For example ``"LIN"`` for Linux.
+        Examples
+        --------
+        >>> mapdl.parameters.platform
+        'LIN'
         """
         return self._mapdl.get_value("ACTIVE", item1="PLATFORM")
 
     @property
-    def csys(self):
-        """Active coordinate system"""
+    def csys(self) -> int:
+        """Active coordinate system
+
+        Examples
+        --------
+        >>> mapdl.parameters.csys
+        0
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="CSYS"))
 
     @property
-    def dsys(self):
-        """Active display coordinate system"""
+    def dsys(self) -> int:
+        """Active display coordinate system
+
+        Examples
+        --------
+        >>> mapdl.parameters.dsys
+        0
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="DSYS"))
 
     @property
-    def rsys(self):
-        """Active result coordinate system"""
+    def rsys(self) -> int:
+        """Active result coordinate system
+
+        Examples
+        --------
+        >>> mapdl.parameters.rsys
+        0
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="RSYS"))
 
     @property
-    def esys(self):
-        """Active element coordinate system"""
+    def esys(self) -> int:
+        """Active element coordinate system
+
+        Examples
+        --------
+        >>> mapdl.parameters.esys
+        0
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="ESYS"))
 
     @property
-    def section(self):
-        """Active section number"""
+    def section(self) -> int:
+        """Active section number
+
+        Examples
+        --------
+        >>> mapdl.parameters.section
+        1
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="SECT"))
 
     @property
-    def material(self):
-        """Active material"""
+    def material(self) -> int:
+        """Active material
+
+        Examples
+        --------
+        >>> mapdl.parameters.material
+        1
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="MAT"))
 
     @property
-    def real(self):
-        """Active real constant set"""
+    def real(self) -> int:
+        """Active real constant set
+
+        Examples
+        --------
+        >>> mapdl.parameters.real
+        1
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="REAL"))
 
     @property
-    def type(self):
-        """Active element type"""
+    def type(self) -> int:
+        """Active element type
+
+        Examples
+        --------
+        >>> mapdl.parameters.type
+        1
+        """
         return int(self._mapdl.get_value("ACTIVE", item1="type"))
 
     @property
@@ -198,8 +283,8 @@ class Parameters():
         name : str
             An alphanumeric name used to identify this parameter.  Par
             may be up to 32 characters, beginning with a letter and
-            containing only letters, numbers, and underscores.  Examples:
-            ``"ABC" "A3X" "TOP_END"``.
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
 
         """
         if not isinstance(value, (str, int, float)):
