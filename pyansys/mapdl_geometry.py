@@ -125,10 +125,14 @@ class Geometry():
 
         # duplicate areas to avoid affecting existing areas
         a_num = int(self._mapdl.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self._mapdl.numstr('AREA', a_num)
-        self._mapdl.agen(2, 'ALL', noelem=1)
+        with self._mapdl.chain_commands:
+            self._mapdl.numstr('AREA', a_num)
+            self._mapdl.agen(2, 'ALL', noelem=1)
         a_max = int(self._mapdl.get(entity='AREA', item1='NUM', it1num='MAXD'))
-        self._mapdl.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
+
+        with self._mapdl.chain_commands:
+            self._mapdl.asel('S', 'AREA', vmin=a_num + 1, vmax=a_max)
+            self._mapdl.aatt()  # necessary to reset element/area meshing association
 
         # create a temporary etype
         etype_max = int(self._mapdl.get(entity='ETYP', item1='NUM', it1num='MAX'))
