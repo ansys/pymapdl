@@ -1332,7 +1332,7 @@ class _MapdlCore(_MapdlCommands):
 
         Returns
         -------
-        float
+        value : float
             Value returned by inline function.
 
         Examples

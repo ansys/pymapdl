@@ -34,6 +34,7 @@ class Mesh():
                  elem_comps={}, rdat=[], rnum=[], keyopt={}):
         self._etype = None  # internal element type reference
         self._grid = None  # VTK grid
+        self._surf_cache = None # cached external surface
         self._enum = None  # cached element numbering
         self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
@@ -57,6 +58,13 @@ class Mesh():
         self._rdat = rdat
         self._rnum = rnum
         self._keyopt = keyopt
+
+    @property
+    def _surf(self):
+        """External surface"""
+        if self._surf_cache is None:
+            self._surf_cache = self._grid.extract_surface()
+        return self._surf_cache
 
     @property
     def _has_nodes(self):
