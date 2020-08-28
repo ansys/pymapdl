@@ -1,14 +1,11 @@
 """Module for launching MAPDL locally."""
 from glob import glob
-import time
-import subprocess
 import re
 import warnings
 import os
 import appdirs
 import tempfile
 import socket
-import pexpect
 
 from pyansys.misc import is_float, random_string
 from pyansys.errors import LockFileException, VersionError
@@ -207,114 +204,6 @@ def check_lock_file(path, jobname, override):
                 raise LockFileException('Unable to remove lock file.  '
                                         'Another instance of MAPDL might be '
                                         'running at "%s"' % path)
-
-
-
-def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
-                 additional_switches='', start_timeout=60):
-    """Start MAPDL in AAS mode
-
-
-    Notes
-    -----
-    The CORBA interface is likely to fail on computers with multiple
-    network adapters.  The ANSYS RPC isn't smart enough to determine
-    the right adapter and will likely try to communicate on the wrong
-    IP.
-    """
-    # Using stored parameters so launch command can be run from a
-    # cached state (when launching the GUI)
-
-    # can't run /BATCH in windows, so we trick it using "-b" and
-    # provide a dummy input file
-    if os.name == 'nt':
-        # must be a random filename to avoid conflicts with other
-        # potential instances
-        tmp_file = '%s.inp' % random_string(10)
-        with open(os.path.join(run_location, tmp_file), 'w') as f:
-            f.write('FINISH')
-        additional_switches += ' -b -i %s -o out.txt' % tmp_file
-
-    # command must include "aas" flag to start MAPDL server
-    command = '"%s" -aas -j %s -np %d %s' % (exec_file,
-                                             jobname,
-                                             nproc,
-                                             additional_switches)
-
-    # if os.name == 'nt':  # required after v190
-    #     command = 'START /B "MAPDL" %s' % command
-
-    # remove any broadcast files
-    broadcast_file = os.path.join(run_location, 'mapdl_broadcasts.txt')
-    if os.path.isfile(broadcast_file):
-        os.remove(broadcast_file)
-
-    # windows 7 won't run this
-    # if os.name == 'nt' and platform.release() == '7':
-    #     cwd = os.getcwd()
-    #     os.chdir(run_location)
-    #     os.system('START /B "MAPDL" %s' % command)
-    #     os.chdir(cwd)
-    # else:
-    subprocess.Popen(command, shell=True,
-                     cwd=run_location,
-                     stdin=subprocess.DEVNULL,
-                     stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL)
-
-    # listen for broadcast file
-    telapsed = 0
-    tstart = time.time()
-    started_rpc = False
-    while telapsed < start_timeout and not started_rpc:
-        try:
-            if os.path.isfile(broadcast_file):
-                broadcast = open(broadcast_file).read()
-                # see if connection to RPC has been made
-                rpc_txt = 'visited:collaborativecosolverunitior-set:'
-                started_rpc = rpc_txt in broadcast
-
-            time.sleep(0.1)
-            telapsed = time.time() - tstart
-
-        except KeyboardInterrupt:
-            raise KeyboardInterrupt
-
-    # exit if timed out
-    if not started_rpc:
-        err_str = 'Unable to start ANSYS within %.1f seconds' % start_timeout
-        if os.path.isfile(broadcast_file):
-            broadcast = open(broadcast_file).read()
-            err_str += '\n\nLast broadcast:\n%s' % broadcast
-        raise TimeoutError(err_str)
-
-    # return CORBA key
-    keyfile = os.path.join(run_location, 'aaS_MapdlId.txt')
-    return open(keyfile).read()
-
-
-def launch_pexpect(exec_file=None, run_location=None, jobname=None, nproc=None,
-                   additional_switches='', start_timeout=60):
-    """Launch MAPDL as a pexpect process.
-
-    Limited to only a linux instance
-    """
-    command = '%s -j %s -np %d %s' % (exec_file, jobname, nproc,
-                                      additional_switches)
-    process = pexpect.spawn(command, cwd=run_location)
-    process.delaybeforesend = None
-
-    try:
-        index = process.expect(['BEGIN:', 'CONTINUE'],
-                               timeout=start_timeout)
-    except:  # capture failure
-        raise RuntimeError(process.before.decode('utf-8'))
-
-    if index:  # received ... press enter to continue
-        process.sendline('')
-        process.expect('BEGIN:', timeout=start_timeout)
-
-    return process
 
 
 def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
@@ -632,16 +521,12 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     if mode == 'console':
         from pyansys.mapdl_console import MapdlConsole
-        process = launch_pexpect(**start_parm)
-        return MapdlConsole(process, loglevel=loglevel,
-                            log_apdl=log_apdl, **start_parm)
+        return MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
     elif mode == 'corba':
         from pyansys.mapdl_corba import MapdlCorba
-        corba_key = launch_corba(**start_parm)
-        return MapdlCorba(corba_key, loglevel=loglevel,
-                          log_apdl=log_apdl,
-                          log_broadcast=kwargs.get('log_broadcast', False),
-                          **start_parm)
+        return MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
+                          log_broadcast=kwargs.get('log_broadcast',
+                                                   False), **start_parm)
     else:
         raise ValueError('Invalid mode %s' % mode)
 
@@ -663,12 +548,6 @@ def check_mode(mode, version):
         if mode == 'corba':
             if version < 170:
                 raise VersionError('CORBA AAS mode requires MAPDL v17.0 or newer.')
-            # elif version > 20.1 and os.name == 'nt':
-            #     raise ValueError('CORBA AAS mode on Windows requires MAPDL 2020R1'
-            #                      ' or earlier.')
-            # elif version >= 20.0 and os.name == 'posix':
-            #     raise ValueError('CORBA AAS mode on Linux requires MAPDL 2019R3'
-            #                      ' or earlier.')
 
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')

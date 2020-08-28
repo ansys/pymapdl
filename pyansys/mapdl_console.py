@@ -2,6 +2,7 @@
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
+import pexpect
 import time
 import re
 
@@ -41,25 +42,49 @@ for item in ready_items:
 ignored = re.compile(r'[\s\S]+'.join(['WARNING', 'command', 'ignored']))
 
 
+def launch_pexpect(exec_file=None, run_location=None, jobname=None, nproc=None,
+                   additional_switches='', start_timeout=60):
+    """Launch MAPDL as a pexpect process.
+
+    Limited to only a linux instance
+    """
+    command = '%s -j %s -np %d %s' % (exec_file, jobname, nproc,
+                                      additional_switches)
+    process = pexpect.spawn(command, cwd=run_location)
+    process.delaybeforesend = None
+
+    try:
+        index = process.expect(['BEGIN:', 'CONTINUE'],
+                               timeout=start_timeout)
+    except:  # capture failure
+        raise RuntimeError(process.before.decode('utf-8'))
+
+    if index:  # received ... press enter to continue
+        process.sendline('')
+        process.expect('BEGIN:', timeout=start_timeout)
+
+    return process
+
+
 class MapdlConsole(_MapdlCore):
     """Control interaction with an ANSYS shell instance.
 
     Only works on Linux.
-
-    Parameters
-    ----------
-    process : pexpect 
-
     """
 
-    def __init__(self, process, loglevel='INFO', log_apdl='w',
-                 use_vtk=True, **start_parm):
+    def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
+                 **start_parm):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
         self._continue_on_error = False
-        self._process = process
+        self._process = None
+        self._launch(start_parm)
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
                          **start_parm)
+
+    def _launch(self, start_parm):
+        """Connect to MAPDL process using pexpect"""
+        self._process = launch_pexpect(**start_parm)
 
     def _run(self, command):
         """Sends command and returns ANSYS's response"""
