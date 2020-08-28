@@ -1,11 +1,12 @@
 """CORBA implementation of the MAPDL interface"""
 import atexit
+import subprocess
 import time
 import re
 import os
 
 from pyansys.mapdl import _MapdlCore
-from pyansys.misc import threaded
+from pyansys.misc import threaded, random_string
 from pyansys.errors import MapdlRuntimeError, MapdlExitedError
 
 try:
@@ -47,6 +48,79 @@ def tail(filename, nlines):
         return qfile.read()
 
 
+def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
+                 additional_switches='', start_timeout=60):
+    """Start MAPDL in AAS mode
+
+    Notes
+    -----
+    The CORBA interface is likely to fail on computers with multiple
+    network adapters.  The ANSYS RPC isn't smart enough to determine
+    the right adapter and will likely try to communicate on the wrong
+    IP.
+    """
+    # Using stored parameters so launch command can be run from a
+    # cached state (when launching the GUI)
+
+    # can't run /BATCH in windows, so we trick it using "-b" and
+    # provide a dummy input file
+    if os.name == 'nt':
+        # must be a random filename to avoid conflicts with other
+        # potential instances
+        tmp_file = '%s.inp' % random_string(10)
+        with open(os.path.join(run_location, tmp_file), 'w') as f:
+            f.write('FINISH')
+        additional_switches += ' -b -i %s -o out.txt' % tmp_file
+
+    # command must include "aas" flag to start MAPDL server
+    command = '"%s" -aas -j %s -np %d %s' % (exec_file,
+                                             jobname,
+                                             nproc,
+                                             additional_switches)
+
+    # remove any broadcast files
+    broadcast_file = os.path.join(run_location, 'mapdl_broadcasts.txt')
+    if os.path.isfile(broadcast_file):
+        os.remove(broadcast_file)
+
+    # windows 7 won't run this
+    subprocess.Popen(command, shell=True,
+                     cwd=run_location,
+                     stdin=subprocess.DEVNULL,
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
+
+    # listen for broadcast file
+    telapsed = 0
+    tstart = time.time()
+    started_rpc = False
+    while telapsed < start_timeout and not started_rpc:
+        try:
+            if os.path.isfile(broadcast_file):
+                broadcast = open(broadcast_file).read()
+                # see if connection to RPC has been made
+                rpc_txt = 'visited:collaborativecosolverunitior-set:'
+                started_rpc = rpc_txt in broadcast
+
+            time.sleep(0.1)
+            telapsed = time.time() - tstart
+
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+
+    # exit if timed out
+    if not started_rpc:
+        err_str = 'Unable to start ANSYS within %.1f seconds' % start_timeout
+        if os.path.isfile(broadcast_file):
+            broadcast = open(broadcast_file).read()
+            err_str += '\n\nLast broadcast:\n%s' % broadcast
+        raise TimeoutError(err_str)
+
+    # return CORBA key
+    keyfile = os.path.join(run_location, 'aaS_MapdlId.txt')
+    return open(keyfile).read()
+
+
 class MapdlCorba(_MapdlCore):
     """CORBA implementation of the MAPDL interface
 
@@ -64,14 +138,21 @@ class MapdlCorba(_MapdlCore):
 
     """
 
-    def __init__(self, corba_key, loglevel='INFO', log_apdl='w',
-                 use_vtk=True, log_broadcast=False, **start_parm):
+    def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
+                 log_broadcast=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
                          log_broadcast=False, **start_parm)
         self._broadcast_logger = None
         self._server = None
         self._outfile = None
+        self._log_broadcast = log_broadcast
+        self._launch(start_parm)
+        super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
+                         **start_parm)
+
+    def _launch(self, start_parm):
+        corba_key = launch_corba(**start_parm)
 
         orb = CORBA.ORB_init()
         self._server = orb.string_to_object(corba_key)
@@ -90,7 +171,7 @@ class MapdlCorba(_MapdlCore):
                         corba_key)
 
         # separate logger for broadcast file
-        if log_broadcast:
+        if self._log_broadcast:
             self._broadcast_logger = self._start_broadcast_logger()
 
         INSTANCES.append(self)

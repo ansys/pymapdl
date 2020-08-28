@@ -19,7 +19,7 @@ from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from pyansys.plotting import general_plotter
-
+from pyansys.launcher import get_ansys_path
 
 MATPLOTLIB_LOADED = True
 try:
@@ -459,22 +459,24 @@ class _MapdlCore(_MapdlCommands):
         if os.path.isfile(tmp_database):
             os.remove(tmp_database)
 
-        # get the state, close, and finish
+        # cache result file, version, and routine before closing
+        resultfile = self._result_file
+        version = self.version
         prior_processor = self.parameters.routine
+
+        # get the close, and finish
         self.finish()
         self.save(tmp_database)
-        # self.exit(close_log=False)
         self.exit()
 
         # copy result file to temp directory
         if include_result:
-            resultfile = os.path.join(self.path, '%s.rst' % self.jobname)
             if os.path.isfile(resultfile):
                 tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
                 copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
-        start_file = os.path.join(save_path, 'start%s.ans' % self.version)
+        start_file = os.path.join(save_path, 'start%s.ans' % version)
         with open(start_file, 'w') as f:
             f.write('RESUME\n')
 
@@ -486,21 +488,24 @@ class _MapdlCore(_MapdlCommands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path,
-                                                self._start_parm['exec_file'],
-                                                name))
+        exec_file = self._start_parm.get('exec_file',
+                                         get_ansys_path(allow_input=False))
+        os.system('cd "%s" && "%s" -g -j %s' % (save_path, exec_file, name))
         os.chdir(cwd)
 
         # must remove the start file when finished
         os.remove(start_file)
         os.remove(other_start_file)
 
-        # reload database when finished
-        # self._launch()  # TODO
+        # reattach to a new session and reload database
+        self._launch(self._start_parm)
         self.resume(tmp_database)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor:
                 self.run('/%s' % prior_processor)
+
+    def _launch(self, *args, **kwargs):  # pragma: no cover
+        raise NotImplementedError('Implemented by child class')
 
     def _close_apdl_log(self):
         """Closes the APDL log"""
@@ -1047,6 +1052,20 @@ class _MapdlCore(_MapdlCommands):
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')
 
+        result_path = self._result_file
+        if not os.path.isfile(result_path):
+            raise FileNotFoundError('No results found at %s' % result_path)
+        return pyansys.read_binary(result_path)
+
+    @property
+    def _result_file(self):
+        """Path of the result file
+
+        Notes
+        -----
+        There may be multiple result files at this location (if not
+        combining results)
+        """
         try:
             result_path = self.inquire('RSTFILE')
         except RuntimeError:
@@ -1056,12 +1075,7 @@ class _MapdlCore(_MapdlCommands):
             result_path = os.path.join(self.path, '%s.rst' % self._jobname)
         elif not os.path.dirname(result_path):
             result_path = os.path.join(self.path, '%s.rst' % result_path)
-
-        # there may be multiple result files at this location (if not
-        # combining results)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError('No results found at %s' % result_path)
-        return pyansys.read_binary(result_path)
+        return result_path
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""

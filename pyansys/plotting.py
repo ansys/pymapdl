@@ -11,6 +11,7 @@ def general_plotter(title, meshes, points, labels,
                     background=None, off_screen=None,
                     screenshot=False,
                     window_size=None,
+                    notebook=None,
                     # add_mesh kwargs:
                     color='w',
                     show_edges=None, edge_color=None, point_size=5.0,
@@ -46,6 +47,11 @@ def general_plotter(title, meshes, points, labels,
 
     window_size : list, optional
         Window size in pixels.  Defaults to ``[1024, 768]``
+
+    notebook : bool, optional
+        When True, the resulting plot is placed inline a jupyter
+        notebook.  Assumes a jupyter console is active.  Automatically
+        enables off_screen.
 
     show_bounds : bool, optional
         Shows mesh bounds when ``True``.
@@ -116,7 +122,10 @@ def general_plotter(title, meshes, points, labels,
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
     """
-    pl = pv.Plotter(off_screen=off_screen)
+    if notebook:
+        off_screen = True
+
+    pl = pv.Plotter(off_screen=off_screen, notebook=notebook)
 
     if background:
         pl.set_background(background)
