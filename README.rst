@@ -6,6 +6,8 @@ pyansys
 .. image:: https://dev.azure.com/femorph/pyansys/_apis/build/status/akaszynski.pyansys?branchName=master
     :target: https://dev.azure.com/femorph/pyansys/_build/latest?definitionId=8&branchName=master
 
+.. image:: https://zenodo.org/badge/70696039.svg
+   :target: https://zenodo.org/badge/latestdoi/70696039
 
 This Python module allows you to:
  - Interactively control an instance of ANSYS v14.5 + using Python on
@@ -15,7 +17,7 @@ This Python module allows you to:
  - Rapidly read in binary result ``(.rst)``, binary mass and stiffness
    ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
-See the `Documentation <https://akaszynski.github.io/pyansys/>`_ page for more details.
+See the `Documentation <https://akaszynski.github.io/pyansys/>`_ page for more details, and the `Examples gallery <https://akaszynski.github.io/pyansys/examples/index.html>`_ for some examples.
 
 
 Installation
@@ -43,7 +45,8 @@ Controlling ANSYS
 ~~~~~~~~~~~~~~~~~
 Create an instance of ANSYS and interactively send commands to it.
 This is a direct interface and does not rely on writing a temporary
-script file.  You can also generate plots using ``matplotlib``.
+script file.  You can also generate plots using either MAPDL's
+internal plotting with ``matplotlib``, or interactive plots using VTK:
 
 .. code:: python
 
@@ -66,10 +69,14 @@ script file.  You can also generate plots using ``matplotlib``.
     mapdl.al(1, 2, 3, 4)
     mapdl.aplot()
     mapdl.save()
-    mapdl.exit()
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/aplot.png
-    :width: 500pt
+
+Here is an example plot from of the more complex examples:
+
+.. raw:: html
+
+    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/mapdl/images/vplot_vtk.png" height="350px">
+
 
 
 Loading and Plotting an ANSYS Archive File
@@ -102,8 +109,9 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     # or as a vtk binary
     grid.save('hex.vtk')
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png
-    :width: 500pt
+.. raw:: html
+
+    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png" height="350px">
 
 You can then load this vtk file using ``pyvista`` or another program that uses VTK.
     
@@ -170,8 +178,9 @@ plotted using ``VTK``.
     result.plot_nodal_solution(0, 'x', label='Displacement')
 
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_disp.png
-    :width: 500pt
+.. raw:: html
+
+    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_disp.png" height="350px">
 
 
 Results can be plotted non-interactively and screenshots saved by
@@ -207,8 +216,10 @@ displayed.
     # Display node averaged stress in x direction for result 6
     result.plot_nodal_stress(5, 'Sx')
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_stress.png
-    :width: 500pt
+.. raw:: html
+
+    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_stress.png" height="350px">
+
 
 
 Nodal stress can also be generated non-interactively with:
@@ -233,8 +244,9 @@ If you wish to save the animation to a file, specify the movie_filename and anim
 
     result.animate_nodal_solution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
 
-.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_mode_shape.gif
-    :width: 500pt
+.. raw:: html
+
+    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_mode_shape.gif" height="350px">
 
 
 Reading a Full File
@@ -299,6 +311,31 @@ You can also install `pyansystools` with
 ```
 pip install pyansystools
 ```
+
+
+Citing this Module
+-------------------
+If you use ``pyansys`` for research and would like to cite the module
+and source, you can visit `pyansys Zenodo <https://zenodo.org/badge/latestdoi/70696039>`_
+and generate the correct citation.  For example, the BibTex citation
+is:
+
+.. code::
+
+    @software{alexander_kaszynski_2020_4009467,
+      author       = {Alexander Kaszynski},
+      title        = {{pyansys: Python Interface to MAPDL and Associated 
+                       Binary and ASCII Files}},
+      month        = aug,
+      year         = 2020,
+      publisher    = {Zenodo},
+      version      = {0.43.2},
+      doi          = {10.5281/zenodo.4009467},
+      url          = {https://doi.org/10.5281/zenodo.4009467}
+    }
+
+Please visit  above for the most recent citation as the
+citation here may not be current.
 
 
 License and Acknowledgments
