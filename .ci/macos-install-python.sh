@@ -35,7 +35,8 @@ which python
 python --version
 python -m ensurepip
 python -m pip install --upgrade pip
-python -m pip install setuptools twine wheel
+python -m pip install setuptools --upgrade
+python -m pip install twine wheel
 
 # brew doesn't install correctly
 # install openmp
