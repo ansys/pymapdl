@@ -1,3 +1,5 @@
+import weakref
+
 import os
 import numpy as np
 
@@ -56,7 +58,12 @@ class Parameters():
     def __init__(self, mapdl):
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError('Must be implemented from MAPDL class')
-        self._mapdl = mapdl
+        self._mapdl_weakref = weakref.ref(mapdl)
+
+    @property
+    def _mapdl(self):
+        """Return the weakly referenced instance of mapdl"""
+        return self._mapdl_weakref()
 
     def _set_log_level(self, level):
         self._mapdl.set_log_level(level)

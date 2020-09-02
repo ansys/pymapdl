@@ -57491,7 +57491,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "NUMEXP,%s,%s,%s,%s" % (str(num), str(begrng), str(endrng), str(elcalc))
         return self.run(command, **kwargs)
 
-    def nerr(self, nmerr="", nmabt="", ifkey="", num="", **kwargs):
+    def nerr(self, nmerr="", nmabt="", abort="", ifkey="", num="", **kwargs):
         """APDL Command: /NERR
 
         Limits the number of warning and error messages displayed.
@@ -57499,21 +57499,26 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         nmerr
-            Maximum number of warning and error messages displayed per command.
-            Defaults to 5 for interactive runs with the GUI turned on, 20 for
-            interactive runs with the GUI turned off, 200 for batch runs.  If
-            NMERR is negative, the absolute value of NMERR is used as the
-            maximum number of warning and error messages written to the error
-            file (file.ERR) per command, as well as the maximum number of
+            Maximum number of warning and error messages displayed per
+            command.  Defaults to 5 for interactive runs with the GUI
+            turned on, 20 for interactive runs with the GUI turned
+            off, 200 for batch runs.  If NMERR is negative, the
+            absolute value of NMERR is used as the maximum number of
+            warning and error messages written to the error file
+            (file.ERR) per command, as well as the maximum number of
             messages displayed per command.
 
         nmabt
-            Maximum number of warning and error messages allowed per command
-            before run aborts (must be greater than zero).  Maximum value is
-            99,999,999. Defaults to 10,000.
+            Maximum number of warning and error messages allowed per
+            command before run aborts (must be greater than zero).
+            Maximum value is 99,999,999. Defaults to 10,000.
 
-        --
-            Unused field.
+        abort
+            Abort level key.  Set to 0 for default abort behavior, -1
+            to never abort, and -2 to abort after ``nmabt`` errors.
+            Altering the abort level key is not recommended, but can
+            be helpful for avoiding an abort within /BATCH mode but
+            using ``pyansys`` interactively.
 
         ifkey
             Specifies whether or not to abort if an error occurs during a
