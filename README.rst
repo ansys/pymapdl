@@ -71,7 +71,7 @@ internal plotting with ``matplotlib``, or interactive plots using VTK:
     mapdl.save()
 
 
-Here is an example plot from of the more complex examples:
+Here is an example plot from one of the more complex examples:
 
 
 .. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/mapdl/images/vplot_vtk_small.png
