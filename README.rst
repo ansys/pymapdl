@@ -73,9 +73,8 @@ internal plotting with ``matplotlib``, or interactive plots using VTK:
 
 Here is an example plot from of the more complex examples:
 
-.. raw:: html
 
-    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/mapdl/images/vplot_vtk.png" height="350px">
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/mapdl/images/vplot_vtk_small.png
 
 
 
@@ -109,9 +108,9 @@ ANSYS archive files containing solid elements (both legacy and current), can be 
     # or as a vtk binary
     grid.save('hex.vtk')
 
-.. raw:: html
 
-    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam.png" height="350px">
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_small.png
+   :alt: Hexahedral beam
 
 You can then load this vtk file using ``pyvista`` or another program that uses VTK.
     
@@ -177,10 +176,7 @@ plotted using ``VTK``.
     # Plot the displacement of Mode 0 in the x direction
     result.plot_nodal_solution(0, 'x', label='Displacement')
 
-
-.. raw:: html
-
-    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_disp.png" height="350px">
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/hexbeam_disp_small.png
 
 
 Results can be plotted non-interactively and screenshots saved by
@@ -216,10 +212,7 @@ displayed.
     # Display node averaged stress in x direction for result 6
     result.plot_nodal_stress(5, 'Sx')
 
-.. raw:: html
-
-    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_stress.png" height="350px">
-
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_stress_small.png
 
 
 Nodal stress can also be generated non-interactively with:
@@ -244,9 +237,8 @@ If you wish to save the animation to a file, specify the movie_filename and anim
 
     result.animate_nodal_solution(0, movie_filename='/tmp/movie.mp4', cpos=cpos)
 
-.. raw:: html
 
-    <img src="https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_mode_shape.gif" height="350px">
+.. figure:: https://github.com/akaszynski/pyansys/raw/master/docs/images/beam_mode_shape_small.gif
 
 
 Reading a Full File
