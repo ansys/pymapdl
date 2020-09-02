@@ -57569,7 +57569,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         The command is valid in any processor.
         """
-        command = "/NERR,%s,%s,%s,%s" % (str(nmerr), str(nmabt), str(ifkey), str(num))
+        command = "/NERR,%s,%s,%s,%s,%s" % (str(nmerr), str(nmabt), str(abort),
+                                            str(ifkey), str(num))
         return self.run(command, **kwargs)
 
     def ctype(self, key="", dotd="", dots="", dshp="", tlen="", **kwargs):
