@@ -392,7 +392,7 @@ def test_nodal_elastic_strain_cyclic(result_x):
     stress_ans = from_mapdl['stress']
 
     # get EPEL
-    nnum, stress = result_x.nodal_elastic_strain(0)
+    nnum, stress = result_x.nodal_elastic_strain(0, full_rotor=True)
 
     # include only common values
     mask = np.in1d(nnum, nnum_ans[0])
@@ -429,7 +429,7 @@ def test_nodal_thermal_strain_cyclic(result_x):
     nnum_ans = from_mapdl['nnum']
     strain_ans = from_mapdl['strain']
 
-    nnum, strain = result_x.nodal_thermal_strain(0)
+    nnum, strain = result_x.nodal_thermal_strain(0, full_rotor=True)
 
     # include only common values
     mask = np.in1d(nnum, nnum_ans)

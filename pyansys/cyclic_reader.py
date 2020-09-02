@@ -27,24 +27,12 @@ class CyclicResult(ResultFile):
             raise TypeError('Result is not a cyclic model')
 
         self._animating = False
-        # self._positive_cyclic_dir = True    # TODO: this needs to be figured out
         self._rotor_cache = None
         self._has_duplicate_sector = None
         self._is_repeated_mode = np.empty(0)
         self._repeated_index = np.empty(0)
 
         self._add_cyclic_properties()
-
-    # @property
-    # def positive_cyclic_dir(self):
-    #     """Rotor results are default anti-clockwise.  Set this to
-    #     `True` if cyclic results to not look correct.
-    #     """
-    #     return self._positive_cyclic_dir
-
-    # @positive_cyclic_dir.setter
-    # def positive_cyclic_dir(self, value):
-    #     self._positive_cyclic_dir = bool(value)
 
     def plot_sectors(self, **kwargs):
         """Plot the full rotor and individually color the sectors.
@@ -189,7 +177,7 @@ class CyclicResult(ResultFile):
         return self.nodal_solution(*args, **kwargs)
 
     def _expand_cyclic_static(self, result, tensor=False, stress=True):
-        """ expands cyclic static results """
+        """Expand cyclic static result for a full rotor"""
         cs_cord = self._resultheader['csCord']
         if cs_cord > 1:
             matrix = self.cs_4x4(cs_cord, as_vtk_matrix=True)
@@ -515,8 +503,12 @@ class CyclicResult(ResultFile):
             result = full_result
 
         if self._resultheader['kan'] == 0:  # static result
-            expanded_result = self._expand_cyclic_static(result, tensor=tensor,
-                                                         stress=stress)
+            if full_rotor:
+                expanded_result = self._expand_cyclic_static(result,
+                                                             tensor=tensor,
+                                                             stress=stress)
+            else:
+                return nnum, result
         elif self._resultheader['kan'] == 2:  # modal analysis
             # combine modal solution results
             hindex_table = self._resultheader['hindex']
