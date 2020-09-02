@@ -87,6 +87,18 @@ with io_open(version_file, mode='r') as fd:
     # execute file from raw string
     exec(fd.read())
 
+install_requires = ['numpy>=1.14.0',
+                    'pyvista>=0.25.0',
+                    'appdirs',
+                    'psutil>=5.0.0',
+                    'pexpect',
+                    'tqdm',
+                    'pyiges>=0.1.2']
+
+# MacOS can't launch MAPDL
+if sys.platform != 'darwin':
+    install_requires.append('ansys_corba')
+
 
 # Actual setup
 setup(
@@ -158,13 +170,5 @@ setup(
                                        'sector.rst',
                                        'sector.cdb']},
 
-    install_requires=['numpy>=1.14.0',
-                      'pyvista>=0.25.0',
-                      'ansys_corba',
-                      'appdirs',
-                      'psutil>=5.0.0',
-                      'pexpect',
-                      'tqdm',
-                      'pyiges>=0.1.2',
-    ]
+    install_requires=install_requires,
 )
