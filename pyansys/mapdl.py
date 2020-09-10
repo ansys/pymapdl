@@ -1582,7 +1582,7 @@ class _MapdlCore(_MapdlCommands):
         self.finish()
         return out
 
-    def run(self, command, write_to_log=True):
+    def run(self, command, write_to_log=True, **kwargs):
         """Runs APDL command
 
         Parameters
@@ -1594,6 +1594,9 @@ class _MapdlCore(_MapdlCommands):
             Overrides APDL log writing.  Default True.  When set to
             False, will not write command to log, even if APDL
             command logging is enabled.
+
+        kwargs : Optional keyword arguments
+            These keyword arguments are interface specific.
 
         Returns
         -------
@@ -1639,7 +1642,7 @@ class _MapdlCore(_MapdlCommands):
             function = self._redirected_commands[command[:4]]
             return function(command)
 
-        text = self._run(command)
+        text = self._run(command, **kwargs)
         if text:
             self._response = text.strip()
         else:

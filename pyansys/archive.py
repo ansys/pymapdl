@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 log.setLevel('CRITICAL')
 
 
-
 class Archive(Mesh):
     """Read a blocked ANSYS archive file.
 
