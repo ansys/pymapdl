@@ -81,7 +81,7 @@ __inline int ans_strtod(char *raw, int fltsz, double *arr){
   // Read through the rest of the number
   double k = 0.1;
   for (; i<fltsz; i++){
-    if (*raw == 'E'){
+    if (*raw == 'e' || *raw == 'E'){  // incredibly, can be lowercase
       break;
     }
     else if (*raw >= '0' && *raw <= '9') {
@@ -94,7 +94,7 @@ __inline int ans_strtod(char *raw, int fltsz, double *arr){
   // 1.0000000000000E-001
   int evalue = 0;
   int esign = 1;
-  if (*raw == 'E'){
+  if (*raw == 'e' || *raw == 'E'){
     raw++; // skip "E"
     // always a sign of some sort
     if (*raw == '-'){
@@ -165,7 +165,7 @@ static inline double ans_strtod2(char *raw, int fltsz){
   // Read through the rest of the number
   k = 0.1;
   for (; i<fltsz; i++){
-    if (*raw == 'E'){
+    if (*raw == 'e' || *raw == 'E'){
       break;
     }
     else if (*raw >= '0' && *raw <= '9') {
@@ -178,7 +178,7 @@ static inline double ans_strtod2(char *raw, int fltsz){
   // 1.0000000000000E-001
   int evalue = 0;
   int esign = 1;
-  if (*raw == 'E'){
+  if (*raw == 'e' || *raw == 'E'){
     raw++; // skip "E"
     // always a sign of some sort
     if (*raw == '-'){
