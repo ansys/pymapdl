@@ -13,27 +13,6 @@ STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', '1', '2', '3', 'INT', 'EQV']
 COMP_TYPE = ['X', 'Y', 'Z', 'SUM']
 DISP_TYPE = ['X', 'Y', 'Z', 'NORM', 'ALL']
 ROT_TYPE = ['X', 'Y', 'Z', 'ALL']
-# VGET_NODE_ENTITY_TYPES = {'U': ['X', 'Y', 'Z'],
-#                           'S': STRESS_TYPES,
-#                           'EPTO': STRESS_TYPES,
-#                           'EPEL': STRESS_TYPES,
-#                           'EPPL': STRESS_TYPES,
-#                           'EPCR': STRESS_TYPES,
-#                           'EPTH': STRESS_TYPES,
-#                           'EPDI': STRESS_TYPES,
-#                           'EPSW': [None],
-#                           'NL': ['SEPL', 'SRAT', 'HPRES', 'EPEQ', 'PSV', 'PLWK'],
-#                           'HS': ['X', 'Y', 'Z'],
-#                           'BFE': ['TEMP'],
-#                           'TG': COMP_TYPE,
-#                           'TF': COMP_TYPE,
-#                           'PG': COMP_TYPE,
-#                           'EF': COMP_TYPE,
-#                           'D': COMP_TYPE,
-#                           'H': COMP_TYPE,
-#                           'B': COMP_TYPE,
-#                           'FMAG': COMP_TYPE,
-#                           'NLIST': [None]}
 
 
 def check_result_loaded(func):

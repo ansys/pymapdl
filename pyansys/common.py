@@ -152,8 +152,11 @@ def read_binary(filename, **kwargs):
         return FullFile(filename, **kwargs)
     elif file_format == 12:
         from pyansys.rst import Result
+        from pyansys.dis_result import DistributedResult
         read_mesh = kwargs.pop('read_mesh', True)
         result = Result(filename, read_mesh=False, **kwargs)
+        if result._is_distributed:
+            return DistributedResult(filename, **kwargs)
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)

@@ -83,7 +83,6 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    # windows 7 won't run this
     subprocess.Popen(command, shell=True,
                      cwd=run_location,
                      stdin=subprocess.DEVNULL,

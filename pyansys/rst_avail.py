@@ -80,7 +80,7 @@ DISCRIPTION = {
 
 class AvailableResults():
 
-    def __init__(self, avail_bits):
+    def __init__(self, avail_bits, is_thermal):
         """Parse the available bits and determine if a given result is
         available.
         """
@@ -123,6 +123,8 @@ class AvailableResults():
                 self._valid_results.append(key)
 
         self.description = DISCRIPTION
+        if is_thermal:
+            self.description['NSL'] = 'Nodal temperatures'
 
     def __getitem__(self, key):
         """Allow a key access"""

@@ -42,7 +42,7 @@ geometry_header_keys = ['__unused',  # position not used
                         'ptrNODh',
                         'ptrELMl',
                         'ptrELMh',
-                        'Glbnnod',
+                        'Glblenb',
                         'ptrGNODl',
                         'ptrGNODh',
                         'maxn',

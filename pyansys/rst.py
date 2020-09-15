@@ -110,14 +110,22 @@ class Result(AnsysBinary):
         self._geometry_header = {}
         self._materials = None
         self._section_data = None
-        self._available_results = AvailableResults(self._resultheader['AvailData'])
+        self._available_results = AvailableResults(self._resultheader['AvailData'],
+                                                   self._is_thermal)
 
     @property
     def mesh(self):
         """Mesh from result file
 
-        
-
+        Examples
+        --------
+        >>> rst.mesh
+        ANSYS Mesh
+          Number of Nodes:              1448
+          Number of Elements:           226
+          Number of Element Types:      1
+          Number of Node Components:    0
+          Number of Element Components: 0
         """
         if self._mesh is None:
             raise ValueError('Pass ``read_mesh=True`` to store the mesh'
@@ -1008,11 +1016,16 @@ class Result(AnsysBinary):
 
         # check for invalid values (mapdl writes invalid values as 2*100)
         result[result == 2**100] = 0
+        # if result.shape[1] == 1:
+        #     result = result.ravel()
         return nnum, result
 
     @wraps(nodal_solution)
     def nodal_displacement(self, *args, **kwargs):
         """wraps plot_nodal_solution"""
+        if self._is_thermal:
+            raise AttributeError('Thermal solution does not contain nodal '
+                                 'displacement results')
         return self.nodal_solution(*args, **kwargs)
 
     def _read_components(self):
@@ -2277,7 +2290,8 @@ class Result(AnsysBinary):
         if is_int(user_input):
             # check if result exists
             if user_input > self.nsets - 1:
-                raise ValueError('Only %d result(s) in the result file.' % self.nsets)
+                raise ValueError('There are only %d result(s) in the result file.'
+                                 % self.nsets)
             return user_input
 
         elif isinstance(user_input, (list, tuple)):
@@ -2300,7 +2314,10 @@ class Result(AnsysBinary):
             raise TypeError('Input must be either an int or a list')
 
     def __repr__(self):
-        rst_info = ['PyANSYS MAPDL Result file object']
+        if self._is_distributed:
+            rst_info = ['PyANSYS MAPDL Distributed Result']
+        else:
+            rst_info = ['PyANSYS MAPDL Result']
         keys = ['title', 'subtitle', 'units']
         for key in keys:
             value = self._resultheader[key]
@@ -2666,7 +2683,10 @@ class Result(AnsysBinary):
         >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_temperature(0)
         """
-        nnum, temp = self._nodal_result(rnum, 'EPT')
+        if self._is_thermal:
+            nnum, temp = self.nodal_solution(rnum)
+        else:
+            nnum, temp = self._nodal_result(rnum, 'EPT')
         temp = temp.ravel()
         return nnum, temp
 
@@ -3258,6 +3278,24 @@ class Result(AnsysBinary):
         midside (quadratic) nodes.
         """
         return self._nodal_result(rnum, 'ENF')
+
+    @property
+    def _is_distributed(self):
+        """True when this result file is part of a distributed result
+        Only True when Global number of nodes must not equal the
+        number of nodes in this file.
+        """
+        return self._resultheader['Glbnnod'] != self._resultheader['nnod']
+
+    def _is_main(self):
+        """Result file written from the main process"""
+        return bool(self._resultheader['ptrGNOD'])
+
+    @property
+    def _is_thermal(self):
+        """True when result file is a rth file"""
+        return self.filename[-3:] == 'rth'
+
 
 def pol2cart(rho, phi):
     """ Convert cylindrical to cartesian """
