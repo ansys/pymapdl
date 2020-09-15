@@ -196,7 +196,7 @@ def test_nodal_stress_v182_non_cyclic():
     ansys_stress = array[:, 1:]
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.rst.ResultFile(ansys_result_file, ignore_cyclic=True)
+    result = pyansys.rst.Result(ansys_result_file, ignore_cyclic=True)
     nnum, stress = result.nodal_stress(0)
 
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_prnsol_s.npz'))
