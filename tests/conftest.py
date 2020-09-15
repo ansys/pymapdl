@@ -1,10 +1,14 @@
 import socket
 import os
-from pyansys.misc import get_ansys_bin
-import pyansys
 
 import pytest
 import pyvista
+
+from pyansys.misc import get_ansys_bin
+import pyansys
+from pyansys.errors import MapdlRuntimeError, MapdlExitedError
+
+
 pyvista.OFF_SCREEN = True
 
 # check for a valid MAPDL install with CORBA
@@ -23,8 +27,12 @@ else:
 skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
 
 
+modes = ['corba']
+if os.name == 'posix':  # console only for linux
+    modes.append('console')
 
-@pytest.fixture(scope="session")
+
+@pytest.fixture(scope="session", params=modes)
 def mapdl():
 
     # launch in shared memory parallel for Windows VM
@@ -37,5 +45,18 @@ def mapdl():
 
     mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True, mode='corba',
                                  additional_switches=additional_switches)
+    mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
+    yield mapdl
 
-    return mapdl
+    ### test exit ###
+    # must be at end as this uses a module scoped fixture
+    mapdl.exit()
+    assert mapdl._exited
+    with pytest.raises(RuntimeError):
+        mapdl.prep7()
+
+    assert not os.path.isfile(mapdl._lockfile)
+    assert 'MAPDL exited' in str(mapdl)
+
+    with pytest.raises(MapdlExitedError):
+        mapdl.prep7()

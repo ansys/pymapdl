@@ -151,9 +151,9 @@ def read_binary(filename, **kwargs):
         from pyansys.full import FullFile
         return FullFile(filename, **kwargs)
     elif file_format == 12:
-        from pyansys.rst import ResultFile
+        from pyansys.rst import Result
         read_mesh = kwargs.pop('read_mesh', True)
-        result = ResultFile(filename, read_mesh=False, **kwargs)
+        result = Result(filename, read_mesh=False, **kwargs)
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)

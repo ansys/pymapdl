@@ -20,6 +20,7 @@ from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from pyansys.plotting import general_plotter
 from pyansys.launcher import get_ansys_path
+from pyansys.post import PostProcessing
 
 MATPLOTLIB_LOADED = True
 try:
@@ -131,6 +132,25 @@ class _MapdlCore(_MapdlCommands):
         if log_apdl:
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
+
+        self._post = PostProcessing(self)
+
+    @property
+    def post_processing(self):
+        """Post-process an active MAPDL session.
+        Examples
+        --------
+        Get the nodal displacement in the X direction for the first
+        result set.
+        >>> mapdl.set(1, 1)
+        >>> disp_x = mapdl.post_processing.nodal_displacement('X')
+        array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
+               5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
+        """
+        if self._exited:
+            raise RuntimeError('MAPDL exited.\n\nCan only postprocess a live '
+                               'MAPDL instance.')
+        return self._post
 
     @property
     def chain_commands(self):
@@ -359,6 +379,12 @@ class _MapdlCore(_MapdlCommands):
                                           name='Mesh')
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
+
+            # rare bug
+            if grid is not None:
+                if grid.n_points != self._archive_cache.n_node:
+                    self._archive_cache = Archive(arch_filename, parse_vtk=True,
+                                                  name='Mesh')
 
             # overwrite nodes in archive
             nblock = Archive(nblock_filename, parse_vtk=False)
@@ -1020,7 +1046,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def result(self):
-        """Binary interface to the result file using ``pyansys.ResultFile``
+        """Binary interface to the result file using ``pyansys.Result``
 
         Examples
         --------
@@ -1799,12 +1825,17 @@ class _MapdlCore(_MapdlCommands):
         Please reference your ANSYS help manual *VGET command tables
         for all the available *VGET values
         """
-        return self._get_array(entity, entnum, item1, it1num, item2,
-                               it2num, kloop)
+        arr = self._get_array(entity, entnum, item1, it1num, item2,
+                              it2num, kloop)
 
-    # def _get_array(self, *args, **kwargs):  # pragma: no cover
-    #     """Implemented by child class"""
-    #     raise NotImplementedError('Implemented by child class')
+        # edge case where corba refuses to return the array
+        ntry = 0
+        while arr.size == 1 and arr[0] == -1:
+            arr = self._get_array(entity, entnum, item1, it1num,
+                                  item2, it2num, kloop)
+            if ntry > 5:
+                raise RuntimeError('Unable to get array for %s' % entity)
+        return arr
 
     def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                    it2num='', kloop='', dtype=None, **kwargs):

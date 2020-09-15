@@ -60,7 +60,7 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'EDI': 7}
 
 
-class ResultFile(AnsysBinary):
+class Result(AnsysBinary):
     """Reads a binary ANSYS result file.
 
     Parameters

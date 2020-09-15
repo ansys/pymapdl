@@ -61,8 +61,8 @@ def static_canteliver_bc():
 
 @pytest.fixture(scope="module")
 def cyclic_modal(mapdl):
-
     # build the cyclic model
+    mapdl.clear()
     mapdl.prep7()
     mapdl.shpp('off')
     mapdl.cdread('db', pyansys.examples.sector_archive_file)
@@ -352,10 +352,3 @@ def test_reaction_forces():
     nnum, forces = rst.nodal_static_forces(0)
     assert np.allclose(nnum, [1, 2, 3, 4])
     assert np.allclose(forces[:, 1], [-600, 250, 500, -900])
-
-
-@skip_no_ansys
-def test_exit(mapdl):
-    # must manually shutdown mapdl server
-    # Required on windows, not sure on other platforms
-    mapdl.exit()

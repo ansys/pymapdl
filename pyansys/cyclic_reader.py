@@ -9,13 +9,13 @@ import pyvista as pv
 from pyansys.common import (STRESS_TYPES, STRAIN_TYPES,
                             PRINCIPAL_STRESS_TYPES,
                             THERMAL_STRAIN_TYPES)
-from pyansys.rst import ResultFile, trans_to_matrix, check_comp
+from pyansys.rst import Result, trans_to_matrix, check_comp
 from pyansys import _binary_reader
 
 np.seterr(divide='ignore', invalid='ignore')
 
 
-class CyclicResult(ResultFile):
+class CyclicResult(Result):
     """Adds cyclic functionality to the result class"""
 
     def __init__(self, filename):
