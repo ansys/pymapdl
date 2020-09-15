@@ -32,17 +32,19 @@ for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
 
-
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False
 else:
     HAS_ANSYS = EXEC_FILE is not None
 
-RSETS = list(zip(range(1, 9), [1]*8))
 
 skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+
+
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
+
+RSETS = list(zip(range(1, 9), [1]*8))
 
 
 @pytest.fixture(scope='module')
@@ -58,18 +60,7 @@ def static_canteliver_bc():
 
 
 @pytest.fixture(scope="module")
-def mapdl():
-
-    # launch in shared memory parallel for Windows VM
-    # configure shared memory parallel for VM
-    additional_switches = ''
-    if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
-        additional_switches = '-smp'
-    elif os.name == 'posix':
-        os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
-
-    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True, mode='corba',
-                                 additional_switches=additional_switches)
+def cyclic_modal(mapdl):
 
     # build the cyclic model
     mapdl.prep7()
@@ -103,12 +94,10 @@ def mapdl():
     mapdl.format('', 'E', nsigfig + 9, nsigfig)
     mapdl.page(1E9, '', -1, 240)
 
-    return mapdl
-
 
 @pytest.mark.parametrize("rset", RSETS)
 @skip_no_ansys
-def test_prnsol_u(mapdl, rset):
+def test_prnsol_u(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
@@ -133,7 +122,7 @@ def test_prnsol_u(mapdl, rset):
 
 @pytest.mark.parametrize("rset", RSETS)
 @skip_no_ansys
-def test_presol_s(mapdl, rset):
+def test_presol_s(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
 
     # verify element stress
@@ -160,7 +149,7 @@ def test_presol_s(mapdl, rset):
 
 @pytest.mark.parametrize("rset", RSETS)
 @skip_no_ansys
-def test_prnsol_s(mapdl, rset):
+def test_prnsol_s(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
 
     # verify cyclic displacements
@@ -186,7 +175,7 @@ def test_prnsol_s(mapdl, rset):
 
 @pytest.mark.parametrize("rset", RSETS)
 @skip_no_ansys
-def test_prnsol_prin(mapdl, rset):
+def test_prnsol_prin(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
 
     # verify principal stress
