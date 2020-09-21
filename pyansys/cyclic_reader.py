@@ -107,6 +107,12 @@ class CyclicResult(Result):
         mask_a = np.isclose(self.time_values, np.roll(self.time_values, 1))
         mask_b = np.isclose(self.time_values, np.roll(self.time_values, -1))
         self._is_repeated_mode = np.logical_or(mask_a, mask_b)
+
+        # edge case for single pair of repeated modes
+        if self._is_repeated_mode.size == 2 and self._is_repeated_mode.all():
+            self._repeated_index = np.array([1, 0])
+            return
+
         self._repeated_index = np.empty(self._is_repeated_mode.size, np.int)
         self._repeated_index[:] = -1
         if np.any(self._is_repeated_mode):
