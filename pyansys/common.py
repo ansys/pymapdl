@@ -1,8 +1,4 @@
-"""Methods common to binary files
-Documentation taken from:
-https://www.sharcnet.ca/Software/Ansys/16.2.3/en-us/help/ans_prog/Hlp_P_INT1_1.html
-
-"""
+"""Methods common to binary files"""
 import struct
 import os
 from collections import Counter
@@ -12,6 +8,7 @@ import pyvista as pv
 
 from pyansys._binary_reader import c_read_record
 from pyansys import _binary_reader
+from pyansys.errors import NoDistributedFiles
 
 STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
 PRINCIPAL_STRESS_TYPES = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
@@ -141,7 +138,6 @@ def read_binary(filename, **kwargs):
         raise FileNotFoundError('%s is not a file or cannot be found' %
                                 str(filename))
 
-    # return BinaryFile(filename)
     file_format = read_standard_header(filename)['file format']
 
     if file_format == 2:
@@ -151,13 +147,21 @@ def read_binary(filename, **kwargs):
         from pyansys.full import FullFile
         return FullFile(filename, **kwargs)
     elif file_format == 12:
-        from pyansys.rst import ResultFile
+        from pyansys.rst import Result
+        from pyansys.dis_result import DistributedResult
         read_mesh = kwargs.pop('read_mesh', True)
-        result = ResultFile(filename, read_mesh=False, **kwargs)
+        result = Result(filename, read_mesh=False, **kwargs)
+
+        if result._is_distributed:
+            try:  # can't find any files!
+                return DistributedResult(filename, **kwargs)
+            except NoDistributedFiles:
+                # simply try to treat it as a non-distributed file
+                pass
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
-        if result.header['nSector'] != 1 and not ignore_cyclic:
+        if result._resultheader['nSector'] != 1 and not ignore_cyclic:
             from pyansys.cyclic_reader import CyclicResult
             return CyclicResult(filename)
 

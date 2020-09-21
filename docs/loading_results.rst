@@ -40,7 +40,7 @@ can initialize with:
     import pyansys
     result = pyansys.read_binary('file.rst')
     
-Upon initialization the ``ResultFile`` object contains several
+Upon initialization the ``Result`` object contains several
 properties to include the time values from the analysis, node
 numbering, element numbering, etc.
 
@@ -54,9 +54,9 @@ example, a thermal result file can be read with
     rth = pyansys.read_binary('file.rth')
 
 
-ResultFile Properties
----------------------
-The properties of the ``ResultFile`` can be quickly shown by printing the result file with:
+Result Properties
+-----------------
+The properties of the ``Result`` can be quickly shown by printing the result file with:
 
 .. code:: python
 
@@ -507,9 +507,9 @@ node average stress in the Sx, Sy Sz, Sxy, Syz, and Sxz directions.
 .. image:: ./images/paraview.jpg
 
 
-ResultFile Object Methods
--------------------------
-.. autoclass:: pyansys.rst.ResultFile
+Result Object Methods
+---------------------
+.. autoclass:: pyansys.rst.Result
     :members:
 
 .. autoclass:: pyansys.cyclic_reader.CyclicResult

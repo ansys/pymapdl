@@ -9,6 +9,9 @@ pyansys
 .. image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
 
+.. image:: https://img.shields.io/discord/412182089279209474.svg?label=Discord&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2
+   :target: https://discord.gg/QDaTdx3
+
 This Python module allows you to:
  - Interactively control an instance of ANSYS v14.5 + using Python on
    Linux, >=17.0 on Windows.
@@ -18,6 +21,8 @@ This Python module allows you to:
    ``(.full)``, and ASCII block archive ``(.cdb)`` files.
 
 See the `Documentation <https://akaszynski.github.io/pyansys/>`_ page for more details, and the `Examples gallery <https://akaszynski.github.io/pyansys/examples/index.html>`_ for some examples.
+
+Be sure to visit the discord channel at `pyansys Discord Channel <https://discord.gg/QDaTdx3>`_
 
 
 Installation

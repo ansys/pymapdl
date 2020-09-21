@@ -105,7 +105,7 @@ def test_load(result):
 
 
 def test_element_stress(result):
-    element_stress, _, _ = result.element_stress(0)
+    _, element_stress, _ = result.element_stress(0)
     element0 = element_stress[0]
 
     # ansys prints both postiive and negative component values
@@ -117,7 +117,7 @@ def test_element_stress(result):
 
 
 def test_nodal_stress(result):
-    nnum, stress = result.nodal_stress(0)
+    _, stress = result.nodal_stress(0)
     if np.sign(stress[0][0]) != np.sign(ANSYS_NODE[0][0]):
         stress *= -1
 

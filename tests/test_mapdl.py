@@ -30,28 +30,23 @@ if not HAS_ANSYS:
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-modes = ['corba']
-if os.name == 'posix':  # console only for linux
-    modes.append('console')
 
+# @pytest.fixture(scope="module", params=modes)
+# def mapdl(request):
 
-@pytest.fixture(scope="module", params=modes)
-def mapdl(request):
+#     # configure shared memory parallel for VM
+#     additional_switches = ''
+#     if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
+#         additional_switches = '-smp'
+#     elif os.name == 'posix':
+#         os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
 
-    # configure shared memory parallel for VM
-    additional_switches = ''
-    if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
-        additional_switches = '-smp'
-    elif os.name == 'posix':
-        os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
-
-    mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True,
-                                 mode=request.param,
-                                 additional_switches=additional_switches,
-                                 log_broadcast=True)
-    mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
-    return mapdl
-
+#     mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True,
+#                                  mode=request.param,
+#                                  additional_switches=additional_switches,
+#                                  log_broadcast=True)
+#     mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
+#     return mapdl
 
 @pytest.fixture(scope='function')
 def cleared(mapdl):
@@ -519,19 +514,3 @@ def test_cyclic_solve(mapdl, cleared):
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
     assert mapdl.result.nsets == 16
-
-
-# must be at end as this uses a module scoped fixture
-def test_exit(mapdl):
-    mapdl.exit()
-    assert mapdl._exited
-    with pytest.raises(RuntimeError):
-        mapdl.prep7()
-
-    assert not os.path.isfile(mapdl._lockfile)
-    assert 'MAPDL exited' in str(mapdl)
-
-
-def test_mapdl_exited_error(mapdl):
-    with pytest.raises(MapdlExitedError):
-        mapdl.prep7()

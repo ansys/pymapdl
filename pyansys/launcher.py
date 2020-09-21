@@ -494,7 +494,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     if run_location is None:
         temp_dir = tempfile.gettempdir()
-        run_location = os.path.join(temp_dir, 'ansys')
+        run_location = os.path.join(temp_dir, 'ansys_%s' % random_string(10))
         if not os.path.isdir(run_location):
             try:
                 os.mkdir(run_location)

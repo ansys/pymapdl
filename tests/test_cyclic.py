@@ -102,7 +102,7 @@ def test_nodal_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
 def test_non_cyclic():
     from pyansys.cyclic_reader import CyclicResult
     with pytest.raises(TypeError):
-        CyclicResult(rstfile)
+        rst = CyclicResult(rstfile)
 
 
 @skip_with_no_xserver
@@ -175,7 +175,7 @@ def test_element_stress_v182_non_cyclic():
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
     result = pyansys.read_binary(ansys_result_file)
 
-    element_stress, elemnum, enode = result.element_stress(0, False, False)
+    elemnum, element_stress, enode = result.element_stress(0, False, False)
     assert np.allclose(np.sort(elemnum), elemnum), 'elemnum must be sorted'
 
     element_stress = np.vstack(element_stress)
@@ -196,7 +196,7 @@ def test_nodal_stress_v182_non_cyclic():
     ansys_stress = array[:, 1:]
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.rst.ResultFile(ansys_result_file, ignore_cyclic=True)
+    result = pyansys.rst.Result(ansys_result_file, ignore_cyclic=True)
     nnum, stress = result.nodal_stress(0)
 
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_prnsol_s.npz'))

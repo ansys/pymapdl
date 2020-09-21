@@ -20,6 +20,7 @@ from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from pyansys.plotting import general_plotter
 from pyansys.launcher import get_ansys_path
+from pyansys.post import PostProcessing
 
 MATPLOTLIB_LOADED = True
 try:
@@ -131,6 +132,26 @@ class _MapdlCore(_MapdlCommands):
         if log_apdl:
             filename = os.path.join(self.path, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
+
+        self._post = PostProcessing(self)
+        self._distributed = '-smp' not in start_parm.get('additional_switches', '')
+
+    @property
+    def post_processing(self):
+        """Post-process an active MAPDL session.
+        Examples
+        --------
+        Get the nodal displacement in the X direction for the first
+        result set.
+        >>> mapdl.set(1, 1)
+        >>> disp_x = mapdl.post_processing.nodal_displacement('X')
+        array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
+               5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
+        """
+        if self._exited:
+            raise RuntimeError('MAPDL exited.\n\nCan only postprocess a live '
+                               'MAPDL instance.')
+        return self._post
 
     @property
     def chain_commands(self):
@@ -359,6 +380,12 @@ class _MapdlCore(_MapdlCommands):
                                           name='Mesh')
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
+
+            # rare bug
+            if grid is not None:
+                if grid.n_points != self._archive_cache.n_node:
+                    self._archive_cache = Archive(arch_filename, parse_vtk=True,
+                                                  name='Mesh')
 
             # overwrite nodes in archive
             nblock = Archive(nblock_filename, parse_vtk=False)
@@ -1020,7 +1047,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def result(self):
-        """Binary interface to the result file using ``pyansys.ResultFile``
+        """Binary interface to the result file using ``pyansys.Result``
 
         Examples
         --------
@@ -1052,30 +1079,93 @@ class _MapdlCore(_MapdlCommands):
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')
 
-        result_path = self._result_file
+        if self._distributed_result_file:
+            from pyansys.rst import Result
+            result_path = self._distributed_result_file
+            result = Result(result_path, read_mesh=False)
+            if result._is_cyclic:
+                if not os.path.isfile(self._result_file):
+                    raise RuntimeError('Distributed Cyclic result not supported')
+                result_path = self._result_file
+        else:
+            result_path = self._result_file
+
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
+
         return pyansys.read_binary(result_path)
 
     @property
     def _result_file(self):
         """Path of the result file
-
-        Notes
-        -----
-        There may be multiple result files at this location (if not
-        combining results)
         """
         try:
-            result_path = self.inquire('RSTFILE')
-        except RuntimeError:
-            result_path = ''
+            filename = self.inquire('RSTFILE')
+            if not filename:
+                filename = self.jobname
+        except:
+            filename = self.jobname
 
-        if not result_path:
-            result_path = os.path.join(self.path, '%s.rst' % self._jobname)
-        elif not os.path.dirname(result_path):
-            result_path = os.path.join(self.path, '%s.rst' % result_path)
-        return result_path
+        # ansys decided that a jobname ended in a number needs a bonus "_"
+        if filename[-1].isnumeric():
+            filename += '_'
+
+        try:
+            ext = self.inquire('RSTEXT')
+            if not ext:
+                ext = 'rst'
+        except:  # check if rth file exists
+            rth_file = os.path.join(self.path, '%s.%s' % (filename, 'rth'))
+            if not os.path.isfile(rth_file) and self._distributed:
+                rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
+
+            if os.path.isfile(rth_file):
+                ext = 'rth'
+            else:
+                ext = 'rst'
+
+        # try to return the non-distributed first
+        rst_file = os.path.join(self.path, '%s.%s' % (filename, ext))
+        if os.path.isfile(rst_file):
+            return rst_file
+
+        if self._distributed:
+            # no all solutions return a distributed result file
+            rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
+            if os.path.isfile(rst_file):
+                return rst_file
+
+    @property
+    def _distributed_result_file(self):
+        """Path of the result file
+        """
+        try:
+            filename = self.inquire('RSTFILE')
+            if not filename:
+                filename = self.jobname
+        except:
+            filename = self.jobname
+
+        # ansys decided that a jobname ended in a number needs a bonus "_"
+        if filename[-1].isnumeric():
+            filename += '_'
+
+        try:
+            ext = self.inquire('RSTEXT')
+            if not ext:
+                ext = 'rst'
+        except:  # check if rth file exists
+            rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
+
+            if os.path.isfile(rth_file):
+                ext = 'rth'
+            else:
+                ext = 'rst'
+
+        # no all solutions return a distributed result file
+        rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
+        if os.path.isfile(rst_file):
+            return rst_file
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
@@ -1130,8 +1220,8 @@ class _MapdlCore(_MapdlCommands):
         file.  Used with non_interactive.
         """
         self._log.debug('Flushing stored commands')
-        tmp_out = os.path.join(appdirs.user_data_dir('pyansys'),
-                               'tmp_%s.out' % random_string())
+        rnd_str = random_string()
+        tmp_out = os.path.join(tempfile.gettempdir(), 'tmp_%s.out' % rnd_str)
         self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
         self._stored_commands.append('/OUTPUT')
         commands = '\n'.join(self._stored_commands)
@@ -1139,17 +1229,16 @@ class _MapdlCore(_MapdlCommands):
             self._apdl_log.write(commands + '\n')
 
         # write to a temporary input file
-        filename = os.path.join(appdirs.user_data_dir('pyansys'),
-                                'tmp_%s.inp' % random_string())
+        tmp_inp = os.path.join(tempfile.gettempdir(), 'tmp_%s.inp' % rnd_str)
         self._log.debug('Writing the following commands to a temporary '
                         'apdl input file:\n%s', commands)
 
-        with open(filename, 'w') as f:
+        with open(tmp_inp, 'w') as f:
             f.writelines(commands)
 
         self._store_commands = False
         self._stored_commands = []
-        out = self.input(filename, write_to_log=False)
+        out = self.input(tmp_inp, write_to_log=False)
         if os.path.isfile(tmp_out):
             self._response = '\n' + open(tmp_out).read()
 
@@ -1367,7 +1456,7 @@ class _MapdlCore(_MapdlCommands):
         try:
             self._jobname = self.inquire('JOBNAME')
         except:
-            self._jobname = 'file'
+            pass
         return self._jobname
 
     @supress_logging
@@ -1648,6 +1737,8 @@ class _MapdlCore(_MapdlCommands):
         else:
             self._response = ''
 
+        # self._response = self._response.replace('\\r\\n', '\n').replace('\\n', '\n')
+
         if self._response:
             self._log.info(self._response)
 
@@ -1799,12 +1890,17 @@ class _MapdlCore(_MapdlCommands):
         Please reference your ANSYS help manual *VGET command tables
         for all the available *VGET values
         """
-        return self._get_array(entity, entnum, item1, it1num, item2,
-                               it2num, kloop)
+        arr = self._get_array(entity, entnum, item1, it1num, item2,
+                              it2num, kloop)
 
-    # def _get_array(self, *args, **kwargs):  # pragma: no cover
-    #     """Implemented by child class"""
-    #     raise NotImplementedError('Implemented by child class')
+        # edge case where corba refuses to return the array
+        ntry = 0
+        while arr.size == 1 and arr[0] == -1:
+            arr = self._get_array(entity, entnum, item1, it1num,
+                                  item2, it2num, kloop)
+            if ntry > 5:
+                raise RuntimeError('Unable to get array for %s' % entity)
+        return arr
 
     def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                    it2num='', kloop='', dtype=None, **kwargs):
