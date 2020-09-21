@@ -28,12 +28,10 @@ def static_solve(mapdl):
     mapdl.clear()
 
     # cylinder and mesh parameters
-    # torque = 100
     radius = 2
     h_tip = 2
     height = 20
     elemsize = 2.0
-    # pi = np.arccos(-1)
     force = 100/radius
     pressure = force/(h_tip*2*np.pi*radius)
 

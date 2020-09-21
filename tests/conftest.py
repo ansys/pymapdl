@@ -32,6 +32,11 @@ if os.name == 'posix':  # console only for linux
     modes.append('console')
 
 
+collect_ignore = []
+if not HAS_ANSYS:
+    collect_ignore.append("test_post.py")
+
+
 @pytest.fixture(scope="session", params=modes)
 def mapdl():
 

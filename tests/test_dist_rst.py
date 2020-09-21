@@ -13,6 +13,22 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
 
+# check for a valid MAPDL install with CORBA
+from pyansys.misc import get_ansys_bin
+valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
+EXEC_FILE = None
+for rver in valid_rver:
+    if os.path.isfile(get_ansys_bin(rver)):
+        EXEC_FILE = get_ansys_bin(rver)
+
+if 'PYANSYS_IGNORE_ANSYS' in os.environ:
+    HAS_ANSYS = False
+else:
+    HAS_ANSYS = EXEC_FILE is not None
+
+skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+
+
 @pytest.fixture()
 def beam_blade():
     filename = os.path.join(testfiles_path, 'dist_rst', 'blade_stations',
@@ -59,6 +75,7 @@ def thermal_solution(mapdl):
     mapdl.set(1, 1)
 
 
+@skip_no_ansys
 def test_not_all_found(thermal_solution, mapdl, tmpdir):
     filename = os.path.join(mapdl.path, 'file0.rth')
 
@@ -68,6 +85,7 @@ def test_not_all_found(thermal_solution, mapdl, tmpdir):
         dist_rst = pyansys.read_binary(tmp_file)
 
 
+@skip_no_ansys
 def test_temperature(thermal_solution, mapdl, tmpdir):
     ans_temp = mapdl.post_processing.nodal_temperature
     dist_rst = pyansys.read_binary(os.path.join(mapdl.path, 'file0.rth'))
@@ -83,6 +101,7 @@ def test_temperature(thermal_solution, mapdl, tmpdir):
     assert np.allclose(dist_nnum, nnum)
 
 
+@skip_no_ansys
 def test_plot_temperature(thermal_solution, mapdl):
     dist_rst = pyansys.read_binary(os.path.join(mapdl.path, 'file0.rth'))
     cpos = dist_rst.plot_nodal_temperature(0)
