@@ -42,6 +42,7 @@ static inline void add_cell(bool build_offset, int n_points, uint8_t celltype){
   vtk_data.celltypes[0] = celltype;
   vtk_data.celltypes++;
   vtk_data.cells[vtk_data.loc++] = n_points;
+  /* printf("Finished adding cell\n"); */
   return;
 }
 
@@ -274,16 +275,25 @@ static inline void add_quad(bool build_offset, const int *elem, bool is_quad){
   int n_points;
   if (is_quad){
     n_points = 8;
-    add_cell(build_offset, n_points, VTK_QUADRATIC_QUAD);
+
+    if (elem[6] == elem[7]){ // edge case: check if repeated
+      n_points = 4;
+      /* printf("Duplicate midside points found...\nCelltype - Linear\n"); */
+      add_cell(build_offset, n_points, VTK_QUAD);
+    } else {
+      /* printf("Celltype - Quadratic\n"); */
+      add_cell(build_offset, n_points, VTK_QUADRATIC_QUAD);
+    }
   } else {
     n_points = 4;
+    /* printf("Celltype - Linear\n"); */
     add_cell(build_offset, n_points, VTK_QUAD);
   }
 
-  // translate connectivity
   for (i=0; i<n_points; i++){
+    /* printf("(%i) %i --> ", i, elem[i]); */
+    /* printf("%i, \n", vtk_data.nref[elem[i]]); */
     vtk_data.cells[vtk_data.loc++] = vtk_data.nref[elem[i]];
-    /* printf(", %i", vtk_data.nref[elem[i]]); */
   }
   /* printf("\n"); */
 
@@ -477,7 +487,7 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
   	add_tri(build_offset, &elem[off], is_quad);
       } else {  // is quadrilateral
 	/* printf(" subtype quad\n"); */
-	is_quad = nnode_elem > 4;
+	is_quad = nnode_elem > 5;
   	add_quad(build_offset, &elem[off], is_quad);
       }
       break;
@@ -506,6 +516,8 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
     // should never reach here
     } // end of switch
   }  // end of loop
+
+  /* printf("Done\n"); */
 
   free(nref);
   return vtk_data.loc;
