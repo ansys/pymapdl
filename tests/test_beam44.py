@@ -1,8 +1,7 @@
 import os
 import pyansys
 
-# TEST_PATH = os.path.dirname(os.path.abspath(__file__))
-TEST_PATH = '/home/alex/python/pyansys/tests'
+TEST_PATH = os.path.dirname(os.path.abspath(__file__))
 TESTFILES_PATH = os.path.join(TEST_PATH, 'testfiles')
 BEAM44_RST = os.path.join(TESTFILES_PATH, 'beam44.rst')
 
