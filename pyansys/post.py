@@ -277,6 +277,8 @@ class PostProcessing():
 
         mask = np.in1d(nnum, surf['ansys_node_num'])
         ridx = np.argsort(np.argsort(surf['ansys_node_num']))
+        if scalars.size != mask.size:
+            scalars = scalars[self.selected_nodes]
         scalars = scalars[mask][ridx]
 
         meshes = [{'mesh': surf,

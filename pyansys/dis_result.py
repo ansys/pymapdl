@@ -1,16 +1,20 @@
 """Handle result files from a distributed MAPDL analysis"""
-import inspect
+from inspect import currentframe
 import glob
 import os
 from functools import wraps
 
-from pyansys.mesh import Mesh
 import pyvista as pv
 import numpy as np
 from vtk import vtkAppendFilter
 
-from pyansys.misc import is_float
-from pyansys.rst import Result
+from pyansys.misc import is_float, vtk_cell_info
+from pyansys.mesh import Mesh
+from pyansys.rst import Result, ELEMENT_INDEX_TABLE_KEYS, within_plotter
+from pyansys.errors import NoDistributedFiles
+from pyansys._binary_reader import (read_nodal_values_dist,
+                                    populate_surface_element_result)
+from pyansys._rst_keys import element_index_table_info
 
 
 def find_dis_files(main_file):
@@ -29,6 +33,9 @@ def find_dis_files(main_file):
         index = os.path.basename(filename).replace(jobname, '')[:-4]
         if is_float(index):
             filenames[int(index)] = filename
+
+    if not filenames:
+        raise NoDistributedFiles
 
     if max(filenames.keys()) + 1 != len(filenames):
         raise FileNotFoundError('Unable to find all the result files of a '
@@ -92,12 +99,21 @@ class DistributedResult(Result):
         for i, result in enumerate(self._results):
             # map the merged node numbering with the individual mappings
             result.grid['_dist_idx'] = np.arange(st, st + result.grid.n_points)
+            _result_idx = np.empty(result.grid.n_cells, np.int32)
+            _result_idx[:] = i
+            result.grid.cell_arrays['_result_idx'] = _result_idx
             st += result.grid.n_points
             vtkappend.AddInputData(result.grid)
+
+        self._total_sol_nodes = st  # total nodes in all result files
 
         vtkappend.Update()
         self.grid = pv.wrap(vtkappend.GetOutput())
         # nodes are not sorted here
+
+        # start of each section of the grid
+        elem_split_ind = np.diff(self.grid['_result_idx']).nonzero()[0]
+        self._elem_split = np.hstack(([0], elem_split_ind))
 
         elem = np.hstack(result.mesh._elem for result in self._results)
         glb_elem_off = []
@@ -109,6 +125,8 @@ class DistributedResult(Result):
             else:
                 glb_elem_off.append(elem_off)
 
+        # TODO: Add node and element components
+
         glb_elem_off = np.hstack(glb_elem_off)
         self._mesh = Mesh(self.grid['ansys_node_num'], self.grid.points,
                           elem, glb_elem_off, self._main_result.mesh.ekey)
@@ -117,6 +135,10 @@ class DistributedResult(Result):
         # from the sorted individual mappings
         self._dist_sort_idx = np.argsort(self.grid['ansys_node_num'])
         self._glb_idx = self.grid['_dist_idx']
+        self._sorted_nnum = self.mesh.nnum[self._dist_sort_idx]
+
+        # self._neqv = self._resultheader['neqv']  # may not need this
+        self._eeqv = self.grid.cell_arrays['ansys_elem_num']
 
     @property
     def _main_result(self):
@@ -131,34 +153,272 @@ class DistributedResult(Result):
 
     @wraps(Result.nodal_solution)
     def nodal_solution(self, *args, **kwargs):
-        this_function_name = inspect.currentframe().f_code.co_name
-        if 'plot_' in inspect.stack()[2][3]:
-            # Sorting must be disabled on plotting functions
-            kwargs['sort'] = False
-        return self._dis_solution(this_function_name, *args, **kwargs)
+        return self._dis_solution(currentframe().f_code.co_name, *args, **kwargs)
 
     def _dis_solution(self, func_name, *args, **kwargs):
         """Get the distributed solution for a given function"""
-        sort = kwargs.pop('sort', True)
+        glb_nnum = []
         glb_sol = []
         for result in self._results:
             func = getattr(result, func_name)
-            glb_sol.append(func(*args, **kwargs)[1])
+            rst_nnum, rst_sol = func(*args, **kwargs)
+            glb_nnum.append(rst_nnum)
+            glb_sol.append(rst_sol)
 
-        sol = np.vstack(glb_sol)[self._glb_idx]
+        # resort and organize stacked solutions
+        glb_sol = np.vstack(glb_sol)
+        if glb_sol.shape[0] == self._total_sol_nodes:
+            # not all values from the global solution are unique and
+            # we need to pare this down (due to merging to meshes)
+            glb_sol = glb_sol[self._glb_idx]
+            if not self._within_plotter:
+                return self._sorted_nnum, glb_sol[self._dist_sort_idx]
+
+            return self.mesh.nnum, glb_sol
+        else:  # limited subset of solution
+            # must remap due to how the subset of nodes relate to the
+            # global mesh solution
+            nnum = np.hstack(glb_nnum)
+            u_nnum, idx = np.unique(nnum, return_index=True)
+            if not self._within_plotter:
+                return u_nnum, glb_sol[idx]
+
+            # unique, unsorted
+            unsort_uidx = np.argsort(idx)
+            return u_nnum[unsort_uidx], glb_sol[idx[unsort_uidx]]
+
+    def _nodal_result(self, rnum, result_type, **kwargs):
+        """Load generic nodal result
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        result_type : int
+            EMS: misc. data
+            ENF: nodal forces
+            ENS: nodal stresses
+            ENG: volume and energies
+            EGR: nodal gradients
+            EEL: elastic strains
+            EPL: plastic strains
+            ECR: creep strains
+            ETH: thermal strains
+            EUL: euler angles
+            EFX: nodal fluxes
+            ELF: local forces
+            EMN: misc. non-sum values
+            ECD: element current densities
+            ENL: nodal nonlinear data
+            EHC: calculated heat
+            EPT: element temperatures
+            ESF: element surface stresses
+            EDI: diffusion strains
+            ETB: ETABLE items(post1 only
+            ECT: contact data
+            EXY: integration point locations
+            EBA: back stresses
+            ESV: state variables
+            MNL: material nonlinear record
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers
+
+        result : np.ndarray
+            Array of result data
+        """
+        # check result exists
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
+        # element header
+        rnum = self.parse_step_substep(rnum)
+
+        result_type = result_type.upper()
+        nitem = self._result_nitem(rnum, result_type)
+        result_index = ELEMENT_INDEX_TABLE_KEYS.index(result_type)
+
+        # Element types for nodal averaging from the global mesh
+        n_points = self.grid.n_points
+        cells, offset = vtk_cell_info(self.grid)
+        data = np.zeros((n_points, nitem), np.float64)
+        ncount = np.zeros(n_points, np.int32)
+
+        c = 0  # global cell index counter
+        for result in self._results:
+            ele_ind_table, nodstr, etype, ptr_off = result._element_solution_header(rnum)
+            # we return c here since it is copied to C, not passed by reference
+            c = read_nodal_values_dist(result.filename,
+                                       self.grid.celltypes,
+                                       ele_ind_table,
+                                       offset,
+                                       cells,
+                                       nitem,
+                                       n_points,
+                                       nodstr,
+                                       etype,
+                                       self._mesh.etype,
+                                       result_index,
+                                       ptr_off,
+                                       ncount,
+                                       data,
+                                       c)
+
+        if result_type == 'ENS' and nitem != 6:
+            data = data[:, :6]
+
+        if not np.any(ncount):
+            raise ValueError('Result file contains no %s records for result %d' %
+                             (element_index_table_info[result_type.upper()], rnum))
+
+        # average across nodes
+        data /= ncount.reshape(-1, 1)
+
+        # sort by default unless called by a plotter
+        if not self._within_plotter:
+            return self._sorted_nnum, data[self._dist_sort_idx]
+        return self.grid.point_arrays['ansys_node_num'], data
+
+    @wraps(Result.element_solution_data)
+    def element_solution_data(self, *args, **kwargs):
+        """Accumulate the element solution individual results from each result"""
+        sort = kwargs.get('sort', True)
+        glb_element_data = []
+        for result in self._results:
+            element_data = result.element_solution_data(*args, is_dist_rst=True,
+                                                        **kwargs)
+            glb_element_data.extend(element_data)
+
+        # Assemble and sort (args[0] is rnum)
+        _, nodstr, etype, _ = self._element_solution_header(args[0])
+
+        enum = self._eeqv
+        enode = []
+        nnode = nodstr[etype]
         if sort:
-            return self.mesh.nnum, sol[self._dist_sort_idx]
+            sidx = np.argsort(enum)
+            enum = enum[sidx]
+            glb_element_data = [glb_element_data[i] for i in sidx]
+
+            for i in sidx:
+                enode.append(self._mesh.elem[i][10:10+nnode[i]])
+
         else:
-            return self.mesh.nnum[self._dist_sort_idx], sol
+            for i in range(enum.size):
+                enode.append(self._mesh.elem[i][10:10+nnode[i]])
 
+        return enum, glb_element_data, enode
 
-# testing...
-# rst = DistributedResult('/tmp/ansys_pdxxfbahxy/file0.rth')
-# nnum, sol = rst.nodal_solution(0)
-# rst.plot_nodal_solution(0)
+    @wraps(Result.element_stress)
+    def element_stress(self, *args, **kwargs):
+        """Accumulate the element solution individual results from each result"""
+        sort = kwargs.get('sort', True)
+        glb_stress = []
+        for result in self._results:
+            element_data = result.element_stress(*args, is_dist_rst=True, **kwargs)
+            glb_stress.extend(element_data)
 
-# rst.nodal_stress(0)
+        # Assemble and sort (args[0] is rnum)
+        _, nodstr, etype, _ = self._element_solution_header(args[0])
 
-# self = rst
+        enum = self._eeqv
+        enode = []
+        nnode = nodstr[etype]
 
-# all_nnum = np.hstack([result.mesh.nnum for result in self._results])
+        if sort:
+            sidx = np.argsort(enum)
+            enum = enum[sidx]
+            glb_element_data = [glb_stress[i] for i in sidx]
+
+            for i in sidx:
+                enode.append(self._mesh.elem[i][10:10+nnode[i]])
+
+        else:
+            for i in range(enum.size):
+                enode.append(self._mesh.elem[i][10:10+nnode[i]])
+
+        return enum, glb_element_data, enode
+
+    @within_plotter
+    def plot_element_result(self, rnum, result_type, item_index,
+                            in_element_coord_sys=False, **kwargs):
+        """Plot an element result.
+
+        Parameters
+        ----------
+        rnum : int
+            Result number.
+
+        result_type : str
+            Element data type to retreive.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        item_index : int
+            Index of the data item for each node within the element.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system.
+            Default False and will return the results in the global
+            coordinate system.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            ANSYS node numbers
+
+        result : np.ndarray
+            Array of result data
+
+        Examples
+        --------
+        # >>> rst.plot_element_result(
+        """
+        # check result exists
+        result_type = result_type.upper()
+        if not self.available_results[result_type]:
+            raise ValueError('Result %s is not available in this result file'
+                             % result_type)
+
+        if result_type not in ELEMENT_INDEX_TABLE_KEYS:
+            raise ValueError('Result "%s" is not an element result' % result_type)
+
+        bsurfs = []
+        for result in self._results:
+            bsurf = result._extract_surface_element_result(rnum,
+                                                           result_type,
+                                                           item_index,
+                                                           in_element_coord_sys)
+            bsurfs.append(bsurf)
+
+        desc = self.available_results.description[result_type].capitalize()
+        kwargs.setdefault('stitle', desc)
+        return pv.plot(bsurfs, scalars='_scalars', **kwargs)

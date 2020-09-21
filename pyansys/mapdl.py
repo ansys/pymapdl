@@ -1079,9 +1079,20 @@ class _MapdlCore(_MapdlCommands):
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')
 
-        result_path = self._result_file
+        if self._distributed_result_file:
+            from pyansys.rst import Result
+            result_path = self._distributed_result_file
+            result = Result(result_path, read_mesh=False)
+            if result._is_cyclic:
+                if not os.path.isfile(self._result_file):
+                    raise RuntimeError('Distributed Cyclic result not supported')
+                result_path = self._result_file
+        else:
+            result_path = self._result_file
+
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
+
         return pyansys.read_binary(result_path)
 
     @property
@@ -1094,6 +1105,10 @@ class _MapdlCore(_MapdlCommands):
                 filename = self.jobname
         except:
             filename = self.jobname
+
+        # ansys decided that a jobname ended in a number needs a bonus "_"
+        if filename[-1].isnumeric():
+            filename += '_'
 
         try:
             ext = self.inquire('RSTEXT')
@@ -1119,6 +1134,38 @@ class _MapdlCore(_MapdlCommands):
             rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
             if os.path.isfile(rst_file):
                 return rst_file
+
+    @property
+    def _distributed_result_file(self):
+        """Path of the result file
+        """
+        try:
+            filename = self.inquire('RSTFILE')
+            if not filename:
+                filename = self.jobname
+        except:
+            filename = self.jobname
+
+        # ansys decided that a jobname ended in a number needs a bonus "_"
+        if filename[-1].isnumeric():
+            filename += '_'
+
+        try:
+            ext = self.inquire('RSTEXT')
+            if not ext:
+                ext = 'rst'
+        except:  # check if rth file exists
+            rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
+
+            if os.path.isfile(rth_file):
+                ext = 'rth'
+            else:
+                ext = 'rst'
+
+        # no all solutions return a distributed result file
+        rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
+        if os.path.isfile(rst_file):
+            return rst_file
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
@@ -1409,7 +1456,7 @@ class _MapdlCore(_MapdlCommands):
         try:
             self._jobname = self.inquire('JOBNAME')
         except:
-            self._jobname = 'file'
+            pass
         return self._jobname
 
     @supress_logging

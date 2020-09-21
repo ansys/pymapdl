@@ -125,7 +125,7 @@ def test_presol_s(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
 
     # verify element stress
-    element_stress, _, enode = mapdl.result.element_stress(rset)
+    _, element_stress, enode = mapdl.result.element_stress(rset)
     element_stress = np.vstack(element_stress)
     enode = np.hstack(enode)
 
@@ -142,8 +142,11 @@ def test_presol_s(mapdl, cyclic_modal, rset):
     ansys_element_stress = ansys_element_stress[:, 1:]
 
     arr_sz = element_stress.shape[0]
-    assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
-    assert np.allclose(enode, ansys_enode[:arr_sz])
+    try:
+        assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
+        assert np.allclose(enode, ansys_enode[:arr_sz])
+    except:
+        breakpoint()    
 
 
 @pytest.mark.parametrize("rset", RSETS)
@@ -226,12 +229,12 @@ def test_loadresult(result):
     assert nnum.size
     assert disp.size
 
-    element_stress, enum, enode = result.element_stress(0)
+    enum, element_stress, enode = result.element_stress(0)
     assert element_stress[0].size
     assert enum.size
     assert enode[0].size
 
-    element_stress, enum, enode = result.element_stress(0, principal=True)
+    enum, element_stress, enode = result.element_stress(0, principal=True)
     assert element_stress[0].size
     assert enum.size
     assert enode[0].size

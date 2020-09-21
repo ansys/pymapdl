@@ -9,7 +9,7 @@ import pyvista as pv
 from pyansys.common import (STRESS_TYPES, STRAIN_TYPES,
                             PRINCIPAL_STRESS_TYPES,
                             THERMAL_STRAIN_TYPES)
-from pyansys.rst import Result, trans_to_matrix, check_comp
+from pyansys.rst import Result, check_comp
 from pyansys import _binary_reader
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -19,14 +19,13 @@ class CyclicResult(Result):
     """Adds cyclic functionality to the result class"""
 
     def __init__(self, filename):
-        """ Initializes object """
+        """Initializes cyclic result"""
         super().__init__(filename)
 
         # sanity check
-        if self.n_sector == 1:
+        if not self._is_cyclic:
             raise TypeError('Result is not a cyclic model')
 
-        self._animating = False
         self._rotor_cache = None
         self._has_duplicate_sector = None
         self._is_repeated_mode = np.empty(0)

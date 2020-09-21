@@ -780,7 +780,7 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
         celltype = celltypes[i]
         offset = offsets[i] + 1
 
-        if celltype == VTK_LINE:  # untested
+        if celltype == VTK_LINE:
             read_element(cells, offset, ncount, data, bufferdata, nitems, 2)
         elif celltype == VTK_TRIANGLE:  # untested
             read_element(cells, offset, ncount, data, bufferdata, nitems, 3)
@@ -801,6 +801,126 @@ def read_nodal_values(filename, uint8 [::1] celltypes,
 
     return np.asarray(data), np.asarray(ncount)
 
+
+def read_nodal_values_dist(filename,
+                           uint8 [::1] celltypes,
+                           int64_t [::1] ele_ind_table,
+                           int64_t [::1] offsets,
+                           int64_t [::1] cells,
+                           int nitems,
+                           int npoints,
+                           int [::1] nodstr,
+                           int [::1] etype,
+                           int [::1] element_type,
+                           int result_index,
+                           int64_t ptr_off,
+                           int [::1] ncount,
+                           double [:, ::1] data,
+                           int c,
+):
+    """Read nodal results from a distributed result directly into a numpy array.
+
+    element_type : int [::1] np.ndarray
+        Array of ANSYS element types.
+
+    ptr_off : int64_t
+        Pointer offset
+
+    result_index : int
+        EMS - 0 : misc. data
+        ENF - 1 : nodal forces
+        ENS - 2 : nodal stresses
+        ENG - 3 : volume and energies
+        EGR - 4 : nodal gradients
+        EEL - 5 : elastic strains
+        EPL - 6 : plastic strains
+        ECR - 7 : creep strains
+        ETH - 8 : thermal strains
+        EUL - 9 : euler angles
+        EFX - 10 : nodal fluxes
+        ELF - 11 : local forces
+        EMN - 12 : misc. non-sum values
+        ECD - 13 : element current densities
+        ENL - 14 : nodal nonlinear data
+        EHC - 15 : calculated heat
+        EPT - 16 : element temperatures
+        ESF - 17 : element surface stresses
+        EDI - 18 : diffusion strains
+        ETB - 19 : ETABLE items
+        ECT - 20 : contact data
+        EXY - 21 : integration point locations
+        EBA - 22 : back stresses
+        ESV - 23 : state variables
+        MNL - 24 : material nonlinear record
+
+    data : double [:, ::1] np.ndarray
+        Data for each individual node.
+
+    c : int
+        Global index counter.  Keeps track of the cell location
+        between multiple result files.
+
+    """
+    # number of cells in this distributed result file
+    cdef int64_t ncells = ele_ind_table.size
+
+    # open this result file
+    cdef bytes py_bytes = filename.encode()
+    cdef char* c_filename = py_bytes
+    cdef ifstream* binfile = new ifstream(c_filename, binary)
+
+    # temp buffer to hold data read from element
+    cdef int64_t i, j, k, ind, nread, offset
+    cdef double [:, ::1] bufferdata = np.zeros((20, nitems), np.float64)
+    cdef int64_t ele_table, nnode_elem
+    cdef int ptr_result, skip
+    cdef uint8 celltype
+    for i in range(ncells):
+
+        # read element data
+        nnode_elem = nodstr[etype[i]]  # global
+        if ele_ind_table[i] == 0:  # element contains no data
+            c += 1  # global solution cell index
+            continue
+        else:
+            skip = read_element_result(binfile, ele_ind_table[i] + ptr_off,
+                                       result_index, nnode_elem, nitems,
+                                       &bufferdata[0, 0])
+            if skip:
+                c += 1  # global solution cell index
+                continue
+
+        # Get number of nodes in the global element
+        celltype = celltypes[c]
+        offset = offsets[c] + 1
+        # NOTE: value at offsets[c] is the number of points in cell
+
+        if celltype == VTK_LINE:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 2)
+        elif celltype == VTK_TRIANGLE:  # untested
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 3)
+        elif celltype == VTK_QUAD or celltype == VTK_QUADRATIC_QUAD:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
+        elif celltype == VTK_HEXAHEDRON:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 8)
+        elif celltype == VTK_PYRAMID:
+            read_element(cells, offset, ncount, data, bufferdata, nitems, 5)
+        elif celltype == VTK_TETRA:  # dependent on element type
+            if nodstr[etype[i]] == 4:
+                read_element(cells, offset, ncount, data, bufferdata, nitems, 4)
+            else:
+                read_tetrahedral(cells, offset, ncount, data, bufferdata, nitems)
+        elif celltype == VTK_WEDGE:
+            read_wedge(cells, offset, ncount, data, bufferdata, nitems)
+
+        c += 1  # global solution cell index
+
+    # must delete to manually collect
+    del binfile
+
+    # have to increment again
+    # return c + 1
+    return c
 
 # indices of a wedge must be reordered (see _parser.store_weg)
 cdef int64_t [6] wedge_ind

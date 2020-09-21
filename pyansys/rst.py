@@ -60,6 +60,16 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'EDI': 7}
 
 
+def within_plotter(fn):
+    """Calls a result method.  Must be called from a class"""
+    def wrapper(*args, **kwargs):
+        args[0]._within_plotter = True
+        out = fn(*args, **kwargs)
+        args[0]._within_plotter = False
+        return out
+    return wrapper
+
+
 class Result(AnsysBinary):
     """Reads a binary ANSYS result file.
 
@@ -85,6 +95,7 @@ class Result(AnsysBinary):
         """Loads basic result information from result file and
         initializes result object.
         """
+        self._within_plotter = False  # necessary for distributed plotting
         self.filename = filename
         self._resultheader = self._read_result_header()
         self._animating = False
@@ -101,17 +112,21 @@ class Result(AnsysBinary):
         self._neqv = self._resultheader['neqv']
         self._eeqv = self._resultheader['eeqv']  # unsorted
 
+        # cache geometry header
+        table = self.read_record(self._resultheader['ptrGEO'])
+        self._geometry_header = parse_header(table, geometry_header_keys)
+        self._element_table = self._load_element_table()
+
+        self._materials = None
+        self._section_data = None
+        self._available_results = AvailableResults(self._resultheader['AvailData'],
+                                                   self._is_thermal)
+
         # store mesh for later retrival
         self._mesh = None
         if read_mesh:
             self._store_mesh()
 
-        self.header = parse_header(self.read_record(103), result_header_keys)
-        self._geometry_header = {}
-        self._materials = None
-        self._section_data = None
-        self._available_results = AvailableResults(self._resultheader['AvailData'],
-                                                   self._is_thermal)
 
     @property
     def mesh(self):
@@ -480,6 +495,7 @@ class Result(AnsysBinary):
 
         return self._plot_point_scalars(None, grid=grid, **kwargs)
 
+    @within_plotter
     def plot_nodal_solution(self, rnum, comp='norm',
                             show_displacement=False,
                             displacement_factor=1.0,
@@ -569,11 +585,9 @@ class Result(AnsysBinary):
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
         if nnum.size != npoints:
-            new_scalars = np.empty(npoints)
-            new_scalars[:] = np.nan
+            new_scalars = np.zeros(npoints)
             nnum_grid = self.grid.point_arrays['ansys_node_num']
-            mask = np.in1d(nnum_grid, nnum)
-            new_scalars[mask] = scalars
+            new_scalars[np.in1d(nnum_grid, nnum, assume_unique=True)] = scalars
             scalars = new_scalars
 
         ind = None
@@ -717,6 +731,7 @@ class Result(AnsysBinary):
     def time_values(self):
         return self._resultheader['time_values']
 
+    @within_plotter
     def animate_nodal_solution(self, rnum, comp='norm',
                                node_components=None,
                                element_components=None,
@@ -963,10 +978,11 @@ class Result(AnsysBinary):
 
         Notes
         -----
-        Some solution results may not include all node numbers.  This
-        is reflected in the ``result`` and ``nnum`` arrays.
-
+        Some solution results may not include results for each node.
+        These results are removed by and the node numbers of the
+        solution results are reflected in ``nnum``.
         """
+
         # convert to cumulative index
         rnum = self.parse_step_substep(rnum)
 
@@ -990,8 +1006,8 @@ class Result(AnsysBinary):
         if result.shape[0] > nnod:
             result = result[:nnod]
 
-        # # it's possible that not all results are written
-        if result.shape[0] != nnod:
+        # it's possible that not all results are written
+        if result.shape[0] < nnod:
             # read second buffer containing the node indices of the
             # results and convert from fortran to zero indexing
             sidx = self.read_record(ptr_nsl + ptr_rst + bufsz) - 1
@@ -1073,46 +1089,24 @@ class Result(AnsysBinary):
 
         return node_comp, elem_comp
 
-    def _store_mesh(self):
-        """Store the mesh from the result file"""
-        # read geometry header
-        table = self.read_record(self._resultheader['ptrGEO'])
-        geometry_header = parse_header(table, geometry_header_keys)
-        self._geometry_header = geometry_header
-
-        # Node information
-        nnod = geometry_header['nnod']
-        nnum = np.empty(nnod, np.int32)
-        nodes = np.empty((nnod, 6), np.float)
-        _binary_reader.load_nodes(self.filename, geometry_header['ptrLOC'],
-                                  nnod, nodes, nnum)
-        # Element information
-        nelm = geometry_header['nelm']
-        maxety = geometry_header['maxety']
+    def _load_element_table(self):
+        """Store element type information"""
+        maxety = self._geometry_header['maxety']  # number of elemet types
 
         # pointer to the element type index table
-        e_type_table = self.read_record(geometry_header['ptrETY'])
+        e_type_table = self.read_record(self._geometry_header['ptrETY'])
 
         # store information for each element type
-        # make these arrays large so you can reference a value via element
-        # type numbering
-
-        # number of nodes for this element type
-        nodelm = np.empty(10000, np.int32)
-
-        # number of nodes per element having nodal forces
-        nodfor = np.empty(10000, np.int32)
-
-        # number of nodes per element having nodal stresses
-        nodstr = np.empty(10000, np.int32)
-        # etype_id = np.empty(maxety, np.int32)
+        nodelm = np.empty(10000, np.int32)  # n nodes for this element type
+        nodfor = np.empty(10000, np.int32)  # n nodes per element having nodal forces
+        nodstr = np.empty(10000, np.int32)  # n nodes per element having nodal stresses
         ekey = []
         keyopts = np.zeros((10000, 11), np.int16)
         for i in range(maxety):
             if not e_type_table[i]:
                 continue
 
-            ptr = geometry_header['ptrETY'] + e_type_table[i]
+            ptr = self._geometry_header['ptrETY'] + e_type_table[i]
             einfo = self.read_record(ptr)
 
             etype_ref = einfo[0]
@@ -1143,34 +1137,47 @@ class Result(AnsysBinary):
                     nodstr[etype_ref] *= 2
 
         # store element table data
-        self.element_table = {'nodelm': nodelm,
-                              'nodfor': nodfor,
-                              'nodstr': nodstr,
-                              'keyopts': keyopts}
+        return {'nodelm': nodelm,
+                'nodfor': nodfor,
+                'nodstr': nodstr,
+                'keyopts': keyopts,
+                'ekey': np.array(ekey)}
+
+    def _store_mesh(self):
+        """Store the mesh from the result file"""
+
+        # Node information
+        nnod = self._geometry_header['nnod']
+        nnum = np.empty(nnod, np.int32)
+        nodes = np.empty((nnod, 6), np.float)
+        _binary_reader.load_nodes(self.filename, self._geometry_header['ptrLOC'],
+                                  nnod, nodes, nnum)
 
         # the element description table
         # must view this record as int64, even though ansys reads
         # it in as a 32 bit int
-        ptr_eid = geometry_header['ptrEID']
+        ptr_eid = self._geometry_header['ptrEID']
         e_disp_table = self.read_record(ptr_eid).view(np.int64)
 
         # get pointer to start of element table and adjust element pointers
-        ptr_elem = geometry_header['ptrEID'] + e_disp_table[0]
+        ptr_elem = self._geometry_header['ptrEID'] + e_disp_table[0]
         e_disp_table -= e_disp_table[0]
 
         # read in coordinate systems, material properties, and sections
         self._c_systems = self.parse_coordinate_system()
 
         # load elements
+        nelm = self._geometry_header['nelm']
         elem, elem_off = _binary_reader.load_elements(self.filename, ptr_elem,
                                                       nelm, e_disp_table)
 
         # Store geometry and parse to VTK quadradic and null unallowed
         ncomp, ecomp = self._read_components()
-        self._mesh = Mesh(nnum, nodes, elem, elem_off, np.array(ekey),
-                         node_comps=ncomp, elem_comps=ecomp)
+        self._mesh = Mesh(nnum, nodes, elem, elem_off,
+                          self._element_table['ekey'],
+                          node_comps=ncomp, elem_comps=ecomp)
         self.quadgrid = self._mesh._parse_vtk(null_unallowed=True,
-                                                 fix_midside=False)
+                                              fix_midside=False)
         self.grid = self.quadgrid.linear_copy()
 
         # identify nodes that are actually in the solution
@@ -1255,9 +1262,8 @@ class Result(AnsysBinary):
             Offset to the start of the element result table.
         """
         # Get the header information from the header dictionary
-
         rpointers = self._resultheader['rpointers']
-        nodstr = self.element_table['nodstr']
+        nodstr = self._element_table['nodstr']
 
         # read result solution header
         solution_header = self._result_solution_header(rnum)
@@ -1459,7 +1465,8 @@ class Result(AnsysBinary):
         """
         return float(self._resultheader['verstring'])
 
-    def element_stress(self, rnum, principal=False, in_element_coord_sys=False):
+    def element_stress(self, rnum, principal=False, in_element_coord_sys=False,
+                       **kwargs):
         """Retrives the element component stresses.
 
         Equivalent ANSYS command: PRESOL, S
@@ -1479,19 +1486,32 @@ class Result(AnsysBinary):
             Default False and will return the results in the global
             coordinate system.
 
+        **kwargs : optional keyword arguments
+            Hidden options for distributed result files.
+
         Returns
         -------
+        enum : np.ndarray
+            ANSYS element numbers corresponding to each element.
+
         element_stress : list
             Stresses at each element for each node for Sx Sy Sz Sxy
             Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
             principal is True.
 
-        enum : np.ndarray
-            ANSYS element numbers corresponding to each element.
-
         enode : list
             Node numbers corresponding to each element's stress
             results.  One list entry for each element.
+
+        Examples
+        --------
+        Element component stress for the first result set.
+
+        >>> rst.element_stress(0)
+
+        Element principal stress for the first result set.
+
+        >>> enum, element_stress, enode = result.element_stress(0, principal=True)
 
         Notes
         -----
@@ -1549,6 +1569,10 @@ class Result(AnsysBinary):
         splitind = np.cumsum(nnode)
         element_stress = np.split(ele_data_arr, splitind[:-1])
 
+        # just return the distributed result if requested
+        if kwargs.get('is_dist_rst', False):
+            return element_stress
+
         # reorder list using sorted indices
         enum = self._eeqv
         sidx = np.argsort(enum)
@@ -1560,9 +1584,9 @@ class Result(AnsysBinary):
 
         # Get element numbers
         elemnum = self._eeqv[self._sidx_elem]
-        return element_stress, elemnum, enode
+        return elemnum, element_stress, enode
 
-    def element_solution_data(self, rnum, datatype, sort=True):
+    def element_solution_data(self, rnum, datatype, sort=True, **kwargs):
         """Retrives element solution data.  Similar to ETABLE.
 
         Parameters
@@ -1599,6 +1623,12 @@ class Result(AnsysBinary):
             - EBA: back stresses
             - ESV: state variables
             - MNL: material nonlinear record
+
+        sort : bool
+            Sort results by element number.  Default ``True``.
+
+        **kwargs : optional keyword arguments
+            Hidden options for distributed result files.
 
         Returns
         -------
@@ -1686,13 +1716,16 @@ class Result(AnsysBinary):
                 else:
                     element_data.append(None)
 
+        # just return the distributed result if requested
+        if kwargs.get('is_dist_rst', False):
+            return element_data
+
         enum = self._eeqv
         if sort:
             sidx = np.argsort(enum)
             enum = enum[sidx]
             element_data = [element_data[i] for i in sidx]
 
-        # include the nodes corresponding to each element
         enode = []
         nnode = nodstr[etype]
         if sort:
@@ -1754,6 +1787,7 @@ class Result(AnsysBinary):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
+    @within_plotter
     def plot_principal_nodal_stress(self, rnum, comp=None,
                                     show_displacement=False,
                                     displacement_factor=1.0,
@@ -1919,8 +1953,12 @@ class Result(AnsysBinary):
         if 'vtkOriginalPointIds' in grid.point_arrays:
             mapped_indices = grid.point_arrays['vtkOriginalPointIds']
 
+        # weird bug in some edge cases, have to roll our own indices here
+        if '_temp_id' not in grid.point_arrays:
+            grid['_temp_id'] = np.arange(grid.n_points)
         mesh = grid.extract_surface()
-        ind = mesh.point_arrays['vtkOriginalPointIds']
+        ind = mesh.point_arrays['_temp_id']
+
         if disp is not None:
             if mapped_indices is not None:
                 disp = disp[mapped_indices][ind]
@@ -1978,7 +2016,7 @@ class Result(AnsysBinary):
                          rng=rng,
                          cmap=cmap,
                          **kwargs)
-        
+
         # set scalar bar text colors
         if text_color:
             from pyvista.plotting.theme import parse_color
@@ -2141,11 +2179,11 @@ class Result(AnsysBinary):
         >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
         kwargs['stitle'] = '%s Component Nodal Stress' % comp
-        self._plot_nodal_result(rnum, 'ENS', comp, STRESS_TYPES,
-                                show_displacement,
-                                displacement_factor, node_components,
-                                element_components,
-                                sel_type_all, **kwargs)
+        return self._plot_nodal_result(rnum, 'ENS', comp, STRESS_TYPES,
+                                       show_displacement,
+                                       displacement_factor, node_components,
+                                       element_components,
+                                       sel_type_all, **kwargs)
 
     def save_as_vtk(self, filename, rsets=None, result_types=['ENS']):
         """Writes results to a vtk readable file.
@@ -2378,6 +2416,9 @@ class Result(AnsysBinary):
             ESV: state variables
             MNL: material nonlinear record
 
+        sort : bool, optional
+            Unused by base class.
+
         Returns
         -------
         nnum : np.ndarray
@@ -2407,7 +2448,7 @@ class Result(AnsysBinary):
                                                         offset,
                                                         cells,
                                                         nitem,
-                                                        self.grid.number_of_points,
+                                                        self.grid.n_points,
                                                         nodstr,
                                                         etype,
                                                         self._mesh.etype,
@@ -2418,13 +2459,13 @@ class Result(AnsysBinary):
             data = data[:, :6]
 
         nnum = self.grid.point_arrays['ansys_node_num']
-        if np.isnan(data).all():
+        if not np.any(ncount):
             raise ValueError('Result file contains no %s records for result %d' %
                              (element_index_table_info[result_type.upper()], rnum))
 
         # average across nodes
-        result = data/ncount.reshape(-1, 1)
-        return nnum, result
+        ncount = ncount.reshape(-1, 1)
+        return nnum, data/ncount
 
     def _result_nitem(self, rnum, result_type):
         """Return the number of items for a given result type"""
@@ -2446,6 +2487,7 @@ class Result(AnsysBinary):
             nitem = ELEMENT_RESULT_NCOMP.get(result_type, 1)
         return nitem
 
+    @within_plotter
     def plot_element_result(self, rnum, result_type, item_index,
                             in_element_coord_sys=False, **kwargs):
         """Plot an element result.
@@ -2499,6 +2541,10 @@ class Result(AnsysBinary):
 
         result : np.ndarray
             Array of result data
+
+        Examples
+        --------
+        # >>> rst.plot_element_result(
         """
         # check result exists
         result_type = result_type.upper()
@@ -2509,6 +2555,19 @@ class Result(AnsysBinary):
         if result_type not in ELEMENT_INDEX_TABLE_KEYS:
             raise ValueError('Result "%s" is not an element result' % result_type)
 
+        bsurf = self._extract_surface_element_result(rnum,
+                                                     result_type,
+                                                     item_index,
+                                                     in_element_coord_sys)
+
+        desc = self.available_results.description[result_type].capitalize()
+        kwargs.setdefault('stitle', desc)
+        return bsurf.plot(scalars='_scalars', **kwargs)
+
+    def _extract_surface_element_result(self, rnum, result_type, item_index,
+                                        in_element_coord_sys):
+        """Return the surface of the grid with the active scalars
+        being the element result"""
         # element header
         rnum = self.parse_step_substep(rnum)
         ele_ind_table, nodstr, etype, ptr_off = self._element_solution_header(rnum)
@@ -2548,10 +2607,8 @@ class Result(AnsysBinary):
                                                self._mesh._elem_off,
                                                item_index,
                                                as_global=not in_element_coord_sys)
-
-        desc = self.available_results.description[result_type].capitalize()
-        kwargs.setdefault('stitle', desc)
-        return bsurf.plot(scalars=data, **kwargs)
+        bsurf['_scalars'] = data
+        return bsurf
 
     def _result_solution_header(self, rnum):
         """Return the solution header for a given cumulative result index"""
@@ -2690,6 +2747,7 @@ class Result(AnsysBinary):
         temp = temp.ravel()
         return nnum, temp
 
+    @within_plotter
     def plot_cylindrical_nodal_stress(self, rnum, comp=None, show_displacement=False,
                                       displacement_factor=1, node_components=None,
                                       element_components=None, sel_type_all=True,
@@ -2760,6 +2818,7 @@ class Result(AnsysBinary):
                                         displacement_factor=displacement_factor,
                                         **kwargs)
 
+    @within_plotter
     def plot_nodal_temperature(self, rnum, show_displacement=False,
                                displacement_factor=1, node_components=None,
                                element_components=None, sel_type_all=True,
@@ -3133,6 +3192,7 @@ class Result(AnsysBinary):
                                        stitle=stitle,
                                        **kwargs)
 
+    @within_plotter
     def _plot_nodal_result(self, rnum, result_type, comp, available_comps,
                            show_displacement=False, displacement_factor=1,
                            node_components=None, element_components=None,
@@ -3282,8 +3342,13 @@ class Result(AnsysBinary):
     @property
     def _is_distributed(self):
         """True when this result file is part of a distributed result
-        Only True when Global number of nodes must not equal the
+
+        Only True when Global number of nodes does not equal the
         number of nodes in this file.
+
+        Notes
+        -----
+        Not a reliabile indicator if a cyclic result.
         """
         return self._resultheader['Glbnnod'] != self._resultheader['nnod']
 
@@ -3295,6 +3360,11 @@ class Result(AnsysBinary):
     def _is_thermal(self):
         """True when result file is a rth file"""
         return self.filename[-3:] == 'rth'
+
+    @property
+    def _is_cyclic(self):
+        """True when the result file is from a cyclic analysis"""
+        return self.n_sector > 1
 
 
 def pol2cart(rho, phi):
