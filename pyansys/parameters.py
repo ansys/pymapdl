@@ -293,7 +293,7 @@ class Parameters():
         Parameters
         ----------
         name : str
-            An alphanumeric name used to identify this parameter.  Par
+            An alphanumeric name used to identify this parameter.  Name
             may be up to 32 characters, beginning with a letter and
             containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.

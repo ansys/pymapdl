@@ -139,10 +139,12 @@ class _MapdlCore(_MapdlCommands):
     @property
     def post_processing(self):
         """Post-process an active MAPDL session.
+
         Examples
         --------
         Get the nodal displacement in the X direction for the first
         result set.
+
         >>> mapdl.set(1, 1)
         >>> disp_x = mapdl.post_processing.nodal_displacement('X')
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
@@ -1764,7 +1766,51 @@ class _MapdlCore(_MapdlCommands):
     def load_table(self, name, array, var1='', var2='', var3=''):
         """Load a table from Python to MAPDL
 
-        Uses *TREAD to transfer the table.
+        Uses \*TREAD to transfer the table.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : np.ndarray or List
+            List as a table or ``numpy`` array.
+
+        var1 : str, optional
+            A primary variable (listed below) or can be an independent
+            parameter. If specifying an independent parameter, then
+            you must define an additional table for the independent
+            parameter. The additional table must have the same name as
+            the independent parameter and may be a function of one or
+            more primary variables or another independent
+            parameter. All independent parameters must relate to a
+            primary variable.
+
+            - ``"TIME"``: Time
+            - ``"FREQ"``: Frequency
+            - ``"X"``: X-coordinate location
+            - ``"Y"``: Y-coordinate location
+            - ``"Z"``: Z-coordinate location
+            - ``"TEMP"``: Temperature
+            - ``"VELOCITY"``: Velocity
+            - ``"1"``]: Pressure	PRESSURE [
+            - ``"GAP"``: Geometric gap/penetration
+            - ``"SECTOR"``: Cyclic sector number
+            - ``"OMEGS"``: Amplitude of the rotational velocity vector
+            - ``"ECCENT"``: Eccentricity
+            - ``"THETA"``: Phase shift
+            - ``"ELEM"``: Element number
+            - ``"NODE"``: Node number
+            - ``"CONC"``: Concentration
+
+        var2 : str, optional
+            See ``var1``
+
+        var3 : str, optional
+            See ``var1``
 
         Examples
         --------
@@ -1783,7 +1829,7 @@ class _MapdlCore(_MapdlCommands):
                              'only 1 dimension')
         self.dim(name, 'TABLE', array.shape[0], var1=var1, var2=var2, var3=var3)
         filename = os.path.join(tempfile.gettempdir(), random_string() + '.txt')
-        np.savetxt(filename, array)  #, '%.18f')
+        np.savetxt(filename, array)
         self.tread(name, filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
