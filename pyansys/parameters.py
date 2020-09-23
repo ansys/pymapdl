@@ -248,12 +248,17 @@ class Parameters():
         lines = ['MAPDL Parameters',
                  '----------------']
         for key, info in self._parm.items():
+            value_str = ''
             if info['type'] == 'ARRAY':
                 value_str = 'ARRAY DIM %s' % str(info['shape'])
+            elif info['type'] == 'TABLE':
+                value_str = 'TABLE DIM %s' % str(info['shape'])
             elif info['type'] == 'CHARACTER':
                 value_str = '"%s"' % info['value']
-            else:
+            elif 'value' in info:
                 value_str = str(info['value'])
+            else:
+                continue
             lines.append('%-32s : %s' % (key, value_str))
         return '\n'.join(lines)
 
@@ -268,7 +273,7 @@ class Parameters():
             raise IndexError('%s not a valid parameter_name' % key)
 
         parm = parameters[key]
-        if parm['type'] == 'ARRAY':
+        if parm['type'] in ['ARRAY', 'TABLE']:
             return self._get_parameter_array(key, parm['shape'])
 
         return parm['value']

@@ -94,6 +94,7 @@ def static_solve(mapdl):
     mapdl.antype('static', 'new')
     # mapdl.eqslv('pcg', 1e-8)
     mapdl.solve()
+    mapdl.finish()
 
     # necessary for any prnsol printouts
     mapdl.header('off', 'off', 'off', 'off', 'off', 'off')

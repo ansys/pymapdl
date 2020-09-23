@@ -10,7 +10,7 @@ from vtk import vtkAppendFilter
 
 from pyansys.misc import is_float, vtk_cell_info
 from pyansys.mesh import Mesh
-from pyansys.rst import Result, ELEMENT_INDEX_TABLE_KEYS, within_plotter
+from pyansys.rst import Result, ELEMENT_INDEX_TABLE_KEYS
 from pyansys.errors import NoDistributedFiles
 from pyansys._binary_reader import (read_nodal_values_dist,
                                     populate_surface_element_result)
@@ -108,12 +108,15 @@ class DistributedResult(Result):
         self._total_sol_nodes = st  # total nodes in all result files
 
         vtkappend.Update()
-        self.grid = pv.wrap(vtkappend.GetOutput())
+        grid = pv.wrap(vtkappend.GetOutput())
         # nodes are not sorted here
 
+        # Map nodes from individual results to the global mesh
+        self._glb_idx = grid['_dist_idx']
+
         # start of each section of the grid
-        elem_split_ind = np.diff(self.grid['_result_idx']).nonzero()[0]
-        self._elem_split = np.hstack(([0], elem_split_ind))
+        # elem_split_ind = np.diff(self.grid['_result_idx']).nonzero()[0]
+        # self._elem_split = np.hstack(([0], elem_split_ind))
 
         elem = np.hstack(result.mesh._elem for result in self._results)
         glb_elem_off = []
@@ -126,16 +129,18 @@ class DistributedResult(Result):
                 glb_elem_off.append(elem_off)
 
         # TODO: Add node and element components
+        # resort node numbers
+        self._dist_sort_idx = np.argsort(grid['ansys_node_num'])
+        self._sorted_nnum = grid['ansys_node_num'][self._dist_sort_idx]
+        nodes = grid.points[self._dist_sort_idx]
 
         glb_elem_off = np.hstack(glb_elem_off)
-        self._mesh = Mesh(self.grid['ansys_node_num'], self.grid.points,
-                          elem, glb_elem_off, self._main_result.mesh.ekey)
+        self._mesh = Mesh(self._sorted_nnum, nodes, elem, glb_elem_off,
+                          self._main_result.mesh.ekey)
                           # node_comps=ncomp, elem_comps=ecomp)
 
-        # from the sorted individual mappings
-        self._dist_sort_idx = np.argsort(self.grid['ansys_node_num'])
-        self._glb_idx = self.grid['_dist_idx']
-        self._sorted_nnum = self.mesh.nnum[self._dist_sort_idx]
+        self.quadgrid = self._mesh._parse_vtk(fix_midside=False)
+        self.grid = self.quadgrid.linear_copy()
 
         # self._neqv = self._resultheader['neqv']  # may not need this
         self._eeqv = self.grid.cell_arrays['ansys_elem_num']
@@ -171,21 +176,15 @@ class DistributedResult(Result):
             # not all values from the global solution are unique and
             # we need to pare this down (due to merging to meshes)
             glb_sol = glb_sol[self._glb_idx]
-            if not self._within_plotter:
-                return self._sorted_nnum, glb_sol[self._dist_sort_idx]
+            return self._sorted_nnum, glb_sol[self._dist_sort_idx]
 
-            return self.mesh.nnum, glb_sol
+            # return self.mesh.nnum, glb_sol
         else:  # limited subset of solution
             # must remap due to how the subset of nodes relate to the
             # global mesh solution
             nnum = np.hstack(glb_nnum)
             u_nnum, idx = np.unique(nnum, return_index=True)
-            if not self._within_plotter:
-                return u_nnum, glb_sol[idx]
-
-            # unique, unsorted
-            unsort_uidx = np.argsort(idx)
-            return u_nnum[unsort_uidx], glb_sol[idx[unsort_uidx]]
+            return u_nnum, glb_sol[idx]
 
     def _nodal_result(self, rnum, result_type, **kwargs):
         """Load generic nodal result
@@ -277,10 +276,6 @@ class DistributedResult(Result):
 
         # average across nodes
         data /= ncount.reshape(-1, 1)
-
-        # sort by default unless called by a plotter
-        if not self._within_plotter:
-            return self._sorted_nnum, data[self._dist_sort_idx]
         return self.grid.point_arrays['ansys_node_num'], data
 
     @wraps(Result.element_solution_data)
@@ -343,7 +338,6 @@ class DistributedResult(Result):
 
         return enum, glb_element_data, enode
 
-    @within_plotter
     def plot_element_result(self, rnum, result_type, item_index,
                             in_element_coord_sys=False, **kwargs):
         """Plot an element result.

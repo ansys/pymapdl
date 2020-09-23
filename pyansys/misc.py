@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+import stat
 import os
 from threading import Thread
 import sys
@@ -276,3 +277,14 @@ def unique_rows(a):
     _, idx, idx2 = np.unique(b, True, True)
 
     return a[idx], idx, idx2
+
+
+def creation_time(filename):
+    """Returns the file creation time in UNIX time"""
+    return os.stat(filename)[stat.ST_CTIME]
+
+
+def last_created(filenames):
+    """Return the last created file given a list of filenames"""
+    idx = np.argmax([creation_time(filename) for filename in filenames])
+    return filenames[idx]
