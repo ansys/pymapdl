@@ -176,7 +176,8 @@ class Mesh():
 
         # store node angles
         if angles is not None:
-            grid.point_arrays['angles'] = angles
+            if angles.shape[1] == 3:
+                grid.point_arrays['angles'] = angles
 
         if not null_unallowed:
             grid = grid.extract_cells(grid.celltypes != 0)

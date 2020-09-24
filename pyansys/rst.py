@@ -2076,10 +2076,7 @@ class Result(AnsysBinary):
         if '_temp_id' not in grid.point_arrays:
             grid.point_arrays['_temp_id'] = np.arange(grid.n_points)
         mesh = grid.extract_surface()
-        try:
-            ind = mesh.point_arrays['_temp_id']
-        except:  # LINUX BUG: sometimes array doesn't transfer
-            ind = mesh.point_arrays['vtkOriginalPointIds']
+        ind = mesh.point_arrays['_temp_id']
 
         if disp is not None:
             if mapped_indices is not None:

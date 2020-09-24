@@ -237,6 +237,7 @@ def test_aplot(cleared, mapdl):
     # and legacy as well
     mapdl.aplot(vtk=False)
 
+
 @skip_no_xserver
 @pytest.mark.parametrize('vtk', [True, False])
 def test_vplot(cleared, mapdl, vtk):
