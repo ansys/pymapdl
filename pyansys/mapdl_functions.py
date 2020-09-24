@@ -26771,7 +26771,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is not applicable to 4- or 5-D tables.
         """
-        command = "*TREAD,%s,%s,%s,%s" % (str(par), str(fname), str(ext), str(nskip))
+        command = "*TREAD,%s,%s,%s,,%s" % (str(par), str(fname), str(ext), str(nskip))
         return self.run(command, **kwargs)
 
     def tbin(self, oper="", par1="", par2="", par3="", par4="", **kwargs):

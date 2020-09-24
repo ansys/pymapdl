@@ -8,13 +8,13 @@ import tempfile
 from shutil import rmtree, copyfile
 
 import numpy as np
-import appdirs
 import pyvista as pv
 
 import pyansys
 from pyansys import Archive
 from pyansys.mapdl_functions import _MapdlCommands
-from pyansys.misc import random_string, supress_logging, run_as_prep7
+from pyansys.misc import (random_string, supress_logging,
+                          run_as_prep7, last_created)
 from pyansys.geometry_commands import geometry_commands
 from pyansys.element_commands import element_commands
 from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
@@ -139,10 +139,12 @@ class _MapdlCore(_MapdlCommands):
     @property
     def post_processing(self):
         """Post-process an active MAPDL session.
+
         Examples
         --------
         Get the nodal displacement in the X direction for the first
         result set.
+
         >>> mapdl.set(1, 1)
         >>> disp_x = mapdl.post_processing.nodal_displacement('X')
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
@@ -1076,11 +1078,22 @@ class _MapdlCore(_MapdlCommands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
+        from pyansys.rst import Result
+
         if not self._local:
             raise RuntimeError('Binary interface only available when result is local.')
 
-        if self._distributed_result_file:
-            from pyansys.rst import Result
+        if self._distributed_result_file and self._result_file:
+            result_path = self._distributed_result_file
+            result = Result(result_path, read_mesh=False)
+            if result._is_cyclic:
+                result_path = self._result_file
+            else:
+                # return the file with the last access time
+                filenames = [self._distributed_result_file, self._result_file]
+                result_path = last_created(filenames)
+
+        elif self._distributed_result_file:
             result_path = self._distributed_result_file
             result = Result(result_path, read_mesh=False)
             if result._is_cyclic:
@@ -1090,6 +1103,9 @@ class _MapdlCore(_MapdlCommands):
         else:
             result_path = self._result_file
 
+        if result_path is None:
+            breakpoint()
+            raise RuntimeError('Unable to generate result path')
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
 
@@ -1097,8 +1113,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def _result_file(self):
-        """Path of the result file
-        """
+        """Path of the non-distributed result file"""
         try:
             filename = self.inquire('RSTFILE')
             if not filename:
@@ -1106,39 +1121,29 @@ class _MapdlCore(_MapdlCommands):
         except:
             filename = self.jobname
 
-        # ansys decided that a jobname ended in a number needs a bonus "_"
-        if filename[-1].isnumeric():
-            filename += '_'
-
         try:
             ext = self.inquire('RSTEXT')
-            if not ext:
-                ext = 'rst'
         except:  # check if rth file exists
+            ext = ''
+
+        if ext == '':
             rth_file = os.path.join(self.path, '%s.%s' % (filename, 'rth'))
-            if not os.path.isfile(rth_file) and self._distributed:
-                rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
+            rst_file = os.path.join(self.path, '%s.%s' % (filename, 'rst'))
 
-            if os.path.isfile(rth_file):
-                ext = 'rth'
-            else:
-                ext = 'rst'
-
-        # try to return the non-distributed first
-        rst_file = os.path.join(self.path, '%s.%s' % (filename, ext))
-        if os.path.isfile(rst_file):
-            return rst_file
-
-        if self._distributed:
-            # no all solutions return a distributed result file
-            rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
-            if os.path.isfile(rst_file):
+            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+                return last_created([rth_file, rst_file])
+            elif os.path.isfile(rth_file):
+                return rth_file
+            elif os.path.isfile(rst_file):
                 return rst_file
+        else:
+            filename = os.path.join(self.path, '%s.%s' % (filename, ext))
+            if os.path.isfile(filename):
+                return filename
 
     @property
     def _distributed_result_file(self):
-        """Path of the result file
-        """
+        """Path of the distributed result file """
         try:
             filename = self.inquire('RSTFILE')
             if not filename:
@@ -1150,21 +1155,13 @@ class _MapdlCore(_MapdlCommands):
         if filename[-1].isnumeric():
             filename += '_'
 
-        try:
-            ext = self.inquire('RSTEXT')
-            if not ext:
-                ext = 'rst'
-        except:  # check if rth file exists
-            rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
-
-            if os.path.isfile(rth_file):
-                ext = 'rth'
-            else:
-                ext = 'rst'
-
-        # no all solutions return a distributed result file
-        rst_file = os.path.join(self.path, '%s0.%s' % (filename, ext))
-        if os.path.isfile(rst_file):
+        rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
+        rst_file = os.path.join(self.path, '%s0.%s' % (filename, 'rst'))
+        if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+            return last_created([rth_file, rst_file])
+        elif os.path.isfile(rth_file):
+            return rth_file
+        elif os.path.isfile(rst_file):
             return rst_file
 
     def _get(self, *args, **kwargs):
@@ -1732,12 +1729,12 @@ class _MapdlCore(_MapdlCommands):
             return function(command)
 
         text = self._run(command, **kwargs)
+        text = text.replace('\\r\\n', '\n').replace('\\n', '\n')
         if text:
             self._response = text.strip()
         else:
             self._response = ''
 
-        # self._response = self._response.replace('\\r\\n', '\n').replace('\\n', '\n')
 
         if self._response:
             self._log.info(self._response)
@@ -1763,8 +1760,77 @@ class _MapdlCore(_MapdlCommands):
         if short_cmd in PLOT_COMMANDS:
             return self._display_plot(self._response)
 
-        self._response = self._response.replace('\\r\\n', '\n').replace('\\n', '\n')
         return self._response
+
+    # @supress_logging
+    def load_table(self, name, array, var1='', var2='', var3=''):
+        """Load a table from Python to MAPDL
+
+        Uses \*TREAD to transfer the table.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : np.ndarray or List
+            List as a table or ``numpy`` array.
+
+        var1 : str, optional
+            A primary variable (listed below) or can be an independent
+            parameter. If specifying an independent parameter, then
+            you must define an additional table for the independent
+            parameter. The additional table must have the same name as
+            the independent parameter and may be a function of one or
+            more primary variables or another independent
+            parameter. All independent parameters must relate to a
+            primary variable.
+
+            - ``"TIME"``: Time
+            - ``"FREQ"``: Frequency
+            - ``"X"``: X-coordinate location
+            - ``"Y"``: Y-coordinate location
+            - ``"Z"``: Z-coordinate location
+            - ``"TEMP"``: Temperature
+            - ``"VELOCITY"``: Velocity
+            - ``"1"``]: Pressure	PRESSURE [
+            - ``"GAP"``: Geometric gap/penetration
+            - ``"SECTOR"``: Cyclic sector number
+            - ``"OMEGS"``: Amplitude of the rotational velocity vector
+            - ``"ECCENT"``: Eccentricity
+            - ``"THETA"``: Phase shift
+            - ``"ELEM"``: Element number
+            - ``"NODE"``: Node number
+            - ``"CONC"``: Concentration
+
+        var2 : str, optional
+            See ``var1``
+
+        var3 : str, optional
+            See ``var1``
+
+        Examples
+        --------
+        >>> my_conv = np.array([[0, 0.001],
+                                [120, 0.001],
+                                [130, 0.005],
+                                [700, 0.005],
+                                [710, 0.002],
+                                [1000, 0.002]])
+        >>> mapdl.load_table('MY_TABLE', my_conv, 'TIME')
+        >>> mapdl.parameters['MY_TABLE']
+        array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
+        """
+        if array.ndim < 2:
+            raise ValueError('Expecting at least a 2D table, but input contains '
+                             'only 1 dimension')
+        self.dim(name, 'TABLE', array.shape[0], var1=var1, var2=var2, var3=var3)
+        filename = os.path.join(tempfile.gettempdir(), random_string() + '.txt')
+        np.savetxt(filename, array)
+        self.tread(name, filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')

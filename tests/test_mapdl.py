@@ -237,6 +237,7 @@ def test_aplot(cleared, mapdl):
     # and legacy as well
     mapdl.aplot(vtk=False)
 
+
 @skip_no_xserver
 @pytest.mark.parametrize('vtk', [True, False])
 def test_vplot(cleared, mapdl, vtk):
@@ -513,4 +514,15 @@ def test_cyclic_solve(mapdl, cleared):
     mapdl.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
-    assert mapdl.result.nsets == 16
+    assert mapdl.result.nsets == 16  # multiple result files...
+
+
+def test_load_table(mapdl):
+    my_conv = np.array([[0, 0.001],
+                        [120, 0.001],
+                        [130, 0.005],
+                        [700, 0.005],
+                        [710, 0.002],
+                        [1000, 0.002]])
+    mapdl.load_table('my_conv', my_conv, 'TIME')
+    assert np.allclose(mapdl.parameters['my_conv'], my_conv[:, -1])

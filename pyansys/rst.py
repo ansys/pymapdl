@@ -12,6 +12,7 @@ from functools import wraps
 import vtk
 import numpy as np
 import pyvista as pv
+from tqdm import tqdm
 
 from pyansys import _binary_reader, _reader
 from pyansys.mesh import Mesh
@@ -60,16 +61,6 @@ ELEMENT_RESULT_NCOMP = {'ENS': 6,
                         'EDI': 7}
 
 
-def within_plotter(fn):
-    """Calls a result method.  Must be called from a class"""
-    def wrapper(*args, **kwargs):
-        args[0]._within_plotter = True
-        out = fn(*args, **kwargs)
-        args[0]._within_plotter = False
-        return out
-    return wrapper
-
-
 class Result(AnsysBinary):
     """Reads a binary ANSYS result file.
 
@@ -95,7 +86,6 @@ class Result(AnsysBinary):
         """Loads basic result information from result file and
         initializes result object.
         """
-        self._within_plotter = False  # necessary for distributed plotting
         self.filename = filename
         self._resultheader = self._read_result_header()
         self._animating = False
@@ -495,7 +485,6 @@ class Result(AnsysBinary):
 
         return self._plot_point_scalars(None, grid=grid, **kwargs)
 
-    @within_plotter
     def plot_nodal_solution(self, rnum, comp='norm',
                             show_displacement=False,
                             displacement_factor=1.0,
@@ -611,6 +600,9 @@ class Result(AnsysBinary):
     @wraps(plot_nodal_solution)
     def plot_nodal_displacement(self, *args, **kwargs):
         """wraps plot_nodal_solution"""
+        if self._is_thermal:
+            raise AttributeError('Thermal solution does not contain nodal '
+                                 'displacement results')
         return self.plot_nodal_solution(*args, **kwargs)
 
     @property
@@ -731,7 +723,6 @@ class Result(AnsysBinary):
     def time_values(self):
         return self._resultheader['time_values']
 
-    @within_plotter
     def animate_nodal_solution(self, rnum, comp='norm',
                                node_components=None,
                                element_components=None,
@@ -765,13 +756,17 @@ class Result(AnsysBinary):
             containing all nodes of the component.  Default True.
 
         add_text : bool, optional
-            Adds information about the result when rnum is given.
+            Adds information about the result.
 
         displacement_factor : float, optional
             Increases or decreases displacement by a factor.
 
         nangles : int, optional
             Number of "frames" between each full cycle.
+
+        loop : bool, optional
+            Loop the animation.  Default ``True``.  Disable this to
+            animate once and close.
 
         movie_filename : str, optional
             Filename of the movie to open.  Filename should end in
@@ -843,6 +838,131 @@ class Result(AnsysBinary):
     def animate_nodal_displacement(self, *args, **kwargs):
         """wraps animate_nodal_solution"""
         return self.animate_nodal_solution(*args, **kwargs)
+
+    def animate_nodal_solution_set(self, rnums=None, comp='norm',
+                                   node_components=None,
+                                   element_components=None,
+                                   sel_type_all=True,
+                                   loop=True, movie_filename=None,
+                                   add_text=True,
+                                   fps=20,
+                                   **kwargs):
+        """Animate a set of nodal solutions.
+
+        Animates the scalars of all the result sets.  Best when used
+        with a series of static analyses.
+
+        rnums : collection.Iterable
+            Range or list containing the zero based indexed cumulative
+            result numbers to animate.
+
+        comp : str, optional
+            Scalar component to display.  Options are ``'x'``,
+            ``'y'``, ``'z'``, and ``'norm'``, and ``None``.  Not
+            applicable for a thermal analysis.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default True.
+
+        loop : bool, optional
+            Loop the animation.  Default ``True``.  Disable this to
+            animate once and close.
+
+        movie_filename : str, optional
+            Filename of the movie to open.  Filename should end in
+            ``'mp4'``, but other filetypes may be supported.  See
+            ``imagio.get_writer``.  A single loop of the mode will be
+            recorded.
+
+        add_text : bool, optional
+            Adds information about the result to the animation.
+
+        fps : int, optional
+            Frames per second.  Defaults to 20 and limited to hardware
+            capabilities and model density.
+
+        kwargs : optional keyword arguments, optional
+            See help(pyvista.Plot) for additional keyword arguments.
+
+        Examples
+        --------
+        Animate all results
+
+        >>> rst.animate_nodal_solution_set()
+
+        Animate every 50th result in a set of results and save to a
+        gif.  Use the "zx" camera position to view the ZX plane from
+        the top down.
+
+        >>> rsets = range(0, rst.nsets, 50)
+        >>> rst.animate_nodal_solution_set(rsets, stitle='Temp', lighting=False,
+                               cpos='zx', movie_filename='example.gif')
+        """
+        if rnums is None:
+            rnums = range(self.nsets)
+        elif not isinstance(rnums, Iterable):
+            raise TypeError('``rnums`` must be a range or list of result numbers')
+
+        def get_scalars(rnum):
+            _, data = self.nodal_solution(rnum)
+            if not self._is_thermal:
+                data = data[:, :3]
+
+                axis = None
+                if comp == 'x':
+                    axis = 0
+                elif comp == 'y':
+                    axis = 1
+                elif comp == 'z':
+                    axis = 2
+
+                if axis is not None:
+                    data = data[:, axis]
+                else:
+                    data = (data*data).sum(1)**0.5
+            else:
+                data = data.ravel()
+
+            return data
+
+        ind = None
+        if node_components:
+            grid, ind = self._extract_node_components(node_components,
+                                                      sel_type_all)
+        elif element_components:
+            grid, ind = self._extract_element_components(element_components)
+        else:
+            grid = self.grid
+
+        scalars = []
+        for rnum in tqdm(rnums, desc='Caching scalars'):
+            if ind is None:
+                scalars.append(get_scalars(rnum))
+            else:
+                scalars.append(get_scalars(rnum)[ind])
+
+        text = None
+        if add_text:
+            time_values = self.time_values
+            text = ['Time Value: %12.4f' % time_values[i] for i in rnums]
+
+        return self._animate_point_scalars(scalars, grid=grid,
+                                           text=text,
+                                           movie_filename=movie_filename,
+                                           loop=loop,
+                                           fps=fps,
+                                           **kwargs)
 
     def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
@@ -1787,7 +1907,6 @@ class Result(AnsysBinary):
         pstress[isnan] = np.nan
         return nodenum, pstress
 
-    @within_plotter
     def plot_principal_nodal_stress(self, rnum, comp=None,
                                     show_displacement=False,
                                     displacement_factor=1.0,
@@ -1955,7 +2074,7 @@ class Result(AnsysBinary):
 
         # weird bug in some edge cases, have to roll our own indices here
         if '_temp_id' not in grid.point_arrays:
-            grid['_temp_id'] = np.arange(grid.n_points)
+            grid.point_arrays['_temp_id'] = np.arange(grid.n_points)
         mesh = grid.extract_surface()
         ind = mesh.point_arrays['_temp_id']
 
@@ -2046,6 +2165,8 @@ class Result(AnsysBinary):
         if animate:
             orig_pts = copied_mesh.points.copy()
             plotter.show(interactive=False, auto_close=False,
+                         window_size=window_size,
+                         full_screen=full_screen,
                          interactive_update=not off_screen)
 
             self._animating = True
@@ -2058,6 +2179,7 @@ class Result(AnsysBinary):
             first_loop = True
             cached_normals = [None for _ in range(nangles)]
             while self._animating:
+
                 for j, angle in enumerate(np.linspace(0, np.pi*2, nangles + 1)[:-1]):
                     mag_adj = np.sin(angle)
                     if scalars is not None:
@@ -2112,6 +2234,191 @@ class Result(AnsysBinary):
             return cpos, img
 
         return cpos
+
+    def _animate_point_scalars(self, scalars, grid=None,
+                               text=None,
+                               movie_filename=None,
+                               loop=True,
+                               fps=20,
+                               **kwargs):
+        """Animate a set of point scalars on active mesh.
+
+        Parameters
+        ----------
+        scalars : List
+            List of node scalars to plot.  One set of values for each frame.
+
+        grid : pyvista.PolyData or pyvista.UnstructuredGrid, optional
+            Uses self.grid by default.  When specified, uses this grid
+            instead.
+
+        text : List, optional
+            One string for each value in ``scalars``.
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See ``help(pyvista.plot)``
+
+        Returns
+        -------
+        cpos : list
+            Camera position.
+        """
+        # if rnum:
+        #     rnum = self.parse_step_substep(rnum)
+
+        if grid is None:
+            grid = self.grid
+
+        # disp = None
+        # if show_displacement and not animate:
+        #     disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
+        #     if node_components:
+        #         _, ind = self._extract_node_components(node_components, sel_type_all)
+        #         disp = disp[ind]
+        #     elif element_components:
+        #         _, ind = self._extract_element_components(element_components)
+        #         disp = disp[ind]
+        #     new_points = disp + grid.points
+        #     grid = grid.copy()
+        #     grid.points = new_points
+        # elif animate:
+        #     disp = self.nodal_solution(rnum)[1][:, :3]*displacement_factor
+
+        # extract mesh surface
+        # mapped_indices = None
+        # if 'vtkOriginalPointIds' in grid.point_arrays:
+        #     mapped_indices = grid.point_arrays['vtkOriginalPointIds']
+
+        # weird bug in some edge cases, have to roll our own indices here
+        if '_temp_id' not in grid.point_arrays:
+            grid['_temp_id'] = np.arange(grid.n_points)
+        mesh = grid.extract_surface()
+        ind = mesh.point_arrays['_temp_id']
+
+        # if disp is not None:
+        #     if mapped_indices is not None:
+        #         disp = disp[mapped_indices][ind]
+        #     else:
+        #         disp = disp[ind]
+
+        # remap scalars
+        for i in range(len(scalars)):
+            scalars[i] = scalars[i][ind]
+
+        rng = kwargs.pop('rng', [np.min(scalars), np.max(scalars)])
+        cmap = kwargs.pop('cmap', 'jet')
+        window_size = kwargs.pop('window_size', [1024, 768])
+        full_screen = kwargs.pop('full_screen', False)
+        notebook = kwargs.pop('notebook', False)
+        off_screen = kwargs.pop('off_screen', None)
+        cpos = kwargs.pop('cpos', None)
+        # screenshot = kwargs.pop('screenshot', None)
+        # interactive = kwargs.pop('interactive', True)
+        text_color = kwargs.pop('text_color', None)
+
+        kwargs.setdefault('smooth_shading', True)
+        kwargs.setdefault('color', 'w')
+        kwargs.setdefault('interpolate_before_map', True)
+
+        plotter = pv.Plotter(off_screen=off_screen, notebook=notebook)
+
+        # set axes
+        if kwargs.pop('show_axes', True):
+            plotter.add_axes()
+
+        # set background
+        plotter.background_color = kwargs.pop('background', None)
+
+        # remove extra keyword args
+        kwargs.pop('node_components', None)
+        kwargs.pop('sel_type_all', None)
+
+        # if overlay_wireframe:
+        #     plotter.add_mesh(self.grid, style='wireframe', color='w',
+        #                      opacity=0.5)
+
+        copied_mesh = mesh.copy()
+        plotter.add_mesh(copied_mesh,
+                         scalars=scalars[0],
+                         rng=rng,
+                         cmap=cmap,
+                         **kwargs)
+
+        # set scalar bar text colors
+        if text_color:
+            from pyvista.plotting.theme import parse_color
+            text_color = parse_color(text_color)
+            plotter.scalar_bar.GetLabelTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetAnnotationTextProperty().SetColor(text_color)
+            plotter.scalar_bar.GetTitleTextProperty().SetColor(text_color)
+
+        # NAN/missing data are white
+        # plotter.renderers[0].SetUseDepthPeeling(1)  # <-- for transparency issues
+        plotter.mapper.GetLookupTable().SetNanColor(1, 1, 1, 1)
+
+        if cpos:
+            plotter.camera_position = cpos
+
+        if movie_filename:
+            if movie_filename.strip()[-3:] == 'gif':
+                plotter.open_gif(movie_filename)
+            else:
+                plotter.open_movie(movie_filename)
+
+        # add table
+        if text is not None:
+            if len(text) != len(scalars):
+                raise ValueError('Length of ``text`` must be the same as '
+                                 '``scalars``')
+            plotter.add_text(text[0], font_size=20, color=text_color)
+
+        # orig_pts = copied_mesh.points.copy()
+        plotter.show(interactive=False, auto_close=False,
+                     window_size=window_size,
+                     full_screen=full_screen,
+                     interactive_update=not off_screen)
+
+        self._animating = True
+        def q_callback():
+            """exit when user wants to leave"""
+            self._animating = False
+
+        plotter.add_key_event("q", q_callback)
+
+        if off_screen:
+            twait = 0
+        else:
+            twait = 1/fps
+
+        first_loop = True
+        while self._animating:
+            for i, data in enumerate(scalars):
+                tstart_render = time.time()
+                copied_mesh.active_scalars[:] = data
+
+                if text is not None:
+                    # 2 maps to vtk.vtkCornerAnnotation.UpperLeft
+                    plotter.textActor.SetText(2, text[i])
+
+                # at max supported framerate
+                plotter.update(1, force_redraw=True)
+                if not self._animating:
+                    break
+
+                if movie_filename and first_loop:
+                    plotter.write_frame()
+
+                # wait to maintain desired frame rate
+                telap = time.time() - tstart_render
+                if telap < twait:
+                    time.sleep(twait - telap)
+
+            first_loop = False
+            if not loop:
+                break
+
+        plotter.close()
+        return plotter.camera_position
 
     def text_result_table(self, rnum):
         """ Returns a text result table for plotting """
@@ -2487,7 +2794,6 @@ class Result(AnsysBinary):
             nitem = ELEMENT_RESULT_NCOMP.get(result_type, 1)
         return nitem
 
-    @within_plotter
     def plot_element_result(self, rnum, result_type, item_index,
                             in_element_coord_sys=False, **kwargs):
         """Plot an element result.
@@ -2711,7 +3017,7 @@ class Result(AnsysBinary):
         _binary_reader.euler_cart_to_cyl(stress, angle)  # mod stress inplace
         return nnum, stress
 
-    def nodal_temperature(self, rnum):
+    def nodal_temperature(self, rnum, **kwargs):
         """Retrieves the temperature for each node in the
         solution.
 
@@ -2747,7 +3053,6 @@ class Result(AnsysBinary):
         temp = temp.ravel()
         return nnum, temp
 
-    @within_plotter
     def plot_cylindrical_nodal_stress(self, rnum, comp=None, show_displacement=False,
                                       displacement_factor=1, node_components=None,
                                       element_components=None, sel_type_all=True,
@@ -2818,7 +3123,6 @@ class Result(AnsysBinary):
                                         displacement_factor=displacement_factor,
                                         **kwargs)
 
-    @within_plotter
     def plot_nodal_temperature(self, rnum, show_displacement=False,
                                displacement_factor=1, node_components=None,
                                element_components=None, sel_type_all=True,
@@ -3192,7 +3496,6 @@ class Result(AnsysBinary):
                                        stitle=stitle,
                                        **kwargs)
 
-    @within_plotter
     def _plot_nodal_result(self, rnum, result_type, comp, available_comps,
                            show_displacement=False, displacement_factor=1,
                            node_components=None, element_components=None,
