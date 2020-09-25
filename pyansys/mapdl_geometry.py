@@ -159,11 +159,12 @@ class Geometry():
         groups = [[int(anum), int(nelem)] for anum, nelem in groups]
         self._mapdl.esla('S')
 
-        grid = self._mapdl.mesh._grid
+        grid = self._mapdl.mesh._grid.linear_copy()
         pd = pv.PolyData(grid.points, grid.cells)
 
         pd['ansys_node_num'] = grid['ansys_node_num']
         pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
+        # breakpoint()
         # pd.clean(inplace=True)  # TODO: Consider
 
         # delete all temporary meshes and clean up settings
@@ -188,8 +189,11 @@ class Geometry():
         else:
             entity_num[:] = 0
 
-        grid['entity_num'] = entity_num
-        return grid
+        # grid['entity_num'] = entity_num
+        # return grid
+
+        pd['entity_num'] = entity_num
+        return pd
 
     @property
     def n_volu(self):
