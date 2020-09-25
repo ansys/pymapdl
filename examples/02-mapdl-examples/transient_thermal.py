@@ -14,6 +14,8 @@ https://www.simutechgroup.com/tips-and-tricks/fea-articles/97-fea-tips-tricks-th
 Thanks SimuTech!
 
 """
+# sphinx_gallery_thumbnail_number = 4
+
 import os
 import numpy as np
 
