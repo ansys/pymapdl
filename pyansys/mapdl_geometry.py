@@ -164,8 +164,7 @@ class Geometry():
 
         pd['ansys_node_num'] = grid['ansys_node_num']
         pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
-        # breakpoint()
-        # pd.clean(inplace=True)  # TODO: Consider
+        # pd.clean(inplace=True)  # OPTIONAL
 
         # delete all temporary meshes and clean up settings
         with self._mapdl.chain_commands:
@@ -188,9 +187,6 @@ class Geometry():
                 i += nelem
         else:
             entity_num[:] = 0
-
-        # grid['entity_num'] = entity_num
-        # return grid
 
         pd['entity_num'] = entity_num
         return pd
