@@ -112,7 +112,7 @@ class Archive(Mesh):
                                          force_linear, null_unallowed)
 
     @property
-    def raw(self):
+    def raw(self):  # pragma: no cover
         raise AttributeError('The `raw` attribute has been depreciated.  Access'
                              ' the values directly from the archive object.\n\n'
                              '    Instead of:\n'
@@ -191,7 +191,7 @@ class Archive(Mesh):
                1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
                1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
         """
-        if self._grid is None:
+        if self._grid is None:  # pragma: no cover
             raise AttributeError('Archive must be parsed as a vtk grid.\n'
                                  'Set `parse_vtk=True`')
         return quality(self._grid)

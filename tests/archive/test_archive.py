@@ -40,6 +40,10 @@ def all_solid_cells_archive_linear():
     return pyansys.Archive(os.path.join(testfiles_path, 'all_solid_cells.cdb'),
                            force_linear=True)
 
+def test_repr(hex_archive):
+    assert '%s' % hex_archive.n_node in str(hex_archive)
+    assert '%s' % hex_archive.n_elem in str(hex_archive)
+
 
 def test_read_mesh200():
     archive = pyansys.Archive(os.path.join(testfiles_path, 'mesh200.cdb'))
