@@ -78,7 +78,7 @@ def thermal_solution(mapdl):
 
 def test_not_a_dis_rst(tmpdir):
     filename = os.path.join(testfiles_path, 'dist_rst', 'static', 'file.rst')
-    tmp_file = os.path.join(tmpdir, 'tmp0.rth')
+    tmp_file = os.path.join(str(tmpdir), 'tmp0.rth')
     shutil.copy(filename, tmp_file)
     with pytest.raises(RuntimeError):
         DistributedResult(tmp_file)
