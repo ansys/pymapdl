@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from pyvista.plotting.renderer import CameraPosition
 
+from pyansys.dis_result import DistributedResult
 from pyansys._rst_keys import element_index_table_info
 import pyansys
 
@@ -73,6 +74,14 @@ def thermal_solution(mapdl):
     mapdl.finish()
     mapdl.post1()
     mapdl.set(1, 1)
+
+
+def test_not_a_dis_rst(tmpdir):
+    filename = os.path.join(testfiles_path, 'dist_rst', 'static', 'file.rst')
+    tmp_file = os.path.join(tmpdir, 'tmp0.rth')
+    shutil.copy(filename, tmp_file)
+    with pytest.raises(RuntimeError):
+        DistributedResult(tmp_file)
 
 
 @skip_no_ansys

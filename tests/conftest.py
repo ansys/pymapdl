@@ -6,7 +6,7 @@ import pyvista
 
 from pyansys.misc import get_ansys_bin
 import pyansys
-from pyansys.errors import MapdlRuntimeError, MapdlExitedError
+from pyansys.errors import MapdlExitedError
 
 
 pyvista.OFF_SCREEN = True
@@ -28,8 +28,8 @@ skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS install
 
 
 modes = ['corba']
-if os.name == 'posix':  # console only for linux
-    modes.append('console')
+# if os.name == 'posix':  # console only for linux
+#     modes.append('console')
 
 
 collect_ignore = []

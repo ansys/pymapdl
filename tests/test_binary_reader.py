@@ -3,7 +3,7 @@ import os
 
 import pytest
 from pyvista.plotting import system_supports_plotting
-
+from pyvista.plotting.renderer import CameraPosition
 import numpy as np
 import pyvista as pv
 
@@ -54,6 +54,11 @@ def static_canteliver_bc():
     filename = os.path.join(testfiles_path, 'rst', 'beam_static_bc.rst')
     return pyansys.read_binary(filename)
 
+
+@pytest.fixture(scope='module')
+def thermal_rst():
+    filename = os.path.join(testfiles_path, 'file.rth')
+    return pyansys.read_binary(filename)
 
 
 @pytest.fixture(scope="module")
@@ -352,3 +357,42 @@ def test_reaction_forces():
     nnum, forces = rst.nodal_static_forces(0)
     assert np.allclose(nnum, [1, 2, 3, 4])
     assert np.allclose(forces[:, 1], [-600, 250, 500, -900])
+
+
+def test_thermal_result(thermal_rst):
+    assert thermal_rst._is_thermal
+    assert thermal_rst.result_dof(0) == ['TEMP']
+    with pytest.raises(AttributeError):
+        thermal_rst.nodal_displacement()
+
+    with pytest.raises(AttributeError):
+        thermal_rst.nodal_velocity(0)
+
+    with pytest.raises(AttributeError):
+        thermal_rst.nodal_acceleration(0)
+
+    with pytest.raises(AttributeError):
+        thermal_rst.plot_nodal_solution(0, 'NORM')
+
+    with pytest.raises(ValueError):
+        thermal_rst.plot_nodal_solution(0, 'ROTX')
+
+
+def test_plot_temperature(thermal_rst):
+    cpos = thermal_rst.plot_nodal_temperature(0)
+    assert isinstance(cpos, CameraPosition)
+
+
+def test_file_not_found():
+    with pytest.raises(FileNotFoundError):
+        pyansys.read_binary('not_a_file.rst')
+
+
+def test_file_not_supported():
+    with pytest.raises(RuntimeError):
+        pyansys.read_binary(os.path.join(testfiles_path, 'file.esav'))
+
+
+def test_not_valid_file():
+    with pytest.raises(RuntimeError):
+        pyansys.read_binary(__file__)

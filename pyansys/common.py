@@ -299,8 +299,8 @@ def read_standard_header(filename):
 
             # Otherwise, it's probably not a result file
             else:
-                raise Exception('Unable to determine endian type.  ' +
-                                'Possibly not an ANSYS binary file')
+                raise RuntimeError('Unable to determine endian type.  ' +
+                                   'Possibly not an ANSYS binary file')
 
         f.seek(0)
 
@@ -376,25 +376,6 @@ def read_standard_header(filename):
         # header['file length'] = two_ints_to_long(ints[0], ints[1])
 
     return header
-
-
-def midside_mask(grid):
-    """Returns a mask of midside nodes
-
-    Parameters
-    ----------
-    grid : pyvista.UnstructuredGrid
-        Grid to check.
-
-    Returns
-    -------
-    mask : bool np.ndarray
-        True when a midside node.
-    """
-    return _binary_reader.midside_mask(grid.celltypes,
-                                       grid.cells,
-                                       grid.offset,
-                                       grid.number_of_points)
 
 
 def rotate_to_global(result, euler_angles):

@@ -485,7 +485,7 @@ class Result(AnsysBinary):
 
         return self._plot_point_scalars(None, grid=grid, **kwargs)
 
-    def plot_nodal_solution(self, rnum, comp='norm',
+    def plot_nodal_solution(self, rnum, comp=None,
                             show_displacement=False,
                             displacement_factor=1.0,
                             node_components=None,
@@ -501,10 +501,13 @@ class Result(AnsysBinary):
             list containing (step, substep) of the requested result.
 
         comp : str, optional
-            Display component to display.  Options are ``'x'``,
-            ``'y'``, ``'z'``, or ``'norm'``.  This corresponds to the
-            x directin, y direction, z direction, and the normalized
-            result.
+            Display component to display.  Options are ``'X'``,
+            ``'Y'``, ``'Z'``, ``'NORM'``, or an available degree of
+            freedom.  Result may also include other degrees of
+            freedom, check ``rst.result_dof`` for available degrees of
+            freedoms for a given result.  Defaults to ``"NORM"`` for a
+            structural displacement result, and ``"TEMP"`` for a
+            thermal result.
 
         show_displacement : bool, optional
             Deforms mesh according to the result.
@@ -545,31 +548,40 @@ class Result(AnsysBinary):
         >>> result.plot_nodal_solution(0, background='w', show_edges=True)
 
         """
-        # Load result from file
         rnum = self.parse_step_substep(rnum)
         nnum, result = self.nodal_solution(rnum)
-        label = 'Displacement'
+        dof = self.result_dof(rnum)
 
-        # Process result
-        if comp == 'x':
-            scalars = result[:, 0]
-            stitle = 'X {:s}\n'.format(label)
-
-        elif comp == 'y':
-            scalars = result[:, 1]
-            stitle = 'Y {:s}\n'.format(label)
-
-        elif comp == 'z':
-            scalars = result[:, 2]
-            stitle = 'Z {:s}\n'.format(label)
-
+        if self._is_thermal:
+            label = 'Temperature'
         else:
-            # Normalize displacement
-            scalars = result[:, :3]
-            scalars = (scalars*scalars).sum(1)**0.5
+            label = 'Displacement'
 
-            stitle = 'Normalized\n%s\n' % label
-        kwargs.setdefault('stitle', stitle)
+        if comp is None:
+            if self._is_thermal:
+                comp = 'TEMP'
+            else:
+                comp = 'NORM'
+        if not isinstance(comp, str):
+            raise TypeError('``comp`` must be a string')
+        comp = comp.upper()
+
+        # check component is in available degrees of freedom
+        if comp in ('X', 'Y', 'Z'):
+            comp = 'U' + comp
+
+        if comp == 'NORM':
+            if dof[:3] != ['UX', 'UY', 'UZ']:
+                raise AttributeError('Unable to compute norm given the DOF(s) %s'
+                                     % str(dof))
+            # Normalize displacement
+            scalars = np.linalg.norm(result[:, :3], axis=1)
+            comp = 'Normalized'
+        else:
+            if comp not in dof:
+                raise ValueError('Component %s not in the available ' % comp +
+                                 'degrees of freedom:\n``%s``' % dof)
+            scalars = result[:, dof.index(comp)]
 
         # sometimes there are less nodes in the result than in the geometry
         npoints = self.grid.number_of_points
@@ -589,6 +601,7 @@ class Result(AnsysBinary):
         else:
             grid = self.grid
 
+        kwargs.setdefault('stitle', '%s\n%s\n' % (comp, label))
         return self._plot_point_scalars(scalars, rnum=rnum, grid=grid,
                                         show_displacement=show_displacement,
                                         displacement_factor=displacement_factor,
@@ -909,6 +922,10 @@ class Result(AnsysBinary):
         >>> rst.animate_nodal_solution_set(rsets, stitle='Temp', lighting=False,
                                cpos='zx', movie_filename='example.gif')
         """
+        if self.nsets == 1:
+            raise RuntimeError('Unable to animate.  Solution contains only one '
+                               'result set')
+
         if rnums is None:
             rnums = range(self.nsets)
         elif not isinstance(rnums, Iterable):
@@ -965,11 +982,179 @@ class Result(AnsysBinary):
                                            **kwargs)
 
     def nodal_time_history(self, solution_type='NSL', in_nodal_coord_sys=False):
+        """The DOF solution for each node for all result sets.
+
+        The nodal results are returned returned in the global
+        cartesian coordinate system or nodal coordinate system.
+
+        Parameters
+        ----------
+        solution_type: str, optional
+            The solution type.  Must be either nodal displacements
+            (``'NSL'``), nodal velocities (``'VEL'``) or nodal
+            accelerations (``'ACC'``).
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate system.
+            Default ``False``.
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Nodal solution for all result sets.  Array is sized
+            ``rst.nsets x nnod x Sumdof``, which is the number of
+            time steps by number of nodes by degrees of freedom.
+        """
+        if not isinstance(solution_type, str):
+            raise TypeError('Solution type must be a string')
+
+        if solution_type == 'NSL':
+            func = self.nodal_solution
+        elif solution_type == 'VEL':
+            func = self.nodal_velocity
+        elif solution_type == 'ACC':
+            func = self.nodal_acceleration
+        else:
+            raise ValueError("Argument 'solution type' must be either 'NSL', "
+                             "'VEL', or 'ACC'")
+
+        # size based on the first result
+        nnum, sol = func(0)
+        data = np.empty((self.nsets, sol.shape[0], sol.shape[1]), np.float64)
+        for i in range(self.nsets):
+            data[i] = func(i)[1]
+
+        return nnum, data
+
+    def nodal_solution(self, rnum, in_nodal_coord_sys=False):
+        """Returns the DOF solution for each node in the global
+        cartesian coordinate system or nodal coordinate system.
+
+        Solution may be nodal temperatures or nodal displacements
+        depending on the type of the solution.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate system.
+            Default ``False``.
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Array of nodal displacements or nodal temperatures.  Array
+            is (``nnod`` x ``sumdof``), the number of nodes by the
+            number of degrees of freedom which includes ``numdof`` and
+            ``nfldof``
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, data = rst.nodal_solution(0)
+
+        Notes
+        -----
+        Some solution results may not include results for each node.
+        These results are removed by and the node numbers of the
+        solution results are reflected in ``nnum``.
+        """
+        return self._nodal_solution_result(rnum, 'NSL', in_nodal_coord_sys)
+
+    def nodal_velocity(self, rnum, in_nodal_coord_sys=False):
+        """Nodal velocities for a given result set.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Array of nodal velocities.  Array is (``nnod`` x
+            ``sumdof``), the number of nodes by the number of degrees
+            of freedom which includes ``numdof`` and ``nfldof``
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, data = rst.nodal_velocity(0)
+
+        Notes
+        -----
+        Some solution results may not include results for each node.
+        These results are removed by and the node numbers of the
+        solution results are reflected in ``nnum``.
+        """
+        return self._nodal_solution_result(rnum, 'VSL', in_nodal_coord_sys)
+
+    def nodal_acceleration(self, rnum, in_nodal_coord_sys=False):
+        """Nodal velocities for a given result set.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Array of nodal accelerations.  Array is (``nnod`` x
+            ``sumdof``), the number of nodes by the number of degrees
+            of freedom which includes ``numdof`` and ``nfldof``
+
+        Examples
+        --------
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> nnum, data = rst.nodal_acceleration(0)
+
+        Notes
+        -----
+        Some solution results may not include results for each node.
+        These results are removed by and the node numbers of the
+        solution results are reflected in ``nnum``.
+        """
+        return self._nodal_solution_result(rnum, 'ASL', in_nodal_coord_sys)
+
+    def _nodal_solution_result(self, rnum, solution_type, in_nodal_coord_sys=False):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
         Parameters
         ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
         solution_type: str, optional
             Specify, whether nodal displacements (``'NSL'``), nodal
             velocities (``'VEL'``) or nodal accelerations (``'ACC'``)
@@ -985,116 +1170,8 @@ class Result(AnsysBinary):
             Node numbers associated with the results.
 
         result : float np.ndarray
-            Result is ``self.nsets x nnod x Sumdof``, or number of
-            time steps by number of nodes by degrees of freedom.
-        """
-        if solution_type not in ('NSL', 'VEL', 'ACC'):
-            raise ValueError("Argument 'solution type' must be either 'NSL', 'VEL', or 'ACC'")
-
-        # Get info from result header
-        rpointers = self._resultheader['rpointers']
-        nsets = self.nsets
-
-        # get first solution header and assume following solution
-        # headers are equal
-        solution_header = self._result_solution_header(0)
-
-        mask = solution_header['mask']
-        # PDBN = bool(mask & 0b1<<10)
-        pdnsl = bool(solution_header['AvailData'] & 0b1 << 27)
-        PDVEL = bool(mask & 0b1 << 27)
-        PDACC = bool(mask & 0b1 << 28)
-
-        if solution_type == 'NSL' and not pdnsl:
-            raise Exception("Result file does not contain nodal displacements.")
-
-        if solution_type == 'VEL' and not PDVEL:
-            raise Exception("Result file does not contain nodal velocities.")
-
-        if solution_type == 'ACC' and not PDACC:
-            raise Exception("Result file does not contain nodal accelerations.")
-
-        nnod = solution_header['nnod']
-        numdof = solution_header['numdof']
-        nfldof = solution_header['nfldof']
-        sumdof = numdof + nfldof
-
-        # iterate over all loadsteps
-        results = np.zeros((nsets, nnod, sumdof))
-        for rnum in range(self.nsets):
-            # Seek to result table and to get pointer to DOF
-            # results of result table
-            rsol_header = self._result_solution_header(rnum)
-            if solution_type == 'NSL':  # Nodal Displacements
-                ptr_sl = rsol_header['ptrNSL']
-            elif solution_type == 'VEL':  # Nodal Velocities
-                ptr_sl = rsol_header['ptrVSL']
-            elif solution_type == 'ACC':  # Nodal Accelerations
-                ptr_sl = rsol_header['ptrASL']
-
-            record, sz = self.read_record(rpointers[rnum] + ptr_sl,
-                                          return_bufsize=True)
-            # nitems = record.size
-            result = record.reshape((-1, sumdof))
-
-            # PDBN should be set if only a subset of nodes was output
-            # PDBN is set only when solution type: nodal solution/displacement
-            # PDBN is not set when solution type: acceleration, velocities
-            if record.size != sumdof*nnod:
-                # read the next record to the internal indexing reording
-                nodlist = self.read_record(rpointers[rnum] + ptr_sl + sz)
-
-                # convert to zero index
-                sidx = nodlist -1
-
-            else:
-                # Reorder based on sorted indexing
-                sidx = self._sidx
-
-            results[rnum, sidx, :] = result
-
-        if not in_nodal_coord_sys:
-            euler_angles = self._mesh.node_angles[self._insolution].T
-
-            for rnum in range(nsets):
-                result = results[rnum, :, :]
-                rotate_to_global(result, euler_angles)
-
-        # check for invalid values
-        # mapdl writes invalid values as 2*100
-        results[results == 2**100] = 0
-
-        # also include nodes in output
-        return self._neqv[self._sidx], results
-
-    def nodal_solution(self, rnum, in_nodal_coord_sys=False):
-        """Returns the DOF solution for each node in the global
-        cartesian coordinate system or nodal coordinate system.
-
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
-
-        in_nodal_coord_sys : bool, optional
-            When True, returns results in the nodal coordinate system.
-            Default False.
-
-        Returns
-        -------
-        nnum : int np.ndarray
-            Node numbers associated with the results.
-
-        result : float np.ndarray
             Result is (``nnod`` x ``sumdof``), or number of nodes by degrees
             of freedom which includes ``numdof`` and ``nfldof``.
-
-        Examples
-        --------
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
-        >>> nnum, data = rst.nodal_solution(0)
 
         Notes
         -----
@@ -1102,11 +1179,17 @@ class Result(AnsysBinary):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
+        if solution_type not in ('NSL', 'VSL', 'ASL'):  # pragma: no cover
+            raise ValueError("Argument ``solution type`` must be either "
+                             "'NSL', 'VSL', or 'ASL'")
 
-        # convert to cumulative index
-        rnum = self.parse_step_substep(rnum)
+        # check if nodal solution exists
+        if not self.available_results[solution_type]:
+            raise AttributeError('Result file is missing "%s"' %
+                                 self.available_results.description[solution_type])
 
         # result pointer
+        rnum = self.parse_step_substep(rnum)  # convert to cumulative index
         ptr_rst = self._resultheader['rpointers'][rnum]
         result_solution_header = self._result_solution_header(rnum)
 
@@ -1115,10 +1198,13 @@ class Result(AnsysBinary):
         nfldof = result_solution_header['nfldof']
         sumdof = numdof + nfldof
 
-        ptr_nsl = result_solution_header['ptrNSL']
+        ptr = result_solution_header['ptr' + solution_type]
+        if ptr == 0:  # shouldn't get here...
+            raise AttributeError('Result file is missing "%s"' %
+                                 self.available_results.description[solution_type])
 
         # Read the nodal solution
-        result, bufsz = self.read_record(ptr_nsl + ptr_rst, True)
+        result, bufsz = self.read_record(ptr + ptr_rst, True)
         result = result.reshape(-1, sumdof)
 
         # additional entries are sometimes written for no discernible
@@ -1130,7 +1216,7 @@ class Result(AnsysBinary):
         if result.shape[0] < nnod:
             # read second buffer containing the node indices of the
             # results and convert from fortran to zero indexing
-            sidx = self.read_record(ptr_nsl + ptr_rst + bufsz) - 1
+            sidx = self.read_record(ptr + ptr_rst + bufsz) - 1
             unsort_nnum = self._resultheader['neqv'][sidx]
 
             # now, sort using the new sorted node numbers indices
@@ -1155,6 +1241,7 @@ class Result(AnsysBinary):
         # if result.shape[1] == 1:
         #     result = result.ravel()
         return nnum, result
+
 
     @wraps(nodal_solution)
     def nodal_displacement(self, *args, **kwargs):

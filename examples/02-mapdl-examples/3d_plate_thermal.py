@@ -70,5 +70,3 @@ mapdl.post_processing.plot_nodal_temperature()
 nnum, temp = mapdl.result.nodal_temperature(0)
 # this is the same as pyansys.read_binary(mapdl._result_file)
 
-print(mapdl.result.filename)
-print(temp)

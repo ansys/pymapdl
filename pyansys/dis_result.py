@@ -67,7 +67,7 @@ class DistributedResult(Result):
         if not self._main_result._is_distributed:
             raise RuntimeError('Result file is not part of a distributed result')
 
-        if not self._main_result._is_main:
+        if not self._main_result._is_main:  # pragma: no cover
             raise RuntimeError('DistributedResult must be created from the main '
                                'result file')
 
@@ -79,7 +79,7 @@ class DistributedResult(Result):
         for index in range(1, len(filenames)):
             result = Result(filenames[index])
             new_mask = np.in1d(gl_nnum, result.mesh.nnum, assume_unique=True)
-            if not new_mask.any():
+            if not new_mask.any():  # pragma: no cover
                 raise RuntimeError('File %s not part of the distributed result'
                                    % filenames[index])
             mask += new_mask
