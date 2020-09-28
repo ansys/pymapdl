@@ -86,9 +86,9 @@ def test_not_a_dis_rst(tmpdir):
 
 @skip_no_ansys
 def test_not_all_found(thermal_solution, mapdl, tmpdir):
-    filename = os.path.join(mapdl.path, 'file0.rth')
+    filename = os.path.join(mapdl.directory, 'file0.rth')
 
-    tmp_file = os.path.join(mapdl.path, 'tmp0.rth')
+    tmp_file = os.path.join(mapdl.directory, 'tmp0.rth')
     shutil.copy(filename, tmp_file)
     with pytest.raises(FileNotFoundError):
         dist_rst = pyansys.read_binary(tmp_file)
@@ -97,7 +97,7 @@ def test_not_all_found(thermal_solution, mapdl, tmpdir):
 @skip_no_ansys
 def test_temperature(thermal_solution, mapdl, tmpdir):
     ans_temp = mapdl.post_processing.nodal_temperature
-    dist_rst = pyansys.read_binary(os.path.join(mapdl.path, 'file0.rth'))
+    dist_rst = pyansys.read_binary(os.path.join(mapdl.directory, 'file0.rth'))
 
     # normal result should match
     rst = mapdl.result  # normally not distributed
@@ -112,7 +112,7 @@ def test_temperature(thermal_solution, mapdl, tmpdir):
 
 @skip_no_ansys
 def test_plot_temperature(thermal_solution, mapdl):
-    dist_rst = pyansys.read_binary(os.path.join(mapdl.path, 'file0.rth'))
+    dist_rst = pyansys.read_binary(os.path.join(mapdl.directory, 'file0.rth'))
     cpos = dist_rst.plot_nodal_temperature(0)
     assert isinstance(cpos, CameraPosition)
 
