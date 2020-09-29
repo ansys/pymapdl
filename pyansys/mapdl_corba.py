@@ -177,7 +177,7 @@ class MapdlCorba(_MapdlCore):
 
     @property
     def _broadcast_file(self):
-        return os.path.join(self.path, 'mapdl_broadcasts.txt')
+        return os.path.join(self.directory, 'mapdl_broadcasts.txt')
 
     @threaded
     def _start_broadcast_logger(self, update_rate=1.0):
@@ -216,7 +216,7 @@ class MapdlCorba(_MapdlCore):
     def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process"""
         # cache final path and lockfile before exiting
-        path = self.path
+        path = self.directory
         lockfile = self._lockfile
 
         self._log.debug('Exiting ANSYS')
@@ -295,7 +295,7 @@ class MapdlCorba(_MapdlCore):
 
                 if filename:
                     if os.path.basename(filename) == filename:
-                        filename = os.path.join(self.path, filename)
+                        filename = os.path.join(self.directory, filename)
                     self._output = filename
                     if len(items) == 5:
                         if items[4].lower().strip() == 'append':

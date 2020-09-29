@@ -130,7 +130,7 @@ class _MapdlCore(_MapdlCommands):
         self._redirected_commands = {'*LIS': self._list}
 
         if log_apdl:
-            filename = os.path.join(self.path, 'log.inp')
+            filename = os.path.join(self.directory, 'log.inp')
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
@@ -364,8 +364,8 @@ class _MapdlCore(_MapdlCommands):
         """Write entire archive to ASCII and read it in as a ``pyansys.Archive``"""
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.path, '_tmp.cdb')
-            nblock_filename = os.path.join(self.path, 'nblock.cdb')
+            arch_filename = os.path.join(self.directory, '_tmp.cdb')
+            nblock_filename = os.path.join(self.directory, 'nblock.cdb')
             # must have all nodes elements are using selected
             with self.chain_commands:
                 self.cm('__NODE__', 'NODE')
@@ -459,7 +459,7 @@ class _MapdlCore(_MapdlCommands):
     @run_as_prep7
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.path, '_tmp.iges')
+        filename = os.path.join(self.directory, '_tmp.iges')
         self.igesout(filename, att=1)
         return filename
 
@@ -850,7 +850,7 @@ class _MapdlCore(_MapdlCommands):
     def _list(self, command):
         """ Replaces *LIST command """
         items = command.split(',')
-        filename = os.path.join(self.path, '.'.join(items[1:]))
+        filename = os.path.join(self.directory, '.'.join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
             self._log.info(self._response)
@@ -1104,8 +1104,7 @@ class _MapdlCore(_MapdlCommands):
             result_path = self._result_file
 
         if result_path is None:
-            breakpoint()
-            raise RuntimeError('Unable to generate result path')
+            raise FileNotFoundError('No result file(s) at %s' % self.directory)
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
 
@@ -1127,8 +1126,8 @@ class _MapdlCore(_MapdlCommands):
             ext = ''
 
         if ext == '':
-            rth_file = os.path.join(self.path, '%s.%s' % (filename, 'rth'))
-            rst_file = os.path.join(self.path, '%s.%s' % (filename, 'rst'))
+            rth_file = os.path.join(self.directory, '%s.%s' % (filename, 'rth'))
+            rst_file = os.path.join(self.directory, '%s.%s' % (filename, 'rst'))
 
             if os.path.isfile(rth_file) and os.path.isfile(rst_file):
                 return last_created([rth_file, rst_file])
@@ -1137,7 +1136,7 @@ class _MapdlCore(_MapdlCommands):
             elif os.path.isfile(rst_file):
                 return rst_file
         else:
-            filename = os.path.join(self.path, '%s.%s' % (filename, ext))
+            filename = os.path.join(self.directory, '%s.%s' % (filename, ext))
             if os.path.isfile(filename):
                 return filename
 
@@ -1155,8 +1154,8 @@ class _MapdlCore(_MapdlCommands):
         if filename[-1].isnumeric():
             filename += '_'
 
-        rth_file = os.path.join(self.path, '%s0.%s' % (filename, 'rth'))
-        rst_file = os.path.join(self.path, '%s0.%s' % (filename, 'rst'))
+        rth_file = os.path.join(self.directory, '%s0.%s' % (filename, 'rth'))
+        rst_file = os.path.join(self.directory, '%s0.%s' % (filename, 'rst'))
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
         elif os.path.isfile(rth_file):
@@ -1851,19 +1850,20 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     @supress_logging
-    def path(self):
+    def directory(self):
         """Current MAPDL directory
 
         Examples
         --------
-        Path on Linux
+        Directory on Linux
 
-        >>> mapdl.path
+        >>> mapdl.directory
         '/tmp/ansys'
 
-        Path on Windows
+        Directory on Windows
 
-        >>> mapdl.path
+        >>> mapdl.directory
+        'C:/temp_directory/'
 
         """
         # always attempt to cache the path
@@ -1876,7 +1876,7 @@ class _MapdlCore(_MapdlCommands):
     @property
     def _lockfile(self):
         """lockfile path"""
-        path = self.path
+        path = self.directory
         if path is not None:
             return os.path.join(path, self.jobname + '.lock').replace('\\', '/')
 
@@ -2023,7 +2023,7 @@ class _MapdlCore(_MapdlCommands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.path, '%s*.png' % self.jobname))
+        filenames = glob.glob(os.path.join(self.directory, '%s*.png' % self.jobname))
         filenames.sort()
         return filenames[-1]
 

@@ -89,7 +89,7 @@ def test_output(cleared, mapdl):
     comment = 'Testing...'
     resp = mapdl.com(comment)
     mapdl.output()
-    output = open(os.path.join(mapdl.path, tmp_file)).read()
+    output = open(os.path.join(mapdl.directory, tmp_file)).read()
     assert comment in output
 
 

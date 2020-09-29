@@ -423,7 +423,7 @@ class Parameters():
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""
-        filename = os.path.join(self._mapdl.path, filename)
+        filename = os.path.join(self._mapdl.directory, filename)
         if arr.dtype != np.double:
             arr = arr.astype(np.double)
         pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
