@@ -1,7 +1,7 @@
 """
 .. _ref_plane_stress_concentration:
 
-Path Operations Within pyansys and MAPDL
+Path Operations within pyansys and MAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tutorial shows how you can use pyansys and MAPDL to interpolate

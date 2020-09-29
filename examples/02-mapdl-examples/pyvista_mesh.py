@@ -24,7 +24,7 @@ mesh.plot(color='w', show_edges=True)
 
 ###############################################################################
 # Write the mesh to an archive file
-archive_filename = os.path.join(mapdl.path, 'tmp.cdb')
+archive_filename = os.path.join(mapdl.directory, 'tmp.cdb')
 pyansys.save_as_archive(archive_filename, mesh)
 
 
