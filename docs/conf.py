@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 import sphinx_rtd_theme
 
 # -- pyvista configuration ---------------------------------------------------
@@ -20,6 +21,15 @@ if not os.path.exists(pyvista.FIGURE_PATH):
     os.makedirs(pyvista.FIGURE_PATH)
 
 pyvista.BUILDING_GALLERY = True
+
+
+# supress annoying matplotlib bug
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message='Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.',
+)
+
 
 # -- General configuration ------------------------------------------------
 # If your documentation needs a minimal Sphinx version, state it here.

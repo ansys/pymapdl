@@ -1104,8 +1104,7 @@ class _MapdlCore(_MapdlCommands):
             result_path = self._result_file
 
         if result_path is None:
-            breakpoint()
-            raise RuntimeError('Unable to generate result path')
+            raise FileNotFoundError('No result file(s) at %s' % self.directory)
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
 
