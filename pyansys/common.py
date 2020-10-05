@@ -161,7 +161,7 @@ def read_binary(filename, **kwargs):
 
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
-        if result._resultheader['nSector'] != 1 and not ignore_cyclic:
+        if result._is_cyclic and not ignore_cyclic:
             from pyansys.cyclic_reader import CyclicResult
             return CyclicResult(filename)
 
