@@ -1223,10 +1223,6 @@ class Result(AnsysBinary):
             new_sidx = np.argsort(unsort_nnum)
             nnum = unsort_nnum[new_sidx]
             result = result[new_sidx]
-
-            # these are the associated nodal locations
-            # sidx_inv = np.argsort(self._sidx)
-            # nodes = self._mesh['nodes'][sidx_inv][sidx][:, :3]
         else:
             nnum = self._neqv[self._sidx]
             result = result.take(self._sidx, 0)
@@ -1238,10 +1234,7 @@ class Result(AnsysBinary):
 
         # check for invalid values (mapdl writes invalid values as 2*100)
         result[result == 2**100] = 0
-        # if result.shape[1] == 1:
-        #     result = result.ravel()
         return nnum, result
-
 
     @wraps(nodal_solution)
     def nodal_displacement(self, *args, **kwargs):
