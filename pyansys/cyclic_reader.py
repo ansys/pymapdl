@@ -112,6 +112,9 @@ class CyclicResult(Result):
         if self._is_repeated_mode.size == 2 and self._is_repeated_mode.all():
             self._repeated_index = np.array([1, 0])
             return
+        elif self._is_repeated_mode.size == 1:  # edge case single result
+            self._is_repeated_mode = np.array([False])
+            return
 
         self._repeated_index = np.empty(self._is_repeated_mode.size, np.int)
         self._repeated_index[:] = -1
