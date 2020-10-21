@@ -20742,7 +20742,7 @@ class _MapdlCommands(object):  # pragma: no cover
         return self.run(command, **kwargs)
 
     def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
-               tintopt="",vaout="", dmpsfreq="", engcalc="", mckey=""):
+               tintopt="",vaout="", dmpsfreq="", engcalc="", mckey="", **kwargs):
         """APDL Command: TRNOPT
 
         Specifies transient analysis options.
@@ -30972,9 +30972,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Redirects text output to a file or to the screen.
 
-        This command is not supported unless running in
-        `non_interactive` or when using `mode='console'` on Linux
-
         Parameters
         ----------
         fname
@@ -31012,7 +31009,10 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        return self.run(f"/OUTPUT,{fname},{ext},,{loc}", **kwargs)
+        if loc:
+            return self.run(f"/OUTPUT,{fname},{ext},,{loc}", **kwargs)
+        else:
+            return self.run(f"/OUTPUT,{fname},{ext}", **kwargs)
 
     def dump(self, nstrt="", nstop="", **kwargs):
         """APDL Command: DUMP
@@ -33123,7 +33123,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
+        command = f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
         return self.run(command, **kwargs)
 
     def rsplit(self, option="", label="", name1="", name2="", name3="",
@@ -42621,7 +42621,7 @@ class _MapdlCommands(object):  # pragma: no cover
         -----
         Maps pressures from source points to target surface elements.
         """
-        return self.run(f"MAP,,{kdim},,{kout},{limit}, **kwargs)
+        return self.run(f"MAP,,{kdim},,{kout},{limit}", **kwargs)
 
     def smbc(self, mode="", **kwargs):
         """APDL Command: /SMBC
