@@ -1,17 +1,9 @@
-"""
-Built using ansys documentation from
-https://www.sharcnet.ca/Software/Ansys/
-
-RIP sharcnet
-
-"""
-
-# consider moving the docstrings into a different module
-
+"""Pythonic MAPDL Commands"""
 
 class _MapdlCommands(object):  # pragma: no cover
-    """ANSYS class containing MAPDl functions generated from ANSYS 16.2
+    """ANSYS class containing MAPDl functions.
 
+    Valid for Versions 16.2 - 2020R2
     """
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -335,22 +327,22 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         Notes
         -----
-        Writes the interpolated pressure data to the specified file. The data
-        is written as SFE commands applied to the SURF154 elements that are on
-        the target surface. You may read this data for inclusion in an analysis
-        by using /INPUT,Fname.
+        Writes the interpolated pressure data to the specified
+        file. The data is written as SFE commands applied to the
+        SURF154 elements that are on the target surface. You may read
+        this data for inclusion in an analysis by using /INPUT,Fname.
         """
-        command = "WRITEMAP,%s" % (str(fname))
-        return self.run(command, **kwargs)
+        return self.run(f"WRITEMAP,{fname}", **kwargs)
 
-    def ewrite(self, fname="", ext="", unused="", kappnd="", format="", **kwargs):
+    def ewrite(self, fname="", ext="", kappnd="", format="", **kwargs):
         """APDL Command: EWRITE
 
         Writes elements to a file.
@@ -358,16 +350,14 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kappnd
             Append key:
@@ -385,26 +375,25 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Writes the selected elements to a file. The write operation is not
-        necessary in a standard ANSYS run but is provided as convenience to
-        users wanting a coded element file. If issuing EWRITE from ANSYS to be
-        used in ANSYS, you must also issue NWRITE to store nodal information
-        for later use. Only elements having all of their nodes defined (and
-        selected) are written. Data are written in a coded format. The data
-        description of each record is: I, J, K, L, M, N, O, P, MAT, TYPE, REAL,
-        SECNUM, ESYS, IEL, where MAT, TYPE, REAL, and ESYS are attribute
-        numbers, SECNUM is the beam section number, and IEL is the element
-        number.
+        Writes the selected elements to a file. The write operation is
+        not necessary in a standard ANSYS run but is provided as
+        convenience to users wanting a coded element file. If issuing
+        EWRITE from ANSYS to be used in ANSYS, you must also issue
+        NWRITE to store nodal information for later use. Only elements
+        having all of their nodes defined (and selected) are
+        written. Data are written in a coded format. The data
+        description of each record is: I, J, K, L, M, N, O, P, MAT,
+        TYPE, REAL, SECNUM, ESYS, IEL, where MAT, TYPE, REAL, and ESYS
+        are attribute numbers, SECNUM is the beam section number, and
+        IEL is the element number.
 
-        The format is (14I6) if Format is set to SHORT and (14I8) if the Format
-        is set to LONG, with one element description per record for elements
-        having eight nodes of less. For elements having more than eight nodes,
-        nodes nine and above are written on a second record with the same
-        format.
+        The format is (14I6) if Format is set to SHORT and (14I8) if
+        the Format is set to LONG, with one element description per
+        record for elements having eight nodes of less. For elements
+        having more than eight nodes, nodes nine and above are written
+        on a second record with the same format.
         """
-        command = "EWRITE,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(unused),
-                                             str(kappnd), str(format))
-        return self.run(command, **kwargs)
+        return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format}", **kwargs)
 
     def f(self, node="", lab="", value="", value2="", nend="", ninc="",
           **kwargs):
@@ -540,7 +529,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
             First derivative: d(Par1)/d(Par2).  The derivative at a point is determined  over points half way between the previous and next points (by linear  interpolation). Par1 must be a function (a unique Par1 value for each Par2 value) and Par2 must be in ascending order. - Second derivative: d2(Par1)/d(Par2)2.  See also DER1.
 
-            Single integral:    Par1 d(Par2), where CON1 is the integration constant.  The integral at a point is determined by using the single integration procedure described in the Mechanical APDL Theory Reference. - Double integral:       Par1 d(Par2), where CON1 is the integration constant of
+            Single integral:    Par1 d(Par2), where CON1 is the integration constant.  The integral at a point is determined by using the single integration procedure described in the Mechanical APDL Theory Reference. - Double integral:       Par1 d(Par2), where CON1 is the integration constant of
                               the first integral and CON2 is the integration
                               constant of the second integral.  If Par1
                               contains acceleration data, CON1 is the initial
@@ -636,14 +625,14 @@ class _MapdlCommands(object):  # pragma: no cover
         key
             State or value
 
-            On or 1  - Allows you to exit and reenter /POST26 without losing your current time history
+            On or 1  - Allows you to exit and reenter /POST26 without losing your current time history
                        variable information. Keeps a cache of the /POST26
                        variable information including the active file name
                        (FILE),  variable definitions (NSOL, ESOL, GAPF, RFORCE,
                        SOLU, and EDREAD) and stored variable data in memory for
                        the current ANSYS session.
 
-            Off or 0  - /POST26 variable information is deleted when you exit /POST26.
+            Off or 0  - /POST26 variable information is deleted when you exit /POST26.
 
         Notes
         -----
@@ -742,11 +731,11 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Label identifying the option to be performed (no default).
 
-            ON   - Turn small penetration checking on for specified contact entities.
+            ON   - Turn small penetration checking on for specified contact entities.
 
             OFF - Turn small penetration checking off for specified contact entities.
 
-            LIST   - List current setting for penetration checking.
+            LIST   - List current setting for penetration checking.
 
         min
             Minimum contact entity number for which to turn on/off small
@@ -794,7 +783,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "RMCLIST," % ()
         return self.run(command, **kwargs)
 
-    def latt(self, mat="", real="", type="", unused="", kb="", ke="", secnum="",
+    def latt(self, mat="", real="", type="", kb="", ke="", secnum="",
              **kwargs):
         """APDL Command: LATT
 
@@ -803,63 +792,64 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         mat, real, type
-            Material number, real constant set number, and type number to be
-            associated with selected, unmeshed lines.
-
-        --
-            Unused field.
+            Material number, real constant set number, and type number
+            to be associated with selected, unmeshed lines.
 
         kb, ke
-            Beginning and ending orientation keypoints to be associated with
-            selected, unmeshed lines.  ANSYS uses the location of these
-            keypoints to determine how to orient beam cross sections during
-            beam meshing.  Beam elements may be created along a line with a
-            constant orientation by specifying only one orientation keypoint
-            (KB), or a pre-twisted beam may be created by selecting different
-            orientation keypoints at each end of the line (KB and KE).  (For a
-            line bounded by two keypoints (KP1 and KP2), the orientation vector
-            at the beginning of the line extends from KP1 to KB, and the
-            orientation vector at the end of the line extends from KP2 to KE.
-            The orientation vectors are used to compute the orientation nodes
-            of the elements.)
+            Beginning and ending orientation keypoints to be
+            associated with selected, unmeshed lines.  ANSYS uses the
+            location of these keypoints to determine how to orient
+            beam cross sections during beam meshing.  Beam elements
+            may be created along a line with a constant orientation by
+            specifying only one orientation keypoint (KB), or a
+            pre-twisted beam may be created by selecting different
+            orientation keypoints at each end of the line (KB and KE).
+            (For a line bounded by two keypoints (KP1 and KP2), the
+            orientation vector at the beginning of the line extends
+            from KP1 to KB, and the orientation vector at the end of
+            the line extends from KP2 to KE.  The orientation vectors
+            are used to compute the orientation nodes of the
+            elements.)
 
         secnum
-            Section identifier to be associated with selected, unmeshed lines.
-            For details, see the description of the SECTYPE and SECNUM
-            commands.
+            Section identifier to be associated with selected,
+            unmeshed lines.  For details, see the description of the
+            SECTYPE and SECNUM commands.
 
         Notes
         -----
-        The element attributes specified by the LATT command will be used when
-        the lines are meshed.
+        The element attributes specified by the LATT command will be
+        used when the lines are meshed.
 
         Lines subsequently generated from the lines will also have the
-        attributes specified by MAT, REAL, TYPE, and SECNUM.  If a line does
-        not have these attributes associated with it (by this command) at the
-        time it is meshed, the attributes are obtained from the then current
-        MAT, REAL, TYPE, and SECNUM command settings.
+        attributes specified by MAT, REAL, TYPE, and SECNUM.  If a
+        line does not have these attributes associated with it (by
+        this command) at the time it is meshed, the attributes are
+        obtained from the then current MAT, REAL, TYPE, and SECNUM
+        command settings.
 
-        In contrast, the values specified by KB and KE apply only to the
-        selected lines; that is, lines subsequently generated from these lines
-        will not share these attributes.  Similarly, if a line does not have KB
-        and KE attributes associated with it via the LATT command at the time
-        it is meshed, ANSYS cannot obtain the attributes from elsewhere.  See
-        the discussion on beam meshing in Meshing Your Solid Model in the
-        Modeling and Meshing Guide for more information.
+        In contrast, the values specified by KB and KE apply only to
+        the selected lines; that is, lines subsequently generated from
+        these lines will not share these attributes.  Similarly, if a
+        line does not have KB and KE attributes associated with it via
+        the LATT command at the time it is meshed, ANSYS cannot obtain
+        the attributes from elsewhere.  See the discussion on beam
+        meshing in Meshing Your Solid Model in the Modeling and
+        Meshing Guide for more information.
 
-        Reissue the LATT command (before lines are meshed) to change the
-        attributes.  A zero (or blank) argument removes the corresponding
-        association. If any of the arguments are defined as -1, then that value
-        will be left unchanged in the selected set.
+        Reissue the LATT command (before lines are meshed) to change
+        the attributes.  A zero (or blank) argument removes the
+        corresponding association. If any of the arguments are defined
+        as -1, then that value will be left unchanged in the selected
+        set.
 
-        In some cases, ANSYS can proceed with a line meshing operation even
-        when no logical element type has been assigned via LATT,,,TYPE or TYPE.
-        See Meshing Your Solid Model in the Modeling and Meshing Guide for more
-        information about setting element attributes.
+        In some cases, ANSYS can proceed with a line meshing operation
+        even when no logical element type has been assigned via
+        LATT,,,TYPE or TYPE.  See Meshing Your Solid Model in the
+        Modeling and Meshing Guide for more information about setting
+        element attributes.
         """
-        command = "LATT,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type),
-                                                 str(unused), str(kb), str(ke),
-                                                 str(secnum))
+        command = f"LATT,{mat},{real},{type},,{kb},{ke},{secnum}"
         return self.run(command, **kwargs)
 
     def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
@@ -895,7 +885,7 @@ class _MapdlCommands(object):  # pragma: no cover
             (blank) - The DOF is not locked (default).
 
             FIXED - Displacement on the specified degrees of freedom (Lab) is locked. The program
-                    prescribes the degree of freedom to the “current” relative
+                    prescribes the degree of freedom to the "current" relative
                     displacement value in addition to deleting the force. If a
                     displacement constraint (for example, D command) is applied
                     in conjunction with this option, the actual applied
@@ -1620,7 +1610,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
             KEY = 3 - The command controls the ANNOTATION/GRAPH font.
 
-            Linux: Values 1 through 4 are used to find a match in the X11 database of font strings. Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
+            Linux: Values 1 through 4 are used to find a match in the X11 database of font strings. Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
 
             Family name (e.g., Courier). If Val1 = MENU, all other values are ignored and a font selection menu appears (GUI must be active). - Val2
 
@@ -1629,12 +1619,6 @@ class _MapdlCommands(object):  # pragma: no cover
             Slant (e.g., r) - Val4
 
             Pixel size (e.g., 14). Note that this value does no affect the annotation fonts (KEY = 3). Use the /TSPEC command for annotation font size.  - Val5
-
-            unused - Val6
-
-            unused - PC: The values are encoded in a PC logical font
-                     structure.  Value 1 is a character string, and
-                     the remaining values are integers:
 
             Val1 - Family name (e.g., Courier*New) Substitute an asterisk (*) for any blank
                    character that appears in a family name. If Val1 = MENU, all
@@ -1903,7 +1887,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "RSFIT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(slab), str(name), str(rmod), str(ytrans), str(yval), str(xfilt), str(conf))
         return self.run(command, **kwargs)
 
-    def pdlhs(self, nsim="", nrep="", isopt="", unused="", astop="", accmean="",
+    def pdlhs(self, nsim="", nrep="", isopt="", astop="", accmean="",
               accstdv="", check="", seed="", **kwargs):
         """APDL Command: PDLHS
 
@@ -1930,121 +1914,124 @@ class _MapdlCommands(object):  # pragma: no cover
 
             MEDI - Picks the median value location within the interval.
 
-        --
-            Unused field.
-
         astop
             Autostop option label.
 
-            AUTO - Enable Autostop. When Autostop is used, the PDS feature continues the
-                   simulation loops until the convergence criteria for the mean
-                   value and the standard deviation have been met or until the
-                   number of simulations NSIM are complete, whichever comes
-                   first. The convergence criteria (mean value and standard
-                   deviations of all random output parameters) are specified by
-                   the ACCMEAN and ACCSTDEV parameters. The criteria are met if
-                   the mean value and the standard deviations converge within
-                   the accuracy specified in the ACCMEAN and ACCSTDEV options.
-                   The convergence check is done every i-th loop, where i is
-                   specified in the CHECK parameter.
+            AUTO - Enable Autostop. When Autostop is used, the PDS
+                   feature continues the simulation loops until the
+                   convergence criteria for the mean value and the
+                   standard deviation have been met or until the
+                   number of simulations NSIM are complete, whichever
+                   comes first. The convergence criteria (mean value
+                   and standard deviations of all random output
+                   parameters) are specified by the ACCMEAN and
+                   ACCSTDEV parameters. The criteria are met if the
+                   mean value and the standard deviations converge
+                   within the accuracy specified in the ACCMEAN and
+                   ACCSTDEV options.  The convergence check is done
+                   every i-th loop, where i is specified in the CHECK
+                   parameter.
 
-            ALL - Disable Autostop option. All Monte Carlo Simulations as specified by NSIM and
-                  NREP are performed (default).
+            ALL - Disable Autostop option. All Monte Carlo Simulations
+                  as specified by NSIM and NREP are performed
+                  (default).
 
         accmean
-            Accuracy of the mean values of all random output parameters that
-            must be met to activate Autostop. Default is 0.01 (1%). ACCMEAN is
-            ignored for Astop = ALL. The convergence for the mean values is met
-            if for all random output parameters y the following equation is
-            true:
+            Accuracy of the mean values of all random output
+            parameters that must be met to activate Autostop. Default
+            is 0.01 (1%). ACCMEAN is ignored for Astop = ALL. The
+            convergence for the mean values is met if for all random
+            output parameters y the following equation is true:
 
         accstdev
-            Accuracy of the standard deviations of all random output parameters
-            that must be met to activate Autostop. The default is 0.02 (2%).
-            ACCSTDEV is ignored for Astop = ALL. The convergence for the
-            standard deviations is met if for all random output parameters y
-            the following equation is true:
+            Accuracy of the standard deviations of all random output
+            parameters that must be met to activate Autostop. The
+            default is 0.02 (2%).  ACCSTDEV is ignored for Astop =
+            ALL. The convergence for the standard deviations is met if
+            for all random output parameters y the following equation
+            is true:
 
         check
-            Sets how often conditions for convergence are checked for Autostop.
-            The PDS feature checks if the convergence criteria are met every
-            i-th loop, where i is given by the CHECK parameter. The default
-            value is 10. It not recommended to use CHECK = 1, because it could
-            cause Autostop to terminate the simulations prematurely. The mean
-            values and standard deviation might not show large differences
-            between all simulation loops but might still have a visible
-            "global" trend if viewed over several simulations. This behavior
-            indicates that convergence has not really been achieved. If you set
-            CHECK = 1, then Autostop is not able to detect such a global trend.
-            CHECK is ignored for Astop = ALL.
+            Sets how often conditions for convergence are checked for
+            Autostop.  The PDS feature checks if the convergence
+            criteria are met every i-th loop, where i is given by the
+            CHECK parameter. The default value is 10. It not
+            recommended to use CHECK = 1, because it could cause
+            Autostop to terminate the simulations prematurely. The
+            mean values and standard deviation might not show large
+            differences between all simulation loops but might still
+            have a visible "global" trend if viewed over several
+            simulations. This behavior indicates that convergence has
+            not really been achieved. If you set CHECK = 1, then
+            Autostop is not able to detect such a global trend.  CHECK
+            is ignored for Astop = ALL.
 
         seed
-            Seed value label. Random number generators require a seed value
-            that is used to calculate the next random number. After each random
-            number generation finishes, the seed value is updated and is used
-            again to calculate the next random number. ANSYS initializes the
-            seed value with the system time when the ANSYS session started.
+            Seed value label. Random number generators require a seed
+            value that is used to calculate the next random
+            number. After each random number generation finishes, the
+            seed value is updated and is used again to calculate the
+            next random number. ANSYS initializes the seed value with
+            the system time when the ANSYS session started.
 
             CONT - Continues updating using the derived seed value (default).
 
-            TIME - Initializes the seed value with the system time. You can use this if you want
-                   the seed value set to a specific value for one analysis and
-                   then you want to continue with a "random" seed in the next
-                   analysis. It is not recommended to "randomize" the seed
-                   value with the Seed = TIME option for multiple analyses. If
-                   the Monte Carlo simulations requested with this command will
-                   be appended to previously existing simulations, then the
-                   Seed option is ignored and Seed = CONT is used.
+            TIME - Initializes the seed value with the system
+                   time. You can use this if you want the seed value
+                   set to a specific value for one analysis and then
+                   you want to continue with a "random" seed in the
+                   next analysis. It is not recommended to "randomize"
+                   the seed value with the Seed = TIME option for
+                   multiple analyses. If the Monte Carlo simulations
+                   requested with this command will be appended to
+                   previously existing simulations, then the Seed
+                   option is ignored and Seed = CONT is used.
 
-            INIT - Initializes the seed value using 123457 (a typical recommendation). This option
-                   leads to identical random numbers for all random input
-                   variables when the exact analysis will be repeated, making
-                   it useful for benchmarking and validation purposes (where
-                   identical random numbers are desired). If the Monte Carlo
-                   simulations requested with this command will be appended to
-                   previously existing simulations, then the Seed option is
-                   ignored and Seed = CONT is used.
+            INIT - Initializes the seed value using 123457 (a typical
+                   recommendation). This option leads to identical
+                   random numbers for all random input variables when
+                   the exact analysis will be repeated, making it
+                   useful for benchmarking and validation purposes
+                   (where identical random numbers are desired). If
+                   the Monte Carlo simulations requested with this
+                   command will be appended to previously existing
+                   simulations, then the Seed option is ignored and
+                   Seed = CONT is used.
 
-            Value - Uses the specified (positive) value for the initialization of the seed value.
-                    This option has the same effect as Seed = INIT, except you
-                    can chose an arbitrary (positive) number for the
-                    initialization. If the Monte Carlo simulations requested
-                    with this command will be appended to previously existing
-                    simulations, then the Seed option is ignored and Seed =
-                    CONT is used.
+            Value - Uses the specified (positive) value for the
+                    initialization of the seed value.  This option has
+                    the same effect as Seed = INIT, except you can
+                    chose an arbitrary (positive) number for the
+                    initialization. If the Monte Carlo simulations
+                    requested with this command will be appended to
+                    previously existing simulations, then the Seed
+                    option is ignored and Seed = CONT is used.
 
         Notes
         -----
-        Defines the number of simulations per repetition cycle, number of
-        repetition cycles, specification of the Autostop option, checking
-        frequency for the Autostop option, and the seed value for random number
-        generation.
+        Defines the number of simulations per repetition cycle, number
+        of repetition cycles, specification of the Autostop option,
+        checking frequency for the Autostop option, and the seed value
+        for random number generation.
 
-        For Latin-Hypercube sampling, it is advantageous to divide the total
-        number of requested simulations into a few repetitions. This adds more
-        randomness to the sampling process. If NTOT is the total number of
-        simulations, then as a rough rule of thumb NTOT should be NREP =
-        repetitions. The number obtained with this rule of thumb must be
-        adjusted such that NTOT = NREP*NSIM. For example if NTOT = 1000 then
-        NREP =  = 10, so the 1000 simulations can be done in 100 simulations
-        with 10 repetitions. If for example NTOT = 100 then NREP =  = 3.16,
-        which means that the 100 simulations could be broken up into either
-        2*50 or 4*25 simulations.
+        For Latin-Hypercube sampling, it is advantageous to divide the
+        total number of requested simulations into a few
+        repetitions. This adds more randomness to the sampling
+        process. If NTOT is the total number of simulations, then as a
+        rough rule of thumb NTOT should be NREP = repetitions. The
+        number obtained with this rule of thumb must be adjusted such
+        that NTOT = NREP*NSIM. For example if NTOT = 1000 then NREP =
+        = 10, so the 1000 simulations can be done in 100 simulations
+        with 10 repetitions. If for example NTOT = 100 then NREP = =
+        3.16, which means that the 100 simulations could be broken up
+        into either 2*50 or 4*25 simulations.
 
-        If Autostop is enabled then the maximum number of simulations to be
-        performed is given by NSIM*NREP. The Autostop option will terminate the
-        simulations before the NSIM*NREP simulations are done if the
-        convergence criteria are met.
+        If Autostop is enabled then the maximum number of simulations
+        to be performed is given by NSIM*NREP. The Autostop option
+        will terminate the simulations before the NSIM*NREP
+        simulations are done if the convergence criteria are met.
         """
-        command = "PDLHS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nsim),
-                                                        str(nrep),
-                                                        str(isopt),
-                                                        str(unused),
-                                                        str(astop),
-                                                        str(accmean),
-                                                        str(accstdv),
-                                                        str(check),
-                                                        str(seed))
+        command = f"PDLHS,{nsim},{nrep},{isopt},,{astop},{accmean},{accstdv},{check},{seed}"
         return self.run(command, **kwargs)
 
     def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
@@ -2317,7 +2304,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "PPATH,%s,%s,%s,%s,%s,%s" % (str(point), str(node), str(x), str(y), str(z), str(cs))
         return self.run(command, **kwargs)
 
-    def fclist(self, mat="", unused="", temp="", **kwargs):
+    def fclist(self, mat="", temp="", **kwargs):
         """APDL Command: FCLIST
 
         To list what the failure criteria is that you have input.
@@ -2327,9 +2314,6 @@ class _MapdlCommands(object):  # pragma: no cover
         mat
              Material number (defaults to ALL for all materials).
 
-        --
-            Unused field.
-
         temp
             Temperature to be evaluated at (defaults to TUNIF).
 
@@ -2338,8 +2322,7 @@ class _MapdlCommands(object):  # pragma: no cover
         This command allows you to see what you have already input for failure
         criteria using the FC commands.
         """
-        command = "FCLIST,%s,%s,%s" % (str(mat), str(unused), str(temp))
-        return self.run(command, **kwargs)
+        return self.run(f"FCLIST,{mat},,{temp}", **kwargs)
 
     def d(self, node="", lab="", value="", value2="", nend="", ninc="",
           lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
@@ -2425,7 +2408,7 @@ class _MapdlCommands(object):  # pragma: no cover
         and full transient (ANTYPE,TRANS) analyses.
 
         %_FIX% is an ANSYS reserved table name. When VALUE is set to %_FIX%,
-        ANSYS will prescribe the degree of freedom to the “current” relative
+        ANSYS will prescribe the degree of freedom to the "current" relative
         displacement value. This option is only valid for the following labels:
         UX, UY, UZ, ROTX, ROTY, ROTZ. Alternatively, functions UX(), UY(), etc.
         may be used (see *GET for a complete list of available functions). In
@@ -2599,9 +2582,9 @@ class _MapdlCommands(object):  # pragma: no cover
             output files (.LOG, .ERR, .LOCK, .PAGE and .OUT) or start new
             files.
 
-            0, OFF - Continue using current log, error, lock, page, and output files.
+            0, OFF - Continue using current log, error, lock, page, and output files.
 
-            1, ON - Start new log, error, lock, page, and output files (old log and error files are
+            1, ON - Start new log, error, lock, page, and output files (old log and error files are
                     closed and saved, but old lock, page, and output files are
                     deleted). Existing log and error files are appended.
 
@@ -2667,7 +2650,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "/CFORMAT,%s,%s" % (str(nfirst), str(nl_ast))
         return self.run(command, **kwargs)
 
-    def radopt(self, unused="", fluxtol="", solver="", maxiter="",
+    def radopt(self, fluxtol="", solver="", maxiter="",
                toler="", overrlex="", maxfluxiter="", **kwargs):
         """APDL Command: RADOPT
 
@@ -2675,9 +2658,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         fluxtol
             Convergence tolerance for radiation flux. Defaults to 0.0001. This
             value is a relative tolerance.
@@ -2703,9 +2683,6 @@ class _MapdlCommands(object):  # pragma: no cover
             Over-relaxation factor applied to the iterative solver (SOLVER = 0
             or 2). Defaults to 0.1.
 
-        --, --, --, --
-            Unused fields
-
         maxfluxiter
             Maximum number of flux iterations to be performed according to the
             specified solver type:
@@ -2716,13 +2693,15 @@ class _MapdlCommands(object):  # pragma: no cover
                 convergence criteria are ignored and one iteration is
                 performed. This value is the default.
 
-            1, 2, 3, ...N  - If the FULL solver is specified (THOPT,FULL), convergence criteria are
-                             monitored and iterations are performed until
-                             convergence occurs, or until the specified number
-                             of iterations has been completed, whichever comes
-                             first. If the QUASI solver is specified
-                             (THOPT,QUASI), convergence criteria are ignored
-                             and the specified number of iterations are
+            1, 2, 3, ...N  - If the FULL solver is specified
+                             (THOPT,FULL), convergence criteria are
+                             monitored and iterations are performed
+                             until convergence occurs, or until the
+                             specified number of iterations has been
+                             completed, whichever comes first. If the
+                             QUASI solver is specified (THOPT,QUASI),
+                             convergence criteria are ignored and the
+                             specified number of iterations are
                              completed.
 
         Notes
@@ -2762,13 +2741,12 @@ class _MapdlCommands(object):  # pragma: no cover
         to 2 for a 2-D analysis, the Gauss-Seidel iterative solver (SOLVER = 0)
         is used.
         """
-        command = "RADOPT,%s,%s,%s,%s,%s,%s" % (str(unused),
-                                                str(fluxtol),
-                                                str(solver),
-                                                str(maxiter),
-                                                str(toler),
-                                                str(overrlex),
-                                                str(maxfluxiter))
+        command = "RADOPT,,%s,%s,%s,%s,%s,,,,,%s" % (str(fluxtol),
+                                                     str(solver),
+                                                     str(maxiter),
+                                                     str(toler),
+                                                     str(overrlex),
+                                                     str(maxfluxiter))
         return self.run(command, **kwargs)
 
     def tiff(self, kywrd="", opt="", **kwargs):
@@ -2781,39 +2759,47 @@ class _MapdlCommands(object):  # pragma: no cover
         kywrd
             Specifies various TIFF file export options.
 
-            COMP - If Kywrd = COMP, then OPT controls data compression for the output file. If
-                   COMP = 0, then compression is off. If COMP = 1 (default),
-                   then compression is on.
+            COMP - If Kywrd = COMP, then OPT controls data compression
+                   for the output file. If COMP = 0, then compression
+                   is off. If COMP = 1 (default), then compression is
+                   on.
 
-            ORIENT - If Kywrd = ORIENT, then OPT will determine the orientation of the entire plot.
-                     OPT can be either Horizontal (default) or Vertical.
+            ORIENT - If Kywrd = ORIENT, then OPT will determine the
+                     orientation of the entire plot.  OPT can be
+                     either Horizontal (default) or Vertical.
 
-            COLOR - If Kywrd = COLOR, then OPT will determine the color attribute of the saved
-                    file. OPT can be 0, 1, or 2, corresponding to Black and
-                    White, Grayscale, and Color (default), respectively.
+            COLOR - If Kywrd = COLOR, then OPT will determine the
+                    color attribute of the saved file. OPT can be 0,
+                    1, or 2, corresponding to Black and White,
+                    Grayscale, and Color (default), respectively.
 
-            TMOD - If Kywrd = TMOD, then OPT will determine the text method. OPT can be either 1
-                   or 0, corresponding to bitmap text (default) or line stroke
-                   text, respectively.
+            TMOD - If Kywrd = TMOD, then OPT will determine the text
+                   method. OPT can be either 1 or 0, corresponding to
+                   bitmap text (default) or line stroke text,
+                   respectively.
 
-            DEFAULT - If Kywrd = DEFAULT, then all of the default values, for all of the Kywrd
-                      parameters listed above, are active.
+            DEFAULT - If Kywrd = DEFAULT, then all of the default
+                      values, for all of the Kywrd parameters listed
+                      above, are active.
 
-        opt
-            OPT can have the following names or values, depending on the value
-            for Kywrd (see above).
+        opt 
+            OPT can have the following names or values, depending on
+            the value for Kywrd (see above).
 
-            1 or 0 - If Kywrd = COMP, a value or 1 (on) or 0 (off) will control compression for the
-                     TIFF file.
+            1 or 0 - If Kywrd = COMP, a value or 1 (on) or 0 (off)
+                     will control compression for the TIFF file.
 
-            Horizontal, Vertical - If Kywrd = ORIENT, the terms Horizontal or Vertical determine the orientation
-                              of the plot.
+            Horizontal, Vertical - If Kywrd = ORIENT, the terms
+                                   Horizontal or Vertical determine
+                                   the orientation of the plot.
 
-            0, 1, 2 - If Kywrd = COLOR, the numbers 0, 1, and 2 correspond to Black and White ,
-                      Grayscale and Color, respectively.
+            0, 1, 2 - If Kywrd = COLOR, the numbers 0, 1, and 2
+                      correspond to Black and White , Grayscale and
+                      Color, respectively.
 
-            1, 0 - If Kywrd = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text
-                   (0) fonts will be used
+            1, 0 - If Kywrd = TMOD, the values 1 and 0 determine
+                   whether bitmap (1) or stroke text (0) fonts will be
+                   used
         """
         command = "TIFF,%s,%s" % (str(kywrd), str(opt))
         return self.run(command, **kwargs)
@@ -2826,45 +2812,49 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         vpath
-            Path name for a predefined path [PATH command] for calculating the
-            EMF (voltage drop) from the conductor to a reference point. The
-            path should start at the outer conductor wall and end at a
-            reference voltage point.
+            Path name for a predefined path [PATH command] for
+            calculating the EMF (voltage drop) from the conductor to a
+            reference point. The path should start at the outer
+            conductor wall and end at a reference voltage point.
 
         ipath
-            Path name for a predefined path [PATH command] for calculating the
-            MMF (current) in a conductor. The path should traverse a closed
-            contour surrounding the conductor, and you should define the path
-            in a counterclockwise direction.
+            Path name for a predefined path [PATH command] for
+            calculating the MMF (current) in a conductor. The path
+            should traverse a closed contour surrounding the
+            conductor, and you should define the path in a
+            counterclockwise direction.
 
         vsymm
-            Symmetry factor applied to the calculated EMF (voltage drop). The
-            EMF (voltage drop) from the conductor to the reference point is
-            multiplied by Vsymm.
+            Symmetry factor applied to the calculated EMF (voltage
+            drop). The EMF (voltage drop) from the conductor to the
+            reference point is multiplied by Vsymm.
 
         isymm
-            Symmetry factor applied to the calculated current. The calculated
-            current is multiplied by Isymm.
+            Symmetry factor applied to the calculated current. The
+            calculated current is multiplied by Isymm.
 
         Notes
         -----
-        Used in a harmonic high-frequency electromagnetic analysis, IMPD
-        calculates the impedance of a conductor at a reference plane from the
-        EMF (voltage) and MMF (current) at the reference plane. The EMF
-        (voltage drop) is calculated by a line integral from the input path
-        name (specified by the Vpath argument) that extends from the conductor
-        to a reference point. The MMF (current) is calculated by a closed path
-        around the conductor from the input path name (specified with Ipath).
-        In cases having modeled symmetry, you can multiply the voltage drop or
-        current by symmetry factors (Vsymm and Isymm respectively).
+        Used in a harmonic high-frequency electromagnetic analysis,
+        IMPD calculates the impedance of a conductor at a reference
+        plane from the EMF (voltage) and MMF (current) at the
+        reference plane. The EMF (voltage drop) is calculated by a
+        line integral from the input path name (specified by the Vpath
+        argument) that extends from the conductor to a reference
+        point. The MMF (current) is calculated by a closed path around
+        the conductor from the input path name (specified with Ipath).
+        In cases having modeled symmetry, you can multiply the voltage
+        drop or current by symmetry factors (Vsymm and Isymm
+        respectively).
 
         This command macro returns the scalar parameters Zre and Zim,
-        representing the real and imaginary components of the impedance.
+        representing the real and imaginary components of the
+        impedance.
 
         See magnetic macros for further details.
 
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed ANSYS Restriction: This command is not supported
+        in Distributed ANSYS.
         """
         command = "IMPD,%s,%s,%s,%s" % (str(vpath), str(ipath), str(vsymm), str(isymm))
         return self.run(command, **kwargs)
@@ -2877,58 +2867,66 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         nv1
-            Volume (or volumes, if picking is used) to be subtracted from.  If
-            ALL, use all selected volumes.  Volumes specified in set NV2 are
-            removed from set NV1.  If P, graphical picking is enabled (valid
-            only in the GUI) and remaining fields are ignored.  A component
-            name may also be substituted for NV1.
+            Volume (or volumes, if picking is used) to be subtracted
+            from.  If ALL, use all selected volumes.  Volumes
+            specified in set NV2 are removed from set NV1.  If P,
+            graphical picking is enabled (valid only in the GUI) and
+            remaining fields are ignored.  A component name may also
+            be substituted for NV1.
 
         nv2
-            Volume (or volumes, if picking is used) to subtract.  If ALL, use
-            all selected volumes (except those included in the NV1 argument).
-            A component name may also be substituted for NV2.
+            Volume (or volumes, if picking is used) to subtract.  If
+            ALL, use all selected volumes (except those included in
+            the NV1 argument).  A component name may also be
+            substituted for NV2.
 
         sepo
-            Behavior if the intersection of the NV1 volumes and the NV2 volumes
-            is an area or areas:
+            Behavior if the intersection of the NV1 volumes and the
+            NV2 volumes is an area or areas:
 
             (blank) - The resulting volumes will share area(s) where they touch.
 
-            SEPO - The resulting volumes will have separate, but coincident area(s) where they
-                   touch.
+            SEPO - The resulting volumes will have separate, but
+                   coincident area(s) where they touch.
 
         keep1
             Specifies whether NV1 volumes are to be deleted:
 
             (blank) - Use the setting of KEEP on the BOPTN command.
 
-            DELETE - Delete NV1 volumes after VSBV operation (override BOPTN command settings).
+            DELETE - Delete NV1 volumes after VSBV operation (override
+                     BOPTN command settings).
 
-            KEEP - Keep NV1 volumes after VSBV operation (override BOPTN command settings).
+            KEEP - Keep NV1 volumes after VSBV operation (override
+                   BOPTN command settings).
 
         keep2
             Specifies whether NV2 volumes are to be deleted:
 
             (blank) - Use the setting of KEEP on the BOPTN command.
 
-            DELETE - Delete NV2 volumes after VSBV operation (override BOPTN command settings).
+            DELETE - Delete NV2 volumes after VSBV operation (override
+                     BOPTN command settings).
 
-            KEEP - Keep NV2 volumes after VSBV operation (override BOPTN command settings).
+            KEEP - Keep NV2 volumes after VSBV operation (override
+                   BOPTN command settings).
 
         Notes
         -----
-        Generates new volumes by subtracting the regions common to both NV1 and
-        NV2 volumes (the intersection) from the NV1 volumes.  The intersection
-        can be a volume(s) or area(s).  If the intersection is an area and SEPO
-        is blank, the NV1 volume is divided at the area and the resulting
-        volumes will be connected, sharing a common area where they touch.  If
-        SEPO is set to SEPO, NV1 is divided into two unconnected volumes with
-        separate areas where they touch.  See the Modeling and Meshing Guide
-        for an illustration.  See the BOPTN command for an explanation of the
-        options available to Boolean operations.  Element attributes and solid
-        model boundary conditions assigned to the original entities will not be
-        transferred to the new entities generated.  VSBV,ALL,ALL will have no
-        effect because all the volumes in set NV1will have been moved to set
+        Generates new volumes by subtracting the regions common to
+        both NV1 and NV2 volumes (the intersection) from the NV1
+        volumes.  The intersection can be a volume(s) or area(s).  If
+        the intersection is an area and SEPO is blank, the NV1 volume
+        is divided at the area and the resulting volumes will be
+        connected, sharing a common area where they touch.  If SEPO is
+        set to SEPO, NV1 is divided into two unconnected volumes with
+        separate areas where they touch.  See the Modeling and Meshing
+        Guide for an illustration.  See the BOPTN command for an
+        explanation of the options available to Boolean operations.
+        Element attributes and solid model boundary conditions
+        assigned to the original entities will not be transferred to
+        the new entities generated.  VSBV,ALL,ALL will have no effect
+        because all the volumes in set NV1will have been moved to set
         NV2.
         """
         command = "VSBV,%s,%s,%s,%s,%s" % (str(nv1), str(nv2), str(sepo), str(keep1), str(keep2))
@@ -3195,7 +3193,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "/MPLIB,%s,%s" % (str(r_w_opt), str(path))
         return self.run(command, **kwargs)
 
-    def asbl(self, na="", nl="", unused="", keepa="", keepl="", **kwargs):
+    def asbl(self, na="", nl="", keepa="", keepl="", **kwargs):
         """APDL Command: ASBL
 
         Subtracts lines from areas.
@@ -3211,9 +3209,6 @@ class _MapdlCommands(object):  # pragma: no cover
         nl
             Line (or lines, if picking is used) to subtract.  If ALL, use all
             selected lines.    A component name may also be substituted for NL.
-
-        --
-            Unused field.
 
         keepa
             Specifies whether NA areas are to be deleted:
@@ -3243,11 +3238,10 @@ class _MapdlCommands(object):  # pragma: no cover
         model boundary conditions assigned to the original entities will not be
         transferred to the new entities generated.
         """
-        command = "ASBL,%s,%s,%s,%s,%s" % (str(na),
-                                           str(nl),
-                                           str(unused),
-                                           str(keepa),
-                                           str(keepl))
+        command = "ASBL,%s,%s,%s,%s" % (str(na),
+                                        str(nl),
+                                        str(keepa),
+                                        str(keepl))
         return self.run(command, **kwargs)
 
     def neqit(self, neqit="", forcekey="", **kwargs):
@@ -3499,9 +3493,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -3759,28 +3750,24 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname1
-            File name and directory path (248 characters maximum, including
-            directory) from which to read boundary node data. If no specified
-            directory path exists, the path defaults to your working directory
-            and you can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including directory) from which to read boundary node
+            data. If no specified directory path exists, the path
+            defaults to your working directory and you can use all 248
+            characters for the file name.
 
         ext1
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         fname2
-            File name and directory path (248 characters maximum, including
-            directory) to which cut-boundary D commands are written. If no
-            specified directory path exists, the path defaults to your working
-            directory and you can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including directory) to which cut-boundary D commands are
+            written. If no specified directory path exists, the path
+            defaults to your working directory and you can use all 248
+            characters for the file name.
 
         ext2
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kpos
             Position on Fname2 to write block of D commands:
@@ -3790,11 +3777,12 @@ class _MapdlCommands(object):  # pragma: no cover
             1 - End of file (append to existing file).
 
         clab
-            Label (eight characters maximum, including the colon) for this
-            block of D commands on Fname2.  his label is appended to the colon
-            (:).  Defaults to CBn, where n is the cumulative iteration number
-            for the data set currently in the database.  For imaginary data
-            (see KIMG on the *SET command), Clab defaults to CIn.
+            Label (eight characters maximum, including the colon) for
+            this block of D commands on Fname2.  his label is appended
+            to the colon (:).  Defaults to CBn, where n is the
+            cumulative iteration number for the data set currently in
+            the database.  For imaginary data (see KIMG on the *SET
+            command), Clab defaults to CIn.
 
         kshs
             Shell-to-solid submodeling key:
@@ -3804,60 +3792,67 @@ class _MapdlCommands(object):  # pragma: no cover
             1 - Shell-to-solid submodel.
 
         tolout
-            Extrapolation tolerance about elements, based on a fraction of the
-            element dimension. Submodel nodes outside the element by more than
-            TOLOUT are not accepted as candidates for DOF extrapolation.
-            Defaults to 0.5 (50 percent).
+            Extrapolation tolerance about elements, based on a
+            fraction of the element dimension. Submodel nodes outside
+            the element by more than TOLOUT are not accepted as
+            candidates for DOF extrapolation.  Defaults to 0.5 (50
+            percent).
 
         tolhgt
-            Height tolerance above or below shell elements, in units of length.
-            Used only for shell-to-shell submodeling (KSHS = 0). Submodel nodes
-            off the element surface by more than TOLHGT are not accepted as
-            candidates for degree-of-freedom interpolation or extrapolation.
+            Height tolerance above or below shell elements, in units
+            of length.  Used only for shell-to-shell submodeling (KSHS
+            = 0). Submodel nodes off the element surface by more than
+            TOLHGT are not accepted as candidates for
+            degree-of-freedom interpolation or extrapolation.
             Defaults to 0.0001 times the maximum element dimension.
 
         tolthk
-            Height tolerance above or below shell elements, based on a fraction
-            of the shell element thickness. Used only for shell-to-solid
-            submodeling (KSHS = 1). Submodel nodes off the element surface by
-            more than TOLTHK are not accepted as candidates for DOF
-            interpolation or extrapolation. Defaults to 0.1 times the average
-            shell thickness.
+            Height tolerance above or below shell elements, based on a
+            fraction of the shell element thickness. Used only for
+            shell-to-solid submodeling (KSHS = 1). Submodel nodes off
+            the element surface by more than TOLTHK are not accepted
+            as candidates for DOF interpolation or
+            extrapolation. Defaults to 0.1 times the average shell
+            thickness.
 
         Notes
         -----
-        File Fname1 should contain a node list for which boundary conditions
-        are to be interpolated (NWRITE).  File Fname2 is created to contain
-        interpolated boundary conditions written as a block of D commands.
+        File Fname1 should contain a node list for which boundary
+        conditions are to be interpolated (NWRITE).  File Fname2 is
+        created to contain interpolated boundary conditions written as
+        a block of D commands.
 
-        Boundary conditions are written for the active degree-of-freedom set
-        for the element from which interpolation is performed. Interpolation
-        occurs on the selected set of elements.  The block of D commands begins
-        with an identifying colon label and ends with a /EOF command.  The
-        colon label is of the form :Clab (described above).
+        Boundary conditions are written for the active
+        degree-of-freedom set for the element from which interpolation
+        is performed. Interpolation occurs on the selected set of
+        elements.  The block of D commands begins with an identifying
+        colon label and ends with a /EOF command.  The colon label is
+        of the form :Clab (described above).
 
-        Interpolation from multiple results sets can be performed by looping
-        through the results file in a user-defined macro.  Additional blocks
-        can be appended to Fname2 by using KPOS and unique colon labels.  To
-        read the block of commands, issue the /INPUT command with the
-        appropriate colon label.
+        Interpolation from multiple results sets can be performed by
+        looping through the results file in a user-defined macro.
+        Additional blocks can be appended to Fname2 by using KPOS and
+        unique colon labels.  To read the block of commands, issue the
+        /INPUT command with the appropriate colon label.
 
-        If the model has coincident (or very close) nodes, the CBDOF must be
-        applied to each part of the model separately to ensure that the mapping
-        of the nodes is correct.  For example, if nodes belonging to two
-        adjacent parts linked by springs are coincident, the operation should
-        be performed on each part of the model separately.
+        If the model has coincident (or very close) nodes, the CBDOF
+        must be applied to each part of the model separately to ensure
+        that the mapping of the nodes is correct.  For example, if
+        nodes belonging to two adjacent parts linked by springs are
+        coincident, the operation should be performed on each part of
+        the model separately.
 
-        Resume the coarse model database at the beginning of the cut-boundary
-        procedure. The database should have been saved after the first coarse
-        model solution, as the number of nodes in the database and the results
-        file must match, and internal nodes are sometimes created during the
-        solution.
+        Resume the coarse model database at the beginning of the
+        cut-boundary procedure. The database should have been saved
+        after the first coarse model solution, as the number of nodes
+        in the database and the results file must match, and internal
+        nodes are sometimes created during the solution.
 
-        Caution:: : Relaxing the TOLHGT or TOLTHK tolerances to allow submodel
-        nodes to be “found” can produce poor submodel results.
+        Caution: Relaxing the TOLHGT or TOLTHK tolerances to allow
+        submodel nodes to be "found" can produce poor submodel
+        results.
         """
-        command = "CBDOF,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname1), str(ext1), str(fname2), str(ext2), str(kpos), str(clab), str(kshs), str(tolout), str(tolhgt), str(tolthk))
+        command = f"CBDOF,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt},{tolthk}"
         return self.run(command, **kwargs)
 
     def nsll(self, type="", nkey="", **kwargs):
@@ -3883,14 +3878,14 @@ class _MapdlCommands(object):  # pragma: no cover
 
             0 - Select only nodes interior to selected lines.
 
-            1 - Select all nodes (interior to line and at keypoints) associated with the
-                selected lines.
+            1 - Select all nodes (interior to line and at keypoints)
+                associated with the selected lines.
 
         Notes
         -----
-        Valid only if the nodes were generated by a line meshing operation
-        [LMESH, AMESH, VMESH] on a solid model that contains the associated
-        lines.
+        Valid only if the nodes were generated by a line meshing
+        operation [LMESH, AMESH, VMESH] on a solid model that contains
+        the associated lines.
 
         This command is valid in any processor.
         """
@@ -3969,7 +3964,7 @@ class _MapdlCommands(object):  # pragma: no cover
     #     the *IF for details.  If a batch input stream hits an end-of-file
     #     during a false *IF  condition, the ANSYS run will not terminate
     #     normally. You will need to terminate it externally (use either the
-    #     Linux “kill” function or the Windows task manager). The *ELSE command
+    #     Linux "kill" function or the Windows task manager). The *ELSE command
     #     must appear on the same file as the *IF  command, and all five
     #     characters must be input.
 
@@ -5057,7 +5052,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Notes
         -----
         The naming conventions for components, as specified in the CM command,
-        apply for CMMOD (32 characters, “ALL”, “STAT” and “DEFA” are not
+        apply for CMMOD (32 characters, "ALL", "STAT" and "DEFA" are not
         allowed, etc.). However, if you choose a component name that is already
         designated for another component, an error message will be issued and
         the command will be ignored.
@@ -5542,14 +5537,11 @@ class _MapdlCommands(object):  # pragma: no cover
         reusekey
             Reuse key for method=QRDAMP specified in MODOPT command.
 
-            ON - Reuse the symmetric eigensolution from the previous load steps or from the
-                 previous solution.
+            ON - Reuse the symmetric eigensolution from the previous
+                 load steps or from the previous solution.
 
-            OFF - Do not reuse (calculates symmetric eigensolution at current load step). This is
-                  the default.
-
-        --, --
-            Unused fields.
+            OFF - Do not reuse (calculates symmetric eigensolution at
+                  current load step). This is the default.
 
         symmeth
             Mode-extraction method to be used for the symmetric eigenvalue
@@ -5557,12 +5549,14 @@ class _MapdlCommands(object):  # pragma: no cover
 
             LANB - Block Lanczos (default for shared-memory parallel processing).
 
-            SUBSP - Subspace algorithm (default for distributed-memory parallel processing).
+            SUBSP - Subspace algorithm (default for distributed-memory
+                    parallel processing).
 
         cmccoutkey
-            Complex Modal Contribution Coefficients (CMCC) output key. See
-            Calculate the Complex Mode Contribution Coefficients (CMCC) in the
-            Structural Analysis Guide for details and usage.
+            Complex Modal Contribution Coefficients (CMCC) output
+            key. See Calculate the Complex Mode Contribution
+            Coefficients (CMCC) in the Structural Analysis Guide for
+            details and usage.
 
             ON - Output the CMCC to the text file Jobname.CMCC.
 
@@ -5570,23 +5564,23 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        If the filename.modesym file exists in the working directory and
-        ReuseKey = ON, filename.modesym will be reused. If filename.modesym
-        does not exist in the working directory, the symmetric eigensolution
-        will be calculated.
+        If the filename.modesym file exists in the working directory
+        and ReuseKey = ON, filename.modesym will be reused. If
+        filename.modesym does not exist in the working directory, the
+        symmetric eigensolution will be calculated.
 
-        When ReuseKey=ON, both the new modal analysis (filename.modesym usage)
-        and the preceding modal analysis (filename.modesym generation) must be
-        performed using the same product version number.
+        When ReuseKey=ON, both the new modal analysis
+        (filename.modesym usage) and the preceding modal analysis
+        (filename.modesym generation) must be performed using the same
+        product version number.
 
-        The mode-extraction method changes depending on the type of parallelism
-        involved. For performance reasons, the subspace method is used with
-        distributed-memory parallel processing (Distributed ANSYS) runs, while
-        the Block Lanczos method is used with shared-memory parallel processing
-        runs.
+        The mode-extraction method changes depending on the type of
+        parallelism involved. For performance reasons, the subspace
+        method is used with distributed-memory parallel processing
+        (Distributed ANSYS) runs, while the Block Lanczos method is
+        used with shared-memory parallel processing runs.
         """
-        command = "QRDOPT,%s,%s,%s" % (str(reusekey), str(symmeth), str(cmccoutkey))
-        return self.run(command, **kwargs)
+        return self.run(f"QRDOPT,{reusekey},,,{symmeth},{cmccoutkey}", **kwargs)
 
     def abs(self, ir="", ia="", name="", facta="", **kwargs):
         """APDL Command: ABS
@@ -5596,27 +5590,22 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            the printout and displays.  Embedded blanks are compressed
+            upon output.
 
         facta
-            Scaling factor (positive or negative) applied to variable IA
-            (defaults to 1.0).
+            Scaling factor (positive or negative) applied to variable
+            IA (defaults to 1.0).
 
         Notes
         -----
@@ -5624,14 +5613,14 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = | FACTA x IA |
 
-        For a complex number (a + ib), the absolute value is the magnitude,
-        where the IA values are obtained from:
+        For a complex number (a + ib), the absolute value is the
+        magnitude, where the IA values are obtained from:
+        ``sqrt(a**2 + b**2)``
 
-        See POST26 - Data Operations in the Mechanical APDL Theory Reference
-        for details.
+        See POST26 - Data Operations in the Mechanical APDL Theory
+        Reference for details.
         """
-        command = "ABS,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
-        return self.run(command, **kwargs)
+        return self.run(f"ABS,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
     def rigid(self, dof1="", dof2="", dof3="", dof4="", dof5="", dof6="",
               **kwargs):
@@ -5642,23 +5631,25 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         dof1, dof2, dof3, . . . , dof6
-            Up to six global Cartesian directions of the rigid modes.  For a
-            completely free 2-D model, use ALL or UX, UY, ROTZ.   For a
-            completely free 3-D model, use ALL or UX, UY, UZ, ROTX, ROTY, ROTZ.
-            For a constrained model, use UX, UY, UZ, ROTX, ROTY, or ROTZ, as
-            appropriate, to specify each and every unconstrained direction
-            which exists in the model (not specifying every direction may cause
+            Up to six global Cartesian directions of the rigid modes.
+            For a completely free 2-D model, use ALL or UX, UY, ROTZ.
+            For a completely free 3-D model, use ALL or UX, UY, UZ,
+            ROTX, ROTY, ROTZ.  For a constrained model, use UX, UY,
+            UZ, ROTX, ROTY, or ROTZ, as appropriate, to specify each
+            and every unconstrained direction which exists in the
+            model (not specifying every direction may cause
             difficulties in extracting the modes).
 
         Notes
         -----
-        Specifies known rigid body modes (if any) of the model.  This command
-        applies only to a component mode synthesis (CMS) analysis (see the
-        CMSOPT command).  Any rigid body modes specified must be permitted by
-        the applied displacement constraints (i.e., do not specify a rigid body
-        mode in a constrained direction).  Reissue the command to redefine the
-        specification.  If used in SOLUTION, this command is valid only within
-        the first load step.
+        Specifies known rigid body modes (if any) of the model.  This
+        command applies only to a component mode synthesis (CMS)
+        analysis (see the CMSOPT command).  Any rigid body modes
+        specified must be permitted by the applied displacement
+        constraints (i.e., do not specify a rigid body mode in a
+        constrained direction).  Reissue the command to redefine the
+        specification.  If used in SOLUTION, this command is valid
+        only within the first load step.
 
         This command is also valid in PREP7.
 
@@ -5730,8 +5721,8 @@ class _MapdlCommands(object):  # pragma: no cover
             +1.
 
         x, y, z
-            Node location in the active coordinate system (R, θ, Z for
-            cylindrical, R, θ, Φ for spherical or toroidal).  If X = P,
+            Node location in the active coordinate system (R, θ, Z for
+            cylindrical, R, θ, Φ for spherical or toroidal).  If X = P,
             graphical picking is enabled and all remaining command fields are
             ignored (valid only in the GUI).
 
@@ -5857,16 +5848,16 @@ class _MapdlCommands(object):  # pragma: no cover
         key
             Reuse key:
 
-            0  - Program decides whether or not to reuse the previous factorized stiffness
+            0  - Program decides whether or not to reuse the previous factorized stiffness
                  matrix.
 
-            1  - Force the previous factorized stiffness matrix to be reused.  Used mainly in a
+            1  - Force the previous factorized stiffness matrix to be reused.  Used mainly in a
                  restart.  Forcing reuse of the matrix is a nonstandard use of
                  the program, and should be done with caution.  For instance,
                  using this option and changing the number of elements, or the
                  number or type of degrees of freedom, may cause an abort.
 
-            -1  - All element matrices are reformed and are used to reform a new factorized
+            -1  - All element matrices are reformed and are used to reform a new factorized
                   stiffness matrix.
 
         Notes
@@ -6772,9 +6763,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         See the *USE command for a discussion of macros.  All commands
@@ -6791,8 +6779,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*CREATE,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
+        return self.run(f"CREATE,{fname},{ext}", **kwargs)
 
     def clocal(self, kcn="", kcs="", xl="", yl="", zl="", thxy="", thyz="",
                thzx="", par1="", par2="", **kwargs):
@@ -7067,9 +7054,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         This command is valid in any processor, but only during an interactive
@@ -7171,32 +7155,29 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         file
-            The name (case sensitive) of the file containing the original
-            superelement matrix created by the generation pass (Sename.SUB).
-            The default is the current Jobname.
-
-        --, --
-            Unused fields.
+            The name (case sensitive) of the file containing the
+            original superelement matrix created by the generation
+            pass (Sename.SUB).  The default is the current Jobname.
 
         toler
-            Tolerance used to determine if use pass nodes are noncoincident
-            with master nodes having the same node numbers.  Defaults to
-            0.0001.  Use pass nodes will always be replaced by master nodes of
-            the same node number.  However, if a use pass node is more than
-            TOLER away from the corresponding master node, a warning is
-            generated.
+            Tolerance used to determine if use pass nodes are
+            noncoincident with master nodes having the same node
+            numbers.  Defaults to 0.0001.  Use pass nodes will always
+            be replaced by master nodes of the same node number.
+            However, if a use pass node is more than TOLER away from
+            the corresponding master node, a warning is generated.
 
         Notes
         -----
-        Defines a superelement by reading in the superelement matrices and
-        master nodes from the superelement matrix file.  The matrix file
-        (File.SUB) must be available from the substructure generation pass.
-        The proper element type (MATRIX50) must be active [TYPE] for this
-        command.  A scratch file called File.SORD showing the superelement
-        names and their corresponding element numbers is also written.
+        Defines a superelement by reading in the superelement matrices
+        and master nodes from the superelement matrix file.  The
+        matrix file (File.SUB) must be available from the substructure
+        generation pass.  The proper element type (MATRIX50) must be
+        active [TYPE] for this command.  A scratch file called
+        File.SORD showing the superelement names and their
+        corresponding element numbers is also written.
         """
-        command = "SE,%s,%s" % (str(file), str(toler))
-        return self.run(command, **kwargs)
+        return self.run(f"SE,{file},,,{toler}", **kwargs)
 
     def sfact(self, type="", **kwargs):
         """APDL Command: SFACT
@@ -7317,24 +7298,26 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        The NUMCMP command effectively compresses out unused item numbers by
-        renumbering all the items, beginning with one and continuing throughout
-        the model.  The renumbering order follows the initial item numbering
-        order (that is, compression lowers the maximum number by "sliding"
-        numbers down to take advantage of unused or skipped numbers).  All
-        defined items are renumbered, regardless of whether or not they are
-        actually used or selected.  Applicable related items are also checked
+        The NUMCMP command effectively compresses out unused item
+        numbers by renumbering all the items, beginning with one and
+        continuing throughout the model.  The renumbering order
+        follows the initial item numbering order (that is, compression
+        lowers the maximum number by "sliding" numbers down to take
+        advantage of unused or skipped numbers).  All defined items
+        are renumbered, regardless of whether or not they are actually
+        used or selected.  Applicable related items are also checked
         for renumbering as described for the merge operation (NUMMRG).
 
-        Compressing material numbers (NUMCMP,ALL or NUMCMP,MAT) does not update
-        the material number referenced by either of the following:
+        Compressing material numbers (NUMCMP,ALL or NUMCMP,MAT) does
+        not update the material number referenced by either of the
+        following:
 
-        A temperature-dependent convection or surface-to-surface radiation load
-        (SF, SFE, SFL, SFA)
+        A temperature-dependent convection or surface-to-surface
+        radiation load (SF, SFE, SFL, SFA)
 
         Real constants for multi-material elements (such as SOLID65)
 
-         Compression is usually not required unless memory space is limited and
+        Compression is usually not required unless memory space is limited and
         there are large gaps in the numbering sequence.
         """
         command = "NUMCMP,%s" % (str(label))
@@ -7363,9 +7346,6 @@ class _MapdlCommands(object):  # pragma: no cover
             Thirty-two character name for identifying the variable on the
             printout and displays.  Embedded blanks are compressed upon output.
 
-        --, --
-            Unused fields.
-
         facta, factb, factc
             Scaling factors (positive or negative) applied to the corresponding
             variables (default to 1.0).
@@ -7376,7 +7356,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = (FACTA x IA) + (FACTB x IB) + (FACTC x IC)
         """
-        command = "ADD,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(ic), str(name), str(facta), str(factb), str(factc))
+        command = f"ADD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)
 
     def gcolumn(self, curve="", string="", **kwargs):
@@ -7387,12 +7367,12 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         curve
-            Curve number on which label will be applied (integer value between
-            1 and 10).
+            Curve number on which label will be applied (integer value
+            between 1 and 10).
 
         string
-            Name or designation that will be applied to the curve (8 characters
-            max).
+            Name or designation that will be applied to the curve (8
+            characters max).
 
         Notes
         -----
@@ -7424,11 +7404,11 @@ class _MapdlCommands(object):  # pragma: no cover
 
         item
             Label identifying the item.  Valid item labels are shown in
-            Table 202: JSOL - Valid Item and Component Labels below.
+            Table 202: JSOL - Valid Item and Component Labels below.
 
         comp
             Component of the Item (if required).  Valid component labels are
-            shown in Table 202: JSOL - Valid Item and Component Labels below.
+            shown in Table 202: JSOL - Valid Item and Component Labels below.
 
         name
             Thirty-two character name identifying the item on printouts and
@@ -7674,16 +7654,12 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Extension of the ROM database file. Default to .rom.
 
-        --
-            Unused field.
-
         Notes
         -----
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMSAVE,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
+        return self.run(f"RMSAVE,{fname},{ext}", **kwargs)
 
     def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="",
                **kwargs):
@@ -8023,9 +7999,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Reads a file containing IGES data and transfers it into the ANSYS
@@ -8042,8 +8015,7 @@ class _MapdlCommands(object):  # pragma: no cover
         via the SMOOTH method (the only available method) use the standard
         database.
         """
-        command = "IGESIN,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
+        return self.run(f"IGESIN,{fname},{ext}", **kwargs)
 
     def mater(self, **kwargs):
         """APDL Command: MATER
@@ -8072,21 +8044,20 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         loc
             Determines whether existing file will be overwritten or appended:
 
-            The existing file will be overwritten. - The file will be appended to the existing file.
+            (blank) : The existing file will be overwritten.
+            APPEND :  The file will be appended to the existing file.
 
         Notes
         -----
@@ -8095,8 +8066,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*CFOPEN,%s,%s,%s" % (str(fname), str(ext), str(loc))
-        return self.run(command, **kwargs)
+        return self.run(f"*CFOPEN,{fname},{ext},,{loc}", **kwargs)
 
     def pldisp(self, kund="", **kwargs):
         """APDL Command: PLDISP
@@ -8110,11 +8080,11 @@ class _MapdlCommands(object):  # pragma: no cover
 
             0 - Display only displaced structure.
 
-            1 - Overlay displaced display with similar undisplaced display (appearance is
-                system-dependent).
+            1 - Overlay displaced display with similar undisplaced
+                display (appearance is system-dependent).
 
-            2 - Same as 1 except overlay with undisplaced edge display (appearance is system-
-                dependent).
+            2 - Same as 1 except overlay with undisplaced edge display
+                (appearance is system-dependent).
 
         Notes
         -----
@@ -8243,28 +8213,24 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.  Table values represent integrated
-            sum of IY to current table position of IX.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
+            Table values represent integrated sum of IY to current
+            table position of IX.
 
         iy, ix
             Integrate variable IY with respect to IX.
 
-        --
-            Unused field.
-
         name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            the printout and displays.  Embedded blanks are compressed
+            upon output.
 
         facta, factb
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (default to 1.0).
+            Scaling factors (positive or negative) applied to the
+            corresponding variables (default to 1.0).
 
         const
             Initial value.
@@ -8275,7 +8241,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = ∫ (FACTA x IY) d(FACTB x IX) + CONST
         """
-        command = "INT1,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(iy), str(ix), str(name), str(facta), str(factb), str(const))
+        command = f"INT1,{ir},{iy},{ix},,{name},,,{facta},{factb},{const}"
         return self.run(command, **kwargs)
 
     def kscon(self, npt="", delr="", kctip="", nthet="", rrat="", **kwargs):
@@ -8286,11 +8252,12 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         npt
-            Keypoint number at concentration.  If NPT = ALL, use all selected
-            keypoints.  If remaining fields are blank, remove concentration
-            from this keypoint (if unmeshed).  If NPT = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).  A component name may also be substituted for NPT.
+            Keypoint number at concentration.  If NPT = ALL, use all
+            selected keypoints.  If remaining fields are blank, remove
+            concentration from this keypoint (if unmeshed).  If NPT =
+            P, graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI).  A component
+            name may also be substituted for NPT.
 
         delr
             Radius of first row of elements about keypoint.
@@ -8300,12 +8267,13 @@ class _MapdlCommands(object):  # pragma: no cover
 
             0 - Do not skew midside nodes, if any, within the element.
 
-            1 - Skew midside nodes of the first row of elements to the 1/4 point for crack tip
-                singularity.
+            1 - Skew midside nodes of the first row of elements to the
+                1/4 point for crack tip singularity.
 
         nthet
-            Number of elements in circumferential direction (defaults to
-            approximately one per 45° (or one per 30°, if KCTIP = 1)).
+            Number of elements in circumferential direction (defaults
+            to approximately one per 45° (or one per 30°, if KCTIP =
+            1)).
 
         rrat
             Ratio of 2nd row element size to DELR (defaults to 0.75, or 0.5 if
@@ -8313,14 +8281,15 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Defines a concentration keypoint about which an area mesh will be
-        skewed. Useful for modeling stress concentrations and crack tips.
-        During meshing, elements are initially generated circumferentially
-        about, and radially away, from the keypoint. Lines attached to the
-        keypoint are given appropriate divisions and spacing ratios. Only one
-        concentration keypoint per unmeshed area is allowed.  Use KSCON,STAT to
-        list current status of concentration keypoints. The KSCON command does
-        not support 3-D modeling.
+        Defines a concentration keypoint about which an area mesh will
+        be skewed. Useful for modeling stress concentrations and crack
+        tips.  During meshing, elements are initially generated
+        circumferentially about, and radially away, from the
+        keypoint. Lines attached to the keypoint are given appropriate
+        divisions and spacing ratios. Only one concentration keypoint
+        per unmeshed area is allowed.  Use KSCON,STAT to list current
+        status of concentration keypoints. The KSCON command does not
+        support 3-D modeling.
 
         This command is also valid for rezoning.
         """
@@ -8348,7 +8317,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         pcolor
-            Polygon color (0  PCOLOR   15):
+            Polygon color (0  PCOLOR   15):
 
             0 - Black.
 
@@ -8424,11 +8393,11 @@ class _MapdlCommands(object):  # pragma: no cover
         style
             Outline key:
 
-             0  - Solid element outlines (default)
+             0  - Solid element outlines (default)
 
-             1  - Dashed element outlines
+             1  - Dashed element outlines
 
-            -1  - No element outlines
+            -1  - No element outlines
 
         Notes
         -----
@@ -8587,12 +8556,12 @@ class _MapdlCommands(object):  # pragma: no cover
 
         item
             Label identifying the item. General item labels are shown in
-            Table 134: ESOL - General Item and Component Labels below. Some
+            Table 134: ESOL - General Item and Component Labels below. Some
             items also require a component label.
 
         comp
             Component of the item (if required). General component labels are
-            shown in Table 134: ESOL - General Item and Component Labels below.
+            shown in Table 134: ESOL - General Item and Component Labels below.
             If Comp is a sequence number (n), the NODE field will be ignored.
 
         name
@@ -8703,7 +8672,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         The STS option ties regions of solid elements to regions of shell
         elements. A single shell node may be tied to up to nine brick element
-        nodes that define a “fiber” vector. Solid element nodes constrained in
+        nodes that define a "fiber" vector. Solid element nodes constrained in
         this way remain linear throughout the analysis but can move relative to
         each other in the fiber direction.
 
@@ -9202,19 +9171,19 @@ class _MapdlCommands(object):  # pragma: no cover
         label
             Orientation:
 
-            Y  - Y vertical upward, X horizontal to the right, Z out from the screen (default).
+            Y  - Y vertical upward, X horizontal to the right, Z out from the screen (default).
 
-            -Y  - Y vertical downward, X horizontal to the left, Z out from the screen.
+            -Y  - Y vertical downward, X horizontal to the left, Z out from the screen.
 
-            X  - X vertical upward, Y horizontal to the left, Z out from the screen.
+            X  - X vertical upward, Y horizontal to the left, Z out from the screen.
 
-            -X  - X vertical downward, Y horizontal to the right, Z out from the screen.
+            -X  - X vertical downward, Y horizontal to the right, Z out from the screen.
 
-            Z  - Z vertical upward, Y horizontal to the right, X out from the screen.  With this
+            Z  - Z vertical upward, Y horizontal to the right, X out from the screen.  With this
                  choice, you should use a view other than the /VIEW default of
                  (0,0,1).
 
-            -Z  - Z vertical downward, Y horizontal to the left, X out from the screen.  With
+            -Z  - Z vertical downward, Y horizontal to the left, X out from the screen.  With
                   this choice, you should use a view other than the /VIEW
                   default of (0,0,1).
 
@@ -9480,7 +9449,7 @@ class _MapdlCommands(object):  # pragma: no cover
         elements have overlapping material, such as shell elements which are
         not co-planar. Additionally, if adjacent elements have different
         thicknesses, the polygons depicting the connectivity between the
-        “thicker” and “thinner” elements along the shared element edges may not
+        "thicker" and "thinner" elements along the shared element edges may not
         always be displayed.
 
         For POST1 results displays (such as PLNSOL), the following limitations
@@ -9562,9 +9531,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Saves the paths selected with the PSEL command to an external file
@@ -9584,9 +9550,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field
-
         matf
             Material reference number from where material property data will be
             copied.
@@ -10092,33 +10055,170 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "DISPLAY," % ()
         return self.run(command, **kwargs)
 
-    def cmwrite(self, fname="", ext="", fmat="", **kwargs):
+    def cmwrite(self, option="", fname="", ext="", fnamei="", exti="",
+                fmat="", **kwargs):
         """APDL Command: CMWRITE
 
         Writes node and element components and assemblies to a file.
 
         Parameters
         ----------
+        option
+            Selects which data to write:
+
+            ALL - Write all appropriate geometry, material property,
+                  load, and component data (default). Two files will
+                  be produced. Fname.Ext will contain all data items
+                  mentioned in "Notes", except the solid model
+                  data. Fnamei.Exti will contain the solid model
+                  geometry and solid model loads data in the form of
+                  IGES commands. This option is not valid when
+                  CDOPT,ANF is active.
+
+            COMB - Write all data mentioned, but to a single file,
+                   Fname.Ext. Solid model geometry data will be
+                   written in either IGES or ANF format as specified
+                   in the CDOPT command, followed by the remainder of
+                   the data in the form of ANSYS commands. More
+                   information on these (IGES/ANF) file formats is
+                   provided in "Notes".
+
+            DB - Write all database information except the solid model
+                 and solid model loads to Fname.Ext in the form of
+                 ANSYS commands. This option is not valid when
+                 CDOPT,ANF is active.
+
+            SOLID - Write only the solid model geometry and solid
+                    model load data. This output will be in IGES or
+                    ANF format, as specified in the CDOPT
+                    command. More information on these (IGES/ANF) file
+                    formats is provided in "Notes".
+
+            GEOM - Write only element and nodal geometry data. Neither
+                   solid model geometry nor element attribute data
+                   will be written. One file, Fname.Ext, will be
+                   produced. Use CDREAD,DB to read in a file written
+                   with this option. Element types [ET] compatible
+                   with the connectivity of the elements on the file
+                   must first be defined before reading the file in
+                   with CDREAD,DB.
+
+            CM - Write only node and element component and geometry
+                 data to Fname.Ext.
+
+            MAT - Write only material property data (both linear and
+                  nonlinear) to Fname.Ext .
+
+            LOAD - Write only loads for current load step to
+                   Fname.Ext.
+
+            SECT - Write only section data to Fname.Ext. Pretension
+                   sections are not included.
+
+
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
-            Filename extension (eight-character maximum).
+            Filename extension (eight-character maximum).  The
+            extension defaults to CDB if Fname is blank.
 
-        --
-            Unused field.
+        fnamei
+            Name of the IGES file and its directory path (248
+            characters maximum, including directory). If you do not
+            specify a directory path, it will default to your working
+            directory and you can use all 248 characters for the file
+            name.
+
+            The file name defaults to Fname. Used only if
+            Option = ALL or SOLID. Previous data on this file, if any,
+            is overwritten.
+
+        Exti
+            Filename extension (eight-character maximum).  The
+            extension defaults to IGES in all cases, except when
+            CDOPT,ANF is active and CDWRITE, Option = SOLID. In this
+            case Exti = ANF.
 
         fmat
             Format of the output file (defaults to BLOCKED).
 
-            BLOCKED - Blocked format. This format allows faster reading of the file.
+            BLOCKED - Blocked format. This format allows faster
+                      reading of the output file. The time savings is
+                      most significant when BLOCKED is used to read
+                      .cdb files associated with very large models.
 
             UNBLOCKED - Unblocked format.
+
+        Notes
+        -----
+        Load data includes the current load step only. Loads applied
+        to the solid model (if any) are automatically transferred to
+        the finite element model when this command is issued. CDWRITE
+        writes out solid model loads for meshed models only. If the
+        model is not meshed, the solid model loads cannot be
+        saved. Component data include component definitions, but not
+        assembly definitions. Appropriate NUMOFF commands are included
+        at the beginning of the file; this is to avoid overlap of an
+        existing database when the file is read in.
+
+        Solution control commands are typically not written to the
+        file unless you specifically change a default solution
+        setting.
+
+        CDWRITE does not support the GSBDATA and GSGDATA commands, and
+        these commands are not written to the file.
+
+        The data may be reread (on a different machine, for example)
+        with the CDREAD command. Caution: When the file is read in,
+        the NUMOFF,MAT command may cause a mismatch between material
+        definitions and material numbers referenced by certain loads
+        and element real constants. See NUMOFF for details. Also, be
+        aware that the files created by the CDWRITE command explicitly
+        set the active coordinate system to Cartesian (CSYS,0).
+
+        You should generally use the blocked format (Fmat = BLOCKED)
+        when writing out model data with CDWRITE. This is a compressed
+        data format that greatly reduces the time required to read
+        large models through the CDREAD command. The blocked and
+        unblocked formats are described in Chapter 3 of the Guide to
+        Interfacing with ANSYS.
+
+        If you use CDWRITE in any of the derived products (ANSYS
+        Mechanical Pro, ANSYS Mechanical Premium), then before reading
+        the file, you must edit the Jobname.cdb file to remove
+        commands that are not available in the respective component
+        product.
+
+        The CDWRITE command writes PART information for any ANSYS
+        LS-DYNA input file to the Jobname.cdb file via the EDPREAD
+        command. (EDPREAD is not a documented command; it is written
+        only when the CDWRITE command is issued.) The PART information
+        can be automatically read in via the CDREAD command; however,
+        if more than one Jobname.cdb file is read, the PART list from
+        the last Jobname.cdb file overwrites the existing PART list of
+        the total model. This behavior affects all PART-related
+        commands contained in the Jobname.cdb file. You can join
+        models, but not PART-related inputs, which you must modify
+        using the newly-created PART numbers. In limited cases, an
+        update of the PART list (EDWRITE,PUPDATE) is possible; doing
+        so requires that no used combination of MAT/TYPE/REAL appears
+        more than once in the list.
+
+        The CDWRITE command does not support (for beam meshing) any
+        line operation that relies on solid model associativity. For
+        example, meshing the areas adjacent to the meshed line,
+        plotting the line that contains the orientation nodes, or
+        clearing the mesh from the line that contains orientation
+        nodes may not work as expected. For more information about
+        beam meshing, see Meshing Your Solid Model in the Modeling and
+        Meshing Guide.
         """
-        command = "CMWRITE,%s,%s,%s" % (str(fname), str(ext), str(fmat))
+        command = f"CDWRITE,{option},{fname},{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)
 
     def nlist(self, node1="", node2="", ninc="", lcoord="", sort1="", sort2="",
@@ -10563,12 +10663,13 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "LSSCALE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(ninc), str(rx), str(ry), str(rz), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def mpwrite(self, fname="", ext="", mat="", **kwargs):
+    def mpwrite(self, fname="", ext="", lib="", mat="", **kwargs):
         """APDL Command: MPWRITE
 
-        Writes linear material properties in the database to a file (if the LIB
-        option is not specified) or writes both linear and nonlinear material
-        properties (if LIB is specified) from the database to a file.
+        Writes linear material properties in the database to a file
+        (if the LIB option is not specified) or writes both linear and
+        nonlinear material properties (if LIB is specified) from the
+        database to a file.
 
         Parameters
         ----------
@@ -10581,14 +10682,35 @@ class _MapdlCommands(object):  # pragma: no cover
             the current working directory. If you use the default for your
             directory, you can use all 248 characters for the file name.
 
+            The file name defaults to Jobname.
+
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
+            If you omit the LIB option, the default extension is
+            MP. If you specify the LIB option, the default extension
+            is units_MPL, where units is the system of units currently
+            in use. (See the description of the /UNITS command.) For
+            example, if /UNITS is set to BIN, the extension defaults
+            to BIN_MPL.
 
         lib
             The only value allowed for this field is the string "LIB."
+
+            The LIB option indicates that you wish to have properties
+            associated with the material (MAT) written to the
+            specified material library file using the material library
+            file format. The material library file format is
+            ASCII-text-based ANSYS command input. Certain commands
+            associated with this format have been modified to
+            interpret the string "_MATL" to mean the currently
+            selected material. This feature makes the material library
+            file independent of the material number in effect when the
+            file was written; this enables you to restore the
+            properties into the ANSYS database using the material
+            number of your choice. The LIB option also enables you to
+            save both linear and nonlinear properties. If you omit the
+            LIB option, you can save linear properties only.
 
         mat
             Specifies the material to be written to the named material library
@@ -10603,8 +10725,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is also valid in SOLUTION.
         """
-        command = "MPWRITE,%s,%s,%s" % (str(fname), str(ext), str(mat))
-        return self.run(command, **kwargs)
+        return self.run(f"MPWRITE,{fname},{ext},,{lib},{mat}", **kwargs)
 
     def bfk(self, kpoi="", lab="", val1="", val2="", val3="", ph_ase="",
             **kwargs):
@@ -10876,10 +10997,10 @@ class _MapdlCommands(object):  # pragma: no cover
             X - Surface is normal to coordinate X direction (default).  Interpreted as R
                 direction for non-Cartesian coordinate systems.
 
-            Y - Surface is normal to coordinate Y direction.   θ direction for non-Cartesian
+            Y - Surface is normal to coordinate Y direction.   θ direction for non-Cartesian
                 coordinate systems.
 
-            Z - Surface is normal to coordinate Z direction.   Φ direction for spherical or
+            Z - Surface is normal to coordinate Z direction.   Φ direction for spherical or
                 toroidal coordinate systems.
 
         kcn
@@ -10926,19 +11047,22 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         lab
-            Label that specifies the write operation:
+            Label that specifies the write operation.
+
+            ALL - Write all abbreviations (default).
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+            The file name defaults to Jobname.
 
         ext
-            Filename extension (eight-character maximum).
-
-        --
-            Unused field.
+            Filename extension (eight-character maximum).  The
+            extension defaults to ABBR if Fname is blank.
 
         Notes
         -----
@@ -11165,10 +11289,10 @@ class _MapdlCommands(object):  # pragma: no cover
             X - Slope is along X direction (default).  Interpreted as R direction for non-
                 Cartesian coordinate systems.
 
-            Y - Slope is along Y direction.  Interpreted as  θ direction for non-Cartesian
+            Y - Slope is along Y direction.  Interpreted as  θ direction for non-Cartesian
                 coordinate systems.
 
-            Z - Slope is along Z direction.  Interpreted as Φ direction for spherical or
+            Z - Slope is along Z direction.  Interpreted as Φ direction for spherical or
                 toroidal coordinate systems.
 
         slzer
@@ -11228,11 +11352,11 @@ class _MapdlCommands(object):  # pragma: no cover
             Operation label. A tolerance of 1.0E-10 is used for comparisons
             between real numbers:
 
-            Equal (for VAL1 = VAL2). - Not equal (for VAL1 ≠VAL2).
+            Equal (for VAL1 = VAL2). - Not equal (for VAL1 ≠VAL2).
 
             Less than (for VAL1<VAL2). - Greater than (for VAL1>VAL2).
 
-            Less than or equal (for VAL1 VAL2). - Greater than or equal (for VAL1 VAL2).
+            Less than or equal (for VAL1 VAL2). - Greater than or equal (for VAL1 VAL2).
 
             Absolute values of VAL1 and VAL2 before < operation. - Absolute values of VAL1 and VAL2 before > operation.
 
@@ -11287,7 +11411,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         kbr
             Through-thickness bending stresses key for an axisymmetric analysis
-            (RHO  ≠ 0):
+            (RHO  ≠ 0):
 
             0 - Include the thickness-direction bending stresses.
 
@@ -11765,7 +11889,7 @@ class _MapdlCommands(object):  # pragma: no cover
         lcomb
             Specifies how to combine adjacent line segments:
 
-             0 - Line segments combined by connecting ends to ends. This value is the default.
+             0 - Line segments combined by connecting ends to ends. This value is the default.
 
             -1 - No line segments combined.
 
@@ -11779,7 +11903,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Issue the AREMESH command after issuing a REMESH,START command and
         before issuing a REMESH,FINISH command.
 
-        The AREMESH command cannot account for an open area (or “hole”) inside
+        The AREMESH command cannot account for an open area (or "hole") inside
         a completely enclosed region. Instead, try meshing around an open area
         by selecting two adjoining regions; for more information, see Hints for
         Remeshing Multiple Regions .
@@ -12269,43 +12393,47 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "KESIZE,%s,%s,%s,%s" % (str(npt), str(size), str(fact1), str(fact2))
         return self.run(command, **kwargs)
 
-    def pddmcs(self, nsim="", _astop="", accmean="", accstdev="", check="",
+    def pddmcs(self, nsim="", astop="", accmean="", accstdev="", check="",
                seed="", **kwargs):
         """APDL Command: PDDMCS
 
-        Specifies options for Monte Carlo Simulations using direct sampling.
+        This command appears to have been removed by V18.2
+
+        Specifies options for Monte Carlo Simulations using direct
+        sampling.
 
         Parameters
         ----------
         nsim
             Number of simulation loops of the analysis.
 
-        --
-            Unused field.
-
         astop
             Autostop option label.
 
-            AUTO - Enable Autostop. When Autostop is used, the PDS feature continues the
-                   simulation loops until the convergence criteria for the mean
-                   value and the standard deviation have been met or until the
-                   number of simulations NSIM are complete, whichever comes
-                   first. The convergence criteria (mean value and standard
-                   deviations of all random output parameters) are specified by
-                   the ACCMEAN and ACCSTDEV parameters. The criteria are met if
-                   the mean value and the standard deviations converge within
-                   the accuracy specified in the ACCMEAN and ACCSTDEV options.
-                   The convergence check is done every i-th loop, where i is
-                   specified in the CHECK parameter.
+            AUTO - Enable Autostop. When Autostop is used, the PDS
+                   feature continues the simulation loops until the
+                   convergence criteria for the mean value and the
+                   standard deviation have been met or until the
+                   number of simulations NSIM are complete, whichever
+                   comes first. The convergence criteria (mean value
+                   and standard deviations of all random output
+                   parameters) are specified by the ACCMEAN and
+                   ACCSTDEV parameters. The criteria are met if the
+                   mean value and the standard deviations converge
+                   within the accuracy specified in the ACCMEAN and
+                   ACCSTDEV options.  The convergence check is done
+                   every i-th loop, where i is specified in the CHECK
+                   parameter.
 
-            ALL - Disable Autostop option. All Monte Carlo Simulations as specified by NSIM are
-                  performed (default).
+            ALL - Disable Autostop option. All Monte Carlo Simulations
+                  as specified by NSIM are performed (default).
 
         accmean
-            Accuracy of the mean values of all random output parameters that
-            must be met for the Autostop option. Default is 0.01 (1%). ACCMEAN
-            is ignored for Astop = ALL. The convergence of the mean values is
-            met if for all random output parameters y the equation holds:
+            Accuracy of the mean values of all random output
+            parameters that must be met for the Autostop
+            option. Default is 0.01 (1%). ACCMEAN is ignored for Astop
+            = ALL. The convergence of the mean values is met if for
+            all random output parameters y the equation holds:
 
         accstdev
             Accuracy of the standard deviations of all random output parameters
@@ -12372,7 +12500,7 @@ class _MapdlCommands(object):  # pragma: no cover
         terminate the simulations before NSIM simulations are done if the
         convergence criteria are met.
         """
-        command = "PDDMCS,%s,%s,%s,%s,%s,%s" % (str(nsim), str(_astop), str(accmean), str(accstdev), str(check), str(seed))
+        command = f"PDDMCS,{nsim},,{astop},{accmean},{accstdev},{check},{seed}"
         return self.run(command, **kwargs)
 
     def ascres(self, opt="", **kwargs):
@@ -12777,9 +12905,9 @@ class _MapdlCommands(object):  # pragma: no cover
         rkey
             Ramping key:
 
-            OFF  - Loads are step-removed (default).
+            OFF  - Loads are step-removed (default).
 
-            ON or FORCE  - Forces on the specified degrees of freedom (Lab) are ramped during the next
+            ON or FORCE  - Forces on the specified degrees of freedom (Lab) are ramped during the next
                            load step. The forces are ramped from the reaction
                            forces of the previous load step, regardless of
                            whether or not a constraint was present. If the
@@ -13136,12 +13264,12 @@ class _MapdlCommands(object):  # pragma: no cover
         ----------
         item
             Label identifying the item.  Valid item labels are shown in
-            Table 219: PLESOL - Valid Item and Component Labels for Element
+            Table 219: PLESOL - Valid Item and Component Labels for Element
             Results below.  Some items also require a component label.
 
         comp
             Component of the item (if required).  Valid component labels are
-            shown in Table 219: PLESOL - Valid Item and Component Labels for
+            shown in Table 219: PLESOL - Valid Item and Component Labels for
             Element Results below.
 
         kund
@@ -13672,11 +13800,10 @@ class _MapdlCommands(object):  # pragma: no cover
             directory path defaults to the working directory; in this case, you
             can use all 248 characters for the file name.
 
+            The file name defaults to Jobname.
+
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kedit
             Flag to suppress nonessential commands:
@@ -13689,22 +13816,22 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Writes the database command log to a named file.  The database command
-        log contains all commands that were used to create the current
-        database.  These commands are recorded in the database as they are
-        issued, and saved in the database file (File.DB) whenever the database
-        is saved.  The LGWRITE command extracts these commands from the
-        database and writes them to a file.  Nonessential commands (for
-        listing, graphics displays, help, etc.) can be excluded from the file
-        by using the Kedit field.  The file resulting from LGWRITE can be used
-        as command input to the program.  This command is most useful if the
-        session log file (File.LOG), which is normally saved during an
+        Writes the database command log to a named file.  The database
+        command log contains all commands that were used to create the
+        current database.  These commands are recorded in the database
+        as they are issued, and saved in the database file (File.DB)
+        whenever the database is saved.  The LGWRITE command extracts
+        these commands from the database and writes them to a file.
+        Nonessential commands (for listing, graphics displays, help,
+        etc.) can be excluded from the file by using the Kedit field.
+        The file resulting from LGWRITE can be used as command input
+        to the program.  This command is most useful if the session
+        log file (File.LOG), which is normally saved during an
         interactive session, has been lost or corrupted.
 
         This command is valid in any processor.
         """
-        command = "LGWRITE,%s,%s,%s" % (str(fname), str(ext), str(kedit))
-        return self.run(command, **kwargs)
+        return self.run(f"LGWRITE,{fname},{ext},,{kedit}", **kwargs)
 
     def ainv(self, na="", nv="", **kwargs):
         """APDL Command: AINV
@@ -14046,8 +14173,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         If you have applied the Coriolis effect (CORIOLIS) using a stationary
         reference frame, the CMOMEGA command takes the gyroscopic damping
-        matrix into account for the elements listed under “Stationary Reference
-        Frame” in the notes section of the CORIOLIS command. ANSYS verifies
+        matrix into account for the elements listed under "Stationary Reference
+        Frame" in the notes section of the CORIOLIS command. ANSYS verifies
         that the rotation vector axis is parallel to the axis of the element;
         if not, the gyroscopic effect is not applied. If you issue a CMOMEGA
         command when the Coriolis or gyroscopic effect is present, a
@@ -14439,41 +14566,37 @@ class _MapdlCommands(object):  # pragma: no cover
         ia
             Reference number of the complex variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
             Thirty-two character name for identifying the variable on the
             printout and displays.  Embedded blanks are compressed upon output.
 
-        --, --
-            Unused fields.
-
         facta
-            Scaling factor (positive or negative) applied to variable IA
-            (defaults to 1.0).  Usually FACTA should be set to 1.  FACTA may
-            affect the position of the angle by a multiple of  π, resulting in
-            a quadrant change.
+            Scaling factor (positive or negative) applied to variable
+            IA (defaults to 1.0).  Usually FACTA should be set to 1.
+            FACTA may affect the position of the angle by a multiple
+            of π, resulting in a quadrant change.
 
         Notes
         -----
-        Forms the arctangent of a complex variable according to the operation:
+        Forms the arctangent of a complex variable according to the
+        operation:
 
         IR = ATAN(FACTA X b/a)
 
-        where a and b are the real and imaginary parts, respectively, of the
-        complex variable IA (which is of the form a + ib).  The arctangent
-        represents the phase angle (in radians), and is valid only for a
-        harmonic analysis (ANTYPE,HARMIC).
+        where a and b are the real and imaginary parts, respectively,
+        of the complex variable IA (which is of the form a + ib).  The
+        arctangent represents the phase angle (in radians), and is
+        valid only for a harmonic analysis (ANTYPE,HARMIC).
 
-        Since the scaling factor is applied uniformly to b/a, applying any
-        positive or negative scaling factor will not affect the size of the
-        phase angle, with the exception that a negative scaling factor will
-        change the results quadrant by : π.  The magnitude of a complex number
-        is still obtained through the ABS command.  See POST26 - Data
-        Operations in the Mechanical APDL Theory Reference for details.
+        Since the scaling factor is applied uniformly to b/a, applying
+        any positive or negative scaling factor will not affect the
+        size of the phase angle, with the exception that a negative
+        scaling factor will change the results quadrant by : π.  The
+        magnitude of a complex number is still obtained through the
+        ABS command.  See POST26 - Data Operations in the Mechanical
+        APDL Theory Reference for details.
         """
-        command = "ATAN,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
+        command = f"ATAN,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)
 
     def etdele(self, ityp1="", ityp2="", inc="", **kwargs):
@@ -14951,9 +15074,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Writes the probabilistic model data to a file. Saved data include
@@ -15064,9 +15184,9 @@ class _MapdlCommands(object):  # pragma: no cover
             Window number (or ALL) to which command applies (defaults to 1).
 
         dmult
-            AUTO or 0
+            AUTO or 0
 
-            AUTO or 0 - Scale displacements automatically so that maximum  displacement (vector
+            AUTO or 0 - Scale displacements automatically so that maximum  displacement (vector
                         amplitude) displays as 5 percent of the maximum model
                         length, as measured in the global Cartesian X, Y, or Z
                         directions.
@@ -16314,7 +16434,7 @@ class _MapdlCommands(object):  # pragma: no cover
             up to 32 characters, beginning with a letter and containing only
             letters, numbers, and underscores.  Component names beginning with
             an underscore (e.g., _LOOP) are reserved for use by ANSYS and
-            should be avoided.  Components named “ALL,” “STAT,” and “DEFA” are
+            should be avoided.  Components named "ALL," "STAT," and "DEFA" are
             not permitted. Overwrites a previously defined name.
 
         entity
@@ -16429,32 +16549,32 @@ class _MapdlCommands(object):  # pragma: no cover
         hgen
             Hourglass energy control key:
 
-            OFF or 0 - Hourglass energy is not computed.
+            OFF or 0 - Hourglass energy is not computed.
 
-            ON or 1 - Hourglass energy is computed and included in the energy balance (default).
+            ON or 1 - Hourglass energy is computed and included in the energy balance (default).
 
         swen
             Stonewall energy dissipation control key:
 
-            OFF or 0 - Stonewall energy dissipation is not computed.
+            OFF or 0 - Stonewall energy dissipation is not computed.
 
-            ON or 1 - Stonewall energy dissipation is computed and included in the energy balance
+            ON or 1 - Stonewall energy dissipation is computed and included in the energy balance
                       (default).
 
         sien
             Sliding interface energy dissipation control key:
 
-            OFF or 0 - Sliding interface energy dissipation is not computed.
+            OFF or 0 - Sliding interface energy dissipation is not computed.
 
-            ON or 1 - Sliding interface energy dissipation is computed and included in the energy
+            ON or 1 - Sliding interface energy dissipation is computed and included in the energy
                       balance (default).
 
         rlen
             Rayleigh (damping) energy dissipation control key:
 
-            OFF or 0 - Rayleigh energy dissipation is not computed.
+            OFF or 0 - Rayleigh energy dissipation is not computed.
 
-            ON or 1 - Rayleigh energy dissipation is computed and included in the energy balance
+            ON or 1 - Rayleigh energy dissipation is computed and included in the energy balance
                       (default).
 
         Notes
@@ -16502,14 +16622,14 @@ class _MapdlCommands(object):  # pragma: no cover
         option2
             For curve-fit function operations (Oper = FADD, FDEL, FSET, SET,
             CDEL, SOLVE, or FIX), this field specifies constitutive model type.
-            The valid entries are listed in Table 231: Hyperelastic Options
+            The valid entries are listed in Table 231: Hyperelastic Options
             below.
 
         option3
             For Oper = FADD, FDEL, FSET, CDEL, SET, SOLVE or FIX, some of the
             cases specified in Option2 will require that the polynomial order
             be specified. The applicable values for the order specification are
-            listed in Table 231: Hyperelastic Options.
+            listed in Table 231: Hyperelastic Options.
 
         option4
             When you are working on a specific coefficient (Oper = FIX), this
@@ -16544,7 +16664,7 @@ class _MapdlCommands(object):  # pragma: no cover
         kaxis
             Axis selection key:
 
-            0 or 1 - Single Y-axis.  Up to 10 curves scaled to a single Y-axis.
+            0 or 1 - Single Y-axis.  Up to 10 curves scaled to a single Y-axis.
 
             2 - Additional Y-axes (one for each curve) (3 curves maximum).  Allows better
                 scaling of curves with widely differing numbering ranges.
@@ -16590,9 +16710,6 @@ class _MapdlCommands(object):  # pragma: no cover
             Thirty-two character name for identifying the variable on the
             printout and displays.  Embedded blanks are compressed upon output.
 
-        --, --
-            Unused fields.
-
         facta, factb, factc
             Scaling factors (positive or negative) applied to the corresponding
             variables (default to 1.0).
@@ -16607,7 +16724,7 @@ class _MapdlCommands(object):  # pragma: no cover
         The comparison is done at each time location, so that the new variable
         is the "envelope" of the three existing variables.
         """
-        command = "LARGE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(ic), str(name), str(facta), str(factb), str(factc))
+        command = f"LARGE,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)
 
     def sscale(self, wn="", smult="", **kwargs):
@@ -16713,11 +16830,11 @@ class _MapdlCommands(object):  # pragma: no cover
         key
             Symbol key:
 
-            -1  - Effective only if Label = LAYR and solid shape element display (/ESHAPE) is
+            -1  - Effective only if Label = LAYR and solid shape element display (/ESHAPE) is
                   active. Orientation of all layers appears with the solid
                   shape element display.
 
-            0  - No symbol (default). If Label = LDIV, then KEY= 0 indicates that the displayed
+            0  - No symbol (default). If Label = LDIV, then KEY= 0 indicates that the displayed
                  element divisions will correspond to the existing mesh (the
                  word MESHED or EXISTING can also be substituted). Also, for
                  Label = LDIV, if you execute any meshing command (such as
@@ -16727,7 +16844,7 @@ class _MapdlCommands(object):  # pragma: no cover
                  forces/moments will be scaled to their respective maximum
                  values.
 
-            1  - Include symbol. If Label = LDIV, then KEY = 1 indicates that the displayed line
+            1  - Include symbol. If Label = LDIV, then KEY = 1 indicates that the displayed line
                  divisions will correspond to the value assigned by LESIZE (the
                  word LESIZE can also be substituted). Also, for Label = LDIV,
                  if you execute the LESIZE command, KEY is set to 1 (LESIZE)
@@ -16736,7 +16853,7 @@ class _MapdlCommands(object):  # pragma: no cover
                  derived forces/moments will be scaled to the same maximum
                  value.
 
-            N  - If Label = LAYR, then N is equal to the layer number. If Label = DOT, then N
+            N  - If Label = LAYR, then N is equal to the layer number. If Label = DOT, then N
                  can be equal to 0,1,.....15, indicating the dot size. If Label
                  = LDIV, then KEY = -1, indicates that no element divisions
                  will be displayed (the word OFF can also be substituted).
@@ -17233,7 +17350,7 @@ class _MapdlCommands(object):  # pragma: no cover
         -----
         The INISTATE command is available for current-technology elements.
         Initial state supported for a given element is indicated in the
-        documentation for the element under “Special Features.”
+        documentation for the element under "Special Features."
 
         The command is not for use with kinematic hardening material properties
         (TB,BKIN, TB,KINH, TB,PLAS,,,,KINH) or the shape memory alloy material
@@ -17750,7 +17867,7 @@ class _MapdlCommands(object):  # pragma: no cover
         ircs
             Flag for inertia tensor reference coordinate system.
 
-            0 (or blank) - Global inertia tensor (default). You must supply all six inertia tensor
+            0 (or blank) - Global inertia tensor (default). You must supply all six inertia tensor
                            components (see Ivect).
 
             1 - Principal moments of inertia with orientation vectors. You must supply IXX,
@@ -17968,7 +18085,7 @@ class _MapdlCommands(object):  # pragma: no cover
         be typed in directly in an ANSYS session (although it can be included
         in an input file for batch input or for use with the /INPUT command).
 
-        You cannot use the “!” and “$” characters in ANSYS text annotation.
+        You cannot use the "!" and "$" characters in ANSYS text annotation.
 
         /ANNOT activates annotation graphics for adding annotation to displays.
         Commands representing the annotation instructions are automatically
@@ -18645,8 +18762,8 @@ class _MapdlCommands(object):  # pragma: no cover
         (if inside of the adjusted pinball region)
 
         If an open gap exists at the end of the previous load step and the
-        contact status is adjusted as sliding or sticking due to a “bonded” or
-        “no seperation” contact behavior definition, then the program will
+        contact status is adjusted as sliding or sticking due to a "bonded" or
+        "no seperation" contact behavior definition, then the program will
         treat it as near-field contact when executing CNKMOD in the subsequent
         load steps.
 
@@ -18709,70 +18826,77 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Specifies what to do with element information:
 
-            WRITE - Write all appropriate element types, key options, real constants, material
-                    properties, solution analysis options, load step options,
-                    constraint equations, coupled nodes, defined components,
-                    and GUI preference settings to the file specified with the
-                    Fname and Ext arguments.
+            WRITE - Write all appropriate element types, key options,
+                    real constants, material properties, solution
+                    analysis options, load step options, constraint
+                    equations, coupled nodes, defined components, and
+                    GUI preference settings to the file specified with
+                    the Fname and Ext arguments.
 
-            READ - Deletes all solution information (material properties, solution options, load
-                   step options, constraint equations, coupled nodes, results,
-                   and GUI preference settings) then reads all the information
-                   listed above into the ANSYS database from the location
-                   specified by the Fname and Ext arguments.
+            READ - Deletes all solution information (material
+                   properties, solution options, load step options,
+                   constraint equations, coupled nodes, results, and
+                   GUI preference settings) then reads all the
+                   information listed above into the ANSYS database
+                   from the location specified by the Fname and Ext
+                   arguments.
 
             LIST - Lists currently defined physics files and their titles.
 
-            DELETE - Deletes a specified physics file and its title from the database.
+            DELETE - Deletes a specified physics file and its title
+                     from the database.
 
-            CLEAR - Deletes all material properties, solution options, load step options,
-                    constraint equations, coupled nodes, results, and GUI
-                    preference settings from the database. Does NOT clear the
-                    active physics file title from the database.
+            CLEAR - Deletes all material properties, solution options,
+                    load step options, constraint equations, coupled
+                    nodes, results, and GUI preference settings from
+                    the database. Does NOT clear the active physics
+                    file title from the database.
 
-            STATUS - Displays information about all active elements and settings.
+            STATUS - Displays information about all active elements
+                     and settings.
 
         title
-            A user-defined title that quickly identifies a set of physics
-            settings.  For example, you might use "Fluid," "Structural," or
-            "Magnetic" as titles.  A title can contain up to 64 characters. It
-            can be entered in lower or upper case. Lower case is internally
-            converted to upper case within the program.
+            A user-defined title that quickly identifies a set of
+            physics settings.  For example, you might use "Fluid,"
+            "Structural," or "Magnetic" as titles.  A title can
+            contain up to 64 characters. It can be entered in lower or
+            upper case. Lower case is internally converted to upper
+            case within the program.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
-        Use the PHYSICS command when you are performing a multiphysics analysis
-        that involves two different disciplines (for example, magnetic and
-        structural analyses) and you cannot solve both analyses simultaneously.
-        Once you have set up physics environments for both analyses, you can
-        use the PHYSICS,READ command to change between the defined physics
-        environments.  For more information about doing multiphysics analyses,
-        see Sequential Coupled-Field Analysis in the Coupled-Field Analysis
-        Guide.
+        Use the PHYSICS command when you are performing a multiphysics
+        analysis that involves two different disciplines (for example,
+        magnetic and structural analyses) and you cannot solve both
+        analyses simultaneously.  Once you have set up physics
+        environments for both analyses, you can use the PHYSICS,READ
+        command to change between the defined physics environments.
+        For more information about doing multiphysics analyses, see
+        Sequential Coupled-Field Analysis in the Coupled-Field
+        Analysis Guide.
 
-        The PHYSICS command outputs all solution information, including
-        analysis options, to the Jobname.PHn file described above.  Although it
-        also outputs components, the ANSYS program does not list entities
-        (nodes, elements, lines, etc.).
+        The PHYSICS command outputs all solution information,
+        including analysis options, to the Jobname.PHn file described
+        above.  Although it also outputs components, the ANSYS program
+        does not list entities (nodes, elements, lines, etc.).
 
-        PHYSICS,WRITE will overwrite existing physics files with the same title
-        (even if the name is different). In other words, if the directory has a
-        physics file with the same title as the active physics file title, but
-        a different name, the PHYSICS,WRITE command will overwrite the existing
-        physics file and use the existing filename, not the filename specified
-        on the PHYSICS,WRITE command.
+        PHYSICS,WRITE will overwrite existing physics files with the
+        same title (even if the name is different). In other words, if
+        the directory has a physics file with the same title as the
+        active physics file title, but a different name, the
+        PHYSICS,WRITE command will overwrite the existing physics file
+        and use the existing filename, not the filename specified on
+        the PHYSICS,WRITE command.
         """
         command = "PHYSICS,%s,%s,%s,%s" % (str(option), str(title), str(fname), str(ext))
         return self.run(command, **kwargs)
@@ -19105,46 +19229,47 @@ class _MapdlCommands(object):  # pragma: no cover
 
             ON - Use a predictor on all substeps after the first.
 
-            AUTO - The program uses a predictor but, within certain exceptions, automatically
-                   switches prediction off. This behavior is the default; see
-                   "Command Default" for details.
-
-        --
-            Unused field.
+            AUTO - The program uses a predictor but, within certain
+                   exceptions, automatically switches prediction
+                   off. This behavior is the default; see "Command
+                   Default" for details.
 
         lskey
             Load step predictor:
 
-            OFF - No prediction across load steps occurs. This is the default behavior.
+            OFF - No prediction across load steps occurs. This is the
+                  default behavior.
 
-            ON - Use a predictor also on the first substep of the load step. (Sskey = ON is
-                 required.)
+            ON - Use a predictor also on the first substep of the load
+                 step. (Sskey = ON is required.)
 
         Notes
         -----
-        Activates a predictor in a nonlinear analysis on the degree-of-freedom
-        solution for the first equilibrium iteration of each substep.
+        Activates a predictor in a nonlinear analysis on the
+        degree-of-freedom solution for the first equilibrium iteration
+        of each substep.
 
-        When using the arc-length method (ARCLEN, ARCTRM), you cannot issue the
-        DOF solution predictor command (PRED), the automatic time stepping
-        command (AUTOTS), or the line search command (LNSRCH). If you activate
-        the arc-length method after you set PRED, AUTOTS, or LNSRCH, a warning
-        message appears. If you elect to proceed with the arc-length method,
-        the program disables your DOF predictor, automatic time stepping, and
-        line search settings, and the time step size is controlled by the arc-
-        length method internally.
+        When using the arc-length method (ARCLEN, ARCTRM), you cannot
+        issue the DOF solution predictor command (PRED), the automatic
+        time stepping command (AUTOTS), or the line search command
+        (LNSRCH). If you activate the arc-length method after you set
+        PRED, AUTOTS, or LNSRCH, a warning message appears. If you
+        elect to proceed with the arc-length method, the program
+        disables your DOF predictor, automatic time stepping, and line
+        search settings, and the time step size is controlled by the
+        arc- length method internally.
 
-        When using step-applied loads, such as TUNIF, BFUNIF, etc., or other
-        types of non-monotonic loads, the predictor may adversely affect the
-        convergence. If the solution is discontinuous, the predictor may need
-        to be turned off.
+        When using step-applied loads, such as TUNIF, BFUNIF, etc., or
+        other types of non-monotonic loads, the predictor may
+        adversely affect the convergence. If the solution is
+        discontinuous, the predictor may need to be turned off.
 
-        When performing a nonlinear analysis involving large rotations, the
-        predictor may require using smaller substeps.
+        When performing a nonlinear analysis involving large
+        rotations, the predictor may require using smaller substeps.
 
         This command is also valid in PREP7.
         """
-        command = "PRED,%s,%s" % (str(sskey), str(lskey))
+        command = f"PRED,{sskey},,{lskey}"
         return self.run(command, **kwargs)
 
     def pdcorr(self, name1="", name2="", corr="", **kwargs):
@@ -19201,26 +19326,25 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kywrd
             Keyword indicating the disposition of the color map file.
 
             (blank) - Loads existing color map file.
 
-            CREATE - Starts the CMAP utility and modifies or creates the specified file.
+            CREATE - Starts the CMAP utility and modifies or creates
+            the specified file.
 
-            SAVE - Writes the active color map to the specified file, which can be imported into
-                   future sessions.
+            SAVE - Writes the active color map to the specified file,
+            which can be imported into future sessions.
 
         ncntr
             Number of contours to be defined. Default = 9 (even if an existing
@@ -19228,26 +19352,26 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Reads the color map file (RGB index specifications) to change from
-        current specifications.  Only one color map may be active at a time.
+        Reads the color map file (RGB index specifications) to change
+        from current specifications.  Only one color map may be active
+        at a time.
 
-        For 2-D drivers (especially Win32c), modifying the color map can
-        produce anomalies, including legend/contour disagreement.
+        For 2-D drivers (especially Win32c), modifying the color map
+        can produce anomalies, including legend/contour disagreement.
 
-        When Kywrd equals CREATE, the 2-D drivers (X11c and Win32c) display the
-        CMAP utility with an additional contour color picker called CONTOURS.
-        Colors selected via the CONTOURS picker affect result contour displays
-        (such as stresses). No other drivers offer the CONTOURS picker in the
-        CMAP utility.
+        When Kywrd equals CREATE, the 2-D drivers (X11c and Win32c)
+        display the CMAP utility with an additional contour color
+        picker called CONTOURS.  Colors selected via the CONTOURS
+        picker affect result contour displays (such as stresses). No
+        other drivers offer the CONTOURS picker in the CMAP utility.
 
-        Changing the color map using the /CMAP command changes the meaning of
-        the color labels on the /COLOR command. See /COLOR for other color
-        controls.
+        Changing the color map using the /CMAP command changes the
+        meaning of the color labels on the /COLOR command. See /COLOR
+        for other color controls.
 
         This command is valid anywhere.
         """
-        command = "/CMAP,%s,%s,%s,%s" % (str(fname), str(ext), str(kywrd), str(ncntr))
-        return self.run(command, **kwargs)
+        return self.run(f"/CMAP,{fname},{ext},,{kywrd},{ncntr}", **kwargs)
 
     def cycfreq(self, option="", value1="", value2="", value3="", value4="",
                 value5="", **kwargs):
@@ -19707,9 +19831,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         dx, dy, dz
             Node location increments in the global Cartesian coordinate system.
             Defaults to zero.
@@ -19763,27 +19884,28 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "SETRAN,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(sename), str(kcnto), str(inc), str(file), str(ext), str(dx), str(dy), str(dz), str(norot))
+        command = f"SETRAN,{sename},{kcnto},{inc},{file},{ext},,{dx},{dy},{dz},{norot}"
         return self.run(command, **kwargs)
 
     def fc(self, mat="", lab1="", lab2="", data1="", data2="", data3="",
            data4="", data5="", data6="", **kwargs):
         """APDL Command: FC
 
-        Provides failure criteria information and activates a data table to
-        input temperature-dependent stress and strain limits.
+        Provides failure criteria information and activates a data
+        table to input temperature-dependent stress and strain limits.
 
         Parameters
         ----------
         mat
-             Material reference number. You can define failure criteria for up
-            to 250 different materials.
+            Material reference number. You can define failure criteria
+            for up to 250 different materials.
 
         lab1
             Type of data.
 
-            TEMP - Temperatures. Each of the materials you define can have a different set of
-                   temperatures to define the failure criteria.
+            TEMP - Temperatures. Each of the materials you define can
+            have a different set of temperatures to define the failure
+            criteria.
 
             EPEL - Strains.
 
@@ -19792,56 +19914,69 @@ class _MapdlCommands(object):  # pragma: no cover
         lab2
             Specific criteria. Not used if Lab1 = TEMP.
 
-            XTEN - Allowable tensile stress or strain in the x-direction. (Must be positive.)
+            XTEN - Allowable tensile stress or strain in the
+            x-direction. (Must be positive.)
 
-            XCMP - Allowable compressive stress or strain in the x-direction. (Defaults to
-                   negative of XTEN.)
+            XCMP - Allowable compressive stress or strain in the
+            x-direction. (Defaults to negative of XTEN.)
 
-            YTEN - Allowable tensile stress or strain in the y-direction. (Must be positive.)
+            YTEN - Allowable tensile stress or strain in the
+            y-direction. (Must be positive.)
 
-            YCMP - Allowable compressive stress or strain in the y-direction. (Defaults to
-                   negative of YTEN.)
+            YCMP - Allowable compressive stress or strain in the
+            y-direction. (Defaults to negative of YTEN.)
 
-            ZTEN - Allowable tensile stress or strain in the z-direction. (Must be positive.)
+            ZTEN - Allowable tensile stress or strain in the
+            z-direction. (Must be positive.)
 
-            ZCMP - Allowable compressive stress or strain in the z-direction. (Defaults to
-                   negative of ZTEN.)
+            ZCMP - Allowable compressive stress or strain in the
+            z-direction. (Defaults to negative of ZTEN.)
 
-            XY - Allowable XY stress or shear strain. (Must be positive.)
+            XY - Allowable XY stress or shear strain. (Must be
+            positive.)
 
-            YZ - Allowable YZ stress or shear strain. (Must be positive.)
+            YZ - Allowable YZ stress or shear strain. (Must be
+            positive.)
 
-            XZ - Allowable XZ stress or shear strain. (Must be positive.)
+            XZ - Allowable XZ stress or shear strain. (Must be
+            positive.)
 
-            XYCP - XY coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+            XYCP - XY coupling coefficient (Used only if Lab1 =
+            S). Defaults to -1.0. [1]
 
-            YZCP - YZ coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+            YZCP - YZ coupling coefficient (Used only if Lab1 =
+            S). Defaults to -1.0. [1]
 
-            XZCP - XZ coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+            XZCP - XZ coupling coefficient (Used only if Lab1 =
+            S). Defaults to -1.0. [1]
 
         data1, data2, data3, . . . , data6
             Description of DATA1 through DATA6.
 
-            T1, T2, T3, T4, T5, T6 - Temperature at which limit data is input. Used only when Lab1 = TEMP.
+            T1, T2, T3, T4, T5, T6 - Temperature at which limit data
+            is input. Used only when Lab1 = TEMP.
 
-            V1, V2, V3, V4, V5, V6 - Value of limit stress or strain at temperature T1 through T6. Used only when
-                              Lab1 = S or EPEL.
+            V1, V2, V3, V4, V5, V6 - Value of limit stress or strain
+            at temperature T1 through T6. Used only when Lab1 = S or
+            EPEL.
 
         Notes
         -----
-        The data table can be input in either PREP7 or POST1. This table is
-        used only in POST1. When you postprocess failure criteria results
-        defined via the FC command (PLESOL, PRESOL, PLNSOL, PRNSOL, PRRSOL,
-        etc.), the active coordinate system must be the coordinate system of
-        the material being analyzed. You do this using RSYS, SOLU. For layered
-        applications, you also use the LAYER command. See the specific element
-        documentation in the Element Reference for information on defining your
-        coordinate system for layers.
+        The data table can be input in either PREP7 or POST1. This
+        table is used only in POST1. When you postprocess failure
+        criteria results defined via the FC command (PLESOL, PRESOL,
+        PLNSOL, PRNSOL, PRRSOL, etc.), the active coordinate system
+        must be the coordinate system of the material being
+        analyzed. You do this using RSYS, SOLU. For layered
+        applications, you also use the LAYER command. See the specific
+        element documentation in the Element Reference for information
+        on defining your coordinate system for layers.
 
-        Some plotting and printing functions will not support Failure Criteria
-        for your PowerGraphics displays. This could result in minor changes to
-        other data when Failure Criteria are applied. See the appropriate plot
-        or print command documentation for more information .
+        Some plotting and printing functions will not support Failure
+        Criteria for your PowerGraphics displays. This could result in
+        minor changes to other data when Failure Criteria are
+        applied. See the appropriate plot or print command
+        documentation for more information.
         """
         command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(lab2), str(data1), str(data2), str(data3), str(data4), str(data5), str(data6))
         return self.run(command, **kwargs)
@@ -19854,112 +19989,120 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field
-
         memory_option
             Memory allocation option:
 
-            DEFAULT - Use the default memory allocation strategy for the sparse solver. The default
-                      strategy attempts to run in the INCORE memory mode. If
-                      there is not enough available physical memory when the
-                      solver starts to run in the INCORE memory mode, the
-                      solver will then attempt to run in the OUTOFCORE memory
-                      mode.
+            DEFAULT - Use the default memory allocation strategy for
+                      the sparse solver. The default strategy attempts
+                      to run in the INCORE memory mode. If there is
+                      not enough available physical memory when the
+                      solver starts to run in the INCORE memory mode,
+                      the solver will then attempt to run in the
+                      OUTOFCORE memory mode.
 
-            INCORE -  Use a memory allocation strategy in the sparse solver that will attempt to
-                     obtain enough memory to run with the entire factorized
-                     matrix in memory. This option uses the most amount of
-                     memory and should avoid doing any I/O. By avoiding I/O,
-                     this option achieves optimal solver performance. However,
-                     a significant amount of memory is required to run in this
-                     mode, and it is only recommended on machines with a large
-                     amount of memory. If the allocation for in-core memory
-                     fails, the solver will automatically revert to out-of-core
-                     memory mode.
+            INCORE - Use a memory allocation strategy in the sparse
+                     solver that will attempt to obtain enough memory
+                     to run with the entire factorized matrix in
+                     memory. This option uses the most amount of
+                     memory and should avoid doing any I/O. By
+                     avoiding I/O, this option achieves optimal solver
+                     performance. However, a significant amount of
+                     memory is required to run in this mode, and it is
+                     only recommended on machines with a large amount
+                     of memory. If the allocation for in-core memory
+                     fails, the solver will automatically revert to
+                     out-of-core memory mode.
 
-            OUTOFCORE - Use a memory allocation strategy in the sparse solver that will attempt to
-                        allocate only enough work space to factor each
-                        individual frontal matrix in memory, but will store the
-                        entire factorized matrix on disk. Typically, this
-                        memory mode results in poor performance due to the
-                        potential bottleneck caused by the I/O to the various
-                        files written by the solver.
+            OUTOFCORE - Use a memory allocation strategy in the sparse
+                        solver that will attempt to allocate only
+                        enough work space to factor each individual
+                        frontal matrix in memory, but will store the
+                        entire factorized matrix on disk. Typically,
+                        this memory mode results in poor performance
+                        due to the potential bottleneck caused by the
+                        I/O to the various files written by the
+                        solver.
 
-            FORCE - This option, when used in conjunction with the Memory_Size option, allows you
-                    to force the sparse solver to run with a specific amount of
-                    memory. This option is only recommended for the advanced
-                    user who understands sparse solver memory requirements for
-                    the problem being solved, understands the physical memory
-                    on the system, and wants to control the sparse solver
-                    memory usage.
+            FORCE - This option, when used in conjunction with the
+                    Memory_Size option, allows you to force the sparse
+                    solver to run with a specific amount of
+                    memory. This option is only recommended for the
+                    advanced user who understands sparse solver memory
+                    requirements for the problem being solved,
+                    understands the physical memory on the system, and
+                    wants to control the sparse solver memory usage.
 
         memory_size
-            Initial memory size allocation for the sparse solver in MB. This
-            argument allows you to tune the sparse solver memory and is not
-            generally required. Although there is no upper limit for
-            Memory_Size, the Memory_Size setting should always be well within
-            the physical memory available, but not so small as to cause the
-            sparse solver to run out of memory. Warnings and/or errors from the
-            sparse solver will appear if this value is set too low. If the
-            FORCE memory option is used, this value is the amount of memory
-            allocated for the entire duration of the sparse solver solution.
-
-        --, --
-            Unused fields
+            Initial memory size allocation for the sparse solver in
+            MB. This argument allows you to tune the sparse solver
+            memory and is not generally required. Although there is no
+            upper limit for Memory_Size, the Memory_Size setting
+            should always be well within the physical memory
+            available, but not so small as to cause the sparse solver
+            to run out of memory. Warnings and/or errors from the
+            sparse solver will appear if this value is set too low. If
+            the FORCE memory option is used, this value is the amount
+            of memory allocated for the entire duration of the sparse
+            solver solution.
 
         solve_info
             Solver output option:
 
-            OFF - Turns off additional output printing from the sparse solver (default).
+            OFF - Turns off additional output printing from the sparse
+            solver (default).
 
-            PERFORMANCE - Turns on additional output printing from the sparse solver, including a
-                          performance summary and a summary of file I/O for the
-                          sparse solver. Information on memory usage during
-                          assembly of the global matrix (that is, creation of
-                          the Jobname.FULL file) is also printed with this
-                          option.
+            PERFORMANCE - Turns on additional output printing from the
+                          sparse solver, including a performance
+                          summary and a summary of file I/O for the
+                          sparse solver. Information on memory usage
+                          during assembly of the global matrix (that
+                          is, creation of the Jobname.FULL file) is
+                          also printed with this option.
 
         Notes
         -----
-        This command controls options related to the sparse solver in all
-        analysis types where the sparse solver can be used. It also controls
-        the Block Lanczos eigensolver in a modal or buckling analysis.
+        This command controls options related to the sparse solver in
+        all analysis types where the sparse solver can be used. It
+        also controls the Block Lanczos eigensolver in a modal or
+        buckling analysis.
 
-        The sparse solver runs from one large work space (that is, one large
-        memory allocation). The amount of memory required for the sparse solver
-        is unknown until the matrix structure is preprocessed, including
-        equation reordering. The amount of memory allocated for the sparse
-        solver is then dynamically adjusted to supply the solver what it needs
-        to compute the solution.
+        The sparse solver runs from one large work space (that is, one
+        large memory allocation). The amount of memory required for
+        the sparse solver is unknown until the matrix structure is
+        preprocessed, including equation reordering. The amount of
+        memory allocated for the sparse solver is then dynamically
+        adjusted to supply the solver what it needs to compute the
+        solution.
 
-        If you have a very large memory system, you may want to try selecting
-        the INCORE memory mode for larger jobs to improve performance. When
-        running the sparse solver on a machine with very slow I/O performance
-        (for example, slow hard drive speed), you may want to try using the
-        INCORE memory mode to achieve better performance. However, doing so may
-        require much more memory compared to running in the OUTOFCORE memory
-        mode.
+        If you have a very large memory system, you may want to try
+        selecting the INCORE memory mode for larger jobs to improve
+        performance. When running the sparse solver on a machine with
+        very slow I/O performance (for example, slow hard drive
+        speed), you may want to try using the INCORE memory mode to
+        achieve better performance. However, doing so may require much
+        more memory compared to running in the OUTOFCORE memory mode.
 
-        Running with the INCORE memory mode is best for jobs which comfortably
-        fit within the limits of the physical memory on a given system. If the
-        sparse solver work space exceeds physical memory size, the system will
-        be forced to use virtual memory (or the system page/swap file). In this
-        case, it is typically more efficient to run with the OUTOFCORE memory
-        mode. Assuming the job fits comfortably within the limits of the
-        machine, running with the INCORE memory mode is often ideal for jobs
-        where repeated solves are performed for a single matrix factorization.
-        This occurs in a modal or buckling analysis or when doing multiple load
-        steps in a linear, static analysis.
+        Running with the INCORE memory mode is best for jobs which
+        comfortably fit within the limits of the physical memory on a
+        given system. If the sparse solver work space exceeds physical
+        memory size, the system will be forced to use virtual memory
+        (or the system page/swap file). In this case, it is typically
+        more efficient to run with the OUTOFCORE memory mode. Assuming
+        the job fits comfortably within the limits of the machine,
+        running with the INCORE memory mode is often ideal for jobs
+        where repeated solves are performed for a single matrix
+        factorization.  This occurs in a modal or buckling analysis or
+        when doing multiple load steps in a linear, static analysis.
 
-        For repeated runs with the sparse solver, you may set the initial
-        sparse solver memory allocation to the amount required for
-        factorization. This strategy reduces the frequency of allocation and
-        reallocation in the run to make the INCORE option fully effective. If
-        you have a very large memory system, you may use the Memory_Size
-        argument to increase the maximum size attempted for in-core runs.
+        For repeated runs with the sparse solver, you may set the
+        initial sparse solver memory allocation to the amount required
+        for factorization. This strategy reduces the frequency of
+        allocation and reallocation in the run to make the INCORE
+        option fully effective. If you have a very large memory
+        system, you may use the Memory_Size argument to increase the
+        maximum size attempted for in-core runs.
         """
-        command = "BCSOPTION,%s,%s,%s" % (str(memory_option), str(memory_size), str(solve_info))
+        command = f"BCSOPTION,,{memory_option},{memory_size},,,{solve_info}"
         return self.run(command, **kwargs)
 
     def prjsol(self, item="", comp="", **kwargs):
@@ -20488,15 +20631,15 @@ class _MapdlCommands(object):  # pragma: no cover
         manual).  You can use any standard FORTRAN real format (such as
         (4F6.0), (E10.3,2X,D8.2), etc.) and alphanumeric format (A).
         Alphanumeric strings are limited to a maximum of 8 characters for any
-        field (A8) using the Fortran format. Use the “C” format for string
+        field (A8) using the Fortran format. Use the "C" format for string
         arrays larger than 8 characters. Integer (I) and list-directed (*)
         descriptors may not be used.  You can include text in the format as a
         quoted string.  The parentheses must be included in the format and the
         format must not exceed 80 characters (including parentheses).  The
         output line length is limited to 128 characters.
 
-        The “C” format descriptors are used if the first character of the
-        format descriptor line is not a left parenthesis. “C” format
+        The "C" format descriptors are used if the first character of the
+        format descriptor line is not a left parenthesis. "C" format
         descriptors are up to 80 characters long, consisting of text strings
         and predefined "data descriptors" between the strings where numeric or
         alphanumeric character data will be inserted.  The normal descriptors
@@ -20598,8 +20741,8 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "MFTIME,%s" % (str(time))
         return self.run(command, **kwargs)
 
-    def trnopt(self, method="", maxmode="", minmode="", mcout="", tintopt="",
-               vaout="", **kwargs):
+    def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
+               tintopt="",vaout="", dmpsfreq="", engcalc="", mckey="", **kwargs):
         """APDL Command: TRNOPT
 
         Specifies transient analysis options.
@@ -20613,23 +20756,20 @@ class _MapdlCommands(object):  # pragma: no cover
 
             MSUP - Mode-superposition method.
 
-            VT - Variational Technology method.
+            VT - Variational Technology method.  (Removed by V18.2)
 
         maxmode
-            Largest mode number to be used to calculate the response (for
-            Method = MSUP).  Defaults to the highest mode calculated in the
-            preceding modal analysis.
-
-        --
-            Unused field.
+            Largest mode number to be used to calculate the response
+            (for Method = MSUP).  Defaults to the highest mode
+            calculated in the preceding modal analysis.
 
         minmode
-            Smallest mode number to be used (for Method = MSUP).  Defaults to
-            1.
+            Smallest mode number to be used (for Method = MSUP).
+            Defaults to 1.
 
-        mcout
-            Modal coordinates output key (valid only for the mode-superposition
-            method):
+        mcfwrite
+            Modal coordinates output key to the .mcf file (valid only
+            for the mode-superposition method):
 
             NO - No output of modal coordinates (default).
 
@@ -20643,43 +20783,75 @@ class _MapdlCommands(object):  # pragma: no cover
             HHT or 1 - HHT algorithm (valid only for the full transient method).
 
         vaout
-            Velocities and accelerations output key (valid only for mode-
-            superposition transient analysis):
+            Velocities and accelerations output key (valid only for
+            mode- superposition transient analysis):
 
             NO - No output of velocities and accelerations (default).
 
             YES - Write velocities and accelerations on the reduced displacement file
                   Jobname.RDSP.
 
+        dmpsfreq
+            Average excitation frequency (Hz) for the calculation of
+            equivalent viscous damping from structural damping input
+            (DMPSTR and MP,DMPS). See Damping for more
+            details. Defaults to zero. If an excitation frequency is
+            not specified, structural damping is ignored. If tabular
+            excitation frequency data is provided in a full transient
+            analysis (DMPSFreqTab on DMPSTR), it supersedes this
+            value.
+
+        engcalc
+            Additional element energies calculation key:
+
+            NO - Do not calculate additional element energies
+            (default).
+
+            YES - Calculate damping energy and work done by external
+            loads.
+
+        mckey
+            Modal coordinates output key to the .rdsp file (valid only
+            for the mode-superposition method):
+
+            AUTO - Writing depends on the modal analysis settings of
+            the MXPAND command (default).
+
+            YES - Always write the modal coordinates to the file
+            Jobname.rdsp. A subsequent expansion pass (EXPASS) is not
+            supported.
+
         Notes
         -----
-        Specifies transient analysis (ANTYPE,TRANS) options. If used in
-        SOLUTION, this command is valid only within the first load step. Use
-        the TINTP command to set transient integration parameters.
+        Specifies transient analysis (ANTYPE,TRANS) options. If used
+        in SOLUTION, this command is valid only within the first load
+        step. Use the TINTP command to set transient integration
+        parameters.
 
-        Method = VT is valid for either thermal or structural analysis, where
-        it attempts to reduce the total number of iterations. Both linear and
-        nonlinear structural transient analyses are supported. The VT method is
-        a full transient solution.
-
-        To include residual vectors in your mode-superposition transient
-        analysis (Method = MSUP), specify RESVEC,ON.
+        To include residual vectors in your mode-superposition
+        transient analysis (Method = MSUP), specify RESVEC,ON.
 
         Method = MSUP is not available for ocean loading.
 
+        By default in a mode-superposition transient analysis,
+        reaction force and other force output contains only static
+        contributions. If you want to postprocess the velocities,
+        accelerations, and derived results (Lab = TOTAL, DAMP, or
+        INERT on the FORCE command), set VAout = YES to activate
+        velocity and acceleration output.
+
+        The calculation of additional energies (EngCalc = YES) is
+        valid only for the full solution method (Method = FULL). The
+        Jobname.ESAV file is always saved in this case. The numerical
+        integration for damping energy and work are consistent only if
+        solution data are written to the database for every substep
+        (OUTRES,ALL,ALL, OUTRES,ESOL,ALL, or OUTRES,VENG, ALL). For
+        more information, see Damping Energy and Work Done by External
+        Loads in the Mechanical APDL Theory Reference.
+
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: The VT transient solution method is not
-        supported in Distributed ANSYS.
-
-        Additional product restrictions for the TRNOPT command are shown in the
-        table below.
-
-        The ANSYS Professional - Nonlinear Thermal (PR) product supports the
-        Method = FULL option only when thermal degrees of freedom are present
-        in the model.
         """
-        command = "TRNOPT,%s,%s,%s,%s,%s,%s" % (str(method), str(maxmode), str(minmode), str(mcout), str(tintopt), str(vaout))
+        command = f"TRNOPT,{method},{maxmode},,{minmode},{mcfwrite},{tintopt},{vaout},{dmpsfreq},{engcalc},{mckey}"
         return self.run(command, **kwargs)
 
     def rprism(self, z1="", z2="", nsides="", lside="", majrad="", minrad="",
@@ -20771,10 +20943,10 @@ class _MapdlCommands(object):  # pragma: no cover
         stabval
             Flag to print the stability values:
 
-            0 (OFF or NO) - Print the frequencies (the imaginary parts of the eigenvalues in Hz). This
+            0 (OFF or NO) - Print the frequencies (the imaginary parts of the eigenvalues in Hz). This
                             value is the default.
 
-            1 (ON or YES) - Print the stability values (the real parts of the eigenvalues in Hz).
+            1 (ON or YES) - Print the stability values (the real parts of the eigenvalues in Hz).
 
             2 - Print the logarithmic decrements.
 
@@ -20836,7 +21008,7 @@ class _MapdlCommands(object):  # pragma: no cover
         values or logarithmic decrements are printed (STABVAL = 1 or 2).
 
         At each load step, the program checks for instability (based on the
-        sign of the real part of the eigenvalue). The label “U” appears on the
+        sign of the real part of the eigenvalue). The label "U" appears on the
         printout for each unstable frequency.
 
         If specified, the rotational velocities of the named component (Cname)
@@ -20903,9 +21075,9 @@ class _MapdlCommands(object):  # pragma: no cover
 
             STAT - Displays a list of items to track.
 
-            OFF or 0 - Deactivates tracking of all variables. This value is the default.
+            OFF or 0 - Deactivates tracking of all variables. This value is the default.
 
-            ON or 1 - Activates tracking of all variables.  Tracking also activates whenever any
+            ON or 1 - Activates tracking of all variables.  Tracking also activates whenever any
                       specification changes.
 
             DEL - Removes the specified variable from the set of result items to track. If Name =
@@ -21095,10 +21267,10 @@ class _MapdlCommands(object):  # pragma: no cover
         key
             Activation key:
 
-            0 or OFF - Use global assembly for the stiffness matrix (and mass matrix, when using PCG
+            0 or OFF - Use global assembly for the stiffness matrix (and mass matrix, when using PCG
                        Lanczos) of the entire model.
 
-            1 or ON - Use an element-by-element approach when possible to save memory during the
+            1 or ON - Use an element-by-element approach when possible to save memory during the
                       solution. In this case, the global stiffness (and mass)
                       matrix is not assembled; element stiffness (and mass) is
                       regenerated during PCG or PCG Lanczos iterations.
@@ -21341,7 +21513,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
             Note:This option is only valid for 2 to 20 random input variables. You will receive an error if you have specified fewer than 2 or more than 20 random input variables. - BBM
 
-            Box-Behnken Matrix Design. Valid only for Method = RSM. A Box-Behnken Matrix design is composed of a center point plus the points at the middle of the edges of the hypercube in the space of random input variables. A Box-Behnken design might be advantageous if the corner points of the hypercube represent very extreme conditions that are undesirable and therefore should not be used for the sampling.  See the PDDOEL command for more information. - Note:  This option is only valid for 3 to 12 random input variables. You will
+            Box-Behnken Matrix Design. Valid only for Method = RSM. A Box-Behnken Matrix design is composed of a center point plus the points at the middle of the edges of the hypercube in the space of random input variables. A Box-Behnken design might be advantageous if the corner points of the hypercube represent very extreme conditions that are undesirable and therefore should not be used for the sampling.  See the PDDOEL command for more information. - Note:  This option is only valid for 3 to 12 random input variables. You will
                               receive an error if you have specified fewer than
                               3 or more than 12 random input variables.
 
@@ -21863,10 +22035,10 @@ class _MapdlCommands(object):  # pragma: no cover
         stabval
             Flag to plot the stability values:
 
-            0 (OFF or NO) - Plot the frequencies (the imaginary parts of the eigenvalues in Hz). This value
+            0 (OFF or NO) - Plot the frequencies (the imaginary parts of the eigenvalues in Hz). This value
                             is the default.
 
-            1 (ON or YES) - Plot the stability values (the real parts of the eigenvalues in Hz).
+            1 (ON or YES) - Plot the stability values (the real parts of the eigenvalues in Hz).
 
             2 - Plot the logarithmic decrements.
 
@@ -21912,8 +22084,8 @@ class _MapdlCommands(object):  # pragma: no cover
         whirl mode (BW for backward whirl and FW for forward whirl).
 
         At each load step, the program checks for instability (based on the
-        sign of the real part of the eigenvalue). The labels “stable” or
-        “unstable” appear in the plot legend for each frequency curve.
+        sign of the real part of the eigenvalue). The labels "stable" or
+        "unstable" appear in the plot legend for each frequency curve.
 
         The rotational velocities of a named component (Cname) are displayed on
         the X-axis.
@@ -22207,28 +22379,23 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         iy, ix
             Reference numbers of variables to be operated on.  IY is
             differentiated with respect to IX.
 
-        --
-            Unused field.
-
         name
-            Thirty-two character name for identifying the variable on printouts
-            and displays. Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            printouts and displays. Embedded blanks are compressed for
+            output.
 
         facta
-            Scaling factor (positive or negative) applied as shown below
-            (defaults to 1.0).
+            Scaling factor (positive or negative) applied as shown
+            below (defaults to 1.0).
 
         Notes
         -----
@@ -22236,8 +22403,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = FACTA x d(IY)/d(IX)
         """
-        command = "DERIV,%s,%s,%s,%s,%s" % (str(ir), str(iy), str(ix), str(name), str(facta))
-        return self.run(command, **kwargs)
+        return self.run(f"DERIV,{ir},{iy},{ix},,{name},,,{facta}", **kwargs)
 
     def edndtsd(self, vect1="", vect2="", datap="", fitpt="", vect3="",
                 vect4="", disp="", **kwargs):
@@ -22762,57 +22928,62 @@ class _MapdlCommands(object):  # pragma: no cover
             Sets a flag in the LS-DYNA input file (Fname.Ext) to produce
             desired output.
 
-            ANSYS - Set a flag to write results files for the ANSYS postprocessors (default).  The
-                    files that will be written are Jobname.RST and Jobname.HIS
-                    (see Notes below).
+            ANSYS - Set a flag to write results files for the ANSYS
+                    postprocessors (default).  The files that will be
+                    written are Jobname.RST and Jobname.HIS (see Notes
+                    below).
 
-            LSDYNA - Set a flag to write results files for the LS-DYNA postprocessor (LS-POST).  The
-                     files that will be written are D3PLOT, and files specified
-                     by EDOUT and EDHIST (see Notes below).
+            LSDYNA - Set a flag to write results files for the LS-DYNA
+                     postprocessor (LS-POST).  The files that will be
+                     written are D3PLOT, and files specified by EDOUT
+                     and EDHIST (see Notes below).
 
-            BOTH - Set a flag to write results files for both ANSYS and LS-DYNA postprocessors.
+            BOTH - Set a flag to write results files for both ANSYS
+            and LS-DYNA postprocessors.
 
         fname
-            File name and directory path (80 characters maximum, including
-            directory; this limit is due to an LS-DYNA program limitation). If
-            you do not specify a directory path, it will default to your
-            working directory. The file name defaults to Jobname. Previous data
-            on this file, if any, are overwritten.
+            File name and directory path (80 characters maximum,
+            including directory; this limit is due to an LS-DYNA
+            program limitation). If you do not specify a directory
+            path, it will default to your working directory. The file
+            name defaults to Jobname. Previous data on this file, if
+            any, are overwritten.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
-        This command writes an LS-DYNA input file for the LS-DYNA solver.
-        EDWRITE is only valid if explicit dynamic elements have been specified.
-        This command is not necessary if the LS-DYNA solver is invoked from
-        within ANSYS, in which case Jobname.K (or Jobname.R) is written
-        automatically when the solution is initiated. (If LS-DYNA is invoked
-        from within ANSYS, use EDOPT to specify desired output.)
+        This command writes an LS-DYNA input file for the LS-DYNA
+        solver.  EDWRITE is only valid if explicit dynamic elements
+        have been specified.  This command is not necessary if the
+        LS-DYNA solver is invoked from within ANSYS, in which case
+        Jobname.K (or Jobname.R) is written automatically when the
+        solution is initiated. (If LS-DYNA is invoked from within
+        ANSYS, use EDOPT to specify desired output.)
 
-        If the analysis is a small restart (EDSTART,2), the file that is
-        written will have the name Jobname.R (by default) and will only contain
-        changes from the original analysis.
+        If the analysis is a small restart (EDSTART,2), the file that
+        is written will have the name Jobname.R (by default) and will
+        only contain changes from the original analysis.
 
-        If the analysis is a full restart (EDSTART,3), the file that is written
-        will have the name Jobname_nn.K (by default) and will contain all the
-        information from the database. In a full restart, the jobname is
-        changed to Jobname_nn (nn = 01 initially, and is incremented for each
-        subsequent full restart.)
+        If the analysis is a full restart (EDSTART,3), the file that
+        is written will have the name Jobname_nn.K (by default) and
+        will contain all the information from the database. In a full
+        restart, the jobname is changed to Jobname_nn (nn = 01
+        initially, and is incremented for each subsequent full
+        restart.)
 
-        A command is included in the LS-DYNA input file to instruct the LS-DYNA
-        solver to write the results files indicated by Option.  By default, LS-
-        DYNA will write the ANSYS results file Jobname.RST (see the EDRST
-        command).  If Jobname.HIS is desired, you must also issue EDHIST.
+        A command is included in the LS-DYNA input file to instruct
+        the LS-DYNA solver to write the results files indicated by
+        Option.  By default, LS- DYNA will write the ANSYS results
+        file Jobname.RST (see the EDRST command).  If Jobname.HIS is
+        desired, you must also issue EDHIST.
 
-        Option = LSDYNA or BOTH will cause LS-DYNA to write results files for
-        the LS-POST postprocessor. The D3PLOT file is always written for these
-        two options. If other LS-POST files are desired, you must issue the
-        appropriate EDHIST and EDOUT commands.
+        Option = LSDYNA or BOTH will cause LS-DYNA to write results
+        files for the LS-POST postprocessor. The D3PLOT file is always
+        written for these two options. If other LS-POST files are
+        desired, you must issue the appropriate EDHIST and EDOUT
+        commands.
 
         This command is also valid in PREP7.
 
@@ -22856,9 +23027,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         label
             Can use a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (JIK).
 
@@ -22889,8 +23057,8 @@ class _MapdlCommands(object):  # pragma: no cover
         be enclosed in parentheses and the format must not exceed 80 characters
         (including parentheses).
 
-        The “C” format descriptors are used if the first character of the
-        format descriptor line is not a left parenthesis. “C” format
+        The "C" format descriptors are used if the first character of the
+        format descriptor line is not a left parenthesis. "C" format
         descriptors may be up to 80 characters long, consisting of text strings
         and predefined "data descriptors" between the strings where numeric or
         alphanumeric character data are to be inserted. The normal descriptors
@@ -22960,9 +23128,6 @@ class _MapdlCommands(object):  # pragma: no cover
             Total number of components.  If a ground is modeled, it is to be
             included as a component.
 
-        --
-            Unused field.
-
         matrixname
             Array name for computed conductance matrix.  Defaults to GMATRIX.
 
@@ -23006,7 +23171,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "GMATRIX,%s,%s,%s,%s" % (str(symfac), str(condname), str(numcond), str(matrixname))
+        command = f"GMATRIX,{symfac},{condname},{numcond},,{matrixname}"
         return self.run(command, **kwargs)
 
     def deltim(self, dtime="", dtmin="", dtmax="", carry="", **kwargs):
@@ -23409,9 +23574,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Writes the current parameters to a coded file.  Previous parameters on
@@ -23576,13 +23738,13 @@ class _MapdlCommands(object):  # pragma: no cover
         HIGH) will be kept, except for "force" loads for which the values will
         be summed if they are not defined using tabular boundary conditions.
 
-        Note:: : The unused nodes (not recommended) in elements, couplings,
+        Note:: The unused nodes (not recommended) in elements, couplings,
         constraint equations, etc. may become active after the merge operation.
 
         The Action field provides the option of visualizing the coincident
         items before the merging operation.
 
-        Caution:: : When merging entities in a model that has already been
+        Caution:: When merging entities in a model that has already been
         meshed, the order in which you issue multiple NUMMRG commands is
         significant.  If you want to merge two adjacent meshed regions that
         have coincident nodes and keypoints, always merge nodes [NUMMRG,NODE]
@@ -24087,6 +24249,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Prints the result of the inversion of a probability.
 
+        This command is no longer supported in V18.2 and newer
+
         Parameters
         ----------
         rlab
@@ -24104,9 +24268,6 @@ class _MapdlCommands(object):  # pragma: no cover
         prob
             Target probability for which the random parameter value should be
             determined.
-
-        --
-            Unused field.
 
         conf
             Confidence level. The confidence level is used to print the
@@ -24148,8 +24309,7 @@ class _MapdlCommands(object):  # pragma: no cover
         solution set that is based on Response Surface Methods, only Monte
         Carlo Simulations.
         """
-        command = "PDPINV,%s,%s,%s,%s" % (str(rlab), str(name), str(prob), str(conf))
-        return self.run(command, **kwargs)
+        return self.run(f"PDPINV,{rlab},{name},{prob},,{conf}", **kwargs)
 
     def fvmesh(self, keep="", **kwargs):
         """APDL Command: FVMESH
@@ -24391,8 +24551,8 @@ class _MapdlCommands(object):  # pragma: no cover
               end="", **kwargs):
         """APDL Command: EDALE
 
-        Assigns mesh smoothing to explicit dynamic elements that use the ALE
-        formulation.
+        Assigns mesh smoothing to explicit dynamic elements that use
+        the ALE formulation.
 
         Parameters
         ----------
@@ -24405,17 +24565,11 @@ class _MapdlCommands(object):  # pragma: no cover
 
             LIST - List smoothing controls.
 
-        --
-            Unused field.
-
         afac
             Simple average smoothing weight factor (default = 0).
 
         bfac
             Volume weighted smoothing weight factor (default = 0).
-
-        --
-            Unused field.
 
         dfac
             Equipotential smoothing weight factor (default = 0).
@@ -24432,12 +24586,13 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Mesh smoothing specified by the EDALE command is only applicable to
-        PLANE162 and SOLID164 elements that are flagged to use the ALE
-        formulation (KEYOPT(5) = 1). To activate the ALE formulation, you must
-        specify at least one smoothing weight factor on this command and the
-        number of cycles between advection (NADV) on the EDGCALE command. See
-        Arbitrary Lagrangian-Eulerian Formulation in the ANSYS LS-DYNA User's
+        Mesh smoothing specified by the EDALE command is only
+        applicable to PLANE162 and SOLID164 elements that are flagged
+        to use the ALE formulation (KEYOPT(5) = 1). To activate the
+        ALE formulation, you must specify at least one smoothing
+        weight factor on this command and the number of cycles between
+        advection (NADV) on the EDGCALE command. See Arbitrary
+        Lagrangian-Eulerian Formulation in the ANSYS LS-DYNA User's
         Guide for more information.
 
         The EDALE command is also valid in PREP7.
@@ -24445,7 +24600,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDALE,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(afac), str(bfac), str(dfac), str(efac), str(start), str(end))
+        command = f"EDALE,{option},,{afac},{bfac},,{dfac},{efac},{start},{end}"
         return self.run(command, **kwargs)
 
     def accat(self, na1="", na2="", **kwargs):
@@ -24616,7 +24771,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Required terminator for the if-then-else construct. See the *IF  for
         details.  If a batch input stream hits an end-of-file during a false
         *IF condition, the ANSYS run will not terminate normally. You will need
-        to terminate it externally (use either the Linux “kill” function or the
+        to terminate it externally (use either the Linux "kill" function or the
         Windows task manager). The *ENDIF command must appear on the same file
         as the *IF command, and all six characters must be input.
 
@@ -24720,7 +24875,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "CNVTOL,%s,%s,%s,%s,%s" % (str(lab), str(value), str(toler), str(norm), str(minref))
         return self.run(command, **kwargs)
 
-    def secread(self, fname="", ext="", unused="", option="", **kwargs):
+    def secread(self, fname="", ext="", option="", **kwargs):
         """APDL Command: SECREAD
 
         Reads a custom section library or a user-defined section mesh into
@@ -24737,65 +24892,60 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         option
-            LIBRARY
-
-            LIBRARY - Reads in a library of sections and their associated section data values; the
-                      default. A section library may be created by editing the
-                      section-defining portions of the Jobname.LOG file and
-                      saving it with a .SECT suffix.
+            LIBRARY - Reads in a library of sections and
+            theirassociated section data values; the default. A
+            section library may be created by editing the
+            section-defining portions of the Jobname.LOG file and
+            saving it with a .SECT suffix.
 
         Notes
         -----
-        The SECREAD command operates on the section specified via the most
-        recently issued SECTYPE command. Issue a separate SECREAD command for
-        each section ID that you want to read in.
+        The SECREAD command operates on the section specified via the
+        most recently issued SECTYPE command. Issue a separate SECREAD
+        command for each section ID that you want to read in.
 
-        Here are excerpts from a sample user section mesh file for a section
-        with 75 nodes, 13 cells, and 9 nodes per cell for a two-hole box
-        section. Illustrations of the two-hole box section and the cell mesh
-        for it appear later in this command description.
+        Here are excerpts from a sample user section mesh file for a
+        section with 75 nodes, 13 cells, and 9 nodes per cell for a
+        two-hole box section. Illustrations of the two-hole box
+        section and the cell mesh for it appear later in this command
+        description.
 
-        The mesh file is divided into three sections: the First Line, the Cells
-        Section, and the Nodes Section.  Here are brief descriptions of the
-        contents of each.
+        The mesh file is divided into three sections: the First Line,
+        the Cells Section, and the Nodes Section.  Here are brief
+        descriptions of the contents of each.
 
-        First Line:  The First Line defines the number of nodes and the number
-        of cells for the mesh.
+        First Line: The First Line defines the number of nodes and the
+        number of cells for the mesh.
 
-        Cells Section:  The Cells Section contains as many lines as there are
-        cells.  In this example, there are thirteen cells, so there are
-        thirteen lines in this section. In each line, the number “1” that
-        follows the cell connectivity information is the material number.
+        Cells Section: The Cells Section contains as many lines as
+        there are cells.  In this example, there are thirteen cells,
+        so there are thirteen lines in this section. In each line, the
+        number "1" that follows the cell connectivity information is
+        the material number.
 
-        Cell nodal connectivity must be given in a counterclockwise direction,
-        with the center node being the ninth node. For details, see Figure:
-        10:: Cell Mesh for the Two-hole Box Section.
+        Cell nodal connectivity must be given in a counterclockwise
+        direction, with the center node being the ninth node. For
+        details, see Figure: 10:: Cell Mesh for the Two-hole Box
+        Section.
 
-        Nodes Section:  The Nodes Section contains as many lines as there are
-        nodes.  In this example, there are 75 nodes, so there are a total of 75
-        lines in this section.  Each node line contains the node's boundary
-        flag, the Y coordinate of the node, and the Z coordinate of the node.
-        Currently, all node boundary flags appear as 0s in a cell mesh file (as
-        illustrated in Figure: 9:: Two-hole Box Section). Since all node
-        boundary flags are 0, SECREAD ignores them when it reads a cell mesh
-        file into ANSYS.
+        Nodes Section: The Nodes Section contains as many lines as
+        there are nodes.  In this example, there are 75 nodes, so
+        there are a total of 75 lines in this section.  Each node line
+        contains the node's boundary flag, the Y coordinate of the
+        node, and the Z coordinate of the node.  Currently, all node
+        boundary flags appear as 0s in a cell mesh file (as
+        illustrated in Figure: 9:: Two-hole Box Section). Since all
+        node boundary flags are 0, SECREAD ignores them when it reads
+        a cell mesh file into ANSYS.
 
-        There cannot be any gaps in the node numbering of a cell mesh.  The
-        nodes in a cell mesh must be numbered consecutively, with the first
-        node having a node number of 1, and the last node having a node number
-        that is equal to the maximum number of nodes in the cell mesh.
-
-        Figure: 9:: : Two-hole Box Section
-
-        Figure: 10:: : Cell Mesh for the Two-hole Box Section
+        There cannot be any gaps in the node numbering of a cell mesh.
+        The nodes in a cell mesh must be numbered consecutively, with
+        the first node having a node number of 1, and the last node
+        having a node number that is equal to the maximum number of
+        nodes in the cell mesh.
         """
-        command = "SECREAD,%s,%s,%s,%s" % (str(fname), str(ext),
-                                           str(unused), str(option))
-        return self.run(command, **kwargs)
+        return self.run(f"SECREAD,{fname},{ext},,{option}", **kwargs)
 
     def sspe(self, e11="", e21="", e22="", t="", **kwargs):
         """APDL Command: SSPE
@@ -25176,7 +25326,7 @@ class _MapdlCommands(object):  # pragma: no cover
         return self.run(command, **kwargs)
 
     def andata(self, delay="", ncycl="", rsltdat="", min="", max="", incr="",
-               frclst="", autocont="", unused="", autocntr="", **kwargs):
+               frclst="", autocont="", autocntr="", **kwargs):
         """APDL Command: ANDATA
 
         Displays animated graphics data for nonlinear problems.
@@ -25220,9 +25370,6 @@ class _MapdlCommands(object):  # pragma: no cover
             the overall subset range of values. The default value is 0 (no
             automatic scaling).
 
-        --
-            Unused field.
-
         autocntr
             A value of 1 disables automatic centering of displaced plots. The
             default value is 0 (allow automatic centering).
@@ -25245,16 +25392,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command functions only in the postprocessor.
         """
-        command = "ANDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(delay),
-                                                         str(ncycl),
-                                                         str(rsltdat),
-                                                         str(min),
-                                                         str(max),
-                                                         str(incr),
-                                                         str(frclst),
-                                                         str(autocont),
-                                                         str(unused),
-                                                         str(autocntr))
+        command = f"ANDATA,{delay},{ncycl},{rsltdat},{min},{max},{incr},{frclst},{autocont},,{autocntr}"
         return self.run(command, **kwargs)
 
     def dmpstr(self, coeff="", **kwargs):
@@ -25447,7 +25585,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "SPLOT,%s,%s,%s,%s" % (str(na1), str(na2), str(ninc), str(mesh))
         return self.run(command, **kwargs)
 
-    def cdread(self, option="", fname="", ext="", unused="", fnamei="", exti="",
+    def cdread(self, option="", fname="", ext="", fnamei="", exti="",
                **kwargs):
         """APDL Command: CDREAD
 
@@ -25458,23 +25596,25 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Selects which data to read:
 
-            ALL - Read all geometry, material property, load, and component data (default).
-                  Solid model geometry and loads will be read from the file
-                  Fnamei.Exti.  All other data will be read from the file
-                  Fname.Ext.
+            ALL - Read all geometry, material property, load, and
+            component data (default).  Solid model geometry and loads
+            will be read from the file Fnamei.Exti.  All other data
+            will be read from the file Fname.Ext.
 
-            DB - Read all database information contained in file Fname.Ext. This file should
-                 contain all information mentioned above except the solid model
-                 loads. If reading a .CDB file written with the GEOM option of
-                 the CDWRITE  command, element types [ET] compatible with the
-                 connectivity of the elements on the file must be defined prior
-                 to reading.
+            DB - Read all database information contained in file
+            Fname.Ext. This file should contain all information
+            mentioned above except the solid model loads. If reading a
+            .CDB file written with the GEOM option of the CDWRITE
+            command, element types [ET] compatible with the
+            connectivity of the elements on the file must be defined
+            prior to reading.
 
-            SOLID - Read the solid model geometry and solid model loads from the file Fnamei.Exti.
-                    This file could have been written by the CDWRITE or IGESOUT
-                    command.
+            SOLID - Read the solid model geometry and solid model
+            loads from the file Fnamei.Exti.  This file could have
+            been written by the CDWRITE or IGESOUT command.
 
-            COMB - Read the combined solid model and database information from the file Fname.Ext.
+            COMB - Read the combined solid model and database
+            information from the file Fname.Ext.
 
         fname
             File name and directory path (248 characters maximum, including the
@@ -25484,9 +25624,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         fnamei
             Name of the IGES file and its directory path (248 characters
@@ -25525,10 +25662,8 @@ class _MapdlCommands(object):  # pragma: no cover
         and section definitions is not recommended.
 
         This command is valid in any processor.
-        """
-        command = "CDREAD,%s,%s,%s,%s,%s,%s" % (str(option), str(fname), str(ext),
-                                                str(unused), str(fnamei), str(exti))
-        return self.run(command, **kwargs)
+        """        
+        return self.run(f"CDREAD,{option},{fname},{ext},,{fnamei},{exti}", **kwargs)
 
     def edpart(self, option="", partid="", cname="", **kwargs):
         """APDL Command: EDPART
@@ -25800,13 +25935,13 @@ class _MapdlCommands(object):  # pragma: no cover
         nkey
             Numbering style:
 
-             0  - Color (terminal dependent) the numbered items and show numbers.
+             0  - Color (terminal dependent) the numbered items and show numbers.
 
-             1  - Color the numbered items.  Do not show the numbers.
+             1  - Color the numbered items.  Do not show the numbers.
 
-             2  - Show the numbers.  Do not color the items.
+             2  - Show the numbers.  Do not color the items.
 
-            -1  - Do not color the items or show the numbers. For contour plots, the resulting
+            -1  - Do not color the items or show the numbers. For contour plots, the resulting
                   display will vary (see below).
 
         Notes
@@ -25841,7 +25976,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "/NUMBER,%s" % (str(nkey))
         return self.run(command, **kwargs)
 
-    def pmore(self, unused="", x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
+    def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
               **kwargs):
         """APDL Command: /PMORE
 
@@ -25849,9 +25984,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         x5
             X location for vertex 5 of polygon (-1.0 < X < 2.0).
 
@@ -25887,7 +26019,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/PMORE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x5), str(y5), str(x6), str(y6), str(x7), str(y7), str(x8), str(y8))
+        command = "/PMORE,,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x5), str(y5), str(x6), str(y6), str(x7), str(y7), str(x8), str(y8))
         return self.run(command, **kwargs)
 
     def vcone(self, wn="", phi="", **kwargs):
@@ -26185,9 +26317,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         label
             Can take a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (IJK).
 
@@ -26245,7 +26374,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*VREAD,%s,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3), str(nskip))
+        command = f"*VREAD,{parr},{fname},{ext},,{label},{n1},{n2},{n3},{nskip}"
         return self.run(command, **kwargs)
 
     def mat(self, mat="", **kwargs):
@@ -26339,7 +26468,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Tabular boundary conditions (VALUE = %tabname%) can be used.
 
         %_FIX% is an ANSYS reserved table name. When VALUE is set to %_FIX%,
-        ANSYS will prescribe the degree of freedom to the “current” relative
+        ANSYS will prescribe the degree of freedom to the "current" relative
         displacement value. This option is only valid for the following labels:
         UX, UY, UZ, ROTX, ROTY, ROTZ. In most cases, %_FIX% usage is efficient
         and recommended for all structural degrees of freedom.
@@ -26751,9 +26880,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         nskip
             Number of comment lines at the beginning of the file being read
@@ -27220,15 +27346,9 @@ class _MapdlCommands(object):  # pragma: no cover
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
             Thirty-two character name identifying the variable on printouts and
             displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
 
         facta
             Scaling factor (positive or negative) applied to variable IA
@@ -27239,17 +27359,18 @@ class _MapdlCommands(object):  # pragma: no cover
         Forms a variable using only the real part of a variable.  Used only
         with harmonic analyses (ANTYPE,HARMIC).
 
-        Complex variables are stored in two-column arrays with the real
-        component stored in the first column and the imaginary component stored
-        in the second column.  This command extracts the value stored in the
-        first column (i.e., real component).  However with harmonic analyses,
-        all variables are stored in two-column arrays as complex variables.  If
-        the variable is not complex, then the same value is stored in both
-        columns.  This command will extract the variable in the first column of
-        the array, even if this variable is not the real component of a complex
-        variable.
+        Complex variables are stored in two-column arrays with the
+        real component stored in the first column and the imaginary
+        component stored in the second column.  This command extracts
+        the value stored in the first column (i.e., real component).
+        However with harmonic analyses, all variables are stored in
+        two-column arrays as complex variables.  If the variable is
+        not complex, then the same value is stored in both columns.
+        This command will extract the variable in the first column of
+        the array, even if this variable is not the real component of
+        a complex variable.
         """
-        command = "REALVAR,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
+        command = f"REALVAR,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)
 
     def cpngen(self, nset="", lab="", node1="", node2="", ninc="", **kwargs):
@@ -27627,7 +27748,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
             Caution:When used in problems with both current sources and iron regions, errors may result due to numerical cancellation. - 1
 
-            Calculate and store a preliminary H field in "iron" regions (μr ≠ 1).  Requires flux-parallel boundary conditions to be specified on exterior iron boundaries.  Used in conjunction with subsequent solutions with VALUE = 2 followed by VALUE = 3.  Applicable to multiply-connected iron domain problems. - 2
+            Calculate and store a preliminary H field in "iron" regions (μr ≠ 1).  Requires flux-parallel boundary conditions to be specified on exterior iron boundaries.  Used in conjunction with subsequent solutions with VALUE = 2 followed by VALUE = 3.  Applicable to multiply-connected iron domain problems. - 2
 
             Calculate and store a preliminary H field in "air" regions (μr = 1).  The air-iron interface is appropriately treated internally by the program.  Used in conjunction with a subsequent solution with VALUE = 3.  Applicable to singly-connected iron domain problems (with subsequent solution with VALUE = 3) or to multiply-connected iron domain problems (when preceded by a solution with VALUE = 1 and followed by a solution with VALUE = 3). - 3
 
@@ -27692,7 +27813,7 @@ class _MapdlCommands(object):  # pragma: no cover
         x, y, z
             Replace the previous coordinate values assigned to this node with
             these corresponding coordinate values.  Values are interpreted in
-            the active coordinate system (R, θ, Z for cylindrical; R, θ, Φ for
+            the active coordinate system (R, θ, Z for cylindrical; R, θ, Φ for
             spherical or toroidal).  Leaving any of these fields blank retains
             the previous value(s).
 
@@ -27987,9 +28108,9 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Activates implicit creep analysis.
 
-            0 or OFF  - No implicit creep analysis. This option is the default.
+            0 or OFF  - No implicit creep analysis. This option is the default.
 
-            1 or ON  - Perform implicit creep analysis.
+            1 or ON  - Perform implicit creep analysis.
 
         Notes
         -----
@@ -28091,15 +28212,9 @@ class _MapdlCommands(object):  # pragma: no cover
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
             Thirty-two character name for identifying the variable on printouts
             and displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
 
         facta
             Scaling factor (positive or negative) applied to variable (default
@@ -28108,9 +28223,8 @@ class _MapdlCommands(object):  # pragma: no cover
         Notes
         -----
         Used only with harmonic analyses (ANTYPE,HARMIC).
-        """
-        command = "CONJUG,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
-        return self.run(command, **kwargs)
+        """        
+        return self.run(f"CONJUG,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
     def modcont(self, mlskey="", enforcedkey="", **kwargs):
         """APDL Command: MODCONT
@@ -28847,16 +28961,14 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -28891,9 +29003,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
         """
         command = "/IMAGE,%s,%s,%s" % (str(label), str(fname), str(ext))
         return self.run(command, **kwargs)
@@ -29370,57 +29479,57 @@ class _MapdlCommands(object):  # pragma: no cover
         iinc
             Increment to be added to element numbers in existing set.
 
-        --
-            Unused field.
-
         ninc
             Increment nodes in the given pattern by NINC.
 
         iel1, iel2, ieinc
-            Reflect elements from pattern beginning with IEL1 to IEL2 (defaults
-            to IEL1) in steps of IEINC (defaults to 1). If IEL1 = ALL, IEL2 and
-            IEINC are ignored and pattern is all selected elements [ESEL].  If
-            IEL1 = P, graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI). A component name may
-            also be substituted for IEL1 (IEL2 and IEINC are ignored).
+            Reflect elements from pattern beginning with IEL1 to IEL2
+            (defaults to IEL1) in steps of IEINC (defaults to 1). If
+            IEL1 = ALL, IEL2 and IEINC are ignored and pattern is all
+            selected elements [ESEL].  If IEL1 = P, graphical picking
+            is enabled and all remaining command fields are ignored
+            (valid only in the GUI). A component name may also be
+            substituted for IEL1 (IEL2 and IEINC are ignored).
 
         Notes
         -----
         This command is the same as the ESYM command except it allows
-        explicitly assigning element numbers to the generated set (in terms of
-        an increment IINC). Any existing elements already having these numbers
-        will be redefined.
+        explicitly assigning element numbers to the generated set (in
+        terms of an increment IINC). Any existing elements already
+        having these numbers will be redefined.
 
-        The operation generates a new element by incrementing the nodes on the
-        original element, and reversing and shifting the node connectivity
-        pattern.  For example, for a 4-node 2-D element, the nodes in positions
-        I, J, K and L of the original element are placed in positions J, I, L
-        and K of the reflected element.
+        The operation generates a new element by incrementing the
+        nodes on the original element, and reversing and shifting the
+        node connectivity pattern.  For example, for a 4-node 2-D
+        element, the nodes in positions I, J, K and L of the original
+        element are placed in positions J, I, L and K of the reflected
+        element.
 
-        Similar permutations occur for all other element types. For line
-        elements, the nodes in positions I and J of the original element are
-        placed in positions J and I of the reflected element. In releases prior
-        to ANSYS 5.5, no node pattern reversing and shifting occurred for line
-        elements generated by ENSYM. To achieve the same results as you did in
-        releases prior to ANSYS 5.5, use the ENGEN command instead.
+        Similar permutations occur for all other element types. For
+        line elements, the nodes in positions I and J of the original
+        element are placed in positions J and I of the reflected
+        element. In releases prior to ANSYS 5.5, no node pattern
+        reversing and shifting occurred for line elements generated by
+        ENSYM. To achieve the same results as you did in releases
+        prior to ANSYS 5.5, use the ENGEN command instead.
 
         See the ESYM command for additional information about symmetry
         elements.
 
-        The ENSYM command also provides a convenient way to reverse shell
-        element normals. If the IINC and NINC argument fields are left blank,
-        the effect of the reflection is to reverse the direction of the outward
-        normal of the specified elements. You cannot use the ENSYM command to
-        change the normal direction of any element that has a body or surface
-        load. We recommend that you apply all of your loads only after ensuring
-        that the element normal directions are acceptable. Also note that real
+        The ENSYM command also provides a convenient way to reverse
+        shell element normals. If the IINC and NINC argument fields
+        are left blank, the effect of the reflection is to reverse the
+        direction of the outward normal of the specified elements. You
+        cannot use the ENSYM command to change the normal direction of
+        any element that has a body or surface load. We recommend that
+        you apply all of your loads only after ensuring that the
+        element normal directions are acceptable. Also note that real
         constants (such as nonuniform shell thickness and tapered beam
-        constants) may be invalidated by an element reversal. See Revising Your
-        Model in the Modeling and Meshing Guide for more information about
-        controlling element normals.
+        constants) may be invalidated by an element reversal. See
+        Revising Your Model in the Modeling and Meshing Guide for more
+        information about controlling element normals.
         """
-        command = "ENSYM,%s,%s,%s,%s,%s" % (str(iinc), str(ninc), str(iel1), str(iel2), str(ieinc))
-        return self.run(command, **kwargs)
+        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
     def dadele(self, area="", lab="", **kwargs):
         """APDL Command: DADELE
@@ -29723,25 +29832,31 @@ class _MapdlCommands(object):  # pragma: no cover
         lab
             Read operation:
 
+            S - Saves only selected paths.
+
             ALL - Read all paths from the selected file (default).
 
+            Pname - Saves the named path (from the PSEL command).
+
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+            The file name defaults to Jobname.
 
         ext
-            Filename extension (eight-character maximum).
-
-        --
-            Unused field.
+            Filename extension (eight-character maximum).  The
+            extension defaults to PATH if Fname is blank.
 
         Notes
         -----
-        This command removes all paths from virtual memory and then reads path
-        data from a file written with the PASAVE command.  All paths on the
-        file will be restored.  All paths currently in memory will be deleted.
+        This command removes all paths from virtual memory and then
+        reads path data from a file written with the PASAVE command.
+        All paths on the file will be restored.  All paths currently
+        in memory will be deleted.
         """
         command = "PARESU,%s,%s,%s" % (str(lab), str(fname), str(ext))
         return self.run(command, **kwargs)
@@ -29970,7 +30085,7 @@ class _MapdlCommands(object):  # pragma: no cover
             memory is controlled by Kywrd
 
         kywrd
-            Turns the memory “keep” mode on or off
+            Turns the memory "keep" mode on or off
 
             ON - Keep any memory allocated during the analysis.
 
@@ -30002,16 +30117,14 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -30330,33 +30443,30 @@ class _MapdlCommands(object):  # pragma: no cover
 
             2 - Activate.
 
-        --
-            Unused field.
-
         tdmax
             Maximum allowed time step after restart (no default).
 
         Notes
         -----
-        This command is only valid in an explicit dynamic small restart
-        analysis (EDSTART,2). Use this command when you do a rigid/deformable
-        switch (EDRD command) and you want to control constraints defined by
-        other means for the deformable body (such as nodal constraints or a
-        weld). For example, if a deformable body has nodal constraints defined
-        and it is switched to a rigid body, the nodal constraints should be
-        deleted since they are invalid for the rigid body. Later on, if you
-        want to switch the rigid body to deformable again and retain the nodal
-        constraints, you can use EDRC to activate the constraints previously
-        defined for the deformable body. Otherwise, the nodal constraints
-        remain deactivated.
+        This command is only valid in an explicit dynamic small
+        restart analysis (EDSTART,2). Use this command when you do a
+        rigid/deformable switch (EDRD command) and you want to control
+        constraints defined by other means for the deformable body
+        (such as nodal constraints or a weld). For example, if a
+        deformable body has nodal constraints defined and it is
+        switched to a rigid body, the nodal constraints should be
+        deleted since they are invalid for the rigid body. Later on,
+        if you want to switch the rigid body to deformable again and
+        retain the nodal constraints, you can use EDRC to activate the
+        constraints previously defined for the deformable
+        body. Otherwise, the nodal constraints remain deactivated.
 
         This command is also valid in PREP7.
 
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed ANSYS Restriction: This command is not supported
+        in Distributed ANSYS.
         """
-        command = "EDRC,%s,%s,%s,%s" % (str(option), str(nrbf), str(ncsf), str(dtmax))
-        return self.run(command, **kwargs)
+        return self.run(f"EDRC,{option},{nrbf},{ncsf},,{dtmax}", **kwargs)
 
     def sspd(self, d11="", d21="", d31="", d22="", d32="", d33="", t="",
              **kwargs):
@@ -30474,8 +30584,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         rx, ry, rz
             Scale factors to be applied to the X, Y, and Z keypoint coordinates
-            in the active coordinate system.  (RR, R θ, RZ for cylindrical; RR,
-            R θ, R Φ for spherical).  Note that the R θ and R Φ scale factors
+            in the active coordinate system.  (RR, R θ, RZ for cylindrical; RR,
+            R θ, R Φ for spherical).  Note that the R θ and R Φ scale factors
             are interpreted as angular offsets.  For example, if CSYS = 1, RX,
             RY, RZ input of (1.5,10,3) would scale the specified keypoints 1.5
             times in the radial and 3 times in the Z direction, while adding an
@@ -30738,52 +30848,57 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path). An unspecified directory
-            path defaults to the working directory; in this case, you can use
-            all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory
+            path). An unspecified directory path defaults to the
+            working directory; in this case, you can use all 248
+            characters for the file name.  The file name extension
+            varies as follows:
 
-        --, --, --
-            Unused fields.
+            - .RST for structural, fluid, or coupled-field analyses
+             - .RTH for thermal or electrical analyses
+             - .RMG for magnetic analyses
 
         cflag
-            0
+            0 - The complex results flag is set to 0 in the results
+            file header. This is the default option.
 
-            0 - The complex results flag is set to 0 in the results file header. This is the
-                default option.
-
-            1 - The complex results flag is set to 1 in the results file header.
+            1 - The complex results flag is set to 1 in the results
+            file header.
 
         Notes
         -----
-        The RESWRITE command appends a data set to the specified file by
-        writing the results data currently in the database. If the intended
-        results file does not exist, it will be created and will include the
-        geometry records. The current load step, substep, and time (or
-        frequency) value are maintained. All data (summable and nonsummable)
-        are written.
+        The RESWRITE command appends a data set to the specified file
+        by writing the results data currently in the database. If the
+        intended results file does not exist, it will be created and
+        will include the geometry records. The current load step,
+        substep, and time (or frequency) value are maintained. All
+        data (summable and nonsummable) are written.
 
-        When complex results are appended, cFlag must be set to 1 so that the
-        header is consistent with the results written on the file.
+        When complex results are appended, cFlag must be set to 1 so
+        that the header is consistent with the results written on the
+        file.
 
-        The command is primarily intended for use in a top-down substructuring
-        analysis, where the full model is resumed and the results data read
-        from the use pass results file (SET), and subsequently from all
-        substructure expansion pass results files (APPEND). The full set of
-        data in memory can then be written out via the RESWRITE command to
-        create a complete results file (as though you had run a
-        nonsubstructured analysis).
+        The command is primarily intended for use in a top-down
+        substructuring analysis, where the full model is resumed and
+        the results data read from the use pass results file (SET),
+        and subsequently from all substructure expansion pass results
+        files (APPEND). The full set of data in memory can then be
+        written out via the RESWRITE command to create a complete
+        results file (as though you had run a nonsubstructured
+        analysis).
 
-        The RESWRITE command can also be used to write a global results file
-        for a distributed parallel (Distributed ANSYS) solution. This should
-        only be necessary if the RESCOMBINE command was used to combine results
-        from local results files into the database. The RESWRITE command can
-        then be used to write the combined results into a new results file.
-        This new results file will essentially contain the current set of
+        The RESWRITE command can also be used to write a global
+        results file for a distributed parallel (Distributed ANSYS)
+        solution. This should only be necessary if the RESCOMBINE
+        command was used to combine results from local results files
+        into the database. The RESWRITE command can then be used to
+        write the combined results into a new results file.  This new
+        results file will essentially contain the current set of
         results data for the entire (i.e., global) model.
         """
-        command = "RESWRITE,%s,%s" % (str(fname), str(cflag))
-        return self.run(command, **kwargs)
+        
+        return self.run(f"RESWRITE,{fname},,,,{cflag}", **kwargs)
 
     def hmagsolv(self, freq="", nramp="", cnva="", cnvv="", cnvc="", cnve="",
                  neqit="", **kwargs):
@@ -30870,9 +30985,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         loc
             Location within a file to which output will be written:
 
@@ -30882,21 +30994,25 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Text output includes responses to every command and GUI function,
-        notes, warnings, errors, and other informational messages.  Upon
-        execution of /OUTPUT,Fname, Ext, ..., all subsequent text output is
-        redirected to the file Fname.Ext.  To redirect output back to the
-        default location, issue /OUTPUT (no arguments).
+        Text output includes responses to every command and GUI
+        function, notes, warnings, errors, and other informational
+        messages.  Upon execution of /OUTPUT,Fname, Ext, ..., all
+        subsequent text output is redirected to the file Fname.Ext.
+        To redirect output back to the default location, issue /OUTPUT
+        (no arguments).
 
-        Note:: : When using the GUI, output from list operations [NLIST, DLIST,
-        etc.] is always sent to a list window regardless of the /OUTPUT
-        setting.  The output can then be saved on a file or copied to the
-        /OUTPUT location using the File menu in the list window.
+        Note: When using the GUI, output from list operations [NLIST,
+        DLIST, etc.] is always sent to a list window regardless of the
+        /OUTPUT setting.  The output can then be saved on a file or
+        copied to the /OUTPUT location using the File menu in the list
+        window.
 
         This command is valid in any processor.
         """
-        command = "/OUTPUT,%s,%s,%s" % (str(fname), str(ext), str(loc))
-        return self.run(command, **kwargs)
+        if loc:
+            return self.run(f"/OUTPUT,{fname},{ext},,{loc}", **kwargs)
+        else:
+            return self.run(f"/OUTPUT,{fname},{ext}", **kwargs)
 
     def dump(self, nstrt="", nstop="", **kwargs):
         """APDL Command: DUMP
@@ -30919,7 +31035,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "DUMP,%s,%s" % (str(nstrt), str(nstop))
         return self.run(command, **kwargs)
 
-    def catiain(self, name="", extension="", path="", **kwargs):
+    def catiain(self, name="", extension="", path="", blank="", **kwargs):
         """APDL Command: ~CATIAIN
 
         Transfers a CATIA model into the ANSYS program.
@@ -30927,10 +31043,10 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         name
-            The name of a valid CATIA model, created with CATIA 4.x or lower.
-            The first character of the file name must be an alphanumeric.
-            Special characters such as & - and * and spaces are not permitted
-            in the part name.
+            The name of a valid CATIA model, created with CATIA 4.x or
+            lower.  The first character of the file name must be an
+            alphanumeric.  Special characters such as & - and * and
+            spaces are not permitted in the part name.
 
         extension
             The extension for the file. The default extension is .model.
@@ -30940,30 +31056,20 @@ class _MapdlCommands(object):  # pragma: no cover
             in single quotes. The default path name is the current working
             directory.
 
-        --
-            Unused field.
-
-        --
-            Unused field.
-
         blank
-            Sets whether to import “blanked” entities.
+            Sets whether to import "blanked" entities.
 
-            0 - Does not import “blanked” (suppressed) CATIA entities (default).
+            0 - Does not import "blanked" (suppressed) CATIA entities (default).
 
-            1 - Imports “blanked” entities. The portions of CATIA data that were suppressed
-                will be included in the import.
-
-        --
-            Unused field.
+            1 - Imports "blanked" entities. The portions of CATIA data
+            that were suppressed will be included in the import.
 
         Notes
         -----
         More information on importing CATIA parts is available in CATIA V4 in
         the Connection User's Guide.
         """
-        command = "~CATIAIN,%s,%s,%s" % (str(name), str(extension), str(path))
-        return self.run(command, **kwargs)
+        return self.run(f"~CATIAIN,{name},{extension},{path},,,{blank}", **kwargs)
 
     def wpstyl(self, snap="", grspac="", grmin="", grmax="", wptol="",
                wpctyp="", grtype="", wpvis="", snapang="", **kwargs):
@@ -31108,23 +31214,18 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            the printout and displays.  Embedded blanks are compressed
+            upon output.
 
         facta
             Scaling factor (positive or negative) applied to variable IA
@@ -31132,23 +31233,23 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        This command forms a new variable from a complex variable by storing
-        the imaginary part as the real part.  The imaginary part can then be
-        used in other operations.  Used only with harmonic analyses
-        (ANTYPE,HARMIC).
+        This command forms a new variable from a complex variable by
+        storing the imaginary part as the real part.  The imaginary
+        part can then be used in other operations.  Used only with
+        harmonic analyses (ANTYPE,HARMIC).
 
-        Complex variables are stored in two-column arrays with the real
-        component stored in the first column and the imaginary component stored
-        in the second column.  This command extracts the value stored in the
-        second column (i.e., imaginary component).  However, with harmonic
-        analyses, all variables are stored in two-column arrays as complex
-        variables.  If the variable is not complex, then the same value is
-        stored in both columns.  This command will extract the variable in the
-        second column of the array, even if this variable is not the imaginary
-        component of a complex variable.
+        Complex variables are stored in two-column arrays with the
+        real component stored in the first column and the imaginary
+        component stored in the second column.  This command extracts
+        the value stored in the second column (i.e., imaginary
+        component).  However, with harmonic analyses, all variables
+        are stored in two-column arrays as complex variables.  If the
+        variable is not complex, then the same value is stored in both
+        columns.  This command will extract the variable in the second
+        column of the array, even if this variable is not the
+        imaginary component of a complex variable.
         """
-        command = "IMAGIN,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
-        return self.run(command, **kwargs)
+        return self.run(f"IMAGIN,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
     def ssmt(self, mt11="", mt22="", mt12="", t="", **kwargs):
         """APDL Command: SSMT
@@ -31325,28 +31426,31 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         lab
-            Read operation:
+            Read operation.
 
-            Replace current parameter set with these parameters (default). - Extend current parameter set with these parameters, replacing any that already
-                              exist.
+            NEW - Replace current parameter set with these parameters (default).
+
+            CHANGE - Extend current parameter set with these
+            parameters, replacing any that already exist.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+            The file name defaults to Jobname.
 
         ext
-            Filename extension (eight-character maximum).
-
-        --
-            Unused field.
+            Filename extension (eight-character maximum).  The
+            extension defaults to PARM if Fname is blank.
 
         Notes
         -----
-        Reads parameters from a coded file.  The parameter file may have been
-        written with the PARSAV command.  The parameters read may replace or
-        change the current parameter set.
+        Reads parameters from a coded file.  The parameter file may
+        have been written with the PARSAV command.  The parameters
+        read may replace or change the current parameter set.
 
         This command is valid in any processor.
         """
@@ -31361,7 +31465,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         value
-            Stefan-Boltzmann constant (defaults to 0.119E-10 Btu/hr/in2/ °R4).
+            Stefan-Boltzmann constant (defaults to 0.119E-10 Btu/hr/in2/ °R4).
 
         Notes
         -----
@@ -31383,11 +31487,11 @@ class _MapdlCommands(object):  # pragma: no cover
         time
             Restart time
 
-            0  -  New analysis (Default)
+            0  -  New analysis (Default)
 
-            -1  - Restart from the last result set from a previous run.
+            -1  - Restart from the last result set from a previous run.
 
-            n  - Specify any positive number for the actual time point from which the ANSYS
+            n  - Specify any positive number for the actual time point from which the ANSYS
                  Multi-field solver will restart. ANSYS checks the availability
                  of the result set and database file.
 
@@ -31900,23 +32004,18 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name identifying the variable on
+            printouts and displays.  Embedded blanks are compressed
+            for output.
 
         facta
             Scaling factor applied to variable IA (defaults to 1.0).
@@ -31931,8 +32030,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = FACTB*LN(FACTA x IA)
         """
-        command = "NLOG,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta), str(factb))
-        return self.run(command, **kwargs)
+        return self.run(f"NLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
     def volumes(self, **kwargs):
         """APDL Command: VOLUMES
@@ -32961,18 +33059,15 @@ class _MapdlCommands(object):  # pragma: no cover
             pass through both an electrostatics and structural analysis
             constitutes one loop.  Defaults to 100.
 
-        --
-            Unused field.
-
         ruseky
             Reuse flag option:
 
-            1 - Assumes initial run of ESSOLV using base geometry for the first electrostatics
-                solution.
+            1 - Assumes initial run of ESSOLV using base geometry for
+                the first electrostatics solution.
 
-            >1 - Assumes ESSOLV run is a continuation of a previous ESSOLV run, whereby the
-                 morphed geometry is used for the initial electrostatic
-                 simulation.
+            >1 - Assumes ESSOLV run is a continuation of a previous
+                 ESSOLV run, whereby the morphed geometry is used for
+                 the initial electrostatic simulation.
 
         restky
             Structural restart key.
@@ -33028,7 +33123,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "ESSOLV,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(electit), str(strutit), str(dimn), str(morphopt), str(mcomp), str(xcomp), str(electol), str(strutol), str(mxloop), str(ruseky), str(restky), str(eiscomp))
+        command = f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
         return self.run(command, **kwargs)
 
     def rsplit(self, option="", label="", name1="", name2="", name3="",
@@ -33142,15 +33237,9 @@ class _MapdlCommands(object):  # pragma: no cover
         ia, ib
             Reference numbers of the two variables to be operated on.
 
-        --
-            Unused field.
-
         name
             Thirty-two character name identifying the variable on printouts and
             displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
 
         facta, factb
             Scaling factors (positive or negative) applied to the corresponding
@@ -33162,8 +33251,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = (FACTA x IA)/(FACTB x IB)
         """
-        command = "QUOT,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(name), str(facta), str(factb))
-        return self.run(command, **kwargs)
+        return self.run(f"QUOT,{ir},{ia},{ib},,{name},,,{facta},{factb}", **kwargs)
 
     def edcgen(self, option="", cont="", targ="", fs="", fd="", dc="", vc="",
                vdc="", v1="", v2="", v3="", v4="", btime="", dtime="",
@@ -33358,11 +33446,11 @@ class _MapdlCommands(object):  # pragma: no cover
             n - Activate SmartSizing and set the size level to n.  Must be an integer value
                 from 1 (fine mesh) to 10 (coarse mesh).  Remaining arguments
                 are ignored, and argument values are set as shown in
-                Table 229: SMRTSIZE - Argument Values for h-elements .
+                Table 229: SMRTSIZE - Argument Values for h-elements .
 
             STAT - List current SMRTSIZE settings.
 
-            DEFA - Set all SMRTSIZE settings to default values (as shown in Table 229: SMRTSIZE -
+            DEFA - Set all SMRTSIZE settings to default values (as shown in Table 229: SMRTSIZE -
                    Argument Values for h-elements  for size level 6).
 
             OFF - Deactivate SmartSizing.  Current settings of DESIZE will be used.  To
@@ -33525,32 +33613,27 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         option
-            OFF
-
             OFF - Turns off morphing for field elements (default).
 
             ON - Turns on morphing for field elements.
 
-        --
-            Unused field
-
         remeshopt
-            OFF
-
             OFF - Do not remesh (default).
 
-            ON - Remesh when element qualities fall below values specified by ARMAX, VOCH, or
-                 ARCH as explained below. Valid only when Option is ON.
+            ON - Remesh when element qualities fall below values
+                 specified by ARMAX, VOCH, or ARCH as explained
+                 below. Valid only when Option is ON.
 
         elemset
-            ALL
+            ALL - Remesh all selected elements if the quality of the
+                  worst defined element falls below any quality
+                  requirement (default when Remeshopt = ON).
 
-            ALL - Remesh all selected elements if the quality of the worst defined element falls
-                  below any quality requirement (default when Remeshopt = ON).
-
-            CompName  - Specify a component name, up to 32 characters. All elements included in this
-                        component name are remeshed if the quality of the worst
-                        element falls below any quality requirement.
+            CompName - Specify a component name, up to 32
+                        characters. All elements included in this
+                        component name are remeshed if the quality of
+                        the worst element falls below any quality
+                        requirement.
 
         armax
             The maximum allowable element generalized aspect ratio. Defaults to
@@ -33621,7 +33704,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is also valid in SOLUTION.
         """
-        command = "MORPH,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(remeshopt), str(elemset), str(armax), str(voch), str(arch), str(step), str(time), str(stropt))
+        command = f"MORPH,{option},,{remeshopt},{elemset},{armax},{voch},{arch},{step},{time},{stropt}"
         return self.run(command, **kwargs)
 
     def padele(self, delopt="", **kwargs):
@@ -33722,9 +33805,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Extension of the ROM database file. Default to .rom.
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -33966,7 +34046,7 @@ class _MapdlCommands(object):  # pragma: no cover
             COND - Activates or deactivates condensation in the radiosity solver for all defined
                    radiation symmetries. Condensation is the process where the
                    radiosity equation system is reduced in size. Default is
-                   off. (See Figure 7: Usage Example: Option = COND .)
+                   off. (See Figure 7: Usage Example: Option = COND .)
 
         cs
             Local coordinate system (11) as defined using the LOCAL or CS
@@ -34084,10 +34164,10 @@ class _MapdlCommands(object):  # pragma: no cover
             Key to use response frequency computation along with midstep
             residual criterion for automatic time stepping (AUTOTS,ON).
 
-            OFF or 0 - Do not calculate response frequency and do not consider it in the automatic
+            OFF or 0 - Do not calculate response frequency and do not consider it in the automatic
                        time stepping (default).
 
-            ON or 1 - Calculate response frequency and consider it in the automatic time stepping.
+            ON or 1 - Calculate response frequency and consider it in the automatic time stepping.
 
         Notes
         -----
@@ -34985,9 +35065,9 @@ class _MapdlCommands(object):  # pragma: no cover
 
             CHRG - Applied electric charge.
 
-            F or FORC - Applied structural forces (FX, FY, FZ).
+            F or FORC - Applied structural forces (FX, FY, FZ).
 
-            M or MOME - Applied structural moments (MX, MY, MZ).
+            M or MOME - Applied structural moments (MX, MY, MZ).
 
             HEAT - Applied heat flows (HEAT, HBOT, HE2, HE3, . . ., HTOP).
 
@@ -35026,9 +35106,6 @@ class _MapdlCommands(object):  # pragma: no cover
             WELD - Applied spotwelds (ANSYS LS-DYNA).
 
             ALL - Represents all appropriate labels.
-
-        --
-            Unused field.
 
         key
             Symbol key:
@@ -35086,7 +35163,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         The /PBC command is valid in any processor.
         """
-        command = "/PBC,%s,%s,%s,%s,%s" % (str(item), str(key), str(min), str(max), str(abs))
+        command = f"/PBC,{item},,{key},{min},{max},{abs}"
         return self.run(command, **kwargs)
 
     def lsdele(self, lsmin="", lsmax="", lsinc="", **kwargs):
@@ -35221,7 +35298,7 @@ class _MapdlCommands(object):  # pragma: no cover
         return self.run(command, **kwargs)
 
     def modopt(self, method="", nmode="", freqb="", freqe="", cpxmod="",
-               nrmkey="", modtype="", blocksize="", scalekey="", **kwargs):
+               nrmkey="", modtype="", blocksize="", freqmod="", **kwargs):
         """APDL Command: MODOPT
 
         Specifies modal analysis options.
@@ -35299,26 +35376,33 @@ class _MapdlCommands(object):  # pragma: no cover
                    analysis is intended.
 
         blocksize
-            The block vector size to be used with the Block Lanczos or Subspace
-            eigensolver (used only when Method = LANB or SUBSP). BlockSize must
-            be an integer value between 0 and 16. When BlockSize = zero or
-            blank, the code decides the block size internally (normally, a
-            value of 8 is used for LANB and a value of 6 is used for SUBSP).
-            Typically, higher BlockSize values are more efficient under each of
+            The block vector size to be used with the Block Lanczos or
+            Subspace eigensolver (used only when Method = LANB or
+            SUBSP). BlockSize must be an integer value between 0 and
+            16. When BlockSize = zero or blank, the code decides the
+            block size internally (normally, a value of 8 is used for
+            LANB and a value of 6 is used for SUBSP).  Typically,
+            higher BlockSize values are more efficient under each of
             the following conditions:
 
-        --
-            Unused field.
+            - When running in out-of-core mode and there is not enough
+              physical memory to buffer all of the files written by
+              the Block Lanczos or Subspace eigensolver (and thus, the
+              time spent doing I/O is considerable).
+            - Many modes are requested (>100).
+            - Higher-order solid elements dominate the model.
 
-        --
-            Unused field.
+            The memory usage only slightly increases as BlockSize is
+            increased. It is recommended that you use a value
+            divisible by 4 (4, 8, 12, or 16).
 
-        scalekey
-            Matrices scaling key for acoustic-structural interaction:
-
-            OFF - Do not scale the matrices (default).
-
-            ON - Scale the matrices.
+        freqmod
+            The specified frequency when the solved eigenvalues are no
+            longer frequencies (for example, the model has the Floquet
+            periodic boundary condition). In a modal analysis, the
+            Floquet periodic boundary condition (body load FPBC) is
+            only valid for the acoustic elements FLUID30, FLUID220,
+            and FLUID221.
 
         Notes
         -----
@@ -35355,7 +35439,7 @@ class _MapdlCommands(object):  # pragma: no cover
         performance improvements with these methods that you would with a fully
         distributed solution.
         """
-        command = "MODOPT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(method), str(nmode), str(freqb), str(freqe), str(cpxmod), str(nrmkey), str(modtype), str(blocksize), str(scalekey))
+        command = f"MODOPT,{method},{nmode},{freqb},{freqe},{cpxmod},{nrmkey},{modtype},{blocksize},,,,{freqmod}"
         return self.run(command, **kwargs)
 
     def cedele(self, neqn1="", neqn2="", ninc="", nsel="", **kwargs):
@@ -35373,9 +35457,9 @@ class _MapdlCommands(object):  # pragma: no cover
         nsel
             Additional node selection control:
 
-            ANY  - Delete equation set if any of the selected nodes are in the set (default).
+            ANY  - Delete equation set if any of the selected nodes are in the set (default).
 
-            ALL  - Delete equation set only if all of the selected nodes are in the set.
+            ALL  - Delete equation set only if all of the selected nodes are in the set.
         """
         command = "CEDELE,%s,%s,%s,%s" % (str(neqn1), str(neqn2), str(ninc), str(nsel))
         return self.run(command, **kwargs)
@@ -35660,8 +35744,8 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "PRCINT,%s,%s,%s" % (str(id), str(node), str(dtype))
         return self.run(command, **kwargs)
 
-    def moper(self, parr="", par1="", oper="", par2="", par3="", kdim="",
-              kout="", limit="", **kwargs):
+    def moper(self, parr="", par1="", oper="", val1="", val2="",
+            val3="", val4="", val5="", val6="", **kwargs):
         """APDL Command: *MOPER
 
          Performs matrix operations on array parameter matrices.
@@ -35681,108 +35765,152 @@ class _MapdlCommands(object):  # pragma: no cover
         oper
             Matrix operations:
 
-            (*MOPER, ParR, Par1, INVERT) - Square matrix invert: Inverts the n x n matrix in Par1 into ParR. The matrix
-                              must be well conditioned.
+            INVERT - (*MOPER, ParR, Par1, INVERT)
+            Square matrix invert: Inverts the n x n matrix in Par1
+            into ParR. The matrix must be well conditioned.
 
-            Warning:Non-independent or ill-conditioned equations can cause erroneous results. - For large matrices, use the APDL Math operation *LSFACTOR for efficiency (see
-                              APDL Math).
+            Warning: Non-independent or ill-conditioned equations can
+            cause erroneous results. - For large matrices, use the
+            APDL Math operation *LSFACTOR for efficiency (see APDL
+            Math).
 
-            (*MOPER, ParR, Par1, MULT, Par2) - Matrix multiply: Multiplies Par1 by Par2.  The number of rows of Par2 must
-                              equal the number of columns of Par1 for the
-                              operation. If Par2 is input with a number of rows
-                              greater than the number of columns of Par1,
-                              matrices are still multiplied. However, the
-                              operation only uses a number of rows of Par2
-                              equal to the number of columns of Par1.
+            MULT - (*MOPER, ParR, Par1, MULT, Par2)
+            Matrix multiply: Multiplies Par1 by Par2.  The number of
+            rows of Par2 must equal the number of columns of Par1 for
+            the operation. If Par2 is input with a number of rows
+            greater than the number of columns of Par1, matrices are
+            still multiplied. However, the operation only uses a
+            number of rows of Par2 equal to the number of columns of
+            Par1.
 
-            (*MOPER, ParR, Par1, COVAR, Par2) - Covariance: The measure of association between two columns of the input matrix
-                              (Par1).  Par1, of size m runs (rows) by n data
-                              (columns) is first processed to produce a row
-                              vector containing the mean of each column which
-                              is transposed to a column vector (Par2) of n
-                              array elements.  The Par1 and Par2 operation then
-                              produces a resulting n x n matrix (ParR) of
-                              covariances (with the variances as the diagonal
-                              terms).
+            COVAR - (*MOPER, ParR, Par1, COVAR, Par2)
+            Covariance: The measure of association between two columns
+            of the input matrix (Par1).  Par1, of size m runs (rows)
+            by n data (columns) is first processed to produce a row
+            vector containing the mean of each column which is
+            transposed to a column vector (Par2) of n array elements.
+            The Par1 and Par2 operation then produces a resulting n x
+            n matrix (ParR) of covariances (with the variances as the
+            diagonal terms).
 
-            (*MOPER, ParR, Par1, CORR, Par2) - Correlation: The correlation coefficient between two variables.  The input
-                              matrix (Par1), of size m runs (rows) by n data
-                              (columns), is first processed to produce a row
-                              vector containing the mean of each column which
-                              is then transposed to a column vector (Par2) of n
-                              array elements.  The Par1 and Par2 operation then
-                              produces a resulting n x n matrix (ParR) of
-                              correlation coefficients (with a value of 1.0 for
-                              the diagonal terms).
+            CORR - (*MOPER, ParR, Par1, CORR, Par2)
+            Correlation: The correlation coefficient between two
+            variables.  The input matrix (Par1), of size m runs (rows)
+            by n data (columns), is first processed to produce a row
+            vector containing the mean of each column which is then
+            transposed to a column vector (Par2) of n array elements.
+            The Par1 and Par2 operation then produces a resulting n x
+            n matrix (ParR) of correlation coefficients (with a value
+            of 1.0 for the diagonal terms).
 
-            (*MOPER, ParR, Par1, SOLV, Par2) - Solution of simultaneous equations:  Solves the set of n equations of n terms
-                              of the form an1x1 + an2x2 + ... + annxn = bn
-                              where Par1 contains the matrix of a-coefficients,
-                              Par2 the vector(s) of b-values, and ParR the
-                              vector(s) of x-results.  Par1 must be a square
-                              matrix.  The equations must be linear,
-                              independent, and well conditioned.
+            SOLV - (*MOPER, ParR, Par1, SOLV, Par2)
+            Solution of simultaneous equations: Solves the set of n
+            equations of n terms of the form an1x1 + an2x2 + ... +
+            annxn = bn where Par1 contains the matrix of
+            a-coefficients, Par2 the vector(s) of b-values, and ParR
+            the vector(s) of x-results.  Par1 must be a square matrix.
+            The equations must be linear, independent, and well
+            conditioned.
 
-            Warning:Non-independent or ill-conditioned equations can cause erroneous results. - For large matrices, use the APDL Math operation *LSFACTOR for efficiency (see
-                              APDL Math).
+            Warning: Non-independent or ill-conditioned equations can
+            cause erroneous results. - For large matrices, use the
+            APDL Math operation *LSFACTOR for efficiency (see APDL
+            Math).
 
-            (*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3) - Matrix sort: Sorts matrix Par1 according to sort vector Par2 and places the
-                              result back in Par1. Rows of Par1 are moved to
-                              the corresponding positions indicated by the
-                              values of Par2. Par2 may be a column of Par1 (in
-                              which case it will also be reordered).
-                              Alternatively, you may specify the column of Par1
-                              to sort using n1 (leaving Par2 blank). A
-                              secondary sort can be specified by column n2, and
-                              a third sort using n3. ParR is the vector of
-                              initial row positions (the permutation vector).
-                              Sorting Par1 according to ParR should reproduce
-                              the initial ordering.
+            SORT - (*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)
+            Matrix sort: Sorts matrix Par1 according to sort vector
+            Par2 and places the result back in Par1. Rows of Par1 are
+            moved to the corresponding positions indicated by the
+            values of Par2. Par2 may be a column of Par1 (in which
+            case it will also be reordered). Alternatively, you may
+            specify the column of Par1 to sort using n1 (leaving Par2
+            blank). A secondary sort can be specified by column n2,
+            and a third sort using n3. ParR is the vector of initial
+            row positions (the permutation vector).  Sorting Par1
+            according to ParR should reproduce the initial ordering.
 
-            (*MOPER, ParR, Par1, NNEAR, Toler) - Nearest Node: Quickly determine all the nodes within a specified tolerance of a
-                              given array.
+            NNEAR - (*MOPER, ParR, Par1, NNEAR, Toler)
+            Nearest Node: Quickly determine all the nodes within a
+            specified tolerance of a given array.  ParR is a vector of
+            the nearest selected nodes, or 0 if no nodes are nearer
+            than Toler. Par1 is the n x 3 array of coordinate
+            locations. Toler defaults to 1 and is limited to the
+            maximum model size. - (*MOPER, ParR, Par1, ENEAR, Toler)
 
-            ParR is a vector of the nearest selected nodes, or 0 if no nodes are nearer than Toler. Par1 is the n x 3 array of coordinate locations. Toler defaults to 1 and is limited to the maximum model size. - (*MOPER, ParR, Par1, ENEAR, Toler)
+            ENEAR - (*MOPER, ParR, Par1, ENEAR, Toler)
+            Nearest Element: Quickly determine the elements with
+            centroids that are within a specified tolerance of the
+            points in a given array. - ParR is a vector of the nearest
+            selected elements, or 0 if no element centroids are nearer
+            than Toler. Par1 is the n x 3 array of coordinate
+            locations.
 
-            Nearest Element: Quickly determine the elements with centroids that are within a specified tolerance of the points in a given array. - ParR is a vector of the nearest selected elements, or 0 if no element centroids
-                              are nearer than Toler. Par1 is the n x 3 array of
-                              coordinate locations.
+            MAP - (*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)
 
-            (*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT) - Maps the results from another program onto your ANSYS finite element model. For
-                              example, you can map pressures from a CFD
-                              analysis onto your model for a structural
-                              analysis.
+            Maps the results from one set of points to another. For
+            example, you can map pressures from a CFD analysis onto
+            your model for a structural analysis.
 
-            When you map results, the subsequent Par2 and Par3 arguments define your input values and their locations, and the arguments that follow determine the search area and interpolation schemes (see below). -  For Oper = MAP, output points are incorrect if they are not within the
-                              boundaries (area or volume) set via the specified
-                              input points. Also, calculations for out-of-bound
-                              points require much more processing time than do
-                              points that are within bounds.
+            Par1 is the Nout x 3 array of points that will be mapped
+            to. Par2 is the Nin x M array that contains M values of
+            data to be interpolated at each point and corresponds to
+            the Nin x 3 points in Par3. The resulting ParR is the Nout
+            x M array of mapped data points.
 
-        par2
-            Second array parameter matrix input to the operation.  For the
-            COVAR and CORR operations, this parameter must exist as a
-            dimensioned array vector without specified values since its values
-            (means) will be calculated as part of the operations. For MAP, this
-            will be an {N(in) x M} array of values to be interpolated, where
-            N(in) is the number of points to interpolate from, and M is the
-            number of values at each point. For the ENEAR and NNEAR operations,
-            this parameter specifies the tolerance for the search.
+            For each point in the destination mesh, all possible
+            triangles in the source mesh are searched to find the best
+            triangle containing each point. It then does a linear
+            interpolation inside this triangle. You should carefully
+            specify your interpolation method and search criteria in
+            order to provide faster and more accurate results (see
+            LIMIT, below).
 
-        par3
-            Third array parameter, used for Oper = MAP. This is an N x 3 array
-            of coordinate locations corresponding to the values in Par2.
+            kDim is the interpolation criteria. If kDim = 2 or 0, two
+            dimensional interpolation is applied (interpolate on a
+            surface). If kDim = 3, three dimensional interpolation is
+            applied (interpolate on a volume).
 
-        kdim
-            Interpolation criteria; used for Oper = MAP:
+            kOut specified how points outside of the domain are
+            handled. If kOut = 0, use the value(s) of the nearest
+            region point for points outside of the region. If kOut =
+            1, set results outside of the region to zero.
 
-        --
-            Unused field
+            LIMIT specifies the number of nearby points considered for
+            interpolation. The default is 20, and the minimum is
+            5. Lower values will reduce processing time; however, some
+            distorted or irregular sets of points will require a
+            higher LIMIT value to encounter three nodes for
+            triangulation.
 
-        kout
-            Outside region results; used for Oper = MAP
+            Output points are incorrect if they are not within the
+            domain (area or volume) defined by the specified input
+            points. Also, calculations for out-of-bound points require
+            much more processing time than do points that are within
+            bounds. Results mapping is available from the command line
+            only.
+
+            INTP - (*MOPER, ParR, Par1, INTP, Par2)
+            Finds the elements that contain each point in the array of
+            n x 3 points in Par1. Par2 will contain the set of element
+            ID numbers and ParR will contain their n x 3 set of
+            natural element coordinates (values between -1 and
+            1). Par1 must be in global Cartesian coordinates.
+
+            SGET - (*MOPER, ParR, Par1, SGET, Par2, Label, Comp)
+            Gets the nodal solution item corresponding to Label and
+            Comp (see the PLNSOL command) and interpolates it to the
+            given element locations. Par1 contains the n x 3 array of
+            natural element coordinates (values between -1 and 1) of
+            the n element ID numbers in Par2. Par1 and Par2 are
+            usually the output of the *MOPER,,,INTP operation. ParR
+            contains the n interpolated results.
+
+            Val1, Val2, ..., Val6
+            Additional input used in the operation. The meanings of
+            Val1 through Val6 vary depending on the specified matrix
+            operation. See the description of Oper for details.
         """
-        command = "*MOPER,%s,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(par1), str(oper), str(par2), str(par3), str(kdim), str(kout), str(limit))
+        command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
     def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
@@ -35800,71 +35928,79 @@ class _MapdlCommands(object):  # pragma: no cover
 
             SUMMARY - List only the open/closed status for each contact pair.
 
-            POST - Execute a partial solution to write the initial contact configuration to the
-                   Jobname.RCN file.
+            POST - Execute a partial solution to write the initial
+                   contact configuration to the Jobname.RCN file.
 
-            ADJUST - Physically move contact nodes to the target in order to close a gap or reduce
-                     penetration. The initial adjustment is converted to
-                     structural displacement values (UX, UY, UZ) and stored in
+            ADJUST - Physically move contact nodes to the target in
+                     order to close a gap or reduce penetration. The
+                     initial adjustment is converted to structural
+                     displacement values (UX, UY, UZ) and stored in
                      the Jobname.RCN file.
 
-            RESET - Reset target element and contact element key options and real constants to
-                    their default values. This option is not valid for general
+            RESET - Reset target element and contact element key
+                    options and real constants to their default
+                    values. This option is not valid for general
                     contact.
 
-            AUTO - Automatically sets certain real constants and key options to recommended values
-                   or settings in order to achieve better convergence based on
-                   overall contact pair behaviors. This option is not valid for
-                   general contact.
+            AUTO - Automatically sets certain real constants and key
+                   options to recommended values or settings in order
+                   to achieve better convergence based on overall
+                   contact pair behaviors. This option is not valid
+                   for general contact.
 
             TRIM - Trim contact pair (remove certain contact and target elements).
 
             UNSE - Unselect certain contact and target elements.
 
         rid1, rid2, rinc
-            For pair-based contact, the range of real constant pair ID's for
-            which Option will be performed. If RID2 is not specified, it
-            defaults to RID1. If no value is specified, all contact pairs in
-            the selected set of elements are considered.
+            For pair-based contact, the range of real constant pair
+            ID's for which Option will be performed. If RID2 is not
+            specified, it defaults to RID1. If no value is specified,
+            all contact pairs in the selected set of elements are
+            considered.
 
         intertype
-            The type of contact interface (pair-based versus general contact)
-            to be considered; or the type of contact pair to be
-            trimmed/unselected/auto-set.
+            The type of contact interface (pair-based versus general
+            contact) to be considered; or the type of contact pair to
+            be trimmed/unselected/auto-set.
 
             (blank) - Include all contact definitions (pair-based and general contact).
 
-            GCN - Include general contact definitions only (not valid when Option = RESET or
-                  AUTO).
+            GCN - Include general contact definitions only (not valid
+                  when Option = RESET or AUTO).
 
         trlevel
             Trimming level (used only when Option = TRIM or UNSE):
 
-            (blank) - Normal trimming (default): remove/unselect contact and target elements which
-                      are in far-field.
+            (blank) - Normal trimming (default): remove/unselect
+                      contact and target elements which are in
+                      far-field.
 
-            AGGRE - Aggressive trimming: remove/unselect contact and target elements which are in
-                    far-field, and certain elements in near-field.
+            AGGRE - Aggressive trimming: remove/unselect contact and
+                    target elements which are in far-field, and
+                    certain elements in near-field.
 
         Notes
         -----
-        The CNCHECK command provides information for surface-to-surface, node-
-        to-surface, and line-to-line contact pairs (element types TARGE169,
-        TARGE170, CONTA171, CONTA172, CONTA173, CONTA174, CONTA175, CONTA176,
-        CONTA177). All contact and target elements of interest, along with the
-        solid elements and nodes attached to them, must be selected for the
-        command to function properly. For performance reasons, the program uses
-        a subset of nodes and elements based on the specified contact regions
-        (RID1, RID2, RINC) when executing the CNCHECK command.
+        The CNCHECK command provides information for
+        surface-to-surface, node- to-surface, and line-to-line contact
+        pairs (element types TARGE169, TARGE170, CONTA171, CONTA172,
+        CONTA173, CONTA174, CONTA175, CONTA176, CONTA177). All contact
+        and target elements of interest, along with the solid elements
+        and nodes attached to them, must be selected for the command
+        to function properly. For performance reasons, the program
+        uses a subset of nodes and elements based on the specified
+        contact regions (RID1, RID2, RINC) when executing the CNCHECK
+        command.
 
-        CNCHECK is available in both the PREP7 and SOLUTION processors, but
-        only before the first solve operation (that is, only before the first
-        load step or the first substep).
+        CNCHECK is available in both the PREP7 and SOLUTION
+        processors, but only before the first solve operation (that
+        is, only before the first load step or the first substep).
 
-        If the contact and target elements were generated through mesh commands
-        (AMESH, LMESH, etc.) instead of the ESURF command, you must issue
-        MODMSH,DETACH before CNCHECK. Otherwise, CNCHECK will not work
-        correctly.
+        If the contact and target elements were generated through mesh
+        commands (AMESH, LMESH, etc.) instead of the ESURF command,
+        you must issue MODMSH,DETACH before CNCHECK. Otherwise,
+        CNCHECK will not work correctly.
 
         The following additional notes are available:
 
@@ -35878,7 +36014,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Because Option = POST forces a solve operation, the PrepPost (PP)
         license does not work with CNCHECK,POST.
-
         """
         command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(rid1), str(rid2), str(rinc), str(intertype), str(trlevel), str(cgap), str(cpen), str(ioff))
         return self.run(command, **kwargs)
@@ -35965,54 +36100,64 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Selects which data to write:
 
-            ALL - Write all appropriate geometry, material property, load, and component data
-                  (default). Two files will be produced. Fname.Ext will contain
-                  all data items mentioned in "Notes", except the solid model
-                  data. Fnamei.Exti will contain the solid model geometry and
-                  solid model loads data in the form of IGES commands. This
-                  option is not valid when CDOPT,ANF is active.
+            ALL - Write all appropriate geometry, material property,
+                  load, and component data (default). Two files will
+                  be produced. Fname.Ext will contain all data items
+                  mentioned in "Notes", except the solid model
+                  data. Fnamei.Exti will contain the solid model
+                  geometry and solid model loads data in the form of
+                  IGES commands. This option is not valid when
+                  CDOPT,ANF is active.
 
-            COMB - Write all data mentioned, but to a single file, Fname.Ext. Solid model geometry
-                   data will be written in either IGES or ANF format as
-                   specified in the CDOPT command, followed by the remainder of
-                   the data in the form of ANSYS commands. More information on
-                   these (IGES/ANF) file formats is provided in "Notes".
+            COMB - Write all data mentioned, but to a single file,
+                   Fname.Ext. Solid model geometry data will be
+                   written in either IGES or ANF format as specified
+                   in the CDOPT command, followed by the remainder of
+                   the data in the form of ANSYS commands. More
+                   information on these (IGES/ANF) file formats is
+                   provided in "Notes".
 
-            DB - Write all database information except the solid model and solid model loads to
-                 Fname.Ext in the form of ANSYS commands. This option is not
-                 valid when CDOPT,ANF is active.
+            DB - Write all database information except the solid model
+                 and solid model loads to Fname.Ext in the form of
+                 ANSYS commands. This option is not valid when
+                 CDOPT,ANF is active.
 
-            SOLID - Write only the solid model geometry and solid model load data. This output will
-                    be in IGES or ANF format, as specified in the CDOPT
-                    command. More information on these (IGES/ANF) file formats
-                    is provided in "Notes".
+            SOLID - Write only the solid model geometry and solid
+                    model load data. This output will be in IGES or
+                    ANF format, as specified in the CDOPT
+                    command. More information on these (IGES/ANF) file
+                    formats is provided in "Notes".
 
-            GEOM - Write only element and nodal geometry data. Neither solid model geometry nor
-                   element attribute data will be written. One file, Fname.Ext,
-                   will be produced. Use CDREAD,DB to read in a file written
-                   with this option. Element types [ET] compatible with the
-                   connectivity of the elements on the file must first be
-                   defined before reading the file in with CDREAD,DB.
+            GEOM - Write only element and nodal geometry data. Neither
+                   solid model geometry nor element attribute data
+                   will be written. One file, Fname.Ext, will be
+                   produced. Use CDREAD,DB to read in a file written
+                   with this option. Element types [ET] compatible
+                   with the connectivity of the elements on the file
+                   must first be defined before reading the file in
+                   with CDREAD,DB.
 
-            CM - Write only node and element component and geometry data to Fname.Ext.
+            CM - Write only node and element component and geometry
+            data to Fname.Ext.
 
-            MAT - Write only material property data (both linear and nonlinear) to Fname.Ext.
+            MAT - Write only material property data (both linear and
+            nonlinear) to Fname.Ext.
 
-            LOAD - Write only loads for current load step to Fname.Ext.
+            LOAD - Write only loads for current load step to
+            Fname.Ext.
 
-            SECT - Write only section data to Fname.Ext. Pretension sections are not included.
+            SECT - Write only section data to Fname.Ext. Pretension
+            sections are not included.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         fnamei
             Name of the IGES file and its directory path (248 characters
@@ -36102,7 +36247,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Before writing solid model entities, select all corresponding lower
         level entities (ALLSEL,BELOW,ALL).
         """
-        command = "CDWRITE,%s,%s,%s,%s,%s,%s" % (str(option), str(fname), str(ext), str(fnamei), str(exti), str(fmat))
+        command = f"CDWRITE,{option},{fname},{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)
 
     def fscale(self, rfact="", ifact="", **kwargs):
@@ -36152,7 +36297,7 @@ class _MapdlCommands(object):  # pragma: no cover
             Defaults to 1.
 
         evalu
-            Emissivity for this material (0.0 < EVALU   1.0).  Enter a very
+            Emissivity for this material (0.0 < EVALU   1.0).  Enter a very
             small number for zero.
 
         Notes
@@ -36413,14 +36558,14 @@ class _MapdlCommands(object):  # pragma: no cover
 
             Sector edge display key. - -1
 
-            Suppresses display of edges between sectors even if the cyclic count varies between active windows. - Caution:  Plots with fewer than the maximum number of repetitions may have
+            Suppresses display of edges between sectors even if the cyclic count varies between active windows. - Caution:  Plots with fewer than the maximum number of repetitions may have
                               missing element faces at the sector boundaries.
 
-            0 or OFF - Averages stresses or strains across sector boundaries. This value is the
+            0 or OFF - Averages stresses or strains across sector boundaries. This value is the
                        default (although the default reverts to 1 or ON if the
                        cyclic count varies between active windows).
 
-            1 or ON - No averaging of stresses or strains occurs and sector boundaries are shown on
+            1 or ON - No averaging of stresses or strains occurs and sector boundaries are shown on
                       the plot.
 
             PHASEANG - The phase angle shift:
@@ -36758,7 +36903,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         fext
             File name extension (eight-character maximum). The extension
-            defaults to “surf”.
+            defaults to "surf".
 
         fdir
             Optional path specification.
@@ -36937,58 +37082,58 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         att
             Attribute key:
 
-            0 - Do not write assigned numbers and attributes of the solid model entities to the
-                IGES file (default).
+            0 - Do not write assigned numbers and attributes of the
+                solid model entities to the IGES file (default).
 
-            1 - Write assigned numbers and attributes of solid model entities (keypoints,
-                lines, areas, volumes) to the IGES file.  Attributes include
-                MAT, TYPE, REAL, and ESYS specifications as well as associated
-                solid model loads and meshing (keypoint element size, number of
+            1 - Write assigned numbers and attributes of solid model
+                entities (keypoints, lines, areas, volumes) to the
+                IGES file.  Attributes include MAT, TYPE, REAL, and
+                ESYS specifications as well as associated solid model
+                loads and meshing (keypoint element size, number of
                 line divisions and spacing ratio) specifications.
 
         Notes
         -----
-        Causes the selected solid model data to be written to a coded file in
-        the IGES Version 5.1 format.  Previous data on this file, if any, are
-        overwritten.  Keypoints that are not attached to any line are written
-        to the output file as IGES entity 116 (Point).  Lines that are not
-        attached to any area are written to the output file as either IGES
-        Entity 100 (Circular Arc), 110 (Line), or 126 (Rational B-Spline Curve)
-        depending upon whether the ANSYS entity was defined as an arc, straight
-        line, or spline.  Areas are written to the output file as IGES Entity
-        144 (Trimmed Parametric Surface).  Volumes are written to the output
-        file as IGES entity 186 (Manifold Solid B-Rep Object).  Solid model
-        entities to be written must have all corresponding lower level entities
-        selected (use ALLSEL,BELOW,ALL) before issuing command.  Concatenated
-        lines and areas are not written to the IGES file; however, the entities
-        that make up these concatenated entities are written.
+        Causes the selected solid model data to be written to a coded
+        file in the IGES Version 5.1 format.  Previous data on this
+        file, if any, are overwritten.  Keypoints that are not
+        attached to any line are written to the output file as IGES
+        entity 116 (Point).  Lines that are not attached to any area
+        are written to the output file as either IGES Entity 100
+        (Circular Arc), 110 (Line), or 126 (Rational B-Spline Curve)
+        depending upon whether the ANSYS entity was defined as an arc,
+        straight line, or spline.  Areas are written to the output
+        file as IGES Entity 144 (Trimmed Parametric Surface).  Volumes
+        are written to the output file as IGES entity 186 (Manifold
+        Solid B-Rep Object).  Solid model entities to be written must
+        have all corresponding lower level entities selected (use
+        ALLSEL,BELOW,ALL) before issuing command.  Concatenated lines
+        and areas are not written to the IGES file; however, the
+        entities that make up these concatenated entities are written.
 
-        Caution:: : Section properties assigned to areas, lines and other solid
-        model entities will not be maintained when the model is exported using
-        IGESOUT.
+        Caution:: : Section properties assigned to areas, lines and
+        other solid model entities will not be maintained when the
+        model is exported using IGESOUT.
 
-        If you issue the IGESOUT command after generating a beam mesh with
-        orientation nodes, the orientation keypoints that were specified for
-        the line (LATT) are no longer associated with the line and are not
-        written out to the IGES file.  The line does not recognize that
-        orientation keypoints were ever assigned to it, and the orientation
-        keypoints do not "know" that they are orientation keypoints.  Thus the
-        IGESOUT command does not support (for beam meshing) any line operation
-        that relies on solid model associativity.  For example, meshing the
-        areas adjacent to the meshed line, plotting the line that contains the
-        orientation nodes, or clearing the mesh from the line that contains
-        orientation nodes may not work as expected.  See Meshing Your Solid
-        Model in the Modeling and Meshing Guide for more information about beam
-        meshing.
+        If you issue the IGESOUT command after generating a beam mesh
+        with orientation nodes, the orientation keypoints that were
+        specified for the line (LATT) are no longer associated with
+        the line and are not written out to the IGES file.  The line
+        does not recognize that orientation keypoints were ever
+        assigned to it, and the orientation keypoints do not "know"
+        that they are orientation keypoints.  Thus the IGESOUT command
+        does not support (for beam meshing) any line operation that
+        relies on solid model associativity.  For example, meshing the
+        areas adjacent to the meshed line, plotting the line that
+        contains the orientation nodes, or clearing the mesh from the
+        line that contains orientation nodes may not work as expected.
+        See Meshing Your Solid Model in the Modeling and Meshing Guide
+        for more information about beam meshing.
         """
-        command = "IGESOUT,%s,%s,,%s" % (str(fname), str(ext), str(att))
-        return self.run(command, **kwargs)
+        return self.run(f"IGESOUT,{fname},{ext},,{att}", **kwargs)
 
     def nsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
              kabs="", **kwargs):
@@ -37244,9 +37389,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         The current database information may be written on File.DB or a named
@@ -37283,7 +37425,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         dx, dy, dz
             Keypoint location increments in the active coordinate system (--,
-            D θ, DZ for cylindrical;  --, D θ, -- for spherical).
+            D θ, DZ for cylindrical;  --, D θ, -- for spherical).
 
         kinc
             Keypoint number increment between generated sets.  If zero, the
@@ -37556,7 +37698,7 @@ class _MapdlCommands(object):  # pragma: no cover
         ldstep
             Specify action to take:
 
-            OFF or 0 - Turn off feature (default)
+            OFF or 0 - Turn off feature (default)
 
             N - Turn on feature and set it to stop after assembling the global matrices and
                 writing the .FULL file for load step N.
@@ -37819,77 +37961,85 @@ class _MapdlCommands(object):  # pragma: no cover
 
             EVALUE - The eigensolver computes only the eigenvalues.
 
-            EVECTOR - The eigensolver computes only the eigenvectors (must be preceded by a modal
-                      analysis where the eigenvalues were computed using the
-                      Supernode eigensolver).
+            EVECTOR - The eigensolver computes only the eigenvectors
+                      (must be preceded by a modal analysis where the
+                      eigenvalues were computed using the Supernode
+                      eigensolver).
 
-            BOTH - The eigensolver computes both the eigenvalues and eigenvectors in the same pass
-                   (default).
-
-        --
-            Unused field
+            BOTH - The eigensolver computes both the eigenvalues and
+                   eigenvectors in the same pass (default).
 
         solve_info
             Solver output option:
 
-            OFF - Turns off additional output printing from the Supernode eigensolver (default).
+            OFF - Turns off additional output printing from the
+            Supernode eigensolver (default).
 
-            PERFORMANCE - Turns on additional output printing from the Supernode eigensolver, including a
-                          performance summary and a summary of file I/O for the
-                          Supernode eigensolver. Information on memory usage
-                          during assembly of the global matrices (that is,
-                          creation of the Jobname.FULL file) is also printed
-                          with this option.
+            PERFORMANCE - Turns on additional output printing from the
+                          Supernode eigensolver, including a
+                          performance summary and a summary of file
+                          I/O for the Supernode
+                          eigensolver. Information on memory usage
+                          during assembly of the global matrices (that
+                          is, creation of the Jobname.FULL file) is
+                          also printed with this option.
 
         Notes
         -----
-        This command specifies options for the Supernode (SNODE) eigensolver.
+        This command specifies options for the Supernode (SNODE)
+        eigensolver.
 
-        Setting RangeFact to a value greater than 2.0 will improve the accuracy
-        of the computed eigenvalues and eigenvectors, but will often increase
-        the computing time of the SNODE eigensolver. Conversely, setting
-        RangeFact to a value less than 2.0 will deteriorate the accuracy of the
-        computed eigenvalues and eigenvectors, but will often speedup the
-        computing time of the SNODE eigensolver.  The default value of 2.0 has
-        been set as a good blend of accuracy and performance.
+        Setting RangeFact to a value greater than 2.0 will improve the
+        accuracy of the computed eigenvalues and eigenvectors, but
+        will often increase the computing time of the SNODE
+        eigensolver. Conversely, setting RangeFact to a value less
+        than 2.0 will deteriorate the accuracy of the computed
+        eigenvalues and eigenvectors, but will often speedup the
+        computing time of the SNODE eigensolver.  The default value of
+        2.0 has been set as a good blend of accuracy and performance.
 
-        The SNODE eigensolver reads the eigenvectors and related information
-        for each supernode from a file and uses that information to compute the
-        final eigenvectors.  For each eigenvalue/eigenvector requested by the
-        user, the program must do one pass through the entire file that
-        contains the supernode eigenvectors.  By choosing a BlockSize value
-        greater than 1, the program can compute BlockSize number of final
-        eigenvectors for each pass through the file.  Therefore, smaller values
-        of BlockSize result in more I/O, and larger values of BlockSize result
-        in less I/O.  Larger values of  BlockSize also result in significant
-        additional memory usage, as BlockSize number of final eigenvectors must
-        be stored in memory. The default Blocksize of min(NMODE,40) is normally
-        a good choice to balance memory and I/O usage.
+        The SNODE eigensolver reads the eigenvectors and related
+        information for each supernode from a file and uses that
+        information to compute the final eigenvectors.  For each
+        eigenvalue/eigenvector requested by the user, the program must
+        do one pass through the entire file that contains the
+        supernode eigenvectors.  By choosing a BlockSize value greater
+        than 1, the program can compute BlockSize number of final
+        eigenvectors for each pass through the file.  Therefore,
+        smaller values of BlockSize result in more I/O, and larger
+        values of BlockSize result in less I/O.  Larger values of
+        BlockSize also result in significant additional memory usage,
+        as BlockSize number of final eigenvectors must be stored in
+        memory. The default Blocksize of min(NMODE,40) is normally a
+        good choice to balance memory and I/O usage.
 
-        The RobustLev field should only be used when a problem is detected with
-        the accuracy of the final solution or if the Supernode eigensolver
-        fails while computing the eigenvalues/eigenvectors. Setting RobustLev
-        to a value greater than 0 will cause the performance of the eigensolver
-        to deteriorate. If the performance deteriorates too much or if the
-        eigensolver continues to fail when setting the RobustLev field to
-        higher values, then switching to another eigensolver such as Block
-        Lanczos or PCG Lanczos is recommended.
+        The RobustLev field should only be used when a problem is
+        detected with the accuracy of the final solution or if the
+        Supernode eigensolver fails while computing the
+        eigenvalues/eigenvectors. Setting RobustLev to a value greater
+        than 0 will cause the performance of the eigensolver to
+        deteriorate. If the performance deteriorates too much or if
+        the eigensolver continues to fail when setting the RobustLev
+        field to higher values, then switching to another eigensolver
+        such as Block Lanczos or PCG Lanczos is recommended.
 
-        Setting Compute = EVALUE causes the Supernode eigensolver to compute
-        only the requested eigenvalues.  During this process a Jobname.SNODE
-        file is written; however, a Jobname.MODE file is not written. Thus,
-        errors will likely occur in any downstream computations that require
-        the Jobname.MODE file (for example, participation factor computations,
-        mode superpostion transient/harmonic analysis, PSD analysis). Setting
-        Compute = EVECTOR causes the Supernode eigensolver to compute only the
-        corresponding eigenvectors. The Jobname.SNODE file and the associated
-        Jobname.FULL file are required when requesting these eigenvectors. In
-        other words, the eigenvalues must have already been computed for this
-        model before computing the eigenvectors. This field can be useful in
-        order to separate the two steps (computing eigenvalues and computing
+        Setting Compute = EVALUE causes the Supernode eigensolver to
+        compute only the requested eigenvalues.  During this process a
+        Jobname.SNODE file is written; however, a Jobname.MODE file is
+        not written. Thus, errors will likely occur in any downstream
+        computations that require the Jobname.MODE file (for example,
+        participation factor computations, mode superpostion
+        transient/harmonic analysis, PSD analysis). Setting Compute =
+        EVECTOR causes the Supernode eigensolver to compute only the
+        corresponding eigenvectors. The Jobname.SNODE file and the
+        associated Jobname.FULL file are required when requesting
+        these eigenvectors. In other words, the eigenvalues must have
+        already been computed for this model before computing the
+        eigenvectors. This field can be useful in order to separate
+        the two steps (computing eigenvalues and computing
         eigenvectors).
         """
-        command = "SNOPTION,%s,%s,%s,%s,%s" % (str(rangefact), str(blocksize), str(robustlev), str(compute), str(solve_info))
+        command = f"SNOPTION,{rangefact},{blocksize},{robustlev},{compute},,{solve_info}"
         return self.run(command, **kwargs)
 
     def areverse(self, anum="", noeflip="", **kwargs):
@@ -37975,9 +38125,9 @@ class _MapdlCommands(object):  # pragma: no cover
         vertaxis
             Axis in the vertical direction:
 
-            Y (or 2)  - Global Y axis.
+            Y (or 2)  - Global Y axis.
 
-            Z (or 3)  - Global Z axis (default).
+            Z (or 3)  - Global Z axis (default).
 
         gc
             Gravitational acceleration. Defaults to 9.81.
@@ -38854,9 +39004,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
             VLTG - Applied voltage drop.
 
-        --
-            Unused field.
-
         key
             Symbol key:
 
@@ -38885,8 +39032,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/PBF,%s,%s" % (str(item), str(key))
-        return self.run(command, **kwargs)
+        return self.run(f"/PBF,{item},,{key}", **kwargs)
 
     def fssparm(self, port1="", port2="", **kwargs):
         """APDL Command: FSSPARM
@@ -39039,9 +39185,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         ninc
             Increment nodes in the given pattern by NINC.
 
@@ -39086,8 +39229,7 @@ class _MapdlCommands(object):  # pragma: no cover
         of this command, any orientation of the "symmetry" elements is
         possible. See also the ENSYM command for modifying existing elements.
         """
-        command = "ESYM,%s,%s,%s,%s" % (str(ninc), str(iel1), str(iel2), str(ieinc))
-        return self.run(command, **kwargs)
+        return self.run(f"ESYM,,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
     def undo(self, kywrd="", **kwargs):
         """APDL Command: UNDO
@@ -39099,20 +39241,20 @@ class _MapdlCommands(object):  # pragma: no cover
         ----------
         kywrd
 
-
-            NEW - Create an editable GUI window that allows the user to alter the commands issued
-                  since the most recent SAVE or RESUME operations (GUI only).
+            NEW - Create an editable GUI window that allows the user
+                  to alter the commands issued since the most recent
+                  SAVE or RESUME operations (GUI only).
 
         Notes
         -----
-         The UNDO command brings up the session editor, a text window that
+        The UNDO command brings up the session editor, a text window that
         displays all of the program operations since the last SAVE or RESUME
         command. You can modify command parameters, delete whole sections of
         text and even save a portion of the command string to a separate file.
         The file is named jobname000.cmds, with each subsequent save operation
         incrementing the filename by one digit.
 
-        Note:: : The session editor file can be changed only by the session
+        Note: The session editor file can be changed only by the session
         editor. If you rename your database file outside of ANSYS and then
         resume that database, the session editor will display the old filename.
 
@@ -39204,7 +39346,7 @@ class _MapdlCommands(object):  # pragma: no cover
         vary. Use the options menu of the 3-D annotation widget to adjust the
         size and placement of your bitmaps.
 
-        You cannot use the “!” and “$” characters in ANSYS text annotation.
+        You cannot use the "!" and "$" characters in ANSYS text annotation.
 
         The GUI generates this command during 3-D annotation operations and
         inserts the command into the log file (Jobname.LOG). You should NOT
@@ -39421,9 +39563,9 @@ class _MapdlCommands(object):  # pragma: no cover
         Notes
         -----
         If using the ANTYPE command to change the analysis type in the same
-        SOLVE session, the program issues the following message: “Some analysis
+        SOLVE session, the program issues the following message: "Some analysis
         options have been reset to their defaults. Please verify current
-        settings or respecify as required.” Typically, the program resets
+        settings or respecify as required." Typically, the program resets
         commands such as NLGEOM and EQSLV to their default values.
 
         The analysis type (Antype) cannot be changed if a restart is specified.
@@ -39620,7 +39762,11 @@ class _MapdlCommands(object):  # pragma: no cover
         label
             Indicates how ANSYS is to interpret this /TEE command:
 
-            Signals the beginning of the command text that is to be written to Fname. If Fname already exists, specifying NEW causes the contents of Fname to be overwritten. - Indicates that you want to append to Fname the command text that follows.
+            Signals the beginning of the command text that is to be
+            written to Fname. If Fname already exists, specifying NEW
+            causes the contents of Fname to be overwritten. -
+            Indicates that you want to append to Fname the command
+            text that follows.
 
         fname
             File name and directory path (248 characters maximum, including the
@@ -39630,9 +39776,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -40274,9 +40417,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         The LDREAD command reads results data from the results file and applies
@@ -40461,9 +40601,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -41249,83 +41386,95 @@ class _MapdlCommands(object):  # pragma: no cover
 
             DEFAULT - Use the default reordering scheme.
 
-            SEQORDER - Use a sequential equation reordering scheme within the distributed sparse
-                       solver. Relative to PARORDER, this option typically
-                       results in longer equation ordering times and therefore
-                       longer overall solver times. Occasionally, however, this
-                       option will produce better quality orderings which
-                       decrease the matrix factorization times and improve
-                       overall solver performance.
+            SEQORDER - Use a sequential equation reordering scheme
+                       within the distributed sparse solver. Relative
+                       to PARORDER, this option typically results in
+                       longer equation ordering times and therefore
+                       longer overall solver times. Occasionally,
+                       however, this option will produce better
+                       quality orderings which decrease the matrix
+                       factorization times and improve overall solver
+                       performance.
 
-            PARORDER - Use a parallel equation reordering scheme within the distributed sparse solver.
-                       Relative to SEQORDER, this option typically results in
-                       shorter equation ordering times and therefore shorter
-                       overall solver times. Occasionally, however, this option
-                       will produce lower quality orderings which increase the
-                       matrix factorization times and degrade overall solver
+            PARORDER - Use a parallel equation reordering scheme
+                       within the distributed sparse solver.  Relative
+                       to SEQORDER, this option typically results in
+                       shorter equation ordering times and therefore
+                       shorter overall solver times. Occasionally,
+                       however, this option will produce lower quality
+                       orderings which increase the matrix
+                       factorization times and degrade overall solver
                        performance.
 
         memory_option
             Memory allocation option:
 
-            DEFAULT - Use the default memory allocation strategy for the distributed sparse solver.
-                      The default strategy attempts to run in the INCORE memory
-                      mode. If there is not enough physical memory available
-                      when the solver starts to run in the INCORE memory mode,
-                      the solver will then attempt to run in the OUTOFCORE
-                      memory mode.
+            DEFAULT - Use the default memory allocation strategy for
+                      the distributed sparse solver.  The default
+                      strategy attempts to run in the INCORE memory
+                      mode. If there is not enough physical memory
+                      available when the solver starts to run in the
+                      INCORE memory mode, the solver will then attempt
+                      to run in the OUTOFCORE memory mode.
 
-            INCORE -  Use a memory allocation strategy in the distributed sparse solver that will
-                     attempt to obtain enough memory to run with the entire
-                     factorized matrix in memory. This option uses the most
-                     amount of memory and should avoid doing any I/O. By
-                     avoiding I/O, this option achieves optimal solver
-                     performance. However, a significant amount of memory is
-                     required to run in this mode, and it is only recommended
-                     on machines with a large amount of memory. If the
-                     allocation for in-core memory fails, the solver will
-                     automatically revert to out-of-core memory mode.
+            INCORE - Use a memory allocation strategy in the
+                     distributed sparse solver that will attempt to
+                     obtain enough memory to run with the entire
+                     factorized matrix in memory. This option uses the
+                     most amount of memory and should avoid doing any
+                     I/O. By avoiding I/O, this option achieves
+                     optimal solver performance. However, a
+                     significant amount of memory is required to run
+                     in this mode, and it is only recommended on
+                     machines with a large amount of memory. If the
+                     allocation for in-core memory fails, the solver
+                     will automatically revert to out-of-core memory
+                     mode.
 
-            OUTOFCORE - Use a memory allocation strategy in the distributed sparse solver that will
-                        attempt to allocate only enough work space to factor
-                        each individual frontal matrix in memory, but will
-                        share the entire factorized matrix on disk. Typically,
-                        this memory mode results in poor performance due to the
-                        potential bottleneck caused by the I/O to the various
+            OUTOFCORE - Use a memory allocation strategy in the
+                        distributed sparse solver that will attempt to
+                        allocate only enough work space to factor each
+                        individual frontal matrix in memory, but will
+                        share the entire factorized matrix on
+                        disk. Typically, this memory mode results in
+                        poor performance due to the potential
+                        bottleneck caused by the I/O to the various
                         files written by the solver.
 
-            FORCE - This option, when used in conjunction with the Memory_Size option, allows you
-                    to force the distributed sparse solver to run with a
-                    specific amount of memory. This option is only recommended
-                    for the advanced user who understands distributed sparse
-                    solver memory requirements for the problem being solved,
-                    understands the physical memory on the system, and wants to
-                    control the distributed sparse solver memory usage.
+            FORCE - This option, when used in conjunction with the
+                    Memory_Size option, allows you to force the
+                    distributed sparse solver to run with a specific
+                    amount of memory. This option is only recommended
+                    for the advanced user who understands distributed
+                    sparse solver memory requirements for the problem
+                    being solved, understands the physical memory on
+                    the system, and wants to control the distributed
+                    sparse solver memory usage.
 
         memory_size
-            Initial memory size allocation for the sparse solver in MB. The
-            Memory_Size setting should always be well within the physical
-            memory available, but not so small as to cause the distributed
-            sparse solver to run out of memory. Warnings and/or errors from the
-            distributed sparse solver will appear if this value is set too low.
-            If the FORCE memory option is used, this value is the amount of
-            memory allocated for the entire duration of the distributed sparse
-            solver solution.
-
-        --, --
-            Unused fields
+            Initial memory size allocation for the sparse solver in
+            MB. The Memory_Size setting should always be well within
+            the physical memory available, but not so small as to
+            cause the distributed sparse solver to run out of
+            memory. Warnings and/or errors from the distributed sparse
+            solver will appear if this value is set too low.  If the
+            FORCE memory option is used, this value is the amount of
+            memory allocated for the entire duration of the
+            distributed sparse solver solution.
 
         solve_info
             Solver output option:
 
-            OFF - Turns off additional output printing from the distributed sparse solver
-                  (default).
+            OFF - Turns off additional output printing from the
+                  distributed sparse solver (default).
 
-            PERFORMANCE - Turns on additional output printing from the distributed sparse solver,
-                          including a performance summary and a summary of file
-                          I/O for the distributed sparse solver. Information on
-                          memory usage during assembly of the global matrix
-                          (that is, creation of the Jobname.FULL file) is also
+            PERFORMANCE - Turns on additional output printing from the
+                          distributed sparse solver, including a
+                          performance summary and a summary of file
+                          I/O for the distributed sparse
+                          solver. Information on memory usage during
+                          assembly of the global matrix (that is,
+                          creation of the Jobname.FULL file) is also
                           printed with this option.
 
         Notes
@@ -41354,7 +41503,7 @@ class _MapdlCommands(object):  # pragma: no cover
         file). In this case, it is typically more efficient to run with the
         OUTOFCORE memory mode.
         """
-        command = "DSPOPTION,%s,%s,%s,%s" % (str(reord_option), str(memory_option), str(memory_size), str(solve_info))
+        command = f"DSPOPTION,{reord_option},{memory_option},{memory_size},,,{solve_info}"
         return self.run(command, **kwargs)
 
     def aglue(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
@@ -41388,7 +41537,7 @@ class _MapdlCommands(object):  # pragma: no cover
         The AGLUE command results in the merging of lines and keypoints at the
         common area boundaries. The lines and keypoints of the lower numbered
         area will be kept. This means one must be aware of area numbering when
-        multiple AGLUE commands are applied to avoid any “ungluing” of
+        multiple AGLUE commands are applied to avoid any "ungluing" of
         geometry.
         """
         command = "AGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(na3), str(na4), str(na5), str(na6), str(na7), str(na8), str(na9))
@@ -41962,9 +42111,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Specifies the ANSYS data file where the results are to be found for
@@ -42258,7 +42404,7 @@ class _MapdlCommands(object):  # pragma: no cover
         You can define up to ten element types per field.
 
         Define only element types that contain elements in the field. Do not
-        include MESH200 because it is a “mesh-only” element that does not
+        include MESH200 because it is a "mesh-only" element that does not
         contribute to the solution.
 
         This command is also valid in PREP7.
@@ -42445,42 +42591,37 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         kdim
             Interpolation key:
 
             0 or 2 - Interpolation is done on a surface (default).
 
-            3 - Interpolation is done within a volume. This option is useful if the supplied
-                source data is volumetric field data rather than surface data.
-
-        --
-            Unused field.
+            3 - Interpolation is done within a volume. This option is
+                useful if the supplied source data is volumetric field
+                data rather than surface data.
 
         kout
             Key to control how pressure is applied when a target node is
             outside of the source region:
 
-            0 - Use the pressure(s) of the nearest source point for target nodes outside of the
-                region (default).
+            0 - Use the pressure(s) of the nearest source point for
+                target nodes outside of the region (default).
 
             1 - Set pressures outside of the region to zero.
 
         limit
-            Number of nearby points considered for interpolation. The minimum
-            is 5; the default is 20. Lower values reduce processing time.
-            However, some distorted or irregular meshes will require a higher
-            LIMIT value to find the points encompassing the target node in
-            order to define the region for interpolation.
+            Number of nearby points considered for interpolation. The
+            minimum is 5; the default is 20. Lower values reduce
+            processing time.  However, some distorted or irregular
+            meshes will require a higher LIMIT value to find the
+            points encompassing the target node in order to define the
+            region for interpolation.
 
         Notes
         -----
         Maps pressures from source points to target surface elements.
         """
-        command = "MAP,%s,%s,%s" % (str(kdim), str(kout), str(limit))
-        return self.run(command, **kwargs)
+        return self.run(f"MAP,,{kdim},,{kout},{limit}", **kwargs)
 
     def smbc(self, mode="", **kwargs):
         """APDL Command: /SMBC
@@ -42586,56 +42727,57 @@ class _MapdlCommands(object):  # pragma: no cover
         option
             Label identifying the option to be performed.
 
-            ADD - Define contact parameters for the contact entity specified by NUM (default).
+            ADD - Define contact parameters for the contact entity
+            specified by NUM (default).
 
-            DELE - Delete contact parameters (VAL1 and VAL2) for the contact entity specified by
-                   NUM. If NUM = ALL, all contact parameters previously defined
-                   by EDCMORE are deleted.
+            DELE - Delete contact parameters (VAL1 and VAL2) for the
+                   contact entity specified by NUM. If NUM = ALL, all
+                   contact parameters previously defined by EDCMORE
+                   are deleted.
 
         num
             Contact entity number. This contact entity must have been
-            previously defined with the EDCGEN command. Use EDCLIST to obtain a
-            list of contact entity numbers.
-
-        --
-            Unused field.
+            previously defined with the EDCGEN command. Use EDCLIST to
+            obtain a list of contact entity numbers.
 
         val1
-            Penalty scale factor for slave (contact) surface (SFS); default =
-            1.
+            Penalty scale factor for slave (contact) surface (SFS);
+            default = 1.
 
         val2
-            Penalty scale factor for master (target) surface (SFM); default =
-            1.
+            Penalty scale factor for master (target) surface (SFM);
+            default = 1.
 
         Notes
         -----
-        You can use the EDCMORE command to specify two additional contact
-        parameters (SFS and SFM) for a specific contact definition. These
-        parameters will apply only to the contact entity number entered on the
-        NUM field. Use the EDCLIST command to obtain a list of contact
-        definitions and their corresponding contact entity numbers. The listing
-        produced by EDCLIST will include any contact parameters specified with
-        the EDCMORE command.
+        You can use the EDCMORE command to specify two additional
+        contact parameters (SFS and SFM) for a specific contact
+        definition. These parameters will apply only to the contact
+        entity number entered on the NUM field. Use the EDCLIST
+        command to obtain a list of contact definitions and their
+        corresponding contact entity numbers. The listing produced by
+        EDCLIST will include any contact parameters specified with the
+        EDCMORE command.
 
-        When you use the EDDC command to delete a contact definition, any
-        parameters you specified with EDCMORE for that contact definition will
-        also be deleted. To delete only the parameters specified by EDCMORE for
-        a given contact definition, use the command EDCMORE,DELE,NUM.
+        When you use the EDDC command to delete a contact definition,
+        any parameters you specified with EDCMORE for that contact
+        definition will also be deleted. To delete only the parameters
+        specified by EDCMORE for a given contact definition, use the
+        command EDCMORE,DELE,NUM.
 
-        Note:: : When you delete a contact definition with the EDDC command,
-        the contact entity numbers will be renumbered for the remaining contact
-        definitions. Therefore, you should always issue EDCLIST to obtain a
-        current list of contact entity numbers before adding or deleting
-        contact parameters with the EDCMORE command.
+        Note: When you delete a contact definition with the EDDC
+        command, the contact entity numbers will be renumbered for the
+        remaining contact definitions. Therefore, you should always
+        issue EDCLIST to obtain a current list of contact entity
+        numbers before adding or deleting contact parameters with the
+        EDCMORE command.
 
         The EDCMORE command is also valid in SOLUTION.
 
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed ANSYS Restriction: This command is not supported
+        in Distributed ANSYS.
         """
-        command = "EDCMORE,%s,%s,%s,%s" % (str(option), str(num), str(val1), str(val2))
-        return self.run(command, **kwargs)
+        return self.run(f"EDCMORE,{option},{num},,{val1},{val2}", **kwargs)
 
     def noorder(self, lab="", **kwargs):
         """APDL Command: NOORDER
@@ -42869,6 +43011,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Prints a probability result.
 
+        This command was removed prior to V18.2
+
         Parameters
         ----------
         rlab
@@ -42893,9 +43037,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         limit
             Limit value.
-
-        --
-            Unused field.
 
         conf
             Confidence level. The confidence level is used to print the
@@ -42942,8 +43083,7 @@ class _MapdlCommands(object):  # pragma: no cover
         solution set that is based on Response Surface Methods, only Monte
         Carlo Simulations.
         """
-        command = "PDPROB,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(relation), str(limit), str(conf))
-        return self.run(command, **kwargs)
+        return self.run(f"PDPROB,{rlab},{name},{relation},{limit},,{conf}", **kwargs)
 
     def numvar(self, nv="", **kwargs):
         """APDL Command: NUMVAR
@@ -43260,89 +43400,93 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         lev_diff
-            Indicates the level of difficulty of the analysis. Valid settings
-            are AUTO or 0 (default), 1, 2, 3, 4, or 5. This option applies to
-            both the PCG solver when used in static and full transient analyses
-            and to the PCG Lanczos method in modal analyses. Use AUTO to let
-            ANSYS automatically choose the proper level of difficulty for the
-            model. Lower values (1 or 2) generally provide the best performance
-            for well-conditioned problems. Values of 3 or 4 generally provide
-            the best performance for ill-conditioned problems; however, higher
-            values may increase the solution time for well-conditioned
-            problems. Higher level-of-difficulty values typically require more
-            memory. Using the highest value of 5 essentially performs a
-            factorization of the global matrix (similar to the sparse solver)
-            and may require a very large amount of memory. If necessary, use
-            Memory to reduce the memory usage when using  Lev_Diff = 5.
-            Lev_Diff = 5 is generally recommended for small- to medium-sized
-            problems when using the PCG Lanczos mode extraction method.
-
-        --
-            Unused field.
+            Indicates the level of difficulty of the analysis. Valid
+            settings are AUTO or 0 (default), 1, 2, 3, 4, or 5. This
+            option applies to both the PCG solver when used in static
+            and full transient analyses and to the PCG Lanczos method
+            in modal analyses. Use AUTO to let ANSYS automatically
+            choose the proper level of difficulty for the model. Lower
+            values (1 or 2) generally provide the best performance for
+            well-conditioned problems. Values of 3 or 4 generally
+            provide the best performance for ill-conditioned problems;
+            however, higher values may increase the solution time for
+            well-conditioned problems. Higher level-of-difficulty
+            values typically require more memory. Using the highest
+            value of 5 essentially performs a factorization of the
+            global matrix (similar to the sparse solver) and may
+            require a very large amount of memory. If necessary, use
+            Memory to reduce the memory usage when using Lev_Diff = 5.
+            Lev_Diff = 5 is generally recommended for small- to
+            medium-sized problems when using the PCG Lanczos mode
+            extraction method.
 
         reduceio
-             Controls whether the PCG solver will attempt to reduce I/O
+            Controls whether the PCG solver will attempt to reduce I/O
             performed during equation solution:
 
-            AUTO  - Automatically chooses whether to reduce I/O or not (default).
+            AUTO - Automatically chooses whether to reduce I/O or not
+            (default).
 
-            YES  - Reduces I/O performed during equation solution in order to reduce total solver
-                   time.
+            YES - Reduces I/O performed during equation solution in
+            order to reduce total solver time.
 
             NO  - Does NOT reduce I/O performed during equation solution.
 
         strmck
-             Controls whether or not a Sturm sequence check is performed:
+            Controls whether or not a Sturm sequence check is performed:
 
-            OFF  - Does NOT perform Sturm sequence check (default).
+            OFF - Does NOT perform Sturm sequence check (default).
 
-            ON  - Performs Sturm sequence check
+            ON - Performs Sturm sequence check
 
         wrtfull
             Controls whether or not the .FULL file is written.
 
-            ON  - Write .FULL file (default)
+            ON - Write .FULL file (default)
 
-            OFF  - Do not write .FULL file.
+            OFF - Do not write .FULL file.
 
         memory
-             Controls whether to run using in-core or out-of-core mode when
-            using Lev_Diff = 5.
+            Controls whether to run using in-core or out-of-core mode
+            when using Lev_Diff = 5.
 
-            AUTO  - Automatically chooses which mode to use (default).
+            AUTO - Automatically chooses which mode to use (default).
 
-            INCORE  - Run using in-core mode.
+            INCORE - Run using in-core mode.
 
-            OOC  - Run using out-of-core mode.
+            OOC - Run using out-of-core mode.
 
         lm_key
-             Controls use of the PCG solver for MPC184 Lagrange multiplier
-            method elements. This option applies only to the PCG solver when
-            used in static and full transient analyses.
+            Controls use of the PCG solver for MPC184 Lagrange
+            multiplier method elements. This option applies only to
+            the PCG solver when used in static and full transient
+            analyses.
 
-            OFF  - Do not use the PCG solver for the MPC184 Lagrange multiplier method (default).
+            OFF - Do not use the PCG solver for the MPC184 Lagrange
+            multiplier method (default).
 
-            ON  - Allow use of the PCG solver for the MPC184 Lagrange multiplier method.
+            ON - Allow use of the PCG solver for the MPC184 Lagrange
+            multiplier method.
 
         Notes
         -----
-        ReduceIO works independently of the MSAVE command in the PCG solver.
-        Setting ReduceIO to YES can significantly increase the memory usage in
-        the PCG solver.
+        ReduceIO works independently of the MSAVE command in the PCG
+        solver.  Setting ReduceIO to YES can significantly increase
+        the memory usage in the PCG solver.
 
-        To minimize the memory used by the PCG solver with respect to the
-        Lev_Diff option only, set  Lev_Diff = 1 if you do not have sufficient
-        memory to run the PCG solver with  Lev_Diff = AUTO.
+        To minimize the memory used by the PCG solver with respect to
+        the Lev_Diff option only, set Lev_Diff = 1 if you do not have
+        sufficient memory to run the PCG solver with Lev_Diff = AUTO.
 
-        The MSAVE,ON command is not valid when using  Lev_Diff = 5. In this
-        case, the  Lev_Diff value will automatically be reset to 2. The
-        MSAVE,ON command is also not valid with the StrmCk   option. In this
-        case, StrmCk   will be set to OFF.
+        The MSAVE,ON command is not valid when using Lev_Diff = 5. In
+        this case, the Lev_Diff value will automatically be reset to
+        2. The MSAVE,ON command is also not valid with the StrmCk
+        option. In this case, StrmCk will be set to OFF.
 
-        Distributed ANSYS Restriction: The Memory option and the LM_Key option
-        are not supported in Distributed ANSYS.
+        Distributed ANSYS Restriction: The Memory option and the
+        LM_Key option are not supported in Distributed ANSYS.
         """
-        command = "PCGOPT,%s,%s,%s,%s,%s,%s" % (str(lev_diff ), str(reduceio), str(strmck), str(wrtfull), str(memory), str(lm_key))
+        command = f"PCGOPT,{lev_diff},,{reduceio},{strmck},{wrtfull},{memory},{lm_key}"
         return self.run(command, **kwargs)
 
     def lina(self, nl="", na="", **kwargs):
@@ -43574,9 +43718,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         lgkey
             Key to specify local or global file name control for the specified
             file identifier in a distributed-memory parallel processing
@@ -43606,8 +43747,7 @@ class _MapdlCommands(object):  # pragma: no cover
         returned. Ensure that the directory exists prior to using /ASSIGN
         command.
         """
-        command = "/ASSIGN,%s,%s,%s,%s" % (str(ident), str(fname), str(ext), str(lgkey))
-        return self.run(command, **kwargs)
+        return self.run(f"/ASSIGN,{ident},{fname},{ext},,{lgkey}", **kwargs)
 
     def krefine(self, np1="", np2="", ninc="", level="", depth="", post="",
                 retain="", **kwargs):
@@ -43700,15 +43840,9 @@ class _MapdlCommands(object):  # pragma: no cover
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
             Thirty-two character name identifying the variable on printouts and
             displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
 
         facta
             Scaling factor (positive or negative) applied to variable IA
@@ -43717,9 +43851,9 @@ class _MapdlCommands(object):  # pragma: no cover
         Notes
         -----
         Forms the square root of a variable according to the operation:
+        ``IR=sqrt(FACTA*IA)``
         """
-        command = "SQRT,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta))
-        return self.run(command, **kwargs)
+        return self.run(f"SQRT,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
     def vardel(self, nvar="", **kwargs):
         """APDL Command: VARDEL
@@ -43760,22 +43894,21 @@ class _MapdlCommands(object):  # pragma: no cover
             STAT - Shows the status/listing. Other command options are ignored.
 
         reduc
-            Approximate reduction in the number of surface elements. Valid
-            range is from 0.0 (no decimation, the default) to 1.0. This number
-            is a factor applied to the initial number of element radiosity
-            surfaces.
-
-        --
-            Unused field.
+            Approximate reduction in the number of surface
+            elements. Valid range is from 0.0 (no decimation, the
+            default) to 1.0. This number is a factor applied to the
+            initial number of element radiosity surfaces.
 
         nplace
             Node placement algorithm
 
-            OPTI  - Optimal placement. An edge is collapsed by moving both nodes (I and J in the
-                    figure below) to a new location.
+            OPTI - Optimal placement. An edge is collapsed by moving
+                    both nodes (I and J in the figure below) to a new
+                    location.
 
-            SUBS  - Subset placement. An edge is collapsed by moving one node to another one. In
-                    the figure below, node I is moved to node J.
+            SUBS - Subset placement. An edge is collapsed by moving
+                    one node to another one. In the figure below, node
+                    I is moved to node J.
 
         Notes
         -----
@@ -43787,8 +43920,7 @@ class _MapdlCommands(object):  # pragma: no cover
         of decimation is always less than 1.0 because the decimated mesh must
         always consist of at least one element.
         """
-        command = "RDEC,%s,%s,%s" % (str(option ), str(reduc ), str(nplace ))
-        return self.run(command, **kwargs)
+        return self.run(f"RDEC,{option},{reduc},,{nplace}", **kwargs)
 
     def ernorm(self, key="", **kwargs):
         """APDL Command: ERNORM
@@ -43800,20 +43932,21 @@ class _MapdlCommands(object):  # pragma: no cover
         key
             Control key:
 
-            ON - Perform error estimation (default). This option is not valid for PowerGraphics.
+            ON - Perform error estimation (default). This option is
+            not valid for PowerGraphics.
 
             OFF - Do not perform error estimation.
 
         Notes
         -----
-        Especially for thermal analyses, program speed increases if error
-        estimation is suppressed.  Therefore, it might be desirable to use
-        error estimation only when needed.  The value of the ERNORM key is not
-        saved on file.db. Consequently, you need to reissue the ERNORM key
-        after a RESUME if you wish to deactivate error estimation again.
+        Especially for thermal analyses, program speed increases if
+        error estimation is suppressed.  Therefore, it might be
+        desirable to use error estimation only when needed.  The value
+        of the ERNORM key is not saved on file.db. Consequently, you
+        need to reissue the ERNORM key after a RESUME if you wish to
+        deactivate error estimation again.
         """
-        command = "ERNORM,%s" % (str(key))
-        return self.run(command, **kwargs)
+        return self.run("ERNORM,%s" % (str(key)), **kwargs)
 
     def edis(self, option="", pidn="", pido="", **kwargs):
         """APDL Command: EDIS
@@ -44711,8 +44844,8 @@ class _MapdlCommands(object):  # pragma: no cover
     def rmanl(self, fname="", ext="", dimn="", oper="", **kwargs):
         """APDL Command: RMANL
 
-        Assigns model database, dimensionality, and operating direction for the
-        ROM method.
+        Assigns model database, dimensionality, and operating
+        direction for the ROM method.
 
         Parameters
         ----------
@@ -44722,9 +44855,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             File extension (8 character maximum). The extension defaults to db.
-
-        --
-            Unused field.
 
         dimn
             Model dimensionality:
@@ -44749,8 +44879,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMANL,%s,%s,%s,%s" % (str(fname), str(ext), str(dimn), str(oper))
-        return self.run(command, **kwargs)
+        return self.run(f"RMANL,{fname},{ext},,{dimn},{oper}", **kwargs)
 
     def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
               con5="", con6="", con7="", con8="", con9="", con10="", **kwargs):
@@ -44767,27 +44896,75 @@ class _MapdlCommands(object):  # pragma: no cover
         func
             Fill function:
 
-            Assign specified values CON1, CON2, etc. to successive array elements.  Up to 10 assignments may be made at a time.  Any CON values after a blank CON value are ignored. - Assign ramp function values: CON1+((n-1)*CON2) , where n is the loop number
-                              [*VLEN].  To specify a constant function (no
-                              ramp), set CON2 to zero.
+            DATA - Assign specified values CON1, CON2, etc. to successive
+            array elements.  Up to 10 assignments may be made at a
+            time.  Any CON values after a blank CON value are
+            ignored. - Assign ramp function values: CON1+((n-1)*CON2)
+            , where n is the loop number [*VLEN].  To specify a
+            constant function (no ramp), set CON2 to zero.
 
-            Assign random number values based on a uniform distribution RAND(CON1,CON2), where: - Assign random sample of Gaussian distributions GDIS(CON1,CON2) where:
+            RAMP - Assign random number values based on a uniform
+            distribution RAND(CON1,CON2), where: - Assign random
+            sample of Gaussian distributions GDIS(CON1,CON2).
 
-            Assigns random number values based on a triangular distribution TRIA(CON1,CON2,CON3) where: - Assigns random number values based on a beta distribution
-                              BETA(CON1,CON2,CON3,CON4) where:
+            RAND - Assign random number values based on a uniform
+            distribution RAND(CON1,CON2), where CON1 is the lower
+            bound (defaults to 0.0) and CON2 is the upper bound
+            (defaults to 1.0)
 
-            Assigns random number values based on a gamma distribution: GAMM(CON1,CON2,CON3) where: - Generates the rigid body modes with respect to the reference point coordinates
-                              (CON1, CON2, CON3). The dimensions of the array
-                              parameter ParR are (dim1,dim2) where dim1 is the
-                              maximum node number (including internal nodes)
-                              multiplied by the number of degrees of freedom,
-                              and dim2 is the number of rigid body modes (which
-                              corresponds to the number of structural degrees
-                              of freedom).
+            GDIS - Assign random sample of Gaussian distributions
+            GDIS(CON1,CON2) where CON1 is the mean (defaults to 0.0),
+            and CON2 is the standard deviation (defaults to 1.0)
 
-            Generates excitation frequencies with clustering option CLUSTER(CON1,CON2,CON3,CON4,%CON5%) where: - The dimension of the resulting array parameter ParR is less than
-                              2+NFR*(2*CON3+1) where NFR is the number of
-                              natural frequencies defined in CON5.
+            TRIA - Assigns random number values based on a triangular
+            distribution TRIA(CON1,CON2,CON3) where CON1 is the lower
+            bound (defaults to 0.0), CON2 is the location of the peak
+            value (CON1 ≤ CON2 ≤CON3; CON2 defaults to 0 if CON1 ≤ 0 ≤
+            CON3, CON1 if 0 ≤ CON1, or CON3 if CON3 ≤ 0), and CON3 is
+            the upper bound (defaults to 1.0 + CON1 if CON1 ≥ 0 or 0.0
+            if CON1 ≤ 0)
+
+            BETA - Assigns random number values based on a beta
+            distribution BETA(CON1,CON2,CON3,CON4) where: CON1 is the
+            lower bound (defaults to 0.0), CON2 is the upper bound
+            (defaults to 1.0 + CON1 if CON1 ≥ 0 or 0.0 if CON1 ≤ 0), and CON3
+            and CON4 are the alpha and beta parameters, respectively,
+            of the beta function. Alpha and beta must both be
+            positive; they default to 1.0.
+
+            GAMM - Assigns random number values based on a gamma
+            distribution: GAMM(CON1,CON2,CON3) where: CON1 is the
+            lower bound (defaults to 0.0), CON2 and CON3 are the alpha
+            and beta parameters, respectively, of the gamma
+            function. Alpha and beta must both be positive; they
+            default to 1.0.
+
+            RIGID - Generates the rigid body modes with respect to the
+            reference point coordinates (CON1, CON2, CON3). The
+            dimensions of the array parameter ParR are (dim1,dim2)
+            where dim1 is the maximum node number (including internal
+            nodes but excluding orientation nodes) multiplied by the
+            number of degrees of freedom, and dim2 is the number of
+            rigid body modes (which corresponds to the number of
+            structural degrees of freedom).
+
+            CLUSTER - Generates excitation frequencies with clustering
+            option CLUSTER(CON1,CON2,CON3,CON4,%CON5%) where:
+
+            - CON1 is the lower end of the frequency range in Hz (0 < CON1)
+            - CON2 is the upper end of the frequency range in Hz (CON1 < CON2)
+            - CON3 is the number of points on each side of the natural
+              frequency (4 ≤ CON3 ≤ 20, defaults to 4)
+            - CON4 is the constant damping ratio value or an array
+              parameter (size NFR) specifying the damping ratios (if
+              zero or blank, defaults to constant damping ratio of
+              0.005)
+            - CON5 is an array parameter (size NFR) specifying the
+              natural frequencies in Hz
+        
+            The dimension of the resulting array parameter ParR is
+            less than 2+NFR*(2*CON3+1) where NFR is the number of
+            natural frequencies defined in CON5.
 
         con1, con2, con3, . . . , con10
             Constants used with above functions.
@@ -46424,9 +46601,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         This command does not save all graphics settings, but only those that
@@ -47193,9 +47367,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         nchar
             Number of characters per line to read (default is length of the
             longest line in the file).
@@ -47208,10 +47379,10 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        The *SREAD command reads from a file into a string array parameter. The
-        file must be an ASCII text file.
+        The *SREAD command reads from a file into a string array
+        parameter. The file must be an ASCII text file.
         """
-        command = "*SREAD,%s,%s,%s,%s,%s,%s" % (str(strarray), str(fname), str(ext), str(nchar), str(nskip), str(nread))
+        command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
         return self.run(command, **kwargs)
 
     def flst(self, nfield="", narg="", type="", otype="", leng="", **kwargs):
@@ -47417,9 +47588,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -47732,7 +47900,7 @@ class _MapdlCommands(object):  # pragma: no cover
             AUTO - Use the default domain decomposition algorithm when splitting the model into
                    domains for Distributed ANSYS (default).
 
-            GREEDY - Use the “greedy” domain decomposition algorithm.
+            GREEDY - Use the "greedy" domain decomposition algorithm.
 
             METIS - Use the METIS graph partitioning domain decomposition algorithm.
 
@@ -48106,33 +48274,37 @@ class _MapdlCommands(object):  # pragma: no cover
 
             VOLU - Apply texture to volumes N1 through N2 in steps of NINC.
 
-            CM - Apply texture to the component named in N1. N2 and NINC are ignored.
+            CM - Apply texture to the component named in N1. N2 and
+            NINC are ignored.
 
-            ON, OFF - Sets the specified texture display on or off. All other fields are ignored.
+            ON, OFF - Sets the specified texture display on or
+            off. All other fields are ignored.
 
-            File - If Lab = File, the command format is /TXTRE, File, Key_Index, Fname, Fext, --,
-                   Format (This variant of the command is applicable to 2-D
-                   drivers).
+            File - If Lab = File, the command format is /TXTRE, File,
+                   Key_Index, Fname, Fext, --, Format (This variant of
+                   the command is applicable to 2-D drivers).
 
-            Key_Index - The texture index associated with the file. If the number fifty-one (51) is
-                        used, the imported bitmap will be used as the window's
+            Key_Index - The texture index associated with the file. If
+                        the number fifty-one (51) is used, the
+                        imported bitmap will be used as the window's
                         logo.
 
-            Fname - File name and directory path (248 characters maximum, including the characters
-                    needed for the directory path).  An unspecified directory
-                    path defaults to the working directory; in this case, you
-                    can use all 248 characters for the file name.
+            Fname - File name and directory path (248 characters
+                    maximum, including the characters needed for the
+                    directory path).  An unspecified directory path
+                    defaults to the working directory; in this case,
+                    you can use all 248 characters for the file name.
 
             Fext - Filename extension (eight-character maximum).
 
-            -- - Unused field.
-
-            Format - The file format. If Format = 0, the file is a pixmap (Linux) or Bitmap (PC).
-                     The file cannot contain a compressed image, and the PC
-                     file must be 8 or 24 bit BI_RGB format. If Format = 1 or
-                     JPEG, then the file is in JPEG (Joint Photographic Experts
-                     Group) format. If Format = 2 or PNG, then the file is in
-                     PNG (Portable Network Graphics) format.
+            Format - The file format. If Format = 0, the file is a
+                     pixmap (Linux) or Bitmap (PC).  The file cannot
+                     contain a compressed image, and the PC file must
+                     be 8 or 24 bit BI_RGB format. If Format = 1 or
+                     JPEG, then the file is in JPEG (Joint
+                     Photographic Experts Group) format. If Format = 2
+                     or PNG, then the file is in PNG (Portable Network
+                     Graphics) format.
 
         num
             Select the texture index number from the following list:
@@ -48525,14 +48697,11 @@ class _MapdlCommands(object):  # pragma: no cover
     def suresu(self, fname="", fext="", fdir="", **kwargs):
         """APDL Command: SURESU
 
-        Read a set of surface definitions and result items from a file and make
-        them the current set.
+        Read a set of surface definitions and result items from a file
+        and make them the current set.
 
         Parameters
         ----------
-        --
-            Unused field.
-
         fname
             Eight character name.
 
@@ -48544,15 +48713,15 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Reading (and therefore resuming) surface and result definitions from a
-        file overwritea any existing surface definitions.
+        Reading (and therefore resuming) surface and result
+        definitions from a file overwritea any existing surface
+        definitions.
 
-        Reading surfaces back into the postprocessor (/POST1) does not insure
-        that the surfaces (and their results) are appropriate for the model
-        currently residing in /POST1.
+        Reading surfaces back into the postprocessor (/POST1) does not
+        insure that the surfaces (and their results) are appropriate
+        for the model currently residing in /POST1.
         """
-        command = "SURESU,%s,%s,%s" % (str(fname), str(fext), str(fdir))
-        return self.run(command, **kwargs)
+        return self.run(f"SURESU,,{fname},{fext},{fdir}", **kwargs)
 
     def grid(self, key="", **kwargs):
         """APDL Command: /GRID
@@ -48824,9 +48993,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -49444,7 +49610,7 @@ class _MapdlCommands(object):  # pragma: no cover
         system where N is the number of coils in the system, and calculates the
         total flux linkage in each coil. LMATRIX may only be executed after the
         solution of a problem with nominal currents applied to the coils at a
-        desired “operating point.” The array Indname has N rows and N+1
+        desired "operating point." The array Indname has N rows and N+1
         columns. The N x N block is the differential inductance matrix; the
         N+1th column contains the total flux linkage, with the ith row
         corresponding to the ith coil. See the Mechanical APDL Theory Reference
@@ -49825,9 +49991,6 @@ class _MapdlCommands(object):  # pragma: no cover
                 displacement results in the database. Other real constants are
                 updated as specified in the command input parameters.
 
-        --
-            Unused field
-
         pamb
             Ambient pressure.
 
@@ -49852,7 +50015,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "SETFGAP,%s,%s,%s,%s,%s,%s,%s" % (str(gap), str(ropt), str(pamb), str(acf1), str(acf2), str(pref), str(mfp))
+        command = f"SETFGAP,{gap},{ropt},,{pamb},{acf1},{acf2},{pref},{mfp}"
         return self.run(command, **kwargs)
 
     def bstq(self, val1="", val2="", t="", **kwargs):
@@ -49924,14 +50087,11 @@ class _MapdlCommands(object):  # pragma: no cover
         tol
             Tolerance applied to OSLM.  Defaults to 0.0.
 
-        --, --
-            Unused fields.
-
         avsmooth
             Smoothing flag option:
 
-            0 - Include smoothing of the velocity (1st order system) or the acceleration (2nd
-                order system) (default).
+            0 - Include smoothing of the velocity (1st order system)
+                or the acceleration (2nd order system) (default).
 
             1 - Do not include smoothing.
 
@@ -49949,25 +50109,28 @@ class _MapdlCommands(object):  # pragma: no cover
         information on transient integration parameters, refer to the
         Mechanical APDL Theory Reference.
 
-        For structural transient analyses, you may choose between the Newmark
-        and HHT time integration methods (see the TRNOPT command). In this
-        case, if GAMMA is input and the integration parameters ALPHA, DELTA,
-        ALPHAF, and ALPHAM are left blank, the program will calculate the
-        integration parameters. Alternatively, you can input these integration
-        parameters directly on this command. However, for the unconditional
-        stability and second order accuracy of the time integration, these
-        parameters should satisfy a specific relationship, as described in
-        Description of Structural and Other Second Order Systems of the
-        Mechanical APDL Theory Reference.
+        For structural transient analyses, you may choose between the
+        Newmark and HHT time integration methods (see the TRNOPT
+        command). In this case, if GAMMA is input and the integration
+        parameters ALPHA, DELTA, ALPHAF, and ALPHAM are left blank,
+        the program will calculate the integration
+        parameters. Alternatively, you can input these integration
+        parameters directly on this command. However, for the
+        unconditional stability and second order accuracy of the time
+        integration, these parameters should satisfy a specific
+        relationship, as described in Description of Structural and
+        Other Second Order Systems of the Mechanical APDL Theory
+        Reference.
 
-         In a transient piezoelectric analysis, required input for this command
-        is ALPHA = 0.25, DELTA = 0.5, and THETA = 0.5.  For a coupled
-        electromagnetic-circuit transient analysis, use THETA = 1.0, the
-        default value, to specify the backward Euler method.
+        In a transient piezoelectric analysis, required input for this
+        command is ALPHA = 0.25, DELTA = 0.5, and THETA = 0.5.  For a
+        coupled electromagnetic-circuit transient analysis, use THETA
+        = 1.0, the default value, to specify the backward Euler
+        method.
 
         This command is also valid in PREP7.
         """
-        command = "TINTP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(gamma), str(alpha), str(delta), str(theta), str(oslm), str(tol), str(avsmooth), str(alphaf), str(alpham))
+        command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},,,{avsmooth},{alphaf},{alpham}"
         return self.run(command, **kwargs)
 
     def lrefine(self, nl1="", nl2="", ninc="", level="", depth="", post="",
@@ -50437,14 +50600,16 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Initiates element reordering based upon a geometric sort.
 
+        This command was removed by V18.2
+
         Parameters
         ----------
         lab
-            Coordinate (in the active system) along which element centroid
-            locations are sorted.  Valid labels are:  X, Y, Z, ALL.  If ALL
-            (default), all three directions will be used, and the order
-            corresponding to the lowest MAX or RMS wavefront value will be
-            retained.
+            Coordinate (in the active system) along which element
+            centroid locations are sorted.  Valid labels are: X, Y, Z,
+            ALL.  If ALL (default), all three directions will be used,
+            and the order corresponding to the lowest MAX or RMS
+            wavefront value will be retained.
 
         kord
             Sort order:
@@ -50452,9 +50617,6 @@ class _MapdlCommands(object):  # pragma: no cover
             0 - Sort according to ascending coordinate values.
 
             1 - Sort according to descending coordinate values.
-
-        --
-            Unused field.
 
         wopt
             Option for comparison:
@@ -50476,7 +50638,7 @@ class _MapdlCommands(object):  # pragma: no cover
         not the element numbers (input referring to element numbers, such as
         element pressures, is unaffected by reordering).
 
-        Note:: : The new order is retained only if new the new maximum or RMS
+        Note: The new order is retained only if new the new maximum or RMS
         wavefront values are lower than the old values, as described below.
         See the WAVES command for another reordering procedure and for more
         details on reordering.  The resulting element ordering can be shown by
@@ -50486,8 +50648,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "WSORT,%s,%s,%s,%s,%s" % (str(lab), str(kord), str(wopt), str(oldmax), str(oldrms))
-        return self.run(command, **kwargs)
+        return self.run(f"WSORT,{lab},{kord},,{wopt},{oldmax},{oldrms}", **kwargs)
 
     def pdcfld(self, parr="", entity="", ctype="", clength="", **kwargs):
         """APDL Command: PDCFLD
@@ -50497,45 +50658,51 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         parr
-            Parameter name. ParR is a one-dimensional array with the dimension
-            N * (N - 1)/2, where N is either the number of the selected nodes
-            or the number of the selected elements (depending on the Entity
-            field). The PDCFLD command automatically sets ParR as a one-
-            dimensional array, (so you do not have to use the *DIM command). If
-            you use the PDCFLD command twice with the ANSYS parameter ParR,
-            then the values stored in the array are automatically overwritten.
-            If the number of selected FE entities is different from the
-            previous PDCFLD command, then the array ParR is re-dimensioned
-            automatically.
+            Parameter name. ParR is a one-dimensional array with the
+            dimension N * (N - 1)/2, where N is either the number of
+            the selected nodes or the number of the selected elements
+            (depending on the Entity field). The PDCFLD command
+            automatically sets ParR as a one- dimensional array, (so
+            you do not have to use the *DIM command). If you use the
+            PDCFLD command twice with the ANSYS parameter ParR, then
+            the values stored in the array are automatically
+            overwritten.  If the number of selected FE entities is
+            different from the previous PDCFLD command, then the array
+            ParR is re-dimensioned automatically.
 
         entity
             Specifies which FE entity the calculation of the correlation field
             is based on. This field must not be blank.
 
-            NODE - Calculate the correlation coefficients based on the distance between the
-                   selected nodes.
+            NODE - Calculate the correlation coefficients based on the
+                   distance between the selected nodes.
 
-            ELEM - Calculate the correlation coefficients based on the distance between the
-                   centroids of the selected elements.
+            ELEM - Calculate the correlation coefficients based on the
+                   distance between the centroids of the selected
+                   elements.
 
         ctype
             Specifies the equation used to calculate the correlation
             coefficients as a function of the nodal or element centroid
             distances. This field must not be blank.
 
-            NONE - The random field is not correlated. This means the correlation coefficients are
-                   determined according to
+            NONE - The random field is not correlated. This means the
+                   correlation coefficients are determined according
+                   to
 
             ρij = 1 for i = j - ρij = 0 for i ≠ j
 
-            Here, ρij is the correlation coefficient between the i-th and j-th selected FE entity (node or element centroid). - LEXP
+            Here, ρij is the correlation coefficient between the i-th
+            and j-th selected FE entity (node or element centroid). -
+            LEXP.
 
-            Calculate the correlation coefficient according to a linear-exponential decay function. - Here, D({xi} , {xj}) is the “domain distance” between {xi}, {xj}, and {xi} and
-                              {xj} are the coordinate vectors of the i-th and
-                              j-th selected FE entity (node or element
-                              centroid), and CL is the correlation length of
-                              the random field as specified in the CLENGTH
-                              field.
+            Calculate the correlation coefficient according to a
+            linear-exponential decay function. - Here, D({xi} , {xj})
+            is the "domain distance" between {xi}, {xj}, and {xi} and
+            {xj} are the coordinate vectors of the i-th and j-th
+            selected FE entity (node or element centroid), and CL is
+            the correlation length of the random field as specified in
+            the CLENGTH field.
 
         clength
             Correlation length of the correlation field. The correlation length
@@ -50563,14 +50730,14 @@ class _MapdlCommands(object):  # pragma: no cover
         For more information, see Probabilistic Design in the Advanced Analysis
         Guide.
 
-        Note that for correlation fields, the “domain distance” D({xi} , {xj})
+        Note that for correlation fields, the "domain distance" D({xi} , {xj})
         is not the spatial distance |{xi} - {xj}|, but the length of a path
         between {xi} and {xj} that always remains inside the finite element
         domain. However, exceptions are possible in extreme meshing cases. For
         elements that share at least one node, the PDCFLD evaluates the
         distance by directly connecting the element centroids with a straight
         line. If these neighboring elements form a sharp inward corner then it
-        is possible that the “domain distance” path lies partly outside the
+        is possible that the "domain distance" path lies partly outside the
         finite element domain, as illustrated below.
 
         After the correlation coefficients have been calculated and stored in
@@ -51182,7 +51349,7 @@ class _MapdlCommands(object):  # pragma: no cover
                    velocities," etc.  Written as load step 4 of File.RST.
 
             ACEL - Acceleration solution.  One-sigma accelerations, "stress accelerations," "force
-                   accelerations,” etc.  Written as load step 5 on File.RST.
+                   accelerations," etc.  Written as load step 5 on File.RST.
 
         relkey
             Key defining relative or absolute calculations:
@@ -51421,9 +51588,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -51899,7 +52063,7 @@ class _MapdlCommands(object):  # pragma: no cover
         The LGLUE command results in the merging of keypoints at the common end
         of the lines. The keypoints of the lower numbered line will be kept.
         This means one must be aware of line numbering when multiple LGLUE
-        commands are applied to avoid any “ungluing” of geometry.
+        commands are applied to avoid any "ungluing" of geometry.
         """
         command = "LGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nl7), str(nl8), str(nl9))
         return self.run(command, **kwargs)
@@ -52052,54 +52216,58 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname1
-            File name to be copied and its directory path (248 characters
-            maximum for both file name and directory). If you do not specify a
-            directory path, it will default to your working directory and you
-            can use all 248 characters for the file name.
+            File name to be copied and its directory path (248
+            characters maximum for both file name and directory). If
+            you do not specify a directory path, it will default to
+            your working directory and you can use all 248 characters
+            for the file name.
 
         ext1
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         fname2
-            File name to be created and its directory path (248 characters
-            maximum for both file name and directory). If you do not specify a
-            directory path, it will default to your working directory and you
-            can use all 248 characters for the file name.
+            File name to be created and its directory path (248
+            characters maximum for both file name and directory). If
+            you do not specify a directory path, it will default to
+            your working directory and you can use all 248 characters
+            for the file name.
 
         ext2
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         distkey
-            Key that specifies whether the copy operation is performed on all
-            processes in distributed parallel mode (Distributed ANSYS):
+            Key that specifies whether the copy operation is performed
+            on all processes in distributed parallel mode (Distributed
+            ANSYS):
 
-            1 (ON or YES) - The program performs the copy operation locally on each process.
+            0 (OFF or NO) - The program performs the copy operation
+            only on the master process (default).
 
-            0 (OFF or NO) - The program performs the copy operation only on the master process (default).
+            1 (ON or YES) - The program performs the copy operation
+            locally on each process.
+
+            2 or BOTH - The program performs the copy operation for
+            Fname.Ext on the master process and for FnameN.Ext on all
+            processes.
 
         Notes
         -----
-        The original file is untouched.  Ex:  /COPY,A,,,B copies file A to B in
-        the same directory.  /COPY,A,DAT,,,INP copies the file A.DAT to A.INP.
-        See the Operations Guide for details.  ANSYS binary and ASCII files can
-        be copied.
+        The original file is untouched.  Ex: /COPY,A,,,B copies file A
+        to B in the same directory.  /COPY,A,DAT,,,INP copies the file
+        A.DAT to A.INP.  See the Operations Guide for details.  ANSYS
+        binary and ASCII files can be copied.
 
-        In distributed parallel mode (Distributed ANSYS), only the master
-        process will copy Fname1.Ext1 to Fname2.Ext2 by default. However, when
-        DistKey is set to 1 (or ON or YES), the command is executed by all
-        processes. In this case, Fname1 and Fname2 will automatically have the
-        process rank appended to them. This means Fname1N.Ext1 will be copied
-        to Fname2N.Ext2 by all processes, where N is the Distributed ANSYS
-        process rank.  For more information see Differences in General Behavior
-        in the Parallel Processing Guide.
+        In distributed parallel mode (Distributed ANSYS), only the
+        master process will copy Fname1.Ext1 to Fname2.Ext2 by
+        default. However, when DistKey is set to 1 (or ON or YES), the
+        command is executed by all processes. In this case, Fname1 and
+        Fname2 will automatically have the process rank appended to
+        them. This means Fname1N.Ext1 will be copied to Fname2N.Ext2
+        by all processes, where N is the Distributed ANSYS process
+        rank.  For more information see Differences in General
+        Behavior in the Parallel Processing Guide.
         """
-        command = "/COPY,%s,%s,%s,%s,%s" % (str(fname1), str(ext1), str(fname2), str(ext2), str(distkey))
+        command = f"/COPY,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
         return self.run(command, **kwargs)
 
     def lsrestore(self, enginename="", filename="", **kwargs):
@@ -52377,7 +52545,7 @@ class _MapdlCommands(object):  # pragma: no cover
     def edge(self, wn="", key="", angle="", **kwargs):
         """APDL Command: /EDGE
 
-        Displays only the common lines (“edges”) of an object.
+        Displays only the common lines ("edges") of an object.
 
         Parameters
         ----------
@@ -52748,8 +52916,8 @@ class _MapdlCommands(object):  # pragma: no cover
         of type TABLE are graphed as continuous curves.  Arrays of type ARRAY
         is displayed in bar chart fashion.
 
-        The normal curve labeling scheme for *VPLOT is to label curve 1 “COL
-        1”, curve 2 “COL 2” and so on. You can use the /GCOLUMN command to
+        The normal curve labeling scheme for *VPLOT is to label curve 1 "COL
+        1", curve 2 "COL 2" and so on. You can use the /GCOLUMN command to
         apply user-specified labels (8 characters maximum) to your curves. See
         Modifying Curve Labels in the ANSYS Parametric Design Language Guide
         for more information on using /GCOLUMN.
@@ -53286,16 +53454,14 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kappnd
             Append key:
@@ -53306,17 +53472,17 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        Writes selected nodes [NSEL] to a file.  The write operation is not
-        necessary in a standard ANSYS run but is provided as a convenience to
-        users wanting a coded node file.  Data are written in a coded format.
-        The format used is (I8, 6G20.13) to write out
-        NODE,X,Y,Z,THXY,THYZ,THZX.  If the last number is zero (i.e., THZX =
-        0), or the last set of numbers are zero, they are not written but are
-        left blank. Therefore, you must use a formatted read to process this
-        file.  Coordinate values are in the global Cartesian system.
+        Writes selected nodes [NSEL] to a file.  The write operation
+        is not necessary in a standard ANSYS run but is provided as a
+        convenience to users wanting a coded node file.  Data are
+        written in a coded format.  The format used is (I8, 6G20.13)
+        to write out NODE,X,Y,Z,THXY,THYZ,THZX.  If the last number is
+        zero (i.e., THZX = 0), or the last set of numbers are zero,
+        they are not written but are left blank. Therefore, you must
+        use a formatted read to process this file.  Coordinate values
+        are in the global Cartesian system.
         """
-        command = "NWRITE,%s,%s,%s" % (str(fname), str(ext), str(kappnd))
-        return self.run(command, **kwargs)
+        return self.run(f"NWRITE,{fname},{ext},,{kappnd}", **kwargs)
 
     def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs):
         """APDL Command: LTAN
@@ -53356,8 +53522,9 @@ class _MapdlCommands(object):  # pragma: no cover
 
             HPGL - Hewlett-Packard Graphics Language
 
-            HPGL2 - Hewlett-Packard Graphics Language with enhanced color.  (See the HPGL command
-                    for options.)  Ignores the NCPL field.
+            HPGL2 - Hewlett-Packard Graphics Language with enhanced
+                    color.  (See the HPGL command for options.)
+                    Ignores the NCPL field.
 
             INTERLEAF - Interleaf ASCII Format, OPS Version 5.0
 
@@ -53365,14 +53532,10 @@ class _MapdlCommands(object):  # pragma: no cover
 
             DUMP - ASCII Text Dump
 
-        --, --
-            Unused fields.
-
         ncpl
             Number of color planes (4 to 8).  Default is device-dependent.
         """
-        command = "/SHOWDISP,%s,%s" % (str(dname), str(ncpl))
-        return self.run(command, **kwargs)
+        return self.run(f"/SHOWDISP,{dname},,,{ncpl}", **kwargs)
 
     def pstres(self, key="", **kwargs):
         """APDL Command: PSTRES
@@ -53911,25 +54074,25 @@ class _MapdlCommands(object):  # pragma: no cover
             File name extension. The only valid (and the default) extension is
             CDB. Valid only when Action = READ.
 
-        --
-            Unused field.
-
         opt1
             Specifies options for the new mesh when using a generic imported
             mesh file or the mesh-splitting remeshing method. Valid only when
             Action = READ or Action = SPLIT.
 
-            REGE  - Regenerates all node and element numbers on the new mesh using an offset of the
-                    highest existing node and element numbers. This is the
-                    default behavior when Action = READ; otherwise, this value
-                    is ignored.
+            REGE - Regenerates all node and element numbers on the new
+                    mesh using an offset of the highest existing node
+                    and element numbers. This is the default behavior
+                    when Action = READ; otherwise, this value is
+                    ignored.
 
-            KEEP  - Keeps the similarly numbered nodes and elements in the new and the old meshes
-                    unchanged. Valid only when Action = READ.
+            KEEP - Keeps the similarly numbered nodes and elements in
+                    the new and the old meshes unchanged. Valid only
+                    when Action = READ.
 
-            TRAN  - Generates transition elements to ensure nodal compatibility between split and
-                    unsplit parts of the mesh. Valid only when Action = SPLIT
-                    for 2-D analyses.
+            TRAN - Generates transition elements to ensure nodal
+                    compatibility between split and unsplit parts of
+                    the mesh. Valid only when Action = SPLIT for 2-D
+                    analyses.
 
         opt2
             Specifies transition options for the mesh when elements are split.
@@ -53987,8 +54150,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "REMESH,%s,%s,%s,%s,%s" % (str(action), str(filename), str(ext), str(opt1), str(opt2))
-        return self.run(command, **kwargs)
+        return self.run(f"REMESH,{action},{filename},{ext},,{opt1},{opt2}", **kwargs)
 
     def gcmd(self, wn="", lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
              lab7="", lab8="", lab9="", lab10="", lab11="", lab12="",
@@ -55549,34 +55711,34 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia, ib, ic
-            Reference numbers of the three variables to be operated on.  If
-            only two leave IC blank.  If only one, leave IB blank also.
+            Reference numbers of the three variables to be operated
+            on.  If only two leave IC blank.  If only one, leave IB
+            blank also.
 
         name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields
+            Thirty-two character name identifying the variable on
+            printouts and displays.  Embedded blanks are compressed
+            for output.
 
         facta, factb, factc
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (default to 1.0).
+            Scaling factors (positive or negative) applied to the
+            corresponding variables (default to 1.0).
 
         Notes
         -----
-        Multiplies variables (up to three at once) according to the operation:
+        Multiplies variables (up to three at once) according to the
+        operation:
 
-        IR = (FACTA x IA) x (FACTB x IB) x (FACTC x IC)
+        ``IR = (FACTA x IA) x (FACTB x IB) x (FACTC x IC)``
         """
-        command = "PROD,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(ic), str(name), str(facta), str(factb), str(factc))
-        return self.run(command, **kwargs)
+        return self.run(f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}",
+                        **kwargs)
 
     def sectype(self, secid="", type="", subtype="", name="", refinekey="",
                 **kwargs):
@@ -55702,32 +55864,29 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         address
-            Email address (up to 64 characters) of the intended recipient of
-            the file.
+            Email address (up to 64 characters) of the intended
+            recipient of the file.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
         Notes
         -----
-        Issue the /MAIL command to alert someone when a long-running job has
-        completed, as shown in this example:
+        Issue the /MAIL command to alert someone when a long-running
+        job has completed, as shown in this example:
 
-        If you are running ANSYS in a Microsoft Windows environment, you must
-        cofigure BLAT
+        If you are running ANSYS in a Microsoft Windows environment,
+        you must cofigure BLAT.
         """
-        command = "/MAIL,%s,%s,%s" % (str(address), str(fname), str(ext))
-        return self.run(command, **kwargs)
+        return self.run(f"/MAIL,,{address},{fname},{ext}", **kwargs)
 
     def replot(self, label="", **kwargs):
         """APDL Command: /REPLOT
@@ -55846,9 +56005,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
             0 (OFF or NO) - Deactivate.
 
-        --, --
-            Unused fields.
-
         refframe
             Flag to activate or deactivate a stationary reference frame.
 
@@ -55865,64 +56021,69 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        The CORIOLIS command is used for analyses in either a rotating or a
-        stationary reference frame, and performs differently according to the
-        designated RefFrame value. Specific restrictions and elements apply to
-        each case, as follows:
+        The CORIOLIS command is used for analyses in either a rotating
+        or a stationary reference frame, and performs differently
+        according to the designated RefFrame value. Specific
+        restrictions and elements apply to each case, as follows:
 
         ROTATING REFERENCE FRAME (RefFrame = OFF):
 
-        The command applies the Coriolis effect in the following structural
-        element types: MASS21, SHELL181, PLANE182, PLANE183, SOLID185,
-        SOLID186, SOLID187, BEAM188, BEAM189, SOLSH190, SHELL281, PIPE288 and
-        PIPE289. It also applies this effect in the PLANE223, SOLID226, and
-        SOLID227 analyses with structural degrees of freedom.
+        The command applies the Coriolis effect in the following
+        structural element types: MASS21, SHELL181, PLANE182,
+        PLANE183, SOLID185, SOLID186, SOLID187, BEAM188, BEAM189,
+        SOLSH190, SHELL281, PIPE288 and PIPE289. It also applies this
+        effect in the PLANE223, SOLID226, and SOLID227 analyses with
+        structural degrees of freedom.
 
-        In a rotating reference frame, both the Coriolis and spin-softening
-        effects contribute to the gyroscopic moment. Therefore, ANSYS applies
-        spin-softening by default for dynamic analyses. If a rotational
-        velocity is specified (OMEGA or CMOMEGA), centrifugal forces will be
-        included.
+        In a rotating reference frame, both the Coriolis and
+        spin-softening effects contribute to the gyroscopic
+        moment. Therefore, ANSYS applies spin-softening by default for
+        dynamic analyses. If a rotational velocity is specified (OMEGA
+        or CMOMEGA), centrifugal forces will be included.
 
-        To include Coriolis effects in a large deflection prestressed analysis,
-        follow the procedure for linear perturbation detailed in Considerations
-        for Rotating Structures. In a nonlinear transient analysis
-        (ANTYPE,TRANS and NLGEOM, ON), any spinning motion applied through
-        either the IC of the D commands will include the Coriolis effect
-        without having to issue the CORIOLIS command. Refer to Rotating
-        Structure Analysis in the Advanced Analysis Guide for more information.
+        To include Coriolis effects in a large deflection prestressed
+        analysis, follow the procedure for linear perturbation
+        detailed in Considerations for Rotating Structures. In a
+        nonlinear transient analysis (ANTYPE,TRANS and NLGEOM, ON),
+        any spinning motion applied through either the IC of the D
+        commands will include the Coriolis effect without having to
+        issue the CORIOLIS command. Refer to Rotating Structure
+        Analysis in the Advanced Analysis Guide for more information.
 
         STATIONARY REFERENCE FRAME (RefFrame = ON):
 
-        The command activates the gyroscopic damping matrix in the following
-        structural elements: MASS21, BEAM188, SHELL181, BEAM189, SOLID185,
-        SOLID186, SOLID187, SOLID272, SOLID273, SHELL281, PIPE288, PIPE289, and
-        MATRIX50.
+        The command activates the gyroscopic damping matrix in the
+        following structural elements: MASS21, BEAM188, SHELL181,
+        BEAM189, SOLID185, SOLID186, SOLID187, SOLID272, SOLID273,
+        SHELL281, PIPE288, PIPE289, and MATRIX50.
 
-        The rotating structure must be axisymmetric about the axis of rotation.
+        The rotating structure must be axisymmetric about the axis of
+        rotation.
 
-        Static analysis (ANTYPE, STATIC) does not support Coriolis effects with
-        a stationary reference frame. However, you can include the gyroscopic
-        effects in a prestresses analysis follow the procedure detailed in
-        Considerations for Rotating Structures.
+        Static analysis (ANTYPE, STATIC) does not support Coriolis
+        effects with a stationary reference frame. However, you can
+        include the gyroscopic effects in a prestresses analysis
+        follow the procedure detailed in Considerations for Rotating
+        Structures.
 
-        Rotating damping effect (RotDamp = ON) applies only for the stationary
-        reference frame. Therefore, this effect is supported only by the
-        elements listed above that generate a gyroscopic damping matrix.
-        Proportional damping must be present in the element (MP,BETD or BETAD).
-        It is also supported by element COMBI214 with non zero and axisymmetric
+        Rotating damping effect (RotDamp = ON) applies only for the
+        stationary reference frame. Therefore, this effect is
+        supported only by the elements listed above that generate a
+        gyroscopic damping matrix.  Proportional damping must be
+        present in the element (MP,BETD or BETAD).  It is also
+        supported by element COMBI214 with non zero and axisymmetric
         damping characteristics (non zero real constants C11=C22 and
         C21=C12=0).
 
-        For more information about using the CORIOLIS command, see Rotating
-        Structure Analysis in the Advanced Analysis Guide and also in the
-        Rotordynamic Analysis Guide. For details about the Coriolis and
-        gyroscopic effect element formulations, see the Mechanical APDL Theory
-        Reference.
+        For more information about using the CORIOLIS command, see
+        Rotating Structure Analysis in the Advanced Analysis Guide and
+        also in the Rotordynamic Analysis Guide. For details about the
+        Coriolis and gyroscopic effect element formulations, see the
+        Mechanical APDL Theory Reference.
 
         This command is also valid in PREP7.
         """
-        command = "CORIOLIS,%s,%s,%s" % (str(option), str(refframe), str(rotdamp))
+        command = f"CORIOLIS,{option},,,{refframe},{rotdamp},{rotmass}"
         return self.run(command, **kwargs)
 
     def mfanalysis(self, key="", **kwargs):
@@ -55961,33 +56122,34 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         nopar
             Parameter resume key:
 
-            0 - All data in the database, including the scalar parameters, are replaced with
-                the data saved on File.DB (default).
+            0 - All data in the database, including the scalar
+                parameters, are replaced with the data saved on
+                File.DB (default).
 
-            1 - All data in the database, except the scalar parameters, are replaced with the
-                data saved on File.DB.
+            1 - All data in the database, except the scalar
+                parameters, are replaced with the data saved on
+                File.DB.
 
         knoplot
-            If equal to 1, will suppress automatic plot. Otherwise, if the GUI
-            is on and this RESUME command was not read from a file, the
-            selected elements from Fname are plotted. (If there are no selected
-            elements, selected nodes are plotted. If no nodes, volumes; if no
-            volumes, areas; if no areas, lines; if no lines, keypoints. If
-            there are no selected keypoints, the screen is erased.)
+            If equal to 1, will suppress automatic plot. Otherwise, if
+            the GUI is on and this RESUME command was not read from a
+            file, the selected elements from Fname are plotted. (If
+            there are no selected elements, selected nodes are
+            plotted. If no nodes, volumes; if no volumes, areas; if no
+            areas, lines; if no lines, keypoints. If there are no
+            selected keypoints, the screen is erased.)
 
         Notes
         -----
@@ -56016,8 +56178,7 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.  If used in the solution
         processor, this command is valid only within the first load step.
         """
-        command = "RESUME,%s,%s,%s,%s" % (str(fname), str(ext), str(nopar), str(knoplot))
-        return self.run(command, **kwargs)
+        return self.run(f"RESUME,{fname},{ext},,{nopar},{knoplot}", **kwargs)
 
     def stargo(self, b_ase="", **kwargs):
         """APDL Command: *GO
@@ -56512,61 +56673,60 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname1
-            The file to be renamed. You can also include an optional directory
-            path as part of the specified file name; if not, the default file
-            location is the working directory.
+            The file to be renamed. You can also include an optional
+            directory path as part of the specified file name; if not,
+            the default file location is the working directory.
 
         ext1
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         fname2
-            The new name for the file. You can also include an optional
-            directory path as part of the new file name; if not, the default is
-            the working directory. A maximum of 248 characters is allowed for
-            the file name (or combined file name and directory path, if both
-            are specified).
+            The new name for the file. You can also include an
+            optional directory path as part of the new file name; if
+            not, the default is the working directory. A maximum of
+            248 characters is allowed for the file name (or combined
+            file name and directory path, if both are specified).
 
         ext2
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         distkey
-            Key that specifies whether the rename operation is performed on all
-            processes in distributed parallel mode (Distributed ANSYS):
+            Key that specifies whether the rename operation is
+            performed on all processes in distributed parallel mode
+            (Distributed ANSYS):
 
-            1 (ON or YES) - The program performs the rename operation locally on each process.
+            1 (ON or YES) - The program performs the rename operation
+            locally on each process.
 
-            0 (OFF or NO) - The program performs the rename operation only on the master process (default).
+            0 (OFF or NO) - The program performs the rename operation
+            only on the master process (default).
 
         Notes
         -----
-        Renames a file.  Ex:  /RENAME,A,,,B renames file A to B in the same
-        directory.  /RENAME,A,DAT,,,INP renames file A.DAT to A.INP. On all
-        systems, this command will overwrite any existing file named B. See the
-        Operations Guide for details. Only ANSYS binary files should be
-        renamed. Use /SYS and system renaming commands for other files.
+        Renames a file.  Ex: /RENAME,A,,,B renames file A to B in the
+        same directory.  /RENAME,A,DAT,,,INP renames file A.DAT to
+        A.INP. On all systems, this command will overwrite any
+        existing file named B. See the Operations Guide for
+        details. Only ANSYS binary files should be renamed. Use /SYS
+        and system renaming commands for other files.
 
-        In distributed parallel mode (Distributed ANSYS), only the master
-        process will rename Fname1.Ext1 to Fname2.Ext2 by default. However,
-        when DistKey is set to 1 (or ON or YES), the command is executed by all
-        processes. In this case, Fname1 and Fname2 will automatically have the
-        process rank appended to them. This means Fname1N.Ext1 will be renamed
-        to Fname2N.Ext2 by all processes, where N is the Distributed ANSYS
-        process rank. For more information see Differences in General Behavior
+        In distributed parallel mode (Distributed ANSYS), only the
+        master process will rename Fname1.Ext1 to Fname2.Ext2 by
+        default. However, when DistKey is set to 1 (or ON or YES), the
+        command is executed by all processes. In this case, Fname1 and
+        Fname2 will automatically have the process rank appended to
+        them. This means Fname1N.Ext1 will be renamed to Fname2N.Ext2
+        by all processes, where N is the Distributed ANSYS process
+        rank. For more information see Differences in General Behavior
         in the Parallel Processing Guide.
 
-        Renaming across system partitions may be internally done by a copy and
-        delete operation on some systems.
+        Renaming across system partitions may be internally done by a
+        copy and delete operation on some systems.
 
         This command is valid only at the Begin Level.
         """
-        command = "/RENAME,%s,%s,%s,%s,%s" % (str(fname1), str(ext1), str(fname2), str(ext2), str(distkey))
-        return self.run(command, **kwargs)
+        return self.run(f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}",
+                        **kwargs)
 
     def lesize(self, nl1="", size="", angsiz="", ndiv="", space="", kforc="",
                layer1="", layer2="", kyndiv="", **kwargs):
@@ -57165,138 +57325,186 @@ class _MapdlCommands(object):  # pragma: no cover
         lab
             Equation solver type:
 
-            SPARSE - Sparse direct equation solver.  Applicable to real-value or complex-value
-                     symmetric and unsymmetric matrices. Available only for
-                     STATIC, HARMIC (full method only), TRANS (full method
-                     only), SUBSTR, and PSD spectrum analysis types [ANTYPE].
-                     Can be used for nonlinear and linear analyses, especially
-                     nonlinear analysis where indefinite matrices are
-                     frequently encountered. Well suited for contact analysis
-                     where contact status alters the mesh topology. Other
-                     typical well-suited applications are: (a) models
-                     consisting of shell/beam or shell/beam and solid elements
-                     (b) models with a multi-branch structure, such as an
-                     automobile exhaust or a turbine fan. This is an
-                     alternative to iterative solvers since it combines both
-                     speed and robustness. Generally, it requires considerably
-                     more memory (~10x) than the PCG solver to obtain optimal
-                     performance (running totally in-core). When memory is
-                     limited, the solver works partly in-core and out-of-core,
-                     which can noticeably slow down the performance of the
-                     solver. See the BCSOPTION command for more details on the
-                     various modes of operation for this solver.
+            SPARSE - Sparse direct equation solver.  Applicable to
+                     real-value or complex-value symmetric and
+                     unsymmetric matrices. Available only for STATIC,
+                     HARMIC (full method only), TRANS (full method
+                     only), SUBSTR, and PSD spectrum analysis types
+                     [ANTYPE].  Can be used for nonlinear and linear
+                     analyses, especially nonlinear analysis where
+                     indefinite matrices are frequently
+                     encountered. Well suited for contact analysis
+                     where contact status alters the mesh
+                     topology. Other typical well-suited applications
+                     are: (a) models consisting of shell/beam or
+                     shell/beam and solid elements (b) models with a
+                     multi-branch structure, such as an automobile
+                     exhaust or a turbine fan. This is an alternative
+                     to iterative solvers since it combines both speed
+                     and robustness. Generally, it requires
+                     considerably more memory (~10x) than the PCG
+                     solver to obtain optimal performance (running
+                     totally in-core). When memory is limited, the
+                     solver works partly in-core and out-of-core,
+                     which can noticeably slow down the performance of
+                     the solver. See the BCSOPTION command for more
+                     details on the various modes of operation for
+                     this solver.
 
-            This solver can be run in shared memory parallel or distributed memory parallel (Distributed ANSYS) mode. When used in Distributed ANSYS, this solver preserves all of the merits of the classic or shared memory sparse solver. The total sum of memory (summed for all processes) is usually higher than the shared memory sparse solver. System configuration also affects the performance of the distributed memory parallel solver. If enough physical memory is available, running this solver in the in-core memory mode achieves optimal performance. The ideal configuration when using the out-of-core memory mode is to use one processor per machine on multiple machines (a cluster), spreading the I/O across the hard drives of each machine, assuming that you are using a high-speed network such as Infiniband to efficiently support all communication across the multiple machines.  - This solver supports use of the GPU accelerator capability.
+            This solver can be run in shared memory parallel or
+            distributed memory parallel (Distributed ANSYS) mode. When
+            used in Distributed ANSYS, this solver preserves all of
+            the merits of the classic or shared memory sparse
+            solver. The total sum of memory (summed for all processes)
+            is usually higher than the shared memory sparse
+            solver. System configuration also affects the performance
+            of the distributed memory parallel solver. If enough
+            physical memory is available, running this solver in the
+            in-core memory mode achieves optimal performance. The
+            ideal configuration when using the out-of-core memory mode
+            is to use one processor per machine on multiple machines
+            (a cluster), spreading the I/O across the hard drives of
+            each machine, assuming that you are using a high-speed
+            network such as Infiniband to efficiently support all
+            communication across the multiple machines.  - This solver
+            supports use of the GPU accelerator capability.
 
-            JCG - Jacobi Conjugate Gradient iterative equation solver. Available only for STATIC,
-                  HARMIC (full method only), and TRANS (full method only)
-                  analysis types [ANTYPE]. Can be used for structural, thermal,
-                  and multiphysics applications. Applicable for symmetric,
-                  unsymmetric, complex, definite, and indefinite matrices.
-                  Recommended for 3-D harmonic analyses in structural and
-                  multiphysics applications. Efficient for heat transfer,
+            JCG - Jacobi Conjugate Gradient iterative equation
+                  solver. Available only for STATIC, HARMIC (full
+                  method only), and TRANS (full method only) analysis
+                  types [ANTYPE]. Can be used for structural, thermal,
+                  and multiphysics applications. Applicable for
+                  symmetric, unsymmetric, complex, definite, and
+                  indefinite matrices.  Recommended for 3-D harmonic
+                  analyses in structural and multiphysics
+                  applications. Efficient for heat transfer,
                   electromagnetics, piezoelectrics, and acoustic field
                   problems.
 
-            This solver can be run in shared memory parallel or distributed memory parallel (Distributed ANSYS) mode. When used in Distributed ANSYS, in addition to the limitations listed above, this solver only runs in a distributed parallel fashion for STATIC and TRANS (full method) analyses in which the stiffness is symmetric and only when not using the fast thermal option (THOPT). Otherwise, this solver runs in shared memory parallel mode inside Distributed ANSYS. - This solver supports use of the GPU accelerator capability. When using the GPU
-                              accelerator capability, in addition to the
-                              limitations listed above, this solver is
-                              available only for STATIC and TRANS (full method)
-                              analyses where the stiffness is symmetric and
-                              does not support the fast thermal option (THOPT).
+            This solver can be run in shared memory parallel or
+            distributed memory parallel (Distributed ANSYS) mode. When
+            used in Distributed ANSYS, in addition to the limitations
+            listed above, this solver only runs in a distributed
+            parallel fashion for STATIC and TRANS (full method)
+            analyses in which the stiffness is symmetric and only when
+            not using the fast thermal option (THOPT). Otherwise, this
+            solver runs in shared memory parallel mode inside
+            Distributed ANSYS. - This solver supports use of the GPU
+            accelerator capability. When using the GPU accelerator
+            capability, in addition to the limitations listed above,
+            this solver is available only for STATIC and TRANS (full
+            method) analyses where the stiffness is symmetric and does
+            not support the fast thermal option (THOPT).
 
-            ICCG - Incomplete Cholesky Conjugate Gradient iterative equation solver. Available for
-                   STATIC, HARMIC (full method only), and TRANS (full method
-                   only) analysis types [ANTYPE].  Can be used for structural,
-                   thermal, and multiphysics applications, and for symmetric,
-                   unsymmetric, complex, definite, and indefinite matrices. The
-                   ICCG solver requires more memory than the JCG solver, but is
-                   more robust than the JCG solver for ill-conditioned
-                   matrices.
+            ICCG - Incomplete Cholesky Conjugate Gradient iterative
+                   equation solver. Available for STATIC, HARMIC (full
+                   method only), and TRANS (full method only) analysis
+                   types [ANTYPE].  Can be used for structural,
+                   thermal, and multiphysics applications, and for
+                   symmetric, unsymmetric, complex, definite, and
+                   indefinite matrices. The ICCG solver requires more
+                   memory than the JCG solver, but is more robust than
+                   the JCG solver for ill-conditioned matrices.
 
-            This solver can only be run in shared memory parallel mode. This is also true when the solver is used inside Distributed ANSYS. - This solver does not support use of the GPU accelerator capability.
+            This solver can only be run in shared memory parallel
+            mode. This is also true when the solver is used inside
+            Distributed ANSYS. - This solver does not support use of
+            the GPU accelerator capability.
 
-            QMR - Quasi-Minimal Residual iterative equation solver. Available for the HARMIC
-                  (full method only) analysis type [ANTYPE]. Can be used for
+            QMR - Quasi-Minimal Residual iterative equation
+                  solver. Available for the HARMIC (full method only)
+                  analysis type [ANTYPE]. Can be used for
                   high-frequency electromagnetic applications, and for
-                  symmetric, complex, definite, and indefinite matrices. The
-                  QMR solver is more stable than the ICCG solver.
+                  symmetric, complex, definite, and indefinite
+                  matrices. The QMR solver is more stable than the
+                  ICCG solver.
 
-            This solver can only be run in shared memory parallel mode. This is also true when the solver is used inside Distributed ANSYS. - This solver does not support use of the GPU accelerator capability.
+            This solver can only be run in shared memory parallel
+            mode. This is also true when the solver is used inside
+            Distributed ANSYS. - This solver does not support use of
+            the GPU accelerator capability.
 
-            PCG - Preconditioned Conjugate Gradient iterative equation solver (licensed from
-                  Computational Applications and Systems Integration, Inc.).
-                  Requires less disk file space than SPARSE and is faster for
-                  large models. Useful for plates, shells, 3-D models, large
-                  2-D models, and other problems having symmetric, sparse,
-                  definite or indefinite matrices for nonlinear analysis.
-                  Requires twice as much memory as JCG. Available only for
-                  analysis types [ANTYPE] STATIC, TRANS (full method only), or
-                  MODAL (with PCG Lanczos option only). Also available for the
-                  use pass of substructure analyses (MATRIX50). The PCG solver
-                  can robustly solve equations with constraint equations (CE,
-                  CEINTF, CPINTF, and CERIG).  With this solver, you can use
-                  the MSAVE command to obtain a considerable memory savings.
+            PCG - Preconditioned Conjugate Gradient iterative equation
+                  solver (licensed from Computational Applications and
+                  Systems Integration, Inc.).  Requires less disk file
+                  space than SPARSE and is faster for large
+                  models. Useful for plates, shells, 3-D models, large
+                  2-D models, and other problems having symmetric,
+                  sparse, definite or indefinite matrices for
+                  nonlinear analysis.  Requires twice as much memory
+                  as JCG. Available only for analysis types [ANTYPE]
+                  STATIC, TRANS (full method only), or MODAL (with PCG
+                  Lanczos option only). Also available for the use
+                  pass of substructure analyses (MATRIX50). The PCG
+                  solver can robustly solve equations with constraint
+                  equations (CE, CEINTF, CPINTF, and CERIG).  With
+                  this solver, you can use the MSAVE command to obtain
+                  a considerable memory savings.
 
-            The PCG solver can handle ill-conditioned problems by using a higher level of difficulty (see PCGOPT). Ill-conditioning arises from elements with high aspect ratios, contact, and plasticity. - This solver can be run in shared memory parallel or distributed memory parallel
-                              (Distributed ANSYS) mode. When used in
-                              Distributed ANSYS, this solver preserves all of
-                              the merits of the classic or shared memory PCG
-                              solver. The total sum of memory (summed for all
-                              processes) is about 30% more than the shared
-                              memory PCG solver.
+            The PCG solver can handle ill-conditioned problems by
+            using a higher level of difficulty (see
+            PCGOPT). Ill-conditioning arises from elements with high
+            aspect ratios, contact, and plasticity. - This solver can
+            be run in shared memory parallel or distributed memory
+            parallel (Distributed ANSYS) mode. When used in
+            Distributed ANSYS, this solver preserves all of the merits
+            of the classic or shared memory PCG solver. The total sum
+            of memory (summed for all processes) is about 30% more
+            than the shared memory PCG solver.
 
         toler
-            Iterative solver tolerance value. Used only with the Jacobi
-            Conjugate Gradient, Incomplete Cholesky Conjugate Gradient, Pre-
-            conditioned Conjugate Gradient, and Quasi-Minimal Residual equation
-            solvers. For the PCG solver, the default is 1.0E-8. The value
-            1.0E-5 may be acceptable in many situations. When using the PCG
-            Lanczos mode extraction method, the default solver tolerance value
-            is 1.0E-4. For the JCG and ICCG solvers with symmetric matrices,
-            the default is 1.0E-8. For the JCG and ICCG solvers with
-            unsymmetric matrices, and for the QMR solver, the default is
-            1.0E-6. Iterations continue until the SRSS norm of the residual is
-            less than TOLER times the norm of the applied load vector. For the
-            PCG solver in the linear static analysis case, 3 error norms are
-            used. If one of the error norms is smaller than TOLER, and the SRSS
-            norm of the residual is smaller than 1.0E-2, convergence is assumed
-            to have been reached. See Iterative Solver in the Mechanical APDL
-            Theory Reference for details.
+            Iterative solver tolerance value. Used only with the
+            Jacobi Conjugate Gradient, Incomplete Cholesky Conjugate
+            Gradient, Pre- conditioned Conjugate Gradient, and
+            Quasi-Minimal Residual equation solvers. For the PCG
+            solver, the default is 1.0E-8. The value 1.0E-5 may be
+            acceptable in many situations. When using the PCG Lanczos
+            mode extraction method, the default solver tolerance value
+            is 1.0E-4. For the JCG and ICCG solvers with symmetric
+            matrices, the default is 1.0E-8. For the JCG and ICCG
+            solvers with unsymmetric matrices, and for the QMR solver,
+            the default is 1.0E-6. Iterations continue until the SRSS
+            norm of the residual is less than TOLER times the norm of
+            the applied load vector. For the PCG solver in the linear
+            static analysis case, 3 error norms are used. If one of
+            the error norms is smaller than TOLER, and the SRSS norm
+            of the residual is smaller than 1.0E-2, convergence is
+            assumed to have been reached. See Iterative Solver in the
+            Mechanical APDL Theory Reference for details.
 
         mult
-            Multiplier (defaults to 2.5 for nonlinear analyses; 1.0 for linear
-            analyses) used to control the maximum number of iterations
-            performed during convergence calculations. Used only with the Pre-
-            conditioned Conjugate Gradient equation solver (PCG). The maximum
-            number of iterations is equal to the multiplier (MULT) times the
-            number of degrees of freedom (DOF). If MULT is input as a negative
-            value, then the maximum number of iterations is equal to abs(MULT).
-            Iterations continue until either the maximum number of iterations
-            or solution convergence has been reached. In general, the default
-            value for MULT is adequate for reaching convergence.  However, for
-            ill-conditioned matrices (that is, models containing elements with
-            high aspect ratios or material type discontinuities) the multiplier
-            may be used to increase the maximum number of iterations used to
-            achieve convergence.  The recommended range for the multiplier is
-            1.0 MULT 3.0.  Normally, a value greater than 3.0 adds no further
-            benefit toward convergence, and merely increases time requirements.
-            If the solution does not converge with 1.0 MULT 3.0, or in less
-            than 10,000 iterations, then convergence is highly unlikely and
-            further examination of the model is recommended. Rather than
-            increasing the default value of MULT, consider increasing the level
-            of difficulty (Lev_Diff) on the PCGOPT command.
-
-        --
-            Unused field.
+            Multiplier (defaults to 2.5 for nonlinear analyses; 1.0
+            for linear analyses) used to control the maximum number of
+            iterations performed during convergence calculations. Used
+            only with the Pre- conditioned Conjugate Gradient equation
+            solver (PCG). The maximum number of iterations is equal to
+            the multiplier (MULT) times the number of degrees of
+            freedom (DOF). If MULT is input as a negative value, then
+            the maximum number of iterations is equal to abs(MULT).
+            Iterations continue until either the maximum number of
+            iterations or solution convergence has been reached. In
+            general, the default value for MULT is adequate for
+            reaching convergence.  However, for ill-conditioned
+            matrices (that is, models containing elements with high
+            aspect ratios or material type discontinuities) the
+            multiplier may be used to increase the maximum number of
+            iterations used to achieve convergence.  The recommended
+            range for the multiplier is 1.0 MULT 3.0.  Normally, a
+            value greater than 3.0 adds no further benefit toward
+            convergence, and merely increases time requirements.  If
+            the solution does not converge with 1.0 MULT 3.0, or in
+            less than 10,000 iterations, then convergence is highly
+            unlikely and further examination of the model is
+            recommended. Rather than increasing the default value of
+            MULT, consider increasing the level of difficulty
+            (Lev_Diff) on the PCGOPT command.
 
         keepfile
             Determines whether files from a SPARSE solver run should be deleted
             or retained. Applies only to Lab = SPARSE for static and full
             transient analyses.
         """
-        command = "EQSLV,%s,%s,%s,%s" % (str(lab), str(toler), str(mult), str(keepfile))
-        return self.run(command, **kwargs)
+        return self.run(f"EQSLV,{lab},{toler},{mult},,{keepfile}", **kwargs)
 
     def lvscale(self, fact="", ldstep="", **kwargs):
         """APDL Command: LVSCALE
@@ -57361,9 +57569,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -57642,32 +57847,28 @@ class _MapdlCommands(object):  # pragma: no cover
 
             SOURCE - Plot only the source pressures.
 
-        --
-            Unused field.
-
         nodekey
-            If the source data contains faces (that is, surface elements were
-            created upon the READ command), set NODEkey = 1 to plot only the
-            source nodes rather than both the nodes and the elements.
+            If the source data contains faces (that is, surface
+            elements were created upon the READ command), set NODEkey
+            = 1 to plot only the source nodes rather than both the
+            nodes and the elements.
 
         imagkey
-            1
-
             1 - Plot the real pressures (default).
 
             0 - Plot the imaginary pressures.
 
         Notes
         -----
-        Pressures on the target faces are displayed as a color contour plot
-        using the command /PSF,PRES,,3. If the source data contains faces (that
-        is, surface elements were created upon the READ command), the source
-        faces are also displayed using a color contour plot by default. If
-        NODEkey = 1 or no source faces are available, the source pressures are
-        displayed as colored node symbols (/PSYMB,DOT,1 command).
+        Pressures on the target faces are displayed as a color contour
+        plot using the command /PSF,PRES,,3. If the source data
+        contains faces (that is, surface elements were created upon
+        the READ command), the source faces are also displayed using a
+        color contour plot by default. If NODEkey = 1 or no source
+        faces are available, the source pressures are displayed as
+        colored node symbols (/PSYMB,DOT,1 command).
         """
-        command = "PLMAP,%s,%s,%s" % (str(item), str(nodekey), str(imagkey))
-        return self.run(command, **kwargs)
+        return self.run(f"PLMAP,{item},,{nodekey},{imagkey}", **kwargs)
 
     def wmid(self, key="", **kwargs):
         """APDL Command: WMID
@@ -57681,9 +57882,9 @@ class _MapdlCommands(object):  # pragma: no cover
 
             NO - Do not consider midside nodes when reordering (default).
 
-            YES - Consider midside nodes when reordering. This option is useful for models where
-                  line elements are only attached to midside nodes of solid
-                  elements.
+            YES - Consider midside nodes when reordering. This option
+                  is useful for models where line elements are only
+                  attached to midside nodes of solid elements.
 
         Notes
         -----
@@ -57766,9 +57967,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -57858,9 +58056,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -58352,16 +58547,14 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -58700,9 +58893,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         Data are written in terms of the equivalent POST1 fatigue commands
@@ -58886,7 +59076,7 @@ class _MapdlCommands(object):  # pragma: no cover
     #     then-else construct.  If a batch input stream hits an end-of-file
     #     during a false *IF condition, the ANSYS run will not terminate
     #     normally. You will need to terminate it externally (use either the
-    #     Linux “kill” function or the Windows task manager). The *IF, *ELSEIF,
+    #     Linux "kill" function or the Windows task manager). The *IF, *ELSEIF,
     #     *ELSE, and *ENDIF commands for each if-then-else construct must all be
     #     read from the same file (or keyboard).
 
@@ -58978,7 +59168,7 @@ class _MapdlCommands(object):  # pragma: no cover
         applied (KBC = 0) if it is a force (KFD = FORC), and step-applied (KBC
         = 1) if it is a displacement (KFD = DISP).
 
-        You can “lock” the load value at a specified load step. When locked,
+        You can "lock" the load value at a specified load step. When locked,
         the load changes from a force to a displacement, and ANSYS applies the
         load as a constant displacement in all future load steps. Locking is
         useful when applying additional loadings. The additional loadings alter
@@ -59036,33 +59226,32 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia, ib, ic
-            Reference numbers of the three variables to be operated on.  If
-            only two, leave IC blank.  If only one, leave IB blank also.
+            Reference numbers of the three variables to be operated
+            on.  If only two, leave IC blank.  If only one, leave IB
+            blank also.
 
         name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name identifying the variable on
+            printouts and displays.  Embedded blanks are compressed
+            for output.
 
         facta, factb, factc
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (defaults to 1.0).
+            Scaling factors (positive or negative) applied to the
+            corresponding variables (defaults to 1.0).
 
         Notes
         -----
         Finds the smallest of three variables according to the operation:
 
-        IR = smallest of (FACTA x IA, FACTB x IB, FACTC x IC)
+        ``IR = min(FACTA x IA, FACTB x IB, FACTC x IC)``
         """
-        command = "SMALL,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(ic), str(name), str(facta), str(factb), str(factc))
+        command = f"SMALL,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)
 
     def fp(self, stitm="", c1="", c2="", c3="", c4="", c5="", c6="", **kwargs):
@@ -59601,33 +59790,32 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         elem_type
-            Element type attribute pointer (ET) for the elements that are part
-            of the section.  See   SECREAD for a detailed description.
+            Element type attribute pointer (ET) for the elements that
+            are part of the section.  See SECREAD for a detailed
+            description.
 
         Notes
         -----
-        Before creating a user mesh file, first create a model using 2-D
-        meshing. Use PLANE183 or MESH200 with KEYOPT(1) = 7 (quadrilateral with
-        8 nodes option) to model the cells.  SECWRITE creates an ASCII file
-        that contains information about the nodes and cells that describe a
-        beam section. For detailed information on how to create a user mesh
-        file, see Creating Custom Cross Sections with a User-defined Mesh in
-        the Structural Analysis Guide.
+        Before creating a user mesh file, first create a model using
+        2-D meshing. Use PLANE183 or MESH200 with KEYOPT(1) = 7
+        (quadrilateral with 8 nodes option) to model the cells.
+        SECWRITE creates an ASCII file that contains information about
+        the nodes and cells that describe a beam section. For detailed
+        information on how to create a user mesh file, see Creating
+        Custom Cross Sections with a User-defined Mesh in the
+        Structural Analysis Guide.
         """
-        command = "SECWRITE,%s,%s,%s" % (str(fname), str(ext), str(elem_type))
-        return self.run(command, **kwargs)
+        return self.run(f"SECWRITE,{fname},{ext},,{elem_type}", **kwargs)
 
     def arsym(self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="",
               imove="", **kwargs):
@@ -59708,11 +59896,9 @@ class _MapdlCommands(object):  # pragma: no cover
 
             OFF - Ignore initial displacements.
 
-            DYNA - Get initial displacements from an earlier implicit (ANSYS) run and export to an
-                   explicit ANSYS LS-DYNA run (Default).
-
-        --, --
-            Unused fields.
+            DYNA - Get initial displacements from an earlier implicit
+                   (ANSYS) run and export to an explicit ANSYS LS-DYNA
+                   run (Default).
 
         lstep
             Load step number of data to be exported.  Defaults to the last load
@@ -59723,16 +59909,14 @@ class _MapdlCommands(object):  # pragma: no cover
             substep.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -59744,7 +59928,7 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is not written to the Jobname.CDB file when the CDWRITE
         command is issued.
         """
-        command = "REXPORT,%s,%s,%s,%s,%s" % (str(target), str(lstep), str(sbstep), str(fname), str(ext))
+        command = f"REXPORT,{target},,,{lstep},{sbstep},{fname},{ext}"
         return self.run(command, **kwargs)
 
     def eddbl(self, key="", **kwargs):
@@ -60096,58 +60280,60 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         slab
             Mode for saving the database:
 
-            ALL - Save the model data, solution data and post data (element tables, etc.). This
-                  value is the default.
+            ALL - Save the model data, solution data and post data
+                  (element tables, etc.). This value is the default.
 
-            MODEL - Save the model data (solid model, finite element model, loadings, etc.) only.
+            MODEL - Save the model data (solid model, finite element
+            model, loadings, etc.) only.
 
-            SOLU - Save the model data and the solution data (nodal and element results).
+            SOLU - Save the model data and the solution data (nodal
+            and element results).
 
         Notes
         -----
-        Saves all current database information to a file (File.DB).  In
-        interactive mode, an existing File.DB is first written to a backup file
-        (File.DBB).  In batch mode, an existing File.DB is replaced by the
-        current database information with no backup.  The command should be
-        issued periodically to ensure a current file backup in case of a system
-        "crash" or a "line drop."  It may also be issued before a "doubtful"
-        command so that if the result is not what was intended the database may
-        be easily restored to the previous state.  A save may be time consuming
-        for large models.  Repeated use of this command overwrites the previous
-        data on the file (but a backup file is first written during an
-        interactive run).  When issued from within POST1, the nodal boundary
-        conditions in the database (which were read from the results file) will
-        overwrite the nodal boundary conditions existing on the database file.
+        Saves all current database information to a file (File.DB).
+        In interactive mode, an existing File.DB is first written to a
+        backup file (File.DBB).  In batch mode, an existing File.DB is
+        replaced by the current database information with no backup.
+        The command should be issued periodically to ensure a current
+        file backup in case of a system "crash" or a "line drop."  It
+        may also be issued before a "doubtful" command so that if the
+        result is not what was intended the database may be easily
+        restored to the previous state.  A save may be time consuming
+        for large models.  Repeated use of this command overwrites the
+        previous data on the file (but a backup file is first written
+        during an interactive run).  When issued from within POST1,
+        the nodal boundary conditions in the database (which were read
+        from the results file) will overwrite the nodal boundary
+        conditions existing on the database file.
 
-        Internal nodes may be created during solution (for example, via the
-        mixed u-P formulation or generalized plane strain option for current-
-        technology elements, the Lagrangian multiplier method for contact
-        elements or the MPC184 elements, or the quadratic or cubic option of
-        the BEAM188 and PIPE288 elements). It is sometimes necessary to save
-        the internal nodes in the database for later operations, such as
-        cutting boundary interpolations (CBDOF) for submodeling. To do so,
+        Internal nodes may be created during solution (for example,
+        via the mixed u-P formulation or generalized plane strain
+        option for current- technology elements, the Lagrangian
+        multiplier method for contact elements or the MPC184 elements,
+        or the quadratic or cubic option of the BEAM188 and PIPE288
+        elements). It is sometimes necessary to save the internal
+        nodes in the database for later operations, such as cutting
+        boundary interpolations (CBDOF) for submodeling. To do so,
         issue the SAVE command after the first SOLVE command.
 
         In general, saving after solving is always a good practice.
 
         This command is valid in any processor.
         """
-        command = "SAVE,%s,%s,%s" % (str(fname), str(ext), str(slab))
-        return self.run(command, **kwargs)
+        return self.run(f"SAVE,{fname},{ext},,{slab}", **kwargs)
 
     def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
                **kwargs):
@@ -60486,37 +60672,38 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         distkey
-            Key that specifies whether the file deletion is performed on all
-            processes in distributed parallel mode (Distributed ANSYS):
+            Key that specifies whether the file deletion is performed
+            on all processes in distributed parallel mode (Distributed
+            ANSYS):
 
-            1 (ON or YES) - The program performs the file deletion locally on each process.
+            1 (ON or YES) - The program performs the file deletion
+            locally on each process.
 
-            0 (OFF or NO) - The program performs the file deletion only on the master process (default).
+            0 (OFF or NO) - The program performs the file deletion
+            only on the master process (default).
 
         Notes
         -----
-        In distributed parallel mode (Distributed ANSYS), only the master
-        process will delete Fname.Ext by default. However, when DistKey is set
-        to 1 (or ON or YES), the command is executed by all processes. In this
-        case, Fname will automatically have the process rank appended to it.
-        This means FnameN.Ext will be deleted by all processes, where N is the
-        Distributed ANSYS process rank. For more information see Differences in
-        General Behavior  in the Parallel Processing Guide.
+        In distributed parallel mode (Distributed ANSYS), only the
+        master process will delete Fname.Ext by default. However, when
+        DistKey is set to 1 (or ON or YES), the command is executed by
+        all processes. In this case, Fname will automatically have the
+        process rank appended to it.  This means FnameN.Ext will be
+        deleted by all processes, where N is the Distributed ANSYS
+        process rank. For more information see Differences in General
+        Behavior in the Parallel Processing Guide.
         """
-        command = "/DELETE,%s,%s,%s" % (str(fname), str(ext), str(distkey))
-        return self.run(command, **kwargs)
+        return self.run(f"/DELETE,{fname},{ext},,{distkey}", **kwargs)
 
     def et(self, itype="", ename="", kop1="", kop2="", kop3="", kop4="",
            kop5="", kop6="", inopr="", **kwargs):
@@ -60733,10 +60920,11 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         sename
-            The name (case-sensitive) of the superelement matrix file created
-            by the substructure generation pass (Sename.SUB).  Defaults to the
-            current Jobname.  If a number, it is the element number of a
-            previously defined superelement in the current use pass.
+            The name (case-sensitive) of the superelement matrix file
+            created by the substructure generation pass (Sename.SUB).
+            Defaults to the current Jobname.  If a number, it is the
+            element number of a previously defined superelement in the
+            current use pass.
 
         ncomp
             Symmetry key:
@@ -60751,32 +60939,31 @@ class _MapdlCommands(object):  # pragma: no cover
             Increment all nodes in the superelement by INC.
 
         file
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
-        Performs a symmetry operation on a superelement within the substructure
-        use pass by reversing the sign of component Ncomp in the global
-        Cartesian coordinate system.  The node numbers are incremented by INC.
-        The new superelement is written to File.SUB in the current directory
-        (by default).  All master node nodal coordinate systems must be global
-        Cartesian (no rotated nodes allowed).
+        Performs a symmetry operation on a superelement within the
+        substructure use pass by reversing the sign of component Ncomp
+        in the global Cartesian coordinate system.  The node numbers
+        are incremented by INC.  The new superelement is written to
+        File.SUB in the current directory (by default).  All master
+        node nodal coordinate systems must be global Cartesian (no
+        rotated nodes allowed).
 
-        The maximum number of transformations for a given superelement is five
-        (including SETRAN, SESYMM, and the large rotation transformation if
-        NLGEOM is ON in the use pass).
+        The maximum number of transformations for a given superelement
+        is five (including SETRAN, SESYMM, and the large rotation
+        transformation if NLGEOM is ON in the use pass).
 
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed ANSYS Restriction: This command is not supported
+        in Distributed ANSYS.
         """
         command = "SESYMM,%s,%s,%s,%s,%s" % (str(sename), str(ncomp), str(inc), str(file), str(ext))
         return self.run(command, **kwargs)
@@ -60921,23 +61108,18 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
 
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
-            Thirty-two character name for identifying the variable on printouts
-            and displays.  Embedded blanks are compressed for output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            printouts and displays.  Embedded blanks are compressed
+            for output.
 
         facta
             Scaling factor applied to variable IA (defaults to 1.0).
@@ -60952,8 +61134,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         IR = FACTB*LOG(FACTA x IA)
         """
-        command = "CLOG,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta), str(factb))
-        return self.run(command, **kwargs)
+        return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
     def vstat(self, **kwargs):
         """APDL Command: *VSTAT
@@ -61480,33 +61661,33 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
-        This read operation is not necessary in a standard ANSYS run but is
-        provided as a convenience to users wanting to read a coded element
-        file, such as from another mesh generator or from a CAD/CAM program.
-        Data should be formatted as produced with the EWRITE command. If
-        issuing EREAD to acquire element information generated from ANSYS
-        EWRITE, you must also issue NREAD before the EREAD command. The element
-        types [ET] must be defined before the file is read so that the file may
-        be read properly. Only elements that are specified with the ERRANG
-        command are read from the file. Also, only elements that are fully
-        attached to the nodes specified on the NRRANG command are read from the
-        file. Elements are assigned numbers consecutively as read from the
-        file, beginning with the current highest database element number plus
-        one. The file is rewound before and after reading. Reading continues
-        until the end of the file.
+        This read operation is not necessary in a standard ANSYS run
+        but is provided as a convenience to users wanting to read a
+        coded element file, such as from another mesh generator or
+        from a CAD/CAM program.  Data should be formatted as produced
+        with the EWRITE command. If issuing EREAD to acquire element
+        information generated from ANSYS EWRITE, you must also issue
+        NREAD before the EREAD command. The element types [ET] must be
+        defined before the file is read so that the file may be read
+        properly. Only elements that are specified with the ERRANG
+        command are read from the file. Also, only elements that are
+        fully attached to the nodes specified on the NRRANG command
+        are read from the file. Elements are assigned numbers
+        consecutively as read from the file, beginning with the
+        current highest database element number plus one. The file is
+        rewound before and after reading. Reading continues until the
+        end of the file.
         """
         command = "EREAD,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
@@ -62760,7 +62941,7 @@ class _MapdlCommands(object):  # pragma: no cover
         -----
         There are 2 listings for the number of element divisions and the
         spacing ratio. The first listing shows assignments from LESIZE only,
-        followed by the “hard” key (KYNDIV). See LESIZE for more information.
+        followed by the "hard" key (KYNDIV). See LESIZE for more information.
         The second listing shows NDIV and SPACE for the existing mesh, if one
         exists. Whether this existing mesh and the mesh generated by LESIZE
         match at any given point depends upon meshing options and the sequence
@@ -63736,9 +63917,6 @@ class _MapdlCommands(object):  # pragma: no cover
         dz
             Out-of-plane thickness (depth) of the racetrack source.
 
-        --, --
-            Unused fields
-
         cname
             An alphanumeric name assigned as a component name to the group of
             SOURC36 elements created by the command macro.  Cname must be
@@ -63760,8 +63938,7 @@ class _MapdlCommands(object):  # pragma: no cover
 
         The diagram below shows you a racetrack current source.
         """
-        command = "RACE,%s,%s,%s,%s,%s,%s,%s" % (str(xc), str(yc), str(rad), str(tcur), str(dy), str(dz), str(cname))
-        return self.run(command, **kwargs)
+        return self.run(f"RACE,{xc},{yc},{rad},{tcur},{dy},{dz},,,{cname}", **kwargs)
 
     def vitrp(self, parr="", part="", pari="", parj="", park="", **kwargs):
         """APDL Command: *VITRP
@@ -63862,94 +64039,98 @@ class _MapdlCommands(object):  # pragma: no cover
 
             OFF - Ignore initial stresses.
 
-            DYNA - Get initial stresses from an earlier explicit (ANSYS LS-DYNA) run (default).
+            DYNA - Get initial stresses from an earlier explicit
+            (ANSYS LS-DYNA) run (default).
 
         type
-            Type of data imported.  Note that this is an ANSYS-defined field;
-            the only valid value is STRESS.
+            Type of data imported.  Note that this is an ANSYS-defined
+            field; the only valid value is STRESS.
 
         loc
-            Location where the data is imported.  Note that this is an ANSYS-
-            defined field; the only valid value is ELEM (data imported at the
-            element integration points).
+            Location where the data is imported.  Note that this is an
+            ANSYS- defined field; the only valid value is ELEM (data
+            imported at the element integration points).
 
         lstep
-            Load step number of data to be imported.  Defaults to the last load
-            step.
+            Load step number of data to be imported.  Defaults to the
+            last load step.
 
         sbstep
-            Substep number of data to be imported.  Defaults to the last
-            substep.
+            Substep number of data to be imported.  Defaults to the
+            last substep.
 
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         spscale
-            Stabilization factor. This factor is used in a springback analysis
-            to scale (up or down) the initial stiffness of the applied spring.
-            No default; input a value only if you want to activate
-            stabilization. If SPSCALE is blank, stabilization is not activated.
+            Stabilization factor. This factor is used in a springback
+            analysis to scale (up or down) the initial stiffness of
+            the applied spring.  No default; input a value only if you
+            want to activate stabilization. If SPSCALE is blank,
+            stabilization is not activated.
 
         mscale
-            Acceptable stabilization stiffness (defaults to 1.0 X 10--4). In a
-            springback analysis, iterations will stop when the applied spring
-            stiffness comes down to this value. MSCALE is not used if SPSCALE
-            is blank.
+            Acceptable stabilization stiffness (defaults to 1.0 X
+            10--4). In a springback analysis, iterations will stop
+            when the applied spring stiffness comes down to this
+            value. MSCALE is not used if SPSCALE is blank.
 
         Notes
         -----
-        This command imports initial stress information into ANSYS from an
-        earlier explicit (ANSYS LS-DYNA) run.  The stress state from SHELL163
-        and SOLID164 elements in the explicit analysis is imported to the
-        corresponding SHELL181 and SOLID185 implicit elements. For the shell
-        elements, the current shell element thickness is also imported. This
-        command is valid only before the first SOLVE command of the implicit
-        analysis (which comes after the explicit analysis) and is ignored if
-        issued after subsequent SOLVE commands (that is, stresses will not be
-        re-imported).
+        This command imports initial stress information into ANSYS
+        from an earlier explicit (ANSYS LS-DYNA) run.  The stress
+        state from SHELL163 and SOLID164 elements in the explicit
+        analysis is imported to the corresponding SHELL181 and
+        SOLID185 implicit elements. For the shell elements, the
+        current shell element thickness is also imported. This command
+        is valid only before the first SOLVE command of the implicit
+        analysis (which comes after the explicit analysis) and is
+        ignored if issued after subsequent SOLVE commands (that is,
+        stresses will not be re-imported).
 
-        RIMPORT is typically used to perform springback analysis of sheet metal
-        forming. We recommend that you use SHELL163 elements in the explicit
-        analysis with 3 to 5 integration points through the thickness. This
-        ensures that the through-thickness stress distribution is transferred
-        accurately to the SHELL181 elements. If more than 5 integration points
-        are used, ANSYS imports resultants (forces and moments) to the SHELL181
-        elements. This implies that linearization of the through-thickness
-        stress distribution is assumed in SHELL181 elements. If SHELL163 uses
-        full integration in the shell plane, stress and thickness data are
-        averaged and then transferred. For the solid elements, the stress at
-        the SOLID164 element centroid is transferred to the SOLID185 element
-        centroid. If SOLID164 has full integration, the stress is averaged and
-        then transferred.
+        RIMPORT is typically used to perform springback analysis of
+        sheet metal forming. We recommend that you use SHELL163
+        elements in the explicit analysis with 3 to 5 integration
+        points through the thickness. This ensures that the
+        through-thickness stress distribution is transferred
+        accurately to the SHELL181 elements. If more than 5
+        integration points are used, ANSYS imports resultants (forces
+        and moments) to the SHELL181 elements. This implies that
+        linearization of the through-thickness stress distribution is
+        assumed in SHELL181 elements. If SHELL163 uses full
+        integration in the shell plane, stress and thickness data are
+        averaged and then transferred. For the solid elements, the
+        stress at the SOLID164 element centroid is transferred to the
+        SOLID185 element centroid. If SOLID164 has full integration,
+        the stress is averaged and then transferred.
 
-        When the  SPSCALE argument is specified, artificial springs with
-        exponentially decaying stiffness (as a function of iterations) are
-        applied. This technique is recommended only for those cases in which
-        there are severe convergence difficulties. In general, you should first
-        attempt a springback analysis without using the stabilization factors
-        SPSCALE and MSCALE. (For more information on springback stabilization,
-        see the ANSYS LS-DYNA User's Guide.)
+        When the SPSCALE argument is specified, artificial springs
+        with exponentially decaying stiffness (as a function of
+        iterations) are applied. This technique is recommended only
+        for those cases in which there are severe convergence
+        difficulties. In general, you should first attempt a
+        springback analysis without using the stabilization factors
+        SPSCALE and MSCALE. (For more information on springback
+        stabilization, see the ANSYS LS-DYNA User's Guide.)
 
-        This command is not written to the Jobname.CDB file when the CDWRITE
-        command is issued. Further, the RIMPORT information is not saved to the
-        database; therefore, the RIMPORT command must be reissued if the
-        database is resumed.
+        This command is not written to the Jobname.CDB file when the
+        CDWRITE command is issued. Further, the RIMPORT information is
+        not saved to the database; therefore, the RIMPORT command must
+        be reissued if the database is resumed.
 
         This command is also valid in PREP7.
 
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RIMPORT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(source), str(type), str(loc), str(lstep), str(sbstep), str(fname), str(ext), str(spscale), str(mscale))
+        command = f"RIMPORT,{source},{type},{loc},{lstep},{sbstep},{fname},{ext},,{spscale},{mscale}"
         return self.run(command, **kwargs)
 
     def edread(self, nstart="", label="", num="", step1="", step2="",
@@ -64224,28 +64405,24 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname1
-            File name and directory path (248 characters maximum, including
-            directory) from which to read data for interpolation. If you do not
-            specify a directory path, it will default to your working directory
-            and you can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including directory) from which to read data for
+            interpolation. If you do not specify a directory path, it
+            will default to your working directory and you can use all
+            248 characters for the file name.
 
         ext1
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         fname2
-            File name and directory path (248 characters maximum, including
-            directory) to which BF commands are written. If you do not specify
-            a directory path, it will default to your working directory and you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including directory) to which BF commands are written. If
+            you do not specify a directory path, it will default to
+            your working directory and you can use all 248 characters
+            for the file name.
 
         ext2
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         kpos
             Position on Fname2 to write block of BF commands:
@@ -64255,10 +64432,11 @@ class _MapdlCommands(object):  # pragma: no cover
             1 - End of file (append to existing file).
 
         clab
-            Label (8 characters maximum, including the colon) for this block of
-            BF commands in Fname2.  This label is appended to the colon (:).
-            Defaults to BFn, where n is the cumulative iteration number for the
-            data set currently in the database.
+            Label (8 characters maximum, including the colon) for this
+            block of BF commands in Fname2.  This label is appended to
+            the colon (:).  Defaults to BFn, where n is the cumulative
+            iteration number for the data set currently in the
+            database.
 
         kshs
             Shell-to-solid submodeling key:
@@ -64268,17 +64446,18 @@ class _MapdlCommands(object):  # pragma: no cover
             1 - Shell-to-solid submodel.
 
         tolout
-            Extrapolation tolerance about elements, based on a fraction of the
-            element dimension. Submodel nodes outside the element by more than
-            TOLOUT are not accepted as candidates for DOF extrapolation.
-            Defaults to 0.5 (50%).
+            Extrapolation tolerance about elements, based on a
+            fraction of the element dimension. Submodel nodes outside
+            the element by more than TOLOUT are not accepted as
+            candidates for DOF extrapolation.  Defaults to 0.5 (50%).
 
         tolhgt
-            Height tolerance above or below shell elements, in units of length.
-            Used only for shell-to-shell submodeling (KSHS = 0). Submodel nodes
-            off the element surface by more than TOLHGT are not accepted as
-            candidates for DOF interpolation or extrapolation. Defaults to
-            0.0001 times the maximum element dimension.
+            Height tolerance above or below shell elements, in units
+            of length.  Used only for shell-to-shell submodeling (KSHS
+            = 0). Submodel nodes off the element surface by more than
+            TOLHGT are not accepted as candidates for DOF
+            interpolation or extrapolation. Defaults to 0.0001 times
+            the maximum element dimension.
 
         Notes
         -----
@@ -64308,7 +64487,7 @@ class _MapdlCommands(object):  # pragma: no cover
         adjacent parts linked by springs are coincident, the operation should
         be performed on each part of the model separately.
         """
-        command = "BFINT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname1), str(ext1), str(fname2), str(ext2), str(kpos), str(clab), str(kshs), str(tolout), str(tolhgt))
+        command = f"BFINT,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt}"
         return self.run(command, **kwargs)
 
     def mdele(self, node="", lab1="", nend="", ninc="", lab2="", lab3="",
@@ -64930,7 +65109,7 @@ class _MapdlCommands(object):  # pragma: no cover
                    menu.
 
             POWER - Controls whether or not PowerGraphics is active when the GUI is initiated. The
-                    ANSYS program default status is PowerGraphics “ON”;  this
+                    ANSYS program default status is PowerGraphics "ON";  this
                     command is used (placed in the start.ans file) when full
                     graphics is desired on start up.
 
@@ -65055,41 +65234,40 @@ class _MapdlCommands(object):  # pragma: no cover
 
             LIST - List the current output type specification.
 
-        --
-            Unused field.
-
         value
-            Label identifying the type of output that the LS-DYNA solver should
-            produce:
+            Label identifying the type of output that the LS-DYNA
+            solver should produce:
 
-            ANSYS - Write results files for the ANSYS postprocessors (default). The files that will
-                    be written are Jobname.RST and Jobname.HIS (see "Notes"
-                    below).
+            ANSYS - Write results files for the ANSYS postprocessors
+                    (default). The files that will be written are
+                    Jobname.RST and Jobname.HIS (see "Notes" below).
 
-            LSDYNA - Write results files for the LS-DYNA postprocessor (LS-POST). The files that
-                     will be written are D3PLOT, and files specified by EDOUT
-                     and EDHIST (see "Notes" below).
+            LSDYNA - Write results files for the LS-DYNA postprocessor
+                     (LS-POST). The files that will be written are
+                     D3PLOT, and files specified by EDOUT and EDHIST
+                     (see "Notes" below).
 
-            BOTH - Write results files for both ANSYS and LS-DYNA postprocessors.
+            BOTH - Write results files for both ANSYS and LS-DYNA
+            postprocessors.
 
         Notes
         -----
-        By default, LS-DYNA will write the ANSYS results file Jobname.RST (see
-        the EDRST command.)  If Jobname.HIS is desired, you must also issue
-        EDHIST.
+        By default, LS-DYNA will write the ANSYS results file
+        Jobname.RST (see the EDRST command.)  If Jobname.HIS is
+        desired, you must also issue EDHIST.
 
-        Value = LSDYNA or BOTH will cause LS-DYNA to write results files for
-        the LS-POST postprocessor. The D3PLOT file is always written for these
-        two options. If other LS-POST files are desired, you must issue the
-        appropriate EDHIST and EDOUT commands.
+        Value = LSDYNA or BOTH will cause LS-DYNA to write results
+        files for the LS-POST postprocessor. The D3PLOT file is always
+        written for these two options. If other LS-POST files are
+        desired, you must issue the appropriate EDHIST and EDOUT
+        commands.
 
         This command is also valid in PREP7.
 
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDOPT,%s,%s" % (str(option), str(value))
-        return self.run(command, **kwargs)
+        return self.run(f"EDOPT,{option},,{value}", **kwargs)
 
     def selm(self, **kwargs):
         """APDL Command: SELM
@@ -65098,11 +65276,12 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
+        This is a status [STAT] topic command.  Status topic commands
+        are generated by the GUI and will appear in the log file
+        (Jobname.LOG) if status is requested for some items under
+        Utility Menu> List> Status.  This command will be immediately
+        followed by a STAT command, which will report the status for
+        the specified topic.
 
         If entered directly into the program, the STAT command should
         immediately follow this command.
@@ -65110,8 +65289,7 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "SELM," % ()
-        return self.run(command, **kwargs)
+        return self.run("SELM,", **kwargs)
 
     def spread(self, value="", **kwargs):
         """APDL Command: SPREAD
@@ -65123,8 +65301,7 @@ class _MapdlCommands(object):  # pragma: no cover
         value
             Amount of tolerance.  For example, 0.1 is ± 10%.
         """
-        command = "SPREAD,%s" % (str(value))
-        return self.run(command, **kwargs)
+        return self.run("SPREAD,%s" % (str(value)), **kwargs)
 
     def vlen(self, nrow="", ninc="", **kwargs):
         """APDL Command: *VLEN
@@ -65468,36 +65645,43 @@ class _MapdlCommands(object):  # pragma: no cover
             loads. Non-mechanical loads (including thermal loads) are always
             kept (i.e., not deleted).
 
-            ALLKEEP - Keep all the boundary conditions (loads and constraints) from the end of the
-                      load step of the current restart point. This option is
-                      convenient for further load application and is useful for
-                      a linear perturbation analysis restarted from a previous
-                      linear analysis. For this option, {Fend} is the total
-                      load vector at the end of the load step at the restart
-                      point.
+            ALLKEEP - Keep all the boundary conditions (loads and
+                      constraints) from the end of the load step of
+                      the current restart point. This option is
+                      convenient for further load application and is
+                      useful for a linear perturbation analysis
+                      restarted from a previous linear analysis. For
+                      this option, {Fend} is the total load vector at
+                      the end of the load step at the restart point.
 
-            INERKEEP - Delete all loads and constraints from the restart step, except for displacement
+            INERKEEP - Delete all loads and constraints from the
+                       restart step, except for displacement
                        constraints and inertia loads (default). All
-                       displacement constraints and inertia loads are kept for
-                       convenience when performing the linear perturbation
-                       analysis. Note that nonzero and tabular displacement
-                       constraints can be considered as external loads;
-                       however, they are not deleted when using this option.
+                       displacement constraints and inertia loads are
+                       kept for convenience when performing the linear
+                       perturbation analysis. Note that nonzero and
+                       tabular displacement constraints can be
+                       considered as external loads; however, they are
+                       not deleted when using this option.
 
-            PARKEEP - Delete all loads and constraints from the restart step, except for displacement
-                      constraints. All displacement constraints are kept for
-                      convenience when performing the linear perturbation
-                      analysis. Note that nonzero and tabular displacement
-                      constraints can be considered as external loads; however,
-                      they are not deleted when using this option.
+            PARKEEP - Delete all loads and constraints from the
+                      restart step, except for displacement
+                      constraints. All displacement constraints are
+                      kept for convenience when performing the linear
+                      perturbation analysis. Note that nonzero and
+                      tabular displacement constraints can be
+                      considered as external loads; however, they are
+                      not deleted when using this option.
 
-            DZEROKEEP - Behaves the same as the PARKEEP option, except that all nonzero displacement
-                        constraints are set to zero upon the onset of linear
+            DZEROKEEP - Behaves the same as the PARKEEP option, except
+                        that all nonzero displacement constraints are
+                        set to zero upon the onset of linear
                         perturbation.
 
-            NOKEEP - Delete all the loads and constraints, including all displacement constraints.
-                     For this option, {Fend} is zero unless non-mechanical
-                     loads (e.g., thermal loads) are present.
+            NOKEEP - Delete all the loads and constraints, including
+                     all displacement constraints.  For this option,
+                     {Fend} is zero unless non-mechanical loads (e.g.,
+                     thermal loads) are present.
 
         Notes
         -----
@@ -66017,7 +66201,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "*COMP,%s,%s,%s" % (str(matrix), str(algorithm), str(threshold))
         return self.run(command, **kwargs)
 
-    def mpread(self, fname="", ext="", **kwargs):
+    def mpread(self, fname="", ext="", lib="", **kwargs):
         """APDL Command: MPREAD
 
         Reads a file containing material properties.
@@ -66025,48 +66209,49 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including
-            directory). If you do not specify the LIB option, the default
-            directory is the current working directory. If you specify the LIB
-            option, the default is the following search path: the current
-            working directory, the user's home directory, MPLIB_DIR (as
-            specified by the /MPLIB,READ,PATH command) and /ansys_dir/matlib
-            (as defined by installation). If you use the default for your
-            directory, you can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including directory). If you do not specify the LIB
+            option, the default directory is the current working
+            directory. If you specify the LIB option, the default is
+            the following search path: the current working directory,
+            the user's home directory, MPLIB_DIR (as specified by the
+            /MPLIB,READ,PATH command) and /ansys_dir/matlib (as
+            defined by installation). If you use the default for your
+            directory, you can use all 248 characters for the file
+            name.
 
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         lib
-            Reads material library files previously written with the MPWRITE
-            command.  (See the description of the LIB option for the MPWRITE
-            command.)  The only allowed value for LIB is LIB.
+            Reads material library files previously written with the
+            MPWRITE command.  (See the description of the LIB option
+            for the MPWRITE command.)  The only allowed value for LIB
+            is LIB.
 
         Notes
         -----
-        Material properties written to a file without the LIB option do not
-        support nonlinear properties.  Also, properties written to a file
-        without the LIB option are restored in the same material number as
-        originally defined.  To avoid errors, use MPREAD with the LIB option
-        only when reading files written using MPWRITE with the LIB option.
+        Material properties written to a file without the LIB option
+        do not support nonlinear properties.  Also, properties written
+        to a file without the LIB option are restored in the same
+        material number as originally defined.  To avoid errors, use
+        MPREAD with the LIB option only when reading files written
+        using MPWRITE with the LIB option.
 
-        If you omit the LIB option for MPREAD, this command supports only
-        linear properties.
+        If you omit the LIB option for MPREAD, this command supports
+        only linear properties.
 
-        Material numbers are hardcoded.  If you write a material file without
-        specifying the LIB option, then read that file in using the MPREAD
-        command with the LIB option, the ANSYS program will not write the file
-        to a new material number.  Instead, it will write the file to the "old"
-        material number (the number specified on the MPWRITE command that
-        created the file.)
+        Material numbers are hardcoded.  If you write a material file
+        without specifying the LIB option, then read that file in
+        using the MPREAD command with the LIB option, the ANSYS
+        program will not write the file to a new material number.
+        Instead, it will write the file to the "old" material number
+        (the number specified on the MPWRITE command that created the
+        file.)
 
         This command is also valid in SOLUTION.
         """
-        command = "MPREAD,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
+        return self.run(f"MPREAD,{fname},{ext},,{lib}", **kwargs)
 
     def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
         """APDL Command: /PSF
@@ -66923,9 +67108,6 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
         This command updates the geometry of the finite element model according
@@ -67459,8 +67641,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
         If you have applied the Coriolis effect (CORIOLIS) using a stationary
         reference frame, the OMEGA command takes the gyroscopic damping matrix
-        into account for the elements listed in the “Stationary Reference
-        Frame” heading in the notes section of the CORIOLIS command. The
+        into account for the elements listed in the "Stationary Reference
+        Frame" heading in the notes section of the CORIOLIS command. The
         element axis must pass through the global Cartesian origin. ANSYS
         verifies that the rotation vector axis is parallel to the axis of the
         element; if not, the gyroscopic effect is not applied. After issuing
@@ -67853,18 +68035,16 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
         ident
-            ANSYS filename identifier.  See the Basic Analysis Guide for file
-            descriptions and identifiers.  If not an ANSYS identifier, Ident
-            will be used as the filename extension.
-
-        --
-            Unused field.
+            ANSYS filename identifier.  See the Basic Analysis Guide
+            for file descriptions and identifiers.  If not an ANSYS
+            identifier, Ident will be used as the filename extension.
 
         Notes
         -----
@@ -68173,7 +68353,7 @@ class _MapdlCommands(object):  # pragma: no cover
             Data curve ID number representing the load curve to be applied. The
             load curve must have been previously defined using the EDCURVE
             command. If LCID is specified, Par1 and Par2 must be left blank (in
-            the GUI, select “None” for Par1 and Par2).
+            the GUI, select "None" for Par1 and Par2).
 
         scale
             Load curve scale factor applied to the specified load curve. The
@@ -68419,9 +68599,6 @@ class _MapdlCommands(object):  # pragma: no cover
             L2 norm of the new load in a multi-field analysis). Defaults to
             0.01 (1%) for all labels. Must be less than 1.0.
 
-        --
-            Unused field.
-
         minref
             The minimum value allowed for the program calculated reference
             value. If negative, no minimum is enforced. Defaults to 1.0e-6 for
@@ -68431,20 +68608,19 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Notes
         -----
-        MFCONV sets convergence values for variables at the ANSYS Multi-field
-        solver interface.
+        MFCONV sets convergence values for variables at the ANSYS
+        Multi-field solver interface.
 
         This command is also valid in PREP7.
 
-        See Multi-field Commands in the Coupled-Field Analysis Guide for a list
-        of all ANSYS Multi-field solver commands and their availability for MFS
-        and MFX analyses.
+        See Multi-field Commands in the Coupled-Field Analysis Guide
+        for a list of all ANSYS Multi-field solver commands and their
+        availability for MFS and MFX analyses.
 
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed ANSYS Restriction: This command is not supported
+        in Distributed ANSYS.
         """
-        command = "MFCONV,%s,%s,%s" % (str(lab), str(toler), str(minref))
-        return self.run(command, **kwargs)
+        return self.run(f"MFCONV,{lab},{toler},,{minref}", **kwargs)
 
     def ftsize(self, mxloc="", mxev="", mxlod="", **kwargs):
         """APDL Command: FTSIZE
@@ -68519,23 +68695,18 @@ class _MapdlCommands(object):  # pragma: no cover
         Parameters
         ----------
         ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]). If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]). If this number is the same as
+            for a previously defined variable, the previously defined
+            variable will be overwritten with this result.
 
         ia
             Reference number of the variable to be operated on.
 
-        --, --
-            Unused fields.
-
         name
-            Thirty-two character name for identifying the variable on the
-            printout and displays. Embedded blanks are compressed upon output.
-
-        --, --
-            Unused fields.
+            Thirty-two character name for identifying the variable on
+            the printout and displays. Embedded blanks are compressed
+            upon output.
 
         facta
             Scaling factor applied to variable IA (defaults to 1.0).
@@ -68548,10 +68719,9 @@ class _MapdlCommands(object):  # pragma: no cover
         -----
         Forms the exponential of a variable according to the operation:
 
-        IR = FACTB*EXP(FACTA x IA)
+        ``IR = FACTB*EXP(FACTA x IA)``
         """
-        command = "EXP,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(name), str(facta), str(factb))
-        return self.run(command, **kwargs)
+        return self.run(f"EXP,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
     def prerr(self, **kwargs):
         """APDL Command: PRERR
@@ -69709,7 +69879,7 @@ class _MapdlCommands(object):  # pragma: no cover
         surfaces. The normals for various planes and facets are compared to a
         tolerance to determine continuity. The ANGLE value you specify in the
         /EDGE command is the tolerance for classifying surfaces as continuous
-        or “coplanar.”
+        or "coplanar."
 
         The command affects nodal solution contour plots (PLNSOL), nodal
         solution printout (PRNSOL), and subgrid solution results accessed
@@ -69808,9 +69978,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         ext
             Filename extension (eight-character maximum).
-
-        --
-            Unused field.
 
         Notes
         -----
@@ -70559,9 +70726,6 @@ class _MapdlCommands(object):  # pragma: no cover
 
         Parameters
         ----------
-        --
-            Unused field.
-
         tolerance
             Angle tolerance (in degrees) between adjacent elements. Defaults to
             20°. Set TOLERANCE to -1 to indicate all selected elements.
@@ -70584,7 +70748,8 @@ class _MapdlCommands(object):  # pragma: no cover
 
             UZ - Release displacements in the Z direction.
 
-            BALL - Create ball joints (equivalent to releasing WARP, ROTX, ROTY, and ROTZ).
+            BALL - Create ball joints (equivalent to releasing WARP,
+            ROTX, ROTY, and ROTZ).
 
         Notes
         -----
@@ -70603,7 +70768,7 @@ class _MapdlCommands(object):  # pragma: no cover
         command, as improper use may result in mechanics that render a solution
         impossible.
         """
-        command = "ENDRELEASE,%s,%s,%s,%s,%s" % (str(tolerance), str(dof1), str(dof2), str(dof3), str(dof4))
+        command = f"ENDRELEASE,,{tolerance},{dof1},{dof2},{dof3},{dof4}"
         return self.run(command, **kwargs)
 
     def dist(self, wn="", dval="", kfact="", **kwargs):
@@ -70872,32 +71037,33 @@ class _MapdlCommands(object):  # pragma: no cover
         ext
             Filename extension (eight-character maximum).
 
-        --
-            Unused field.
-
         Notes
         -----
-        Identifies a macro library file for the *USE command.  A library of
-        macros allows blocks of often used ANSYS commands to be stacked and
-        executed from a single file.  The macro blocks must be enclosed within
-        block identifier and terminator lines as shown in the example below.
-        If you want to add comment lines to a macro block, you may place them
-        anywhere within the macro block.  (This includes placing them directly
-        on the lines where the macro block identifier and the macro block
-        terminator appear, as shown in the example.)  Do not place comment
-        lines (or any other lines) outside of a macro block.
+        Identifies a macro library file for the *USE command.  A
+        library of macros allows blocks of often used ANSYS commands
+        to be stacked and executed from a single file.  The macro
+        blocks must be enclosed within block identifier and terminator
+        lines as shown in the example below.  If you want to add
+        comment lines to a macro block, you may place them anywhere
+        within the macro block.  (This includes placing them directly
+        on the lines where the macro block identifier and the macro
+        block terminator appear, as shown in the example.)  Do not
+        place comment lines (or any other lines) outside of a macro
+        block.
 
-        The name of the macro library file is identified for reading on the
-        *ULIB command.   The name of the macro block is identified on the *USE
-        command.  The commands within the macro block are copied to a temporary
-        file (of the macro block name) during the *USE  operation and executed
-        as if a macro file of that name had been created by the user.  The
-        temporary file is deleted after it has been used.  Macro block names
-        should be acceptable filenames (system dependent) and should not match
-        user created macro file names, since the user macro file will be used
-        first (if it exists) before the library file is searched.  Macro blocks
-        may be stacked in any order.  Branching  [*GO or  *IF] external to the
-        macro block is not allowed.
+        The name of the macro library file is identified for reading
+        on the *ULIB command.  The name of the macro block is
+        identified on the *USE command.  The commands within the macro
+        block are copied to a temporary file (of the macro block name)
+        during the *USE operation and executed as if a macro file of
+        that name had been created by the user.  The temporary file is
+        deleted after it has been used.  Macro block names should be
+        acceptable filenames (system dependent) and should not match
+        user created macro file names, since the user macro file will
+        be used first (if it exists) before the library file is
+        searched.  Macro blocks may be stacked in any order.
+        Branching [*GO or *IF] external to the macro block is not
+        allowed.
 
         This command is valid in any processor.
         """
