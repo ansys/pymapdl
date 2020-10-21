@@ -499,7 +499,7 @@ class _MapdlCore(_MapdlCommands):
         self.exit()
 
         # copy result file to temp directory
-        if include_result:
+        if include_result and self._result_file is not None:
             if os.path.isfile(resultfile):
                 tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
                 copyfile(resultfile, tmp_resultfile)

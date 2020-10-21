@@ -485,12 +485,12 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         if exec_file is None:
             raise FileNotFoundError('Invalid or path or cannot load cached '
                                     'ansys path.  Enter one manually using '
-                                    'pyansys.Mapdl(exec_file=...)')
+                                    'launch_mapdl(exec_file=)')
     else:  # verify ansys exists at this location
         if not os.path.isfile(exec_file):
             raise FileNotFoundError('Invalid ANSYS executable at "%s"\n'
                                     % exec_file + 'Enter one manually using '
-                                    'pyansys.Mapdl(exec_file=)')
+                                    'launch_mapdl(exec_file=)')
 
     if run_location is None:
         temp_dir = tempfile.gettempdir()
