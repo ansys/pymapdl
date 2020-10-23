@@ -316,7 +316,7 @@ def read(filename, read_parameters=False, debug=False):
                 # Get Component name
                 ind1 = line.find(b',') + 1
                 ind2 = line.find(b',', ind1)
-                comname = line[ind1:ind2].decode()
+                comname = line[ind1:ind2].decode().strip()
 
                 # Get number of items
                 ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
