@@ -54,7 +54,7 @@ def mapdl():
     yield mapdl
 
     ### test exit ###
-    # must be at end as this uses a module scoped fixture
+    # must be after yield as this uses a module scoped fixture
     mapdl.exit()
     assert mapdl._exited
     with pytest.raises(RuntimeError):

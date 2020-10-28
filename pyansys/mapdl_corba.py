@@ -4,6 +4,7 @@ import subprocess
 import time
 import re
 import os
+import weakref
 
 from pyansys.mapdl import _MapdlCore
 from pyansys.misc import threaded, random_string
@@ -23,7 +24,7 @@ INSTANCES = []
 def cleanup():  # pragma: no cover
     if os.name == 'nt':
         for instance in INSTANCES:
-            instance.exit()
+            instance().exit()
 
 
 def tail(filename, nlines):
@@ -173,7 +174,7 @@ class MapdlCorba(_MapdlCore):
         if self._log_broadcast:
             self._broadcast_logger = self._start_broadcast_logger()
 
-        INSTANCES.append(self)
+        INSTANCES.append(weakref.ref(self))
 
     @property
     def _broadcast_file(self):
@@ -221,6 +222,10 @@ class MapdlCorba(_MapdlCore):
 
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
+            try:
+                self.run('/EXIT')
+            except:
+                pass
             try:
                 self._server.terminate()
             except:

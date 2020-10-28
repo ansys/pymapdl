@@ -1,4 +1,5 @@
 """Test the mapdl launcher"""
+import weakref
 import socket
 import os
 import pytest
@@ -81,4 +82,9 @@ def test_launch_corba(version):
     mapdl = pyansys.launch_mapdl(exec_file, override=True, mode='corba',
                                  additional_switches=additional_switches)
     assert mapdl.version == int(version)/10
-    mapdl.exit()
+    # mapdl.exit() # exit is already tested for in test_mapdl.py.
+    # Instead, test collection
+
+    mapdl_ref = weakref.ref(mapdl)
+    del mapdl
+    assert mapdl_ref() is None
