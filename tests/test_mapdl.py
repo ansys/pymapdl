@@ -31,23 +31,6 @@ skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
 
-# @pytest.fixture(scope="module", params=modes)
-# def mapdl(request):
-
-#     # configure shared memory parallel for VM
-#     additional_switches = ''
-#     if os.name == 'nt' and socket.gethostname() == 'WIN-FRDMRVG7QAB':
-#         additional_switches = '-smp'
-#     elif os.name == 'posix':
-#         os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu and dmp
-
-#     mapdl = pyansys.launch_mapdl(EXEC_FILE, override=True,
-#                                  mode=request.param,
-#                                  additional_switches=additional_switches,
-#                                  log_broadcast=True)
-#     mapdl._show_matplotlib_figures = False  # don't show matplotlib figures
-#     return mapdl
-
 @pytest.fixture(scope='function')
 def cleared(mapdl):
     mapdl.finish()

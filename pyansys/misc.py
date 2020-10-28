@@ -285,6 +285,13 @@ def creation_time(filename):
 
 
 def last_created(filenames):
-    """Return the last created file given a list of filenames"""
-    idx = np.argmax([creation_time(filename) for filename in filenames])
+    """Return the last created file given a list of filenames
+
+    If all filenames have the same creation time, then return None.
+    """
+    ctimes = [creation_time(filename) for filename in filenames]
+    idx = np.argmax(ctimes)
+    if len(set(ctimes)):
+        return None
+
     return filenames[idx]

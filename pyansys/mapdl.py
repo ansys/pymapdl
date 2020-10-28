@@ -6,6 +6,7 @@ import logging
 from functools import wraps
 import tempfile
 from shutil import rmtree, copyfile
+import weakref
 
 import numpy as np
 import pyvista as pv
@@ -127,7 +128,7 @@ class _MapdlCore(_MapdlCommands):
         from pyansys.parameters import Parameters
         self._parameters = Parameters(self)
 
-        self._redirected_commands = {'*LIS': self._list}
+        self._redirected_commands = {'*LIS': weakref.ref(self._list)}
 
         if log_apdl:
             filename = os.path.join(self.directory, 'log.inp')
@@ -239,30 +240,30 @@ class _MapdlCore(_MapdlCommands):
 
         """
         def __init__(self, parent):
-            self._parent = parent
+            self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent._log.debug('Entering non-interactive mode')
-            self._parent._store_commands = True
+            self._parent()._log.debug('Entering non-interactive mode')
+            self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent._log.debug('Entering non-interactive mode')
-            self._parent._flush_stored()
+            self._parent()._log.debug('Entering non-interactive mode')
+            self._parent()._flush_stored()
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
 
         def __init__(self, parent):
-            self._parent = parent
+            self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent._log.debug('Entering chained command mode')
-            self._parent._store_commands = True
+            self._parent()._log.debug('Entering chained command mode')
+            self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent._log.debug('Entering chained command mode')
-            self._parent._chain_stored()
-            self._parent._store_commands = False
+            self._parent()._log.debug('Entering chained command mode')
+            self._parent()._chain_stored()
+            self._parent()._store_commands = False
 
     @property
     def last_response(self):
@@ -1092,6 +1093,8 @@ class _MapdlCore(_MapdlCommands):
                 # return the file with the last access time
                 filenames = [self._distributed_result_file, self._result_file]
                 result_path = last_created(filenames)
+                if result_path is None:  # if same return result_file
+                    result_path = self._result_file
 
         elif self._distributed_result_file:
             result_path = self._distributed_result_file
@@ -1724,7 +1727,7 @@ class _MapdlCore(_MapdlCommands):
                 self._apdl_log.write('%s\n' % command)
 
         if command[:4] in self._redirected_commands:
-            function = self._redirected_commands[command[:4]]
+            function = self._redirected_commands[command[:4]]()
             return function(command)
 
         text = self._run(command, **kwargs)
