@@ -88,6 +88,12 @@ def hex_rst():
     return pyansys.read_binary(filename)
 
 
+@pytest.fixture(scope='module')
+def volume_rst():
+    rst_file = os.path.join(testfiles_path, 'vol_test.rst')
+    return pyansys.read_binary(rst_file)
+
+
 @pytest.mark.skipif(vm33 is None, reason="Requires example files")
 def test_write_tables(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('vm33.txt'))
@@ -103,14 +109,12 @@ def test_nodal_displacement():
     assert np.allclose(result, result_)
 
 
-def test_read_volume():
-    rst_file = os.path.join(testfiles_path, 'vol_test.rst')
-    rst = pyansys.read_binary(rst_file)
-    enum, edata, enode = rst.element_solution_data(0, datatype='ENG')
+def test_read_volume(volume_rst):
+    enum, edata, enode = volume_rst.element_solution_data(0, datatype='ENG')
     edata = np.asarray(edata)
     volume = edata[:, 0]
 
-    enum_vtk = np.sort(rst.grid.cell_arrays['ansys_elem_num'])
+    enum_vtk = np.sort(volume_rst.grid.cell_arrays['ansys_elem_num'])
     assert np.allclose(enum, enum_vtk)
     assert np.allclose(volume, 291895460.0)
 
@@ -282,3 +286,10 @@ def test_plot_cyl_stress(hex_pipe_corner):
                                                              off_screen=True)
     cpos = hex_pipe_corner.plot_cylindrical_nodal_stress(0, comp='R', off_screen=True)
     assert cpos
+
+
+def test_reaction_forces(volume_rst):
+    rforces, nnum, dof = volume_rst.nodal_reaction_forces(0)
+    assert (np.diff(nnum) >= 0).all()
+    assert (np.in1d(dof, [1, 2, 3])).all()
+    assert rforces.dtype == np.float

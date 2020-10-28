@@ -2874,6 +2874,93 @@ class Result(AnsysBinary):
             nitem = ELEMENT_RESULT_NCOMP.get(result_type, 1)
         return nitem
 
+    def nodal_reaction_forces(self, rnum, sort=True):
+        """Nodal reaction forces.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        sort : bool
+            Sort results by node number.  Default ``True``.
+
+        Returns
+        -------
+        rforces : np.ndarray
+            Reaction Forces
+
+        nnum : np.ndarray
+            Node numbers corresponding to the reaction forces.  Does
+            not necessarily corresponds to ``rst.mesh.nnum`` as each
+            node may not have a reaction force in each degree of
+            freedom.
+
+        dof : np.ndarray
+            Degree of freedom corresponding to each node using the
+            MAPDL degree of freedom reference table.  See
+            ``rst.result_dof`` for the corresponding degrees of
+            freedom for a given solution.
+
+        Examples
+        --------
+        Get the nodal reaction forces for the first result and print
+        the reaction forces of a single node.
+
+        >>> import pyansys
+        >>> rst = pyansys.read_binary('file.rst')
+        >>> rforces, nnum, dof = rst.nodal_reaction_forces(0)
+        >>> dof_ref = rst.result_dof(0)
+        >>> rforces[:3], nnum[:3], dof[:3], dof_ref
+        (array([  24102.21376091, -109357.01854005,   22899.5303263 ]),
+         array([4142, 4142, 4142]),
+         array([1, 2, 3], dtype=int32),
+         ['UX', 'UY', 'UZ'])
+
+        """
+        # PROGRAMMERS NOTE:
+        # RF     LONG      1       nrf     Reaction force DOFs.  This
+        #                                  index is calculated as
+        #                                  (N-1)*numdof+DOF, where N
+        #                                  is the position number of
+        #                                  the node in the nodal
+        #                                  equivalence table, and DOF
+        #                                  is the DOF reference
+        #                                  number.
+        #
+        #  ---     dp       1       nrf    Reaction forces.  The force
+        #                                  values are ordered
+        #                                  according to the DOF order
+        #                                  shown above in the DOF
+        #                                  number reference table.
+        rnum = self.parse_step_substep(rnum)
+
+        rpointers = self._resultheader['rpointers']
+        ptr = rpointers[0] + self._solution_header(0)['ptrRF']
+
+        # table is always ANSYS LONG (INT64)
+        table, bufsz = self.read_record(ptr, True)
+        table = table.view(np.int64)
+
+        solution_header = self._result_solution_header(rnum)
+        numdof = solution_header['numdof']
+
+        rforces = self.read_record(ptr + bufsz)[:table.size]
+
+        shifted_table = (table - 1) / numdof
+        index = np.array(shifted_table, np.int64)
+
+        dof = np.round(1 + numdof*(shifted_table - index)).astype(np.int32)
+
+        if sort:
+            sidx = np.argsort(shifted_table)
+            index = index[sidx]
+            dof = dof[sidx]
+            rforces = rforces[sidx]
+
+        return rforces, index, dof
+
     def plot_element_result(self, rnum, result_type, item_index,
                             in_element_coord_sys=False, **kwargs):
         """Plot an element result.
@@ -2927,10 +3014,6 @@ class Result(AnsysBinary):
 
         result : np.ndarray
             Array of result data
-
-        Examples
-        --------
-        # >>> rst.plot_element_result(
         """
         # check result exists
         result_type = result_type.upper()
