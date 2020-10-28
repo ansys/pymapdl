@@ -223,7 +223,7 @@ class MapdlCorba(_MapdlCore):
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
             try:
-                self.run('/EXIT')
+                self.run('/EXIT')  # untested on Windows
             except:
                 pass
             try:
