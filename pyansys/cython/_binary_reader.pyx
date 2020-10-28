@@ -215,14 +215,14 @@ cdef np.ndarray wrap_array(void* c_ptr, int size, int type_flag, int prec_flag):
 
     if type_flag:
         if prec_flag:
-            my_dtype = 0
+            my_dtype = 0  # np.NPY_INT16
         else:
-            my_dtype = 1
+            my_dtype = 1  # np.NPY_INT32
     else:
         if prec_flag:
-            my_dtype = 2
+            my_dtype = 2  # np.NPY_FLOAT32
         else:
-            my_dtype = 3
+            my_dtype = 3  # np.NPY_FLOAT64
 
     # wrap c_array 
     array_wrapper = ArrayWrapper()
