@@ -1,5 +1,5 @@
 """Module for miscellaneous functions and methods"""
-import stat
+import platform
 import os
 from threading import Thread
 import sys
@@ -279,19 +279,33 @@ def unique_rows(a):
     return a[idx], idx, idx2
 
 
-def creation_time(filename):
-    """Returns the file creation time in UNIX time"""
-    return os.stat(filename)[stat.ST_CTIME]
+def creation_time(path_to_file):
+    """The file creation time.
+
+    Try to get the date that a file was created, falling back to when it was
+    last modified if that isn't possible.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == 'Windows':
+        return os.path.getctime(path_to_file)
+    else:
+        stat = os.stat(path_to_file)
+        try:
+            return stat.st_birthtime
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            return stat.st_mtime
 
 
 def last_created(filenames):
     """Return the last created file given a list of filenames
 
-    If all filenames have the same creation time, then return None.
+    If all filenames have the same creation time, then return the last filename.
     """
     ctimes = [creation_time(filename) for filename in filenames]
     idx = np.argmax(ctimes)
     if len(set(ctimes)):
-        return None
+        return filenames[-1]
 
     return filenames[idx]

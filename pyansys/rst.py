@@ -2934,10 +2934,11 @@ class Result(AnsysBinary):
         #                                  according to the DOF order
         #                                  shown above in the DOF
         #                                  number reference table.
-        rnum = self.parse_step_substep(rnum)
 
+        # pointer to result reaction forces
+        rnum = self.parse_step_substep(rnum)
         rpointers = self._resultheader['rpointers']
-        ptr = rpointers[0] + self._solution_header(0)['ptrRF']
+        ptr = rpointers[rnum] + self._solution_header(rnum)['ptrRF']
 
         # table is always ANSYS LONG (INT64)
         table, bufsz = self.read_record(ptr, True)
