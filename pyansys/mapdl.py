@@ -26,7 +26,8 @@ from pyansys.post import PostProcessing
 MATPLOTLIB_LOADED = True
 try:
     import matplotlib
-    matplotlib.use('tkagg')  # for windows
+    if os.name == 'nt':
+        matplotlib.use('tkagg')  # for windows
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
 except:  # pragma: no cover
