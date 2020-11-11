@@ -1,4 +1,5 @@
 """Module for launching MAPDL locally."""
+import platform
 from glob import glob
 import re
 import warnings
@@ -511,6 +512,12 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     # NOTE: version may or may not be within the full exec_path
     version = int(re.findall(r'\d\d\d', exec_file)[0])
     mode = check_mode(mode, version)
+
+    # known issue with distributed memory parallel
+    if 'ubuntu' in platform.platform().lower():
+        if 'smp' not in additional_switches:
+            # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+            os.environ['I_MPI_SHM_LMT'] = 'shm'
 
     start_parm = {'exec_file': exec_file,
                   'run_location': run_location,
