@@ -8,13 +8,12 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 try:
     import numpy as np
-except:
+except ImportError:
     raise Exception('Please install numpy first with "pip install numpy"')
 
 
 def check_cython():
     """Check if binaries exist and if not check if Cython is installed"""
-    path = os.path.dirname(__file__)
     has_binary_reader = False
     for filename in os.listdir('pyansys'):
         if '_binary_reader' in filename:
@@ -27,6 +26,7 @@ def check_cython():
         except ImportError:
             raise ImportError('\n\n\nTo build pyansys please install Cython with:\n\n'
                               'pip install cython\n\n') from None
+
 
 check_cython()
 
