@@ -89,10 +89,10 @@ with io_open(version_file, mode='r') as fd:
 
 install_requires = ['numpy>=1.14.0',
                     'pyvista>=0.25.0',
-                    'appdirs',
+                    'appdirs>=1.4.0',
                     'psutil>=5.0.0',
-                    'pexpect',
-                    'tqdm',
+                    'pexpect>=4.8.0',
+                    'tqdm>=4.45.0',
                     'pyiges>=0.1.2']
 
 # MacOS can't launch MAPDL

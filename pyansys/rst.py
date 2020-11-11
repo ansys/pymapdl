@@ -571,7 +571,7 @@ class Result(AnsysBinary):
             comp = 'U' + comp
 
         if comp == 'NORM':
-            if dof[:3] != ['UX', 'UY', 'UZ']:
+            if dof[:3] != ['UX', 'UY', 'UZ'] and dof[:2] != ['UX', 'UY']:
                 raise AttributeError('Unable to compute norm given the DOF(s) %s'
                                      % str(dof))
             # Normalize displacement
@@ -2140,7 +2140,12 @@ class Result(AnsysBinary):
             elif element_components:
                 _, ind = self._extract_element_components(element_components)
                 disp = disp[ind]
-            new_points = disp + grid.points
+
+            if disp.shape[1] == 2:  # ignore Z
+                new_points = grid.points.copy()
+                new_points[:, :-1] += disp
+            else:
+                new_points = disp + grid.points
             grid = grid.copy()
             grid.points = new_points
 
