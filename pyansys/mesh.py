@@ -147,7 +147,7 @@ class Mesh():
 
         if additional_checking:
             cells[cells < 0] = 0
-            cells[cells >= nodes.shape[0]] = 0
+            # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
         if VTK9:
             grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)

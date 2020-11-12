@@ -1895,7 +1895,10 @@ class _MapdlCore(_MapdlCommands):
             try:
                 self.exit()
             except Exception as e:
-                self._log.error('exit: %s', str(e))
+                try:  # logger might be closed
+                    self._log.error('exit: %s', str(e))
+                except:
+                    pass
 
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
