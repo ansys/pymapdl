@@ -88,7 +88,7 @@ with io_open(version_file, mode='r') as fd:
     exec(fd.read())
 
 install_requires = ['numpy>=1.14.0',
-                    'pyvista>=0.25.0',
+                    'pyvista>=0.27.2',
                     'appdirs>=1.4.0',
                     'psutil>=5.0.0',
                     'pexpect>=4.8.0',

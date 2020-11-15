@@ -2192,8 +2192,9 @@ class Result(AnsysBinary):
         screenshot = kwargs.pop('screenshot', None)
         interactive = kwargs.pop('interactive', True)
         text_color = kwargs.pop('text_color', None)
+        use_ipyvtk = kwargs.pop('use_ipyvtk', pv.rcParams['use_ipyvtk'])
 
-        kwargs.setdefault('smooth_shading', True)
+        kwargs.setdefault('smooth_shading', pv.rcParams.get('smooth_shading', True))
         kwargs.setdefault('color', 'w')
         kwargs.setdefault('interpolate_before_map', True)
 
@@ -2252,7 +2253,8 @@ class Result(AnsysBinary):
             plotter.show(interactive=False, auto_close=False,
                          window_size=window_size,
                          full_screen=full_screen,
-                         interactive_update=not off_screen)
+                         interactive_update=not off_screen,
+                         use_ipyvtk=use_ipyvtk)
 
             self._animating = True
             def q_callback():
