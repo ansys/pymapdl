@@ -2185,9 +2185,9 @@ class Result(AnsysBinary):
 
         cmap = kwargs.pop('cmap', 'jet')
         window_size = kwargs.pop('window_size', pv.rcParams['window_size'])
-        full_screen = kwargs.pop('full_screen', pv.rcParams['full_screen'])
+        full_screen = kwargs.pop('full_screen', pv.rcParams.get('full_screen', None))
         notebook = kwargs.pop('notebook', pv.rcParams.get('notebook', None))
-        off_screen = kwargs.pop('off_screen', pv.rcParams['off_screen'])
+        off_screen = kwargs.pop('off_screen', pv.OFF_SCREEN)
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
         interactive = kwargs.pop('interactive', True)
