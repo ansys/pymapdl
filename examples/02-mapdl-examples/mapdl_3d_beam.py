@@ -10,12 +10,11 @@ method.
 
 """
 
-import os
 from pyansys import examples
 import pyansys
 
-os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on ubuntu
-mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp')
+
+mapdl = pyansys.launch_mapdl(loglevel='ERROR')
 
 mapdl.cdread('db', examples.hexarchivefile)
 mapdl.esel('s', 'ELEM', vmin=5, vmax=20)
@@ -40,9 +39,37 @@ mapdl.allsel()
 
 mapdl.mxpand(elcalc='YES')
 mapdl.modal_analysis(nmode=6)
+
+
+###############################################################################
+# View the results using the pyansys result object
+result = mapdl.result
+print(result)
+
+
+###############################################################################
+# Access nodal displacement values
+nnum, disp = result.nodal_displacement(0)
+
+# print the nodes 50 - 59
+for i in range(49, 59):
+    print(nnum[i], disp[i])
+
+
+###############################################################################
+# Plot a modal result
+result.plot_nodal_displacement(0, show_edges=True)
+
+
+###############################################################################
+# Animate a modal result
+# result.animate_nodal_solution(0, show_edges=True, loop=False, displacement_factor=10,
+                              # movie_filename='demo.gif')
+
+
+###############################################################################
+# Cleanup
+# ~~~~~~~
+# Close mapdl when complete
 mapdl.exit()
 
-# view the results using pyansys's result viewer
-result = mapdl.result
-result.animate_nodal_solution(0, show_edges=True, loop=False, displacement_factor=10,
-                              movie_filename='demo.gif')

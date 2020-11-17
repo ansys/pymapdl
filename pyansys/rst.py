@@ -2184,16 +2184,17 @@ class Result(AnsysBinary):
             rng = kwargs.pop('rng', None)
 
         cmap = kwargs.pop('cmap', 'jet')
-        window_size = kwargs.pop('window_size', [1024, 768])
-        full_screen = kwargs.pop('full_screen', False)
-        notebook = kwargs.pop('notebook', False)
-        off_screen = kwargs.pop('off_screen', None)
+        window_size = kwargs.pop('window_size', pv.rcParams['window_size'])
+        full_screen = kwargs.pop('full_screen', pv.rcParams.get('full_screen', None))
+        notebook = kwargs.pop('notebook', pv.rcParams.get('notebook', None))
+        off_screen = kwargs.pop('off_screen', pv.OFF_SCREEN)
         cpos = kwargs.pop('cpos', None)
         screenshot = kwargs.pop('screenshot', None)
         interactive = kwargs.pop('interactive', True)
         text_color = kwargs.pop('text_color', None)
+        use_ipyvtk = kwargs.pop('use_ipyvtk', pv.rcParams['use_ipyvtk'])
 
-        kwargs.setdefault('smooth_shading', True)
+        kwargs.setdefault('smooth_shading', pv.rcParams.get('smooth_shading', True))
         kwargs.setdefault('color', 'w')
         kwargs.setdefault('interpolate_before_map', True)
 
@@ -2252,7 +2253,8 @@ class Result(AnsysBinary):
             plotter.show(interactive=False, auto_close=False,
                          window_size=window_size,
                          full_screen=full_screen,
-                         interactive_update=not off_screen)
+                         interactive_update=not off_screen,
+                         use_ipyvtk=use_ipyvtk)
 
             self._animating = True
             def q_callback():

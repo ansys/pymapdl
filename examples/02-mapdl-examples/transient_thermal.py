@@ -16,14 +16,12 @@ Thanks SimuTech!
 """
 # sphinx_gallery_thumbnail_number = 4
 
-import os
 import numpy as np
 
 import matplotlib.pyplot as plt
 import pyansys
 
-os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu
-mapdl = pyansys.launch_mapdl()
+mapdl = pyansys.launch_mapdl(loglevel='ERROR')
 
 mapdl.clear()
 mapdl.prep7()
@@ -234,3 +232,4 @@ plt.legend()
 plt.xlabel('Time (seconds)')
 plt.ylabel('Temperature ($^\circ$F)')
 plt.show()
+

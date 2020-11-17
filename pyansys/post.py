@@ -281,7 +281,7 @@ class PostProcessing():
             scalars = scalars[self.selected_nodes]
         scalars = scalars[mask][ridx]
 
-        meshes = [{'mesh': surf,
+        meshes = [{'mesh': surf.copy(deep=False),  # deep=False for ipyvtk-simple
                    'stitle': kwargs.pop('stitle', ''),
                    'scalars': scalars}]
 

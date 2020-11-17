@@ -1,3 +1,4 @@
+import tempfile
 import weakref
 
 import os
@@ -423,11 +424,17 @@ class Parameters():
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""
-        filename = os.path.join(self._mapdl.directory, filename)
         if arr.dtype != np.double:
             arr = arr.astype(np.double)
+
+        if self._mapdl._local:
+            filename = os.path.join(self._mapdl.directory, filename)
+        else:
+            filename = os.path.join(tempfile.gettempdir(), filename)
         pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
 
+        if not self._mapdl._local:
+            self._mapdl.upload(filename, progress_bar=False)
 
 def interp_star_status(status):
     """Interperts \*STATUS command output from MAPDL

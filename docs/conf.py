@@ -99,6 +99,7 @@ todo_include_todos = False
 from sphinx_gallery.sorting import FileNameSortKey
 
 sphinx_gallery_conf = {
+    'pypandoc': True,  # convert rst to md for ipynb
     # path to your examples scripts
     "examples_dirs": [
         "../examples/",
