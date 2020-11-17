@@ -15,7 +15,6 @@ First, start MAPDL as a service and disable all but error messages.
 import os
 import pyansys
 
-os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu without "smp"
 mapdl = pyansys.launch_mapdl(loglevel='ERROR')
 
 ###############################################################################
@@ -67,6 +66,15 @@ mapdl.post_processing.plot_nodal_temperature()
 # Alternatively you could also use the result object that reads in the
 # result file using pyansys
 
-nnum, temp = mapdl.result.nodal_temperature(0)
+result = mapdl.result
+nnum, temp = result.nodal_temperature(0)
 # this is the same as pyansys.read_binary(mapdl._result_file)
+print(nnum, temp)
+
+
+###############################################################################
+# Cleanup
+# ~~~~~~~
+# Close mapdl when complete
+mapdl.exit()
 

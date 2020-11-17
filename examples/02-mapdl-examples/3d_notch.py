@@ -16,7 +16,6 @@ First, start MAPDL as a service and disable all but error messages.
 import numpy as np
 import pyansys
 
-# os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu without "smp"
 mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp',
                              loglevel='ERROR')
 
@@ -305,3 +304,10 @@ print('Stress Concentration: %.2f' % stress_con)
 # plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
 # plt.legend()
 # plt.show()
+
+
+###############################################################################
+# Cleanup
+# ~~~~~~~
+# Close mapdl when complete
+mapdl.exit()

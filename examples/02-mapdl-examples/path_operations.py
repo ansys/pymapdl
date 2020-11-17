@@ -1,5 +1,5 @@
 """
-.. _ref_plane_stress_concentration:
+.. _ref_path_operation:
 
 Path Operations within pyansys and MAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 
 import pyansys
 
-os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu
 mapdl = pyansys.launch_mapdl(loglevel='ERROR')
 
 ###############################################################################

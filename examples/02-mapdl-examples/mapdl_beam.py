@@ -11,8 +11,7 @@ This is an example from FINITE ELEMENT ANALYSIS USING ANSYS 11.0
 ###############################################################################
 # Launch MAPDL with interactive plotting
 import pyansys
-mapdl = pyansys.launch_mapdl(override=True, loglevel='WARNING',
-                             interactive_plotting=True)
+mapdl = pyansys.launch_mapdl(interactive_plotting=True, loglevel='ERROR')
 
 # reduce pixel count for larger font documentation plots
 mapdl.gfile(1200)

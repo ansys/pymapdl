@@ -17,7 +17,6 @@ import numpy as np
 
 import pyansys
 
-# os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary on Ubuntu without "smp"
 mapdl = pyansys.launch_mapdl(override=True, additional_switches='-smp',
                              loglevel='ERROR')
 
@@ -126,7 +125,7 @@ mapdl.d('ALL', 'UY')
 mapdl.nsel('S', 'LOC', 'X', length)
 
 # Verify that only the nodes at length have been selected:
-assert np.unique(mapdl.mesh.nodes[:, 0]) == length
+assert np.allclose(mapdl.mesh.nodes[:, 0], length)
 
 # Next, couple the DOF for these nodes.  This lets us provide a force
 # to one node that will be spread throughout all nodes in this coupled
@@ -148,7 +147,8 @@ _ = mapdl.allsel()
 # Solve the static analysis
 mapdl.run('/SOLU')
 mapdl.antype('STATIC')
-mapdl.solve()
+output = mapdl.solve()
+print(output)
 
 ###############################################################################
 # Post-Processing
@@ -370,3 +370,10 @@ plt.legend()
 plt.xlabel('Ratio of Hole Diameter to Width of Plate')
 plt.ylabel('Stress Concentration')
 plt.show()
+
+
+###############################################################################
+# Cleanup
+# ~~~~~~~
+# Close mapdl when complete
+mapdl.exit()

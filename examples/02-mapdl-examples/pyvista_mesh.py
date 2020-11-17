@@ -14,8 +14,7 @@ import pyvista as pv
 import pyansys
 
 # launch MAPDL and run a modal analysis
-os.environ['I_MPI_SHM_LMT'] = 'shm'  # necessary for Ubuntu
-mapdl = pyansys.launch_mapdl(loglevel='WARNING', override=True)
+mapdl = pyansys.launch_mapdl(loglevel='WARNING')
 
 # Create a simple plane mesh centered at (0, 0, 0) on the XY plane
 mesh = pv.Plane(i_resolution=100, j_resolution=100)

@@ -11,6 +11,7 @@ import weakref
 import numpy as np
 import pyvista as pv
 
+import scooby
 import pyansys
 from pyansys import Archive
 from pyansys.mapdl_functions import _MapdlCommands
@@ -1083,32 +1084,33 @@ class _MapdlCore(_MapdlCommands):
         from pyansys.rst import Result
 
         if not self._local:
-            raise RuntimeError('Binary interface only available when result is local.')
-
-        if self._distributed_result_file and self._result_file:
-            result_path = self._distributed_result_file
-            result = Result(result_path, read_mesh=False)
-            if result._is_cyclic:
-                result_path = self._result_file
-            else:
-                # return the file with the last access time
-                filenames = [self._distributed_result_file, self._result_file]
-                result_path = last_created(filenames)
-                if result_path is None:  # if same return result_file
-                    result_path = self._result_file
-
-        elif self._distributed_result_file:
-            result_path = self._distributed_result_file
-            result = Result(result_path, read_mesh=False)
-            if result._is_cyclic:
-                if not os.path.isfile(self._result_file):
-                    raise RuntimeError('Distributed Cyclic result not supported')
-                result_path = self._result_file
+            # download to temporary directory
+            save_path = os.path.join(tempfile.gettempdir(), 'ansys_tmp')
+            result_path = self.download_result(save_path)
         else:
-            result_path = self._result_file
+            if self._distributed_result_file and self._result_file:
+                result_path = self._distributed_result_file
+                result = Result(result_path, read_mesh=False)
+                if result._is_cyclic:
+                    result_path = self._result_file
+                else:
+                    # return the file with the last access time
+                    filenames = [self._distributed_result_file, self._result_file]
+                    result_path = last_created(filenames)
+                    if result_path is None:  # if same return result_file
+                        result_path = self._result_file
+
+            elif self._distributed_result_file:
+                result_path = self._distributed_result_file
+                result = Result(result_path, read_mesh=False)
+                if result._is_cyclic:
+                    if not os.path.isfile(self._result_file):
+                        raise RuntimeError('Distributed Cyclic result not supported')
+                    result_path = self._result_file
+            else:
+                result_path = self._result_file
 
         if result_path is None:
-            breakpoint()
             raise FileNotFoundError('No result file(s) at %s' % self.directory)
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
@@ -1159,8 +1161,11 @@ class _MapdlCore(_MapdlCommands):
         if filename[-1].isnumeric():
             filename += '_'
 
-        rth_file = os.path.join(self.directory, '%s0.%s' % (filename, 'rth'))
-        rst_file = os.path.join(self.directory, '%s0.%s' % (filename, 'rst'))
+        rth_basename = '%s0.%s' % (filename, 'rth')
+        rst_basename = '%s0.%s' % (filename, 'rst')
+
+        rth_file = os.path.join(self.directory, rth_basename)
+        rst_file = os.path.join(self.directory, rst_basename)
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
         elif os.path.isfile(rth_file):
@@ -1832,8 +1837,13 @@ class _MapdlCore(_MapdlCommands):
             raise ValueError('Expecting at least a 2D table, but input contains '
                              'only 1 dimension')
         self.dim(name, 'TABLE', array.shape[0], var1=var1, var2=var2, var3=var3)
-        filename = os.path.join(tempfile.gettempdir(), random_string() + '.txt')
+        base_name = random_string() + '.txt'
+        filename = os.path.join(tempfile.gettempdir(), base_name)
         np.savetxt(filename, array)
+
+        if not self._local:
+            self.upload(filename, progress_bar=False)
+            filename = base_name
         self.tread(name, filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
@@ -2026,8 +2036,11 @@ class _MapdlCore(_MapdlCommands):
                 plt.axis('off')
                 if self._show_matplotlib_figures:  # pragma: no cover
                     plt.show()  # consider in-line plotting
+                if scooby.in_ipython():
+                    from IPython.display import display
+                    display(plt.gcf())
             else:  # pragma: no cover
-                self._log.error('Unable to find screenshot at %s' % filename)
+                self._log.error('Unable to find screenshot at %s', filename)
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
