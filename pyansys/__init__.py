@@ -14,13 +14,6 @@ from pyansys.launcher import launch_mapdl, change_default_ansys_path
 from pyansys.misc import Report, _configure_pyvista, _check_has_ansys
 from pyansys.examples.downloads import *
 
-# optional www.pyansys.com feature
-if 'ANSJUPHUB_VER' in os.environ:
-    try:
-        from ansys.mapdl import launch_mapdl
-    except ImportError:
-        raise RuntimeError("you're not supposed to be here")
-
 
 _HAS_ANSYS = _check_has_ansys()
 
