@@ -282,25 +282,41 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
     cdef int [::1] elem_off = np.empty(nelem + 1, np.int32)
     cdef char [512] tmp_buf
 
+    # in the unlikely case where elements are stored as short
     cdef int c = 0  # cell position counter
-    for i in range(nelem):
-        # load element
-        elem_loc = loc + e_disp_table[i]
-        read_record_stream(binfile, elem_loc, <void*>tmp_buf,
-                           &prec_flag, &type_flag, &size)
+    elem_loc = loc + e_disp_table[0]
+    read_record_stream(binfile, elem_loc, <void*>(&elem[0]),
+                       &prec_flag, &type_flag, &size)
 
-        # start of the element
-        elem_off[i] = c
+    if prec_flag:
+        for i in range(nelem):
+            # load element
+            elem_loc = loc + e_disp_table[i]
+            read_record_stream(binfile, elem_loc, <void*>tmp_buf,
+                               &prec_flag, &type_flag, &size)
 
-        # always cast 
-        # read in entire element
-        if prec_flag:
-            for j in range(size):
-                elem[c + j] = <int>(<short*>tmp_buf)[j]
-        else:
-            for j in range(size):
-                elem[c + j] = (<int*>tmp_buf)[j]
-        c += size
+            # start of the element
+            elem_off[i] = c
+
+            # always cast 
+            # read in entire element
+            if prec_flag:
+                for j in range(size):
+                    elem[c + j] = <int>(<short*>tmp_buf)[j]
+            else:
+                for j in range(size):
+                    elem[c + j] = (<int*>tmp_buf)[j]
+            c += size
+    else:
+        for i in range(nelem):
+            # load element
+            elem_loc = loc + e_disp_table[i]
+            read_record_stream(binfile, elem_loc, <void*>(&elem[c]),
+                               &prec_flag, &type_flag, &size)
+
+            # start of the element
+            elem_off[i] = c
+            c += size
 
     # add final position here for parser to know the size of the last element
     elem_off[nelem] = c
