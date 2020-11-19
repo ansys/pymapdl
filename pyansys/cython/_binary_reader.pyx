@@ -271,10 +271,8 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
     cdef int prec_flag, type_flag, size, bufsize
     cdef void* c_ptr
 
-    cdef bytes py_bytes = filename.encode()
-    cdef char* c_filename = py_bytes
-    cdef int* element
-    cdef short* s_element
+    cdef bytes c_filename = filename.encode()
+    cdef ifstream* binfile = new ifstream(<char*>c_filename, binary)
 
     cdef int val, nread
     cdef int64_t elem_loc
@@ -282,26 +280,26 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
     # elem connectivity and info (10 fields + maximum of 20 nodes per element)
     cdef int [::1] elem = np.empty(nelem*30, np.int32)
     cdef int [::1] elem_off = np.empty(nelem + 1, np.int32)
+    cdef char [512] tmp_buf
 
     cdef int c = 0  # cell position counter
     for i in range(nelem):
         # load element
         elem_loc = loc + e_disp_table[i]
-        c_ptr = read_record(c_filename, elem_loc, &prec_flag, &type_flag,
-                            &size, &bufsize)
+        read_record_stream(binfile, elem_loc, <void*>tmp_buf,
+                           &prec_flag, &type_flag, &size)
 
         # start of the element
         elem_off[i] = c
 
-        # read in entire element
+        # always cast in the unlikely case where elements are stored
+        # as short
         if prec_flag:
-            s_element = <short*>c_ptr
             for j in range(size):
-                elem[c + j] = s_element[j]
+                elem[c + j] = <int>(<short*>tmp_buf)[j]
         else:
-            element = <int*>c_ptr
             for j in range(size):
-                elem[c + j] = element[j]
+                elem[c + j] = (<int*>tmp_buf)[j]
         c += size
 
     # add final position here for parser to know the size of the last element
