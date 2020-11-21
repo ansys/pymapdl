@@ -208,6 +208,11 @@ static inline double ans_strtod2(char *raw, int fltsz){
 //=============================================================================
 // reads nblock from ANSYS.  Raw string is from Python reader and file is
 // positioned at the start of the data of NBLOCK
+//
+// Returns
+// -------
+// nnodes_read : int
+//     Number of nodes read.
 //=============================================================================
 int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
 		int fltsz, int *n){
@@ -218,6 +223,13 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
   int i, j, i_val, eol;
 
   for (i=0; i<nnodes; i++){
+
+    // It's possible that less nodes are written to the record than
+    // indicated.  In this case the line starts with a -1
+    if (raw[0] == '-'){
+      break;
+    }
+
     i_val = fast_atoi(raw, intsz[0]);
     /* printf("%d", i_val); */
     nnum[i] = i_val;
@@ -252,8 +264,10 @@ int read_nblock(char *raw, int *nnum, double *nodes, int nnodes, int* intsz,
   }
 
   // return file position
-  int fpos = len_orig - strlen(raw) + n[0];
-  return fpos;
+  /* int fpos = len_orig - strlen(raw) + n[0]; */
+  /* return fpos; */
+  n[0] += len_orig - strlen(raw);
+  return i;
 
 }
 
@@ -405,6 +419,7 @@ int read_eblock(char *raw, int *elem_off, int *elem, int nelem, int intsz,
     
     // Field 11: Element number
     elem[c++] = fast_atoi(raw, intsz); raw += intsz;
+    /* printf("reading element %d\n", elem[c - 1]); */
 
     // Need an additional value for consitency with other formats
     elem[c++] = 0;

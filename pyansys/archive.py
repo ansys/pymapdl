@@ -24,9 +24,12 @@ log.setLevel('CRITICAL')
 
 
 class Archive(Mesh):
-    """Read a blocked ANSYS archive file.
+    """Read a blocked ANSYS archive file or input file.
 
     Reads a blocked CDB file and optionally parses it to a vtk grid.
+    This can be used to read in files written from MAPDL using the
+    ``CDWRITE`` command or input files (``*.dat) files written from
+    ANSYS Workbench.
 
     Write the archive file using ``CDWRITE, DB, archive.cdb``
 
@@ -58,6 +61,13 @@ class Archive(Mesh):
         as empty (null) elements.  Useful for debug or tracking
         element numbers.  Default False.
 
+    verbose : bool, optional
+        Print out each step when reading the archive file.  Used for
+        debug purposes and defaults to ``False``.
+
+    name : str, optional
+        Internally used parameter used to have a custom ``__repr__``.
+
     Examples
     --------
     >>> import pyansys
@@ -80,6 +90,18 @@ class Archive(Mesh):
            [0.75, 0.5 , 3.5 ],
            [0.75, 0.5 , 4.  ],
            [0.75, 0.5 , 4.5 ]])
+
+    Read an ANSYS workbench input file
+
+    >>> my_archive = pyansys.Archive('C:\\Users\\jerry\\stuff.dat')
+
+    Notes
+    -----
+    This class only reads EBLOCK records with SOLID records.  For
+    example, the record ``EBLOCK,19,SOLID,,3588`` will be read, but
+    ``EBLOCK,10,,,3588`` will not be read.  Generally, MAPDL will only
+    write SOLID records and Mechanical Workbench may write SOLID
+    records.  These additional records will be ignored.
     """
 
     def __init__(self, filename, read_parameters=False,
@@ -198,7 +220,12 @@ class Archive(Mesh):
 
     @wraps(pv.plot)
     def plot(self, *args, **kwargs):
-        """Plot the ANSYS archive file"""
+        """Plot the mesh"""
+        if self._grid is None:  # pragma: no cover
+            raise AttributeError('Archive must be parsed as a vtk grid.\n'
+                                 'Set `parse_vtk=True`')
+        kwargs.setdefault('color', 'w')
+        kwargs.setdefault('show_edges', True)
         self.grid.plot(*args, **kwargs)
 
 
