@@ -58,10 +58,63 @@ cdef int myfgets(char *outstr, char *instr, int *n, int fsize):
     return 1
 
 
+def py_read_eblock(char *raw, int n, char *line, int fsize):
+    """Read the eblock
+
+    The format of the element "block" is as follows for the SOLID format:
+    - Field 1 - The material number.
+    - Field 2 - The element type number.
+    - Field 3 - The real constant number.
+    - Field 4 - The section ID attribute (beam section) number.
+    - Field 5 - The element coordinate system number.
+    - Field 6 - The birth/death flag.
+    - Field 7 - The solid model reference number.
+    - Field 8 - The element shape flag.
+    - Field 9 - The number of nodes defining this element if Solkey =
+      SOLID; otherwise, Field 9 = 0.
+    - Field 10 - Not used.
+    - Field 11 - The element number.
+    - Fields 12-19 - The node numbers. The next line will have the
+additional node numbers if there are more than eight.
+
+    From the ANSYS programmer's manual
+    The format without the SOLID keyword is:
+    - Field 1 - The element number.
+    - Field 2 - The type of section ID.
+    - Field 3 - The real constant number.
+    - Field 4 - The material number.
+    - Field 5 - The element coordinate system number.
+    - Fields 6-15 - The node numbers. The next line will have the
+      additional node numbers if there are more
+    than ten.
+
+    """
+
+    # Get size of EBLOCK from the last item in the line
+    # Example: "EBLOCK,19,SOLID,,3588"
+    cdef int nelem = int(line[line.rfind(b',') + 1:])
+    if nelem == 0:
+        raise RuntimeError('Unable to read element block')
+
+    # Get interger block size
+    myfgets(line, raw, &n, fsize)
+    # (19i9)
+    cdef int isz = int(line[line.find(b'i') + 1:line.find(b')')])
+
+    # Populate element field data and connectivity
+    cdef int [::1] elem = np.empty(nelem*30, dtype=ctypes.c_int)
+    cdef int [::1] elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
+    cdef int elem_sz = read_eblock(raw,
+                                   &elem_off[0],
+                                   &elem[0],
+                                   nelem,
+                                   isz,
+                                   &n)
+    return elem_sz, elem, elem_off
+
+
 def read(filename, read_parameters=False, debug=False):
-    """
-    Read blocked ansys archive file.
-    """
+    """Read blocked ansys archive file."""
     badstr = 'Badly formatted cdb file'
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
@@ -106,17 +159,12 @@ def read(filename, read_parameters=False, debug=False):
     cdef int [::1] nnum = np.empty(0, ctypes.c_int)
     cdef double [:, ::1] nodes = np.empty((0, 0))
 
-    # EBLOCK
-    cdef int nelem = 0
-    cdef int elem_sz = 0
-    cdef int [::1] elem = np.empty(0, ctypes.c_int)
-    cdef int [::1] elem_off = np.empty(0, ctypes.c_int)
-
     # CMBLOCK
     cdef int ncomp
     cdef int [::1] component
     cdef int [::1] d_size
     cdef int nblock
+
     node_comps = {}
     elem_comps = {}
 
@@ -132,40 +180,26 @@ def read(filename, read_parameters=False, debug=False):
             break
 
         # Record element types
-        if 'E' == line[0]:
-            if b'ET' in line:
+        if 'E' == line[0] or 'e' == line[0]:
+            if b'ET,' == line[:3] or b'et,' == line[:3]:
                 if debug:
                     print('reading ET')
 
-
-                # element number
-                # element type
+                # element number and element type
                 et_val = line.decode().split(',')
                 elem_type.append([int(et_val[1]), int(et_val[2])])
-                # elem_type.append([int(line[3:line.find(b',', 5)]),
-                                  # int(line[line.find(b',', 5) + 1:])])
 
-            elif b'EBLOCK' in line:
+            elif b'EBLOCK,' == line[:7] or b'eblock,' == line[:7]:
                 if debug:
                     print('reading EBLOCK')
-                eblock_read = True
 
-                # Get size of EBLOCK
-                nelem = int(line[line.rfind(b',') + 1:])
-                if nelem == 0:
-                    raise Exception('Unable to read element block')
+                # only read entries with SOLID
+                if b'SOLID' in line or b'solid' in line:
+                    elem_sz, elem, elem_off = py_read_eblock(raw, n, line, fsize)
+                    eblock_read = True
 
-                # Get interger block size
-                myfgets(line, raw, &n, fsize)
-                isz = int(line[line.find(b'i') + 1:line.find(b')')])
-
-                # Populate element field data and connectivity
-                elem = np.empty(nelem*30, dtype=ctypes.c_int)
-                elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
-                elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz, &n)
-
-        elif b'K' == line[0]:
-            if b'KEYOP' in line:
+        elif b'K' == line[0] or b'k' == line[0]:
+            if b'KEYOP' in line or b'keyop' in line:
                 if debug:
                     print('reading KEYOP')
 
@@ -182,8 +216,8 @@ def read(filename, read_parameters=False, debug=False):
                 else:
                     keyopt[key_num] = [entry[1:]]
 
-        elif 'R' == line[0]:
-            if b'RLBLOCK' in line:
+        elif 'R' == line[0] or 'r' == line[0]:
+            if b'RLBLOCK' in line or b'rlblock' in line:
                 if debug:
                     print('reading RLBLOCK')
 
@@ -246,9 +280,9 @@ def read(filename, read_parameters=False, debug=False):
             
                     rdat.append(rcon)
 
-        elif 'N' == line[0]: # Test is faster than next line
+        elif 'N' == line[0] or 'n' == line[0]:
             # if line contains the start of the node block
-            if b'NBLOCK' in line:
+            if line[:6] == b'NBLOCK' or line[:6] == b'nblock':
                 start_pos = n
                 if debug:
                     print('reading NBLOCK')
@@ -260,45 +294,53 @@ def read(filename, read_parameters=False, debug=False):
 
                 # Get format of NBLOCK
                 if myfgets(line, raw, &n, fsize):
-                    raise Exception('Unable to read nblock format line or '
-                                    'at end of file.')
+                    raise RuntimeError('Unable to read nblock format line or '
+                                       'at end of file.')
                 d_size, f_size, nfld, nexp = node_block_format(line)
                 nnum = np.empty(nnodes, dtype=ctypes.c_int)
                 nodes = np.empty((nnodes, 6))
 
-                n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                &d_size[0], f_size, &n)
+                nnodes_read = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                                          &d_size[0], f_size, &n)
 
                 # verify at the end of the block
-                if myfgets(line, raw, &n, fsize):
-                    raise Exception('Unable to read end of nblock or at end of file')
+                if nnodes_read != nnodes:
+                    nnodes = nnodes_read
+                    nodes = nodes[:nnodes]
+                    nnum = nnum[:nnodes]
+                else:
+                    if myfgets(line, raw, &n, fsize):
+                        raise RuntimeError('Unable to read nblock format line or '
+                                           'at end of file.')
 
-                if 'N,R5.3,LOC' not in line.decode().replace(' ', ''):
-                    if debug:
-                        print('N,R5.3,LOC not at end of block')
-                    # need to reread the number of nodes
-                    n = start_pos
-                    if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                    nnodes = 0
-                    while True:
+                    bl_end = line.decode().replace(' ', '')
+                    if 'N,R5.3,LOC' not in bl_end or b'-1' == bl_end[:2]:
+                        if debug:
+                            print('N,R5.3,LOC not at end of block')
+                        # need to reread the number of nodes
+                        n = start_pos
                         if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                        if 'N,R5.3,LOC' not in line.decode().replace(' ', ''):
-                            break
-                        nnodes += 1
+                        nnodes = 0
+                        while True:
+                            if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                            bl_end = line.decode().replace(' ', '')
+                            if 'N,R5.3,LOC' not in bl_end or b'-1' == bl_end[:2]:
+                                break
+                            nnodes += 1
 
-                    # reread nodes
-                    n = start_pos
-                    if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                    d_size, f_size, nfld, nexp = node_block_format(line)
-                    nnum = np.empty(nnodes, dtype=ctypes.c_int)
-                    nodes = np.zeros((nnodes, 6))
+                        # reread nodes
+                        n = start_pos
+                        if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                        d_size, f_size, nfld, nexp = node_block_format(line)
+                        nnum = np.empty(nnodes, dtype=ctypes.c_int)
+                        nodes = np.zeros((nnodes, 6))
 
-                    n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                    &d_size[0], f_size, &n)
+                        n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                                        &d_size[0], f_size, &n)
 
 
-        elif 'C' == line[0]:  # component
-            if b'CMBLOCK' in line:  # component
+        elif 'C' == line[0] or 'c' == line[0]:
+            if line[:8] == b'CMBLOCK,' or line[:8] == b'cmblock,':  # component block
                 if debug:
                     print('reading CMBLOCK')
 
@@ -312,14 +354,9 @@ def read(filename, read_parameters=False, debug=False):
                 if len(split_line) < 3:
                     print('Poor formatting of CMBLOCK: %s' % line)
                     continue
-                line_comp_type = split_line[2]
-                # Get Component name
-                ind1 = line.find(b',') + 1
-                ind2 = line.find(b',', ind1)
-                comname = line[ind1:ind2].decode().strip()
 
                 # Get number of items
-                ncomp = int(line[line.rfind(b',') + 1:line.find(b'!')])
+                ncomp = int(split_line[3].split(b'!')[0].strip())
                 component = np.empty(ncomp, ctypes.c_int)
 
                 # Get interger size
@@ -341,9 +378,10 @@ def read(filename, read_parameters=False, debug=False):
                     component[i] = atoi(tempstr)
 
                 # Convert component to array and store
+                comname = split_line[1].decode().strip()
+                line_comp_type = split_line[2]
                 if b'NODE' in line_comp_type:
                     node_comps[comname] = component_interperter(component)
-
                 elif b'ELEM' in line_comp_type:
                     elem_comps[comname] = component_interperter(component)
 
@@ -402,42 +440,14 @@ def read(filename, read_parameters=False, debug=False):
                     n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
                                     &d_size[0], f_size, &n)
 
-    # if eblock was not read for some reason
-    if not eblock_read:
-        n = 0
-        while 1:
-            if myfgets(line, raw, &n, fsize):
-                break
-
-            if 'E' == line[0]:  # faster to test one character
-                if b'EBLOCK' in line:
-                    if debug:
-                        print('reading EBLOCK')
-
-                    # Get size of EBLOCK
-                    nelem = int(line[line.rfind(b',') + 1:])
-
-                    # Get interger block size
-                    myfgets(line, raw, &n, fsize)
-                    isz = int(line[line.find(b'i') + 1:line.find(b')')])
-
-                    if debug:
-                        print('nelem:', nelem)
-                        print('isz:', isz)
-
-                    # Initialize element data array.  Use number of lines
-                    # as nelem is unknown
-                    # Populate element field data and connectivity
-                    elem = np.empty(nelem*30, dtype=ctypes.c_int)
-                    elem_off = np.empty(nelem + 1, dtype=ctypes.c_int)
-                    elem_sz = read_eblock(raw, &elem_off[0], &elem[0], nelem, isz,
-                                               &n)
-
-                    if nelem == 0:
-                        raise Exception('Unable to read element block')
-
-    # Free memory
+    # Free cached archive file
     free(raw)
+
+    # assemble global element block
+    if not eblock_read:
+        elem = np.empty(0, dtype=ctypes.c_int)
+        elem_off = np.empty(0, dtype=ctypes.c_int)
+        elem_sz = 0
 
     return {'rnum': np.asarray(rnum),
             'rdat': np.asarray(rdat),
@@ -450,11 +460,11 @@ def read(filename, read_parameters=False, debug=False):
             'elem_comps': elem_comps,
             'keyopt': keyopt,
             'parameters': parameters
-            }
+    }
 
 
 def node_block_format(string):
-    """ Get node block format
+    """Get the node block format.
 
     Example formats:
     (3i9,6e21.13e3)
@@ -467,7 +477,7 @@ def node_block_format(string):
     fields = string.split(',')
 
     # double and float size
-    d_size = np.empty(3, np.int32)
+    d_size = np.zeros(3, np.int32)
     nexp = 2  # default when missing
     nfields = 6
     f_size = 21

@@ -150,10 +150,10 @@ class Mesh():
             # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
         if VTK9:
-            grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=False)
+            grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
         else:
             grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes,
-                                       deep=False)
+                                       deep=True)
 
         # Store original ANSYS element and node information
         grid.point_arrays['ansys_node_num'] = nnum
@@ -611,6 +611,7 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
     nodes_new = np.empty((nnodes + nextra, 3))
     nodes_new[:nnodes] = nodes
+    nodes_new[nnodes:] = 0  # otherwise, segfault disaster
 
     # Set new midside nodes directly between their edge nodes
     temp_nodes = nodes_new.copy()
