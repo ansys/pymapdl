@@ -21,9 +21,8 @@ ANSYS archive files containing solid elements (both legacy and modern) can be lo
     # Read ansys archive file
     archive = pyansys.Archive(filename)
 
-    # Print raw data from cdb
-    for key in archive.raw:
-       print("%s : %s" % (key, archive.raw[key]))
+    # Print overview of data read from cdb
+    print(archive)
 
     # Create a vtk unstructured grid from the raw data and plot it
     grid = archive.parse_vtk(force_linear=True)
