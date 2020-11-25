@@ -450,7 +450,7 @@ def read(filename, read_parameters=False, debug=False):
         elem_sz = 0
 
     return {'rnum': np.asarray(rnum),
-            'rdat': np.asarray(rdat),
+            'rdat': rdat,
             'ekey': np.asarray(elem_type, ctypes.c_int),
             'nnum': np.asarray(nnum),
             'nodes': np.asarray(nodes),
