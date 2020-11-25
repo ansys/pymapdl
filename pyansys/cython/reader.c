@@ -431,6 +431,20 @@ int read_eblock(char *raw, int *elem_off, int *elem, int nelem, int intsz,
       while (raw[0] == '\r' || raw[0] == '\n' ) ++raw;
       elem[c++] = fast_atoi(raw, intsz); raw += intsz;
     }
+
+    // Edge case where missing midside nodes are not written (because
+    // MAPDL refuse to write zeros at the end of a line)
+    if (nnode < 20 && nnode > 10){
+      for (j=nnode; j<20; j++){
+        elem[c++] = 0;
+      }
+    }
+    /* else if (nnode < 8 && nnode > 4){ */
+    /*   for (j=nnode; j<8; j++){ */
+    /*     elem[c++] = 0; */
+    /*   } */
+    /* } */
+
   }
 
   // update file position
