@@ -480,6 +480,7 @@ int ans_to_vtk(const int nelem, const int *elem, const int *elem_off,
       /* printf("nnode_elem %d: \n", nnode_elem); */
       if (nnode_elem == 3){
 	/* printf(" subtype tri\n"); */
+        is_quad = false;
 	add_tri(build_offset, &elem[off], is_quad);
       } else if (elem[off + 2] == elem[off + 3]){
 	/* printf(" subtype tri\n"); */
