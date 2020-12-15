@@ -23,10 +23,11 @@ INSTANCES = []
 @atexit.register
 def cleanup():  # pragma: no cover
     if os.name == 'nt':
-        for instance in INSTANCES:
-            # normally a weakref and is probably closed
+        for ref in INSTANCES:
+            # check if object has already been collected
+            instance = ref()
             if instance is not None:
-                instance().exit()
+                instance.exit()
 
 
 def tail(filename, nlines):
