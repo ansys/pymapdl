@@ -23,6 +23,7 @@ LINEAR_CELL_TYPES = [VTK_TETRA,
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'test_data')
+DAT_FILE = os.path.join(testfiles_path, 'Panel_3D_500x200.dat')
 
 
 @pytest.fixture(scope='module')
@@ -39,6 +40,13 @@ def all_solid_cells_archive():
 def all_solid_cells_archive_linear():
     return pyansys.Archive(os.path.join(testfiles_path, 'all_solid_cells.cdb'),
                            force_linear=True)
+
+
+def test_load_dat():
+    arch = pyansys.Archive(DAT_FILE)
+    assert arch.n_node == 25774  # through inspection of the dat file
+    assert arch.n_elem == 3588  # through inspection of the dat file
+
 
 def test_repr(hex_archive):
     assert '%s' % hex_archive.n_node in str(hex_archive)

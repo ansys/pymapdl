@@ -190,6 +190,12 @@ def read(filename, read_parameters=False, debug=False):
                 elem_type.append([int(et_val[1]), int(et_val[2])])
 
             elif b'EBLOCK,' == line[:7] or b'eblock,' == line[:7]:
+                if eblock_read:
+                    # Sometimes, DAT files contain two EBLOCKs.  Read
+                    # only the first block.
+                    if debug:
+                        print('EBLOCK already read, skipping...')
+                    continue
                 if debug:
                     print('reading EBLOCK')
 
