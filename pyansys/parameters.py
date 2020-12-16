@@ -437,7 +437,7 @@ class Parameters():
             self._mapdl.upload(filename, progress_bar=False)
 
 def interp_star_status(status):
-    """Interperts \*STATUS command output from MAPDL
+    """Interprets \*STATUS command output from MAPDL
 
     Parameters
     ----------

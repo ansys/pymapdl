@@ -1,4 +1,5 @@
 """Module to control interaction with MAPDL through Python"""
+import time
 import glob
 import re
 import os
@@ -1244,7 +1245,8 @@ class _MapdlCore(_MapdlCommands):
 
         self._store_commands = False
         self._stored_commands = []
-        out = self.input(tmp_inp, write_to_log=False)
+        _ = self.input(tmp_inp, write_to_log=False)
+        time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
             self._response = '\n' + open(tmp_out).read()
 

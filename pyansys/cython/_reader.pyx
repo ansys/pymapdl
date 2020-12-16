@@ -187,9 +187,21 @@ def read(filename, read_parameters=False, debug=False):
 
                 # element number and element type
                 et_val = line.decode().split(',')
-                elem_type.append([int(et_val[1]), int(et_val[2])])
+                try:
+                    int(et_val[1])
+                    elem_type.append([int(et_val[1]), int(et_val[2])])
+                except:
+                    if debug:
+                        print('Invalid "ET" command %s' % line.decode())
+                    continue
 
             elif b'EBLOCK,' == line[:7] or b'eblock,' == line[:7]:
+                if eblock_read:
+                    # Sometimes, DAT files contain two EBLOCKs.  Read
+                    # only the first block.
+                    if debug:
+                        print('EBLOCK already read, skipping...')
+                    continue
                 if debug:
                     print('reading EBLOCK')
 
@@ -283,6 +295,10 @@ def read(filename, read_parameters=False, debug=False):
         elif 'N' == line[0] or 'n' == line[0]:
             # if line contains the start of the node block
             if line[:6] == b'NBLOCK' or line[:6] == b'nblock':
+                if nodes_read:
+                    if debug:
+                        print('Skipping additional NBLOCK')
+                    continue
                 start_pos = n
                 if debug:
                     print('reading NBLOCK')
@@ -385,38 +401,36 @@ def read(filename, read_parameters=False, debug=False):
                 elif b'ELEM' in line_comp_type:
                     elem_comps[comname] = component_interperter(component)
 
-        elif '*' == line[0] and read_parameters:  # dim
+        elif '*' == line[0] and read_parameters:  # maybe *DIM
             if b'DIM' in line:
-                _, name, _, dim0, dim1, dim2, _ = line.decode().split(',')
+                items = line.decode().split(',')
+                if len(items) < 3:
+                    continue
 
-                # dim = []
-                # for d in [dim0, dim1, dim2]:
-                #     if d.strip():
-                #         dim.append(int(d))
+                name = items[1]
+                if items[2].lower() == 'string':
+                    myfgets(line, raw, &n, fsize)
+                    string_items = line.decode().split('=')
+                    if len(string_items) > 1:
+                        parameters[name] = string_items[1].replace("'", '').strip()
+                    else:
+                        parameters[name] = line.decode()
+                elif items[2].lower() == 'array':
+                    myfgets(line, raw, &n, fsize)
+                    if b'PREAD' in line:
+                        if debug:
+                            print('reading PREAD')
 
-                # while dim[-1] == 1:
-                #     if len(dim) == 1:
-                #         break
-                #     del dim[-1]
-
-                # init_arr = np.zeros(np.prod(dim))
-
-                myfgets(line, raw, &n, fsize)
-                if b'PREAD' in line:
-                    if debug:
-                        print('reading PREAD')
-
-                    _, name, arr_size = line.decode().split(',')
-                    name = name.strip()
-                    st = n
-                    en = raw.find(b'END PREAD', n)
-                    if debug:
-                        print(st, en)
-                    if st != -1 and en != -1:
-                        lines = raw[st:en].split()
-                        arr = np.genfromtxt(raw[st:en].split())
-                        # init_arr[arr.size] = arr
-                        parameters[name] = arr
+                        _, name, arr_size = line.decode().split(',')
+                        name = name.strip()
+                        st = n
+                        en = raw.find(b'END PREAD', n)
+                        if debug:
+                            print(st, en)
+                        if st != -1 and en != -1:
+                            lines = raw[st:en].split()
+                            arr = np.genfromtxt(raw[st:en].split())
+                            parameters[name] = arr
 
     # if the node block was not read for some reason
     if not nodes_read:

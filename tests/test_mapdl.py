@@ -1,5 +1,4 @@
 """Test MAPDL Console and CORBA interfaces"""
-import socket
 import os
 
 import pytest
