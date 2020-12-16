@@ -187,7 +187,13 @@ def read(filename, read_parameters=False, debug=False):
 
                 # element number and element type
                 et_val = line.decode().split(',')
-                elem_type.append([int(et_val[1]), int(et_val[2])])
+                try:
+                    int(et_val[1])
+                    elem_type.append([int(et_val[1]), int(et_val[2])])
+                except:
+                    if debug:
+                        print('Invalid "ET" command %s' % line.decode())
+                    continue
 
             elif b'EBLOCK,' == line[:7] or b'eblock,' == line[:7]:
                 if eblock_read:
@@ -289,6 +295,10 @@ def read(filename, read_parameters=False, debug=False):
         elif 'N' == line[0] or 'n' == line[0]:
             # if line contains the start of the node block
             if line[:6] == b'NBLOCK' or line[:6] == b'nblock':
+                if nodes_read:
+                    if debug:
+                        print('Skipping additional NBLOCK')
+                    continue
                 start_pos = n
                 if debug:
                     print('reading NBLOCK')
