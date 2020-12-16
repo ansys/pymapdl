@@ -12,11 +12,12 @@ from pyansys.errors import MapdlExitedError
 pyvista.OFF_SCREEN = True
 
 # check for a valid MAPDL install with CORBA
-valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
+valid_rver = ['202', '201', '195', '194', '193', '192', '191', '190', '182']
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
+        break
 
 if 'PYANSYS_IGNORE_ANSYS' in os.environ:
     HAS_ANSYS = False

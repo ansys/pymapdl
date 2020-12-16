@@ -19,12 +19,15 @@ except:
 
 INSTANCES = []
 
-# Ensure all instances close on exit
+# Ensure all instances close on exit within Windows
 @atexit.register
 def cleanup():  # pragma: no cover
     if os.name == 'nt':
-        for instance in INSTANCES:
-            instance().exit()
+        for ref in INSTANCES:
+            # check if object has already been collected
+            instance = ref()
+            if instance is not None:
+                instance.exit()
 
 
 def tail(filename, nlines):
