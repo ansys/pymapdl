@@ -305,6 +305,9 @@ def load_elements(filename, int64_t loc, int nelem, int64_t [::1] e_disp_table):
     # add final position here for parser to know the size of the last element
     elem_off[nelem] = c
 
+    # this isn't collected automatically, must close manually
+    del binfile
+
     return np.array(elem[:c]), np.array(elem_off)
 
 
@@ -340,6 +343,9 @@ def read_element_stress(filename, int64_t [::1] ele_ind_table,
                                 PTR_ENS_IDX, nnode_elem, nitem,
                                 &ele_data_arr[c, 0], as_global)
             c += nnode_elem
+
+    # this isn't collected automatically, must close manually
+    del binfile
 
 
 def populate_surface_element_result(filename,
@@ -472,6 +478,9 @@ def populate_surface_element_result(filename,
             for j in range(fsize):
                 data[cj] = 0
                 cj += 1
+
+    # this isn't collected automatically, must close manually
+    del binfile
 
     return np.array(data)
 
@@ -913,11 +922,9 @@ def read_nodal_values_dist(filename,
 
         c += 1  # global solution cell index
 
-    # must delete to manually collect
+    # this isn't collected automatically, must close manually
     del binfile
 
-    # have to increment again
-    # return c + 1
     return c
 
 # indices of a wedge must be reordered (see _parser.store_weg)
