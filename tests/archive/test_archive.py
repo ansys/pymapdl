@@ -23,7 +23,7 @@ LINEAR_CELL_TYPES = [VTK_TETRA,
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'test_data')
-DAT_FILE = os.path.join(testfiles_path, 'Panel_3D_500x200.dat')
+DAT_FILE = os.path.join(testfiles_path, 'Panel_Transient.dat')
 
 
 @pytest.fixture(scope='module')
@@ -44,9 +44,9 @@ def all_solid_cells_archive_linear():
 
 def test_load_dat():
     arch = pyansys.Archive(DAT_FILE, read_parameters=True)
-    assert arch.n_node == 25774  # through inspection of the dat file
-    assert arch.n_elem == 3588  # through inspection of the dat file
-    assert 'FSCoupledInstationarySim' in arch.parameters['_wb_ProjectScratch_dir']
+    assert arch.n_node == 1263  # through inspection of the dat file
+    assert arch.n_elem == 160  # through inspection of the dat file
+    assert 'Panelflattern' in arch.parameters['_wb_userfiles_dir']
 
 
 def test_repr(hex_archive):
