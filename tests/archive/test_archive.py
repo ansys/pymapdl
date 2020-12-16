@@ -43,9 +43,10 @@ def all_solid_cells_archive_linear():
 
 
 def test_load_dat():
-    arch = pyansys.Archive(DAT_FILE)
+    arch = pyansys.Archive(DAT_FILE, read_parameters=True)
     assert arch.n_node == 25774  # through inspection of the dat file
     assert arch.n_elem == 3588  # through inspection of the dat file
+    assert 'FSCoupledInstationarySim' in arch.parameters['_wb_ProjectScratch_dir']
 
 
 def test_repr(hex_archive):
