@@ -228,10 +228,10 @@ class Result(AnsysBinary):
         Returns
         -------
         c_systems : dict
-            Dictionary containing one entry for each defined coordinate
-            system.  If no non-standard coordinate systems have been
-            defined, there will be only one None.  First coordinate system
-            is assumed to be global cartesian.
+            Dictionary containing one entry for each defined
+            coordinate system.  If no non-standard coordinate systems
+            have been defined, there will be only one None.  First
+            coordinate system is assumed to be global cartesian.
 
         Notes
         -----
@@ -242,14 +242,15 @@ class Result(AnsysBinary):
         - Third rotation about local Y (positive Z toward X).
 
         PAR1
-        Used for elliptical, spheroidal, or toroidal systems. If KCS = 1
-        or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-        radius (defaults to 1.0 (circle)). If KCS = 3, PAR1 is the major
-        radius of the torus.
+        Used for elliptical, spheroidal, or toroidal systems. If KCS =
+        1 or 2, PAR1 is the ratio of the ellipse Y-axis radius to
+        X-axis radius (defaults to 1.0 (circle)). If KCS = 3, PAR1 is
+        the major radius of the torus.
 
         PAR2
-        Used for spheroidal systems. If KCS = 2, PAR2 = ratio of ellipse
-        Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
+        Used for spheroidal systems. If KCS = 2, PAR2 = ratio of
+        ellipse Z-axis radius to X-axis radius (defaults to 1.0
+        (circle)).
 
         Coordinate system type:
             - 0: Cartesian
@@ -257,13 +258,21 @@ class Result(AnsysBinary):
             - 2: Spherical (or spheroidal)
             - 3: Toroidal
         """
-        # number of coordinate systems
-        maxcsy = self._geometry_header['maxcsy']
+        c_systems = [None]
 
         # load coordinate system index table
         ptr_csy = self._geometry_header['ptrCSY']
         if ptr_csy:
-            csy = self.read_record(ptr_csy)
+            csy, sz = self.read_record(ptr_csy, return_bufsize=True)
+        else:
+            return c_systems
+
+        # Assemble element record pointers relative to ptrETY
+        if self._map_flag:
+            csys_record_pointers = self.read_record(ptr_csy + sz)
+        else:
+            maxcsy = self._geometry_header['maxcsy']
+            csys_record_pointers = csy[:maxcsy]
 
         # parse each coordinate system
         # The items stored in each record:
@@ -274,12 +283,11 @@ class Result(AnsysBinary):
         # * Items 19-20 are theta and phi singularity keys.
         # * Item 21 is the coordinate system type (0, 1, 2, or 3).
         # * Item 22 is the coordinate system reference number.
-        c_systems = [None]
-        for i in range(maxcsy):
-            if not csy[i]:
+        for csys_record_pointer in csys_record_pointers:
+            if not csys_record_pointer:
                 c_system = None
             else:
-                data = self.read_record(ptr_csy + csy[i])
+                data = self.read_record(ptr_csy + csys_record_pointer)
                 c_system = {'transformation matrix': np.array(data[:9].reshape(-1, 3)),
                             'origin': np.array(data[9:12]),
                             'PAR1': data[12],
@@ -1289,12 +1297,22 @@ class Result(AnsysBinary):
 
         return node_comp, elem_comp
 
+    @property
+    def _map_flag(self):
+        """Flag to indicate format of mapping index vectors for
+        element types, real constants, coordinate systems, and sections.
+
+        When ``True``, uses two vectors, and ``False`` using the old
+        format (prior to 2021R1).
+
+        """
+        return bool(self._geometry_header['mapFlag'])
+
     def _load_element_table(self):
         """Store element type information"""
-        maxety = self._geometry_header['maxety']  # number of elemet types
-
         # pointer to the element type index table
-        e_type_table = self.read_record(self._geometry_header['ptrETY'])
+        ptrety = self._geometry_header['ptrETY']
+        e_type_table, sz = self.read_record(ptrety, True)
 
         # store information for each element type
         nodelm = np.empty(10000, np.int32)  # n nodes for this element type
@@ -1302,11 +1320,18 @@ class Result(AnsysBinary):
         nodstr = np.empty(10000, np.int32)  # n nodes per element having nodal stresses
         ekey = []
         keyopts = np.zeros((10000, 11), np.int16)
-        for i in range(maxety):
-            if not e_type_table[i]:
-                continue
 
-            ptr = self._geometry_header['ptrETY'] + e_type_table[i]
+        # Assemble element record pointers relative to ptrETY
+        if self._map_flag:
+            elem_record_pointers = self.read_record(ptrety + sz)
+        else:
+            elem_record_pointers = []
+            for i in range(self._geometry_header['maxety']):
+                if e_type_table[i]:
+                    elem_record_pointers.append(e_type_table[i])
+
+        for elem_record_pointer in elem_record_pointers:
+            ptr = ptrety + elem_record_pointer
             einfo = self.read_record(ptr)
 
             etype_ref = einfo[0]

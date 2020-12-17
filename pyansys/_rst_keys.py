@@ -1,57 +1,76 @@
-"""Various header keys for the result file"""
+"""Various header keys for the result file
 
-geometry_header_keys = ['__unused',  # position not used
-                        'maxety',
-                        'maxrl',
-                        'nnod',
-                        'nelm',
-                        'maxcsy',
-                        'ptrETY',
-                        'ptrREL',
-                        'ptrLOC',
-                        'ptrCSY',
-                        'ptrEID',
-                        'maxsec',
-                        'secsiz',
-                        'nummat',
-                        'matsiz',
-                        'ptrMAS',
-                        'csysiz',
-                        'elmsiz',
-                        'etysiz',
-                        'rlsiz',
-                        'ptrETYl',
-                        'ptrETYh',
-                        'ptrRELl',
-                        'ptrRELh',
-                        'ptrCSYl',
-                        'ptrCSYh',
-                        'ptrLOCl',
-                        'ptrLOCh',
-                        'ptrEIDl',
-                        'ptrEIDh',
-                        'ptrMASl',
-                        'ptrMASh',
-                        'ptrSECl',
-                        'ptrSECh',
-                        'ptrMATl',
-                        'ptrMATh',
-                        'ptrCNTl',
-                        'ptrCNTh',
-                        'ptrNODl',
-                        'ptrNODh',
-                        'ptrELMl',
-                        'ptrELMh',
-                        'Glblenb',
-                        'ptrGNODl',
-                        'ptrGNODh',
-                        'maxn',
-                        'NodesUpd',
-                        'lenbac',
-                        'maxcomp',
-                        'compsiz',
-                        'ptrCOMPl',
-                        'ptrCOMPh']
+/usr/ansys_inc/v150/ansys/customize/include/fdresu.inc
+
+"""
+
+geometry_header_keys = ['__unused',  # 1
+                        'maxety',    # 2
+                        'maxrl',     # 3
+                        'nnod',      # 4
+                        'nelm',      # 5
+                        'maxcsy',    # 6
+                        'ptrETY',    # 7
+                        'ptrREL',    # 8
+                        'ptrLOC',    # 9
+                        'ptrCSY',    # 10
+                        'ptrEID',    # 11
+                        'maxsec',    # 12
+                        'secsiz',    # 13
+                        'nummat',    # 14
+                        'matsiz',    # 15
+                        'ptrMAS',    # 16
+                        'csysiz',    # 17
+                        'elmsiz',    # 18
+                        'etysiz',    # 19
+                        'rlsiz',     # 20
+                        'ptrETYl',   # 21
+                        'ptrETYh',   # 22
+                        'ptrRELl',   # 23
+                        'ptrRELh',   # 24
+                        'ptrCSYl',   # 25
+                        'ptrCSYh',   # 26
+                        'ptrLOCl',   # 27
+                        'ptrLOCh',   # 28
+                        'ptrEIDl',   # 29
+                        'ptrEIDh',   # 30
+                        'ptrMASl',   # 31
+                        'ptrMASh',   # 32
+                        'ptrSECl',   # 33
+                        'ptrSECh',   # 34
+                        'ptrMATl',   # 35
+                        'ptrMATh',   # 36
+                        'ptrCNTl',   # 37
+                        'ptrCNTh',   # 38
+                        'ptrNODl',   # 39
+                        'ptrNODh',   # 40
+                        'ptrELMl',   # 41
+                        'ptrELMh',   # 42
+                        'Glblenb',   # 43
+                        'ptrGNODl',  # 44
+                        'ptrGNODh',  # 45
+                        'maxn',      # 46
+                        'NodesUpd',  # 47
+                        'lenbac',    # 48
+                        'maxcomp',   # 49
+                        'compsiz',   # 50
+                        'ptrCOMPl',  # 51
+                        'ptrCOMPh',  # 52
+                        'nMatProp',  # 53
+                        'nStage',    # 54
+                        'maxMSsz',   # 55
+                        'ptrMSl',    # 56
+                        'ptrMSh',    # 57
+                        'nCycP',     # 58
+                        'ptrCycPl',  # 59
+                        'ptrCycPh',  # 60
+                        'numety',    # 61
+                        'numrl',     # 62
+                        'numcsy',    # 63
+                        'numsec',    # 64
+                        'mapFlag',   # 65
+                        'cysCSID'    # 66
+]
 
 # FROM fdresu.inc
 # maxety - the maximum element type reference number in the model
@@ -72,7 +91,8 @@ geometry_header_keys = ['__unused',  # position not used
 # csysiz - the number of items describing a local coordinate system (usually 24)
 # elmsiz - the maximum number of nodes that a defined element may have
 # etysiz - the number of items describing an element type(=IELCSZ from echprm.inc)
-# rlsiz  - the maximum number of items defining a real constant (0, if no real constants are defined)
+# rlsiz  - the maximum number of items defining a real constant (0, if
+#           no real constants are defined)
 # ETYl,h - 64 bit pointer to element type data
 # RELl,h - 64 bit pointer to real constant data
 # CSYl,h - 64 bit pointer to coordinate system data
@@ -83,9 +103,41 @@ geometry_header_keys = ['__unused',  # position not used
 # CNTl,h - 64 bit pointer to element centroids
 # NODl,h - 64 bit pointer to nodal equivalence table
 # ELMl,h - 64 bit pointer to element equivalence table
-# lbnnod - global number of nodes actually used in the solution phase (== nnod unless using Distributed Ansys)
-# GNODl,h- 64 bit pointer to the global nodal equivalence table (only used with Distributed ANSYS and when the mesh does not change during solution)
-# maxn   - maximum node number of the model
+# lbnnod - global number of nodes actually used in the solution phase
+#          (== nnod unless using Distributed Ansys)
+# GNODl,h- 64 bit pointer to the global nodal equivalence table (only
+#          used with Distributed ANSYS and when the mesh does not change during
+#          solution)
+# maxn     - maximum node number of the model
+# NodesUpd - 1, node coords have been updated
+# lenbac   - the actual number of nodes used in the solution phase
+# numcomp  - number of components/assemblies stored (only node/elem
+#            components/assemblies)
+# mxcmpsz  - maximum size (in integer words) that any
+#            component/assembly record may have
+# ptrCOMPl,h - 64 bit pointer to component/assembly data
+# nMatProp - number of properties stored per material
+# nStage   - number of stages
+# maxMSsz  - maximum size (in integer words) that a
+#            stage record can have
+# ptrMSl,h - 64 bit pointer to multistage (MS) cyclic
+#            analysis data
+# nCycP    - number of cyclic edge node pair tables (CYCLIC and MS)
+# ptrCycPl,h - pointers to cyclic edge node pair tables
+# numety   - the number of defined element types
+#            in the model
+# numrl    - the number of defined real constants in the model
+# numcsy   - the number of defined coordinate
+#            systems in the model
+# numsec   - the number of defined sections in the model
+# mapFlag  - flag to indicate format of mapping index vectors for
+#            element types, real constants, coordinate systems, and
+#            sections.
+#            = 0, old format with 1 vector of maxDef len
+#            = 1, new format with 2 vectors each having numDef len
+# cycCSID  - coordinate system number (CYCLIC and MS)
+#            = 0 is ignored (must be cylindrical)
+
 
 
 element_index_table_info = {

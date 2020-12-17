@@ -275,7 +275,11 @@ class Parameters():
 
         parm = parameters[key]
         if parm['type'] in ['ARRAY', 'TABLE']:
-            return self._get_parameter_array(key, parm['shape'])
+            try:
+                return self._get_parameter_array(key, parm['shape'])
+            except ValueError:
+                # allow a second attempt
+                return self._get_parameter_array(key, parm['shape'])
 
         return parm['value']
 
