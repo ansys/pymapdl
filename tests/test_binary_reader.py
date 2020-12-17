@@ -99,6 +99,7 @@ def cyclic_modal(mapdl):
 
 @pytest.fixture(scope='module')
 def transient_thermal(mapdl):
+    mapdl.finish()
     mapdl.clear()
     mapdl.prep7()
 
@@ -139,7 +140,6 @@ def transient_thermal(mapdl):
                         [400, 0.002],    # ramps down in 10 seconds
                         [end_time, 0.002]])  # end of third "flat" zone
     mapdl.load_table('my_conv', my_conv, 'TIME')
-
 
     # Create a table of bulk temperatures for a given time and transfer to MAPDL
     my_bulk = np.array([[0, 100],      # start time
@@ -219,11 +219,8 @@ def test_presol_s(mapdl, cyclic_modal, rset):
     ansys_element_stress = ansys_element_stress[:, 1:]
 
     arr_sz = element_stress.shape[0]
-    try:
-        assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
-        assert np.allclose(enode, ansys_enode[:arr_sz])
-    except:
-        breakpoint()    
+    assert np.allclose(element_stress, ansys_element_stress[:arr_sz])
+    assert np.allclose(enode, ansys_enode[:arr_sz])
 
 
 @pytest.mark.parametrize("rset", RSETS)
@@ -471,7 +468,6 @@ def test_file_not_supported():
 def test_nodal_time_history(mapdl, transient_thermal):
     rst = mapdl.result
     nnum, data = rst.nodal_time_history()
-
     assert np.allclose(nnum, mapdl.mesh.nnum)
     for i in range(mapdl.post_processing.nsets):
         mapdl.set(1, i + 1)

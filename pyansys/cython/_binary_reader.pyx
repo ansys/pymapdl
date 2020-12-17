@@ -14,10 +14,6 @@ from libc.string cimport memcpy
 from libc.stdint cimport int64_t, int32_t
 from libc.stdlib cimport malloc, free
 
-# debug
-from libc.stdio cimport printf
-
-
 from cython.parallel import prange
 ctypedef unsigned char uint8
 

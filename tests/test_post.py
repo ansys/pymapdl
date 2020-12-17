@@ -133,6 +133,7 @@ def test_disp(mapdl, static_solve, comp):
 
     disp_from_grpc = mapdl.post_processing.nodal_displacement(comp)
     mapdl.post1()
+    breakpoint()
     mapdl.set(1, 1)
     nnum, disp_from_prns = data_from_prnsol(mapdl, mapdl.prnsol('U', comp)).T
     assert np.allclose(mapdl.mesh.nnum, nnum)

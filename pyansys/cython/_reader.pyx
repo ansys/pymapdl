@@ -301,7 +301,7 @@ def read(filename, read_parameters=False, debug=False):
                     continue
                 start_pos = n
                 if debug:
-                    print('reading NBLOCK')
+                    print('reading NBLOCK due to ', line.decode())
 
                 nodes_read = True
                 # Get size of NBLOCK
@@ -319,40 +319,45 @@ def read(filename, read_parameters=False, debug=False):
                 nnodes_read = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
                                           &d_size[0], f_size, &n)
 
-                # verify at the end of the block
                 if nnodes_read != nnodes:
                     nnodes = nnodes_read
                     nodes = nodes[:nnodes]
                     nnum = nnum[:nnodes]
-                else:
-                    if myfgets(line, raw, &n, fsize):
-                        raise RuntimeError('Unable to read nblock format line or '
-                                           'at end of file.')
 
-                    bl_end = line.decode().replace(' ', '')
-                    if 'N,R5.3,LOC' not in bl_end or b'-1' == bl_end[:2]:
-                        if debug:
-                            print('N,R5.3,LOC not at end of block')
-                        # need to reread the number of nodes
-                        n = start_pos
-                        if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                        nnodes = 0
-                        while True:
-                            if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                            bl_end = line.decode().replace(' ', '')
-                            if 'N,R5.3,LOC' not in bl_end or b'-1' == bl_end[:2]:
-                                break
-                            nnodes += 1
+                # # verify at the end of the block
+                # if nnodes_read != nnodes:
+                #     nnodes = nnodes_read
+                #     nodes = nodes[:nnodes]
+                #     nnum = nnum[:nnodes]
+                # else:
+                #     if myfgets(line, raw, &n, fsize):
+                #         raise RuntimeError('Unable to read nblock format line or '
+                #                            'at end of file.')
 
-                        # reread nodes
-                        n = start_pos
-                        if myfgets(line, raw, &n, fsize): raise Exception(badstr)
-                        d_size, f_size, nfld, nexp = node_block_format(line)
-                        nnum = np.empty(nnodes, dtype=ctypes.c_int)
-                        nodes = np.zeros((nnodes, 6))
+                #     bl_end = line.decode().replace(' ', '')
+                #     if 'LOC' not in bl_end or b'-1' == bl_end[:2]:
+                #         if debug:
+                #             print('Unable to find the end of the NBLOCK')
+                #         # need to reread the number of nodes
+                #         n = start_pos
+                #         if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                #         nnodes = 0
+                #         while True:
+                #             if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                #             bl_end = line.decode().replace(' ', '')
+                #             if 'LOC' not in bl_end or b'-1' == bl_end[:2]:
+                #                 break
+                #             nnodes += 1
 
-                        n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
-                                        &d_size[0], f_size, &n)
+                #         # reread nodes
+                #         n = start_pos
+                #         if myfgets(line, raw, &n, fsize): raise Exception(badstr)
+                #         d_size, f_size, nfld, nexp = node_block_format(line)
+                #         nnum = np.empty(nnodes, dtype=ctypes.c_int)
+                #         nodes = np.zeros((nnodes, 6))
+
+                #         n = read_nblock(raw, &nnum[0], &nodes[0, 0], nnodes,
+                #                         &d_size[0], f_size, &n)
 
 
         elif 'C' == line[0] or 'c' == line[0]:
