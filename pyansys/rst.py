@@ -272,7 +272,7 @@ class Result(AnsysBinary):
             csys_record_pointers = self.read_record(ptr_csy + sz)
         else:
             maxcsy = self._geometry_header['maxcsy']
-            csys_record_pointers = csys_record_pointers[:maxcsy]
+            csys_record_pointers = csy[:maxcsy]
 
         # parse each coordinate system
         # The items stored in each record:
