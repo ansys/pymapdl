@@ -17,18 +17,6 @@ except:
                       'Only supported on Python3.5 - Python3.8 for '
                       'Linux and Windows\n')
 
-INSTANCES = []
-
-# Ensure all instances close on exit within Windows
-@atexit.register
-def cleanup():  # pragma: no cover
-    if os.name == 'nt':
-        for ref in INSTANCES:
-            # check if object has already been collected
-            instance = ref()
-            if instance is not None:
-                instance.exit()
-
 
 def tail(filename, nlines):
     """Read the last nlines of a text file """
@@ -87,7 +75,7 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    subprocess.Popen(command, shell=True,
+    subprocess.Popen(command, shell=False,
                      cwd=run_location,
                      stdin=subprocess.DEVNULL,
                      stdout=subprocess.DEVNULL,
@@ -177,8 +165,6 @@ class MapdlCorba(_MapdlCore):
         if self._log_broadcast:
             self._broadcast_logger = self._start_broadcast_logger()
 
-        INSTANCES.append(weakref.ref(self))
-
     @property
     def _broadcast_file(self):
         return os.path.join(self.directory, 'mapdl_broadcasts.txt')
@@ -219,14 +205,17 @@ class MapdlCorba(_MapdlCore):
 
     def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process"""
-        # cache final path and lockfile before exiting
-        path = self.directory
-        lockfile = self._lockfile
+        if self._exited:
+            return
 
         self._log.debug('Exiting ANSYS')
         if self._server is not None:
+            # cache final path and lockfile before exiting
+            path = self.directory
+            lockfile = self._lockfile
+
             try:
-                self.run('/EXIT')  # untested on Windows
+                self.run('/EXIT')
             except:
                 pass
             try:
