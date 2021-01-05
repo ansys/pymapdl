@@ -1888,6 +1888,9 @@ class _MapdlCore(_MapdlCommands):
             self._path = self.inquire('DIRECTORY')
         except:
             pass
+
+        # os independent path format
+        self._path = self._path.replace('\\', '/')
         return self._path
 
     @property
@@ -1903,14 +1906,15 @@ class _MapdlCore(_MapdlCommands):
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
-        if self._cleanup:
-            try:
-                self.exit()
-            except Exception as e:
-                try:  # logger might be closed
-                    self._log.error('exit: %s', str(e))
-                except:
-                    pass
+        if hasattr(self, '_cleanup'):
+            if self._cleanup:
+                try:
+                    self.exit()
+                except Exception as e:
+                    try:  # logger might be closed
+                        self._log.error('exit: %s', str(e))
+                    except:
+                        pass
 
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',

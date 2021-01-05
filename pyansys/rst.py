@@ -1954,11 +1954,9 @@ class Result(AnsysBinary):
         enode = []
         nnode = nodstr[etype]
         if sort:
-            for i in sidx:
-                enode.append(self._mesh.elem[i][10:10+nnode[i]])
+            enode = [self._mesh.elem[i][10:10+nnode[i]] for i in sidx]
         else:
-            for i in range(enum.size):
-                enode.append(self._mesh.elem[i][10:10+nnode[i]])
+            enode = [self._mesh.elem[i][10:10+nnode[i]] for i in range(enum.size)]
 
         return enum, element_data, enode
 
@@ -2674,7 +2672,7 @@ class Result(AnsysBinary):
 
         """
         # Copy grid as to not write results to original object
-        grid = self.grid.copy()
+        grid = self.quadgrid.copy()
 
         if rsets is None:
             rsets = range(self.nsets)
