@@ -75,7 +75,7 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    subprocess.Popen(command, shell=False,
+    subprocess.Popen(command, shell=True,
                      cwd=run_location,
                      stdin=subprocess.DEVNULL,
                      stdout=subprocess.DEVNULL,
