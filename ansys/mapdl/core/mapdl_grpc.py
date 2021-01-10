@@ -366,8 +366,8 @@ class MapdlGrpc(_MapdlCore):
             self._timer.start()
 
         # initialize mesh, post processing, and file explorer interfaces
-        from ansys.mapdl.core.mesh import MeshGrpc
-        from ansys.mapdl.core import ansXpl
+        from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        from ansys.mapdl.core.xpl import ansXpl
 
         self._mesh_rep = MeshGrpc(self)
         self._post = PostProcessing(self)
@@ -1518,8 +1518,8 @@ class MapdlGrpc(_MapdlCore):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from pyansys import read_binary
-        from pyansys.rst import Result
+        from ansys.mapdl.core import read_binary
+        from ansys.mapdl.core.rst import Result
 
         if not self._local:
             # download to temporary directory

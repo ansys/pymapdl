@@ -22,7 +22,6 @@ from ansys.mapdl.core.geometry_commands import geometry_commands
 from ansys.mapdl.core.element_commands import element_commands
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
-from ansys.mapdl.core.launcher import get_ansys_path
 from ansys.mapdl.core.post import PostProcessing
 
 MATPLOTLIB_LOADED = True
@@ -522,6 +521,7 @@ class _MapdlCore(_MapdlCommands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
+        from ansys.mapdl.core.launcher import get_ansys_path
         exec_file = self._start_parm.get('exec_file',
                                          get_ansys_path(allow_input=False))
         os.system('cd "%s" && "%s" -g -j %s' % (save_path, exec_file, name))

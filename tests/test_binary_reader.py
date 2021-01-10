@@ -7,11 +7,10 @@ from pyvista.plotting.renderer import CameraPosition
 import numpy as np
 import pyvista as pv
 
-import pyansys
-from pyansys import examples
-from pyansys._rst_keys import element_index_table_info
-from pyansys.misc import get_ansys_bin
-
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core._rst_keys import element_index_table_info
+from ansys.mapdl.core.misc import get_ansys_bin
+from ansys.mapdl.core import _HAS_ANSYS, examples
 
 HAS_FFMPEG = True
 try:
@@ -19,25 +18,10 @@ try:
 except ImportError:
     HAS_FFMPEG = False
 
-
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
 
-
-# check for a valid MAPDL install with CORBA
-valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
-EXEC_FILE = None
-for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
-
-if 'PYANSYS_IGNORE_ANSYS' in os.environ:
-    HAS_ANSYS = False
-else:
-    HAS_ANSYS = EXEC_FILE is not None
-
-
-skip_no_ansys = pytest.mark.skipif(not HAS_ANSYS, reason="Requires ANSYS installed")
+skip_no_ansys = pytest.mark.skipif(not _HAS_ANSYS, reason="Requires ANSYS installed")
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
@@ -46,19 +30,19 @@ RSETS = list(zip(range(1, 9), [1]*8))
 
 @pytest.fixture(scope='module')
 def result():
-    return pyansys.read_binary(examples.rstfile)
+    return pymapdl.read_binary(examples.rstfile)
 
 
 @pytest.fixture(scope='module')
 def static_canteliver_bc():
     filename = os.path.join(testfiles_path, 'rst', 'beam_static_bc.rst')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 @pytest.fixture(scope='module')
 def thermal_rst():
     filename = os.path.join(testfiles_path, 'file.rth')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 @pytest.fixture(scope="module")
@@ -67,7 +51,7 @@ def cyclic_modal(mapdl):
     mapdl.clear()
     mapdl.prep7()
     mapdl.shpp('off')
-    mapdl.cdread('db', pyansys.examples.sector_archive_file)
+    mapdl.cdread('db', pymapdl.examples.sector_archive_file)
     mapdl.prep7()
     mapdl.cyclic()
 
@@ -177,12 +161,15 @@ def test_prnsol_u(mapdl, cyclic_modal, rset):
     mapdl.set(*rset)
     # verify cyclic displacements
     table = mapdl.prnsol('u').splitlines()
-    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+    if isinstance(mapdl, pymapdl.mapdl_grpc.MapdlGrpc):
+        array = np.genfromtxt(table[7:])
+    elif isinstance(mapdl, pymapdl.mapdl_corba.MapdlCorba):
         array = np.genfromtxt(table[8:])
-    elif isinstance(mapdl, pyansys.mapdl_console.MapdlConsole):
+    elif isinstance(mapdl, pymapdl.mapdl_console.MapdlConsole):
         array = np.genfromtxt(table[9:])
     else:
-        raise RuntimeError('Only MapdlCorba and MapdlConsole supported')
+        raise RuntimeError('Invalid instance')
+
     ansys_nnum = array[:, 0].astype(np.int)
     ansys_disp = array[:, 1:-1]
 
@@ -230,7 +217,7 @@ def test_prnsol_s(mapdl, cyclic_modal, rset):
 
     # verify cyclic displacements
     table = mapdl.prnsol('s').splitlines()
-    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+    if isinstance(mapdl, pymapdl.mapdl_corba.MapdlCorba):
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -256,7 +243,7 @@ def test_prnsol_prin(mapdl, cyclic_modal, rset):
 
     # verify principal stress
     table = mapdl.prnsol('prin').splitlines()
-    if isinstance(mapdl, pyansys.mapdl_corba.MapdlCorba):
+    if isinstance(mapdl, pymapdl.mapdl_corba.MapdlCorba):
         array = np.genfromtxt(table[8:])
     else:
         array = np.genfromtxt(table[10:])
@@ -358,7 +345,7 @@ def test_save_as_vtk(tmpdir, result, result_type):
 def test_plot_component():
     """
     # create example file for component plotting
-    ansys = pyansys.ANSYS('/usr/ansys_inc/v182/ansys/bin/ansys182')
+    ansys = launch_mapdl()
     ansys.Cdread('db', examples.hexarchivefile)
     # ansys.open_gui()
     ansys.Esel('S', 'ELEM', vmin=1, vmax=20)
@@ -389,7 +376,7 @@ def test_plot_component():
     """
 
     filename = os.path.join(testfiles_path, 'comp_hex_beam.rst')
-    result = pyansys.read_binary(filename)
+    result = pymapdl.read_binary(filename)
 
     components = ['MY_COMPONENT', 'MY_OTHER_COMPONENT']
     result.plot_nodal_solution(0, node_components=components,
@@ -402,7 +389,7 @@ def test_plot_component():
 def test_file_close(tmpdir):
     tmpfile = str(tmpdir.mkdir("tmpdir").join('tmp.rst'))
     shutil.copy(examples.rstfile, tmpfile)
-    rst = pyansys.read_binary(tmpfile)
+    rst = pymapdl.read_binary(tmpfile)
     nnum, stress = rst.nodal_stress(0)
     os.remove(tmpfile)  # tests file has been correctly closed
 
@@ -419,12 +406,12 @@ def test_animate_nodal_solution(tmpdir, result):
 
 def test_loadbeam():
     linkresult_path = os.path.join(testfiles_path, 'link1.rst')
-    linkresult = pyansys.read_binary(linkresult_path)
+    linkresult = pymapdl.read_binary(linkresult_path)
     assert np.any(linkresult.grid.cells)
 
 
 def test_reaction_forces():
-    rst = pyansys.read_binary(os.path.join(testfiles_path, 'vm1.rst'))
+    rst = pymapdl.read_binary(os.path.join(testfiles_path, 'vm1.rst'))
     nnum, forces = rst.nodal_static_forces(0)
     assert np.allclose(nnum, [1, 2, 3, 4])
     assert np.allclose(forces[:, 1], [-600, 250, 500, -900])
@@ -456,12 +443,12 @@ def test_plot_temperature(thermal_rst):
 
 def test_file_not_found():
     with pytest.raises(FileNotFoundError):
-        pyansys.read_binary('not_a_file.rst')
+        pymapdl.read_binary('not_a_file.rst')
 
 
 def test_file_not_supported():
     with pytest.raises(RuntimeError):
-        pyansys.read_binary(os.path.join(testfiles_path, 'file.esav'))
+        pymapdl.read_binary(os.path.join(testfiles_path, 'file.esav'))
 
 
 @skip_no_ansys

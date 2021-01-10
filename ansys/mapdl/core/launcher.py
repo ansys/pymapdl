@@ -7,10 +7,15 @@ import os
 import appdirs
 import tempfile
 import socket
+import time
+import subprocess
 
+import pexpect
+from pexpect import popen_spawn
 from ansys.mapdl.core import _LOCAL_PORTS
 from ansys.mapdl.core.misc import is_float, random_string
 from ansys.mapdl.core.errors import LockFileException, VersionError
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('ansys_mapdl_core')
@@ -456,6 +461,11 @@ def get_ansys_path(allow_input=True):
     elif allow_input:  # create configuration file
         exe_loc = save_ansys_path()
 
+    if exe_loc is None:
+        exe_loc = find_ansys()[0]
+        if not exe_loc:
+            exe_loc = None
+
     return exe_loc
 
 
@@ -842,7 +852,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
-        return MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+        mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
     elif mode == 'corba':
         try:
             from ansys.mapdl.corba import MapdlCorba
@@ -851,7 +861,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                               '    pip install ansys-mapdl-corba')
 
         broadcast = kwargs.get('log_broadcast', False)
-        return MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
+        mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
                           log_broadcast=broadcast, **start_parm)
     elif mode == 'grpc':
         port, actual_run_location = launch_grpc(port=port, **start_parm)
@@ -864,6 +874,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
             mapdl._path = actual_run_location
     else:
         raise ValueError('Invalid mode %s' % mode)
+
+    return mapdl
 
 
 def check_mode(mode, version):
@@ -893,10 +905,10 @@ def check_mode(mode, version):
     else:  # auto-select based on best version
         if version >= 211:
             mode = 'grpc'
-        if version >= 170:
+        elif version >= 170:
             mode = 'corba'
         else:
-            if os.name == 'nt':
+            if is_win:
                 raise VersionError('Running MAPDL as a service requires '
                                    'v17.0 or greater on Windows.')
             mode = 'console'

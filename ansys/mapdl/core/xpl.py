@@ -17,7 +17,7 @@ class ansXpl():
     """
 
     def __init__(self, mapdl):
-        from ansys.mapdl.mapdl import MapdlGrpc
+        from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError('Must be initialized using MapdlGrpc class')
 
