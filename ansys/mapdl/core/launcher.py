@@ -8,11 +8,11 @@ import appdirs
 import tempfile
 import socket
 
-from pyansys.misc import is_float, random_string
-from pyansys.errors import LockFileException, VersionError
+from ansys.mapdl.core.misc import is_float, random_string
+from ansys.mapdl.core.errors import LockFileException, VersionError
 
 # settings directory
-SETTINGS_DIR = appdirs.user_data_dir('pyansys')
+SETTINGS_DIR = appdirs.user_data_dir('ansys_mapdl_core')
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
@@ -21,7 +21,7 @@ if not os.path.isdir(SETTINGS_DIR):
                       'Will be unable to cache ANSYS executable location')
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
-ALLOWABLE_MODES = ['corba', 'console']
+ALLOWABLE_MODES = ['corba', 'console', 'grpc']
 
 LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
@@ -138,15 +138,16 @@ def change_default_ansys_path(exe_loc):
     --------
     Change default ansys location on Linux
 
-    >>> import pyansys
-    >>> pyansys.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
-    >>> pyansys.mapdl.get_ansys_path()
+    >>> from ansys.mapdl.core import launcher
+    >>> launcher.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
+    >>> launcher.get_ansys_path()
     '/ansys_inc/v201/ansys/bin/ansys201'
 
     Change default ansys location on Windows
+
     >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
-    >>> pyansys.change_default_ansys_path(ans_pth)
-    >>> pyansys.mapdl.check_valid_ansys()
+    >>> launcher.change_default_ansys_path(ans_pth)
+    >>> launcher.check_valid_ansys()
     True
 
     """
@@ -279,28 +280,28 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     --------
     Launch MAPDL using the default configuration.
 
-    >>> import pyansys
-    >>> mapdl = pyansys.Mapdl()
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of
     the ansys binary.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
-    >>> mapdl = pyansys.Mapdl(exec_file, additional_switches='-smp')
+    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     Run MAPDL using the console mode (only on linux).
 
-    >>> mapdl = pyansys.Mapdl('/ansys_inc/v194/ansys/bin/ansys194',
+    >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
                               mode='console')
 
     Notes
     -----
-    MAPDL has the following command line options as of 2020R1
+    MAPDL has the following command line options as of 2021R1.
 
     -aas : Enables server mode
      When enabling server mode, a custom name for the keyfile can be
      specified using the ``-iorFile`` option.  This is the CORBA that
-     pyansys uses for ``mode='corba'``.
+     PyMAPDL uses for ``mode='corba'``.
 
     -acc <device> : Enables the use of GPU hardware.  Enables the use of
      GPU hardware to accelerate the analysis. See GPU Accelerator
@@ -527,13 +528,18 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                   'start_timeout': start_timeout}
 
     if mode == 'console':
-        from pyansys.mapdl_console import MapdlConsole
+        from ansys.mapdl.core.mapdl_console import MapdlConsole
         return MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
     elif mode == 'corba':
-        from pyansys.mapdl_corba import MapdlCorba
+        try:
+            from ansys.mapdl.corba import MapdlCorba
+        except ImportError:
+            raise ImportError('To use this feature, install ansys.mapdl.corba with\n\n'
+                              '    pip install ansys-mapdl-corba')
+
+        broadcast = kwargs.get('log_broadcast', False)
         return MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
-                          log_broadcast=kwargs.get('log_broadcast',
-                                                   False), **start_parm)
+                          log_broadcast=broadcast, **start_parm)
     else:
         raise ValueError('Invalid mode %s' % mode)
 
@@ -542,24 +548,29 @@ def check_mode(mode, version):
     """Check if the MAPDL server mode matches the allowable version
 
     If ``None``, the newest mode will be selected.
+
+    Returns a value from ``ALLOWABLE_MODES``.
     """
 
     is_win = os.name == 'nt'
 
     if isinstance(mode, str):
         mode = mode.lower()
-        if mode not in ALLOWABLE_MODES:
-            raise ValueError('Invalid MAPDL server mode.  '
-                             'Use one of the following:\n%s' % ALLOWABLE_MODES)
-
-        if mode == 'corba':
+        if mode == 'grpc':
+            if version < 211:
+                raise VersionError('gRPC mode requires MAPDL 2021R1 or newer.')
+        elif mode == 'corba':
             if version < 170:
                 raise VersionError('CORBA AAS mode requires MAPDL v17.0 or newer.')
-
         elif mode == 'console' and is_win:
             raise ValueError('Console mode requires Linux')
+        else:
+            raise ValueError('Invalid MAPDL server mode.  '
+                             'Use one of the following modes:\n%s' % ALLOWABLE_MODES)
 
     else:  # auto-select based on best version
+        if version >= 211:
+            mode = 'grpc'
         if version >= 170:
             mode = 'corba'
         else:

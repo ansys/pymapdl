@@ -6,14 +6,14 @@ import numpy as np
 import pyvista as pv
 from vtk import vtkAppendPolyData
 
-from pyansys.misc import supress_logging, run_as_prep7
+from ansys.mapdl.core.misc import supress_logging, run_as_prep7
 
 
 class Geometry():
     """Pythonic representation of MAPDL CAD geometry"""
 
     def __init__(self, mapdl):
-        from pyansys.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import _MapdlCore
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError('Must be initialized using a MAPDL class')
 

@@ -1,1 +1,1 @@
-from pyansys.examples.examples import *
+from .examples import *

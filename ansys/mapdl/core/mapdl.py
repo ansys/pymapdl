@@ -11,19 +11,19 @@ import weakref
 
 import numpy as np
 import pyvista as pv
-
 import scooby
-import pyansys
-from pyansys import Archive
-from pyansys.mapdl_functions import _MapdlCommands
-from pyansys.misc import (random_string, supress_logging,
-                          run_as_prep7, last_created)
-from pyansys.geometry_commands import geometry_commands
-from pyansys.element_commands import element_commands
-from pyansys.errors import MapdlRuntimeError, MapdlInvalidRoutineError
-from pyansys.plotting import general_plotter
-from pyansys.launcher import get_ansys_path
-from pyansys.post import PostProcessing
+
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core import Archive
+from ansys.mapdl.core.mapdl_functions import _MapdlCommands
+from ansys.mapdl.core.misc import (random_string, supress_logging,
+                                   run_as_prep7, last_created)
+from ansys.mapdl.core.geometry_commands import geometry_commands
+from ansys.mapdl.core.element_commands import element_commands
+from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
+from ansys.mapdl.core.plotting import general_plotter
+from ansys.mapdl.core.launcher import get_ansys_path
+from ansys.mapdl.core.post import PostProcessing
 
 MATPLOTLIB_LOADED = True
 try:
@@ -128,7 +128,7 @@ class _MapdlCore(_MapdlCommands):
         self._log.debug('Logging set to %s', loglevel)
         self.non_interactive = self._non_interactive(self)
 
-        from pyansys.parameters import Parameters
+        from ansys.mapdl.core.parameters import Parameters
         self._parameters = Parameters(self)
 
         self._redirected_commands = {'*LIS': weakref.ref(self._list)}
@@ -305,7 +305,7 @@ class _MapdlCore(_MapdlCommands):
 
         info =  'Product:         %s\n' % product
         info += 'MAPDL Version:   %s\n' % mapdl_version
-        info += 'PyANSYS Version: %s\n' % pyansys.__version__
+        info += 'PyMAPDL Version: %s\n' % pymapdl.__version__
 
         return info
 
@@ -317,7 +317,7 @@ class _MapdlCore(_MapdlCommands):
     @property
     def _geometry(self):  # pragma: no cover
         """Return geometry cache"""
-        from pyansys.mapdl_geometry import Geometry
+        from ansys.mapdl.core.mapdl_geometry import Geometry
         return Geometry(self)
 
     @property
@@ -365,7 +365,8 @@ class _MapdlCore(_MapdlCommands):
     @property
     @supress_logging
     def _mesh(self):
-        """Write entire archive to ASCII and read it in as a ``pyansys.Archive``"""
+        """Write entire archive to ASCII and read it in as an
+        ``ansys.mapdl.core.Archive``"""
         if self._archive_cache is None:
             # write database to an archive file
             arch_filename = os.path.join(self.directory, '_tmp.cdb')
@@ -426,7 +427,7 @@ class _MapdlCore(_MapdlCommands):
         Ignore these messages by setting allow_ignore=True
 
         >>> mapdl.allow_ignore = True
-        2020-06-08 21:39:58,094 [INFO] pyansys.mapdl: K is not a
+        2020-06-08 21:39:58,094 [INFO] : K is not a
         recognized POST1 command, abbreviation, or macro.  This
         command will be ignored.
 
@@ -457,7 +458,7 @@ class _MapdlCore(_MapdlCommands):
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         if mode != 'w':
             self._apdl_log.write('! APDL script generated using pyansys %s\n' %
-                                 pyansys.__version__)
+                                 pymapdl.__version__)
 
     @supress_logging
     @run_as_prep7
@@ -876,7 +877,7 @@ class _MapdlCore(_MapdlCommands):
             Plot the node numbers of surface nodes.
 
         **kwargs
-            See ``help(pyansys.plotter.general_plotter)`` for more
+            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
             keyword arguments related to visualizing using ``vtk``.
 
         Examples
@@ -1053,7 +1054,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def result(self):
-        """Binary interface to the result file using ``pyansys.Result``
+        """Binary interface to the result file using ``ansys.mapdl.core.Result``
 
         Examples
         --------
@@ -1082,7 +1083,7 @@ class _MapdlCore(_MapdlCommands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from pyansys.rst import Result
+        from ansys.mapdl.core.rst import Result
 
         if not self._local:
             # download to temporary directory
@@ -1116,7 +1117,7 @@ class _MapdlCore(_MapdlCommands):
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
 
-        return pyansys.read_binary(result_path)
+        return pymapdl.read_binary(result_path)
 
     @property
     def _result_file(self):
@@ -1724,11 +1725,11 @@ class _MapdlCore(_MapdlCommands):
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+            exception = RuntimeError('Invalid pymapdl command "%s"\n\n%s' %
                                      (command, INVAL_COMMANDS[command[:3]]))
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pyansys command "%s"\n\n%s' %
+            exception = RuntimeError('Invalid pymapdl command "%s"\n\n%s' %
                                      (command, INVAL_COMMANDS[command[:4]]))
             raise exception
         elif write_to_log and self._apdl_log is not None:
@@ -1745,7 +1746,6 @@ class _MapdlCore(_MapdlCommands):
             self._response = text.strip()
         else:
             self._response = ''
-
 
         if self._response:
             self._log.info(self._response)

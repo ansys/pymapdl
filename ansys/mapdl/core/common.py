@@ -6,9 +6,9 @@ from collections import Counter
 import numpy as np
 import pyvista as pv
 
-from pyansys._binary_reader import c_read_record
-from pyansys import _binary_reader
-from pyansys.errors import NoDistributedFiles
+from ansys.mapdl.core._binary_reader import c_read_record
+from ansys.mapdl.core import _binary_reader
+from ansys.mapdl.core.errors import NoDistributedFiles
 
 STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
 PRINCIPAL_STRESS_TYPES = ['S1', 'S2', 'S3', 'SINT', 'SEQV']
@@ -141,14 +141,14 @@ def read_binary(filename, **kwargs):
     file_format = read_standard_header(filename)['file format']
 
     if file_format == 2:
-        from pyansys.emat import EmatFile
+        from ansys.mapdl.core.emat import EmatFile
         return EmatFile(filename, **kwargs)
     elif file_format == 4:
-        from pyansys.full import FullFile
+        from ansys.mapdl.core.full import FullFile
         return FullFile(filename, **kwargs)
     elif file_format == 12:
-        from pyansys.rst import Result
-        from pyansys.dis_result import DistributedResult
+        from ansys.mapdl.core.rst import Result
+        from ansys.mapdl.core.dis_result import DistributedResult
         read_mesh = kwargs.pop('read_mesh', True)
         result = Result(filename, read_mesh=False, **kwargs)
 
@@ -162,7 +162,7 @@ def read_binary(filename, **kwargs):
         # check if it's a cyclic result file
         ignore_cyclic = kwargs.pop('ignore_cyclic', False)
         if result._is_cyclic and not ignore_cyclic:
-            from pyansys.cyclic_reader import CyclicResult
+            from ansys.mapdl.core.cyclic_reader import CyclicResult
             return CyclicResult(filename)
 
         if read_mesh:

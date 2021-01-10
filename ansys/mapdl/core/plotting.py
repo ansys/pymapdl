@@ -2,7 +2,7 @@
 import pyvista as pv
 import numpy as np
 
-from pyansys.misc import unique_rows
+from ansys.mapdl.core.misc import unique_rows
 
 
 def general_plotter(title, meshes, points, labels,

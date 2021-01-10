@@ -1,8 +1,9 @@
-"""pyansys Element matricies file reader
+"""PyMAPDL Element matricies file reader
 
 
-This header is straight out of fdemat.inc and can be found online at
-https://www.sharcnet.ca/Software/Ansys/16.2.3/en-us/help/ans_prog/Hlp_P_INT1_6.html
+This header is straight out of fdemat.inc and can be found within the standard ANSYS install.
+
+Version of this header is 16.2.3
 
 *comdeck,fdemat
 
@@ -311,7 +312,7 @@ c   kygrf        global restoring force matrix calculate key
 """
 import numpy as np
 
-from pyansys.common import read_table, parse_header
+from ansys.mapdl.core.common import read_table, parse_header
 
 EMAT_HEADER_KEYS = ['fun02', 'nume', 'numdof', 'lenu', 'lenbac',
                     'maxn', 'nlgeEMA', 'sstEMAT', 'nodref', 'lumpm',
@@ -328,7 +329,7 @@ ELEMENT_HEADER_KEYS = ['stkey', 'mkey', 'dkey', 'sskey', 'akey',
 
 
 class EmatFile(object):
-    """Enables pythonic access for an ANSYS element matrix file.
+    """Enables pythonic access to an ANSYS element matrix file.
 
     Parameters
     ----------
@@ -337,8 +338,8 @@ class EmatFile(object):
 
     Examples
     --------
-    >>> import pyansys
-    >>> emat_file = pyansys.read_binary('file.emat')
+    >>> import ansys.mapdl.core as pymapdl
+    >>> emat_file = pymapdl.read_binary('file.emat')
     """
 
     def __init__(self, filename):

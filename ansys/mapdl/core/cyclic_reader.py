@@ -6,10 +6,10 @@ import numpy as np
 from pyvista.core.common import axis_rotation
 import pyvista as pv
 
-from pyansys.common import (STRESS_TYPES, STRAIN_TYPES,
-                            PRINCIPAL_STRESS_TYPES,
-                            THERMAL_STRAIN_TYPES)
-from pyansys.rst import Result, check_comp
+from ansys.mapdl.core.common import (STRESS_TYPES, STRAIN_TYPES,
+                                     PRINCIPAL_STRESS_TYPES,
+                                     THERMAL_STRAIN_TYPES)
+from ansys.mapdl.core.rst import Result, check_comp
 from pyansys import _binary_reader
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -159,8 +159,8 @@ class CyclicResult(Result):
         --------
         Visualize the 1st nodal diameter mode.
 
-        >>> import pyansys
-        >>> result = pyansys.download_academic_rotor()
+        >>> import ansys.mapdl.core as pymapdl
+        >>> result = pymapdl.download_academic_rotor()
         >>> result.nodal_solution((2, 1))
 
         Same result but uses Python (zero based) cumulative indexing
@@ -417,7 +417,6 @@ class CyclicResult(Result):
 
         Examples
         --------
-        >>> rst = pyansys.read_binary('file.rst')
         >>> rst.harmonic_indices
         array([ 0,  0,  0,  0,  0,  0, -1,  1, -1,  1,  1, -1,
                -2,  2, -2,  2, -2,  2,  3,  3,  3,  3,  3,  3], dtype=int32)
@@ -467,8 +466,6 @@ class CyclicResult(Result):
 
         Examples
         --------
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_stress(0)
 
         Notes
@@ -623,8 +620,6 @@ class CyclicResult(Result):
         --------
         Load the nodal thermal strain for the first result.
 
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0)
 
         Notes
@@ -703,9 +698,7 @@ class CyclicResult(Result):
         --------
         Plot nodal thermal strain for an academic rotor
 
-        >>> import pyansys
-        >>> result = pyansys.download_academic_rotor()
-        >>> result.plot_nodal_thermal_strain(0)
+        >>> rst.plot_nodal_thermal_strain(0)
 
         """
         if not full_rotor:
@@ -769,8 +762,6 @@ class CyclicResult(Result):
         --------
         Load the nodal elastic strain for the first result.
 
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, elastic_strain = rst.nodal_stress(0)
 
         Notes
@@ -846,8 +837,6 @@ class CyclicResult(Result):
         --------
         Plot nodal elastic strain for an academic rotor
 
-        >>> import pyansys
-        >>> result = pyansys.download_academic_rotor()
         >>> result.plot_nodal_elastic_strain(0, 'X')
 
         """
@@ -909,8 +898,6 @@ class CyclicResult(Result):
         --------
         Load the nodal plastic strain for the first result.
 
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, plastic_strain = rst.nodal_stress(0)
 
         Notes
@@ -986,8 +973,6 @@ class CyclicResult(Result):
         --------
         Plot nodal plastic strain for an academic rotor
 
-        >>> import pyansys
-        >>> result = pyansys.download_academic_rotor()
         >>> result.plot_nodal_plastic_strain(0)
 
         """
@@ -1375,8 +1360,6 @@ class CyclicResult(Result):
 
         Examples
         --------
-        >>> import pyansys
-        >>> rst = pyansys.read_binary('file.rst')
         >>> nnum, stress = rst.nodal_temperature(0)
 
         """

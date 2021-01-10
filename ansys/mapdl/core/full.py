@@ -8,9 +8,10 @@ import warnings
 
 import numpy as np
 
-from pyansys import _binary_reader
-from pyansys.common import (read_table, AnsysBinary, parse_header, two_ints_to_long,
-                            read_standard_header)
+from ansys.mapdl.core import _binary_reader
+from ansys.mapdl.core.common import (read_table, AnsysBinary,
+                                     parse_header, two_ints_to_long,
+                                     read_standard_header)
 
 
 FRONTAL_FULL_HEADER_KEYS = [
@@ -52,8 +53,8 @@ class FullFile(AnsysBinary):
 
     Examples
     --------
-    >>> import pyansys
-    >>> full = pyansys.read_binary('file.rst')
+    >>> import ansys.mapdl.core as pymapdl
+    >>> full = pymapdl.read_binary('file.rst')
     >>> print(full)
     PyANSYS - MAPDL Full File
     Title                    : Demo
@@ -106,8 +107,8 @@ class FullFile(AnsysBinary):
 
         Examples
         --------
-        >>> import pyansys
-        >>> full = pyansys.read_binary('file.rst')
+        >>> import ansys.mapdl.core as pymapdl
+        >>> full = pymapdl.read_binary('file.rst')
         >>> print(full.k)
         <345x345 sparse matrix of type '<class 'numpy.float64'>'
                 with 7002 stored elements in Compressed Sparse Column format>
@@ -122,8 +123,6 @@ class FullFile(AnsysBinary):
 
         Examples
         --------
-        >>> import pyansys
-        >>> full = pyansys.read_binary('file.rst')
         >>> full.m
         <345x345 sparse matrix of type '<class 'numpy.float64'>'
                 with 2883 stored elements in Compressed Sparse Column format>
@@ -138,8 +137,6 @@ class FullFile(AnsysBinary):
 
         Examples
         --------
-        >>> import pyansys
-        >>> full = pyansys.read_binary('file.rst')
         >>> full.dof_ref
         array([[  1,   0],
                [  1,   1],
@@ -206,8 +203,6 @@ class FullFile(AnsysBinary):
 
         Examples
         --------
-        >>> import pyansys
-        >>> full = pyansys.read_binary('file.rst')
         >>> dof_ref, k, m = full.load_km()
         >>> print(k)
         (0, 0)       163408119.6581276

@@ -12,7 +12,7 @@ import pyvista
 import numpy as np
 import vtk
 
-from pyansys import _binary_reader
+from ansys.mapdl.core import _binary_reader
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -173,7 +173,7 @@ def _check_has_ansys():
         True when this local installation has ANSYS installed in a
         standard location.
     """
-    from pyansys.launcher import check_valid_ansys
+    from ansys.mapdl.core.launcher import check_valid_ansys
     try:
         return check_valid_ansys()
     except:

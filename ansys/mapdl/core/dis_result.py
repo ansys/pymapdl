@@ -8,13 +8,13 @@ import pyvista as pv
 import numpy as np
 from vtk import vtkAppendFilter
 
-from pyansys.misc import is_float, vtk_cell_info
-from pyansys.mesh import Mesh
-from pyansys.rst import Result, ELEMENT_INDEX_TABLE_KEYS
-from pyansys.errors import NoDistributedFiles
-from pyansys._binary_reader import (read_nodal_values_dist,
-                                    populate_surface_element_result)
-from pyansys._rst_keys import element_index_table_info
+from ansys.mapdl.core.misc import is_float, vtk_cell_info
+from ansys.mapdl.core.mesh import Mesh
+from ansys.mapdl.core.rst import Result, ELEMENT_INDEX_TABLE_KEYS
+from ansys.mapdl.core.errors import NoDistributedFiles
+from ansys.mapdl.core._binary_reader import (read_nodal_values_dist,
+                                             populate_surface_element_result)
+from ansys.mapdl.core._rst_keys import element_index_table_info
 
 
 def find_dis_files(main_file):

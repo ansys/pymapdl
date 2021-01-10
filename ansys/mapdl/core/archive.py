@@ -12,10 +12,10 @@ from vtk import (VTK_TETRA, VTK_QUADRATIC_TETRA, VTK_PYRAMID,
 import vtk
 import pyvista as pv
 
-from pyansys import _reader
-from pyansys.misc import vtk_cell_info, chunks
-from pyansys.mesh import Mesh
-from pyansys.cell_quality import quality
+from ansys.mapdl.core import _reader
+from ansys.mapdl.core.misc import vtk_cell_info, chunks
+from ansys.mapdl.core.mesh import Mesh
+from ansys.mapdl.core.cell_quality import quality
 
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
@@ -52,9 +52,9 @@ class Archive(Mesh):
 
     allowable_types : list, optional
         Allowable element types.  Defaults to all valid element
-        types in ``pyansys.elements.valid_types``
+        types in ``ansys.mapdl.core.elements.valid_types``
 
-        See ``help(pyansys.elements)`` for available element types.
+        See ``help(ansys.mapdl.core.elements)`` for available element types.
 
     null_unallowed : bool, optional
         Elements types not matching element types will be stored
@@ -70,8 +70,9 @@ class Archive(Mesh):
 
     Examples
     --------
-    >>> import pyansys
-    >>> hex_beam = pyansys.Archive(pyansys.examples.hexarchivefile)
+    >>> import ansys.mapdl.core as pymapdl
+    >>> from ansys.mapdl.core import examples
+    >>> hex_beam = pymapdl.Archive(examples.hexarchivefile)
     >>> print(hex_beam)
     ANSYS Archive File HexBeam.cdb
       Number of Nodes:              40
@@ -93,7 +94,7 @@ class Archive(Mesh):
 
     Read an ANSYS workbench input file
 
-    >>> my_archive = pyansys.Archive('C:\\Users\\jerry\\stuff.dat')
+    >>> my_archive = pymapdl.Archive('C:\\Users\\user\\stuff.dat')
 
     Notes
     -----
@@ -149,8 +150,9 @@ class Archive(Mesh):
 
         Examples
         --------
-        >>> import pyansys
-        >>> archive = pyansys.Archive(pyansys.examples.hexarchivefile,
+        >>> import ansys.mapdl.core as pymapdl
+        >>> from ansys.mapdl.core import examples
+        >>> archive = pymapdl.Archive(examples.hexarchivefile,
                                       read_parameters=True)
         >>> archive.parameters
         {}

@@ -6,9 +6,9 @@ import pexpect
 import time
 import re
 
-from pyansys.misc import kill_process
-from pyansys.mapdl import _MapdlCore
-from pyansys.errors import MapdlExitedError
+from ansys.mapdl.core.misc import kill_process
+from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.errors import MapdlExitedError
 
 ready_items = [
     rb'BEGIN:',

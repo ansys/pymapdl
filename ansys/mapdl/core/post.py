@@ -1,10 +1,11 @@
 """Post-processing module using MAPDL interface"""
 import weakref
 
-from pyansys.plotting import general_plotter
 import numpy as np
-from pyansys.errors import MapdlRuntimeError
-from pyansys.misc import supress_logging
+
+from ansys.mapdl.core.plotting import general_plotter
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.misc import supress_logging
 
 
 COMPONENT_STRESS_TYPE = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
@@ -46,7 +47,7 @@ class PostProcessing():
 
     def __init__(self, mapdl):
         """Initialize postprocessing instance"""
-        from pyansys.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import _MapdlCore
         if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
             raise TypeError('Must be initialized using Mapdl instance')
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -68,7 +69,7 @@ class PostProcessing():
 
     @supress_logging
     def __repr__(self):
-        info = 'PyANSYS MAPDL PostProcessing Instance\n'
+        info = 'PyMAPDL PostProcessing Instance\n'
         info += '\tActive Result File:    %s\n' % self.filename
         info += '\tNumber of result sets: %d\n' % self.nsets
         info += '\tCurrent load step:     %d\n' % self.load_step

@@ -4,9 +4,9 @@ import weakref
 import os
 import numpy as np
 
-import pyansys
-from pyansys.mapdl import _MapdlCore
-from pyansys.misc import supress_logging
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {0: 'Begin level',
                17: 'PREP7',
@@ -435,10 +435,11 @@ class Parameters():
             filename = os.path.join(self._mapdl.directory, filename)
         else:
             filename = os.path.join(tempfile.gettempdir(), filename)
-        pyansys._reader.write_array(filename.encode(), arr.ravel('F'))
+        pymapdl._reader.write_array(filename.encode(), arr.ravel('F'))
 
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
+
 
 def interp_star_status(status):
     """Interprets \*STATUS command output from MAPDL

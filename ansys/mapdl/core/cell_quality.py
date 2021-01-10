@@ -6,8 +6,8 @@ cell quality from VTK unstructured grids.
 import numpy as np
 
 import pyvista as pv
-from pyansys._cellqual import cell_quality_float, cell_quality
-from pyansys.misc import vtk_cell_info
+from ansys.mapdl.core._cellqual import cell_quality_float, cell_quality
+from ansys.mapdl.core.misc import vtk_cell_info
 
 
 def quality(grid):
@@ -18,14 +18,14 @@ def quality(grid):
 
     Examples
     --------
-    >>> import pyansys
+    >>> import ansys.mapdl.core as pymapdl
     >>> import pyvista as pv
     >>> x = np.arange(-10, 10, 5)
     >>> y = np.arange(-10, 10, 5)
     >>> z = np.arange(-10, 10, 5)
     >>> x, y, z = np.meshgrid(x, y, z)
     >>> grid = pv.StructuredGrid(x, y, z)
-    >>> pyansys.quality(grid)
+    >>> pymapdl.quality(grid)
     array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
            1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
     """

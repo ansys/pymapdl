@@ -7,7 +7,7 @@ import sys
 
 import numpy as np
 
-import pyansys
+import ansys.mapdl.core as pymapdl
 import pyvista as pv
 
 
@@ -44,7 +44,7 @@ def run_all(run_ansys=False):
 def show_hex_archive(off_screen=None):
     """Displays a hex beam mesh"""
     # Load an archive file
-    archive = pyansys.Archive(hexarchivefile)
+    archive = pymapdl.Archive(hexarchivefile)
     archive.plot(off_screen=off_screen, color='w', show_edges=True)
     assert archive.grid.n_points
     assert archive.grid.n_cells
@@ -56,7 +56,7 @@ def load_result():
     """
 
     # Load result file
-    result = pyansys.read_binary(rstfile)
+    result = pymapdl.read_binary(rstfile)
     assert result.nsets == 6
     assert len(result.mesh.nnum) == 321
     print('Loaded result file with {:d} result sets'.format(result.nsets))
@@ -79,7 +79,7 @@ def show_displacement(off_screen=None):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
-    fobj = pyansys.read_binary(rstfile)
+    fobj = pymapdl.read_binary(rstfile)
 
     print('Displaying ANSYS Mode 1')
     fobj.plot_nodal_solution(0, label='Displacement', off_screen=off_screen,
@@ -90,7 +90,7 @@ def show_stress(off_screen=None):
     """ Load and plot 1st bend of a hexahedral beam """
 
     # get location of this file
-    result = pyansys.read_binary(rstfile)
+    result = pymapdl.read_binary(rstfile)
 
     print('Displaying node averaged stress in x direction for Mode 6')
     result.plot_nodal_stress(5, 'x', off_screen=off_screen, n_colors=9)
@@ -100,7 +100,7 @@ def load_km():
     """ Loads m and k matrices from a full file """
 
     # Create file reader object
-    fobj = pyansys.read_binary(fullfile)
+    fobj = pymapdl.read_binary(fullfile)
     dofref, k, m = fobj.load_km()
 
     # print results
@@ -153,7 +153,7 @@ def solve_km():
         return
 
     # load the mass and stiffness matrices
-    full = pyansys.read_binary(pyansys.examples.fullfile)
+    full = pymapdl.read_binary(pymapdl.examples.fullfile)
     dofref, k, m = full.load_km(sort=True)
 
     # make symmetric
@@ -178,7 +178,7 @@ def solve_km():
     n /= n.max()  # normalize
 
     # load an archive file and create a vtk unstructured grid
-    archive = pyansys.Archive(pyansys.examples.hexarchivefile)
+    archive = pymapdl.Archive(pymapdl.examples.hexarchivefile)
     grid = archive.grid
 
     # Fancy plot the displacement
@@ -210,9 +210,9 @@ def show_cell_qual(meshtype='tet', off_screen=None):
 
     # load archive file and parse for subsequent FEM queries
     if meshtype == 'hex':
-        archive = pyansys.Archive(hexarchivefile)
+        archive = pymapdl.Archive(hexarchivefile)
     else:
-        archive = pyansys.Archive(tetarchivefile)
+        archive = pymapdl.Archive(tetarchivefile)
 
     # get cell quality
     qual = archive.quality
@@ -242,7 +242,7 @@ def ansys_cylinder_demo(exec_file=None, plot_vtk=True,
     else:
         loglevel = 'INFO'
 
-    ansys = pyansys.launch_mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
+    ansys = pymapdl.launch_mapdl(exec_file=exec_file, override=True, loglevel=loglevel)
 
     # Define higher-order SOLID186
     # Define surface effect elements SURF154 to apply torque
