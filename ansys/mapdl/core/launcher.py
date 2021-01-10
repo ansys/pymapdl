@@ -1,4 +1,4 @@
-"""Module for launching MAPDL locally."""
+"""Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 import platform
 from glob import glob
 import re
@@ -8,6 +8,7 @@ import appdirs
 import tempfile
 import socket
 
+from ansys.mapdl.core import _LOCAL_PORTS
 from ansys.mapdl.core.misc import is_float, random_string
 from ansys.mapdl.core.errors import LockFileException, VersionError
 
@@ -20,6 +21,7 @@ if not os.path.isdir(SETTINGS_DIR):
         warnings.warn('Unable to create settings directory.\n' +
                       'Will be unable to cache ANSYS executable location')
 
+
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
 ALLOWABLE_MODES = ['corba', 'console', 'grpc']
 
@@ -27,10 +29,351 @@ LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
 
 
-def port_in_use(port, ip='localhost'):
-    """Returns True when a port is in use at the given ip"""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((ip, port)) == 0
+def close_all_local_instances(port_range=None):
+    """Close all MAPDL instances within a port_range.
+
+    This function can be used when cleaning up from a failed pool or
+    batch run.
+
+    Parameters
+    ----------
+    port_range : list, optional
+        Defaults to ``range(50000, 50200)``.  Expand this range if
+        there are many potential instances of MAPDL in gRPC mode.
+    """
+    if port_range is None:
+        port_range = range(50000, 50200)
+
+    @threaded
+    def close_mapdl(port):
+        try:
+            mapdl = MapdlGrpc(port=port, set_no_abort=False)
+            mapdl.exit()
+        except OSError:
+            pass
+
+    ports = check_ports(port_range)
+    for port, state in ports.items():
+        if state:
+            close_mapdl(port)
+
+
+# TODO: Will remove this as this should no longer be used
+def check_ports(port_range, ip='localhost'):
+    """Check the state of ports in a port range"""
+    ports = {}
+    for port in port_range:
+        ports[port] = port_in_use(port, ip)
+    return ports
+
+
+def port_in_use(port, host=LOCALHOST):
+    """Returns True when a port is in use at the given host.
+
+    Must actually "bind" the address.  Just checking if we can create
+    a socket is insufficient as it's possible to run into permission
+    errors like:
+
+    - An attempt was made to access a socket in a way forbidden by its
+      access permissions.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind((host, port))
+            return False
+        except:
+            return True
+
+
+def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
+                run_location=None, port=MAPDL_DEFAULT_PORT,
+                additional_switches='', custom_bin=None,
+                override=True, timeout=10) -> int:
+    """Start MAPDL locally in gRPC mode.
+
+    Parameters
+    ----------
+    exec_file : str, optional
+        The location of the MAPDL executable.  Will use the cached
+        location when left at the default ``None``.
+
+    jobname : str, optional
+        MAPDL jobname.  Defaults to ``'file'``.
+
+    nproc : int, optional
+        Number of processors.  Defaults to 2.
+
+    ram : float, optional
+        Fixed amount of memory to request for MAPDL.  If ``None``,
+        then MAPDL will use as much as available on the host machine.
+
+    run_location : str, optional
+        MAPDL working directory.  Defaults to a temporary working
+        directory.
+
+    port : int
+        Port to launch MAPDL gRPC on.  Final port will be the first
+        port available after (or including) this port.
+
+    additional_switches : str, optional
+        Additional switches for MAPDL, for example aa_r, and academic
+        research license, would be added with:
+
+        - ``additional_switches="-aa_r"``
+
+        Avoid adding switches like -i -o or -b as these are already
+        included to start up the MAPDL server.  See the notes
+        section for additional details.
+
+    custom_bin : str, optional
+        Path to the MAPDL custom executable.
+
+    override : bool, optional
+        Attempts to delete the lock file at the run_location.
+        Useful when a prior MAPDL session has exited prematurely and
+        the lock file has not been deleted.
+
+    Returns
+    -------
+    port : int
+        Returns the port number that the gRPC instance started on.
+
+    Examples
+    --------
+    Launch MAPDL using the default configuration.
+
+    >>> from ansys.mapdl import launch_mapdl
+    >>> mapdl = launch_mapdl()
+
+    Run MAPDL with shared memory parallel and specify the location of
+    the ansys binary.
+
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe'
+    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
+
+    Notes
+    -----
+    These are the MAPDL switch options as of 2020R2 applicable for
+    running MAPDL as a service via gRPC.  Excluded switches such as
+    ``"-j"`` either not applicable or are set via keyword arguments.
+
+    -acc <device> : Enables the use of GPU hardware.  See GPU
+     Accelerator Capability in the Parallel Processing Guide for more
+     information.
+
+    -amfg : Enables the additive manufacturing capability.  Requires
+     an additive manufacturing license. For general information about
+     this feature, see AM Process Simulation in ANSYS Workbench.
+
+    -ansexe <executable> :  Activates a custom mechanical APDL executable.
+     In the ANSYS Workbench environment, activates a custom
+     Mechanical APDL executable.
+
+    -custom <executable> : Calls a custom Mechanical APDL executable
+     See Running Your Custom Executable in the Programmer's Reference
+     for more information.
+
+    -db value : Initial memory allocation
+     Defines the portion of workspace (memory) to be used as the
+     initial allocation for the database. The default is 1024
+     MB. Specify a negative number to force a fixed size throughout
+     the run; useful on small memory systems.
+
+    -dis : Enables Distributed ANSYS
+     See the Parallel Processing Guide for more information.
+
+    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
+     Requires DesignXplorer.
+
+    -l <language> : Specifies a language file to use other than English
+     This option is valid only if you have a translated message file
+     in an appropriately named subdirectory in
+     ``/ansys_inc/v201/ansys/docu`` or
+     ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
+
+    -m <workspace> : Specifies the total size of the workspace
+     Workspace (memory) in megabytes used for the initial
+     allocation. If you omit the ``-m`` option, the default is 2 GB
+     (2048 MB). Specify a negative number to force a fixed size
+     throughout the run.
+
+    -machines <IP> : Specifies the distributed machines
+     Machines on which to run a Distributed ANSYS analysis. See
+     Starting Distributed ANSYS in the Parallel Processing Guide for
+     more information.
+
+    -mpi <value> : Specifies the type of MPI to use.
+     See the Parallel Processing Guide for more information.
+
+    -mpifile <appfile> : Specifies an existing MPI file
+     Specifies an existing MPI file (appfile) to be used in a
+     Distributed ANSYS run. See Using MPI Files in the Parallel
+     Processing Guide for more information.
+
+    -na <value>: Specifies the number of GPU accelerator devices
+     Number of GPU devices per machine or compute node when running
+     with the GPU accelerator feature. See GPU Accelerator Capability
+     in the Parallel Processing Guide for more information.
+
+    -name <value> : Defines Mechanical APDL parameters
+     Set mechanical APDL parameters at program start-up. The parameter
+     name must be at least two characters long. For details about
+     parameters, see the ANSYS Parametric Design Language Guide.
+
+    -p <productname> : ANSYS session product
+     Defines the ANSYS session product that will run during the
+     session. For more detailed information about the ``-p`` option,
+     see Selecting an ANSYS Product via the Command Line.
+
+    -ppf <license feature name> : HPC license
+     Specifies which HPC license to use during a parallel processing
+     run. See HPC Licensing in the Parallel Processing Guide for more
+     information.
+
+    -smp : Enables shared-memory parallelism.
+     See the Parallel Processing Guide for more information.
+    """
+    # disable all MAPDL pop-up errors:
+    os.environ['ANS_CMD_NODIAG'] = 'TRUE'
+
+    # use temporary directory if run_location is unspecified
+    if run_location is None:
+        run_location = create_temp_dir()
+    elif not os.path.isdir(run_location):
+        os.mkdir(run_location)
+
+    if not os.access(run_location, os.W_OK):
+        raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
+
+    # verify version
+    version = int(re.findall(r'\d\d\d', exec_file)[0])/10
+    if version < 20.2:
+        raise VersionError('The MAPDL gRPC interface requires MAPDL 20.2 or later')
+
+    # verify lock file does not exist
+    check_lock_file(run_location, jobname, override)
+
+    # get the next available port
+    if port is None:
+        if not _LOCAL_PORTS:
+            port = MAPDL_DEFAULT_PORT
+        else:
+            port = max(_LOCAL_PORTS) + 1
+
+    while port_in_use(port) or port in _LOCAL_PORTS:
+        port += 1
+    _LOCAL_PORTS.append(port)
+
+    cpu_sw = '-np %d' % nproc
+    if ram:
+        ram_sw = '-m %d' % int(1024*ram)
+    else:
+        ram_sw = ''
+
+    # different treatment for windows vs. linux due to v202 build issues
+    custom_sw = ''
+    if os.name == 'posix' and version == 20.2:
+        if custom_bin is None:
+            try:
+                import ansys.mapdl_bin
+            except ImportError:
+                raise ImportError('Please install ``ansys.mapdl_bin`` to use the '
+                                  'gRPC mode on Linux for 2020R2')
+
+            custom_bin = ansys.mapdl_bin.bin_path
+
+        if not os.path.isfile(custom_bin):
+            raise FileNotFoundError('Unable to locate the custom MAPDL executable')
+
+        custom_sw = '-custom %s' % custom_bin
+
+    job_sw = '-j %s' % jobname
+    port_sw = '-port %d' % port
+    grpc_sw = '-grpc'
+
+    # Windows will spawn a new window, only linux will let you use pexpect...
+    if os.name == 'nt':
+
+        # # track PIDs since MAPDL isn't directly launched within the shell
+        # import psutil
+        # orig_pids = psutil.pids()
+
+        tmp_inp = '.__tmp__.inp'
+        with open(os.path.join(run_location, tmp_inp), 'w') as f:
+            f.write('FINISH\r\n')
+
+        # must start in batch mode on windows to hide APDL window
+        command = ['"%s"' % exec_file, custom_sw, job_sw, cpu_sw, ram_sw,
+                   '-b', '-i', tmp_inp, '-o', '.__tmp__.out',
+                   additional_switches, port_sw, grpc_sw]
+        command = ' '.join(command)
+
+        subprocess.Popen(command, shell=False, cwd=run_location,
+                         stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+
+        # watch for the creation of temporary files at the run_directory
+        for _ in range(100):
+            # check if any error files have been created.  This is
+            # more reliable than using the lock file
+
+            files = os.listdir(run_location)
+            has_ans = any([filename for filename in files if ".err" in filename])
+            if has_ans:
+                break
+            time.sleep(0.1)
+
+    else:
+        command = ' '.join(['"%s"' % exec_file, custom_sw, job_sw,
+                            cpu_sw, ram_sw, additional_switches,
+                            port_sw, grpc_sw])
+
+        process = popen_spawn.PopenSpawn(command,
+                                         timeout=timeout,
+                                         cwd=run_location)
+
+        try:
+            idx = process.expect(['Server listening',
+                                  'Another ANSYS job with the same job name',
+                                  'PRESS <CR> OR <ENTER> TO CONTINUE',
+                                  'Address already in use',
+                                  'ERROR'])
+
+            if idx == 1:
+                raise LockFileException()
+
+            if idx == 2:
+                process.sendline('')  # enter to continue
+                process.expect('Server listening', timeout=1)
+            elif idx == 3:
+                raise RuntimeError('Failed to start MAPDL gRPC at port %d.  ' % port
+                                   + 'Port appears to be already in use.  Please '
+                                   'specify a different port with the ``port`` '
+                                   'argument.')
+            elif idx > 3:  # catch all
+                msg = process.read().decode()
+                raise RuntimeError('Failed to start local MAPDL instance:\n"%s"'
+                                   % msg)
+        except pexpect.EOF:
+            msg = process.read().decode()
+            raise RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
+        except pexpect.TIMEOUT:
+            msg = process.before.decode()
+            raise RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
+
+    return port, run_location
+
+
+def get_start_instance(start_instance_default=True):
+    """Check if the environment variable PYMAPDL_START_INSTANCE exists and is valid."""
+    if 'PYMAPDL_START_INSTANCE' in os.environ:
+        if os.environ['PYMAPDL_START_INSTANCE'].lower() not in ['true', 'false']:
+            val = os.environ['PYMAPDL_START_INSTANCE']
+            raise OSError(f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'
+                          'PYMAPDL_START_INSTANCE should be either "TRUE" or "FALSE"')
+        return os.environ['PYMAPDL_START_INSTANCE'].lower() == 'true'
+    return start_instance_default
 
 
 def find_ansys():
@@ -208,12 +551,14 @@ def check_lock_file(path, jobname, override):
                                         'running at "%s"' % path)
 
 
-def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
-                 nproc=2, override=False, loglevel='INFO',
-                 additional_switches='', start_timeout=120,
-                 log_apdl=False, **kwargs):
-    """Launch a local instance of MAPDL in the background
-    and allows commands to be passed to a persistent session.
+def launch_mapdl(exec_file=None, run_location=None, jobname='file',
+                 nproc=2, ram=None, mode=None, override=False,
+                 loglevel='ERROR', additional_switches='',
+                 start_timeout=120, port=MAPDL_DEFAULT_PORT,
+                 custom_bin=None, cleanup_on_exit=True,
+                 start_instance=True, ip=LOCALHOST,
+                 clear_on_connect=True, log_apdl=False, **kwargs):
+    """Start MAPDL locally in gRPC mode.
 
     Parameters
     ----------
@@ -223,13 +568,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
-        directory.
-
-    mode : str, optional
-        Mode to launch MAPDL.  Must be one of the following:
-
-        - ``'corba'``
-        - ``'console'``
+        directory.  If directory doesn't exist, will create one.
 
     jobname : str, optional
         MAPDL jobname.  Defaults to ``'file'``.
@@ -237,48 +576,87 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     nproc : int, optional
         Number of processors.  Defaults to 2.
 
+    ram : float, optional
+        Fixed amount of memory to request for MAPDL.  If ``None``,
+        then MAPDL will use as much as available on the host machine.
+
+    mode : str, optional
+        Mode to launch MAPDL.  Must be one of the following:
+
+        - ``'grpc'``
+        - ``'corba'``
+        - ``'console'``
+
+        The ``'grpc'`` mode is avaiable on ANSYS 2021R1 or newer and
+        provides the best performance and stability.  The ``'corba'``
+        mode is available from v17.0 and newer and is given legacy
+        support.  This mode requires the additional
+        ``ansys-mapdl-corba`` module.  Finally, the ``'console'`` mode 
+
     override : bool, optional
         Attempts to delete the lock file at the run_location.
         Useful when a prior MAPDL session has exited prematurely and
         the lock file has not been deleted.
 
-    wait : bool, optional
-        When True, waits until MAPDL has been initialized before
-        initializing the python ansys object.  Set this to False for
-        debugging.
-
     loglevel : str, optional
         Sets which messages are printed to the console.  Default
-        'INFO' prints out all MAPDL messages, 'WARNING` prints only
-        messages containing MAPDL warnings, and 'ERROR' prints only
+        'INFO' prints out all ANSYS messages, 'WARNING` prints only
+        messages containing ANSYS warnings, and 'ERROR' prints only
         error messages.
 
     additional_switches : str, optional
         Additional switches for MAPDL, for example aa_r, and academic
         research license, would be added with:
 
-        - additional_switches="-aa_r"
+        - ``additional_switches="-aa_r"``
 
         Avoid adding switches like -i -o or -b as these are already
         included to start up the MAPDL server.  See the notes
         section for additional details.
 
     start_timeout : float, optional
-        Time to wait before raising an error that MAPDL is unable to
-        start.
+        Maximum allowable time to connect to the MAPDL server.
 
-    log_broadcast : bool, optional
-        Additional logging for ansys solution progress.  Default True
-        and visible at log level 'INFO'.  Only applicable when ``mode=corba``
+    port : int
+        Port to launch MAPDL gRPC on.  Final port will be the first
+        port available after (or including) this port.  Defaults to
+        50052.  You can also override the default behavior of this
+        keyword argument with the environment variable
+        ``PYMAPDL_PORT=<VALID PORT>``
 
-    log_apdl : str, optional
-        Opens an APDL log file in the current MAPDL working directory
-        to log all MAPDL commands to file.  Default False.  Set to 'a'
-        to append to an existing log or 'w' to write a new log.
+    custom_bin : str, optional
+        Path to the MAPDL custom executable.  On release 2020R2 on
+        Linux, if ``None``, will check to see if you have
+        ``ansys.mapdl_bin`` installed and use that executable.
+
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
+
+    start_instance : bool, optional
+        When False, connect to an existing MAPDL instance at ``ip``
+        and ``port``, which default to ``'127.0.0.1'`` at 50052.
+        Otherwise, launch a local instance of MAPDL.  You can also
+        override the default behavior of this keyword argument with
+        the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
+
+    ip : bool, optional
+        Used only when ``start_instance`` is ``False``.  Defaults to
+        ``'127.0.0.1'``. You can also override the default behavior of
+        this keyword argument with the environment variable
+        "PYMAPDL_IP=FALSE".
+
+    clear_on_connect : bool, optional
+        Used only when ``start_instance`` is ``False``.  Defaults to
+        ``True``, giving you a fresh environment when connecting to
+        MAPDL.
+
+    remove_temp_files : bool, optional
+        Removes temporary files on exit.  Default ``False``.
 
     Examples
     --------
-    Launch MAPDL using the default configuration.
+    Launch MAPDL using the best protocol.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -289,47 +667,43 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
-    Run MAPDL using the console mode (only on linux).
+    Connect to an existing instance of MAPDL at IP 192.168.1.30 and
+    port 50001.  This is only available using the latest ``'grpc'``
+    mode.
+
+    >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
+                             port=50001)
+
+    Force the usage of the CORBA protocol.
+
+    >>> mapdl = launch_mapdl(mode='corba')
+
+    Run MAPDL using the console mode (available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
                               mode='console')
 
     Notes
     -----
-    MAPDL has the following command line options as of 2021R1.
+    These are the MAPDL switch options as of 2020R2 applicable for
+    running MAPDL as a service via gRPC.  Excluded switches such as
+    ``"-j"`` either not applicable or are set via keyword arguments.
 
-    -aas : Enables server mode
-     When enabling server mode, a custom name for the keyfile can be
-     specified using the ``-iorFile`` option.  This is the CORBA that
-     PyMAPDL uses for ``mode='corba'``.
+    -acc <device> : Enables the use of GPU hardware.  See GPU
+     Accelerator Capability in the Parallel Processing Guide for more
+     information.
 
-    -acc <device> : Enables the use of GPU hardware.  Enables the use of
-     GPU hardware to accelerate the analysis. See GPU Accelerator
-     Capability in the Parallel Processing Guide for more information.
+    -amfg : Enables the additive manufacturing capability.  Requires
+     an additive manufacturing license. For general information about
+     this feature, see AM Process Simulation in ANSYS Workbench.
 
-    -amfg : Enables the additive manufacturing capability.
-     Requires an additive manufacturing license. For general
-     information about this feature, see AM Process Simulation in
-     ANSYS Workbench.
-
-    -ansexe <executable> :  activates a custom mechanical APDL executable.
+    -ansexe <executable> :  Activates a custom mechanical APDL executable.
      In the ANSYS Workbench environment, activates a custom
      Mechanical APDL executable.
-
-    -b <list or nolist> : Activates batch mode
-     The options ``-b`` list or ``-b`` by itself cause the input
-     listing to be included in the output. The ``-b`` nolist option
-     causes the input listing not to be included. For more information
-     about running Mechanical APDL in batch mode, see Batch Mode.
 
     -custom <executable> : Calls a custom Mechanical APDL executable
      See Running Your Custom Executable in the Programmer's Reference
      for more information.
-
-    -d <device> : Specifies the type of graphics device
-     This option applies only to interactive mode. For Linux systems,
-     graphics device choices are X11, X11C, or 3D. For Windows
-     systems, graphics device options are WIN32 or WIN32C, or 3D.
 
     -db value : Initial memory allocation
      Defines the portion of workspace (memory) to be used as the
@@ -337,42 +711,11 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      MB. Specify a negative number to force a fixed size throughout
      the run; useful on small memory systems.
 
-    -dir <path> : Defines the initial working directory
-     Using the ``-dir`` option overrides the
-     ``ANSYS201_WORKING_DIRECTORY`` environment variable.
-
     -dis : Enables Distributed ANSYS
      See the Parallel Processing Guide for more information.
 
     -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
      Requires DesignXplorer.
-
-    -g : Launches the Mechanical APDL program with the GUI
-     Graphical User Interface (GUI) on. If you select this option, an
-     X11 graphics device is assumed for Linux unless the ``-d`` option
-     specifies a different device. This option is not used on Windows
-     systems. To activate the GUI after Mechanical APDL has started,
-     enter two commands in the input window: /SHOW to define the
-     graphics device, and /MENU,ON to activate the GUI. The ``-g`` option
-     is valid only for interactive mode.  Note: If you start
-     Mechanical APDL via the ``-g`` option, the program ignores any /SHOW
-     command in the start.ans file and displays a splash screen
-     briefly before opening the GUI windows.
-
-    -i <inputname> : Specifies the name of the file to read
-     Inputs an input file into Mechanical APDL for batch
-     processing.
-
-    -iorFile <keyfile_name> : Specifies the name of the server keyfile
-     Name of the server keyfile when enabling server mode. If this
-     option is not supplied, the default name of the keyfile is
-     ``aas_MapdlID.txt``. For more information, see Mechanical APDL as
-     a Server Keyfile in the Mechanical APDL as a Server User's Guide.
-
-    -j <Jobname> : Specifies the initial jobname
-     A name assigned to all files generated by the program for a
-     specific model. If you omit the ``-j`` option, the jobname is assumed
-     to be file.
 
     -l <language> : Specifies a language file to use other than English
      This option is valid only if you have a translated message file
@@ -400,7 +743,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      Processing Guide for more information.
 
     -na <value>: Specifies the number of GPU accelerator devices
-     Nubmer of GPU devices per machine or compute node when running
+     Number of GPU devices per machine or compute node when running
      with the GPU accelerator feature. See GPU Accelerator Capability
      in the Parallel Processing Guide for more information.
 
@@ -408,15 +751,6 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      Set mechanical APDL parameters at program start-up. The parameter
      name must be at least two characters long. For details about
      parameters, see the ANSYS Parametric Design Language Guide.
-
-    -np <value> : Specifies the number of processors
-     Number of processors to use when running Distributed ANSYS or
-     Shared-memory ANSYS. See the Parallel Processing Guide for more
-     information.
-
-    -o <outputname> : Output file
-     Specifies the name of the file to store the output from a batch
-     execution of Mechanical APDL
 
     -p <productname> : ANSYS session product
      Defines the ANSYS session product that will run during the
@@ -428,59 +762,25 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
      run. See HPC Licensing in the Parallel Processing Guide for more
      information.
 
-    -rcopy <path> : Path to remote copy of files
-     On a Linux cluster, specifies the full path to the program used
-     to perform remote copy of files. The default value is
-     ``/usr/bin/scp``.
-
-    -s <read or noread> : Read startup file
-     Specifies whether the program reads the ``start.ans`` file at
-     start-up. If you omit the ``-s`` option, Mechanical APDL reads the
-     start.ans file in interactive mode and not in batch mode.
-
-    -schost <host>: Coupling service host
-     Specifies the host machine on which the coupling service is
-     running (to which the co-simulation participant/solver must
-     connect) in a System Coupling analysis.
-
-    -scid <value> : System Coupling analysis licensing ID
-     Specifies the licensing ID of the System Coupling analysis.
-
-    -sclic <port@host> : System Coupling analysis host
-     Specifies the licensing port and host to use for the System
-     Coupling analysis.
-
-    -scname <solver> : Name of the co-simulation participant
-     Specifies the unique name used by the co-simulation participant
-     to identify itself to the coupling service in a System Coupling
-     analysis. For Linux systems, you need to quote the name to have
-     the name recognized if it contains a space: (e.g.
-     ``-scname "Solution 1"``)
-
-    -scport <port> : Coupling service port
-     Specifies the port on the host machine upon which the coupling
-     service is listening for connections from co-simulation
-     participants in a System Coupling analysis.
-
     -smp : Enables shared-memory parallelism.
      See the Parallel Processing Guide for more information.
-
-    -usersh : Enable MPI remote shell.
-     Directs the MPI software (used by Distributed ANSYS) to use the
-     remote shell (rsh) protocol instead of the default secure shell
-     (ssh) protocol. See Configuring Distributed ANSYS in the Parallel
-     Processing Guide for more information.
-
-    -v : Return version info
-     Returns the Mechanical APDL release number, update number,
-     copyright date, customer number, and license manager version
-     number.
     """
-    # depreciated options
-    if 'prefer_pexpect' in kwargs:
-        raise NotImplementedError('"prefer_pexpect" is depreciated.  '
-                                  'Please use: ``mode="console"``')
+    # These parameters are partially used for unit testing
+    set_no_abort = kwargs.get('set_no_abort', True)
+    ip = os.environ.get('PYMAPDL_IP', ip)
+    if port is None:
+        port = MAPDL_DEFAULT_PORT
+    port = int(os.environ.get('PYMAPDL_PORT', port))
 
+    # connect to an existing instance if enabled
+    if not get_start_instance(start_instance):
+        mapdl = MapdlGrpc(ip=ip, port=port, cleanup_on_exit=False,
+                          loglevel=loglevel, set_no_abort=set_no_abort)
+        if clear_on_connect:
+            mapdl.clear()
+        return mapdl
+
+    # verify executable
     if exec_file is None:
         # Load cached path
         exec_file = get_ansys_path()
@@ -494,6 +794,7 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
                                     % exec_file + 'Enter one manually using '
                                     'launch_mapdl(exec_file=)')
 
+    # verify run location
     if run_location is None:
         temp_dir = tempfile.gettempdir()
         run_location = os.path.join(temp_dir, 'ansys_%s' % random_string(10))
@@ -501,12 +802,12 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
             try:
                 os.mkdir(run_location)
             except:
-                raise RuntimeError('Unable to create temporary working '
-                                   'directory %s\n' % run_location +
+                raise RuntimeError('Unable to create the temporary working '
+                                   f'directory "{run_location}"\n'
                                    'Please specify run_location=')
     else:
         if not os.path.isdir(run_location):
-            raise FileNotFoundError('"%s" is not a valid directory' % run_location)
+            raise FileNotFoundError(f'"{run_location}" is not a valid directory')
 
     check_lock_file(run_location, jobname, override)
 
@@ -520,12 +821,24 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
             # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
             os.environ['I_MPI_SHM_LMT'] = 'shm'
 
-    start_parm = {'exec_file': exec_file,
-                  'run_location': run_location,
-                  'jobname': jobname,
-                  'nproc': nproc,
-                  'additional_switches': additional_switches,
-                  'start_timeout': start_timeout}
+    # cache start parameters
+    if mode in ['console', 'corba']:
+        start_parm = {'exec_file': exec_file,
+                      'run_location': run_location,
+                      'jobname': jobname,
+                      'nproc': nproc,
+                      'additional_switches': additional_switches,
+                      'start_timeout': start_timeout}
+    else:
+        start_parm = {'exec_file': exec_file,
+                      'jobname': jobname,
+                      'nproc': nproc,
+                      'ram': ram,
+                      'run_location': run_location,
+                      'additional_switches': additional_switches,
+                      'custom_bin': custom_bin,
+                      'override': override,
+                      'timeout': start_timeout}
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
@@ -540,6 +853,15 @@ def launch_mapdl(exec_file=None, run_location=None, mode=None, jobname='file',
         broadcast = kwargs.get('log_broadcast', False)
         return MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
                           log_broadcast=broadcast, **start_parm)
+    elif mode == 'grpc':
+        port, actual_run_location = launch_grpc(port=port, **start_parm)
+        mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
+                          cleanup_on_exit=cleanup_on_exit,
+                          loglevel=loglevel, set_no_abort=set_no_abort,
+                          remove_temp_files=kwargs.pop('remove_temp_files', False),
+                          **start_parm)
+        if run_location is None:
+            mapdl._path = actual_run_location
     else:
         raise ValueError('Invalid mode %s' % mode)
 

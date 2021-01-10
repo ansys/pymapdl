@@ -1,4 +1,6 @@
 """Module for miscellaneous functions and methods"""
+import tempfile
+import inspect
 import platform
 import os
 from threading import Thread
@@ -12,9 +14,11 @@ import pyvista
 import numpy as np
 import vtk
 
-from ansys.mapdl.core import _binary_reader
-
 VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
+
+
+# path of this module
+MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
 def get_ansys_bin(rver):
@@ -228,6 +232,16 @@ def threaded(fn):
     return wrapper
 
 
+def threaded_daemon(fn):
+    """Calls a function using a daemon thread."""
+    def wrapper(*args, **kwargs):
+        thread = Thread(target=fn, args=args, kwargs=kwargs)
+        thread.daemon = True
+        thread.start()
+        return thread
+    return wrapper
+
+
 def break_apart_surface(surf, force_linear=True):
     """Break apart the faces of a vtk PolyData such that the points
     for each face are unique and each point is used only by one face.
@@ -253,6 +267,7 @@ def break_apart_surface(surf, force_linear=True):
     if faces.dtype != np.int64:
         faces = faces.astype(np.int64)
 
+    from ansys.mapdl.core import _binary_reader
     b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points,
                                                                 faces,
                                                                 surf.n_faces,
@@ -309,3 +324,32 @@ def last_created(filenames):
         return filenames[-1]
 
     return filenames[idx]
+
+
+def create_temp_dir(tmpdir=None):
+    """Create a new unique directory at a given temporary directory"""
+    if tmpdir is None:
+        tmpdir = tempfile.gettempdir()
+    elif not os.path.isdir(tmpdir):
+        os.makedirs(tmpdir)
+
+    # in the *rare* case of a duplicate path
+    path = os.path.join(tmpdir, random_string(10))
+    while os.path.isdir(path):
+        path = os.path.join(tempfile.gettempdir(), random_string(10))
+
+    try:
+        os.mkdir(path)
+    except:
+        raise RuntimeError('Unable to create temporary working '
+                           'directory %s\n' % path +
+                           'Please specify run_location=')
+
+    return path
+
+
+def no_return(fn):
+    """Decorator to return nothing from the wrapped function"""
+    def wrapper(*args, **kwargs):
+        fn(*args, **kwargs)
+    return wrapper
