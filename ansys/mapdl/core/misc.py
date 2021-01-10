@@ -119,13 +119,13 @@ class Report(scooby.Report):
         """
         # Mandatory packages.
         core = ['pyansys', 'pyvista', 'vtk', 'numpy',
-                'appdirs', 'psutil', 'pexpect']
+                'appdirs', 'psutil', 'pexpect', 'ansys.mapdl.core']
 
         if sys.platform != 'darwin':
             core.append('pyansys')
 
         # Optional packages.
-        optional = ['scipy', 'matplotlib']
+        optional = ['scipy', 'matplotlib', 'ansys.mapdl.corba']
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.

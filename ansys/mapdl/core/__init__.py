@@ -20,9 +20,8 @@ from ansys.mapdl.core.launcher import get_ansys_path
 
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.pool import LocalMapdlPool
-from ansys.mapdl.core.math import MapdlMath
 from ansys.mapdl.core.xpl import ansXpl
-from ansys.mapdl.core.report import Report
+# from ansys.mapdl.core.math import MapdlMath
 
 # from ansys.mapdl.core.mapdl_azure import MapdlAzure, JupyterAzureClient
 
