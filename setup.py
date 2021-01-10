@@ -1,4 +1,4 @@
-"""Installation file for pyansys"""
+"""Installation file for ansys-mapdl-core"""
 import os
 import sys
 from io import open as io_open
@@ -15,7 +15,7 @@ except ImportError:
 def check_cython():
     """Check if binaries exist and if not check if Cython is installed"""
     has_binary_reader = False
-    for filename in os.listdir('pyansys'):
+    for filename in os.listdir('ansys/mapdl/core'):
         if '_binary_reader' in filename:
             has_binary_reader = True
 
@@ -71,18 +71,14 @@ def compilerName():
 compiler = compilerName()
 if compiler == 'unix':
     cmp_arg = ['-O3', '-w']
-#    if sys.platform == 'darwin':
-#        cmp_arg.append('-flat_namespace')
 else:
     cmp_arg = ['/Ox', '-w']
 
 
 # Get version from version info
 __version__ = None
-version_file = os.path.join(
-    os.path.dirname(__file__),
-    'pyansys',
-    '_version.py')
+this_file = os.path.dirname(__file__)
+version_file = os.path.join(this_file, 'ansys', 'mapdl', 'core', '_version.py')
 with io_open(version_file, mode='r') as fd:
     # execute file from raw string
     exec(fd.read())
@@ -95,25 +91,17 @@ install_requires = ['numpy>=1.14.0',
                     'tqdm>=4.45.0',
                     'pyiges>=0.1.2']
 
-# MacOS can't launch MAPDL
-if sys.platform != 'darwin':
-    install_requires.append('ansys_corba')
-
 
 # Actual setup
 setup(
-    name='pyansys',
-    packages=['pyansys', 'pyansys.examples'],
+    name='ansys-mapdl-core',
+    packages=['ansys.mapdl.core', 'ansys.mapdl.core.examples'],
 
     # Version
     version=__version__,
 
-    description='Pythonic interface to ANSYS binary files',
+    description='Pythonic interface to MAPDL',
     long_description=open('README.rst').read(),
-
-    # Author details
-    author='Alex Kaszynski',
-    author_email='akascap@gmail.com',
 
     license='MIT',
     classifiers=[
@@ -135,40 +123,40 @@ setup(
     # Build cython modules
     cmdclass={'build_ext': build_ext},
     ext_modules=[
-                 Extension('pyansys._reader',
-                           ['pyansys/cython/_reader.pyx',
-                            'pyansys/cython/reader.c',
-                            'pyansys/cython/vtk_support.c'],
+                 Extension('ansys.mapdl.core._reader',
+                           ['ansys/mapdl/core/cython/_reader.pyx',
+                            'ansys/mapdl/core/cython/reader.c',
+                            'ansys/mapdl/core/cython/vtk_support.c'],
                            extra_compile_args=cmp_arg,
                            language='c',),
 
-                 Extension("pyansys._relaxmidside",
-                           ["pyansys/cython/_relaxmidside.pyx"],
+                 Extension("ansys.mapdl.core._relaxmidside",
+                           ["ansys/mapdl/core/cython/_relaxmidside.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 Extension("pyansys._cellqual",
-                           ["pyansys/cython/_cellqual.pyx"],
+                 Extension("ansys.mapdl.core._cellqual",
+                           ["ansys/mapdl/core/cython/_cellqual.pyx"],
                            extra_compile_args=cmp_arg,
                            language='c'),
 
-                 Extension("pyansys._binary_reader",
-                           ["pyansys/cython/_binary_reader.pyx",
-                            "pyansys/cython/binary_reader.cpp"],
+                 Extension("ansys.mapdl.core._binary_reader",
+                           ["ansys/mapdl/core/cython/_binary_reader.pyx",
+                            "ansys/mapdl/core/cython/binary_reader.cpp"],
                            extra_compile_args=cmp_arg,
                            language='c++'),
                  ],
 
     python_requires='>=3.6.*',
     keywords='vtk ANSYS cdb full rst',
-    package_data={'pyansys.examples': ['TetBeam.cdb',
-                                       'HexBeam.cdb',
-                                       'hex_db_150.db',
-                                       'hex_db_194.db',
-                                       'file.rst',
-                                       'file.full',
-                                       'sector.rst',
-                                       'sector.cdb']},
+    package_data={'ansys.mapdl.core.examples': ['TetBeam.cdb',
+                                                'HexBeam.cdb',
+                                                'hex_db_150.db',
+                                                'hex_db_194.db',
+                                                'file.rst',
+                                                'file.full',
+                                                'sector.rst',
+                                                'sector.cdb']},
 
     install_requires=install_requires,
 )

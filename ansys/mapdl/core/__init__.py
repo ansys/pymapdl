@@ -4,15 +4,15 @@ import os
 # Per contract with Sphinx-Gallery, this method must be available at top level
 from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
 
-from pyansys._version import __version__
-from pyansys.archive import (Archive, write_cmblock, write_nblock,
+from ansys.mapdl.core._version import __version__
+from ansys.mapdl.core.archive import (Archive, write_cmblock, write_nblock,
                              save_as_archive)
-from pyansys.cell_quality import quality
-from pyansys.common import read_binary
-from pyansys.convert import convert_script
-from pyansys.launcher import launch_mapdl, change_default_ansys_path
-from pyansys.misc import Report, _configure_pyvista, _check_has_ansys
-from pyansys.examples.downloads import *
+from ansys.mapdl.core.cell_quality import quality
+from ansys.mapdl.core.common import read_binary
+from ansys.mapdl.core.convert import convert_script
+from ansys.mapdl.core.launcher import launch_mapdl, change_default_ansys_path
+from ansys.mapdl.core.misc import Report, _configure_pyvista, _check_has_ansys
+from ansys.mapdl.core.examples.downloads import *
 
 
 _HAS_ANSYS = _check_has_ansys()

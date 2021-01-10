@@ -16,7 +16,7 @@ _*.cpp
 
 # Pip generated folders #
 #########################
-pyansys.egg-info/
+*.egg-info/
 build/
 dist/
 wheelhouse
