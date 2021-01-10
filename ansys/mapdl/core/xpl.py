@@ -1,10 +1,11 @@
 """Contains the ansXpl class"""
 import weakref
 import json
-import numpy as np
-from pyansys.errors import MapdlRuntimeError
 
+import numpy as np
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 class ansXpl():

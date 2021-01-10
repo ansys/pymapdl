@@ -6,7 +6,7 @@ import pyvista
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.launcher import get_start_instance
+from ansys.mapdl.core.launcher import get_start_instance
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
