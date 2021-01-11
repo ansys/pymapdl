@@ -6,7 +6,9 @@ from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
 import ansys.mapdl.core as pymapdl
-from ansys.mapdl.core.examples import rstfile
+from ansys.mapdl.core import examples
+from ansys.mapdl.core.cyclic_reader import CyclicResult
+
 
 HAS_FFMPEG = True
 try:
@@ -23,7 +25,7 @@ academic_path = os.path.join(cyclic_testfiles_path, 'academic_rotor')
 
 # modal result z axis
 try:
-    result_z = pyansys.download_sector_modal()
+    result_z = examples.download_sector_modal()
     result_z.positive_cyclic_dir = True
 except:
     result_z = None
@@ -35,7 +37,6 @@ skip_with_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
 # static result x axis
 @pytest.fixture(scope='module')
 def academic_rotor():
-    from pyansys.cyclic_reader import CyclicResult
     filename = os.path.join(academic_path, 'academic_rotor.rst')
     return CyclicResult(filename)
 
@@ -44,21 +45,21 @@ def academic_rotor():
 @pytest.fixture(scope='module')
 def result_x():
     filename = os.path.join(testfiles_path, 'cyc12.rst')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 @pytest.fixture(scope='module')
 def cyclic_v182_z():
     # static result z axis
     filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 @pytest.fixture(scope='module')
 def cyclic_v182_z_with_comp():
     # cyclic modal with component
     filename = os.path.join(cyclic_testfiles_path, 'cyclic_v182_w_comp.rst')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 @pytest.mark.parametrize("rtype", ['S', 'EPEL', 'S,PRIN'])
@@ -82,11 +83,11 @@ def test_nodal_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
 
     # ANSYS doesn't include results for all nodes (i.e. sector nodes)
     mask = np.in1d(nnum, nnum_ans)
-    stress = stress[:, mask, :6]  # pyansys strain includes eqv
+    stress = stress[:, mask, :6]  # pymapdl strain includes eqv
     nnum = nnum[mask]
     assert np.allclose(nnum, nnum_ans)
 
-    # ANSYS will not average across geometric discontinuities, pyansys
+    # ANSYS will not average across geometric discontinuities, pymapdl
     # always does.  These 10 nodes are along the blade/sector interface
     dmask = np.ones(stress[0].shape[0], np.bool)
     dmask[[99, 111, 115, 116, 117, 135, 142, 146, 147, 148]] = False
@@ -100,9 +101,8 @@ def test_nodal_cyclic_modal(academic_rotor, load_step, sub_step, rtype):
 
 
 def test_non_cyclic():
-    from pyansys.cyclic_reader import CyclicResult
     with pytest.raises(TypeError):
-        rst = CyclicResult(rstfile)
+        rst = CyclicResult(examples.rstfile)
 
 
 @skip_with_no_xserver
@@ -118,7 +118,6 @@ def test_plot_sectors(tmpdir):
 def test_plot_sectors_x(result_x):
     cpos = result_x.plot_sectors()
     assert isinstance(cpos, CameraPosition)
-
 
 
 @skip_with_no_xserver
@@ -173,7 +172,7 @@ def test_element_stress_v182_non_cyclic():
 
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.read_binary(ansys_result_file)
+    result = pymapdl.read_binary(ansys_result_file)
 
     elemnum, element_stress, enode = result.element_stress(0, False, False)
     assert np.allclose(np.sort(elemnum), elemnum), 'elemnum must be sorted'
@@ -196,7 +195,7 @@ def test_nodal_stress_v182_non_cyclic():
     ansys_stress = array[:, 1:]
     """
     ansys_result_file = os.path.join(cyclic_testfiles_path, 'cyclic_v182.rst')
-    result = pyansys.rst.Result(ansys_result_file, ignore_cyclic=True)
+    result = pymapdl.rst.Result(ansys_result_file, ignore_cyclic=True)
     nnum, stress = result.nodal_stress(0)
 
     from_ansys = np.load(os.path.join(cyclic_testfiles_path, 'v182_prnsol_s.npz'))
@@ -212,8 +211,6 @@ def test_full_x_nodal_solution(result_x):
     ansys_nnum = from_ansys['nnum']
     ansys_disp = from_ansys['disp']
 
-
-    # self = pyansys.read_binary(cyclic_x_filename)
     rnum = 0
     nnum, disp = result_x.nodal_solution(rnum, phase=0, full_rotor=True,
                                          as_complex=False)

@@ -25,8 +25,8 @@ local = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
-if START_INSTANCE:
-    local.append(True)
+# if START_INSTANCE:
+#     local.append(True)
 
 
 @pytest.fixture(scope="session", params=local)

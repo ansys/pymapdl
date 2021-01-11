@@ -80,7 +80,7 @@ import os
 
 import pytest
 import numpy as np
-import pyansys
+import ansys.mapdl.core as pymapdl
 
 ANSYS_ELEM = [[0.17662E-07, 79.410, -11.979, -0.11843E-02, 4.8423, -0.72216E-04],
               [0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
@@ -96,7 +96,7 @@ ANSYS_NODE = [[0.20287E-07, 91.212, 27.364, -0.13603E-02, 4.8423, -0.72216E-04],
 @pytest.fixture(scope='module')
 def result():
     test_path = os.path.dirname(os.path.abspath(__file__))
-    return pyansys.read_binary(os.path.join(test_path, 'shell181.rst'))
+    return pymapdl.read_binary(os.path.join(test_path, 'shell181.rst'))
 
 
 def test_load(result):

@@ -82,7 +82,7 @@ def vtk_cell_info(grid):
 
 def kill_process(proc_pid):
     """Kill a process with extreme prejudice"""
-    import psutil  # imported here to avoid import errors when unused
+    import psutil  # imported here to avoid import errors when unused in windows
     process = psutil.Process(proc_pid)
     for proc in process.children(recursive=True):
         proc.kill()
@@ -118,14 +118,11 @@ class Report(scooby.Report):
 
         """
         # Mandatory packages.
-        core = ['pyansys', 'pyvista', 'vtk', 'numpy',
+        core = ['pyansys', 'pyvista', 'vtk', 'numpy', 'scipy',
                 'appdirs', 'psutil', 'pexpect', 'ansys.mapdl.core']
 
-        if sys.platform != 'darwin':
-            core.append('pyansys')
-
         # Optional packages.
-        optional = ['scipy', 'matplotlib', 'ansys.mapdl.corba']
+        optional = ['matplotlib', 'ansys.mapdl.corba']
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
@@ -141,6 +138,10 @@ class Report(scooby.Report):
                                optional=optional, ncol=ncol,
                                text_width=text_width, sort=sort,
                                extra_meta=extra_meta)
+
+    def __repr__(self):
+        add_text = '-'*79 + '\nPyMAPDL Software and Environment Report'
+        return add_text + super().__repr__()
 
 
 def is_float(string):

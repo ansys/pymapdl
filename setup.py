@@ -86,10 +86,12 @@ with io_open(version_file, mode='r') as fd:
 install_requires = ['numpy>=1.14.0',
                     'pyvista>=0.27.2',
                     'appdirs>=1.4.0',
-                    'psutil>=5.0.0',
-                    'pexpect>=4.8.0',
                     'tqdm>=4.45.0',
                     'pyiges>=0.1.2']
+
+# these are only used when launching a MAPDL via a console
+if os.name == 'linux':
+    install_requires.extend(['psutil>=5.0.0', 'pexpect>=4.8.0'])
 
 
 # Actual setup
@@ -118,7 +120,7 @@ setup(
     ],
 
     # Website
-    url='https://github.com/akaszynski/pyansys',
+    url='https://github.com/pyansys/pymapdl',
 
     # Build cython modules
     cmdclass={'build_ext': build_ext},

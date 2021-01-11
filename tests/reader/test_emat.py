@@ -3,13 +3,9 @@ import os
 import pytest
 import numpy as np
 
-import pyansys
-from pyansys.emat import EmatFile
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core.emat import EmatFile
 
-try:
-    __file__
-except NameError:
-    __file__ = '/home/alex/afrl/python/source/pyansys/tests/test_emat.py'
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -18,7 +14,7 @@ emat_filename = os.path.join(testfiles_path, 'file.emat')
 
 @pytest.fixture(scope='module')
 def emat():
-    emat_bin = pyansys.read_binary(emat_filename)
+    emat_bin = pymapdl.read_binary(emat_filename)
     assert isinstance(emat_bin, EmatFile)
     return emat_bin
 

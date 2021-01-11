@@ -3,6 +3,8 @@ import os
 
 import pytest
 
+from ansys.mapdl.core import examples
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -51,11 +53,11 @@ def test_upload_large(mapdl):
     mapdl.finish()
     mapdl.clear('NOSTART')
 
-    file_name = 'vm153.dat'
+    file_name = examples.vmfiles['vm153']
     test_file = os.path.join(PATH, 'test_files', file_name)
 
     mapdl.upload(test_file)
-    assert file_name in mapdl.list_files()
+    assert os.path.basename(file_name) in mapdl.list_files()
 
 
 def test_upload_fail(mapdl):
@@ -84,7 +86,7 @@ def test_download_missing_file(mapdl, tmpdir):
 # directory.
 
 def test_read_input_file_verbose(mapdl):
-    test_file = os.path.join(PATH, 'test_files', 'vm153.dat')
+    test_file = examples.vmfiles['vm153']
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file, verbose=True)

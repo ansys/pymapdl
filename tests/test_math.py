@@ -1,5 +1,6 @@
 """Test APDL Math functionality"""
 import re
+
 import pytest
 import numpy as np
 from scipy import sparse
@@ -265,5 +266,5 @@ def test_dense(mm):
     # test if a APDLMath object can treated as an array
     array = np.random.random((5, 5))
     apdl_mat = mm.matrix(array)
-    assert isinstance(apdl_mat, math.AnsMat)
+    assert isinstance(apdl_mat, apdl_math.AnsMat)
     assert np.allclose(array, apdl_mat)

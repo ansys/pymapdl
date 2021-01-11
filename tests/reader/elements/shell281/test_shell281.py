@@ -3,7 +3,7 @@ import os
 import pytest
 import numpy as np
 
-import pyansys
+import ansys.mapdl.core as pymapdl
 
 
 path = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +11,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 @pytest.fixture(scope='module')
 def rst():
     rst_file = os.path.join(path, 'file.rst')
-    return pyansys.read_binary(rst_file)
+    return pymapdl.read_binary(rst_file)
 
 
 def test_materials(rst):

@@ -8,15 +8,15 @@ import os
 
 import pytest
 import numpy as np
-import pyansys
+import ansys.mapdl.core as pymapdl
 
 testfiles_path = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope='module')
 def result():
-    filename = os.path.join(testfiles_path, 'pyansys_182_183_42_82.rst')
-    return pyansys.read_binary(filename)
+    filename = os.path.join(testfiles_path, 'pymapdl_182_183_42_82.rst')
+    return pymapdl.read_binary(filename)
 
 
 def test_load(result):

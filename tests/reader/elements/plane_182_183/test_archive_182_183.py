@@ -2,7 +2,7 @@ import os
 
 import pytest
 import numpy as np
-import pyansys
+import ansys.mapdl.core as pymapdl
 
 testfiles_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -10,7 +10,7 @@ testfiles_path = os.path.dirname(os.path.abspath(__file__))
 @pytest.fixture(scope='module')
 def archive():
     filename = os.path.join(testfiles_path, 'archive.cdb')
-    return pyansys.Archive(filename)
+    return pymapdl.Archive(filename)
 
 
 def test_archive_load(archive):

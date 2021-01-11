@@ -4,8 +4,8 @@ import scipy
 import pytest
 import numpy as np
 
-import pyansys
-from pyansys.examples import fullfile
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core import examples
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 testfiles_path = os.path.join(test_path, 'testfiles')
@@ -14,11 +14,11 @@ testfiles_path = os.path.join(test_path, 'testfiles')
 @pytest.fixture()
 def sparse_full():
     filename = os.path.join(testfiles_path, 'sparse.full')
-    return pyansys.read_binary(filename)
+    return pymapdl.read_binary(filename)
 
 
 def test_fullreader():
-    fobj = pyansys.read_binary(fullfile)
+    fobj = pymapdl.read_binary(examples.fullfile)
     dofref, k, m = fobj.load_km()
     assert dofref.size
     assert k.size

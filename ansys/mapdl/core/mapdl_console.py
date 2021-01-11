@@ -2,7 +2,6 @@
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
-import pexpect
 import time
 import re
 
@@ -48,6 +47,7 @@ def launch_pexpect(exec_file=None, run_location=None, jobname=None, nproc=None,
 
     Limited to only a linux instance
     """
+    import pexpect
     command = '%s -j %s -np %d %s' % (exec_file, jobname, nproc,
                                       additional_switches)
     process = pexpect.spawn(command, cwd=run_location)

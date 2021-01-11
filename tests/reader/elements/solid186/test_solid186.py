@@ -2,20 +2,21 @@ import os
 
 import pytest
 import numpy as np
-import pyansys
-from pyansys import examples
+
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core import examples
 
 test_path = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope='module')
 def result():
-    return pyansys.read_binary(examples.rstfile)
+    return pymapdl.read_binary(examples.rstfile)
 
 
 @pytest.fixture(scope='module')
 def archive():
-    return pyansys.Archive(examples.hexarchivefile)
+    return pymapdl.Archive(examples.hexarchivefile)
 
 
 def test_geometry_elements(result, archive):

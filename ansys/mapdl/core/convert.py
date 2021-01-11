@@ -7,7 +7,6 @@ VALID_COMMANDS = dir(mapdl_functions._MapdlCommands)
 NON_INTERACTIVE_COMMANDS = ['*CRE', '*VWR']
 
 
-
 def convert_script(filename_in, filename_out, loglevel='INFO', auto_exit=True,
                    line_ending=None, exec_file=None, macros_as_functions=True,
                    use_function_names=True):

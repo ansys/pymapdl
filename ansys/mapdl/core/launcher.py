@@ -10,9 +10,6 @@ import socket
 import time
 import subprocess
 
-import pexpect
-from pexpect import popen_spawn
-
 import ansys.mapdl.core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir
 from ansys.mapdl.core.errors import LockFileException, VersionError
@@ -314,6 +311,10 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
             time.sleep(0.1)
 
     else:
+        # use pexpect on linux for better error reporting
+        import pexpect
+        from pexpect import popen_spawn
+
         command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
                             ram_sw, additional_switches, port_sw,
                             grpc_sw])

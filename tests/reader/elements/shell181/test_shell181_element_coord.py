@@ -26,7 +26,7 @@ currently provides through result.element_stress(0) command which is in the glob
 coordinate system.
 
 """
-import pyansys
+import ansys.mapdl.core as pymapdl
 import numpy as np
 import os
 
@@ -46,7 +46,7 @@ result_file_name = os.path.join(test_path, 'shell181_box.rst')
 
 
 def test_shell_stress_element_cs():
-    result = pyansys.read_binary(result_file_name)
+    result = pymapdl.read_binary(result_file_name)
     enum, stress, enode = result.element_stress(0, in_element_coord_sys=True)
 
     idx = np.where(enum == 118223)[0][0]
