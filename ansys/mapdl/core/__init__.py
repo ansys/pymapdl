@@ -15,11 +15,12 @@ from ansys.mapdl.core.convert import convert_script
 from ansys.mapdl.core.launcher import (launch_mapdl, change_default_ansys_path,
                                        close_all_local_instances)
 from ansys.mapdl.core.misc import Report, _configure_pyvista, _check_has_ansys
-from ansys.mapdl.core.examples.downloads import *
 from ansys.mapdl.core.launcher import get_ansys_path
-
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.pool import LocalMapdlPool
+
+from ansys.mapdl.core import examples
+
 # from ansys.mapdl.core.xpl import ansXpl
 # from ansys.mapdl.core.math import MapdlMath
 

@@ -1,0 +1,171 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VMC8
+/config,nlco,0
+/SHOW
+/DEVICE,VECTOR,ON
+OKEY=1
+/TITLE, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY
+/COM 
+/COM   Ref: Wilkins M.L and Guinan M.W., "Impact of Cylinders on a Rigid 
+/COM        Boundary", J. Appl. Phys., Vol. 44, No. 3, 1973.
+/COM
+/UNITS,SI                       ! (KG, Ne, M , SEC)
+
+*dim,LFA,,2,6
+*do,i,1,6
+
+*if,i,eq,1,then
+  atype=2 
+  etyp=2  
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE2
+*elseif,i,eq,2,then
+  atype=2 
+  etyp=42 
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE42
+*elseif,i,eq,3,then
+  atype=2 
+  etyp=82  
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE82
+*elseif,i,eq,4,then
+  atype=2 
+  etyp=106  
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - VISCO106 
+*elseif,i,eq,5,then
+  atype=2 
+  etyp=182 
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE182
+*elseif,i,eq,6,then
+  atype=2
+  etyp=183
+  /title, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE183
+*endif
+
+/PREP7
+RAD = 0.00381                   ! BAR RADIUS [m]
+L = 0.02347                     ! BAR LENGTH
+DI = 0.0001                     ! INTERFACE BETWEEN THE BAR AND THE WALL
+VEL = 478                       ! INITIAL VELOCITY [M/SEC]
+CVEL= (70E9/2700)**0.5          ! ELASTIC WAVE PROPAGATION SPEED
+TEL=(RAD/4)/CVEL                ! TIME STEP INCREMENT (4 ELEMENTS ALONG RADIUS) 
+NLS=NINT(1.1*(4.5E-5/TEL))      ! MINIMUM NUMBER OF SUBSTEPS FOT TIME=4.5E-5
+ET,1,ETYP                       ! ELEMENT TYPE
+*IF,ATYPE,EQ,2,THEN
+KEYOPT,1,3,1                    ! AXISYMMETIRC OPTION 
+*ENDIF
+*IF,ETYP,EQ,42,THEN
+KEYOPT,1,1,1			! REDUCED INTEGRATION FOR 42
+*ENDIF
+*IF,ETYP,EQ,182,THEN
+KEYOPT,1,1,1			! REDUCED INTEGRATION FOR 182
+*ENDIF
+MP,EX,1,70E9                    ! ELASTIC MODULUS [Pa]
+MP,NUXY,1,0.3 
+MP,DENS,1,2700                  ! DENSITY (KG/M^3)
+TB,BISO,1                       ! BILINEAR ISOTROPIC HARDENING
+TBDAT,1,420E6,100E6             ! YEILD STRESS [Pa], TANGENT MODULUS [Pa] 
+K,1,0,DI                        ! SOLID MODEL 
+K,2,RAD,DI
+K,3,RAD,(DI+L)
+K,4,0,(DI+L)
+L,1,2
+L,3,4
+LESIZE,ALL,,,4
+L,1,4
+L,2,3
+LESIZE,ALL,,,12,3
+A,1,2,3,4
+AMESH,1
+EPLOT
+NSEL,S,LOC,X,0 
+D,ALL,UX                          
+NSEL,S,LOC,X,0                 
+NSEL,R,LOC,Y,L+DI
+*GET,NTOP,NODE,,NUM,MIN   
+NSEL,ALL
+NBOT=NODE(0,0,0) 
+NSEL,S,,,NBOT
+ESLN,S
+*GET,EBOT,ELEM,,NUM,MIN
+NSEL,ALL
+ESEL,ALL
+SAVE
+FINISH
+
+/OUT,SCRATCH
+/SOLU
+ANTYPE,TRANS
+NLGEOM,ON
+NROPT,FULL
+AUTOTS,ON
+TIMINT,OFF                      ! STATIC LOAD STEP - DEFINE INITIAL VELOCITY    
+T1=DI/VEL                       ! TIME INCREMENT 
+TIME,T1
+DELTIM,T1                      
+NSEL,S,LOC,Y,DI
+D,ALL,UY,-DI
+NSEL,ALL 
+D,ALL,UZ
+NCNV,2
+CNVTOL,U,1,0.001
+OUTPR,ALL,NONE 
+OUTRES,ALL,10 
+SOLVE                           ! LOAD STEP 1 - STATIC
+TIMINT,ON                     
+NEQIT,40
+CNVTOL,U
+CNVTOL,F,0.01,0.001
+NSUBSTEP,NLS,10*NLS,NLS
+TIME,(T1+4.5E-5)
+SOLVE                           ! LOAD STEP 1 - DYNAMIC
+SAVE
+FINISH
+
+/POST1
+SET,LAST
+/DSCAL,1,1
+PLDISP                          ! PLOT DEFORMED SHAPE
+*GET,DYTP,UY,NTOP               ! NODAL DISPLACEMENT OF TOP NODE
+LF=(L+DI)+DYTP                  ! DEFORMED LENGTH
+LFA(1,i)=LF
+LFA(2,i)=LF/(L*0.562)
+/OUT,
+*STATUS,LF
+FINISH
+
+/OUT,SCRATCH
+/POST26
+/GRID,1
+XVAR,1
+NSOL,2,NTOP,U,Y                 ! DISPLACEMENT OF FREE END NODE
+ESOL,3,EBOT,NBOT,EPPL,EQV       ! EQUIVALENT PLASTIC STRAIN
+ADD,2,2,,,DISP,,,-1
+/AXLAB,X,TIME [SEC]
+/AXLAB,Y,FREE END DISPLACEMENT [M]
+PLVAR,2                         ! PLOT DISPLACEMENT VS. TIME
+/AXLAB,Y,EPPL-EQV AT NODE 1       
+PLVAR,3                         ! PLOT PLASTIC STRAIN
+FINISH
+
+PARSAV,ALL
+/clear, nostart 
+PARRES
+
+*ENDDO
+
+FINISH
+*VLEN,1
+/OUT,vmc8,vrt
+/COM
+/COM,------------------- VMC8 RESULTS LISTING ------------------------------------
+/COM,
+/COM,         
+/COM,ETYP  |   2   |   42   |   82   |   106   |   182   |   183   |
+/COM,
+*VWRITE,LFA(1,1),LFA(1,2),LFA(1,3),LFA(1,4),LFA(1,5),LFA(1,6)
+(' L (m)   ',F5.3,'   ',F5.3,'    ',F5.3,'     ',F5.3,'     ',F5.3,'     ',F5.3)
+*VWRITE,LFA(2,1),LFA(2,2),LFA(2,3),LFA(2,4),LFA(2,5),LFA(2,6)
+(' RATIO   ',F5.3,'   ',F5.3,'    ',F5.3,'     ',F5.3,'     ',F5.3,'     ',F5.3)
+/COM,-----------------------------------------------------------------------------
+/OUT
+*LIST,vmc8,vrt
+FINISH

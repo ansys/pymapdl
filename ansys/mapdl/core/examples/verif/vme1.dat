@@ -1,0 +1,119 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VME1
+/TITLE,VME1, Spring-Mass System Response to Step Input 
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+
+/PREP7          !Enter preprocessor
+M=1             !The mass is 1 kg.
+K=100           !The system spring constant is 100 N/m
+W=SQRT(K/M)     !The system natural frequnecy is w
+
+
+N,1,0,0,0        !Define nodes
+N,2,1,0,0
+
+!Define element type 1 as MASS166
+ET,1,166
+!Define element type 2 as COMBIN165
+ET,2,165
+
+R,1,M   !Real constant set one is for the mass
+R,2
+
+!Although the discrete lumped mass and stiffness elements
+!are used, a material model is still required, and it is
+!defined below.
+MP,EX,1,30E6
+MP,DENS,1,.000733
+MP,NUXY,1,0.29
+
+TYPE,1   !Create the MASS166 element at node 2
+REAL,1
+E,2
+
+MP,EX,2,30E6
+MP,DENS,2,.000733
+MP,NUXY,2,0.29
+TB,discrete,2,,,0
+tbdata,1,K
+TYPE,2   !Create the COMBIN165 spring element
+REAL,2
+mat,2
+E,1,2
+
+NSEL,S,NODE,,2   !Create a nodal component
+CM,MASS,NODE
+ALLSEL
+
+D,1,UX,0    !Constrain deflections.
+D,1,UY,0
+D,1,UZ,0
+D,2,UY,0
+D,2,UZ,0
+
+FINISH
+
+!Enter solution processor.
+/SOLU
+
+!Generate 1000 time history points.
+EDRST,1000
+EDHTIME,1000
+
+!Specify the mass component for time history output.
+EDHIST,MASS
+
+
+!Set the time step scaling factor to 0.01.  The default
+!for solution stability considerations is 0.9, however, for this
+!small dof system, the solution time is small, and a smoother response
+!curve can be obtained in minimal time with a reduced time step size.
+EDCTS,,0.01
+
+!Dimension the arrays that will be used for specifying the
+!load on the mass at node 2.
+*DIM,T,ARRAY,3
+*DIM,F,ARRAY,3
+
+!Enter the force vs. time values in the arrays.
+T(1)=0,1,10
+F(1)=0,3,3
+
+EDLOAD,ADD,FX,,MASS,T,F   !Specify the load
+TIME,2                    !Specify the solution time
+
+/COM  &COMPARE,NOCOMPARE
+SOLVE
+/COM  &COMPARE,NORMAL
+
+FINI
+
+/POST26     !Enter the time history post-processor.
+
+!Define variable number 2 as the node 2 deflection in the
+!x-direction.
+NSOL,2,2,U,X,MASS-UX
+PLVAR,2
+EXTREM,2
+*GET,RES1,VARI,2,EXTREM,VMAX, ,
+*DIM,LABEL,CHAR,1
+*DIM,RES,,1,3
+LABEL(1) = 'PEAK Uz'
+*VFILL,RES(1,1),DATA,3.575E-2
+*VFILL,RES(1,2),DATA,ABS(RES1)
+*VFILL,RES(1,3),DATA,ABS(RES(1,2)/RES(1,1))
+/OUT,vme1,vrt
+/OUT,
+/COM,
+/COM,-------------------- VME1 DYNA RESULTS COMPARISION --------------------
+/COM,
+/COM,         |  TARGET  |  ANSYS  |  RATIO  |
+/COM,
+*VWRITE,LABEL(1),RES(1,1),RES(1,2),RES(1,3)
+(1X,A8,'   ',F5.4,'      ',F5.4,'     ',F5.3)
+/COM,
+/COM,-----------------------------------------------------------------------
+!/OUT
+*LIST,vme1,vrt
+FINISH

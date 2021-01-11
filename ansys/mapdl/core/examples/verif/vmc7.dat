@@ -1,0 +1,151 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VMC7
+/SHOW
+  /OUT,SCRATCH
+  *DIM,NARAY,TABLE,9,6            ! 2-D NARAY FOR RESULTS INFO
+    *DO,I,1,9
+      *DO,J,1,6
+        NARAY(I,J)=0.             ! INITIALIZE NARAY
+      *ENDDO
+    *ENDDO
+*CREATE,base,
+  PARSAV,ALL
+  /clear, nostart
+  PARRES,CHANGE
+  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+  /SHOW,JPEG
+  /PREP7
+smrt,off
+  /TITLE, VMC7, ONE-DIMENSIONAL TRANSIENT HEAT TRANSFER WITH CONVECTION
+  /COM,   SEE HOLMAN: "HEAT TRANSFER", MCGRAW HILL CO., 4TH EDITION,
+  /COM,   PG. 106, 1976.
+  /COM,
+  ANTYPE,TRANS
+  ET,1,ARG1                       ! DEFINE ELEMENT TYPE PARAMETRICALLY
+  NARAY(ARG4,1)=ARG1              ! STORE ETYPE
+  MP,KXX,1,54                     ! DEFINE MATERIAL PROPERTIES
+  MP,DENS,1,7833
+  MP,C,1,.465
+  K,1
+  K,2,(1/(ARG2*2))                ! DEFINE KEYPOINTS
+  K,3,(1/(ARG2*2)),1
+  K,4,,1
+  L,1,2
+  L,4,3                           ! DEFINE LINE SEGMENTS
+  LESIZE,ALL,,,1
+  A,1,2,3,4                       ! DEFINE AREAS
+  ESIZE,,ARG2                     ! SET ELEMENT DIVISIONS PARAMETRICALLY
+  NARAY(ARG4,2)=ARG2              ! STORE ELEMENT DIVISIONS
+  AMESH,1                         ! MESH AREA
+  NSEL,S,LOC,Y,1
+  NSEL,R,LOC,X,0
+  *GET,N1,NODE,,NUM,MAX           ! GET NODE NUMBER ON TOP SURFACE
+  NSEL,ALL
+  TUNIF,0                         ! DEFINE INITIAL TEMPERATURE
+  NSEL,S,LOC,Y,1
+  SF,ALL,CONV,50,1000             ! APPLY CONVECTION H=50 TBULK=1000
+  NSEL,ALL
+  KBC,1                           ! STEP BOUNDARY CONDITION
+  TIME,2.0                        ! END TIME= 2 SEC.
+  DELTIM,ARG3
+  NARAY(ARG4,3)=ARG3              ! STORE DELTA T MIN
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /AUTO,1
+  /VIEW,1,,,1
+  /ANG,1
+  /DEVICE,VECTOR,1
+  /DEVICE,DITHER,1
+  /TYPE,ALL,4
+  /COLOR,NUM,BLUE,1
+
+  *IF,ARG1,EQ,77,THEN
+   *IF,ARG2,EQ,6,THEN
+   /TITLE,VMC7 - QUADRILATERAL MESH (N = 6)
+   EPLOT
+   *ENDIF
+   *IF,ARG2,EQ,8,THEN
+   /TITLE,VMC7 - QUADRILATERAL MESH (N = 8)
+   EPLOT
+   *ENDIF
+   *IF,ARG2,EQ,16,THEN
+   /TITLE,VMC7 - QUADRILATERAL MESH (N = 16)
+   EPLOT
+   *ENDIF
+  *ENDIF
+
+  *IF,ARG1,EQ,35,THEN
+   *IF,ARG2,EQ,6,THEN
+   /TITLE,VMC7 - TRIANGLE MESH (N = 6)
+   EPLOT
+   *ENDIF
+   *IF,ARG2,EQ,8,THEN
+   /TITLE,VMC7 - TRIANGLE MESH (N = 8)
+   EPLOT
+   *ENDIF
+   *IF,ARG2,EQ,16,THEN
+   /TITLE,VMC7 - TRIANGLE MESH (N = 16)
+   EPLOT
+   *ENDIF
+  *ENDIF
+
+  /TITLE, VMC7, ONE-DIMENSIONAL TRANSIENT HEAT TRANSFER WITH CONVECTION
+  FINISH
+  /SOLU
+  AUTOTS,ON                       ! INVOKE AUTO TIME STEPPING
+  SOLVE
+  *GET,CIT,ACTIVE,,SOLU,NCMIT     ! GET CUMULATIVE ITERATIONS
+  NARAY(ARG4,4)=CIT               ! STORE CUMULATIVE ITERATIONS
+  FINISH
+  /POST1
+  *GET,TN1,NODE,N1,TEMP           ! GET SURFACE NODE TEMPERATURE
+  NARAY(ARG4,5)=TN1               ! STORE TEMPERATURE
+  NARAY(ARG4,6)=TN1/157.25        ! NORMALIZE TEMPERATURE TO TARGET VALUE
+  PARSAV,,PARAM
+  FINISH
+*END
+  /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPES
+  *DO,I,1,9
+    *IF,I,EQ,1,THEN
+      *USE,base,55,6,.5,I
+    *ELSEIF,I,EQ,2,THEN
+      *USE,base,55,8,.25,I
+    *ELSEIF,I,EQ,3,THEN
+      *USE,base,55,16,.0667,I
+    *ELSEIF,I,EQ,4,THEN
+      *USE,base,77,6,.5,I
+    *ELSEIF,I,EQ,5,THEN
+      *USE,base,77,8,.25,I
+    *ELSEIF,I,EQ,6,THEN
+      *USE,base,77,16,.0667,I
+    *ELSEIF,I,EQ,7,THEN
+      *USE,base,35,6,.5,I
+    *ELSEIF,I,EQ,8,THEN
+      *USE,base,35,8,.25,I
+    *ELSEIF,I,EQ,9,THEN
+      *USE,base,35,16,.0667,I
+    *ENDIF
+  *ENDDO
+  /OUT,
+  !*STAT,NARAY
+  /OUT,vmc7,vrt
+  /COM
+  /COM,------------------- VMC7 RESULTS LISTING ------------------------------------
+  /COM,
+  /COM, TARGET SOLUTION: T = 157.25
+  /COM,
+  /COM,| ETYP | N  | DELTA-T  | CUM ITR  | SURF-TEMP  | TEMP RAT  |
+  /COM,
+  *VWRITE,naray(1,1),naray(1,2),naray(1,3),NARAY(1,4),NARAY(1,5),NARAY(1,6)
+  (F5.0,'  ',F5.0,'   ',F5.4,'     ',F5.0,'        ',F7.3,'     ',F5.3)
+  /COM,-----------------------------------------------------------------------------
+  /OUT
+
+FINISH
+*LIST,vmc7,vrt
+/DELETE,PARAM
+/DELETE,base
+FINISH
+

@@ -5,21 +5,9 @@ from pyvista.plotting.renderer import CameraPosition
 import pytest
 import numpy as np
 
-from pyansys.errors import MapdlRuntimeError
-from pyansys.post import (COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE)
-from pyansys.mapdl_console import MapdlConsole
-
-test_path = os.path.dirname(os.path.abspath(__file__))
-testfiles_path = os.path.join(test_path, 'testfiles')
-
-
-def data_from_prnsol(mapdl, output):
-    """return an array from the data from MAPDL's PRNSOL"""
-    if isinstance(mapdl, MapdlConsole):
-        lines = output.splitlines()[3:]
-    else:
-        lines = output.splitlines()[1:]
-    return np.genfromtxt(lines)
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core import examples
+from ansys.mapdl.core.post import (COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE)
 
 
 @pytest.fixture(scope='module')
@@ -28,10 +16,12 @@ def static_solve(mapdl):
     mapdl.clear()
 
     # cylinder and mesh parameters
+    # torque = 100
     radius = 2
     h_tip = 2
     height = 20
-    elemsize = 2.0
+    elemsize = 0.5
+    # pi = np.arccos(-1)
     force = 100/radius
     pressure = force/(h_tip*2*np.pi*radius)
 
@@ -94,11 +84,9 @@ def static_solve(mapdl):
     mapdl.antype('static', 'new')
     # mapdl.eqslv('pcg', 1e-8)
     mapdl.solve()
-    mapdl.finish()
 
     # necessary for any prnsol printouts
     mapdl.header('off', 'off', 'off', 'off', 'off', 'off')
-    mapdl.page(1E9, '', -1, 240)
     nsigfig = 10
     mapdl.format('', 'E', nsigfig + 9, nsigfig)
     # mapdl.post1()
@@ -109,20 +97,14 @@ def static_solve(mapdl):
 def plastic_solve(mapdl):
     mapdl.finish()
     mapdl.clear()
-
-    mapdl.input(os.path.join(testfiles_path, 'vm273.dat'))
-
-    mapdl.header('off', 'off', 'off', 'off', 'off', 'off')
-    mapdl.page(1E9, '', -1, 240)
-    nsigfig = 10
-    mapdl.format('', 'E', nsigfig + 9, nsigfig)
+    mapdl.input(examples.verif_files.vmfiles['vm273'])
 
     mapdl.post1()
     mapdl.set(1, 2)
 
 
 # must be run first before loading a result
-@pytest.mark.skip(os.name == 'nt', reason="Causes MAPDL to die on windows")
+@pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
 def test_nodal_eqv_stress_fail(mapdl, static_solve):
     with pytest.raises(MapdlRuntimeError):
         mapdl.post_processing.nodal_eqv_stress
@@ -132,19 +114,17 @@ def test_nodal_eqv_stress_fail(mapdl, static_solve):
 def test_disp(mapdl, static_solve, comp):
 
     disp_from_grpc = mapdl.post_processing.nodal_displacement(comp)
+
     mapdl.post1()
     mapdl.set(1, 1)
-    nnum, disp_from_prns = data_from_prnsol(mapdl, mapdl.prnsol('U', comp)).T
+    nnum, disp_from_prns = np.genfromtxt(mapdl.prnsol('U', comp).splitlines()[1:]).T
+
     assert np.allclose(mapdl.mesh.nnum, nnum)
     assert np.allclose(disp_from_grpc, disp_from_prns)
 
-    nnum_rst, disp_rst = mapdl.result.nodal_displacement(0)
-    assert np.allclose(mapdl.mesh.nnum, nnum_rst)
-    disp_idx = ['X', 'Y', 'Z'].index(comp.upper())
-    assert np.allclose(disp_from_grpc, disp_rst[:, disp_idx])
-
 
 def test_disp_norm_all(mapdl, static_solve):
+
     # test norm
     disp_norm = mapdl.post_processing.nodal_displacement('NORM')
     
@@ -179,21 +159,13 @@ def test_nodal_eqv_stress(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('S', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('S', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('S', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
     seqv = mapdl.post_processing.nodal_eqv_stress
 
     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(seqv_ans, seqv_aligned)
-
-    # MAPDL returns zeros where pyansys returns NANs
-    rst = mapdl.result
-    nnum_rst, str_rst = rst.principal_nodal_stress(0)
-    seqv_rst = str_rst[:, -1]
-    seqv_rst[np.isnan(seqv_rst)] = 0
-    assert np.allclose(seqv, str_rst[:, -1])
-    assert np.allclose(nnum_rst, mapdl.mesh.nnum)
 
 
 def test_plot_nodal_eqv_stress(mapdl, static_solve):
@@ -202,9 +174,8 @@ def test_plot_nodal_eqv_stress(mapdl, static_solve):
 
 
 def test_node_selection(mapdl, static_solve):
-    nsel = mapdl.mesh.n_node // 2
-    mapdl.nsel('S', 'NODE', vmin=1, vmax=nsel)
-    assert mapdl.post_processing.selected_nodes.sum() == nsel
+    mapdl.nsel('S', 'NODE', vmin=1, vmax=2000)
+    assert mapdl.post_processing.selected_nodes.sum() == 2000
 
     mapdl.nsel('all')
     assert mapdl.post_processing.selected_nodes.sum() == mapdl.mesh.n_node
@@ -218,7 +189,7 @@ def test_rot(mapdl, static_solve, comp):
     # need a result with ROTX DOF
     # mapdl.post1()
     # mapdl.set(1, 1)
-    # nnum, from_prns = data_from_prnsol(mapdl, mapdl.prnsol('ROT', comp)).T
+    # nnum, from_prns = np.genfromtxt(mapdl.prnsol('ROT', comp).splitlines()[1:]).T
 
     # assert np.allclose(mapdl.mesh.nnum, nnum)
     # assert np.allclose(from_grpc, from_prns)
@@ -231,11 +202,10 @@ def test_plot_rot(mapdl, static_solve, comp):
     assert isinstance(cpos, CameraPosition)
 
 
+# TODO: add valid result
 def test_temperature(mapdl, static_solve):
-    temp_ans = mapdl.post_processing.nodal_temperature
-    _, temp_rst = mapdl.result.nodal_temperature(0)
-    temp_rst[np.isnan(temp_rst)] = 0
-    assert np.allclose(temp_ans, temp_rst)
+    from_grpc = mapdl.post_processing.nodal_temperature
+    assert np.allclose(from_grpc, 0)
 
 
 def test_plot_temperature(mapdl, static_solve):
@@ -266,6 +236,69 @@ def test_plot_voltage(mapdl, static_solve):
 
 
 @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
+def test_nodal_component_stress(mapdl, static_solve, comp):
+    from_grpc = mapdl.post_processing.nodal_component_stress(comp)
+    mapdl.post1()
+    mapdl.set(1, 1)
+    index = COMPONENT_STRESS_TYPE.index(comp)
+    mapdl.prnsol('S', 'COMP')  # flush to ignore warning
+    arr = np.genfromtxt(mapdl.prnsol('S', 'COMP').splitlines()[1:])
+    nnum_ans = arr[:, 0]
+    from_prns = arr[:, index + 1]
+
+    # grpc includes all nodes.  ignore the ones not included in prnsol
+    from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+
+    assert np.allclose(from_grpc, from_prns)
+
+
+def test_plot_nodal_component_stress(mapdl, static_solve):
+    cpos = mapdl.post_processing.plot_nodal_component_stress('X')
+    assert isinstance(cpos, CameraPosition)
+
+
+@pytest.mark.parametrize('comp', PRINCIPAL_TYPE)
+def test_nodal_principal_stress(mapdl, static_solve, comp):
+    from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
+    mapdl.post1()
+    mapdl.set(1, 1)
+    index = PRINCIPAL_TYPE.index(comp)
+    mapdl.prnsol('S', 'PRIN')  # flush to ignore warning
+    arr = np.genfromtxt(mapdl.prnsol('S', 'PRIN').splitlines()[1:])
+    nnum_ans = arr[:, 0]
+    from_prns = arr[:, index + 1]
+
+    # grpc includes all nodes.  ignore the ones not included in prnsol
+    from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+
+    assert np.allclose(from_grpc, from_prns)
+
+
+def test_plot_nodal_principal_stress(mapdl, static_solve):
+    cpos = mapdl.post_processing.plot_nodal_principal_stress(1)
+    assert isinstance(cpos, CameraPosition)
+
+
+def test_nodal_stress_intensity(mapdl, static_solve):
+    mapdl.post1()
+    mapdl.set(1, 1)
+
+    mapdl.prnsol('S', 'PRIN')  # run twice to clear out warning
+    data = np.genfromtxt(mapdl.prnsol('S', 'PRIN').splitlines()[1:])
+    nnum_ans = data[:, 0].astype(np.int32)
+    sint_ans = data[:, -2]
+    sint = mapdl.post_processing.nodal_stress_intensity
+
+    sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+    assert np.allclose(sint_ans, sint_aligned)
+
+
+def test_plot_nodal_stress_intensity(mapdl, static_solve):
+    cpos = mapdl.post_processing.plot_nodal_stress_intensity()
+    assert isinstance(cpos, CameraPosition)
+
+
+@pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
 def test_nodal_total_component_strain(mapdl, static_solve, comp):
     mapdl.post1()
     mapdl.set(1, 1)
@@ -273,7 +306,7 @@ def test_nodal_total_component_strain(mapdl, static_solve, comp):
     index = COMPONENT_STRESS_TYPE.index(comp)
     mapdl.prnsol('EPTO', 'COMP')  # run twice to clear out warning
 
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPTO', 'COMP'))
+    data = np.genfromtxt(mapdl.prnsol('EPTO', 'COMP').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     data_ans = data[:, index + 1]
     data = mapdl.post_processing.nodal_total_component_strain(comp)
@@ -294,7 +327,7 @@ def test_nodal_principal_total_strain(mapdl, static_solve, comp):
     mapdl.set(1, 1)
     index = PRINCIPAL_TYPE.index(comp)
     mapdl.prnsol('EPTO', 'PRIN')  # flush to ignore warning
-    arr = data_from_prnsol(mapdl, mapdl.prnsol('EPTO', 'PRIN'))
+    arr = np.genfromtxt(mapdl.prnsol('EPTO', 'PRIN').splitlines()[1:])
     nnum_ans = arr[:, 0]
     from_prns = arr[:, index + 1]
 
@@ -314,7 +347,7 @@ def test_nodal_total_strain_intensity(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('EPTO', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPTO', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPTO', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
     sint = mapdl.post_processing.nodal_total_strain_intensity
@@ -333,7 +366,7 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('EPTO', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPTO', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPTO', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
     seqv = mapdl.post_processing.nodal_total_eqv_strain
@@ -355,20 +388,14 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
     mapdl.set(1, 1)
     index = COMPONENT_STRESS_TYPE.index(comp)
     mapdl.prnsol('S', 'COMP')  # flush to ignore warning
-    arr = data_from_prnsol(mapdl, mapdl.prnsol('S', 'COMP'))
+    arr = np.genfromtxt(mapdl.prnsol('S', 'COMP').splitlines()[1:])
     nnum_ans = arr[:, 0]
     from_prns = arr[:, index + 1]
 
     # grpc includes all nodes.  ignore the ones not included in prnsol
-    assert np.allclose(from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)], from_prns)
+    from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 
-    nnum_rst, str_rst = mapdl.result.nodal_stress(0)
-    assert np.allclose(mapdl.mesh.nnum, nnum_rst)
-
-    idx = COMPONENT_STRESS_TYPE.index(comp)
-    str_rst[np.isnan(str_rst)] = 0
-    assert np.allclose(from_grpc[:10], str_rst[:, idx][:10])
-
+    assert np.allclose(from_grpc, from_prns)
 
 
 def test_plot_nodal_component_stress(mapdl, static_solve):
@@ -383,7 +410,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
     mapdl.set(1, 1)
     index = PRINCIPAL_TYPE.index(comp)
     mapdl.prnsol('S', 'PRIN')  # flush to ignore warning
-    arr = data_from_prnsol(mapdl, mapdl.prnsol('S', 'PRIN'))
+    arr = np.genfromtxt(mapdl.prnsol('S', 'PRIN').splitlines()[1:])
     nnum_ans = arr[:, 0]
     from_prns = arr[:, index + 1]
 
@@ -402,7 +429,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('S', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('S', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('S', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
     sint = mapdl.post_processing.nodal_stress_intensity
@@ -424,7 +451,7 @@ def test_nodal_elastic_component_strain(mapdl, static_solve, comp):
     index = COMPONENT_STRESS_TYPE.index(comp)
     mapdl.prnsol('EPEL', 'COMP')  # run twice to clear out warning
 
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPEL', 'COMP'))
+    data = np.genfromtxt(mapdl.prnsol('EPEL', 'COMP').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     data_ans = data[:, index + 1]
     data = mapdl.post_processing.nodal_elastic_component_strain(comp)
@@ -445,7 +472,7 @@ def test_nodal_elastic_principal_strain(mapdl, static_solve, comp):
     mapdl.set(1, 1)
     index = PRINCIPAL_TYPE.index(comp)
     mapdl.prnsol('EPEL', 'PRIN')  # flush to ignore warning
-    arr = data_from_prnsol(mapdl, mapdl.prnsol('EPEL', 'PRIN'))
+    arr = np.genfromtxt(mapdl.prnsol('EPEL', 'PRIN').splitlines()[1:])
     nnum_ans = arr[:, 0]
     from_prns = arr[:, index + 1]
 
@@ -465,7 +492,7 @@ def test_nodal_elastic_strain_intensity(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('EPEL', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPEL', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPEL', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
     sint = mapdl.post_processing.nodal_elastic_strain_intensity
@@ -484,7 +511,7 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
     mapdl.set(1, 1)
 
     mapdl.prnsol('EPEL', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPEL', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPEL', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
     seqv = mapdl.post_processing.nodal_elastic_eqv_strain
@@ -496,18 +523,16 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
 def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
     cpos = mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
     assert isinstance(cpos, CameraPosition)
-
-
 ###############################################################################
-# plastic
+
 
 @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
 def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
-    mapdl.post1()
+
     index = COMPONENT_STRESS_TYPE.index(comp)
     mapdl.prnsol('EPPL', 'COMP')  # run twice to clear out warning
 
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPPL', 'COMP'))
+    data = np.genfromtxt(mapdl.prnsol('EPPL', 'COMP').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     data_ans = data[:, index + 1]
     data = mapdl.post_processing.nodal_plastic_component_strain(comp)
@@ -527,7 +552,7 @@ def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
 
     index = PRINCIPAL_TYPE.index(comp)
     mapdl.prnsol('EPPL', 'PRIN')  # flush to ignore warning
-    arr = data_from_prnsol(mapdl, mapdl.prnsol('EPPL', 'PRIN'))
+    arr = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
     nnum_ans = arr[:, 0]
     from_prns = arr[:, index + 1]
 
@@ -544,7 +569,7 @@ def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
 
 def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     mapdl.prnsol('EPPL', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPPL', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
     sint = mapdl.post_processing.nodal_plastic_strain_intensity
@@ -560,7 +585,7 @@ def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
 
 def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     mapdl.prnsol('EPPL', 'PRIN')  # run twice to clear out warning
-    data = data_from_prnsol(mapdl, mapdl.prnsol('EPPL', 'PRIN'))
+    data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
     seqv = mapdl.post_processing.nodal_plastic_eqv_strain
@@ -572,3 +597,79 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     cpos = mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
     assert isinstance(cpos, CameraPosition)
+
+
+###############################################################################
+# @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
+# def test_nodal_thermal_component_strain(mapdl, thermal_solve, comp):
+
+#     index = COMPONENT_STRESS_TYPE.index(comp)
+#     mapdl.prnsol('EPPL', 'COMP')  # run twice to clear out warning
+
+#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'COMP').splitlines()[1:])
+#     nnum_ans = data[:, 0].astype(np.int32)
+#     data_ans = data[:, index + 1]
+#     data = mapdl.post_processing.nodal_thermal_component_strain(comp)
+#     data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+
+#     assert np.allclose(data_ans, data)
+
+
+# def test_plot_nodal_thermal_component_strain(mapdl, thermal_solve):
+#     cpos = mapdl.post_processing.plot_nodal_thermal_component_strain('x')
+#     assert isinstance(cpos, CameraPosition)
+
+
+# @pytest.mark.parametrize('comp', PRINCIPAL_TYPE)
+# def test_nodal_thermal_principal_strain(mapdl, thermal_solve, comp):
+#     from_grpc = mapdl.post_processing.nodal_thermal_principal_strain(comp)
+
+#     index = PRINCIPAL_TYPE.index(comp)
+#     mapdl.prnsol('EPPL', 'PRIN')  # flush to ignore warning
+#     arr = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
+#     nnum_ans = arr[:, 0]
+#     from_prns = arr[:, index + 1]
+
+#     # grpc includes all nodes.  ignore the ones not included in prnsol
+#     from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+
+#     assert np.allclose(from_grpc, from_prns)
+
+
+# def test_plot_nodal_thermal_principal_strain(mapdl, thermal_solve):
+#     cpos = mapdl.post_processing.plot_nodal_thermal_principal_strain(1)
+#     assert isinstance(cpos, CameraPosition)
+
+
+# def test_nodal_thermal_strain_intensity(mapdl, thermal_solve):
+#     mapdl.prnsol('EPPL', 'PRIN')  # run twice to clear out warning
+#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
+#     nnum_ans = data[:, 0].astype(np.int32)
+#     sint_ans = data[:, -2]
+#     sint = mapdl.post_processing.nodal_thermal_strain_intensity
+
+#     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+#     assert np.allclose(sint_ans, sint_aligned)
+
+
+# def test_plot_nodal_thermal_strain_intensity(mapdl, thermal_solve):
+#     cpos = mapdl.post_processing.plot_nodal_thermal_strain_intensity()
+#     assert isinstance(cpos, CameraPosition)
+
+
+# def test_nodal_thermal_eqv_strain(mapdl, thermal_solve):
+#     mapdl.prnsol('EPPL', 'PRIN')  # run twice to clear out warning
+#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
+#     nnum_ans = data[:, 0].astype(np.int32)
+#     seqv_ans = data[:, -1]
+#     seqv = mapdl.post_processing.nodal_thermal_eqv_strain
+
+#     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+#     assert np.allclose(seqv_ans, seqv_aligned)
+
+
+# def test_plot_nodal_thermal_eqv_strain(mapdl, thermal_solve):
+#     cpos = mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
+#     assert isinstance(cpos, CameraPosition)
+
+###############################################################################

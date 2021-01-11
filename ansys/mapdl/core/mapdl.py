@@ -24,6 +24,7 @@ from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
 
+
 MATPLOTLIB_LOADED = True
 try:
     import matplotlib

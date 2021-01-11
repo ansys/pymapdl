@@ -1,0 +1,221 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM237
+/TITLE,VM237, PIEZOELECTRIC-CIRCUIT ANALYSIS 
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/COM,  ---------------------------------------------------------------
+/COM,     FINITE ELEMENT MODEL OF A PIEZOELECTRIC CIRCULAR PLATE 
+/COM,  ---------------------------------------------------------------
+A=1E-3                        ! RADIUS, M
+T=0.1E-3                      ! THICKNESS, M
+/COM,
+/COM,  MATERIAL PROPERTIES OF LEAD ZIRCONATE TITANATE (PZT-5A)
+/COM,
+/COM,  -- MATERIAL MATRICES (POLAR AXIS ALONG Y-AXIS): IEEE INPUT
+/COM,
+/COM,   [s11 s13 s12  0  0  0 ]        [ 0 d31  0 ]      [ep11  0    0  ]
+/COM,   [s13 s33 s13  0  0  0 ]        [ 0 d33  0 ]      [  0  ep33  0  ]
+/COM,   [s12 s13 s11  0  0  0 ]        [ 0 d31  0 ]      [  0   0   ep11]
+/COM,   [ 0   0   0  s44 0  0 ]        [ 0  0  d15]
+/COM,   [ 0   0   0   0 s66 0 ]        [ 0  0   0 ]
+/COM,   [ 0   0   0   0  0 s44]        [d15 0   0 ] 
+/COM,
+/COM,   - COMPLIANCE COEFFICIENTS, M2/N
+S11=16.4E-12          
+S12=-5.74E-12
+S13=-7.22E-12
+S33=18.8E-12
+S44=47.5E-12
+S66=44.3E-12
+/COM,  - PIEZOELECTRIC STRAIN COEFFICIENTS, C/N
+D15=5.84E-10
+D31=-1.71E-10
+D33=3.74E-10
+/COM,  - RELATIVE PERMITTIVITY AT CONSTANT STRESS
+EP11=1730
+EP33=1700
+/COM,  - DENSITY, KG/M3
+RHO=7750
+/NOPR
+
+/PREP7
+/COM,
+/COM,  -- MATERIAL MATRICES (POLAR AXIS ALONG Y-AXIS): Mechanical APDL INPUT
+/COM,
+/COM,   [s11 s13 s12  0  0  0 ]        [ 0 d31  0 ]      [ep11  0    0  ]
+/COM,   [s13 s33 s13  0  0  0 ]        [ 0 d33  0 ]      [  0  ep33  0  ]
+/COM,   [s12 s13 s11  0  0  0 ]        [ 0 d31  0 ]      [  0   0   ep11]
+/COM,   [ 0   0   0  s44 0  0 ]        [d15 0   0 ]
+/COM,   [ 0   0   0   0 s44 0 ]        [ 0  0  d15]
+/COM,   [ 0   0   0   0  0 s66]        [ 0  0   0 ]
+
+TB,ANEL,1,,,1                 ! ANISOTROPIC ELASTIC COMPLIANCE MATRIX
+TBDA,1,S11,S13,S12
+TBDA,7,S33,S13
+TBDA,12,S11
+TBDA,16,S44
+
+TB,PIEZ,1,,,1                 ! PIEZOELECTRIC STRAIN MATRIX       
+TBDA,2,D31
+TBDA,5,D33
+TBDA,8,D31
+TBDA,10,D15
+
+TB,DPER,1,,,1                 ! DIELECTRIC PERMITTIVITY AT CONSTANT STRESS
+TBDA,1,EP11,EP33
+
+TBLIS,ALL                     ! LIST INPUT AND CONVERTED MATRICES
+
+MP,DENS,1,RHO                 ! DENSITY
+
+ET,1,PLANE223,1001,,1         ! PIEZOELECTRIC AXISYMMETRIC ELEMENT TYPE
+RECT,,A,,T
+ESIZE,T                       ! MESH SOLID MODEL
+NUMSTR,NODE,10                
+AMESH,1
+                              ! APPLY STRUCTURAL BC, SIMPLY SUPPORTED PLATE
+NSEL,S,LOC,X
+D,ALL,UX,0
+NSEL,S,LOC,X,A
+NSEL,R,LOC,Y,0
+D,ALL,UY,0
+NSEL,ALL
+                              ! APPLY ELECTRIC BC
+NSEL,S,LOC,Y,0
+CP,1,VOLT,ALL                 ! COUPLE BOTTOM ELECTRODE
+*GET,NBOT,NODE,0,NUM,MIN      ! GET MASTER NODE ON BOTTOM ELECTRODE
+NSEL,S,LOC,Y,T
+CP,2,VOLT,ALL                 ! COUPLE TOP ELECTRODE
+*GET,NTOP,NODE,0,NUM,MIN      ! GET MASTER NODE ON TOP ELECTRODE
+NSEL,ALL
+D,NBOT,VOLT,0                 ! GROUND BOTTOM ELECTRODE
+D,NTOP,VOLT,1                 ! APPLY 1V LOAD ON TOP ELECTRODE
+
+FINI
+/SOLU
+ANTYPE,STATIC                 ! STATIC ANALYSIS
+SOLVE              
+FINI
+
+/POST1
+*GET,QT,NODE,NTOP,RF,CHRG     ! GET TOTAL CHARGE ON TOP ELECTRODE
+CP=ABS(QT)                    ! CAPACITANCE CP=Q/V, WHERE V=1V
+EPZ0=8.854E-12                ! FREE SPACE PERMITTIVITY
+PI=3.1415                     ! PI CONSTANT
+C=EP33*EPZ0*PI*A**2/T         ! ANALYTICAL CAPACITANCE 
+/COM,    2-D CAPACITANCE (ANALYTICAL) =%C%, F
+/COM,    2-D CAPACITANCE (Mechanical APDL) = %CP%, F
+FINI
+
+/COM,  ---------------------------------------------------------------
+/COM,    FINITE ELEMENT MODEL OF RLC-CIRCUIT
+/COM,  ---------------------------------------------------------------
+/PREP7
+DDELE,NTOP,VOLT               ! DELETE VOLTAGE LOAD ON TOP ELECTRODE
+ET,2,CIRCU94,0                ! DEFINE A RESISTOR
+R=3000                        ! RESISTANCE, OHM
+R,1,R                        
+N,1
+TYPE,2
+REAL,1
+E,1,NTOP
+
+ET,3,CIRCU94,1                ! DEFINE AN INDUCTOR
+L=15                          ! INDUCTANCE, H
+R,2,L
+N,2
+TYPE,3
+REAL,2
+E,2,1
+
+ET,4,CIRCU94,4                ! DEFINE A VOLTAGE SOURCE
+V=1                           ! VOLTAGE LOAD, V
+R,3,V
+N,3
+TYPE,4
+REAL,3
+E,2,NBOT,3
+FINI
+
+/SOLU
+ANTYPE,TRANS                  ! TRANSIENT ANALYSIS
+NSUB,100                      ! NUMBER OF TIME STEPS
+TIME,2E-3                     ! ANALYSIS TIME, S
+TINTP,,0.25,0.5,0.5           ! INTEGRATION PARAMETERS FOR A PIEZOELECTRIC ANALYSIS
+OUTRES,ALL,ALL
+SOLVE
+FINI
+
+/GOPR
+/COM, ANALYTICAL SOLUTION:
+/COM,   V_C = 1-EXP(-D*T)*COS(B*T)-D/B*EXP(-D*T)*SIN(B*T)
+/COM,   WHERE:
+D=R/(2*L)
+B=SQRT(1/(L*C)-D**2)
+/NOPR
+
+/POST26
+NUMVAR,20
+NSOL,2,NTOP,VOLT,,V_C_ANSYS
+
+! DERIVE EXACT SOLUTION
+*DIM,WORK1,ARRAY,100
+*DIM,WORK2,ARRAY,100
+FILLDATA,3,,,,1               ! 1
+EXP,4,1,,,,,,-D,-1            ! -EXP(-D*T)
+PROD,5,1,,,,,,B               ! B*T
+VGET,WORK1(1),5
+*VFUN,WORK2(1),COS,WORK1(1)
+VPUT,WORK2(1),6               ! COS(B*T)
+*VFUN,WORK2(1),SIN,WORK1(1)
+VPUT,WORK2(1),7               ! SIN(B*T)
+ADD,8,6,7,,,,,,D/B            ! COS(B*T) + D/B*SIN(B*T)
+PROD,9,4,8                    ! -EXP(-D*T)*[COS(B*T) + D/B*SIN(B*T)]
+ADD,10,3,9,,V_C_EXACT         ! 1-EXP(-D*T)*[COS(B*T) + D/B*SIN(B*T)]       
+
+
+! PRINT AND PLOT Mechanical APDL AND EXACT VOLTAGE ACROSS THE PZT CAPACITOR
+PRVAR,2,10
+PLVAR,2,10
+
+/NOPR
+*DIM,VCE,ARRAY,5		! EXACT SOLUTION FOR RESULTS TABLE
+*DIM,VCA,ARRAY,5		! Mechanical APDL SOLUTION FOR RESULTS TABLE
+
+*GET,VCE(1),VARI,10,RTIME,0.18E-3
+*GET,VCE(2),VARI,10,RTIME,0.40E-3
+*GET,VCE(3),VARI,10,RTIME,0.88E-3
+*GET,VCE(4),VARI,10,RTIME,0.13E-2
+*GET,VCE(5),VARI,10,RTIME,0.186E-2
+
+*GET,VCA(1),VARI,2,RTIME,0.18E-3
+*GET,VCA(2),VARI,2,RTIME,0.40E-3
+*GET,VCA(3),VARI,2,RTIME,0.88E-3
+*GET,VCA(4),VARI,2,RTIME,0.13E-2
+*GET,VCA(5),VARI,2,RTIME,0.186E-2
+
+*DIM,LABEL,CHAR,5
+*DIM,VALUE,,5,3
+LABEL(1) = '1.8E-2s','4.0E-2s','8.8E-2s','1.3E-1s','1.86E-1s'
+*VFILL,VALUE(1,1),DATA,VCE(1),VCE(2),VCE(3),VCE(4),VCE(5)
+*VFILL,VALUE(1,2),DATA,VCA(1),VCA(2),VCA(3),VCA(4),VCA(5)
+V1 = VCA(1)/VCE(1) 
+V2 = VCA(2)/VCE(2) 
+V3 = VCA(3)/VCE(3) 
+V4 = VCA(4)/VCE(4) 
+V5 = VCA(5)/VCE(5) 
+*VFILL,VALUE(1,3),DATA,ABS(V1),ABS(V2),ABS(V3),ABS(V4),ABS(V5)
+/OUT,vm237,vrt
+/COM
+/COM,------------------- VM237 RESULTS COMPARISON ---------------------
+/COM,
+/COM,               |  TARGET  |   Mechanical APDL   |   RATIO
+/COM,
+/COM, VC for t @ ...
+/COM
+*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F12.4,'  ',F16.4,'   ',1F15.3)
+/COM,----------------------------------------------------------------
+/OUT
+FINI
+*LIST,vm237,vrt

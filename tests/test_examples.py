@@ -1,9 +1,12 @@
 import os
+import warnings
 
 import pytest
-import pyansys
-from pyansys import examples
 from pyvista.plotting import system_supports_plotting
+
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core import examples
+
 
 HAS_IMAGEIO = True
 try:
@@ -12,13 +15,20 @@ except ImportError:
     HAS_IMAGEIO = False
 
 try:
-    shaft = pyansys.download_shaft_modal()
+    shaft = examples.download_shaft_modal()
 except:
+    warnings.warn('Unable to execute ``examples.download_shaft_modal``')
     shaft = None
 
 
 skip_plotting = pytest.mark.skipif(not system_supports_plotting(), reason="Requires active X Server")
 skip_no_shaft = pytest.mark.skipif(shaft is None, reason="Requires example file")
+
+
+def test_load_verif():
+    for filename in examples.vmfiles.values():
+        assert os.path.isfile(filename)
+
 
 @skip_plotting
 def test_show_hex_archive():
@@ -49,18 +59,22 @@ def test_show_cell_qual():
     examples.show_cell_qual(meshtype='hex', off_screen=True)
 
 
-@skip_plotting
-def test_cylinderansys_182():
-    exec_file = '/usr/ansys_inc/v182/ansys/bin/ansys182'
-    if os.path.isfile(exec_file):
-        assert examples.ansys_cylinder_demo(exec_file, as_test=True)
+# @skip_plotting
+# def test_cylinderansys_182():
+#     exec_file = '/usr/ansys_inc/v182/ansys/bin/ansys182'
+#     if os.path.isfile(exec_file):
+#         assert examples.ansys_cylinder_demo(exec_file, as_test=True)
 
 
-@skip_plotting
-def test_cylinderansys_150():
-    exec_file = '/usr/ansys_inc/v150/ansys/bin/ansys150'
-    if os.path.isfile(exec_file):
-        assert examples.ansys_cylinder_demo(exec_file, as_test=True)
+# @skip_plotting
+# def test_cylinderansys_150():
+#     exec_file = '/usr/ansys_inc/v150/ansys/bin/ansys150'
+#     if os.path.isfile(exec_file):
+#         assert examples.ansys_cylinder_demo(exec_file, as_test=True)
+
+
+# def test_cylinderansys():
+#     assert examples.ansys_cylinder_demo()
 
 
 @skip_plotting

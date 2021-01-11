@@ -1,6 +1,6 @@
-"""Test MAPDL Console and CORBA interfaces"""
-import os
+"""Test MAPDL interface"""
 import time
+import os
 
 import pytest
 import numpy as np
@@ -8,35 +8,12 @@ import pyvista
 from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
 
-from pyansys.misc import get_ansys_bin
-from pyansys.errors import MapdlRuntimeError
-import pyansys
-
-# check for a valid MAPDL install with CORBA
-valid_rver = ['182', '190', '191', '192', '193', '194', '195', '201']
-EXEC_FILE = None
-for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
-
-if 'PYANSYS_IGNORE_ANSYS' in os.environ:
-    HAS_ANSYS = False
-else:
-    HAS_ANSYS = EXEC_FILE is not None
-
-if not HAS_ANSYS:
-    pytestmark = pytest.mark.skip("Requires ANSYS installed")
+from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.core.errors import MapdlRuntimeError
+import ansys.mapdl.core as pymapdl
 
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
-
-
-@pytest.fixture(scope='function')
-def cleared(mapdl):
-    mapdl.finish()
-    mapdl.clear('NOSTART')  # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl.prep7()
-    yield
 
 
 @pytest.fixture(scope='function')
@@ -45,6 +22,25 @@ def make_block(mapdl, cleared):
     mapdl.et(1, 186)
     mapdl.esize(0.25)
     mapdl.vmesh('ALL')
+
+
+def test_jobname(mapdl, cleared):
+    jobname = 'abcdefg'
+    assert mapdl.jobname != jobname
+    mapdl.finish()
+    mapdl.filname(jobname)
+    assert mapdl.jobname == jobname
+
+    other_jobname = 'gfedcba'
+    mapdl.jobname = other_jobname
+    assert mapdl.jobname == other_jobname
+
+
+def test_no_results(mapdl, cleared, tmpdir):
+    pth = str(tmpdir.mkdir("tmpdir"))
+    mapdl.jobname = random_string()
+    with pytest.raises(FileNotFoundError):
+        mapdl.download_result(pth)
 
 
 def test_empty(mapdl):
@@ -66,14 +62,15 @@ def test_comment(cleared, mapdl):
     assert comment in resp
 
 
-def test_output(cleared, mapdl):
-    tmp_file = 'tmp_redirect.txt'
-    resp = mapdl.output(tmp_file)
-    comment = 'Testing...'
-    resp = mapdl.com(comment)
-    mapdl.output()
-    output = open(os.path.join(mapdl.directory, tmp_file)).read()
-    assert comment in output
+# @skip_grpc
+# def test_output(cleared, mapdl):
+#     tmp_file = 'tmp_redirect.txt'
+#     resp = mapdl.output(tmp_file)
+#     comment = 'Testing...'
+#     resp = mapdl.com(comment)
+#     mapdl.output()
+#     output = open(os.path.join(mapdl.path, tmp_file)).read()
+#     assert comment in output
 
 
 def test_basic_command(cleared, mapdl):
@@ -83,9 +80,9 @@ def test_basic_command(cleared, mapdl):
 
 def test_allow_ignore(mapdl):
     mapdl.clear()
-    mapdl.allow_ignore = False  # reset on __init__
+    mapdl.allow_ignore = False
     assert mapdl.allow_ignore is False
-    with pytest.raises(pyansys.errors.MapdlInvalidRoutineError):
+    with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
         mapdl.k()
 
     # Does not create keypoints and yet does not raise error
@@ -195,9 +192,31 @@ def test_al(cleared, mapdl):
     assert a0 == 1
 
 
-def test_invalid_area():
-    with pytest.raises(Exception):
+def test_invalid_area(mapdl):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
+
+
+def test_invalid_input(mapdl):
+    with pytest.raises(FileNotFoundError):
+        mapdl.input('thisisnotafile')
+
+@skip_no_xserver
+def test_kplot(cleared, mapdl, tmpdir):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.kplot(vtk=True)
+
+    mapdl.k("", 0, 0, 0)
+    mapdl.k("", 1, 0, 0)
+    mapdl.k("", 1, 1, 0)
+    mapdl.k("", 0, 1, 0)
+
+    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    cpos = mapdl.kplot(screenshot=filename)
+    assert isinstance(cpos, CameraPosition)
+    assert os.path.isfile(filename)
+
+    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
 
 
 @skip_no_xserver
@@ -248,24 +267,6 @@ def test_keypoints(cleared, mapdl):
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
-@skip_no_xserver
-def test_kplot(cleared, mapdl, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.kplot(vtk=True)
-
-    mapdl.k("", 0, 0, 0)
-    mapdl.k("", 1, 0, 0)
-    mapdl.k("", 1, 1, 0)
-    mapdl.k("", 0, 1, 0)
-
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.kplot(screenshot=filename)
-    assert isinstance(cpos, CameraPosition)
-    assert os.path.isfile(filename)
-
-    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
-
-
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -308,7 +309,8 @@ def test_lplot(cleared, mapdl, tmpdir):
 
 def test_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
-    mapdl.open_apdl_log(filename, mode='w')
+    if mapdl._log is None:
+        mapdl.open_apdl_log(filename, mode='w')
     mapdl._close_apdl_log()
 
     # test append mode
@@ -329,7 +331,6 @@ def test_logging(mapdl, tmpdir):
     out = open(mapdl._apdl_log.name).read().strip().split()[-5:]
     assert 'PREP7' in out[0]
     assert 'K,4,0,1,0' in out[-1]
-    mapdl._close_apdl_log()
 
 
 def test_nodes(tmpdir, cleared, mapdl):
@@ -337,8 +338,14 @@ def test_nodes(tmpdir, cleared, mapdl):
     mapdl.n(11, 10, 1, 1)
     mapdl.fill(1, 11, 9)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.nodes'))
-    mapdl.nwrite(filename)
+    basename = 'tmp.nodes'
+    filename = str(tmpdir.mkdir("tmpdir").join(basename))
+    if mapdl._local:
+        mapdl.nwrite(filename)
+    else:
+        mapdl.nwrite(basename)
+        mapdl.download(basename, filename)
+
     assert np.allclose(mapdl.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl.mesh.n_node == 11
     assert np.allclose(mapdl.mesh.nnum, range(1, 12))
@@ -349,6 +356,10 @@ def test_nodes(tmpdir, cleared, mapdl):
     assert not mapdl.mesh.n_node
     assert not mapdl.mesh.nnum.size
 
+
+def test_enum(mapdl, make_block):
+    assert mapdl.mesh.n_elem
+    assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
 @pytest.mark.parametrize('knum', [True, False])
@@ -402,6 +413,9 @@ def test_elements(cleared, mapdl):
     mapdl.e(*list(range(9, 17)))
     expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
                          [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
+    if 'Grpc' in str(type(mapdl)):
+        # no element number in elements
+        expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
@@ -411,20 +425,17 @@ def test_elements(cleared, mapdl):
                                   10.0,
                                   [1, 2, 3],
                                   [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),
+                                  np.random.random((10000)),  # fails on gRPC at 100000
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
 def test_set_get_parameters(mapdl, parm):
-    parm_name = pyansys.misc.random_string(20)
+    parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
     else:
-        arr = mapdl.parameters[parm_name]
-        try:
-            assert np.allclose(arr, parm)
-        except:  # MAPDL internal bug
-            assert np.allclose(arr, 0)
+        assert np.allclose(mapdl.parameters[parm_name], parm)
+
 
 def test_set_parameters_arr_to_scalar(mapdl, cleared):
     mapdl.parameters['PARM'] = np.arange(10)
@@ -488,7 +499,46 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp('off')
-    mapdl.cdread('db', pyansys.examples.sector_archive_file)
+    mapdl.cdread('db', pymapdl.examples.sector_archive_file)
+    mapdl.prep7()
+    mapdl.cyclic()
+
+    # set material properties
+    mapdl.mp('NUXY', 1, 0.31)
+    mapdl.mp('DENS', 1, 4.1408E-04)
+    mapdl.mp('EX', 1, 16900000)
+    mapdl.emodif('ALL', 'MAT', 1)
+
+    # setup and solve
+    mapdl.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl.finish()
+
+    # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
+    if mapdl._local:
+        assert mapdl.result.nsets == 16
+
+
+def test_partial_mesh_nnum(mapdl, make_block):
+    allsel_nnum_old = mapdl.mesh.nnum
+    mapdl.nsel('S', 'NODE', vmin=100, vmax=200)
+    allsel_nnum_now = mapdl.mesh.nnum_all
+    assert np.allclose(allsel_nnum_old, allsel_nnum_now)
+
+    mapdl.allsel()
+    assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
+
+
+def test_partial_mesh_nnum(mapdl, make_block):
+    mapdl.nsel('S', 'NODE', vmin=1, vmax=10)
+    mapdl.esel('S', 'ELEM', vmin=10, vmax=20)
+    assert mapdl.mesh._grid.n_cells == 11
+
+
+def test_cyclic_solve(mapdl, cleared):
+    # build the cyclic model
+    mapdl.prep7()
+    mapdl.shpp('off')
+    mapdl.cdread('db', pymapdl.examples.sector_archive_file)
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()

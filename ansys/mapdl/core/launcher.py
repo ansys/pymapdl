@@ -12,8 +12,9 @@ import subprocess
 
 import pexpect
 from pexpect import popen_spawn
-from ansys.mapdl.core import _LOCAL_PORTS
-from ansys.mapdl.core.misc import is_float, random_string
+
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
@@ -260,37 +261,20 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
 
     # get the next available port
     if port is None:
-        if not _LOCAL_PORTS:
+        if not pymapdl._LOCAL_PORTS:
             port = MAPDL_DEFAULT_PORT
         else:
-            port = max(_LOCAL_PORTS) + 1
+            port = max(pymapdl._LOCAL_PORTS) + 1
 
-    while port_in_use(port) or port in _LOCAL_PORTS:
+    while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
         port += 1
-    _LOCAL_PORTS.append(port)
+    pymapdl._LOCAL_PORTS.append(port)
 
     cpu_sw = '-np %d' % nproc
     if ram:
         ram_sw = '-m %d' % int(1024*ram)
     else:
         ram_sw = ''
-
-    # different treatment for windows vs. linux due to v202 build issues
-    custom_sw = ''
-    if os.name == 'posix' and version == 20.2:
-        if custom_bin is None:
-            try:
-                import ansys.mapdl_bin
-            except ImportError:
-                raise ImportError('Please install ``ansys.mapdl_bin`` to use the '
-                                  'gRPC mode on Linux for 2020R2')
-
-            custom_bin = ansys.mapdl_bin.bin_path
-
-        if not os.path.isfile(custom_bin):
-            raise FileNotFoundError('Unable to locate the custom MAPDL executable')
-
-        custom_sw = '-custom %s' % custom_bin
 
     job_sw = '-j %s' % jobname
     port_sw = '-port %d' % port
@@ -308,8 +292,8 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
             f.write('FINISH\r\n')
 
         # must start in batch mode on windows to hide APDL window
-        command = ['"%s"' % exec_file, custom_sw, job_sw, cpu_sw, ram_sw,
-                   '-b', '-i', tmp_inp, '-o', '.__tmp__.out',
+        command = ['"%s"' % exec_file, job_sw, cpu_sw, ram_sw, '-b',
+                   '-i', tmp_inp, '-o', '.__tmp__.out',
                    additional_switches, port_sw, grpc_sw]
         command = ' '.join(command)
 
@@ -330,9 +314,9 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
             time.sleep(0.1)
 
     else:
-        command = ' '.join(['"%s"' % exec_file, custom_sw, job_sw,
-                            cpu_sw, ram_sw, additional_switches,
-                            port_sw, grpc_sw])
+        command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
+                            ram_sw, additional_switches, port_sw,
+                            grpc_sw])
 
         process = popen_spawn.PopenSpawn(command,
                                          timeout=timeout,
@@ -564,7 +548,7 @@ def check_lock_file(path, jobname, override):
 def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                  nproc=2, ram=None, mode=None, override=False,
                  loglevel='ERROR', additional_switches='',
-                 start_timeout=120, port=MAPDL_DEFAULT_PORT,
+                 start_timeout=120, port=None,
                  custom_bin=None, cleanup_on_exit=True,
                  start_instance=True, ip=LOCALHOST,
                  clear_on_connect=True, log_apdl=False, **kwargs):
@@ -778,9 +762,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get('set_no_abort', True)
     ip = os.environ.get('PYMAPDL_IP', ip)
-    if port is None:
-        port = MAPDL_DEFAULT_PORT
-    port = int(os.environ.get('PYMAPDL_PORT', port))
+    if 'PYMAPDL_PORT' in os.environ:
+        port = int(os.environ.get('PYMAPDL_PORT'))
 
     # connect to an existing instance if enabled
     if not get_start_instance(start_instance):
@@ -862,7 +845,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
         broadcast = kwargs.get('log_broadcast', False)
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
-                          log_broadcast=broadcast, **start_parm)
+                           log_broadcast=broadcast, **start_parm)
     elif mode == 'grpc':
         port, actual_run_location = launch_grpc(port=port, **start_parm)
         mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
@@ -885,9 +868,6 @@ def check_mode(mode, version):
 
     Returns a value from ``ALLOWABLE_MODES``.
     """
-
-    is_win = os.name == 'nt'
-
     if isinstance(mode, str):
         mode = mode.lower()
         if mode == 'grpc':
@@ -896,11 +876,18 @@ def check_mode(mode, version):
         elif mode == 'corba':
             if version < 170:
                 raise VersionError('CORBA AAS mode requires MAPDL v17.0 or newer.')
-        elif mode == 'console' and is_win:
-            raise ValueError('Console mode requires Linux')
+            if version >= 211:
+                raise VersionError('Console mode not supported for 2021R1 or newer.  '
+                                   'Use the default "grpc" mode.')
+        elif mode == 'console':
+            if os.name == 'nt':
+                raise ValueError('Console mode requires Linux')
+            if version >= 211:
+                raise VersionError('Console mode not supported for 2021R1 or newer.  '
+                                   'Use the default "grpc" mode.')
         else:
-            raise ValueError('Invalid MAPDL server mode.  '
-                             'Use one of the following modes:\n%s' % ALLOWABLE_MODES)
+            raise ValueError(f'Invalid MAPDL server mode "{mode}".\n\n'
+                             f'Use one of the following modes:\n{ALLOWABLE_MODES}')
 
     else:  # auto-select based on best version
         if version >= 211:
@@ -908,7 +895,7 @@ def check_mode(mode, version):
         elif version >= 170:
             mode = 'corba'
         else:
-            if is_win:
+            if os.name == 'nt':
                 raise VersionError('Running MAPDL as a service requires '
                                    'v17.0 or greater on Windows.')
             mode = 'console'

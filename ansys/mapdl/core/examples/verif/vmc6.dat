@@ -1,0 +1,223 @@
+/COM,ANSYS MEDIA REL. 140 (11/26/2011) REF. VERIF. MANUAL: REL. 140
+/VERIFY,VMC6
+/SHOW
+  /OUT,SCRATCH
+  *DIM,NARAY,TABLE,16,6         ! 2-D NARAY FOR RESULTS INFO
+  *DO,I,1,16
+    *DO,J,1,6
+      NARAY(I,J)=0.             ! INITIALIZE NARAY
+    *ENDDO
+  *ENDDO
+*CREATE,base,
+  PARSAV,ALL
+  /clear, nostart
+  PARRES,CHANGE
+  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+  /SHOW,JPEG
+  /PREP7
+smrt,off
+  /TITLE, VMC6, TWO-DIMENSIONAL HEAT TRANSFER WITH CONVECTION
+  /COM,   SEE "SELECTED FE BENCHMARKS IN STRUCTURAL AND THERMAL
+  /COM,   ANALYSIS", NAFEMS REPT. FEBSTA REV. 1, OCT. 1986
+  /COM,   TEST NO. T4
+  ANTYPE,STATIC                 ! THERMAL ANALYSIS
+  ET,1,ARG1                     ! DEFINE ELEMENT TYPE PARAMETRICALLY
+  NARAY(ARG4,1)=ARG1            ! STORE ETYPE
+  MP,KXX,1,52.0                 ! DEFINE CONDUCTIVITY
+  *IF,I,LE,10,THEN
+    K,1                         ! DEFINE KEYPOINTS
+    K,2,.6
+    K,3,.6,1.0
+    K,4,,1.0
+    A,1,2,3,4
+    ESIZE,ARG2                  ! DEFINE ELEMENT SIZE, & SHAPE PARAMETRICALLY
+    ESHAPE,ARG3
+    NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH)
+    NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
+    AMESH,1                     ! MESH AREA
+  *ELSE
+    G1=(.6/ARG2)+1              ! DEFINE PARAMETERS FOR MESH GENERATION
+    G2=(1/ARG2)+1
+    G3=(G2-1)
+    N,1
+    NGEN,G1,1,ALL,,,ARG2
+    NGEN,G2,G1,ALL,,,,ARG2
+    *IF,ARG1,EQ,77,THEN
+      E,1,2,(G1+2),(G1+2)
+      EGEN,(G1-1),1,ALL
+      E,1,(G1+2),(G1+1),(G1+1)
+      EGEN,(G1-1),1,G1
+      EGEN,G3,G1,ALL
+      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH)
+      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
+    *ELSE
+      E,1,2,(G1+2)
+      EGEN,(G1-1),1,ALL
+      E,1,(G1+2),(G1+1)
+      EGEN,(G1-1),1,G1
+      EGEN,G3,G1,ALL
+      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH) 
+      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
+    *ENDIF
+    *IF,ARG1,NE,55,THEN
+      EMID
+      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH) 
+      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT S)
+    *ENDIF
+  *ENDIF
+  *GET,MAXE,ELEM,,NUM,MAX
+  *GET,MAXN,NODE,,NUM,MAX
+  NARAY(ARG4,4)=MAXN*1          ! CALCULATE NO. DEGREES OF FREEDOM
+  T1=NODE(.6,.2,0)              ! GET NODE NUMBER OF INTEREST
+  NSEL,S,LOC,Y,0
+  D,ALL,TEMP,100.               ! SPECIFY EDGE TEMPERATURE
+  NSEL,S,LOC,X,0.6
+  SF,ALL,CONV,750.0,0.0         ! SPECIFY CONVECTION SURFACES
+  NSEL,A,LOC,Y,1.0
+  SF,ALL,CONV,750.0,0.0
+  NSEL,ALL
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /AUTO,1
+  /VIEW,1,,,1
+  /ANG,1
+  /DEVICE,VECTOR,1
+  /DEVICE,DITHER,1
+  /TYPE,ALL,4
+  /COLOR,NUM,BLUE,1
+  *IF,ARG1,EQ,77,THEN
+   *IF,ARG2,EQ,0.2,THEN
+   *IF,ARG3,EQ,2,THEN
+   /TITLE,VMC6 - QUADRILATERAL MESH (N1 = 0.2)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *IF,ARG2,EQ,0.1,THEN
+   *IF,ARG3,EQ,2,THEN
+   /TITLE,VMC6 - QUADRILATERAL MESH (N1 = 0.1)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *IF,ARG2,EQ,0.2,THEN
+   *IF,ARG3,EQ,1,THEN
+   *IF,I,EQ,15,THEN
+   /TITLE,VMC6 - UNIFORM TRIANGLE MESH (N1 = 0.2)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *ENDIF
+   *IF,ARG2,EQ,0.1,THEN
+   *IF,ARG3,EQ,1,THEN
+   *IF,I,EQ,16,THEN
+   /TITLE,VMC6 - UNIFORM TRIANGLE MESH (N1 = 0.1)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *ENDIF
+   *IF,ARG2,EQ,0.2,THEN
+   *IF,ARG3,EQ,1,THEN
+   *IF,I,EQ,9,THEN
+   /TITLE,VMC6 - TRIANGLE MESH (N1 = 0.2)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *ENDIF
+   *IF,ARG2,EQ,0.1,THEN
+   *IF,ARG3,EQ,1,THEN
+   *IF,I,EQ,10,THEN
+   /TITLE,VMC6 - TRIANGLE MESH (N1 = 0.1)
+   EPLOT
+   *ENDIF
+   *ENDIF
+   *ENDIF
+*ENDIF  
+
+
+  FINISH
+  /SOLU
+  SOLVE
+  *GET,NTEM,TEMP,T1             ! GET TEMERATURE AT NODE OF INTEREST
+  NARAY(ARG4,5)=NTEM            ! STORE TEMPERATURE
+  NARAY(ARG4,6)=NTEM/18.3       ! CALCULATE TEMPERATURE RATIO
+  PARSAV,,PARAM
+  FINISH
+*END
+  /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPES, MESHES
+  *DO,I,1,16
+    *IF,I,EQ,1,THEN
+      *USE,base,55,.2,2,I       ! QUAD MESH
+    *ELSEIF,I,EQ,2,THEN
+      *USE,base,55,.1,2,I       ! QUAD MESH
+    *ELSEIF,I,EQ,3,THEN
+      *USE,base,77,.2,2,I       ! QUAD MESH
+    *ELSEIF,I,EQ,4,THEN
+      *USE,base,77,.1,2,I       ! QUAD MESH
+    *ELSEIF,I,EQ,5,THEN
+      *USE,base,35,.2,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,6,THEN
+      *USE,base,35,.1,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,7,THEN
+      *USE,base,55,.2,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,8,THEN
+      *USE,base,55,.1,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,9,THEN
+      *USE,base,77,.2,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,10,THEN
+      *USE,base,77,.1,1,I       ! TRIANGLE MESH
+    *ELSEIF,I,EQ,11,THEN
+      *USE,base,35,.2,1,I	! TRIANGLE MESH
+    *ELSEIF,I,EQ,12,THEN
+      *USE,base,35,.1,1,I	! TRIANGLE MESH
+    *ELSEIF,I,EQ,13,THEN
+      *USE,base,55,.2,1,I	! TRIANGLE MESH
+    *ELSEIF,I,EQ,14,THEN
+      *USE,base,55,.1,1,I	! TRIANGLE MESH
+    *ELSEIF,I,EQ,15,THEN
+      *USE,base,77,.2,1,I	! TRIANGLE MESH
+    *ELSEIF,I,EQ,16,THEN
+      *USE,base,77,.1,1,I	! TRIANGLE MESH
+    *ENDIF
+  *ENDDO
+  /OUT,
+  !*STAT,NARAY                   ! GET STATUS OF NARAY
+  *VLEN,4
+  *VCOL,6
+  /OUT,vmc6,vrt
+  /COM,
+  /COM,------------------- VMC6 RESULTS LISTING ---------------------
+  /COM
+  /COM, QUAD MESH
+  /COM,
+  /COM,| ETYP | N1  | DOF  | TEMP(C) | TEMP RATIO |
+  /COM,
+  *VWRITE,NARAY(1,1),NARAY(1,2),NARAY(1,4),NARAY(1,5),NARAY(1,6)
+  (F5.0,'   ',F5.2,'  ',F5.0,'   ',F5.1,'    ',F5.2)
+  /COM,
+  /OUT
+  *VLEN,6
+  /OUT,vmc6,vrt,,append
+  /COM, TRIANGLE MESH
+  /COM,
+  /COM,| ETYP | N1  | DOF  | TEMP(C) | TEMP RATIO |
+  /COM,
+  *VWRITE,NARAY(5,1),NARAY(5,2),NARAY(5,4),NARAY(5,5),NARAY(5,6)
+  (F5.0,'   ',F5.2,'  ',F5.0,'   ',F5.1,'    ',F5.2)
+  /COM,
+  /COM, UNIFORM TRIANGLE MESH
+  /COM,
+  /COM,| ETYP | N1  | DOF  | TEMP(C) | TEMP RATIO |
+  /COM,
+  *VWRITE,NARAY(11,1),NARAY(11,2),NARAY(11,4),NARAY(11,5),NARAY(11,6)
+  (F5.0,'   ',F5.2,'  ',F5.0,'   ',F5.1,'    ',F5.2)
+  /COM,
+  /COM,---------------------------------------------------------------
+/OUT
+FINISH
+*LIST,vmc6,vrt
+/DELETE,PARAM
+/DELETE,base
+FINISH
+
+

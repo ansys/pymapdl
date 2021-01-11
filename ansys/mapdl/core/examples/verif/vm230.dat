@@ -1,0 +1,87 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM230
+JPGPRF,500,100,1
+/SHOW,JPEG
+/TITLE, VM230, Analytical Verification of PDS Results
+/COM,Probability Concepts in Engineering Planing and Design, Volume 1 
+/COM, A Ang, H-S Tang, Wiley, 1975 
+/COM, 
+! ---------  make loop file  --------
+*CREATE,VM230,INP
+X1  = 3.0
+X2  = 3.0
+X3  = 3.0
+X4  = 3.0
+X5  = 3.0
+Y   = (X1*X2*X3)/(X4*X5)
+LOGY= log(Y)
+*END
+!
+! ---------  run loop file  --------
+/inp,VM230,INP
+!
+! ---------  define PDS parameters  --------
+LMEAN1 = 1.1
+LMEAN2 = 1.2
+LMEAN3 = 1.3
+LMEAN4 = 1.4
+LMEAN5 = 1.5
+LDEVI1 = 0.1
+LDEVI2 = 0.2
+LDEVI3 = 0.3
+LDEVI4 = 0.4
+LDEVI5 = 0.5
+!
+! ---------  PDS Definitions  --------
+/PDS
+PDANL,VM230,INP                  ! Define analysis file
+PDVAR,X1,LOG2,LMEAN1,LDEVI1,0.0      ! Define X1 as Log-normal
+PDPLOT,X1
+PDVAR,X2,LOG2,LMEAN2,LDEVI2,0.0      ! Define X2 as Log-normal
+PDVAR,X3,LOG2,LMEAN3,LDEVI3,0.0      ! Define X3 as Log-normal
+PDVAR,X4,LOG2,LMEAN4,LDEVI4,0.0      ! Define X4 as Log-normal
+PDVAR,X5,LOG2,LMEAN5,LDEVI5,0.0      ! Define X5 as Log-normal
+PDVAR,Y,RESP                   ! Define Y as response parameter
+PDVAR,LOGY,RESP                      ! Define LOGY as response parameter
+!
+! ---------  PDS Methods - LHS  --------
+/COM, **************************************
+/COM, Define and run latin hypercube samples
+/COM, **************************************
+PDMETH,MCS,LHS                 ! Set LHS as method
+PDLHS,2000,1,RAND,,ALL,,,,INIT ! Define LHS options
+PDEXEC,LHSRUN,SER              ! Execute LHS runs
+!
+! ---------  PDS POST-PROCESSING  --------
+/COM,
+/COM, **************************************
+/COM, Analytical results
+/COM, **************************************
+LMEANY = LMEAN1 + LMEAN2 + LMEAN3 - LMEAN4 - LMEAN5
+LDEVIY = 0.0
+LDEVIY = LDEVIY + LDEVI1*LDEVI1
+LDEVIY = LDEVIY + LDEVI2*LDEVI2
+LDEVIY = LDEVIY + LDEVI3*LDEVI3
+LDEVIY = LDEVIY + LDEVI4*LDEVI4
+LDEVIY = LDEVIY + LDEVI5*LDEVI5
+LDEVIY = SQRT(LDEVIY)
+MEANY  = exp(LMEANY + 0.5*LDEVIY*LDEVIY)
+HLP1  = exp(2.0*LMEANY + LDEVIY*LDEVIY)
+HLP2  = exp(LDEVIY*LDEVIY) - 1.0
+STDEVY = sqrt( HLP1*HLP2 )
+*MSG,NOTE,LMEANY
+The logarithmic mean of Y is      %g
+*MSG,NOTE,LDEVIY
+The logarithmic deviation of Y is %g
+*MSG,NOTE,MEANY
+The mean value of Y is            %g
+*MSG,NOTE,STDEVY
+The standard deviation of Y is    %g
+/COM,
+/COM, **************************************
+/COM, Plot the CDF for LHS
+/COM, **************************************
+JPGPRF,500,100,1
+PDCDF,LHSRUN,Y,LOGN
+PDCDF,LHSRUN,LOGY
+FINISH

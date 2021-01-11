@@ -1,5 +1,4 @@
-"""Common gRPC methods"""
-
+"""Common gRPC functions"""
 import numpy as np
 
 # chunk sizes for streaming and file streaming
@@ -153,10 +152,8 @@ def parse_chunks(chunks, dtype=None):
     if chunks.done():
         return array
 
-    i = 1
     arrays = [array]
     for chunk in chunks:
         arrays.append(np.frombuffer(chunk.payload, dtype))
-        i += 1
 
     return np.hstack(arrays)

@@ -1,0 +1,72 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM113
+/PREP7
+smrt,off
+/TITLE, VM113, TRANSIENT TEMP. DISTRIBUTION IN AN ORTHOTROPIC METAL BAR
+C***    CONDUCTION HEAT TRANSFER, SCHNEIDER, 2ND. PRINTING, PAGE 261, EX. 10-7
+ANTYPE,TRANS
+ET,1,PLANE55               ! THERMAL SOLID
+MP,KXX,1,20                ! ORTHOTROPIC CONDUCTIVITIES
+MP,KYY,1,3.6036
+MP,DENS,1,400
+MP,C,1,.009009
+K,1                        ! USE SOLID MODEL
+K,2,(2/12)
+KGEN,2,1,2,1,,(1/12)
+L,1,2
+*REPEAT,2,2,2
+LESIZE,ALL,,,6,(1/3)
+L,1,3
+*REPEAT,2,1,1
+LESIZE,3,,,5,(1/3)
+LESIZE,4,,,5,(1/3)
+A,1,3,4,2
+AMESH,1
+TIME,(3/3600)
+NSUBST,40
+AUTOTS,ON                  ! USE AUTOMATIC TIME STEPPING
+OUTPR,,LAST                
+BFUNIF,TEMP,500
+KBC,1                      ! STEP BOUNDARY CONDITIONS
+NSEL,S,LOC,X,(2/12)
+NSEL,A,LOC,Y,(1/12)
+SF,ALL,CONV,240,100        ! CONVECTION SURFACE
+NSEL,ALL
+FINISH
+/SOLU    
+EQSLV,JCG                  ! USE JACOBI CONJUGATE GRADIENT SOLVER
+/OUT,SCRATCH
+SOLVE
+FINISH
+/POST1
+NSEL,S,LOC,X
+NSEL,A,LOC,X,(2/12)        ! SELECT NODES OF INTEREST
+NSEL,U,LOC,Y,.01,(.99/12)
+/OUT,
+PRNSOL,TEMP                ! PRINT NODAL TEMPERATURES
+*get,tn1,node,1,temp
+*get,tn7,node,7,temp
+*get,tn13,node,13,temp
+*get,tn2,node,2,temp
+*dim,label,char,4,2
+*dim,value,,4,3
+label(1,1) = 'T,F (nod','T,F (nod','T,F (nod','T,F (nod'
+label(1,2) = 'e  1)   ','e  7)   ','e 13)   ','e  2)   '
+*vfill,value(1,1),data,459,151,279,202
+*vfill,value(1,2),data,tn1,tn7,tn13,tn2
+*vfill,value(1,3),data,abs(tn1/459),abs(tn7/151),abs(tn13/279),abs(tn2/202)
+/com
+
+/OUT,vm113,vrt 
+/com,-------------------(VM113)RESULTS COMPARISON---------------
+/com,
+/com,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/com,
+*vwrite,label(1,1),label(1,2),value(1,1),value(1,2),value(1,3)
+(1x,a8,a8,'   ',f10.0,'  ',f12.0,'   ',1f15.2)
+/com,----------------------------------------------------------
+/OUT 
+FINISH
+*LIST,vm113,vrt
+
+

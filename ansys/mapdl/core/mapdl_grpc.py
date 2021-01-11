@@ -2,7 +2,6 @@
 import re
 from warnings import warn
 import shutil
-import signal
 import threading
 import weakref
 import io
@@ -17,13 +16,13 @@ import subprocess
 import grpc
 import numpy as np
 from tqdm import tqdm
-from grpc._channel import (_InactiveRpcError, _MultiThreadedRendezvous)
+from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7, last_created
 
 from ansys.mapdl.core.post import PostProcessing
@@ -37,67 +36,6 @@ from ansys.mapdl.core import __version__, _LOCAL_PORTS
 logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
-NP_VALUE_TYPE = {value: key for key, value in ANSYS_VALUE_TYPE.items()}
-
-# for windows
-if os.name == 'nt':
-    NP_VALUE_TYPE[np.intc] = 1
-
-SIGINT_TRACKER = []
-
-
-def handler(sig, frame):  # pragma: no cover
-    """Pass signal to custom interrupt handler."""
-    logger.info('KeyboardInterrupt received.  Waiting until MAPDL '
-                'execution finishes')
-    SIGINT_TRACKER.append(True)
-
-
-def protect_grpc(func):
-    """Capture gRPC exceptions and return a more succinct error message
-
-    Capture KeyboardInterrupt to avoid segfaulting MAPDL.
-
-    This works some of the time, but not all the time.  For some
-    reason gRPC still captures SIGINT.
-
-    """
-    def wrapper(*args, **kwargs):
-        """Capture gRPC exceptions and KeyboardInterrupt"""
-
-        # capture KeyboardInterrupt
-        old_handler = None
-        if threading.current_thread().__class__.__name__ == '_MainThread':
-            if threading.current_thread().is_alive():
-                old_handler = signal.signal(signal.SIGINT, handler)
-
-        # Capture gRPC exceptions
-        try:
-            out = func(*args, **kwargs)
-        except (_InactiveRpcError, _MultiThreadedRendezvous) as error:
-            if isinstance(args[0], MapdlGrpc):
-                mapdl = args[0]
-            elif hasattr(args[0], '_mapdl'):
-                mapdl = args[0]._mapdl
-
-            # Must close unfinished processes
-            mapdl._close_process()
-            raise MapdlExitedError('MAPDL server connection terminated') from None
-
-        if threading.current_thread().__class__.__name__ == '_MainThread':
-            received_interrupt = bool(SIGINT_TRACKER)
-
-            # always clear and revert to old handler
-            SIGINT_TRACKER.clear()
-            if old_handler:
-                signal.signal(signal.SIGINT, old_handler)
-
-            if received_interrupt:  # pragma: no cover
-                raise KeyboardInterrupt('Interrupted during MAPDL execution')
-
-        return out
-
-    return wrapper
 
 
 def chunk_raw(raw, save_as):
@@ -177,20 +115,6 @@ class RepeatingTimer(threading.Timer):
             self.finished.wait(self.interval)
 
 
-def get_nparray_chunks(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
-    """Serializes a numpy array into chunks"""
-    stype = NP_VALUE_TYPE[array.dtype.type]
-    arr_sz = array.size
-    i = 0  # position counter
-    byte_array = array.tobytes()
-    while i < len(byte_array):
-        piece = byte_array[i: i + chunk_size]
-        chunk = anskernel.Chunk(payload=piece, size=len(piece))
-        yield pb_types.SetVecDataRequest(vname=name, stype=stype, size=arr_sz,
-                                         chunk=chunk)
-        i += chunk_size
-
-
 def check_valid_ip(ip):
     """Check for valid IP address"""
     if ip != 'localhost':
@@ -249,12 +173,11 @@ class MapdlGrpc(_MapdlCore):
     """
 
     def __init__(self, ip='127.0.0.1', port=50052, timeout=15, loglevel='WARNING',
-                 cleanup_on_exit=True, log_apdl=False, set_no_abort=True,
+                 cleanup_on_exit=False, log_apdl=False, set_no_abort=True,
                  remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
         super().__init__(loglevel)
 
-        SIGINT_TRACKER.clear()
         check_valid_ip(ip)
 
         # gRPC request specific locks as these gRPC request are not thread safe
@@ -1216,7 +1139,7 @@ class MapdlGrpc(_MapdlCore):
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
-        from ansys.mapdl import MapdlMath
+        from ansys.mapdl.core.math import MapdlMath
         return MapdlMath(self)
 
     @protect_grpc
@@ -1237,45 +1160,6 @@ class MapdlGrpc(_MapdlCore):
         return parse_chunks(chunks, dtype)
 
     @protect_grpc
-    def _set_vec(self, vname, arr, dtype=None, chunk_size=DEFAULT_CHUNKSIZE):
-        """Transfer a numpy array to MAPDL as a MAPDL Math vector.
-
-        Parameters
-        ----------
-        vname : str
-            Vector parameter name.  Character ":" is not allowed.
-
-        arr : np.ndarray
-            Numpy array to upload
-
-        dtype : np.dtype, optional
-            Type to upload array as.  Defaults to the current array type.
-
-        chunk_size : int, optional
-            Chunk size in bytes.  Must be less than 4MB.
-
-        """
-        if ':' in vname:
-            raise ValueError('The character ":" is not permitted in a MAPDL MATH'
-                             ' vector parameter name')
-        if not isinstance(arr, np.ndarray):
-            arr = np.asarray(arr)
-
-        if dtype is not None:
-            if arr.dtype != dtype:
-                arr = arr.astype(dtype)
-
-        if arr.dtype not in list(NP_VALUE_TYPE.keys()):
-            dtypes = list(NP_VALUE_TYPE.keys())
-            if None in dtypes:
-                dtypes.remove(None)
-            raise TypeError('Invalid array datatype.  Must be one of the following:\n'
-                            + ('\n'.join([str(dtype) for dtype in dtypes])))
-
-        chunks_generator = get_nparray_chunks(vname, arr, chunk_size)
-        self._stub.SetVecData(chunks_generator)
-
-    @protect_grpc
     def _mat_data(self, pname, raw=False):
         """Downloads matrix data from a parameter and returns a scipy sparse array"""
         try:
@@ -1283,16 +1167,16 @@ class MapdlGrpc(_MapdlCore):
         except ImportError:  # pragma: no cover
             raise ImportError('Install ``scipy`` to use this feature')
 
-        presponse = self._data_info(pname)
-        stype = ANSYS_VALUE_TYPE[presponse.stype]
-        mtype = presponse.objtype
-        shape = (presponse.size1, presponse.size2)
+        minfo = self._data_info(pname)
+        stype = ANSYS_VALUE_TYPE[minfo.stype]
+        mtype = minfo.objtype
+        shape = (minfo.size1, minfo.size2)
 
         if mtype == 2:  # dense
             request = pb_types.ParameterRequest(name=pname)
             chunks = self._stub.GetMatData(request)
             values = parse_chunks(chunks, stype)
-            return np.reshape(values, shape)
+            return np.transpose(np.reshape(values, shape[::-1]))
         elif mtype == 3:
             indptr = self._vec_data(pname + "::ROWS")
             indices = self._vec_data(pname + "::COLS")
@@ -1302,48 +1186,7 @@ class MapdlGrpc(_MapdlCore):
             else:
                 return sparse.csr_matrix((vals, indices, indptr), shape=shape)
 
-        raise ValueError('Invalid matrix type %s' % str(mtype))
-
-    def _load_matrix(self, name, mat, triu=False):
-        """Load a matrix from python to MAPDL"""
-        try:
-            from scipy import sparse
-        except ImportError:  # pragma: no cover
-            raise ImportError('Install ``scipy`` to use this feature')
-
-        if not len(name):
-            raise ValueError('Empty MAPDL matrix name not permitted')
-
-        if isinstance(mat, np.ndarray):
-            if mat.ndim == 1:
-                raise ValueError('Input appears to be an array.  '
-                                 'Use ``set_vec`` instead.)')
-            elif mat.ndim > 2:
-                raise ValueError('Dense arrays must be 2 dimensional')
-
-        elif not isinstance(mat, sparse.csr_matrix):
-            smat = sparse.csr_matrix(mat)
-        else:
-            smat = mat
-
-        # send vectors (limited to single thread)
-        self._set_vec('%s_D' % name, smat.data, np.float64)  # data
-        self._set_vec('%s_P' % name, smat.indptr + 1, np.int64)  # row pointers
-        self._set_vec('%s_I' % name, smat.indices + 1, np.int32)  # column indices
-
-        # sanity checks
-        # assert np.allclose(self._vec_data('%s_D' % name), smat.data)
-        # assert np.allclose(self._vec_data('%s_P' % name), smat.indptr + 1)
-        # assert np.allclose(self._vec_data('%s_I' % name), smat.indices + 1)
-
-        if triu:
-            upper_sym = 'TRUE'
-        else:
-            upper_sym = 'FALSE'
-
-        cmd = '*SMAT,{0:s},D,ALLOC,CSR,{0:s}_P,{0:s}_I,{0:s}_D,{1:s}'.format(name,
-                                                                             upper_sym)
-        self.run(cmd)
+        raise ValueError(f'Invalid matrix type "{mtype}"')
 
     @property
     def locked(self):

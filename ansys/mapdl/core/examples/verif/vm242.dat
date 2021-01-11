@@ -1,0 +1,154 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/verify,vm242
+/title,vm242,Johnson-Champoux-Allard Equivalent Fluid Model
+/com,
+/com, Evaluation of the acoustic and non-acoustic properties
+/com, of sound absorbing materials using a three-microphone
+/com, impedance tube
+/com,
+/com, Reference:
+/com, O.Doutres, Y. Salissou, N. Attalla, R. Panneton, "Evaluation
+/com, of the acoustic and non-acoustic properties of sound
+/com, absorbing materials using a three-microphone impedance
+/com, tube", Applied Acoustics 71 (2010), pg 506-509
+/com,
+
+jpgprf,500,100,1
+/show,jpeg
+
+FREQUENCY  = 4000 
+DIM_WIDTH  = 30e-3
+MAT_SPEED  = 343
+MAT_DENSITY= 1.2
+NUM_EPW    = 8
+NUM_STEPS  = 40
+
+MAT_RESIS  = 10800
+MAT_PORO   = 0.98
+MAT_TORTU  = 1.04
+MAT_VISCL  = 129e-6
+MAT_THERL  = 198e-6
+DIM_PERF   = 51.44e-3
+
+LOADING    = 1e3/MAT_SPEED*2
+
+DIM_WAVELNG= MAT_SPEED/FREQUENCY
+DIM_ESIZE  = DIM_WAVELNG/NUM_EPW
+DIM_LENGTH = MAT_SPEED/(FREQUENCY/NUM_STEPS)
+
+/prep7
+et,1,fluid220			! FLUID220 elements
+keyopt,1,2,1			! No FSI interface
+
+et,2,fluid220			! FLUID220 elements
+keyopt,2,2,1			! No FSI Interface
+
+r,1
+r,2
+
+mp,sonc,1,MAT_SPEED
+mp,dens,1,MAT_DENSITY
+
+mpcopy,,1,2			! Copy material model data
+
+tb,perf,2
+tbdata,1,MAT_RESIS		! Fluid resistivity
+tbdata,2,MAT_PORO		! Fluid porosity
+tbdata,3,MAT_TORTU		! Fluid tortuosity
+tbdata,4,MAT_VISCL		! Viscous Charactersitic length
+tbdata,5,MAT_THERL		! Thermal Characteristic
+
+block,,DIM_WIDTH,,DIM_LENGTH,,DIM_WIDTH
+block,,DIM_WIDTH,,-DIM_PERF,,DIM_WIDTH
+nummrg,kp,1e-8,1e-8
+
+vsel,s,loc,y,-DIM_PERF,0
+vatt,2,2,2
+vsel,all
+esize,DIM_ESIZE
+vmesh,all
+
+asel,s,loc,y,DIM_LENGTH
+nsla,s,1
+bf,all,js,LOADING		! mass source
+sf,all,inf			! Robin radiation boundary flag
+allsel,all
+finish
+
+/solu
+antype,harmic
+harfrq,0,FREQUENCY		
+nsubst,NUM_STEPS
+outres,all,all
+kbc,1
+solve
+finish
+
+
+/color,curve,blue,1
+
+/post26
+numvar,200
+
+asel,s,loc,y,0
+nsla,s,1
+esln
+esel,r,ename,,220,220
+MY_NODE=ndnext(0)
+nsel,r,node,,MY_NODE
+esln
+MY_ELEM=elnext(0)
+
+nsol,3,MY_NODE,pres,,P
+esol,4,MY_ELEM,MY_NODE,pg,y,V
+quot,5,3,4,,Z
+filldata,6,,,,MAT_SPEED*MAT_DENSITY,0
+quot,7,5,6,,Zratio,,1,-1
+filldata,8,,,,1,0
+add,9,7,8
+add,10,7,8,,,,,1,-1
+quot,11,10,9,,R
+abs,12,11
+prod,13,12,12,,R2
+add,14,8,13,,a,,,1,-1
+
+prvar,14
+*get,absorp_coeff,vari,14,rtime,1700
+/title, Absorption Coefficient vs. Frequency
+plvar,14
+allsel,all
+*dim,label,char,1,2
+*dim,value,,1,3
+
+label(1,1)='Absorp'
+label(1,2)='Coeff'
+
+*vfill,value(1,1),data,0.988    !absorption coefficient from reference
+*vfill,value(1,2),data,absorp_coeff ! absorption coefficient from MAPDL
+*vfill,value(1,3),data,abs(0.988/absorp_coeff)
+
+save,table_1
+finish
+resume,table_1
+/com,
+/out,vm242,vrt
+/com,
+/com, ------------------------------VM242 RESULTS COMPARISON----------------------
+/com,
+/com,                               | TARGET |  Mechanical APDL | RATIO
+/com,
+/com,  
+/com, 
+/com,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'      ','     ',F10.3,'    ',F10.3,'    ',F10.3)
+/com,
+/com, 
+/NOPR,
+/com,
+/com, 
+/com, --------------------------------------------------------------------------------
+/out,
+*list,vm242,vrt
+finish
+    

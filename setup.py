@@ -156,7 +156,8 @@ setup(
                                                 'file.rst',
                                                 'file.full',
                                                 'sector.rst',
-                                                'sector.cdb']},
+                                                'sector.cdb',
+                                                'verif/*.dat']},
 
     install_requires=install_requires,
 )

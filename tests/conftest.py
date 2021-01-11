@@ -6,7 +6,7 @@ import pyvista
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.launcher import get_start_instance, MAPDL_DEFAULT_PORT
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -36,6 +36,12 @@ def mapdl(request, tmpdir_factory):
 
     # don't allow mapdl to exit upon collection unless mapdl is local
     cleanup = START_INSTANCE
+
+    if request.param:
+        # usage of a just closed channel on same port causes connectivity issues
+        port = MAPDL_DEFAULT_PORT + 10
+    else:
+        port = MAPDL_DEFAULT_PORT
 
     mapdl = launch_mapdl(EXEC_FILE, override=True, run_location=run_path,
                          cleanup_on_exit=cleanup)

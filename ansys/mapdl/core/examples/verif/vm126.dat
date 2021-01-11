@@ -1,0 +1,64 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM126
+/PREP7
+/TITLE, VM126, HEAT TRANSFERRED TO A FLOWING FLUID
+C***    HEAT, MASS AND MOMENTUM TRANS, ROHSENOW AND CHOI, PAGE 168, EX 7.5
+ET,1,FLUID116,1,4,,1                    ! THERMAL-FLOW PIPE ELEMENT
+ET,2,FLUID116,1
+R,1,(1/12),.00545415                    ! DIAMETER
+RMORE,,,1.63,.08,.7,.35                 ! FLOW DEPENDENT FILM COEFF.
+MP,KXX,1,.017				! BTU/hr-ft-F
+MP,DENS,1,1.4377E-10			! lbf-hr**2/ft**4
+MP,C,1,1.002e8				! BTU-ft/lbf-hr**2-F
+MP,VISC,1,1.17418E-10			! lbf-hr/ft**2
+N,1
+N,19,,,.46875                           ! NODE JUST BEYOND
+FILL,1,19,8,3,2                         ! NODES ALONG PIPE AXIS
+N,2
+N,18
+FILL,2,18,7,4,2                         ! CONVECTION NODES (ARBITRARY LOCATION)
+TYPE,1
+E,1,3,2,4
+EGEN,8,2,1
+type,2
+E,17,19                                 ! EXTENSION ELEMENT
+D,1,TEMP,100                            ! INLET AIR TEMPERATURE
+D,2,TEMP,200,,18,2                      ! WALL TEMPERATURE
+SFE,ALL,,HFLUX,,1.1321e-8               ! FLOW RATE INPUT  lbf-hr/ft
+OUTPR,,LAST                             ! PRINT FINAL CONVERGED ITERATION
+OUTPR,NLOAD,1
+FINISH
+/SOLU    
+EQSLV,JCG
+SOLVE
+FINISH
+/POST1
+ETABLE,HEAT,NMISC,5                     ! STORE HEAT TRANSPORT RATE
+PRETAB,HEAT                             ! PRINT HEAT TRANSPORT RATES PER ELEMENT
+NSEL,S,NODE,,1,19,2                     ! SELECT PIPE NODES
+PRNSOL,TEMP                             ! PRINT TEMPERATURES ALONG PIPE LENGTH
+*GET,TO,NODE,17,TEMP
+ETABLE,HEAT,NMISC,5
+ESORT,HEAT
+*GET,QOUT,SORT,,MAX
+*GET,QIN,SORT,,MIN
+*status,parm
+*DIM,LABEL,CHAR,3,2
+*DIM,VALUE,,3,3
+LABEL(1,1) = 'To ','Q(in)','Q(out)'
+LABEL(1,2) = 'F ','BTU/hr','BTU/hr'
+*VFILL,VALUE(1,1),DATA,123,113.28,139.33
+*VFILL,VALUE(1,2),DATA,TO,QIN,QOUT
+*VFILL,VALUE(1,3),DATA,ABS(TO/123),ABS(QIN/113.28),ABS(QOUT/139.33)
+/COM
+/OUT,vm126,vrt
+/COM,------------------- VM126 RESULTS COMPARISON -------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.2,'  ',F12.2,'   ',1F15.3)
+/COM,----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm126,vrt

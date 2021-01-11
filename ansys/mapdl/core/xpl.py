@@ -13,6 +13,8 @@ class ansXpl():
 
     Examples
     --------
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
     >>> xpl = mapdl.xpl
     """
 
@@ -45,9 +47,6 @@ class ansXpl():
 
         Examples
         --------
-        >>> from ansys.mapdl import MapdlGrpc
-        >>> mapdl = MapdlGrpc()
-        >>> xpl = mapdl.xpl()
         >>> xpl.open('file.full')
         """
         self._filename = filename
@@ -56,7 +55,7 @@ class ansXpl():
         return out
 
     def close(self):
-        """Close an MAPDL file after exploring.
+        """Close the MAPDL file after opening.
 
         Returns
         -------
