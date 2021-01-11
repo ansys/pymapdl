@@ -4,7 +4,6 @@ import inspect
 import platform
 import os
 from threading import Thread
-import sys
 import random
 import string
 
@@ -144,10 +143,10 @@ class Report(scooby.Report):
         return add_text + super().__repr__()
 
 
-def is_float(string):
+def is_float(input_string):
     """Returns true when a string can be converted to a float"""
     try:
-        float(string)
+        float(input_string)
         return True
     except ValueError:
         return False

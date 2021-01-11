@@ -1,0 +1,4 @@
+parm
+pres
+WAN
+filname
