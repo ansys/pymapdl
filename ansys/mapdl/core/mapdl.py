@@ -1299,13 +1299,13 @@ class _MapdlCore(_MapdlCommands):
 
         Examples
         --------
-        Retreive the number of nodes.
+        Retrieve the number of nodes.
 
         >>> value = ansys.get_value('node', '', 'count')
         >>> value
         3003
 
-        Retreive the number of nodes using keywords.
+        Retrieve the number of nodes using keywords.
 
         >>> value = ansys.get_value(entity='node', item1='count')
         >>> value
@@ -1357,13 +1357,13 @@ class _MapdlCore(_MapdlCommands):
 
         Examples
         --------
-        Retreive the number of nodes
+        Retrieve the number of nodes
 
         >>> value = mapdl.get('val', 'node', '', 'count')
         >>> value
         3003
 
-        Retreive the number of nodes using keywords.  Note that the
+        Retrieve the number of nodes using keywords.  Note that the
         parameter name is optional.
 
         >>> value = mapdl.get(entity='node', item1='count')

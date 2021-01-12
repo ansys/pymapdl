@@ -324,8 +324,8 @@ class Geometry():
                     line.cell_arrays['entity_num'] = entity_num
                     lines.append(line)
 
-        entites = iges.lines() + iges.circular_arcs()
-        for line in entites:
+        entities = iges.lines() + iges.circular_arcs()
+        for line in entities:
             if line.d['status_number'] == 1:
                 entity_num = int(line.d['entity_subs_num'])
                 if entity_num not in entity_nums and entity_num in selected_lnum:

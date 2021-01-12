@@ -369,7 +369,7 @@ def get_start_instance(start_instance_default=True):
 def find_ansys():
     """Searches for ansys path within environmental variables.
 
-    Reutrns
+    Returns
     -------
     ansys_exe_path : str
         Full path to ANSYS executable
@@ -582,11 +582,13 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         - ``'corba'``
         - ``'console'``
 
-        The ``'grpc'`` mode is avaiable on ANSYS 2021R1 or newer and
+        The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
         provides the best performance and stability.  The ``'corba'``
         mode is available from v17.0 and newer and is given legacy
         support.  This mode requires the additional
-        ``ansys-mapdl-corba`` module.  Finally, the ``'console'`` mode 
+        ``ansys-mapdl-corba`` module.  Finally, the ``'console'`` mode
+        is for legacy use on Linux only prior to v17.0.  This console
+        mode is pending depreciation.
 
     override : bool, optional
         Attempts to delete the lock file at the run_location.

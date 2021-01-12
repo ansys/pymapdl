@@ -41,7 +41,7 @@ def _retrieve_file(url, filename):
     # grab the correct url retriever
     urlretrieve = urllib.request.urlretrieve
 
-    # Perfrom download
+    # Perform download
     saved_file, resp = urlretrieve(url)
     shutil.move(saved_file, local_path)
     if get_ext(local_path) in ['.zip']:
@@ -68,56 +68,6 @@ def _download_and_read(filename):
 
 
 ###############################################################################
-def download_verification_result(index):
-    """Download a verification manual result file"""
-    return _download_and_read('vm%d.rst' % index)
-
-
-def download_shaft_modal():
-    """Download modal analysis of a rotor shaft"""
-    return _download_and_read('shaft_modal.rst')
-
-
-def download_sector_modal():
-    """Download modal analysis of a cyclic turbine sector"""
-    return _download_and_read('sector_modal.rst')
-
-
-def download_pontoon():
-    """Download modal analysis of a cyclic turbine sector"""
-    return _download_and_read('pontoon.rst')
-
-
-def _download_solid239_240():
-    """SOLID239 and SOLID240 file for unit testing"""
-    return _download_and_read('solid239_240.rth')
-
-
-def _download_plane238():
-    """PLANE result for unit testing"""
-    return _download_and_read('plane238.rth')
-
-
-def _download_shell181():
-    """SHELL181 result for unit testing"""
-    return _download_and_read('shell181.rst')
-
-
-def download_corner_pipe():
-    """Corner pipe result for unit testing and basic demo"""
-    return _download_and_read('cyc_stress.rst')
-
-
-def download_academic_rotor_result():
-    """Cyclic academic rotor result file"""
-    return _download_and_read('academic_rotor.rst')
-
-
-def download_academic_rotor_archive():
-    """Cyclic academic rotor archive file"""
-    return _download_and_read('academic_rotor.cdb')
-
-
-def download_academic_rotor_4blade_result():
-    """Cyclic academic rotor result file"""
-    return _download_and_read('academic_rotor_4_blade.rst')
+# def download_verification_result(index):
+#     """Download a verification manual result file"""
+#     return _download_and_read('vm%d.rst' % index)

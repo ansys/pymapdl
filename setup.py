@@ -22,8 +22,8 @@ install_requires = [
     'scipy>=1.3.0',  # for sparse (consider optional?)
     'google-api-python-client',
     'grpcio>=1.30.0'
-    'ansys.grpc.mapdl==0.2.0',
-    'ansys.mapdl.reader>=0.50.0',
+    'ansys-grpc-mapdl==0.2.0',
+    'ansys-mapdl-reader>=0.50.0',
 ]
 
 # these are only used when launching a MAPDL via a console.  This

@@ -142,7 +142,7 @@ def _check_has_ansys():
 
 
 def supress_logging(func):
-    """Decorator to supress logging for a MAPDL instance"""
+    """Decorator to suppress logging for a MAPDL instance"""
     def wrapper(*args, **kwargs):
         mapdl = args[0]
         prior_log_level = mapdl._log.level

@@ -174,7 +174,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Structural displacement component to retreive.  Must be
+            Structural displacement component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, ``'ALL'``, or ``'NORM'``.
             Defaults to ``'NORM'``.
 
@@ -226,7 +226,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Structural displacement component to retreive.  Must be
+            Structural displacement component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, or ``'NORM'``.  Defaults to
             ``'NORM'``.
 
@@ -337,7 +337,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Structural rotational component to retreive.  Must be
+            Structural rotational component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, ``'ALL'``.  Defaults to ``'ALL'``
 
         Examples
@@ -383,7 +383,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str
-            Structural rotation component to retreive.  Must be
+            Structural rotation component to retrieve.  Must be
             ``'X'``, ``'Y'``, or ``'Z'``.
 
         Returns
@@ -595,7 +595,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Nodal component stress component to retreive.  Must be
+            Nodal component stress component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or
             ``'XZ'``.
 
@@ -664,7 +664,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Nodal component stress component to retreive.  Must be
+            Nodal component stress component to retrieve.  Must be
             ``'1'``, ``'2'``, or ``'3'``
 
         Examples
@@ -865,7 +865,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'X'``, ``'Y'``, ``'Z'``,
+            Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Examples
@@ -937,7 +937,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'1'``, ``'2'``, or
+            Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
 
         Examples
@@ -1144,7 +1144,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'X'``, ``'Y'``, ``'Z'``,
+            Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Examples
@@ -1212,7 +1212,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'1'``, ``'2'``, or
+            Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
 
         Examples
@@ -1419,7 +1419,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'X'``, ``'Y'``, ``'Z'``,
+            Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Examples
@@ -1487,7 +1487,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'1'``, ``'2'``, or
+            Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
 
         Examples
@@ -1694,7 +1694,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'X'``, ``'Y'``, ``'Z'``,
+            Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Examples
@@ -1762,7 +1762,7 @@ class PostProcessing():
         Parameters
         ----------
         component : str, optional
-            Component to retreive.  Must be ``'1'``, ``'2'``, or
+            Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
 
         Examples

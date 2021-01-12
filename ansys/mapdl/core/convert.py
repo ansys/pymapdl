@@ -283,8 +283,8 @@ class FileTranslator():
         self._non_interactive_level += 1
         if self.non_interactive:
             return
-        self.lines.append('%swith %s.non_interactive:%s' % (self.indent, self.obj_name,
-                                                            self.line_ending))
+        line = f'{self.indent}with {self.obj_name}.non_interactive:{self.line_ending}'
+        self.lines.append(line)
         self.non_interactive = True
         self.indent = self.indent + '    '
 
