@@ -117,8 +117,11 @@ class Report(scooby.Report):
 
         """
         # Mandatory packages.
-        core = ['pyansys', 'pyvista', 'vtk', 'numpy', 'scipy',
-                'appdirs', 'psutil', 'pexpect', 'ansys.mapdl.core']
+        core = ['pyvista', 'vtk', 'numpy', 'scipy', 'appdirs', 'pexpect',
+                'ansys.mapdl.core', 'ansys.mapdl.reader']
+
+        if os.name == 'linux':
+            core.extend(['psutil', 'pexpect'])
 
         # Optional packages.
         optional = ['matplotlib', 'ansys.mapdl.corba']
@@ -152,9 +155,8 @@ def is_float(input_string):
         return False
 
 
-def random_string(stringLength=10):
+def random_string(stringLength=10, letters=string.ascii_lowercase):
     """Generate a random string of fixed length """
-    letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 
@@ -333,10 +335,14 @@ def create_temp_dir(tmpdir=None):
     elif not os.path.isdir(tmpdir):
         os.makedirs(tmpdir)
 
+    # running into a rare issue with MAPDL on Windows with "\n" being
+    # treated literally.
+    letters = string.ascii_lowercase.replace('n', '')
+    path = os.path.join(tmpdir, random_string(10, letters))
+
     # in the *rare* case of a duplicate path
-    path = os.path.join(tmpdir, random_string(10))
     while os.path.isdir(path):
-        path = os.path.join(tempfile.gettempdir(), random_string(10))
+        path = os.path.join(tempfile.gettempdir(), random_string(10, letters))
 
     try:
         os.mkdir(path)

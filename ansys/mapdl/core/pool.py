@@ -423,7 +423,7 @@ class LocalMapdlPool():
                         try:
                             instance.inquire('JOBNAME')
                         except:
-                            instance.kill()
+                            instance.exit()
                             continue
 
                         if return_index:
