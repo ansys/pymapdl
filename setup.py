@@ -23,7 +23,7 @@ install_requires = [
     'google-api-python-client',
     'grpcio>=1.30.0'
     'ansys.grpc.mapdl==0.2.0',
-    'ansys.grpc.reader>=0.50.0',
+    'ansys.mapdl.reader>=0.50.0',
 ]
 
 # these are only used when launching a MAPDL via a console.  This
