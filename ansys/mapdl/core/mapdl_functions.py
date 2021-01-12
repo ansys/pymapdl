@@ -1,10 +1,7 @@
 """Pythonic MAPDL Commands"""
 
 class _MapdlCommands(object):  # pragma: no cover
-    """ANSYS class containing MAPDl functions.
-
-    Valid for Versions 16.2 - 2020R2
-    """
+    """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
                 fnumb6="", fnumb7="", fnumb8="", fnumb9="", fnumb10="",

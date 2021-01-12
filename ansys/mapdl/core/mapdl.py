@@ -13,8 +13,9 @@ import numpy as np
 import pyvista as pv
 import scooby
 
+from ansys.mapdl.reader import Archive
+
 import ansys.mapdl.core as pymapdl
-from ansys.mapdl.core import Archive
 from ansys.mapdl.core.mapdl_functions import _MapdlCommands
 from ansys.mapdl.core.misc import (random_string, supress_logging,
                                    run_as_prep7, last_created)

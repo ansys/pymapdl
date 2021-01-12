@@ -34,51 +34,6 @@ def get_ansys_bin(rver):
     return mapdlbin
 
 
-def vtk_cell_info(grid):
-    """Returns version consistent connectivity and cell offset arrays.
-
-    Notes
-    -----
-    VTKv9 changed the connectivity and offset arrays:
-
-    Topology:
-    ---------
-    Cell 0: Triangle | point ids: {0, 1, 2}
-    Cell 1: Triangle | point ids: {5, 7, 2}
-    Cell 2: Quad     | point ids: {3, 4, 6, 7}
-    Cell 4: Line     | point ids: {5, 8}
-
-    VTKv9
-    =====
-    Offsets:      {0, 3, 6, 10, 12}
-    Connectivity: {0, 1, 2, 5, 7, 2, 3, 4, 6, 7, 5, 8}
-
-    Prior to VTKv9
-    ==============
-    Offsets:      {0, 4, 8, 13, 16}
-    Connectivity: {3, 0, 1, 2, 3, 5, 7, 2, 4, 3, 4, 6, 7, 2, 5, 8}
-
-    """
-    if VTK9:
-        # for pyvista < 0.25.0
-        if not hasattr(grid, 'cell_connectivity'):
-            carr = grid.GetCells()
-            cells = vtk.util.numpy_support.vtk_to_numpy(carr.GetConnectivityArray())
-        else:
-            cells = grid.cell_connectivity
-        offset = grid.offset - 1
-    else:
-        cells, offset = grid.cells, grid.offset
-
-    if cells.dtype != np.int64:
-        cells = cells.astype(np.int64)
-
-    if offset.dtype != np.int64:
-        offset = offset.astype(np.int64)
-
-    return cells, offset
-
-
 def kill_process(proc_pid):
     """Kill a process with extreme prejudice"""
     import psutil  # imported here to avoid import errors when unused in windows
@@ -242,41 +197,6 @@ def threaded_daemon(fn):
         thread.start()
         return thread
     return wrapper
-
-
-def break_apart_surface(surf, force_linear=True):
-    """Break apart the faces of a vtk PolyData such that the points
-    for each face are unique and each point is used only by one face.
-    This leads to duplicate points, but allows multiple scalars per
-    face.
-
-    Parameters
-    ----------
-    surf : pyvista.PolyData
-        Surface to break apart.
-
-    force_linear : bool, optional
-        When ``True``, converts quadratic faces to their linear counterparts.
-
-    Returns
-    -------
-    bsurf : pyvista.PolyData
-        Surface with unique points for each face.  Contains the
-        original indices in point_arrays "orig_ind".
-
-    """
-    faces = surf.faces
-    if faces.dtype != np.int64:
-        faces = faces.astype(np.int64)
-
-    from ansys.mapdl.core import _binary_reader
-    b_points, b_faces, idx = _binary_reader.break_apart_surface(surf.points,
-                                                                faces,
-                                                                surf.n_faces,
-                                                                force_linear)
-    bsurf = pyvista.PolyData(b_points, b_faces)
-    bsurf.point_arrays['orig_ind'] = idx
-    return bsurf
 
 
 def chunks(l, n):

@@ -1,3 +1,4 @@
+"""pymapdl specific errors"""
 import logging
 import threading
 import signal

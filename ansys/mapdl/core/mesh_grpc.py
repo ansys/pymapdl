@@ -4,9 +4,9 @@ import os
 import numpy as np
 
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.mapdl.reader.mesh import Mesh
 
 from ansys.mapdl.core.misc import threaded, supress_logging
-from ansys.mapdl.core.mesh import Mesh
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.common_grpc import parse_chunks, DEFAULT_CHUNKSIZE
 

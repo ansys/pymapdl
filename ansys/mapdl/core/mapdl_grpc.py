@@ -1361,8 +1361,8 @@ class MapdlGrpc(_MapdlCore):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.core import read_binary
-        from ansys.mapdl.core.rst import Result
+        from ansys.mapdl.reader import read_binary
+        from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory

@@ -7,10 +7,10 @@ import logging
 
 from tqdm import tqdm
 
+from ansys.mapdl.core import Mapdl, launch_mapdl
 from ansys.mapdl.core.misc import threaded, random_string
 from ansys.mapdl.core.misc import create_temp_dir, threaded_daemon
 from ansys.mapdl.core.launcher import port_in_use, MAPDL_DEFAULT_PORT
-from ansys.mapdl.core import Mapdl, launch_mapdl
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel('DEBUG')

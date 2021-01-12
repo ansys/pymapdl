@@ -8,6 +8,8 @@ import pyvista
 from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
 
+from ansys.mapdl.reader import examples
+
 from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError
 import ansys.mapdl.core as pymapdl
@@ -499,7 +501,7 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp('off')
-    mapdl.cdread('db', pymapdl.examples.sector_archive_file)
+    mapdl.cdread('db', examples.sector_archive_file)
     mapdl.prep7()
     mapdl.cyclic()
 
@@ -538,7 +540,7 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp('off')
-    mapdl.cdread('db', pymapdl.examples.sector_archive_file)
+    mapdl.cdread('db', examples.sector_archive_file)
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()

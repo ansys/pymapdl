@@ -4,6 +4,8 @@ import weakref
 import os
 import numpy as np
 
+from ansys.mapdl.reader._reader import write_array
+
 import ansys.mapdl.core as pymapdl
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
@@ -435,7 +437,7 @@ class Parameters():
             filename = os.path.join(self._mapdl.directory, filename)
         else:
             filename = os.path.join(tempfile.gettempdir(), filename)
-        pymapdl._reader.write_array(filename.encode(), arr.ravel('F'))
+        write_array(filename.encode(), arr.ravel('F'))
 
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
