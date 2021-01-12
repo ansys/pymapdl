@@ -21,7 +21,7 @@ install_requires = [
     'pyiges>=0.1.2'
     'scipy>=1.3.0',  # for sparse (consider optional?)
     'google-api-python-client',
-    'grpcio>=1.30.0'
+    'grpcio>=1.30.0',
     'ansys-grpc-mapdl==0.2.0',
     'ansys-mapdl-reader>=0.50.0',
 ]
