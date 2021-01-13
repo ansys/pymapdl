@@ -7,7 +7,7 @@ sparse or dense matrices.
 
 """
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.examples import vmfiles
+from ansys.mapdl.core.examples import vmfiles
 
 # Start MAPDL as a service and create an APDLMath object.
 mapdl = launch_mapdl()

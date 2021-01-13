@@ -146,4 +146,5 @@ XY plane with ``cpos='xy'``.
 
     >>> mapdl.eplot(cpos='xy')
 
-For all general plotting options, see :ref:`ref_general_plotter`
+For all general plotting options, see :ref:`ref_general_plotter`.
+

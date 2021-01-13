@@ -7,6 +7,7 @@ PyMAPDL Plotting Methods
     :noindex:
     :members: kplot, lplot, aplot, vplot, nplot, eplot
 
+.. _ref_general_plotter:
 
 General Plotter
 ~~~~~~~~~~~~~~~

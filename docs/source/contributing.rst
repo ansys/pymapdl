@@ -198,7 +198,7 @@ unit testing, setup the following environment variables:
 
 .. code::
 
-    SET PYANSYS_START_INSTANCE=False
+    SET PYMAPDL_START_INSTANCE=False
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
     SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 

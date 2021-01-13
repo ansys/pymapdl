@@ -12,7 +12,7 @@ your own sparse or dense matrices and solve those.
 import time
 import numpy as np
 
-from ansys.mapdl.examples import vmfiles
+from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and create an APDLMath object

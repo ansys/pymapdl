@@ -12,7 +12,7 @@ Run a modal analysis on a mesh generated from pyvista within MAPDL.
 import tempfile
 import os
 import pyvista as pv
-from pyansys import save_as_archive
+from ansys.mapdl.reader import save_as_archive
 from ansys.mapdl.core import launch_mapdl
 
 # launch MAPDL as a service

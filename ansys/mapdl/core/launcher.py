@@ -649,7 +649,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         mode is available from v17.0 and newer and is given legacy
         support.  This mode requires the additional
         ``ansys-mapdl-corba`` module.  Finally, the ``'console'`` mode
-        is for legacy use on Linux only prior to v17.0.  This console
+        is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
 
     override : bool, optional
@@ -658,14 +658,14 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         the lock file has not been deleted.
 
     loglevel : str, optional
-        Sets which messages are printed to the console.  Default
-        'INFO' prints out all ANSYS messages, 'WARNING` prints only
-        messages containing ANSYS warnings, and 'ERROR' prints only
+        Sets which messages are printed to the console.  ``'INFO'``
+        prints out all ANSYS messages, ``'WARNING``` prints only
+        messages containing ANSYS warnings, and ``'ERROR'`` logs only
         error messages.
 
     additional_switches : str, optional
-        Additional switches for MAPDL, for example aa_r, and academic
-        research license, would be added with:
+        Additional switches for MAPDL, for example ``'aa_r'``, the
+        academic research license, would be added with:
 
         - ``additional_switches="-aa_r"``
 

@@ -11,7 +11,7 @@ method.
 First, start by launching MAPDL as a service.
 """
 
-from pyansys import examples
+from ansys.mapdl.reader import examples
 from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl()
 

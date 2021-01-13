@@ -9,7 +9,7 @@ Sparse Matrices.
 """
 import matplotlib.pylab as plt
 
-from ansys.mapdl.examples import vmfiles
+from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl()
 mm = mapdl.math
