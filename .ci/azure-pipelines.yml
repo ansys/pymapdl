@@ -72,9 +72,9 @@ jobs:
     - script: |
         pip install twine
         python setup.py sdist
-        twine upload --skip-existing dist/pyvista*
-      displayName: 'Upload to PyPi'
-      condition: and(eq(variables['python.version'], '3.7'), contains(variables['Build.SourceBranch'], 'refs/tags/'))
+        twine upload --skip-existing dist/*
+      displayName: 'Upload to PyPi when tagged'
+      condition: contains(variables['Build.SourceBranch'], 'refs/tags/')
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: $(PYPI_TOKEN)
