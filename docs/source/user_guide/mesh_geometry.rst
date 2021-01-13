@@ -1,13 +1,13 @@
 Mesh and Geometry
 =================
-The ``pyansys.Mapdl`` class allows you to access the mesh and geometry
-without writing to an intermediate file or interperting the text
-output from various MAPDL commands.  For example, to access the nodes
-and elements of a model, normally one would list the nodes within
-MAPDL ``NLIST``, but this generates a string and array access either
-requires cumbersome MAPDL GET commands, or requires the nodes be
-written to a archive file and then read in within other software.  For
-example:
+The ``ansys.mapdl.core.Mapdl`` class allows you to access the mesh and
+geometry without writing to an intermediate file or interpreting the
+text output from various MAPDL commands.  For example, to access the
+nodes and elements of a model, normally one would list the nodes
+within MAPDL ``NLIST``, but this generates a string and array access
+either requires cumbersome MAPDL GET commands, or requires the nodes
+be written to a archive file and then read in within other software.
+For example:
 
 .. code::
 
@@ -21,8 +21,9 @@ example:
         3   0.2500        0.0000        0.0000          0.00     0.00     0.00
 
 
-However, with ``pyansys``, it's possible to interface with a current
-instance of ``mapdl`` and access the current nodes coordinates with:
+However, with ``ansys-mapdl-core``, it's possible to interface with a
+current instance of ``Mapdl`` and access the current nodes coordinates
+with:
 
 .. code:: python
 
@@ -36,7 +37,8 @@ instance of ``mapdl`` and access the current nodes coordinates with:
     [0.75 0.5  4.5 ]]
 
 
-Both the ``geometry`` and ``mesh`` properties support additional, lower level access to MAPDL data.  Access them with:
+Both the ``geometry`` and ``mesh`` properties support additional,
+lower level access to MAPDL data.  Access them with:
 
 .. code:: python
 
@@ -58,13 +60,13 @@ View the current mesh status with:
 
 The MAPDL Geometry Class
 ------------------------
-.. autoclass:: pyansys.mapdl_geometry.Geometry
+.. autoclass:: ansys.mapdl.core.mapdl_geometry.Geometry
     :members:
 
 
-The MAPDL Mesh Class
---------------------
-.. autoclass:: pyansys.mesh.Mesh
+The Mesh Class
+--------------
+.. autoclass:: ansys.mapdl.reader.mesh.Mesh
     :members:
     :show-inheritance:
     :noindex:

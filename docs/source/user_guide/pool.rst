@@ -1,7 +1,7 @@
 Create a Pool of MAPDL Instances
 --------------------------------
-The ``ansys.mapdl`` module contains the ``MapdlLocalPool`` class to
-simplify creating multiple local instances of ``MapdlGrpc`` for batch
+The ``ansys.mapdl.core`` module contains the ``MapdlLocalPool`` class
+to simplify creating multiple local instances of ``Mapdl`` for batch
 processing.  This can be used for the batch processing of a set of
 input files, convergence analysis, or other batch related processes.
 
@@ -9,7 +9,7 @@ To create the pool:
 
 .. code:: python
 
-    >>> from ansys.mapdl import LocalMapdlPool
+    >>> from ansys.mapdl.core import LocalMapdlPool
     >>> pool = mapdl.LocalMapdlPool(10)
     'MAPDL Pool with 10 active instances'
 
@@ -24,13 +24,12 @@ at the current directory within their own isolated directories.
     >>> pool = mapdl.LocalMapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
 
-
 Each individual instance of mapdl can be accessed with:
 
 .. code:: python
 
     >>> pool[0]
-    <ansys.mapdl.mapdl.MapdlGrpc object at 0x7f66270cc8d0>
+    <ansys.mapdl.core.mapdl.MapdlGrpc object at 0x7f66270cc8d0>
 
 Note that this is a self healing pool.  If an instance of MAPDL dies
 during a batch process, that instance will be automatically restarted.
@@ -46,10 +45,11 @@ verification files with:
 
 .. code:: python
 
-    >>> from ansys.mapdl import examples
+    >>> from ansys.mapdl.core import examples
     >>> files = [examples.vmfiles['vm%d' % i] for i in range(1, 21)]
     >>> outputs = pool.run_batch(files)
     >>> len(outputs)
+    20
 
 
 Run a User Function
@@ -82,9 +82,6 @@ output from MAPDL.
      'Begin level']
 
 
-Class Description
-~~~~~~~~~~~~~~~~~
-The description of the ``MapdlLocalPool`` class follows:
-
-.. autoclass:: ansys.mapdl.pool.LocalMapdlPool
-    :members:
+API Description
+~~~~~~~~~~~~~~~
+For a full description of the PyMAPDL Pool API see :ref:`ref_pool_api`.

@@ -1,12 +1,15 @@
+*********************************
 Setting and Retrieving Parameters
-=================================
-APDL parameters can be retrieved using ``pyansys`` using the
-``parameters`` class accessible from the ``mapdl`` instance.  For
+*********************************
+APDL parameters can be retrieved using ``ansys-mapdl-core`` using the
+``Parameters`` class accessible from a ``mapdl`` instance.  For
 example, if you wish to use the MAPDL ``GET`` command to populate a
 parameter, you can then access the parameter with:
 
 .. code:: python
 
+   >>> from ansys.mapdl.core import launch_mapdl
+   >>> mapdl = launch_mapdl()
    >>> mapdl.get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
    >>> mapdl.parameters['DEF_Y']
 
@@ -24,7 +27,6 @@ using ``parameters`` with:
    >>> mapdl.parameters['MY_STRING']
    "helloworld"
 
-
 You an also access some built-in parameters normally accessed through
 the ``\*GET`` command.  For example, instead of getting the current
 routine with ``\*GET, ACTIVE, 0, ROUT``, you can access it with:
@@ -35,7 +37,4 @@ routine with ``\*GET, ACTIVE, 0, ROUT``, you can access it with:
   'Begin level'
 
 
-Parameters Description
-----------------------
-.. autoclass:: pyansys.parameters.Parameters
-    :members:
+For a full listing of the methods and attributes available to the ``Parameters`` class, please reference the :ref:`ref_parameters_api`.

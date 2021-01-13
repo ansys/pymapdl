@@ -36,7 +36,7 @@ the ``scipy`` linear algebra solver and ANSYS's solver:
    |                                            |                                   |
    +--------------------------------------------+-----------------------------------+
 
-What follows is a basic example and a detailed descrption of the
+What follows is a basic example and a detailed description of the
 PyMAPDL Math API.  For additional PyMAPDL Math examples, visit
 :ref:`ref_apdl_math_examples`.
 
@@ -57,7 +57,7 @@ in MAPDL.
 
     import re
 
-    from ansys.mapdl import launch_mapdl
+    from ansys.mapdl.core import launch_mapdl
     mapdl = launch_mapdl()
 
     # setup the full file
@@ -87,8 +87,9 @@ We now have solved for the first 10 modes of the cube:
 
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
-Next, load the mass and stiffness matricies that are stored by default
-at ``<jobname>.full``.  First, create an instance of ``MapdlMath`` as ``mm``:
+Next, load the mass and stiffness matrices that are stored by default
+at ``<jobname>.full``.  First, create an instance of ``MapdlMath`` as
+``mm``:
 
 .. code:: python
 
@@ -153,23 +154,6 @@ initialize a matrix ``eigvec`` and send that to the ``eigs`` method:
 The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
-
-``ansys.mapdl.math`` Module API
--------------------------------
-This is the description of the ``MapdlMath`` module:
-
-.. autoclass:: ansys.mapdl.math.MapdlMath
-    :members:
-
-.. autoclass:: ansys.mapdl.math.ApdlMathObj
-    :members:
-
-.. autoclass:: ansys.mapdl.math.AnsVec
-    :members:
-
-.. autoclass:: ansys.mapdl.math.AnsMat
-    :members:
-
-.. autoclass:: ansys.mapdl.math.AnsSolver
-    :members:
-
+APDLMath Reference
+~~~~~~~~~~~~~~~~~~
+For additional details, please see the :ref:`ref_math_api` reference.

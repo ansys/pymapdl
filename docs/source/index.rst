@@ -1,4 +1,4 @@
-PyMapdl Documentation
+PyMAPDL Documentation
 =====================
 
 Introduction and Purpose
@@ -54,7 +54,6 @@ The ``ansys-mapdl-core`` module bridges the gap between the GRPC client and
 the user with an object oriented interface that should be both
 familiar with established MAPDL coders unfamiliar with Python, and
 Python programmers unfamiliar with MAPDL.
-
 
 .. toctree::
    :hidden:

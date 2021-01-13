@@ -1,19 +1,24 @@
 Post-Processing
 ===============
 You can post process using an active MAPDL session using the
-``post_processing`` property of a ``MapdlGrpc`` instance.  One
-advantage of this approach is it integrates well with existing MAPDL
-scripting or automation, but can also be carried out on result files
-generated from other programs, including ANSYS Mechanical.
+``post_processing`` property of a ``ansys.mapdl.core.Mapdl`` instance.
+One advantage of this approach is it integrates well with existing
+MAPDL scripting or automation, but can also be carried out on result
+files generated from other programs, including ANSYS Mechanical.
 
 Perhaps on of the biggest advantages of gRPC based post-processing is
 it can be done remotely without any file exchange.  Multi gigabyte
 result files can remain remote and only the necessary data needs to be
 streamed back to the client for review or visualization.
 
-In the future, post-processing of result files will be handled by an
-external service that has more functionality and power than MAPDL's
-post processing.
+.. note::
+
+   You are encouraged to use the new Data Processing Framework (DPF)
+   modules at `DPF-Core <https://github.com/pyansys/DPF-Core>`_ and
+   `DPF-Post <https://github.com/pyansys/DPF-Post>`_ as they provide a
+   modern interface to ANSYS result files using a client/server
+   interface using the same software used within ANSYS Workbench, but
+   via a Python client.
 
 
 Examples
@@ -48,7 +53,7 @@ Classically, one would request nodal results from MAPDL using the
      MORE (YES,NO OR CONTINUOUS)=
 
 
-However, using the ``ansys.mapdl`` module, you can instead request the
+However, using an instance of ``Mapdl``, you can instead request the
 nodal displacement with:
 
 .. code:: python
@@ -63,7 +68,7 @@ You could also plot the nodal displacement with:
     >>> mapdl.post_processing.plot_nodal_displacement('X')
 
 
-.. figure:: ./images/post_norm_disp.png
+.. figure:: ../images/post_norm_disp.png
     :width: 300pt
 
     Normalized Displacement of a Cylinder from MAPDL
@@ -86,5 +91,5 @@ get a mask of the currently selected nodes.
 
 Post Processing Object Methods
 ------------------------------
-.. autoclass:: ansys.mapdl.post.PostProcessing
-    :members:
+For a full list of all available post-processing methods, see
+:ref:`ref_post_processing`.

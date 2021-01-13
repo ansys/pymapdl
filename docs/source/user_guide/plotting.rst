@@ -1,5 +1,6 @@
+********************
 Interactive Plotting
-====================
+********************
 When generating geometry from scratch within MAPDL, it is often
 necessary to plot the geometry (e.g. keypoints, lines, areas,
 volumes), and ``pyansys`` supports plotting basic CAD using VTK.  The
@@ -9,12 +10,15 @@ to visualize it.  Combined with the MAPDL geometry commands, you can
 generate and visualize geometry from scratch without opening the GUI
 using ``open_gui``.
 
+
 Line Plotting
 ~~~~~~~~~~~~~
+Plot lines within Python using ``lplot``.
+
 .. code:: python
 
-    import pyansys
-    mapdl = pyansys.launch_mapdl(exec_file=exec_file, override=True, loglevel='INFO')
+    from ansys.mapdl.core import launch_mapdl
+    mapdl = launch_mapdl()
 
     # create a rectangle with a few holes
     mapdl.prep7()
@@ -28,7 +32,7 @@ Line Plotting
     mapdl.lplot(color_lines=True, cpos='xy')
 
 
-.. figure:: ./images/lplot_vtk.png
+.. figure:: ../images/lplot_vtk.png
     :width: 400pt
 
     Line Plot from MAPDL using ``pyansys`` and ``vtk``
@@ -49,7 +53,7 @@ initial area with the 8 circles and then extrude it.
     mapdl.vplot()
 
 
-.. figure:: ./images/vplot_vtk.png
+.. figure:: ../images/vplot_vtk.png
     :width: 400pt
 
     Volume Plot from MAPDL using ``pyansys`` and ``vtk``
@@ -69,7 +73,7 @@ meshing, and displaying the mesh.
     mapdl.vsweep('ALL')
     mapdl.esize(0.1)
 
-.. figure:: ./images/eplot_vtk.png
+.. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
     Volume Plot from MAPDL using ``pyansys`` and ``vtk``
@@ -85,10 +89,10 @@ then shown using ``matploblib``.
 
 .. code:: python
 
-    import pyansys
+    from ansys.mapdl.core import launch_mapdl
 
     # run ansys with interactive plotting enabled
-    mapdl = pyansys.launch_mapdl()
+    mapdl = launch_mapdl()
 
     # create a square area using keypoints
     mapdl.prep7()
@@ -108,22 +112,18 @@ then shown using ``matploblib``.
     mapdl.pnum('line', 1)  # enable line numbering
 
     # each of these will create a matplotlib figure and pause execution
-    mapdl.aplot()
-    mapdl.lplot()
-    mapdl.kplot()
+    mapdl.aplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.kplot(vtk=False)
 
 
-.. figure:: ./images/aplot.png
+.. figure:: ../images/aplot.png
     :width: 400pt
 
     Area Plot from MAPDL displayed using ``matplotlib``
 
 
-MAPDL Plotting Methods
-~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: pyansys.mapdl._MapdlCore
-    :noindex:
-    :members: kplot, lplot, aplot, vplot, nplot, eplot
+For more details on the plotting functions, see :ref:`ref_plotting_api`.
 
 
 Plotting Keyword Options
@@ -146,7 +146,4 @@ XY plane with ``cpos='xy'``.
 
     >>> mapdl.eplot(cpos='xy')
 
-For all general plotting options, see:
-
-.. autofunction:: pyansys.plotting.general_plotter
-    :noindex:
+For all general plotting options, see :ref:`ref_general_plotter`

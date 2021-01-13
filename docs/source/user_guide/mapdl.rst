@@ -1,5 +1,11 @@
+**************************
 PyMAPDL Language and Usage
-==========================
+**************************
+This section gives you an overview of the PyMAPDL API for the
+``Mapdl`` class.  For additional reference, see :ref:`ref_plotting_api`.
+
+Overview
+--------
 When calling MAPDL commands as functions, each command has been
 translated from its original MAPDL all CAPS format to a PEP8
 compatible format.  For example, ``ESEL`` is now ``esel``.
@@ -8,8 +14,7 @@ those characters removed, unless this causes a conflict with an
 existing name.  Most notable is ``/SOLU`` which would conflict with
 ``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``slashsolu``
 to differentiate it from ``solu``.  Out of the 1500 MAPDL commands,
-about 15 start with ``slash`` and 8 with ``star``.  Check the ``MAPDL
-Object Methods`` reference below when necessary.
+about 15 start with ``slash`` and 8 with ``star``.  
 
 MAPDL commands that normally have an empty space, such as ``ESEL, S,
 TYPE, , 1`` should include an empty string when called by Python:
@@ -18,7 +23,7 @@ TYPE, , 1`` should include an empty string when called by Python:
 
     mapdl.esel('s', 'type', '', 1)
 
-or these commands can be called using parameters:
+or these commands can be called using keyword arguments:
 
 .. code:: python
 
@@ -33,9 +38,9 @@ may be easier to run some of these commands (e.g. "/SOLU"):
     mapdl.solve()
 
 Some commands can only be run non-interactively from within in a
-script.  ``pyansys`` gets around this restriction by writing the
-commands to a temporary input file and then reading the input file.
-To run a group of commands that must be run non-interactively, set the
+script.  PyMAPDL gets around this restriction by writing the commands
+to a temporary input file and then reading the input file.  To run a
+group of commands that must be run non-interactively, set the
 ``MAPDL`` object to run a series of commands as an input file by using
 ``non_interactive`` as in this example:
 
@@ -45,7 +50,7 @@ To run a group of commands that must be run non-interactively, set the
         mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
 
-Also note that macros created within pyansys (rather than loaded from
+Also note that macros created within PyMAPDL (rather than loaded from
 a file) do not appear to run correctly.  For example, the macro
 ``DISP`` created using the ``*CREATE`` command within APDL:
 
@@ -89,17 +94,14 @@ using the ``convert_script`` function and setting
 
 .. code:: python
 
-    pyansys.convert_script(apdl_inputfile, pyscript, macros_as_functions=True)
-
-See the ``vm7.dat`` example in the APDL Conversion Examples page.
+    >>> import ansys.mapdl.core as pymapdl
+    >>> pymapdl.convert_script(apdl_inputfile, pyscript, macros_as_functions=True)
 
 
 Conditional Statements and Loops
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 APDL conditional statements such as ``*IF`` must be either implemented
-pythonically or using ``with mapdl.non_interactive:``.  See the
-``vm8.dat`` example in the APDL Conversion Examples page.  For
-example:
+pythonically or using ``with mapdl.non_interactive:``.   For example:
 
 .. code:: 
 
@@ -160,7 +162,8 @@ Or pythonically as:
         mapdl.run("*GET,ARG8,KY,ARG3")
         mapdl.run("*GET,ARG9,KZ,ARG3")
 
-APDL loops using ``*DO`` or ``*DOWHILE`` should also be implemetned using ``mapdl.non_interactive`` or pythonically.
+APDL loops using ``*DO`` or ``*DOWHILE`` should also be implemetned
+using ``mapdl.non_interactive`` or pythonically.
 
 
 Warnings and Errors
@@ -174,7 +177,10 @@ Errors are handled pythonically.  For example:
     except:
         # do something else with MAPDL
 
-Commands that are ignored within MAPDL are flagged as errors.  This is different than MAPDL's default behavior where commands that are ignored are treated as warnings.  For example, in ``pyansys`` running a command in the wrong session raises an error:
+Commands that are ignored within MAPDL are flagged as errors.  This is
+different than MAPDL's default behavior where commands that are
+ignored are treated as warnings.  For example, in ``ansys-mapdl-core``
+running a command in the wrong session raises an error:
 
 .. code:: python
 
@@ -198,18 +204,27 @@ You can change this behavior so ignored commands can be logged as warnings not r
 
 Prompts
 ~~~~~~~
-Prompts from MAPDL automatically continued as if MAPDL is in batch mode.  Commands requiring user input, such as ``*VWRITE`` will fail and must be entered in non-interactively.
+Prompts from MAPDL automatically continued as if MAPDL is in batch
+mode.  Commands requiring user input, such as ``*VWRITE`` will fail
+and must be entered in non-interactively.
 
 
 APDL Command Logging
 --------------------
-While ``pyansys`` is designed to make it easier to control an APDL session by calling it using Python, it may be necessary to call MAPDL again using an input file generated from a pyansys script.  This is automatically enabled with the ``log_apdl='apdl.log'`` parameter.  Enabling this parameter will cause ``pyansys`` to write each command run from a ``Mapdl`` object into a log file named ``"apdl.log"`` in the MAPDL working directory of the active ``mapdl`` object.  For example
+While ``ansys-mapdl-core`` is designed to make it easier to control an
+APDL session by calling it using Python, it may be necessary to call
+MAPDL again using an input file generated from a PyMAPDL script.  This
+is automatically enabled with the ``log_apdl='apdl.log'`` parameter.
+Enabling this parameter will cause ``ansys-mapdl-core`` to write each
+command run from a ``Mapdl`` object into a log file named
+``"apdl.log"`` in the MAPDL working directory of the active ``mapdl``
+object.  For example:
 
 .. code:: python
 
-    import pyansys
+    from ansys.mapdl.core import launch_mapdl
 
-    ansys = pyansys.launch_mapdl(log_apdl='apdl.log')
+    ansys = launch_mapdl(log_apdl='apdl.log')
     ansys.prep7()
     ansys.k(1, 0, 0, 0)
     ansys.k(2, 1, 0, 0)
@@ -220,7 +235,6 @@ Will write the following to ``"apdl.log"``
 
 .. code::
 
-    ! APDL script generated using pyansys 0.40.1
     /PREP7,
     K,1,0,0,0
     K,2,1,0,0
@@ -234,16 +248,14 @@ except for conditional statements, loops, or functions.
 Interactive Breakpoint
 ----------------------
 In most circumstances it is necessary or preferable to open up the
-MAPDL GUI.  The ``pyansys`` module has an ``open_gui`` method that
-allows you to seamlessly open up the GUI without losing work or
+MAPDL GUI.  The ``ansys-mapdl-core`` module has an ``open_gui`` method
+that allows you to seamlessly open up the GUI without losing work or
 having to restart your session.  For example:
 
 .. code:: python
 
-    import pyansys
-
-    # run ansys with interactive plotting enabled
-    mapdl = pyansys.launch_mapdl()
+    from ansys.mapdl.core import launch_mapdl
+    mapdl = launch_mapdl()
 
     # create a square area using keypoints
     mapdl.prep7()
@@ -275,7 +287,7 @@ the GUI and the script will be left unaffected.
 
 Running a Batch
 ---------------
-Instead of running an ANSYS batch by calling ANSYS with an input file,
+Instead of running an MAPDL batch by calling MAPDL with an input file,
 you can instead define a function that runs MAPDL.  This example runs
 a mesh convergence study based on the maximum stress of a cylinder
 with torsional loading.
@@ -283,7 +295,7 @@ with torsional loading.
 .. code:: python
 
     import numpy as np
-    import pyansys
+    from ansys.mapdl.core import launch_mapdl
 
     def cylinder_batch(elemsize, plot=False):
         """ Report the maximum von Mises stress of a Cantilever supported cylinder"""
@@ -360,12 +372,13 @@ with torsional loading.
         mapdl.solve()
         mapdl.finish()
 
-        # access results using ANSYS object
+        # access results using MAPDL object
         result = mapdl.result
 
         # to access the results you could have run:
+        # from ansys.mapdl import reader as pymapdl_reader
         # resultfile = os.path.join(mapdl.path, '%s.rst' % mapdl.jobname)
-        # result = pyansys.read_binary(result file)
+        # result = pymapdl_reader.read_binary(result file)
 
         # Get maximum von Mises stress at result 1
         # Index 0 as it's zero based indexing
@@ -379,9 +392,10 @@ with torsional loading.
         return nodenum.size, maxstress
 
 
-    # initialize ANSYS
-    mapdl = pyansys.launch_mapdl(override=True, loglevel='ERROR')
+    # initialize MAPDL
+    mapdl = launch_mapdl(override=True, loglevel='ERROR')
 
+    # call MAPDL to solve repeatedly
     result_summ = []
     for elemsize in np.linspace(0.6, 0.15, 15):
         # run the batch and report the results
@@ -390,7 +404,7 @@ with torsional loading.
         print('Element size %f: %6d nodes and maximum vom Mises stress %f'
               % (elemsize, nnode, maxstress))
 
-    # Exit ANSYS
+    # Exit MAPDL
     mapdl.exit()
 
 This is the result from the script:
@@ -417,8 +431,8 @@ This is the result from the script:
 Chaining Commands in MAPDL
 --------------------------
 MAPDL permits several commands on one line by using the separation
-character ``"$"``.  This can be utilized within ``pyansys`` to
-effectively chain several commands together rather and send them to
+character ``"$"``.  This can be utilized within ``ansys-mapdl-core``
+to effectively chain several commands together rather and send them to
 MAPDL for execution rather than executing them individually.  This can
 be helpful when you need to execute thousands of commands in a python
 loop and don't need the individual results for each command.  For
@@ -434,8 +448,8 @@ would run:
 
 However, since each command executes individually and returns a
 response, it is much faster to send the commands to be executed by
-MAPDL in groups and have ``pyansys`` handle grouping the commands by
-running ``with mmapdl.chain_commands``:
+MAPDL in groups and have ``ansys-mapdl-core`` handle grouping the
+commands by running ``with mapdl.chain_commands``:
 
 .. code:: python
 
@@ -444,8 +458,8 @@ running ``with mmapdl.chain_commands``:
         for x in xloc:
             mapdl.k(x=x)
 
-The execution time on this generally 4 to 10 times faster than running each command
-individually.
+The execution time on this generally 4 to 10 times faster than running
+each command individually.
 
 
 Sending Arrays to MAPDL
@@ -458,9 +472,9 @@ future.
 
 .. code:: python
 
-    import pyansys
+    from ansys.mapdl.core import launch_mapdl
     import numpy as np
-    mapdl = pyansys.launch_mapdl()
+    mapdl = launch_mapdl()
     arr = np.random.random((5, 3))
     mapdl.load_array(arr, 'MYARR')
 
@@ -470,7 +484,7 @@ first element.  Note that MAPDL uses fortran (1) based indexing.
 .. code:: python
 
    >>> mapdl.read_float_parameter('MYARR(1, 1)')
-   2020-07-03 21:49:54,387 [INFO] pyansys.mapdl: MYARR(1, 1) = MYARR(1, 1)
+   2020-07-03 21:49:54,387 [INFO] mapdl: MYARR(1, 1) = MYARR(1, 1)
 
    PARAMETER MYARR(1,1) =    0.7960742456
 
@@ -478,9 +492,10 @@ first element.  Note that MAPDL uses fortran (1) based indexing.
    0.7960742456194109
 
 
-Downloading Remote MAPDL Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Remote files can be listed and downloaded using ``pyansys``.  For example, to list the remote files and download one of them:
+Downloading a Remote MAPDL File
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Remote files can be listed and downloaded using ``ansys-mapdl-core``.
+For example, to list the remote files and download one of them:
 
 .. code:: python
 
@@ -492,10 +507,14 @@ Remote files can be listed and downloaded using ``pyansys``.  For example, to li
     # download the remote result file
     mapdl.download('file.rst')
 
+.. note::
+
+   This is a gRPC feature only available in 2021R1 or newer.
+
 
 Uploading a Local MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-You can upload a local file to the remote mapdl instance with:
+You can upload a local file a the remote mapdl instance with:
 
 .. code:: python
 
@@ -506,3 +525,6 @@ You can upload a local file to the remote mapdl instance with:
     remote_files = mapdl.list_files()
     assert 'sample.db' in remote_files
 
+.. note::
+
+   This is a gRPC feature only available in 2021R1 or newer.

@@ -10,3 +10,4 @@ functions and methods.
    :maxdepth: 1
 
    mapdl
+   plotting
