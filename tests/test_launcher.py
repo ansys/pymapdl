@@ -62,6 +62,7 @@ def test_old_version():
 
 
 @pytest.mark.skipif(not os.name == 'nt', reason="Requires windows")
+@pytest.mark.console
 def test_failed_console():
     exec_file = get_ansys_bin(valid_versions[0])
     with pytest.raises(ValueError):
@@ -69,6 +70,7 @@ def test_failed_console():
 
 
 @pytest.mark.parametrize('version', valid_versions)
+@pytest.mark.console
 @pytest.mark.skipif(os.name != 'posix', reason="Only supported on Linux")
 def test_launch_console(version):
     exec_file = get_ansys_bin(version)
@@ -76,7 +78,7 @@ def test_launch_console(version):
     assert mapdl.version == int(version)/10
 
 
-@pytest.mark.skipif(not HAS_CORBA, reason="Requires ansys.mapdl.corba")
+@pytest.mark.corba
 @pytest.mark.parametrize('version', valid_versions)
 def test_launch_corba(version):
     mapdl = pymapdl.launch_mapdl(get_ansys_bin(version), mode='corba')

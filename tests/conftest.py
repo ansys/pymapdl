@@ -6,7 +6,9 @@ import pyvista
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.launcher import get_start_instance, MAPDL_DEFAULT_PORT
+from ansys.mapdl.core.launcher import (get_start_instance,
+                                       MAPDL_DEFAULT_PORT,
+                                       _get_available_base_ansys)
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -27,6 +29,96 @@ local = [False]
 START_INSTANCE = get_start_instance()
 # if START_INSTANCE:
 #     local.append(True)
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--corba", action="store_true", default=False, help="run CORBA tests"
+    )
+    parser.addoption(
+        "--console", action="store_true", default=False, help="run console tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--corba"):
+        # --corba given in cli: run CORBA interface tests
+        return
+    skip_corba = pytest.mark.skip(reason="need --corba option to run")
+    for item in items:
+        if "corba" in item.keywords:
+            item.add_marker(skip_corba)
+
+    if config.getoption("--console"):
+        # --console given in cli: run console interface tests
+        return
+    skip_console = pytest.mark.skip(reason="need --console option to run")
+    for item in items:
+        if "console" in item.keywords:
+            item.add_marker(skip_console)
+
+
+@pytest.fixture(scope="session")
+def mapdl_console(request):
+    ansys_base_paths = _get_available_base_ansys()
+
+    if os.name != 'posix':
+        raise RuntimeError('"--console" testing option unavailable.  '
+                           'Only Linux is supported.')
+
+    # find a valid version of corba
+    console_path = None
+    for version in ansys_base_paths:
+        if version < 211:
+            console_path = get_ansys_bin(str(version))
+
+    if console_path is None:
+        raise RuntimeError('"--console" testing option unavailable.'
+                           'No local console compatible MAPDL installation found. '
+                           'Valid versions are up to 2020R2.')
+
+    mapdl = launch_mapdl(console_path)
+    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+
+    # using yield rather than return here to be able to test exit
+    yield mapdl
+
+    # verify mapdl exits
+    mapdl.exit()
+    assert mapdl._exited
+    assert 'MAPDL exited' in str(mapdl)
+    with pytest.raises(MapdlExitedError):
+        mapdl.prep7()
+
+
+@pytest.fixture(scope="session")
+def mapdl_corba(request):
+    ansys_base_paths = _get_available_base_ansys()
+
+    # find a valid version of corba
+    corba_path = None
+    for version in ansys_base_paths:
+        if version >= 170 and version < 211:
+            corba_path = get_ansys_bin(str(version))
+
+    if corba_path is None:
+        raise RuntimeError('"-corba" testing option unavailable.'
+                           'No local CORBA compatible MAPDL installation found.  '
+                           'Valid versions are ANSYS 17.0 up to 2020R2.')
+
+    mapdl = launch_mapdl(corba_path)
+    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+
+    # using yield rather than return here to be able to test exit
+    yield mapdl
+
+    # verify mapdl exits
+    mapdl.exit()
+    assert mapdl._exited
+    assert 'MAPDL exited' in str(mapdl)
+    with pytest.raises(MapdlExitedError):
+        mapdl.prep7()
+
 
 
 @pytest.fixture(scope="session", params=local)
