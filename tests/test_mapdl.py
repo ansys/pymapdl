@@ -12,7 +12,6 @@ from ansys.mapdl.reader import examples
 
 from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 import ansys.mapdl.core as pymapdl
 
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
@@ -39,7 +38,6 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
-@pytest.mark.skip_not_grpc
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
@@ -201,11 +199,9 @@ def test_invalid_area(mapdl):
         mapdl.a(0, 0, 0, 0)
 
 
-@pytest.mark.skip_not_grpc
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input('thisisnotafile')
-
 
 @skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
