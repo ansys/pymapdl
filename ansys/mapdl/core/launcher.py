@@ -903,7 +903,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
     elif mode == 'corba':
         try:
-            from ansys.mapdl.corba import MapdlCorba
+            # pending deprication to ansys-mapdl-corba
+            from ansys.mapdl.core.mapdl_corba import MapdlCorba
         except ImportError:
             raise ImportError('To use this feature, install ansys.mapdl.corba with\n\n'
                               '    pip install ansys-mapdl-corba')

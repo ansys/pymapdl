@@ -24,6 +24,7 @@ install_requires = [
     'grpcio>=1.30.0',
     'ansys-grpc-mapdl==0.2.0',
     'ansys-mapdl-reader>=0.50.0',
+    'ansys-corba',  # pending depreciation to ansys-mapdl-corba
 ]
 
 # these are only used when launching a MAPDL via a console.  This

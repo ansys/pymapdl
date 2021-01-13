@@ -7,7 +7,7 @@ import ansys.mapdl.core as pymapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 
 try:
-    import ansys.mapdl.corba
+    import ansys_corba
     HAS_CORBA = True
 except:
     HAS_CORBA = False
