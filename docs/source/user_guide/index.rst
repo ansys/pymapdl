@@ -13,7 +13,9 @@ PyMAPDL module ``ansys-mapdl-core``.
    :maxdepth: 1
    :hidden:
 
+   launcher
    mapdl
+   mapdl_examples
    plotting
    mesh_geometry
    post

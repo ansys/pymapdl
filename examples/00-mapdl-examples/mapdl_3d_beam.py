@@ -12,7 +12,7 @@ First, start by launching MAPDL as a service.
 """
 
 from pyansys import examples
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl()
 
 # load a beam stored as an example archive file and mesh it

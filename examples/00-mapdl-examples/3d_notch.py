@@ -14,7 +14,7 @@ First, start MAPDL as a service and disable all but error messages.
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl(loglevel='ERROR')
 

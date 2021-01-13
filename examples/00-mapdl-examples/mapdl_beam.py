@@ -10,7 +10,7 @@ This is an example from FINITE ELEMENT ANALYSIS USING ANSYS 11.0
 
 ###############################################################################
 # Launch MAPDL with interactive plotting
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl()
 
 ###############################################################################

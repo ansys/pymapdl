@@ -13,7 +13,7 @@ import tempfile
 import os
 import pyvista as pv
 from pyansys import save_as_archive
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 # launch MAPDL as a service
 mapdl = launch_mapdl(loglevel='ERROR')

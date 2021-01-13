@@ -14,7 +14,7 @@ inside PyMAPDL.
 """
 import numpy as np
 
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and create an APDLMath object.
 mapdl = launch_mapdl()

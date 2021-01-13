@@ -7,7 +7,7 @@ Use the APDLMath module to solve a Dense Matrix Linear System
 
 import time
 import numpy.linalg as np
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and disable all but error messages.
 # Create an APDLMath object.

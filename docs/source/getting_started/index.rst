@@ -15,3 +15,4 @@ getting a licensed copy of Ansys.
 
    install
    versioning
+   docker

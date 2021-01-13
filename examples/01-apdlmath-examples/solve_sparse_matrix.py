@@ -6,7 +6,7 @@ Using APDLMath, you can solve linear systems of equations based on
 sparse or dense matrices.
 
 """
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.examples import vmfiles
 
 # Start MAPDL as a service and create an APDLMath object.

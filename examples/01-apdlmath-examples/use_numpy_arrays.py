@@ -8,7 +8,7 @@ python via numpy arrays.
 """
 import numpy as np
 
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and disable all but error messages.
 # Create an APDLMath object.

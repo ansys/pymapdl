@@ -19,7 +19,7 @@ Thanks SimuTech!
 import numpy as np
 
 import matplotlib.pyplot as plt
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl(loglevel='ERROR')
 

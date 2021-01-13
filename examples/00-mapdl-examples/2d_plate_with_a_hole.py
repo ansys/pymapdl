@@ -1,23 +1,23 @@
 """
 .. _ref_plane_stress_concentration:
 
-ANSYS 2D Plane Stress Concentration Analysis
+MAPDL 2D Plane Stress Concentration Analysis
 --------------------------------------------
 
-This tutorial shows how you can use pyMAPDL to determine and
+This tutorial shows how you can use PyMAPDL to determine and
 verify the "stress concentration factor" when modeling using 2D plane
 elements and then verify this using 3D elements.
 
-First, start MAPDL as a service and disable all but error messages.
+First, start MAPDL as a service.
 """
 # sphinx_gallery_thumbnail_number = 3
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ansys.mapdl import launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 
-mapdl = launch_mapdl(loglevel='ERROR')
+mapdl = launch_mapdl()
 
 ###############################################################################
 # Element Type and Material Properties
@@ -65,7 +65,7 @@ rect_anum = mapdl.blc4(width=length, height=width)
 # create a circle in the middle of the rectangle
 circ_anum = mapdl.cyl4(length/2, width/2, radius)
 
-# Note how pyansys parses the output and returns the area numbers
+# Note how pymapdl parses the output and returns the area numbers
 # created by each command.  This can be used to execute a boolean
 # operation on these areas to cut the circle out of the rectangle.
 plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)

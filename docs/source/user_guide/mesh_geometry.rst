@@ -37,7 +37,7 @@ with:
     [0.75 0.5  4.5 ]]
 
 
-Both the ``geometry`` and ``mesh`` properties support additional,
+Both the ``geometry`` and ``mesh`` attributes support additional,
 lower level access to MAPDL data.  Access them with:
 
 .. code:: python
@@ -58,15 +58,7 @@ View the current mesh status with:
       Number of Element Components: 0
 
 
-The MAPDL Geometry Class
-------------------------
-.. autoclass:: ansys.mapdl.core.mapdl_geometry.Geometry
-    :members:
-
-
-The Mesh Class
---------------
-.. autoclass:: ansys.mapdl.reader.mesh.Mesh
-    :members:
-    :show-inheritance:
-    :noindex:
+API Reference
+~~~~~~~~~~~~~
+For a full descrption of the ``Mesh`` and ``Geometry`` classes, please
+see :ref:`ref_mesh_api` and :ref:`ref_geometry_api`.
