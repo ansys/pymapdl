@@ -366,6 +366,51 @@ def get_start_instance(start_instance_default=True):
     return start_instance_default
 
 
+def _get_available_base_ansys():
+    """Return a dictionary of available ANSYS versions with their base paths.
+
+    Returns
+    -------
+    Return all installed ANSYS paths in Windows
+
+    >>> _get_available_base_ansys()
+    {194: 'C:\\Program Files\\ANSYS INC\\v194',
+     202: 'C:\\Program Files\\ANSYS INC\\v202',
+     211: 'C:\\Program Files\\ANSYS INC\\v211'}
+
+    Within Linux
+
+    >>> 
+    {194: '/usr/ansys_inc/v194',
+     202: '/usr/ansys_inc/v202',
+     211: '/usr/ansys_inc/v211'}
+    """
+    base_path = None
+    if os.name == 'nt':
+        base_path = os.path.join(os.environ['PROGRAMFILES'], 'ANSYS INC')
+    elif os.name == 'posix':
+        for path in ['/usr/ansys_inc', '/ansys_inc']:
+            if os.path.isdir(path):
+                base_path = path
+    else:
+        raise OSError(f'Unsupported OS {os.name}')
+
+    if base_path is None:
+        return '', ''
+
+    paths = glob(os.path.join(base_path, 'v*'))
+
+    if not paths:
+        return None
+
+    ansys_paths = {}
+    for path in paths:
+        ver_str = path[-3:]
+        if is_float(ver_str):
+            ansys_paths[int(ver_str)] = path
+
+    return ansys_paths
+
 
 def find_ansys():
     """Searches for ansys path within the standard install location
@@ -390,32 +435,9 @@ def find_ansys():
     Within Linux
 
     >>> find_ansys()
-    /usr/ansys_inc/v211/ansys/bin/ansys211, 21.1
+    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    base_path = None
-    if os.name == 'nt':
-        base_path = os.path.join(os.environ['PROGRAMFILES'], 'ANSYS INC')
-    elif os.name == 'posix':
-        for path in ['/usr/ansys_inc', '/ansys_inc']:
-            if os.path.isdir(path):
-                base_path = path
-    else:
-        raise OSError(f'Unsupported OS {os.name}')
-
-    if base_path is None:
-        return '', ''
-
-    paths = glob(os.path.join(base_path, 'v*'))
-
-    if not paths:
-        return None
-
-    versions = {}
-    for path in paths:
-        ver_str = path[-3:]
-        if is_float(ver_str):
-            versions[int(ver_str)] = path
-
+    versions = _get_available_base_ansys()
     version = max(versions.keys())
     ans_path = versions[version]
     if os.name == 'nt':
@@ -426,76 +448,8 @@ def find_ansys():
     return ansys_bin, version/10
 
 
-# def find_ansys():
-#     """Searches for ansys path within environmental variables.
-
-#     Returns
-#     -------
-#     ansys_exe_path : str
-#         Full path to ANSYS executable
-
-#     version : float
-#         Version of ANSYS
-#     """
-#     ansys_sysdir_var = 'ANSYS_SYSDIR'
-#     paths = {}
-#     for var in os.environ:
-#         if 'ANSYS' in var and '_DIR' in var:
-#             # add path if valid
-#             path = os.environ[var]
-#             if os.path.isdir(path):
-
-#                 # add path if version number is in path
-#                 version_str = var[5:8]
-#                 if is_float(version_str):
-#                     paths[int(version_str)] = path
-
-#     # On Linux ansys is usually installed at the root directory at
-#     # /usr/ansys_inc
-#     # /ansys_inc
-#     if not paths and os.name == 'posix':
-#         for directory in ['/usr/ansys_inc/', '/ansys_inc/']:
-#             if os.path.isdir(directory):
-#                 # construct ansys path
-#                 for subdirectory in glob('%s*/' % directory):
-#                     ver = os.path.basename(os.path.normpath(subdirectory))
-#                     groups = re.findall(r'v\d\d\d', ver)
-#                     if groups:
-#                         ver = int(groups[0][1:])
-#                         paths[ver] = os.path.join(subdirectory, 'ansys')
-
-#     if not paths:
-#         return '', ''
-
-#     # check through all available paths and return the latest version
-#     while paths:
-#         version = max(paths.keys())
-#         ansys_path = paths[version]
-
-#         if ansys_sysdir_var in os.environ:
-#             sysdir = os.environ[ansys_sysdir_var]
-#             ansys_bin_path = os.path.join(ansys_path, 'bin', sysdir)
-#             if 'win' in sysdir:
-#                 ansys_exe = 'ansys%d.exe' % version
-#             else:
-#                 ansys_exe = 'ansys%d' % version
-#         else:
-#             ansys_bin_path = os.path.join(ansys_path, 'bin')
-#             ansys_exe = 'ansys%d' % version
-
-#         ansys_exe_path = os.path.join(ansys_bin_path, ansys_exe)
-#         if os.path.isfile(ansys_exe_path):
-#             break
-#         else:
-#             paths.pop(version)
-#             paths.remove(ansys_path)
-
-#     version_float = float(version)/10.0
-#     return ansys_exe_path, version_float
-
-
 def get_ansys_path(allow_input=True):
-    """ Acquires ANSYS Path from a cached file or user input """
+    """Acquires ANSYS Path from a cached file or user input"""
     exe_loc = None
     if os.path.isfile(CONFIG_FILE):
         with open(CONFIG_FILE) as f:
@@ -505,7 +459,6 @@ def get_ansys_path(allow_input=True):
             exe_loc = save_ansys_path()
     elif allow_input:  # create configuration file
         exe_loc = save_ansys_path()
-
     if exe_loc is None:
         exe_loc = find_ansys()[0]
         if not exe_loc:

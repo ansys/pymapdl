@@ -458,8 +458,7 @@ class _MapdlCore(_MapdlCommands):
         self._log.debug('Opening ANSYS log file at %s', filename)
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         if mode != 'w':
-            self._apdl_log.write('! APDL script generated using pyansys %s\n' %
-                                 pymapdl.__version__)
+            self._apdl_log.write('! APDL script generated using ansys.mapdl.core %s\n' % pymapdl.__version__)
 
     @supress_logging
     @run_as_prep7
@@ -1056,7 +1055,7 @@ class _MapdlCore(_MapdlCommands):
 
     @property
     def result(self):
-        """Binary interface to the result file using ``ansys.mapdl.core.Result``
+        """Binary interface to the result file using ``ansys.mapdl.reader.Result``
 
         Examples
         --------
@@ -1064,7 +1063,7 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.finish()
         >>> result = mapdl.result
         >>> print(result)
-        PyANSYS MAPDL Result file object
+        PyMAPDL-Reader Result file object
         Units       : User Defined
         Version     : 18.2
         Cyclic      : False
@@ -1085,7 +1084,8 @@ class _MapdlCore(_MapdlCommands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.core.rst import Result
+        from ansys.mapdl.reader import read_binary
+        from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
@@ -1119,7 +1119,7 @@ class _MapdlCore(_MapdlCommands):
         if not os.path.isfile(result_path):
             raise FileNotFoundError('No results found at %s' % result_path)
 
-        return pymapdl.read_binary(result_path)
+        return read_binary(result_path)
 
     @property
     def _result_file(self):
@@ -1469,6 +1469,13 @@ class _MapdlCore(_MapdlCommands):
         except:
             pass
         return self._jobname
+
+    @jobname.setter
+    def jobname(self, new_jobname):
+        """Set the jobname"""
+        self.finish()
+        self.filname(new_jobname)
+        self._jobname = new_jobname
 
     @supress_logging
     def inquire(self, func):
@@ -1908,15 +1915,14 @@ class _MapdlCore(_MapdlCommands):
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
-        if hasattr(self, '_cleanup'):
-            if self._cleanup:
-                try:
-                    self.exit()
-                except Exception as e:
-                    try:  # logger might be closed
-                        self._log.error('exit: %s', str(e))
-                    except:
-                        pass
+        if self._cleanup:
+            try:
+                self.exit()
+            except Exception as e:
+                try:  # logger might be closed
+                    self._log.error('exit: %s', str(e))
+                except:
+                    pass
 
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',

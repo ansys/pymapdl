@@ -1,4 +1,5 @@
 """CORBA implementation of the MAPDL interface"""
+import atexit
 import subprocess
 import time
 import re
@@ -10,6 +11,17 @@ from ansys.mapdl.core.misc import threaded, random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlExitedError
 
 from ansys_corba import CORBA
+
+INSTANCES = []
+
+@atexit.register
+def _cleanup():
+    for instance in INSTANCES:
+        try:
+            if instance() is not None:
+                instance().exit()
+        except:
+            pass
 
 
 def tail(filename, nlines):
@@ -136,6 +148,9 @@ class MapdlCorba(_MapdlCore):
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
                          **start_parm)
 
+        # critical for collection
+        INSTANCES.append(weakref.ref(self))
+
     def _launch(self, start_parm):
         corba_key = launch_corba(**start_parm)
 
@@ -202,16 +217,20 @@ class MapdlCorba(_MapdlCore):
         if self._exited:
             return
 
-        self._log.debug('Exiting ANSYS')
+        # self._log.debug('Exiting ANSYS')
         if self._server is not None:
-            # cache final path and lockfile before exiting
-            path = self.directory
-            lockfile = self._lockfile
+            # attempt to cache final path and lockfile before exiting
+            try:
+                path = self.directory
+                lockfile = self._lockfile
+            except:
+                pass
 
             try:
                 self.run('/EXIT')
             except:
                 pass
+
             try:
                 self._server.terminate()
             except:
@@ -307,7 +326,7 @@ class MapdlCorba(_MapdlCore):
         self._log.debug('Running command %s', command)
         text = self._server.executeCommandToString(command)
 
-        # print supressed output
+        # print suppressed output
         additional_text = self._server.executeCommandToString('/GO')
 
         # return text, additional_text

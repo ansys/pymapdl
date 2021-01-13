@@ -852,13 +852,6 @@ class MapdlGrpc(_MapdlCore):
         # otherwise, read remote file
         return self._download_as_raw(tmp_out).decode('latin-1')
 
-    @_MapdlCore.jobname.setter
-    def jobname(self, new_jobname):
-        """Set the jobname"""
-        self.finish()
-        self.filname(new_jobname)
-        self._jobname = new_jobname
-
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
