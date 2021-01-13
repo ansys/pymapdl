@@ -3,57 +3,46 @@ PyMAPDL Documentation
 
 Introduction and Purpose
 ------------------------
-The ``ansys-mapdl-core`` module, under the ``PyAnsys`` development
-project, is a Python module that allows you to interface with MAPDL
-using Python.  This module provides:
+PyMAPDL is part of the larger PyAnsys effort to facilitate the use 
+of Ansys technologies directly from Python. Its primary package,
+``ansys-mapdl-core``, provides:
 
-- Low and high level scripting of MAPDL through both basic text
-  commands and python commands.
-- Plotting of MAPDL geometry and meshes using VTK from within a Python
-  or jupyterlab environment.
-- Access MAPDL arrays as Python objects (e.g. nodes, elements,
-  internal arrays, results from MAPDL post-processing)
+- scripting of MAPDL through both Python and Ansys Parametric Design
+  Language (APDL) syntax
+- plotting of MAPDL geometry and meshes using VTK from within a Python
+  script or an interactive Jupyter notebook
+- access to MAPDL arrays as Python objects (e.g. nodes, elements,
+  solution matrices, and results)
 
-Ansys MAPDL allows for the direct scripting of structural analysis
-problems through input files.  Unfortunately, MAPDL relies on an
-legacy scripting language that can be difficult to read and control
-and either requires the MAPDL GUI for an interactive session or a
-basic text interface through a batch session.
+With PyMAPDL it is easier than ever to integrate the simulation capabilities 
+of the Ansys MAPDL multi-physics solver direcly into novel applications 
+thanks to an API that will look familiar to APDL and Python users alike.
+The package presents a Python-friendly interface to drive the software
+that manages the submission of low-level APDL commands, while exchanging
+data through high-performance gRPC interfaces.
 
-The weaknesses of this language are often compensated by generating
-APDL scripts using a secondary scripting tool like ``MATLAB`` or
-``Python``.  However, this added layer of complexity means that the
-development feedback loop is quite long as the user must export and
-run an entire script before determining if it ran correctly or of the
-results are valid.  This module seeks to rectify that by providing a
-high level interface to script MAPDL.
+Accelerate the preparation of your simulations using PyMAPDL. Combine the
+expressiveness of general-purpose Python code to control the flow in your
+input decks with methods that drive the solver. Explore proof of concept 
+studies or capture knowledge using interactive Jupyter notebooks.  Tap
+the solver as the physics engine in your next Artificial Intelligence
+application. It is now open source: Enjoy it! Contributions are welcome.
 
 
 Background
 ----------
-ANSYS already has a method of interfacing with MAPDL through the use
-of CORBA.  This interface allows you to send strings from the client
-to the mapdl instance and run commands from a scripting software (such
-as Python or MATLAB).  The ``PyMAPDL`` project using the
-``ansys-mapdl-core`` module is an attempt to enhance this interface
-through the use of an alternative protocol, GRPC.
+PyMAPDL, based on gRPC, represents an improvement over its predecessor based
+on CORBA. These technologies allow the MAPDL solver to function as a server, 
+ready to respond to connecting clients.  
 
-Google remote procedure call or GRPC, establishes a secure connection
-between a client and a server instance (either local or remote). A
-client application can directly call methods on a remote application
-as if it was a local object.  This GRPC interface is established by:
-
- - Define a service in a .proto file
- - Generate server and client code using the protocol buffer compiler
- - Create the server application, implementing the generated service
-   interfaces and spawning the gRPC server
- - Create the client application, making RPC calls using generated
-   stubs
-
-The ``ansys-mapdl-core`` module bridges the gap between the GRPC client and
-the user with an object oriented interface that should be both
-familiar with established MAPDL coders unfamiliar with Python, and
-Python programmers unfamiliar with MAPDL.
+Google remote procedure calls, or gRPC, are used to establish secure 
+connections so that a client application can directly call methods on 
+a potentially remote MAPDL instance as if it were a local object. The 
+use of HTTP/2 makes it friendly to modern internet infrastructures. 
+This, along with the use of binary transmission formats, favors higher
+performance. Using gRPC, PyMAPDL can convert Python statements into APDL 
+commands that can then be transmitted to an MAPDL instance running anywhere, 
+while producing network footprints that are compact and efficient.
 
 .. toctree::
    :hidden:
