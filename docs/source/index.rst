@@ -15,7 +15,7 @@ of Ansys technologies directly from Python. Its primary package,
   solution matrices, and results)
 
 With PyMAPDL it is easier than ever to integrate the simulation capabilities 
-of the Ansys MAPDL multi-physics solver direcly into novel applications 
+of the Ansys MAPDL multi-physics solver directly into novel applications 
 thanks to an API that will look familiar to APDL and Python users alike.
 The package presents a Python-friendly interface to drive the software
 that manages the submission of low-level APDL commands, while exchanging
