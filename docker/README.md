@@ -71,7 +71,7 @@ Once you've launched MAPDL you'll see:
 You can now connect to the instance (locally) with:
 
 ```python
->>> from ansys.mapdl import Mapdl
+>>> from ansys.mapdl.core import Mapdl
 >>> ip = '127.0.0.1'
 >>> mapdl = Mapdl(ip=ip, port=50052)
 ```

@@ -20,6 +20,28 @@ Please feel free to post issues and other questions at `PyMAPDL Issues
 to post questions and code.
 
 
+Project Transition - Legacy Support
+-----------------------------------
+This project was formerly known as ``pyansys``, and we'd like to thank
+all the early adopters, contributors, and users who submitted issues,
+gave feedback, and contributed code through the years.  The
+``pyansys`` project has been taken up Ansys and will be leveraged in
+creating new Pythonic, cross-platform, and multi-language service
+based interfaces for Ansys's products.  Your contributions to
+``pyansys`` has shaped it into a better solution.
+
+The ``pyansys`` project is expanding beyond just MAPDL, and while
+there are many new features and changes to the original Python module,
+many steps have been taken to ensure compatibility with legacy code
+while supporting new features.  The original python module has been
+split up into the following projects and modules:
+
+ - `ansys.mapdl.core <https://github.com/pyansys/pymapdl>`_
+ - `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
+ - `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
+
+Please visit the GitHub pages for further details regarding each project.
+
 
 Installation
 ------------
