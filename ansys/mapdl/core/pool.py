@@ -93,6 +93,7 @@ class LocalMapdlPool():
         self._instances = []
         self._root_dir = run_location
         kwargs['remove_temp_files'] = remove_temp_files
+        kwargs['mode'] = 'grpc'
         self._spawn_kwargs = kwargs
 
         # grab available ports

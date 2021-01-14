@@ -1,11 +1,7 @@
 # Build documentation
 name: Documentation Build
 
-on:
-  push:
-    branches-ignore:
-      - 'gh-pages'
-  pull_request:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   # This workflow contains a single job called "build"
