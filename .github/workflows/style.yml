@@ -1,12 +1,7 @@
 # check spelling, codestyle
 name: Style Check
 
-on:
-  push:
-    branches-ignore:
-      # Push events to branches matching refs/heads/mona/octocat
-      - 'gh-pages'
-  pull_request:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
