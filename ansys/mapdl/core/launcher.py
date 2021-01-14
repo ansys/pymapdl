@@ -893,7 +893,11 @@ def check_mode(mode, version):
         mode = mode.lower()
         if mode == 'grpc':
             if version < 211:
-                raise VersionError('gRPC mode requires MAPDL 2021R1 or newer.')
+                if version < 202 and os.name == 'nt':
+                    raise VersionError('gRPC mode requires MAPDL 2020R2 or newer '
+                                       'on Windows.')
+                elif os.name == 'posix':
+                    raise VersionError('gRPC mode requires MAPDL 2021R1 or newer.')
         elif mode == 'corba':
             if version < 170:
                 raise VersionError('CORBA AAS mode requires MAPDL v17.0 or newer.')
