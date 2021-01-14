@@ -4,7 +4,6 @@ name: Documentation Build
 on:
   push:
     branches-ignore:
-      # Push events to branches matching refs/heads/mona/octocat
       - 'gh-pages'
   pull_request:
 
@@ -72,7 +71,7 @@ jobs:
         run: |
           git clone --no-checkout --depth 1 https://$GH_PAT@github.com/pyansys/pymapdl.git /tmp/gh_pages
           cd /tmp/gh_pages
-          git checkout --orphan $GH_BRANCH
+          git checkout --orphan gh-pages
           rm -rf *
           git config user.name $GH_USERNAME
           git config user.email $GH_EMAIL
@@ -80,9 +79,8 @@ jobs:
           touch .nojekyll
           git add .
           git commit -am "CI: Updated site via $GITHUB_SHA"
-          git push -u origin $GH_BRANCH -f
+          git push -u origin gh-pages -f
         env:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_BRANCH: gh_pages
