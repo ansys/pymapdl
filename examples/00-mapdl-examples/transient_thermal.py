@@ -216,9 +216,9 @@ slices.plot(scalars='temperature', lighting=False, show_edges=True)
 #
 # Here, we use the ``get_value`` command which is very similar to the
 # ``*GET`` command, except it immediately returns the value as a
-# python acessible variable, rather than storing it to a MAPDL value.
+# python accessible variable, rather than storing it to a MAPDL value.
 
-# for example, the temperature of Node 12 is can be retreived simply with:
+# for example, the temperature of Node 12 is can be retrieved simply with:
 mapdl.get_value('node', 12, 'TEMP')
 
 # note that this is similar to # *GET, Par, NODE, N, Item1, IT1NUM, Item2, IT2NUM

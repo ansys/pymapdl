@@ -34,6 +34,9 @@ for version in versions:
 
 V150_EXEC = get_ansys_bin('150')
 
+# skip entire module when using static server
+if not get_start_instance():
+    pytest.skip("Skip when start instance is disabled", allow_module_level=True)
 
 if not valid_versions:
     pytestmark = pytest.mark.skip("Requires MAPDL")
@@ -56,7 +59,6 @@ def test_invalid_mode():
         pymapdl.launch_mapdl(exec_file, mode='notamode')
 
 
-@pytest.mark.skipif(not get_start_instance(), reason="Requires ANSYS install")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
     exec_file = get_ansys_bin('150')
