@@ -1,6 +1,6 @@
 """Test legacy MAPDL CORBA interface
 
-This has been copied from ma
+This has been copied from test_mapdl.py
 
 """
 import time
@@ -23,6 +23,7 @@ skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
 
 # skip entire module unless --corba is enabled
 pytestmark = pytest.mark.corba
+
 
 @pytest.fixture(scope='function')
 def cleared(mapdl_corba):

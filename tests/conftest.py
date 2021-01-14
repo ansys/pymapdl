@@ -41,30 +41,27 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--corba"):
+    if not config.getoption("--corba"):
         # --corba given in cli: run CORBA interface tests
-        return
-    skip_corba = pytest.mark.skip(reason="need --corba option to run")
-    for item in items:
-        if "corba" in item.keywords:
-            item.add_marker(skip_corba)
+        skip_corba = pytest.mark.skip(reason="need --corba option to run")
+        for item in items:
+            if "corba" in item.keywords:
+                item.add_marker(skip_corba)
 
-    if config.getoption("--console"):
+    if not config.getoption("--console"):
         # --console given in cli: run console interface tests
-        return
-    skip_console = pytest.mark.skip(reason="need --console option to run")
-    for item in items:
-        if "console" in item.keywords:
-            item.add_marker(skip_console)
+        skip_console = pytest.mark.skip(reason="need --console option to run")
+        for item in items:
+            if "console" in item.keywords:
+                item.add_marker(skip_console)
 
 
 @pytest.fixture(scope="session")
 def mapdl_console(request):
-    ansys_base_paths = _get_available_base_ansys()
-
     if os.name != 'posix':
         raise RuntimeError('"--console" testing option unavailable.  '
                            'Only Linux is supported.')
+    ansys_base_paths = _get_available_base_ansys()
 
     # find a valid version of corba
     console_path = None
@@ -78,6 +75,8 @@ def mapdl_console(request):
                            'Valid versions are up to 2020R2.')
 
     mapdl = launch_mapdl(console_path)
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
+    assert isinstance(mapdl, MapdlConsole)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     # using yield rather than return here to be able to test exit
@@ -98,7 +97,7 @@ def mapdl_corba(request):
     # find a valid version of corba
     corba_path = None
     for version in ansys_base_paths:
-        if version >= 170 and version < 211:
+        if version >= 170 and version < 202:
             corba_path = get_ansys_bin(str(version))
 
     if corba_path is None:
@@ -107,6 +106,8 @@ def mapdl_corba(request):
                            'Valid versions are ANSYS 17.0 up to 2020R2.')
 
     mapdl = launch_mapdl(corba_path)
+    from ansys.mapdl.core.mapdl_corba import MapdlCorba
+    assert isinstance(mapdl, MapdlCorba)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     # using yield rather than return here to be able to test exit

@@ -1,6 +1,6 @@
-"""Test legacy MAPDL CORBA interface
+"""Test legacy MAPDL console interface
 
-This has been copied from ma
+This has been copied from test_mapdl.py
 
 """
 import time
@@ -21,7 +21,7 @@ import ansys.mapdl.core as pymapdl
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
-# skip entire module unless --corba is enabled
+# skip entire module unless --console is enabled
 pytestmark = pytest.mark.console
 
 
