@@ -52,7 +52,6 @@ def test_find_ansys_linux():
     assert isinstance(ver, float)
 
 
-@pytest.mark.skipif(not get_start_instance(), reason="Requires ANSYS install")
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = get_ansys_bin(valid_versions[0])

@@ -913,6 +913,9 @@ def check_mode(mode, version):
     else:  # auto-select based on best version
         if version >= 211:
             mode = 'grpc'
+        elif version == 202 and os.name == 'nt':
+            # Windows supports it as of 2020R2
+            mode = 'grpc'
         elif version >= 170:
             mode = 'corba'
         else:
