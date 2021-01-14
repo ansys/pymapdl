@@ -67,8 +67,8 @@ on Windows and 13.0 on Linux.
     versions of ANSYS (e.g. APDL Math).
 
 
-Verifiy Your Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Verify Your Installation
+~~~~~~~~~~~~~~~~~~~~~~~~
 Check that you can start MAPDL from Python by running:
 
 .. code:: python
