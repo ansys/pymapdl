@@ -3,7 +3,7 @@ Interactive Plotting
 ********************
 When generating geometry from scratch within MAPDL, it is often
 necessary to plot the geometry (e.g. keypoints, lines, areas,
-volumes), and ``pyansys`` supports plotting basic CAD using VTK.  The
+volumes), and ``PyMAPDL`` supports plotting basic CAD using VTK.  The
 ``mapdl`` class leverages the existing MAPDL commands (e.g.
 ``KPLOT``, ``LPLOT``, ``APLOT``) and transfers the geometry to Python
 to visualize it.  Combined with the MAPDL geometry commands, you can
@@ -35,7 +35,7 @@ Plot lines within Python using ``lplot``.
 .. figure:: ../images/lplot_vtk.png
     :width: 400pt
 
-    Line Plot from MAPDL using ``pyansys`` and ``vtk``
+    Line Plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 
 Area and Volume Plotting
@@ -56,7 +56,7 @@ initial area with the 8 circles and then extrude it.
 .. figure:: ../images/vplot_vtk.png
     :width: 400pt
 
-    Volume Plot from MAPDL using ``pyansys`` and ``vtk``
+    Volume Plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 
 Node and Element Plotting
@@ -67,17 +67,15 @@ meshing, and displaying the mesh.
 
 .. code:: python
 
-    mapdl.et(1, 'SOLID186')
-
-    # Here we mesh by sweeping to generate hexahedral elements
-    mapdl.vsweep('ALL')
-    mapdl.esize(0.1)
+    >>> mapdl.et(1, 'SOLID186')
+    >>> mapdl.vsweep('ALL')
+    >>> mapdl.esize(0.1)
+    >>> mapdl.eplot()
 
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Volume Plot from MAPDL using ``pyansys`` and ``vtk``
-
+    Volume Plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 
 Plotting Non-Interactively using MAPDL

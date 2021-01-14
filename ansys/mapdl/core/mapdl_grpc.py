@@ -24,14 +24,12 @@ from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7, last_created
-
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.common_grpc import (parse_chunks,
                                           ANSYS_VALUE_TYPE,
                                           DEFAULT_CHUNKSIZE,
                                           DEFAULT_FILE_CHUNK_SIZE)
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
-
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +170,7 @@ class MapdlGrpc(_MapdlCore):
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
     """
 
-    def __init__(self, ip='127.0.0.1', port=50052, timeout=15, loglevel='WARNING',
+    def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                  cleanup_on_exit=False, log_apdl=False, set_no_abort=True,
                  remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
@@ -196,6 +194,10 @@ class MapdlGrpc(_MapdlCore):
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
         self._ip = ip
+
+        if port is None:
+            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
+            port = MAPDL_DEFAULT_PORT
         self._port = port
         self._server = None
         self._channel = None
@@ -766,7 +768,7 @@ class MapdlGrpc(_MapdlCore):
             Due to stability issues, the default time_step_stream is
             dependent on verbosity.  The defaults are:
 
-            - ``verbose=True``: ``time_step_stream=500`` 
+            - ``verbose=True``: ``time_step_stream=500``
             - ``verbose=False``: ``time_step_stream=50``
 
             These defaults will be ignored if ``time_step_stream`` is

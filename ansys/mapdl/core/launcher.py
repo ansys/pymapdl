@@ -782,6 +782,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
     ip = os.environ.get('PYMAPDL_IP', ip)
     if 'PYMAPDL_PORT' in os.environ:
         port = int(os.environ.get('PYMAPDL_PORT'))
+    if port is None:
+        port = MAPDL_DEFAULT_PORT
 
     # connect to an existing instance if enabled
     if not get_start_instance(start_instance):

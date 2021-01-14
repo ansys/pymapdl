@@ -167,17 +167,9 @@ mapdl.solve()
 ###############################################################################
 # Post-Processing
 # ~~~~~~~~~~~~~~~
-# Animate the temperature as a function of time.  Disable saving the
-# animation by not specifying ``movie_filename`` to speed up the
-# animation.
-
-# Animate every 5th result
-result = mapdl.thermal_result
-rnums = range(0, result.nsets, 5)
-result.animate_nodal_solution_set(rnums, stitle='Temperature',
-                                  movie_filename='animation.gif',
-                                  loop=False)
-
+# Open up the result file using ``ansys.mapdl.reader``
+# result = mapdl.thermal_result
+mapdl.post1()
 
 ###############################################################################
 # Visualize a Slice
@@ -185,11 +177,12 @@ result.animate_nodal_solution_set(rnums, stitle='Temperature',
 # Visualize a slice through the dataset using ``pyvista``
 # for more details visit <https://docs.pyvista.org/>`_.
 
-# get the temperature of a result set
-nnum, temp = result.nodal_temperature(30)
+# get the temperature of the 30th result set
+mapdl.set(1, 30)
+temp = mapdl.post_processing.nodal_temperature
 
 # Load this result into the underlying VTK grid
-grid = result.grid
+grid = mapdl.mesh._grid
 grid['temperature'] = temp
 
 # generate a single horizontal slice slice along the XY plane
@@ -203,10 +196,11 @@ single_slice.plot(scalars='temperature')
 # This shows how you can visualize a series of slices through a dataset
 
 # get the temperature of a different result set
-nnum, temp = result.nodal_temperature(120)
+mapdl.set(1, 120)
+temp = mapdl.post_processing.nodal_temperature
 
 # Load this result into the underlying VTK grid
-grid = result.grid
+grid = mapdl.mesh._grid
 grid['temperature'] = temp
 
 # generate a single horizontal slice slice along the XY plane
@@ -219,15 +213,49 @@ slices.plot(scalars='temperature', lighting=False, show_edges=True)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract the temperature at a single node and plot it with respect to
 # the input temperatures using ``ansys.mapdl``
+#
+# Here, we use the ``get_value`` command which is very similar to the
+# ``*GET`` command, except it immediately returns the value as a
+# python acessible variable, rather than storing it to a MAPDL value.
 
-# get the index of node 12
-idx = np.nonzero(result.mesh.nnum == 12)[0][0]
+# for example, the temperature of Node 12 is can be retreived simply with:
+mapdl.get_value('node', 12, 'TEMP')
+
+# note that this is similar to # *GET, Par, NODE, N, Item1, IT1NUM, Item2, IT2NUM
+# See the MAPDL reference for all the items you can obtain using *GET
+
+###############################################################################
+# Here, we extract the temperature of the node across for each solution
+nsets = mapdl.post_processing.nsets
+node_temp = []
+for i in range(1, 1 + nsets):
+    mapdl.set(1, i)
+    node_temp.append(mapdl.get_value('node', 12, 'TEMP'))
+
+# here are the first 10 temperatures
+node_temp[:10]
+
+###############################################################################
+# Alternatively, you can simply grab the data for the node from the
+# entire response.  This is less efficient as the entire data set is
+# sent back for each result.
+
+# get the index of node 12 in MAPDL
+idx = np.nonzero(mapdl.mesh.nnum == 12)[0][0]
 
 # get the temperature at that index for each result
-node_temp = [result.nodal_temperature(i)[1][idx] for i in range(result.nsets)]
+node_temp_from_post = []
+for i in range(1, 1 + nsets):
+    mapdl.set(1, i)
+    node_temp_from_post.append(mapdl.post_processing.nodal_temperature[idx])
 
-# plot this as a function of time
-plt.plot(result.time_values, node_temp, label='Node 12')
+# Again, the first 10 temperatures
+node_temp_from_post[:10]
+
+###############################################################################
+# Plot the temperature as a function of time
+time_values = mapdl.post_processing.time_values
+plt.plot(time_values, node_temp, label='Node 12')
 plt.plot(my_bulk[:, 0], my_bulk[:, 1], ':', label='Input')
 plt.legend()
 plt.xlabel('Time (seconds)')

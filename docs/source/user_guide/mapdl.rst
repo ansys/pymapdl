@@ -1,3 +1,5 @@
+.. _ref_mapdl_user_guide:
+
 **************************
 PyMAPDL Language and Usage
 **************************

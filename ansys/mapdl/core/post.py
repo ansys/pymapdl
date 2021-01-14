@@ -1,4 +1,5 @@
 """Post-processing module using MAPDL interface"""
+import re
 import weakref
 
 import numpy as np
@@ -81,6 +82,29 @@ class PostProcessing():
             info += '\n\n Enable routine POST1 to see a table of available results'
 
         return info
+
+    @property
+    def time_values(self):
+        """Return an array of the time values for all result sets.
+
+        Examples
+        --------
+        Get all the time values after loading POST1.
+
+        >>> mapdl.post1()
+        >>> mapdl.post_processing.time_values
+        [75.00054133588232,
+         75.00081189985094,
+         75.00121680412036,
+         75.00574491751847,
+         75.03939292229019,
+         75.20949687626468]
+        """
+        list_rsp = self._mapdl.set('LIST')
+        groups = re.findall(r'([-+]?\d*\.\d+|\d+)', list_rsp)
+
+        # values will always be the second set
+        return np.array([float(item) for item in (groups[1::5])])
 
     def _reset_cache(self):
         """Reset local cache"""

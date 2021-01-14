@@ -5,6 +5,7 @@ import pytest
 
 import ansys.mapdl.core as pymapdl
 from ansys.mapdl.core.misc import get_ansys_bin
+from ansys.mapdl.core.launcher import get_start_instance
 
 try:
     import ansys_corba
@@ -48,12 +49,14 @@ def test_find_ansys_linux():
     assert isinstance(ver, float)
 
 
+@pytest.mark.skipif(not get_start_instance(), reason="Requires ANSYS install")
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = get_ansys_bin(valid_versions[0])
         pymapdl.launch_mapdl(exec_file, mode='notamode')
 
 
+@pytest.mark.skipif(not get_start_instance(), reason="Requires ANSYS install")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
     exec_file = get_ansys_bin('150')
