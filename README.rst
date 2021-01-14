@@ -3,8 +3,8 @@ PyMAPDL
 .. image:: https://img.shields.io/pypi/v/pymapdl.svg
     :target: https://pypi.org/project/pymapdl/
 
-.. image:: https://dev.azure.com/pyansys/pyansys/_apis/build/status/akaszynski.pyansys?branchName=master
-    :target: https://dev.azure.com/femorph/pyansys/_build/latest?definitionId=8&branchName=master
+.. image:: https://dev.azure.com/pyansys/pyansys/_apis/build/status/pyansys.pymapdl?branchName=master
+    :target: https://dev.azure.com/pyansys/pyansys/_build/latest?definitionId=5&branchName=master
 
 .. image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
