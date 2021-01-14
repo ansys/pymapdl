@@ -64,7 +64,7 @@ jobs:
 
       - name: Deploy Documentation
         run: |
-          git clone --no-checkout --depth 1 https://$GIT_PAT@github.com/pyansys/pymapdl.git /tmp/gh_pages
+          git clone --no-checkout --depth 1 https://$GH_PAT@github.com/pyansys/pymapdl.git /tmp/gh_pages
           cd /tmp/gh_pages
           git checkout --orphan gh_pages_tmp
           rm -rf *
