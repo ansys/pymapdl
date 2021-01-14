@@ -1,0 +1,217 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM212
+/TITLE,VM212,DDAM ANALYSIS OF FOUNDATION SYSTEM (2-DOF SYSTEM)
+/COM, --------------------------------------------------------------------
+/COM  REFERENCE:
+/COM, INTERIM DESIGN VALUES FOR SHOCK DESIGN OF SHIPBOARD EQUIPMENT
+/COM  NRL MEMORANDUM REPORT 1396, G. J. O'HARA, FEBRUARY 1963, P10.
+/COM, --------------------------------------------------------------------
+/COM, SHOCK INPUT DESCRIPTION:
+/COM,
+/COM, SHIP TYPE								- SURFACE
+/COM, EQUIPMENT LOCATION					- DECK MOUNTED
+/COM, CATEGORY OF SHOCK DESIGN VALUE		- ELASTIC-PLASTIC
+/COM, SHOCK DIRECTION						- ARTHWARTSHIPS
+/COM,
+/COM, SHOCK DESIGN VALUES AS PER NRL-1396:
+/COM, Aa = 0.4 * Ao AND Va = 0.2 * Vo, 
+/COM, WHERE,
+/COM, Ao 	= 10 * ((37.5 + Wa) * (12 + Wa) / (6 + Wa)**2) * (g)
+/COM, Vo 	= 30 * ((12 + Wa) / (6 + Wa))
+/COM, g 	= ACCELERATION DUE TO GRAVITY
+/COM, Wa	= MODAL EFFECTIVE WEIGHT (KIPS) FOR MODE 'a'
+/COM, 
+/COM, BASED ON THE ABOVE EQUATIONS ACCELERATION AND VELOCITY COMPUTATION
+/COM, CONSTANTS ARE DEFINED AS:
+/COM, AF = 1.0, AA = 10, AB = 37.5, AC = 12, AD = 6
+/COM, VF = 0.5, VA = 30, VB = 12, VC = 6
+/COM, --------------------------------------------------------------------
+/OUT,SCRATCH
+JPGPRF,500,100,1
+/PREP7
+_PI = 4*ATAN(1)
+!*** MATERIAL PROPERTIES FOR SPRING ELEMENT IN POUNDS AND INCH ***
+!-----------------------------------------------------------------
+MP,PRXY,,0.3
+MP,EX,1,1
+! *** FE MODEL ***
+! ----------------
+N,1,0,0 
+N,2,144,0
+N,10,0,0,20
+N,20,54,0,20
+N,30,114,0,20
+N,40,144,0,20
+!*** ELEMENT TYPES ***
+!---------------------
+ET,1,COMBIN40,0,,3                  ! SPRING ELEMENT
+! *** REAL CONSTANTS ***
+! ----------------------
+R,1,1.3E6							! SPRING CONSTANT # 1
+E,1,10
+! *** REAL CONSTANTS ***
+! ----------------------
+R,2,3.9E6                       	! SPRING CONSTANT # 2
+REAL,2 
+E,2,40
+!*** ELEMENT TYPES ***
+!---------------------
+ET, 3, BEAM188						! BEAM188 ELEMENT MODEL
+KEYOPT,3,3,2
+!*** SECTION DATA ***
+!--------------------
+SECTYPE,3,BEAM,ASEC
+SECDATA,100,833,,833,,1,,,,,10,10
+!*** MATERIAL PROPERTIES FOR RIGID BEAM IN POUNDS AND INCH ***
+!-------------------------------------------------------------
+MP,EX,3,1
+MP,GXY,3,1/2.6
+TYPE,3
+MAT,3
+REAL,3
+SECNUM,3
+E,10,20
+E,20,30
+E,30,40
+!*** ELEMENT TYPES ***
+!---------------------
+ET,4,MASS21,,,2                  	! MASS ELEMENTS
+! *** REAL CONSTANTS ***
+! ----------------------
+R,4,10E3/386.						! MASS
+TYPE,4
+REAL,4
+E,20
+E,30
+! *** BOUNDARY CONDITIONS *** 
+! ---------------------------
+D,1,ALL,0.0,,2,1
+D,40,UY,0.0,,,,ROTX,ROTZ
+D,40,UX
+ALLSEL,ALL,ALL
+
+CERIG,10,20,All
+CERIG,30,20,All
+CERIG,30,40,All
+
+SAVE
+FINISH
+! *** SOLUTION CONTROLS FOR MODAL ANALYSIS *** 
+! --------------------------------------------
+/SOLUTION
+ANTYPE,MODAL
+MXPAND,2,,,NO                       ! DO NOT OBTAIN FORCES AND STRESSES
+MODOPT,LANB,2,,,,OFF              	! 2 MODES EXTRACTED
+                                    ! MODE SHAPE NORMALIZE OFF
+SOLVE
+*GET,FREQ_1,MODE,1,FREQ
+*GET,FREQ_2,MODE,2,FREQ
+FINISH
+
+/POST1
+SET,1,1
+*GET,UZ1_20,NODE,20,U,Z
+*GET,UZ1_30,NODE,30,U,Z
+SET,1,2
+*GET,UZ2_20,NODE,20,U,Z
+*GET,UZ2_30,NODE,30,U,Z
+FINISH
+
+/SOLUTION
+ANTYPE,SPECTRUM
+SPOPT,DDAM							
+ADDAM,0.4,10.0,37.5,12.0,6.0   		! INPUT SPECTRAL ACCELERATION
+VDDAM,0.2,30.0,12.0,6.0        		! INPUT SPECTRAL VELOCITY
+SED,0,0,1                      		! ATHWARTSHIPS = Z, DIRECTION
+NRLSUM,,DISP
+OUTRES,ALL,ALL
+/OUT,
+SOLVE
+/OUT,SCRATCH
+*GET,MODC_1,MODE,1,MCOEF
+*GET,MODC_2,MODE,2,MCOEF
+*GET,PFAC_1,MODE,1,PFACT
+*GET,PFAC_2,MODE,2,PFACT
+FINISH
+
+/OUT,
+/COM, -----------------------------
+/COM, FREQUENCY VALUES
+/COM, -----------------------------
+*STATUS,FREQ_1
+*STATUS,FREQ_2
+/COM, -----------------------------
+/COM, MODE COEFFICIENT VALUES
+/COM, -----------------------------
+*STATUS,MODC_1
+*STATUS,MODC_2
+/COM, -----------------------------
+/COM, PARTICIPATION FACTOR VALUES
+/COM, -----------------------------
+*STATUS,PFAC_1
+*STATUS,PFAC_2
+/COM, -----------------------------
+/COM, DISPLACEMENT VALUES
+/COM, -----------------------------
+/COM, ----------
+/COM, MODE 1
+/COM, ----------
+*STATUS,UZ1_20
+*STATUS,UZ1_30
+/COM, ----------
+/COM, MODE 2
+/COM, ----------
+*STATUS,UZ2_20
+*STATUS,UZ2_30
+/COM, -----------------------------
+/COM, SHOCK DESIGN VALUES
+/COM, -----------------------------
+DA_1 = MODC_1*(2*_PI*FREQ_1)**2/PFAC_1
+DA_2 = MODC_2*(2*_PI*FREQ_2)**2/PFAC_2
+/COM
+/OUT,SCRATCH
+*DIM,LABEL,CHAR,2,3
+*DIM,VALUE,,2,3
+LABEL(1,1) = 'FREQ(f1),      ','FREQ(f2)  '  
+LABEL(1,2) = '     Hz','     Hz' 
+*VFILL,VALUE(1,1),DATA,46.30,114.0
+*VFILL,VALUE(1,2),DATA,FREQ_1,FREQ_2
+*VFILL,VALUE(1,3),DATA,FREQ_1/46.3,FREQ_2/114
+
+*DIM,LAB1,CHAR,5,2
+*DIM,VALUE1,,5,3
+LAB1(1,1) = 'DEF.(20), ','DEF.(30)  ','MCOEF  ','PFACT ','SHOCK,D1  ' 
+LAB1(1,2) = '  INCH','  INCH','','','  IN/S^2'
+*VFILL,VALUE1(1,1),DATA,0.1629,0.1099,0.1931,7.0659,2316
+*VFILL,VALUE1(1,2),DATA,UZ1_20,UZ1_30,MODC_1,PFAC_1,DA_1
+*VFILL,VALUE1(1,3),DATA,ABS(UZ1_20)/0.1629,ABS(UZ1_30)/0.1099,ABS(MODC_1)/0.1932,ABS(PFAC_1)/7.060,ABS(DA_1)/2316
+
+*DIM,LAB2,CHAR,5,2
+*DIM,VALUE2,,5,3
+LAB2(1,1) = 'DEF.(20), ','DEF.(30)  ','MCOEF  ','PFACT ','SHOCK,D2  ' 
+LAB2(1,2) = '  INCH','  INCH','','','  IN/S^2'
+*VFILL,VALUE2(1,1),DATA,-0.1099,0.1629,0.2175E-01,1.373,8133
+*VFILL,VALUE2(1,2),DATA,UZ2_20,UZ2_30,MODC_2,PFAC_2,DA_2
+*VFILL,VALUE2(1,3),DATA,ABS(UZ2_20)/0.1099,ABS(UZ2_30)/0.1629,ABS(MODC_2)/0.2176E-01,ABS(PFAC_2)/1.373,ABS(DA_2)/8133
+/COM
+/OUT,vm212,vrt
+/COM,------------------- VM212 RESULTS COMPARISON --------------
+/COM,
+/COM,                   |   TARGET   |   Mechanical APDL   			|   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F12.4,'  ',F16.4,'   ',1F15.3)
+/COM,
+/COM,MODE # 1
+/COM,
+*VWRITE,LAB1(1,1),LAB1(1,2),VALUE1(1,1),VALUE1(1,2),VALUE1(1,3)
+(1X,A8,A8,'   ',F12.4,'  ',F16.4,'   ',1F15.3)
+/COM,
+/COM,MODE # 2
+/COM,
+*VWRITE,LAB2(1,1),LAB2(1,2),VALUE2(1,1),VALUE2(1,2),VALUE2(1,3)
+(1X,A8,A8,'   ',F12.4,'  ',F16.4,'   ',1F15.3)
+/COM,----------------------------------------------------------
+/OUT,
+*LIST,vm212,vrt
+FINISH

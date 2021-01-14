@@ -1,0 +1,63 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM30
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/PREP7
+SMRT,OFF
+/TITLE, VM30, SOLID MODEL OF SURFACE FILLET
+/COM,   REF:  NAFEMS BENCHMARKS FOR FINITE ELEMENT PRE-PROCESSORS
+/COM,         D.R. HOSE, I.A. RUTHERFORD, REF R0001, ISSUED 12/2/93, PP. 23.
+/COM,
+ET,1,SHELL281                      ! 8-NODE SHELL
+L=8.0                              ! BASE LENGTH
+H=2.0                              ! BASE HEIGHT
+RECTNG,,L/2,,H,                    ! CREATE RECTANGULAR AREA
+WPROTA,,90                         ! ROTATE POSITIVE Y TOWARDS Z
+PTXY,0,0,-2,2,6,2,4,0,             ! DEFINE COORDINATE PAIRS FOR POLYGON
+POLY                               ! DEFINE POLYGONAL AREA
+AGLUE,1,2                          ! GLUE AREAS 1 AND 2
+AFILLT,1,3,1                       ! CREATE AREA FILLET WITH CONSTANT RADIUS=1
+/FACET,WIRE
+/VIEW,1,1,2,3
+/PNUM,AREA,1                       ! TURN ON AREA NUMBERING
+APLOT                              ! PLOT AREAS                             
+ACCAT,ALL                          ! CONCATENATE AREAS 
+LSEL,S,LINE,,5                     ! SELECT LINES TO CONCATENATE
+LSEL,A,LINE,,21,24,3
+LCCAT,ALL                          ! CONCATENATE LINES
+LSEL,S,LINE,,20,23,3               ! SELECT LINES TO CONCATENATE
+LSEL,A,LINE,,7
+LCCAT,ALL                          ! CONCATENATE LINES
+MSHK,1                             ! MAPPED AREA MESH 
+MSHA,0,2D                          ! USING QUADS
+AMESH,1                            ! MESH USING DEFAULT ELEMENT SIZE
+EPLOT                              ! PLOT ELEMENTS
+LOCAL,11,,,,,,,-45                 ! ROTATE X TOWARDS Z
+DSYS,11
+NROTAT,ALL
+NSEL,S,LOC,X,-.1,.1
+*GET,NXMAX,NODE,,MXLOC,X           ! CHECK THE POSITIVE DEVIATION FROM ZERO
+*GET,NXMIN,NODE,,MNLOC,X           ! CHECK THE NEGATIVE DEVIATION FROM ZERO
+*DIM,LABEL,CHAR,2,2
+*DIM,VALUE,,2,3
+LABEL(1,1) = 'MAX LOCA','MIN LOCA'
+LABEL(1,2) = 'TION    ','TION    '
+*VFILL,VALUE(1,1),DATA,0,0 
+*VFILL,VALUE(1,2),DATA,NXMAX,NXMIN
+*VFILL,VALUE(1,3),DATA,0,0
+/COM
+/OUT,vm30,vrt
+/COM,------------------- VM30 RESULTS COMPARISON ---------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+/COM,DEVIATION:
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.0,'  ',E14.3,'   ',1F15.3)
+/COM,
+/COM,NOTE: THE LARGER OF THE TWO DEVIATIONS LISTED IS THE 'MAXIMUM DEVIATION'
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm30,vrt
+

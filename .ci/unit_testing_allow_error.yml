@@ -1,8 +1,0 @@
-steps:
-- script: |
-    python -m pip install -r requirements_test.txt
-    cd tests
-    python -m pytest -v --cov pyvista --cov-report xml
-    cd ..
-  displayName: 'Unit Testing'
-  continueOnError: True

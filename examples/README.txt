@@ -1,5 +1,5 @@
-.. _ref_examples:
+.. _ref_example_gallery:
 
-MAPDL and Result Reader Examples
-================================
-Here are a series of examples using MAPDL with ``pyansys``.
+Examples
+========
+Here are a series of examples using MAPDL with ``ansys-mapdl-core``.

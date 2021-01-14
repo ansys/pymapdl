@@ -2,8 +2,8 @@
 ###################
 *.pyc
 *.pyd
-_*.c
-_*.cpp
+*.c
+*.cpp
 *.so
 *.o
 *.cache
@@ -14,19 +14,25 @@ _*.cpp
 *~
 *swp
 
+# emacs
+flycheck*
+
+# Old files #
+_old/
+
 # Pip generated folders #
 #########################
-pyansys.egg-info/
+*.egg-info/
 build/
 dist/
-wheelhouse
-.eggs
 
 # MISC
 _build/
 pyansys/Interface.py
 *.bat
-run_tests.sh
+docs/source/examples/*
+*.out
+*.tar.gz
 
 # Testing
 factory/
@@ -40,14 +46,23 @@ tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
 *,cover
-flycheck*
-test-output.xml
-coverage.xml
-.benchmarks
+.benchmarks/
 
-# ignore certain result files
-tests/testfiles/is16.rst
+\#*
+.\#*
+/.ipynb_checkpoints
 
-# docs
-docs/examples/*
-docs/images/auto-generated/*
+# test scripts
+*.sh
+*.cmd
+wheelhouse/
+
+# jupyterlab
+node_modules
+yarn.lock
+jupyterlab/docker/*.tar.gz
+examples/.local
+.ipynb_checkpoints/
+
+# docker
+docker/mapdl/v211

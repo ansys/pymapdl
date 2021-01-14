@@ -1,0 +1,171 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VMC3
+/SHOW
+  /TITLE, VMC3, BARREL VAULT ROOF UNDER SELF WEIGHT
+  /COM, REF:  COOK, CONCEPTS AND APPL OF F.E.A., 2ND ED., 1981, PP. 284-287.
+  *DIM,NARAY,TABLE,12,7            ! 2-D NARAY FOR RESULTS INFO
+  *DO,I,1,12
+    *DO,J,1,7
+      NARAY(I,J)=0.                ! INITIALIZE NARAY
+    *ENDDO
+  *ENDDO
+*CREATE,base,
+  PARSAV,ALL
+  /clear, nostart
+  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+  /SHOW,JPEG
+  PARRES,CHANGE
+  /PREP7
+  smrt,off
+  /TITLE, VMC3, BARREL VAULT ROOF UNDER SELF WEIGHT
+  /COM, REF:  COOK, CONCEPTS AND APPL OF F.E.A., 2ND ED., 1981, PP. 284-287.
+ /OUT,SCRATCH
+  ANTYPE,STATIC
+  ET,1,ETYP                        ! DEFINE ELEMENT TYPE PARAMETRICALLY
+  *IF,ETYP,EQ,181,THEN
+   KEYOPT,1,3,2
+  *ENDIF
+  MP,EX,1,4.32E8                   ! DEFINE MATERIAL PROPERTIES
+  MP,NUXY,1,0.0
+  R,1,0.25
+  MP,DENS,1,36.7347
+  CSYS,1                           ! DEFINE CYLINDRICAL C.S.
+  K,1,25,50
+  K,2,25,70                        ! DEFINE KEYPOINTS
+  K,3,25,90
+  KGEN,3,1,3,1,,,12.5
+  A,1,2,5,4
+  A,2,3,6,5                        ! DEFINE AREAS
+  A,4,5,8,7
+  A,5,6,9,8
+  ESIZE,,ARG1/2
+  ESHAPE,ARG2
+  AMESH,ALL                        ! MESH ALL AREAS
+  /VIEW,1,1,1,1
+  NARAY(ARG3,2)=ARG1               ! STORE N1
+  NARAY(ARG3,3)=ARG2               ! STORE N2
+  *GET,MAXN,NODE,,NUM,MAX          ! GET MAX NODE NUMBER
+  NARAY(ARG3,4)=MAXN*6             ! CALCULATE NO. DEGREES OF FREEDOM
+  NSEL,S,LOC,Z,0
+  NSEL,R,LOC,Y,50                  ! SELECT NODE OF INTEREST
+  *GET,N1,NODE,,NUM,MAX            ! GET NODE NUMBER
+  NSEL,S,LOC,Z,0
+  NSEL,R,LOC,Y,90
+  *GET,N2,NODE,,NUM,MAX            ! GET NODE NUMBER
+  NSEL,ALL
+  CSYS,0                           ! SWITCH TO GLOBAL CARTESIAN C.S.
+  NSEL,S,LOC,X,0
+  DSYM,SYMM,X,0
+  NSEL,S,LOC,Z,0
+  DSYM,SYMM,Z,0
+  NSEL,S,LOC,Z,25
+  D,ALL,UX,0,,,,UY,ROTZ            ! CONSTRAIN MODEL EDGE
+  NSEL,ALL
+  ACEL,,9.8                        ! DEFINE GRAVITATIONAL ACCELERATION
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /AUTO,1
+  /VIEW,1,0.5,0.5,0.5
+  /ANG,1,6.28
+  /DEVICE,VECTOR,1
+  /DEVICE,DITHER,1
+  /TYPE,ALL,4
+  /COLOR,NUM,BLUE,1
+  *IF,ETYP,NE,43,OR,ETYP,NE,63,THEN,
+  *IF,ARG1,EQ,4,THEN
+  *IF,ARG2,EQ,2,THEN
+  /TITLE,VMC3 - QUADRILATERAL MESH (N = 4)
+  EPLOT
+  *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,NE,43,OR,ETYP,NE,63,THEN
+  *IF,ARG1,EQ,8,THEN
+  *IF,ARG2,EQ,2,THEN
+  /TITLE,VMC3 - QUADRILATERAL MESH (N = 8)
+  EPLOT
+  *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,NE,43,OR,ETYP,NE,63,THEN
+  *IF,ARG1,EQ,4,THEN
+  *IF,ARG2,EQ,1,THEN
+  /TITLE,VMC3 - TRIANGLE MESH (N = 4)
+  EPLOT
+  *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,NE,43,OR,ETYP,NE,63,THEN
+  *IF,ARG1,EQ,8,THEN
+  *IF,ARG2,EQ,1,THEN
+  /TITLE,VMC3 - TRIANGLE MESH (N = 8)
+  EPLOT
+  *ENDIF
+  *ENDIF
+  *ENDIF
+  /SHOW,GRPH
+  /TITLE, VMC3, BARREL VAULT ROOF UNDER SELF WEIGHT
+  FINISH
+  /SOLU
+  SOLVE
+  FINISH
+  /POST1
+  SHELL,MID                        ! SELECT BOTTOM SURFACE
+  *GET,UY1,NODE,N1,U,Y             ! GET UY AT NODE N1
+  NARAY(ARG3,5)=-(UY1/.3016)       ! CALCULATE NORMALIZED UY1 W/R TO TARGET
+  RSYS,1                           ! ACTIVATE CYLINDRICAL C.S. FOR RESULTS
+  SHELL,BOT                        ! SELECT BOTTOM SURFACE
+  *GET,SY2B,NODE,N2,S,Y            ! GET CIRCUMFERENTIAL (Y) STRESS AT BOTTOM
+  NARAY(ARG3,7)=(SY2B/(-213400))   ! CALCULATE NORMALIZED SY2B
+  *GET,SZ1B,NODE,N1,S,Z            ! GET AXIAL (Z) STRESS AT BOTTOM
+  NARAY(ARG3,6)=(SZ1B/358420)      ! CALCULATE NORMALIZED SZ1B
+  PARSAV,,PARAM
+  FINISH
+*END
+  *DO,I,1,4                        ! INITIALIZE COLUMN 1 WITH ELEMENT TYPES
+   NARAY(I,1)=63
+   NARAY(I+4,1)=181
+   NARAY(I+8,1)=281
+*ENDDO
+  *DO,I,1,3
+    *IF,I,EQ,1,THEN
+      ETYP=63
+      JINDX=0
+    *ELSEIF,I,EQ,2,THEN
+      ETYP=181
+      JINDX=4
+    *ELSEIF,I,EQ,3,THEN
+      ETYP=281
+      JINDX=8
+  *ENDIF
+    /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPE
+    *DO,J,1,4
+      *IF,J,EQ,1,THEN
+        *USE,base,4,2,JINDX+J
+      *ELSEIF,J,EQ,2,THEN
+        *USE,base,8,2,JINDX+J
+      *ELSEIF,J,EQ,3,THEN
+        *USE,base,4,1,JINDX+J
+	*ELSEIF,J,EQ,4,THEN
+        *USE,base,8,1,JINDX+J
+    *ENDIF
+    *ENDDO
+  *ENDDO
+SAVE,temp,db
+finish
+  RESUME,temp,db
+  
+  /OUT,vmc3,vrt
+  /OUT
+  /COM
+  /COM,------------------- VMC3 RESULTS LISTING ------------------------------------
+  /COM,
+  /COM,| ETYP | N  | DOF   |  UY(1)  | SIG-z  | SIG-th  |
+  /COM,
+  *VWRITE,naray(1,1),naray(1,2),naray(1,4),NARAY(1,5),NARAY(1,6),NARAY(1,7)
+  (F5.0,'  ',F5.0,'  ',F5.0,' ',F10.3,'  ',F7.3,'     ',F5.3)
+  /COM,-----------------------------------------------------------------------------
+  /OUT
+  *LIST,vmc3,vrt
+finish

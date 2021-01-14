@@ -1,0 +1,99 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM214
+/TITLE, VM214, ROD ROTATING IN UNIFORM MAGNETIC FIELD
+/com,
+/com,  Problem description:
+/com,  A conducting rod of length L and radius R is rotating in a uniform
+/com,  magnetic field Bz with angular velocity OMEGAZ. Determine the EMF
+/com,  induced in the rod.
+/com,  
+/com,  Reference: Any basic electromagnetic text book
+/com,
+
+JPGPRF,500,100,1
+/PREP7
+
+PI=ACOS(-1)
+
+L_ROD=0.06		    ! LENGTH OF ROD
+R_ROD=L_ROD/10		! RADIUS OF ROD
+
+D_DMN=L_ROD/2		! DEPTH OF SURROUNDING DOMAIN (EXTENDING BEYOND ROD)
+
+BZ_EXT=0.1		    ! EXTERNAL FIELD
+
+OMG_ROD=60*2*PI		! ROD ANGULAR VELOCITY (RAD/S)
+
+BLOC,-D_DMN,L_ROD+D_DMN,-D_DMN,D_DMN,-D_DMN,D_DMN
+WPRO,,,90
+CYLI,R_ROD,,0,L_ROD
+
+VSBV,1,2,,DELE,KEEP
+VSEL,S,VOLU,,2
+VATT,2,2,2
+VSEL,INVE
+VATT,1,1,1
+ALLSEL,ALL
+
+ET,1,SOLID236       ! 3D 20 NODE ELECTROMAGNETIC SOLID ELEMENTS
+MP,MURX,1,1
+
+ET,2,SOLID236,1
+MP,MURX,2,1
+MP,RSVX,2,1
+
+VSEL,S,MAT,,2
+VSWE,ALL
+VSEL,S,MAT,,1
+/OUT,SCRATCH
+MSHA,1
+MSHMID,1              ! STRAIGHT EDGES
+VMES,ALL
+
+BF,ALL,VELO,,,,,,OMG_ROD ! OMEGAZ (RAD/S)
+
+DFLX,ALL,,,BZ_EXT     ! UNIFORM MAGNETIC FIELD
+
+VSEL,S,MAT,,2
+ALLS,BELO,VOLU
+NSEL,R,LOC,X
+D,ALL,VOLT            ! ELECTRICALLY GROUND ONE END
+ALLSEL,ALL
+FINISH
+
+/SOLU
+ANTYPE,STATIC         ! ELECTROMAGNETIC STATIC ANALYSIS
+TIME,1.0
+SOLVE
+FINISH
+
+/POST1
+SET,LAST
+ESEL,S,TYPE,,2
+PLNSOL,VOLT
+ALLSEL,ALL
+
+/OUT,
+V_END=VOLT(NODE(L_ROD,0,0))
+V_END_TAR=0.5*OMG_ROD*BZ_EXT*L_ROD**2   ! V=B*OMEGA*L^2/2
+
+*DIM,LABEL,CHAR,2,2
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'VOLTAGE', 
+LABEL(1,2) = '  (V)     '
+*VFILL,VALUE(1,1),DATA,v_end_tar,
+*VFILL,VALUE(1,2),DATA,v_end,
+*VFILL,VALUE(1,3),DATA,ABS(v_end/v_end_tar),
+/COM
+/OUT,vm214,vrt
+/COM,------------------- VM214 RESULTS COMPARISON --------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F9.5,'  ',F13.5,'   ',1F15.3)
+/COM,
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm214,vrt

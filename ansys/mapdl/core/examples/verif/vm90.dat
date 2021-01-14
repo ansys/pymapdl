@@ -1,0 +1,85 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM90
+/PREP7                    
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/TITLE, VM90, HARMONIC RESPONSE OF A TWO-MASS-SPRING SYSTEM
+C*** VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 178,EX 6.6-1
+ANTYPE,HARMIC             ! HARMONIC RESPONSE ANALYSIS
+HROPT,FULL                ! FULL HARMONIC RESPONSE
+HROUT,OFF                 ! PRINT RESULTS AS AMPLITUDES AND PHASE ANGLES
+ET,1,COMBIN14,,,2
+ET,2,MASS21,,,4
+R,1,200                   ! SPRING CONSTANT = 200
+R,2,.5                    ! MASS = 0.5
+N,1
+N,4,1
+FILL
+E,1,2
+TYPE,2
+REAL,2
+E,2                       ! MASS ELEMENT
+TYPE,1
+REAL,1
+E,2,3                     ! SPRING ELEMENT
+TYPE,2
+REAL,2
+E,3                       ! MASS ELEMENT
+TYPE,1
+REAL,1
+E,3,4                     ! SPRING ELEMENT
+OUTPR,BASIC,1
+NSUBST,30                 ! 30 INTERVALS WITHIN FREQ. RANGE
+HARFRQ,,7.5               ! FREQUENCY RANGE FROM 0 TO 7.5 HZ
+KBC,1                     ! STEP BOUNDARY CONDITION
+D,1,UY,,,4
+D,1,UX,,,4,3
+F,2,FX,200
+FINISH
+/SOLU    
+SOLVE
+FINISH
+/POST26
+FILE,,rst
+NSOL,2,2,U,X,2UX          ! STORE UX DISPLACEMENTS 
+NSOL,3,3,U,X,3UX
+PRVAR,2,3
+*GET,X1,VARI,2,RTIME,1.5
+*GET,X2,VARI,3,RTIME,1.5
+*GET,X3,VARI,2,RTIME,4
+*GET,X4,VARI,3,RTIME,4
+*GET,X5,VARI,2,RTIME,6.5
+*GET,X6,VARI,3,RTIME,6.5
+/GRID,1                   ! TURN GRID ON
+/AXLAB,Y,DISP             ! Y-AXIS LABEL DISP
+PLVAR,2,3                 ! DISPLAY VARIABLES 2 AND 3
+*DIM,LABEL,CHAR,6,2
+*DIM,VALUE,,6,3
+LABEL(1,1) = 'X1, in  ','X2, in  ','X1, in  ','X2, in  ','X1, in  ','X2, in  '
+LABEL(1,2) = 'f=1.5 Hz','f=1.5 Hz','f=4 Hz  ','f=4 Hz  ','f=6.5 Hz','f=6.5 Hz'
+*VFILL,VALUE(1,1),DATA,.82272,.46274,.51145,1.2153,.58513,.26966
+*VFILL,VALUE(1,2),DATA,ABS(X1),ABS(X2),ABS(X3),ABS(X4),ABS(X5),ABS(X6)
+V1 = ABS(X1/.82272)
+V2 = ABS(X2/.46274)
+V3 = ABS(X3/.51145)
+V4 = ABS(X4/1.2153)
+V5 = ABS(X5/.58513)
+V6 = ABS(X6/.26965)
+*VFILL,VALUE(1,3),DATA,V1,V2,V3,V4,V5,V6
+/COM
+/OUT,vm90,vrt
+/COM,------------------- VM90 RESULTS COMPARISON ---------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.5,'  ',F14.5,'   ',1F15.3)
+/COM,-----------------------------------------------------------
+/COM,
+/COM,-----------------------------------------------------------
+/COM,NOTE: THERE ARE VERIFIED RESULTS IN VM90  NOT CONTAINED IN
+/COM,THIS TABLE
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm90,vrt

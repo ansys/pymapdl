@@ -1,0 +1,101 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM169
+/PREP7
+smrt,off
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/TITLE, VM169, PERMANENT MAGNET CIRCUIT WITH AN AIR GAP
+/stitle,1,Reason COMPARE differences are acceptable:
+/stitle,2,  mesher accuracy - number of nodes, elements, numbering; near-zero values
+!                MAGNETO-SOLID MECHANICS, MOON, PG. 275
+!                USING TETRAHEDRAL SOLID ELEMENTS (SOLID98)
+ET,1,SOLID98,10             ! TETRAHEDRAL COUPLED-FIELD SOLID
+EMUNIT,MKS                  ! MKS UNITS
+MP,MURX,1,1
+MP,MURX,2,1E5               ! IRON RELATIVE PERMEABILITY
+MP,MURX,3,5.30504           ! PERMANENT MAGNET RELATIVE PERMEABILITY
+MP,MGXX,3,129900            ! MGXX
+MP,MGZZ,3,-75000            ! MGZZ
+LOCAL,11,0,,,,,,30          ! ROTATED LOCAL CARTESIAN SYSTEM
+K,1
+K,2,1.5E-2
+K,3,2.5E-2
+KGEN,2,1,3,1,,1E-2
+KGEN,2,4,6,1,,2E-2
+KGEN,2,7,9,1,,1E-3
+KGEN,2,10,12,1,,1E-2
+A,1,2,5,4                   ! CREATE AREAS
+A,2,3,6,5
+A,5,6,9,8
+A,10,11,14,13
+A,11,12,15,14
+A,8,9,12,11
+K,16,,,1E-2
+L,1,16
+VDRAG,1,2,3,4,5,6,20        ! DRAG AREAS TO CREATE VOLUMES
+VSEL,S,,,1
+VATT,3                      ! SET MATERIAL ATTRIBUTES
+VSEL,S,,,6
+VATT,1
+VSEL,S,,,2,3
+VSEL,A,,,4,5
+VATT,2
+VSEL,S,,,1,5
+ESIZE,,1 
+MSHK,0                    ! FREE VOLUME MESH
+MSHA,1,3D                 ! USING TETS 
+VMESH,ALL
+VSEL,ALL
+VMESH,6                     ! MESH AIR GAP 
+NSEL,,LOC,X,0
+D,ALL,MAG,0                 ! SET FLUX-NORMAL BOUNDARY CONDITION
+NSEL,ALL
+WSORT,Y                     ! REORDER WAVEFRONT
+FINISH
+/SOLU    
+MAGSOLV,2                   ! RSP METHOD
+FINISH
+/POST1
+RSYS,11
+/VIEW,,6E-2,5E-2,6E-2
+/EDGE,1,1
+/DEVICE,VECTOR,1	    ! TURN ON WIREFRAME MODE
+PLVECT,B                    ! DISPLAY B VECTOR
+/VSCALE,,,1                 ! SET FOR UNIFORM VECTOR SCALING
+PLVECT,H                    ! DISPLAY H VECTOR
+ESEL,,MAT,,1                ! SELECT AIR ELEMENTS
+PRNSOL,B,COMP               ! PRINT B
+NSORT,B,SUM
+*GET,B1,SORT,,MAX
+PRNSOL,H,COMP               ! PRINT H
+NSORT,H,SUM
+*GET,H1,SORT,,MAX
+ESEL,,MAT,,3                ! SELECT PERMANENT MAGNET ELEMENTS
+PRNSOL,B,COMP               ! PRINT B
+NSORT,B,SUM
+*GET,B2,SORT,,MAX
+PRNSOL,H,COMP               ! PRINT H
+NSORT,H,SUM
+*GET,H2,SORT,,MAX
+*status,parm
+*DIM,LABEL,CHAR,4,2
+*DIM,VALUE,,4,3
+LABEL(1,1) = 'B T ','H A/m ','B T ','H A/m '
+LABEL(1,2) = 'PMAG','PMAG','AIR','AIR'
+
+*VFILL,VALUE(1,1),DATA,.7387,39150,.7387,587860
+*VFILL,VALUE(1,2),DATA,B2,H2,B1,H1
+*VFILL,VALUE(1,3),DATA,ABS(B2/.7387),ABS(H2/39150),ABS(B1/.7387),ABS(H1/587860)
+/COM
+/OUT,vm169,vrt
+/COM,------------------- VM169 RESULTS COMPARISON -------------
+/COM,
+/COM,                 |   TARGET     |   Mechanical APDL     |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F12.4,'  ',F16.4,'   ',1F15.3)
+/COM,----------------------------------------------------------
+/OUT
+FINISH
+/DELETE,magsolv,out
+*LIST,vm169,vrt

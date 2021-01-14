@@ -1,21 +1,20 @@
 import os
 import pytest
-import pyansys
-
-test_path = os.path.dirname(os.path.abspath(__file__))
-testfiles_path = os.path.join(test_path, 'testfiles')
+import ansys.mapdl.core as pymapdl
+from ansys.mapdl.core import examples
 
 
 def test_convert_no_use_function_names(tmpdir):
-    vm_file = os.path.join(testfiles_path, 'vm1.dat')
+    vm_file = examples.vmfiles['vm1']
     pyscript = str(tmpdir.mkdir('tmpdir').join('vm1.py'))
-    clines = pyansys.convert_script(vm_file, pyscript, loglevel='ERROR',
+    clines = pymapdl.convert_script(vm_file, pyscript, loglevel='ERROR',
                                     use_function_names=False)
+    assert clines
 
 
 @pytest.mark.skipif(os.name == 'nt', reason='Requires multiple instances')
 def test_convert(tmpdir):
-    vm_file = os.path.join(testfiles_path, 'vm1.dat')
+    vm_file = examples.vmfiles['vm1']
     pyscript = str(tmpdir.mkdir('tmpdir').join('vm1.py'))
-    clines = pyansys.convert_script(vm_file, pyscript, loglevel='ERROR')
-    assert len(clines)
+    clines = pymapdl.convert_script(vm_file, pyscript, loglevel='ERROR')
+    assert clines

@@ -1,0 +1,81 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,vm232
+/title,VM232, PDS Response Surface Study
+/COM, Verification Example using the Weibull and the Exponential
+/COM, distribution. We use MCS and RSM to compare with the
+/COM, analytical results
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+!
+! ---------  make loop file  --------
+*CREATE,PDVERIFY1,INP
+XEXPO  = 1.0
+XWEIB  = 1.0
+COEF1  = 1.0
+COEF2  = 0.1
+LAMBDA = 0.5
+Y = COEF1*XWEIB*XWEIB - COEF2*XEXPO
+*END
+!
+! ---------  run loop file  --------
+/INP,PDVERIFY1,INP
+!
+! ---------  PDS Definitions  --------
+/PDS
+PDANL,PDVERIFY1,INP            ! Define analysis file
+! ----------- Exponential ----------------------------------
+PDVAR,XEXPO,EXPO,LAMBDA,0.0    ! Define XEXPO as exponential
+PDPLOT,XEXPO
+! -----------WEIBULL ----------------------------------
+PDVAR,XWEIB,WEIB,2.0,1.0,0.0   ! Define XWEIB as Weibull
+PDPLOT,XWEIB
+! ----------- OUTPUT ----------------------------------
+PDVAR,Y,RESP                   ! Define Y as response parameter
+!
+! ---------  PDS Methods - LHS  --------
+/COM, **************************************
+/COM, Define and run latin hypercube samples
+/COM, **************************************
+PDMETH,MCS,LHS                 ! Set LHS as method
+PDLHS,1000,1,RAND,,ALL,,,,INIT ! Define LHS options
+PDEXEC,LHSRUN,SER              ! Execute LHS runs
+!
+! ---------  PDS Methods - CCD  --------
+/COM, **************************************
+/COM, Define and run central composit design
+/COM, **************************************
+PDMETH,RSM,CCD                 ! Set CCD as method
+PDEXEC,CCDRUN,SER              ! Execute CCD runs
+!
+! ---------  PDS FIT RESPONSE SURFACE  --------
+/COM, *********************************
+/COM, Fit response surface for CCD runs
+/COM, *********************************
+RSFIT,CCDFIT,CCDRUN,Y,QUAX,NONE,,FSR,0.95
+!
+! ---------  PDS SAMPLES ON RESPONSE SURFACE  --------
+/COM, ***************************************
+/COM, Perform MCS samples on response surface
+/COM, ***************************************
+RSSIMS,CCDFIT,50000,INIT
+/DIST,1,1.05
+/VIEW,1,-1,-1,1
+RSPLOT,CCDFIT,Y,XEXPO,XWEIB,3D,
+!
+! ---------  PDS POST-PROCESSING  --------
+/COM,
+/COM, **************************************
+/COM, Analytical probability that "Y<0.0"
+/COM, **************************************
+PROB = 1.0/( (LAMBDA*COEF1/COEF2) + 1.0)
+/COM,
+/COM, **************************************
+/COM, Probability that "Y<0.0" for LHS
+/COM, **************************************
+PDPROB,LHSRUN,Y,LT,0.0
+/COM,
+/COM, **************************************
+/COM, Probability that "Y<0.0" for CCD
+/COM, **************************************
+PDPROB,CCDFIT,Y,LT,0.0
+Fini

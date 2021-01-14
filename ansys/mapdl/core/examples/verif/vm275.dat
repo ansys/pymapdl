@@ -1,0 +1,361 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/verify,vm275
+/title,vm275,Mode lock-in and friction induced vibration on a Pin-Disc Model
+/com,
+/com,  This verification manual highlights the mode coupling 
+/com,  phenomenon on a pin-disc set up using brake squeal analysis.
+/com,  The brake squeal analysis is performed using all 3 methods
+/com,
+/com,  Reference: 
+/com,  Allgaier, R., Gaul, L., Keiper, W., Willner, K., Mode Lock-In
+/com,  and Friction Modeling, Computational Methods in Contact
+/com,  Mechanics IV,ed. By L. Gaul and C.A. Brebbia, WIT Press,
+/com,  Southampton (1999), pg 35-47
+/com,
+
+/output,scratch                        ! Redirect output to Scratch file
+JPGPRF,500,100,1
+/SHOW,JPEG
+/prep7  
+et,1,solid186                       ! Solid186
+keyopt,1,2,1                        ! Full Integration
+type,1  
+    
+mp,ex,1,70000
+mp,dens,1,2.7e-9
+mp,nuxy,1,0.33  
+    
+cylind,8,179,-12.5,12.5,0,90        ! Model Disc 
+    
+lsel,s,line,,9,12,1 
+lesize,all,,,3  
+lsel,all
+    
+lsel,s,line,,1,8,7  
+lsel,a,line,,3,6,3  
+lesize,all,,,12
+lsel,all
+    
+lsel,s,line,,2,7,5  
+lsel,a,line,,4,5,1  
+lesize,all,,,12
+lsel,all
+    
+vsweep,all  
+vsymm,x,all 
+vsymm,y,all 
+nummrg,node 
+nummrg,kp   
+allsel,all  
+    
+csys,1  
+nsel,s,loc,x,8
+d,all,all,0                 ! Constrain the inner radius of Disc
+allsel,all  
+    
+csys,0  
+    
+local,11,0,0,0,12.5,0,0,4   
+csys,11 
+    
+    
+k,100,0,167.00,0.00 
+k,101,0,157.00,0.00 
+k,102,-10.00,157.00,0.00
+k,103,-10.00,167.00,0.00
+    
+k,104,0,167.00,0.00+149 
+k,105,0,157.00,0.00+149  
+k,106,-10.00,157.00,0.00+149
+k,107,-10.00,167.00,0.00+149 
+    
+    
+a,100,101,102,103   
+a,104,105,106,107   
+a,100,101,105,104   
+a,103,102,106,107   
+a,100,104,107,103   
+a,101,105,106,102   
+    
+va,12,17,23,24,25,26            ! Modeling Pin
+    
+    
+ET,2,solid186
+keyopt,2,2,1
+    
+TYPE,2  
+mat,1   
+ESIZE,5
+VMESH,5 
+ALLSEL,ALL  
+
+vsel,s,volume,,5
+eslv,s
+nsle,s
+nrotate,all
+allsel,all
+    
+csys,0  
+    
+    
+et,3,conta175               ! Defining Frictional Contact Pair
+mp,mu,3,0.152               ! Coefficient of Friction
+keyopt,3,2,0                ! Augumented Lagrangian
+keyopt,3,9,2                ! Include penetration or gap with ramped effects
+keyopt,3,10,2               ! Update contact stiffness each iteration
+keyopt,3,12,0               ! Standard Contact
+
+
+    
+et,4,targe170
+    
+r,3 
+rmodif,3,3,1                ! Normal penalty stiffness factor
+rmodif,3,5,0                ! Initial contact closure
+rmodif,3,6,1                ! Pin ball region
+rmodif,3,10,0               ! Contact surface offset
+rmodif,3,12,0               ! Tanget penalty stiffness factor
+    
+type,3  
+real,3  
+mat,3   
+    
+e,node(0,167.00,12.500) 
+e,node(0,164.50,12.500) 
+e,node(0,162.00,12.500) 
+e,node(0,159.50,12.500) 
+e,node(0,157.00,12.500) 
+    
+   
+allsel,all  
+    
+type,4  
+real,3  
+    
+asel,s,area,,2,20,6 
+nsla,s,1
+esln,s  
+esurf   
+allsel,all  
+    
+esel,s,type,,4  
+cm,tar,elem                 ! Forming a component with target elements
+allsel,all  
+
+
+save,vm275,db
+finish
+
+/com, *******************************************************
+/com,  Full Nonlinear Perturbed Modal Analysis
+/com, ********************************************************
+
+   
+/solu   
+antype,static   
+nlgeom,on                   ! Nonlinear analysis
+nropt,unsym                 ! Newton-Raphson with unsymmetric matrices
+rescontrol,define,all,1 
+asel,s,area,,17 
+nsla,s,1
+d,all,ux,0  
+d,all,uy,0 
+d,all,uz,-0.1               ! Displacement load to bring Pin and Disc
+allsel,all                  ! to contact
+time,1  
+autots,on   
+nsubs,10,20,1
+solve                       ! 1st Load Step
+    
+   
+time,2.0
+cmrot,tar,,,2.0             ! Rotate the nodes of target element
+autots,on                   ! to generate sliding friction contact
+solve                       ! 2nd Load Step
+finish  
+
+    
+/solu   
+antype,static,restart,,,perturb     ! Restarting from last load step and sub step
+perturb,modal,,,
+solve,elform                        ! Reform the matrices
+    
+modopt,unsym,30,500,4000,           ! Solving using UNSYM eigensolver
+mxpand,30,,,
+/out,
+solve   
+fini
+    
+/post1  
+file,,rstp  
+set,1,7
+*get,unstablemode1,active,0,set,freq
+*stat,unstablemode1
+*dim,label,char,1,2
+*dim,value,,1,3
+
+label(1,1)='Mode'
+
+*vfill,value(1,1),data,2215                     ! Unstable mode from Reference
+*vfill,value(1,2),data,unstablemode1            ! Results obtained from MAPDL
+*vfill,value(1,3),data,abs(2215/unstablemode1)  ! Ratio
+save,table_1
+finish
+/delete,,rstp
+/delete,,rst
+/clear,nostart
+
+
+/com, *******************************************************
+/com,  Partial Nonlinear Perturbed Modal Analysis
+/com, *******************************************************
+/out,scratch
+
+/prep7
+resume,vm275,db
+finish
+
+/solu   
+antype,static   
+nlgeom,on                   ! Nonlinear analysis
+nropt,unsym                 ! Newton-Raphson with unsymmetric matrices
+rescontrol,define,all,1 
+asel,s,area,,17 
+nsla,s,1
+d,all,ux,0  
+d,all,uy,0 
+d,all,uz,-0.1               ! Displacement load to bring Pin and Disc
+allsel,all                  ! to contact
+time,1  
+autots,on   
+nsubs,10,20,1
+solve                       ! 1st Load Step
+finish  
+
+   
+/solu   
+antype,static,restart,,,perturb     ! Restarting from last load step and sub step
+perturb,modal,,,
+cmrot,tar,,,2.0                     ! Rotate the nodes of target element
+                                    ! to generate sliding friction contact
+solve,elform                        ! Reform the matrices
+    
+modopt,unsym,30,500,4000,           ! Solving using UNSYM eigensolver
+mxpand,30,,,
+/out,
+solve   
+fini
+    
+/post1  
+file,,rstp  
+set,1,7
+*get,unstablemode2,active,0,set,freq
+*stat,unstablemode2
+*dim,label,char,1,2
+*dim,value,,1,3
+
+label(1,1)='Mode'
+
+*vfill,value(1,1),data,2215                     ! Unstable mode from Reference
+*vfill,value(1,2),data,unstablemode2            ! Results obtained from MAPDL
+*vfill,value(1,3),data,abs(2215/unstablemode2)  ! Ratio
+save,table_2
+finish
+/delete,,rstp
+/delete,,rst
+/clear,nostart
+
+
+/com, *******************************************************
+/com,  Linear Non-prestressed Modal Analysis
+/com, *******************************************************
+
+/output,scratch
+/prep7
+resume,vm275,db
+allsel,all
+asel,s,area,,17 
+nsla,s,1
+d,all,ux,0  
+d,all,uy,0 
+d,all,uz,0.0               
+allsel,all
+finish
+
+/solu 
+antype,modal        
+nropt,unsym                         ! Newton-Raphson with unsymmetric matrices 
+cmrot,tar,,,2.0                     ! Rotate the nodes of target element
+                                    ! to generate sliding friction contact
+
+modopt,unsym,30,500,4000,           ! Solving using UNSYM eigensolver   
+mxpand,30,,,
+/out,
+solve   
+fini
+     
+    
+/post1  
+file,,rst  
+set,1,7
+*get,unstablemode3,active,0,set,freq
+*stat,unstablemode3
+*dim,label,char,1,2
+*dim,value,,1,3
+
+label(1,1)='Mode'
+
+*vfill,value(1,1),data,2215                     ! Unstable mode from Reference
+*vfill,value(1,2),data,unstablemode3            ! Results obtained from MAPDL
+*vfill,value(1,3),data,abs(2215/unstablemode3)  ! Ratio
+save,table_3
+finish
+resume,table_1
+/com,
+/out,vm275,vrt
+/com,
+/com, ------------------------------VM275 RESULTS COMPARISON----------------------
+/com,
+/com,                       | TARGET |  Mechanical APDL | RATIO
+/com,
+/com,  
+/com, Full Nonlinear Perturbed Modal Analysis
+/com,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A14,'   ',F12.3,'    ',F12.3,'    ',F12.3)
+/com,
+/com, 
+/NOPR,
+resume,table_2
+/GOPR
+/com,
+/com,
+/com, Partial Nonlinear Perturbed Modal Analysis
+/com,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A14,'   ',F12.3,'    ',F12.3,'    ',F12.3)
+/com,
+/com, 
+/NOPR,
+resume,table_3
+/GOPR
+/com,
+/com,
+/com, Linear Non-prestressed Modal Analysis
+/com,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A14,'   ',F12.3,'    ',F12.3,'    ',F12.3)
+/com,
+/com, 
+/NOPR,
+/com,
+/com, 
+/com, --------------------------------------------------------------------------------
+/out,
+*list,vm275,vrt
+/delete,table_1
+/delete,table_2
+/delete,table_3
+finish
+    
+
