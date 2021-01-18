@@ -115,7 +115,7 @@ for i in range(0, nev):
 pK = K.asarray()
 pM = M.asarray()
 
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 fig, (ax1, ax2) = plt.subplots(1, 2)
 fig.suptitle('K and M Matrix profiles')
@@ -123,7 +123,7 @@ ax1.spy( pK, markersize=0.01)
 ax1.set_title('K Matrix')
 ax2.spy( pM, markersize=0.01)
 ax2.set_title('M Matrix')
-plt.show()
+plt.show(block=True)
 
 
 ###############################################################################
@@ -141,8 +141,7 @@ pM = pM + pM.transpose() - pMd
 ###############################################################################
 # Plot Matrices
 #
-import matplotlib.pylab as plt
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 fig, (ax1, ax2) = plt.subplots(1, 2)
 fig.suptitle('K and M Matrix profiles')
@@ -150,7 +149,7 @@ ax1.spy( pK, markersize=0.01)
 ax1.set_title('K Matrix')
 ax2.spy( pM, markersize=0.01)
 ax2.set_title('M Matrix')
-plt.show()
+plt.show(block=True)
 
 
 ###############################################################################
