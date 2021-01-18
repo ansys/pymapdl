@@ -8,13 +8,13 @@ Compute Eigenvalues using MAPDL or SciPy
  
  - how we extract stifness and mass matrices from an MAPDL model
  - how we use the Math module of PyAnsys to compute the first eigenvalues
- - how we can get these matrices in the SciPy world, to get the same solutions using Python ressources
+ - how we can get these matrices in the SciPy world, to get the same solutions using Python resources
  - how MAPDL is really faster than SciPy :)
 
 """
 
 ###############################################################################
-# First we load python ressources we need all along this test
+# First we load python resources we need all along this test
 import matplotlib.pylab as plt
 import time
 import math
