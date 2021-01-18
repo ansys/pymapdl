@@ -387,7 +387,13 @@ def _get_available_base_ansys():
     """
     base_path = None
     if os.name == 'nt':
-        base_path = os.path.join(os.environ['PROGRAMFILES'], 'ANSYS INC')
+        supported_versions = ['194', '202', '211', '212']
+        awp_roots = [os.environ.get('AWP_ROOT' + ver, '') for ver in supported_versions]
+        installed_versions = [r for r in awp_roots if r and os.path.isdir(r)]
+        if installed_versions:
+            base_path = os.path.abspath(os.path.join(installed_versions[-1], os.pardir))
+        else:
+            base_path = os.path.join(os.environ['PROGRAMFILES'], 'ANSYS INC')
     elif os.name == 'posix':
         for path in ['/usr/ansys_inc', '/ansys_inc']:
             if os.path.isdir(path):
