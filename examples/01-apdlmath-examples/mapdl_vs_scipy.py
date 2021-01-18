@@ -42,8 +42,8 @@ mm = mapdl.math
 # APDLMath EigenSolve
 # First ask MAPDL to load the input file
 #
-print(mapdl.input('wing.dat'))
-
+from ansys.mapdl.core import examples
+print(mapdl.input(examples.examples.wing_model))
 
 ###############################################################################
 # Then PyAnsys get the mesh and plot the 3D model
