@@ -212,4 +212,3 @@ plt.legend(loc='lower right')
 # 
 Ratio = SciPyElapsedTime/MapdlElapsedTime
 print( "Mapdl is ",Ratio," times faster")
-mapdl.exit()
