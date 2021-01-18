@@ -150,8 +150,22 @@ def get_res(i):
     # return the residual
     return kphi.norm()/kphinrm
 
+MapdlAcc = np.zeros(nev)
 
 for i in range(nev):
     f = ev[i]
-    res = get_res(i)
-    print(f'[{i}] : Freq = {f}\t - Residual = {res}')
+    MapdlAcc[i] = get_res(i)
+    print(f'[{i}] : Freq = {f}\t - Residual = {MapdlAcc[i]}')
+
+###############################################################################
+# Plot Accuracy of Eigenresults
+#
+fig = plt.figure(figsize=(12,10))
+ax = plt.axes()
+x = np.linspace(1, nev, nev)
+plt.title('Residual Error (%)')
+plt.yscale('log')
+plt.xlabel('Frequency #')
+plt.ylabel('Errors (%)')
+ax.bar(x, MapdlAcc, label='MAPDL Results')
+plt.legend(loc='lower right')
