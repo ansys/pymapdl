@@ -9,6 +9,7 @@ This example uses a verification manual input file, but you can use
 your own sparse or dense matrices and solve those.
 
 """
+import matplotlib.pylab as plt
 import time
 import numpy as np
 
