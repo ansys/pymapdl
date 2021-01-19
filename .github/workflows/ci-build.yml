@@ -4,8 +4,7 @@ name: Documentation Build
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  # This workflow contains a single job called "build"
-  build:
+  docs_build:
     runs-on: ubuntu-20.04
 
     env:
@@ -62,21 +61,11 @@ jobs:
           path: docs/build/html
           retention-days: 7
 
-      - name: Deploy Documentation
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
         if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          git clone --no-checkout --depth 1 https://$GH_PAT@github.com/pyansys/pymapdl.git /tmp/gh_pages
-          cd /tmp/gh_pages
-          git checkout --orphan gh-pages
-          rm -rf *
-          git config user.name $GH_USERNAME
-          git config user.email $GH_EMAIL
-          cp -r $GITHUB_WORKSPACE/docs/build/html/* .
-          touch .nojekyll
-          git add .
-          git commit -am "CI: Updated site via $GITHUB_SHA"
-          git push -u origin gh-pages -f
-        env:
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs/build/html
+          CLEAN: true
