@@ -59,7 +59,6 @@ print(f'Elapsed time to solve this problem: {time.time() - t1}')
 
 ###############################################################################
 # This is the vector of eigenfrequencies.
-#
 print(ev)
 
 ###############################################################################
@@ -80,7 +79,6 @@ lam = omega*omega
 ###############################################################################
 # Then we get the 1st Eigenshape :math:`\phi_1`, and compute
 # :math:`K.\phi_1` and :math:`M.\phi_1`
-#
 
 # shape
 phi = a[0]
@@ -151,22 +149,23 @@ def get_res(i):
     # return the residual
     return kphi.norm()/kphinrm
 
-MapdlAcc = np.zeros(nev)
+
+mapdl_acc = np.zeros(nev)
 
 for i in range(nev):
     f = ev[i]
-    MapdlAcc[i] = get_res(i)
-    print(f'[{i}] : Freq = {f}\t - Residual = {MapdlAcc[i]}')
+    mapdl_acc[i] = get_res(i)
+    print(f'[{i}] : Freq = {f}\t - Residual = {mapdl_acc[i]}')
 
 ###############################################################################
 # Plot Accuracy of Eigenresults
-#
-fig = plt.figure(figsize=(12,10))
+
+fig = plt.figure(figsize=(12, 10))
 ax = plt.axes()
 x = np.linspace(1, nev, nev)
-plt.title('Residual Error (%)')
+plt.title('APDL Math Residual Error (%)')
 plt.yscale('log')
+plt.ylim([10E-13, 10E-7])
 plt.xlabel('Frequency #')
 plt.ylabel('Errors (%)')
-ax.bar(x, MapdlAcc, label='MAPDL Results')
-plt.legend(loc='lower right')
+ax.bar(x, mapdl_acc, label='MAPDL Results')

@@ -3,61 +3,62 @@
 
 Compute Eigenvalues using MAPDL or SciPy
 ----------------------------------------
- 
- This example shows:
- 
- - how we extract stifness and mass matrices from an MAPDL model
- - how we use the Math module of PyAnsys to compute the first eigenvalues
- - how we can get these matrices in the SciPy world, to get the same solutions using Python resources
- - how MAPDL is really faster than SciPy :)
 
+This example shows:
+
+- How to extract the stiffness and mass matrices from a MAPDL model.
+- How to use the ``Math`` module of PyMapdl to compute the first
+  eigenvalues.
+- How to can get these matrices in the SciPy world, to get the same
+  solutions using Python resources.
+- How MAPDL is really faster than SciPy :)
 """
 
 ###############################################################################
-# First we load python resources we need all along this test
-import matplotlib.pylab as plt
+# First load python packages we need for this example
 import time
 import math
 
+import matplotlib.pylab as plt
 import numpy as np
 import scipy
 from scipy.sparse.linalg import eigs, eigsh
 
-import pyvista
-
+from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import examples
 
 ###############################################################################
-# Then we:
-# 
-# - load the ansys.mapdl module
-# - get the math module of pyMapdl
+# Next:
 #
-from ansys.mapdl.core import launch_mapdl
+# - Load the ansys.mapdl module
+# - Get the ``Math`` module of PyMapdl
+#
 mapdl = launch_mapdl()
 print(mapdl)
 mm = mapdl.math
-
 
 ###############################################################################
 # APDLMath EigenSolve
 # First ask MAPDL to load the input file
 #
-from ansys.mapdl.core import examples
 print(mapdl.input(examples.examples.wing_model))
 
 ###############################################################################
-# Then PyAnsys get the mesh and plot the 3D model
+# Plot and mesh using the ``eplot`` method.
 mapdl.eplot()
 
+
 ###############################################################################
-# Then we setup a modal Analysis, and ask for the $K$ and $M$ matrices 
-# to be formed. MAPDL store these matrices in a ``.FULL`` file
-#
+# Next, setup a modal Analysis and ask for the $K$ and $M$ matrices to
+# be formed. MAPDL store these matrices in a ``.FULL`` file.
+
 print(mapdl.slashsolu())
 print(mapdl.antype(antype='MODAL'))
 print(mapdl.modopt(method='LANB', nmode='10', freqb='1.'))
 print(mapdl.wrfull(ldstep='1'))
-str = mapdl.solve()
+
+# store the output of the solve command
+output = mapdl.solve()
 
 
 ###############################################################################
