@@ -56,7 +56,8 @@ setup(
 
     python_requires='>=3.6.*',
     keywords='ANSYS MAPDL gRPC',
-    package_data={'ansys.mapdl.core.examples': ['verif/*.dat']},
+    package_data={'ansys.mapdl.core.examples': ['verif/*.dat',
+                                                'wing.dat']},
 
     install_requires=install_requires,
 )
