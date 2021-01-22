@@ -12,7 +12,7 @@ from ansys.mapdl.reader import examples
 
 from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")

@@ -6,7 +6,7 @@ import numpy as np
 
 from ansys.mapdl.reader._reader import write_array
 
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
 

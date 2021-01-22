@@ -5,7 +5,7 @@ import pyvista as pv
 import pytest
 from pyvista.plotting import system_supports_plotting
 
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 
 def test_report():
     report = pymapdl.Report(gpu=system_supports_plotting())

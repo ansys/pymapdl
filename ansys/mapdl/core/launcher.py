@@ -10,7 +10,7 @@ import socket
 import time
 import subprocess
 
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
