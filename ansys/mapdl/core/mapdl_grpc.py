@@ -158,7 +158,7 @@ class MapdlGrpc(_MapdlCore):
     Connect to an instance of MAPDL already running on locally on the
     default port 50052.
 
-    >>> import ansys.mapdl.core as pymapdl
+    >>> from ansys.mapdl import core as pymapdl
     >>> mapdl = pymapdl.Mapdl()
 
     Connect to an instance of MAPDL running on the LAN on a default port

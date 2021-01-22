@@ -46,7 +46,7 @@ def convert_script(filename_in, filename_out, loglevel='WARNING', auto_exit=True
 
     Examples
     --------
-    >>> import ansys.mapdl.core as pymapdl
+    >>> from ansys.mapdl import core as pymapdl
     >>> from ansys.mapdl.core import examples
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
     """

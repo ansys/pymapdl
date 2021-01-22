@@ -3,7 +3,7 @@ import weakref
 import os
 import pytest
 
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.launcher import get_start_instance
 

@@ -1,6 +1,6 @@
 import os
 import pytest
-import ansys.mapdl.core as pymapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
 
 
