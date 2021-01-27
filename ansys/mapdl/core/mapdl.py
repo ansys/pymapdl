@@ -124,6 +124,7 @@ class _MapdlCore(_MapdlCommands):
         self._vget_arr_counter = 0
         self._start_parm = start_parm
         self._path = start_parm.get('run_location', None)
+        self._ignore_errors = False
 
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
@@ -1765,9 +1766,15 @@ class _MapdlCore(_MapdlCommands):
                 text += '\n\nIgnore these messages by setting allow_ignore=True'
                 raise MapdlInvalidRoutineError(text)
 
-        if '*** ERROR ***' in self._response:  # flag error
-            self._log.error(self._response)
-            raise MapdlRuntimeError(self._response)
+        # flag error
+        if '*** ERROR ***' in self._response and not self._ignore_errors:
+            # remove "is turning inside out" as this allows the
+            # solution to continue
+            sub = re.sub(r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
+                         '', self._response)
+            if '*** ERROR ***' in sub:
+                self._log.error(self._response)
+                raise MapdlRuntimeError(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -1781,6 +1788,20 @@ class _MapdlCore(_MapdlCommands):
             return self._display_plot(self._response)
 
         return self._response
+
+    @property
+    def ignore_errors(self):
+        """Flag to ignore MAPDL errors.
+
+        Normally, any string containing "*** ERROR ***" from MAPDL
+        will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
+        ignore these errors.
+        """
+        return self._ignore_errors
+
+    @ignore_errors.setter
+    def ignore_errors(self, value):
+        self._ignore_errors = bool(value)
 
     # @supress_logging
     def load_table(self, name, array, var1='', var2='', var3=''):

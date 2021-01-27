@@ -194,9 +194,22 @@ def test_al(cleared, mapdl):
     assert a0 == 1
 
 
-def test_invalid_area(mapdl):
+def test_error(mapdl):
     with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
+
+
+def test_ignore_error(mapdl):
+    assert not mapdl.ignore_errors
+    mapdl.ignore_errors = True
+    assert mapdl.ignore_errors is True
+
+    # verify that an error is not raised
+    out = mapdl._run('A, 0, 0, 0')
+    assert '*** ERROR ***' in out
+
+    mapdl.ignore_error = False
+    assert mapdl.ignore_error is False
 
 
 def test_invalid_input(mapdl):
