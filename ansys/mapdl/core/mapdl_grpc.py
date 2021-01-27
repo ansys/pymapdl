@@ -369,6 +369,9 @@ class MapdlGrpc(_MapdlCore):
         if not cmd.strip():
             raise ValueError('Empty commands not allowed')
 
+        if len(cmd) > 639:  # CMD_MAX_LENGTH
+            raise ValueError('Maximum command length must be less than 640 characters')
+
         self._busy = True
         if verbose:
             response = self._send_command_stream(cmd, True)
