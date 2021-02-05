@@ -349,8 +349,11 @@ class MapdlGrpc(_MapdlCore):
                                     ' the MAPDL server')
 
         self._health_response_queue = Queue()
+
+        # allow main process to exit by setting daemon to true
         thread = threading.Thread(target=_consume_responses,
-                                  args=(rendezvous, self._health_response_queue))
+                                  args=(rendezvous, self._health_response_queue),
+                                  daemon=True)
         thread.start()
 
 
