@@ -17,6 +17,7 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
@@ -298,6 +299,13 @@ class MapdlGrpc(_MapdlCore):
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
+        # TODO: version check
+
+
+        # enable health check
+        self._enable_health_check()
+        breakpoint()
+
         # housekeeping otherwise, many failures in a row will cause
         # MAPDL to exit without returning anything useful.  Also
         # avoids abort in batch mode if set.
@@ -305,6 +313,36 @@ class MapdlGrpc(_MapdlCore):
             self._set_no_abort()
 
         return True
+
+
+    def _enable_health_check(self):
+
+        def _consume_responses(response_iterator, response_queue):
+            for response in response_iterator:
+                response_queue.put(response)
+
+        # enable health check
+        from queue import Queue
+        request = health_pb2.HealthCheckRequest()
+        self._health_stub = health_pb2_grpc.HealthStub(self._channel)
+        rendezvous = self._health_stub.Watch(request)
+
+        self._health_response_queue = Queue()
+        thread = threading.Thread(target=_consume_responses,
+                                  args=(rendezvous, self._health_response_queue))
+        thread.start()
+
+        # response = response_queue.get(timeout=test_constants.SHORT_TIMEOUT)
+        # self.assertEqual(health_pb2.HealthCheckResponse.SERVING,
+        #                  response.status)
+
+        # rendezvous.cancel()
+        # thread.join()
+        # self.assertTrue(response_queue.empty())
+
+        # if self._thread_pool is not None:
+        #     self.assertTrue(self._thread_pool.was_used())
+
 
     def _launch(self, start_parm):
         """Launch a local session of MAPDL in gRPC mode.
