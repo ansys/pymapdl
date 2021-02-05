@@ -327,6 +327,12 @@ class MapdlGrpc(_MapdlCore):
         self._health_stub = health_pb2_grpc.HealthStub(self._channel)
         rendezvous = self._health_stub.Watch(request)
 
+        try:
+            status = rendezvous.next()
+            status = health_pb2.HealthCheckResponse.SERVING
+        except:
+            breakpoint()
+
         self._health_response_queue = Queue()
         thread = threading.Thread(target=_consume_responses,
                                   args=(rendezvous, self._health_response_queue))
