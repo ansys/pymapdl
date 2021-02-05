@@ -17,12 +17,13 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc
+from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7, last_created
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.common_grpc import (parse_chunks,
@@ -194,6 +195,8 @@ class MapdlGrpc(_MapdlCore):
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
         self._ip = ip
+        self._health_response_queue = None
+        self._exiting = False
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -298,6 +301,12 @@ class MapdlGrpc(_MapdlCore):
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
+        # TODO: version check
+
+
+        # enable health check
+        self._enable_health_check()
+
         # housekeeping otherwise, many failures in a row will cause
         # MAPDL to exit without returning anything useful.  Also
         # avoids abort in batch mode if set.
@@ -305,6 +314,48 @@ class MapdlGrpc(_MapdlCore):
             self._set_no_abort()
 
         return True
+
+    def _enable_health_check(self):
+        """Places the status of the health check in _health_response_queue"""
+        def _consume_responses(response_iterator, response_queue):
+            try:
+                for response in response_iterator:
+                    response_queue.put(response)
+                # NOTE: we're doing absolutely nothing with this as
+                # this point since the server side health check
+                # doesn't change state.
+            except Exception as err:
+                if self._exiting:
+                    return
+                self._exited = True
+                raise MapdlExitedError('Lost connection with MAPDL server') from None
+
+        # enable health check
+        from queue import Queue
+        request = health_pb2.HealthCheckRequest()
+        self._health_stub = health_pb2_grpc.HealthStub(self._channel)
+        rendezvous = self._health_stub.Watch(request)
+
+        # health check feature implemented after 2020R2
+        try:
+            status = rendezvous.next()
+        except Exception as err:
+            if err.code().name != 'UNIMPLEMENTED':
+                raise err
+            return
+
+        if status.status != health_pb2.HealthCheckResponse.SERVING:
+            raise MapdlRuntimeError('Unable to enable health check and/or connect to'
+                                    ' the MAPDL server')
+
+        self._health_response_queue = Queue()
+
+        # allow main process to exit by setting daemon to true
+        thread = threading.Thread(target=_consume_responses,
+                                  args=(rendezvous, self._health_response_queue),
+                                  daemon=True)
+        thread.start()
+
 
     def _launch(self, start_parm):
         """Launch a local session of MAPDL in gRPC mode.
@@ -441,6 +492,7 @@ class MapdlGrpc(_MapdlCore):
         --------
         >>> mapdl.exit()
         """
+        self._exiting = True
         self._log.debug('Exiting MAPDL')
 
         if save:

@@ -1920,7 +1920,8 @@ class _MapdlCore(_MapdlCommands):
             pass
 
         # os independent path format
-        self._path = self._path.replace('\\', '/')
+        if self._path is not None:
+            self._path = self._path.replace('\\', '/')
         return self._path
 
     @property

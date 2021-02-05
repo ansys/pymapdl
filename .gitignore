@@ -47,6 +47,7 @@ tests/cyclic/htmlcov
 .coverage
 *,cover
 .benchmarks/
+test-output.xml
 
 \#*
 .\#*
