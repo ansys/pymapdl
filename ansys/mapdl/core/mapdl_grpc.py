@@ -196,6 +196,7 @@ class MapdlGrpc(_MapdlCore):
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
         self._ip = ip
         self._health_response_queue = None
+        self._exiting = False
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -305,7 +306,6 @@ class MapdlGrpc(_MapdlCore):
 
         # enable health check
         self._enable_health_check()
-        breakpoint()
 
         # housekeeping otherwise, many failures in a row will cause
         # MAPDL to exit without returning anything useful.  Also
@@ -318,8 +318,17 @@ class MapdlGrpc(_MapdlCore):
     def _enable_health_check(self):
         """Places the status of the health check in _health_response_queue"""
         def _consume_responses(response_iterator, response_queue):
-            for response in response_iterator:
-                response_queue.put(response)
+            try:
+                for response in response_iterator:
+                    response_queue.put(response)
+                # NOTE: we're doing absolutely nothing with this as
+                # this point since the server side health check
+                # doesn't change state.
+            except Exception as err:
+                if self._exiting:
+                    return
+                self._exited = True
+                raise MapdlExitedError('Lost connection with MAPDL server') from None
 
         # enable health check
         from queue import Queue
@@ -335,7 +344,7 @@ class MapdlGrpc(_MapdlCore):
                 raise err
             return
 
-        if status != health_pb2.HealthCheckResponse.SERVING:
+        if status.status != health_pb2.HealthCheckResponse.SERVING:
             raise MapdlRuntimeError('Unable to enable health check and/or connect to'
                                     ' the MAPDL server')
 
@@ -480,6 +489,7 @@ class MapdlGrpc(_MapdlCore):
         --------
         >>> mapdl.exit()
         """
+        self._exiting = True
         self._log.debug('Exiting MAPDL')
 
         if save:
