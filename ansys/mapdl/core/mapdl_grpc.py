@@ -23,7 +23,7 @@ from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc
+from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7, last_created
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.common_grpc import (parse_chunks,
@@ -195,6 +195,7 @@ class MapdlGrpc(_MapdlCore):
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
         self._ip = ip
+        self._health_response_queue = None
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -314,9 +315,8 @@ class MapdlGrpc(_MapdlCore):
 
         return True
 
-
     def _enable_health_check(self):
-
+        """Places the status of the health check in _health_response_queue"""
         def _consume_responses(response_iterator, response_queue):
             for response in response_iterator:
                 response_queue.put(response)
@@ -327,27 +327,22 @@ class MapdlGrpc(_MapdlCore):
         self._health_stub = health_pb2_grpc.HealthStub(self._channel)
         rendezvous = self._health_stub.Watch(request)
 
+        # health check feature implemented after 2020R2
         try:
             status = rendezvous.next()
-            status = health_pb2.HealthCheckResponse.SERVING
-        except:
-            breakpoint()
+        except Exception as err:
+            if err.code().name != 'UNIMPLEMENTED':
+                raise err
+            return
+
+        if status != health_pb2.HealthCheckResponse.SERVING:
+            raise MapdlRuntimeError('Unable to enable health check and/or connect to'
+                                    ' the MAPDL server')
 
         self._health_response_queue = Queue()
         thread = threading.Thread(target=_consume_responses,
                                   args=(rendezvous, self._health_response_queue))
         thread.start()
-
-        # response = response_queue.get(timeout=test_constants.SHORT_TIMEOUT)
-        # self.assertEqual(health_pb2.HealthCheckResponse.SERVING,
-        #                  response.status)
-
-        # rendezvous.cancel()
-        # thread.join()
-        # self.assertTrue(response_queue.empty())
-
-        # if self._thread_pool is not None:
-        #     self.assertTrue(self._thread_pool.was_used())
 
 
     def _launch(self, start_parm):
