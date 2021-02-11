@@ -8,6 +8,7 @@ from functools import wraps
 import tempfile
 from shutil import rmtree, copyfile
 import weakref
+import warnings
 
 import numpy as np
 import pyvista as pv
@@ -24,6 +25,11 @@ from ansys.mapdl.core.element_commands import element_commands
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
+
+_PERMITTED_ERRORS = [
+    r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
+    r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
+]
 
 
 MATPLOTLIB_LOADED = True
@@ -1766,15 +1772,19 @@ class _MapdlCore(_MapdlCommands):
                 text += '\n\nIgnore these messages by setting allow_ignore=True'
                 raise MapdlInvalidRoutineError(text)
 
-        # flag error
+        # flag errors
         if '*** ERROR ***' in self._response and not self._ignore_errors:
-            # remove "is turning inside out" as this allows the
-            # solution to continue
-            sub = re.sub(r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
-                         '', self._response)
-            if '*** ERROR ***' in sub:
+            # remove permitted errors and allow MAPDL to continue
+            response = self._response
+            for err_str in _PERMITTED_ERRORS:
+                response = re.sub(err_str, '', response)
+
+            if '*** ERROR ***' in response:
                 self._log.error(self._response)
                 raise MapdlRuntimeError(self._response)
+            else:
+                warnings.warn('MAPDL returned non-abort errors.  Please '
+                              'check the logs.')
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)

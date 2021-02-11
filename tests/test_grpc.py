@@ -39,7 +39,7 @@ def test_basic_input_output(mapdl, tmpdir):
         f.write('FINISH\n')
         f.write('/PREP7\n')
 
-    resp = mapdl.upload(basic_inp)
+    mapdl.upload(basic_inp)
     tmpfile = 'tmp.out'
     mapdl._send_command('/OUT, %s' % tmpfile, mute=True)
     mapdl._send_command('/INPUT, %s' % filename, mute=True)

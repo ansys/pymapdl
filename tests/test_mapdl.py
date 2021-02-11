@@ -216,6 +216,7 @@ def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input('thisisnotafile')
 
+
 @skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
@@ -471,8 +472,10 @@ def test_builtin_parameters(mapdl, cleared):
 
     assert isinstance(mapdl.parameters.revision, float)
 
-    if os.name == 'posix':
-        assert 'LIN' in mapdl.parameters.platform
+    # Platform could be either windows or Linux, without regards to
+    # the testing OS.
+    plat = mapdl.parameters.platform
+    assert 'L' in plat or 'W' in plat
 
     mapdl.csys(1)
     assert mapdl.parameters.csys == 1
