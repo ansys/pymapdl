@@ -104,10 +104,11 @@ def plastic_solve(mapdl):
 
 
 # must be run first before loading a result
-@pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
-def test_nodal_eqv_stress_fail(mapdl, static_solve):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.post_processing.nodal_eqv_stress
+# since MAPDL may be on a remote windows machine, cannot test
+# @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
+# def test_nodal_eqv_stress_fail(mapdl, static_solve):
+#     with pytest.raises(MapdlRuntimeError):
+#         mapdl.post_processing.nodal_eqv_stress
 
 
 @pytest.mark.parametrize('comp', ['X', 'Y', 'z'])  # lowercase intentional

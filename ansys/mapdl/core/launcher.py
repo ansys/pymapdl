@@ -380,7 +380,7 @@ def _get_available_base_ansys():
 
     Within Linux
 
-    >>> 
+    >>> _get_available_base_ansys()
     {194: '/usr/ansys_inc/v194',
      202: '/usr/ansys_inc/v202',
      211: '/usr/ansys_inc/v211'}
@@ -402,12 +402,12 @@ def _get_available_base_ansys():
         raise OSError(f'Unsupported OS {os.name}')
 
     if base_path is None:
-        return '', ''
+        return {}
 
     paths = glob(os.path.join(base_path, 'v*'))
 
     if not paths:
-        return None
+        return {}
 
     ansys_paths = {}
     for path in paths:
@@ -444,6 +444,8 @@ def find_ansys():
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
     versions = _get_available_base_ansys()
+    if not versions:
+        return '', ''
     version = max(versions.keys())
     ans_path = versions[version]
     if os.name == 'nt':

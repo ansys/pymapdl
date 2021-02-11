@@ -27,9 +27,29 @@ local = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
-# if START_INSTANCE:
-#     local.append(True)
 
+if os.name == 'nt':
+    os_msg = """SET PYMAPDL_START_INSTANCE=False
+SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
+SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)"""
+else:
+    os_msg = """export PYMAPDL_START_INSTANCE=False
+export PYMAPDL_PORT=<MAPDL Port> (default 50052)
+export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)"""
+
+ERRMSG = f"""Unable to run CI without MAPDL installed or accessible.
+Either install Ansys 2021R1 or newer or specify the remote server with:
+
+{os_msg}
+
+If you do have Ansys installed, you may have to patch pymapdl to
+automatically find your Ansys installation.  Email the developer at:
+alexander.kaszynski@ansys.com
+
+"""
+
+if START_INSTANCE and EXEC_FILE is None:
+    raise RuntimeError(ERRMSG)
 
 def pytest_addoption(parser):
     parser.addoption(
