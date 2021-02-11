@@ -45,7 +45,7 @@ Please visit the GitHub pages for further details regarding each project.
 
 Installation
 ------------
-The ``ansys.mapdl.core`` package currently supports Python 3.6 through
+The ``ansys-mapdl-core`` package currently supports Python 3.6 through
 Python 3.8 on Windows, Mac OS, and Linux.
 
 Install the latest release from `PyPi
@@ -53,7 +53,7 @@ Install the latest release from `PyPi
 
 .. code::
 
-   pip install ansys.mapdl-core
+   pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
 <https://github.com/pyansys/pymapdl/issues>`_ via:

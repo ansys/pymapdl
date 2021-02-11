@@ -26,6 +26,7 @@ install_requires = [
     'ansys-mapdl-reader>=0.50.0',
     'grpcio-health-checking>=1.30.0',
     'ansys-corba',  # pending depreciation to ansys-mapdl-corba
+    'protobuf>=3.1.4',  # had an issue with gRPC health checking
 ]
 
 # these are only used when launching a MAPDL via a console.  This
