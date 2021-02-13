@@ -609,7 +609,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         provides the best performance and stability.  The ``'corba'``
         mode is available from v17.0 and newer and is given legacy
         support.  This mode requires the additional
-        ``ansys-mapdl-corba`` module.  Finally, the ``'console'`` mode
+        ``ansys_corba`` module.  Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
 
@@ -870,7 +870,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
             from ansys.mapdl.core.mapdl_corba import MapdlCorba
         except ImportError:
             raise ImportError('To use this feature, install ansys.mapdl.corba with\n\n'
-                              '    pip install ansys-mapdl-corba')
+                              '    pip install ansys_corba')
 
         broadcast = kwargs.get('log_broadcast', False)
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
