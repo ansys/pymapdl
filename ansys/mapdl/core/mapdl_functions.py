@@ -3570,45 +3570,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
         return self.run(command, **kwargs)
 
-    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
-          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
-          p18="", **kwargs):
-        """APDL Command: A
-
-        Defines an area by connecting keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p18
-            List of keypoints defining the area (18 maximum if using keyboard
-            entry).  At least 3 keypoints must be entered.  If P1 = P,
-            graphical picking is enabled and all remaining arguments are
-            ignored (valid only in the GUI).
-
-        Returns
-        -------
-        result : int
-            Returns the area number of the created area or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Keypoints (P1 through P18) must be input in a clockwise or
-        counterclockwise order around the area.  This order also determines the
-        positive normal direction of the area according to the right-hand rule.
-        Existing lines between adjacent keypoints will be used; missing lines
-        are generated "straight" in the active coordinate system and assigned
-        the lowest available numbers [NUMSTR].  If more than one line exists
-        between two keypoints, the shorter one will be chosen.  If the area is
-        to be defined with more than four keypoints, the required keypoints and
-        lines must lie on a constant coordinate value in the active coordinate
-        system (such as a plane or a cylinder).  Areas may be redefined only if
-        not yet attached to a volume.  Solid modeling in a toroidal coordinate
-        system is not recommended.
-        """
-        command = "A,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8), str(p9), str(p10), str(p11), str(p12), str(p13), str(p14), str(p15), str(p16), str(p17), str(p18))
-        return self.run(command, **kwargs)
-
     def hptcreate(self, type="", entity="", nhp="", label="", val1="", val2="",
                   val3="", **kwargs):
         """APDL Command: HPTCREATE
@@ -31529,61 +31490,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is also valid for rezoning.
         """
         command = "DESIZE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(minl), str(minh), str(mxel), str(angl), str(angh), str(edgmn), str(edgmx), str(adjf), str(adjm))
-        return self.run(command, **kwargs)
-
-    def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
-          **kwargs):
-        """APDL Command: V
-
-        Defines a volume through keypoints.
-
-        Parameters
-        ----------
-        p1
-            Keypoint defining starting corner of volume.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Keypoint defining second corner of volume.
-
-        p3
-            Keypoint defining third corner of volume.
-
-        p4
-            Keypoint defining fourth corner of volume.
-
-        p5
-            Keypoint defining fifth corner of volume.
-
-        p6
-            Keypoint defining sixth corner of volume.
-
-        p7
-            Keypoint defining seventh corner of volume.
-
-        p8
-            Keypoint defining eighth corner of volume.
-
-        Notes
-        -----
-        Defines a volume (and its corresponding lines and areas) through eight
-        (or fewer) existing keypoints.  Keypoints must be input in a continuous
-        order.  The order of the keypoints should be around the bottom and then
-        the top.  Missing lines are generated "straight" in the active
-        coordinate system and assigned the lowest available numbers [NUMSTR].
-        Missing areas are generated and assigned the lowest available numbers.
-
-        Solid modeling in a toroidal coordinate system is not recommended.
-
-        Certain faces may be condensed to a line or point by repeating
-        keypoints.   For example, use V,P1,P2,P3,P3,P5,P6,P7,P7   for a
-        triangular prism or V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
-
-        Using keypoints to produce partial sections in CSYS = 2 can generate
-        anomalies; check the resulting volumes carefully.
-        """
-        command = "V,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8))
         return self.run(command, **kwargs)
 
     def sed(self, sedx="", sedy="", sedz="", cname="", **kwargs):

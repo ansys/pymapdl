@@ -17,6 +17,19 @@ numeric_const_pattern = r"""
 
 NUM_PATTERN = re.compile(numeric_const_pattern, re.VERBOSE)
 
+def parse_a(msg):
+    """Parse create area message and return area number"""
+    res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
+    if res is not None:
+        return int(res.group(2))
+
+
+def parse_v(msg):
+    """Parse volume message and return volume number"""
+    res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
+    if res is not None:
+        return int(res.group(2))
+
 
 class _MapdlGeometryCommands():
     """Wraps MAPDL geometry commands"""
@@ -285,15 +298,151 @@ class _MapdlGeometryCommands():
         if res is not None:
             return int(res.group(2))
 
+    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
+          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
+          p18="", **kwargs):
+        """Define an area by connecting keypoints.
 
-def parse_a(msg):
-    """Parse create area message and return area number"""
-    res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
-    if res is not None:
-        result = int(res.group(2))
-    else:
-        result = None
-    return result
+        APDL Command: A
+
+        Parameters
+        ----------
+        p1, p2, p3, . . . , p18
+            List of keypoints defining the area (18 maximum if using keyboard
+            entry).  At least 3 keypoints must be entered.  If P1 = P,
+            graphical picking is enabled and all remaining arguments are
+            ignored (valid only in the GUI).
+
+        Returns
+        -------
+        int
+            The area number of the created area.
+
+        Examples
+        --------
+        Create a simple triangle in the XY plane using three keypoints.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 0, 1, 0)
+        >>> a0 = mapdl.a(k0, k1, k2)
+        >>> a0
+        1
+
+        Notes
+        -----
+        Keypoints (P1 through P18) must be input in a clockwise or
+        counterclockwise order around the area.  This order also
+        determines the positive normal direction of the area according
+        to the right-hand rule.  Existing lines between adjacent
+        keypoints will be used; missing lines are generated "straight"
+        in the active coordinate system and assigned the lowest
+        available numbers [NUMSTR].  If more than one line exists
+        between two keypoints, the shorter one will be chosen.  If the
+        area is to be defined with more than four keypoints, the
+        required keypoints and lines must lie on a constant coordinate
+        value in the active coordinate system (such as a plane or a
+        cylinder).  Areas may be redefined only if not yet attached to
+        a volume.  Solid modeling in a toroidal coordinate system is
+        not recommended.
+        """
+        command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
+        return parse_a(self.run(command, **kwargs))
+
+    def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
+          **kwargs):
+        """Defines a volume through keypoints.
+
+        APDL Command: V
+
+        Parameters
+        ----------
+        p1
+            Keypoint defining starting corner of volume.
+
+        p2
+            Keypoint defining second corner of volume.
+
+        p3
+            Keypoint defining third corner of volume.
+
+        p4
+            Keypoint defining fourth corner of volume.
+
+        p5
+            Keypoint defining fifth corner of volume.
+
+        p6
+            Keypoint defining sixth corner of volume.
+
+        p7
+            Keypoint defining seventh corner of volume.
+
+        p8
+            Keypoint defining eighth corner of volume.
+
+        Examples
+        --------
+        Create a simple cube volume.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> k4 = mapdl.k("", 0, 0, 1)
+        >>> k5 = mapdl.k("", 1, 0, 1)
+        >>> k6 = mapdl.k("", 1, 1, 1)
+        >>> k7 = mapdl.k("", 0, 1, 1)
+        >>> v0 = mapdl.v(k0, k1, k2, k3, k4, k5, k6, k7)
+        >>> v0
+        1
+
+        Create a triangular prism
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> k4 = mapdl.k("", 0, 0, 1)
+        >>> k5 = mapdl.k("", 1, 0, 1)
+        >>> k6 = mapdl.k("", 1, 1, 1)
+        >>> k7 = mapdl.k("", 0, 1, 1)
+        >>> v1 = mapdl.v(k0, k1, k2, k2, k4, k5, k6, k6)
+        >>> v1
+        2
+
+        Create a tetrahedron
+        V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 0, 1)
+        >>> v2 = mapdl.v(k0, k1, k2, k2, k3, k3, k3, k3)
+        >>> v2
+        3
+
+        Notes
+        -----
+        Defines a volume (and its corresponding lines and areas)
+        through eight (or fewer) existing keypoints.  Keypoints must
+        be input in a continuous order.  The order of the keypoints
+        should be around the bottom and then the top.  Missing lines
+        are generated "straight" in the active coordinate system and
+        assigned the lowest available numbers [NUMSTR].  Missing areas
+        are generated and assigned the lowest available numbers.
+
+        Solid modeling in a toroidal coordinate system is not recommended.
+
+        Certain faces may be condensed to a line or point by repeating
+        keypoints.   For example, use V,P1,P2,P3,P3,P5,P6,P7,P7   for a
+        triangular prism or V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
+
+        Using keypoints to produce partial sections in CSYS = 2 can generate
+        anomalies; check the resulting volumes carefully.
+        """
+        command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
+        return parse_v(self.run(command, **kwargs))
 
 
 def parse_output_area(msg):
@@ -310,16 +459,6 @@ def parse_output_areas(msg):
         return int(res.group(2))
 
 
-def parse_v(msg):
-    """Parse create volume message and return volume number"""
-    res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
-    if res is not None:
-        result = int(res.group(2))
-    else:
-        result = None
-    return result
-
-
 def parse_n(msg):
     """Parse create node message and return node number"""
     res = re.search(r"(NODE\s*)([0-9]+)", msg)
@@ -330,11 +469,6 @@ def parse_n(msg):
 def parse_al(msg):
     """Parse create area message and return area number"""
     return parse_a(msg)
-
-
-# def parse_bsplin(msg):
-#     """Parse create bsplin line message and return line number"""
-#     return parse_l(msg)
 
 
 def parse_kpoint(msg):
@@ -382,8 +516,8 @@ def parse_knode(msg):
     MAPDL message:
     KEYPOINT         0 FROM NODE         4
 
-     CSYS 0 LOCATION (X,Y,Z)=   0.00000       0.00000       0.00000    
-     KEYPOINT NUMBER =      5
+    CSYS 0 LOCATION (X,Y,Z)=   0.00000       0.00000       0.00000
+    KEYPOINT NUMBER =      5
 
     Return: 5
 
@@ -394,9 +528,7 @@ def parse_knode(msg):
 
 
 
-geometry_commands = {'A': parse_a,
-                     'V': parse_v,
-                     'N': parse_n,
+geometry_commands = {'N': parse_n,
                      'AL': parse_al,
                      'BLC4': parse_output_area,
                      'CYL4': parse_output_area,
