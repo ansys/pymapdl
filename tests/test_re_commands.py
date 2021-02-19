@@ -29,6 +29,56 @@ def test_kbetw(cleared, mapdl):
     assert mapdl.kbetw(k0, k1) == 3
 
 
+def test_kdist(cleared, mapdl):
+    kp0 = (0, 10, -3)
+    kp1 = (-1E10, 10, 4)
+
+    knum0 = mapdl.k("", *kp0)
+    knum1 = mapdl.k("", *kp1)
+    xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
+    assert xdist == kp1[0] - kp0[0]
+    assert ydist == kp1[1] - kp0[1]
+    assert zdist == kp1[2] - kp0[2]
+
+
+# kept here for potential usage
+# def test_kfill(cleared, mapdl):
+#     mapdl.clear()
+#     mapdl.prep7()
+#     kp0 = (0, 0, 0)
+#     kp1 = (10, 0, 0)
+
+#     knum0 = mapdl.k("", *kp0)
+#     knum1 = mapdl.k("", *kp1)
+#     mapdl.kfill(knum0, knum1, 8, ninc=1)
+
+
+def test_kl(cleared, mapdl):
+    kp0 = (0, 0, 0)
+    kp1 = (10, 0, 0)
+    knum0 = mapdl.k("", *kp0)
+    knum1 = mapdl.k("", *kp1)
+    lnum = mapdl.l(knum0, knum1)
+
+    assert mapdl.kl(lnum, 0.5) == knum1 + 1
+
+
+def test_kcenter(cleared, mapdl):
+    # compute the center of a circle
+    x, y, z = 0+1j, 1+0j, 0-1j
+
+    # commented out should we wish to confirm the coordinates
+    # w = z-x
+    # w /= y-x
+    # c = (x-y)*(w-abs(w)**2)/2j/w.imag-x
+
+    k0 = mapdl.k("", x.real, x.imag, 0)
+    k1 = mapdl.k("", y.real, y.imag, 0)
+    k2 = mapdl.k("", z.real, z.imag, 0)
+    k3 = mapdl.kcenter('KP', k0, k1, k2)
+    assert k3 == k2 + 1
+
+
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     assert k0 == 1
