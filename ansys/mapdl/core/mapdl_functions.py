@@ -1,6 +1,8 @@
 """Pythonic MAPDL Commands"""
 
-class _MapdlCommands(object):  # pragma: no cover
+from .geometry_commands import _MapdlGeometryCommands
+
+class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -14951,53 +14953,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "/WAIT,%s" % (str(dtime))
-        return self.run(command, **kwargs)
-
-    def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
-          xv2="", yv2="", zv2="", **kwargs):
-        """APDL Command: L
-
-        Defines a line between two keypoints.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at the beginning of line.  If P1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        p2
-            Keypoint at the end of line.
-
-        ndiv
-            Number of element divisions within this line.  Normally this field
-            is not used; specifying divisions with LESIZE, etc. is recommended.
-
-        space
-            Spacing ratio.  Normally this field is not used, as specifying
-            spacing ratios with the LESIZE command is recommended.  If
-            positive, SPACE is the nominal ratio of the last division size (at
-            P2) to the first division size (at P1).  If the ratio is greater
-            than 1, the division sizes increase from P1 to P2, and if less than
-            1, they decrease.  If SPACE is negative, then |SPACE| is the
-            nominal ratio of the center division size to those at the ends.
-
-        Returns
-        -------
-        result : int
-            Returns the line number of the created line or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Defines a line between two keypoints from P1 to P2.  The line shape may
-        be generated as "straight" (in the active coordinate system) or curved.
-        The line shape is invariant with coordinate system after it is
-        generated.  Note that solid modeling in a toroidal coordinate system is
-        not recommended.  A curved line is limited to 180°.  Lines may be
-        redefined only if not yet attached to an area.
-        """
-        command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(ndiv), str(space), str(xv1), str(yv1), str(zv1), str(xv2), str(yv2), str(zv2))
         return self.run(command, **kwargs)
 
     def mfoutput(self, freq="", **kwargs):
@@ -41540,41 +41495,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "AGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(na3), str(na4), str(na5), str(na6), str(na7), str(na8), str(na9))
         return self.run(command, **kwargs)
 
-    def k(self, npt="", x="", y="", z="", **kwargs):
-        """APDL Command: K
-
-        Defines a keypoint.
-
-        Parameters
-        ----------
-        npt
-            Reference number for keypoint.  If zero, the lowest
-            available number is assigned [NUMSTR].
-
-        x, y, z
-            Keypoint location in the active coordinate system (may be
-            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
-            enabled and all other fields (including NPT) are ignored
-            (valid only in the GUI).
-
-        Returns
-        -------
-        result : int
-            Returns the Keypoint number of the created Keypoint or
-            None, if something went wrong.
-
-        Notes
-        -----
-        Defines a keypoint in the active coordinate system [CSYS] for
-        line, area, and volume descriptions.  A previously defined
-        keypoint of the same number will be redefined.  Keypoints may
-        be redefined only if it is not yet attached to a line or is
-        not yet meshed.  Solid modeling in a toroidal system is not
-        recommended.
-        """
-        command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
-        return self.run(command, **kwargs)
-
     def batch(self, lab="", **kwargs):
         """APDL Command: /BATCH
 
@@ -58617,28 +58537,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "FS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(nev), str(nlod), str(stitm), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
         return self.run(command, **kwargs)
 
-    def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
-        """APDL Command: BSPLIN
-
-        Generates a single line from a spline fit to a series of keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p6
-            Keypoints through which a spline is fit.  At least two keypoints
-            must be defined.  If P1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        One line is generated between keypoint P1 and the last keypoint
-        entered.  The line will pass through each entered keypoint.  Solid
-        modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "BSPLIN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(xv1), str(yv1), str(zv1), str(xv6), str(yv6), str(zv6))
-        return self.run(command, **kwargs)
-
     def dnsol(self, node="", item="", comp="", v1="", v2="", v3="", v4="",
               v5="", v6="", **kwargs):
         """APDL Command: DNSOL
@@ -60331,56 +60229,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         return self.run(f"SAVE,{fname},{ext},,{slab}", **kwargs)
-
-    def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
-               **kwargs):
-        """APDL Command: CIRCLE
-
-        Generates circular arc lines.
-
-        Parameters
-        ----------
-        pcent
-            Keypoint defining the center of the circle (in the plane of the
-            circle).  If PCENT = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        rad
-            Radius of the circle.  If RAD is blank and PCENT = P, the radius is
-            the distance from PCENT to PZERO.
-
-        paxis
-            Keypoint defining axis of circle (along with PCENT).  If PCENT = P
-            and PAXIS is omitted, the axis is normal to the working plane.
-
-        pzero
-            Keypoint defining the plane normal to circle (along with PCENT and
-            PAXIS) and the zero degree location.  Need not be in the plane of
-            the circle. This value is not required if PAXIS is defined along
-            the Y axis (that is, a circle in the XZ plane).
-
-        arc
-            Arc length (in degrees).  Positive follows right-hand rule about
-            PCENT-PAXIS vector.  Defaults to 360°.
-
-        nseg
-            Number of lines around circumference (defaults to minimum required
-            for 90°-maximum arcs, i.e., 4 for 360°).  Number of keypoints
-            generated is NSEG for 360° or NSEG + 1 for less than 360°.
-
-        Notes
-        -----
-        Generates circular arc lines (and their corresponding keypoints).
-        Keypoints are generated at regular angular locations (based on a
-        maximum spacing of 90°).  Arc lines are generated connecting the
-        keypoints.  Keypoint and line numbers are automatically assigned,
-        beginning with the lowest available values [NUMSTR].  Adjacent lines
-        use a common keypoint.  Line shapes are generated as arcs, regardless
-        of the active coordinate system.  Line shapes are invariant with
-        coordinate system after they are generated.
-        """
-        command = "CIRCLE,%s,%s,%s,%s,%s,%s" % (str(pcent), str(rad), str(paxis), str(pzero), str(arc), str(nseg))
-        return self.run(command, **kwargs)
 
     def plnsol(self, item="", comp="", kund="", fact="", fileid ="", **kwargs):
         """APDL Command: PLNSOL

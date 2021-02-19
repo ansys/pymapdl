@@ -63,6 +63,23 @@ def test_kl(cleared, mapdl):
     assert mapdl.kl(lnum, 0.5) == knum1 + 1
 
 
+def test_knode(cleared, mapdl):
+    knum0 = mapdl.k()
+    nnum = mapdl.n()
+    knum1 = mapdl.knode('', nnum)
+    assert knum0 + knum1
+
+
+def test_l2ang(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    k2 = mapdl.k("", 0, 0, 0.5)
+    carc0 = mapdl.circle(k0, 1, k1)
+    carc1 = mapdl.circle(k2, 1, k1)
+
+    mapdl.l2ang(carc0[0], carc1[0], 90, 90)
+
+
 def test_kcenter(cleared, mapdl):
     # compute the center of a circle
     x, y, z = 0+1j, 1+0j, 0-1j

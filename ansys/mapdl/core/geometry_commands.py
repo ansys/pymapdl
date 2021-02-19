@@ -17,36 +17,273 @@ numeric_const_pattern = r"""
 
 NUM_PATTERN = re.compile(numeric_const_pattern, re.VERBOSE)
 
-def parse_circle(msg):
-    """Parse the message from CIRCLE and return the line numbers"""
-    matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
-    if matches:
-        return [int(match) for match in matches]
 
+class _MapdlGeometryCommands():
+    """Wraps MAPDL geometry commands"""
 
-def parse_k(msg):
-    """Parse create keypoint message and return keypoint number"""
-    if not re.search(r"KEYPOINT NUMBER", msg):
-        res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
-    else:
-        res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
+    def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
+               zv1="", xv6="", yv6="", zv6="", **kwargs):
+        """Generate a single line from a spline fit to a series of keypoints.
 
-    if res:
-        result = int(res.group(2))
-    else:
-        result = None
+        APDL Command: BSPLIN
 
-    return result
+        Parameters
+        ----------
+        p1, p2, p3, p4, p5, p6
+            Keypoints through which a spline is fit.  At least two
+            keypoints must be defined.
 
+        XV1, YV1, ZV1
+            Orientation point of an outward vector tangent to line at
+        P1. Vector coordinate system has its origin at the
+        keypoint. Coordinate interpretation corresponds to the active
+        coordinate system type, i.e., X is R for cylindrical,
+        etc. Defaults to zero curvature slope.
 
-def parse_l(msg):
-    """Parse create line message and return line number"""
-    res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
-    if res is not None:
-        result = int(res.group(2))
-    else:
-        result = None
-    return result
+        XV6, YV6, ZV6
+            Orientation point of an outward vector tangent to a line
+        at P6 (or the last keypoint specified if fewer than six
+        specified). Defaults to zero curvature slope.
+
+        Returns
+        -------
+        int
+            Line number of the spline generated from the spline fit.
+
+        Examples
+        --------
+        Generate a spline through (0, 0, 0), (0, 1, 0) and (1, 2, 0)
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 1, 0)
+        >>> k2 = mapdl.k("", 1, 2, 0)
+        >>> lnum = mapdl.bsplin(k0, k1, k2)
+
+        Notes
+        -----
+        One line is generated between keypoint P1 and the last keypoint
+        entered.  The line will pass through each entered keypoint.  Solid
+        modeling in a toroidal coordinate system is not recommended.
+        """
+        command = "BSPLIN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1),
+                                                                  str(p2),
+                                                                  str(p3),
+                                                                  str(p4),
+                                                                  str(p5),
+                                                                  str(p6),
+                                                                  str(xv1),
+                                                                  str(yv1),
+                                                                  str(zv1),
+                                                                  str(xv6),
+                                                                  str(yv6),
+                                                                  str(zv6))
+        msg = self.run(command, **kwargs)
+        res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+    def k(self, npt="", x="", y="", z="", **kwargs):
+        """Define a keypoint.
+
+        APDL Command: K
+
+        Parameters
+        ----------
+        npt
+            Reference number for keypoint.  If zero, the lowest
+            available number is assigned [NUMSTR].
+
+        x, y, z
+            Keypoint location in the active coordinate system (may be
+            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
+            enabled and all other fields (including NPT) are ignored
+            (valid only in the GUI).
+
+        Returns
+        -------
+        int
+            The keypoint number of the created keypoint.
+
+        Examples
+        --------
+        Create keypoint at (0, 1, 2)
+
+        >>> knum = mapdl.k('', 0, 1, 2)
+        >>> knum
+        1
+
+        Create keypoint at (10, 11, 12) while specifying the keypoint
+        number.
+
+        >>> knum = mapdl.k(5, 10, 11, 12)
+        >>> knum
+        5
+
+        Notes
+        -----
+        Defines a keypoint in the active coordinate system [CSYS] for
+        line, area, and volume descriptions.  A previously defined
+        keypoint of the same number will be redefined.  Keypoints may
+        be redefined only if it is not yet attached to a line or is
+        not yet meshed.  Solid modeling in a toroidal system is not
+        recommended.
+        """
+        command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
+        msg = self.run(command, **kwargs)
+
+        if not re.search(r"KEYPOINT NUMBER", msg):
+            res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
+        else:
+            res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
+
+        if res:
+            return int(res.group(2))
+
+    def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
+               **kwargs):
+        """Generates circular arc lines.
+
+        APDL Command: CIRCLE
+
+        Parameters
+        ----------
+        pcent
+            Keypoint defining the center of the circle (in the plane
+            of the circle).
+
+        rad
+            Radius of the circle.  If RAD is blank and PCENT = P, the
+            radius is the distance from PCENT to PZERO.
+
+        paxis
+            Keypoint defining axis of circle (along with PCENT).  If
+            PCENT = P and PAXIS is omitted, the axis is normal to the
+            working plane.
+
+        pzero
+            Keypoint defining the plane normal to circle (along with
+            PCENT and PAXIS) and the zero degree location.  Need not
+            be in the plane of the circle. This value is not required
+            if PAXIS is defined along the Y axis (that is, a circle in
+            the XZ plane).
+
+        arc
+            Arc length (in degrees).  Positive follows right-hand rule
+            about PCENT-PAXIS vector.  Defaults to 360°.
+
+        nseg
+            Number of lines around circumference (defaults to minimum
+            required for 90°-maximum arcs, i.e., 4 for 360°).  Number
+            of keypoints generated is NSEG for 360° or NSEG + 1 for
+            less than 360°.
+
+        Returns
+        -------
+        list
+            List of lines of the circular arcs generated from this
+            command.
+
+        Examples
+        --------
+        Create a full circle containing four circular arcs.  Circle
+        centered at (0, 0, 0) and generated in the XY plane.  Return
+        the lines generated from the circle.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> carc0
+        [1, 2, 3, 4]
+
+        Notes
+        -----
+        Generates circular arc lines (and their corresponding
+        keypoints).  Keypoints are generated at regular angular
+        locations (based on a maximum spacing of 90°).  Arc lines are
+        generated connecting the keypoints.  Keypoint and line numbers
+        are automatically assigned, beginning with the lowest
+        available values [NUMSTR].  Adjacent lines use a common
+        keypoint.  Line shapes are generated as arcs, regardless of
+        the active coordinate system.  Line shapes are invariant with
+        coordinate system after they are generated.
+        """
+        command = "CIRCLE,%s,%s,%s,%s,%s,%s" % (str(pcent), str(rad), str(paxis),
+                                                str(pzero), str(arc), str(nseg))
+        msg = self.run(command, **kwargs)
+
+        matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
+        if matches:
+            return [int(match) for match in matches]
+
+    def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
+          xv2="", yv2="", zv2="", **kwargs):
+        """Define a line between two keypoints.
+
+        APDL Command: L
+
+        Parameters
+        ----------
+        p1
+            Keypoint at the beginning of line.
+
+        p2
+            Keypoint at the end of line.
+
+        ndiv
+            Number of element divisions within this line.  Normally
+            this field is not used; specifying divisions with LESIZE,
+            etc. is recommended.
+
+        space
+            Spacing ratio.  Normally this field is not used, as
+            specifying spacing ratios with the LESIZE command is
+            recommended.  If positive, SPACE is the nominal ratio of
+            the last division size (at P2) to the first division size
+            (at P1).  If the ratio is greater than 1, the division
+            sizes increase from P1 to P2, and if less than 1, they
+            decrease.  If SPACE is negative, then |SPACE| is the
+            nominal ratio of the center division size to those at the
+            ends.
+
+        Returns
+        -------
+        int
+            The line number of the created line.
+
+        Examples
+        --------
+        Create a line between the two keypoints (0, 0, 0) and (1, 0, 0)
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> lnum = mapdl.l(k0, k1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Defines a line between two keypoints from P1 to P2.  The line
+        shape may be generated as "straight" (in the active coordinate
+        system) or curved.  The line shape is invariant with
+        coordinate system after it is generated.  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+        A curved line is limited to 180°.  Lines may be redefined only
+        if not yet attached to an area.
+        """
+        command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1),
+                                                       str(p2),
+                                                       str(ndiv),
+                                                       str(space),
+                                                       str(xv1),
+                                                       str(yv1),
+                                                       str(zv1),
+                                                       str(xv2),
+                                                       str(yv2),
+                                                       str(zv2))
+        msg = self.run(command, **kwargs)
+        res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
 
 
 def parse_a(msg):
@@ -95,9 +332,9 @@ def parse_al(msg):
     return parse_a(msg)
 
 
-def parse_bsplin(msg):
-    """Parse create bsplin line message and return line number"""
-    return parse_l(msg)
+# def parse_bsplin(msg):
+#     """Parse create bsplin line message and return line number"""
+#     return parse_l(msg)
 
 
 def parse_kpoint(msg):
@@ -139,19 +376,34 @@ def parse_kl(msg):
         return int(res.group(1))
 
 
-geometry_commands = {'K': parse_k,
-                     'L': parse_l,
-                     'A': parse_a,
+def parse_knode(msg):
+    """Return keypoint number from ``KNODE``
+
+    MAPDL message:
+    KEYPOINT         0 FROM NODE         4
+
+     CSYS 0 LOCATION (X,Y,Z)=   0.00000       0.00000       0.00000    
+     KEYPOINT NUMBER =      5
+
+    Return: 5
+
+    """
+    res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
+    if res is not None:
+        return int(res.group(1))
+
+
+
+geometry_commands = {'A': parse_a,
                      'V': parse_v,
                      'N': parse_n,
                      'AL': parse_al,
                      'BLC4': parse_output_area,
                      'CYL4': parse_output_area,
                      'ASBA': parse_output_areas,
-                     'BSPL': parse_bsplin,
-                     'CIRC': parse_circle,
                      'KBET': parse_kpoint,
                      'KCEN': parse_kpoint,
                      'KDIS': parse_kdist,
                      'KL': parse_kl,
+                     'KNOD': parse_knode,
 }
