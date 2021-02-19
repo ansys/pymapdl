@@ -73,10 +73,7 @@ def parse_n(msg):
     """Parse create node message and return node number"""
     res = re.search(r"(NODE\s*)([0-9]+)", msg)
     if res is not None:
-        result = int(res.group(2))
-    else:
-        result = None
-    return result
+        return int(res.group(2))
 
 
 def parse_al(msg):
@@ -87,6 +84,12 @@ def parse_al(msg):
 def parse_bsplin(msg):
     """Parse create bsplin line message and return line number"""
     return parse_l(msg)
+
+
+def parse_kbetw(msg):
+    res = re.search(r'kpoint=\s+(\d+)\s+', msg)
+    if res is not None:
+        return int(res.group(1))
 
 
 geometry_commands = {'K': parse_k,
@@ -100,4 +103,5 @@ geometry_commands = {'K': parse_k,
                      'ASBA': parse_output_areas,
                      'BSPL': parse_bsplin,
                      'CIRC': parse_circle,
+                     'KBET': parse_kbetw,
 }
