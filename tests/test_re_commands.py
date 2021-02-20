@@ -96,6 +96,27 @@ def test_kcenter(cleared, mapdl):
     assert k3 == k2 + 1
 
 
+def test_blc4(cleared, mapdl):
+    assert mapdl.blc4(0, 0, 1, 1) == 1
+
+
+def test_kbetw(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    assert mapdl.kbetw(k0, k1) == 3
+
+
+def test_asba(cleared, mapdl):
+    anum0 = mapdl.blc4(0, 0, 1, 1)
+    anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+    aout = mapdl.asba(anum0, anum1)
+    assert aout == 3
+
+
+def test_cyl4(cleared, mapdl):
+    assert mapdl.cyl4(0, 0, 1, depth=10) == 1
+
+
 def test_k(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     assert k0 == 1

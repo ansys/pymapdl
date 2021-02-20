@@ -17,18 +17,52 @@ numeric_const_pattern = r"""
 
 NUM_PATTERN = re.compile(numeric_const_pattern, re.VERBOSE)
 
+
+def parse_kpoint(msg):
+    if msg:
+        res = re.search(r'kpoint=\s+(\d+)\s+', msg)
+        if res is not None:
+            return int(res.group(1))
+
+
+def parse_output_area(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"(OUTPUT AREA =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_output_areas(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
 def parse_a(msg):
     """Parse create area message and return area number"""
-    res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
-    if res is not None:
-        return int(res.group(2))
+    if msg:
+        res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
 
 
 def parse_v(msg):
     """Parse volume message and return volume number"""
-    res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
-    if res is not None:
-        return int(res.group(2))
+    if msg:
+        res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_output_volume(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"(OUTPUT VOLUME =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
 
 
 class _MapdlGeometryCommands():
@@ -91,9 +125,10 @@ class _MapdlGeometryCommands():
                                                                   str(yv6),
                                                                   str(zv6))
         msg = self.run(command, **kwargs)
-        res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
-        if res is not None:
-            return int(res.group(2))
+        if msg:
+            res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
+            if res is not None:
+                return int(res.group(2))
 
     def k(self, npt="", x="", y="", z="", **kwargs):
         """Define a keypoint.
@@ -144,13 +179,14 @@ class _MapdlGeometryCommands():
         command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
         msg = self.run(command, **kwargs)
 
-        if not re.search(r"KEYPOINT NUMBER", msg):
-            res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
-        else:
-            res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
+        if msg:
+            if not re.search(r"KEYPOINT NUMBER", msg):
+                res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
+            else:
+                res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
 
-        if res:
-            return int(res.group(2))
+            if res:
+                return int(res.group(2))
 
     def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
                **kwargs):
@@ -224,9 +260,10 @@ class _MapdlGeometryCommands():
                                                 str(pzero), str(arc), str(nseg))
         msg = self.run(command, **kwargs)
 
-        matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
-        if matches:
-            return [int(match) for match in matches]
+        if msg:
+            matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
+            if matches:
+                return [int(match) for match in matches]
 
     def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
           xv2="", yv2="", zv2="", **kwargs):
@@ -294,9 +331,10 @@ class _MapdlGeometryCommands():
                                                        str(yv2),
                                                        str(zv2))
         msg = self.run(command, **kwargs)
-        res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
-        if res is not None:
-            return int(res.group(2))
+        if msg:
+            res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
+            if res is not None:
+                return int(res.group(2))
 
     def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
           p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
@@ -444,37 +482,429 @@ class _MapdlGeometryCommands():
         command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
         return parse_v(self.run(command, **kwargs))
 
+    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
+          **kwargs):
+        """Define a node.
 
-def parse_output_area(msg):
-    """Parse create area message and return area number"""
-    res = re.search(r"(OUTPUT AREA =\s*)([0-9]+)", msg)
-    if res is not None:
-        return int(res.group(2))
+        APDL Command: N
+
+        Parameters
+        ----------
+        node
+            Node number to be assigned.  A previously defined node of
+            the same number will be redefined.  Defaults to the
+            maximum node number used +1.
+
+        x, y, z
+            Node location in the active coordinate system (R, θ, Z for
+            cylindrical, R, θ, Φ for spherical or toroidal).  If X =
+            P, graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI).
+
+        thxy
+            First rotation about nodal Z (positive X toward Y).
+
+        thyz
+            Second rotation about nodal X (positive Y toward Z).
+
+        thzx
+            Third rotation about nodal Y (positive Z toward X).
+
+        Examples
+        --------
+        Create a node at (0, 1, 1)
+
+        >>> nnum = mapdl.n("", 0, 1, 1)
+        >>> nnum
+        1
+
+        Create a node at (4, 5, 1) with a node ID of 10
+
+        >>> nnum = mapdl.n(10, 4, 5, 1)
+        >>> nnum
+        10
+
+        Notes
+        -----
+        Defines a node in the active coordinate system [CSYS].  The
+        nodal coordinate system is parallel to the global Cartesian
+        system unless rotated.  Rotation angles are in degrees and
+        redefine any previous rotation angles.  See the NMODIF, NANG,
+        NROTAT, and NORA commands for other rotation options.
+        """
+        command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
+        msg = self.run(command, **kwargs)
+        if msg:
+            res = re.search(r"(NODE\s*)([0-9]+)", msg)
+            if res is not None:
+                return int(res.group(2))
+
+    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
+           l10="", **kwargs):
+        """Generate an area bounded by previously defined lines.
+
+        APDL Command: AL
+
+        Parameters
+        ----------
+        l1, l2, l3, . . . , l10
+            List of lines defining area.  The minimum number of lines
+            is 3.  The positive normal of the area is controlled by
+            the direction of L1 using the right-hand rule.  A negative
+            value of L1 reverses the normal direction.  If L1 = ALL,
+            use all selected lines with L2 defining the normal (L3 to
+            L10 are ignored and L2 defaults to the lowest numbered
+            selected line).  A component name may also be substituted
+            for L1.
+
+        Returns
+        -------
+        result : int
+            Returns the area number of the created area.
+
+        Examples
+        --------
+        Create an area from four lines
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> l1 = mapdl.l(k1, k2)
+        >>> l2 = mapdl.l(k2, k3)
+        >>> l3 = mapdl.l(k3, k0)
+        >>> anum = mapdl.al(l0, l1, l2, l3)
+        >>> anum
+        1
+
+        Notes
+        -----
+        Lines may be input (once each) in any order and must form a
+        simply connected closed curve.  If the area is defined with
+        more than four lines, the lines must also lie in the same
+        plane or on a constant coordinate value in the active
+        coordinate system (such as a plane or a cylinder).
+
+        Solid modeling in a toroidal coordinate system is not
+        recommended.  Areas may be redefined only if not yet attached
+        to a volume.
+
+        This command is valid in any processor.
+        """
+        command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
+        return parse_a(self.run(command, **kwargs))
+
+    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
+             **kwargs):
+        """APDL Command: BLC4
+
+        Creates a rectangular area or block volume by corner points.
+
+        Parameters
+        ----------
+        xcorner, ycorner
+            Working plane X and Y coordinates of one corner of the
+            rectangle or block face.
+
+        width
+            The distance from XCORNER on or parallel to the working
+            plane X-axis that, together with YCORNER, defines a second
+            corner of the rectangle or block face.
+
+        height
+            The distance from YCORNER on or parallel to the working
+            plane Y-axis that, together with XCORNER, defines a third
+            corner of the rectangle or block face.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the block.  If DEPTH = 0
+            (default), a rectangular area is created on the working
+            plane.
+
+        Examples
+        --------
+        Create a block with dimensions 1 x 2 x 10 with one corner of
+        the block at (0, 0) of the current working plane.
+
+        >>> anum = mapdl.blc4(1, 1, 1, 2, 10)
+        >>> anum
+        1
+
+        Notes
+        -----
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane.
+        A rectangle will be defined with four keypoints and four
+        lines.  A volume will be defined with eight keypoints, twelve
+        lines, and six areas, with the top and bottom faces parallel
+        to the working plane.  See the BLC5, RECTNG, and BLOCK
+        commands for alternate ways to create rectangles and blocks.
+        """
+        command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
+        return parse_output_area(self.run(command, **kwargs))
+
+    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
+             theta2="", depth="", **kwargs):
+        """Creates a circular area or cylindrical volume anywhere on
+        the working plane.
+
+        APDL Command: CYL4
 
 
-def parse_output_areas(msg):
-    """Parse create area message and return area number"""
-    res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
-    if res is not None:
-        return int(res.group(2))
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            circle or cylinder.
 
+        rad1, rad2
+            Inner and outer radii (either order) of the circle or
+            cylinder.  A value of zero or blank for either RAD1 or
+            RAD2, or the same value for both RAD1 and RAD2, defines a
+            solid circle or cylinder.
 
-def parse_n(msg):
-    """Parse create node message and return node number"""
-    res = re.search(r"(NODE\s*)([0-9]+)", msg)
-    if res is not None:
-        return int(res.group(2))
+        theta1, theta2
+            Starting and ending angles (either order) of the circle or
+            faces of the cylinder.  Used for creating a partial
+            annulus or partial cylinder.  The sector begins at the
+            algebraically smaller angle, extends in a positive angular
+            direction, and ends at the larger angle.  The starting
+            angle defaults to 0° and the ending angle defaults to
+            360°.  See the Modeling and Meshing Guide for an
+            illustration.
 
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the cylinder.  If DEPTH =
+            0 (default), a circular area is created on the working
+            plane.
 
-def parse_al(msg):
-    """Parse create area message and return area number"""
-    return parse_a(msg)
+        Examples
+        --------
+        Create a solid cylinder with a depth of 10 at the center of
+        the working plane.
 
+        >>> vnum = mapdl.cyl4(0, 0, 1, depth=10)
+        >>> vnum
+        1
 
-def parse_kpoint(msg):
-    res = re.search(r'kpoint=\s+(\d+)\s+', msg)
-    if res is not None:
-        return int(res.group(1))
+        Create a cylinder with an inner radius of 1.9 and an outer of
+        2.0 with a height of 5 centered at the working plane.
+
+        >>> vnum = mapdl.cyl4(0, 0, rad1=1.9, rad2=2.0, depth=10)
+        2
+
+        Notes
+        -----
+        Defines a circular area anywhere on the working plane or a
+        cylindrical volume with one face anywhere on the working
+        plane.  For a solid cylinder of 360°, the top and bottom faces
+        will be circular (each area defined with four lines) and they
+        will be connected with two surface areas (each spanning 180°).
+        See the CYL5, PCIRC, and CYLIND commands for alternate ways to
+        create circles and cylinders.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you must provide a value for DEPTH or the
+        command will be ignored.
+        """
+        command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
+        return parse_output_volume(self.run(command, **kwargs))
+
+    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs):
+        """Subtracts areas from areas.
+
+        APDL Command: ASBA
+
+        Parameters
+        ----------
+        na1
+            Area (or areas, if picking is used) to be subtracted from.
+            If ALL, use all selected areas.  Areas specified in this
+            argument are not available for use in the NA2 argument.  A
+            component name may also be substituted for NA1.
+
+        na2
+            Area (or areas, if picking is used) to subtract.  If ALL,
+            use all selected areas (except those included in the NA1
+            argument).  A component name may also be substituted for
+            NA2.
+
+        sepo
+            Behavior if the intersection of the NA1 areas and the NA2 areas is
+            a line or lines:
+
+            (blank) - The resulting areas will share line(s) where they touch.
+
+            SEPO - The resulting areas will have separate, but
+                   coincident line(s) where they touch.
+
+        keep1
+            Specifies whether NA1 areas are to be deleted:
+
+            (blank) - Use the setting of KEEP on the BOPTN command.
+
+            DELETE - Delete NA1 areas after ASBA operation (override
+            BOPTN command settings).
+
+            KEEP - Keep NA1 areas after ASBA operation (override BOPTN
+            command settings).
+
+        keep2
+            Specifies whether NA2 areas are to be deleted:
+
+            (blank) - Use the setting of KEEP on the BOPTN command.
+
+            DELETE - Delete NA2 areas after ASBA operation (override
+            BOPTN command settings).
+
+            KEEP - Keep NA2 areas after ASBA operation (override BOPTN
+            command settings).
+
+        Examples
+        --------
+        Subtract a 0.5 x 0.5 rectangle from a 1 x 1 rectangle.
+
+        >>> anum0 = mapdl.blc4(0, 0, 1, 1)
+        >>> anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+        >>> aout = mapdl.asba(anum0, anum1)
+        >>> aout
+        3
+
+        Notes
+        -----
+        Generates new areas by subtracting the regions common to both
+        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
+        intersection can be an area(s) or line(s).  If the
+        intersection is a line and SEPO is blank, the NA1 area is
+        divided at the line and the resulting areas will be connected,
+        sharing a common line where they touch.  If SEPO is set to
+        SEPO, NA1 is divided into two unconnected areas with separate
+        lines where they touch.  See Solid Modeling in the Modeling
+        and Meshing Guide for an illustration.  See the BOPTN command
+        for an explanation of the options available to Boolean
+        operations.  Element attributes and solid model boundary
+        conditions assigned to the original entities will not be
+        transferred to the new entities generated.  ASBA,ALL,ALL will
+        have no effect since all the areas (in NA1) will be
+        unavailable as NA2 areas.
+        """
+        command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
+        return parse_output_areas(self.run(command, **kwargs))
+
+    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs):
+        """Creates a keypoint between two existing keypoints.
+
+        APDL Command: KBETW
+
+        Parameters
+        ----------
+        kp1
+            First keypoint.
+
+        kp2
+            Second keypoint.
+
+        kpnew
+            Number assigned to the new keypoint.  Defaults to the
+            lowest available keypoint number.
+
+        type
+            Type of input for VALUE.
+
+            RATIO - Value is the ratio of the distances between keypoints as follows:
+                    ``(KP1-KPNEW)/(KP1-KP2)``.
+
+            DIST - Value is the absolute distance between KP1 and
+                   KPNEW (valid only if current coordinate system is
+                   Cartesian).
+
+        value
+            Location of new keypoint, as defined by Type (defaults to
+            0.5).  If VALUE is a ratio (Type = RATIO) and is less than
+            0 or greater than 1, the keypoint is created on the
+            extended line.  Similarly, if VALUE is a distance (Type =
+            DIST) and is less than 0 or greater than the distance
+            between KP1 and KP2, the keypoint is created on the
+            extended line.
+
+        Examples
+        --------
+        Create a keypoint exactly centered between two keypoints.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.kbetw(k0, k1)
+        >>> k2
+        3
+
+        Notes
+        -----
+        Placement of the new keypoint depends on the currently active
+        coordinate system [CSYS].  If the coordinate system is
+        Cartesian, the keypoint will lie on a straight line between
+        KP1 and KP2.  If the system is not Cartesian (e.g.,
+        cylindrical, spherical, etc.), the keypoint will be located as
+        if on a line (which may not be straight) created in the
+        current coordinate system between KP1 and KP2.  Note that
+        solid modeling in a toroidal coordinate system is not
+        recommended.
+        """
+        command = f"KBETW,{kp1},{kp2},{kpnew},{type},{value}"
+        return parse_kpoint(self.run(command, **kwargs))
+
+    def kcenter(self, type="", val1="", val2="", val3="", val4="", kpnew="",
+                **kwargs):
+        """Creates a keypoint at the center of a circular arc defined
+        by three locations.
+
+        APDL Command: KCENTER
+
+        Parameters
+        ----------
+        type
+            Type of entity used to define the circular arc.  The
+            meaning of VAL1 through VAL4 will vary depending on Type.
+
+            KP - Arc is defined by keypoints.
+
+            LINE - Arc is defined by locations on a line.
+
+        val1, val2, val3, val4
+            Values used to specify three locations on the arc (see table
+            below).
+
+        kpnew
+            Number assigned to new keypoint.  Defaults to the lowest available
+            keypoint number.
+
+        Examples
+        --------
+        Create a keypoint at the center of a circle centered at (0, 0, 0)
+
+        >>> k0 = mapdl.k("", 0, 1, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 0, -1, 0)
+        >>> k3 = mapdl.kcenter('KP', k0, k1, k2)
+        >>> k3
+        4
+
+        Notes
+        -----
+        KCENTER should be used in the Cartesian coordinate system
+        (CSYS,0) only.  This command provides three methods to define
+        a keypoint at the center of three locations.  As shown below,
+        the center point can be calculated based on a) three
+        keypoints, b) three keypoints and a radius, or c) three
+        locations on a line.  Note that for method c, if a circular
+        line is specified by VAL1, VAL2 through VAL4 are not needed.
+        """
+        command = f"KCENTER,{type},{val1},{val2},{val3},{val4},{kpnew}"
+        return parse_kpoint(self.run(command, **kwargs))
 
 
 def parse_kdist(msg):
@@ -527,14 +957,7 @@ def parse_knode(msg):
         return int(res.group(1))
 
 
-
-geometry_commands = {'N': parse_n,
-                     'AL': parse_al,
-                     'BLC4': parse_output_area,
-                     'CYL4': parse_output_area,
-                     'ASBA': parse_output_areas,
-                     'KBET': parse_kpoint,
-                     'KCEN': parse_kpoint,
+geometry_commands = {
                      'KDIS': parse_kdist,
                      'KL': parse_kl,
                      'KNOD': parse_knode,

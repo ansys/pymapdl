@@ -5667,45 +5667,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "SVTYP,%s,%s,%s" % (str(ksv), str(fact), str(keyinterp))
         return self.run(command, **kwargs)
 
-    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-          **kwargs):
-        """APDL Command: N
-
-        Defines a node.
-
-        Parameters
-        ----------
-        node
-            Node number to be assigned.  A previously defined node of the same
-            number will be redefined.  Defaults to the maximum node number used
-            +1.
-
-        x, y, z
-            Node location in the active coordinate system (R, θ, Z for
-            cylindrical, R, θ, Φ for spherical or toroidal).  If X = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
-
-        thxy
-            First rotation about nodal Z (positive X toward Y).
-
-        thyz
-            Second rotation about nodal X (positive Y toward Z).
-
-        thzx
-            Third rotation about nodal Y (positive Z toward X).
-
-        Notes
-        -----
-        Defines a node in the active coordinate system [CSYS].  The nodal
-        coordinate system is parallel to the global Cartesian system unless
-        rotated.  Rotation angles are in degrees and redefine any previous
-        rotation angles.  See the NMODIF, NANG, NROTAT, and NORA commands for
-        other rotation options.
-        """
-        command = "N,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(x), str(y), str(z), str(thxy), str(thyz), str(thzx))
-        return self.run(command, **kwargs)
-
     def axlab(self, axis="", lab="", **kwargs):
         """APDL Command: /AXLAB
 
@@ -23298,47 +23259,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "MFCALC,%s,%s" % (str(fnumb), str(freq))
         return self.run(command, **kwargs)
 
-    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
-             **kwargs):
-        """APDL Command: BLC4
-
-        Creates a rectangular area or block volume by corner points.
-
-        Parameters
-        ----------
-        xcorner, ycorner
-            Working plane X and Y coordinates of one corner of the rectangle or
-            block face.
-
-        width
-            The distance from XCORNER on or parallel to the working plane
-            X-axis that, together with YCORNER, defines a second corner of the
-            rectangle or block face.
-
-        height
-            The distance from YCORNER on or parallel to the working plane
-            Y-axis that, together with XCORNER, defines a third corner of the
-            rectangle or block face.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the block.  If DEPTH = 0 (default), a rectangular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a rectangular area anywhere on the working plane or a
-        hexahedral volume with one face anywhere on the working plane.  A
-        rectangle will be defined with four keypoints and four lines.  A volume
-        will be defined with eight keypoints, twelve lines, and six areas, with
-        the top and bottom faces parallel to the working plane.  See the BLC5,
-        RECTNG, and BLOCK commands for alternate ways to create rectangles and
-        blocks.
-        """
-        command = "BLC4,%s,%s,%s,%s,%s" % (str(xcorner), str(ycorner), str(width), str(height), str(depth))
-        return self.run(command, **kwargs)
-
     def nplot(self, knum="", **kwargs):
         """APDL Command: NPLOT
 
@@ -38497,70 +38417,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "RBE3,%s,%s,%s,%s" % (str(m_aster), str(dof), str(slaves), str(wtfact))
         return self.run(command, **kwargs)
 
-    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs):
-        """APDL Command: ASBA
-
-        Subtracts areas from areas.
-
-        Parameters
-        ----------
-        na1
-            Area (or areas, if picking is used) to be subtracted from.  If ALL,
-            use all selected areas.  Areas specified in this argument are not
-            available for use in the NA2 argument.  If P, graphical picking is
-            enabled (valid only in the GUI) and remaining fields are ignored.
-            A component name may also be substituted for NA1.
-
-        na2
-            Area (or areas, if picking is used) to subtract.  If ALL, use all
-            selected areas (except those included in the NA1 argument).    A
-            component name may also be substituted for NA2.
-
-        sepo
-            Behavior if the intersection of the NA1 areas and the NA2 areas is
-            a line or lines:
-
-            (blank) - The resulting areas will share line(s) where they touch.
-
-            SEPO - The resulting areas will have separate, but coincident line(s) where they
-                   touch.
-
-        keep1
-            Specifies whether NA1 areas are to be deleted:
-
-            (blank) - Use the setting of KEEP on the BOPTN command.
-
-            DELETE - Delete NA1 areas after ASBA operation (override BOPTN command settings).
-
-            KEEP - Keep NA1 areas after ASBA operation (override BOPTN command settings).
-
-        keep2
-            Specifies whether NA2 areas are to be deleted:
-
-            (blank) - Use the setting of KEEP on the BOPTN command.
-
-            DELETE - Delete NA2 areas after ASBA operation (override BOPTN command settings).
-
-            KEEP - Keep NA2 areas after ASBA operation (override BOPTN command settings).
-
-        Notes
-        -----
-        Generates new areas by subtracting the regions common to both NA1 and
-        NA2 areas (the intersection) from the NA1 areas.  The intersection can
-        be an area(s) or line(s).  If the intersection is a line and SEPO is
-        blank, the NA1 area is divided at the line and the resulting areas will
-        be connected, sharing a common line where they touch.  If SEPO is set
-        to SEPO, NA1 is divided into two unconnected areas with separate lines
-        where they touch.  See Solid Modeling in the Modeling and Meshing Guide
-        for an illustration.  See the BOPTN command for an explanation of the
-        options available to Boolean operations.  Element attributes and solid
-        model boundary conditions assigned to the original entities will not be
-        transferred to the new entities generated.  ASBA,ALL,ALL will have no
-        effect since all the areas (in NA1) will be unavailable as NA2 areas.
-        """
-        command = "ASBA,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(sepo), str(keep1), str(keep2))
-        return self.run(command, **kwargs)
-
     def vscale(self, wn="", vratio="", key="", **kwargs):
         """APDL Command: /VSCALE
 
@@ -40099,54 +39955,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "MAP2DTO3D,%s,%s,%s,%s" % (str(action), str(ldstep), str(sbstep), str(option))
         return self.run(command, **kwargs)
 
-    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs):
-        """APDL Command: KBETW
-
-        Creates a keypoint between two existing keypoints.
-
-        Parameters
-        ----------
-        kp1
-            First keypoint.  If KP1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        kp2
-            Second keypoint.
-
-        kpnew
-            Number assigned to the new keypoint.  Defaults to the lowest
-            available keypoint number.
-
-        type
-            Type of input for VALUE.
-
-            RATIO - Value is the ratio of the distances between keypoints as follows:
-                    (KP1-KPNEW)/(KP1-KP2).
-
-            DIST - Value is the absolute distance between KP1 and KPNEW (valid only if current
-                   coordinate system is Cartesian).
-
-        value
-            Location of new keypoint, as defined by Type (defaults to 0.5).  If
-            VALUE is a ratio (Type = RATIO) and is less than 0 or greater than
-            1, the keypoint is created on the extended line.  Similarly, if
-            VALUE is a distance (Type = DIST) and is less than 0 or greater
-            than the distance between KP1 and KP2, the keypoint is created on
-            the extended line.
-
-        Notes
-        -----
-        Placement of the new keypoint depends on the currently active
-        coordinate system [CSYS].  If the coordinate system is Cartesian, the
-        keypoint will lie on a straight line between KP1 and KP2.  If the
-        system is not Cartesian (e.g., cylindrical, spherical, etc.), the
-        keypoint will be located as if on a line (which may not be straight)
-        created in the current coordinate system between KP1 and KP2.  Note
-        that solid modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "KBETW,%s,%s,%s,%s,%s" % (str(kp1), str(kp2), str(kpnew), str(type), str(value))
-        return self.run(command, **kwargs)
-
     def usrdof(self, action="", dof1="", dof2="", dof3="", dof4="", dof5="",
                dof6="", dof7="", dof8="", dof9="", dof10="", **kwargs):
         """APDL Command: USRDOF
@@ -40609,45 +40417,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "PFACT,%s,%s,%s" % (str(tblno), str(excit), str(parcor))
-        return self.run(command, **kwargs)
-
-    def kcenter(self, type="", val1="", val2="", val3="", val4="", kpnew="",
-                **kwargs):
-        """APDL Command: KCENTER
-
-        Creates a keypoint at the center of a circular arc defined by three
-        locations.
-
-        Parameters
-        ----------
-        type
-            Type of entity used to define the circular arc.  The meaning of
-            VAL1 through VAL4 will vary depending on Type.  If Type = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
-
-            KP - Arc is defined by keypoints.
-
-            LINE - Arc is defined by locations on a line.
-
-        val1, val2, val3, val4
-            Values used to specify three locations on the arc (see table
-            below).
-
-        kpnew
-            Number assigned to new keypoint.  Defaults to the lowest available
-            keypoint number.
-
-        Notes
-        -----
-        KCENTER should be used in the Cartesian coordinate system (CSYS,0)
-        only.  This command provides three methods to define a keypoint at the
-        center of three locations.  As shown below, the center point can be
-        calculated based on a) three keypoints, b) three keypoints and a
-        radius, or c) three locations on a line.  Note that for method c, if a
-        circular line is specified by VAL1, VAL2 through VAL4 are not needed.
-        """
-        command = "KCENTER,%s,%s,%s,%s,%s,%s" % (str(type), str(val1), str(val2), str(val3), str(val4), str(kpnew))
         return self.run(command, **kwargs)
 
     def fcdele(self, mat="", **kwargs):
@@ -41538,47 +41307,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "WPOFFS,%s,%s,%s" % (str(xoff), str(yoff), str(zoff))
-        return self.run(command, **kwargs)
-
-    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
-           l10="", **kwargs):
-        """APDL Command: AL
-
-        Generates an area bounded by previously defined lines.
-
-        Parameters
-        ----------
-        l1, l2, l3, . . . , l10
-            List of lines defining area.  The minimum number of lines is 3.
-            The positive normal of the area is controlled by the direction of
-            L1 using the right-hand rule.  A negative value of L1 reverses the
-            normal direction.  If L1 = ALL, use all selected lines with L2
-            defining the normal (L3 to L10 are ignored and L2 defaults to the
-            lowest numbered selected line).  If L1 = P, graphical picking is
-            enabled and all remaining arguments are ignored (valid only in the
-            GUI).  A component name may also be substituted for L1.
-
-        Returns
-        -------
-        result : int
-            Returns the area number of the created area or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Lines may be input (once each) in any order and must form a simply
-        connected closed curve.  If the area is defined with more than four
-        lines, the lines must also lie in the same plane or on a constant
-        coordinate value in the active coordinate system (such as a plane or a
-        cylinder).
-
-        Note:: : Solid modeling in a toroidal coordinate system is not
-        recommended.  Areas may be redefined only if not yet attached to a
-        volume.
-
-        This command is valid in any processor.
-        """
-        command = "AL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(l1), str(l2), str(l3), str(l4), str(l5), str(l6), str(l7), str(l8), str(l9), str(l10))
         return self.run(command, **kwargs)
 
     def torqc2d(self, rad="", numn="", lcsys="", **kwargs):
@@ -59930,55 +59658,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid only at the Begin Level.
         """
         command = "/AUX3," % ()
-        return self.run(command, **kwargs)
-
-    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
-             theta2="", depth="", **kwargs):
-        """APDL Command: CYL4
-
-        Creates a circular area or cylindrical volume anywhere on the working
-        plane.
-
-        Parameters
-        ----------
-        xcenter, ycenter
-            Working plane X and Y coordinates of the center of the circle or
-            cylinder.
-
-        rad1, rad2
-            Inner and outer radii (either order) of the circle or cylinder.  A
-            value of zero or blank for either RAD1 or RAD2, or the same value
-            for both RAD1 and RAD2, defines a solid circle or cylinder.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the circle or faces of
-            the cylinder.  Used for creating a partial annulus or partial
-            cylinder.  The sector begins at the algebraically smaller angle,
-            extends in a positive angular direction, and ends at the larger
-            angle.  The starting angle defaults to 0° and the ending angle
-            defaults to 360°.  See the Modeling and Meshing Guide for an
-            illustration.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the cylinder.  If DEPTH = 0 (default), a circular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a circular area anywhere on the working plane or a cylindrical
-        volume with one face anywhere on the working plane.  For a solid
-        cylinder of 360°, the top and bottom faces will be circular (each area
-        defined with four lines) and they will be connected with two surface
-        areas (each spanning 180°).  See the CYL5, PCIRC, and CYLIND commands
-        for alternate ways to create circles and cylinders.
-
-        When working with a model imported from an IGES file (DEFAULT import
-        option), you must provide a value for DEPTH or the command will be
-        ignored.
-        """
-        command = "CYL4,%s,%s,%s,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(theta1), str(rad2), str(theta2), str(depth))
         return self.run(command, **kwargs)
 
     def bflist(self, node="", lab="", **kwargs):

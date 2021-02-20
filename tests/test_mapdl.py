@@ -92,6 +92,7 @@ def test_allow_ignore(mapdl):
     assert mapdl.allow_ignore is True
     mapdl.k()
     assert mapdl.geometry.n_keypoint is 0
+    mapdl.allow_ignore = False
 
 
 def test_chaining(mapdl, cleared):
@@ -209,6 +210,14 @@ def test_lines(cleared, mapdl):
     assert isinstance(lines, pyvista.PolyData)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
+
+
+def test_blc4(cleared, mapdl):
+    assert mapdl.blc4(1, 1, 1, 2, 10) == 1
+
+
+def test_cyl4(cleared, mapdl):
+    assert mapdl.cyl4()
 
 
 @skip_no_xserver
