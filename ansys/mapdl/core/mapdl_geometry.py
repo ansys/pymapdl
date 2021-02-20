@@ -57,7 +57,6 @@ class Geometry():
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-
     def areas(self, quality=7):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
@@ -300,8 +299,8 @@ class Geometry():
             self._mapdl.cm('__tmp_volu__', 'VOLU')
             self._mapdl.cm('__tmp_area__', 'AREA')
             self._mapdl.cm('__tmp_keyp__', 'KP')
-            self._mapdl.asel('S', 'ALL')
-            self._mapdl.ksel('S', 'ALL')
+            self._mapdl.ksel('ALL')
+            self._mapdl.asel('ALL')
             self._mapdl.vsel('NONE')
 
         iges = self._load_iges()
