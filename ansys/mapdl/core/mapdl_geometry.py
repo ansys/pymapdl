@@ -316,7 +316,7 @@ class Geometry():
         entity_nums = []
         for bspline in iges.bsplines():
             # allow only 10001 as others appear to be construction entities
-            if bspline.d['status_number'] == 10001:
+            if bspline.d['status_number'] in [1, 10001]:
                 entity_num = int(bspline.d['entity_subs_num'])
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)

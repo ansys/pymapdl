@@ -124,11 +124,7 @@ class _MapdlGeometryCommands():
                                                                   str(xv6),
                                                                   str(yv6),
                                                                   str(zv6))
-        msg = self.run(command, **kwargs)
-        if msg:
-            res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
-            if res is not None:
-                return int(res.group(2))
+        return parse_line_no(self.run(command, **kwargs))
 
     def k(self, npt="", x="", y="", z="", **kwargs):
         """Define a keypoint.
@@ -259,7 +255,6 @@ class _MapdlGeometryCommands():
         command = "CIRCLE,%s,%s,%s,%s,%s,%s" % (str(pcent), str(rad), str(paxis),
                                                 str(pzero), str(arc), str(nseg))
         msg = self.run(command, **kwargs)
-
         if msg:
             matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
             if matches:
@@ -330,11 +325,7 @@ class _MapdlGeometryCommands():
                                                        str(xv2),
                                                        str(yv2),
                                                        str(zv2))
-        msg = self.run(command, **kwargs)
-        if msg:
-            res = re.search(r"(LINE NO\.=\s*)([0-9]+)", msg)
-            if res is not None:
-                return int(res.group(2))
+        return parse_line_no(self.run(command, **kwargs))
 
     def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
           p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
@@ -1103,10 +1094,27 @@ class _MapdlGeometryCommands():
             If negative, assume P3 is the second keypoint of the line
             instead of the first.
 
+        Examples
+        --------
+        Create two circular arcs and connect them with a spline.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", -1.5, 1.5, 0)
+        >>> k3 = mapdl.k("", -1.5, 1.5, 1)
+        >>> carc0 = mapdl.circle(k0, 1, k1, arc=90)
+        >>> carc1 = mapdl.circle(k2, 1, k3, arc=90)
+        >>> lnum = mapdl.l2tan(1, 2)
+        3
+
+        Plot these lines
+
+        >>> mapdl.lplot(cpos='xy')
+
         Notes
         -----
         Generates a line (P2-P3) tangent at point P2 to line NL1
         (P1-P2) and tangent at point P3 to line NL2 (P3-P4).
         """
         command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
-        return self.run(command, **kwargs)
+        return parse_line_no(self.run(command, **kwargs))

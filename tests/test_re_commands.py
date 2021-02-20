@@ -83,13 +83,13 @@ def test_l2tan(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 0, 0, 1)
 
-    k2 = mapdl.k("", 4, 0, 0)
-    k3 = mapdl.k("", 4, 0, -1)
+    k2 = mapdl.k("", -1.5, 1.5, 0)
+    k3 = mapdl.k("", -1.5, 1.5, 1)
 
-    # carc0 = mapdl.circle(k0, 1, k1, arc=90)
-    # carc1 = mapdl.circle(k2, 1, k3, arc=90)
-    # lnum = mapdl.l2tan(1, 3)
-
+    carc0 = mapdl.circle(k0, 1, k1, arc=90)
+    carc1 = mapdl.circle(k2, 1, k3, arc=90)
+    lnum = mapdl.l2tan(1, 2)
+    assert lnum == 3
 
 def test_kcenter(cleared, mapdl):
     # compute the center of a circle
