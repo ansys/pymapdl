@@ -58,8 +58,6 @@ View the current mesh status with:
       Number of Element Components: 0
 
 
-
-
 Geometry Commands
 ~~~~~~~~~~~~~~~~~
 .. autoclass:: ansys.mapdl.core.geometry_commands._MapdlGeometryCommands

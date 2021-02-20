@@ -25,12 +25,12 @@ def parse_kpoint(msg):
             return int(res.group(1))
 
 
-def parse_output_area(msg):
-    """Parse create area message and return area number"""
-    if msg:
-        res = re.search(r"(OUTPUT AREA =\s*)([0-9]+)", msg)
-        if res is not None:
-            return int(res.group(2))
+# def parse_output_area(msg):
+#     """Parse create area message and return area number"""
+#     if msg:
+#         res = re.search(r"(OUTPUT AREA =\s*)([0-9]+)", msg)
+#         if res is not None:
+#             return int(res.group(2))
 
 
 def parse_output_areas(msg):
@@ -57,10 +57,10 @@ def parse_v(msg):
             return int(res.group(2))
 
 
-def parse_output_volume(msg):
-    """Parse create area message and return area number"""
+def parse_output_volume_area(msg):
+    """Parse create area message and return area or volume number"""
     if msg:
-        res = re.search(r"(OUTPUT VOLUME =\s*)([0-9]+)", msg)
+        res = re.search(r"OUTPUT (AREA|VOLUME|AREAS) =\s*([0-9]+)", msg)
         if res is not None:
             return int(res.group(2))
 
@@ -644,7 +644,7 @@ class _MapdlGeometryCommands():
         commands for alternate ways to create rectangles and blocks.
         """
         command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
-        return parse_output_area(self.run(command, **kwargs))
+        return parse_output_volume_area(self.run(command, **kwargs))
 
     def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
              theta2="", depth="", **kwargs):
@@ -713,7 +713,7 @@ class _MapdlGeometryCommands():
         command will be ignored.
         """
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
-        return parse_output_volume(self.run(command, **kwargs))
+        return parse_output_volume_area(self.run(command, **kwargs))
 
     def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs):
         """Subtracts areas from areas.
@@ -794,7 +794,7 @@ class _MapdlGeometryCommands():
         unavailable as NA2 areas.
         """
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
-        return parse_output_areas(self.run(command, **kwargs))
+        return parse_output_volume_area(self.run(command, **kwargs))
 
     def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs):
         """Creates a keypoint between two existing keypoints.

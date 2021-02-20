@@ -212,14 +212,6 @@ def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 4
 
 
-def test_blc4(cleared, mapdl):
-    assert mapdl.blc4(1, 1, 1, 2, 10) == 1
-
-
-def test_cyl4(cleared, mapdl):
-    assert mapdl.cyl4()
-
-
 @skip_no_xserver
 def test_lplot(cleared, mapdl, tmpdir):
     with pytest.raises(MapdlRuntimeError):
