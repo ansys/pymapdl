@@ -11,10 +11,6 @@ import weakref
 import warnings
 
 import numpy as np
-import pyvista as pv
-import scooby
-
-from ansys.mapdl.reader import Archive
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl_functions import _MapdlCommands
@@ -29,17 +25,6 @@ _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
     r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
 ]
-
-
-MATPLOTLIB_LOADED = True
-try:
-    import matplotlib
-    if os.name == 'nt':
-        matplotlib.use('tkagg')  # for windows
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-except:  # pragma: no cover
-    MATPLOTLIB_LOADED = False
 
 # test for png file
 PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
@@ -374,6 +359,9 @@ class _MapdlCore(_MapdlCommands):
     def _mesh(self):
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
+        # lazy import here to avoid loading pyvista and vtk
+        from ansys.mapdl.reader import Archive
+
         if self._archive_cache is None:
             # write database to an archive file
             arch_filename = os.path.join(self.directory, '_tmp.cdb')
@@ -596,6 +584,9 @@ class _MapdlCore(_MapdlCommands):
         Only selected nodes [NSEL] are displayed.  Elements need not
         be defined.
         """
+        # lazy import here to avoid top level import
+        import pyvista as pv
+
         if vtk is None:
             vtk = self._use_vtk
 
@@ -619,7 +610,6 @@ class _MapdlCore(_MapdlCommands):
         if isinstance(knum, bool):
             knum = int(knum)
 
-        self._enable_interactive_plotting()
         return super().nplot(knum)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
@@ -815,14 +805,22 @@ class _MapdlCore(_MapdlCommands):
             Increasing the resolution produces a "sharper" image but
             takes longer to render.
         """
-        if MATPLOTLIB_LOADED:
-            if not self._png_mode:
-                self.show('PNG')
-                self.gfile(pixel_res)
-        else:
+        if not self._has_matplotlib:
             raise ImportError('Install matplotlib to display plots from MAPDL ,'
                               'from Python.  Otherwise, plot with vtk with:\n'
                               '``vtk=True``')
+
+        if not self._png_mode:
+            self.show('PNG')
+            self.gfile(pixel_res)
+
+    @property
+    def _has_matplotlib(self):
+        try:
+            import matplotlib
+            return True
+        except ImportError:
+            return False
 
     @property
     def _png_mode(self):
@@ -929,7 +927,6 @@ class _MapdlCore(_MapdlCommands):
                                    **kwargs)
 
         # otherwise, use MAPDL plotter
-        self._enable_interactive_plotting()
         return super().eplot()
 
     def lplot(self, nl1="", nl2="", ninc="", vtk=None,
@@ -970,8 +967,8 @@ class _MapdlCore(_MapdlCommands):
 
         Notes
         -----
-        Mesh divisions on plotted lines are controlled by the LDIV option of
-        the /PSYMB command.
+        Mesh divisions on plotted lines are controlled by the LDIV
+        option of the /PSYMB command.
 
         This command is valid in any processor.
         """
@@ -1812,9 +1809,9 @@ class _MapdlCore(_MapdlCommands):
 
     # @supress_logging
     def load_table(self, name, array, var1='', var2='', var3=''):
-        """Load a table from Python to MAPDL
+        """Load a table from Python to MAPDL.
 
-        Uses \*TREAD to transfer the table.
+        Uses TREAD to transfer the table.
 
         Parameters
         ----------
@@ -2063,6 +2060,9 @@ class _MapdlCore(_MapdlCommands):
 
     def _display_plot(self, text):
         """Display the last generated plot (*.png) from MAPDL"""
+        import scooby
+
+        self._enable_interactive_plotting()
         png_found = PNG_TEST.findall(text)
         if png_found:
             # flush graphics writer

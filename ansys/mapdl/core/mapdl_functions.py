@@ -9849,32 +9849,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "CECHECK,%s,%s,%s" % (str(itemlab), str(tolerance), str(dof))
         return self.run(command, **kwargs)
 
-    def l2tan(self, nl1="", nl2="", **kwargs):
-        """APDL Command: L2TAN
-
-        Generates a line tangent to two lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first line generated line is tangent to.  If
-            negative, assume P1 (see below) is the second keypoint of the line
-            instead of the first.  If NL1 = P, graphical picking is enabled and
-            all remaining command fields are ignored (valid only in the GUI).
-
-        nl2
-            Number of the second line generated line is tangent to.  If
-            negative, assume P3 is the second keypoint of the line instead of
-            the first.
-
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at point P2 to line NL1 (P1-P2) and
-        tangent at point P3 to line NL2 (P3-P4).
-        """
-        command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
-        return self.run(command, **kwargs)
-
     def dcum(self, oper="", rfact="", ifact="", tb_ase="", **kwargs):
         """APDL Command: DCUM
 
@@ -38502,56 +38476,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         both RAD1 and RAD2 the command is ignored.
         """
         command = "SPH4,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(rad2))
-        return self.run(command, **kwargs)
-
-    def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
-              **kwargs):
-        """APDL Command: L2ANG
-
-        Generates a line at an angle with two existing lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first line to be hit (touched by the end of the new
-            line).  If negative, assume P1 (see below) is the second keypoint
-            of the line instead of the first.  If NL1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        nl2
-            Number of the second line to be hit.  If negative, assume P3 is the
-            second keypoint of the line instead of the first.
-
-        ang1
-            Angle of intersection (usually zero or 180) of generated line with
-            tangent to first line.
-
-        ang2
-            Angle of intersection (usually zero or 180) of generated line with
-            tangent to second line.
-
-        phit1
-            Number to be assigned to keypoint generated at hit location on
-            first line (defaults to lowest available keypoint number [NUMSTR]).
-
-        phit2
-            Number to be assigned to keypoint generated at hit location on
-            second line (defaults to lowest available keypoint number
-            [NUMSTR]).
-
-        Notes
-        -----
-        Generates a straight line (PHIT1-PHIT2) at an angle (ANG1) with an
-        existing line NL1 (P1-P2)  and which is also at an angle (ANG2) with
-        another existing line NL2 (P3-P4).  If the angles are zero the
-        generated line is tangent to the two lines.  The PHIT1 and PHIT2
-        locations on the lines are automatically calculated.  Line P1-P2
-        becomes P1-PHIT1, P3-P4 becomes P3-PHIT2, and new lines PHIT1-P2,
-        PHIT2-P4, and PHIT1-PHIT2 are generated.  Line divisions are set to
-        zero (use LESIZE, etc. to modify).
-        """
-        command = "L2ANG,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(ang1), str(ang2), str(phit1), str(phit2))
         return self.run(command, **kwargs)
 
     def ucmd(self, cmd="", srnum="", **kwargs):
