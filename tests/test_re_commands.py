@@ -91,6 +91,24 @@ def test_l2tan(cleared, mapdl):
     lnum = mapdl.l2tan(1, 2)
     assert lnum == 3
 
+
+def test_lang(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    lnum = mapdl.l(k0, k1)
+    k2 = mapdl.k("", 1, 1, 0)
+
+    # output is three as the first line is split
+    assert mapdl.lang(lnum, k2, 60) == 3
+
+
+def test_larc(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 1, 0)
+    k2 = mapdl.k("", 0, 1, 0)
+    assert mapdl.larc(k0, k1, k2, 2) == 1
+
+
 def test_kcenter(cleared, mapdl):
     # compute the center of a circle
     x, y, z = 0+1j, 1+0j, 0-1j

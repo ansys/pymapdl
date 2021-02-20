@@ -1118,3 +1118,125 @@ class _MapdlGeometryCommands():
         """
         command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
         return parse_line_no(self.run(command, **kwargs))
+
+    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs):
+        """Generate a straight line at an angle with a line.
+
+        APDL Command: LANG
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be hit (touched by the end of the
+            new line).  If negative, assume P1 (see below) is the
+            second keypoint of the line instead of the first.
+
+        p3
+            Keypoint at which generated line must end.
+
+        ang
+            Angle of intersection of generated line PHIT-P3 with
+            tangent to line P1-P2 at PHIT.  If 0 (default), the
+            generated line is tangent to NL1 toward end P1; if 90, the
+            generated line is perpendicular to NL1.  If 180, the
+            generated line is tangent to NL1 toward end P2.  ANG can
+            be any value, but is adjusted to the corresponding acute
+            angle with respect to LOCAT. See "Notes" for a discussion
+            of accuracy.
+
+        phit
+            Number to be assigned to keypoint generated at hit
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).
+
+        locat
+            Approximate location of PHIT in terms of the ratio of the
+            distance along the line (NL1) to the length of the line.
+            LOCAT can range from 0 to 1.  If LOCAT is blank, the point
+            will be located with less speed and accuracy, and an
+            arbitrary location may result.
+
+        Examples
+        --------
+        Create a line from a line from (0, 0, 0) to (1, 0, 0) to a
+        keypoint at (1, 1, 1) at an angle of 60 degrees.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> lnum = mapdl.l(k0, k1)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> lnum = mapdl.lang(lnum, k2, 60)
+        >>> lnum
+        2
+
+        Notes
+        -----
+        Generates a straight line (PHIT-P3) at an angle (ANG) with a
+        line NL1 (P1-P2).  The location of PHIT on the line is
+        automatically calculated.  Line P1-P2 becomes P1-PHIT and new
+        lines PHIT-P2 and PHIT-P3 are generated.  Line divisions are
+        set to zero (use LESIZE, etc. to modify).
+
+        PHIT is positioned closest to LOCAT for the given angle, ANG.
+        To ensure better performance, it is recommended that LOCAT be
+        input, even if it is 0.
+
+        The program uses an iterative procedure to position PHIT.  The
+        procedure is not exact, with the result that the actual value
+        of ANG will sometimes differ slightly from the specified
+        value.
+        """
+        command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def larc(self, p1="", p2="", pc="", rad="", **kwargs):
+        """Define a circular arc.
+
+        APDL Command: LARC
+
+        Parameters
+        ----------
+        p1
+            Keypoint at one end of circular arc line.
+
+        p2
+            Keypoint at other end of circular arc line.
+
+        pc
+            Keypoint defining plane of arc and center of curvature
+            side (with positive radius).  Must not lie along the
+            straight line from P1 to P2.  PC need not be at the center
+            of curvature.
+
+        rad
+            Radius of curvature of the arc.  If negative, assume
+            center of curvature side is opposite to that defined by
+            PC.  If RAD is blank, RAD will be calculated from a curve
+            fit through P1, PC, and P2.
+
+        Examples
+        --------
+        Create a circular arc that travels between (0, 0, 0) and
+        (1, 1, 0) with a radius of curvature of 2.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 1, 0)
+        >>> k2 = mapdl.k("", 0, 1, 0)
+        >>> lnum = mapdl.larc(k0, k1, k2, 2)
+        1
+
+        Notes
+        -----
+        Defines a circular arc line from P1 to P2.  The line shape is
+        generated as circular, regardless of the active coordinate
+        system.  The line shape is invariant with coordinate system
+        after it is generated.
+
+        When dealing with a large radius arc (1e3), or if the location
+        of the arc you create is far away from the origin of your
+        coordinate system, anomalies may occur. You can prevent this
+        by creating the arc at a smaller scale, and then scaling the
+        model back to full size (LSSCALE).
+        """
+        command = f"LARC,{p1},{p2},{pc},{rad}"
+        return parse_line_no(self.run(command, **kwargs))

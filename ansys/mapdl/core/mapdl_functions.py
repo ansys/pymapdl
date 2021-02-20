@@ -45407,61 +45407,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "*VCOL,%s,%s" % (str(ncol1), str(ncol2))
         return self.run(command, **kwargs)
 
-    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs):
-        """APDL Command: LANG
-
-        Generates a straight line at an angle with a line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line to be hit (touched by the end of the new line).
-            If negative, assume P1 (see below) is the second keypoint of the
-            line instead of the first.  If NL1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        p3
-            Keypoint at which generated line must end.
-
-        ang
-            Angle of intersection of generated line PHIT-P3 with tangent to
-            line P1-P2 at PHIT.  If 0 (default), the generated line is tangent
-            to NL1 toward end P1; if 90, the generated line is perpendicular to
-            NL1.  If 180, the generated line is tangent to NL1 toward end P2.
-            ANG can be any value, but is adjusted to the corresponding acute
-            angle with respect to LOCAT. See "Notes" for a discussion of
-            accuracy.
-
-        phit
-            Number to be assigned to keypoint generated at hit location
-            (defaults to lowest available keypoint number [NUMSTR]).
-
-        locat
-            Approximate location of PHIT in terms of the ratio of the distance
-            along the line (NL1) to the length of the line.  LOCAT can range
-            from 0 to 1.  If LOCAT is blank, the point will be located with
-            less speed and accuracy, and an arbitrary location may result.
-
-        Notes
-        -----
-        Generates a straight line (PHIT-P3) at an angle (ANG) with a line NL1
-        (P1-P2).  The location of PHIT on the line is automatically calculated.
-        Line P1-P2 becomes P1-PHIT and new lines PHIT-P2 and PHIT-P3 are
-        generated.  Line divisions are set to zero (use LESIZE, etc. to
-        modify).
-
-        PHIT is positioned closest to LOCAT for the given angle, ANG.  To
-        ensure better performance, it is recommended that LOCAT be input, even
-        if it is 0.
-
-        The program uses an iterative procedure to position PHIT.  The
-        procedure is not exact, with the result that the actual value of ANG
-        will sometimes differ slightly from the specified value.
-        """
-        command = "LANG,%s,%s,%s,%s,%s" % (str(nl1), str(p3), str(ang), str(phit), str(locat))
-        return self.run(command, **kwargs)
-
     def xfrm(self, lab="", x1="", y1="", z1="", x2="", y2="", z2="", **kwargs):
         """APDL Command: /XFRM
 
@@ -56508,45 +56453,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "SFLLIST,%s,%s" % (str(line), str(lab))
-        return self.run(command, **kwargs)
-
-    def larc(self, p1="", p2="", pc="", rad="", **kwargs):
-        """APDL Command: LARC
-
-        Defines a circular arc.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at one end of circular arc line.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Keypoint at other end of circular arc line.
-
-        pc
-            Keypoint defining plane of arc and center of curvature side (with
-            positive radius).  Must not lie along the straight line from P1 to
-            P2.  PC need not be at the center of curvature.
-
-        rad
-            Radius of curvature of the arc.  If negative, assume center of
-            curvature side is opposite to that defined by PC.  If RAD is blank,
-            RAD will be calculated from a curve fit through P1, PC, and P2.
-
-        Notes
-        -----
-        Defines a circular arc line from P1 to P2.  The line shape is generated
-        as circular, regardless of the active coordinate system.  The line
-        shape is invariant with coordinate system after it is generated.
-
-        When dealing with a large radius arc (1e3), or if the location of the
-        arc you create is far away from the origin of your coordinate system,
-        anomalies may occur. You can prevent this by creating the arc at a
-        smaller scale, and then scaling the model back to full size (LSSCALE).
-        """
-        command = "LARC,%s,%s,%s,%s" % (str(p1), str(p2), str(pc), str(rad))
         return self.run(command, **kwargs)
 
     def nslv(self, type="", nkey="", **kwargs):
