@@ -50391,36 +50391,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "NCNV,%s,%s,%s,%s,%s" % (str(kstop), str(dlim), str(itlim), str(etlim), str(cplim))
         return self.run(command, **kwargs)
 
-    def larea(self, p1="", p2="", narea="", **kwargs):
-        """APDL Command: LAREA
-
-        Generates the shortest line between two keypoints on an area.
-
-        Parameters
-        ----------
-        p1
-            First keypoint of line to be generated.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Second keypoint of line to be generated.
-
-        narea
-            Area containing P1 and P2, or area to which generated line is to be
-            parallel.
-
-        Notes
-        -----
-        Generates the shortest line between two keypoints, P1 and P2, both of
-        which lie on an area.  The generated line will also lie on the area.
-        P1 and P2 may also be equidistant (in global Cartesian space) from the
-        area (and on the same side of the area), in which case a line parallel
-        to the area is generated.
-        """
-        command = "LAREA,%s,%s,%s" % (str(p1), str(p2), str(narea))
-        return self.run(command, **kwargs)
-
     def mdamp(self, stloc="", v1="", v2="", v3="", v4="", v5="", v6="",
               **kwargs):
         """APDL Command: MDAMP

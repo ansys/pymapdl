@@ -168,6 +168,15 @@ def test_a(cleared, mapdl):
     assert a0 == 1
 
 
+def test_larea(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 0, 1, 0)
+    a0 = mapdl.a(k0, k1, k2, k3)
+    assert mapdl.larea(k0, k2, a0) == 5
+
+
 def test_v(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)

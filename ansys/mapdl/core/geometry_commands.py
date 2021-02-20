@@ -1240,3 +1240,44 @@ class _MapdlGeometryCommands():
         """
         command = f"LARC,{p1},{p2},{pc},{rad}"
         return parse_line_no(self.run(command, **kwargs))
+
+    def larea(self, p1="", p2="", narea="", **kwargs):
+        """Generate the shortest line between two keypoints on an area.
+
+        APDL Command: LAREA
+
+        Parameters
+        ----------
+        p1
+            First keypoint of line to be generated.
+
+        p2
+            Second keypoint of line to be generated.
+
+        narea
+            Area containing P1 and P2, or area to which generated line
+            is to be parallel.
+
+        Examples
+        --------
+        Generate a line on a square between its two corners.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> a0 = mapdl.a(k0, k1, k2, k3)
+        >>> lnum = mapdl.larea(k0, k2, a0)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Generates the shortest line between two keypoints, P1 and P2,
+        both of which lie on an area.  The generated line will also
+        lie on the area.  P1 and P2 may also be equidistant (in global
+        Cartesian space) from the area (and on the same side of the
+        area), in which case a line parallel to the area is generated.
+        """
+        command = f"LAREA,{p1},{p2},{narea}"
+        return parse_line_no(self.run(command, **kwargs))
