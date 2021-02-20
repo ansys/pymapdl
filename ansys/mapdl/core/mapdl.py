@@ -20,7 +20,6 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl_functions import _MapdlCommands
 from ansys.mapdl.core.misc import (random_string, supress_logging,
                                    run_as_prep7, last_created)
-from ansys.mapdl.core.geometry_commands import geometry_commands
 from ansys.mapdl.core.element_commands import element_commands
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
@@ -1790,8 +1789,6 @@ class _MapdlCore(_MapdlCommands):
         short_cmd = parse_to_short_cmd(command)
 
         # command parsing
-        if short_cmd in geometry_commands:
-            return geometry_commands[short_cmd](self._response)
         if short_cmd in element_commands:
             return element_commands[short_cmd](self._response)
         if short_cmd in PLOT_COMMANDS:

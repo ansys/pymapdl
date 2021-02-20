@@ -7781,26 +7781,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "SELIST,%s,%s,%s" % (str(sename), str(kopt), str(kint))
         return self.run(command, **kwargs)
 
-    def knode(self, npt="", node="", **kwargs):
-        """APDL Command: KNODE
-
-        Defines a keypoint at an existing node location.
-
-        Parameters
-        ----------
-        npt
-            Arbitrary reference number for keypoint.  If zero, the lowest
-            available number is assigned [NUMSTR].
-
-        node
-            Node number defining global X, Y, Z keypoint location.  If NODE =
-            P, graphical picking is enabled and all remaining command fields
-            are ignored (valid only in the GUI).  A component name may also be
-            substituted for NODE.
-        """
-        command = "KNODE,%s,%s" % (str(npt), str(node))
-        return self.run(command, **kwargs)
-
     def ndist(self, nd1="", nd2="", **kwargs):
         """APDL Command: NDIST
 
@@ -11984,30 +11964,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         use a common line.
         """
         command = "AROTAT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(pax1), str(pax2), str(arc), str(nseg))
-        return self.run(command, **kwargs)
-
-    def kl(self, nl1="", ratio="", nk1="", **kwargs):
-        """APDL Command: KL
-
-        Generates a keypoint at a specified location on an existing line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line.  If negative, the direction of line (as
-            interpreted for RATIO) is reversed.  If NL1 = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI).
-
-        ratio
-            Ratio of line length to locate keypoint.  Must be between 0.0 and
-            1.0.  Defaults to 0.5 (divide the line in half).
-
-        nk1
-            Number to be assigned to keypoint generated at division location
-            (defaults to lowest available keypoint number [NUMSTR]).
-        """
-        command = "KL,%s,%s,%s" % (str(nl1), str(ratio), str(nk1))
         return self.run(command, **kwargs)
 
     def gsbdata(self, labz="", valuez="", labx="", valuex="", laby="",
@@ -18858,42 +18814,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "BETAD,%s" % (str(value))
-        return self.run(command, **kwargs)
-
-    def kdist(self, kp1="", kp2="", **kwargs):
-        """APDL Command: KDIST
-
-        Calculates and lists the distance between two keypoints.
-
-        Parameters
-        ----------
-        kp1
-            First keypoint in distance calculation.  If KP1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        kp2
-            Second keypoint in distance calculation.
-
-        Notes
-        -----
-        KDIST lists the distance between keypoints KP1 and KP2, as well as the
-        current coordinate system offsets from KP1 to KP2, where the X, Y, and
-        Z locations of KP1 are subtracted from the X, Y, and Z locations of KP2
-        (respectively) to determine the offsets.  KDIST is valid in any
-        coordinate system except toroidal [CSYS,3].
-
-        KDIST returns a variable, called "_RETURN," which contains the distance
-        value.  You can use this value for various purposes; for example, to
-        set the default number of line divisions to be generated along region
-        boundary lines [ESIZE,_RETURN]. In interactive mode, you can access
-        this command by using the Model Query Picker (Utility Menu> List>
-        Picked Entities), where you can also access automatic annotation
-        functions, and display the value on your model.
-
-        This command is valid in any processor.
-        """
-        command = "KDIST,%s,%s" % (str(kp1), str(kp2))
         return self.run(command, **kwargs)
 
     def harfrq(self, freqb="", freqe="", logopt="", freqarr="", toler="",

@@ -65,8 +65,8 @@ def parse_output_volume(msg):
             return int(res.group(2))
 
 
+# Wrap MAPDL geometry commands
 class _MapdlGeometryCommands():
-    """Wraps MAPDL geometry commands"""
 
     def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
                zv1="", xv6="", yv6="", zv6="", **kwargs):
@@ -82,15 +82,15 @@ class _MapdlGeometryCommands():
 
         XV1, YV1, ZV1
             Orientation point of an outward vector tangent to line at
-        P1. Vector coordinate system has its origin at the
-        keypoint. Coordinate interpretation corresponds to the active
-        coordinate system type, i.e., X is R for cylindrical,
-        etc. Defaults to zero curvature slope.
+            P1. Vector coordinate system has its origin at the
+            keypoint. Coordinate interpretation corresponds to the
+            active coordinate system type, i.e., X is R for
+            cylindrical, etc. Defaults to zero curvature slope.
 
         XV6, YV6, ZV6
             Orientation point of an outward vector tangent to a line
-        at P6 (or the last keypoint specified if fewer than six
-        specified). Defaults to zero curvature slope.
+            at P6 (or the last keypoint specified if fewer than six
+            specified). Defaults to zero curvature slope.
 
         Returns
         -------
@@ -287,11 +287,11 @@ class _MapdlGeometryCommands():
         space
             Spacing ratio.  Normally this field is not used, as
             specifying spacing ratios with the LESIZE command is
-            recommended.  If positive, SPACE is the nominal ratio of
+            recommended.  If positive, space is the nominal ratio of
             the last division size (at P2) to the first division size
             (at P1).  If the ratio is greater than 1, the division
             sizes increase from P1 to P2, and if less than 1, they
-            decrease.  If SPACE is negative, then |SPACE| is the
+            decrease.  If space is negative, then ``space`` is the
             nominal ratio of the center division size to those at the
             ends.
 
@@ -906,59 +906,114 @@ class _MapdlGeometryCommands():
         command = f"KCENTER,{type},{val1},{val2},{val3},{val4},{kpnew}"
         return parse_kpoint(self.run(command, **kwargs))
 
+    def kdist(self, kp1="", kp2="", **kwargs):
+        """Calculates and lists the distance between two keypoints.
 
-def parse_kdist(msg):
-    """Return xyz distance from KDIST
+        APDL Command: KDIST
 
-    For example:
-    The distance between keypoints 10 and 11 in coordinate system 0
-    is:
-    DIST              DX (KP2-KP1)      DY (KP2-KP1)      DZ (KP2-KP1)
-    1.0000000000E+10 -1.0000000000E+10   0.000000000       0.000000000
+        Parameters
+        ----------
+        kp1
+            First keypoint in distance calculation.
 
-    Will return: [-10000000000.0, 0.0, 0.0]
+        kp2
+            Second keypoint in distance calculation.
 
-    """
-    finds = re.findall(NUM_PATTERN, msg)[-3:]
-    if len(finds) == 3:
-        return [float(val) for val in finds]
+        Examples
+        --------
+        Compute the distance between two keypoints points
 
+        >>> kp0 = (0, 10, -3)
+        >>> kp1 = (1, 5, 10)
+        >>> knum0 = mapdl.k("", *kp0)
+        >>> knum1 = mapdl.k("", *kp1)
+        >>> dist = mapdl.kdist(knum0, knum1)
+        >>> dist
+        [1.0, -5.0, 13.0]
 
-def parse_kl(msg):
-    """Return keypoint number from ``kl``
+        Notes
+        -----
+        KDIST lists the distance between keypoints KP1 and KP2, as
+        well as the current coordinate system offsets from KP1 to KP2,
+        where the X, Y, and Z locations of KP1 are subtracted from the
+        X, Y, and Z locations of KP2 (respectively) to determine the
+        offsets.  KDIST is valid in any coordinate system except
+        toroidal [CSYS,3].
 
-    MAPDL message
-    GENERATE KEYPOINT ON LINE      1 AT RATIO=  0.500000
+        This command is valid in any processor.
+        """
+        msg = self.run(f"KDIST,{kp1},{kp2}", **kwargs)
+        if msg:
+            finds = re.findall(NUM_PATTERN, msg)[-3:]
+            if len(finds) == 3:
+                return [float(val) for val in finds]
 
-    KEYPOINT    26   X,Y,Z=   5.00000       0.00000       0.00000      IN CSYS=  0
+    def kl(self, nl1="", ratio="", nk1="", **kwargs):
+        """Generates a keypoint at a specified location on an existing line.
 
-    Return: 25
+        APDL Command: KL
 
-    """
-    res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
-    if res is not None:
-        return int(res.group(1))
+        Parameters
+        ----------
+        nl1
+            Number of the line.  If negative, the direction of line
+            (as interpreted for RATIO) is reversed.
 
+        ratio
+            Ratio of line length to locate keypoint.  Must be between
+            0.0 and 1.0.  Defaults to 0.5 (divide the line in half).
 
-def parse_knode(msg):
-    """Return keypoint number from ``KNODE``
+        nk1
+            Number to be assigned to keypoint generated at division
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).
 
-    MAPDL message:
-    KEYPOINT         0 FROM NODE         4
+        Examples
+        --------
+        Create a keypoint on a line from (0, 0, 0) and (10, 0, 0)
 
-    CSYS 0 LOCATION (X,Y,Z)=   0.00000       0.00000       0.00000
-    KEYPOINT NUMBER =      5
+        >>> kp0 = (0, 0, 0)
+        >>> kp1 = (10, 0, 0)
+        >>> knum0 = mapdl.k("", *kp0)
+        >>> knum1 = mapdl.k("", *kp1)
+        >>> lnum = mapdl.l(knum0, knum1)
+        >>> lnum
+        1
 
-    Return: 5
+        """
+        msg = self.run(f"KL,{nl1},{ratio},{nk1}", **kwargs)
+        if msg:
+            res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
+            if res is not None:
+                return int(res.group(1))
 
-    """
-    res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
-    if res is not None:
-        return int(res.group(1))
+    def knode(self, npt="", node="", **kwargs):
+        """Defines a keypoint at an existing node location.
 
+        APDL Command: KNODE
 
-geometry_commands = {
-                     'KDIS': parse_kdist,
-                     'KL': parse_kl,
-                     'KNOD': parse_knode,
-}
+        Parameters
+        ----------
+        npt
+            Arbitrary reference number for keypoint.  If zero, the
+            lowest available number is assigned [NUMSTR].
+
+        node
+            Node number defining global X, Y, Z keypoint location.  A
+            component name may also be substituted for NODE.
+
+        Examples
+        --------
+        Create a keypoint at a node at (1, 2, 3)
+
+        >>> nnum = mapdl.n('', 1, 2, 3)
+        >>> knum1 = mapdl.knode('', nnum)
+        >>> knum1
+        1
+
+        """
+        msg = self.run(f"KNODE,{npt},{node}", **kwargs)
+        if msg:
+            res = re.search(r'KEYPOINT NUMBER =\s+(\d+)', msg)
+            if res is not None:
+                return int(res.group(1))

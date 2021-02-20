@@ -64,10 +64,9 @@ def test_kl(cleared, mapdl):
 
 
 def test_knode(cleared, mapdl):
-    knum0 = mapdl.k()
-    nnum = mapdl.n()
+    nnum = mapdl.n('', 1, 2, 3)
     knum1 = mapdl.knode('', nnum)
-    assert knum0 + knum1
+    assert knum1 == 1
 
 
 def test_l2ang(cleared, mapdl):
