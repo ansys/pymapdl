@@ -44135,43 +44135,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "*VABS,%s,%s,%s,%s" % (str(kabsr), str(kabs1), str(kabs2), str(kabs3))
         return self.run(command, **kwargs)
 
-    def lfillt(self, nl1="", nl2="", rad="", pcent="", **kwargs):
-        """APDL Command: LFILLT
-
-        Generates a fillet line between two intersecting lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first intersecting line.  If NL1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        nl2
-            Number of the second intersecting line.
-
-        rad
-            Radius of fillet to be generated.  Radius should be less than the
-            lengths of the two lines specified with NL1 and NL2.
-
-        pcent
-            Number to be assigned to generated keypoint at fillet arc center.
-            If zero (or blank), no keypoint is generated.
-
-        Notes
-        -----
-        Generates a fillet line between two intersecting lines NL1 (P1-PINT)
-        and NL2 (P2-PINT).  Three keypoints may be generated, two at the fillet
-        tangent points (PTAN1 and PTAN2) and one (optional) at the fillet arc
-        center (PCENT).  Line P1-PINT becomes P1-PTAN1, P2-PINT becomes
-        P2-PTAN2, and new arc line PTAN1-PTAN2 is generated.  Generated
-        keypoint and line numbers are automatically assigned (beginning with
-        the lowest available values [NUMSTR]).  Line divisions are set to zero
-        (use LESIZE, etc. to modify).
-        """
-        command = "LFILLT,%s,%s,%s,%s" % (str(nl1), str(nl2), str(rad), str(pcent))
-        return self.run(command, **kwargs)
-
     def compress(self, **kwargs):
         """APDL Command: COMPRESS
 

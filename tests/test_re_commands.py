@@ -184,6 +184,15 @@ def test_lextnd(cleared, mapdl):
     mapdl.lextnd(carcs[0], 3, 1)
 
 
+def test_lfillt(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 1, 0)
+    k2 = mapdl.k("", 1, 0, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k0, k2)
+    assert mapdl.lfillt(l0, l1, 0.25) == 3
+
+
 def test_lcomb(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
