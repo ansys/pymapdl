@@ -79,6 +79,15 @@ def test_l2ang(cleared, mapdl):
     assert lnum == 11
 
 
+def test_spline(cleared, mapdl):
+    k0 = mapdl.k('', 0, 0, 0)
+    k1 = mapdl.k('', 0.2, 0.2, 0)
+    k2 = mapdl.k('', 0.4, 0.3, 0)
+    k3 = mapdl.k('', 0.6, 0.5, 0)
+    k4 = mapdl.k('', 0.8, 0.3, 0)
+    assert mapdl.spline(k0, k1, k2, k3, k4) == [1, 2, 3, 4]
+
+
 def test_ltan(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 0, 0, 1)

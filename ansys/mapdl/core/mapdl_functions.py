@@ -67501,28 +67501,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "KGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(itime), str(np1), str(np2), str(ninc), str(dx), str(dy), str(dz), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
-        """APDL Command: SPLINE
-
-        Generates a segmented spline through a series of keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p6
-            Keypoints through which the spline is fit.  At least two must be
-            defined.  If P1 = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        The output from this command is a series of connected lines (one line
-        between each pair of keypoints) that together form a spline.  Note that
-        solid modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "SPLINE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(xv1), str(yv1), str(zv1), str(xv6), str(yv6), str(zv6))
-        return self.run(command, **kwargs)
-
     def mfconv(self, lab="", toler="", minref="", **kwargs):
         """APDL Command: MFCONV
 

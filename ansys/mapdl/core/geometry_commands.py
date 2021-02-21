@@ -49,6 +49,13 @@ def parse_line_no(msg):
             return int(res.group(1))
 
 
+def parse_line_nos(msg):
+    if msg:
+        matches = re.findall(r"LINE NO[.]=\s*(\d*)", msg)
+        if matches:
+            return [int(match) for match in matches]
+
+
 def parse_v(msg):
     """Parse volume message and return volume number"""
     if msg:
@@ -252,13 +259,8 @@ class _MapdlGeometryCommands():
         the active coordinate system.  Line shapes are invariant with
         coordinate system after they are generated.
         """
-        command = "CIRCLE,%s,%s,%s,%s,%s,%s" % (str(pcent), str(rad), str(paxis),
-                                                str(pzero), str(arc), str(nseg))
-        msg = self.run(command, **kwargs)
-        if msg:
-            matches = re.findall(r"LINE NO.=\s*(\d*)", msg)
-            if matches:
-                return [int(match) for match in matches]
+        command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
+        return parse_line_nos(self.run(command, **kwargs))
 
     def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
           xv2="", yv2="", zv2="", **kwargs):
@@ -1570,3 +1572,40 @@ class _MapdlGeometryCommands():
         """
         command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
         return parse_line_no(self.run(command, **kwargs))
+
+    def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
+               zv1="", xv6="", yv6="", zv6="", **kwargs):
+        """Generate a segmented spline through a series of keypoints.
+
+        APDL Command: SPLINE
+
+        Parameters
+        ----------
+        p1, p2, p3, . . . , p6
+            Keypoints through which the spline is fit.  At least two
+            must be defined.
+
+        Returns
+        list
+            List of line numbers generated.
+
+        Examples
+        --------
+        Create a spline with 5 keypoints.
+
+        >>> k0 = mapdl.k('', 0, 0, 0)
+        >>> k1 = mapdl.k('', 0.2, 0.2, 0)
+        >>> k2 = mapdl.k('', 0.4, 0.3, 0)
+        >>> k3 = mapdl.k('', 0.6, 0.5, 0)
+        >>> k4 = mapdl.k('', 0.8, 0.3, 0)
+        >>> mapdl.spline(k0, k1, k2, k3, k4)
+
+        Notes
+        -----
+        The output from this command is a series of connected lines
+        (one line between each pair of keypoints) that together form a
+        spline.  Note that solid modeling in a toroidal coordinate
+        system is not recommended.
+        """
+        command = f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        return parse_line_nos(self.run(command, **kwargs))
