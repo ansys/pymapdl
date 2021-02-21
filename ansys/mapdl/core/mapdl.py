@@ -947,12 +947,8 @@ class _MapdlCore(_MapdlCommands):
         vtk : bool, optional
             Plot the currently selected lines using ``pyvista``.
 
-        show_numbering : bool, optional
+        show_line_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
-
-        show_keypoints : bool, optional
-            Display keypoints associated with current lines.  Only
-            valid with ``vtk=True``.
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when show_keypoints is True

@@ -177,6 +177,22 @@ def test_larea(cleared, mapdl):
     assert mapdl.larea(k0, k2, a0) == 5
 
 
+def test_lextnd(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    carcs = mapdl.circle(k0, 1, k1, arc=90)
+    mapdl.lextnd(carcs[0], 3, 1)
+
+
+def test_lcomb(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 2, 0, 0)
+    l0 = mapdl.l(k0, k1)
+    l1 = mapdl.l(k0, k2)
+    assert mapdl.lcomb(l0, l1) == 1
+
+
 def test_v(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)

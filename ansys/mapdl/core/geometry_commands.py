@@ -1281,3 +1281,166 @@ class _MapdlGeometryCommands():
         """
         command = f"LAREA,{p1},{p2},{narea}"
         return parse_line_no(self.run(command, **kwargs))
+
+    def lcomb(self, nl1="", nl2="", keep="", **kwargs):
+        """Combines adjacent lines into one line.
+
+        APDL Command: LCOMB
+
+        Parameters
+        ----------
+        nl1
+            Number of the first line to be combined.  If NL1 = ALL,
+            NL2 is ignored and all selected lines [LSEL] are combined.
+            A component name may also be substituted for NL1 (NL2 is
+            ignored).
+
+        nl2
+            Number of the second line to be combined.
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Delete lines NL1 and NL2 and their common keypoint.
+                Keypoints will not be deleted if they are meshed or if
+                they are attached to other lines.  Lines will not be
+                deleted if they are attached to different areas.
+
+            1 - Keep NL1, NL2, and their common keypoint.  (The common
+                keypoint will not be attached to the output line.)
+
+        Examples
+        --------
+        Create two lines and combine them.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 2, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> l1 = mapdl.l(k0, k2)
+        >>> lout = mapdl.lcomb(l0, l1)
+        >>> lout
+        1
+
+        Notes
+        -----
+        Combines adjacent lines into one line (the output line).  This
+        operation will effectively "undo" the LDIV operation.  Line
+        divisions are set to zero (use LESIZE, etc. to modify).  Lines
+        attached to the same area(s) can also be combined.  See also
+        the LCCAT command for line concatenation capability.
+        """
+        command = f"LCOMB,{nl1},{nl2},{keep}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def ldiv(self, nl1="", ratio="", pdiv="", ndiv="", keep="", **kwargs):
+        """Divides a single line into two or more lines.
+
+        APDL Command: LDIV
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be divided.  If negative, assume P1
+            (see below) is the second keypoint of the line instead of
+            the first for RATIO.  If ALL, divide all selected lines
+            [LSEL].  A component name may also be substituted for NL1.
+
+        ratio
+            Ratio of line length P1-PDIV to line length P1-P2.  Must
+            be between 0.0 and 1.0. Input ignored if NDIV > 2.
+
+        pdiv
+            Number to be assigned to keypoint generated at division
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).  Input ignored if NL1 = ALL or NDIV > 2.  If
+            PDIV already exists and lies on line NL1, divide line at
+            PDIV (RATIO must also be 0.0).  If PDIV already exists and
+            does not lie on line NL1, PDIV is projected and moved to
+            the nearest point on line NL1 (if possible). PDIV cannot
+            be attached to another line, area, or volume.
+
+        ndiv
+            The number of new lines to be generated from old line
+            (defaults to 2).
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Modify old line to use new keypoints and slopes.
+
+            1 - Do not modify old line.  New lines will overlay old
+                line and have unique keypoints.
+
+        Examples
+        --------
+        Create a single line and divide it exactly half.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> mapdl.ldiv(l0, ratio=0.5)
+
+        Create a single line and divide it into 5 pieces.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> mapdl.ldiv(l0, ndiv=5)
+
+        Notes
+        -----
+        Divides a single line NL1 (defined from keypoint P1 to
+        keypoint P2) into two or more lines.  Line NL1 becomes the new
+        line beginning with keypoint P1 and new lines are generated
+        ending at keypoint P2.  If the line is attached to an area,
+        the area will also be updated.  Line divisions are set to zero
+        (use LESIZE, etc. to modify).
+        """
+        command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
+        return self.run(command, **kwargs)
+
+    def lextnd(self, nl1="", nk1="", dist="", keep="", **kwargs):
+        """Extends a line at one end by using its slope.
+
+        APDL Command: LEXTND
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be extended.
+
+        nk1
+            Number of keypoint at the end of line NL1 to be extended.
+
+        dist
+            Distance that the line will be extended.
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Modify old line to use new keypoints and slopes.
+
+            1 - Do not modify old line.  New line will overlay old
+                line and have unique keypoints.
+
+        Examples
+        --------
+        Create a circular arc and extend it at one of its keypoints
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> carcs = mapdl.circle(k0, 1, k1, arc=90)
+        >>> lnum = mapdl.lextnd(carcs[0], 3, 1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Extends a line at one end by using its slope.  Lines may be
+        redefined only if not yet attached to an area.  Line divisions
+        are set to zero (use LESIZE, etc. to modify).  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+        """
+        command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
+        return parse_line_no(self.run(command, **kwargs))
