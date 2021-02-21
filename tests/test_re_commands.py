@@ -96,6 +96,14 @@ def test_ltan(cleared, mapdl):
     assert mapdl.ltan(carc[0], k2) == 2
 
 
+def test_adrag(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    carc = mapdl.circle(k0, 1, k1, arc=90)
+    l0 = mapdl.l(k0, k1)
+    assert '2' in mapdl.adrag(carc[0], nlp1=l0)
+
+
 def test_l2tan(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 0, 0, 1)

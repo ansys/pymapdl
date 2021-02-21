@@ -40438,54 +40438,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "*INIT,%s,%s,%s,%s,%s" % (str(name), str(method), str(val1), str(val2), str(val3))
         return self.run(command, **kwargs)
 
-    def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs):
-        """APDL Command: ADRAG
-
-        Generates areas by dragging a line pattern along a path.
-
-        Parameters
-        ----------
-        nl1, nl2, nl3, . . . , nl6
-            List of lines in the pattern to be dragged (6 maximum if using
-            keyboard entry).  Lines should form a continuous pattern (no more
-            than two lines connected to any one keypoint.  If NL1 = P,
-            graphical picking is enabled and all remaining arguments are
-            ignored (valid only in the GUI).  If NL1 = ALL, all selected lines
-            (except those that define the drag path) will be swept along the
-            path.  A component name may also be substituted for NL1.
-
-        nlp1, nlp2, nlp3, . . . , nlp6
-            List of lines defining the path along which the pattern is to be
-            dragged (6 maximum if using keyboard entry).  Must be a continuous
-            set of lines.
-
-        Notes
-        -----
-        Generates areas (and their corresponding keypoints and lines) by
-        sweeping a given line pattern along a characteristic drag path.  If the
-        drag path consists of multiple lines, the drag direction is determined
-        by the sequence in which the path lines are input (NLP1, NLP2, etc.).
-        If the drag path is a single line (NLP1), the drag direction is  from
-        the keypoint on the drag line that is closest to the first keypoint of
-        the given line pattern to the other end of the drag line.
-
-        The magnitude of the vector between the keypoints of the given pattern
-        and the first path keypoint remains constant for all generated keypoint
-        patterns and the path keypoints.  The direction of the vector relative
-        to the path slope also remains constant so that patterns may be swept
-        around curves.
-
-        Keypoint, line, and area numbers are automatically assigned (beginning
-        with the lowest available values [NUMSTR]).  Adjacent lines use a
-        common keypoint.  Adjacent areas use a common line.  For best results,
-        the entities to be dragged should be orthogonal to the start of the
-        drag path.  Drag operations that produce an error message may create
-        some of the desired entities prior to terminating.
-        """
-        command = "ADRAG,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nlp1), str(nlp2), str(nlp3), str(nlp4), str(nlp5), str(nlp6))
-        return self.run(command, **kwargs)
-
     def edsolv(self, **kwargs):
         """APDL Command: EDSOLV
 
