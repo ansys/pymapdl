@@ -48802,31 +48802,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "RMNDISP,%s,%s" % (str(loadt), str(loc))
         return self.run(command, **kwargs)
 
-    def lstr(self, p1="", p2="", **kwargs):
-        """APDL Command: LSTR
-
-        Defines a straight line irrespective of the active coordinate system.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at the beginning of line.  If P1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI)
-
-        p2
-            Keypoint at the end of line.
-
-        Notes
-        -----
-        Defines a straight line from P1 to P2 using the global Cartesian
-        coordinate system.  The active coordinate system will be ignored.  The
-        line shape is invariant with the coordinate system after it is
-        generated.  Lines may be redefined only if not yet attached to an area.
-        """
-        command = "LSTR,%s,%s" % (str(p1), str(p2))
-        return self.run(command, **kwargs)
-
     def lmatrix(self, symfac="", coilname="", curname="", indname="",
                 **kwargs):
         """APDL Command: LMATRIX
@@ -52705,29 +52680,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         are in the global Cartesian system.
         """
         return self.run(f"NWRITE,{fname},{ext},,{kappnd}", **kwargs)
-
-    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs):
-        """APDL Command: LTAN
-
-        Generates a line at the end of, and tangent to, an existing line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line the generated line is tangent to.  If negative,
-            assume P1 (see below), instead of P2, is the second keypoint of
-            line NL1.  If NL1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        p3
-            Keypoint at which generated line must end.
-
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at end point (P2) of line NL1 (P1-P2).
-        """
-        command = "LTAN,%s,%s,%s,%s,%s" % (str(nl1), str(p3), str(xv3), str(yv3), str(zv3))
-        return self.run(command, **kwargs)
 
     def showdisp(self, dname="", ncpl="", **kwargs):
         """APDL Command: /SHOWDISP

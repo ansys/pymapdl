@@ -79,6 +79,14 @@ def test_l2ang(cleared, mapdl):
     assert lnum == 11
 
 
+def test_ltan(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    k2 = mapdl.k("", -1, 1.5, 0)
+    carc = mapdl.circle(k0, 1, k1, arc=90)
+    assert mapdl.ltan(carc[0], k2) == 2
+
+
 def test_l2tan(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 0, 0, 1)
@@ -191,6 +199,12 @@ def test_lfillt(cleared, mapdl):
     l0 = mapdl.l(k0, k1)
     l1 = mapdl.l(k0, k2)
     assert mapdl.lfillt(l0, l1, 0.25) == 3
+
+
+def test_lstr(cleared, mapdl):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 1, 1)
+    assert mapdl.lstr(k0, k1) == 1
 
 
 def test_lcomb(cleared, mapdl):

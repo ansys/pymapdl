@@ -1493,3 +1493,80 @@ class _MapdlGeometryCommands():
         """
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse_line_no(self.run(command, **kwargs))
+
+    def lstr(self, p1="", p2="", **kwargs):
+        """Define a straight line irrespective of the active coordinate system.
+
+        APDL Command: LSTR
+
+        Parameters
+        ----------
+        p1
+            Keypoint at the beginning of line.
+
+        p2
+            Keypoint at the end of line.
+
+        Returns
+        -------
+        int
+            Line number of the created line.
+
+        Examples
+        --------
+        Create a cartesian straight line regardless of the coordinate
+        system being in cylindrical.
+
+        >>> mapdl.csys(1)
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 1, 1)
+        >>> lnum = mapdl.lstr(k0, k1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Defines a straight line from P1 to P2 using the global
+        Cartesian coordinate system.  The active coordinate system
+        will be ignored.  The line shape is invariant with the
+        coordinate system after it is generated.  Lines may be
+        redefined only if not yet attached to an area.
+        """
+        command = f"LSTR,{p1},{p2}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs):
+        """Generate a line at the end of, and tangent to, an existing line.
+
+        APDL Command: LTAN
+
+        Parameters
+        ----------
+        nl1
+            Number of the line the generated line is tangent to.  If
+            negative, assume P1 (see below), instead of P2, is the
+            second keypoint of line NL1.
+
+        p3
+            Keypoint at which generated line must end.
+
+        Examples
+        --------
+        Create a circular arc and generate a tangent spline at the end
+        of it directed to a new keypoint.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", -1, 1.5, 0)
+        >>> carc = mapdl.circle(k0, 1, k1, arc=90)
+        >>> lnum = mapdl.ltan(carc[0], k2)
+        >>> lnum
+        2
+
+        Notes
+        -----
+        Generates a line (P2-P3) tangent at end point (P2) of line NL1
+        (P1-P2).
+        """
+        command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
+        return parse_line_no(self.run(command, **kwargs))
