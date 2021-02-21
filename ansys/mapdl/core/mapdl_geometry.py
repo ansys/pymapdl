@@ -297,9 +297,11 @@ class Geometry():
         # ignore volumes
         with self._mapdl.chain_commands:
             self._mapdl.cm('__tmp_volu__', 'VOLU')
+            self._mapdl.cm('__tmp_line__', 'LINE')
             self._mapdl.cm('__tmp_area__', 'AREA')
             self._mapdl.cm('__tmp_keyp__', 'KP')
             self._mapdl.ksel('ALL')
+            self._mapdl.lsel('ALL')
             self._mapdl.asel('ALL')
             self._mapdl.vsel('NONE')
 
@@ -308,6 +310,7 @@ class Geometry():
         with self._mapdl.chain_commands:
             self._mapdl.cmsel('S', '__tmp_volu__', 'VOLU')
             self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
+            self._mapdl.cmsel('S', '__tmp_line__', 'LINE')
             self._mapdl.cmsel('S', '__tmp_keyp__', 'KP')
 
         selected_lnum = self.lnum
