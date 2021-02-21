@@ -57,7 +57,6 @@ class Geometry():
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-
     def areas(self, quality=7):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
@@ -298,10 +297,12 @@ class Geometry():
         # ignore volumes
         with self._mapdl.chain_commands:
             self._mapdl.cm('__tmp_volu__', 'VOLU')
+            self._mapdl.cm('__tmp_line__', 'LINE')
             self._mapdl.cm('__tmp_area__', 'AREA')
             self._mapdl.cm('__tmp_keyp__', 'KP')
-            self._mapdl.asel('S', 'ALL')
-            self._mapdl.ksel('S', 'ALL')
+            self._mapdl.ksel('ALL')
+            self._mapdl.lsel('ALL')
+            self._mapdl.asel('ALL')
             self._mapdl.vsel('NONE')
 
         iges = self._load_iges()
@@ -309,6 +310,7 @@ class Geometry():
         with self._mapdl.chain_commands:
             self._mapdl.cmsel('S', '__tmp_volu__', 'VOLU')
             self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
+            self._mapdl.cmsel('S', '__tmp_line__', 'LINE')
             self._mapdl.cmsel('S', '__tmp_keyp__', 'KP')
 
         selected_lnum = self.lnum
@@ -316,7 +318,7 @@ class Geometry():
         entity_nums = []
         for bspline in iges.bsplines():
             # allow only 10001 as others appear to be construction entities
-            if bspline.d['status_number'] == 10001:
+            if bspline.d['status_number'] in [1, 10001]:
                 entity_num = int(bspline.d['entity_subs_num'])
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)

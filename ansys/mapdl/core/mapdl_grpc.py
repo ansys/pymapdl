@@ -367,7 +367,8 @@ class MapdlGrpc(_MapdlCore):
                                'MAPDL')
         from ansys.mapdl.core.launcher import launch_grpc
         self._exited = False  # reset exit state
-        self._connect(launch_grpc(**start_parm))
+        port, directory = launch_grpc(**start_parm)
+        self._connect(port)
 
     @property
     def post_processing(self):

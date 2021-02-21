@@ -1,6 +1,8 @@
 """Pythonic MAPDL Commands"""
 
-class _MapdlCommands(object):  # pragma: no cover
+from .geometry_commands import _MapdlGeometryCommands
+
+class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -3568,45 +3570,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
         return self.run(command, **kwargs)
 
-    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
-          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
-          p18="", **kwargs):
-        """APDL Command: A
-
-        Defines an area by connecting keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p18
-            List of keypoints defining the area (18 maximum if using keyboard
-            entry).  At least 3 keypoints must be entered.  If P1 = P,
-            graphical picking is enabled and all remaining arguments are
-            ignored (valid only in the GUI).
-
-        Returns
-        -------
-        result : int
-            Returns the area number of the created area or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Keypoints (P1 through P18) must be input in a clockwise or
-        counterclockwise order around the area.  This order also determines the
-        positive normal direction of the area according to the right-hand rule.
-        Existing lines between adjacent keypoints will be used; missing lines
-        are generated "straight" in the active coordinate system and assigned
-        the lowest available numbers [NUMSTR].  If more than one line exists
-        between two keypoints, the shorter one will be chosen.  If the area is
-        to be defined with more than four keypoints, the required keypoints and
-        lines must lie on a constant coordinate value in the active coordinate
-        system (such as a plane or a cylinder).  Areas may be redefined only if
-        not yet attached to a volume.  Solid modeling in a toroidal coordinate
-        system is not recommended.
-        """
-        command = "A,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8), str(p9), str(p10), str(p11), str(p12), str(p13), str(p14), str(p15), str(p16), str(p17), str(p18))
-        return self.run(command, **kwargs)
-
     def hptcreate(self, type="", entity="", nhp="", label="", val1="", val2="",
                   val3="", **kwargs):
         """APDL Command: HPTCREATE
@@ -5702,45 +5665,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "SVTYP,%s,%s,%s" % (str(ksv), str(fact), str(keyinterp))
-        return self.run(command, **kwargs)
-
-    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-          **kwargs):
-        """APDL Command: N
-
-        Defines a node.
-
-        Parameters
-        ----------
-        node
-            Node number to be assigned.  A previously defined node of the same
-            number will be redefined.  Defaults to the maximum node number used
-            +1.
-
-        x, y, z
-            Node location in the active coordinate system (R, θ, Z for
-            cylindrical, R, θ, Φ for spherical or toroidal).  If X = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
-
-        thxy
-            First rotation about nodal Z (positive X toward Y).
-
-        thyz
-            Second rotation about nodal X (positive Y toward Z).
-
-        thzx
-            Third rotation about nodal Y (positive Z toward X).
-
-        Notes
-        -----
-        Defines a node in the active coordinate system [CSYS].  The nodal
-        coordinate system is parallel to the global Cartesian system unless
-        rotated.  Rotation angles are in degrees and redefine any previous
-        rotation angles.  See the NMODIF, NANG, NROTAT, and NORA commands for
-        other rotation options.
-        """
-        command = "N,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(x), str(y), str(z), str(thxy), str(thyz), str(thzx))
         return self.run(command, **kwargs)
 
     def axlab(self, axis="", lab="", **kwargs):
@@ -7857,26 +7781,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "SELIST,%s,%s,%s" % (str(sename), str(kopt), str(kint))
         return self.run(command, **kwargs)
 
-    def knode(self, npt="", node="", **kwargs):
-        """APDL Command: KNODE
-
-        Defines a keypoint at an existing node location.
-
-        Parameters
-        ----------
-        npt
-            Arbitrary reference number for keypoint.  If zero, the lowest
-            available number is assigned [NUMSTR].
-
-        node
-            Node number defining global X, Y, Z keypoint location.  If NODE =
-            P, graphical picking is enabled and all remaining command fields
-            are ignored (valid only in the GUI).  A component name may also be
-            substituted for NODE.
-        """
-        command = "KNODE,%s,%s" % (str(npt), str(node))
-        return self.run(command, **kwargs)
-
     def ndist(self, nd1="", nd2="", **kwargs):
         """APDL Command: NDIST
 
@@ -9943,32 +9847,6 @@ class _MapdlCommands(object):  # pragma: no cover
         (this check assumes a single isotropic coefficient of expansion).
         """
         command = "CECHECK,%s,%s,%s" % (str(itemlab), str(tolerance), str(dof))
-        return self.run(command, **kwargs)
-
-    def l2tan(self, nl1="", nl2="", **kwargs):
-        """APDL Command: L2TAN
-
-        Generates a line tangent to two lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first line generated line is tangent to.  If
-            negative, assume P1 (see below) is the second keypoint of the line
-            instead of the first.  If NL1 = P, graphical picking is enabled and
-            all remaining command fields are ignored (valid only in the GUI).
-
-        nl2
-            Number of the second line generated line is tangent to.  If
-            negative, assume P3 is the second keypoint of the line instead of
-            the first.
-
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at point P2 to line NL1 (P1-P2) and
-        tangent at point P3 to line NL2 (P3-P4).
-        """
-        command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
         return self.run(command, **kwargs)
 
     def dcum(self, oper="", rfact="", ifact="", tb_ase="", **kwargs):
@@ -12060,30 +11938,6 @@ class _MapdlCommands(object):  # pragma: no cover
         use a common line.
         """
         command = "AROTAT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(pax1), str(pax2), str(arc), str(nseg))
-        return self.run(command, **kwargs)
-
-    def kl(self, nl1="", ratio="", nk1="", **kwargs):
-        """APDL Command: KL
-
-        Generates a keypoint at a specified location on an existing line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line.  If negative, the direction of line (as
-            interpreted for RATIO) is reversed.  If NL1 = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI).
-
-        ratio
-            Ratio of line length to locate keypoint.  Must be between 0.0 and
-            1.0.  Defaults to 0.5 (divide the line in half).
-
-        nk1
-            Number to be assigned to keypoint generated at division location
-            (defaults to lowest available keypoint number [NUMSTR]).
-        """
-        command = "KL,%s,%s,%s" % (str(nl1), str(ratio), str(nk1))
         return self.run(command, **kwargs)
 
     def gsbdata(self, labz="", valuez="", labx="", valuex="", laby="",
@@ -14951,53 +14805,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "/WAIT,%s" % (str(dtime))
-        return self.run(command, **kwargs)
-
-    def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
-          xv2="", yv2="", zv2="", **kwargs):
-        """APDL Command: L
-
-        Defines a line between two keypoints.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at the beginning of line.  If P1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        p2
-            Keypoint at the end of line.
-
-        ndiv
-            Number of element divisions within this line.  Normally this field
-            is not used; specifying divisions with LESIZE, etc. is recommended.
-
-        space
-            Spacing ratio.  Normally this field is not used, as specifying
-            spacing ratios with the LESIZE command is recommended.  If
-            positive, SPACE is the nominal ratio of the last division size (at
-            P2) to the first division size (at P1).  If the ratio is greater
-            than 1, the division sizes increase from P1 to P2, and if less than
-            1, they decrease.  If SPACE is negative, then |SPACE| is the
-            nominal ratio of the center division size to those at the ends.
-
-        Returns
-        -------
-        result : int
-            Returns the line number of the created line or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Defines a line between two keypoints from P1 to P2.  The line shape may
-        be generated as "straight" (in the active coordinate system) or curved.
-        The line shape is invariant with coordinate system after it is
-        generated.  Note that solid modeling in a toroidal coordinate system is
-        not recommended.  A curved line is limited to 180°.  Lines may be
-        redefined only if not yet attached to an area.
-        """
-        command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(ndiv), str(space), str(xv1), str(yv1), str(zv1), str(xv2), str(yv2), str(zv2))
         return self.run(command, **kwargs)
 
     def mfoutput(self, freq="", **kwargs):
@@ -18981,42 +18788,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "BETAD,%s" % (str(value))
-        return self.run(command, **kwargs)
-
-    def kdist(self, kp1="", kp2="", **kwargs):
-        """APDL Command: KDIST
-
-        Calculates and lists the distance between two keypoints.
-
-        Parameters
-        ----------
-        kp1
-            First keypoint in distance calculation.  If KP1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        kp2
-            Second keypoint in distance calculation.
-
-        Notes
-        -----
-        KDIST lists the distance between keypoints KP1 and KP2, as well as the
-        current coordinate system offsets from KP1 to KP2, where the X, Y, and
-        Z locations of KP1 are subtracted from the X, Y, and Z locations of KP2
-        (respectively) to determine the offsets.  KDIST is valid in any
-        coordinate system except toroidal [CSYS,3].
-
-        KDIST returns a variable, called "_RETURN," which contains the distance
-        value.  You can use this value for various purposes; for example, to
-        set the default number of line divisions to be generated along region
-        boundary lines [ESIZE,_RETURN]. In interactive mode, you can access
-        this command by using the Model Query Picker (Utility Menu> List>
-        Picked Entities), where you can also access automatic annotation
-        functions, and display the value on your model.
-
-        This command is valid in any processor.
-        """
-        command = "KDIST,%s,%s" % (str(kp1), str(kp2))
         return self.run(command, **kwargs)
 
     def harfrq(self, freqb="", freqe="", logopt="", freqarr="", toler="",
@@ -23380,47 +23151,6 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS.
         """
         command = "MFCALC,%s,%s" % (str(fnumb), str(freq))
-        return self.run(command, **kwargs)
-
-    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
-             **kwargs):
-        """APDL Command: BLC4
-
-        Creates a rectangular area or block volume by corner points.
-
-        Parameters
-        ----------
-        xcorner, ycorner
-            Working plane X and Y coordinates of one corner of the rectangle or
-            block face.
-
-        width
-            The distance from XCORNER on or parallel to the working plane
-            X-axis that, together with YCORNER, defines a second corner of the
-            rectangle or block face.
-
-        height
-            The distance from YCORNER on or parallel to the working plane
-            Y-axis that, together with XCORNER, defines a third corner of the
-            rectangle or block face.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the block.  If DEPTH = 0 (default), a rectangular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a rectangular area anywhere on the working plane or a
-        hexahedral volume with one face anywhere on the working plane.  A
-        rectangle will be defined with four keypoints and four lines.  A volume
-        will be defined with eight keypoints, twelve lines, and six areas, with
-        the top and bottom faces parallel to the working plane.  See the BLC5,
-        RECTNG, and BLOCK commands for alternate ways to create rectangles and
-        blocks.
-        """
-        command = "BLC4,%s,%s,%s,%s,%s" % (str(xcorner), str(ycorner), str(width), str(height), str(depth))
         return self.run(command, **kwargs)
 
     def nplot(self, knum="", **kwargs):
@@ -31576,61 +31306,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "DESIZE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(minl), str(minh), str(mxel), str(angl), str(angh), str(edgmn), str(edgmx), str(adjf), str(adjm))
         return self.run(command, **kwargs)
 
-    def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
-          **kwargs):
-        """APDL Command: V
-
-        Defines a volume through keypoints.
-
-        Parameters
-        ----------
-        p1
-            Keypoint defining starting corner of volume.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Keypoint defining second corner of volume.
-
-        p3
-            Keypoint defining third corner of volume.
-
-        p4
-            Keypoint defining fourth corner of volume.
-
-        p5
-            Keypoint defining fifth corner of volume.
-
-        p6
-            Keypoint defining sixth corner of volume.
-
-        p7
-            Keypoint defining seventh corner of volume.
-
-        p8
-            Keypoint defining eighth corner of volume.
-
-        Notes
-        -----
-        Defines a volume (and its corresponding lines and areas) through eight
-        (or fewer) existing keypoints.  Keypoints must be input in a continuous
-        order.  The order of the keypoints should be around the bottom and then
-        the top.  Missing lines are generated "straight" in the active
-        coordinate system and assigned the lowest available numbers [NUMSTR].
-        Missing areas are generated and assigned the lowest available numbers.
-
-        Solid modeling in a toroidal coordinate system is not recommended.
-
-        Certain faces may be condensed to a line or point by repeating
-        keypoints.   For example, use V,P1,P2,P3,P3,P5,P6,P7,P7   for a
-        triangular prism or V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
-
-        Using keypoints to produce partial sections in CSYS = 2 can generate
-        anomalies; check the resulting volumes carefully.
-        """
-        command = "V,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8))
-        return self.run(command, **kwargs)
-
     def sed(self, sedx="", sedy="", sedz="", cname="", **kwargs):
         """APDL Command: SED
 
@@ -38636,70 +38311,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "RBE3,%s,%s,%s,%s" % (str(m_aster), str(dof), str(slaves), str(wtfact))
         return self.run(command, **kwargs)
 
-    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs):
-        """APDL Command: ASBA
-
-        Subtracts areas from areas.
-
-        Parameters
-        ----------
-        na1
-            Area (or areas, if picking is used) to be subtracted from.  If ALL,
-            use all selected areas.  Areas specified in this argument are not
-            available for use in the NA2 argument.  If P, graphical picking is
-            enabled (valid only in the GUI) and remaining fields are ignored.
-            A component name may also be substituted for NA1.
-
-        na2
-            Area (or areas, if picking is used) to subtract.  If ALL, use all
-            selected areas (except those included in the NA1 argument).    A
-            component name may also be substituted for NA2.
-
-        sepo
-            Behavior if the intersection of the NA1 areas and the NA2 areas is
-            a line or lines:
-
-            (blank) - The resulting areas will share line(s) where they touch.
-
-            SEPO - The resulting areas will have separate, but coincident line(s) where they
-                   touch.
-
-        keep1
-            Specifies whether NA1 areas are to be deleted:
-
-            (blank) - Use the setting of KEEP on the BOPTN command.
-
-            DELETE - Delete NA1 areas after ASBA operation (override BOPTN command settings).
-
-            KEEP - Keep NA1 areas after ASBA operation (override BOPTN command settings).
-
-        keep2
-            Specifies whether NA2 areas are to be deleted:
-
-            (blank) - Use the setting of KEEP on the BOPTN command.
-
-            DELETE - Delete NA2 areas after ASBA operation (override BOPTN command settings).
-
-            KEEP - Keep NA2 areas after ASBA operation (override BOPTN command settings).
-
-        Notes
-        -----
-        Generates new areas by subtracting the regions common to both NA1 and
-        NA2 areas (the intersection) from the NA1 areas.  The intersection can
-        be an area(s) or line(s).  If the intersection is a line and SEPO is
-        blank, the NA1 area is divided at the line and the resulting areas will
-        be connected, sharing a common line where they touch.  If SEPO is set
-        to SEPO, NA1 is divided into two unconnected areas with separate lines
-        where they touch.  See Solid Modeling in the Modeling and Meshing Guide
-        for an illustration.  See the BOPTN command for an explanation of the
-        options available to Boolean operations.  Element attributes and solid
-        model boundary conditions assigned to the original entities will not be
-        transferred to the new entities generated.  ASBA,ALL,ALL will have no
-        effect since all the areas (in NA1) will be unavailable as NA2 areas.
-        """
-        command = "ASBA,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(sepo), str(keep1), str(keep2))
-        return self.run(command, **kwargs)
-
     def vscale(self, wn="", vratio="", key="", **kwargs):
         """APDL Command: /VSCALE
 
@@ -38865,56 +38476,6 @@ class _MapdlCommands(object):  # pragma: no cover
         both RAD1 and RAD2 the command is ignored.
         """
         command = "SPH4,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(rad2))
-        return self.run(command, **kwargs)
-
-    def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
-              **kwargs):
-        """APDL Command: L2ANG
-
-        Generates a line at an angle with two existing lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first line to be hit (touched by the end of the new
-            line).  If negative, assume P1 (see below) is the second keypoint
-            of the line instead of the first.  If NL1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        nl2
-            Number of the second line to be hit.  If negative, assume P3 is the
-            second keypoint of the line instead of the first.
-
-        ang1
-            Angle of intersection (usually zero or 180) of generated line with
-            tangent to first line.
-
-        ang2
-            Angle of intersection (usually zero or 180) of generated line with
-            tangent to second line.
-
-        phit1
-            Number to be assigned to keypoint generated at hit location on
-            first line (defaults to lowest available keypoint number [NUMSTR]).
-
-        phit2
-            Number to be assigned to keypoint generated at hit location on
-            second line (defaults to lowest available keypoint number
-            [NUMSTR]).
-
-        Notes
-        -----
-        Generates a straight line (PHIT1-PHIT2) at an angle (ANG1) with an
-        existing line NL1 (P1-P2)  and which is also at an angle (ANG2) with
-        another existing line NL2 (P3-P4).  If the angles are zero the
-        generated line is tangent to the two lines.  The PHIT1 and PHIT2
-        locations on the lines are automatically calculated.  Line P1-P2
-        becomes P1-PHIT1, P3-P4 becomes P3-PHIT2, and new lines PHIT1-P2,
-        PHIT2-P4, and PHIT1-PHIT2 are generated.  Line divisions are set to
-        zero (use LESIZE, etc. to modify).
-        """
-        command = "L2ANG,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(ang1), str(ang2), str(phit1), str(phit2))
         return self.run(command, **kwargs)
 
     def ucmd(self, cmd="", srnum="", **kwargs):
@@ -39986,57 +39547,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "/SHOW,%s,%s,%s,%s" % (str(fname), str(option), str(vect), str(ncpl))
         return self.run(command, **kwargs)
 
-    def ldiv(self, nl1="", ratio="", pdiv="", ndiv="", keep="", **kwargs):
-        """APDL Command: LDIV
-
-        Divides a single line into two or more lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line to be divided.  If negative, assume P1 (see
-            below) is the second keypoint of the line instead of the first for
-            RATIO.  If ALL, divide all selected lines [LSEL].  If NL1 = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).  A component name may also be
-            substituted for NL1.
-
-        ratio
-            Ratio of line length P1-PDIV to line length P1-P2.  Must be between
-            0.0 and 1.0. Input ignored if NDIV > 2.
-
-        pdiv
-            Number to be assigned to keypoint generated at division location
-            (defaults to lowest available keypoint number [NUMSTR]).  Input
-            ignored if NL1 = ALL or NDIV > 2.  If PDIV already exists and lies
-            on line NL1, divide line at PDIV (RATIO must also be 0.0).  If PDIV
-            already exists and does not lie on line NL1, PDIV is projected and
-            moved to the nearest point on line NL1 (if possible). PDIV cannot
-            be attached to another line, area, or volume.
-
-        ndiv
-            The number of new lines to be generated from old line (defaults to
-            2).
-
-        keep
-            Specifies whether to keep the input entities:
-
-            0 - Modify old line to use new keypoints and slopes.
-
-            1 - Do not modify old line.  New lines will overlay old line and have unique
-                keypoints.
-
-        Notes
-        -----
-        Divides a single line NL1 (defined from keypoint P1 to keypoint P2)
-        into two or more lines.  Line NL1 becomes the new line beginning with
-        keypoint P1 and new lines are generated ending at keypoint P2.  If the
-        line is attached to an area, the area will also be updated.  Line
-        divisions are set to zero (use LESIZE, etc. to modify).
-        """
-        command = "LDIV,%s,%s,%s,%s,%s" % (str(nl1), str(ratio), str(pdiv), str(ndiv), str(keep))
-        return self.run(command, **kwargs)
-
     def bfldele(self, line="", lab="", **kwargs):
         """APDL Command: BFLDELE
 
@@ -40236,54 +39746,6 @@ class _MapdlCommands(object):  # pragma: no cover
         Distributed ANSYS.
         """
         command = "MAP2DTO3D,%s,%s,%s,%s" % (str(action), str(ldstep), str(sbstep), str(option))
-        return self.run(command, **kwargs)
-
-    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs):
-        """APDL Command: KBETW
-
-        Creates a keypoint between two existing keypoints.
-
-        Parameters
-        ----------
-        kp1
-            First keypoint.  If KP1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        kp2
-            Second keypoint.
-
-        kpnew
-            Number assigned to the new keypoint.  Defaults to the lowest
-            available keypoint number.
-
-        type
-            Type of input for VALUE.
-
-            RATIO - Value is the ratio of the distances between keypoints as follows:
-                    (KP1-KPNEW)/(KP1-KP2).
-
-            DIST - Value is the absolute distance between KP1 and KPNEW (valid only if current
-                   coordinate system is Cartesian).
-
-        value
-            Location of new keypoint, as defined by Type (defaults to 0.5).  If
-            VALUE is a ratio (Type = RATIO) and is less than 0 or greater than
-            1, the keypoint is created on the extended line.  Similarly, if
-            VALUE is a distance (Type = DIST) and is less than 0 or greater
-            than the distance between KP1 and KP2, the keypoint is created on
-            the extended line.
-
-        Notes
-        -----
-        Placement of the new keypoint depends on the currently active
-        coordinate system [CSYS].  If the coordinate system is Cartesian, the
-        keypoint will lie on a straight line between KP1 and KP2.  If the
-        system is not Cartesian (e.g., cylindrical, spherical, etc.), the
-        keypoint will be located as if on a line (which may not be straight)
-        created in the current coordinate system between KP1 and KP2.  Note
-        that solid modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "KBETW,%s,%s,%s,%s,%s" % (str(kp1), str(kp2), str(kpnew), str(type), str(value))
         return self.run(command, **kwargs)
 
     def usrdof(self, action="", dof1="", dof2="", dof3="", dof4="", dof5="",
@@ -40750,45 +40212,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "PFACT,%s,%s,%s" % (str(tblno), str(excit), str(parcor))
         return self.run(command, **kwargs)
 
-    def kcenter(self, type="", val1="", val2="", val3="", val4="", kpnew="",
-                **kwargs):
-        """APDL Command: KCENTER
-
-        Creates a keypoint at the center of a circular arc defined by three
-        locations.
-
-        Parameters
-        ----------
-        type
-            Type of entity used to define the circular arc.  The meaning of
-            VAL1 through VAL4 will vary depending on Type.  If Type = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
-
-            KP - Arc is defined by keypoints.
-
-            LINE - Arc is defined by locations on a line.
-
-        val1, val2, val3, val4
-            Values used to specify three locations on the arc (see table
-            below).
-
-        kpnew
-            Number assigned to new keypoint.  Defaults to the lowest available
-            keypoint number.
-
-        Notes
-        -----
-        KCENTER should be used in the Cartesian coordinate system (CSYS,0)
-        only.  This command provides three methods to define a keypoint at the
-        center of three locations.  As shown below, the center point can be
-        calculated based on a) three keypoints, b) three keypoints and a
-        radius, or c) three locations on a line.  Note that for method c, if a
-        circular line is specified by VAL1, VAL2 through VAL4 are not needed.
-        """
-        command = "KCENTER,%s,%s,%s,%s,%s,%s" % (str(type), str(val1), str(val2), str(val3), str(val4), str(kpnew))
-        return self.run(command, **kwargs)
-
     def fcdele(self, mat="", **kwargs):
         """APDL Command: FCDELE
 
@@ -41013,54 +40436,6 @@ class _MapdlCommands(object):  # pragma: no cover
         matrix (*DMAT).
         """
         command = "*INIT,%s,%s,%s,%s,%s" % (str(name), str(method), str(val1), str(val2), str(val3))
-        return self.run(command, **kwargs)
-
-    def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs):
-        """APDL Command: ADRAG
-
-        Generates areas by dragging a line pattern along a path.
-
-        Parameters
-        ----------
-        nl1, nl2, nl3, . . . , nl6
-            List of lines in the pattern to be dragged (6 maximum if using
-            keyboard entry).  Lines should form a continuous pattern (no more
-            than two lines connected to any one keypoint.  If NL1 = P,
-            graphical picking is enabled and all remaining arguments are
-            ignored (valid only in the GUI).  If NL1 = ALL, all selected lines
-            (except those that define the drag path) will be swept along the
-            path.  A component name may also be substituted for NL1.
-
-        nlp1, nlp2, nlp3, . . . , nlp6
-            List of lines defining the path along which the pattern is to be
-            dragged (6 maximum if using keyboard entry).  Must be a continuous
-            set of lines.
-
-        Notes
-        -----
-        Generates areas (and their corresponding keypoints and lines) by
-        sweeping a given line pattern along a characteristic drag path.  If the
-        drag path consists of multiple lines, the drag direction is determined
-        by the sequence in which the path lines are input (NLP1, NLP2, etc.).
-        If the drag path is a single line (NLP1), the drag direction is  from
-        the keypoint on the drag line that is closest to the first keypoint of
-        the given line pattern to the other end of the drag line.
-
-        The magnitude of the vector between the keypoints of the given pattern
-        and the first path keypoint remains constant for all generated keypoint
-        patterns and the path keypoints.  The direction of the vector relative
-        to the path slope also remains constant so that patterns may be swept
-        around curves.
-
-        Keypoint, line, and area numbers are automatically assigned (beginning
-        with the lowest available values [NUMSTR]).  Adjacent lines use a
-        common keypoint.  Adjacent areas use a common line.  For best results,
-        the entities to be dragged should be orthogonal to the start of the
-        drag path.  Drag operations that produce an error message may create
-        some of the desired entities prior to terminating.
-        """
-        command = "ADRAG,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nlp1), str(nlp2), str(nlp3), str(nlp4), str(nlp5), str(nlp6))
         return self.run(command, **kwargs)
 
     def edsolv(self, **kwargs):
@@ -41540,41 +40915,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "AGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(na3), str(na4), str(na5), str(na6), str(na7), str(na8), str(na9))
         return self.run(command, **kwargs)
 
-    def k(self, npt="", x="", y="", z="", **kwargs):
-        """APDL Command: K
-
-        Defines a keypoint.
-
-        Parameters
-        ----------
-        npt
-            Reference number for keypoint.  If zero, the lowest
-            available number is assigned [NUMSTR].
-
-        x, y, z
-            Keypoint location in the active coordinate system (may be
-            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
-            enabled and all other fields (including NPT) are ignored
-            (valid only in the GUI).
-
-        Returns
-        -------
-        result : int
-            Returns the Keypoint number of the created Keypoint or
-            None, if something went wrong.
-
-        Notes
-        -----
-        Defines a keypoint in the active coordinate system [CSYS] for
-        line, area, and volume descriptions.  A previously defined
-        keypoint of the same number will be redefined.  Keypoints may
-        be redefined only if it is not yet attached to a line or is
-        not yet meshed.  Solid modeling in a toroidal system is not
-        recommended.
-        """
-        command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
-        return self.run(command, **kwargs)
-
     def batch(self, lab="", **kwargs):
         """APDL Command: /BATCH
 
@@ -41712,47 +41052,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "WPOFFS,%s,%s,%s" % (str(xoff), str(yoff), str(zoff))
-        return self.run(command, **kwargs)
-
-    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
-           l10="", **kwargs):
-        """APDL Command: AL
-
-        Generates an area bounded by previously defined lines.
-
-        Parameters
-        ----------
-        l1, l2, l3, . . . , l10
-            List of lines defining area.  The minimum number of lines is 3.
-            The positive normal of the area is controlled by the direction of
-            L1 using the right-hand rule.  A negative value of L1 reverses the
-            normal direction.  If L1 = ALL, use all selected lines with L2
-            defining the normal (L3 to L10 are ignored and L2 defaults to the
-            lowest numbered selected line).  If L1 = P, graphical picking is
-            enabled and all remaining arguments are ignored (valid only in the
-            GUI).  A component name may also be substituted for L1.
-
-        Returns
-        -------
-        result : int
-            Returns the area number of the created area or None,
-            if something went wrong.
-
-        Notes
-        -----
-        Lines may be input (once each) in any order and must form a simply
-        connected closed curve.  If the area is defined with more than four
-        lines, the lines must also lie in the same plane or on a constant
-        coordinate value in the active coordinate system (such as a plane or a
-        cylinder).
-
-        Note:: : Solid modeling in a toroidal coordinate system is not
-        recommended.  Areas may be redefined only if not yet attached to a
-        volume.
-
-        This command is valid in any processor.
-        """
-        command = "AL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(l1), str(l2), str(l3), str(l4), str(l5), str(l6), str(l7), str(l8), str(l9), str(l10))
         return self.run(command, **kwargs)
 
     def torqc2d(self, rad="", numn="", lcsys="", **kwargs):
@@ -44788,43 +44087,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "*VABS,%s,%s,%s,%s" % (str(kabsr), str(kabs1), str(kabs2), str(kabs3))
         return self.run(command, **kwargs)
 
-    def lfillt(self, nl1="", nl2="", rad="", pcent="", **kwargs):
-        """APDL Command: LFILLT
-
-        Generates a fillet line between two intersecting lines.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first intersecting line.  If NL1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        nl2
-            Number of the second intersecting line.
-
-        rad
-            Radius of fillet to be generated.  Radius should be less than the
-            lengths of the two lines specified with NL1 and NL2.
-
-        pcent
-            Number to be assigned to generated keypoint at fillet arc center.
-            If zero (or blank), no keypoint is generated.
-
-        Notes
-        -----
-        Generates a fillet line between two intersecting lines NL1 (P1-PINT)
-        and NL2 (P2-PINT).  Three keypoints may be generated, two at the fillet
-        tangent points (PTAN1 and PTAN2) and one (optional) at the fillet arc
-        center (PCENT).  Line P1-PINT becomes P1-PTAN1, P2-PINT becomes
-        P2-PTAN2, and new arc line PTAN1-PTAN2 is generated.  Generated
-        keypoint and line numbers are automatically assigned (beginning with
-        the lowest available values [NUMSTR]).  Line divisions are set to zero
-        (use LESIZE, etc. to modify).
-        """
-        command = "LFILLT,%s,%s,%s,%s" % (str(nl1), str(nl2), str(rad), str(pcent))
-        return self.run(command, **kwargs)
-
     def compress(self, **kwargs):
         """APDL Command: COMPRESS
 
@@ -46007,61 +45269,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "*VCOL,%s,%s" % (str(ncol1), str(ncol2))
-        return self.run(command, **kwargs)
-
-    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs):
-        """APDL Command: LANG
-
-        Generates a straight line at an angle with a line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line to be hit (touched by the end of the new line).
-            If negative, assume P1 (see below) is the second keypoint of the
-            line instead of the first.  If NL1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        p3
-            Keypoint at which generated line must end.
-
-        ang
-            Angle of intersection of generated line PHIT-P3 with tangent to
-            line P1-P2 at PHIT.  If 0 (default), the generated line is tangent
-            to NL1 toward end P1; if 90, the generated line is perpendicular to
-            NL1.  If 180, the generated line is tangent to NL1 toward end P2.
-            ANG can be any value, but is adjusted to the corresponding acute
-            angle with respect to LOCAT. See "Notes" for a discussion of
-            accuracy.
-
-        phit
-            Number to be assigned to keypoint generated at hit location
-            (defaults to lowest available keypoint number [NUMSTR]).
-
-        locat
-            Approximate location of PHIT in terms of the ratio of the distance
-            along the line (NL1) to the length of the line.  LOCAT can range
-            from 0 to 1.  If LOCAT is blank, the point will be located with
-            less speed and accuracy, and an arbitrary location may result.
-
-        Notes
-        -----
-        Generates a straight line (PHIT-P3) at an angle (ANG) with a line NL1
-        (P1-P2).  The location of PHIT on the line is automatically calculated.
-        Line P1-P2 becomes P1-PHIT and new lines PHIT-P2 and PHIT-P3 are
-        generated.  Line divisions are set to zero (use LESIZE, etc. to
-        modify).
-
-        PHIT is positioned closest to LOCAT for the given angle, ANG.  To
-        ensure better performance, it is recommended that LOCAT be input, even
-        if it is 0.
-
-        The program uses an iterative procedure to position PHIT.  The
-        procedure is not exact, with the result that the actual value of ANG
-        will sometimes differ slightly from the specified value.
-        """
-        command = "LANG,%s,%s,%s,%s,%s" % (str(nl1), str(p3), str(ang), str(phit), str(locat))
         return self.run(command, **kwargs)
 
     def xfrm(self, lab="", x1="", y1="", z1="", x2="", y2="", z2="", **kwargs):
@@ -49547,31 +48754,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "RMNDISP,%s,%s" % (str(loadt), str(loc))
         return self.run(command, **kwargs)
 
-    def lstr(self, p1="", p2="", **kwargs):
-        """APDL Command: LSTR
-
-        Defines a straight line irrespective of the active coordinate system.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at the beginning of line.  If P1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI)
-
-        p2
-            Keypoint at the end of line.
-
-        Notes
-        -----
-        Defines a straight line from P1 to P2 using the global Cartesian
-        coordinate system.  The active coordinate system will be ignored.  The
-        line shape is invariant with the coordinate system after it is
-        generated.  Lines may be redefined only if not yet attached to an area.
-        """
-        command = "LSTR,%s,%s" % (str(p1), str(p2))
-        return self.run(command, **kwargs)
-
     def lmatrix(self, symfac="", coilname="", curname="", indname="",
                 **kwargs):
         """APDL Command: LMATRIX
@@ -51046,36 +50228,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "NCNV,%s,%s,%s,%s,%s" % (str(kstop), str(dlim), str(itlim), str(etlim), str(cplim))
-        return self.run(command, **kwargs)
-
-    def larea(self, p1="", p2="", narea="", **kwargs):
-        """APDL Command: LAREA
-
-        Generates the shortest line between two keypoints on an area.
-
-        Parameters
-        ----------
-        p1
-            First keypoint of line to be generated.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Second keypoint of line to be generated.
-
-        narea
-            Area containing P1 and P2, or area to which generated line is to be
-            parallel.
-
-        Notes
-        -----
-        Generates the shortest line between two keypoints, P1 and P2, both of
-        which lie on an area.  The generated line will also lie on the area.
-        P1 and P2 may also be equidistant (in global Cartesian space) from the
-        area (and on the same side of the area), in which case a line parallel
-        to the area is generated.
-        """
-        command = "LAREA,%s,%s,%s" % (str(p1), str(p2), str(narea))
         return self.run(command, **kwargs)
 
     def mdamp(self, stloc="", v1="", v2="", v3="", v4="", v5="", v6="",
@@ -53480,29 +52632,6 @@ class _MapdlCommands(object):  # pragma: no cover
         are in the global Cartesian system.
         """
         return self.run(f"NWRITE,{fname},{ext},,{kappnd}", **kwargs)
-
-    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs):
-        """APDL Command: LTAN
-
-        Generates a line at the end of, and tangent to, an existing line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line the generated line is tangent to.  If negative,
-            assume P1 (see below), instead of P2, is the second keypoint of
-            line NL1.  If NL1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        p3
-            Keypoint at which generated line must end.
-
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at end point (P2) of line NL1 (P1-P2).
-        """
-        command = "LTAN,%s,%s,%s,%s,%s" % (str(nl1), str(p3), str(xv3), str(yv3), str(zv3))
-        return self.run(command, **kwargs)
 
     def showdisp(self, dname="", ncpl="", **kwargs):
         """APDL Command: /SHOWDISP
@@ -57112,45 +56241,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "SFLLIST,%s,%s" % (str(line), str(lab))
         return self.run(command, **kwargs)
 
-    def larc(self, p1="", p2="", pc="", rad="", **kwargs):
-        """APDL Command: LARC
-
-        Defines a circular arc.
-
-        Parameters
-        ----------
-        p1
-            Keypoint at one end of circular arc line.  If P1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
-
-        p2
-            Keypoint at other end of circular arc line.
-
-        pc
-            Keypoint defining plane of arc and center of curvature side (with
-            positive radius).  Must not lie along the straight line from P1 to
-            P2.  PC need not be at the center of curvature.
-
-        rad
-            Radius of curvature of the arc.  If negative, assume center of
-            curvature side is opposite to that defined by PC.  If RAD is blank,
-            RAD will be calculated from a curve fit through P1, PC, and P2.
-
-        Notes
-        -----
-        Defines a circular arc line from P1 to P2.  The line shape is generated
-        as circular, regardless of the active coordinate system.  The line
-        shape is invariant with coordinate system after it is generated.
-
-        When dealing with a large radius arc (1e3), or if the location of the
-        arc you create is far away from the origin of your coordinate system,
-        anomalies may occur. You can prevent this by creating the arc at a
-        smaller scale, and then scaling the model back to full size (LSSCALE).
-        """
-        command = "LARC,%s,%s,%s,%s" % (str(p1), str(p2), str(pc), str(rad))
-        return self.run(command, **kwargs)
-
     def nslv(self, type="", nkey="", **kwargs):
         """APDL Command: NSLV
 
@@ -58617,28 +57707,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "FS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(nev), str(nlod), str(stitm), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
         return self.run(command, **kwargs)
 
-    def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
-        """APDL Command: BSPLIN
-
-        Generates a single line from a spline fit to a series of keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p6
-            Keypoints through which a spline is fit.  At least two keypoints
-            must be defined.  If P1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        One line is generated between keypoint P1 and the last keypoint
-        entered.  The line will pass through each entered keypoint.  Solid
-        modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "BSPLIN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(xv1), str(yv1), str(zv1), str(xv6), str(yv6), str(zv6))
-        return self.run(command, **kwargs)
-
     def dnsol(self, node="", item="", comp="", v1="", v2="", v3="", v4="",
               v5="", v6="", **kwargs):
         """APDL Command: DNSOL
@@ -59452,42 +58520,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "SOLUOPT," % ()
         return self.run(command, **kwargs)
 
-    def lextnd(self, nl1="", nk1="", dist="", keep="", **kwargs):
-        """APDL Command: LEXTND
-
-        Extends a line at one end by using its slope.
-
-        Parameters
-        ----------
-        nl1
-            Number of the line to be extended.  If NL1 = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI).
-
-        nk1
-            Number of keypoint at the end of line NL1 to be extended.
-
-        dist
-            Distance that the line will be extended.
-
-        keep
-            Specifies whether to keep the input entities:
-
-            0 - Modify old line to use new keypoints and slopes.
-
-            1 - Do not modify old line.  New line will overlay old line and have unique
-                keypoints.
-
-        Notes
-        -----
-        Extends a line at one end by using its slope.  Lines may be redefined
-        only if not yet attached to an area.  Line divisions are set to zero
-        (use LESIZE, etc. to modify).  Note that solid modeling in a toroidal
-        coordinate system is not recommended.
-        """
-        command = "LEXTND,%s,%s,%s,%s" % (str(nl1), str(nk1), str(dist), str(keep))
-        return self.run(command, **kwargs)
-
     def emunit(self, lab="", value="", **kwargs):
         """APDL Command: EMUNIT
 
@@ -60128,55 +59160,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "/AUX3," % ()
         return self.run(command, **kwargs)
 
-    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
-             theta2="", depth="", **kwargs):
-        """APDL Command: CYL4
-
-        Creates a circular area or cylindrical volume anywhere on the working
-        plane.
-
-        Parameters
-        ----------
-        xcenter, ycenter
-            Working plane X and Y coordinates of the center of the circle or
-            cylinder.
-
-        rad1, rad2
-            Inner and outer radii (either order) of the circle or cylinder.  A
-            value of zero or blank for either RAD1 or RAD2, or the same value
-            for both RAD1 and RAD2, defines a solid circle or cylinder.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the circle or faces of
-            the cylinder.  Used for creating a partial annulus or partial
-            cylinder.  The sector begins at the algebraically smaller angle,
-            extends in a positive angular direction, and ends at the larger
-            angle.  The starting angle defaults to 0° and the ending angle
-            defaults to 360°.  See the Modeling and Meshing Guide for an
-            illustration.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the cylinder.  If DEPTH = 0 (default), a circular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a circular area anywhere on the working plane or a cylindrical
-        volume with one face anywhere on the working plane.  For a solid
-        cylinder of 360°, the top and bottom faces will be circular (each area
-        defined with four lines) and they will be connected with two surface
-        areas (each spanning 180°).  See the CYL5, PCIRC, and CYLIND commands
-        for alternate ways to create circles and cylinders.
-
-        When working with a model imported from an IGES file (DEFAULT import
-        option), you must provide a value for DEPTH or the command will be
-        ignored.
-        """
-        command = "CYL4,%s,%s,%s,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(theta1), str(rad2), str(theta2), str(depth))
-        return self.run(command, **kwargs)
-
     def bflist(self, node="", lab="", **kwargs):
         """APDL Command: BFLIST
 
@@ -60331,56 +59314,6 @@ class _MapdlCommands(object):  # pragma: no cover
         This command is valid in any processor.
         """
         return self.run(f"SAVE,{fname},{ext},,{slab}", **kwargs)
-
-    def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
-               **kwargs):
-        """APDL Command: CIRCLE
-
-        Generates circular arc lines.
-
-        Parameters
-        ----------
-        pcent
-            Keypoint defining the center of the circle (in the plane of the
-            circle).  If PCENT = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        rad
-            Radius of the circle.  If RAD is blank and PCENT = P, the radius is
-            the distance from PCENT to PZERO.
-
-        paxis
-            Keypoint defining axis of circle (along with PCENT).  If PCENT = P
-            and PAXIS is omitted, the axis is normal to the working plane.
-
-        pzero
-            Keypoint defining the plane normal to circle (along with PCENT and
-            PAXIS) and the zero degree location.  Need not be in the plane of
-            the circle. This value is not required if PAXIS is defined along
-            the Y axis (that is, a circle in the XZ plane).
-
-        arc
-            Arc length (in degrees).  Positive follows right-hand rule about
-            PCENT-PAXIS vector.  Defaults to 360°.
-
-        nseg
-            Number of lines around circumference (defaults to minimum required
-            for 90°-maximum arcs, i.e., 4 for 360°).  Number of keypoints
-            generated is NSEG for 360° or NSEG + 1 for less than 360°.
-
-        Notes
-        -----
-        Generates circular arc lines (and their corresponding keypoints).
-        Keypoints are generated at regular angular locations (based on a
-        maximum spacing of 90°).  Arc lines are generated connecting the
-        keypoints.  Keypoint and line numbers are automatically assigned,
-        beginning with the lowest available values [NUMSTR].  Adjacent lines
-        use a common keypoint.  Line shapes are generated as arcs, regardless
-        of the active coordinate system.  Line shapes are invariant with
-        coordinate system after they are generated.
-        """
-        command = "CIRCLE,%s,%s,%s,%s,%s,%s" % (str(pcent), str(rad), str(paxis), str(pzero), str(arc), str(nseg))
-        return self.run(command, **kwargs)
 
     def plnsol(self, item="", comp="", kund="", fact="", fileid ="", **kwargs):
         """APDL Command: PLNSOL
@@ -67559,45 +66492,6 @@ class _MapdlCommands(object):  # pragma: no cover
         command = "PLCHIST,%s,%s" % (str(spec), str(freqpt))
         return self.run(command, **kwargs)
 
-    def lcomb(self, nl1="", nl2="", keep="", **kwargs):
-        """APDL Command: LCOMB
-
-        Combines adjacent lines into one line.
-
-        Parameters
-        ----------
-        nl1
-            Number of the first line to be combined.  If NL1 = ALL, NL2 is
-            ignored and all selected lines [LSEL] are combined.  If NL1 = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).  A component name may also be
-            substituted for NL1 (NL2 is ignored).
-
-        nl2
-            Number of the second line to be combined.
-
-        keep
-            Specifies whether to keep the input entities:
-
-            0 - Delete lines NL1 and NL2 and their common keypoint.  Keypoints will not be
-                deleted if they are meshed or if they are attached to other
-                lines.  Lines will not be deleted if they are attached to
-                different areas.
-
-            1 - Keep NL1, NL2, and their common keypoint.  (The common keypoint will not be
-                attached to the output line.)
-
-        Notes
-        -----
-        Combines adjacent lines into one line (the output line).  This
-        operation will effectively "undo" the LDIV operation.  Line divisions
-        are set to zero (use LESIZE, etc. to modify).  Lines attached to the
-        same area(s) can also be combined.  See also the LCCAT command for line
-        concatenation capability.
-        """
-        command = "LCOMB,%s,%s,%s" % (str(nl1), str(nl2), str(keep))
-        return self.run(command, **kwargs)
-
     def omega(self, omegx="", omegy="", omegz="", **kwargs):
         """APDL Command: OMEGA
 
@@ -68557,28 +67451,6 @@ class _MapdlCommands(object):  # pragma: no cover
         modeling in a toroidal coordinate system is not recommended.
         """
         command = "KGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(itime), str(np1), str(np2), str(ninc), str(dx), str(dy), str(dz), str(kinc), str(noelem), str(imove))
-        return self.run(command, **kwargs)
-
-    def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
-        """APDL Command: SPLINE
-
-        Generates a segmented spline through a series of keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p6
-            Keypoints through which the spline is fit.  At least two must be
-            defined.  If P1 = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        The output from this command is a series of connected lines (one line
-        between each pair of keypoints) that together form a spline.  Note that
-        solid modeling in a toroidal coordinate system is not recommended.
-        """
-        command = "SPLINE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(xv1), str(yv1), str(zv1), str(xv6), str(yv6), str(zv6))
         return self.run(command, **kwargs)
 
     def mfconv(self, lab="", toler="", minref="", **kwargs):
