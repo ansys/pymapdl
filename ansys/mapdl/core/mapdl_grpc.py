@@ -17,7 +17,6 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-from grpc_health.v1 import health_pb2, health_pb2_grpc
 from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
 from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
@@ -257,7 +256,7 @@ class MapdlGrpc(_MapdlCore):
         info = super().__repr__()
         return info
 
-    def _connect(self, port, timeout=5, set_no_abort=True):
+    def _connect(self, port, timeout=5, set_no_abort=True, enable_health_check=False):
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
@@ -305,7 +304,8 @@ class MapdlGrpc(_MapdlCore):
 
 
         # enable health check
-        self._enable_health_check()
+        if enable_health_check:
+            self._enable_health_check()
 
         # housekeeping otherwise, many failures in a row will cause
         # MAPDL to exit without returning anything useful.  Also
@@ -317,6 +317,9 @@ class MapdlGrpc(_MapdlCore):
 
     def _enable_health_check(self):
         """Places the status of the health check in _health_response_queue"""
+        # lazy imports here to speed up module load
+        from grpc_health.v1 import health_pb2, health_pb2_grpc
+
         def _consume_responses(response_iterator, response_queue):
             try:
                 for response in response_iterator:
@@ -355,7 +358,6 @@ class MapdlGrpc(_MapdlCore):
                                   args=(rendezvous, self._health_response_queue),
                                   daemon=True)
         thread.start()
-
 
     def _launch(self, start_parm):
         """Launch a local session of MAPDL in gRPC mode.
