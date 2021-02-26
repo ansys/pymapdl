@@ -346,17 +346,11 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                 raise RuntimeError('Failed to start local MAPDL instance:\n"%s"'
                                    % msg)
         except pexpect.EOF:
-            breakpoint()
             msg = process.read().decode()
-            if not msg:
-                raise RuntimeError('Unable to launch MAPDL from Python.  Attempt to '
-                                   'launch MAPDL from the command line '
-                                   f'with\n{command}')
-            else:
-                RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
+            raise RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
         except pexpect.TIMEOUT:
             msg = process.before.decode()
-            raise TimeoutError('Failed to start local MAPDL instance:\n"%s"' % msg)
+            raise RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
 
     return port, run_location
 
