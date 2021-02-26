@@ -50,7 +50,7 @@ jobs:
   
       - name: Build Documentation
         run: |
-          sudo apt install pandoc -qy
+          sudo apt-get install pandoc -qy
           pip install -r requirements_docs.txt
           make -C docs html
   

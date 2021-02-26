@@ -1,0 +1,156 @@
+.. _using_standard_install:
+
+***************************************
+Using PyMAPDL from the Standard Install
+***************************************
+
+The pyansys ``ansys-mapdl-core`` package requires either a local or
+remote instance of MAPDL to communicate with it.  This section covers
+launching and interfacing with MAPDL from a local instance by
+launching it from Python.
+
+Installing MAPDL
+----------------
+
+MAPDL is installed by default from the standard installer.  When
+installing ANSYS, verify that the "Mechanical Products" option is
+checked under the "Structural Mechanics" option.  The standard
+installer options may change, but for reference see the following
+figure.
+
+.. figure:: ../images/unified_install_2019R1.jpg
+    :width: 400pt
+
+
+Launching MAPDL
+---------------
+There are two ways to launch MAPDL to use it with pymapdl.  First, you
+can use the ``launch_mapdl`` function to have Python startup MAPDL and automatically connect to it:
+
+.. code:: python
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> print(mapdl)
+
+    Product:             ANSYS Mechanical Enterprise
+    MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
+    PyMAPDL Version:     Version: 0.57.0
+
+For any number of reasons, Python may fail to launch MAPDL.  Here's
+some approaches to debug the start:
+
+
+Manually Set the Executable Location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you have a non-standard install, ``pymapdl`` may be unable find
+your installation.  If that's the case, provide the location of MAPDL
+as the first parameter to ``launch_mapdl``.  For example, on Windows,
+this will be:
+
+.. code:: python
+
+    >>> exec_loc = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe'
+    >>> mapdl = launch_mapdl(exec_loc)
+
+For Linux:
+
+.. code:: python
+
+    >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    >>> mapdl = launch_mapdl(exec_loc)
+
+
+Debug Launch Issues
+~~~~~~~~~~~~~~~~~~~
+In some cases, it may be necessary to debug why MAPDL isn't launching
+by running the launch command manually from the command line.  In
+Windows, open up a command prompt and run the following (version
+dependent) command:
+
+.. code::
+
+    "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
+
+For Linux:
+
+.. code::
+
+    /usr/ansys_inc/v211/ansys/bin/ansys211
+
+You probably should startup MAPDL in a temporary working directory as
+MAPDL creates a several temporary files.
+
+If this command doesn't launch, you could have a variety of issues, including:
+
+  - Licence server setup
+  - Running behind a VPN
+  - Missing dependencies
+
+
+Licencing Issues
+~~~~~~~~~~~~~~~~
+
+PADT generally has a great blog regarding ANSYS issues, and licencing is always a common issue (for example `Changes to Licencing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  Should you be responsible for maintaining Ansys licencing or have a personal install of Ansys, please check the online Ansys licencing documentation at `Installation and Licencing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
+
+For an in-depth explanation, please see the :download:`ANSYS Licencing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
+
+
+VPN Issues
+~~~~~~~~~~
+
+MAPDL has issues starting when some VPN software is running.  The
+issue stems from MPI communication and can be solved by simply passing
+the ``-smp`` option that sets the execution mode to "Shared Memory
+Parallel", rather than the default "Distributed Memory Parallel" mode.
+
+.. code::
+
+   >>> mapdl = launch_mapdl(additional_switches='-smp')
+
+While this approach has the disavantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
+
+
+Missing Dependencies on Linux
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some Linux installations may be missing required dependencies.  Should
+you get errors like ``libXp.so.6: cannot open shared object file: No
+such file or directory``, you may be missing some necessary
+dependencies.  On CentOS 7, you can install these with:
+
+.. code::
+
+    yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
+
+
+Since MAPDL isn't officially supported on Ubuntu, it's a bit more
+difficult to setup, but it's still possible.  On Ubuntu 20.04 with
+Ansys 2021R1, install the following:
+
+.. code::
+
+    sudo apt-get install libx11-6 libgl1 libxm4 libxt6 libxext6 libxi6 libx11-6 libsm6 libice6 libxxf86vm1 libglu1
+
+This takex care of everything except for ``libxp6``.  Should you be
+using Ubuntu 16.04, you can install that simply with ``sudo apt
+install libxp6``.  However, on Ubuntu 18.04+, you must manually
+download and install the package.
+
+Since ``libxpl6`` also pre-depends on ``multiarch-support``, which is
+also outdated, it must be removed, otherwise you'll have a broken
+package configuration.  The following step downloads and modifies the
+``libxp6`` package to remove the ``multiarch-support`` dependency, and
+then installs it via ``dpkg``.
+
+.. code::
+
+    cd /tmp
+    wget http://ftp.br.debian.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
+    ar x libxp6_1.0.2-2_amd64.deb
+    sudo tar xzf control.tar.gz
+    sudo sed '/Pre-Depends/d' control -i
+    sudo bash -c "tar c postinst postrm md5sums control | gzip -c > control.tar.gz"
+    ar rcs libxp6_1.0.2-2_amd64_mod.deb debian-binary control.tar.gz data.tar.xz
+    sudo dpkg -i ./libxp6_1.0.2-2_amd64_mod.deb
