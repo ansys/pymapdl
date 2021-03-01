@@ -24,15 +24,16 @@ install_requires = [
     'grpcio>=1.30.0',  # tested up to grpcio==1.35
     'ansys-grpc-mapdl==0.2.0',
     'ansys-mapdl-reader>=0.50.0',
-    'grpcio-health-checking>=1.30.0',
     'ansys-corba',  # pending depreciation to ansys-mapdl-corba
     'protobuf>=3.1.4',  # had an issue with gRPC health checking with this version
 ]
+# 'grpcio-health-checking>=1.30.0',
+
 
 # these are only used when launching a MAPDL via a console.  This
 # feature is subject to be removed or moved out of this module.
 if os.name == 'linux':
-    install_requires.extend(['psutil>=5.0.0', 'pexpect>=4.8.0'])
+    install_requires.extend(['pexpect>=4.8.0'])
 
 
 setup(

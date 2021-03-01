@@ -17,8 +17,9 @@ for rver in valid_rver:
         EXEC_FILE = get_ansys_bin(rver)
         break
 
+IGNORE_POOL = os.environ.get('IGNORE_POOL', '').upper() == 'TRUE'
 
-skip_launch_mapdl = pytest.mark.skipif(get_start_instance() is False,
+skip_launch_mapdl = pytest.mark.skipif(get_start_instance() is False or IGNORE_POOL,
                                        reason="Must be able to launch MAPDL locally")
 
 TWAIT = 90

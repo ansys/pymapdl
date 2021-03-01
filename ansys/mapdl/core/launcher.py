@@ -91,7 +91,7 @@ def port_in_use(port, host=LOCALHOST):
 def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                 run_location=None, port=MAPDL_DEFAULT_PORT,
                 additional_switches='', custom_bin=None,
-                override=True, timeout=10) -> int:
+                override=True, timeout=20, verbose=False) -> int:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -135,6 +135,11 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         Attempts to delete the lock file at the run_location.
         Useful when a prior MAPDL session has exited prematurely and
         the lock file has not been deleted.
+
+    verbose : bool, optional
+        Print all output when launching and running MAPDL.  Not
+        recommended unless debugging the MAPDL start.  Default
+        ``False``.
 
     Returns
     -------
@@ -277,13 +282,22 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     port_sw = '-port %d' % port
     grpc_sw = '-grpc'
 
+    # remove any temporary error files at the run location.  This is
+    # important because we need to know if MAPDL is already running
+    # here and because we're looking for any temporary files that are
+    # created to tell when the process has started
+    for filename in os.listdir(run_location):
+        if ".err" == filename[-4:] and jobname in filename:
+            try:
+                os.remove(filename)
+            except:
+                raise IOError('Unable to remove {filename}.  There might be '
+                              'an instance of MAPDL running at this location')
+
     # Windows will spawn a new window, only linux will let you use pexpect...
     if os.name == 'nt':
 
-        # # track PIDs since MAPDL isn't directly launched within the shell
-        # import psutil
-        # orig_pids = psutil.pids()
-
+        # track PIDs since MAPDL isn't directly launched within the shell
         tmp_inp = '.__tmp__.inp'
         with open(os.path.join(run_location, tmp_inp), 'w') as f:
             f.write('FINISH\r\n')
@@ -294,69 +308,39 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                    additional_switches, port_sw, grpc_sw]
         command = ' '.join(command)
 
-        subprocess.Popen(command, shell=False, cwd=run_location,
+    else:  # linux
+        # command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
+        #                     ram_sw, additional_switches, port_sw,
+        #                     grpc_sw])
+
+        command = ['%s' % exec_file, job_sw, cpu_sw,
+                   ram_sw, additional_switches, port_sw,
+                   grpc_sw]
+
+    if verbose:
+        subprocess.Popen(command,
+                         shell=False,
+                         cwd=run_location)
+    else:
+        subprocess.Popen(command,
+                         shell=False,
+                         cwd=run_location,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL)
 
-        # watch for the creation of temporary files at the run_directory
-        for _ in range(100):
-            # check if any error files have been created.  This is
-            # more reliable than using the lock file
+    # watch for the creation of temporary files at the run_directory.
+    # This lets us know that the MAPDL process has at least started
+    sleep_time = 0.1
+    for _ in range(int(timeout/sleep_time)):
+        # check if any error files have been created.  This is
+        # more reliable than using the lock file
 
-            files = os.listdir(run_location)
-            has_ans = any([filename for filename in files if ".err" in filename])
-            if has_ans:
-                break
-            time.sleep(0.1)
-
-    else:
-        # use pexpect on linux for better error reporting
-        import pexpect
-        from pexpect import popen_spawn
-
-        command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
-                            ram_sw, additional_switches, port_sw,
-                            grpc_sw])
-
-        process = popen_spawn.PopenSpawn(command,
-                                         timeout=timeout,
-                                         cwd=run_location)
-
-        try:
-            idx = process.expect(['Server listening',
-                                  'Another ANSYS job with the same job name',
-                                  'PRESS <CR> OR <ENTER> TO CONTINUE',
-                                  'Address already in use',
-                                  'ERROR'])
-
-            if idx == 1:
-                raise LockFileException()
-
-            if idx == 2:
-                process.sendline('')  # enter to continue
-                process.expect('Server listening', timeout=1)
-            elif idx == 3:
-                raise RuntimeError('Failed to start MAPDL gRPC at port %d.  ' % port
-                                   + 'Port appears to be already in use.  Please '
-                                   'specify a different port with the ``port`` '
-                                   'argument.')
-            elif idx > 3:  # catch all
-                msg = process.read().decode()
-                raise RuntimeError('Failed to start local MAPDL instance:\n"%s"'
-                                   % msg)
-        except pexpect.EOF:
-            breakpoint()
-            msg = process.read().decode()
-            if not msg:
-                raise RuntimeError('Unable to launch MAPDL from Python.  Attempt to '
-                                   'launch MAPDL from the command line '
-                                   f'with\n{command}')
-            else:
-                RuntimeError('Failed to start local MAPDL instance:\n"%s"' % msg)
-        except pexpect.TIMEOUT:
-            msg = process.before.decode()
-            raise TimeoutError('Failed to start local MAPDL instance:\n"%s"' % msg)
+        files = os.listdir(run_location)
+        has_ans = any([filename for filename in files if ".err" in filename])
+        if has_ans:
+            break
+        time.sleep(sleep_time)
 
     return port, run_location
 
@@ -581,7 +565,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                  start_timeout=120, port=None,
                  custom_bin=None, cleanup_on_exit=True,
                  start_instance=True, ip=LOCALHOST,
-                 clear_on_connect=True, log_apdl=False, **kwargs):
+                 clear_on_connect=True, log_apdl=False,
+                 verbose_mapdl=False, **kwargs):
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -679,6 +664,11 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
     remove_temp_files : bool, optional
         Removes temporary files on exit.  Default ``False``.
+
+    verbose_mapdl : bool, optional
+        Enable printing of all output when launching and running
+        MAPDL.  This should be used for debugging only as output can
+        be tracked within pymapdl.  Default ``False``.
 
     Examples
     --------

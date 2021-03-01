@@ -34,13 +34,13 @@ def get_ansys_bin(rver):
     return mapdlbin
 
 
-def kill_process(proc_pid):
-    """Kill a process with extreme prejudice"""
-    import psutil  # imported here to avoid import errors when unused in windows
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.kill()
-    process.kill()
+# def kill_process(proc_pid):
+#     """Kill a process with extreme prejudice"""
+#     import psutil  # imported here to avoid import errors when unused in windows
+#     process = psutil.Process(proc_pid)
+#     for proc in process.children(recursive=True):
+#         proc.kill()
+#     process.kill()
 
 
 class Report(scooby.Report):
@@ -71,15 +71,14 @@ class Report(scooby.Report):
             a report.
 
         """
-        # Mandatory packages.
-        core = ['pyvista', 'vtk', 'numpy', 'scipy', 'appdirs', 'pexpect',
+        # Mandatory packages
+        core = ['pyvista', 'vtk', 'numpy', 'scipy', 'appdirs',
                 'ansys.mapdl.core', 'ansys.mapdl.reader']
-
         if os.name == 'linux':
-            core.extend(['psutil', 'pexpect'])
+            core.extend(['pexpect'])
 
-        # Optional packages.
-        optional = ['matplotlib', 'ansys.mapdl.corba']
+        # Optional packages
+        optional = ['matplotlib', 'ansys_corba']
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.

@@ -6,8 +6,6 @@ import numpy as np
 
 from ansys.mapdl.core import __version__
 
-# BUILD_GALLERY = True
-BUILD_GALLERY = False
 
 # Manage errors
 pyvista.set_error_output_file('errors.txt')
@@ -63,12 +61,10 @@ extensions = [
     'sphinx.ext.autosummary',
     'notfound.extension',
     'sphinx_copybutton',
+    'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
 ]
-
-if BUILD_GALLERY:
-    extensions.append('sphinx_gallery.gen_gallery')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -101,32 +97,30 @@ todo_include_todos = False
 # -- Sphinx Gallery Options
 from sphinx_gallery.sorting import FileNameSortKey
 
-if BUILD_GALLERY:
-
-    sphinx_gallery_conf = {
-        # convert rst to md for ipynb
-        'pypandoc': True,
-        # path to your examples scripts
-        "examples_dirs": ["../../examples/"],
-        # path where to save gallery generated examples
-        "gallery_dirs": ["examples"],
-        # Patter to search for example files
-        "filename_pattern": r"\.py",
-        # Remove the "Download all examples" button from the top level gallery
-        "download_all_examples": False,
-        # Sort gallery example by file name instead of number of lines (default)
-        "within_subsection_order": FileNameSortKey,
-        # directory where function granular galleries are stored
-        "backreferences_dir": None,
-        # Modules for which function level galleries are created.  In
-        "doc_module": "ansys-mapdl-core",
-        "image_scrapers": ('pyvista', 'matplotlib'),
-        'ignore_pattern': 'flycheck*',
-        "thumbnail_size": (350, 350),
-        # 'first_notebook_cell': ("%matplotlib inline\n"
-        #                         "from pyvista import set_plot_theme\n"
-        #                         "set_plot_theme('document')"),
-    }
+sphinx_gallery_conf = {
+    # convert rst to md for ipynb
+    'pypandoc': True,
+    # path to your examples scripts
+    "examples_dirs": ["../../examples/"],
+    # path where to save gallery generated examples
+    "gallery_dirs": ["examples"],
+    # Patter to search for example files
+    "filename_pattern": r"\.py",
+    # Remove the "Download all examples" button from the top level gallery
+    "download_all_examples": False,
+    # Sort gallery example by file name instead of number of lines (default)
+    "within_subsection_order": FileNameSortKey,
+    # directory where function granular galleries are stored
+    "backreferences_dir": None,
+    # Modules for which function level galleries are created.  In
+    "doc_module": "ansys-mapdl-core",
+    "image_scrapers": ('pyvista', 'matplotlib'),
+    'ignore_pattern': 'flycheck*',
+    "thumbnail_size": (350, 350),
+    # 'first_notebook_cell': ("%matplotlib inline\n"
+    #                         "from pyvista import set_plot_theme\n"
+    #                         "set_plot_theme('document')"),
+}
 
 
 # -- Options for HTML output -------------------------------------------------

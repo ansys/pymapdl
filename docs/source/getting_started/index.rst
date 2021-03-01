@@ -14,9 +14,8 @@ getting a licensed copy of Ansys.
    :maxdepth: 2
 
    versioning
-   running_mapdl
    docker
-   
+
 
 ************
 Installation
@@ -101,9 +100,6 @@ on Windows and 13.0 on Linux.
     The latest versions of ANSYS provide signifiantly better support
     and features.  Certain features will not be supported by earlier
     versions of ANSYS (e.g. APDL Math).
-
-For additional details for installing and using MAPDL, see
-:ref:`using_standard_install`.
 
 
 Verify Your Installation
