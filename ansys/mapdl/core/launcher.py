@@ -61,7 +61,6 @@ def close_all_local_instances(port_range=None):
             close_mapdl(port)
 
 
-# TODO: Will remove this as this should no longer be used
 def check_ports(port_range, ip='localhost'):
     """Check the state of ports in a port range"""
     ports = {}
@@ -309,10 +308,6 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         command = ' '.join(command)
 
     else:  # linux
-        # command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
-        #                     ram_sw, additional_switches, port_sw,
-        #                     grpc_sw])
-
         command = ['%s' % exec_file, job_sw, cpu_sw,
                    ram_sw, additional_switches, port_sw,
                    grpc_sw]
@@ -859,20 +854,24 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
-        mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+        mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl,
+                             **start_parm)
     elif mode == 'corba':
         try:
             # pending deprication to ansys-mapdl-corba
             from ansys.mapdl.core.mapdl_corba import MapdlCorba
         except ImportError:
-            raise ImportError('To use this feature, install ansys.mapdl.corba with\n\n'
+            raise ImportError('To use this feature, install the MAPDL CORBA package'
+                              ' with:\n\n'
                               '    pip install ansys_corba')
 
         broadcast = kwargs.get('log_broadcast', False)
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
-                           log_broadcast=broadcast, **start_parm)
+                           log_broadcast=broadcast, verbose=verbose_mapdl,
+                           **start_parm)
     elif mode == 'grpc':
-        port, actual_run_location = launch_grpc(port=port, **start_parm)
+        port, actual_run_location = launch_grpc(port=port, verbose=verbose_mapdl,
+                                                **start_parm)
         mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
                           cleanup_on_exit=cleanup_on_exit,
                           loglevel=loglevel, set_no_abort=set_no_abort,
