@@ -43,7 +43,6 @@ some approaches to debug the start:
 
 Manually Set the Executable Location
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 If you have a non-standard install, ``pymapdl`` may be unable find
 your installation.  If that's the case, provide the location of MAPDL
 as the first parameter to ``launch_mapdl``.  For example, on Windows,
@@ -60,6 +59,12 @@ For Linux:
 
     >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
     >>> mapdl = launch_mapdl(exec_loc)
+
+Should this fail to launch or hang while launching, pass
+``verbose_mapdl=True`` when using ``launch_mapdl``.  This will print
+the output of MAPDL within Python and can be used to debug why MAPDL
+isn't launching.  Output will be limited on Windows due to the way
+MAPDL launches on Windows.
 
 
 Debug Launch Issues
@@ -79,8 +84,8 @@ For Linux:
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
-You probably should startup MAPDL in a temporary working directory as
-MAPDL creates a several temporary files.
+Note that you should probably startup MAPDL in a temporary working
+directory as MAPDL creates a several temporary files.
 
 If this command doesn't launch, you could have a variety of issues, including:
 
@@ -90,7 +95,7 @@ If this command doesn't launch, you could have a variety of issues, including:
 
 
 Licencing Issues
-~~~~~~~~~~~~~~~~
+----------------
 
 PADT generally has a great blog regarding ANSYS issues, and licencing is always a common issue (for example `Changes to Licencing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  Should you be responsible for maintaining Ansys licencing or have a personal install of Ansys, please check the online Ansys licencing documentation at `Installation and Licencing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
 
@@ -98,8 +103,7 @@ For an in-depth explanation, please see the :download:`ANSYS Licencing Guide <AN
 
 
 VPN Issues
-~~~~~~~~~~
-
+----------
 MAPDL has issues starting when some VPN software is running.  The
 issue stems from MPI communication and can be solved by simply passing
 the ``-smp`` option that sets the execution mode to "Shared Memory
@@ -113,18 +117,23 @@ While this approach has the disavantage of using the potentially slower shared m
 
 
 Missing Dependencies on Linux
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+-----------------------------
 Some Linux installations may be missing required dependencies.  Should
 you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you may be missing some necessary
-dependencies.  On CentOS 7, you can install these with:
+dependencies.
+
+CentOS
+~~~~~~
+On CentOS 7, you can install these with:
 
 .. code::
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
+Ubuntu
+~~~~~~
 Since MAPDL isn't officially supported on Ubuntu, it's a bit more
 difficult to setup, but it's still possible.  On Ubuntu 20.04 with
 Ansys 2021R1, install the following:
