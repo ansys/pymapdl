@@ -2,10 +2,11 @@
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
+import os
 import time
 import re
 
-from ansys.mapdl.core.misc import kill_process
+# from ansys.mapdl.core.misc import kill_process
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError
 
@@ -200,5 +201,8 @@ class MapdlConsole(_MapdlCore):
             try:
                 self.exit()
             except:
-                kill_process(self._process.pid)
-                self._log.debug('Killed process %d' % self._process.pid)
+                try:
+                    os.kill(self._process.pid, 9)
+                except:
+                    self._log.warning('Unable to kill process %d', self._process.pid)
+                self._log.debug('Killed process %d', self._process.pid)

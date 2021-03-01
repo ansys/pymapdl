@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest
 import pyvista
@@ -50,6 +51,17 @@ alexander.kaszynski@ansys.com
 
 if START_INSTANCE and EXEC_FILE is None:
     raise RuntimeError(ERRMSG)
+
+
+def check_pid(pid):
+    """ Check For the existence of a pid."""
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -188,6 +200,11 @@ def mapdl(request, tmpdir_factory):
             mapdl._send_command('/PREP7')
         with pytest.raises(MapdlExitedError):
             mapdl._send_command_stream('/PREP7')
+
+        # verify PIDs are closed
+        time.sleep(1)  # takes a second for the processes to shutdown
+        for pid in mapdl._pids:
+            assert not check_pid(pid)
 
 
 @pytest.fixture(scope='function')
