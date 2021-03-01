@@ -46,8 +46,17 @@ MAPDL with:
 LICENSE_SERVER=1055@XXX.XXX.XXX.XXX
 VERSION=v21.1.0
 
-IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl:$VERSION
-docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
+IMAGE=docker.pkg.github.com/pyansys/pymapdl/mapdl:$VERSION
+docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE
+```
+
+Note that if you use elastic licencing, input your elastic licencing
+credentials with:
+```
+ANSYS_ELASTIC_CLS=<CLSID>:<PIN>
+VERSION=v21.1.0
+IMAGE=docker.pkg.github.com/pyansys/pymapdl/mapdl:$VERSION
+docker run -e ANSYS_ELASTIC_CLS=$ANSYS_ELASTIC_CLS -p 50052:50052 $IMAGE
 ```
 
 Note that port `50052` (local to the container) is being mapped to
@@ -91,7 +100,7 @@ ANSYS Mechanical Enterprise
 
  Analysis type. . . . . . . . . . . . .Modal
 
- pyansys version: 0.53.0
+ pyansys version: 0.58.0
 ```
 
 Should you need to connect to the instance externally, simply set the
