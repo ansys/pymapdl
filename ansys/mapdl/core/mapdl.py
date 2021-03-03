@@ -763,10 +763,10 @@ class _MapdlCore(_MapdlCommands):
                 meshes.append({'mesh': surf})
 
             if show_area_numbering:
-                anums = np.unique(surf['area_num'])
+                anums = np.unique(surf['entity_num'])
                 centers = []
                 for anum in anums:
-                    area = surf.extract_cells(surf['area_num'] == anum)
+                    area = surf.extract_cells(surf['entity_num'] == anum)
                     centers.append(area.center)
 
                 labels.append({'points': np.array(centers), 'labels': anums})
@@ -1937,7 +1937,9 @@ class _MapdlCore(_MapdlCommands):
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
+        self._log.debug('Collecting...')
         if self._cleanup:
+            self._log.debug('self._cleanup == True')
             try:
                 self.exit()
             except Exception as e:
