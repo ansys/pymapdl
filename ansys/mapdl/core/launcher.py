@@ -327,16 +327,14 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     if verbose:
         subprocess.Popen(command,
                          shell=False,
-                         cwd=run_location,
-                         env=os.environ.copy())
+                         cwd=run_location)
     else:
         subprocess.Popen(command,
                          shell=False,
                          cwd=run_location,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL,
-                         env=os.environ.copy())
+                         stderr=subprocess.DEVNULL)
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
