@@ -89,23 +89,23 @@ directory as MAPDL creates a several temporary files.
 
 If this command doesn't launch, you could have a variety of issues, including:
 
-  - Licence server setup
+  - License server setup
   - Running behind a VPN
   - Missing dependencies
 
 
-Licencing Issues
+Licensing Issues
 ----------------
 
-PADT generally has a great blog regarding ANSYS issues, and licencing is always a common issue (for example `Changes to Licencing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  Should you be responsible for maintaining Ansys licencing or have a personal install of Ansys, please check the online Ansys licencing documentation at `Installation and Licencing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
+PADT generally has a great blog regarding ANSYS issues, and licensing is always a common issue (for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys, please check the online Ansys licensing documentation at `Installation and Licensing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
 
-For an in-depth explanation, please see the :download:`ANSYS Licencing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
+For an in-depth explanation, please see the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
 
 
 VPN Issues
 ----------
-MAPDL has issues starting when some VPN software is running.  The
-issue stems from MPI communication and can be solved by simply passing
+Sometimes, MAPDL has issues starting when VPN software is running.  One
+issue stems from MPI communication and can be solved by passing
 the ``-smp`` option that sets the execution mode to "Shared Memory
 Parallel", rather than the default "Distributed Memory Parallel" mode.
 
@@ -113,7 +113,7 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
 
    >>> mapdl = launch_mapdl(additional_switches='-smp')
 
-While this approach has the disavantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
+While this approach has the disadvantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
 
 
 Missing Dependencies on Linux
@@ -142,7 +142,7 @@ Ansys 2021R1, install the following:
 
     sudo apt-get install libx11-6 libgl1 libxm4 libxt6 libxext6 libxi6 libx11-6 libsm6 libice6 libxxf86vm1 libglu1
 
-This takex care of everything except for ``libxp6``.  Should you be
+This takes care of everything except for ``libxp6``.  Should you be
 using Ubuntu 16.04, you can install that simply with ``sudo apt
 install libxp6``.  However, on Ubuntu 18.04+, you must manually
 download and install the package.
