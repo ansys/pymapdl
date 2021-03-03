@@ -313,21 +313,30 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         #                     ram_sw, additional_switches, port_sw,
         #                     grpc_sw])
 
-        command = ['%s' % exec_file, job_sw, cpu_sw,
-                   ram_sw, additional_switches, port_sw,
-                   grpc_sw]
+        command = []
+        if 'ubuntu' in platform.platform().lower():
+            if '-smp' not in additional_switches:
+                # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+                command.extend(['env', 'I_MPI_SHM_LMT=shm'])
 
+        command.extend(['%s' % exec_file, job_sw, cpu_sw,
+                        ram_sw, additional_switches, port_sw,
+                        grpc_sw])
+
+    # breakpoint()
     if verbose:
         subprocess.Popen(command,
                          shell=False,
-                         cwd=run_location)
+                         cwd=run_location,
+                         env=os.environ.copy())
     else:
         subprocess.Popen(command,
                          shell=False,
                          cwd=run_location,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
+                         stderr=subprocess.DEVNULL,
+                         env=os.environ.copy())
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -872,7 +881,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
                            log_broadcast=broadcast, **start_parm)
     elif mode == 'grpc':
-        port, actual_run_location = launch_grpc(port=port, **start_parm)
+        port, actual_run_location = launch_grpc(port=port, verbose=verbose_mapdl,
+                                                **start_parm)
         mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
                           cleanup_on_exit=cleanup_on_exit,
                           loglevel=loglevel, set_no_abort=set_no_abort,
