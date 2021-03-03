@@ -132,7 +132,7 @@ sphinx_gallery_conf = {
 html_theme = 'pydata_sphinx_theme'
 html_logo = '_static/pyansys-logo-black-cropped.png'
 html_theme_options = {
-    "github_url": "https://github.com/pyansys/pymapdl-reader",
+    "github_url": "https://github.com/pyansys/pymapdl",
     # "show_toc_level": 1,
     # "show_prev_next": False
 }
@@ -173,7 +173,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pyansys.tex', 'ansys.mapdl Documentation',
+    (master_doc, 'pyansys.tex', 'ansys.mapdl.core Documentation',
      author, 'manual'),
 ]
 
@@ -183,7 +183,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ansys.mapdl', 'ansys.mapdl Documentation',
+    (master_doc, 'ansys.mapdl.core', 'ansys.mapdl.core Documentation',
      [author], 1)
 ]
 
@@ -194,8 +194,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ansys.mapdl', 'ansys.mapdl Documentation',
-     author, 'ansys.mapdl', 'Pythonic interface to MAPDL using gRPC',
+    (master_doc, 'ansys.mapdl.core', 'ansys.mapdl.core Documentation',
+     author, 'ansys.mapdl.core', 'Pythonic interface to MAPDL using gRPC',
      'Engineering Software'),
 ]
 
