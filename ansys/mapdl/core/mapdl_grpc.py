@@ -142,8 +142,8 @@ class MapdlGrpc(_MapdlCore):
         error messages.
 
     cleanup_on_exit : bool, optional
-        Exit MAPDL when python exits or the mapdl Python instance is
-        garbage collected.
+        Exit MAPDL when Python exits or when this instance is garbage
+        collected.
 
     set_no_abort : bool, optional
         Sets MAPDL to not abort at the first error within /BATCH mode.
