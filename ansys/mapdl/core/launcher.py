@@ -309,25 +309,22 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         command = ' '.join(command)
 
     else:  # linux
-        # command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
-        #                     ram_sw, additional_switches, port_sw,
-        #                     grpc_sw])
-
-        command = ['%s' % exec_file, job_sw, cpu_sw,
-                   ram_sw, additional_switches, port_sw,
-                   grpc_sw]
+        command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
+                            ram_sw, additional_switches, port_sw,
+                            grpc_sw])
 
     if verbose:
         subprocess.Popen(command,
-                         shell=False,
+                         shell=os.name != 'nt',
                          cwd=run_location)
     else:
         subprocess.Popen(command,
-                         shell=False,
+                         shell=os.name != 'nt',
                          cwd=run_location,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL)
+
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -872,7 +869,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
                            log_broadcast=broadcast, **start_parm)
     elif mode == 'grpc':
-        port, actual_run_location = launch_grpc(port=port, **start_parm)
+        port, actual_run_location = launch_grpc(port=port, verbose=verbose_mapdl,
+                                                **start_parm)
         mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
                           cleanup_on_exit=cleanup_on_exit,
                           loglevel=loglevel, set_no_abort=set_no_abort,
