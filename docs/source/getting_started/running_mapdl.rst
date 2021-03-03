@@ -25,7 +25,8 @@ figure.
 Launching MAPDL
 ---------------
 There are two ways to launch MAPDL to use it with pymapdl.  First, you
-can use the ``launch_mapdl`` function to have Python startup MAPDL and automatically connect to it:
+can use the ``launch_mapdl`` function to have Python startup MAPDL and
+automatically connect to it:
 
 .. code:: python
 
@@ -37,6 +38,64 @@ can use the ``launch_mapdl`` function to have Python startup MAPDL and automatic
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
     PyMAPDL Version:     Version: 0.57.0
 
+The second approach is to start MAPDL from the command line and then
+connect to it.  First, launch MAPDL with:
+
+.. code::
+
+    C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
+
+Or on Linux with (assuming a ``/usr/ansys_inc`` install:
+
+    /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
+
+This starts up MAPDL in gRPC mode, and MAPDL should output:
+
+.. code::
+
+     Start GRPC Server
+
+     ##############################
+     ### START GRPC SERVER      ###
+     ##############################
+
+     Server Executable   : MapdlGrpc Server
+     Server listening on : 0.0.0.0:50052
+
+You can configure the IP address and the port MAPDL starts on with the
+and ``-port``.  For example, you can startup the server to listen for
+connections at port 50005 with:
+
+.. code::
+
+    /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
+
+This server can be connected to either from the same host, or from an
+external host.  For example, you can connect to a MAPDL service
+running locally with:
+
+.. code::
+
+    >>> from ansys.mapdl.core import Mapdl
+    >>> mapdl = Mapdl()
+
+This assumes that your MAPDL service is running locally on the default
+port of 50052.  If you want to connect to a remote instance of MAPDL
+and you know the IP address of that instance, you can connect to it.
+For example, if on your local network at IP ``192.168.0.1`` there is a
+computer running MAPDL, you can connect to it with
+
+.. code::
+
+    >>> mapdl = Mapdl('192.168.0.1', port=50052)
+
+Please note that you must have started MAPDL for both of these code
+blocks to work.  If you have MAPDL installed on your local host, you
+can use ``launch_mapdl`` to both start and connect to MAPDL.
+
+
+Debugging Launching MAPDL
+-------------------------
 For any number of reasons, Python may fail to launch MAPDL.  Here's
 some approaches to debug the start:
 
