@@ -1291,6 +1291,9 @@ class MapdlGrpc(_MapdlCore):
     @property
     def _distributed_result_file(self):
         """Path of the distributed result file """
+        if not self._distributed:
+            return
+
         try:
             filename = self.inquire('RSTFILE')
             if not filename:
