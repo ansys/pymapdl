@@ -31,6 +31,36 @@ LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
 
 
+def _version_from_path(path):
+    """Extract ansys version from a path.  Generally, the version of
+    ANSYS is contained in the path:
+
+    C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe
+
+    /usr/ansys_inc/v211/ansys/bin/mapdl
+
+    Note that if the MAPDL executable, you have to rely on the version
+    in the path.
+
+    Parameters
+    ----------
+    path : str
+        Path to the MAPDL executable
+
+    Returns
+    -------
+    int
+        Integer version number (e.g. 211).
+
+    """
+    # expect v<ver>/ansys
+    # replace \\ with / to account for possible windows path
+    matches = re.findall(r'v(\d\d\d).ansys', path.replace('\\', '/'))
+    if not matches:
+        raise RuntimeError(f'Unable to extract Ansys version from {path}')
+    return int(matches[-1])
+
+
 def close_all_local_instances(port_range=None):
     """Close all MAPDL instances within a port_range.
 
@@ -252,8 +282,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    version = int(re.findall(r'\d\d\d', exec_file)[0])/10
-    if version < 20.2:
+    if _version_from_path(exec_file) < 202:
         raise VersionError('The MAPDL gRPC interface requires MAPDL 20.2 or later')
 
     # verify lock file does not exist
@@ -464,9 +493,8 @@ def check_valid_ansys():
     """ Checks if a valid version of ANSYS is installed and preconfigured """
     ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
-        version = int(re.findall(r'\d\d\d', ansys_bin)[0])
+        version = _version_from_path(ansys_bin)
         return not(version < 170 and os.name != 'posix')
-
     return False
 
 
@@ -821,11 +849,9 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
 
+    # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
-
-    # NOTE: version may or may not be within the full exec_path
-    version = int(re.findall(r'\d\d\d', exec_file)[0])
-    mode = check_mode(mode, version)
+    mode = check_mode(mode, _version_from_path(exec_file))
 
     # known issue with distributed memory parallel
     if 'ubuntu' in platform.platform().lower():
