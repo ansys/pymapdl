@@ -11,7 +11,7 @@ import time
 import subprocess
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir
+from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
