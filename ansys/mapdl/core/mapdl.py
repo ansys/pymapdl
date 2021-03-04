@@ -130,7 +130,6 @@ class _MapdlCore(_MapdlCommands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
-        breakpoint()
 
     @property
     def _distributed(self):
