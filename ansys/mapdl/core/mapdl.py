@@ -130,7 +130,12 @@ class _MapdlCore(_MapdlCommands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
-        self._distributed = '-smp' not in start_parm.get('additional_switches', '')
+        breakpoint()
+
+    @property
+    def _distributed(self):
+        """Is a distributed analysis"""
+        return '-smp' not in self._start_parm.get('additional_switches', '')
 
     @property
     def post_processing(self):

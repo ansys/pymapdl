@@ -174,7 +174,7 @@ class MapdlGrpc(_MapdlCore):
                  cleanup_on_exit=False, log_apdl=False, set_no_abort=True,
                  remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
-        super().__init__(loglevel)
+        super().__init__(loglevel, start_parm=**kwargs)
 
         check_valid_ip(ip)
 
@@ -189,7 +189,6 @@ class MapdlGrpc(_MapdlCore):
         self._remove_tmp = remove_temp_files
         self._jobname = kwargs.pop('jobname', 'file')
         self._path = kwargs.pop('run_location', None)
-        self._start_parm = kwargs
         self._busy = False  # used to check if running a command on the server
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
@@ -1311,6 +1310,7 @@ class MapdlGrpc(_MapdlCore):
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
+                breakpoint()
                 raise FileNotFoundError('Thermal Result not available')
             return rth_file
 
