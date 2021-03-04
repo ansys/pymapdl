@@ -424,29 +424,6 @@ def test_eplot_screenshot(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
-def test_cyclic_solve(mapdl, cleared):
-    # build the cyclic model
-    mapdl.prep7()
-    mapdl.shpp('off')
-    mapdl.cdread('db', examples.sector_archive_file)
-    mapdl.prep7()
-    mapdl.cyclic()
-
-    # set material properties
-    mapdl.mp('NUXY', 1, 0.31)
-    mapdl.mp('DENS', 1, 4.1408E-04)
-    mapdl.mp('EX', 1, 16900000)
-    mapdl.emodif('ALL', 'MAT', 1)
-
-    # setup and solve
-    mapdl.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
-    mapdl.finish()
-
-    # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
-    if mapdl._local:
-        assert mapdl.result.nsets == 16
-
-
 def test_partial_mesh_nnum(mapdl, make_block):
     allsel_nnum_old = mapdl.mesh.nnum
     mapdl.nsel('S', 'NODE', vmin=100, vmax=200)
@@ -483,7 +460,8 @@ def test_cyclic_solve(mapdl, cleared):
     mapdl.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
-    assert mapdl.result.nsets == 16  # multiple result files...
+    mapdl.post1()
+    assert mapdl.post_processing.nsets == 16
 
 
 def test_load_table(mapdl):

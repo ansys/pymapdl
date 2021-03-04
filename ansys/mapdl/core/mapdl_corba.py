@@ -47,7 +47,7 @@ def tail(filename, nlines):
 
 
 def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
-                 additional_switches='', start_timeout=60):
+                 verbose=False, additional_switches='', start_timeout=60):
     """Start MAPDL in AAS mode
 
     Notes
@@ -81,11 +81,15 @@ def launch_corba(exec_file=None, run_location=None, jobname=None, nproc=None,
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    subprocess.Popen(command, shell=True,
-                     cwd=run_location,
-                     stdin=subprocess.DEVNULL,
-                     stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL)
+    if verbose:
+        subprocess.Popen(command, shell=True,
+                         cwd=run_location)
+    else:
+        subprocess.Popen(command, shell=True,
+                         cwd=run_location,
+                         stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
 
     # listen for broadcast file
     telapsed = 0
@@ -133,10 +137,13 @@ class MapdlCorba(_MapdlCore):
         exec_file, run_location, jobname='file', nproc=2,
         additional_switches='', timeout
 
+    verbose : bool
+        Print all output from MAPDL to Python.  Useful for debugging
+
     """
 
     def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
-                 log_broadcast=False, **start_parm):
+                 log_broadcast=False, verbose=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
                          log_broadcast=False, **start_parm)
@@ -144,15 +151,15 @@ class MapdlCorba(_MapdlCore):
         self._server = None
         self._outfile = None
         self._log_broadcast = log_broadcast
-        self._launch(start_parm)
+        self._launch(start_parm, verbose)
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
                          **start_parm)
 
         # critical for collection
         INSTANCES.append(weakref.ref(self))
 
-    def _launch(self, start_parm):
-        corba_key = launch_corba(**start_parm)
+    def _launch(self, start_parm, verbose):
+        corba_key = launch_corba(verbose=verbose, **start_parm)
 
         orb = CORBA.ORB_init()
         self._server = orb.string_to_object(corba_key)
