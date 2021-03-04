@@ -24,7 +24,6 @@ if not os.path.isdir(SETTINGS_DIR):
         warnings.warn('Unable to create settings directory.\n' +
                       'Will be unable to cache ANSYS executable location')
 
-
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
 ALLOWABLE_MODES = ['corba', 'console', 'grpc']
 
