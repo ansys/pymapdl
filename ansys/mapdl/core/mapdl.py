@@ -1941,9 +1941,7 @@ class _MapdlCore(_MapdlCommands):
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
-        self._log.debug('Collecting...')
         if self._cleanup:
-            self._log.debug('self._cleanup == True')
             try:
                 self.exit()
             except Exception as e:
