@@ -219,10 +219,12 @@ class MeshGrpc(Mesh):
         self._update_cache_element_desc().join()
 
         # convert to ekey format
-        ekey = []
-        for einfo in self._cache_element_desc:
-            ekey.append(einfo[:2])
-        return np.vstack(ekey).astype(np.int32)
+        if self._cache_element_desc:
+            ekey = []
+            for einfo in self._cache_element_desc:
+                ekey.append(einfo[:2])
+            return np.vstack(ekey).astype(np.int32)
+        return []
 
     @_ekey.setter
     def _ekey(self, value):

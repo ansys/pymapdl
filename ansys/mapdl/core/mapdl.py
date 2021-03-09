@@ -614,6 +614,7 @@ class _MapdlCore(_MapdlCommands):
         if isinstance(knum, bool):
             knum = int(knum)
 
+        self._enable_interactive_plotting()
         return super().nplot(knum)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
@@ -676,6 +677,7 @@ class _MapdlCore(_MapdlCommands):
                        show_lines=show_lines, **kwargs)
             self.cmsel('S', cm_name, 'AREA')
         else:
+            self._enable_interactive_plotting()
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
 
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
@@ -795,6 +797,7 @@ class _MapdlCore(_MapdlCommands):
                                    labels, **kwargs)
 
         else:
+            self._enable_interactive_plotting()
             return super().aplot(na1=na1, na2=na2, ninc=ninc)
 
     @supress_logging
@@ -931,6 +934,7 @@ class _MapdlCore(_MapdlCommands):
                                    **kwargs)
 
         # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
         return super().eplot()
 
     def lplot(self, nl1="", nl2="", ninc="", vtk=None,
@@ -1000,6 +1004,7 @@ class _MapdlCore(_MapdlCommands):
                                    labels,
                                    **kwargs)
         else:
+            self._enable_interactive_plotting()
             return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc)
 
     def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
@@ -1054,6 +1059,7 @@ class _MapdlCore(_MapdlCommands):
                                    labels, **kwargs)
 
         # otherwise, use the legacy plotter
+        self._enable_interactive_plotting()
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
 
     @property

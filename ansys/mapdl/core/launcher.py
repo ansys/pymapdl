@@ -374,8 +374,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                          cwd=run_location,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL,
-                         env={'I_MPI_SHM_LMT': 'shm'})
+                         stderr=subprocess.DEVNULL)
 
 
     # watch for the creation of temporary files at the run_directory.

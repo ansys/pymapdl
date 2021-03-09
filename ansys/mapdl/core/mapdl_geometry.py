@@ -8,9 +8,55 @@ from vtk import vtkAppendPolyData
 
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7
 
+def get_elements_per_area(resp):
+    """Get the number of elements meshed for each area given the response
+    from ``AMESH``.
+
+    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS    
+        ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     4 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     5 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     6 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     7 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     8 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     9 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    10 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    11 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    12 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+
+     NUMBER OF AREAS MESHED     =         12
+     MAXIMUM NODE NUMBER        =        772
+     MAXIMUM ELEMENT NUMBER     =        768
+
+    Returns
+    -------
+    list
+        List of tuples, each containing the area number and number of
+        elements per area.
+
+    """
+    # MAPDL changed their output at some point.  Check for both output types.
+    reg = re.compile(r'Meshing of area (\d*) completed \*\* (\d*) elements')
+    groups = reg.findall(resp)
+    if groups:
+        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
+    else:
+        reg = re.compile(r'AREA\s*(\d*).*?(\d*)\s*QUADRILATERALS,\s*(\d*) TRIANGLES')
+        groups = reg.findall(resp)
+        groups = [(int(anum), int(nquad) + int(ntri)) for anum, nquad, ntri in groups]
+
+    return groups
+
 
 class Geometry():
-    """Pythonic representation of MAPDL CAD geometry"""
+    """Pythonic representation of MAPDL CAD geometry
+
+    Contains advanced methods to extend geometry building and
+    selection within MAPDL.
+
+    """
 
     def __init__(self, mapdl):
         from ansys.mapdl.core.mapdl import _MapdlCore
@@ -84,7 +130,7 @@ class Geometry():
     @supress_logging
     @run_as_prep7
     def generate_surface(self, density=5, amin=None, amax=None, ninc=None):
-        """Generate an-triangular surface of the active surfaces.
+        """Generate an all-triangular surface of the active surfaces.
 
         Parameters
         ----------
@@ -104,8 +150,10 @@ class Geometry():
             Steps to between amin and amax.
         """
         # store initially selected areas and elements
-        self._mapdl.cm('__tmp_area__', 'AREA')
-        self._mapdl.cm('__tmp_elem__', 'ELEM')
+        with self._mapdl.chain_commands:
+            self._mapdl.cm('__tmp_elem__', 'ELEM')
+            self._mapdl.cm('__tmp_area__', 'AREA')
+        orig_anum = self.anum
 
         # reselect from existing selection to mimic APDL behavior
         if amin or amax:
@@ -138,28 +186,24 @@ class Geometry():
         etype_old = self._mapdl.parameters.type
         etype_tmp = etype_max + 1
 
+        old_routine = self._mapdl.parameters.routine
+
         with self._mapdl.chain_commands:
-            self._mapdl.et(etype_tmp, 'MESH200', 4)
+            self._mapdl.et(etype_tmp, 'MESH200', 6)
             self._mapdl.shpp('off')
             self._mapdl.smrtsize(density)
             self._mapdl.type(etype_tmp)
 
-        if self._mapdl.parameters.routine != 'PREP7':
-            self._mapdl.prep7()
+            if old_routine != 'PREP7':
+                self._mapdl.prep7()
 
+        # Mesh and get the number of elements per area
         resp = self._mapdl.amesh('all')
+        groups = get_elements_per_area(resp)
 
-        # must know the number of elements in each area
-        reg = re.compile(r'Meshing of area (\d*) completed \*\* (\d*) elements')
-        groups = reg.findall(resp)
-        if not groups:
-            reg = re.compile(r'AREA\s*(\d*).*?,\s*(\d*) TRIANGLES')
-            groups = reg.findall(resp)
-        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
         self._mapdl.esla('S')
-
         grid = self._mapdl.mesh._grid.linear_copy()
-        pd = pv.PolyData(grid.points, grid.cells)
+        pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
 
         pd['ansys_node_num'] = grid['ansys_node_num']
         pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
@@ -177,12 +221,19 @@ class Geometry():
             self._mapdl.cmsel('S', '__tmp_area__', 'AREA')
             self._mapdl.cmsel('S', '__tmp_elem__', 'ELEM')
 
+        # ensure the number of groups matches the number of areas
+        if len(groups) != len(orig_anum):
+            groups = None
+
+        # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
         if grid and groups:
             # add anum info
             i = 0
-            for anum, nelem in groups:
-                entity_num[i:i+nelem] = anum
+            for index, (anum, nelem) in enumerate(groups):
+                # have to use original area numbering here as the
+                # duplicated areas numbers are inaccurate
+                entity_num[i:i+nelem] = orig_anum[index]
                 i += nelem
         else:
             entity_num[:] = 0
