@@ -144,3 +144,84 @@ k1 = mapdl.k("", 0, 0, 1)
 carcs = mapdl.circle(k0, 1, k1, arc=90)
 lnum = mapdl.lextnd(carcs[0], 3, 1)
 mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
+
+
+###############################################################################
+# APDL Command: LFILLT
+# ~~~~~~~~~~~~~~~~~~~~
+# Create two intersecting lines at a right angle and add a
+# fillet between them.
+mapdl.clear(); mapdl.prep7()
+
+k0 = mapdl.k("", 0, 0, 0)
+k1 = mapdl.k("", 0, 1, 0)
+k2 = mapdl.k("", 1, 0, 0)
+l0 = mapdl.l(k0, k1)
+l1 = mapdl.l(k0, k2)
+lnum = mapdl.lfillt(l0, l1, 0.25)
+mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
+
+
+###############################################################################
+# APDL Command: LTAN
+# ~~~~~~~~~~~~~~~~~~
+# Create a circular arc and generate a tangent spline at the end of it
+# directed to a new keypoint.
+mapdl.clear(); mapdl.prep7()
+
+k0 = mapdl.k("", 0, 0, 0)
+k1 = mapdl.k("", 0, 0, 1)
+k2 = mapdl.k("", -1, 1.5, 0)
+carc = mapdl.circle(k0, 1, k1, arc=90)
+lnum = mapdl.ltan(carc[0], k2)
+mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
+
+
+###############################################################################
+# APDL Command: LTAN
+# ~~~~~~~~~~~~~~~~~~
+# Create a spline with 5 keypoints.
+mapdl.clear(); mapdl.prep7()
+
+k0 = mapdl.k('', 0, 0, 0)
+k1 = mapdl.k('', 0.2, 0.2, 0)
+k2 = mapdl.k('', 0.4, 0.3, 0)
+k3 = mapdl.k('', 0.6, 0.5, 0)
+k4 = mapdl.k('', 0.8, 0.3, 0)
+mapdl.spline(k0, k1, k2, k3, k4)
+mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
+
+
+###############################################################################
+# Line IDs
+# ~~~~~~~~
+# Return an array of the Line IDs
+lnum = mapdl.geometry.lnum
+lnum
+
+
+###############################################################################
+# Lines Geometry
+# ~~~~~~~~~~~~~~~~~~~
+# Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
+# saved or plotted.  For more details, visit https://docs.pyvista.com
+lines = mapdl.geometry.lines
+lines
+
+
+###############################################################################
+# APDL Command: KPLOT
+# ~~~~~~~~~~~~~~~~~~~
+# Plot colored lines while displaying the keypoint numbers.
+#
+# There are a variety of plotting options available for all the common
+# plotting methods.
+# 
+mapdl.lplot(show_keypoint_numbering=True,
+            color_lines=True,
+            show_line_numbering=False,
+            background='black',
+            show_bounds=True,
+            line_width=5,
+            cpos='xy',
+            font_size=26)
