@@ -1,8 +1,8 @@
 """
 .. _ref_basic-geometry-keypoints:
 
-Basic Geometry
---------------
+Keypoint Geometry
+-----------------
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 commands.
 
@@ -10,9 +10,10 @@ This section is focused on creating keypoints.
 
 """
 
-# start MAPDL and enter the pre-processing routine
+import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
+# start MAPDL and enter the pre-processing routine
 mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.prep7()
@@ -79,6 +80,53 @@ kloc
 # compute this yourself from ``kloc``
 dist = mapdl.kdist(k0, k1)
 dist
+
+
+###############################################################################
+# Keypoint Selection
+# ~~~~~~~~~~~~~~~~~~
+# There are two approaches for selecting keypoints, the old "legacy"
+# style and the new style.  The old style is valuable for those who
+# are comfortable with the existing MAPDL commands, and new style is
+# useful for selecting keypoints in a pythonic manner.
+#
+# This example generates a series of random keypoints and selects them
+mapdl.clear(); mapdl.prep7()
+
+# create 20 random keypoints
+for _ in range(20):
+    mapdl.k('', *np.random.random(3))
+
+# Print the keypoint numbers
+print(mapdl.geometry.knum)
+
+
+###############################################################################
+# Select every other keypoint with the old style command.
+mapdl.ksel('S', 'KP', '', 1, 20, 2)
+print(mapdl.geometry.knum)
+
+
+###############################################################################
+# Select every other keypoint with the new style command.
+#
+# Note that the item IDs are 1 based in MAPDL, while Python ranges are
+# 0 based.
+mapdl.geometry.keypoint_select(range(1, 21, 2))
+print(mapdl.geometry.knum)
+
+
+###############################################################################
+# Select keypoints from a list
+#
+# Note that you can ``return_selected`` if you want to see what you
+# have selected.  This is helpful when reselecting from existing
+# areas.
+#
+# Note that you could use a numpy array here as well.
+items = mapdl.geometry.keypoint_select([1, 5, 10, 20], return_selected=True)
+print(items)
+
 
 ###############################################################################
 # APDL Command: KPLOT

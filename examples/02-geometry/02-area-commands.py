@@ -1,16 +1,17 @@
 """
 .. _ref_basic-geometry-areas:
 
-Line Commands
+Area Geometry
 -------------
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 area commands.
 
 """
 
-# start MAPDL and enter the pre-processing routine
+import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
+# start MAPDL and enter the pre-processing routine
 mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.prep7()
@@ -122,7 +123,8 @@ areas
 
 
 ###############################################################################
-# Merged area
+# Merged Area Geometry
+# ~~~~~~~~~~~~~~~~~~~~
 area = mapdl.geometry.areas(quality=3, merge=True)
 area
 
@@ -130,6 +132,53 @@ area
 # area.save('mesh.vtk')
 # area.plot()
 
+
+###############################################################################
+# Area Selection
+# ~~~~~~~~~~~~~~
+# There are two approaches for selecting areas, the old "legacy" style
+# and the new style.  The old style is valuable for those who are
+# comfortable with the existing MAPDL commands, and new style is
+# useful for selecting areas in a pythonic manner.
+#
+# This example generates a series of random squares and selects them
+mapdl.clear(); mapdl.prep7()
+
+
+def generate_random_area():
+    start_x, start_y, height, width = np.random.random(4)
+    mapdl.blc4(start_x*10, start_y*10, height, width)
+
+# create 20 random rectangles
+for i in range(20):
+    generate_random_area()
+
+# Print the area numbers
+print(mapdl.geometry.anum)
+
+
+###############################################################################
+# Select every other area with the old style command.
+mapdl.asel('S', 'AREA', '', 1, 20, 2)
+print(mapdl.geometry.anum)
+
+
+###############################################################################
+# Select every other area with the new style command.
+#
+# Note that the Area IDs are 1 based in MAPDL, while Python ranges are 0 based.
+mapdl.geometry.area_select(range(1, 21, 2))
+print(mapdl.geometry.anum)
+
+
+###############################################################################
+# Select areas from a list
+#
+# Note that you can ``return_selected`` if you want to see what you
+# have selected.  This is helpful when reselecting from existing
+# areas.
+items = mapdl.geometry.area_select([1, 5, 10, 20], return_selected=True)
+print(items)
 
 
 ###############################################################################

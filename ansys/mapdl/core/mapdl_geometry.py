@@ -6,6 +6,21 @@ import pyvista as pv
 
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7
 
+VALID_TYPE_MSG = """- 'S' : Select a new set (default)
+- 'R' : Reselect a set from the current set.
+- 'A' : Additionally select a set and extend the current set.
+- 'U' : Unselect a set from the current set.
+"""
+
+FLST_LOOKUP = {'NODE': 1,  # node numbers
+               'ELEM': 2,  # element numbers
+               'KP': 3,  # keypoint numbers
+               'LINE': 4,  # line numbers
+               'AREA': 5,  # area numbers
+               'VOLU': 6,  # volume numbers
+               'TRACE': 7,  # trace points
+               'COORD': 8,  # coordinate locations
+}
 
 def merge_polydata(items):
     """Merge list of polydata or unstructured grids"""
@@ -184,7 +199,7 @@ class Geometry():
 
 
         """
-        quality = quality(int)
+        quality = int(quality)
         if quality > 10:
             raise ValueError('``quality`` parameter must be a value between 0 and 10')
         surf = self.generate_surface(11 - quality)
@@ -504,3 +519,376 @@ class Geometry():
         info += 'Areas:      %d\n' % self.n_area
         info += 'Volumes:    %d\n' % self.n_volu
         return info
+
+    def keypoint_select(self, items, sel_type='S', return_selected=False):
+        """Select keypoints using a sequence of items.
+
+        Parameters
+        ----------
+        items : sequence or None
+            List, range, or sequence of integers of the keypoints you want
+            to select.  If ``None`` or ``'NONE'``, no keypoints will be
+            selected.  If 'ALL', selects all keypoints.
+
+        sel_type : str, optional
+            Selection type.  May be one of the following:
+
+            * ``'S'``: Select a new set (default)
+            * ``'R'``: Reselect a set from the current set.
+            * ``'A'``: Additionally select a set and extend the current set.
+            * ``'U'``: Unselect a set from the current set.
+
+        return_selected : bool, optional
+            Return the keypoint numbers selected.  Optional, and can be
+            disabled for performance.  Default ``False``.
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Create a new selection of keypoints [1, 5, 10]
+
+        >>> mapdl.geometry.keypoint_select([1, 5, 10])
+
+        Create a new selection of keypoints from 1 through 20
+
+        >>> mapdl.geometry.keypoint_select(range(1, 21))
+
+        Unselect keypoints 1 through 20
+
+        >>> mapdl.geometry.keypoint_select(range(1, 21), sel_type='U')
+
+        Append to an existing selection of keypoints
+
+        >>> mapdl.geometry.keypoint_select([1, 2, 3], sel_type='A')
+
+        Reselect from the existing selection of keypoints
+
+        >>> mapdl.geometry.keypoint_select([3, 4, 5], sel_type='R')
+
+        Select no keypoints
+
+        >>> mapdl.geometry.keypoint_select(None)
+
+        Select all keypoints
+
+        >>> mapdl.geometry.keypoint_select('ALL')
+
+        """
+        if isinstance(items, str):
+            items = items.upper()
+
+        # special cases
+        if items is None or items == 'NONE':
+            self._mapdl.ksel('NONE')
+            return
+
+        if items == 'ALL':
+            self._mapdl.ksel('ALL')
+            if return_selected:
+                return self.knum
+            return
+
+        self._select_items(items, 'KP', sel_type)
+
+        if return_selected:
+            return self.knum
+
+    def line_select(self, items, sel_type='S', return_selected=False):
+        """Select lines using a sequence of items.
+
+        Parameters
+        ----------
+        items : sequence or None
+            List, range, or sequence of integers of the lines you want
+            to select.  If ``None`` or ``'NONE'``, no lines will be
+            selected.  If 'ALL', selects all lines.
+
+        sel_type : str, optional
+            Selection type.  May be one of the following:
+
+            * ``'S'``: Select a new set (default)
+            * ``'R'``: Reselect a set from the current set.
+            * ``'A'``: Additionally select a set and extend the current set.
+            * ``'U'``: Unselect a set from the current set.
+
+        return_selected : bool, optional
+            Return the line numbers selected.  Optional, and can be
+            disabled for performance.  Default ``False``.
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Create a new selection of lines [1, 5, 10]
+
+        >>> mapdl.geometry.line_select([1, 5, 10])
+
+        Create a new selection of lines from 1 through 20
+
+        >>> mapdl.geometry.line_select(range(1, 21))
+
+        Unselect lines 1 through 20
+
+        >>> mapdl.geometry.line_select(range(1, 21), sel_type='U')
+
+        Append to an existing selection of lines
+
+        >>> mapdl.geometry.line_select([1, 2, 3], sel_type='A')
+
+        Reselect from the existing selection of lines
+
+        >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
+
+        Select no lines
+
+        >>> mapdl.geometry.line_select(None)
+
+        Select all lines
+
+        >>> mapdl.geometry.line_select('ALL')
+
+        """
+        if isinstance(items, str):
+            items = items.upper()
+
+        # special cases
+        if items is None or items == 'NONE':
+            self._mapdl.lsel('NONE')
+            return
+
+        if items == 'ALL':
+            self._mapdl.lsel('ALL')
+            if return_selected:
+                return self.lnum
+            return
+
+        self._select_items(items, 'LINE', sel_type)
+
+        if return_selected:
+            return self.lnum
+
+    def area_select(self, items, sel_type='S', return_selected=False):
+        """Select areas using a sequence of items.
+
+        Parameters
+        ----------
+        items : sequence, str, None
+            List, range, or sequence of integers of the areas you want
+            to select.  If ``None`` or ``'NONE'``, no areas will be
+            selected.  If 'ALL', selects all areas.
+
+        sel_type : str, optional
+            Selection type.  May be one of the following:
+
+            * ``'S'``: Select a new set (default)
+            * ``'R'``: Reselect a set from the current set.
+            * ``'A'``: Additionally select a set and extend the current set.
+            * ``'U'``: Unselect a set from the current set.
+
+        return_selected : bool, optional
+            Return the area numbers selected.  Optional, and can be
+            disabled for performance.  Default ``False``.
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Create a new selection of areas [1, 5, 10]
+
+        >>> mapdl.geometry.area_select([1, 5, 10])
+
+        Create a new selection of areas from 1 through 20
+
+        >>> mapdl.geometry.area_select(range(1, 21))
+
+        Unselect areas 1 through 20
+
+        >>> mapdl.geometry.area_select(range(1, 21), sel_type='U')
+
+        Append to an existing selection of areas
+
+        >>> mapdl.geometry.area_select([1, 2, 3], sel_type='A')
+
+        Reselect from the existing selection of areas
+
+        >>> mapdl.geometry.area_select([3, 4, 5], sel_type='R')
+
+        Select no areas
+
+        >>> mapdl.geometry.area_select(None)
+
+        Select all areas
+
+        >>> mapdl.geometry.area_select('ALL')
+
+        """
+        if isinstance(items, str):
+            items = items.upper()
+
+        # special cases
+        if items is None or items == 'NONE':
+            self._mapdl.asel('NONE')
+            return
+
+        if items == 'ALL':
+            self._mapdl.asel('ALL')
+            if return_selected:
+                return self.anum
+            return
+
+        self._select_items(items, 'AREA', sel_type)
+
+        if return_selected:
+            return self.anum
+
+    def volume_select(self, items, sel_type='S', return_selected=False):
+        """Select volumes using a sequence of items.
+
+        Parameters
+        ----------
+        items : sequence, str, or None
+            List, range, or sequence of integers of the volumes you want
+            to select.  If ``None`` or ``'NONE'``, no volumes will be
+            selected.  If 'ALL', selects all volumes.
+
+        sel_type : str, optional
+            Selection type.  May be one of the following:
+
+            * ``'S'``: Select a new set (default)
+            * ``'R'``: Reselect a set from the current set.
+            * ``'A'``: Additionally select a set and extend the current set.
+            * ``'U'``: Unselect a set from the current set.
+
+        return_selected : bool, optional
+            Return the volume numbers selected.  Optional, and can be
+            disabled for performance.  Default ``False``.
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Create a new selection of volumes [1, 5, 10]
+
+        >>> mapdl.geometry.volume_select([1, 5, 10])
+
+        Create a new selection of volumes from 1 through 20
+
+        >>> mapdl.geometry.volume_select(range(1, 21))
+
+        Unselect volumes 1 through 20
+
+        >>> mapdl.geometry.volume_select(range(1, 21), sel_type='U')
+
+        Append to an existing selection of volumes
+
+        >>> mapdl.geometry.volume_select([1, 2, 3], sel_type='A')
+
+        Reselect from the existing selection of volumes
+
+        >>> mapdl.geometry.volume_select([3, 4, 5], sel_type='R')
+
+        Select no volumes
+
+        >>> mapdl.geometry.volume_select(None)
+
+        Select all volumes
+
+        >>> mapdl.geometry.volume_select('ALL')
+
+        """
+        if isinstance(items, str):
+            items = items.upper()
+
+        # special cases
+        if items is None or items == 'NONE':
+            self._mapdl.vsel('NONE')
+            return
+
+        if items == 'ALL':
+            self._mapdl.vsel('ALL')
+            if return_selected:
+                return self.vnum
+            return
+
+        self._select_items(items, 'VOLU', sel_type)
+
+        if return_selected:
+            return self.vnum
+
+    def _select_items(self, items, item_type, sel_type):
+        """Select items using FLST
+
+        Parameters
+        ----------
+        areas : sequence
+            Sequence of items.
+
+        item_type : str
+            Item lookup type.  One of:
+
+               * 'NODE' : node numbers
+               * 'ELEM' : element numbers
+               * 'KP' : keypoint numbers
+               * 'LINE' : line numbers
+               * 'AREA' : area numbers
+               * 'VOLU' : volume numbers
+               * 'TRACE' : trace points
+               * 'COORD' : coordinate locations
+
+        sel_type : str, optional
+            Selection type.  Must be one of the following:
+
+            * ``'S'``: Select a new set (default)
+            * ``'R'``: Reselect a set from the current set.
+            * ``'A'``: Additionally select a set and extend the current set.
+            * ``'U'``: Unselect a set from the current set.
+
+        """
+        if item_type not in FLST_LOOKUP:
+            raise KeyError(f'Invalid ``item_type`` "{item_type}"')
+
+        sel_type = sel_type.upper()
+        valid_sel_type = ['S', 'R', 'A', 'U']
+        if sel_type not in valid_sel_type:
+            raise ValueError(f'Invalid ``sel_type`` "{sel_type}"\n\n'
+                             f'Use one of the following:\n{VALID_TYPE_MSG}')
+
+        # convert to a flat array as it's easier for type checking
+        items = np.asarray(items)
+        if not np.issubdtype(items.dtype, np.number):
+            raise TypeError('Item numbers must be a numeric type')
+        items = items.ravel().astype(np.int, copy=False)
+
+        # consider logic for negative values to support ranges.  This
+        # is the 'ORDER' option
+
+        # ordered items
+        # FLST,5,76,4,ORDE,74
+        # FITEM,5,2
+        # LSEL, , , ,P51X
+
+        # unordered option
+        with self._mapdl.chain_commands:
+            self._mapdl.flst(5, items.size, FLST_LOOKUP[item_type])
+            for item in items:
+                self._mapdl.fitem(5, item)
+
+            if item_type == 'NODE':
+                self._mapdl.nsel(sel_type, vmin='P51X')
+            elif item_type == 'ELEM':
+                self._mapdl.esel(sel_type, vmin='P51X')
+            elif item_type == 'KP':
+                self._mapdl.ksel(sel_type, vmin='P51X')
+            elif item_type == 'LINE':
+                self._mapdl.lsel(sel_type, vmin='P51X')
+            elif item_type == 'AREA':
+                self._mapdl.asel(sel_type, vmin='P51X')
+            elif item_type == 'VOLU':
+                self._mapdl.vsel(sel_type, vmin='P51X')
+            else:
+                raise ValueError(f'Unable to select "{item_type}"')

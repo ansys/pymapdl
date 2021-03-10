@@ -1,16 +1,17 @@
 """
 .. _ref_basic-geometry-lines:
 
-Area Commands
+Line Geometry
 -------------
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 line commands.
 
 """
 
-# start MAPDL and enter the pre-processing routine
+import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
+# start MAPDL and enter the pre-processing routine
 mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.prep7()
@@ -214,12 +215,64 @@ lnum
 
 
 ###############################################################################
-# Lines Geometry
-# ~~~~~~~~~~~~~~~~~~~
+# Line Geometry
+# ~~~~~~~~~~~~~
 # Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
 # saved or plotted.  For more details, visit https://docs.pyvista.com
 lines = mapdl.geometry.lines
 lines
+
+
+###############################################################################
+# Line Selection
+# ~~~~~~~~~~~~~~
+# There are two approaches for selecting lines, the old "legacy"
+# style and the new style.  The old style is valuable for those who
+# are comfortable with the existing MAPDL commands, and new style is
+# useful for selecting lines in a pythonic manner.
+#
+# This example generates a series of random lines and selects them
+mapdl.clear(); mapdl.prep7()
+
+
+def generate_random_line():
+    k0 = mapdl.k('', *np.random.random(3))
+    k1 = mapdl.k('', *np.random.random(3))
+    mapdl.l(k0, k1)
+
+# create 20 random lines
+for _ in range(20):
+    generate_random_line()
+
+# Print the line numbers
+print(mapdl.geometry.lnum)
+
+
+###############################################################################
+# Select every other line with the old style command.
+mapdl.ksel('S', 'KP', '', 1, 20, 2)
+print(mapdl.geometry.lnum)
+
+
+###############################################################################
+# Select every other line with the new style command.
+#
+# Note that the item IDs are 1 based in MAPDL, while Python ranges are
+# 0 based.
+mapdl.geometry.line_select(range(1, 21, 2))
+print(mapdl.geometry.lnum)
+
+
+###############################################################################
+# Select lines from a list
+#
+# Note that you can ``return_selected`` if you want to see what you
+# have selected.  This is helpful when reselecting from existing
+# areas.
+#
+# Note that you could use a numpy array here as well.
+items = mapdl.geometry.line_select([1, 5, 10, 20], return_selected=True)
+print(items)
 
 
 ###############################################################################

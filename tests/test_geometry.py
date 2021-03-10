@@ -1,4 +1,94 @@
-"""Test regular expression parsing commands"""
+"""Test geometry commands"""
+import numpy as np
+from ansys.mapdl.core import Mapdl; mapdl = Mapdl()
+
+
+def test_keypoint_selection(mapdl, cleared):
+    def generate_random_kp():
+        mapdl.k('', *np.random.random(3))
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_kp()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.keypoint_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.keypoint_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.keypoint_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_line_selection(mapdl, cleared):
+    def generate_random_line():
+        k0 = mapdl.k('', *np.random.random(3))
+        k1 = mapdl.k('', *np.random.random(3))
+        mapdl.l(k0, k1)
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_line()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.line_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.line_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.line_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_area_selection(mapdl, cleared):
+    def generate_random_area():
+        start_x, start_y, height, width = np.random.random(4)
+        mapdl.blc4(start_x*10, start_y*10, height, width)
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_area()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.area_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.area_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.area_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_volu_selection(mapdl, cleared):
+    def generate_random_volu():
+        start_x, start_y, height, width, depth = np.random.random(5)
+        mapdl.blc4(start_x*10, start_y*10, height, width, depth)
+
+    # create n random volumes
+    n_item = 20
+    for i in range(n_item):
+        generate_random_volu()
+
+    # select every other volu
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.volume_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.volume_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.volume_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
 
 
 def test_e(mapdl, cleared):
