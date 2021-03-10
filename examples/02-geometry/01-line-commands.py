@@ -195,7 +195,7 @@ mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
 ###############################################################################
 # Line IDs
 # ~~~~~~~~
-# Return an array of the Line IDs
+# Return an array of the line IDs
 lnum = mapdl.geometry.lnum
 lnum
 
