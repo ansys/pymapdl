@@ -1,12 +1,10 @@
 """
 .. _ref_basic-geometry-lines:
 
-Basic Geometry
---------------
+Area Commands
+-------------
 This example shows how you can use PyMAPDL to create basic geometry
-using Pythonic PREP7 commands.
-
-This section is focused on creating lines.
+using Pythonic PREP7 line commands.
 
 """
 
@@ -80,8 +78,6 @@ mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
 # ~~~~~~~~~~~~~~~~~~
 # Create a line from a line from ``(0, 0, 0)`` to ``(1, 0, 0)`` to a
 # keypoint at ``(1, 1, 1)`` at an angle of 60 degrees.  Plot the result.
-
-# Create two circular arcs and connect them with a spline.
 mapdl.clear(); mapdl.prep7()
 
 k0 = mapdl.k("", 0, 0, 0)
@@ -178,9 +174,9 @@ mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
 
 
 ###############################################################################
-# APDL Command: LTAN
-# ~~~~~~~~~~~~~~~~~~
-# Create a spline with 5 keypoints.
+# APDL Command: SPLINE
+# ~~~~~~~~~~~~~~~~~~~~
+# Generate a segmented spline through 5 keypoints.
 mapdl.clear(); mapdl.prep7()
 
 k0 = mapdl.k('', 0, 0, 0)
@@ -189,6 +185,23 @@ k2 = mapdl.k('', 0.4, 0.3, 0)
 k3 = mapdl.k('', 0.6, 0.5, 0)
 k4 = mapdl.k('', 0.8, 0.3, 0)
 mapdl.spline(k0, k1, k2, k3, k4)
+mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
+
+
+###############################################################################
+# APDL Command: BSPLIN
+# ~~~~~~~~~~~~~~~~~~~~
+# Generate a single line from a spline fit to a series of keypoints.
+# Generate through ``(0, 0, 0)``, ``(0, 1, 0)`` and ``(1, 2, 0)``
+#
+# This is different than the ``spline`` method as this creates a
+# single line rather than multiple lines.
+mapdl.clear(); mapdl.prep7()
+
+k0 = mapdl.k("", 0, 0, 0)
+k1 = mapdl.k("", 0, 1, 0)
+k2 = mapdl.k("", 1, 2, 0)
+lnum = mapdl.bsplin(k0, k1, k2)
 mapdl.lplot(background='w', color='k', line_width=5, cpos='xy')
 
 
@@ -210,13 +223,13 @@ lines
 
 
 ###############################################################################
-# APDL Command: KPLOT
+# APDL Command: LPLOT
 # ~~~~~~~~~~~~~~~~~~~
 # Plot colored lines while displaying the keypoint numbers.
 #
 # There are a variety of plotting options available for all the common
 # plotting methods.
-# 
+
 mapdl.lplot(show_keypoint_numbering=True,
             color_lines=True,
             show_line_numbering=False,

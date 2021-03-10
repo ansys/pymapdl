@@ -1,18 +1,34 @@
 """Module to support MAPDL CAD geometry"""
 import re
 
-from pyiges import Iges
 import numpy as np
 import pyvista as pv
-from vtk import vtkAppendPolyData
 
 from ansys.mapdl.core.misc import supress_logging, run_as_prep7
+
+
+def merge_polydata(items):
+    """Merge list of polydata or unstructured grids"""
+
+    # lazy import here for faster module loading
+    try:
+        from pyvista._vtk import vtkAppendPolyData
+    except:
+        from vtk import vtkAppendPolyData
+
+    afilter = vtkAppendPolyData()
+    for item in items:
+        afilter.AddInputData(item)
+        afilter.Update()
+
+    return pv.wrap(afilter.GetOutput())
+
 
 def get_elements_per_area(resp):
     """Get the number of elements meshed for each area given the response
     from ``AMESH``.
 
-    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS    
+    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS
         ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
         ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
         ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
@@ -73,6 +89,13 @@ class Geometry():
 
     def _load_iges(self):
         """Loads the iges file from MAPDL as a pyiges class"""
+        # Lazy import here for speed and stability
+        # possible to exclude this import in the future
+        try:
+            from pyiges import Iges
+        except ImportError:
+            raise ImportError('Please install pyiges to use this feature with:\n'
+                              'pip install pyiges')
         return Iges(self._mapdl._generate_iges())
 
     def _reset_cache(self):
@@ -103,7 +126,7 @@ class Geometry():
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-    def areas(self, quality=7):
+    def areas(self, quality=4, merge=False):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
@@ -112,24 +135,73 @@ class Geometry():
             quality of the mesh to display.  Varies between 1 (worst)
             to 10 (best).
 
+        merge : bool, optional
+            Option to merge areas into a single mesh. Default
+            ``False`` to return a list of areas.  When ``True``,
+            output will be a single mesh.
+
         Returns
         -------
-        areas : list
-            List of ``pyvista.PolyData`` areas representing the active
-            surface areas selected by ``ASEL``.
+        areas : list, pyvista.UnstructuredGrid
+            List of ``pyvista.UnstructuredGrid`` meshes representing
+            the active surface areas selected by ``ASEL``.  If
+            ``merge=True``, areas are returned as a single merged
+            UnstructuredGrid.
+
+        Examples
+        --------
+        Return a list of areas as indiviudal grids
+
+        >>> areas = mapdl.areas(quality=3)
+        >>> areab
+        [UnstructuredGrid (0x7f14add95040)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	0.000e+00, 0.000e+00
+          N Arrays:	4,
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4,
+        ...
+
+        Return a single merged mesh.
+
+        >>> area_mesh = mapdl.areas(quality=3)
+        >>> area_mesh
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	24
+          N Points:	30
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4
+
 
         """
+        quality = quality(int)
+        if quality > 10:
+            raise ValueError('``quality`` parameter must be a value between 0 and 10')
         surf = self.generate_surface(11 - quality)
+        if merge:
+            return surf
 
+        entity_num = surf['entity_num']
         areas = []
-        anums = np.unique(surf['entity_num'])
+        anums = np.unique(entity_num)
         for anum in anums:
-            areas.append(surf.extract_cells(surf['entity_num'] == anum))
+            areas.append(surf.extract_cells(entity_num == anum))
+
         return areas
 
     @supress_logging
     @run_as_prep7
-    def generate_surface(self, density=5, amin=None, amax=None, ninc=None):
+    def generate_surface(self, density=4, amin=None, amax=None, ninc=None):
         """Generate an all-triangular surface of the active surfaces.
 
         Parameters
@@ -388,11 +460,7 @@ class Geometry():
                     lines.append(line)
 
         if lines:
-            afilter = vtkAppendPolyData()
-            for line in lines:
-                afilter.AddInputData(line)
-            afilter.Update()
-            lines = pv.wrap(afilter.GetOutput())
+            lines = merge_polydata(lines)
             lines['entity_num'] = lines['entity_num'].astype(np.int32)
         else:
             lines = pv.PolyData()

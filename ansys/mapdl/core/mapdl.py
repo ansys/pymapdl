@@ -618,7 +618,7 @@ class _MapdlCore(_MapdlCommands):
         return super().nplot(knum)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
-              vtk=None, quality=7, show_area_numbering=False,
+              vtk=None, quality=4, show_area_numbering=False,
               show_line_numbering=False,
               color_areas=False, show_lines=True,
               **kwargs):
@@ -681,7 +681,7 @@ class _MapdlCore(_MapdlCommands):
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
 
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
-              vtk=None, quality=7, show_area_numbering=False,
+              vtk=None, quality=4, show_area_numbering=False,
               show_line_numbering=False, color_areas=False,
               show_lines=False, **kwargs):
         """APDL Command: APLOT

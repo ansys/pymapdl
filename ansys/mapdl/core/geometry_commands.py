@@ -622,8 +622,8 @@ class _MapdlGeometryCommands():
         Create a block with dimensions 1 x 2 x 10 with one corner of
         the block at (0, 0) of the current working plane.
 
-        >>> anum = mapdl.blc4(1, 1, 1, 2, 10)
-        >>> anum
+        >>> vnum = mapdl.blc4(1, 1, 1, 2, 10)
+        >>> vnum
         1
 
         Notes
@@ -678,6 +678,13 @@ class _MapdlGeometryCommands():
 
         Examples
         --------
+        Create a half arc centered at the origin with an outer radius
+        of 2 and an inner radius of 1
+
+        >>> anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1,
+                              theta1=0, rad2=2, theta2=180)
+        >>> anum
+
         Create a solid cylinder with a depth of 10 at the center of
         the working plane.
 
@@ -1633,6 +1640,8 @@ class _MapdlGeometryCommands():
 
         Examples
         --------
+        Drag a circle between two keypoints to create an area
+
         >>> k0 = mapdl.k("", 0, 0, 0)
         >>> k1 = mapdl.k("", 0, 0, 1)
         >>> carc = mapdl.circle(k0, 1, k1, arc=90)
