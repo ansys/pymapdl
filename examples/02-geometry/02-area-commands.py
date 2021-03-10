@@ -67,7 +67,7 @@ mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, smooth_shading=True
 ###############################################################################
 # APDL Command: BLC4
 # ~~~~~~~~~~~~~~~~~~
-# Createa a ``0.5 x 0.5`` rectangle starting at ``(0.25, 0.25)``
+# Create a ``0.5 x 0.5`` rectangle starting at ``(0.25, 0.25)``
 mapdl.clear(); mapdl.prep7()
 
 anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
