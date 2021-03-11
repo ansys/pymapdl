@@ -448,3 +448,13 @@ def test_con4(cleared, mapdl):
 
 def test_cone(cleared, mapdl):
     assert mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90) == 1
+
+
+def test_cyl5(cleared, mapdl):
+    # test both the area and volume cases
+    assert mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1
+    assert mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2, depth=5) == 1
+
+
+def test_cylind(cleared, mapdl):
+    assert mapdl.cylind(0.9, 1, z1=0, z2=5) == 1

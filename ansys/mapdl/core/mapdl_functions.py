@@ -4941,41 +4941,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "UNPAUSE," % ()
         return self.run(command, **kwargs)
 
-    def cyl5(self, xedge1="", yedge1="", xedge2="", yedge2="", depth="",
-             **kwargs):
-        """APDL Command: CYL5
-
-        Creates a circular area or cylindrical volume by end points.
-
-        Parameters
-        ----------
-        xedge1, yedge1
-            Working plane X and Y coordinates of one end of the circle or
-            cylinder face.
-
-        xedge2, yedge2
-            Working plane X and Y coordinates of the other end of the circle or
-            cylinder face.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the cylinder.  If DEPTH = 0 (default), a circular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a circular area anywhere on the working plane or a cylindrical
-        volume with one face anywhere on the working plane by specifying
-        diameter end points.  For a solid cylinder of 360°, the top and bottom
-        faces will be circular (each area defined with four lines) and they
-        will be connected with two surface areas (each spanning 180°).  See the
-        CYL4, PCIRC, and CYLIND commands for alternate ways to create circles
-        and cylinders.
-        """
-        command = "CYL5,%s,%s,%s,%s,%s" % (str(xedge1), str(yedge1), str(xedge2), str(yedge2), str(depth))
-        return self.run(command, **kwargs)
-
     def fmagsum(self, cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
                 cnam6="", cnam7="", cnam8="", cnam9="", **kwargs):
         """APDL Command: FMAGSUM
@@ -38140,47 +38105,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor.
         """
         command = "/VSCALE,%s,%s,%s" % (str(wn), str(vratio), str(key))
-        return self.run(command, **kwargs)
-
-    def cylind(self, rad1="", rad2="", z1="", z2="", theta1="", theta2="",
-               **kwargs):
-        """APDL Command: CYLIND
-
-        Creates a cylindrical volume centered about the working plane origin.
-
-        Parameters
-        ----------
-        rad1, rad2
-            Inner and outer radii (either order) of the cylinder.  A value of
-            zero or blank for either RAD1 or RAD2, or the same value for both
-            RAD1 and RAD2,  defines a solid cylinder.
-
-        z1, z2
-            Working plane Z coordinates of the cylinder.  If either Z1 or Z2 is
-            zero, one of the faces of the cylinder will be coplanar with the
-            working plane.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the cylinder.  Used
-            for creating a cylindrical sector.  The sector begins at the
-            algebraically smaller angle, extends in a positive angular
-            direction, and ends at the larger angle.  The starting angle
-            defaults to 0.0° and the ending angle defaults to 360.0°.   See the
-            Modeling and Meshing Guide for an illustration.
-
-        Notes
-        -----
-        Defines a cylindrical volume centered about the working plane origin.
-        The top and bottom faces are parallel to the working plane but neither
-        face need be coplanar with (i.e., "on") the working plane.  The
-        cylinder must have a spatial volume greater than zero. (i.e., this
-        volume primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  For a solid cylinder of 360°, the top
-        and bottom faces will be circular (each area defined with four lines),
-        and they will be connected with two areas (each spanning 180°.)  See
-        the CYL4 and CYL5 commands for alternate ways to create cylinders.
-        """
-        command = "CYLIND,%s,%s,%s,%s,%s,%s" % (str(rad1), str(rad2), str(z1), str(z2), str(theta1), str(theta2))
         return self.run(command, **kwargs)
 
     def ddaspec(self, keyref="", shptyp="", mountloc="", deftyp="", amin="",

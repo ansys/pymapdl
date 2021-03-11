@@ -40,34 +40,6 @@ mapdl.clear(); mapdl.prep7()
 vnum = mapdl.blc4(width=1, height=4, depth=9)
 mapdl.vplot(show_lines=True)
 
-
-###############################################################################
-# APDL Command: CYL4
-# ~~~~~~~~~~~~~~~~~~
-# Creates a circular area or cylindrical volume anywhere on the working plane.
-#
-# Create a half arc centered at the origin with an outer radius
-# of 2 and an inner radius of 1.
-#
-# Note that the ``depth`` keyword argument is unset, which will
-# generate an area rather than a volume.  Setting depth to a value
-# greater than 0 will generate a volume.
-mapdl.clear(); mapdl.prep7()
-
-anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, theta2=180)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
-
-
-###############################################################################
-# Create a volumetric half arc centered at the origin with an outer
-# radius of 2 and an inner radius of 1, and a thickness of 0.55.
-mapdl.clear(); mapdl.prep7()
-
-anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, theta2=180,
-                  depth=0.55)
-mapdl.vplot(show_bounds=True)
-
-
 ###############################################################################
 # APDL Command: BLC5
 # ~~~~~~~~~~~~~~~~~~
@@ -132,3 +104,65 @@ mapdl.clear(); mapdl.prep7()
 
 vnum = mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90)
 mapdl.vplot(show_lines=False, quality=6, show_bounds=True)
+
+###############################################################################
+# APDL Command: CYL4
+# ~~~~~~~~~~~~~~~~~~
+# Creates a circular area or cylindrical volume anywhere on the working plane.
+#
+# Create a half arc centered at the origin with an outer radius
+# of 2 and an inner radius of 1.
+#
+# Note that the ``depth`` keyword argument is unset, which will
+# generate an area rather than a volume.  Setting depth to a value
+# greater than 0 will generate a volume.
+mapdl.clear(); mapdl.prep7()
+
+anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, theta2=180)
+mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
+
+
+###############################################################################
+# Create a volumetric half arc centered at the origin with an outer
+# radius of 2 and an inner radius of 1, and a thickness of 0.55.
+mapdl.clear(); mapdl.prep7()
+
+anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, theta2=180,
+                  depth=0.55)
+mapdl.vplot(show_bounds=True)
+
+
+###############################################################################
+# APDL Command: CYL5
+# ~~~~~~~~~~~~~~~~~~
+# Creates a circular area or cylindrical volume by end points.
+#
+# Create a circular with one point of the circle at ``(1, 1)`` and the
+# other point at ``(2, 2)``
+mapdl.clear(); mapdl.prep7()
+
+anum = mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
+mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
+
+
+###############################################################################
+# Create a cylinder with one point of the circle at ``(X, Y) == (1, 1)``
+# and the other point at ``(X, Y) == (2, 2)`` with a height of 3.
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2, depth=5)
+mapdl.vplot(show_lines=False, quality=6, show_bounds=True)
+
+
+###############################################################################
+# APDL Command: CYLIND
+# ~~~~~~~~~~~~~~~~~~~~
+# Create a cylindrical volume centered about the working plane origin.
+#
+# Create a hollow cylinder with an inner radius of 0.9 and an
+# outer radius of 1.0 with a height of 5
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.cylind(0.9, 1, z1=0, z2=5)
+mapdl.vplot(show_lines=False, quality=4, show_bounds=True)
+
