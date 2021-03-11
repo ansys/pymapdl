@@ -458,3 +458,5 @@ def test_cyl5(cleared, mapdl):
 
 def test_cylind(cleared, mapdl):
     assert mapdl.cylind(0.9, 1, z1=0, z2=5) == 1
+
+
