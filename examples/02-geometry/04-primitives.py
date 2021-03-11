@@ -8,7 +8,9 @@ using Pythonic PREP7 volume commands.
 
 """
 
+import pyvista
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine
@@ -166,3 +168,54 @@ mapdl.clear(); mapdl.prep7()
 vnum = mapdl.cylind(0.9, 1, z1=0, z2=5)
 mapdl.vplot(show_lines=False, quality=4, show_bounds=True)
 
+
+###############################################################################
+# APDL Command: PCIRC
+# ~~~~~~~~~~~~~~~~~~~
+# Create a circular area centered about the working plane origin.
+#
+# In this example a circular area with an inner radius of 0.95 and an
+# outer radius of 1 is created.
+mapdl.clear(); mapdl.prep7()
+
+anum = mapdl.pcirc(0.95, 1)
+mapdl.aplot(show_bounds=True)
+
+
+###############################################################################
+# APDL Command: RECTNG
+# ~~~~~~~~~~~~~~~~~~~~
+# Create a rectangular area anywhere on the working plane.
+#
+# In this example a rectangle with one corner at ``(0.5, 0.5)`` and
+# another at ``(1.5, 2.5)`` is created.
+mapdl.clear(); mapdl.prep7()
+
+anum = mapdl.rectng(0.5, 1.5, 0.5, 2.5)
+mapdl.aplot(show_bounds=True)
+
+
+###############################################################################
+# APDL Command: SPH4
+# ~~~~~~~~~~~~~~~~~~
+# Create a spherical volume anywhere on the working plane.
+#
+# This example creates a hollow sphere with an inner radius of 0.9 and
+# an outer radius of 1.0 centered at ``(0, 0)``
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.sph4(0, 0, rad1=0.9, rad2=1.0)
+mapdl.vplot(show_lines=False, quality=4, show_bounds=True, smooth_shading=True)
+
+
+###############################################################################
+# APDL Command: SPHERE
+# ~~~~~~~~~~~~~~~~~~~~
+# Create a spherical volume anywhere on the working plane.
+#
+# This example creates a half hollow sphere with an inner radius of 0.9 and
+# an outer radius of 1.0.
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270)
+mapdl.vplot(show_lines=False, quality=4, show_bounds=True)

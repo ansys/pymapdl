@@ -24207,43 +24207,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "ACCAT,%s,%s" % (str(na1), str(na2))
         return self.run(command, **kwargs)
 
-    def sphere(self, rad1="", rad2="", theta1="", theta2="", **kwargs):
-        """APDL Command: SPHERE
-
-        Creates a spherical volume centered about the working plane origin.
-
-        Parameters
-        ----------
-        rad1, rad2
-            Inner and outer radii (either order) of the sphere.  A value of
-            zero or blank for either RAD1 or RAD2 defines a solid sphere.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the sphere.  Used for
-            creating a spherical sector.  The sector begins at the
-            algebraically smaller angle, extends in a positive angular
-            direction, and ends at the larger angle.  The starting angle
-            defaults to 0.0° and the ending angle defaults to 360.0°.  See the
-            Modeling and Meshing Guide for an illustration.
-
-        Notes
-        -----
-        Defines either a solid or hollow sphere or spherical sector centered
-        about the working plane origin.  The sphere must have a spatial volume
-        greater than zero. (i.e., this volume primitive command cannot be used
-        to create a degenerate volume as a means of creating an area.)
-        Inaccuracies can develop when the size of the object you create is much
-        smaller than the relative coordinate system values (ratios near to or
-        greater than 1000). If you require an exceptionally small sphere,
-        create a larger object, and scale it down to the appropriate size.
-
-        For a solid sphere of 360°, you define it with two areas, each
-        consisting of a hemisphere.  See the SPH4 and SPH5 commands for the
-        other ways to create spheres.
-        """
-        command = "SPHERE,%s,%s,%s,%s" % (str(rad1), str(rad2), str(theta1), str(theta2))
-        return self.run(command, **kwargs)
-
     def prep7(self, **kwargs):
         """APDL Command: /PREP7
 
@@ -28592,36 +28555,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         range.
         """
         command = "PLTIME,%s,%s" % (str(tmin), str(tmax))
-        return self.run(command, **kwargs)
-
-    def pcirc(self, rad1="", rad2="", theta1="", theta2="", **kwargs):
-        """APDL Command: PCIRC
-
-        Creates a circular area centered about the working plane origin.
-
-        Parameters
-        ----------
-        rad1, rad2
-            Inner and outer radii (either order) of the circle.  A value of
-            either zero or blank for either RAD1 or RAD2, or the same value for
-            both RAD1 and RAD2, defines a solid circle.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the circular area.
-            Used for creating a circular sector.  The sector begins at the
-            algebraically smaller angle, extends in a positive angular
-            direction, and ends at the larger angle.  The starting angle
-            defaults to 0.0° and the ending angle defaults to 360.0°.  See the
-            Modeling and Meshing Guide for an illustration.
-
-        Notes
-        -----
-        Defines a solid circular area or circular sector centered about the
-        working plane origin.  For a solid circle of 360°, the area will be
-        defined with four keypoints and four lines.  See the CYL4 and CYL5
-        commands for alternate ways to create circles.
-        """
-        command = "PCIRC,%s,%s,%s,%s" % (str(rad1), str(rad2), str(theta1), str(theta2))
         return self.run(command, **kwargs)
 
     def gformat(self, ftype="", nwidth="", dsignf="", **kwargs):
@@ -38169,36 +38102,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "DDASPEC,%s,%s,%s,%s,%s" % (str(keyref), str(shptyp), str(mountloc), str(deftyp), str(amin))
         return self.run(command, **kwargs)
 
-    def sph4(self, xcenter="", ycenter="", rad1="", rad2="", **kwargs):
-        """APDL Command: SPH4
-
-        Creates a spherical volume anywhere on the working plane.
-
-        Parameters
-        ----------
-        xcenter, ycenter
-            Working plane X and Y coordinates of the center of the sphere.
-
-        rad1, rad2
-            Inner and outer radii (either order) of the sphere.   A value of
-            zero or blank for either RAD1 or RAD2 defines a solid sphere.
-
-        Notes
-        -----
-        Defines either a solid or hollow spherical volume anywhere on the
-        working plane.  The sphere must have a spatial volume greater than
-        zero.  (i.e., this volume primitive command cannot be used to create a
-        degenerate volume as a means of creating an area.)  A sphere of 360°
-        will be defined with two areas, each consisting of a hemisphere.  See
-        the SPHERE and SPH5 commands for other ways to create spheres.
-
-        When working with a model imported from an IGES file (DEFAULT import
-        option), you can create only solid spheres.  If you enter a value for
-        both RAD1 and RAD2 the command is ignored.
-        """
-        command = "SPH4,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(rad2))
-        return self.run(command, **kwargs)
-
     def ucmd(self, cmd="", srnum="", **kwargs):
         """APDL Command: /UCMD
 
@@ -46445,27 +46348,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "BFKDELE,%s,%s" % (str(kpoi), str(lab))
-        return self.run(command, **kwargs)
-
-    def rectng(self, x1="", x2="", y1="", y2="", **kwargs):
-        """APDL Command: RECTNG
-
-        Creates a rectangular area anywhere on the working plane.
-
-        Parameters
-        ----------
-        x1, x2
-            Working plane X coordinates of the rectangle.
-
-        y1, y2
-            Working plane Y coordinates of the rectangle.
-
-        Notes
-        -----
-        The area will be defined with four keypoints and four lines.  See the
-        BLC4 and BLC5 commands for alternate ways to create rectangles.
-        """
-        command = "RECTNG,%s,%s,%s,%s" % (str(x1), str(x2), str(y1), str(y2))
         return self.run(command, **kwargs)
 
     def lsread(self, lsnum="", **kwargs):

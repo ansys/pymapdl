@@ -2541,3 +2541,173 @@ class _MapdlGeometryCommands():
         """
         command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
         return parse_output_volume_area(self.run(command, **kwargs))
+
+    def pcirc(self, rad1="", rad2="", theta1="", theta2="", **kwargs) -> int:
+        """Create a circular area centered about the working plane origin.
+
+        APDL Command: PCIRC
+
+        Parameters
+        ----------
+        rad1, rad2
+            Inner and outer radii (either order) of the circle.  A
+            value of either zero or blank for either ``rad1`` or
+            ``rad2``, or the same value for both ``rad1`` and
+            ``rad2``, defines a solid circle.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the circular
+            area.  Used for creating a circular sector.  The sector
+            begins at the algebraically smaller angle, extends in a
+            positive angular direction, and ends at the larger angle.
+            The starting angle defaults to 0.0° and the ending angle
+            defaults to 360.0°.  See the Modeling and Meshing Guide
+            for an illustration.
+
+        Returns
+        -------
+        int
+            Area number of the new circular area.
+
+        Examples
+        --------
+        In this example a circular area with an inner radius of 0.95
+        and an outer radius of 1 is created.
+
+        >>> anum = mapdl.pcirc(0.95, 1)
+        >>> anum
+        1
+
+        Notes
+        -----
+        Defines a solid circular area or circular sector centered
+        about the working plane origin.  For a solid circle of 360°,
+        the area will be defined with four keypoints and four lines.
+        See the ``cyl4`` and ``cyl5`` commands for alternate ways to
+        create circles.
+        """
+        command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def rectng(self, x1="", x2="", y1="", y2="", **kwargs):
+        """Create a rectangular area anywhere on the working plane.
+
+        APDL Command: RECTNG
+
+        Parameters
+        ----------
+        x1, x2
+            Working plane X coordinates of the rectangle.
+
+        y1, y2
+            Working plane Y coordinates of the rectangle.
+
+        Notes
+        -----
+        The area will be defined with four keypoints and four lines.
+        See the ``blc4`` and ``blc5`` commands for alternate ways to
+        create rectangles.
+        """
+        command = f"RECTNG,{x1},{x2},{y1},{y2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sph4(self, xcenter="", ycenter="", rad1="", rad2="", **kwargs) -> int:
+        """Create a spherical volume anywhere on the working plane.
+
+        APDL Command: SPH4
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            sphere.
+
+        rad1, rad2
+            Inner and outer radii (either order) of the sphere.  A
+            value of zero or blank for either ``rad1`` or ``rad2``
+            defines a solid sphere.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+
+        Examples
+        --------
+        This example creates a hollow sphere with an inner radius of
+        0.9 and an outer radius of 1.0 centered at ``(0, 0)``
+
+        >>> vnum = mapdl.sph4(0, 0, rad1=0.9, rad2=1.0)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines either a solid or hollow spherical volume anywhere on
+        the working plane.  The sphere must have a spatial volume
+        greater than zero.  (i.e., this volume primitive command
+        cannot be used to create a degenerate volume as a means of
+        creating an area.)  A sphere of 360° will be defined with two
+        areas, each consisting of a hemisphere.  See the ``sphere``
+        and ``sph5`` commands for other ways to create spheres.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you can create only solid spheres.  If you
+        enter a value for both ``rad1`` and ``rad2`` the command is
+        ignored.
+        """
+        command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sphere(self, rad1="", rad2="", theta1="", theta2="", **kwargs) -> int:
+        """Create a spherical volume centered about the working plane origin.
+
+        APDL Command: SPHERE
+
+        Parameters
+        ----------
+        rad1, rad2
+            Inner and outer radii (either order) of the sphere.  A
+            value of zero or blank for either ``rad1`` or ``rad2``
+            defines a solid sphere.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the sphere.
+            Used for creating a spherical sector.  The sector begins
+            at the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0.0° and the ending angle
+            defaults to 360.0°.  See the Modeling and Meshing Guide
+            for an illustration.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+        Examples
+        --------
+        >>> vnum = mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines either a solid or hollow sphere or spherical sector
+        centered about the working plane origin.  The sphere must have
+        a spatial volume greater than zero. (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  Inaccuracies can develop
+        when the size of the object you create is much smaller than
+        the relative coordinate system values (ratios near to or
+        greater than 1000). If you require an exceptionally small
+        sphere, create a larger object, and scale it down to the
+        appropriate size.
+
+        For a solid sphere of 360°, you define it with two areas, each
+        consisting of a hemisphere.  See the ``sph4`` and ``sph5``
+        commands for the other ways to create spheres.
+        """
+        command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))

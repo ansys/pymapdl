@@ -460,3 +460,17 @@ def test_cylind(cleared, mapdl):
     assert mapdl.cylind(0.9, 1, z1=0, z2=5) == 1
 
 
+def test_pcirc(cleared, mapdl):
+    assert mapdl.pcirc(0.95, 1) == 1
+
+
+def test_rectng(cleared, mapdl):
+    assert mapdl.rectng(0.5, 1.5, 0.5, 2.5) == 1
+
+
+def test_sph4(cleared, mapdl):
+    assert mapdl.sph4(0, 0, rad1=0.9, rad2=1.0) == 1
+
+
+def test_sphere(cleared, mapdl):
+    assert mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270) == 1
