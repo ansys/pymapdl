@@ -221,13 +221,13 @@ class _MapdlGeometryCommands():
 
         arc
             Arc length (in degrees).  Positive follows right-hand rule
-            about PCENT-PAXIS vector.  Defaults to 360°.
+            about PCENT-PAXIS vector.  Defaults to 360 degrees.
 
         nseg
             Number of lines around circumference (defaults to minimum
-            required for 90°-maximum arcs, i.e., 4 for 360°).  Number
-            of keypoints generated is NSEG for 360° or NSEG + 1 for
-            less than 360°.
+            required for 90 degrees-maximum arcs, i.e., 4 for 360 degrees).  Number
+            of keypoints generated is NSEG for 360 degrees or NSEG + 1 for
+            less than 360 degrees.
 
         Returns
         -------
@@ -251,7 +251,7 @@ class _MapdlGeometryCommands():
         -----
         Generates circular arc lines (and their corresponding
         keypoints).  Keypoints are generated at regular angular
-        locations (based on a maximum spacing of 90°).  Arc lines are
+        locations (based on a maximum spacing of 90 degrees).  Arc lines are
         generated connecting the keypoints.  Keypoint and line numbers
         are automatically assigned, beginning with the lowest
         available values [NUMSTR].  Adjacent lines use a common
@@ -314,7 +314,7 @@ class _MapdlGeometryCommands():
         system) or curved.  The line shape is invariant with
         coordinate system after it is generated.  Note that solid
         modeling in a toroidal coordinate system is not recommended.
-        A curved line is limited to 180°.  Lines may be redefined only
+        A curved line is limited to 180 degrees.  Lines may be redefined only
         if not yet attached to an area.
         """
         command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1),
@@ -675,8 +675,8 @@ class _MapdlGeometryCommands():
             annulus or partial cylinder.  The sector begins at the
             algebraically smaller angle, extends in a positive angular
             direction, and ends at the larger angle.  The starting
-            angle defaults to 0° and the ending angle defaults to
-            360°.  See the Modeling and Meshing Guide for an
+            angle defaults to 0 degrees and the ending angle defaults to
+            360 degrees.  See the Modeling and Meshing Guide for an
             illustration.
 
         depth
@@ -717,9 +717,9 @@ class _MapdlGeometryCommands():
         -----
         Defines a circular area anywhere on the working plane or a
         cylindrical volume with one face anywhere on the working
-        plane.  For a solid cylinder of 360°, the top and bottom faces
+        plane.  For a solid cylinder of 360 degrees, the top and bottom faces
         will be circular (each area defined with four lines) and they
-        will be connected with two surface areas (each spanning 180°).
+        will be connected with two surface areas (each spanning 180 degrees).
         See the CYL5, PCIRC, and CYLIND commands for alternate ways to
         create circles and cylinders.
 
@@ -2058,8 +2058,8 @@ class _MapdlGeometryCommands():
 
         nseg
             Number of volumes (8 maximum) around circumference.
-            Defaults to minimum required for 90° (maximum) arcs, i.e.,
-            4 for 360°, 3 for 270°, etc.
+            Defaults to minimum required for 90 degrees (maximum) arcs, i.e.,
+            4 for 360 degrees, 3 for 270 degrees, etc.
 
         Returns
         -------
@@ -2093,7 +2093,7 @@ class _MapdlGeometryCommands():
         keypoints, lines, and areas) by rotating an area pattern (and
         its associated line and keypoint patterns) about an axis.
         Keypoint patterns are generated at regular angular locations
-        (based on a maximum spacing of 90°).  Line patterns are
+        (based on a maximum spacing of 90 degrees).  Line patterns are
         generated at the keypoint patterns.  Arc lines are also
         generated to connect the keypoints circumferentially.
         Keypoint, line, area, and volume numbers are automatically
@@ -2101,7 +2101,7 @@ class _MapdlGeometryCommands():
         Adjacent lines use a common keypoint, adjacent areas use a
         common line, and adjacent volumes use a common area.
 
-        To generate a single volume with an arc greater than 180°,
+        To generate a single volume with an arc greater than 180 degrees,
         NSEG must be greater than or equal to 2.
 
         If element attributes have been associated with the input area
@@ -2355,8 +2355,68 @@ class _MapdlGeometryCommands():
         primitive command cannot be used to create a degenerate volume
         as a means of creating an area.)  The face or faces will be
         circular (each area defined with four lines), and they will be
-        connected with two areas (each spanning 180°).  See the CONE
+        connected with two areas (each spanning 180 degrees).  See the CONE
         command for an alternate way to create cones.
         """
         command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def cone(self, rbot="", rtop="", z1="", z2="", theta1="", theta2="",
+             **kwargs) -> int:
+        """Create a conical volume centered about the working plane origin.
+
+        APDL Command: CONE
+
+        Parameters
+        ----------
+        rbot, rtop
+            Radii of the bottom and top faces of the cone.  A value of
+            zero or blank for either RBOT or RTOP defines a degenerate
+            face at the center axis (i.e., the vertex of the cone).
+            The same value for both RBOT and RTOP defines a cylinder
+            instead of a cone.
+
+        z1, z2
+            Working plane Z coordinates of the cone.  The smaller
+            value is always associated with the bottom face.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the cone.
+            Used for creating a conical sector.  The sector begins at
+            the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0 degrees and the ending angle
+            defaults to 360 degrees.  See the Modeling and Meshing Guide for
+            an illustration.
+
+        Returns
+        -------
+        int
+            Volume number of the cone.
+
+        Examples
+        --------
+        Create a quarter cone with a bottom radius of 3, top radius of 1 and
+        a height of 10 centered at ``(0, 0)``.
+
+        >>> vnum = mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid conical volume centered about the working
+        plane origin.  The non-degenerate face (top or bottom) is
+        parallel to the working plane but not necessarily coplanar
+        with (i.e., "on") the working plane.  The cone must have a
+        spatial volume greater than zero. (i.e., this volume primitive
+        command cannot be used to create a degenerate volume as a
+        means of creating an area.)
+
+        For a cone of 360, top and bottom faces will be circular (each
+        area defined with four lines), and they will be connected with
+        two areas (each spanning 180 degrees).  See the ``CON4``
+        command for an alternate way to create cones.
+        """
+        command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
         return parse_output_volume_area(self.run(command, **kwargs))

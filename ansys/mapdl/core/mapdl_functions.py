@@ -48845,47 +48845,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "*DOT,%s,%s,%s,%s" % (str(vector1), str(vector2), str(par_real), str(par_imag))
         return self.run(command, **kwargs)
 
-    def cone(self, rbot="", rtop="", z1="", z2="", theta1="", theta2="",
-             **kwargs):
-        """APDL Command: CONE
-
-        Creates a conical volume centered about the working plane origin.
-
-        Parameters
-        ----------
-        rbot, rtop
-            Radii of the bottom and top faces of the cone.  A value of zero or
-            blank for either RBOT or RTOP defines a degenerate face at the
-            center axis (i.e., the vertex of the cone).  The same value for
-            both RBOT and RTOP defines a cylinder instead of a cone.
-
-        z1, z2
-            Working plane Z coordinates of the cone.  The smaller value is
-            always associated with the bottom face.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the cone.  Used for
-            creating a conical sector.  The sector begins at the algebraically
-            smaller angle, extends in a positive angular direction, and ends at
-            the larger angle.  The  starting angle defaults to 0° and the
-            ending angle defaults to 360°.  See the Modeling and Meshing Guide
-            for an illustration.
-
-        Notes
-        -----
-        Defines a solid conical volume centered about the working plane origin.
-        The non-degenerate face (top or bottom) is parallel to the working
-        plane but not necessarily coplanar with (i.e., "on") the working plane.
-        The cone must have a spatial volume greater than zero. (i.e., this
-        volume primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  For a cone of 360°, top and bottom
-        faces will be circular (each area defined with four lines), and they
-        will be connected with two areas (each spanning 180°).  See the CON4
-        command for an alternate way to create cones.
-        """
-        command = "CONE,%s,%s,%s,%s,%s,%s" % (str(rbot), str(rtop), str(z1), str(z2), str(theta1), str(theta2))
-        return self.run(command, **kwargs)
-
     def engen(self, iinc="", itime="", ninc="", iel1="", iel2="", ieinc="",
               minc="", tinc="", rinc="", cinc="", sinc="", dx="", dy="", dz="",
               **kwargs):

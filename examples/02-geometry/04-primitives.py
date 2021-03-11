@@ -119,3 +119,16 @@ mapdl.clear(); mapdl.prep7()
 
 vnum = mapdl.con4(rad1=3, rad2=0, depth=10)
 mapdl.vplot(show_lines=False, quality=6, show_bounds=True)
+
+
+###############################################################################
+# APDL Command: CONE
+# ~~~~~~~~~~~~~~~~~~
+# Create a conical volume centered about the working plane origin.
+#
+# Create a quarter cone with a bottom radius of 3, top radius of 1 and
+# a height of 10 centered at ``(0, 0)``.
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90)
+mapdl.vplot(show_lines=False, quality=6, show_bounds=True)
