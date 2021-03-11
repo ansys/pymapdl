@@ -1,6 +1,5 @@
 """Test geometry commands"""
 import numpy as np
-from ansys.mapdl.core import Mapdl; mapdl = Mapdl()
 
 
 def test_keypoint_selection(mapdl, cleared):
