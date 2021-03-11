@@ -1,6 +1,7 @@
 """Test geometry commands"""
 import numpy as np
 
+
 def test_keypoint_selection(mapdl, cleared):
     def generate_random_kp():
         mapdl.k('', *np.random.random(3))
@@ -443,6 +444,7 @@ def test_block(cleared, mapdl):
 
 def test_con4(cleared, mapdl):
     assert mapdl.con4(rad1=3, rad2=0, depth=10) == 1
+
 
 def test_cone(cleared, mapdl):
     assert mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90) == 1
