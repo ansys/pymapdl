@@ -76,7 +76,7 @@ def parse_output_volume_area(msg):
 class _MapdlGeometryCommands():
 
     def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
+               zv1="", xv6="", yv6="", zv6="", **kwargs) -> int:
         """Generate a single line from a spline fit to a series of keypoints.
 
         APDL Command: BSPLIN
@@ -106,7 +106,8 @@ class _MapdlGeometryCommands():
 
         Examples
         --------
-        Generate a spline through (0, 0, 0), (0, 1, 0) and (1, 2, 0)
+        Generate a spline through ``(0, 0, 0)``, ``(0, 1, 0)`` and
+        ``(1, 2, 0)``
 
         >>> k0 = mapdl.k("", 0, 0, 0)
         >>> k1 = mapdl.k("", 0, 1, 0)
@@ -115,9 +116,10 @@ class _MapdlGeometryCommands():
 
         Notes
         -----
-        One line is generated between keypoint P1 and the last keypoint
-        entered.  The line will pass through each entered keypoint.  Solid
-        modeling in a toroidal coordinate system is not recommended.
+        One line is generated between keypoint P1 and the last
+        keypoint entered.  The line will pass through each entered
+        keypoint.  Solid modeling in a toroidal coordinate system is
+        not recommended.
         """
         command = "BSPLIN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1),
                                                                   str(p2),
@@ -133,7 +135,7 @@ class _MapdlGeometryCommands():
                                                                   str(zv6))
         return parse_line_no(self.run(command, **kwargs))
 
-    def k(self, npt="", x="", y="", z="", **kwargs):
+    def k(self, npt="", x="", y="", z="", **kwargs) -> int:
         """Define a keypoint.
 
         APDL Command: K
@@ -151,18 +153,18 @@ class _MapdlGeometryCommands():
         Returns
         -------
         int
-            The keypoint number of the created keypoint.
+            The keypoint number of the generated keypoint.
 
         Examples
         --------
-        Create keypoint at (0, 1, 2)
+        Create keypoint at ``(0, 1, 2)``
 
         >>> knum = mapdl.k('', 0, 1, 2)
         >>> knum
         1
 
-        Create keypoint at (10, 11, 12) while specifying the keypoint
-        number.
+        Create keypoint at ``(10, 11, 12)`` while specifying the
+        keypoint number.
 
         >>> knum = mapdl.k(5, 10, 11, 12)
         >>> knum
@@ -190,8 +192,8 @@ class _MapdlGeometryCommands():
                 return int(res.group(2))
 
     def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
-               **kwargs):
-        """Generates circular arc lines.
+               **kwargs) -> list:
+        """Generate circular arc lines.
 
         APDL Command: CIRCLE
 
@@ -261,7 +263,7 @@ class _MapdlGeometryCommands():
         return parse_line_nos(self.run(command, **kwargs))
 
     def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
-          xv2="", yv2="", zv2="", **kwargs):
+          xv2="", yv2="", zv2="", **kwargs) -> int:
         """Define a line between two keypoints.
 
         APDL Command: L
@@ -293,7 +295,7 @@ class _MapdlGeometryCommands():
         Returns
         -------
         int
-            The line number of the created line.
+            The line number of the generated line.
 
         Examples
         --------
@@ -329,7 +331,7 @@ class _MapdlGeometryCommands():
 
     def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
           p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
-          p18="", **kwargs):
+          p18="", **kwargs) -> int:
         """Define an area by connecting keypoints.
 
         APDL Command: A
@@ -343,7 +345,7 @@ class _MapdlGeometryCommands():
         Returns
         -------
         int
-            The area number of the created area.
+            The area number of the generated area.
 
         Examples
         --------
@@ -377,7 +379,7 @@ class _MapdlGeometryCommands():
         return parse_a(self.run(command, **kwargs))
 
     def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
-          **kwargs):
+          **kwargs) -> int:
         """Define a volume through keypoints.
 
         APDL Command: V
@@ -407,6 +409,11 @@ class _MapdlGeometryCommands():
 
         p8 : int, optional
             Keypoint defining eighth corner of volume.
+
+        Returns
+        -------
+        int
+            Volume number of the generated volume.
 
         Examples
         --------
@@ -471,7 +478,7 @@ class _MapdlGeometryCommands():
         return parse_v(self.run(command, **kwargs))
 
     def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-          **kwargs):
+          **kwargs) -> int:
         """Define a node.
 
         APDL Command: N
@@ -496,15 +503,21 @@ class _MapdlGeometryCommands():
         thzx
             Third rotation about nodal Y (positive Z toward X).
 
+        Returns
+        -------
+        int
+            Node number of the generated node.
+
+
         Examples
         --------
-        Create a node at (0, 1, 1)
+        Create a node at ``(0, 1, 1)``
 
         >>> nnum = mapdl.n("", 0, 1, 1)
         >>> nnum
         1
 
-        Create a node at (4, 5, 1) with a node ID of 10
+        Create a node at ``(4, 5, 1)`` with a node ID of 10
 
         >>> nnum = mapdl.n(10, 4, 5, 1)
         >>> nnum
@@ -526,7 +539,7 @@ class _MapdlGeometryCommands():
                 return int(res.group(2))
 
     def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
-           l10="", **kwargs):
+           l10="", **kwargs) -> int:
         """Generate an area bounded by previously defined lines.
 
         APDL Command: AL
@@ -545,8 +558,8 @@ class _MapdlGeometryCommands():
 
         Returns
         -------
-        result : int
-            Returns the area number of the created area.
+        int
+            Area number of the generated area.
 
         Examples
         --------
@@ -582,7 +595,7 @@ class _MapdlGeometryCommands():
         return parse_a(self.run(command, **kwargs))
 
     def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
-             **kwargs):
+             **kwargs) -> int:
         """APDL Command: BLC4
 
         Creates a rectangular area or block volume by corner points.
@@ -610,6 +623,11 @@ class _MapdlGeometryCommands():
             (default), a rectangular area is created on the working
             plane.
 
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
+
         Examples
         --------
         Create a block with dimensions 1 x 2 x 10 with one corner of
@@ -633,12 +651,11 @@ class _MapdlGeometryCommands():
         return parse_output_volume_area(self.run(command, **kwargs))
 
     def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
-             theta2="", depth="", **kwargs):
+             theta2="", depth="", **kwargs) -> int:
         """Creates a circular area or cylindrical volume anywhere on
         the working plane.
 
         APDL Command: CYL4
-
 
         Parameters
         ----------
@@ -668,6 +685,11 @@ class _MapdlGeometryCommands():
             plane representing the depth of the cylinder.  If DEPTH =
             0 (default), a circular area is created on the working
             plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
 
         Examples
         --------
@@ -708,7 +730,7 @@ class _MapdlGeometryCommands():
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
         return parse_output_volume_area(self.run(command, **kwargs))
 
-    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs):
+    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs) -> int:
         """Subtracts areas from areas.
 
         APDL Command: ASBA
@@ -758,6 +780,11 @@ class _MapdlGeometryCommands():
             KEEP - Keep NA2 areas after ASBA operation (override BOPTN
             command settings).
 
+        Returns
+        -------
+        int
+            Area number of the new area (if applicable)
+
         Examples
         --------
         Subtract a 0.5 x 0.5 rectangle from a 1 x 1 rectangle.
@@ -789,7 +816,7 @@ class _MapdlGeometryCommands():
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse_output_volume_area(self.run(command, **kwargs))
 
-    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs):
+    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs) -> int:
         """Creates a keypoint between two existing keypoints.
 
         APDL Command: KBETW
@@ -825,6 +852,11 @@ class _MapdlGeometryCommands():
             between KP1 and KP2, the keypoint is created on the
             extended line.
 
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
         Examples
         --------
         Create a keypoint exactly centered between two keypoints.
@@ -851,7 +883,7 @@ class _MapdlGeometryCommands():
         return parse_kpoint(self.run(command, **kwargs))
 
     def kcenter(self, type="", val1="", val2="", val3="", val4="", kpnew="",
-                **kwargs):
+                **kwargs) -> int:
         """Creates a keypoint at the center of a circular arc defined
         by three locations.
 
@@ -875,6 +907,11 @@ class _MapdlGeometryCommands():
             Number assigned to new keypoint.  Defaults to the lowest available
             keypoint number.
 
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
         Examples
         --------
         Create a keypoint at the center of a circle centered at (0, 0, 0)
@@ -890,16 +927,22 @@ class _MapdlGeometryCommands():
         -----
         KCENTER should be used in the Cartesian coordinate system
         (CSYS,0) only.  This command provides three methods to define
-        a keypoint at the center of three locations.  As shown below,
-        the center point can be calculated based on a) three
-        keypoints, b) three keypoints and a radius, or c) three
-        locations on a line.  Note that for method c, if a circular
-        line is specified by VAL1, VAL2 through VAL4 are not needed.
+        a keypoint at the center of three locations.
+
+        Three keypoints:
+
+                 , - ~ ~ ~ - ,
+             ,(x)(VAL2)        ' , <--- imaginary circluar arc
+           ,                       ,
+          ,                         ,
+         ,                           ,
+        (x)(VAL1)     (x)(KPNEW)    (x)(VAL3)
+
         """
         command = f"KCENTER,{type},{val1},{val2},{val3},{val4},{kpnew}"
         return parse_kpoint(self.run(command, **kwargs))
 
-    def kdist(self, kp1="", kp2="", **kwargs):
+    def kdist(self, kp1="", kp2="", **kwargs) -> list:
         """Calculates and lists the distance between two keypoints.
 
         APDL Command: KDIST
@@ -912,9 +955,14 @@ class _MapdlGeometryCommands():
         kp2
             Second keypoint in distance calculation.
 
+        Returns
+        -------
+        list
+            ``[X, Y, Z]`` distance between two keypoints.
+
         Examples
         --------
-        Compute the distance between two keypoints points
+        Compute the distance between two keypoints.
 
         >>> kp0 = (0, 10, -3)
         >>> kp1 = (1, 5, 10)
@@ -941,7 +989,7 @@ class _MapdlGeometryCommands():
             if len(finds) == 3:
                 return [float(val) for val in finds]
 
-    def kl(self, nl1="", ratio="", nk1="", **kwargs):
+    def kl(self, nl1="", ratio="", nk1="", **kwargs) -> int:
         """Generates a keypoint at a specified location on an existing line.
 
         APDL Command: KL
@@ -960,6 +1008,11 @@ class _MapdlGeometryCommands():
             Number to be assigned to keypoint generated at division
             location (defaults to lowest available keypoint number
             [NUMSTR]).
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
 
         Examples
         --------
@@ -980,7 +1033,7 @@ class _MapdlGeometryCommands():
             if res is not None:
                 return int(res.group(1))
 
-    def knode(self, npt="", node="", **kwargs):
+    def knode(self, npt="", node="", **kwargs) -> int:
         """Defines a keypoint at an existing node location.
 
         APDL Command: KNODE
@@ -994,6 +1047,11 @@ class _MapdlGeometryCommands():
         node
             Node number defining global X, Y, Z keypoint location.  A
             component name may also be substituted for NODE.
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
 
         Examples
         --------
@@ -1012,7 +1070,7 @@ class _MapdlGeometryCommands():
                 return int(res.group(1))
 
     def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
-              **kwargs):
+              **kwargs) -> int:
         """Generates a line at an angle with two existing lines.
 
         APDL Command: L2ANG
@@ -1047,6 +1105,11 @@ class _MapdlGeometryCommands():
             location on second line (defaults to lowest available
             keypoint number [NUMSTR]).
 
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
         Examples
         --------
         Create two circles and join them with a line.
@@ -1077,7 +1140,7 @@ class _MapdlGeometryCommands():
         if msg:
             return parse_line_no(msg)
 
-    def l2tan(self, nl1="", nl2="", **kwargs):
+    def l2tan(self, nl1="", nl2="", **kwargs) -> int:
         """Generates a line tangent to two lines.
 
         APDL Command: L2TAN
@@ -1093,6 +1156,11 @@ class _MapdlGeometryCommands():
             Number of the second line generated line is tangent to.
             If negative, assume P3 is the second keypoint of the line
             instead of the first.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
 
         Examples
         --------
@@ -1119,7 +1187,7 @@ class _MapdlGeometryCommands():
         command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
         return parse_line_no(self.run(command, **kwargs))
 
-    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs):
+    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs) -> int:
         """Generate a straight line at an angle with a line.
 
         APDL Command: LANG
@@ -1156,6 +1224,11 @@ class _MapdlGeometryCommands():
             will be located with less speed and accuracy, and an
             arbitrary location may result.
 
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
         Examples
         --------
         Create a line from a line from (0, 0, 0) to (1, 0, 0) to a
@@ -1189,7 +1262,7 @@ class _MapdlGeometryCommands():
         command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def larc(self, p1="", p2="", pc="", rad="", **kwargs):
+    def larc(self, p1="", p2="", pc="", rad="", **kwargs) -> int:
         """Define a circular arc.
 
         APDL Command: LARC
@@ -1213,6 +1286,11 @@ class _MapdlGeometryCommands():
             center of curvature side is opposite to that defined by
             PC.  If RAD is blank, RAD will be calculated from a curve
             fit through P1, PC, and P2.
+
+        Returns
+        -------
+        int
+            Line number of the arc.
 
         Examples
         --------
@@ -1241,7 +1319,7 @@ class _MapdlGeometryCommands():
         command = f"LARC,{p1},{p2},{pc},{rad}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def larea(self, p1="", p2="", narea="", **kwargs):
+    def larea(self, p1="", p2="", narea="", **kwargs) -> int:
         """Generate the shortest line between two keypoints on an area.
 
         APDL Command: LAREA
@@ -1257,6 +1335,11 @@ class _MapdlGeometryCommands():
         narea
             Area containing P1 and P2, or area to which generated line
             is to be parallel.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
 
         Examples
         --------
@@ -1282,7 +1365,7 @@ class _MapdlGeometryCommands():
         command = f"LAREA,{p1},{p2},{narea}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def lcomb(self, nl1="", nl2="", keep="", **kwargs):
+    def lcomb(self, nl1="", nl2="", keep="", **kwargs) -> int:
         """Combines adjacent lines into one line.
 
         APDL Command: LCOMB
@@ -1309,6 +1392,11 @@ class _MapdlGeometryCommands():
             1 - Keep NL1, NL2, and their common keypoint.  (The common
                 keypoint will not be attached to the output line.)
 
+        Returns
+        -------
+        int
+            Line number of the combined line.
+
         Examples
         --------
         Create two lines and combine them.
@@ -1333,7 +1421,7 @@ class _MapdlGeometryCommands():
         command = f"LCOMB,{nl1},{nl2},{keep}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def ldiv(self, nl1="", ratio="", pdiv="", ndiv="", keep="", **kwargs):
+    def ldiv(self, nl1="", ratio="", pdiv="", ndiv="", keep="", **kwargs) -> str:
         """Divides a single line into two or more lines.
 
         APDL Command: LDIV
@@ -1372,6 +1460,11 @@ class _MapdlGeometryCommands():
             1 - Do not modify old line.  New lines will overlay old
                 line and have unique keypoints.
 
+        Returns
+        -------
+        str
+            MAPDL command output.
+
         Examples
         --------
         Create a single line and divide it exactly half.
@@ -1379,7 +1472,11 @@ class _MapdlGeometryCommands():
         >>> k0 = mapdl.k("", 0, 0, 0)
         >>> k1 = mapdl.k("", 1, 0, 0)
         >>> l0 = mapdl.l(k0, k1)
-        >>> mapdl.ldiv(l0, ratio=0.5)
+        >>> output = mapdl.ldiv(l0, ratio=0.5)
+        >>> print(output)
+        DIVIDE LINE      1       RATIO=  0.50000       NEW KEYPOINT=     0
+          NUMBER OF LINES DIVIDED =      1
+
 
         Create a single line and divide it into 5 pieces.
 
@@ -1400,7 +1497,7 @@ class _MapdlGeometryCommands():
         command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
         return self.run(command, **kwargs)
 
-    def lextnd(self, nl1="", nk1="", dist="", keep="", **kwargs):
+    def lextnd(self, nl1="", nk1="", dist="", keep="", **kwargs) -> int:
         """Extends a line at one end by using its slope.
 
         APDL Command: LEXTND
@@ -1424,6 +1521,11 @@ class _MapdlGeometryCommands():
             1 - Do not modify old line.  New line will overlay old
                 line and have unique keypoints.
 
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
         Examples
         --------
         Create a circular arc and extend it at one of its keypoints
@@ -1445,7 +1547,7 @@ class _MapdlGeometryCommands():
         command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def lfillt(self, nl1="", nl2="", rad="", pcent="", **kwargs):
+    def lfillt(self, nl1="", nl2="", rad="", pcent="", **kwargs) -> int:
         """Generate a fillet line between two intersecting lines.
 
         APDL Command: LFILLT
@@ -1465,6 +1567,11 @@ class _MapdlGeometryCommands():
         pcent
             Number to be assigned to generated keypoint at fillet arc center.
             If zero (or blank), no keypoint is generated.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
 
         Examples
         --------
@@ -1494,7 +1601,7 @@ class _MapdlGeometryCommands():
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def lstr(self, p1="", p2="", **kwargs):
+    def lstr(self, p1="", p2="", **kwargs) -> int:
         """Define a straight line irrespective of the active coordinate system.
 
         APDL Command: LSTR
@@ -1510,7 +1617,7 @@ class _MapdlGeometryCommands():
         Returns
         -------
         int
-            Line number of the created line.
+            Line number of the generated line.
 
         Examples
         --------
@@ -1535,7 +1642,7 @@ class _MapdlGeometryCommands():
         command = f"LSTR,{p1},{p2}"
         return parse_line_no(self.run(command, **kwargs))
 
-    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs):
+    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs) -> int:
         """Generate a line at the end of, and tangent to, an existing line.
 
         APDL Command: LTAN
@@ -1549,6 +1656,11 @@ class _MapdlGeometryCommands():
 
         p3
             Keypoint at which generated line must end.
+
+        Returns
+        -------
+        int
+            Line number of the line generated.
 
         Examples
         --------
@@ -1572,7 +1684,7 @@ class _MapdlGeometryCommands():
         return parse_line_no(self.run(command, **kwargs))
 
     def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs):
+               zv1="", xv6="", yv6="", zv6="", **kwargs) -> list:
         """Generate a segmented spline through a series of keypoints.
 
         APDL Command: SPLINE
@@ -1584,6 +1696,7 @@ class _MapdlGeometryCommands():
             must be defined.
 
         Returns
+        -------
         list
             List of line numbers generated.
 
@@ -1596,7 +1709,9 @@ class _MapdlGeometryCommands():
         >>> k2 = mapdl.k('', 0.4, 0.3, 0)
         >>> k3 = mapdl.k('', 0.6, 0.5, 0)
         >>> k4 = mapdl.k('', 0.8, 0.3, 0)
-        >>> mapdl.spline(k0, k1, k2, k3, k4)
+        >>> lines = mapdl.spline(k0, k1, k2, k3, k4)
+        >>> lines
+        [1, 2, 3, 4]
 
         Notes
         -----
@@ -1609,7 +1724,7 @@ class _MapdlGeometryCommands():
         return parse_line_nos(self.run(command, **kwargs))
 
     def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs):
+              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
         """Generate areas by dragging a line pattern along a path.
 
         APDL Command: ADRAG
@@ -1629,6 +1744,11 @@ class _MapdlGeometryCommands():
             to be dragged (6 maximum if using keyboard entry).  Must
             be a continuous set of lines.
 
+        Returns
+        -------
+        str
+            MAPDL command output.
+
         Examples
         --------
         Drag a circle between two keypoints to create an area
@@ -1637,7 +1757,8 @@ class _MapdlGeometryCommands():
         >>> k1 = mapdl.k("", 0, 0, 1)
         >>> carc = mapdl.circle(k0, 1, k1, arc=90)
         >>> l0 = mapdl.l(k0, k1)
-        >>> print(mapdl.adrag(carc[0], nlp1=l0))
+        >>> output = mapdl.adrag(carc[0], nlp1=l0)
+        >>> print(output)
         DRAG LINES:
              1,
         ALONG LINES
@@ -1672,7 +1793,7 @@ class _MapdlGeometryCommands():
         return self.run(command, **kwargs)
 
     def vdrag(self, na1="", na2="", na3="", na4="", na5="", na6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs):
+              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
         """APDL Command: VDRAG
 
         Generate volumes by dragging an area pattern along a path.
@@ -1692,6 +1813,11 @@ class _MapdlGeometryCommands():
             lines must share the connecting keypoint (the end keypoint
             of one line must also be first keypoint of the next line).
 
+        Returns
+        -------
+        str
+            MAPDL command output.
+
         Examples
         --------
         Create a square with a hole in it and drag it along an arc.
@@ -1703,7 +1829,13 @@ class _MapdlGeometryCommands():
         >>> k1 = mapdl.k("", 1, 0, 1)
         >>> k2 = mapdl.k("", 1, 0, 0)
         >>> l0 = mapdl.larc(k0, k1, k2, 2)
-        >>> mapdl.vdrag(aout, nlp1=l0)
+        >>> output = mapdl.vdrag(aout, nlp1=l0)
+        >>> print(output)
+        DRAG AREAS
+          3,
+        ALONG LINES
+          9
+
 
         Notes
         -----
@@ -1763,7 +1895,7 @@ class _MapdlGeometryCommands():
         return self.run(command, **kwargs)
 
     def va(self, a1="", a2="", a3="", a4="", a5="", a6="", a7="", a8="", a9="",
-           a10="", **kwargs):
+           a10="", **kwargs) -> int:
         """APDL Command: VA
 
         Generate a volume bounded by existing areas.
@@ -1775,6 +1907,12 @@ class _MapdlGeometryCommands():
             areas is 4.  If A1 = ALL, use all selected [ASEL] areas
             and ignore A2 to A10.  A component name may also be
             substituted for A1.
+
+        Returns
+        -------
+        int
+            Volume number of the volume.
+
 
         Examples
         --------
@@ -1804,7 +1942,7 @@ class _MapdlGeometryCommands():
         return parse_v(self.run(command, **kwargs))
 
     def vext(self, na1="", na2="", ninc="", dx="", dy="", dz="", rx="", ry="",
-             rz="", **kwargs):
+             rz="", **kwargs) -> str:
         """APDL Command: VEXT
 
         Generate additional volumes by extruding areas.
@@ -1835,6 +1973,11 @@ class _MapdlGeometryCommands():
             an offset of 10 degrees to the keypoints.  Zero, blank, or
             negative scale factor values are assumed to be 1.0.  Zero
             or blank angular offsets have no effect.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
 
         Examples
         --------
@@ -1890,7 +2033,7 @@ class _MapdlGeometryCommands():
 
     def vrotat(self, na1="", na2="", na3="", na4="", na5="",
                na6="", pax1="", pax2="", arc="", nseg="",
-               **kwargs):
+               **kwargs) -> str:
         """APDL Command: VROTAT
 
         Generate cylindrical volumes by rotating an area pattern about
@@ -1917,6 +2060,11 @@ class _MapdlGeometryCommands():
             Number of volumes (8 maximum) around circumference.
             Defaults to minimum required for 90° (maximum) arcs, i.e.,
             4 for 360°, 3 for 270°, etc.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
 
         Examples
         --------
@@ -1974,7 +2122,7 @@ class _MapdlGeometryCommands():
         return self.run(command, **kwargs)
 
     def vsymm(self, ncomp="", nv1="", nv2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+              imove="", **kwargs) -> str:
         """APDL Command: VSYMM
 
         Generate volumes from a volume pattern by symmetry reflection.
@@ -2017,6 +2165,23 @@ class _MapdlGeometryCommands():
                 Corresponding meshed items are also moved if not
                 needed at their original position.
 
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Create four blocks by reflecting a single block across the X
+        component and then the Y component.
+
+        >>> vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
+        >>> mapdl.vsymm('X', vnum)
+        >>> output = mapdl.vsymm('Y', 'ALL')
+        >>> print(output)
+        SYMMETRY TRANSFORMATION OF VOLUMES       USING COMPONENT  Y
+           SET IS ALL SELECTED VOLUMES
+
         Notes
         -----
         Generates a reflected set of volumes (and their corresponding
@@ -2037,3 +2202,161 @@ class _MapdlGeometryCommands():
         """
         command = f"VSYMM,{ncomp},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
+
+    def blc5(self, xcenter="", ycenter="", width="", height="", depth="",
+             **kwargs) -> int:
+        """APDL Command: BLC5
+
+        Create a rectangular area or block volume by center and corner
+        points.
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            rectangle or block face.
+
+        width
+            The total distance on or parallel to the working plane
+            X-axis defining the width of the rectangle or block face.
+
+        height
+            The total distance on or parallel to the working plane
+            Y-axis defining the height of the rectangle or block face.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the block.  If ``depth=0``
+            (default), a rectangular area is created on the working
+            plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
+
+        Examples
+        --------
+        Create a square centered at ``(0, 0)`` with a width of 0.5 and
+        a height of 0.5
+
+        >>> anum = mapdl.blc5(width=0.5, height=0.5)
+        >>> anum
+        1
+
+        >>> vnum = mapdl.blc5(width=1, height=4, depth=9)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane
+        by specifying the center and corner points.  A rectangle will
+        be defined with four keypoints and four lines.  A volume will
+        be defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4``, ``RECTNG``, and ``BLOCK`` commands for
+        alternate ways to create rectangles and blocks.
+        """
+        command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def block(self, x1="", x2="", y1="", y2="", z1="", z2="", **kwargs):
+        """APDL Command: BLOCK
+
+        Create a block volume based on working plane coordinates.
+
+        Parameters
+        ----------
+        x1, x2
+            Working plane X coordinates of the block.
+
+        y1, y2
+            Working plane Y coordinates of the block.
+
+        z1, z2
+            Working plane Z coordinates of the block.
+
+        Returns
+        -------
+        int
+            Volume number of the block.
+
+        Examples
+        --------
+        Create a block volume based on working plane coordinates with
+        the size ``(1 x 2 x 3)``.
+
+        >>> vnum = mapdl.block(0, 1, 0, 2, 1, 4)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a hexahedral volume based on the working plane.  The
+        block must have a spatial volume greater than zero (i.e., this
+        volume primitive command cannot be used to create a degenerate
+        volume as a means of creating an area.)  The volume will be
+        defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4`` and ``BLC5`` commands for alternate ways to
+        create blocks.
+        """
+        command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="",
+             **kwargs) -> int:
+        """Create a conical volume anywhere on the working plane.
+
+        APDL Command: CON4
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center axis of
+            the cone.
+
+        rad1, rad2
+            Radii of the faces of the cone.  RAD1 defines the bottom
+            face and will be located on the working plane.  RAD2
+            defines the top face and is parallel to the working plane.
+            A value of zero or blank for either RAD1 or RAD2 defines a
+            degenerate face at the center axis (i.e., the vertex of
+            the cone).  The same value for both RAD1 and RAD2 defines
+            a cylinder instead of a cone.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the cone.  DEPTH cannot be
+            zero (see "Notes" below).
+
+        Returns
+        -------
+        int
+            Volume number of the cone.
+
+        Examples
+        --------
+        Create a cone with a bottom radius of 3 and a height of 10.
+
+        >>> vnum = mapdl.con4(rad1=3, rad2=0, depth=10)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid conical volume with either the vertex or a
+        face anywhere on the working plane.  The cone must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  The face or faces will be
+        circular (each area defined with four lines), and they will be
+        connected with two areas (each spanning 180°).  See the CONE
+        command for an alternate way to create cones.
+        """
+        command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))

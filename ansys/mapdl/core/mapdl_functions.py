@@ -1530,35 +1530,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "MODSELOPTION,%s,%s,%s,%s,%s,%s" % (str(dir1), str(dir2), str(dir3), str(dir4), str(dir5), str(dir6 ))
         return self.run(command, **kwargs)
 
-    def block(self, x1="", x2="", y1="", y2="", z1="", z2="", **kwargs):
-        """APDL Command: BLOCK
-
-        Creates a block volume based on working plane coordinates.
-
-        Parameters
-        ----------
-        x1, x2
-            Working plane X coordinates of the block.
-
-        y1, y2
-            Working plane Y coordinates of the block.
-
-        z1, z2
-            Working plane Z coordinates of the block.
-
-        Notes
-        -----
-        Defines a hexahedral volume based on the working plane.  The block must
-        have a spatial volume greater than zero (i.e., this volume primitive
-        command cannot be used to create a degenerate volume as a means of
-        creating an area.)  The volume will be defined with eight keypoints,
-        twelve lines, and six areas, with the top and bottom faces parallel to
-        the working plane.  See the BLC4 and BLC5 commands for alternate ways
-        to create blocks.
-        """
-        command = "BLOCK,%s,%s,%s,%s,%s,%s" % (str(x1), str(x2), str(y1), str(y2), str(z1), str(z2))
-        return self.run(command, **kwargs)
-
     def device(self, label="", key="", **kwargs):
         """APDL Command: /DEVICE
 
@@ -15563,45 +15534,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is also valid in PREP7.
         """
         command = "GPDELE,%s,%s,%s" % (str(gap1), str(gap2), str(ginc))
-        return self.run(command, **kwargs)
-
-    def blc5(self, xcenter="", ycenter="", width="", height="", depth="",
-             **kwargs):
-        """APDL Command: BLC5
-
-        Creates a rectangular area or block volume by center and corner points.
-
-        Parameters
-        ----------
-        xcenter, ycenter
-            Working plane X and Y coordinates of the center of the rectangle or
-            block face.
-
-        width
-            The total distance on or parallel to the working plane X-axis
-            defining the width of the rectangle or block face.
-
-        height
-            The total distance on or parallel to the working plane Y-axis
-            defining the height of the rectangle or block face.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the block.  If DEPTH = 0 (default), a rectangular area
-            is created on the working plane.
-
-        Notes
-        -----
-        Defines a rectangular area anywhere on the working plane or a
-        hexahedral volume with one face anywhere on the working plane by
-        specifying the center and corner points.  A rectangle will be defined
-        with four keypoints and four lines.  A volume will be defined with
-        eight keypoints, twelve lines, and six areas, with the top and bottom
-        faces parallel to the working plane.  See the BLC4, RECTNG, and BLOCK
-        commands for alternate ways to create rectangles and blocks.
-        """
-        command = "BLC5,%s,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(width), str(height), str(depth))
         return self.run(command, **kwargs)
 
     def asum(self, lab="", **kwargs):
@@ -38068,43 +38000,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Constraint Equations for more information.
         """
         command = "CE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(neqn), str(const), str(node1), str(lab1), str(c1), str(node2), str(lab2), str(c2), str(node3), str(lab3), str(c3))
-        return self.run(command, **kwargs)
-
-    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="",
-             **kwargs):
-        """APDL Command: CON4
-
-        Creates a conical volume anywhere on the working plane.
-
-        Parameters
-        ----------
-        xcenter, ycenter
-            Working plane X and Y coordinates of the center axis of the cone.
-
-        rad1, rad2
-            Radii of the faces of the cone.  RAD1 defines the bottom face and
-            will be located on the working plane.  RAD2 defines the top face
-            and is parallel to the working plane.  A value of zero or blank for
-            either RAD1 or RAD2 defines a degenerate face at the center axis
-            (i.e., the vertex of the cone).  The same value for both RAD1 and
-            RAD2 defines a cylinder instead of a cone.
-
-        depth
-            The perpendicular distance (either positive or negative based on
-            the working plane Z direction) from the working plane representing
-            the depth of the cone.  DEPTH cannot be zero (see "Notes" below).
-
-        Notes
-        -----
-        Defines a solid conical volume with either the vertex or a face
-        anywhere on the working plane.  The cone must have a spatial volume
-        greater than zero.  (i.e., this volume primitive command cannot be used
-        to create a degenerate volume as a means of creating an area.)  The
-        face or faces will be circular (each area defined with four lines), and
-        they will be connected with two areas (each spanning 180°).  See the
-        CONE command for an alternate way to create cones.
-        """
-        command = "CON4,%s,%s,%s,%s,%s" % (str(xcenter), str(ycenter), str(rad1), str(rad2), str(depth))
         return self.run(command, **kwargs)
 
     def filldata(self, ir="", lstrt="", lstop="", linc="", value="", dval="",

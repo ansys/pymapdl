@@ -431,3 +431,17 @@ def test_al(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
     a0 = mapdl.al(l0, l1, l2, l3)
     assert a0 == 1
+
+
+def test_bcl5(cleared, mapdl):
+    # test both the area and volume cases
+    assert mapdl.blc5(width=0.5, height=0.5) == 1
+    assert mapdl.blc5(width=1, height=4, depth=9) == 1
+
+
+def test_block(cleared, mapdl):
+    assert mapdl.block(0, 1, 0, 2, 1, 4) == 1
+
+
+def test_con4(cleared, mapdl):
+    assert mapdl.con4(rad1=3, rad2=0, depth=10) == 1
