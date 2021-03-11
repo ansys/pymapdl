@@ -205,7 +205,7 @@ mapdl.aplot(show_bounds=True)
 mapdl.clear(); mapdl.prep7()
 
 vnum = mapdl.sph4(0, 0, rad1=0.9, rad2=1.0)
-mapdl.vplot(show_lines=False, quality=4, show_bounds=True, smooth_shading=True)
+mapdl.vplot(show_lines=False, show_bounds=True, smooth_shading=True)
 
 
 ###############################################################################
@@ -219,3 +219,30 @@ mapdl.clear(); mapdl.prep7()
 
 vnum = mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270)
 mapdl.vplot(show_lines=False, quality=4, show_bounds=True)
+
+
+###############################################################################
+# APDL Command: SPH5
+# ~~~~~~~~~~~~~~~~~~
+# Create a spherical volume anywhere on the working plane.
+#
+# This example creates a sphere with one point at ``(1, 1)`` and one
+# point at ``(2, 2)``
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
+mapdl.vplot(show_lines=False, show_bounds=True, smooth_shading=True)
+
+
+###############################################################################
+# APDL Command: TORUS
+# ~~~~~~~~~~~~~~~~~~~
+# Create a toroidal volume.
+#
+# This example creates a torus with an inner minor radius of 1, an
+# intermediate radii of 2, and a major radius of 5.  The values 0
+# and 180 define the starting and ending angles of the torus.
+mapdl.clear(); mapdl.prep7()
+
+vnum = mapdl.torus(rad1=5, rad2=1, rad3=2, theta1=0, theta2=180)
+mapdl.vplot(show_lines=False, show_bounds=True, smooth_shading=False)

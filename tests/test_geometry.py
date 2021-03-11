@@ -474,3 +474,7 @@ def test_sph4(cleared, mapdl):
 
 def test_sphere(cleared, mapdl):
     assert mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270) == 1
+
+
+def test_sph5(cleared, mapdl):
+    assert mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1

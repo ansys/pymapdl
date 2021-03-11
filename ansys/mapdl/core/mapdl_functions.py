@@ -779,7 +779,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMCLIST," % ()
+        command = "RMCLIST,"
         return self.run(command, **kwargs)
 
     def latt(self, mat="", real="", type="", kb="", ke="", secnum="",
@@ -2226,7 +2226,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         in directly in an ANSYS session, although it can be included in an
         input file for batch input or for use with the /INPUT command.
         """
-        command = "CLRMSHLN," % ()
+        command = "CLRMSHLN,"
         return self.run(command, **kwargs)
 
     def ppath(self, point="", node="", x="", y="", z="", cs="", **kwargs):
@@ -3041,7 +3041,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Changing the selected element set [ESEL] also restores the original
         element order.
         """
-        command = "EUSORT," % ()
+        command = "EUSORT,"
         return self.run(command, **kwargs)
 
     def vsum(self, lab="", **kwargs):
@@ -3628,7 +3628,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SMCONS," % ()
+        command = "SMCONS,"
         return self.run(command, **kwargs)
 
     def tref(self, tref="", **kwargs):
@@ -3901,7 +3901,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
     #     This command is valid in any processor.
     #     """
-    #     command = "*ELSE," % ()
+    #     command = "*ELSE,"
     #     return self.run(command, **kwargs)
 
     def nladaptive(self, component="", action="", criterion="", option="",
@@ -4582,7 +4582,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "WSPRINGS," % ()
+        command = "WSPRINGS,"
         return self.run(command, **kwargs)
 
     def fsnode(self, node="", nev="", nlod="", **kwargs):
@@ -4671,7 +4671,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/NOERASE," % ()
+        command = "/NOERASE,"
         return self.run(command, **kwargs)
 
     def spopt(self, sptype="", nmode="", elcalc="", modereusekey="", **kwargs):
@@ -4938,7 +4938,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         For more information, see the documentation for the PAUSE command and
         the ANSYS, Inc. Licensing Guide.
         """
-        command = "UNPAUSE," % ()
+        command = "UNPAUSE,"
         return self.run(command, **kwargs)
 
     def fmagsum(self, cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
@@ -5172,7 +5172,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMFLVEC," % ()
+        command = "RMFLVEC,"
         return self.run(command, **kwargs)
 
     def asel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
@@ -6476,7 +6476,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SMSURF," % ()
+        command = "SMSURF,"
         return self.run(command, **kwargs)
 
     def plmc(self, lstep="", sbstep="", timfrq="", kimg="", hibeg="", hiend="",
@@ -7025,7 +7025,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "MMF," % ()
+        command = "MMF,"
         return self.run(command, **kwargs)
 
     def enddo(self, **kwargs):
@@ -7041,7 +7041,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*ENDDO," % ()
+        command = "*ENDDO,"
         return self.run(command, **kwargs)
 
     def numcmp(self, label="", **kwargs):
@@ -7247,7 +7247,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         and should be placed at the top of the file.  /PMACRO should be
         included in any macro or input file that calls GUI functions.
         """
-        command = "/PMACRO," % ()
+        command = "/PMACRO,"
         return self.run(command, **kwargs)
 
     def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
@@ -7600,7 +7600,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         SOLID236 and SOLID237 elements. For any other elements, you must use
         FMAGSUM.
         """
-        command = "EMFT," % ()
+        command = "EMFT,"
         return self.run(command, **kwargs)
 
     def selist(self, sename="", kopt="", kint="", **kwargs):
@@ -7744,7 +7744,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EMF," % ()
+        command = "EMF,"
         return self.run(command, **kwargs)
 
     def igesin(self, fname="", ext="", **kwargs):
@@ -7797,7 +7797,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "MATER," % ()
+        command = "MATER,"
         return self.run(command, **kwargs)
 
     def cfopen(self, fname="", ext="", loc="", **kwargs):
@@ -8070,7 +8070,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMMLIST," % ()
+        command = "RMMLIST,"
         return self.run(command, **kwargs)
 
     def pspec(self, pcolor="", kfill="", kbordr="", **kwargs):
@@ -8293,7 +8293,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor.  This command is not valid at
         the Begin level.
         """
-        command = "/QUIT," % ()
+        command = "/QUIT,"
         return self.run(command, **kwargs)
 
     def esol(self, nvar="", elem="", node="", item="", comp="", name="",
@@ -9267,7 +9267,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor, but only within a batch run
         [/BATCH].
         """
-        command = "/GOLIST," % ()
+        command = "/GOLIST,"
         return self.run(command, **kwargs)
 
     def pasave(self, lab="", fname="", ext="", **kwargs):
@@ -9357,7 +9357,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "ETYPE," % ()
+        command = "ETYPE,"
         return self.run(command, **kwargs)
 
     def tbfield(self, type="", value="", **kwargs):
@@ -9790,7 +9790,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DISPLAY," % ()
+        command = "DISPLAY,"
         return self.run(command, **kwargs)
 
     def cmwrite(self, option="", fname="", ext="", fnamei="", exti="",
@@ -11592,7 +11592,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         -----
         Often used before the LCOPER command.  Same as LCOPER,ZERO.
         """
-        command = "LCZERO," % ()
+        command = "LCZERO,"
         return self.run(command, **kwargs)
 
     def lumpm(self, key="", **kwargs):
@@ -12540,7 +12540,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command are valid only if the model is not modified after the KSUM
         command is issued.
         """
-        command = "KSUM," % ()
+        command = "KSUM,"
         return self.run(command, **kwargs)
 
     def ndsurf(self, snode="", telem="", dimn="", **kwargs):
@@ -12658,7 +12658,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor, but only within a batch run
         [/BATCH].
         """
-        command = "/NOLIST," % ()
+        command = "/NOLIST,"
         return self.run(command, **kwargs)
 
     def thexpand(self, key="", **kwargs):
@@ -12930,7 +12930,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EMAGERR," % ()
+        command = "EMAGERR,"
         return self.run(command, **kwargs)
 
     def iclist(self, node1="", node2="", ninc="", lab="", **kwargs):
@@ -13044,7 +13044,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "FESURF," % ()
+        command = "FESURF,"
         return self.run(command, **kwargs)
 
     def btol(self, ptol="", **kwargs):
@@ -13590,7 +13590,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         valid only if the model is not modified after the LSUM command is
         issued.
         """
-        command = "LSUM," % ()
+        command = "LSUM,"
         return self.run(command, **kwargs)
 
     def eextrude(self, action="", nelem="", space="", dist="", theta="",
@@ -14472,7 +14472,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         VHDL files: Initial.vhd, S_ams_ijk.vhd, Cxxx_ams_ijk.vhd,
         transducer.vhd.
         """
-        command = "RMXPORT," % ()
+        command = "RMXPORT,"
         return self.run(command, **kwargs)
 
     def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="",
@@ -14575,7 +14575,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/EOF," % ()
+        command = "/EOF,"
         return self.run(command, **kwargs)
 
     def mflist(self, option="", value="", **kwargs):
@@ -15027,7 +15027,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Lists the current data and specifications in the database.  If batch,
         lists all appropriate data.  If interactive, lists only summaries.
         """
-        command = "AFLIST," % ()
+        command = "AFLIST,"
         return self.run(command, **kwargs)
 
     def trtime(self, time="", spacing="", offset="", size="", length="",
@@ -15248,7 +15248,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "GENOPT," % ()
+        command = "GENOPT,"
         return self.run(command, **kwargs)
 
     def inrtia(self, **kwargs):
@@ -15267,7 +15267,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "INRTIA," % ()
+        command = "INRTIA,"
         return self.run(command, **kwargs)
 
     def pdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
@@ -15384,7 +15384,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         or NUMCMP commands, for example), remove all affected reinforcing
         elements and reissue the EREINF command to avoid inconsistencies.
         """
-        command = "EREINF," % ()
+        command = "EREINF,"
         return self.run(command, **kwargs)
 
     def cpmerge(self, lab="", **kwargs):
@@ -16536,7 +16536,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "GAP," % ()
+        command = "GAP,"
         return self.run(command, **kwargs)
 
     def rmuse(self, option="", usefil="", **kwargs):
@@ -16579,7 +16579,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "FEFOR," % ()
+        command = "FEFOR,"
         return self.run(command, **kwargs)
 
     def tallow(self, temp1="", temp2="", temp3="", temp4="", temp5="",
@@ -17137,7 +17137,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*EXIT," % ()
+        command = "*EXIT,"
         return self.run(command, **kwargs)
 
     def color(self, lab="", clab="", n1="", n2="", ninc="", **kwargs):
@@ -17920,7 +17920,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DIGIT," % ()
+        command = "DIGIT,"
         return self.run(command, **kwargs)
 
     def cpdele(self, nset1="", nset2="", ninc="", nsel="", **kwargs):
@@ -18162,7 +18162,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DEACT," % ()
+        command = "DEACT,"
         return self.run(command, **kwargs)
 
     def andyna(self, delay="", ncycl="", start="", end="", inc="",
@@ -18441,7 +18441,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "CURR2D," % ()
+        command = "CURR2D,"
         return self.run(command, **kwargs)
 
     def physics(self, option="", title="", fname="", ext="", **kwargs):
@@ -19333,7 +19333,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         item [ETABLE] for the selected elements.  If absolute values are
         requested [SABS,1], absolute values are used.
         """
-        command = "SSUM," % ()
+        command = "SSUM,"
         return self.run(command, **kwargs)
 
     def inres(self, item1="", item2="", item3="", item4="", item5="", item6="",
@@ -20643,7 +20643,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "OUTOPT," % ()
+        command = "OUTOPT,"
         return self.run(command, **kwargs)
 
     def nlhist(self, key="", name="", item="", comp="", node="", elem="",
@@ -21052,7 +21052,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMALIST," % ()
+        command = "RMALIST,"
         return self.run(command, **kwargs)
 
     def pdmeth(self, method="", samp="", **kwargs):
@@ -22397,7 +22397,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "FATIGUE," % ()
+        command = "FATIGUE,"
         return self.run(command, **kwargs)
 
     def vlscale(self, nv1="", nv2="", ninc="", rx="", ry="", rz="", kinc="",
@@ -22596,7 +22596,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/POST26," % ()
+        command = "/POST26,"
         return self.run(command, **kwargs)
 
     def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
@@ -23388,7 +23388,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid for rezoning.
         """
-        command = "LCCALC," % ()
+        command = "LCCALC,"
         return self.run(command, **kwargs)
 
     def sbctran(self, **kwargs):
@@ -23407,7 +23407,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "SBCTRAN," % ()
+        command = "SBCTRAN,"
         return self.run(command, **kwargs)
 
     def mfsurface(self, inumb="", fnumb1="", label="", fnumb2="", **kwargs):
@@ -23528,7 +23528,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "TBLE," % ()
+        command = "TBLE,"
         return self.run(command, **kwargs)
 
     def seg(self, label="", aviname="", delay="", **kwargs):
@@ -23687,7 +23687,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "BFTRAN," % ()
+        command = "BFTRAN,"
         return self.run(command, **kwargs)
 
     def mapvar(self, option="", matid="", istrtstress="", ntenstress="",
@@ -24218,7 +24218,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/PREP7," % ()
+        command = "/PREP7,"
         return self.run(command, **kwargs)
 
     def force(self, lab="", **kwargs):
@@ -24291,7 +24291,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*ENDIF," % ()
+        command = "*ENDIF,"
         return self.run(command, **kwargs)
 
     def torq2d(self, **kwargs):
@@ -24316,7 +24316,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         completion.  See the TORQC2D command for torque calculation based on a
         circular path.
         """
-        command = "TORQ2D," % ()
+        command = "TORQ2D,"
         return self.run(command, **kwargs)
 
     def cnvtol(self, lab="", value="", toler="", norm="", minref="", **kwargs):
@@ -25436,7 +25436,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "LSOPER," % ()
+        command = "LSOPER,"
         return self.run(command, **kwargs)
 
     def number(self, nkey="", **kwargs):
@@ -26037,7 +26037,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "FTRAN," % ()
+        command = "FTRAN,"
         return self.run(command, **kwargs)
 
     def exunit(self, ldtype="", load="", untype="", name="", **kwargs):
@@ -27370,7 +27370,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "DTRAN," % ()
+        command = "DTRAN,"
         return self.run(command, **kwargs)
 
     def pddoel(self, name="", method="", vtype="", lopt="", val1="", val2="",
@@ -27654,7 +27654,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "PRINT," % ()
+        command = "PRINT,"
         return self.run(command, **kwargs)
 
     def mpplot(self, lab="", mat="", tmin="", tmax="", pmin="", pmax="",
@@ -27707,7 +27707,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         defaults, erases all variables defined, and zeroes the data storage
         space.
         """
-        command = "RESET," % ()
+        command = "RESET,"
         return self.run(command, **kwargs)
 
     def conjug(self, ir="", ia="", name="", facta="", **kwargs):
@@ -28156,7 +28156,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "PLOTTING," % ()
+        command = "PLOTTING,"
         return self.run(command, **kwargs)
 
     def eintf(self, toler="", k="", tlab="", kcn="", dx="", dy="", dz="",
@@ -29332,7 +29332,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "WERASE," % ()
+        command = "WERASE,"
         return self.run(command, **kwargs)
 
     def eddc(self, option="", ctype="", cont="", targ="", **kwargs):
@@ -30634,7 +30634,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "AREAS," % ()
+        command = "AREAS,"
         return self.run(command, **kwargs)
 
     def cbtmp(self, temp="", **kwargs):
@@ -31231,7 +31231,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "NODES," % ()
+        command = "NODES,"
         return self.run(command, **kwargs)
 
     def fluxv(self, **kwargs):
@@ -31252,7 +31252,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         cleared upon completion.  This macro is only available for vector
         potential formulations.
         """
-        command = "FLUXV," % ()
+        command = "FLUXV,"
         return self.run(command, **kwargs)
 
     def efacet(self, num="", **kwargs):
@@ -31452,7 +31452,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "VOLUMES," % ()
+        command = "VOLUMES,"
         return self.run(command, **kwargs)
 
     def cslist(self, kcn1="", kcn2="", kcinc="", **kwargs):
@@ -31620,7 +31620,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         The coordinate system for displaying nodal results must be global
         Cartesian (RSYS,KCN = 0).
         """
-        command = "PRORB," % ()
+        command = "PRORB,"
         return self.run(command, **kwargs)
 
     def smfor(self, **kwargs):
@@ -31639,7 +31639,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SMFOR," % ()
+        command = "SMFOR,"
         return self.run(command, **kwargs)
 
     def edgcale(self, nadv="", meth="", **kwargs):
@@ -31719,7 +31719,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Enters the Probabilistic Design System (PDS). This command is valid
         only at the Begin Level.
         """
-        command = "/PDS," % ()
+        command = "/PDS,"
         return self.run(command, **kwargs)
 
     def vsweep(self, vnum="", srca="", trga="", lsmo="", **kwargs):
@@ -32079,7 +32079,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "SBCLIST," % ()
+        command = "SBCLIST,"
         return self.run(command, **kwargs)
 
     def slashmap(self, **kwargs):
@@ -32100,7 +32100,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/MAP," % ()
+        command = "/MAP,"
         return self.run(command, **kwargs)
 
     def starset(self, par="", value="", val2="", val3="", val4="", val5="",
@@ -32267,7 +32267,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         equilibrium iterations, convergence values, etc.) from a static or full
         transient analysis. All other analyses print zeros for the data.
         """
-        command = "PRITER," % ()
+        command = "PRITER,"
         return self.run(command, **kwargs)
 
     def helpdisp(self, commandname="", **kwargs):
@@ -32392,7 +32392,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SMBODY," % ()
+        command = "SMBODY,"
         return self.run(command, **kwargs)
 
     def essolv(self, electit="", strutit="", dimn="", morphopt="", mcomp="",
@@ -33005,7 +33005,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "IRLIST," % ()
+        command = "IRLIST,"
         return self.run(command, **kwargs)
 
     def morph(self, option="", remeshopt="", elemset="", armax="", voch="",
@@ -33667,7 +33667,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/POST1," % ()
+        command = "/POST1,"
         return self.run(command, **kwargs)
 
     def slashsolu(self, **kwargs):
@@ -33679,7 +33679,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         -----
         This command is valid only at the Begin Level.
         """
-        command = "/SOLU," % ()
+        command = "/SOLU,"
         return self.run(command, **kwargs)
 
     def abbr(self, abbr="", string="", **kwargs):
@@ -33739,7 +33739,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "GPLOT," % ()
+        command = "GPLOT,"
         return self.run(command, **kwargs)
 
     def nldiag(self, label="", key="", maxfile="", **kwargs):
@@ -35844,7 +35844,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "CALC," % ()
+        command = "CALC,"
         return self.run(command, **kwargs)
 
     def sudel(self, surfname="", **kwargs):
@@ -36627,7 +36627,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/RESET," % ()
+        command = "/RESET,"
         return self.run(command, **kwargs)
 
     def eddamp(self, part="", lcid="", valdmp="", **kwargs):
@@ -37806,7 +37806,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "CEQN," % ()
+        command = "CEQN,"
         return self.run(command, **kwargs)
 
     def ce(self, neqn="", const="", node1="", lab1="", c1="", node2="",
@@ -38553,7 +38553,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "SFTRAN," % ()
+        command = "SFTRAN,"
         return self.run(command, **kwargs)
 
     def fkdele(self, kpoi="", lab="", **kwargs):
@@ -38930,7 +38930,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "FEBODY," % ()
+        command = "FEBODY,"
         return self.run(command, **kwargs)
 
     def tee(self, label="", fname="", ext="", **kwargs):
@@ -39592,7 +39592,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         3) is the number of coordinate pairs defined with the PTXY command.
         See the RPOLY and RPR4 commands for other ways to create polygons.
         """
-        command = "POLY," % ()
+        command = "POLY,"
         return self.run(command, **kwargs)
 
     def vddam(self, vf="", va="", vb="", vc="", **kwargs):
@@ -39660,7 +39660,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         The coordinate system for displaying nodal results must be global
         Cartesian (RSYS,KCN = 0).
         """
-        command = "PLORB," % ()
+        command = "PLORB,"
         return self.run(command, **kwargs)
 
     def abbres(self, lab="", fname="", ext="", **kwargs):
@@ -40027,7 +40027,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "NLOPT," % ()
+        command = "NLOPT,"
         return self.run(command, **kwargs)
 
     def init(self, name="", method="", val1="", val2="", val3="", **kwargs):
@@ -40083,7 +40083,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDSOLV," % ()
+        command = "EDSOLV,"
         return self.run(command, **kwargs)
 
     def rmnevec(self, **kwargs):
@@ -40109,7 +40109,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         jobname.evx, jobname.evy, jobname.evz, jobname.evn, jobname.evl
         """
-        command = "RMNEVEC," % ()
+        command = "RMNEVEC,"
         return self.run(command, **kwargs)
 
     def geometry(self, **kwargs):
@@ -40128,7 +40128,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "GEOMETRY," % ()
+        command = "GEOMETRY,"
         return self.run(command, **kwargs)
 
     def subset(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
@@ -41176,7 +41176,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "REORDER," % ()
+        command = "REORDER,"
         return self.run(command, **kwargs)
 
     def rgb(self, kywrd="", pred="", pgrn="", pblu="", n1="", n2="", ninc="",
@@ -42612,7 +42612,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         -----
         This command is valid in any processor.
         """
-        command = "*CFCLOS," % ()
+        command = "*CFCLOS,"
         return self.run(command, **kwargs)
 
     def assign(self, ident="", fname="", ext="", lgkey="", **kwargs):
@@ -43294,7 +43294,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "ERASE," % ()
+        command = "ERASE,"
         return self.run(command, **kwargs)
 
     def alist(self, na1="", na2="", ninc="", lab="", **kwargs):
@@ -43617,50 +43617,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "AFILLT,%s,%s,%s" % (str(na1), str(na2), str(rad))
         return self.run(command, **kwargs)
 
-    def torus(self, rad1="", rad2="", rad3="", theta1="", theta2="", **kwargs):
-        """APDL Command: TORUS
-
-        Creates a toroidal volume.
-
-        Parameters
-        ----------
-        rad1, rad2, rad3
-            Three values that define the radii of the torus.  You can specify
-            the radii in any order.  The smallest of the values is the inner
-            minor radius, the intermediate value is the outer minor radius, and
-            the largest value is the major radius.  (There is one exception
-            regarding the order of the radii values--if you want to create a
-            solid torus, specify zero or blank for the inner minor radius, in
-            which case the zero or blank must occupy either the RAD1 or RAD2
-            position.)  At least two of the values that you specify must be
-            positive values; they will be used to define the outer minor radius
-            and the major radius.  See the diagram in the Notes section for a
-            view of a toroidal sector showing all radii.
-
-        theta1, theta2
-            Starting and ending angles (either order) of the torus.  Used for
-            creating a toroidal sector.  The sector begins at the algebraically
-            smaller angle, extends in a positive angular direction, and ends at
-            the larger angle.  The starting angle defaults to 0° and the ending
-            angle defaults to 360°.
-
-        Notes
-        -----
-        Defines a toroidal volume centered about the working plane origin.  A
-        solid torus of 360° will be defined with four areas, each area spanning
-        180° around the major and minor circumference.
-
-        To create the toroidal sector shown below, the command
-        TORUS,5,1,2,0,180 was issued.  Since "1" was the smallest radii value
-        specified, it defined the inner minor radius; since "2" was the
-        intermediate radii value specified, it defined the outer minor radius;
-        and since "5" was the largest radii value specified, it defined the
-        major radius.  The values "0" and "180" defined the starting and ending
-        angles of the torus.
-        """
-        command = "TORUS,%s,%s,%s,%s,%s" % (str(rad1), str(rad2), str(rad3), str(theta1), str(theta2))
-        return self.run(command, **kwargs)
-
     def vabs(self, kabsr="", kabs1="", kabs2="", kabs3="", **kwargs):
         """APDL Command: *VABS
 
@@ -43721,7 +43677,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Issue this command to delete all sets specified with the DELETE
         command.
         """
-        command = "COMPRESS," % ()
+        command = "COMPRESS,"
         return self.run(command, **kwargs)
 
     def rmanl(self, fname="", ext="", dimn="", oper="", **kwargs):
@@ -44177,7 +44133,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "PRIM," % ()
+        command = "PRIM,"
         return self.run(command, **kwargs)
 
     def gropt(self, lab="", key="", **kwargs):
@@ -46570,7 +46526,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "KEYPTS," % ()
+        command = "KEYPTS,"
         return self.run(command, **kwargs)
 
     def domega(self, domgx="", domgy="", domgz="", **kwargs):
@@ -46832,7 +46788,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "FECONS," % ()
+        command = "FECONS,"
         return self.run(command, **kwargs)
 
     def dmat(self, matrix="", type="", method="", val1="", val2="", val3="",
@@ -46928,7 +46884,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/GO," % ()
+        command = "/GO,"
         return self.run(command, **kwargs)
 
     def kclear(self, np1="", np2="", ninc="", **kwargs):
@@ -47463,7 +47419,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SORT," % ()
+        command = "SORT,"
         return self.run(command, **kwargs)
 
     def asub(self, na1="", p1="", p2="", p3="", p4="", **kwargs):
@@ -48549,7 +48505,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "FOR2D," % ()
+        command = "FOR2D,"
         return self.run(command, **kwargs)
 
     def rsplot(self, rslab="", yname="", x1name="", x2name="", type="",
@@ -50039,7 +49995,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         For more information, see the ANSYS, Inc. Licensing Guide.
         """
-        command = "PAUSE," % ()
+        command = "PAUSE,"
         return self.run(command, **kwargs)
 
     def psdres(self, lab="", relkey="", **kwargs):
@@ -50915,7 +50871,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         POST26 topic commands (and their corresponding topics) are:
         """
-        command = "STAT," % ()
+        command = "STAT,"
         return self.run(command, **kwargs)
 
     def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
@@ -51320,7 +51276,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SPEC," % ()
+        command = "SPEC,"
         return self.run(command, **kwargs)
 
     def ematwrite(self, key="", **kwargs):
@@ -52006,7 +51962,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         Response surface coefficients jobname_ijk.pcs (modes i, j, k)
         """
-        command = "RMRGENERATE," % ()
+        command = "RMRGENERATE,"
         return self.run(command, **kwargs)
 
     def campbell(self, action="", **kwargs):
@@ -52653,7 +52609,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         issued.  This command combines the functions of the KSUM, LSUM, ASUM,
         and VSUM commands.
         """
-        command = "GSUM," % ()
+        command = "GSUM,"
         return self.run(command, **kwargs)
 
     def ksll(self, type="", **kwargs):
@@ -53366,7 +53322,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         This command is valid in any processor.  This command is not valid at
         the Begin level.
         """
-        command = "FINISH," % ()
+        command = "FINISH,"
         return self.run(command, **kwargs)
 
     def rmroptions(self, refname="", type="", invert="", **kwargs):
@@ -53564,7 +53520,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "MASTER," % ()
+        command = "MASTER,"
         return self.run(command, **kwargs)
 
     def plvect(self, item="", lab2="", lab3="", labp="", mode="", loc="",
@@ -53693,7 +53649,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SPTOPT," % ()
+        command = "SPTOPT,"
         return self.run(command, **kwargs)
 
     def nscale(self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="",
@@ -54126,32 +54082,6 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         command = "PCALC,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(labr), str(lab1), str(lab2), str(fact1), str(fact2), str(const))
         return self.run(command, **kwargs)
 
-    def sph5(self, xedge1="", yedge1="", xedge2="", yedge2="", **kwargs):
-        """APDL Command: SPH5
-
-        Creates a spherical volume by diameter end points.
-
-        Parameters
-        ----------
-        xedge1, yedge1
-            Working plane X and Y coordinates of one edge of the sphere.
-
-        xedge2, yedge2
-            Working plane X and Y coordinates of the other edge of the sphere.
-
-        Notes
-        -----
-        Defines a solid spherical volume anywhere on the working plane by
-        specifying diameter end points.  The sphere must have a spatial volume
-        greater than zero.  (i.e., this volume primitive command cannot be used
-        to create a degenerate volume as a means of creating an area.)  A
-        sphere of 360° will be defined with two areas, each consisting of a
-        hemisphere.  See the SPHERE and SPH4 commands for other ways to create
-        spheres.
-        """
-        command = "SPH5,%s,%s,%s,%s" % (str(xedge1), str(yedge1), str(xedge2), str(yedge2))
-        return self.run(command, **kwargs)
-
     def rappnd(self, lstep="", time="", **kwargs):
         """APDL Command: RAPPND
 
@@ -54199,7 +54129,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "BIOOPT," % ()
+        command = "BIOOPT,"
         return self.run(command, **kwargs)
 
     def expand(self, nrepeat="", hindex="", icsys="", sctang="", ph_ase="",
@@ -54477,7 +54407,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "ELEM," % ()
+        command = "ELEM,"
         return self.run(command, **kwargs)
 
     def mail(self, address="", fname="", ext="", **kwargs):
@@ -56530,7 +56460,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/NOPR," % ()
+        command = "/NOPR,"
         return self.run(command, **kwargs)
 
     def lcfile(self, lcno="", fname="", ext="", **kwargs):
@@ -57948,7 +57878,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "SOLUOPT," % ()
+        command = "SOLUOPT,"
         return self.run(command, **kwargs)
 
     def emunit(self, lab="", value="", **kwargs):
@@ -58013,7 +57943,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "LINE," % ()
+        command = "LINE,"
         return self.run(command, **kwargs)
 
     def dim(self, par="", type="", imax="", jmax="", kmax="", var1="", var2="",
@@ -58588,7 +58518,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/AUX3," % ()
+        command = "/AUX3,"
         return self.run(command, **kwargs)
 
     def bflist(self, node="", lab="", **kwargs):
@@ -59509,7 +59439,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*VSTAT," % ()
+        command = "*VSTAT,"
         return self.run(command, **kwargs)
 
     def tb(self, lab="", mat="", ntemp="", npts="", tbopt="", eosopt="",
@@ -60011,7 +59941,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         Issue the FCCHECK command to check the completeness of the input during
         the input phase.
         """
-        command = "FCCHECK," % ()
+        command = "FCCHECK,"
         return self.run(command, **kwargs)
 
     def eread(self, fname="", ext="", **kwargs):
@@ -60738,7 +60668,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         ascending node number sequence) after an NSORT command.  Changing the
         selected nodal set [NSEL] also restores the original nodal order.
         """
-        command = "NUSORT," % ()
+        command = "NUSORT,"
         return self.run(command, **kwargs)
 
     def biot(self, label="", **kwargs):
@@ -61046,7 +60976,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*END," % ()
+        command = "*END,"
         return self.run(command, **kwargs)
 
     def nrlsum(self, signif="", label="", labelcsm="", forcetype="", **kwargs):
@@ -62022,7 +61952,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "BOOL," % ()
+        command = "BOOL,"
         return self.run(command, **kwargs)
 
     def cpsgen(self, itime="", inc="", nset1="", nset2="", ninc="", **kwargs):
@@ -63243,7 +63173,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "RCON," % ()
+        command = "RCON,"
         return self.run(command, **kwargs)
 
     def pdwrite(self, file="", fnam="", lnam="", **kwargs):
@@ -63354,7 +63284,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         Lists the property table stored for fatigue evaluation.
         """
-        command = "FPLIST," % ()
+        command = "FPLIST,"
         return self.run(command, **kwargs)
 
     def boptn(self, lab="", value="", **kwargs):
@@ -64101,7 +64031,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "*CYCLE," % ()
+        command = "*CYCLE,"
         return self.run(command, **kwargs)
 
     def modmsh(self, lab="", **kwargs):
@@ -64960,7 +64890,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/AUX2," % ()
+        command = "/AUX2,"
         return self.run(command, **kwargs)
 
     def rock(self, cgx="", cgy="", cgz="", omx="", omy="", omz="", **kwargs):
@@ -65416,7 +65346,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "COUPLE," % ()
+        command = "COUPLE,"
         return self.run(command, **kwargs)
 
     def operate(self, **kwargs):
@@ -65435,7 +65365,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "OPERATE," % ()
+        command = "OPERATE,"
         return self.run(command, **kwargs)
 
     def upgeom(self, factor="", lstep="", sbstep="", fname="", ext="",
@@ -65760,7 +65690,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/AUX12," % ()
+        command = "/AUX12,"
         return self.run(command, **kwargs)
 
     def suget(self, surfname="", rsetname="", parm="", geom="", **kwargs):
@@ -65819,7 +65749,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         must be selected before this command is issued.  POWERH is valid for
         2-D and 3-D analyses.
         """
-        command = "POWERH," % ()
+        command = "POWERH,"
         return self.run(command, **kwargs)
 
     def czdel(self, grp1="", grp2="", grp3="", **kwargs):
@@ -65894,7 +65824,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "/GOPR," % ()
+        command = "/GOPR,"
         return self.run(command, **kwargs)
 
     def plchist(self, spec="", freqpt="", **kwargs):
@@ -66296,7 +66226,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DYNOPT," % ()
+        command = "DYNOPT,"
         return self.run(command, **kwargs)
 
     def fklist(self, kpoi="", lab="", **kwargs):
@@ -66756,7 +66686,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid only at the Begin Level.
         """
-        command = "/AUX15," % ()
+        command = "/AUX15,"
         return self.run(command, **kwargs)
 
     def eplot(self, **kwargs):
@@ -66784,7 +66714,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is valid in any processor.
         """
-        command = "EPLOT," % ()
+        command = "EPLOT,"
         return self.run(command, **kwargs)
 
     def secmodif(self, secid="", kywrd="", **kwargs):
@@ -67097,7 +67027,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         Anisotropic materials (TB,ANEL) are not considered.
         """
-        command = "PRERR," % ()
+        command = "PRERR,"
         return self.run(command, **kwargs)
 
     def menu(self, key="", **kwargs):
@@ -67755,7 +67685,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
 
         This command is also valid in PREP7.
         """
-        command = "ICDELE," % ()
+        command = "ICDELE,"
         return self.run(command, **kwargs)
 
     def edstart(self, restart="", memory="", fsize="", dumpfile="", **kwargs):
@@ -68686,7 +68616,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "ATYPE," % ()
+        command = "ATYPE,"
         return self.run(command, **kwargs)
 
     def bss2(self, val1="", val2="", t="", **kwargs):
@@ -68757,7 +68687,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "POINT," % ()
+        command = "POINT,"
         return self.run(command, **kwargs)
 
     def outaero(self, sename="", timeb="", dtime="", **kwargs):
@@ -69744,7 +69674,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DATADEF," % ()
+        command = "DATADEF,"
         return self.run(command, **kwargs)
 
     def resp(self, ir="", lftab="", ldtab="", spectype="", dampratio="",
@@ -69888,7 +69818,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "MESHING," % ()
+        command = "MESHING,"
         return self.run(command, **kwargs)
 
     def define(self, **kwargs):
@@ -69907,7 +69837,7 @@ class _MapdlCommands(_MapdlGeometryCommands):  # pragma: no cover
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "DEFINE," % ()
+        command = "DEFINE,"
         return self.run(command, **kwargs)
 
     def dv3d(self, lab="", key="", **kwargs):

@@ -2711,3 +2711,103 @@ class _MapdlGeometryCommands():
         """
         command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
         return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sph5(self, xedge1="", yedge1="", xedge2="", yedge2="", **kwargs) -> int:
+        """Create a spherical volume by diameter end points.
+
+        APDL Command: SPH5
+
+        Parameters
+        ----------
+        xedge1, yedge1
+            Working plane X and Y coordinates of one edge of the sphere.
+
+        xedge2, yedge2
+            Working plane X and Y coordinates of the other edge of the
+            sphere.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+        Examples
+        --------
+        This example creates a sphere with one point at ``(1, 1)`` and
+        one point at ``(2, 2)``
+
+        >>> vnum = mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid spherical volume anywhere on the working plane
+        by specifying diameter end points.  The sphere must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  A sphere of 360° will be
+        defined with two areas, each consisting of a hemisphere.  See
+        the ``sphere`` and ``sph4`` commands for other ways to create
+        spheres.
+        """
+        command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def torus(self, rad1="", rad2="", rad3="", theta1="", theta2="", **kwargs):
+        """Create a toroidal volume.
+
+        APDL Command: TORUS
+
+        Parameters
+        ----------
+        rad1, rad2, rad3
+            Three values that define the radii of the torus.  You can
+            specify the radii in any order.  The smallest of the
+            values is the inner minor radius, the intermediate value
+            is the outer minor radius, and the largest value is the
+            major radius.  (There is one exception regarding the order
+            of the radii values--if you want to create a solid torus,
+            specify zero or blank for the inner minor radius, in which
+            case the zero or blank must occupy either the ``rad1`` or
+            ``rad2`` position.)
+
+            At least two of the values that you specify must be
+            positive values; they will be used to define the outer
+            minor radius and the major radius.  See the diagram in the
+            Notes section for a view of a toroidal sector showing all
+            radii.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the torus.
+            Used for creating a toroidal sector.  The sector begins at
+            the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0° and the ending angle
+            defaults to 360°.
+
+        Returns
+        -------
+        int
+            Volume number of the torus.
+
+
+        Examples
+        --------
+        This example creats a torus with an inner minor radus of 1, an
+        intermediate radii of 2, and a major radius of 5.  The values
+        0 and 180 define the starting and ending angles of the torus.
+
+        >>> vnum = mapdl.torus(rad1=5, rad2=1, rad3=2, theta1=0, theta2=180)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a toroidal volume centered about the working plane
+        origin.  A solid torus of 360° will be defined with four
+        areas, each area spanning 180° around the major and minor
+        circumference.
+        """
+        command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
