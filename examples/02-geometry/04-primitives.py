@@ -2,7 +2,7 @@
 .. _ref_basic-geometry-volumes:
 
 Primitives
----------------
+----------
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 volume commands.
 
