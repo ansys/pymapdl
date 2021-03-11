@@ -1,8 +1,8 @@
 """
 .. _ref_basic-geometry-keypoints:
 
-Keypoint Geometry
------------------
+Keypoints
+---------
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 commands.
 

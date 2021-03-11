@@ -91,6 +91,70 @@ def test_volu_selection(mapdl, cleared):
     assert np.allclose(items, range(1, n_item + 1))
 
 
+def test_vdrag(mapdl, cleared):
+    # create a square with a hole in it.
+    anum0 = mapdl.blc4(0, 0, 1, 1)
+    anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+    aout = mapdl.asba(anum0, anum1)
+
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    l0 = mapdl.l(k0, k1)
+    assert 'DRAG AREAS' in mapdl.vdrag(aout, nlp1=l0)
+
+
+def test_vext(mapdl, cleared):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    k2 = mapdl.k("", 0, 0, 0.5)
+    carc0 = mapdl.circle(k0, 1, k1)
+    a0 = mapdl.al(*carc0)
+
+    # next, extrude it and plot it
+    mapdl.vext(a0, dz=4)
+
+
+def test_vrotate(mapdl, cleared):
+    # first, create an area from a circle
+    hoop_radius = 10
+    hoop_thickness = 0.5
+    k0 = mapdl.k("", hoop_radius, 0, 0)
+    k1 = mapdl.k("", hoop_radius, 1, 0)
+    k2 = mapdl.k("", hoop_radius, 0, hoop_thickness)
+    carc0 = mapdl.circle(k0, 1, k1)
+    a0 = mapdl.al(*carc0)
+
+    # define a Z-axis
+    k_axis0 = mapdl.k("", 0, 0, 0)
+    k_axis1 = mapdl.k("", 0, 0, 1)
+
+    # Rotate about the Z-axis.  By default it will rotate all 360 degrees
+    mapdl.vrotat(a0, pax1=k_axis0, pax2=k_axis1)
+
+
+def test_vsymm(mapdl, cleared):
+    vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
+    mapdl.vsymm('X', vnum)
+    assert mapdl.geometry.vnum.size == 2
+
+
+def test_va(mapdl, cleared):
+    k0 = mapdl.k('', 0, 0, 0)
+    k1 = mapdl.k('', 1, 0,  0)
+    k2 = mapdl.k('', 1,  1, 0)
+    k3 = mapdl.k('', 1,  1, 1)
+
+    # create faces
+    a0 = mapdl.a(k0, k1, k2)
+    a1 = mapdl.a(k0, k1, k3)
+    a2 = mapdl.a(k1, k2, k3)
+    a3 = mapdl.a(k0, k2, k3)
+
+    # generate and plot the volume
+    vnum = mapdl.va(a0, a1, a2, a3)
+    assert vnum == 1
+
+
 def test_e(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)

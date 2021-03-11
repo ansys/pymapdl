@@ -1,8 +1,8 @@
 """
 .. _ref_basic-geometry-lines:
 
-Line Geometry
--------------
+Lines
+-----
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 line commands.
 
@@ -28,6 +28,7 @@ k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 0, 0)
 lnum = mapdl.l(k0, k1)
 lnum
+
 
 ###############################################################################
 # APDL Command: LARC

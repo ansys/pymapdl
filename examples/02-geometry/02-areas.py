@@ -1,8 +1,8 @@
 """
 .. _ref_basic-geometry-areas:
 
-Area Geometry
--------------
+Areas
+-----
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 area commands.
 
@@ -65,16 +65,6 @@ mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, smooth_shading=True
 
 
 ###############################################################################
-# APDL Command: BLC4
-# ~~~~~~~~~~~~~~~~~~
-# Create a ``0.5 x 0.5`` rectangle starting at ``(0.25, 0.25)``
-mapdl.clear(); mapdl.prep7()
-
-anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
-
-
-###############################################################################
 # APDL Command: ASBA
 # ~~~~~~~~~~~~~~~~~~
 # Subtract a ``0.5 x 0.5`` rectangle from a ``1 x 1`` rectangle.
@@ -83,21 +73,6 @@ mapdl.clear(); mapdl.prep7()
 anum0 = mapdl.blc4(0, 0, 1, 1)
 anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
 aout = mapdl.asba(anum0, anum1)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
-
-
-###############################################################################
-# APDL Command: CYL4
-# ~~~~~~~~~~~~~~~~~~
-# Create a half arc centered at the origin with an outer radius
-# of 2 and an inner radius of 1.
-#
-# Note that the ``depth`` keyword argument is unset, which will
-# generate an area rather than a volume.  Setting depth to a value
-# greater than 0 will generate a volume.
-mapdl.clear(); mapdl.prep7()
-
-anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, theta2=180)
 mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
 
 

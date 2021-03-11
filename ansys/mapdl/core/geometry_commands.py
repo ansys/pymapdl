@@ -146,9 +146,7 @@ class _MapdlGeometryCommands():
 
         x, y, z
             Keypoint location in the active coordinate system (may be
-            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
-            enabled and all other fields (including NPT) are ignored
-            (valid only in the GUI).
+            R, θ, Z or R, θ, Φ).
 
         Returns
         -------
@@ -339,10 +337,8 @@ class _MapdlGeometryCommands():
         Parameters
         ----------
         p1, p2, p3, . . . , p18
-            List of keypoints defining the area (18 maximum if using keyboard
-            entry).  At least 3 keypoints must be entered.  If P1 = P,
-            graphical picking is enabled and all remaining arguments are
-            ignored (valid only in the GUI).
+            List of keypoints defining the area (18 maximum if using
+            keyboard entry).  At least 3 keypoints must be entered.
 
         Returns
         -------
@@ -382,34 +378,34 @@ class _MapdlGeometryCommands():
 
     def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
           **kwargs):
-        """Defines a volume through keypoints.
+        """Define a volume through keypoints.
 
         APDL Command: V
 
         Parameters
         ----------
-        p1
+        p1 : int, optional
             Keypoint defining starting corner of volume.
 
-        p2
+        p2 : int, optional
             Keypoint defining second corner of volume.
 
-        p3
+        p3 : int, optional
             Keypoint defining third corner of volume.
 
-        p4
+        p4 : int, optional
             Keypoint defining fourth corner of volume.
 
-        p5
+        p5 : int, optional
             Keypoint defining fifth corner of volume.
 
-        p6
+        p6 : int, optional
             Keypoint defining sixth corner of volume.
 
-        p7
+        p7 : int, optional
             Keypoint defining seventh corner of volume.
 
-        p8
+        p8 : int, optional
             Keypoint defining eighth corner of volume.
 
         Examples
@@ -443,7 +439,6 @@ class _MapdlGeometryCommands():
         2
 
         Create a tetrahedron
-        V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
 
         >>> k0 = mapdl.k("", 0, 0, 0)
         >>> k1 = mapdl.k("", 1, 0, 0)
@@ -490,9 +485,7 @@ class _MapdlGeometryCommands():
 
         x, y, z
             Node location in the active coordinate system (R, θ, Z for
-            cylindrical, R, θ, Φ for spherical or toroidal).  If X =
-            P, graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI).
+            cylindrical, R, θ, Φ for spherical or toroidal).
 
         thxy
             First rotation about nodal Z (positive X toward Y).
@@ -1094,9 +1087,7 @@ class _MapdlGeometryCommands():
         nl1
             Number of the first line generated line is tangent to.  If
             negative, assume P1 (see below) is the second keypoint of
-            the line instead of the first.  If NL1 = P, graphical
-            picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
+            the line instead of the first.
 
         nl2
             Number of the second line generated line is tangent to.
@@ -1678,4 +1669,371 @@ class _MapdlGeometryCommands():
         the desired entities prior to terminating.
         """
         command = f"ADRAG,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
+        return self.run(command, **kwargs)
+
+    def vdrag(self, na1="", na2="", na3="", na4="", na5="", na6="", nlp1="",
+              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs):
+        """APDL Command: VDRAG
+
+        Generate volumes by dragging an area pattern along a path.
+
+        Parameters
+        ----------
+        na1, na2, na3, . . . , na6
+            List of areas in the pattern to be dragged (6 maximum if
+            using keyboard entry).  If NA1 = ALL, all selected areas
+            will be swept along the path.  A component name may also
+            be substituted for NA1.
+
+        nlp1, nlp2, nlp3, . . . , nlp6
+            List of lines defining the path along which the pattern is
+            to be dragged (6 maximum if using keyboard entry).  Must
+            be a continuous set of lines.  To be continuous, adjacent
+            lines must share the connecting keypoint (the end keypoint
+            of one line must also be first keypoint of the next line).
+
+        Examples
+        --------
+        Create a square with a hole in it and drag it along an arc.
+
+        >>> anum0 = mapdl.blc4(0, 0, 1, 1)
+        >>> anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+        >>> aout = mapdl.asba(anum0, anum1)
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 1)
+        >>> k2 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.larc(k0, k1, k2, 2)
+        >>> mapdl.vdrag(aout, nlp1=l0)
+
+        Notes
+        -----
+        Generates volumes (and their corresponding keypoints, lines,
+        and areas) by sweeping a given area pattern along a
+        characteristic drag path.  If the drag path consists of
+        multiple lines, the drag direction is determined by the
+        sequence in which the path lines are input (NLP1, NLP2, etc.).
+        If the drag path is a single line (NLP1), the drag direction
+        is from the keypoint on the drag line that is closest to the
+        first keypoint of the given area pattern to the other end of
+        the drag line.
+
+        The magnitude of the vector between the keypoints of the given
+        pattern and the first path keypoint remains constant for all
+        generated keypoint patterns and the path keypoints.  The
+        direction of the vector relative to the path slope also
+        remains constant so that patterns may be swept around curves.
+        Lines are generated with the same shapes as the given pattern
+        and the path lines.
+
+        Keypoint, line, area, and volume numbers are automatically
+        assigned (beginning with the lowest available values
+        [NUMSTR]).  Adjacent lines use a common keypoint, adjacent
+        areas use a common line, and adjacent volumes use a common
+        area.  For best results, the entities to be dragged should be
+        orthogonal to the start of the drag path.  Drag operations
+        that produce an error message may create some of the desired
+        entities prior to terminating.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the VDRAG
+        operation will also have those attributes (i.e., the element
+        attributes from the input area are copied to the opposite
+        area).  Note that only the area opposite the input area will
+        have the same attributes as the input area; the areas adjacent
+        to the input area will not.
+
+        If the input areas are meshed or belong to a meshed volume,
+        the area(s) can be extruded to a 3-D mesh.  Note that the NDIV
+        argument of the ESIZE command should be set before extruding
+        the meshed areas.  Alternatively, mesh divisions can be
+        specified directly on the drag line(s) (LESIZE).  See the
+        Modeling and Meshing Guide for more information.
+
+        You can use the VDRAG command to generate 3-D interface
+        element meshes for elements INTER194 and INTER195. When
+        generating interface element meshes using VDRAG, you must
+        specify the line divisions to generate one interface element
+        directly on the drag line using the LESIZE command.  The
+        source area to be extruded becomes the bottom surface of the
+        interface element. Interface elements must be extruded in what
+        will become the element's local x direction, that is, bottom
+        to top.
+        """
+        command = f"VDRAG,{na1},{na2},{na3},{na4},{na5},{na6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
+        return self.run(command, **kwargs)
+
+    def va(self, a1="", a2="", a3="", a4="", a5="", a6="", a7="", a8="", a9="",
+           a10="", **kwargs):
+        """APDL Command: VA
+
+        Generate a volume bounded by existing areas.
+
+        Parameters
+        ----------
+        a1, a2, a3, . . . , a10
+            List of areas defining volume.  The minimum number of
+            areas is 4.  If A1 = ALL, use all selected [ASEL] areas
+            and ignore A2 to A10.  A component name may also be
+            substituted for A1.
+
+        Examples
+        --------
+        Create a simple tetrahedral bounded by 4 areas.
+
+        >>> k0 = mapdl.k('', -1, 0, 0)
+        >>> k1 = mapdl.k('', 1, 0,  0)
+        >>> k2 = mapdl.k('', 1, 1, 0)
+        >>> k3 = mapdl.k('', 1, 0.5, 1)
+        >>> a0 = mapdl.a(k0, k1, k2)
+        >>> a1 = mapdl.a(k0, k1, k3)
+        >>> a2 = mapdl.a(k1, k2, k3)
+        >>> a3 = mapdl.a(k0, k2, k3)
+        >>> vnum = mapdl.va(a0, a1, a2, a3)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        This command conveniently allows generating volumes from
+        regions having more than eight keypoints (which is not allowed
+        with the V command).  Areas may be input in any order.  The
+        exterior surface of a VA volume must be continuous, but holes
+        may pass completely through it.
+        """
+        command = f"VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}"
+        return parse_v(self.run(command, **kwargs))
+
+    def vext(self, na1="", na2="", ninc="", dx="", dy="", dz="", rx="", ry="",
+             rz="", **kwargs):
+        """APDL Command: VEXT
+
+        Generate additional volumes by extruding areas.
+
+        Parameters
+        ----------
+        na1, na2, ninc
+            Set of areas (NA1 to NA2 in steps of NINC) that defines
+            the pattern to be extruded.  NA2 defaults to NA1, NINC
+            defaults to 1.  If NA1 = ALL, NA2 and NINC are ignored and
+            the pattern is defined by all selected areas.  A component
+            name may also be substituted for NA1 (NA2 and NINC are
+            ignored).
+
+        dx, dy, dz
+            Increments to be applied to the X, Y, and Z keypoint
+            coordinates in the active coordinate system (DR, Dθ, DZ
+            for cylindrical; DR, Dθ, DΦ for spherical).
+
+        rx, ry, rz
+            Scale factors to be applied to the X, Y, and Z keypoint
+            coordinates in the active coordinate system (RR, Rθ, RZ
+            for cylindrical; RR, Rθ, RΦ for spherical).  Note that the
+            Rθ and RΦ scale factors are interpreted as angular
+            offsets.  For example, if CSYS = 1, RX, RY, RZ input of
+            (1.5,10,3) would scale the specified keypoints 1.5 times
+            in the radial and 3 times in the Z direction, while adding
+            an offset of 10 degrees to the keypoints.  Zero, blank, or
+            negative scale factor values are assumed to be 1.0.  Zero
+            or blank angular offsets have no effect.
+
+        Examples
+        --------
+        Create a basic cylinder by extruding a circle.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", 0, 0, 0.5)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> a0 = mapdl.al(*carc0)
+        >>> mapdl.vext(a0, dz=4)
+
+        Create a tapered cylinder.
+
+        >>> mapdl.vdele('all')
+        >>> mapdl.vext(a0, dz=4, rx=0.3, ry=0.3, rz=1)
+
+        Notes
+        -----
+        Generates additional volumes (and their corresponding
+        keypoints, lines, and areas) by extruding and scaling a
+        pattern of areas in the active coordinate system.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the VEXT
+        operation will also have those attributes (i.e., the element
+        attributes from the input area are copied to the opposite
+        area).  Note that only the area opposite the input area will
+        have the same attributes as the input area; the areas adjacent
+        to the input area will not.
+
+        If the areas are meshed or belong to meshed volumes, a 3-D
+        mesh can be extruded with this command.  Note that the NDIV
+        argument on the ESIZE command should be set before extruding
+        the meshed areas.
+
+        Scaling of the input areas, if specified, is performed first,
+        followed by the extrusion.
+
+        In a non-Cartesian coordinate system, the VEXT command locates
+        the end face of the volume based on the active coordinate
+        system.  However, the extrusion is made along a straight line
+        between the end faces.  Note that solid modeling in a toroidal
+        coordinate system is not recommended.
+
+        Caution:: : Use of the VEXT command can produce unexpected
+        results when operating in a non-Cartesian coordinate system.
+        For a detailed description of the possible problems that may
+        occur, see Solid Modeling in the Modeling and Meshing Guide.
+        """
+        command = f"VEXT,{na1},{na2},{ninc},{dx},{dy},{dz},{rx},{ry},{rz}"
+        return self.run(command, **kwargs)
+
+    def vrotat(self, na1="", na2="", na3="", na4="", na5="",
+               na6="", pax1="", pax2="", arc="", nseg="",
+               **kwargs):
+        """APDL Command: VROTAT
+
+        Generate cylindrical volumes by rotating an area pattern about
+        an axis.
+
+        Parameters
+        ----------
+        na1, na2, na3, . . . , na6
+            List of areas in the pattern to be rotated (6 maximum if
+            using keyboard entry).  Areas must lie to one side of, and
+            in the plane of, the axis of rotation.  If NA1 = ALL,
+            all selected areas will define the pattern to be rotated.
+            A component name may also be substituted for NA1.
+
+        pax1, pax2
+            Keypoints defining the axis about which the area pattern
+            is to be rotated.
+
+        arc
+            Arc length (in degrees).  Positive follows right-hand rule
+            about PAX1-PAX2 vector.  Defaults to 360.
+
+        nseg
+            Number of volumes (8 maximum) around circumference.
+            Defaults to minimum required for 90° (maximum) arcs, i.e.,
+            4 for 360°, 3 for 270°, etc.
+
+        Examples
+        --------
+        Rotate a circle about the Z axis to create a hoop.
+
+        First, create a circle offset from origin on the XZ plane.
+
+        >>> hoop_radius = 10
+        >>> hoop_thickness = 0.5
+        >>> k0 = mapdl.k("", hoop_radius, 0, 0)
+        >>> k1 = mapdl.k("", hoop_radius, 1, 0)
+        >>> k2 = mapdl.k("", hoop_radius, 0, hoop_thickness)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> a0 = mapdl.al(*carc0)
+
+        Create a hoop by rotating it about an axis defined by two
+        keypoints.
+
+        >>> k_axis0 = mapdl.k("", 0, 0, 0)
+        >>> k_axis1 = mapdl.k("", 0, 0, 1)
+        mapdl.vrotat(a0, pax1=k_axis0, pax2=k_axis1)
+
+        Notes
+        -----
+        Generates cylindrical volumes (and their corresponding
+        keypoints, lines, and areas) by rotating an area pattern (and
+        its associated line and keypoint patterns) about an axis.
+        Keypoint patterns are generated at regular angular locations
+        (based on a maximum spacing of 90°).  Line patterns are
+        generated at the keypoint patterns.  Arc lines are also
+        generated to connect the keypoints circumferentially.
+        Keypoint, line, area, and volume numbers are automatically
+        assigned (beginning with the lowest available values).
+        Adjacent lines use a common keypoint, adjacent areas use a
+        common line, and adjacent volumes use a common area.
+
+        To generate a single volume with an arc greater than 180°,
+        NSEG must be greater than or equal to 2.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the
+        VROTAT operation will also have those attributes (i.e., the
+        element attributes from the input area are copied to the
+        opposite area).  Note that only the area opposite the input
+        area will have the same attributes as the input area; the
+        areas adjacent to the input area will not.
+
+        If the given areas are meshed or belong to meshed volumes, the
+        2-D mesh can be rotated (extruded) to a 3-D mesh. See the
+        Modeling and Meshing Guide for more information.  Note that
+        the NDIV argument on the ESIZE command should be set before
+        extruding the meshed areas.
+        """
+        command = f"VROTAT,{na1},{na2},{na3},{na4},{na5},{na6},{pax1},{pax2},{arc},{nseg}"
+        return self.run(command, **kwargs)
+
+    def vsymm(self, ncomp="", nv1="", nv2="", ninc="", kinc="", noelem="",
+              imove="", **kwargs):
+        """APDL Command: VSYMM
+
+        Generate volumes from a volume pattern by symmetry reflection.
+
+        Parameters
+        ----------
+        ncomp
+            Symmetry key:
+
+            - ``'X'`` : X symmetry (default).
+            - ``'Y'`` : Y symmetry.
+            - ``'Z'`` : Z symmetry.
+
+        nv1, nv2, ninc
+            Reflect volumes from pattern beginning with NV1 to NV2
+            (defaults to NV1) in steps of NINC (defaults to 1).  If
+            NV1 = ALL, NV2 and NINC are ignored and the pattern is all
+            selected volumes [VSEL].  A component name may also be
+            substituted for NV1 (NV2 and NINC are ignored).
+
+        kinc
+            Keypoint increment between sets.  If zero, the lowest
+            available keypoint numbers are assigned [NUMSTR].
+
+        noelem
+            Specifies whether nodes and elements are also to be generated:
+
+            0 - Generate nodes and elements associated with the
+                original volumes, if they exist.
+
+            1 - Do not generate nodes and elements.
+
+        imove
+            Specifies whether volumes will be moved or newly defined:
+
+            0 - Generate additional volumes.
+
+            1 - Move original volumes to new position retaining the
+                same keypoint numbers (KINC and NOELEM are ignored).
+                Corresponding meshed items are also moved if not
+                needed at their original position.
+
+        Notes
+        -----
+        Generates a reflected set of volumes (and their corresponding
+        keypoints, lines, areas and mesh) from a given volume pattern
+        by a symmetry reflection (see analogous node symmetry command,
+        NSYM).  The MAT, TYPE, REAL, and ESYS attributes are based
+        upon the volumes in the pattern and not upon the current
+        settings.  Reflection is done in the active coordinate system
+        by changing a particular coordinate sign.  The active
+        coordinate system must be a Cartesian system.  Volumes in the
+        pattern may have been generated in any coordinate system.
+        However, solid modeling in a toroidal coordinate system is not
+        recommended.  Volumes are generated as described in the VGEN
+        command.
+
+        See the ESYM command for additional information about symmetry
+        elements.
+        """
+        command = f"VSYMM,{ncomp},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
