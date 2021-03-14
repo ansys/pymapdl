@@ -2794,7 +2794,7 @@ class _MapdlGeometryCommands():
 
         Examples
         --------
-        This example creats a torus with an inner minor radus of 1, an
+        This example creates a torus with an inner minor radius of 1, an
         intermediate radii of 2, and a major radius of 5.  The values
         0 and 180 define the starting and ending angles of the torus.
 
