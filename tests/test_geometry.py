@@ -1,4 +1,157 @@
-"""Test regular expression parsing commands"""
+"""Test geometry commands"""
+import numpy as np
+
+
+def test_keypoint_selection(mapdl, cleared):
+    def generate_random_kp():
+        mapdl.k('', *np.random.random(3))
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_kp()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.keypoint_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.keypoint_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.keypoint_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_line_selection(mapdl, cleared):
+    def generate_random_line():
+        k0 = mapdl.k('', *np.random.random(3))
+        k1 = mapdl.k('', *np.random.random(3))
+        mapdl.l(k0, k1)
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_line()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.line_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.line_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.line_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_area_selection(mapdl, cleared):
+    def generate_random_area():
+        start_x, start_y, height, width = np.random.random(4)
+        mapdl.blc4(start_x*10, start_y*10, height, width)
+
+    # create n random rectangles
+    n_item = 10
+    for i in range(n_item):
+        generate_random_area()
+
+    # select every other area
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.area_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.area_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.area_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_volu_selection(mapdl, cleared):
+    def generate_random_volu():
+        start_x, start_y, height, width, depth = np.random.random(5)
+        mapdl.blc4(start_x*10, start_y*10, height, width, depth)
+
+    # create n random volumes
+    n_item = 20
+    for i in range(n_item):
+        generate_random_volu()
+
+    # select every other volu
+    rng = range(1, n_item + 1, 2)
+    items = mapdl.geometry.volume_select(rng, return_selected=True)
+    assert np.allclose(items, rng)
+
+    items = mapdl.geometry.volume_select(None, return_selected=True)
+    assert items is None
+
+    items = mapdl.geometry.volume_select('ALL', return_selected=True)
+    assert np.allclose(items, range(1, n_item + 1))
+
+
+def test_vdrag(mapdl, cleared):
+    # create a square with a hole in it.
+    anum0 = mapdl.blc4(0, 0, 1, 1)
+    anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+    aout = mapdl.asba(anum0, anum1)
+
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    l0 = mapdl.l(k0, k1)
+    assert 'DRAG AREAS' in mapdl.vdrag(aout, nlp1=l0)
+
+
+def test_vext(mapdl, cleared):
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0, 0, 1)
+    k2 = mapdl.k("", 0, 0, 0.5)
+    carc0 = mapdl.circle(k0, 1, k1)
+    a0 = mapdl.al(*carc0)
+
+    # next, extrude it and plot it
+    mapdl.vext(a0, dz=4)
+
+
+def test_vrotate(mapdl, cleared):
+    # first, create an area from a circle
+    hoop_radius = 10
+    hoop_thickness = 0.5
+    k0 = mapdl.k("", hoop_radius, 0, 0)
+    k1 = mapdl.k("", hoop_radius, 1, 0)
+    k2 = mapdl.k("", hoop_radius, 0, hoop_thickness)
+    carc0 = mapdl.circle(k0, 1, k1)
+    a0 = mapdl.al(*carc0)
+
+    # define a Z-axis
+    k_axis0 = mapdl.k("", 0, 0, 0)
+    k_axis1 = mapdl.k("", 0, 0, 1)
+
+    # Rotate about the Z-axis.  By default it will rotate all 360 degrees
+    mapdl.vrotat(a0, pax1=k_axis0, pax2=k_axis1)
+
+
+def test_vsymm(mapdl, cleared):
+    vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
+    mapdl.vsymm('X', vnum)
+    assert mapdl.geometry.vnum.size == 2
+
+
+def test_va(mapdl, cleared):
+    k0 = mapdl.k('', 0, 0, 0)
+    k1 = mapdl.k('', 1, 0,  0)
+    k2 = mapdl.k('', 1,  1, 0)
+    k3 = mapdl.k('', 1,  1, 1)
+
+    # create faces
+    a0 = mapdl.a(k0, k1, k2)
+    a1 = mapdl.a(k0, k1, k3)
+    a2 = mapdl.a(k1, k2, k3)
+    a3 = mapdl.a(k0, k2, k3)
+
+    # generate and plot the volume
+    vnum = mapdl.va(a0, a1, a2, a3)
+    assert vnum == 1
 
 
 def test_e(mapdl, cleared):
@@ -277,3 +430,51 @@ def test_al(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
     a0 = mapdl.al(l0, l1, l2, l3)
     assert a0 == 1
+
+
+def test_bcl5(cleared, mapdl):
+    # test both the area and volume cases
+    assert mapdl.blc5(width=0.5, height=0.5) == 1
+    assert mapdl.blc5(width=1, height=4, depth=9) == 1
+
+
+def test_block(cleared, mapdl):
+    assert mapdl.block(0, 1, 0, 2, 1, 4) == 1
+
+
+def test_con4(cleared, mapdl):
+    assert mapdl.con4(rad1=3, rad2=0, depth=10) == 1
+
+
+def test_cone(cleared, mapdl):
+    assert mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90) == 1
+
+
+def test_cyl5(cleared, mapdl):
+    # test both the area and volume cases
+    assert mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1
+    assert mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2, depth=5) == 1
+
+
+def test_cylind(cleared, mapdl):
+    assert mapdl.cylind(0.9, 1, z1=0, z2=5) == 1
+
+
+def test_pcirc(cleared, mapdl):
+    assert mapdl.pcirc(0.95, 1) == 1
+
+
+def test_rectng(cleared, mapdl):
+    assert mapdl.rectng(0.5, 1.5, 0.5, 2.5) == 1
+
+
+def test_sph4(cleared, mapdl):
+    assert mapdl.sph4(0, 0, rad1=0.9, rad2=1.0) == 1
+
+
+def test_sphere(cleared, mapdl):
+    assert mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270) == 1
+
+
+def test_sph5(cleared, mapdl):
+    assert mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1

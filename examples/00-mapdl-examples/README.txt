@@ -1,3 +1,3 @@
-ANSYS MAPDL Examples Using Pyansys
-----------------------------------
-These examples demonstrate using MAPDL and pyansys together.
+Full Examples Using PyMAPDL
+---------------------------
+These examples demonstrate full examples using the PyMAPDL module.

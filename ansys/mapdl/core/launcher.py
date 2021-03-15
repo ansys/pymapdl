@@ -31,6 +31,27 @@ LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
 
 
+def _is_ubuntu():
+    """Determine if running as Ubuntu
+
+    It's a bit complicated because sometimes the distribution is
+    Ubuntu, but the kernel has been recompiled and no longer has the
+    word "ubuntu" in it.
+
+    """
+    # must be running linux for this to be True
+    if os.name != 'posix':
+        return False
+
+    # try lsb_release as this is more reliable
+    try:
+        import lsb_release
+        if lsb_release.get_distro_information()['ID'].lower() == 'ubuntu':
+            return True
+    except ImportError:
+        return 'ubuntu' in platform.platform().lower()
+
+
 def _version_from_path(path):
     """Extract ansys version from a path.  Generally, the version of
     ANSYS is contained in the path:
@@ -336,11 +357,14 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         command = ' '.join(command)
 
     else:  # linux
-        command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
+        command_parm = []
+        command_parm.extend(['"%s"' % exec_file, job_sw, cpu_sw,
                             ram_sw, additional_switches, port_sw,
                             grpc_sw])
+        command = ' '.join(command_parm)
 
     if verbose:
+        print(f'Running {command}')
         subprocess.Popen(command,
                          shell=os.name != 'nt',
                          cwd=run_location)
@@ -854,9 +878,9 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
     mode = check_mode(mode, _version_from_path(exec_file))
 
     # known issue with distributed memory parallel
-    if 'ubuntu' in platform.platform().lower():
-        if 'smp' not in additional_switches:
-            # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    if 'smp' not in additional_switches:
+        if _is_ubuntu():
             os.environ['I_MPI_SHM_LMT'] = 'shm'
 
     # cache start parameters

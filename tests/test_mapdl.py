@@ -64,20 +64,10 @@ def test_comment(cleared, mapdl):
     assert comment in resp
 
 
-# @skip_grpc
-# def test_output(cleared, mapdl):
-#     tmp_file = 'tmp_redirect.txt'
-#     resp = mapdl.output(tmp_file)
-#     comment = 'Testing...'
-#     resp = mapdl.com(comment)
-#     mapdl.output()
-#     output = open(os.path.join(mapdl.path, tmp_file)).read()
-#     assert comment in output
-
-
 def test_basic_command(cleared, mapdl):
-    resp = mapdl.block(0, 1, 0, 1, 0, 1)
-    assert 'CREATE A HEXAHEDRAL VOLUME' in resp
+    resp = mapdl.prep7()
+    resp = mapdl.finish()
+    assert 'ROUTINE COMPLETED' in resp
 
 
 def test_allow_ignore(mapdl):
