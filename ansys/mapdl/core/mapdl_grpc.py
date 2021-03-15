@@ -888,7 +888,7 @@ class MapdlGrpc(_MapdlCore):
         # file.
         tmp_name = '_input_tmp_.inp'
         tmp_out = '_input_tmp_.out'
-        tmp_dat = f'/OUT,{tmp_out}\n/INP,{filename}\n'
+        tmp_dat = f"/OUT,{tmp_out}\n/INP,'{filename}'\n"
         if self._local:
             local_path = self.directory
             with open(os.path.join(local_path, tmp_name), 'w') as f:
