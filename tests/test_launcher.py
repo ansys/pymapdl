@@ -5,7 +5,7 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import get_ansys_bin
-from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.launcher import get_start_instance, _version_from_path
 
 try:
     import ansys_corba
@@ -40,6 +40,23 @@ if not get_start_instance():
 
 if not valid_versions:
     pytestmark = pytest.mark.skip("Requires MAPDL")
+
+
+
+
+paths = [('/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211', 211),
+         ('C:/Program Files/ANSYS Inc/v202\\ansys/bin/win64/ANSYS202.exe', 202),
+         ('/usr/ansys_inc/v211/ansys/bin/mapdl', 211)]
+@pytest.mark.parametrize('path_data', paths)
+def test_version_from_path(path_data):
+    exec_file, version = path_data
+    assert _version_from_path(exec_file) == version
+
+
+def test_catch_version_from_path():
+    with pytest.raises(RuntimeError):
+        _version_from_path('abc')
+
 
 
 @pytest.mark.skipif(os.name != 'posix', reason="Requires Linux")

@@ -10,6 +10,8 @@ PyMAPDL
    :target: https://zenodo.org/badge/latestdoi/70696039
 
 
+Documentation and Issues
+------------------------
 See the `Documentation <https://mapdldocs.pyansys.com>`_ page for more
 details, and the `Examples gallery
 <https://mapdldocs.pyansys.com/pyansys/examples/index.html>`_ for some

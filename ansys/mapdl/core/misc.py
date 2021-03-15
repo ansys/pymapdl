@@ -7,13 +7,8 @@ from threading import Thread
 import random
 import string
 
-from pyvista.utilities.errors import GPUInfo
 import scooby
-import pyvista
 import numpy as np
-import vtk
-
-VTK9 = vtk.vtkVersion().GetVTKMajorVersion() >= 9
 
 
 # path of this module
@@ -83,6 +78,7 @@ class Report(scooby.Report):
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if gpu:
+            from pyvista.utilities.errors import GPUInfo
             try:
                 extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
             except:

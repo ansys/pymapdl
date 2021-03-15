@@ -11,7 +11,7 @@ import time
 import subprocess
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir
+from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
@@ -24,12 +24,62 @@ if not os.path.isdir(SETTINGS_DIR):
         warnings.warn('Unable to create settings directory.\n' +
                       'Will be unable to cache ANSYS executable location')
 
-
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
 ALLOWABLE_MODES = ['corba', 'console', 'grpc']
 
 LOCALHOST = '127.0.0.1'
 MAPDL_DEFAULT_PORT = 50052
+
+
+def _is_ubuntu():
+    """Determine if running as Ubuntu
+
+    It's a bit complicated because sometimes the distribution is
+    Ubuntu, but the kernel has been recompiled and no longer has the
+    word "ubuntu" in it.
+
+    """
+    # must be running linux for this to be True
+    if os.name != 'posix':
+        return False
+
+    # try lsb_release as this is more reliable
+    try:
+        import lsb_release
+        if lsb_release.get_distro_information()['ID'].lower() == 'ubuntu':
+            return True
+    except ImportError:
+        return 'ubuntu' in platform.platform().lower()
+
+
+def _version_from_path(path):
+    """Extract ansys version from a path.  Generally, the version of
+    ANSYS is contained in the path:
+
+    C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe
+
+    /usr/ansys_inc/v211/ansys/bin/mapdl
+
+    Note that if the MAPDL executable, you have to rely on the version
+    in the path.
+
+    Parameters
+    ----------
+    path : str
+        Path to the MAPDL executable
+
+    Returns
+    -------
+    int
+        Integer version number (e.g. 211).
+
+    """
+    # expect v<ver>/ansys
+    # replace \\ with / to account for possible windows path
+    matches = re.findall(r'v(\d\d\d).ansys', path.replace('\\', '/'))
+    if not matches:
+        raise RuntimeError(f'Unable to extract Ansys version from {path}')
+    return int(matches[-1])
 
 
 def close_all_local_instances(port_range=None):
@@ -253,8 +303,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    version = int(re.findall(r'\d\d\d', exec_file)[0])/10
-    if version < 20.2:
+    if _version_from_path(exec_file) < 202:
         raise VersionError('The MAPDL gRPC interface requires MAPDL 20.2 or later')
 
     # verify lock file does not exist
@@ -308,11 +357,14 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         command = ' '.join(command)
 
     else:  # linux
-        command = ' '.join(['"%s"' % exec_file, job_sw, cpu_sw,
+        command_parm = []
+        command_parm.extend(['"%s"' % exec_file, job_sw, cpu_sw,
                             ram_sw, additional_switches, port_sw,
                             grpc_sw])
+        command = ' '.join(command_parm)
 
     if verbose:
+        print(f'Running {command}')
         subprocess.Popen(command,
                          shell=os.name != 'nt',
                          cwd=run_location)
@@ -465,9 +517,8 @@ def check_valid_ansys():
     """ Checks if a valid version of ANSYS is installed and preconfigured """
     ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
-        version = int(re.findall(r'\d\d\d', ansys_bin)[0])
+        version = _version_from_path(ansys_bin)
         return not(version < 170 and os.name != 'posix')
-
     return False
 
 
@@ -822,16 +873,14 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
 
+    # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
-
-    # NOTE: version may or may not be within the full exec_path
-    version = int(re.findall(r'\d\d\d', exec_file)[0])
-    mode = check_mode(mode, version)
+    mode = check_mode(mode, _version_from_path(exec_file))
 
     # known issue with distributed memory parallel
-    if 'ubuntu' in platform.platform().lower():
-        if 'smp' not in additional_switches:
-            # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    if 'smp' not in additional_switches:
+        if _is_ubuntu():
             os.environ['I_MPI_SHM_LMT'] = 'shm'
 
     # cache start parameters
