@@ -1,6 +1,8 @@
 """Pythonic MAPDL Commands"""
 
+from .mesh_commands import _MapdlMeshingCommands
 from .geometry_commands import _MapdlGeometryCommands
+
 
 class _MapdlCommands(_MapdlGeometryCommands,
                      _MapdlMeshingCommands):  # pragma: no cover
@@ -19,7 +21,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Parameters
         ----------
         fnumb1, fnumb2, fnumb3, . . . , fnumb20
-            Field numbers defined by the MFELEM command .
+            Field numbers defined by the MFELEM command.
 
         Notes
         -----
