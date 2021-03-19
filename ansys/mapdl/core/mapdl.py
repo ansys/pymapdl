@@ -29,8 +29,19 @@ _PERMITTED_ERRORS = [
 # test for png file
 PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
 
-INVAL_COMMANDS = {'*vwr':  'Use "with ansys.non_interactive:\n\t*ansys.Run("VWRITE(..."',
-                  '*cfo': '',
+VWRITE_REPLACEMENT = """
+Cannot use *VWRITE directly as a command in MAPDL 
+service mode.  Instead, run it as ``non_interactive``.
+
+For example:
+
+with self.non_interactive:
+    self.vwrite('%s(1)' % parm_name)
+    self.run('(F20.12)')
+"""
+
+INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
+                  '*CFO': 'Run CFOPEN as non_interactive',
                   '*CRE': 'Create a function within python or run as non_interactive',
                   '*END': 'Create a function within python or run as non_interactive',
                   '*IF': 'Use a python if or run as non_interactive'}
@@ -275,10 +286,37 @@ class _MapdlCore(_MapdlCommands):
         """
         return self._response
 
-    @wraps(_MapdlCommands.clear)
     def clear(self, *args, **kwargs):
-        kwargs['read'] = 'NOSTART'
-        super().clear(**kwargs)
+        """Clear the database.
+
+        APDL Command: ``/CLEAR``
+
+        Examples
+        --------
+        >>> mapdl.clear()
+
+        Notes
+        -----
+        Resets the ANSYS database to the conditions at the beginning
+        of the problem.  Sets the import and Boolean options back to
+        the ANSYS default. All items are deleted from the database and
+        memory values are set to zero for items derived from database
+        information.  All files are left intact.  This command is
+        useful between multiple analyses in the same run, or between
+        passes of a multi-pass analysis (such as between the
+        substructure generation, use, and expansion passes).  Should
+        not be used in a do-loop since loop counters will be reset.
+        on the same line as the ``/CLEAR`` command.
+
+        ``/CLEAR`` resets the jobname to match the currently open
+        session .LOG and .ERR files. This will return the jobname to
+        its original value, or to the most recent value specified on
+        ``/FILNAME`` with KEY = 1.
+
+        This command is valid only at the Begin level.
+
+        """
+        self.run('/CLEAR,NOSTART')
 
     @supress_logging
     def __str__(self):
@@ -1738,6 +1776,12 @@ class _MapdlCore(_MapdlCommands):
         """
         # always reset the cache
         self._reset_cache()
+
+        # address MAPDL /INPUT level issue
+        if command[:4].upper() == '/CLE':
+            # Address gRPC issue
+            # https://github.com/pyansys/pymapdl/issues/380
+            command = '/CLE,NOSTART'
 
         if self._store_commands:
             self._stored_commands.append(command)
