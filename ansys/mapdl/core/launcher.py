@@ -532,14 +532,14 @@ def change_default_ansys_path(exe_loc):
 
     Examples
     --------
-    Change default ansys location on Linux
+    Change default Ansys location on Linux
 
     >>> from ansys.mapdl.core import launcher
     >>> launcher.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
     >>> launcher.get_ansys_path()
     '/ansys_inc/v201/ansys/bin/ansys201'
 
-    Change default ansys location on Windows
+    Change default Ansys location on Windows
 
     >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
     >>> launcher.change_default_ansys_path(ans_pth)
