@@ -402,7 +402,7 @@ class MapdlGrpc(_MapdlCore):
         return self._mesh_rep
 
     def _run(self, cmd, verbose=False, mute=False):
-        """Sends a command and returns the response as a string.
+        """Sens a command and return the response as a string.
 
         Parameters
         ----------
@@ -414,6 +414,21 @@ class MapdlGrpc(_MapdlCore):
 
         mute : bool, optional
             Request that no output be sent from the gRPC server.
+
+        Examples
+        --------
+        Run a basic command.
+
+        >>> mapdl.run('/PREP7')
+
+        Run a command and suppress its output.
+
+        >>> mapdl.run('/PREP7', mute=True)
+
+        Run a command and stream its output while it is being run.
+
+        >>> mapdl.run('/PREP7', mute=True)
+
         """
         if self._exited:
             raise MapdlExitedError

@@ -14,10 +14,19 @@ def test_clear_nostart(mapdl):
     assert 'CLEAR ANSYS DATABASE AND RESTART' in resp
 
 
+# NOTE: This command cannot be run repeately, otherwise we end up with
+# to many levels of /INPUT.  2021R2 should have a fix for this
 def test_clear(mapdl):
     resp = mapdl._send_command('FINISH')
     resp = mapdl._send_command('/CLEAR')
     assert 'CLEAR' in resp
+
+
+def test_clear_multiple(mapdl):
+    # simply should not fail.  See:
+    # https://github.com/pyansys/pymapdl/issues/380
+    for i in range(20):
+        mapdl.run('/CLEAR')
 
 
 def test_invalid_get(mapdl):

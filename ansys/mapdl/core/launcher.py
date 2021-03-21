@@ -76,7 +76,8 @@ def _version_from_path(path):
     """
     # expect v<ver>/ansys
     # replace \\ with / to account for possible windows path
-    matches = re.findall(r'v(\d\d\d).ansys', path.replace('\\', '/'))
+    matches = re.findall(r'v(\d\d\d).ansys', path.replace('\\', '/'),
+                         re.IGNORECASE)
     if not matches:
         raise RuntimeError(f'Unable to extract Ansys version from {path}')
     return int(matches[-1])
@@ -425,7 +426,7 @@ def _get_available_base_ansys():
     """
     base_path = None
     if os.name == 'nt':
-        supported_versions = [194, 202, 211, 212]
+        supported_versions = [194, 202, 211, 212, 221]
         awp_roots = {ver: os.environ.get(f'AWP_ROOT{ver}', '') for ver in supported_versions}
         installed_versions = {ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)}
         if installed_versions:
@@ -532,14 +533,14 @@ def change_default_ansys_path(exe_loc):
 
     Examples
     --------
-    Change default ansys location on Linux
+    Change default Ansys location on Linux
 
     >>> from ansys.mapdl.core import launcher
     >>> launcher.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
     >>> launcher.get_ansys_path()
     '/ansys_inc/v201/ansys/bin/ansys201'
 
-    Change default ansys location on Windows
+    Change default Ansys location on Windows
 
     >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
     >>> launcher.change_default_ansys_path(ans_pth)

@@ -212,11 +212,11 @@ License and Acknowledgments
 ---------------------------
 ``PyMAPDL`` is licensed under the MIT license.
 
-This module, ``ansys-mapdl-core`` makes no commercial claim over ANSYS
+This module, ``ansys-mapdl-core`` makes no commercial claim over Ansys
 whatsoever.  This tool extends the functionality of ``MAPDL`` by
 adding a Python interface to the MAPDL service without changing the
 core behavior or license of the original software.  The use of the
 interactive APDL control of ``PyMAPDL`` requires a legally licensed
-local copy of ANSYS.
+local copy of Ansys.
 
-To get a copy of ANSYS, please visit `ANSYS <https://www.ansys.com/>`_.
+To get a copy of Ansys, please visit `Ansys <https://www.ansys.com/>`_.
