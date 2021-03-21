@@ -425,7 +425,7 @@ def _get_available_base_ansys():
     """
     base_path = None
     if os.name == 'nt':
-        supported_versions = [194, 202, 211, 212]
+        supported_versions = [194, 202, 211, 212, 221]
         awp_roots = {ver: os.environ.get(f'AWP_ROOT{ver}', '') for ver in supported_versions}
         installed_versions = {ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)}
         if installed_versions:

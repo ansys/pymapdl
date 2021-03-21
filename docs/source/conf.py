@@ -38,7 +38,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = 'ansys.mapdl.core'
-copyright = '2020, ANSYS'
+copyright = '2021, ANSYS'
 author = 'ANSYS Open Source Developers'
 
 # The short X.Y version
@@ -93,8 +93,12 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Copy button customization ---------------------------------------------------
+# exclude traditional Python prompts from the copied code
+copybutton_prompt_text = ">>> "
 
-# -- Sphinx Gallery Options
+
+# -- Sphinx Gallery Options ---------------------------------------------------
 from sphinx_gallery.sorting import FileNameSortKey
 
 sphinx_gallery_conf = {
