@@ -417,11 +417,11 @@ class MapdlGrpc(_MapdlCore):
 
         Examples
         --------
-        Run a basic command
+        Run a basic command.
 
         >>> mapdl.run('/PREP7')
 
-        Run a command and supress its output
+        Run a command and suppress its output.
 
         >>> mapdl.run('/PREP7', mute=True)
 

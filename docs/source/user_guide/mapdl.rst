@@ -104,12 +104,12 @@ using the ``convert_script`` function and setting
 Additional Options When Running Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Commands can be run in ``mute`` or ``verbose`` mode, which allows you
-to supress or print the output in as it is being run for any MAPDL
+to suppress or print the output in as it is being run for any MAPDL
 command.  This can be especially helpful for long-running commands
 like ``SOLVE``.  This works for the pythonic wrapping of all commands
 and when using ``run``.
 
-Run a command and supress its output
+Run a command and suppress its output:
 
 .. code:: python
 
