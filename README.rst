@@ -118,7 +118,7 @@ Next, connect to the instance of MAPDL from python with:
 
 .. code:: python
 
-    >>> from ansys.mapdl import Mapdl
+    >>> from ansys.mapdl.core import Mapdl
     >>> ip = '127.0.0.1'
     >>> mapdl = Mapdl(ip=ip, port=50052, request_instance=False)
     >>> print(mapdl)
