@@ -359,8 +359,9 @@ class MapdlMath():
         elif not isinstance(name, str):
             raise TypeError('``name`` parameter must be a string')
         
+        from scipy import sparse
         self._set_mat(name, matrix, triu)
-        if ( sparse.issparse(mat)) :
+        if ( sparse.issparse(matrix)) :
             return AnsSparseMat(name, self._mapdl)
         else:
             return AnsDenseMat(name, self._mapdl)
