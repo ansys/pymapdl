@@ -734,6 +734,9 @@ class MapdlMath():
                 self._mapdl.run(f'*SMAT,{mname},D,ALLOC,CSR,{indptrname},{indxname},{dataname},{flagsym}')
         else:
 
+            if self._mapdl._grpc_api_ver < 0.4:
+                    raise TypeError('This feature is not supported.\n')                
+                
             if dtype is not None:
                 if arr.dtype != dtype:
                     arr = arr.astype(dtype)
@@ -917,6 +920,11 @@ class AnsVec(ApdlMathObj):
         hadamard_product : Ansys vector object
             Hadamard product between this vector and the other vector.
         """
+
+        if self._mapdl._grpc_api_ver < 0.4:        
+            raise AttributeError('Array multiplication is not yet available.  '
+                                 'For dot product, please use `dot()`')
+
         if not isinstance(vec, AnsVec):
             raise TypeError('Must be an Ansys vector object')
             
