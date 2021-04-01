@@ -21,6 +21,7 @@ from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
 
+
 _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
     r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
@@ -505,13 +506,19 @@ class _MapdlCore(_MapdlCommands):
         return filename
 
     def open_gui(self, include_result=True):  # pragma: no cover
-        """Saves existing database and opens up APDL GUI
+        """Saves existing database and opens up the APDL GUI.
 
         Parameters
         ----------
         include_result : bool, optional
             Allow the result file to be post processed in the GUI.
+
+        Examples
+        --------
+        >>> mapdl.open_gui()
         """
+        # lazy load here to avoid circular import
+        from ansys.mapdl.core.launcher import get_ansys_path
 
         if not self._local:
             raise RuntimeError('``open_gui`` can only be called from a local '
@@ -519,7 +526,7 @@ class _MapdlCore(_MapdlCommands):
 
         # specify a path for the temporary database
         temp_dir = tempfile.gettempdir()
-        save_path = os.path.join(temp_dir, 'ansys_tmp')
+        save_path = os.path.join(temp_dir, f'ansys_{random_string(10)}')
         if os.path.isdir(save_path):
             rmtree(save_path)
         os.mkdir(save_path)
@@ -534,7 +541,7 @@ class _MapdlCore(_MapdlCommands):
         version = self.version
         prior_processor = self.parameters.routine
 
-        # get the close, and finish
+        # finish, save and exit the server
         self.finish()
         self.save(tmp_database)
         self.exit()
@@ -558,21 +565,19 @@ class _MapdlCore(_MapdlCommands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
-        from ansys.mapdl.core.launcher import get_ansys_path
         exec_file = self._start_parm.get('exec_file',
                                          get_ansys_path(allow_input=False))
-        os.system('cd "%s" && "%s" -g -j %s' % (save_path, exec_file, name))
+        nproc = self._start_parm.get('nproc', 2)
+        add_sw = self._start_parm.get('additional_switches', '')
+        os.system(f'cd "{save_path}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}')
         os.chdir(cwd)
-
-        # must remove the start file when finished
-        os.remove(start_file)
-        os.remove(other_start_file)
+        # Consider removing this temporary directory
 
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(tmp_database)
         if prior_processor is not None:
-            if 'BEGIN' not in prior_processor:
+            if 'BEGIN' not in prior_processor.upper():
                 self.run('/%s' % prior_processor)
 
     def _launch(self, *args, **kwargs):  # pragma: no cover

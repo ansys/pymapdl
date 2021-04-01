@@ -141,7 +141,7 @@ def port_in_use(port, host=LOCALHOST):
 def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                 run_location=None, port=MAPDL_DEFAULT_PORT,
                 additional_switches='', custom_bin=None,
-                override=True, timeout=20, verbose=False) -> int:
+                override=True, timeout=20, verbose=False) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -337,25 +337,25 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     # created to tell when the process has started
     for filename in os.listdir(run_location):
         if ".err" == filename[-4:] and jobname in filename:
-            try:
-                os.remove(filename)
-            except:
-                raise IOError('Unable to remove {filename}.  There might be '
-                              'an instance of MAPDL running at this location')
+            if os.path.isfile(filename):
+                try:
+                    os.remove(filename)
+                except:
+                    raise IOError(f'Unable to remove {filename}.  There might be '
+                                  'an instance of MAPDL running at running at '
+                                  f'"{run_location}"')
 
-    # Windows will spawn a new window, only linux will let you use pexpect...
+    # Windows will spawn a new window, special treatment
     if os.name == 'nt':
-
-        # track PIDs since MAPDL isn't directly launched within the shell
         tmp_inp = '.__tmp__.inp'
         with open(os.path.join(run_location, tmp_inp), 'w') as f:
             f.write('FINISH\r\n')
 
         # must start in batch mode on windows to hide APDL window
-        command = ['"%s"' % exec_file, job_sw, cpu_sw, ram_sw, '-b',
-                   '-i', tmp_inp, '-o', '.__tmp__.out',
-                   additional_switches, port_sw, grpc_sw]
-        command = ' '.join(command)
+        command_parm = ['"%s"' % exec_file, job_sw, cpu_sw, ram_sw, '-b',
+                        '-i', tmp_inp, '-o', '.__tmp__.out',
+                        additional_switches, port_sw, grpc_sw]
+        command = ' '.join(command_parm)
 
     else:  # linux
         command_parm = []
