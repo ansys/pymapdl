@@ -320,6 +320,37 @@ class ansXpl():
         mm = self._mapdl.math
         return mm.vec(dtype=dtype, name="TmpXplData")
 
+    def write(self, recordname, vecname):
+        """Write a given record back to an MAPDL File
+        Use the write function at your own risk, you may corrupt 
+        an existing file by changing the size of a record in the 
+        file. 
+        This function must be used only on a non-compressed file
+
+        Parameters
+        ----------
+        recordname : str
+            Name of the record you want to overwrite. Your position
+            in the file must be set accordingly to this record location
+            ( same as if you want to read it)
+
+        vecname : str
+            Name of the APDLMath vector you want to write in the MAPDL
+            file. Its size must be consistent with the existing record
+
+        Returns
+        -------
+        mapdl_response : str
+            Response from MAPDL.
+
+        Examples
+        --------
+        >>> xpl.write('MASS', vecname)
+        """
+        response = self._mapdl.run("*XPL,WRITE," + recordname + "," + vecname)        
+        self._check_ignored(response)
+        return response
+
     def __repr__(self):
         txt = 'MAPDL File Explorer\n'
         if self._open:
