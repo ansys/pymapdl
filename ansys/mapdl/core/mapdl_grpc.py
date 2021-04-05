@@ -301,7 +301,6 @@ class MapdlGrpc(_MapdlCore):
 
         # TODO: version check
 
-
         # enable health check
         if enable_health_check:
             self._enable_health_check()
@@ -358,7 +357,7 @@ class MapdlGrpc(_MapdlCore):
                                   daemon=True)
         thread.start()
 
-    def _launch(self, start_parm):
+    def _launch(self, start_parm, timeout=10):
         """Launch a local session of MAPDL in gRPC mode.
 
         This should only need to be used for legacy ``open_gui``
@@ -370,6 +369,21 @@ class MapdlGrpc(_MapdlCore):
         self._exited = False  # reset exit state
         port, directory = launch_grpc(**start_parm)
         self._connect(port)
+
+        # may need to wait for viable connection in open_gui case
+        tmax = time.time() + timeout
+        success = False
+        while time.time() < tmax:
+            try:
+                self.prep7()
+                success = True
+                break
+            except:
+                pass
+
+        if not success:
+            breakpoint()
+            raise RuntimeError('Unable to reconnect to MAPDL')
 
     @property
     def post_processing(self):

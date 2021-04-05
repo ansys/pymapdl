@@ -15,7 +15,9 @@ except:
 
 # CORBA and console available versions
 versions = [
-    '182',
+    '170',  # 17.0
+    '182',  # 18.2
+    '182',  # 18.2
     '190',  # 19.0
     '191',  # 19.1
     '192',  # 19.2
