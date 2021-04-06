@@ -522,7 +522,7 @@ class MapdlMath():
         if not thresh:
             thresh = ''
 
-        self._mapdl.run("*COMP," + M.id + ",SPARSE," + str(thresh))        
+        self._mapdl.run(f"*COMP,{M.id},SPARSE,{thresh}")
         return
     
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
