@@ -31,7 +31,7 @@ _PERMITTED_ERRORS = [
 PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
 
 VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL 
+Cannot use *VWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
 For example:
