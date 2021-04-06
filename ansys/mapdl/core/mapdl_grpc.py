@@ -23,7 +23,8 @@ from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
-from ansys.mapdl.core.misc import supress_logging, run_as_prep7, last_created
+from ansys.mapdl.core.misc import (supress_logging, run_as_prep7, last_created,
+                                   random_string)
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.common_grpc import (parse_chunks,
                                           ANSYS_VALUE_TYPE,
@@ -954,19 +955,33 @@ class MapdlGrpc(_MapdlCore):
                         'apdl input file:\n%s', commands)
 
         # write to a temporary input file
-        filename = os.path.join(tempfile.gettempdir(), '__tmp__.inp')
-        with open(filename, 'w') as f:
-            f.writelines(commands)
+        def build_rand_tmp():
+            return os.path.join(tempfile.gettempdir(),
+                                f'tmp_{random_string()}.out')
+
+        # rare case of duplicated tmpfile (birthday problem)
+        tmp_filename = build_rand_tmp()
+        while os.path.isfile(tmp_filename):
+            tmp_filename = build_rand_tmp()
+
+        with open(tmp_filename, 'w') as fid:
+            fid.writelines(commands)
 
         self._store_commands = False
         self._stored_commands = []
 
         # run the stored commands
-        out = self.input(filename, write_to_log=False, verbose=False,
+        out = self.input(tmp_filename, write_to_log=False, verbose=False,
                          chunk_size=DEFAULT_CHUNKSIZE, progress_bar=False)
         # skip the first line as it simply states that it's reading an input file
         self._response = out[out.find('LINE=       0') + 13:]
         self._log.info(self._response)
+
+        # try/except here because MAPDL might have not closed the temp file
+        try:
+            os.remove(tmp_filename)
+        except:
+            self._log.warning('Unable to remove temporary file %s', tmp_filename)
 
     @protect_grpc
     def _get(self, entity, entnum, item1, it1num, item2, it2num):
