@@ -310,10 +310,16 @@ class ansXpl():
 
         if (response.stype == anskernel.INTEGER):
             dtype = np.int32
-        elif (response.stype == anskernel.DOUBLE):
-            dtype = np.double
         elif (response.stype == anskernel.HYPER):
             dtype = np.int64
+        elif (response.stype == anskernel.FLOAT):
+            dtype = np.single
+        elif (response.stype == anskernel.DOUBLE):
+            dtype = np.double
+        elif (response.stype == anskernel.FCPLX):
+            dtype = np.complex64
+        elif (response.stype == anskernel.DCPLX):
+            dtype = np.complex128
         else:
             raise TypeError('Unhandled ANSYS type %s' % response.stype)
 
