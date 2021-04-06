@@ -452,6 +452,79 @@ class MapdlMath():
     def rhs(self, type=np.double, fname="file.full"):
         return self.getVec(type, fname, "RHS")
 
+    def svd(self, M, thresh=None, sig=None, V=None):
+        """Apply an SVD Algorithm on a matrix
+
+        Parameters
+        ----------
+        M : ansys.AnsMat
+            The array to compress.
+
+        thresh:
+            
+        sig : str, optional
+        V   : str, optional
+            
+        Examples
+        --------
+        Apply SVD on an existing Dense Rectangular Matrix, using default threshold.
+        The M matrix is modified in-situ. 
+
+        >>> mm.svd( M)
+        """
+
+        if not thresh:
+            thresh = ''
+
+        if not sig:
+            sig = ''
+
+        if not V:
+            V = ''
+
+        self._mapdl.run("*COMP," + M.id + ",SVD," + str(thresh) + ',' + str(sig) + ',' + str(V))
+        
+        return
+
+    def mgs(self, M, thresh=None):
+        """Apply an MGS Algorithm on a matrix
+
+        Parameters
+        ----------
+        M : ansys.AnsMat
+            The array to consider.
+
+        thresh:
+            
+        Examples
+        --------
+        Apply MGS on an existing Dense Rectangular Matrix, using default threshold.
+        The M matrix is modified in-situ. 
+
+        >>> mm.mgs( M)
+        """
+        if not thresh:
+            thresh = ''
+
+        self._mapdl.run("*COMP," + M.id + ",MGS," + str(thresh))        
+        return
+
+    def sparse(self, M, thresh=None):
+        """Sparsify a existing matrix based on a threshold value
+
+        Parameters
+        ----------
+        M : ansys.AnsMat
+            The array to consider.
+
+        thresh:
+        """            
+        if not thresh:
+            thresh = ''
+
+        self._mapdl.run("*COMP," + M.id + ",SPARSE," + str(thresh))        
+        return
+    
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
              fmin=None, fmax=None):
         """Solve an eigenproblem
