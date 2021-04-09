@@ -2,10 +2,11 @@
 
 from .mesh_commands import _MapdlMeshingCommands
 from .geometry_commands import _MapdlGeometryCommands
-
+from .io_commands import _MapdlIoCommands
 
 class _MapdlCommands(_MapdlGeometryCommands,
-                     _MapdlMeshingCommands):  # pragma: no cover
+                     _MapdlMeshingCommands,
+                     _MapdlIoCommands):  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -30838,45 +30839,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         analyses results processing.
         """
         command = "PLCINT,%s,%s,%s,%s,%s" % (str(action), str(id), str(node), str(cont), str(dtype))
-        return self.run(command, **kwargs)
-
-    def parres(self, lab="", fname="", ext="", **kwargs):
-        """APDL Command: PARRES
-
-        Reads parameters from a file.
-
-        Parameters
-        ----------
-        lab
-            Read operation.
-
-            NEW - Replace current parameter set with these parameters (default).
-
-            CHANGE - Extend current parameter set with these
-            parameters, replacing any that already exist.
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-            The file name defaults to Jobname.
-
-        ext
-            Filename extension (eight-character maximum).  The
-            extension defaults to PARM if Fname is blank.
-
-        Notes
-        -----
-        Reads parameters from a coded file.  The parameter file may
-        have been written with the PARSAV command.  The parameters
-        read may replace or change the current parameter set.
-
-        This command is valid in any processor.
-        """
-        command = "PARRES,%s,%s,%s" % (str(lab), str(fname), str(ext))
         return self.run(command, **kwargs)
 
     def stef(self, value="", **kwargs):

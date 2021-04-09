@@ -38,6 +38,14 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
+def test_parsav_parres(mapdl, cleared, tmpdir):
+    arr = np.random.random((10, 3))
+    mapdl.parameters['MYARR'] = arr
+    mapdl.parsav('', 'tmp.txt')
+    mapdl.parres('', 'tmp.txt')
+    assert np.allclose(mapdl.parameters['MYARR'], arr)
+
+
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
