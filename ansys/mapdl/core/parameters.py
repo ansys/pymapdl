@@ -419,13 +419,10 @@ class Parameters():
         filename = '_tmp.dat'
         self._write_numpy_array(filename, arr)
 
-        self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
+        cmd = f'{name}(1, 1),{filename},,,IJK,{idim},{jdim},{kdim}$(1F20.12)'
         with self._mapdl.non_interactive:
-            self._mapdl.vread('%s(1, 1),%s,,,IJK, %d, %d, %d' % (name,
-                                                                 filename,
-                                                                 idim,
-                                                                 jdim,
-                                                                 kdim))
+            self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
+            self._mapdl.vread(cmd)
             self._mapdl.run('(1F20.12)')
 
     def _write_numpy_array(self, filename, arr):

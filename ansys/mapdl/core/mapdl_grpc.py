@@ -957,7 +957,7 @@ class MapdlGrpc(_MapdlCore):
         # write to a temporary input file
         def build_rand_tmp():
             return os.path.join(tempfile.gettempdir(),
-                                f'tmp_{random_string()}.out')
+                                f'tmp_{random_string()}.inp')
 
         # rare case of duplicated tmpfile (birthday problem)
         tmp_filename = build_rand_tmp()
