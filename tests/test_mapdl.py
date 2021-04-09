@@ -41,8 +41,9 @@ def test_jobname(mapdl, cleared):
 def test_parsav_parres(mapdl, cleared, tmpdir):
     arr = np.random.random((10, 3))
     mapdl.parameters['MYARR'] = arr
-    mapdl.parsav('', 'tmp.txt')
-    mapdl.parres('', 'tmp.txt')
+    mapdl.parsav('ALL', 'tmp.txt')
+    mapdl.clear()
+    mapdl.parres('ALL', 'tmp.txt')
     assert np.allclose(mapdl.parameters['MYARR'], arr)
 
 
