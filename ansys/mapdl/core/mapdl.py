@@ -1300,6 +1300,8 @@ class _MapdlCore(_MapdlCommands):
 
         self._store_commands = False
         self._stored_commands = []
+
+        # interactive result
         _ = self.input(tmp_inp, write_to_log=False)
         time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
