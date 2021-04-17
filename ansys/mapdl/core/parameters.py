@@ -319,14 +319,14 @@ class Parameters():
         parm = self._parm
         if name in parm:
             if parm[name]['type'] == 'ARRAY':
-                self._mapdl.starset(name)
+                self._mapdl.starset(name, mute=True)
 
         if isinstance(value, str):
             if ' ' in value:
                 raise ValueError('Spaces not allowed in strings in MAPDL')
-            self._mapdl.starset(name, "'%s'" % value)
+            self._mapdl.starset(name, f"'{value}'", mute=True)
         else:
-            self._mapdl.starset(name, value)
+            self._mapdl.starset(name, value, mute=True)
 
     @supress_logging
     def _get_parameter_array(self, parm_name, shape):

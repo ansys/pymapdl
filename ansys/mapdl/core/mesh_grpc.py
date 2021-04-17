@@ -1,4 +1,5 @@
 """Module to manage downloading and parsing the FEM from the MAPDL grpc server"""
+import time
 import weakref
 import os
 import numpy as np
@@ -93,6 +94,8 @@ class MeshGrpc(Mesh):
         if os.name == 'nt':
             _ = self._mapdl.path
 
+        # TODO: flaky
+        time.sleep(0.05)
         self._mapdl.cmsel('S', '__NODE__', 'NODE', mute=True)
         self._ignore_cache_reset = False
 

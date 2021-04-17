@@ -1035,8 +1035,7 @@ class MapdlGrpc(_MapdlCore):
         WARNING: Not thread SAFE.  Uses _get_lock to ensure multiple
         request aren't evaluated simultaneously.
         """
-        cmd = ','.join([str(entity), str(entnum), str(item1),
-                        str(it1num), str(item2), str(it2num)])
+        cmd = f'{entity},{entnum},{item1},{it1num},{item2},{it2num}'
 
         # not threadsafe; don't allow multiple get commands
         while self._get_lock:
@@ -1057,8 +1056,7 @@ class MapdlGrpc(_MapdlCore):
         elif getresponse.type == 2:
             return getresponse.sval
 
-        raise RuntimeError('Unsupported type %s response from MAPDL' %
-                           str(getresponse.type))
+        raise RuntimeError(f'Unsupported type {getresponse.type} response from MAPDL')
 
     @protect_grpc
     def download(self, target_name, out_file_name=None,
@@ -1155,13 +1153,11 @@ class MapdlGrpc(_MapdlCore):
         if 'parm' in kwargs:
             raise ValueError('Parameter name `parm` not supported with gRPC')
 
-        cmd = "%s,%s,%s,%s,%s,%s,%s" % (str(entity), str(entnum), str(item1),
-                                        str(it1num), str(item2), str(it2num),
-                                        str(kloop))
-
         while self._vget_lock:
             time.sleep(0.001)
         self._vget_lock = True
+
+        cmd = f'{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}'
         try:
             chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
             values = parse_chunks(chunks)
@@ -1247,14 +1243,13 @@ class MapdlGrpc(_MapdlCore):
         if response.length != len(raw):
             raise IOError('Raw Bytes failed to upload')
 
-    ###########################################################################
-    # not fully tested/implemented
-
+    # TODO: not fully tested/implemented
     @protect_grpc
     def Param(self, pname):
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
         return presponse.val
 
+    # TODO: not fully tested/implemented
     @protect_grpc
     def Var(self, num):
         presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
@@ -1306,7 +1301,7 @@ class MapdlGrpc(_MapdlCore):
         try:
             from scipy import sparse
         except ImportError:  # pragma: no cover
-            raise ImportError('Install ``scipy`` to use this feature')
+            raise ImportError('Install ``scipy`` to use this feature') from None
 
         minfo = self._data_info(pname)
         stype = ANSYS_VALUE_TYPE[minfo.stype]
@@ -1343,7 +1338,7 @@ class MapdlGrpc(_MapdlCore):
         try:
             if self._exited:
                 return 'MAPDL exited'
-            stats = self.slashstatus('PROD')
+            stats = self.slashstatus('PROD', mute=False)
         except:  # pragma: no cover
             return 'MAPDL exited'
 
