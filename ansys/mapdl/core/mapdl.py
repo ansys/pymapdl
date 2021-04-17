@@ -1538,7 +1538,7 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.inquire('RSTFILE')
         'file.rst'
         """
-        response = self.run(f'/INQUIRE,,{func}')
+        response = self.run(f'/INQUIRE,,{func}', mute=False)
         return response.split('=')[1].strip()
 
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',

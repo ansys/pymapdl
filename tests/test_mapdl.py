@@ -38,6 +38,18 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
+def test_global_mute(mapdl):
+    mapdl.mute = True
+    assert mapdl.mute is True
+    assert mapdl.prep7() == ''
+
+    # commands like /INQUIRE must always return something
+    jobname = 'file'
+    mapdl.jobname = jobname
+    assert mapdl.inquire('JOBNAME') == jobname
+    mapdl.mute = False
+
+
 def test_parsav_parres(mapdl, cleared, tmpdir):
     arr = np.random.random((10, 3))
     mapdl.parameters['MYARR'] = arr
