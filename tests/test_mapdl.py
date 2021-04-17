@@ -142,7 +142,7 @@ def test_kplot(cleared, mapdl, tmpdir):
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
+    mapdl.kplot(vtk=False)    # make sure legacy still works
 
 
 @skip_no_xserver
@@ -305,7 +305,7 @@ def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False, background='w', color='k')
+    mapdl.nplot(vtk=False)
 
 
 def test_elements(cleared, mapdl):

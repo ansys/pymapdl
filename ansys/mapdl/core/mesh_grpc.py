@@ -93,7 +93,7 @@ class MeshGrpc(Mesh):
         if os.name == 'nt':
             _ = self._mapdl.path
 
-        self._mapdl.cmsel('S', '__NODE__', 'NODE')
+        self._mapdl.cmsel('S', '__NODE__', 'NODE', mute=True)
         self._ignore_cache_reset = False
 
     @property
@@ -117,8 +117,8 @@ class MeshGrpc(Mesh):
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
-        self._mapdl.cm('__NODE__', 'NODE')
-        self._mapdl.nsel('all')
+        self._mapdl.cm('__NODE__', 'NODE', mute=True)
+        self._mapdl.nsel('all', mute=True)
 
         nnum = self._mapdl.get_array('NODE', item1='NLIST')
         nnum = nnum.astype(np.int32)
@@ -126,7 +126,7 @@ class MeshGrpc(Mesh):
             if nnum[0] == 0:
                 nnum = np.empty(0, np.int32)
 
-        self._mapdl.cmsel('S', '__NODE__', 'NODE')
+        self._mapdl.cmsel('S', '__NODE__', 'NODE', mute=True)
         self._ignore_cache_reset = False
 
         return nnum
@@ -386,7 +386,7 @@ class MeshGrpc(Mesh):
             self._grid_cache = self._parse_vtk(force_linear=True)
         return self._grid_cache
 
-    # grid probably may not need a setter...
+    # TODO: grid probably does not need a setter...
     @_grid.setter
     def _grid(self, value):
         self._grid_cache = value

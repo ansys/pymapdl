@@ -193,9 +193,12 @@ class MapdlGrpc(_MapdlCore):
         self._busy = False  # used to check if running a command on the server
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
+        if 'local' in kwargs:  # allow this to be overridden
+            self._local = kwargs['local']
         self._ip = ip
         self._health_response_queue = None
         self._exiting = False
+        self._mute = False
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -224,15 +227,18 @@ class MapdlGrpc(_MapdlCore):
             raise IOError('Unable to connect to MAPDL gRPC instance at %s' %
                           self._channel_str)
 
-        self._verify_local()
-        if self._local:
+        # double check we have access to the local path if not
+        # explicitly specified
+        if 'local' not in kwargs:
+            self._verify_local()
+
+        # only cache process IDs if launched locally
+        if self._local and 'exec_file' in kwargs:
             self._cache_pids()
 
     def _verify_local(self):
-        """Check if Python is local to the MAPDL instance.
-
-        Verify if python has assess to the MAPDL directory.
-        """
+        """Check if Python is local to the MAPDL instance."""
+        # Verify if python has assess to the MAPDL directory.
         if self._local:
             if self._path is None:
                 directory = self.directory
@@ -251,6 +257,31 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(lockfile0):
                 return
             self._local = False
+
+    @property
+    def mute(self):
+        """Silence the response from all MAPDL functions unless
+        explicitly set to ``True``
+
+        Examples
+        --------
+        >>> mapdl.mute = True
+        >>> mapdl.prep()
+        ''
+
+        Override this with ``mute=False``.  This is useful for methods
+        that parse the MAPDL output like ``k``.
+
+        >>> mapdl.k('', 1, 1, 1, mute=False)
+        1
+
+        """
+        return self._mute
+
+    @mute.setter
+    def mute(self, value):
+        """Set mute."""
+        self._mute = value
 
     def __repr__(self):
         info = super().__repr__()
@@ -405,7 +436,7 @@ class MapdlGrpc(_MapdlCore):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL"""
-        self.nerr(abort=-1)
+        self.nerr(abort=-1, mute=True)
 
     def _reset_cache(self):
         """Reset cached items"""
@@ -416,7 +447,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         return self._mesh_rep
 
-    def _run(self, cmd, verbose=False, mute=False):
+    def _run(self, cmd, verbose=False, mute=None):
         """Sens a command and return the response as a string.
 
         Parameters
@@ -429,6 +460,8 @@ class MapdlGrpc(_MapdlCore):
 
         mute : bool, optional
             Request that no output be sent from the gRPC server.
+            Defaults to the global setting as specified with
+            ``mapdl.mute = <bool>``.  Default ``False``
 
         Examples
         --------
@@ -442,9 +475,12 @@ class MapdlGrpc(_MapdlCore):
 
         Run a command and stream its output while it is being run.
 
-        >>> mapdl.run('/PREP7', mute=True)
+        >>> mapdl.run('/PREP7', verbose=True)
 
         """
+        if mute is None:
+            mute = self._mute
+
         if self._exited:
             raise MapdlExitedError
 
@@ -617,8 +653,14 @@ class MapdlGrpc(_MapdlCore):
                     self._log.debug('Cleanup output:\n\n%s\n%s', output.decode(),
                                     err.decode())
 
-    def list_files(self):
+    def list_files(self, refresh_cache=True):
         """List the files in the working directory of MAPDL.
+
+        Parameters
+        ----------
+        refresh_cache : bool, optional
+            If local, refresh local cache by querying MAPDL for its
+            current path.
 
         Returns
         -------
@@ -640,10 +682,13 @@ class MapdlGrpc(_MapdlCore):
         file1.page
         """
         if self._local:  # simply return a python list of files
-            local_path = self.directory
+            if refresh_cache:
+                local_path = self.directory
+            else:
+                local_path = self._directory
             if local_path:
                 if os.path.isdir(local_path):
-                    return os.listdir(self.directory)
+                    return os.listdir(local_path)
             return []
         elif self._exited:
             raise RuntimeError('Cannot list remote files since MAPDL has exited')
