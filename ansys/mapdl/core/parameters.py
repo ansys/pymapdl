@@ -409,21 +409,48 @@ class Parameters():
 
         name = name.upper()
 
-        idim, jdim, kdim = arr.shape[0], 0, 0
+        idim, jdim, kdim = arr.shape[0], 1, 1
         if arr.ndim >= 2:
             jdim = arr.shape[1]
         if arr.ndim == 3:
             kdim = arr.shape[2]
 
+        # 2021R1 and earlier has stability issues.  Directly stream
+        # results for improved performance and stability, but up to a
+        # size limit.
+        if arr.size < 1000:
+            return self._set_array_chain(name, arr, idim, jdim, kdim)
+
         # write array from numpy to disk
         filename = '_tmp.dat'
         self._write_numpy_array(filename, arr)
 
-        cmd = f'{name}(1, 1),{filename},,,IJK,{idim},{jdim},{kdim}$(1F20.12)'
+        cmd = f'{name}(1, 1),{filename},,,IJK,{idim},{jdim},{kdim}'
         with self._mapdl.non_interactive:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             self._mapdl.vread(cmd)
             self._mapdl.run('(1F20.12)')
+
+    def _set_array_chain(self, name, arr, idim, jdim, kdim):
+        """Sets an array using chained commands
+
+        Faster and more stable (as of 2021R1) for small arrays.
+        """
+        if arr.ndim == 1:
+            arr = np.expand_dims(arr, [1, 2])
+        elif arr.ndim == 2:
+            arr = np.expand_dims(arr, 2)
+        old_mute = self._mapdl.mute
+        self._mapdl.mute = True
+        with self._mapdl.chain_commands:
+            self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
+            for i in range(idim):
+                for j in range(jdim):
+                    for k in range(kdim):
+                        index = f'{i + 1},{j + 1},{k + 1}'
+                        self._mapdl.run(f'{name}({index})={arr[i, j, k]}')
+
+        self._mapdl.mute = old_mute
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""

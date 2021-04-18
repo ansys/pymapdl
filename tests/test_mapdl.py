@@ -363,7 +363,7 @@ def test_elements(cleared, mapdl):
                                   10.0,
                                   [1, 2, 3],
                                   [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
+                                  np.random.random((2000)),  # fails on gRPC at 100000
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
 def test_set_get_parameters(mapdl, parm):
