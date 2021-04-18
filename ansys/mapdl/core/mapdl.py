@@ -4,7 +4,6 @@ import glob
 import re
 import os
 import logging
-from functools import wraps
 import tempfile
 from shutil import rmtree, copyfile
 import weakref
@@ -314,10 +313,10 @@ class _MapdlCore(_MapdlCommands):
         its original value, or to the most recent value specified on
         ``/FILNAME`` with KEY = 1.
 
-        This command is valid only at the Begin level.
+        this command is valid only at the Begin level.
 
         """
-        self.run('/CLEAR,NOSTART')
+        self.run('/CLE,NOSTART', mute=True)
 
     @supress_logging
     def __str__(self):
@@ -341,7 +340,6 @@ class _MapdlCore(_MapdlCommands):
         info =  'Product:         %s\n' % product
         info += 'MAPDL Version:   %s\n' % mapdl_version
         info += 'PyMAPDL Version: %s\n' % pymapdl.__version__
-
         return info
 
     @property
@@ -409,7 +407,12 @@ class _MapdlCore(_MapdlCommands):
             # write database to an archive file
             arch_filename = os.path.join(self.directory, '_tmp.cdb')
             nblock_filename = os.path.join(self.directory, 'nblock.cdb')
+
             # must have all nodes elements are using selected
+            if hasattr(self, 'mute'):
+                old_mute = self.mute
+                self.mute = True
+
             with self.chain_commands:
                 self.cm('__NODE__', 'NODE')
                 self.nsle('S')
@@ -420,6 +423,9 @@ class _MapdlCore(_MapdlCommands):
                 self.esel('NONE')
                 self.cdwrite('db', nblock_filename)
                 self.cmsel('S', '__ELEM__', 'ELEM')
+
+            if hasattr(self, 'mute'):
+                self.mute = old_mute
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False,
                                           name='Mesh')
@@ -443,10 +449,6 @@ class _MapdlCore(_MapdlCommands):
     def _reset_cache(self):
         """Reset cached items"""
         self._archive_cache = None
-
-    # def _reset_cache(self):    # pragma: no cover
-    #     """Reset cached items and other items"""
-    #     raise NotImplementedError('Implemented by child class')
 
     @property
     def allow_ignore(self):
@@ -502,7 +504,7 @@ class _MapdlCore(_MapdlCommands):
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         filename = os.path.join(self.directory, '_tmp.iges')
-        self.igesout(filename, att=1)
+        self.igesout(filename, att=1, mute=True)
         return filename
 
     def open_gui(self, include_result=True):  # pragma: no cover
@@ -542,8 +544,8 @@ class _MapdlCore(_MapdlCommands):
         prior_processor = self.parameters.routine
 
         # finish, save and exit the server
-        self.finish()
-        self.save(tmp_database)
+        self.finish(mute=True)
+        self.save(tmp_database, mute=True)
         self.exit()
 
         # copy result file to temp directory
@@ -575,10 +577,10 @@ class _MapdlCore(_MapdlCommands):
 
         # reattach to a new session and reload database
         self._launch(self._start_parm)
-        self.resume(tmp_database)
+        self.resume(tmp_database, mute=True)
         if prior_processor is not None:
             if 'BEGIN' not in prior_processor.upper():
-                self.run('/%s' % prior_processor)
+                self.run(f'/{prior_processor}', mute=True)
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')
@@ -658,7 +660,7 @@ class _MapdlCore(_MapdlCommands):
             knum = int(knum)
 
         self._enable_interactive_plotting()
-        return super().nplot(knum)
+        return super().nplot(knum, **kwargs)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,
@@ -721,7 +723,7 @@ class _MapdlCore(_MapdlCommands):
             self.cmsel('S', cm_name, 'AREA')
         else:
             self._enable_interactive_plotting()
-            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc)
+            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc, **kwargs)
 
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,
@@ -841,7 +843,7 @@ class _MapdlCore(_MapdlCommands):
 
         else:
             self._enable_interactive_plotting()
-            return super().aplot(na1=na1, na2=na2, ninc=ninc)
+            return super().aplot(na1=na1, na2=na2, ninc=ninc, **kwargs)
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
@@ -861,8 +863,8 @@ class _MapdlCore(_MapdlCommands):
                               '``vtk=True``')
 
         if not self._png_mode:
-            self.show('PNG')
-            self.gfile(pixel_res)
+            self.show('PNG', mute=True)
+            self.gfile(pixel_res, mute=True)
 
     @property
     def _has_matplotlib(self):
@@ -875,7 +877,7 @@ class _MapdlCore(_MapdlCommands):
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
-        return 'PNG' in self.show()
+        return 'PNG' in self.show(mute=False)
 
     def set_log_level(self, loglevel):
         """Sets log level
@@ -915,7 +917,7 @@ class _MapdlCore(_MapdlCommands):
             self._response = open(filename).read()
             self._log.info(self._response)
         else:
-            raise Exception('Cannot run:\n%s\n' % command + 'File does not exist')
+            raise Exception('Cannot run:\n{command}\n\nFile does not exist')
 
     def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
         """Plots the currently selected elements.
@@ -978,7 +980,7 @@ class _MapdlCore(_MapdlCommands):
 
         # otherwise, use MAPDL plotter
         self._enable_interactive_plotting()
-        return super().eplot()
+        return super().eplot(**kwargs)
 
     def lplot(self, nl1="", nl2="", ninc="", vtk=None,
               show_line_numbering=True,
@@ -1048,7 +1050,7 @@ class _MapdlCore(_MapdlCommands):
                                    **kwargs)
         else:
             self._enable_interactive_plotting()
-            return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc)
+            return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
     def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
               show_keypoint_numbering=True, **kwargs):
@@ -1103,7 +1105,7 @@ class _MapdlCore(_MapdlCommands):
 
         # otherwise, use the legacy plotter
         self._enable_interactive_plotting()
-        return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab)
+        return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
     def result(self):
@@ -1382,27 +1384,28 @@ class _MapdlCore(_MapdlCommands):
             restrictions.
 
         entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc., as shown for Entity = in the tables below.
+            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE,
+            AREA, VOLU, PDS, etc., as shown for Entity = in the tables
+            below.
 
         entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
+            The number or label for the entity (as shown for ENTNUM =
+            in the tables below). In some cases, a zero (or blank)
+            ENTNUM represents all entities of the set.
 
         item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
+            The name of a particular item for the given entity.
 
         it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
+            The number (or label) for the specified Item1 (if
+            any). Valid IT1NUM values are as shown in the IT1NUM
+            columns of the tables below. Some Item1 labels do not
+            require an IT1NUM value.
 
         item2, it2num
-            A second set of item labels and numbers to further qualify the item
-            for which data are to be retrieved. Most items do not require this
-            level of information.
+            A second set of item labels and numbers to further qualify
+            the item for which data are to be retrieved. Most items do
+            not require this level of information.
 
         Returns
         -------
@@ -1426,91 +1429,49 @@ class _MapdlCore(_MapdlCommands):
 
         Notes
         -----
-        GET retrieves a value for a specified item and stores the value as a
-        scalar parameter, or as a value in a user-named array parameter. An
-        item is identified by various keyword, label, and number combinations.
-        Usage is similar to the SET command except that the parameter values
-        are retrieved from previously input or calculated results. For example,
-        GET,A,ELEM,5,CENT,X returns the centroid x-location of element 5 and
-        stores the result as parameter A. GET command operations, along with
-        the associated Get functions return values in the active coordinate
-        system unless stated otherwise. A Get function is an alternative in-
-        line function that can be used to retrieve a value instead of the GET
-        command (see Using In-line Get Functions for more information).
+        GET retrieves a value for a specified item and stores the
+        value as a scalar parameter, or as a value in a user-named
+        array parameter. An item is identified by various keyword,
+        label, and number combinations.  Usage is similar to the SET
+        command except that the parameter values are retrieved from
+        previously input or calculated results. For example,
+        GET,A,ELEM,5,CENT,X returns the centroid x-location of element
+        5 and stores the result as parameter A. GET command
+        operations, along with the associated Get functions return
+        values in the active coordinate system unless stated
+        otherwise. A Get function is an alternative in- line function
+        that can be used to retrieve a value instead of the GET
+        command (see Using In-line Get Functions for more
+        information).
 
-        Both GET and VGET retrieve information from the active data stored in
-        memory. The database is often the source, and sometimes the information
-        is retrieved from common memory blocks that the program uses to
-        manipulate information. Although POST1 and POST26 operations use a
-        .rst file, GET data is accessed from the database or from the common
-        blocks. Get operations do not access the .rst file directly. For
-        repeated gets of sequential items, such as from a series of elements,
-        see the VGET command.
+        Both GET and VGET retrieve information from the active data
+        stored in memory. The database is often the source, and
+        sometimes the information is retrieved from common memory
+        blocks that the program uses to manipulate
+        information. Although POST1 and POST26 operations use a .rst
+        file, GET data is accessed from the database or from the
+        common blocks. Get operations do not access the .rst file
+        directly. For repeated gets of sequential items, such as from
+        a series of elements, see the VGET command.
 
-        Most items are stored in the database after they are calculated and are
-        available anytime thereafter. Items are grouped according to where they
-        are usually first defined or calculated. Preprocessing data will often
-        not reflect the calculated values generated from section data. Do not
-        use GET to obtain data from elements that use calculated section data,
-        such as beams or shells. Most of the general items listed below are
-        available from all modules. Each of the sections for accessing GET
-        parameters are shown in the following order:
+        Most items are stored in the database after they are
+        calculated and are available anytime thereafter. Items are
+        grouped according to where they are usually first defined or
+        calculated. Preprocessing data will often not reflect the
+        calculated values generated from section data. Do not use GET
+        to obtain data from elements that use calculated section data,
+        such as beams or shells. Most of the general items listed
+        below are available from all modules.
 
-        GET General Entity Items
-
-        GET Preprocessing Entity Items
-
-        GET Solution Entity Items
-
-        GET Postprocessing Entity Items
-
-        GET Probabilistic Design Entity Items
-
-        The GET command is valid in any processor.
         """
-        command = "*GET,%s,%s,%s,%s,%s,%s,%s" % (str(par),
-                                                 str(entity),
-                                                 str(entnum),
-                                                 str(item1),
-                                                 str(it1num),
-                                                 str(item2),
-                                                 str(it2num))
+        command = f'*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}'
+        kwargs['mute'] = False
         response = self.run(command, **kwargs)
         value = response.split('=')[-1].strip()
         try:  # always either a float or string
             return float(value)
         except:
             return value
-
-    def read_float_parameter(self, parameter_name):  # pragma: no cover
-        """Depreciated in favor of ``mapdl.parameters[parameter_name]``"""
-        raise NotImplementedError('The ``read_float_parameter`` Depreciated.  '
-                                  '\n\nInstead, please use:\n'
-                                  'mapdl.parameters["%s"]' % parameter_name)
-
-    def read_float_from_inline_function(self, function_str):
-        """Use a APDL inline function to get a float value from ANSYS.
-        Take note, that internally an APDL parameter
-        "__floatparameter__" is created/overwritten.
-
-        Parameters
-        ----------
-        function_str : str
-            String containing an inline function as used in APDL.
-
-        Returns
-        -------
-        value : float
-            Value returned by inline function.
-
-        Examples
-        --------
-        >>> inline_function = "node({},{},{})".format(0, 1, 2)
-        >>> node = apdl.read_float_from_inline_function(inline_function)
-        75.0
-        """
-        self.run("__floatparameter__="+function_str)
-        return self.read_float_parameter("__floatparameter__")
 
     @property
     def jobname(self):
@@ -1527,8 +1488,8 @@ class _MapdlCore(_MapdlCommands):
     @jobname.setter
     def jobname(self, new_jobname):
         """Set the jobname"""
-        self.finish()
-        self.filname(new_jobname)
+        self.finish(mute=True)
+        self.filname(new_jobname, mute=True)
         self._jobname = new_jobname
 
     @supress_logging
@@ -1577,12 +1538,8 @@ class _MapdlCore(_MapdlCommands):
         >>> mapdl.inquire('RSTFILE')
         'file.rst'
         """
-        response = ''
-        try:
-            response = self.run('/INQUIRE, , %s' % func)
-            return response.split('=')[1].strip()
-        except IndexError:
-            raise RuntimeError('Cannot parse %s' % response)
+        response = self.run(f'/INQUIRE,,{func}', mute=False)
+        return response.split('=')[1].strip()
 
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
                        nrmkey='', modtype='', memory_option='', elcalc=False):
@@ -1699,7 +1656,7 @@ class _MapdlCore(_MapdlCommands):
         Returns
         -------
         response : str
-            Output from MAPDL SOLVE command. 
+            Output from MAPDL SOLVE command.
 
         Examples
         --------
@@ -1731,16 +1688,17 @@ class _MapdlCore(_MapdlCommands):
                 nrmkey = 'ON'
         nrmkey = 'OFF'
 
-        self.slashsolu()
-        self.antype(2, 'new')
-        self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
-        self.bcsoption(memory_option)
+        with self.chain_commands:
+            self.slashsolu()
+            self.antype(2, 'new')
+            self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
+            self.bcsoption(memory_option)
 
-        if elcalc:
-            self.mxpand(elcalc='YES')
+            if elcalc:
+                self.mxpand(elcalc='YES')
 
         out = self.solve()
-        self.finish()
+        self.finish(mute=True)
         return out
 
     def run(self, command, write_to_log=True, **kwargs):
@@ -1777,9 +1735,9 @@ class _MapdlCore(_MapdlCommands):
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) use
 
-        >>> with ansys.non_interactive:
-        >>>     ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-        >>>     ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>> with mapdl.non_interactive:
+        ...     mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        ...     mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         """
         # always reset the cache
         self._reset_cache()
@@ -1864,7 +1822,6 @@ class _MapdlCore(_MapdlCommands):
     def ignore_errors(self, value):
         self._ignore_errors = bool(value)
 
-    # @supress_logging
     def load_table(self, name, array, var1='', var2='', var3=''):
         """Load a table from Python to MAPDL.
 
@@ -1937,7 +1894,7 @@ class _MapdlCore(_MapdlCommands):
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
-        self.tread(name, filename)
+        self.tread(name, filename, mute=True)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError('Implemented by child class')
@@ -2093,7 +2050,7 @@ class _MapdlCore(_MapdlCommands):
             self._vget_arr_counter += 1
 
         out = self.starvget(parm_name, entity, entnum, item1, it1num, item2,
-                            it2num, kloop)
+                            it2num, kloop, mute=False)
 
         # check if empty array
         if 'the dimension number 1 is 0' in out:
@@ -2123,8 +2080,8 @@ class _MapdlCore(_MapdlCommands):
         png_found = PNG_TEST.findall(text)
         if png_found:
             # flush graphics writer
-            self.show('CLOSE')
-            self.show('PNG')
+            self.show('CLOSE', mute=True)
+            self.show('PNG', mute=True)
 
             import matplotlib.pyplot as plt
             import matplotlib.image as mpimg
@@ -2144,7 +2101,7 @@ class _MapdlCore(_MapdlCommands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, '%s*.png' % self.jobname))
+        filenames = glob.glob(os.path.join(self.directory, f'{self.jobname}*.png'))
         filenames.sort()
         return filenames[-1]
 

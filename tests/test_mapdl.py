@@ -38,6 +38,18 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
+def test_global_mute(mapdl):
+    mapdl.mute = True
+    assert mapdl.mute is True
+    assert mapdl.prep7() == ''
+
+    # commands like /INQUIRE must always return something
+    jobname = 'file'
+    mapdl.jobname = jobname
+    assert mapdl.inquire('JOBNAME') == jobname
+    mapdl.mute = False
+
+
 def test_parsav_parres(mapdl, cleared, tmpdir):
     arr = np.random.random((10, 3))
     mapdl.parameters['MYARR'] = arr
@@ -142,7 +154,7 @@ def test_kplot(cleared, mapdl, tmpdir):
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
+    mapdl.kplot(vtk=False)    # make sure legacy still works
 
 
 @skip_no_xserver
@@ -305,7 +317,7 @@ def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False, background='w', color='k')
+    mapdl.nplot(vtk=False)
 
 
 def test_elements(cleared, mapdl):
@@ -351,7 +363,7 @@ def test_elements(cleared, mapdl):
                                   10.0,
                                   [1, 2, 3],
                                   [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
+                                  np.random.random((2000)),  # fails on gRPC at 100000
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
 def test_set_get_parameters(mapdl, parm):

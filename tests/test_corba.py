@@ -73,20 +73,9 @@ def test_comment(cleared, mapdl_corba):
     assert comment in resp
 
 
-# @skip_grpc
-# def test_output(cleared, mapdl):
-#     tmp_file = 'tmp_redirect.txt'
-#     resp = mapdl_corba.output(tmp_file)
-#     comment = 'Testing...'
-#     resp = mapdl_corba.com(comment)
-#     mapdl_corba.output()
-#     output = open(os.path.join(mapdl_corba.path, tmp_file)).read()
-#     assert comment in output
-
-
 def test_basic_command(cleared, mapdl_corba):
-    resp = mapdl_corba.block(0, 1, 0, 1, 0, 1)
-    assert 'CREATE A HEXAHEDRAL VOLUME' in resp
+    resp = mapdl_corba.finish()
+    assert 'ROUTINE COMPLETED' in resp
 
 
 def test_allow_ignore(mapdl_corba):

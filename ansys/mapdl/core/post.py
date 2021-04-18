@@ -119,7 +119,8 @@ class PostProcessing():
         >>> mapdl.post_processing.filename
         'file'
         """
-        return self._mapdl.run('/INQUIRE, param, RSTFILE').split('=')[-1].strip()
+        response = self._mapdl.run('/INQUIRE, param, RSTFILE', mute=False)
+        return response.split('=')[-1].strip()
 
     @property
     def nsets(self) -> int:
