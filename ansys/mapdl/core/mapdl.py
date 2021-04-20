@@ -134,6 +134,9 @@ class _MapdlCore(_MapdlCommands):
         from ansys.mapdl.core.parameters import Parameters
         self._parameters = Parameters(self)
 
+        from ansys.mapdl.core.solution import Solution
+        self._solution = Solution(self)
+
         self._redirected_commands = {'*LIS': weakref.ref(self._list)}
 
         if log_apdl:
@@ -141,6 +144,20 @@ class _MapdlCore(_MapdlCommands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
+
+    @property
+    def solution(self):
+        """Solution parameters of MAPDL.
+
+        Examples
+        --------
+        Check if a solution has converged.
+
+        >>> mapdl.solution.converged
+        """
+        if self._exited:
+            raise RuntimeError('MAPDL exited.')
+        return self._solution
 
     @property
     def _distributed(self):
