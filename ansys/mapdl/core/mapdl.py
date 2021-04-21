@@ -1977,7 +1977,8 @@ class _MapdlCore(_MapdlCommands):
                 self.exit()
             except Exception as e:
                 try:  # logger might be closed
-                    self._log.error('exit: %s', str(e))
+                    if self._log is not None:
+                        self._log.error('exit: %s', str(e))
                 except:
                     pass
 
