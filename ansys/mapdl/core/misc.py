@@ -172,7 +172,7 @@ def run_as_prep7(func):
 
 
 def threaded(func):
-    """ calls a function using a thread """
+    """Decorator to call a function using a thread"""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -183,7 +183,7 @@ def threaded(func):
 
 
 def threaded_daemon(func):
-    """Calls a function using a daemon thread."""
+    """Decorator to call a function using a daemon thread."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):

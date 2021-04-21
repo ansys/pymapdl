@@ -106,9 +106,9 @@ def setup_logger(loglevel='INFO'):
 class _MapdlCore(_MapdlCommands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False, local=True,
-                 **start_parm):
-        """ Initialize connection with ANSYS program """
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
+                 local=True, **start_parm):
+        """Initialize connection with MAPDL. """
         self._show_matplotlib_figures = True  # for testing
         self._exited = False
         self._allow_ignore = False
@@ -1718,8 +1718,73 @@ class _MapdlCore(_MapdlCommands):
         self.finish(mute=True)
         return out
 
+    def run_multiline(self, commands):
+        """Run several commands as a single block
+
+        Parameters
+        ----------
+        commands : str
+            Commands separated by new lines.  See example.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.  Includes the output from
+            running every command, as if it was an input file.
+
+        Examples
+        --------
+        Run several commands from Python multi-line string.
+
+        >>> cmd = '''/prep7
+        ! Mat
+        MP,EX,1,200000
+        MP,NUXY,1,0.3
+        MP,DENS,1,7.85e-09
+        ! Elements
+        et,1,186
+        et,2,154
+        ! Geometry
+        BLC4,0,0,1000,100,10
+        ! Mesh
+        esize,5
+        vmesh,all
+        nsel,s,loc,x,0
+        d,all,all
+        nsel,s,loc,x,999,1001
+        type,2
+        esurf
+        esel,s,type,,2
+        nsle
+        sfe,all,3,pres,,-10
+        allsel
+        /solu
+        antype,0
+        solve
+        /post1
+        set,last
+        plnsol,u,sum
+        '''
+        >>> resp = mapdl.run_multiline(cmd)
+        >>> resp
+        MATERIAL          1     EX   =   200000.0
+        MATERIAL          1     NUXY =  0.3000000
+        MATERIAL          1     DENS =  0.7850000E-08
+        ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+         KEYOPT( 1- 6)=        0      0      0        0      0      0
+         KEYOPT( 7-12)=        0      0      0        0      0      0
+         KEYOPT(13-18)=        0      0      0        0      0      0
+        output continues...
+
+        """
+        self._stored_commands = commands.splitlines()
+        self._flush_stored()
+        return self._response
+
     def run(self, command, write_to_log=True, **kwargs):
-        """Runs APDL command
+        """Run single APDL command.
+
+        For multiple commands, use ``run_multiline``.
 
         Parameters
         ----------
@@ -1727,8 +1792,8 @@ class _MapdlCore(_MapdlCommands):
             ANSYS APDL command.
 
         write_to_log : bool, optional
-            Overrides APDL log writing.  Default True.  When set to
-            False, will not write command to log, even if APDL
+            Overrides APDL log writing.  Default ``True``.  When set
+            to ``False``, will not write command to log, even if APDL
             command logging is enabled.
 
         kwargs : Optional keyword arguments
@@ -1737,7 +1802,7 @@ class _MapdlCore(_MapdlCommands):
         Returns
         -------
         command_output : str
-            Command output from ANSYS.
+            Command output from MAPDL.
 
         Examples
         --------
@@ -1755,7 +1820,16 @@ class _MapdlCore(_MapdlCommands):
         >>> with mapdl.non_interactive:
         ...     mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         ...     mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+
+        Alternatively, you can simply run a block of commands with:
+
+        >>> mapdl.run_multiline(cmd)
         """
+        command = command.strip()
+        # check if multiline
+        if '\n' in command or '\r' in command:
+            raise ValueError('Use ``run_multiline`` for multi-line commands')
+
         # always reset the cache
         self._reset_cache()
 
@@ -1788,11 +1862,10 @@ class _MapdlCore(_MapdlCommands):
         text = text.replace('\\r\\n', '\n').replace('\\n', '\n')
         if text:
             self._response = text.strip()
+            self._log.info(self._response)
         else:
             self._response = ''
-
-        if self._response:
-            self._log.info(self._response)
+            return self._response
 
         if 'is not a recognized' in text:
             if not self.allow_ignore:

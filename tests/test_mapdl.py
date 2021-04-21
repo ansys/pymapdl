@@ -18,6 +18,23 @@ skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
 
+CMD_BLOCK = """/prep7
+! Mat
+MP,EX,1,200000
+MP,NUXY,1,0.3
+MP,DENS,1,7.85e-09
+! Elements
+et,1,186
+et,2,154
+! Geometry
+BLC4,0,0,1000,100,10
+! Mesh
+esize,5
+vmesh,all
+"""
+
+
+
 @pytest.fixture(scope='function')
 def make_block(mapdl, cleared):
     mapdl.block(0, 1, 0, 1, 0, 1)
@@ -69,6 +86,17 @@ def test_no_results(mapdl, cleared, tmpdir):
 def test_empty(mapdl):
     with pytest.raises(ValueError):
         mapdl.run('')
+
+
+def test_multiline_fail(mapdl):
+    with pytest.raises(ValueError, match='Use ``run_multiline``'):
+        mapdl.run(CMD_BLOCK)
+
+
+def test_multiline_fail(mapdl, cleared):
+    resp = mapdl.run_multiline(CMD_BLOCK)
+    assert 'IS SOLID186' in resp, 'not capturing the beginning of the block'
+    assert 'GENERATE NODES AND ELEMENTS' in resp, 'not capturing the end of the block'
 
 
 def test_str(mapdl):
