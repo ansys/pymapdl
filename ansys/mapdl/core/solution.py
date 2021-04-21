@@ -5,12 +5,21 @@ from ansys.mapdl.core.mapdl import _MapdlCore
 class Solution():
     """Collection of parameters specific to the solution.
 
+    Useful for checking the status of a solve after running
+    ``mapdl.solve()`` and determining if it converged, the number of
+    iterations to converge, etc.
+
     Examples
     --------
-    Check if a solution has converged
+    Check if a solution has converged.
 
     >>> mapdl.solution.converged
     True
+
+    Get the cumulative number of iterations.
+
+    >>> mapdl.solution.n_cmit
+    1.0
     """
 
     def __init__(self, mapdl):
@@ -32,22 +41,46 @@ class Solution():
 
     @property
     def time_step_size(self):
-        """Time step size."""
+        """Time step size.
+
+        Examples
+        --------
+        >>> mapdl.solution.time_step_size
+        1.0
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DTIME')
 
     @property
     def n_cmls(self):
-        """Cumulative number of load steps."""
+        """Cumulative number of load steps.
+
+        Examples
+        --------
+        >>> mapdl.solution.n_cmls
+        1.0
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'NCMLS')
 
     @property
     def n_cmss(self):
-        """Number of substeps. NOTE: Used only for static and transient analyses."""
+        """Number of substeps. NOTE: Used only for static and transient analyses.
+
+        Examples
+        --------
+        >>> mapdl.solution.n_cmss
+        1.0
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'NCMSS')
 
     @property
     def n_eqit(self):
-        """Number of equilibrium iterations."""
+        """Number of equilibrium iterations.
+
+        Examples
+        --------
+        >>> mapdl.solution.n_eqit
+        1.0
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'EQIT')
 
     @property

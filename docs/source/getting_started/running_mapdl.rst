@@ -137,6 +137,10 @@ dependent) command:
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
+.. note::
+   Powershell users can run the above without quotes.
+
+
 For Linux:
 
 .. code::
