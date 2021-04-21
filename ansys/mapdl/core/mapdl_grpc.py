@@ -915,6 +915,18 @@ class MapdlGrpc(_MapdlCore):
         -------
         response : str
             Response from MAPDL.
+
+        Examples
+        --------
+        Load a simple ``"ds.dat"`` input file generated from Ansys
+        Workbench.
+
+        >>> output = mapdl.input('ds.dat')
+
+        Load that same file while streaming the output in real-time.
+
+        >>> output = mapdl.input('ds.dat', verbose=True)
+
         """
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
