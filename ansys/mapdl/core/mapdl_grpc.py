@@ -198,6 +198,7 @@ class MapdlGrpc(_MapdlCore):
         self._ip = ip
         self._health_response_queue = None
         self._exiting = False
+        self._exited = None
         self._mute = False
 
         if port is None:
@@ -563,6 +564,9 @@ class MapdlGrpc(_MapdlCore):
         --------
         >>> mapdl.exit()
         """
+        if self._exited:
+            return
+
         self._exiting = True
         self._log.debug('Exiting MAPDL')
 
