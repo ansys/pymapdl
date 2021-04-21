@@ -6,6 +6,7 @@ import os
 from threading import Thread
 import random
 import string
+from functools import wraps
 
 import scooby
 import numpy as np
@@ -27,15 +28,6 @@ def get_ansys_bin(rver):
                                 'ansys%s' % rver)
 
     return mapdlbin
-
-
-# def kill_process(proc_pid):
-#     """Kill a process with extreme prejudice"""
-#     import psutil  # imported here to avoid import errors when unused in windows
-#     process = psutil.Process(proc_pid)
-#     for proc in process.children(recursive=True):
-#         proc.kill()
-#     process.kill()
 
 
 class Report(scooby.Report):
@@ -138,6 +130,8 @@ def _check_has_ansys():
 
 def supress_logging(func):
     """Decorator to suppress logging for a MAPDL instance"""
+
+    @wraps(func)
     def wrapper(*args, **kwargs):
         mapdl = args[0]
         prior_log_level = mapdl._log.level
@@ -156,6 +150,8 @@ def supress_logging(func):
 
 def run_as_prep7(func):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
+
+    @wraps(func)
     def wrapper(*args, **kwargs):
         mapdl = args[0]
         if hasattr(mapdl, '_mapdl'):
@@ -175,19 +171,23 @@ def run_as_prep7(func):
     return wrapper
 
 
-def threaded(fn):
+def threaded(func):
     """ calls a function using a thread """
+
+    @wraps(func)
     def wrapper(*args, **kwargs):
-        thread = Thread(target=fn, args=args, kwargs=kwargs)
+        thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.start()
         return thread
     return wrapper
 
 
-def threaded_daemon(fn):
+def threaded_daemon(func):
     """Calls a function using a daemon thread."""
+
+    @wraps(func)
     def wrapper(*args, **kwargs):
-        thread = Thread(target=fn, args=args, kwargs=kwargs)
+        thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
         return thread
@@ -214,8 +214,8 @@ def unique_rows(a):
 def creation_time(path_to_file):
     """The file creation time.
 
-    Try to get the date that a file was created, falling back to when it was
-    last modified if that isn't possible.
+    Try to get the date that a file was created, falling back to when
+    it was last modified if that isn't possible.
     See http://stackoverflow.com/a/39501288/1709587 for explanation.
     """
     if platform.system() == 'Windows':
@@ -233,7 +233,8 @@ def creation_time(path_to_file):
 def last_created(filenames):
     """Return the last created file given a list of filenames
 
-    If all filenames have the same creation time, then return the last filename.
+    If all filenames have the same creation time, then return the last
+    filename.
     """
     ctimes = [creation_time(filename) for filename in filenames]
     idx = np.argmax(ctimes)
@@ -269,8 +270,10 @@ def create_temp_dir(tmpdir=None):
     return path
 
 
-def no_return(fn):
+def no_return(func):
     """Decorator to return nothing from the wrapped function"""
+
+    @wraps(func)
     def wrapper(*args, **kwargs):
-        fn(*args, **kwargs)
+        func(*args, **kwargs)
     return wrapper
