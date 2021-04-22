@@ -18,6 +18,23 @@ skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
 
 
+CMD_BLOCK = """/prep7
+! Mat
+MP,EX,1,200000
+MP,NUXY,1,0.3
+MP,DENS,1,7.85e-09
+! Elements
+et,1,186
+et,2,154
+! Geometry
+BLC4,0,0,1000,100,10
+! Mesh
+esize,5
+vmesh,all
+"""
+
+
+
 @pytest.fixture(scope='function')
 def make_block(mapdl, cleared):
     mapdl.block(0, 1, 0, 1, 0, 1)
@@ -36,6 +53,18 @@ def test_jobname(mapdl, cleared):
     other_jobname = 'gfedcba'
     mapdl.jobname = other_jobname
     assert mapdl.jobname == other_jobname
+
+
+def test_global_mute(mapdl):
+    mapdl.mute = True
+    assert mapdl.mute is True
+    assert mapdl.prep7() == ''
+
+    # commands like /INQUIRE must always return something
+    jobname = 'file'
+    mapdl.jobname = jobname
+    assert mapdl.inquire('JOBNAME') == jobname
+    mapdl.mute = False
 
 
 def test_parsav_parres(mapdl, cleared, tmpdir):
@@ -57,6 +86,17 @@ def test_no_results(mapdl, cleared, tmpdir):
 def test_empty(mapdl):
     with pytest.raises(ValueError):
         mapdl.run('')
+
+
+def test_multiline_fail(mapdl):
+    with pytest.raises(ValueError, match='Use ``run_multiline``'):
+        mapdl.run(CMD_BLOCK)
+
+
+def test_multiline_fail(mapdl, cleared):
+    resp = mapdl.run_multiline(CMD_BLOCK)
+    assert 'IS SOLID186' in resp, 'not capturing the beginning of the block'
+    assert 'GENERATE NODES AND ELEMENTS' in resp, 'not capturing the end of the block'
 
 
 def test_str(mapdl):
@@ -122,6 +162,19 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
+def test_list(mapdl, tmpdir):
+    """Added for backwards compatibility"""
+    fname = 'tmp.txt'
+    filename = str(tmpdir.mkdir("tmpdir").join(fname))
+    txt = 'this is a test'
+    with open(filename, 'w') as fid:
+        fid.write(txt)
+    mapdl.upload(filename)
+
+    output = mapdl.list(fname)
+    assert output == txt
+
+
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input('thisisnotafile')
@@ -142,7 +195,7 @@ def test_kplot(cleared, mapdl, tmpdir):
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl.kplot(knum=True, vtk=False)    # make sure legacy still works
+    mapdl.kplot(vtk=False)    # make sure legacy still works
 
 
 @skip_no_xserver
@@ -305,7 +358,7 @@ def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False, background='w', color='k')
+    mapdl.nplot(vtk=False)
 
 
 def test_elements(cleared, mapdl):
@@ -351,7 +404,7 @@ def test_elements(cleared, mapdl):
                                   10.0,
                                   [1, 2, 3],
                                   [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
+                                  np.random.random((2000)),  # fails on gRPC at 100000
                                   np.random.random((10, 3)),
                                   np.random.random((10, 3, 3))))
 def test_set_get_parameters(mapdl, parm):

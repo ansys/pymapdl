@@ -272,7 +272,7 @@ class MapdlCorba(_MapdlCore):
             except:
                 pass
 
-    def _run(self, command):
+    def _run(self, command, **kwargs):
         """Sends a command to the mapdl server via the CORBA interface"""
         self._reset_cache()
         if self._server is None:

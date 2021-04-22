@@ -377,10 +377,9 @@ class LocalMapdlPool():
 
         def run_file(mapdl, input_file):
             if clear_at_start:
-                mapdl.finish()
-                mapdl.clear()
-            response = mapdl.input(input_file)
-            return response
+                mapdl.finish(mute=True)
+                mapdl.clear(mute=True)
+            return mapdl.input(input_file)
 
         return self.map(run_file, files, progress_bar=progress_bar)
 

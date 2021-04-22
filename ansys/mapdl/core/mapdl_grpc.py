@@ -193,9 +193,13 @@ class MapdlGrpc(_MapdlCore):
         self._busy = False  # used to check if running a command on the server
         self._channel_str = None
         self._local = ip in ['127.0.0.1', '127.0.1.1', 'localhost']
+        if 'local' in kwargs:  # allow this to be overridden
+            self._local = kwargs['local']
         self._ip = ip
         self._health_response_queue = None
         self._exiting = False
+        self._exited = None
+        self._mute = False
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -224,15 +228,18 @@ class MapdlGrpc(_MapdlCore):
             raise IOError('Unable to connect to MAPDL gRPC instance at %s' %
                           self._channel_str)
 
-        self._verify_local()
-        if self._local:
+        # double check we have access to the local path if not
+        # explicitly specified
+        if 'local' not in kwargs:
+            self._verify_local()
+
+        # only cache process IDs if launched locally
+        if self._local and 'exec_file' in kwargs:
             self._cache_pids()
 
     def _verify_local(self):
-        """Check if Python is local to the MAPDL instance.
-
-        Verify if python has assess to the MAPDL directory.
-        """
+        """Check if Python is local to the MAPDL instance."""
+        # Verify if python has assess to the MAPDL directory.
         if self._local:
             if self._path is None:
                 directory = self.directory
@@ -251,6 +258,31 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(lockfile0):
                 return
             self._local = False
+
+    @property
+    def mute(self):
+        """Silence the response from all MAPDL functions unless
+        explicitly set to ``True``
+
+        Examples
+        --------
+        >>> mapdl.mute = True
+        >>> mapdl.prep()
+        ''
+
+        Override this with ``mute=False``.  This is useful for methods
+        that parse the MAPDL output like ``k``.
+
+        >>> mapdl.k('', 1, 1, 1, mute=False)
+        1
+
+        """
+        return self._mute
+
+    @mute.setter
+    def mute(self, value):
+        """Set mute."""
+        self._mute = value
 
     def __repr__(self):
         info = super().__repr__()
@@ -405,7 +437,7 @@ class MapdlGrpc(_MapdlCore):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL"""
-        self.nerr(abort=-1)
+        self.nerr(abort=-1, mute=True)
 
     def _reset_cache(self):
         """Reset cached items"""
@@ -416,7 +448,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         return self._mesh_rep
 
-    def _run(self, cmd, verbose=False, mute=False):
+    def _run(self, cmd, verbose=False, mute=None):
         """Sens a command and return the response as a string.
 
         Parameters
@@ -429,6 +461,8 @@ class MapdlGrpc(_MapdlCore):
 
         mute : bool, optional
             Request that no output be sent from the gRPC server.
+            Defaults to the global setting as specified with
+            ``mapdl.mute = <bool>``.  Default ``False``
 
         Examples
         --------
@@ -442,9 +476,12 @@ class MapdlGrpc(_MapdlCore):
 
         Run a command and stream its output while it is being run.
 
-        >>> mapdl.run('/PREP7', mute=True)
+        >>> mapdl.run('/PREP7', verbose=True)
 
         """
+        if mute is None:
+            mute = self._mute
+
         if self._exited:
             raise MapdlExitedError
 
@@ -527,6 +564,9 @@ class MapdlGrpc(_MapdlCore):
         --------
         >>> mapdl.exit()
         """
+        if self._exited:
+            return
+
         self._exiting = True
         self._log.debug('Exiting MAPDL')
 
@@ -617,8 +657,14 @@ class MapdlGrpc(_MapdlCore):
                     self._log.debug('Cleanup output:\n\n%s\n%s', output.decode(),
                                     err.decode())
 
-    def list_files(self):
+    def list_files(self, refresh_cache=True):
         """List the files in the working directory of MAPDL.
+
+        Parameters
+        ----------
+        refresh_cache : bool, optional
+            If local, refresh local cache by querying MAPDL for its
+            current path.
 
         Returns
         -------
@@ -640,10 +686,13 @@ class MapdlGrpc(_MapdlCore):
         file1.page
         """
         if self._local:  # simply return a python list of files
-            local_path = self.directory
+            if refresh_cache:
+                local_path = self.directory
+            else:
+                local_path = self._directory
             if local_path:
                 if os.path.isdir(local_path):
-                    return os.listdir(self.directory)
+                    return os.listdir(local_path)
             return []
         elif self._exited:
             raise RuntimeError('Cannot list remote files since MAPDL has exited')
@@ -840,6 +889,7 @@ class MapdlGrpc(_MapdlCore):
               time_step_stream=None, chunk_size=512, **kwargs):
         """Stream a local input file to a remote mapdl instance.
         Stream the response back and deserialize the output.
+
         Parameters
         ----------
         fname : str
@@ -865,6 +915,18 @@ class MapdlGrpc(_MapdlCore):
         -------
         response : str
             Response from MAPDL.
+
+        Examples
+        --------
+        Load a simple ``"ds.dat"`` input file generated from Ansys
+        Workbench.
+
+        >>> output = mapdl.input('ds.dat')
+
+        Load that same file while streaming the output in real-time.
+
+        >>> output = mapdl.input('ds.dat', verbose=True)
+
         """
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
@@ -990,8 +1052,7 @@ class MapdlGrpc(_MapdlCore):
         WARNING: Not thread SAFE.  Uses _get_lock to ensure multiple
         request aren't evaluated simultaneously.
         """
-        cmd = ','.join([str(entity), str(entnum), str(item1),
-                        str(it1num), str(item2), str(it2num)])
+        cmd = f'{entity},{entnum},{item1},{it1num},{item2},{it2num}'
 
         # not threadsafe; don't allow multiple get commands
         while self._get_lock:
@@ -1012,8 +1073,7 @@ class MapdlGrpc(_MapdlCore):
         elif getresponse.type == 2:
             return getresponse.sval
 
-        raise RuntimeError('Unsupported type %s response from MAPDL' %
-                           str(getresponse.type))
+        raise RuntimeError(f'Unsupported type {getresponse.type} response from MAPDL')
 
     @protect_grpc
     def download(self, target_name, out_file_name=None,
@@ -1110,13 +1170,11 @@ class MapdlGrpc(_MapdlCore):
         if 'parm' in kwargs:
             raise ValueError('Parameter name `parm` not supported with gRPC')
 
-        cmd = "%s,%s,%s,%s,%s,%s,%s" % (str(entity), str(entnum), str(item1),
-                                        str(it1num), str(item2), str(it2num),
-                                        str(kloop))
-
         while self._vget_lock:
             time.sleep(0.001)
         self._vget_lock = True
+
+        cmd = f'{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}'
         try:
             chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
             values = parse_chunks(chunks)
@@ -1202,14 +1260,13 @@ class MapdlGrpc(_MapdlCore):
         if response.length != len(raw):
             raise IOError('Raw Bytes failed to upload')
 
-    ###########################################################################
-    # not fully tested/implemented
-
+    # TODO: not fully tested/implemented
     @protect_grpc
     def Param(self, pname):
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
         return presponse.val
 
+    # TODO: not fully tested/implemented
     @protect_grpc
     def Var(self, num):
         presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
@@ -1261,7 +1318,7 @@ class MapdlGrpc(_MapdlCore):
         try:
             from scipy import sparse
         except ImportError:  # pragma: no cover
-            raise ImportError('Install ``scipy`` to use this feature')
+            raise ImportError('Install ``scipy`` to use this feature') from None
 
         minfo = self._data_info(pname)
         stype = ANSYS_VALUE_TYPE[minfo.stype]
@@ -1298,7 +1355,7 @@ class MapdlGrpc(_MapdlCore):
         try:
             if self._exited:
                 return 'MAPDL exited'
-            stats = self.slashstatus('PROD')
+            stats = self.slashstatus('PROD', mute=False)
         except:  # pragma: no cover
             return 'MAPDL exited'
 
