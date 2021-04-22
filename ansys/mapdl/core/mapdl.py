@@ -2213,9 +2213,9 @@ class _MapdlCore(_MapdlCommands):
         ext : str, optional
             Filename extension
         """
-        if hasattr(self, '_local'):
+        if hasattr(self, '_local'):  # gRPC
             if not self._local:
-                self.download(filename)
+                return self._download_as_raw(filename).decode()
 
         path = pathlib.Path(filename)
         if path.parent != '.':
