@@ -33,7 +33,6 @@ pyansys/Interface.py
 docs/source/examples/*
 *.out
 *.tar.gz
-tmp.txt
 
 # Testing
 factory/

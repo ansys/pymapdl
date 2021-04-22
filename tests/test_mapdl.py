@@ -162,13 +162,14 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
-def test_list(mapdl):
+def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = 'tmp.txt'
-    path = os.path.join(mapdl.directory, fname)
+    filename = str(tmpdir.mkdir("tmpdir").join(fname))
     txt = 'this is a test'
-    with open(path, 'w') as fid:
+    with open(filename, 'w') as fid:
         fid.write(txt)
+    mapdl.upload(filename)
 
     output = mapdl.list(fname)
     assert output == txt
