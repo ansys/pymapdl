@@ -2,6 +2,7 @@
 import logging
 import threading
 import signal
+from functools import wraps
 
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
@@ -86,6 +87,7 @@ def protect_grpc(func):
     reason gRPC still captures SIGINT.
 
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         """Capture gRPC exceptions and KeyboardInterrupt"""
 
