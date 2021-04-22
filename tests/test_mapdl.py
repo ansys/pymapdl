@@ -162,6 +162,18 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
+def test_list(mapdl):
+    """Added for backwards compatibility"""
+    fname = 'tmp.txt'
+    path = os.path.join(mapdl.directory, fname)
+    txt = 'this is a test'
+    with open(path, 'w') as fid:
+        fid.write(txt)
+
+    output = mapdl.list(fname)
+    assert output == txt
+
+
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input('thisisnotafile')

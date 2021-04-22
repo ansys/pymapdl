@@ -8,6 +8,7 @@ import tempfile
 from shutil import rmtree, copyfile
 import weakref
 import warnings
+import pathlib
 
 import numpy as np
 
@@ -136,8 +137,6 @@ class _MapdlCore(_MapdlCommands):
 
         from ansys.mapdl.core.solution import Solution
         self._solution = Solution(self)
-
-        self._redirected_commands = {'*LIS': weakref.ref(self._list)}
 
         if log_apdl:
             filename = os.path.join(self.directory, 'log.inp')
@@ -1854,9 +1853,9 @@ class _MapdlCore(_MapdlCommands):
             if not self._apdl_log.closed:
                 self._apdl_log.write('%s\n' % command)
 
-        if command[:4] in self._redirected_commands:
-            function = self._redirected_commands[command[:4]]()
-            return function(command)
+        if command[:4].upper() == '/LIS':
+            # simply return the contents of the file
+            return self.list(*command.split(',')[1:])
 
         text = self._run(command, **kwargs)
         text = text.replace('\\r\\n', '\n').replace('\\n', '\n')
@@ -2199,3 +2198,29 @@ class _MapdlCore(_MapdlCommands):
     def _set_log_level(self, level):
         """alias for set_log_level"""
         self.set_log_level(level)
+
+    def list(self, filename, ext=''):
+        """Displays the contents of an external, coded file.
+
+        APDL Command: ``/LIST``
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path. An unspecified directory
+            path defaults to the working directory.
+
+        ext : str, optional
+            Filename extension
+        """
+        if hasattr(self, '_local'):
+            if not self._local:
+                self.download(filename)
+
+        path = pathlib.Path(filename)
+        if path.parent != '.':
+            path = os.path.join(self.directory, filename)
+
+        path = str(path) + ext
+        with open(path) as fid:
+            return fid.read()
