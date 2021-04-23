@@ -111,7 +111,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.mxdvl
+        >>> mapdl.solution.mx_dof
         -0.00020707416808476303
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MXDVL')
@@ -122,7 +122,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.resfrq
+        >>> mapdl.solution.res_frq
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'RESFRQ')
@@ -133,7 +133,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.reseig
+        >>> mapdl.solution.res_eig
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'RESEIG')
@@ -144,7 +144,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.dsprm
+        >>> mapdl.solution.decent_parm
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DSPRM')
@@ -155,7 +155,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.focv
+        >>> mapdl.solution.force_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'FOCV')
@@ -166,7 +166,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.mocv
+        >>> mapdl.solution.moment_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MOCV')
@@ -177,7 +177,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.hfcv
+        >>> mapdl.solution.heat_flow_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'HFCV')
@@ -188,7 +188,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.mfcv
+        >>> mapdl.solution.magnetic_flux_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MFCV')
@@ -199,7 +199,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.cscv
+        >>> mapdl.solution.current_segment_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CSCV')
@@ -210,7 +210,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.cucv
+        >>> mapdl.solution.current_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CUCV')
@@ -221,7 +221,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.ffcv
+        >>> mapdl.solution.fluid_flow_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'FFCV')
@@ -232,7 +232,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.dicv
+        >>> mapdl.solution.displacement_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DICV')
@@ -243,7 +243,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.rocv
+        >>> mapdl.solution.rotation_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'ROCV')
@@ -254,7 +254,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.tecv
+        >>> mapdl.solution.temperature_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'TECV')
@@ -265,7 +265,7 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.vmcv
+        >>> mapdl.solution.vector_cnv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VMCV')
@@ -287,19 +287,31 @@ class Solution():
 
         Examples
         --------
-        >>> mapdl.solution.voltage_convergence
+        >>> mapdl.solution.voltage_conv
         0.0
         """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VOCV')
 
     @property
     def pressure_conv(self):
-        """Pressure convergence value."""
+        """Pressure convergence value.
+
+        Examples
+        --------
+        >>> mapdl.solution.pressure_conv
+
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'PRCV')
 
     @property
     def velocity_conv(self):
-        """Velocity convergence value."""
+        """Velocity convergence value.
+
+        Examples
+        --------
+        >>> mapdl.solution.velocity_conv
+
+        """
         return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VECV')
 
     @property
