@@ -482,7 +482,7 @@ class MapdlMath():
         if not V:
             V = ''
 
-        self._mapdl.run("*COMP," + M.id + ",SVD," + str(thresh) + ',' + str(sig) + ',' + str(V))
+        self._mapdl.run(f"*COMP,{M.id},SVD,{thresh},{sig},{V}")
         
         return
 
