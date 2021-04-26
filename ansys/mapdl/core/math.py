@@ -452,39 +452,47 @@ class MapdlMath():
     def rhs(self, type=np.double, fname="file.full"):
         return self.getVec(type, fname, "RHS")
 
-    def svd(self, M, thresh=None, sig=None, V=None):
-        """Apply an SVD Algorithm on a matrix
+    def svd(self, mat, thresh='', sig='', v=''):
+        """Apply an SVD Algorithm on a matrix.
+
+        The SVD algorithm is only applicable to dense matrices. 
+        Columns that are linearly dependent on others are removed,
+        leaving the independent or basis vectors. The matrix is
+        resized according to the new size determined by the algorithm.
+
+        For the SVD algorithm, the singular value decomposition of an
+        input matrix is a factorization of the form:
+
+        ``M = U*SIGMA*V.T``
+
+        For more details, see:
+        https://en.wikipedia.org/wiki/Singular_value_decomposition
 
         Parameters
         ----------
-        M : ansys.AnsMat
+        mat : ansys.AnsMat
             The array to compress.
 
-        thresh:
-            
+        thresh : float, optional
+            Numerical threshold value used to manage the compression.
+            Default is 1E-7.
+
         sig : str, optional
-        V   : str, optional
+            Name of the vector used to store the ``SIGMA`` values.
+
+        v   : str, optional
+            Name of the vector used to store the values from ``V``.
+            See the equation above.
             
         Examples
         --------
         Apply SVD on an existing Dense Rectangular Matrix, using default threshold.
-        The M matrix is modified in-situ. 
+        The matrix is modified in-place. 
 
-        >>> mm.svd( M)
+        >>> mm.svd(mat)
         """
 
-        if not thresh:
-            thresh = ''
-
-        if not sig:
-            sig = ''
-
-        if not V:
-            V = ''
-
-        self._mapdl.run(f"*COMP,{M.id},SVD,{thresh},{sig},{V}")
-        
-        return
+        self._mapdl.run(f"*COMP,{mat.id},SVD,{thresh},{sig},{v}")
 
     def mgs(self, M, thresh=None):
         """Apply an MGS Algorithm on a matrix
