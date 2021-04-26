@@ -452,7 +452,7 @@ class MapdlMath():
     def rhs(self, type=np.double, fname="file.full"):
         return self.getVec(type, fname, "RHS")
 
-    def svd(self, mat, thresh='', sig='', v=''):
+    def svd(self, mat, thresh='', sig='', v='', **kwargs):
         """Apply an SVD Algorithm on a matrix.
 
         The SVD algorithm is only applicable to dense matrices. 
@@ -491,47 +491,50 @@ class MapdlMath():
 
         >>> mm.svd(mat)
         """
+        kwargs.setdefault('mute', True)
+        self._mapdl.run(f"*COMP,{mat.id},SVD,{thresh},{sig},{v}", **kwargs)
 
-        self._mapdl.run(f"*COMP,{mat.id},SVD,{thresh},{sig},{v}")
+    def mgs(self, mat, thresh='', **kwargs):
+        """Apply Modified Gram-Schmidt algorithm to a matrix.
 
-    def mgs(self, M, thresh=None):
-        """Apply an MGS Algorithm on a matrix
+        The MGS algorithm is only applicable to dense matrices. Columns
+        that are linearly dependent on others are removed, leaving
+        the independent or basis vectors. The matrix is resized
+        according to the new size determined by the algorithm.
 
         Parameters
         ----------
-        M : ansys.AnsMat
-            The array to consider.
+        mat : ansys.mapdl.core.math.AnsMat
+            The array to apply Modified Gram-Schmidt algorithm to.
 
-        thresh:
-            
+        thresh : float, optional
+            Numerical threshold value used to manage the compression.
+            The default value is 1E-14 for MGS.
+
         Examples
         --------
         Apply MGS on an existing Dense Rectangular Matrix, using default threshold.
-        The M matrix is modified in-situ. 
+        The mat matrix is modified in-situ. 
 
-        >>> mm.mgs( M)
+        >>> mm.mgs(mat)
         """
-        if not thresh:
-            thresh = ''
+        kwargs.setdefault('mute', True)
+        self._mapdl.run(f"*COMP,{mat.id},MGS,{thresh}", **kwargs)
 
-        self._mapdl.run("*COMP," + M.id + ",MGS," + str(thresh))        
-        return
-
-    def sparse(self, M, thresh=None):
-        """Sparsify a existing matrix based on a threshold value
+    def sparse(self, mat, thresh='', **kwargs):
+        """Sparsify a existing matrix based on a threshold value.
 
         Parameters
         ----------
-        M : ansys.AnsMat
-            The array to consider.
+        mat : ansys.mapdl.core.math.AnsMat
+            The dense matrix to convert to a sparse matrix. 
 
-        thresh:
+        thresh : float, optional
+            Numerical threshold value used to sparsify. The default 
+            value is 1E-16.
         """            
-        if not thresh:
-            thresh = ''
-
-        self._mapdl.run(f"*COMP,{M.id},SPARSE,{thresh}")
-        return
+        kwargs.setdefault('mute', True)
+        self._mapdl.run(f"*COMP,{M.id},SPARSE,{thresh}", **kwargs)
     
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
              fmin=None, fmax=None):

@@ -353,7 +353,7 @@ class ansXpl():
         --------
         >>> xpl.write('MASS', vecname)
         """
-        response = self._mapdl.run("*XPL,WRITE," + recordname + "," + vecname)        
+        response = self._mapdl.run(f"*XPL,WRITE,{recordname},{vecname}")        
         self._check_ignored(response)
         return response
 
