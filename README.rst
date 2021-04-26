@@ -14,7 +14,7 @@ Documentation and Issues
 ------------------------
 See the `Documentation <https://mapdldocs.pyansys.com>`_ page for more
 details, and the `Examples gallery
-<https://mapdldocs.pyansys.com/pyansys/examples/index.html>`_ for some
+<https://mapdldocs.pyansys.com/examples/index.html>`_ for some
 examples.
 
 Please feel free to post issues and other questions at `PyMAPDL Issues
