@@ -2030,7 +2030,7 @@ class _MapdlCore(_MapdlCommands):
         if self._path is not None:
             self._path = self._path.replace('\\', '/')
             # new line to fix path issue, see #416
-            self._path = self._path.replace('\n', '/n')
+            self._path = repr(pth)[1:-1]
         return self._path
 
     @property
