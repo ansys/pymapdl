@@ -264,16 +264,17 @@ following from the PyMAPDL source directory:
 
 .. code::
 
+   pip install -e .
    pip install -r requirements_docs.txt
 
 
-Next, if running Linux/Mac OS, build the documentation with 
+Next, if running Linux/Mac OS, build the documentation with:
 
 .. code::
 
     make -C docs html
 
-Otherwise, if running Windows, build the documentation by running
+Otherwise, if running Windows, build the documentation by running:
 
 .. code::
 
