@@ -1,0 +1,418 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/verify,vm149
+/title,vm149,Residual Vector in Mode Superposition Harmonic Analysis
+/com,
+/com, Verification manual to verify the effect of residual
+/com, vector to improve the solution accuracy in modal
+/com, response analysis
+/com,
+/com, Reference: J.M.Dickens,J.M.Nakagawa,M.J.Wittbrodt
+/com, "A critique of mode acceleration and modal truncation
+/com,  augmentation methods for modal response analysis"
+/com, computers & structures,Vol.62,No.6,pp 985-998,1997
+/com,
+
+/com, ********************************
+/com, CASE1: EXTRACTING ALL THE MODES
+/com, ********************************
+
+JPGPRF,500,100,1
+/show,jpeg
+
+/filename,case1
+
+/prep7
+et,1,combin14,,,2           ! 2D Spring-damper element
+et,2,mass21,,,4             ! 2D Mass without rotary inertia
+et,3,mass21,,,4             ! 2D Mass without rotary inertia
+
+r,1,10000                   ! Stiffness for spring element
+r,2,1                       ! Mass 
+r,3,0.5                     ! Mass
+
+n,1
+n,2,1
+n,3,2
+n,4,3
+n,5,4
+n,6,5
+
+e,1,2                       ! Spring 1
+e,2,3                       ! Spring 2
+e,3,4                       ! Spring 3
+e,4,5                       ! Spring 4
+e,5,6                       ! Spring 5
+
+type,2
+real,2
+
+e,2                         ! Mass 1
+e,3                         ! Mass 2
+e,4                         ! Mass 3
+
+type,3
+real,3
+e,5                         ! Mass 4
+
+d,1,all
+d,6,all
+
+nsel,s,,,2,5
+d,all,uy
+nsel,all
+finish
+
+/solution
+antype,modal
+modopt,lanb,4               ! Extracting all modes
+mxpand,all,,,yes    
+f,4,fx,1                    ! Generate load vector for harmonic analysis
+solve
+fini
+
+/solution
+antype,harmic,new
+hropt,msup,4,,              ! Mode superposition harmonic analysis
+outres,all,all
+fdele,all
+lvscale,1                   ! Scaling the load vector 
+harfrq,3,70                 ! Frequency range
+dmprat,0.02                 ! Damping
+nsubst,500
+kbc,1
+save
+solve
+fini
+
+/solution
+expass,on
+outres,all,all
+numexp,all,,,yes
+solve
+finish
+
+
+/post26
+file,case1,rst
+numvar,20
+/com, *******************************************************
+/com,  Computing the 1st peak displacement and spring force
+/com, *********************************************************
+/show,jpeg
+nsol,2,4,u,x,4ux
+realvar,4,2,,,UXR           ! Real value of UX
+imagin,5,2,,,UXI            ! Imaginary value of UX
+prod,6,4,4,,UXR_2     
+prod,7,5,5,,UXI_2     
+add,8,6,7,,UXR_2+UXI_2    
+sqrt,9,8,,,ampl_disp,,,1    ! Amplitude
+
+
+esol,10,4,4,smisc,1
+realvar,11,10,,,ForceR       ! Real value of Spring force 
+imagin,12,10,,,ForceI        ! Imaginary value of Spring force
+prod,13,11,11,,ForceR_2     
+prod,14,12,12,,ForceI_2     
+add,15,13,14,,ForceR_2+ForceI_2    
+sqrt,16,15,,,ampl_force,,,1     ! Amplitude
+
+/out,scratch
+/grid,1
+/gropt,logy,1
+/xrange,3,70
+/axlab,y,amplitude_disp_force
+plvar,9,16
+prvar,9,16
+
+*get,ux_max_all,vari,9,extrem,vmax
+*get,force_max_all,vari,16,extrem,vmax
+*get,freq_ux_all,vari,9,extrem,tmax
+*get,freq_force_all,vari,16,extrem,tmax
+
+/out,
+/com, *******************************************************
+/com,  Computing the 2nd peak spring force
+/com, *******************************************************
+timerange,11,70             ! Listing values between 11hz to 70Hz
+store,new                   ! Store new set of data
+
+esol,10,4,4,smisc,1
+realvar,11,10,,,ForceR       ! Real value of Spring force 
+imagin,12,10,,,ForceI        ! Imaginary value of Spring force
+prod,13,11,11,,ForceR_2     
+prod,14,12,12,,ForceI_2     
+add,15,13,14,,ForceR_2+ForceI_2    
+sqrt,16,15,,,ampl_force,,,1     ! Amplitude
+
+/out,scratch
+/grid,1
+/gropt,logy,1
+/xrange,3,70
+/axlab,y,amplitude_disp_force
+plvar,16
+prvar,16
+
+*get,force_max_all2,vari,16,extrem,vmax
+
+
+*dim,label,char,5,1
+*dim,value,,5,3
+
+label(1,1)='UX_MAX'
+label(2,1)='F_MAX'
+label(3,1)='FREQ_UX'
+label(4,1)='FREQ_F'
+label(5,1)='F_MAX2'
+
+*vfill,value(1,1),data,2.500e-03
+*vfill,value(1,2),data,ux_max_all
+*vfill,value(1,3),data,abs(2.500e-03/ux_max_all)
+
+*vfill,value(2,1),data,10.000
+*vfill,value(2,2),data,force_max_all
+*vfill,value(2,3),data,abs(10.000/force_max_all)
+
+*vfill,value(3,1),data,10.100
+*vfill,value(3,2),data,freq_ux_all
+*vfill,value(3,3),data,abs(10.100/freq_ux_all)
+
+*vfill,value(4,1),data,10.100
+*vfill,value(4,2),data,freq_force_all
+*vfill,value(4,3),data,abs(10.100/freq_force_all)
+
+*vfill,value(5,1),data,4.5
+*vfill,value(5,2),data,force_max_all2
+*vfill,value(5,3),data,abs(4.5/force_max_all2)
+
+save,table_1
+fini
+/clear,nostart
+
+/out,
+/com, *******************************************
+/com, CASE2: EXTRACTING 1 MODE + RESIDUAL VECTOR
+/com, ********************************************
+
+JPGPRF,500,100,1
+/show,jpeg
+/title,vm149,Residual Vector in Mode Superposition Harmonic Analysis
+/filename,case2
+
+/prep7
+et,1,combin14,,,2           ! 2D Spring-damper element
+et,2,mass21,,,4             ! 2D Mass without rotary inertia
+et,3,mass21,,,4             ! 2D Mass without rotary inertia
+
+r,1,10000                   ! Stiffness for spring element
+r,2,1                       ! Mass 
+r,3,0.5                     ! Mass
+
+n,1
+n,2,1
+n,3,2
+n,4,3
+n,5,4
+n,6,5
+
+e,1,2                       ! Spring 1
+e,2,3                       ! Spring 2
+e,3,4                       ! Spring 3
+e,4,5                       ! Spring 4
+e,5,6                       ! Spring 5
+
+type,2
+real,2
+
+e,2                         ! Mass 1
+e,3                         ! Mass 2
+e,4                         ! Mass 3
+
+type,3
+real,3
+e,5                         ! Mass 4
+
+d,1,all
+d,6,all
+
+nsel,s,,,2,5
+d,all,uy
+nsel,all
+finish
+
+/solution
+antype,modal
+modopt,lanb,1           ! Extract 1 mode
+mxpand,1,,,yes
+resvec,on               ! Compute residual vector
+f,4,fx,1                ! Generate load vector
+solve
+fini
+
+/post1
+set,1,2
+*get,residual_vector,active,0,set,freq
+finish
+
+/solution
+antype,harmic,
+resvec,on               ! Include residual vector
+hropt,msup,1,,
+fdele,all
+lvscale,1               ! Scale load vector
+harfrq,3,70             ! Excitation frequency range
+dmprat,0.02             ! Damping
+nsubst,500
+kbc,1
+save
+solve
+fini
+
+/solution
+expass,on
+outres,all,all
+numexp,all,,,yes
+solve
+finish
+
+/post26
+file,case2,rst
+numvar,20
+/com, *******************************************************
+/com,  Computing the 1st peak displacement and spring force
+/com, *********************************************************
+/show,jpeg
+nsol,2,4,u,x,4ux
+realvar,4,2,,,UXR           ! Real value of UX
+imagin,5,2,,,UXI            ! Imaginary value of UX
+prod,6,4,4,,UXR_2     
+prod,7,5,5,,UXI_2     
+add,8,6,7,,UXR_2+UXI_2    
+sqrt,9,8,,,ampl_disp,,,1
+
+
+esol,10,4,4,smisc,1
+realvar,11,10,,,ForceR     ! Real value of Spring force 
+imagin,12,10,,,ForceI      ! Imaginary value of Spring force
+prod,13,11,11,,ForceR_2     
+prod,14,12,12,,ForceI_2     
+add,15,13,14,,ForceR_2+ForceI_2    
+sqrt,16,15,,,ampl_force,,,1
+
+/out,scratch
+/grid,1
+/gropt,logy,1
+/xrange,3,70
+/axlab,y,amplitude_disp_force
+plvar,9,16
+prvar,9,16
+
+
+*get,ux_max_residual,vari,9,extrem,vmax
+*get,force_max_residual,vari,16,extrem,vmax
+*get,freq_ux_residual,vari,9,extrem,tmax
+*get,freq_force_residual,vari,16,extrem,tmax
+
+/out,
+/com, *********************************************************
+/com,  Computing the 2nd peak spring force
+/com, *********************************************************
+timerange,11,70
+store,new
+
+esol,10,4,4,smisc,1
+realvar,11,10,,,ForceR       ! Real value of Spring force 
+imagin,12,10,,,ForceI        ! Imaginary value of Spring force
+prod,13,11,11,,ForceR_2     
+prod,14,12,12,,ForceI_2     
+add,15,13,14,,ForceR_2+ForceI_2    
+sqrt,16,15,,,ampl_force,,,1     ! Amplitude
+
+/out,scratch
+/grid,1
+/gropt,logy,1
+/xrange,3,70
+/axlab,y,amplitude_disp_force
+plvar,16
+prvar,16
+
+*get,force_max_resvec2,vari,16,extrem,vmax
+
+
+*dim,label,char,6,1
+*dim,value,,6,3
+
+label(1,1)='RES_MODE'
+label(2,1)='UX_MAX'
+label(3,1)='F_MAX'
+label(4,1)='FREQ_UX'
+label(5,1)='FREQ_F'
+label(6,1)='F_MAX2'
+
+*vfill,value(1,1),data,21.865
+*vfill,value(1,2),data,residual_vector
+*vfill,value(1,3),data,abs(21.865/residual_vector)
+
+*vfill,value(2,1),data,2.500e-03
+*vfill,value(2,2),data,ux_max_residual
+*vfill,value(2,3),data,abs(2.500e-03/ux_max_residual)
+
+*vfill,value(3,1),data,10.000
+*vfill,value(3,2),data,force_max_residual
+*vfill,value(3,3),data,abs(10.000/force_max_residual)
+
+*vfill,value(4,1),data,10.100
+*vfill,value(4,2),data,freq_ux_residual
+*vfill,value(4,3),data,abs(10.100/freq_ux_residual)
+
+*vfill,value(5,1),data,10.100
+*vfill,value(5,2),data,freq_force_residual
+*vfill,value(5,3),data,abs(10.100/freq_force_residual)
+
+*vfill,value(6,1),data,4.5
+*vfill,value(6,2),data,force_max_resvec2
+*vfill,value(6,3),data,abs(4.5/force_max_resvec2)
+
+
+
+save,table_2
+finish
+resume,table_1
+/com,
+/out,vm149,vrt
+/com,
+/com, ------------------------------VM149 RESULTS COMPARISON----------------------
+/com,
+/com,                       | TARGET |  Mechanical APDL | RATIO
+/com,
+/com,  
+/com, Extracting all modes
+/com, --------------------
+/com,
+/com,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A14,'   ',F12.5,'    ',F12.5,'    ',F12.3)
+/com,
+/com,
+/NOPR,
+resume,table_2
+/GOPR
+/com,
+/com, Extracting 1 mode + residual vector
+/com, -----------------------------------
+/com,
+/com,
+/com,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A14,'   ',F12.5,'    ',F12.5,'    ',F12.3)
+/com,
+/com,
+/NOPR,
+/com,
+/com, 
+/com, --------------------------------------------------------------------------------
+/out,
+*list,vm149,vrt
+finish
+    
+
+

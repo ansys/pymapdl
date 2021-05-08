@@ -1,0 +1,93 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM168
+/PREP7
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/TITLE, VM168, MAGNETIC FIELD IN A NONFERROUS SOLENOID
+/COM,   PRINCIPLES OF ELECTRIC AND MAGNETIC FIELDS, BOAST, PG.243
+ANTYPE,STATIC
+ET,1,SOLID5,10                         ! 3D COUPLED-FIELD SOLID, MAG DOF
+ET,2,SOURC36                           ! CURRENT SOURCE ELEMENT
+EMUNIT,MKS                             ! MKS UNITS
+MP,MURX,1,1                            ! RELATIVE PERMEABILITY - AIR
+/COM    !**    DEFINE CONVENIENT PARAMETERS    !**
+I=0.5                                  ! CURRENT
+NI=115.5                               ! MMF
+S=2.5                                  ! SOLENOID 1/2 LENGTH
+R=0.5                                  ! SOLENOID RADIUS
+THK=.0216                              ! SOLENOID THICKNESS
+INM=.0254                              ! INCHES TO METER CONVERSION
+INC=.0001                              ! SET SMALL RADIUS
+TH=5                                   ! SET ANGLE
+L=7.5                                  ! SET BOUNDARY LENGTH
+R,1,1,NI,THK*INM,S*2*INM,1,50          ! COIL REAL CONSTANTS
+CSYS,1
+N,1,INC,-TH                            ! CREATE NODES FOR SOLID5
+N,8,INC,-TH,S-.1
+FILL
+N,9,INC,-TH,S
+N,10,INC,-TH,S+.1
+N,19,INC,-TH,L-.1
+FILL,10,19,,,,,,2
+N,20,INC,-TH,L
+NGEN,4,20,1,20,1,R/3,,,5
+NGEN,7,20,61,80,1,(5.5/6),,,10
+NSEL,S,LOC,Z,0
+DSYS,1
+NLIST,ALL
+NSEL,ALL
+DSYS,0
+NGEN,2,200,ALL,,,,(TH*2)
+E,22,222,202,2,21,221,201,1            ! CREATE SOLID5 ELEMENTS
+EGEN,19,1,-1
+EGEN,9,20,-19
+NUMMRG,NODE                            ! MERGE NODES NEAR X=0 AXIS
+N,500,R                                ! CREATE NODES FOR SOURC36
+N,501,R,90
+N,502
+TYPE,2
+E,500,501,502                          ! CREATE SOURC36 ELEMENT
+NSCALE,,ALL,,,INM,,INM                 ! SCALE MODEL TO METERS
+D,ALL,MAG,0                            ! SET MAG=0 EVERYWHERE
+FINISH
+/SOLU    
+MAGOPT                                 ! RSP STRATEGY (DEFAULT)
+OUTPR,ALL,NONE
+SOLVE
+FINISH
+/POST1
+PATH,FIELD,2,,48                       ! DEFINE PATH WITH NAME = "FIELD"
+PPATH,1,1                              ! DEFINE PATH POINTS BY NODE
+PPATH,2,20
+PDEF,BZ,B,Z
+PRPATH,BZ                              ! PRINT BZ ALONG COIL AXIS
+/SHOW,,GRPH,1
+PLPATH,BZ                              ! DISPLAY BZ ALONG COIL AXIS
+*GET,S1A,PATH,0,MIN,BZ
+*GET,S2A,PATH,0,MAX,BZ
+*SET,S1,(S1A*1E6)
+*SET,S2,(S2A*1E6)
+*DIM,LABEL,CHAR,2,2
+*DIM,VALUE,,2,3
+LABEL(1,1) = 'BZ T ','BZ T'
+LABEL(1,2) = 'Z=0','Z=.1905m'
+*VFILL,VALUE(1,1),DATA,1120,2.12
+*VFILL,VALUE(1,2),DATA,S2,S1
+*VFILL,VALUE(1,3),DATA,ABS(S2/1120),ABS(S1/2.12)
+/OUT,vm168,vrt
+/COM,------------------- VM168 RESULTS COMPARISON --------------
+/COM,ANSWERS MULTIPLIED BY 1E6
+/COM,
+/COM,                  |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.2,'  ',F15.2,'   ',1F15.3)
+/COM,-----------------------------------------------------------
+/COM,
+/COM,-----------------------------------------------------------
+/COM,NOTE: THERE ARE VERIFIED RESULTS IN VM168  NOT CONTAINED IN
+/COM,THIS TABLE
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm168,vrt

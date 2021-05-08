@@ -1,0 +1,300 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM213
+/TITLE,VM213, DIFFERENTIAL INDUCTANCE OF A TRANSFORMER
+/NOPR
+/COM
+/COM  REFERENCE:
+/COM  M.GYIMESI,D.OSTERGAARD,"INDUCTANCE COMPUTATION BY
+/COM  INCREMENTAL FINITE ELEMENT ANALYSIS", IEEE
+/COM  TRANSACTION ON MAGNETICS, VOL.35, NO.3 (1998),
+/COM  PP.1119-1122
+/COM
+/COM
+/COM       ^ y axis             : symmetry plane
+/COM       :                    : core center
+/COM       :<.x1.>.<.x2.>.<.x..>:
+/COM       :      :      :      :
+/COM  --------------------------:
+/COM !                          : nonlin core:
+/COM !     yoke ideal iron      : H = Hs (B/Bs)^2; BS=2T;HS=100A/m
+/COM !                          :
+/COM !      -------------       :....
+/COM !leg  !      :      !nonlin:  ^
+/COM !ideal!coil1 :coil2 ! iron :  y
+/COM !iron !      :      ! core :  :
+/COM !      -------------       :..v..> x axis
+/COM !                          :
+/COM !     yoke ideal iron      :
+/COM !                          :
+/COM  --------------------------:
+/COM
+/COM target
+/COM
+/COM nominal
+/COM    magnetic field in the core    : Hn  = (N1 I1 + N2 I2) / y    = 25
+/COM    flux density   in the core    : Bn  = Bs sqrt(H/Hs)          = 1
+/COM    tangent reluctivity           : dH/dB = 2 Hs/Bs B/Bs         = 50
+/COM    magnetic energy in the core   : nlene = Hs/Bs^2 Bn^3/3 2xyz  = 0.0166
+/COM    magnetic coenergy in the core : nlcene = Bn Hn 2xyz - nlene  = 0.0333
+/COM
+/COM inductances
+/COM    self coil 1                   : L11 ~ 2 N1^2  x z / (y nui)  = 0.4
+/COM    self coil 2                   : L22 ~ 2 N2^2  x z / (y nui)  = 1.6
+/COM    mutual between coil 1 and 2   : L12 ~ 2 N1 N2 x z / (y nui)  = 0.8
+/COM
+/COM flux linkages
+/COM    coil 1                        : psi1 = 2 N1 x z B0           = 0.2
+/COM    coil 2                        : psi2 = 2 N2 x z B0           = 0.4
+
+
+JPGPRF,500,100,1
+
+!       GEOMETRY DATA
+
+N=1                     ! MESHING PARAMETER
+X1=0.1                  ! WIDTH (X SIZE) OF COIL 1
+X2=0.1                  ! WIDTH (X SIZE) OF COIL 2
+X=0.1                   ! WIDTH (X SIZE) OF CORE
+Y=0.1                   ! HIGHT OF CORE, Y SIZE OF WINDOW
+Z=0.1                   ! THICKNESS OF IRON IN Z DIRECTION
+NUI=50                  ! ABSOLUTE RELUCTIVITY OF IRON
+N1=10                   ! NUMBER OF TURNS IN COIL1
+N2=20                   ! NUMBER OF TURNS IN COIL2
+
+!      EXCITATION DATA 
+
+SYMFAC=2                ! SYMMETRIC FACTOR FOR INDUCTANCE COMPUTATION
+NC=2                    ! NUMBER OF COILS
+*DIM,CUR,ARRAY,NC       ! NOMINAL CURRENTS OF COILS
+CUR(1)=0.2              ! NOMINAL CURRENT OF 1ST COIL
+CUR(2)=0.025            ! TINY NOMINAL CURRENT OF 2ND COIL
+
+!      DERIVED AUXILIARY PARAMETERS
+
+MU0=3.1415926*4.0E-7
+MURI=1/NUI/MU0          ! RELATIVE PERMEABILITY OF IRON
+X3=X1+X2                ! X COORDINATE OF THE RIGHT OF COIL2
+X4=X3+X                 ! X COORDINATE OF MIDDLE OF CORE (SYMMETRY PLANE)
+JS1=CUR(1)*N1/(X1*Y)    ! NOMINAL CURRENT DENSITY OF COIL1
+JS2=CUR(2)*N2/(X2*Y)    ! NOMINAL CURRENT DENSITY OF COIL2
+
+
+/PREP7
+SMRT,OFF
+ET,1,SOLID236
+
+MP,MURX,1,1             ! AIR/COIL
+BS=2                    ! SATURATION FLUX DENSITY
+HS=100                  ! SATURATION MAGNETIC FIELD
+TB,BH,2                 ! CORE: H = Hs (B/Bs)^2; Bs=2T;Hs=100A/m
+TBPT,,  1, 0.2
+TBPT,,  4, 0.4
+TBPT,,  9, 0.6
+TBPT,, 16, 0.8
+TBPT,, 25, 1.0
+TBPT,, 36, 1.2
+TBPT,, 49, 1.4
+TBPT,, 64, 1.6
+TBPT,, 81, 1.8
+TBPT,,100, 2.0
+TBPT,,121, 2.2
+TBPT,,144, 2.4
+TBPT,,169, 2.6
+TBPT,,176, 2.8
+TBPT,,225, 3.0
+TBPT,,256, 3.2
+TBPT,,289, 3.4
+TBPT,,324, 3.6
+TBPT,,361, 3.8
+TBPT,,400, 4.0
+TBPLOT,BH,2	 	!PLOT BH CURVE
+
+
+BLOCK, 0,X1,0,Y,0,Z     ! COIL1
+BLOCK,X1,X3,0,Y,0,Z     ! COIL2
+BLOCK,X3,X4,0,Y,0,Z     ! CORE
+
+VGLUE,ALL
+
+VSEL,S,LOC,X,X1/2
+VATT,1,1,1               ! COIL 1 VOLUME ATTRIBUTE
+VSEL,S,LOC,X,X1+X2/2
+VATT,1,2,1               ! COIL 2 VOLUME ATTRIBUTE
+VSEL,S,LOC,X,X3+X/2
+VATT,2,3,1               ! IRON VOLUME ATTRIBUTE
+VSEL,ALL
+
+ESIZE,,N
+VMESH,ALL
+
+NSEL,S,LOC,X,X4         ! FLUX PARALLEL DIRICHLET AT SYMMETRY PLAIN, X=X4,Z=0,Z=Z
+NSEL,A,LOC,Z,0
+NSEL,A,LOC,Z,Z
+D,ALL,AZ,0
+!                       ! HOMOGENEOUS NEUMANN FLUX NORMAL AT YOKE, X=0, Y=0, Y=Y
+NSEL,ALL
+
+ESEL,S,ELEM,,1          ! COIL 1 COMPONENT
+BFE,ALL,JS,,,,JS1       ! CURRENT DENSITY IN COIL 1
+
+ESEL,S,ELEM,,2          ! COIL 2 COMPONENT
+BFE,ALL,JS,,,,JS2       ! UNITE CURRENT DENSITY IN COIL 2
+
+ALLSEL
+FINISH
+
+/COM
+/COM OBTAIN OPERATING SOLUTION
+/COM
+/SOLUTION
+ANTYPE,STATIC
+CNVTOL,CSG,1,1.0E-3
+SOLVE
+FINISH
+
+/POST1
+SET,LAST
+/COM
+/COM COMPUTE STORED ENERGY AND CO-ENERGY
+/COM
+ETABLE,_mene,MENE
+ETABLE,_coen,COEN
+ETABLE,_aene,AENE
+
+SSUM
+*get,STORENG,ssum,,item,_mene
+*get,STORCOE,ssum,,item,_coen
+*get,STORAEN,ssum,,item,_aene
+/com,
+/com, Energy = %STORENG*SYMFAC%
+/com, Co-energy = %STORCOE*SYMFAC%
+/com, Apparent energy = %STORAEN*SYMFAC%
+/com
+FINISH
+
+*DIM,LABENG,CHAR,2
+*DIM,VALENG,,2,2
+*DIM,RESENG,,2,1
+LABENG(1)='ENERGY','CO-ENERGY'
+*VFILL,VALENG(1,1),DATA,0.0166,0.0333
+*VFILL,RESENG(1,1),DATA,2*STORENG,2*STORCOE
+*VFILL,VALENG(1,2),DATA,ABS(2*STORENG/0.0166),ABS(2*STORCOE/0.0333)
+PARSAVE,all
+/COM,
+/COM, ***  COMPUTE INDUCTANCE AND FLUX USING THE LINEAR PERTURBATION PROCEDURE
+/COM,
+ALLSEL
+
+/SOLUTION
+ANTYPE,STATIC,RESTART,,,PERTURB
+PERTURB,STATIC,,CURRENT,ALLKEEP
+SOLVE,ELFORM
+
+! Apply CUR(1) only to determine L11
+BFE,1,JS,,,,JS1
+BFEDELE,2,JS
+SOLVE
+
+! Apply CUR(2) only to determine L12
+BFEDELE,1,JS
+BFE,2,JS,,,,JS2
+SOLVE
+
+! Apply CUR(1) and CUR(2) together to determine L12
+BFE,1,JS,,,,JS1
+BFE,2,JS,,,,JS2
+SOLVE
+FINISH
+
+PARRES
+! define arrays for inductance, flux linkage, and energy
+*DIM,INDI,ARRAY,2,2  ! incremental inductance matrix
+
+*DIM,IENE,ARRAY,2,2  ! incremental energy
+*DIM,COEN,ARRAY,2,2  ! coenergy energy
+
+*DIM,FLX,ARRAY,2     ! flux
+
+/POST1
+FILE,,rstp
+SET,1,LAST
+ETABLE,_iene,IENE
+ETABLE,_coen,COEN
+SSUM
+*GET,IENE(1,1),ssum,,item,_iene
+*GET,COEN(1,1),ssum,,item,_coen
+
+SET,2,LAST
+ETABLE,_iene,IENE
+ETABLE,_coen,COEN
+SSUM
+*GET,IENE(2,2),ssum,,item,_iene
+*GET,COEN(2,2),ssum,,item,_coen
+
+SET,3,LAST
+ETABLE,_iene,IENE
+ETABLE,_coen,COEN
+SSUM
+*GET,IENE(1,2),ssum,,item,_iene
+*GET,COEN(1,2),ssum,,item,_coen
+
+FINISH
+
+! COMPUTE INCREMENTAL INDUCTANCE 
+INDI(1,1)=2*IENE(1,1)/CUR(1)**2*SYMFAC
+INDI(2,2)=2*IENE(2,2)/CUR(2)**2*SYMFAC
+INDI(1,2)=(IENE(1,2)-IENE(1,1)-IENE(2,2))/(CUR(1)*CUR(2))*SYMFAC
+INDI(2,1)=INDI(1,2)
+
+! COMPUTE FLUX
+FLX(1)=COEN(1,1)/CUR(1)*SYMFAC
+FLX(2)=COEN(2,2)/CUR(2)*SYMFAC
+
+!SET UP AND FILL VM RATIO TABLE
+RAT_1 = ABS(INDI(1,1)/0.40)
+RAT_2 = ABS(INDI(2,2)/1.60)
+RAT_3 = ABS(INDI(1,2)/0.80)
+*DIM,LABEL,CHAR,3
+*DIM,VALUE,,3,2
+*DIM,RESULTS,,3,1
+LABEL(1) = 'COIL1','COIL2','MUTUAL'
+*VFILL,VALUE(1,1),DATA,0.40,1.60,0.80
+!
+!FILL RESULTS VECTOR WITH INDUCTANCE MATRIX VALUES
+!
+*VFILL,RESULTS(1,1),DATA,INDI(1,1),INDI(2,2),INDI(1,2)
+*VFILL,VALUE(1,2),DATA,RAT_1,RAT_2,RAT_3
+
+*DIM,LABEL1,CHAR,2
+*DIM,VALUE1,,2,2
+*DIM,RESULT1,,2,1
+LABEL1(1)= 'COIL1','COIL2'
+*VFILL,VALUE1(1,1),DATA,0.2,0.4
+!
+! FILL RESULTS VECTOR WITH FLUX ARRAY VALUES
+!
+*VFILL,RESULT1(1,1),DATA,FLX(1),FLX(2)
+*VFILL,VALUE1(1,2),DATA,ABS(FLX(1)/0.2),ABS(FLX(2)/0.4)
+
+/COM
+/OUT,vm213,vrt
+/COM,------------------- VM213  RESULTS COMPARISON ---------------------
+/COM
+/COM,   ENERGY (J)   |   TARGET   |  Mechanical APDL  |   RATIO
+/COM 
+*VWRITE,LABENG(1),VALENG(1,1),RESENG(1,1),VALENG(1,2)
+(1X,A10,'     ',F10.4,'    ',F10.4,'     ',1F13.3)
+/COM
+/COM,  FLUX (Weber)  |   TARGET   |  Mechanical APDL  |   RATIO
+/COM,
+*VWRITE,LABEL1(1),VALUE1(1,1),RESULT1(1,1),VALUE1(1,2)
+(1X,A10,'     ',F10.4,'    ',F10.4,'     ',1F13.3)
+/COM,
+/COM, INDUCTANCE (H) |   TARGET   |  Mechanical APDL  |   RATIO
+/COM,
+*VWRITE,LABEL(1),VALUE(1,1),RESULTS(1,1),VALUE(1,2)
+(1X,A10,'     ',F10.4,'    ',F10.4,'     ',1F13.3)
+/COM,-------------------------------------------------------------------
+/OUT,
+*LIST,vm213,vrt
+FINISH

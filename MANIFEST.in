@@ -1,6 +1,0 @@
-include pyansys/cython/*.h
-include tests/*
-include pyansys/examples/sector.cdb
-include pyansys/examples/hex_db_150.db
-include pyansys/examples/hex_db_194.db
-include pyansys/cython/parsefull.c

@@ -14,9 +14,15 @@
 *~
 *swp
 
+# emacs
+flycheck*
+
+# Old files #
+_old/
+
 # Pip generated folders #
 #########################
-pyansys.egg-info/
+*.egg-info/
 build/
 dist/
 
@@ -24,7 +30,9 @@ dist/
 _build/
 pyansys/Interface.py
 *.bat
-docs/examples/*
+docs/source/examples/*
+*.out
+*.tar.gz
 
 # Testing
 factory/
@@ -38,3 +46,27 @@ tests/htmlcov
 tests/cyclic/htmlcov
 .coverage
 *,cover
+.benchmarks/
+test-output.xml
+
+\#*
+.\#*
+/.ipynb_checkpoints
+
+# test scripts
+*.sh
+*.cmd
+wheelhouse/
+
+# jupyterlab
+node_modules
+yarn.lock
+jupyterlab/docker/*.tar.gz
+examples/.local
+.ipynb_checkpoints/
+
+# docker
+docker/mapdl/v211
+
+# temp testing
+tmp.out

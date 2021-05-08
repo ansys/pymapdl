@@ -1,0 +1,497 @@
+/COM,ANSYS MEDIA REL. 140 (11/26/2011) REF. VERIF. MANUAL: REL. 140
+/VERIFY,VMC1
+*DIM,NARAY,TABLE,13,8           ! 2-D NARAY FOR RESULTS INFO
+*taxis,naray(1,0),1,1,2,3,4,5,6,7,8,9,10
+*taxis,naray(11,0),1,11,12,13
+*taxis,naray(0,1),2,1,2,3,4,5,6,7,8
+*CREATE,base,
+  PARSAV,ALL
+  /clear, nostart
+  PARRES,CHANGE
+  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+  /SHOW,JPEG
+  /PREP7
+  smrt,off
+  /TITLE, VMC1, CLAMPED PLATE UNDER UNIFORMLY-DISTRIBUTED LOAD
+  /COM,
+  /OUT,SCRATCH
+  ANTYPE,STATIC
+  ET,1,ETYP                       ! DEFINE ELEMENT TYPE PARAMETRICALLY
+  MP,EX,1,10E6                    ! DEFINE MATERIAL PROPERTIES
+  MP,NUXY,1,.3
+  A=10                            ! DEFINE PLATE EDGE LENGTH
+  T=1.0                           ! DEFINE PLATE THICKNESS
+  K,1,,,(-T/2)                    ! DEFINE KEYPOINTS
+  K,2,(A/2),,(-T/2)
+  K,3,(A/2),(A/2),(-T/2)
+  K,4,,(A/2),(-T/2)
+  KGEN,2,1,4,1,,,(T/2)
+  L,1,5
+  *REPEAT,4,1,1
+  L,1,4
+  *REPEAT,2,4,4
+  L,1,2
+  *REPEAT,2,4,4
+  L,2,3
+  *REPEAT,2,4,4
+  L,3,4
+  *REPEAT,2,4,4
+  LSEL,S,LINE,,1,4
+  LESIZE,ALL,,,ARG2
+  LSEL,INVE
+  LESIZE,ALL,,,ARG1
+  LSEL,ALL
+  V,1,2,3,4,5,6,7,8
+  ESIZE,,1
+  MOPT,VMESH,ALTE
+  VMESH,ALL                       ! MESH VOLUMES
+  *GET,MAXN,NODE,,NUM,MAX         ! GET MAX NODE NUMBER
+  NARAY(ARG3,2)=ARG1              ! STORE N1
+  NARAY(ARG3,3)=ARG2              ! STORE N2
+  NARAY(ARG3,4)=MAXN*3            ! CALCULATE TOTAL NO. OF DOF'S
+  NSEL,S,LOC,X,(A/2)              ! SELECT NODES AND APPLY BOUNDARY CONDITIONS
+  D,ALL,UX,0
+  NSEL,R,LOC,Z,0
+  D,ALL,ALL,0
+  NSEL,S,LOC,Y,(A/2)
+  D,ALL,UY,0
+  NSEL,R,LOC,Z,0
+  D,ALL,ALL,0
+  NSEL,S,LOC,X,0
+  DSYM,SYMM,X
+  NSEL,S,LOC,Y,0
+  DSYM,SYMM,Y
+  NSEL,S,LOC,Z,0
+  DSYM,ASYM,Z
+  NSEL,S,LOC,Z,-T/2
+  SF,ALL,PRES,-500                ! APPLY PRESSURE TO BOTTOM SURFACE
+  NSEL,ALL
+  /VIEW,1,0.5,-0.5,0.5
+  /ANG,1,-63
+  /AUTO,1
+  /DEVICE,VECTOR,1
+  /DEVICE,DITHER,1
+  /TYPE,ALL,4
+  /COLOR,NUM,BLUE,1
+  *IF,ETYP,EQ,45,THEN
+  *IF,ARG1,EQ,3,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 3, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,92,THEN
+  *IF,ARG1,EQ,3,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 3, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,45,THEN
+  *IF,ARG1,EQ,15,THEN
+   *IF,ARG2,EQ,2,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 15, N2 = 2)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ARG1,EQ,5,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 5, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,45,THEN
+  *IF,ARG1,EQ,25,THEN
+   *IF,ARG2,EQ,5,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 25, N2 = 5)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ARG1,EQ,7,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 7, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  /SHOW,GRPH
+  /TITLE, VMC1, CLAMPED PLATE UNDER UNIFORMLY-DISTRIBUTED LOAD
+  FINISH
+  /SOLU
+  EQSLV,PCG
+  SOLVE
+  FINISH
+  /POST1
+  NOD1=NODE(0,0,0)                ! SELECT NODE AT LOCATION 1
+  *GET,UZ0,NODE,NOD1,U,Z          ! GET DISPLACEMENT VALUE UZ(1)
+  NARAY(ARG3,6)=-(UZ0/.017169)    ! CALCULATE NORMALIZED UZ(1)
+  NOD3=NODE(0,0,-T/2)
+  *GET,SX3,NODE,NOD3,S,X          ! GET STRESS VALUE SX(3)
+  NARAY(ARG3,8)=(SX3/14.465E3)    ! CALCULATE NORMALIZED SX(3)
+  NOD2=NODE(A/2,0,-T/2)           ! SELECT NODES AT LOCATION 2
+  *GET,SX2,NODE,NOD2,S,X          ! GET STRESS VALUE SX(2)
+  NARAY(ARG3,7)=-(SX2/32.124E3)   ! CALCULATE NORMALIZED SX(2)
+  NSEL,ALL
+  *GET,NARAY(ARG3,5),PRERR,,SEPC  ! STORE PERCENT ENERGY ERROR NORM
+  PARSAV,,PARAM
+  FINISH
+*END
+*DO,I,1,5                       ! INITIALIZE COLUMN 1 WITH ELEMENT TYPES
+ NARAY(I,1)=45
+*ENDDO
+*DO,I,6,9
+ NARAY(I,1)=95
+*ENDDO
+*DO,I,10,13
+ NARAY(I,1)=92
+*ENDDO
+*DO,I,1,3                       ! FOR ETYP = 45,95,92
+  *IF,I,LT,3,THEN
+     *IF,I,EQ,1,THEN
+       ETYP=45
+       NEND=5
+       JINDX=0
+     *ELSE
+       ETYP=95
+       NEND=4
+       JINDX=5
+     *ENDIF
+     /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPES
+     *DO,J,1,NEND
+       *IF,J,EQ,1,THEN
+         *USE,base,3,1,JINDX+J
+       *ELSEIF,J,EQ,2,THEN
+         *USE,base,6,1,JINDX+J
+       *ELSEIF,J,EQ,3,THEN
+         *USE,base,15,2,JINDX+J
+       *ELSEIF,J,EQ,4,THEN
+         *USE,base,20,4,JINDX+J
+       *ELSEIF,J,EQ,5,THEN
+         *USE,base,25,5,JINDX+J
+       *ENDIF
+     *ENDDO
+  *ELSE
+     ETYP=92
+     NEND=4
+     JINDX=9
+     *DO,J,1,NEND
+       *IF,J,EQ,1,THEN
+         *USE,base,3,1,JINDX+J
+       *ELSEIF,J,EQ,2,THEN
+          *USE,base,5,1,JINDX+J
+       *ELSEIF,J,EQ,3,THEN
+          *USE,base,7,1,JINDX+J
+       *ELSEIF,J,EQ,4,THEN
+          *USE,base,10,2,JINDX+J
+       *ENDIF
+     *ENDDO
+  *ENDIF
+*ENDDO
+SAVE,temp,db
+/OUT
+/GRID,1
+/AXLAB,X,No. DOF'S
+/AXLAB,Y,% ERROR IN ENERGY NORM
+/GTHK,AXIS,2
+/GTHK,CURVE,3
+/GROPT,LOGX,ON
+/GROPT,LOGY,ON
+/XRANGE,10,1E5
+/YRANGE,0,1.25
+*VLEN,5,1
+*VPLOT,NARAY(1,4),NARAY(1,5)
+*VLEN,4,1
+*VPLOT,NARAY(6,4),NARAY(6,5)
+*VLEN,4,1
+*VPLOT,NARAY(10,4),NARAY(10,5)
+/AXLAB,Y,SX(2) RATIO
+/GROPT,LOGY,OFF
+*VLEN,5,1
+*VPLOT,NARAY(1,4),NARAY(1,7)
+*VLEN,4,1
+*VPLOT,NARAY(6,4),NARAY(6,7)
+*VLEN,4,1
+*VPLOT,NARAY(10,4),NARAY(10,7)
+FINISH
+/DELETE,PARAM
+/DELETE,base
+/DELETE,vmc1,PCS
+
+
+/TITLE, VMC1, CLAMPED PLATE UNDER UNIFORMLY-DISTRIBUTED LOAD
+*DIM,NARAY,TABLE,13,8           ! 2-D NARAY FOR RESULTS INFO
+*taxis,naray(1,0),1,1,2,3,4,5,6,7,8,9,10
+*taxis,naray(11,0),1,11,12,13
+*taxis,naray(0,1),2,1,2,3,4,5,6,7,8
+*CREATE,base,
+  PARSAV,ALL
+  /clear, nostart
+  PARRES,CHANGE
+  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+  /SHOW,JPEG
+  /PREP7
+  smrt,off
+  /TITLE, VMC1, CLAMPED PLATE UNDER UNIFORMLY-DISTRIBUTED LOAD
+  /COM,
+  !/OUT,SCRATCH
+  ANTYPE,STATIC
+  *IF,ETYP,EQ,185,THEN
+    K2=2
+  *ELSEIF,ETYP,EQ,186,THEN
+    K2=1
+  *ELSE
+    K2=0
+  *ENDIF
+  ET,1,ETYP,,K2                   ! DEFINE ELEMENT TYPE PARAMETRICALLY
+  MP,EX,1,10E6                    ! DEFINE MATERIAL PROPERTIES
+  MP,NUXY,1,.3
+  A=10                            ! DEFINE PLATE EDGE LENGTH
+  T=1.0                           ! DEFINE PLATE THICKNESS
+  K,1,,,(-T/2)                    ! DEFINE KEYPOINTS
+  K,2,(A/2),,(-T/2)
+  K,3,(A/2),(A/2),(-T/2)
+  K,4,,(A/2),(-T/2)
+  KGEN,2,1,4,1,,,(T/2)
+  L,1,5
+  *REPEAT,4,1,1
+  L,1,4
+  *REPEAT,2,4,4
+  L,1,2
+  *REPEAT,2,4,4
+  L,2,3
+  *REPEAT,2,4,4
+  L,3,4
+  *REPEAT,2,4,4
+  LSEL,S,LINE,,1,4
+  LESIZE,ALL,,,ARG2
+  LSEL,INVE
+  LESIZE,ALL,,,ARG1
+  LSEL,ALL
+  V,1,2,3,4,5,6,7,8
+  ESIZE,,1
+  MOPT,VMESH,ALTE
+  VMESH,ALL                       ! MESH VOLUMES
+  *GET,MAXN,NODE,,NUM,MAX         ! GET MAX NODE NUMBER
+  NARAY(ARG3,2)=ARG1              ! STORE N1
+  NARAY(ARG3,3)=ARG2              ! STORE N2
+  NARAY(ARG3,4)=MAXN*3            ! CALCULATE TOTAL NO. OF DOF'S
+  NSEL,S,LOC,X,(A/2)              ! SELECT NODES AND APPLY BOUNDARY CONDITIONS
+  D,ALL,UX,0
+  NSEL,R,LOC,Z,0
+  D,ALL,ALL,0
+  NSEL,S,LOC,Y,(A/2)
+  D,ALL,UY,0
+  NSEL,R,LOC,Z,0
+  D,ALL,ALL,0
+  NSEL,S,LOC,X,0
+  DSYM,SYMM,X
+  NSEL,S,LOC,Y,0
+  DSYM,SYMM,Y
+  NSEL,S,LOC,Z,0
+  DSYM,ASYM,Z
+  NSEL,S,LOC,Z,-T/2
+  SF,ALL,PRES,-500                ! APPLY PRESSURE TO BOTTOM SURFACE
+  NSEL,ALL
+  /VIEW,1,0.5,-0.5,0.5
+  /ANG,1,-63
+  /AUTO,1
+  /DEVICE,VECTOR,1
+  /DEVICE,DITHER,1
+  /TYPE,ALL,4
+  /COLOR,NUM,BLUE,1
+  *IF,ETYP,EQ,185,THEN
+  *IF,ARG1,EQ,3,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 3, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,187,THEN
+  *IF,ARG1,EQ,3,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 3, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,185,THEN
+  *IF,ARG1,EQ,15,THEN
+   *IF,ARG2,EQ,2,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 15, N2 = 2)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ARG1,EQ,5,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 5, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *IF,ETYP,EQ,185,THEN
+  *IF,ARG1,EQ,25,THEN
+   *IF,ARG2,EQ,5,THEN
+    /TITLE,VMC1 - SQUARE MESH: (N1 = 25, N2 = 5)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  *ENDIF
+  *IF,ARG1,EQ,7,THEN
+   *IF,ARG2,EQ,1,THEN
+    /TITLE,VMC1 - TETRAHEDRAL MESH: (N1 = 7, N2 = 1)
+    EPLOT
+   *ENDIF
+  *ENDIF
+  /SHOW,GRPH
+  /TITLE, VMC1, CLAMPED PLATE UNDER UNIFORMLY-DISTRIBUTED LOAD
+  FINISH
+  /SOLU
+  EQSLV,PCG
+  SOLVE
+  FINISH
+  /POST1
+  NOD1=NODE(0,0,0)                ! SELECT NODE AT LOCATION 1
+  *GET,UZ0,NODE,NOD1,U,Z          ! GET DISPLACEMENT VALUE UZ(1)
+  NARAY(ARG3,6)=-(UZ0/.017169)    ! CALCULATE NORMALIZED UZ(1)
+  NOD3=NODE(0,0,-T/2)
+  *GET,SX3,NODE,NOD3,S,X          ! GET STRESS VALUE SX(3)
+  NARAY(ARG3,8)=(SX3/14.465E3)    ! CALCULATE NORMALIZED SX(3)
+  NOD2=NODE(A/2,0,-T/2)           ! SELECT NODES AT LOCATION 2
+  *GET,SX2,NODE,NOD2,S,X          ! GET STRESS VALUE SX(2)
+  NARAY(ARG3,7)=-(SX2/32.124E3)   ! CALCULATE NORMALIZED SX(2)
+  NSEL,ALL
+  *GET,NARAY(ARG3,5),PRERR,,SEPC  ! STORE PERCENT ENERGY ERROR NORM
+  PARSAV,,PARAM
+  FINISH
+*END
+*DO,I,1,5                       ! INITIALIZE COLUMN 1 WITH ELEMENT TYPES
+ NARAY(I,1)=185
+*ENDDO
+*DO,I,6,9
+ NARAY(I,1)=186
+*ENDDO
+*DO,I,10,13
+ NARAY(I,1)=187
+*ENDDO
+*DO,I,1,3                       ! FOR ETYP = 185,186,187
+  *IF,I,LT,3,THEN
+     *IF,I,EQ,1,THEN
+       ETYP=185
+       K2=2
+       NEND=5
+       JINDX=0
+     *ELSEIF,I,EQ,2,THEN
+       ETYP=186
+       K2=1
+       NEND=4
+       JINDX=5
+     *ELSEIF,I,EQ,3,THEN
+       ETYP=187
+       K2=0
+       NEND=4
+       JINDX=5
+     *ENDIF
+     /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPES
+     *DO,J,1,NEND
+       *IF,J,EQ,1,THEN
+         *USE,base,3,1,JINDX+J
+       *ELSEIF,J,EQ,2,THEN
+         *USE,base,6,1,JINDX+J
+       *ELSEIF,J,EQ,3,THEN
+         *USE,base,15,2,JINDX+J
+       *ELSEIF,J,EQ,4,THEN
+         *USE,base,20,4,JINDX+J
+       *ELSEIF,J,EQ,5,THEN
+         *USE,base,25,5,JINDX+J
+       *ENDIF
+     *ENDDO
+  *ELSE
+     ETYP=187
+     NEND=4
+     JINDX=9
+     *DO,J,1,NEND
+       *IF,J,EQ,1,THEN
+         *USE,base,3,1,JINDX+J
+       *ELSEIF,J,EQ,2,THEN
+          *USE,base,5,1,JINDX+J
+       *ELSEIF,J,EQ,3,THEN
+          *USE,base,7,1,JINDX+J
+       *ELSEIF,J,EQ,4,THEN
+          *USE,base,10,2,JINDX+J
+       *ENDIF
+     *ENDDO
+  *ENDIF
+*ENDDO
+SAVE,temp2,db
+/GRID,1
+/AXLAB,X,No. DOF'S
+/AXLAB,Y,% ERROR IN ENERGY NORM
+/GTHK,AXIS,2
+/GTHK,CURVE,3
+/GROPT,LOGX,ON
+/GROPT,LOGY,ON
+/XRANGE,10,1E5
+/YRANGE,0,1.25
+*VLEN,5,1
+*VPLOT,NARAY(1,4),NARAY(1,5)
+*VLEN,4,1
+*VPLOT,NARAY(6,4),NARAY(6,5)
+*VLEN,4,1
+*VPLOT,NARAY(10,4),NARAY(10,5)
+/AXLAB,Y,SX(2) RATIO
+/GROPT,LOGY,OFF
+*VLEN,5,1
+*VPLOT,NARAY(1,4),NARAY(1,7)
+*VLEN,4,1
+*VPLOT,NARAY(6,4),NARAY(6,7)
+*VLEN,4,1
+*VPLOT,NARAY(10,4),NARAY(10,7)
+FINISH
+/DELETE,PARAM
+/DELETE,base
+/DELETE,vmc1,PCS
+RESUME,temp,db
+/OUT
+/OUT,vmc1,vrt
+/COM
+/COM,------------------- VMC1 RESULTS LISTING ------------------------------------
+/COM,
+/COM,| ETYP | N1  | N2   |   DOF  | %ERR NM  | UZ(1)
+/COM,
+*VWRITE,naray(1,1),naray(1,2),naray(1,3),NARAY(1,4),NARAY(1,5),NARAY(1,6)
+(F5.0,'  ',F5.0,'  ',F5.0,' ',F10.0,'  ',F7.3,'     ',F5.3)
+/COM,-----------------------------------------------------------------------------
+/COM
+/COM,------------------- VMC1 RESULTS CONT. --------------------------------------
+/COM,
+/COM,| SX(2)  |   SX(3) |
+/COM,
+*VWRITE,NARAY(1,7),NARAY(1,8)
+(F7.3,'    ',F7.3)
+/COM,-----------------------------------------------------------------------------
+/OUT
+/OUT
+RESUME,temp2,db
+/OUT,vmc1,vrt,,append
+/COM
+/COM,------------------- VMC1 RESULTS LISTING ------------------------------------
+/COM,
+/COM,| ETYP | N1  | N2   |   DOF  | %ERR NM  | UZ(1)
+/COM,
+*VWRITE,naray(1,1),naray(1,2),naray(1,3),NARAY(1,4),NARAY(1,5),NARAY(1,6)
+(F5.0,'  ',F5.0,'  ',F5.0,' ',F10.0,'  ',F7.3,'     ',F5.3)
+/COM,-----------------------------------------------------------------------------
+/COM
+/COM,------------------- VMC1 RESULTS CONT. --------------------------------------
+/COM,
+/COM,| SX(2)  |   SX(3) |
+/COM,
+*VWRITE,NARAY(1,7),NARAY(1,8)
+(F7.3,'    ',F7.3)
+/COM,-----------------------------------------------------------------------------
+/OUT
+*LIST,vmc1,vrt

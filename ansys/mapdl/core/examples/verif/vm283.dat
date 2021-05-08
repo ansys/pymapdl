@@ -1,0 +1,227 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM283 
+/TITLE,VM283,Low Reduced Frequency Model for Visco-thermal Fluid with Thin Structure
+/COM,
+/COM, REFERENCE:
+/COM, W. M. BELTMAN, "Viscothermal Wave Propagation Including Acousto-elastic Interaction", 
+/COM, THESIS, SECTION6.3, PP128-136, ISBN 90-3651217-4, 1998.
+/COM, 
+JPGPRF,500,100,1
+
+/PREP7
+
+ET,1,FLUID30,,1                 ! FLUID30 ELEMENTS, NO FSI
+ET,2,SOLSH190                   ! SOLIDSHELL190 ELEMENTS
+ET,3,FLUID30,,0                 ! FLUID30 ELEMENTS, WITH FSI
+
+/COM, MATERIAL PROPERTIES FOR AIR
+
+rho = 1.2                       ! DENSITY
+c0 = 340                        ! SOUND SPEED
+visc = 18.2e-6                  ! DYNAMIC VISCOSITY
+kxx = 25.6e-3                   ! THERMAL CONDUCTIVITY
+Cp = 1004                       ! SPECIFIC HEAT       
+Cv = 1004/1.4
+
+z0 = rho*c0
+WL=c0/300
+H=WL/15
+
+tp1 = 1e-3
+tp2 = 2e-3
+h0 = 1e-3
+
+LX = 245e-3
+LY = 122.5e-3
+ZA = 0.5                        ! HEIGHT OF ROOM A
+ZB = 2.0                        ! HEIGHT OF ROOM B
+
+TB,AFDM,1,,,MAT                 ! ACOUSTIC FREQUENCY-DEPENDENT MATERIAL PROPERTIES
+TBDATA,1,rho,c0,visc,kxx,Cp,Cv  
+TB,AFDM,1,,,THIN                ! ACOUSTIC FREQUENCY-DEPENDENT THIN LAYER
+TBDATA,1,2*h0
+
+/COM, MATERIAL PROPERTIES FOR ALUMINIUM PLATE
+
+MP,DENS,2,2710                  ! DENSITY
+MP,EX,2,70.e9                   ! ELASTIC MODULUS
+MP,NUXY,2,0.3                   ! POISSON'S RATIO
+MP,DENS,3,rho
+MP,SONC,3,c0
+
+*DIM,zz,ARRAY,6
+zz(1)=0
+zz(2)=zz(1)+zb
+zz(3)=zz(2)+tp2
+zz(4)=zz(3)+2*h0
+zz(5)=zz(4)+tp1
+zz(6)=zz(5)+za
+
+*DO,i,1,5
+BLOCK,-LX,LX,-LY,LY,zz(i),zz(i+1)
+*ENDDO
+VGLUE,ALL
+SHPP,OFF,ALL
+
+LSEL,S,LOC,Y,0
+LESIZE,ALL,,,1
+ALLSEL,ALL
+
+VSEL,S,LOC,Z,zz(3),zz(4)
+LESIZE,67,,,4
+ESIZE,LX/10
+TYPE,1
+MAT,1
+/OUT,SCRATCH
+VMESH,ALL
+
+VSEL,S,LOC,Z,zz(2),zz(3)
+VSEL,A,LOC,Z,zz(4),zz(5)
+TYPE,2
+MAT,2
+LESIZE,61,,,3
+LESIZE,69,,,3
+VEORIENT,6,THIN
+VEORIENT,8,THIN
+VMESH,ALL
+
+VSEL,S,LOC,Z,zz(1),zz(2)
+TYPE,1
+MAT,3
+ESIZE,(zz(2)-zz(1))/15
+VMESH,ALL
+ALLSEL,ALL
+
+VSEL,S,LOC,Z,zz(5),zz(6)
+ESIZE,(zz(6)-zz(5))/10
+VMESH,ALL
+ALLSEL,ALL
+
+NSEL,S,LOC,Y,-ly
+NSEL,A,LOC,Y,ly
+D,ALL,UY
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,zz(2)
+NSEL,A,LOC,Z,zz(3)
+NSEL,A,LOC,Z,zz(4)
+NSEL,A,LOC,Z,zz(5)
+ESLN,S,0
+ESEL,U,TYPE,,2
+EMODIF,ALL,TYPE,3
+ALLSEL,ALL
+
+ESEL,S,TYPE,,3
+NSLE,S
+NSEL,S,LOC,Z,zz(2)
+NSEL,A,LOC,Z,zz(3)
+NSEL,A,LOC,Z,zz(4)
+NSEL,A,LOC,Z,zz(5)
+ESEL,S,TYPE,,2
+NSLE,R
+ESEL,S,TYPE,,3
+SF,ALL,FSI                          ! FLUID SOLID INTERACTION
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,zz(2)
+NSEL,A,LOC,Z,zz(5)
+NSEL,R,LOC,X,LX
+D,ALL,UZ,0,,,,UX,UY
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,zz(2)
+NSEL,A,LOC,Z,zz(5)
+NSEL,R,LOC,X,-LX
+D,ALL,UZ,0,,,,UX,UY
+ALLSEL,ALL
+NSEL,S,LOC,Z,zz(6)
+SF,ALL,PORT,1                       ! PORT NUMBER
+NSEL,R,LOC,X,LX
+BF,ALL,JS,1                         ! MASS SOURCE RATE
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,zz(1)
+SF,ALL,IMPD,z0                      ! IMPEDANCE
+SF,ALL,PORT,2                       ! PORT NUMBER
+CM,N_IMPD,node
+ALLSEL,ALL
+FINISH
+
+/SOLUTION
+EQSLV,SPARSE                        ! SPARSE SOLVER
+ANTYPE,HARMIC                       ! HARMONIC ANALYSIS
+HROPT,FULL                          ! FULL METHOD
+HARFRQ,0,300                        ! EXCITATION FREQUENCY
+NSUB,150                            ! NUMBER OF SUBSTEPS
+SOLVE
+FINISH
+
+*CREATE,MYPOST,MAC
+*GET,AR80,NODE,,COUNT
+AR70=0
+AR71=0
+*DO,AR99,1,AR80
+  AR70=NDNEXT(AR70)
+  AR71=AR71+PRES(AR70)
+*ENDDO
+AVG_PRES=AR71/AR80
+*END
+
+/POST1
+SET,LAST
+*GET,NUM_LSTEP,ACTIVE,0,SET,SBST
+VSEL,S,LOC,Z,zz(5),zz(6)
+ALLSEL,BELOW,VOLU
+CM,N_ROOMA,NODE
+ALLSEL,ALL
+
+/COM, ---Freq (Hz)   Computed TL---
+/COM,
+/NOPR
+*DO,AR99,1,NUM_LSTEP
+  SET,1,AR99,,AMPL
+  *GET,Freq,ACTIVE,,SET,FREQ
+  CMSEL,S,N_ROOMA
+  MYPOST
+  P_A=AVG_PRES
+  CMSEL,S,N_IMPD
+  MYPOST
+  P_B=AVG_PRES
+  TL = 20*LOG10(P_A/P_B)
+/OUT
+  *VWRITE,Freq,TL
+  %12.5e,%12.5e
+*ENDDO
+
+/OUT,SCRATCH
+*DIM,Frq,CHAR,9,1
+*DIM,TL1,CHAR,9,1
+*DIM,TL2,CHAR,9,1
+*DIM,Ratio,,9,1
+
+Frq(1)='10','40','80','84','214','228','278','286','300'
+TL1(1)='29.000','0.000','22.000','20.000','51.500','8.000','34.000','24.000','28.500'
+TL2(1)='28.708','0.071','21.544','20.000','49.984','7.642','32.576','22.696','26.685'
+R1 = 28.7/28.5
+R2 = 1.000
+R3 = 21.5/21.5
+R4 = 20.0/20.0
+R5 = 50.0/51.5
+R6 = 7.6/8.0
+R7 = 32.6/33.0
+R8 = 22.7/25.0
+R9 = 26.7/29.0
+*VFILL,Ratio(1,1),DATA,R1,R2,R3,R4,R5,R6,R7,R8,R9
+/OUT,vm283,vrt
+/COM, -----------------VM283 RESULT COMPARISON---------------------
+/COM
+/COM,| Freq (Hz) |  Target | Mechanical APDL | Ratio |
+/COM,
+*VWRITE,Frq(1),TL1(1),TL2(1),RATIO(1,1)
+(3X,A8,'   ',3X,A8,'   ',3X,A8,'  ',2X,F5.3,'  ')
+/COM,
+/COM, ---------------------------------------------------------------
+/OUT,
+*list,vm283,vrt
+FINISH
+

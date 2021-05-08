@@ -1,0 +1,59 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM193
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/NOPR
+/PREP7
+SMRT,OFF
+/TITLE, VM193, TWO DIMENSIONAL HEAT TRANSFER WITH CONVECTION
+C***    "THE STANDARD NAFEMS BENCHMARKS", TEST NO. T4,
+C***    NAFEMS, REV 3, OCTOBER 1990.
+ANTYPE,STATIC                       
+ET,1,PLANE55
+MP,KXX,1,52.0                
+K,1                          
+K,2,.6                                                                          
+K,3,.6,1.0                                                                      
+K,4,,1.0
+K,5,.6,.2
+L,1,2
+L,2,5
+L,5,3
+L,3,4
+L,4,1
+AL,ALL
+DK,1,TEMP,100,,1
+DK,2,TEMP,100,,1
+SFL,2,CONV,750.0,,0.0
+SFL,3,CONV,750.0,,0.0
+SFL,4,CONV,750.0,,0.0
+FINISH
+ADAPT,10,,5,0.2,1            ! FINAL PERCENT ERROR NEAR 5% WITHIN 10 LOOPS
+/POST1
+PLNSOL,TEMP                  ! DISPLAY TEMP CONTOURS IN FINAL MESH
+*GET,TEPC,PRERR,,TEPC        
+KSEL,,,,5
+NSLK
+*GET,N1,NODE,,NUM,MAX
+*GET,TEMP1,NODE,N1,TEMP
+*status,parm
+*DIM,VALUE,,1,3
+*DIM,LABEL,CHAR,1,2
+LABEL(1,1) = 'TEMP '
+LABEL(1,2) = 'DEG C'
+*VFILL,VALUE(1,1),DATA,18.3
+*VFILL,VALUE(1,2),DATA,TEMP1
+*VFILL,VALUE(1,3),DATA,ABS(TEMP1/18.3)
+/COM
+/OUT,vm193,vrt
+/COM,------------------- VM193 RESULTS COMPARISON --------------
+/COM,
+/COM,  LOAD STP 4      |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.1,'  ',F15.1,'   ',1F18.3)
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm193,vrt

@@ -1,0 +1,76 @@
+finish
+/clear
+
+/pnum,type,1
+/number,1
+/view,1,1,2,3
+
+keyw,beta,1
+
+/prep7
+!et,1,30,,2
+et,1,30,
+et,2,181,,,2
+r,1
+r,2
+mp,dens,1,1000
+mp,sonc,1,1500
+mp,ex  ,2,70e9
+mp,nuxy,2,0.3
+mp,dens,2,2700
+sectype,2,shell
+secdata,0.0005,2
+
+block,,0.02,,0.03,,0.015
+esize,0.005
+vmesh,all
+
+type,2
+secnum,2
+mat,2
+real,2
+amesh,all
+
+esel,s,type,,1
+nsel,s,ext
+sf,all,fsi
+allsel,all
+
+nsel,s,loc,y,0
+d,all,ux,0
+d,all,uy,0
+d,all,uz,0
+d,all,pres,0
+nsel,all
+finish
+
+/solu
+antype,harmic
+
+harfrq,1000,8000
+nsubst,700
+
+outres,all,none
+outres,nsol,all
+
+nsel,s,loc,x,0
+CM,BASEF,NODE
+CMSEL,S,BASEF,NODE
+f,all,fx,10
+alls 
+
+kbc,1
+solve
+finish
+
+/post26
+numvar,20
+nsol,2,108,pres108
+nsol,3,108,u,x,ux108
+nsol,4,108,u,y,uy108
+
+! /show,png
+! /gropt,logy,on
+! prvar,2
+! plvar,2
+! plvar,3,4

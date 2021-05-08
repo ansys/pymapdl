@@ -1,0 +1,151 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,vme4
+/TITLE,VME4, Undamped Vibration Absorber
+! Elements of Vibration Analysis, Meirovitch, pp. 131-134  
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+   
+PI=3.1415927
+M1=5             !The main mass is 5 kg
+K1=10            !The main system spring constant is 10 N/m
+WN=SQRT(K1/M1)   !The main system natural frequency is wn
+M2=1             !The absorber mass is 1 kg.
+K2=100           !The absorber system spring constant is 100 N/m
+WA=SQRT(K2/M2)   !The absorber system alone natural frequnecy is wa
+W=WA             !The forcing frequency is w
+
+/PREP7           !Enter preprocessor
+
+N,1,0,0,0        !Define nodes
+N,2,1,0,0
+N,3,2,0,0
+
+!Define element type 1 as MASS166
+ET,1,166
+!Define element type 2 as COMBIN165
+ET,2,165
+
+R,1,M1   !Real constant set one is for the main mass
+R,2,M2   !Real constant set two is for the absorber mass
+R,3
+R,4
+
+MP,EX,1,30E6
+MP,DENS,1,.000733
+MP,NUXY,1,0.29
+
+TYPE,1   !Create the main system MASS166 element at node 2 and
+REAL,1   !the absorber mass at node 3.
+E,2
+REAL,2
+E,3
+
+MP,EX,2,30E6
+MP,DENS,2,.000733
+MP,NUXY,2,0.29
+TB,disc,2,,,0
+TBDATA,1,K1
+TYPE,2         !Create the COMBIN165 spring elements between the masses.
+REAL,3
+MAT,2
+E,1,2
+
+
+MP,EX,3,30E6
+MP,DENS,3,.000733
+MP,NUXY,3,0.29
+TB,disc,3,,,0
+TBDATA,1,K2
+TYPE,2         !Create the COMBIN165 spring elements between the masses.
+REAL,4
+MAT,3
+E,2,3
+
+NSEL,S,NODE,,2,3  !Create nodal components
+CM,MASSES,NODE
+ALLSEL
+NSEL,S,NODE,,2
+CM,MASS1,NODE
+ALLSEL
+NSEL,S,NODE,,3
+CM,MASS2,NODE
+ALLSEL
+
+D,1,UX,0    !Constrain deflections.
+D,1,UY,0
+D,1,UZ,0
+D,2,UY,0
+D,2,UZ,0
+D,3,UY,0
+D,3,UZ,0
+
+FINISH
+
+!Enter solution processor.
+/SOLU
+
+!Generate 1000 time history points.
+EDRST,1000
+EDHTIME,1000
+
+!Specify the mass component for time history output.
+EDHIST,MASSES
+
+
+!Set the time step scaling factor to 0.01.  The default
+!for solution stability considerations is 0.9, however, for this
+!small dof system, the solution time is small, and a smoother response
+!curve can be obtained in minimal time with a reduced time step size.
+edcts,,0.01
+
+!Dimension the arrays that will be used for specifying the
+!sinusoidal load on the mass at node 2.
+*dim,t,array,8000
+*dim,f,array,8000
+
+!Enter the force vs. time values in the arrays.
+*do,i,1,8000,1
+ t(i)=(i-1)/4000
+ f(i)=sin(w*t(i))
+*enddo
+
+edload,add,fx,,mass1,t,f   !Specify the load
+time,2                     !Specify the solution time
+EDVEL,VELO,MASS2,-W/k2 !Specify the initial velocity for mass 2, it is at steady-state.
+
+/COM  &COMPARE,NOCOMPARE
+solve
+/COM  &COMPARE,NORMAL
+fini
+
+/post26     !Enter the time history post-processor.
+
+!Define variable number 2 as the node 2 deflection in the
+!x-direction.
+nsol,2,2,u,x,MAIN
+nsol,3,3,u,x,ABSORBER
+plvar,2,3
+
+extrem,2,3  !List the maximum and minimum values of the variables.
+*GET,RES1,VARI,2,EXTREM,VMAX, ,
+*GET,RES2,VARI,3,EXTREM,VMAX, ,
+*DIM,LABEL,CHAR,2
+*DIM,RES,,2,3
+LABEL(1) = 'ABS AMP','MAX DEFL'
+*VFILL,RES(1,1),DATA,0.01,0.00
+*VFILL,RES(1,2),DATA,RES2,RES1
+*VFILL,RES(1,3),DATA,RES(1,2)/RES(1,1)
+/OUT,vme4,vrt
+/COM,
+/COM,-------------------- VME4 DYNA RESULTS COMPARISION --------------------
+/COM,
+/COM,        |  TARGET  |  ANSYS  |  RATIO  |
+/COM,
+*VWRITE,LABEL(1),RES(1,1),RES(1,2),RES(1,3)
+(1X,A8,'   ',F5.3,'      ',F5.3,'    ',F5.3)
+/COM,
+/COM,-----------------------------------------------------------------------
+/OUT
+*LIST,vme4,vrt
+/GOPR
+FINISH

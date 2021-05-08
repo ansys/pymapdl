@@ -1,0 +1,55 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM107
+/PREP7
+/TITLE, VM107, THERMOCOUPLE RADIATION
+C***    HEAT TRANSFER, CHAPMAN, 1ST. PRINTING, PAGE 396, ART. 13.5
+ANTYPE,STATIC         ! STATIC ANALYSIS
+ET,1,LINK34
+ET,2,LINK31
+R,1,1
+R,2,1,1,.5, 0.174E-8
+MP,HF,1,11.85         ! FILM COEFFICIENT
+N,1
+N,3
+FILL
+E,1,2
+TYPE,2
+REAL,2
+E,2,3
+OUTPR,BASIC,1           
+OUTPR,NLOAD,1         ! PRINT NODAL HEAT FLOWS
+KBC,1                 ! STEP CHANGE LOADS
+TOFFST,460            ! OFFSET TEMPERATURE
+D,1,TEMP,1309
+D,3,TEMP,300
+FINISH
+/SOLU    
+SOLVE
+FINISH
+/POST1
+*GET,TN2,NODE,2,TEMP
+*DIM,LABEL,CHAR,1,2
+*DIM,VALUE,,1,3
+LABEL(1,1) = '     TT,'
+LABEL(1,2) = ' F      '
+*VFILL,VALUE(1,1),DATA,1000
+*VFILL,VALUE(1,2),DATA,TN2 
+*VFILL,VALUE(1,3),DATA,ABS(TN2/1000 )
+/COM
+/OUT,vm107,vrt
+/COM,------------------- VM107 RESULTS COMPARISON --------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.2,'  ',F10.2,'   ',1F5.3)
+/COM,-----------------------------------------------------------
+/COM,
+/COM,-----------------------------------------------------------
+/COM,NOTE: THERE ARE VERIFIED RESULTS IN VM107 NOT CONTAINED IN
+/COM,THIS TABLE
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm107,vrt
+

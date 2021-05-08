@@ -1,0 +1,182 @@
+/VERIFY,VM246         
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/TITLE,VM246, CYCLIC ANALYSIS OF AN END-LOADED HOLLOW CYLINDRICAL CANTILEVER BEAM
+/COM,*************************************************************
+/COM,* PREMISE OF TEST:   TEST UTILIZES THE FUNDAMENTAL FEATURES *
+/COM,*                    OF ANSYS TO VERIFY FEA RESULTS         *
+/COM,*                    TO CALCULATED APPROXIMATION RESULTS    *
+/COM,*************************************************************
+/COM,*************************************************************
+/COM,*                   TEST OBJECTIVES:                        *
+/COM,*                                                           *
+/COM,* TEST THAT DEFLECTION VALUES MATCH THEORETICAL DEFLECTION  *
+/COM,* TEST CYCLIC EXPANSION FEATURE                             *
+/COM,*                                                           *
+/COM,*************************************************************
+/COM,*************************************************************
+/COM,*                   VARIABLE DEFINITION:                    *
+/COM,*                                                           *
+/COM,*  _THETA1    = STARTING ANGLE FOR SECTION                  *
+/COM,*  _THETA2    = ENDING ANGLE FOR SECTION                    *
+/COM,*  _FLOWER    = MAX DISPLACEMENT                            *
+/COM,*                                                           *
+/COM,*************************************************************
+/COM,*************************************************************
+/COM,*                       REFFERENCES:                        *
+/COM,*                                                           *
+/COM,*  F. P. BEER, E. R. JOHNSTON, JR.,"MECHANICS OF MATERIALS" *
+/COM,*  NEW YORK, NY, MCGRAW-HILL,INC 1981, P 598.               *
+/COM,*                                                           *
+/COM,*************************************************************
+/OUT,SCRATCH
+/COM,***********************************************************
+/COM,*                                                         *
+/COM,*              ANALYSIS PARAMETER DEFINITIONS             *
+/COM,*                                                         *
+/COM,***********************************************************
+/SHOW,PLOTS,GRPH
+/GRAPHICS,POWER
+
+_A = .5			!OUTSIDE RADIUS (IN)
+_B = .25		!INSIDE RADIUS (IN)
+_L = 10			!LENGTH (IN)
+_E = 70000		!YOUNGS (PSI)
+_V = 0.3		!POISON'S RATIO
+_THETA1 = 0		!DEGREE
+_THETA2 = 30		!DEGREE
+_FLOWER =0.5187         !DISPLACEMENT
+_FREQDIF = 2.1		!PERCENT
+
+*DIM,VALUE,ARRAY,3,3
+*DIM,LABEL,CHAR,3
+LABEL(1)='SOLID185'
+LABEL(2)='SOLID186'
+LABEL(3)='SOLID187'
+
+*DO,I,1,3,1
+
+/COM,************************************************************
+/COM,*                                                          *
+/COM,* FOLLOWING BLOCK OF INPUT WAS USED TO GENERATE MODEL      *
+/COM,*                                                          *
+/COM,************************************************************
+/COM,************************************************************
+/COM,*                                                          *
+/COM,*  CYCSYM MODEL, FIXED AT ORGIN, 5LB LOAD AT FREE END      *
+/COM,*  SOLID ELEMENTS                                          *
+/COM,*                                                          *
+/COM,************************************************************
+
+/PREP7  
+        MP,EX,1,_E
+	MP,NUXY,1,_V
+	CSYS,1
+	CYL4,0,0,_A,_THETA1,_B,_THETA2,_L 
+        ET,1,LABEL(I)
+        TYPE,1
+     
+*IF,LABEL(I),EQ,'SOLID185',THEN
+	KEYOPT,1,2,2	                     !ENHANCED STRAIN FORMULATION
+      
+        
+*ELSEIF,LABEL(I),EQ,'SOLID186',THEN
+	KEYOPT,1,2,1                         !FULL INTERGRATION
+    
+
+*ELSE,LABEL(I),EQ,'SOLID187',THEN           
+	KEYOPT,1,6,0	                     !USE PURE DISPLACEMENT FORMULATION  
+*ENDIF    
+
+        VMESH,ALL
+
+        CYCLIC
+        /CYCEXP,,ON
+        
+ASEL,S,AREA,,1
+DA,ALL,ALL
+ALLSEL
+
+        /COM,SECTOR 12 FN
+        CYCOPT,LDSECT,12
+        NSEL,S,LOC,Z,10
+	NSEL,R,LOC,X,_A
+	NSEL,R,LOC,Y,0
+        F,ALL,FX,-5
+        ALLSEL
+
+FINISH  	                              !EXIT PREPROCESSING
+/SOLU					      !ENTER SOLUTION
+SOLVE
+
+FINISH						!EXIT SOLUTION
+/POST1						!ENTER POST PROCESSING
+/CYCEXPAND,,ON
+SET,FIRST
+PLNSOL,U,SUM
+*GET,F%I%,PLNSOL,0,MAX                    
+
+/OUT
+/COM,
+/COM,*********************************************************************
+/COM,                                                                   
+/COM,                        COMPARE RESULTS:                           
+/COM,             DISPLACEMENT COMPARE FOR ELEMENT %LABEL(I)%
+/COM,*********************************************************************
+/COM,
+/OUT,SCRATCH
+*IF,(ABS((F%I% - _FLOWER)/_FLOWER))*100,LT,_FREQDIF,THEN
+        /OUT
+           /COM,**********************************************************
+           /COM,*                                                        *
+           /COM,*  DISPLACEMENT MATCHES THEORETICAL RESULT!!!            *
+           /COM,*                                                        *
+           /COM,**********************************************************
+           /COM,
+	/OUT,SCRATCH   
+        *ELSE
+        /OUT
+           /COM,**********************************************************
+           /COM,*                                                        *
+           /COM,*  FAILURE: DISPLACEMENT OUT OF ACCAPTABLE LIMITS!!!     *
+           /COM,*                                                        *
+           /COM,**********************************************************
+        FINISH                          !EXIT PREP7     
+        /EXIT,NOSAVE                    !EXIT DUE TO FAILURE
+        *ENDIF                          !CLOSE IF LOOP     
+
+FINISH
+PARSAV,ALL
+/CLEAR,NOSTART
+PARRES,
+*ENDDO
+
+*VFILL,VALUE(1,1),DATA,_FLOWER,_FLOWER,_FLOWER
+*VFILL,VALUE(1,2),DATA,F1,F2,F3
+*VFILL,VALUE(1,3),DATA,ABS(F1/_FLOWER),ABS(F2/_FLOWER),ABS(F3/_FLOWER)
+
+*STAT,VALUE
+/OUT,vm246,vrt
+/OUT,
+/COM,------------------- VM246 RESULTS COMPARISON -------------
+/COM,
+/COM,                 |    TARGET   |    Mechanical APDL   |    RATIO
+/COM,
+*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(8X,A9,4X,F8.2,4X,E15.5,4X,E15.5,4X,F14.5)
+/COM,----------------------------------------------------------
+/COM,
+/COM,
+/COM,*************************************************
+/COM,*************************************************
+/COM,********* ALL TEST WERE SUCCESSFUL !!! **********
+/COM,*************************************************
+/COM,*************************************************
+FINISH                                    !FINISH
+*LIST,vm246,vrt
+QAEND,23
+
+
+
+
+
+

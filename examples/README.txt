@@ -1,5 +1,5 @@
-.. _ref_examples:
+.. _ref_example_gallery:
 
-Result Visulization Gallery
-===========================
-Here is a gallery of pyansys result visualization examples.
+Examples
+========
+Here are a series of examples using MAPDL with ``ansys-mapdl-core``.

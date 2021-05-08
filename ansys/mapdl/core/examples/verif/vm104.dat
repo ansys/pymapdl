@@ -1,0 +1,84 @@
+/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/VERIFY,VM104  
+JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
+/SHOW,JPEG
+/PREP7
+SMRT,OFF
+/TITLE, VM104, LIQUID-SOLID PHASE CHANGE
+C***    DANTZIG,J.A., IJNME, VOL 28, 1989, PAGE 1773-1775.
+ANTYPE,TRANS
+ET,1,PLANE55
+MP,DENS,1,1000
+MP,KXX,1,0.6
+MPTEMP,1,-10,-1,0,10                  
+MPDATA,ENTH,1,1,0,37.8E6,79.8E6,121.8E6  ! ENTHALPY 
+K,1
+K,2,0.01
+K,3,0.01,0.001
+K,4,,0.001
+L,2,3
+L,1,4
+LESIZE,ALL,,,1
+A,1,2,3,4
+ESIZE,,15
+AMESH,1
+FINISH
+/SOLU    
+OUTRES,,ALL  
+BFUNIF,TEMP                              ! INITIAL TEMPERATURE
+NSEL,S,LOC,X
+D,ALL,TEMP,-5.0                          ! SURFACE TEMPERATURE
+NSEL,ALL
+KBC,1                                    ! STEP LOAD
+AUTOTS,ON
+DELTIM,3,3,10
+TIME,900                                 ! FINAL TIME
+SOLVE
+FINISH
+/POST1
+SET,,,,,500
+*GET,T1,NODE,5,TEMP
+*GET,T2,NODE,8,TEMP
+PATH,TPATH,2,,48                         ! DEFINE PATH WITH NAME = "TPATH"
+PPATH,1,1                                ! DEFINE PATH POINTS BY NODE
+PPATH,2,2
+PDEF,TEMP,TEMP
+PLPATH,TEMP
+NSEL,S,LOC,Y
+PRNSOL,TEMP                              ! NODAL TEMPERATURES
+FINISH
+/POST26
+NSOL,2,2,TEMP,,T2
+NSOL,3,3,TEMP,,T3
+NSOL,4,4,TEMP,,T4
+NSOL,5,5,TEMP,,T5
+NSOL,6,6,TEMP,,T6
+NSOL,7,7,TEMP,,T7
+PLVAR,2,3,4,5,6,7                        ! DISPLAY TEMPERATURE HISTORY
+PRTIME,700,900
+PRVAR,2,3,4,5,6,7
+FINISH
+*DIM,VALUE,,2,3
+*DIM,LABEL,CHAR,2,2
+*VFILL,VALUE(1,1),DATA,-3.64,-2.32
+*VFILL,VALUE(1,2),DATA,T1,T2
+*VFILL,VALUE(1,3),DATA,ABS(T1/3.64),ABS(T2/2.32)
+LABEL(1,1) = 'T,C (X=0','T,C (X=0'
+LABEL(1,2) = '.002 m) ','004 m)  '
+/OUT,vm104,vrt
+/COM,------------------- VM104 RESULTS COMPARISON --------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.2,'  ',F10.2,'   ',1F5.3)
+/COM,-----------------------------------------------------------
+/COM,
+/COM,-----------------------------------------------------------
+/COM,NOTE: THERE ARE VERIFIED RESULTS IN VM104 NOT CONTAINED IN
+/COM,THIS TABLE
+/COM,-----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vm104,vrt
+ 
