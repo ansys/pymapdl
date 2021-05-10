@@ -10,7 +10,7 @@ def general_plotter(meshes, points, labels,
                     cpos=None,
                     show_bounds=False, show_axes=True,
                     background=None, off_screen=None,
-                    screenshot=False,
+                    screenshot=None,
                     window_size=None,
                     notebook=None,
                     # add_mesh kwargs:
@@ -63,8 +63,8 @@ def general_plotter(meshes, points, labels,
     show_axes : bool, optional
         Shows a vtk axes widget.  Enabled by default.
 
-    screenshot : str or bool, optional
-        Saves screenshot to file when enabled.
+    screenshot : str, optional
+        Saves screenshot to a file named screenshot, if not None
 
     color : string or 3 item list, optional, defaults to white
         Use to make the entire mesh have a single solid color.  Either
@@ -187,7 +187,7 @@ def general_plotter(meshes, points, labels,
         pl.add_title(title)
     if screenshot:
         pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
-        pl.screenshot(f'screenshot_{title}')
+        pl.screenshot(screenshot)
     else:
         pl.show()
 
