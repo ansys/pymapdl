@@ -188,7 +188,7 @@ def test_kplot(cleared, mapdl, tmpdir):
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.kplot(screenshot=filename)
+    cpos = mapdl.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -273,7 +273,7 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, screenshot=filename)
+    cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -454,10 +454,10 @@ def test_eplot(mapdl, make_block):
 
 
 @skip_no_xserver
-def test_eplot_screenshot(mapdl, make_block, tmpdir):
+def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], screenshot=filename)
+                window_size=[1920, 1080], savefig=filename)
     assert os.path.isfile(filename)
 
 
