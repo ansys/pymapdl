@@ -183,7 +183,9 @@ def mapdl(request, tmpdir_factory):
     mapdl = launch_mapdl(EXEC_FILE, override=True, run_location=run_path,
                          cleanup_on_exit=cleanup)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
-    mapdl._local = request.param  # CI: override for testing
+
+    if HAS_GRPC:
+        mapdl._local = request.param  # CI: override for testing
 
     if mapdl._local:
         assert mapdl.directory == run_path

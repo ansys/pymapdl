@@ -440,8 +440,12 @@ class Parameters():
             arr = np.expand_dims(arr, [1, 2])
         elif arr.ndim == 2:
             arr = np.expand_dims(arr, 2)
-        old_mute = self._mapdl.mute
-        self._mapdl.mute = True
+
+        # backwards compatibility with CORBA
+        if hasattr(self._mapdl, 'mute'):
+            old_mute = self._mapdl.mute
+            self._mapdl.mute = True
+
         with self._mapdl.chain_commands:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             for i in range(idim):
@@ -450,7 +454,8 @@ class Parameters():
                         index = f'{i + 1},{j + 1},{k + 1}'
                         self._mapdl.run(f'{name}({index})={arr[i, j, k]}')
 
-        self._mapdl.mute = old_mute
+        if hasattr(self._mapdl, 'mute'):
+            self._mapdl.mute = old_mute
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""
