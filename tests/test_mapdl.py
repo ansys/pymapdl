@@ -182,9 +182,6 @@ def test_invalid_input(mapdl):
 
 @skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.kplot(vtk=True)
-
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
@@ -266,9 +263,6 @@ def test_lines(cleared, mapdl):
 
 @skip_no_xserver
 def test_lplot(cleared, mapdl, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.lplot(vtk=True)
-
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -344,9 +338,6 @@ def test_enum(mapdl, make_block):
 @pytest.mark.parametrize('knum', [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl, knum):
-    with pytest.raises(RuntimeError):
-        mapdl.nplot()
-
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
@@ -451,12 +442,6 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.material == 1
     assert mapdl.parameters.section == 1
     assert mapdl.parameters.real == 1
-
-
-def test_eplot_fail(mapdl):
-    # must fail with empty mesh
-    with pytest.raises(RuntimeError):
-        mapdl.eplot()
 
 
 @skip_no_xserver
