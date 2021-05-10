@@ -16,12 +16,16 @@ pyvista.OFF_SCREEN = True
 
 
 # check for a valid MAPDL install with gRPC
-valid_rver = ['211']  # checks in this order
+# NOTE: checks in this order
+valid_rver = ['211', '202', '201', '195', '194', '193', '192', '191']
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
         break
+
+# minimum version on linux.  Windows is v202, but using v211 for consistency
+HAS_GRPC = int(rver) >= 211
 
 # determine if we can launch an instance of MAPDL locally
 local = [False]
@@ -38,8 +42,9 @@ else:
 export PYMAPDL_PORT=<MAPDL Port> (default 50052)
 export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)"""
 
-ERRMSG = f"""Unable to run CI without MAPDL installed or accessible.
-Either install Ansys 2021R1 or newer or specify the remote server with:
+ERRMSG = f"""Unable to run unit tests without MAPDL installed or
+accessible.  Either install Ansys 2021R1 or newer or specify the
+remote server with:
 
 {os_msg}
 
@@ -86,6 +91,13 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "console" in item.keywords:
                 item.add_marker(skip_console)
+
+    if not HAS_GRPC:
+        # --corba given in cli: run CORBA interface tests
+        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
+        for item in items:
+            if "skip_grpc" in item.keywords:
+                item.add_marker(skip_grpc)
 
 
 @pytest.fixture(scope="session")
@@ -197,15 +209,16 @@ def mapdl(request, tmpdir_factory):
             mapdl.prep7()
 
         # actually test if server is shutdown
-        with pytest.raises(MapdlExitedError):
-            mapdl._send_command('/PREP7')
-        with pytest.raises(MapdlExitedError):
-            mapdl._send_command_stream('/PREP7')
+        if HAS_GRPC:
+            with pytest.raises(MapdlExitedError):
+                mapdl._send_command('/PREP7')
+            with pytest.raises(MapdlExitedError):
+                mapdl._send_command_stream('/PREP7')
 
-        # verify PIDs are closed
-        time.sleep(1)  # takes a second for the processes to shutdown
-        for pid in mapdl._pids:
-            assert not check_pid(pid)
+            # verify PIDs are closed
+            time.sleep(1)  # takes a second for the processes to shutdown
+            for pid in mapdl._pids:
+                assert not check_pid(pid)
 
 
 @pytest.fixture(scope='function')

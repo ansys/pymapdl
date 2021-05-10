@@ -2,6 +2,9 @@
 import pytest
 import numpy as np
 
+# skip entire module unless HAS_GRPC
+pytestmark = pytest.mark.skip_grpc
+
 
 @pytest.fixture(scope='function')
 def xpl(mapdl, cube_solve):
