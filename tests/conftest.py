@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import time
 
@@ -188,7 +189,7 @@ def mapdl(request, tmpdir_factory):
         mapdl._local = request.param  # CI: override for testing
 
     if mapdl._local:
-        assert mapdl.directory == run_path
+        assert Path(mapdl.directory) == Path(run_path)
         assert mapdl._distributed
 
     # using yield rather than return here to be able to test exit
