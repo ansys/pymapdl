@@ -55,6 +55,7 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
+@pytest.mark.skip_grpc
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
@@ -76,6 +77,7 @@ def test_parsav_parres(mapdl, cleared, tmpdir):
     assert np.allclose(mapdl.parameters['MYARR'], arr)
 
 
+@pytest.mark.skip_grpc
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
@@ -162,6 +164,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
+@pytest.mark.skip_grpc
 def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = 'tmp.txt'
@@ -175,6 +178,7 @@ def test_list(mapdl, tmpdir):
     assert output == txt
 
 
+@pytest.mark.skip_grpc
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input('thisisnotafile')

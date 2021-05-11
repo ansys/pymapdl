@@ -7,6 +7,9 @@ from ansys.mapdl.core import examples
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
+# skip entire module unless HAS_GRPC
+pytestmark = pytest.mark.skip_grpc
+
 
 def test_clear_nostart(mapdl):
     resp = mapdl._send_command('FINISH')

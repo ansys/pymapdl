@@ -8,6 +8,10 @@ from scipy import sparse
 import ansys.mapdl.core.math as apdl_math
 
 
+# skip entire module unless HAS_GRPC
+pytestmark = pytest.mark.skip_grpc
+
+
 @pytest.fixture(scope='module')
 def mm(mapdl):
     return mapdl.math
