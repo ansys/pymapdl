@@ -213,7 +213,7 @@ def test_kplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl_corba.kplot(screenshot=filename)
+    cpos = mapdl_corba.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -492,7 +492,7 @@ def test_eplot(mapdl_corba, make_block):
 def test_eplot_screenshot(mapdl_corba, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl_corba.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], screenshot=filename)
+                window_size=[1920, 1080], savefig=filename)
     assert os.path.isfile(filename)
 
 

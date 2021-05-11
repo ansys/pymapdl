@@ -186,16 +186,13 @@ def test_invalid_input(mapdl):
 
 @skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.kplot(vtk=True)
-
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.kplot(screenshot=filename)
+    cpos = mapdl.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -270,9 +267,6 @@ def test_lines(cleared, mapdl):
 
 @skip_no_xserver
 def test_lplot(cleared, mapdl, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.lplot(vtk=True)
-
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -283,7 +277,7 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, screenshot=filename)
+    cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -348,9 +342,6 @@ def test_enum(mapdl, make_block):
 @pytest.mark.parametrize('knum', [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl, knum):
-    with pytest.raises(RuntimeError):
-        mapdl.nplot()
-
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
@@ -457,12 +448,6 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-def test_eplot_fail(mapdl):
-    # must fail with empty mesh
-    with pytest.raises(RuntimeError):
-        mapdl.eplot()
-
-
 @skip_no_xserver
 def test_eplot(mapdl, make_block):
     init_elem = mapdl.mesh.n_elem
@@ -473,10 +458,10 @@ def test_eplot(mapdl, make_block):
 
 
 @skip_no_xserver
-def test_eplot_screenshot(mapdl, make_block, tmpdir):
+def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], screenshot=filename)
+                window_size=[1920, 1080], savefig=filename)
     assert os.path.isfile(filename)
 
 
