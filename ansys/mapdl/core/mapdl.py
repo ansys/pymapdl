@@ -812,7 +812,7 @@ class _MapdlCore(_MapdlCommands):
 
         if vtk:
             kwargs.setdefault('title', 'MAPDL Area Plot')
-            kwargs.setdefault('stitle', None)
+            kwargs.setdefault('scalar_bar_args', {'title': 'Scalar Bar Title'})
             if quality > 10:
                 quality = 10
             if quality < 1:

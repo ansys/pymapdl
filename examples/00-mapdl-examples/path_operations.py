@@ -165,7 +165,8 @@ plt.show()
 stress_slice = rst.grid.slice('z', pl_start)
 
 # can plot this individually
-# stress_slice.plot(scalars=stress_slice['Stress YZ'], stitle='Stress YZ')
+# stress_slice.plot(scalars=stress_slice['Stress YZ'],
+#                   scalar_bar_args={'title': 'Stress YZ'})
 
 # good camera position (determined manually using pl.camera_position)
 cpos = [(3.2, 4, 8),

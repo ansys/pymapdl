@@ -20,7 +20,7 @@ def general_plotter(meshes, points, labels,
                     lighting=None, n_colors=256,
                     interpolate_before_map=True, cmap=None,
                     render_points_as_spheres=False, render_lines_as_tubes=False,
-                    stitle=None,
+                    scalar_bar_args={},
                     smooth_shading=None,
                     # labels kwargs
                     font_size=None,
@@ -148,8 +148,8 @@ def general_plotter(meshes, points, labels,
 
     for mesh in meshes:
         pl.add_mesh(mesh['mesh'],
-                    scalars=mesh.get('scalars', None),
-                    stitle=mesh.get('stitle', None),
+                    scalars=mesh.get('scalars'),
+                    scalar_bar_args=scalar_bar_args,
                     color=mesh.get('color', color),
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
@@ -172,8 +172,8 @@ def general_plotter(meshes, points, labels,
                             font_family=font_family,
                             text_color=text_color)
 
-    if stitle is not None:
-        pl.add_scalar_bar(title=stitle)
+    # if stitle is not None:
+    #     pl.add_scalar_bar(title=stitle)
 
     if cpos:
         pl.camera_position = cpos
@@ -185,8 +185,10 @@ def general_plotter(meshes, points, labels,
         pl.show_axes()
     if title:
         pl.add_title(title)
+
     if savefig:
-        pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
+        pl.show(title=title, auto_close=False, window_size=window_size,
+                screenshot=True)
         pl.screenshot(savefig)
     else:
         pl.show()

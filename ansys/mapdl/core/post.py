@@ -308,7 +308,7 @@ class PostProcessing():
         scalars = scalars[mask][ridx]
 
         meshes = [{'mesh': surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                   'stitle': kwargs.pop('stitle', ''),
+                   'scalar_bar_args': {'title': kwargs.pop('stitle', '')},
                    'scalars': scalars}]
 
         labels = []
