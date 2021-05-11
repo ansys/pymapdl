@@ -970,7 +970,7 @@ class _MapdlCore(_MapdlCommands):
         Save a screenshot to disk without showing the plot
 
         >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                        window_size=[1920, 1080], screenshot='screenshot.png',
+                        window_size=[1920, 1080], savefig='screenshot.png',
                         off_screen=True)
 
         """
