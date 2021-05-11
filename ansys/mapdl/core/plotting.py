@@ -64,7 +64,7 @@ def general_plotter(meshes, points, labels,
         Shows a vtk axes widget.  Enabled by default.
 
     savefig : str, optional
-        Saves screenshot to a file named screenshot, if not None
+        Saves screenshot to a file path.
 
     color : string or 3 item list, optional, defaults to white
         Use to make the entire mesh have a single solid color.  Either
