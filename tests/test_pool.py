@@ -19,6 +19,13 @@ skip_launch_mapdl = pytest.mark.skipif(get_start_instance() is False or IGNORE_P
 
 TWAIT = 90
 
+valid_rver = ['211', '202', '201', '195', '194', '193', '192', '191']
+EXEC_FILE = None
+for rver in valid_rver:
+    if os.path.isfile(get_ansys_bin(rver)):
+        EXEC_FILE = get_ansys_bin(rver)
+        break
+
 
 @pytest.fixture(scope="module")
 def pool():
