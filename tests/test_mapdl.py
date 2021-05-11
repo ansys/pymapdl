@@ -514,3 +514,51 @@ def test_load_table(mapdl):
                         [1000, 0.002]])
     mapdl.load_table('my_conv', my_conv, 'TIME')
     assert np.allclose(mapdl.parameters['my_conv'], my_conv[:, -1])
+
+
+@pytest.mark.skip_grpc
+def test_lssolve(mapdl, cleared):
+    mapdl.mute = True
+
+    mapdl.run("/units,user,0.001,0.001,1,1,0,1,1,1")
+    mapdl.prep7()
+    mapdl.et(1, 182)
+    mapdl.mp("ex", 1, 210e3)
+    mapdl.mp("nuxy", 1, 0.33)
+    mapdl.mp("dens", 1, 7.81e-06)
+    mapdl.k(1, 0, 0)
+    mapdl.k(2, 5, 0)
+    mapdl.k(3, 5, 1)
+    mapdl.k(4, 0, 1)
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 4)
+    mapdl.l(4, 1)
+    mapdl.al(1, 2, 3, 4)
+    mapdl.lsel("s", "", "", 1, 4)
+    mapdl.lesize("all", 0.5)
+    mapdl.amesh(1)
+    mapdl.allsel()
+    mapdl.finish()
+    mapdl.run("/solu")
+    mapdl.antype("static'")
+    mapdl.kbc(0)
+    mapdl.lsel("s", "", "", 4)
+    mapdl.nsll("s", 1)
+    mapdl.d("all", "all", 0)
+    mapdl.ksel("s", "", "", 3)
+    mapdl.nslk("s")
+    mapdl.f("all", "fy", 5)
+    mapdl.allsel()
+    mapdl.lswrite(1)
+    mapdl.fdele("all", "all")
+    mapdl.ksel("s", "", "", 3)
+    mapdl.nslk("s")
+    mapdl.f("all", "fy", -5)
+    mapdl.allsel()
+
+    lsnum = 2
+    mapdl.lswrite(lsnum)
+    mapdl.mute = False
+    out = mapdl.lssolve(1, lsnum)
+    assert f'Load step file number {lsnum}.  Begin solution ...' in out
