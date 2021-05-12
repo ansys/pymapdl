@@ -590,13 +590,13 @@ class MapdlMath():
         solver.factorize(mat)
         return solver
 
-    def norm(self, obj, ord="nrm2"):
+    def norm(self, obj, ord_="nrm2"):
         """ Matrix or vector norm
 
         Parameters
         ----------
         obj : ansys.mapdl.math.AnsMat or ansys.mapdl.math.AnsVec
-        ord : Order of the norm. nrm2(default), nrminf, nrm1
+        ord_ : Order of the norm. nrm2(default), nrminf, nrm1
 
         Examples
         --------
