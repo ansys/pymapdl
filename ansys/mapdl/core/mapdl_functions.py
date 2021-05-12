@@ -41,7 +41,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MFORDER,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fnumb1), str(fnumb2), str(fnumb3), str(fnumb4), str(fnumb5), str(fnumb6), str(fnumb7), str(fnumb8), str(fnumb9), str(fnumb10), str(fnumb11), str(fnumb12), str(fnumb13), str(fnumb14), str(fnumb15), str(fnumb16), str(fnumb17), str(fnumb18), str(fnumb19), str(fnumb20))
         return self.run(command, **kwargs)
 
-    def pdshis(self, rlab="", name="", type="", conf="", **kwargs):
+    def pdshis(self, rlab="", name="", type_="", conf="", **kwargs):
         """APDL Command: PDSHIS
 
         Plots the sample history values.
@@ -59,7 +59,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable or a random output parameter using the
             PDVAR command.
 
-        type
+        type_
             Keyword to identify which type of data is to be plotted:
 
             SAMP - Sampled values (default).
@@ -106,7 +106,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         bounds are plotted for simulation numbers 1 to 5 even if they might be
         available.
         """
-        command = "PDSHIS,%s,%s,%s,%s" % (str(rlab), str(name), str(type), str(conf))
+        command = "PDSHIS,%s,%s,%s,%s" % (str(rlab), str(name), str(type_), str(conf))
         return self.run(command, **kwargs)
 
     def cscir(self, kcn="", kthet="", kphi="", **kwargs):
@@ -285,7 +285,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "HPTDELETE,%s,%s,%s" % (str(np1), str(np2), str(ninc))
         return self.run(command, **kwargs)
 
-    def sfcalc(self, labr="", labs="", labt="", type="", **kwargs):
+    def sfcalc(self, labr="", labs="", labt="", type_="", **kwargs):
         """APDL Command: SFCALC
 
         Calculates the safety factor or margin of safety.
@@ -302,7 +302,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         labt
             Labeled result item corresponding to the element temperature.
 
-        type
+        type_
             Type of calculation:
 
             0 or 1 - Use safety factor (SF) calculation.
@@ -319,7 +319,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         results.  Allowable element stress is determined from the SALLOW-TALLOW
         table [SALLOW, TALLOW].
         """
-        command = "SFCALC,%s,%s,%s,%s" % (str(labr), str(labs), str(labt), str(type))
+        command = "SFCALC,%s,%s,%s,%s" % (str(labr), str(labs), str(labt), str(type_))
         return self.run(command, **kwargs)
 
     def writemap(self, fname="", **kwargs):
@@ -786,7 +786,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "RMCLIST,"
         return self.run(command, **kwargs)
 
-    def latt(self, mat="", real="", type="", kb="", ke="", secnum="",
+    def latt(self, mat="", real="", type_="", kb="", ke="", secnum="",
              **kwargs):
         """APDL Command: LATT
 
@@ -794,7 +794,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        mat, real, type
+        mat, real, type_
             Material number, real constant set number, and type number
             to be associated with selected, unmeshed lines.
 
@@ -852,7 +852,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Modeling and Meshing Guide for more information about setting
         element attributes.
         """
-        command = f"LATT,{mat},{real},{type},,{kb},{ke},{secnum}"
+        command = f"LATT,{mat},{real},{type_},,{kb},{ke},{secnum}"
         return self.run(command, **kwargs)
 
     def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
@@ -1446,7 +1446,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MFEM,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fnumb), str(itype1), str(itype2), str(itype3), str(itype4), str(itype5), str(itype6), str(itype7), str(itype8), str(itype9), str(itype10))
         return self.run(command, **kwargs)
 
-    def ksel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kabs="", **kwargs):
         """APDL Command: KSEL
 
@@ -1454,7 +1454,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -1501,7 +1501,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 203:: : KSEL - Valid Item and Component Labels
         """
-        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
         return self.run(command, **kwargs)
 
     def modseloption(self, dir1="", dir2="", dir3="", dir4="", dir5="", dir6
@@ -2095,14 +2095,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TBPT,%s,%s,%s,%s,%s" % (str(oper), str(x1), str(x2), str(x3), str(xn))
         return self.run(command, **kwargs)
 
-    def cmsel(self, type="", name="", entity="", **kwargs):
+    def cmsel(self, type_="", name="", entity="", **kwargs):
         """APDL Command: CMSEL
 
         Selects a subset of components and assemblies.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -2157,7 +2157,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "CMSEL,%s,%s,%s" % (str(type), str(name), str(entity))
+        command = "CMSEL,%s,%s,%s" % (str(type_), str(name), str(entity))
         return self.run(command, **kwargs)
 
     def pvect(self, oper="", labxr="", labyr="", labzr="", **kwargs):
@@ -3545,7 +3545,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
         return self.run(command, **kwargs)
 
-    def hptcreate(self, type="", entity="", nhp="", label="", val1="", val2="",
+    def hptcreate(self, type_="", entity="", nhp="", label="", val1="", val2="",
                   val3="", **kwargs):
         """APDL Command: HPTCREATE
 
@@ -3553,7 +3553,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Type of entity on which the hard point will be created.
 
             LINE - Hard point will be created on a line.
@@ -3612,7 +3612,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Hard points are only applicable for area and volume meshing, not for
         beams.
         """
-        command = "HPTCREATE,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(entity), str(nhp), str(label), str(val1), str(val2), str(val3))
+        command = "HPTCREATE,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(entity), str(nhp), str(label), str(val1), str(val2), str(val3))
         return self.run(command, **kwargs)
 
     def smcons(self, **kwargs):
@@ -3790,14 +3790,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = f"CBDOF,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt},{tolthk}"
         return self.run(command, **kwargs)
 
-    def nsll(self, type="", nkey="", **kwargs):
+    def nsll(self, type_="", nkey="", **kwargs):
         """APDL Command: NSLL
 
         Selects those nodes associated with the selected lines.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -3824,7 +3824,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "NSLL,%s,%s" % (str(type), str(nkey))
+        command = "NSLL,%s,%s" % (str(type_), str(nkey))
         return self.run(command, **kwargs)
 
     def cs(self, kcn="", kcs="", norig="", nxax="", nxypl="", par1="", par2="",
@@ -4981,7 +4981,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FMAGSUM,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8), str(cnam9))
         return self.run(command, **kwargs)
 
-    def ui(self, func="", type="", format="", screen="", color="", krev="",
+    def ui(self, func="", type_="", format="", screen="", color="", krev="",
            orient="", compress="", quality="", **kwargs):
         """APDL Command: /UI
 
@@ -5030,7 +5030,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             COLL - Controls the collapse of the ANSYS Main Menu when a FINISH command is issued.
                    See Type below for a discussion of the arguments.
 
-        type
+        type_
             Label identifying the type of select operation.  Valid only for the
             following Func labels; NSEL, ESEL, KSEL, LSEL, ASEL, and VSEL:
 
@@ -5047,7 +5047,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Allows you to activate specified GUI dialog boxes directly in either
         GUI or non-GUI mode.
         """
-        command = "/UI,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(func), str(type), str(format), str(screen), str(color), str(krev), str(orient), str(compress), str(quality))
+        command = "/UI,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(func), str(type_), str(format), str(screen), str(color), str(krev), str(orient), str(compress), str(quality))
         return self.run(command, **kwargs)
 
     def ktran(self, kcnto="", np1="", np2="", ninc="", kinc="", noelem="",
@@ -5179,7 +5179,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "RMFLVEC,"
         return self.run(command, **kwargs)
 
-    def asel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kswp="", **kwargs):
         """APDL Command: ASEL
 
@@ -5187,7 +5187,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default)
@@ -5241,7 +5241,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 127:: : ASEL - Valid Item and Component Labels
         """
-        command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
         return self.run(command, **kwargs)
 
     def mfrelax(self, lab="", value="", option="", **kwargs):
@@ -5960,7 +5960,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EMODIF,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(stloc), str(i1), str(i2), str(i3), str(i4), str(i5), str(i6), str(i7), str(i8))
         return self.run(command, **kwargs)
 
-    def susel(self, type="", name1="", name2="", name3="", name4="", name5="",
+    def susel(self, type_="", name1="", name2="", name3="", name4="", name5="",
               name6="", name7="", name8="", **kwargs):
         """APDL Command: SUSEL
 
@@ -5968,7 +5968,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Selects a new set (default).
@@ -5991,7 +5991,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The selected set of surfaces is used in the following operations:
         SUMAP, SUDEL, SUCALC, SUEVAL, and SUVECT.
         """
-        command = "SUSEL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(name1), str(name2), str(name3), str(name4), str(name5), str(name6), str(name7), str(name8))
+        command = "SUSEL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(name1), str(name2), str(name3), str(name4), str(name5), str(name6), str(name7), str(name8))
         return self.run(command, **kwargs)
 
     def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
@@ -6967,14 +6967,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         return self.run(f"SE,{file},,,{toler}", **kwargs)
 
-    def sfact(self, type="", **kwargs):
+    def sfact(self, type_="", **kwargs):
         """APDL Command: SFACT
 
         Allows safety factor or margin of safety calculations to be made.
 
         Parameters
         ----------
-        type
+        type_
             Type of calculation:
 
             0 - No nodal safety factor or margin of safety calculations.
@@ -7002,7 +7002,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         automatically stored for the node.  Related commands are SFCALC,
         SALLOW, TALLOW.
         """
-        command = "SFACT,%s" % (str(type))
+        command = "SFACT,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def mmf(self, **kwargs):
@@ -8206,14 +8206,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NPRINT,%s" % (str(n))
         return self.run(command, **kwargs)
 
-    def nsla(self, type="", nkey="", **kwargs):
+    def nsla(self, type_="", nkey="", **kwargs):
         """APDL Command: NSLA
 
         Selects those nodes associated with the selected areas.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -8239,7 +8239,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "NSLA,%s,%s" % (str(type), str(nkey))
+        command = "NSLA,%s,%s" % (str(type_), str(nkey))
         return self.run(command, **kwargs)
 
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
@@ -8462,7 +8462,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCNSTR,%s,%s,%s,%s,%s" % (str(option), str(ctype), str(comp1), str(comp2), str(val1))
         return self.run(command, **kwargs)
 
-    def slist(self, sfirst="", sl_ast="", sinc="", details="", type="",
+    def slist(self, sfirst="", sl_ast="", sinc="", details="", type_="",
               **kwargs):
         """APDL Command: SLIST
 
@@ -8502,7 +8502,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             GROUP - If a section calls other sections, this option lists those sections too.
 
-        type
+        type_
             The section type. Valid arguments are ALL (the default) and the
             types available on the SECTYPE command.
 
@@ -8516,10 +8516,10 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Following is example output from the SLIST,,,,BRIEF command for a
         rectangular beam section subtype (SECTYPE,,BEAM,RECT):
         """
-        command = "SLIST,%s,%s,%s,%s,%s" % (str(sfirst), str(sl_ast), str(sinc), str(details), str(type))
+        command = "SLIST,%s,%s,%s,%s,%s" % (str(sfirst), str(sl_ast), str(sinc), str(details), str(type_))
         return self.run(command, **kwargs)
 
-    def pdinqr(self, rpar="", name="", type="", val="", **kwargs):
+    def pdinqr(self, rpar="", name="", type_="", val="", **kwargs):
         """APDL Command: PDINQR
 
         Evaluates statistical characteristics of a random input variable.
@@ -8534,7 +8534,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Parameter name. The parameter must have been previously defined as
             a random input variable using the PDVAR command.
 
-        type
+        type_
             Keyword for the type of information you need to retrieve.
 
             MEAN - Mean value of the random input variable specified in Name.
@@ -8562,7 +8562,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Evaluates statistical characteristics of a random input variable. The
         result is stored in the ANSYS parameter Rpar.
         """
-        command = "PDINQR,%s,%s,%s,%s" % (str(rpar), str(name), str(type), str(val))
+        command = "PDINQR,%s,%s,%s,%s" % (str(rpar), str(name), str(type_), str(val))
         return self.run(command, **kwargs)
 
     def asol(self, lab="", opt="", **kwargs):
@@ -9364,14 +9364,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ETYPE,"
         return self.run(command, **kwargs)
 
-    def tbfield(self, type="", value="", **kwargs):
+    def tbfield(self, type_="", value="", **kwargs):
         """APDL Command: TBFIELD
 
         Defines values of field variables for material data tables.
 
         Parameters
         ----------
-        type
+        type_
             Type of field variable:
 
             FREQ - A frequency is to be specified in Value
@@ -9450,7 +9450,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         See Contact Friction in the Material Reference for more information
         about using TBFIELD with TB,FRIC.
         """
-        command = "TBFIELD,%s,%s" % (str(type), str(value))
+        command = "TBFIELD,%s,%s" % (str(type_), str(value))
         return self.run(command, **kwargs)
 
     def mftol(self, key="", value="", toler="", **kwargs):
@@ -10584,14 +10584,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CDOPT,%s" % (str(option))
         return self.run(command, **kwargs)
 
-    def nslk(self, type="", **kwargs):
+    def nslk(self, type_="", **kwargs):
         """APDL Command: NSLK
 
         Selects those nodes associated with the selected keypoints.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -10610,7 +10610,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "NSLK,%s" % (str(type))
+        command = "NSLK,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def mlist(self, node1="", node2="", ninc="", **kwargs):
@@ -12743,14 +12743,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PLF2D,%s,%s,%s,%s" % (str(ncont), str(olay), str(anum), str(win))
         return self.run(command, **kwargs)
 
-    def nsle(self, type="", nodetype="", num="", **kwargs):
+    def nsle(self, type_="", nodetype="", num="", **kwargs):
         """APDL Command: NSLE
 
         Selects those nodes attached to the selected elements.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -12794,7 +12794,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "NSLE,%s,%s,%s" % (str(type), str(nodetype), str(num))
+        command = "NSLE,%s,%s,%s" % (str(type_), str(nodetype), str(num))
         return self.run(command, **kwargs)
 
     def dflab(self, dof="", displab="", forcelab="", **kwargs):
@@ -14333,14 +14333,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ETDELE,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
         return self.run(command, **kwargs)
 
-    def lsengine(self, type="", enginename="", matrix="", option="", **kwargs):
+    def lsengine(self, type_="", enginename="", matrix="", option="", **kwargs):
         """APDL Command: *LSENGINE
 
         Creates a linear solver engine.
 
         Parameters
         ----------
-        type
+        type_
             Specifies the algorithm to be used:
 
             Boeing sparse solver (default if applied to sparse matrices). - MKL sparse linear solver (Intel Windows and Linux systems only).
@@ -14366,7 +14366,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The BCS, DSS, and DSP solvers can only be used with sparse matrices.
         For dense matrices, use the LAPACK solver.
         """
-        command = "*LSENGINE,%s,%s,%s,%s" % (str(type), str(enginename), str(matrix), str(option))
+        command = "*LSENGINE,%s,%s,%s,%s" % (str(type_), str(enginename), str(matrix), str(option))
         return self.run(command, **kwargs)
 
     def prcplx(self, key="", **kwargs):
@@ -15643,7 +15643,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDHIST,%s" % (str(comp))
         return self.run(command, **kwargs)
 
-    def pdvar(self, name="", type="", par1="", par2="", par3="", par4="",
+    def pdvar(self, name="", type_="", par1="", par2="", par3="", par4="",
               **kwargs):
         """APDL Command: PDVAR
 
@@ -15658,7 +15658,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             random output parameter with the PDVAR command. See the *SET
             command for restrictions about ANSYS parameters.
 
-        type
+        type_
             Probabilistic design variable type. This is the statistical
             distribution type. For more information on each of these types, see
             Probabilistic Design in the Advanced Analysis Guide.
@@ -15748,7 +15748,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         specified by the name of the ANSYS parameter and the type identifying
         it as a random output parameter (Type = RESP).
         """
-        command = "PDVAR,%s,%s,%s,%s,%s,%s" % (str(name), str(type), str(par1), str(par2), str(par3), str(par4))
+        command = "PDVAR,%s,%s,%s,%s,%s,%s" % (str(name), str(type_), str(par1), str(par2), str(par3), str(par4))
         return self.run(command, **kwargs)
 
     def mfimport(self, fnumb="", option="", fname="", ext="", **kwargs):
@@ -18192,7 +18192,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "AADD,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(na3), str(na4), str(na5), str(na6), str(na7), str(na8), str(na9))
         return self.run(command, **kwargs)
 
-    def aatt(self, mat="", real="", type="", esys="", secn="", **kwargs):
+    def aatt(self, mat="", real="", type_="", esys="", secn="", **kwargs):
         """APDL Command: AATT
 
         Associates element attributes with the selected, unmeshed areas.
@@ -18206,7 +18206,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             The real constant set number to be associated with selected,
             unmeshed areas.
 
-        type
+        type_
             The type number to be associated with selected, unmeshed areas.
 
         esys
@@ -18234,7 +18234,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         For more information, see the discussion on setting element attributes
         in Meshing Your Solid Model in the Modeling and Meshing Guide.
         """
-        command = "AATT,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type), str(esys), str(secn))
+        command = "AATT,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type_), str(esys), str(secn))
         return self.run(command, **kwargs)
 
     def rpoly(self, nsides="", lside="", majrad="", minrad="", **kwargs):
@@ -20053,7 +20053,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SPFREQ,%s,%s,%s,%s,%s,%s,%s,%s" % (str(tblno), str(freq1), str(freq2), str(freq3), str(freq4), str(freq5), str(freq6), str(freq7))
         return self.run(command, **kwargs)
 
-    def itengine(self, type="", enginename="", precondname="", matrix="",
+    def itengine(self, type_="", enginename="", precondname="", matrix="",
                  rhsvector="", solvector="", maxiter="", toler="", **kwargs):
         """APDL Command: *ITENGINE
 
@@ -20061,7 +20061,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Specifies the algorithm to be used:
 
         enginename
@@ -20096,7 +20096,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This solution method is useful if an existing matrix has been solved
         and minor changes have been made to the matrix.
         """
-        command = "*ITENGINE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(enginename), str(precondname), str(matrix), str(rhsvector), str(solvector), str(maxiter), str(toler))
+        command = "*ITENGINE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(enginename), str(precondname), str(matrix), str(rhsvector), str(solvector), str(maxiter), str(toler))
         return self.run(command, **kwargs)
 
     def wpcsys(self, wn="", kcn="", **kwargs):
@@ -20228,14 +20228,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*VWRITE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par1), str(par2), str(par3), str(par4), str(par5), str(par6), str(par7), str(par8), str(par9), str(par10), str(par11), str(par12), str(par13), str(par14), str(par15), str(par16), str(par17), str(par18), str(par19))
         return self.run(command, **kwargs)
 
-    def pdclr(self, type="", **kwargs):
+    def pdclr(self, type_="", **kwargs):
         """APDL Command: PDCLR
 
         Clears the probabilistic design database.
 
         Parameters
         ----------
-        type
+        type_
             Specifies the part of the probabilistic database to be cleared.
 
             ALL - Clear the entire probabilistic database. Both the preprocessing and
@@ -20264,7 +20264,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         the PDCLR command, you should save the probabilistic database using the
         PDSAVE command.
         """
-        command = "PDCLR,%s" % (str(type))
+        command = "PDCLR,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def mftime(self, time="", **kwargs):
@@ -21660,14 +21660,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PLCAMP,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(slope), str(unit), str(freqb), str(cname), str(stabval), str(keyallfreq), str(keynegfreq))
         return self.run(command, **kwargs)
 
-    def eslv(self, type="", **kwargs):
+    def eslv(self, type_="", **kwargs):
         """APDL Command: ESLV
 
         Selects elements associated with the selected volumes.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of element selected:
 
             S - Select a new set (default).
@@ -21685,7 +21685,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "ESLV,%s" % (str(type))
+        command = "ESLV,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def edweld(self, option="", nweld="", n1="", n2="", sn="", ss="", expn="",
@@ -24521,14 +24521,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "UPCOORD,%s,%s" % (str(factor), str(key))
         return self.run(command, **kwargs)
 
-    def esla(self, type="", **kwargs):
+    def esla(self, type_="", **kwargs):
         """APDL Command: ESLA
 
         Selects those elements associated with the selected areas.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of element select:
 
             S - Select a new set (default).
@@ -24546,7 +24546,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "ESLA,%s" % (str(type))
+        command = "ESLA,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def kmove(self, npt="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="",
@@ -24726,7 +24726,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/GRAPHICS,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def vec(self, vector="", type="", method="", val1="", val2="", val3="",
+    def vec(self, vector="", type_="", method="", val1="", val2="", val3="",
             val4="", **kwargs):
         """APDL Command: *VEC
 
@@ -24737,7 +24737,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         vector
             Name used to identify the vector. Must be specified.
 
-        type
+        type_
             Vector type:
 
             Double precision real values (default). - Complex double precision values.
@@ -24764,7 +24764,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Degree of Freedom Ordering in the ANSYS Parametric Design Language
         Guide.
         """
-        command = "*VEC,%s,%s,%s,%s,%s,%s,%s" % (str(vector), str(type), str(method), str(val1), str(val2), str(val3), str(val4))
+        command = "*VEC,%s,%s,%s,%s,%s,%s,%s" % (str(vector), str(type_), str(method), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
     def msolve(self, numslv="", nrmtol="", nrmchkinc="", **kwargs):
@@ -25239,14 +25239,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDPART,%s,%s,%s" % (str(option), str(partid), str(cname))
         return self.run(command, **kwargs)
 
-    def lslk(self, type="", lskey="", **kwargs):
+    def lslk(self, type_="", lskey="", **kwargs):
         """APDL Command: LSLK
 
         Selects those lines containing the selected keypoints.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -25269,7 +25269,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "LSLK,%s,%s" % (str(type), str(lskey))
+        command = "LSLK,%s,%s" % (str(type_), str(lskey))
         return self.run(command, **kwargs)
 
     def gcgen(self, option="", featureangle="", edgekey="", splitkey="",
@@ -25678,7 +25678,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MXPAND,%s,%s,%s,%s,%s,%s,%s" % (str(nmode), str(freqb), str(freqe), str(elcalc), str(signif), str(msupkey), str(modeselmethod))
         return self.run(command, **kwargs)
 
-    def vsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kswp="", **kwargs):
         """APDL Command: VSEL
 
@@ -25686,7 +25686,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
@@ -25733,7 +25733,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 251:: : VSEL - Valid Item and Component Labels
         """
-        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
         return self.run(command, **kwargs)
 
     def anmode(self, nfram="", delay="", ncycl="", kaccel="", **kwargs):
@@ -26259,14 +26259,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ERESX,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def vatt(self, mat="", real="", type="", esys="", secnum="", **kwargs):
+    def vatt(self, mat="", real="", type_="", esys="", secnum="", **kwargs):
         """APDL Command: VATT
 
         Associates element attributes with the selected, unmeshed volumes.
 
         Parameters
         ----------
-        mat, real, type, esys, secnum
+        mat, real, type_, esys, secnum
             Material number, real constant set number, type number, coordinate
             system number, and section number to be associated with selected,
             unmeshed volumes.
@@ -26288,7 +26288,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         For more information, see the discussion on setting element attributes
         in Meshing Your Solid Model of the Modeling and Meshing Guide.
         """
-        command = "VATT,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type), str(esys), str(secnum))
+        command = "VATT,%s,%s,%s,%s,%s" % (str(mat), str(real), str(type_), str(esys), str(secnum))
         return self.run(command, **kwargs)
 
     def edrd(self, option="", part="", mrb="", **kwargs):
@@ -31952,7 +31952,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "STABILIZE,%s,%s,%s,%s,%s" % (str(key), str(method), str(value), str(substpopt), str(forcelimit))
         return self.run(command, **kwargs)
 
-    def psel(self, type="", pname1="", pname2="", pname3="", pname4="",
+    def psel(self, type_="", pname1="", pname2="", pname3="", pname4="",
              pname5="", pname6="", pname7="", pname8="", pname9="", pname10="",
              **kwargs):
         """APDL Command: PSEL
@@ -31961,7 +31961,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new path.
@@ -31988,7 +31988,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         database.  There is no default for this command; you must specify a
         type and pathname.
         """
-        command = "PSEL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(pname1), str(pname2), str(pname3), str(pname4), str(pname5), str(pname6), str(pname7), str(pname8), str(pname9), str(pname10))
+        command = "PSEL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(pname1), str(pname2), str(pname3), str(pname4), str(pname5), str(pname6), str(pname7), str(pname8), str(pname9), str(pname10))
         return self.run(command, **kwargs)
 
     def sbclist(self, **kwargs):
@@ -34092,14 +34092,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NLMESH,%s,%s,%s,%s,%s" % (str(control), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
-    def asll(self, type="", arkey="", **kwargs):
+    def asll(self, type_="", arkey="", **kwargs):
         """APDL Command: ASLL
 
         Selects those areas containing the selected lines.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -34121,7 +34121,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "ASLL,%s,%s" % (str(type), str(arkey))
+        command = "ASLL,%s,%s" % (str(type_), str(arkey))
         return self.run(command, **kwargs)
 
     def ovcheck(self, method="", frequency="", set="", **kwargs):
@@ -35625,7 +35625,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SUDEL,%s" % (str(surfname))
         return self.run(command, **kwargs)
 
-    def spunit(self, tblno="", type="", gvalue="", keyinterp="", **kwargs):
+    def spunit(self, tblno="", type_="", gvalue="", keyinterp="", **kwargs):
         """APDL Command: SPUNIT
 
         Defines the type of multi-point response spectrum.
@@ -35635,7 +35635,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         tblno
             Input table number.
 
-        type
+        type_
             Label identifying the type of spectrum:
 
             DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of
@@ -35679,7 +35679,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "SPUNIT,%s,%s,%s,%s" % (str(tblno), str(type), str(gvalue), str(keyinterp))
+        command = "SPUNIT,%s,%s,%s,%s" % (str(tblno), str(type_), str(gvalue), str(keyinterp))
         return self.run(command, **kwargs)
 
     def cycexpand(self, wn="", option="", value1="", value2="", **kwargs):
@@ -36303,7 +36303,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         return self.run(f"IGESOUT,{fname},{ext},,{att}", **kwargs)
 
-    def nsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kabs="", **kwargs):
         """APDL Command: NSEL
 
@@ -36311,7 +36311,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -36375,7 +36375,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Table: 209:: : NSEL - Valid Item and Component Labels for Nodal DOF
         Result Values
         """
-        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
         return self.run(command, **kwargs)
 
     def slashreset(self, **kwargs):
@@ -36731,7 +36731,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "RDELE,%s,%s,%s,%s" % (str(nset1), str(nset2), str(ninc), str(lchk))
         return self.run(command, **kwargs)
 
-    def dofsel(self, type="", dof1="", dof2="", dof3="", dof4="", dof5="",
+    def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
                dof6="", **kwargs):
         """APDL Command: DOFSEL
 
@@ -36739,7 +36739,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set of labels.
@@ -36787,7 +36787,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
+        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
         return self.run(command, **kwargs)
 
     def window(self, wn="", xmin="", xmax="", ymin="", ymax="", ncopy="",
@@ -37426,14 +37426,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BFL,%s,%s,%s,%s,%s,%s" % (str(line), str(lab), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
-    def ksln(self, type="", **kwargs):
+    def ksln(self, type_="", **kwargs):
         """APDL Command: KSLN
 
         Selects those keypoints associated with the selected nodes.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -37452,7 +37452,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "KSLN,%s" % (str(type))
+        command = "KSLN,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def bfe(self, elem="", lab="", stloc="", val1="", val2="", val3="",
@@ -38528,14 +38528,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ANTYPE,%s,%s,%s,%s,%s" % (str(antype), str(status), str(ldstep), str(substep), str(action))
         return self.run(command, **kwargs)
 
-    def katt(self, mat="", real="", type="", esys="", **kwargs):
+    def katt(self, mat="", real="", type_="", esys="", **kwargs):
         """APDL Command: KATT
 
         Associates attributes with the selected, unmeshed keypoints.
 
         Parameters
         ----------
-        mat, real, type, esys
+        mat, real, type_, esys
             Material number, real constant set number, type number, and
             coordinate system number to be associated with selected, unmeshed
             keypoints.
@@ -38559,7 +38559,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         For more information, see the discussion on setting element attributes
         in Meshing Your Solid Model in the Modeling and Meshing Guide.
         """
-        command = "KATT,%s,%s,%s,%s" % (str(mat), str(real), str(type), str(esys))
+        command = "KATT,%s,%s,%s,%s" % (str(mat), str(real), str(type_), str(esys))
         return self.run(command, **kwargs)
 
     def rescontrol(self, action="", ldstep="", frequency="", maxfiles="",
@@ -38993,7 +38993,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CESGEN,%s,%s,%s,%s,%s" % (str(itime), str(inc), str(nset1), str(nset2), str(ninc))
         return self.run(command, **kwargs)
 
-    def fft(self, type="", inputdata="", outputdata="", dim1="", dim2="",
+    def fft(self, type_="", inputdata="", outputdata="", dim1="", dim2="",
             resultformat="", **kwargs):
         """APDL Command: *FFT
 
@@ -39002,7 +39002,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Type of FFT transformation:
 
             Forward FFT computation (default). - Backward FFT computation.
@@ -39041,7 +39041,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         In the example that follows, the fast Fourier transformation is used to
         filter frequencies from a noisy input signal.
         """
-        command = "*FFT,%s,%s,%s,%s,%s,%s" % (str(type), str(inputdata), str(outputdata), str(dim1), str(dim2), str(resultformat))
+        command = "*FFT,%s,%s,%s,%s,%s,%s" % (str(type_), str(inputdata), str(outputdata), str(dim1), str(dim2), str(resultformat))
         return self.run(command, **kwargs)
 
     def view(self, wn="", xv="", yv="", zv="", **kwargs):
@@ -39618,14 +39618,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FCDELE,%s" % (str(mat))
         return self.run(command, **kwargs)
 
-    def lcsel(self, type="", lcmin="", lcmax="", lcinc="", **kwargs):
+    def lcsel(self, type_="", lcmin="", lcmax="", lcinc="", **kwargs):
         """APDL Command: LCSEL
 
         Selects a subset of load cases.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set.
@@ -39663,7 +39663,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         cases are flagged as selected and unselected; no load case pointers
         [LCDEF, LCWRITE, LCFILE] are actually deleted from the database.
         """
-        command = "LCSEL,%s,%s,%s,%s" % (str(type), str(lcmin), str(lcmax), str(lcinc))
+        command = "LCSEL,%s,%s,%s,%s" % (str(type_), str(lcmin), str(lcmax), str(lcinc))
         return self.run(command, **kwargs)
 
     def shell(self, loc="", **kwargs):
@@ -41791,7 +41791,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NUMVAR,%s" % (str(nv))
         return self.run(command, **kwargs)
 
-    def pdsens(self, rlab="", name="", chart="", type="", slevel="", **kwargs):
+    def pdsens(self, rlab="", name="", chart="", type_="", slevel="", **kwargs):
         """APDL Command: PDSENS
 
         Plots the probabilistic sensitivities.
@@ -41821,7 +41821,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             BOTH - Both pie and bar charts plotted side by side (default).
 
-        type
+        type_
             Keyword for the type of correlation coefficients used to evaluate
             the sensitivities.
 
@@ -41856,7 +41856,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         significant sensitivities only and lists the insignificant ones
         separately.
         """
-        command = "PDSENS,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(chart), str(type), str(slevel))
+        command = "PDSENS,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(chart), str(type_), str(slevel))
         return self.run(command, **kwargs)
 
     def ptxy(self, x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="",
@@ -42007,14 +42007,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/GFILE,%s" % (str(size))
         return self.run(command, **kwargs)
 
-    def hrocean(self, type="", nph_ase="", **kwargs):
+    def hrocean(self, type_="", nph_ase="", **kwargs):
         """APDL Command: HROCEAN
 
         Perform the harmonic ocean wave procedure (HOWP).
 
         Parameters
         ----------
-        type
+        type_
             Specifies how to include ocean wave information in a harmonic
             analysis:
 
@@ -42072,7 +42072,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "HROCEAN,%s,%s" % (str(type), str(nph_ase))
+        command = "HROCEAN,%s,%s" % (str(type_), str(nph_ase))
         return self.run(command, **kwargs)
 
     def pcgopt(self, lev_diff ="", reduceio="", strmck="", wrtfull="",
@@ -42785,14 +42785,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "THOPT,%s,%s,%s,%s,%s,%s" % (str(refopt), str(reformtol), str(ntabpoints), str(tempmin), str(tempmax), str(algo))
         return self.run(command, **kwargs)
 
-    def esll(self, type="", **kwargs):
+    def esll(self, type_="", **kwargs):
         """APDL Command: ESLL
 
         Selects those elements associated with the selected lines.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of element select:
 
             S - Select a new set (default).
@@ -42810,7 +42810,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "ESLL,%s" % (str(type))
+        command = "ESLL,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def cmdomega(self, cm_name="", domegax="", domegay="", domegaz="", x1="",
@@ -44272,7 +44272,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFDELE,%s,%s" % (str(nlist), str(lab))
         return self.run(command, **kwargs)
 
-    def pdscat(self, rlab="", name1="", name2="", type="", order="", nmax="",
+    def pdscat(self, rlab="", name1="", name2="", type_="", order="", nmax="",
                **kwargs):
         """APDL Command: PDSCAT
 
@@ -44293,7 +44293,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             and the parameter data for Name2 is shown on the Y-axis in the
             plot.
 
-        type
+        type_
             Keyword for the type of trendline curve.
 
             POLY - Polynomial trendline (default).
@@ -44342,7 +44342,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         for Response Surface Methods, you will see an appropriate warning in
         the plot legend.
         """
-        command = "PDSCAT,%s,%s,%s,%s,%s,%s" % (str(rlab), str(name1), str(name2), str(type), str(order), str(nmax))
+        command = "PDSCAT,%s,%s,%s,%s,%s,%s" % (str(rlab), str(name1), str(name2), str(type_), str(order), str(nmax))
         return self.run(command, **kwargs)
 
     def filedisp(self, fname="", ext="", **kwargs):
@@ -45687,7 +45687,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SET,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lstep), str(sbstep), str(fact), str(kimg), str(time), str(angle), str(nset), str(order))
         return self.run(command, **kwargs)
 
-    def pdhist(self, rlab="", name="", ncl="", type="", **kwargs):
+    def pdhist(self, rlab="", name="", ncl="", type_="", **kwargs):
         """APDL Command: PDHIST
 
         Plots the frequency histogram.
@@ -45715,7 +45715,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             equal width and determines the histogram frequencies by counting
             the number of hits that fall in the classes.
 
-        type
+        type_
             Type of histogram.
 
             ABS - Absolute frequency histogram. This is the actual number of hits in each class.
@@ -45741,7 +45741,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         solution set that is based on Response Surface Methods, only Monte
         Carlo Simulations.
         """
-        command = "PDHIST,%s,%s,%s,%s" % (str(rlab), str(name), str(ncl), str(type))
+        command = "PDHIST,%s,%s,%s,%s" % (str(rlab), str(name), str(ncl), str(type_))
         return self.run(command, **kwargs)
 
     def mffname(self, fnumb="", fname="", **kwargs):
@@ -45933,7 +45933,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
         return self.run(command, **kwargs)
 
-    def flst(self, nfield="", narg="", type="", otype="", leng="", **kwargs):
+    def flst(self, nfield="", narg="", type_="", otype="", leng="", **kwargs):
         """APDL Command: FLST
 
         Specifies data required for a picking operation (GUI).
@@ -45949,7 +45949,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         narg
             Number of items in the picked list.
 
-        type
+        type_
             Type of items picked:
 
             1 - Node numbers
@@ -45999,7 +45999,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "FLST,%s,%s,%s,%s,%s" % (str(nfield), str(narg), str(type), str(otype), str(leng))
+        command = "FLST,%s,%s,%s,%s,%s" % (str(nfield), str(narg), str(type_), str(otype), str(leng))
         return self.run(command, **kwargs)
 
     def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
@@ -46555,7 +46555,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FECONS,"
         return self.run(command, **kwargs)
 
-    def dmat(self, matrix="", type="", method="", val1="", val2="", val3="",
+    def dmat(self, matrix="", type_="", method="", val1="", val2="", val3="",
              val4="", val5="", **kwargs):
         """APDL Command: *DMAT
 
@@ -46566,7 +46566,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type
+        type_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -46610,7 +46610,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         A formatted file (using Val3=’F’, and Val4=8):
         """
-        command = "*DMAT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type), str(method), str(val1), str(val2), str(val3), str(val4), str(val5))
+        command = "*DMAT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4), str(val5))
         return self.run(command, **kwargs)
 
     # def return(self, level="", **kwargs):
@@ -47281,7 +47281,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/GRID,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def lsel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kswp="", **kwargs):
         """APDL Command: LSEL
 
@@ -47289,7 +47289,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -47344,7 +47344,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 204:: : LSEL - Valid Item and Component Labels
         """
-        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
         return self.run(command, **kwargs)
 
     def timerange(self, tmin="", tmax="", **kwargs):
@@ -47410,7 +47410,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SELTOL,%s" % (str(toler))
         return self.run(command, **kwargs)
 
-    def shade(self, wn="", type="", **kwargs):
+    def shade(self, wn="", type_="", **kwargs):
         """APDL Command: /SHADE
 
         Defines the type of surface shading used with Z-buffering.
@@ -47420,7 +47420,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type
+        type_
             Shading type:
 
             FACET or 0 - Facet shading (one color per area face) (default).
@@ -47440,10 +47440,10 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/SHADE,%s,%s" % (str(wn), str(type))
+        command = "/SHADE,%s,%s" % (str(wn), str(type_))
         return self.run(command, **kwargs)
 
-    def anum(self, num="", type="", xhot="", yhot="", **kwargs):
+    def anum(self, num="", type_="", xhot="", yhot="", **kwargs):
         """APDL Command: /ANUM
 
         Specifies the annotation number, type, and hot spot (GUI).
@@ -47456,7 +47456,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             number is available; ANSYS will substitute the lowest available
             number in place of any user-specified higher number.
 
-        type
+        type_
             Annotation internal type number.  If TYPE = DELE, delete annotation
             NUM.
 
@@ -47502,7 +47502,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/ANUM,%s,%s,%s,%s" % (str(num), str(type), str(xhot), str(yhot))
+        command = "/ANUM,%s,%s,%s,%s" % (str(num), str(type_), str(xhot), str(yhot))
         return self.run(command, **kwargs)
 
     def starlist(self, fname="", ext="", **kwargs):
@@ -48272,7 +48272,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FOR2D,"
         return self.run(command, **kwargs)
 
-    def rsplot(self, rslab="", yname="", x1name="", x2name="", type="",
+    def rsplot(self, rslab="", yname="", x1name="", x2name="", type_="",
                npts="", plow="", pup="", **kwargs):
         """APDL Command: RSPLOT
 
@@ -48297,7 +48297,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable with the PDVAR command. X2Name must be
             different than X1Name.
 
-        type
+        type_
             Type of the response surface visualization.
 
             2D - 2-D contour plot.
@@ -48338,7 +48338,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         However, sampling points falling outside of the plotting range defined
         by the PLOW and PUP fields will not be shown in the plot.
         """
-        command = "RSPLOT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(yname), str(x1name), str(x2name), str(type), str(npts), str(plow), str(pup))
+        command = "RSPLOT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(yname), str(x1name), str(x2name), str(type_), str(npts), str(plow), str(pup))
         return self.run(command, **kwargs)
 
     def dot(self, vector1="", vector2="", par_real="", par_imag="", **kwargs):
@@ -48711,14 +48711,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "WPLANE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(xorig), str(yorig), str(zorig), str(xxax), str(yxax), str(zxax), str(xplan), str(yplan), str(zplan))
         return self.run(command, **kwargs)
 
-    def esln(self, type="", ekey="", nodetype="", **kwargs):
+    def esln(self, type_="", ekey="", nodetype="", **kwargs):
         """APDL Command: ESLN
 
         Selects those elements attached to the selected nodes.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of element selected:
 
             S - Select a new set (default).
@@ -48759,7 +48759,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "ESLN,%s,%s,%s" % (str(type), str(ekey), str(nodetype))
+        command = "ESLN,%s,%s,%s" % (str(type_), str(ekey), str(nodetype))
         return self.run(command, **kwargs)
 
     def dowhile(self, par="", **kwargs):
@@ -50098,7 +50098,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "VTRAN,%s,%s,%s,%s,%s,%s,%s" % (str(kcnto), str(nv1), str(nv2), str(ninc), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def pdcdf(self, rlab="", name="", type="", conf="", nmax="", **kwargs):
+    def pdcdf(self, rlab="", name="", type_="", conf="", nmax="", **kwargs):
         """APDL Command: PDCDF
 
         Plots the cumulative distribution function.
@@ -50117,7 +50117,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable or a random output parameter with the PDVAR
             command.
 
-        type
+        type_
             Type of cumulative distribution curve to be displayed.
 
             EMP - Show an empirical cumulative distribution curve.
@@ -50163,7 +50163,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         used PDS postprocessing command where a result set label was explicitly
         specified.
         """
-        command = "PDCDF,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(type), str(conf), str(nmax))
+        command = "PDCDF,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(type_), str(conf), str(nmax))
         return self.run(command, **kwargs)
 
     def help(self, name="", **kwargs):
@@ -51767,14 +51767,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CAMPBELL,%s" % (str(action))
         return self.run(command, **kwargs)
 
-    def partsel(self, type="", pmin="", pmax="", pinc="", **kwargs):
+    def partsel(self, type_="", pmin="", pmax="", pinc="", **kwargs):
         """APDL Command: PARTSEL
 
         Selects a subset of parts in an explicit dynamic analysis.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying type of select. Because PARTSEL is a command
             macro, the label must be enclosed in single quotes.
 
@@ -51826,7 +51826,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "PARTSEL,%s,%s,%s,%s" % (str(type), str(pmin), str(pmax), str(pinc))
+        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
         return self.run(command, **kwargs)
 
     def pdplot(self, name="", plow="", pup="", **kwargs):
@@ -52376,14 +52376,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "GSUM,"
         return self.run(command, **kwargs)
 
-    def ksll(self, type="", **kwargs):
+    def ksll(self, type_="", **kwargs):
         """APDL Command: KSLL
 
         Selects those keypoints contained in the selected lines.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -52398,7 +52398,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "KSLL,%s" % (str(type))
+        command = "KSLL,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def etchg(self, cnv="", **kwargs):
@@ -53089,7 +53089,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FINISH,"
         return self.run(command, **kwargs)
 
-    def rmroptions(self, refname="", type="", invert="", **kwargs):
+    def rmroptions(self, refname="", type_="", invert="", **kwargs):
         """APDL Command: RMROPTIONS
 
         Defines options for ROM response surface fitting.
@@ -53102,7 +53102,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             capacitance reference name previously defined by means of RMCAP
             command for the electrostatic domain.
 
-        type
+        type_
             Type of fitting function to be applied for regression analysis.
             Valid types are:
 
@@ -53122,7 +53122,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMROPTIONS,%s,%s,%s" % (str(refname), str(type), str(invert))
+        command = "RMROPTIONS,%s,%s,%s" % (str(refname), str(type_), str(invert))
         return self.run(command, **kwargs)
 
     def presol(self, item="", comp="", **kwargs):
@@ -54057,7 +54057,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         return self.run(f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}",
                         **kwargs)
 
-    def sectype(self, secid="", type="", subtype="", name="", refinekey="",
+    def sectype(self, secid="", type_="", subtype="", name="", refinekey="",
                 **kwargs):
         """APDL Command: SECTYPE
 
@@ -54068,7 +54068,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         secid
             Section identification number.
 
-        type
+        type_
             BEAM
 
             BEAM - Defines a beam section.
@@ -54152,7 +54152,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         and the same shell section ID for a composite pipe wall.
 
         """
-        command = "SECTYPE,%s,%s,%s,%s,%s" % (str(secid), str(type), str(subtype), str(name), str(refinekey))
+        command = "SECTYPE,%s,%s,%s,%s,%s" % (str(secid), str(type_), str(subtype), str(name), str(refinekey))
         return self.run(command, **kwargs)
 
     def elem(self, **kwargs):
@@ -54727,7 +54727,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDNROT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(cid), str(cname), str(dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
         return self.run(command, **kwargs)
 
-    def mflcomm(self, type="", fname1="", intname1="", label1="", fname2="",
+    def mflcomm(self, type_="", fname1="", intname1="", label1="", fname2="",
                 intname2="", label2="", option="", **kwargs):
         """APDL Command: MFLCOMM
 
@@ -54735,7 +54735,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
              Set to SURF for a surface load transfer. Only surface load
             transfers are available for MFX.
 
@@ -54839,7 +54839,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "MFLCOMM,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(fname1), str(intname1), str(label1), str(fname2), str(intname2), str(label2), str(option))
+        command = "MFLCOMM,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(fname1), str(intname1), str(label1), str(fname2), str(intname2), str(label2), str(option))
         return self.run(command, **kwargs)
 
     def madapt(self, errtargt="", nadapt="", nmax="", kplt="", ksmooth="",
@@ -55194,7 +55194,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EINFIN,%s,%s" % (str(compname), str(pnode))
         return self.run(command, **kwargs)
 
-    def cycphase(self, type="", option="", **kwargs):
+    def cycphase(self, type_="", option="", **kwargs):
         """APDL Command: CYCPHASE
 
         Provides tools for determining minimum and maximum possible result
@@ -55203,7 +55203,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             The type of operation requested:
 
             DISP - Calculate the maximum and minimum possible displacement at each node in the
@@ -55288,7 +55288,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         To learn more about analyzing a cyclically symmetric structure, see the
         Cyclic Symmetry Analysis Guide.
         """
-        command = "CYCPHASE,%s,%s" % (str(type), str(option))
+        command = "CYCPHASE,%s,%s" % (str(type_), str(option))
         return self.run(command, **kwargs)
 
     def pcopy(self, key="", **kwargs):
@@ -55432,14 +55432,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFLLIST,%s,%s" % (str(line), str(lab))
         return self.run(command, **kwargs)
 
-    def nslv(self, type="", nkey="", **kwargs):
+    def nslv(self, type_="", nkey="", **kwargs):
         """APDL Command: NSLV
 
         Selects those nodes associated with the selected volumes.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -55465,7 +55465,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "NSLV,%s,%s" % (str(type), str(nkey))
+        command = "NSLV,%s,%s" % (str(type_), str(nkey))
         return self.run(command, **kwargs)
 
     def plcfreq(self, spec="", sectbeg="", sectend="", **kwargs):
@@ -55881,14 +55881,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TARGET,%s" % (str(nlist))
         return self.run(command, **kwargs)
 
-    def aslv(self, type="", **kwargs):
+    def aslv(self, type_="", **kwargs):
         """APDL Command: ASLV
 
         Selects those areas contained in the selected volumes.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -55903,7 +55903,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "ASLV,%s" % (str(type))
+        command = "ASLV,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def numexp(self, num="", begrng="", endrng="", elcalc="", **kwargs):
@@ -57275,14 +57275,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
     #     command = "*IF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(val1), str(oper1), str(val2), str(b_ase1), str(val3), str(oper2), str(val4), str(b_ase2))
     #     return self.run(command, **kwargs)
 
-    def lsla(self, type="", **kwargs):
+    def lsla(self, type_="", **kwargs):
         """APDL Command: LSLA
 
         Selects those lines contained in the selected areas.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -57297,7 +57297,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "LSLA,%s" % (str(type))
+        command = "LSLA,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def sload(self, secid="", plnlab="", kinit="", kfd="", fdvalue="",
@@ -57710,7 +57710,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "LINE,"
         return self.run(command, **kwargs)
 
-    def dim(self, par="", type="", imax="", jmax="", kmax="", var1="", var2="",
+    def dim(self, par="", type_="", imax="", jmax="", kmax="", var1="", var2="",
             var3="", csysid="", **kwargs):
         """APDL Command: *DIM
 
@@ -57722,7 +57722,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Name of parameter to be dimensioned.  See *SET for name
             restrictions.
 
-        type
+        type_
             Array type:
 
             Arrays are similar to standard FORTRAN arrays (indices are integers) (default).  Index numbers for the rows, columns, and planes are sequential values beginning with one. Used for 1-, 2-, or 3-D arrays. - Same as ARRAY, but used to specify 4-D arrays.
@@ -57844,7 +57844,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "*DIM,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(type), str(imax), str(jmax), str(kmax), str(var1), str(var2), str(var3), str(csysid))
+        command = "*DIM,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(type_), str(imax), str(jmax), str(kmax), str(var1), str(var2), str(var3), str(csysid))
         return self.run(command, **kwargs)
 
     def emtgen(self, ncomp="", ecomp="", pncomp="", dof="", gap="", gapmin="",
@@ -58147,7 +58147,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDHGLS,%s" % (str(hgco))
         return self.run(command, **kwargs)
 
-    def smat(self, matrix="", type="", method="", val1="", val2="", val3="", val4="",
+    def smat(self, matrix="", type_="", method="", val1="", val2="", val3="", val4="",
              **kwargs):
         """APDL Command: *SMAT
 
@@ -58158,7 +58158,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type
+        type_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -58187,7 +58187,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         For more information about .FULL file contents, see the HBMAT in the
         Command Reference.
         """
-        command = "*SMAT,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type), str(method), str(val1), str(val2), str(val3), str(val4))
+        command = "*SMAT,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
     def hpgl(self, kywrd="", opt1="", opt2="", **kwargs):
@@ -59487,14 +59487,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "VIMP,%s,%s,%s" % (str(vol), str(chgbnd), str(implevel))
         return self.run(command, **kwargs)
 
-    def vsla(self, type="", vlkey="", **kwargs):
+    def vsla(self, type_="", vlkey="", **kwargs):
         """APDL Command: VSLA
 
         Selects those volumes containing the selected areas.
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
@@ -59517,7 +59517,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         This command is valid in any processor.
         """
-        command = "VSLA,%s,%s" % (str(type), str(vlkey))
+        command = "VSLA,%s,%s" % (str(type_), str(vlkey))
         return self.run(command, **kwargs)
 
     def anorm(self, anum="", noeflip="", **kwargs):
@@ -60221,7 +60221,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PAPUT,%s,%s" % (str(parray), str(popt))
         return self.run(command, **kwargs)
 
-    def psdunit(self, tblno="", type="", gvalue="", **kwargs):
+    def psdunit(self, tblno="", type_="", gvalue="", **kwargs):
         """APDL Command: PSDUNIT
 
         Defines the type of input PSD.
@@ -60231,7 +60231,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         tblno
             Input table number.
 
-        type
+        type_
             Label identifying the type of spectrum:
 
             DISP - Displacement spectrum (in terms of displacement2/Hz ).
@@ -60263,7 +60263,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "PSDUNIT,%s,%s,%s" % (str(tblno), str(type), str(gvalue))
+        command = "PSDUNIT,%s,%s,%s" % (str(tblno), str(type_), str(gvalue))
         return self.run(command, **kwargs)
 
     def alphad(self, value="", **kwargs):
@@ -62081,7 +62081,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MAPSOLVE,%s" % (str(maxsbstep))
         return self.run(command, **kwargs)
 
-    def rimport(self, source="", type="", loc="", lstep="", sbstep="",
+    def rimport(self, source="", type_="", loc="", lstep="", sbstep="",
                 fname="", ext="", spscale="", mscale="", **kwargs):
         """APDL Command: RIMPORT
 
@@ -62097,7 +62097,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             DYNA - Get initial stresses from an earlier explicit
             (ANSYS LS-DYNA) run (default).
 
-        type
+        type_
             Type of data imported.  Note that this is an ANSYS-defined
             field; the only valid value is STRESS.
 
@@ -62185,7 +62185,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = f"RIMPORT,{source},{type},{loc},{lstep},{sbstep},{fname},{ext},,{spscale},{mscale}"
+        command = f"RIMPORT,{source},{type_},{loc},{lstep},{sbstep},{fname},{ext},,{spscale},{mscale}"
         return self.run(command, **kwargs)
 
     def edread(self, nstart="", label="", num="", step1="", step2="",
@@ -62661,7 +62661,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SWADD,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ecomp), str(shrd), str(ncm1), str(ncm2), str(ncm3), str(ncm4), str(ncm5), str(ncm6), str(ncm7), str(ncm8), str(ncm9))
         return self.run(command, **kwargs)
 
-    def esel(self, type="", item="", comp="", vmin="", vmax="", vinc="",
+    def esel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kabs="", **kwargs):
         """APDL Command: ESEL
 
@@ -62669,7 +62669,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -62728,7 +62728,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 133:: : ESEL - Valid Item and Component Labels
         """
-        command = "ESEL,%s,%s,%s,%s,%s,%s,%s" % (str(type), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "ESEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
         return self.run(command, **kwargs)
 
     def sfe(self, elem="", lkey="", lab="", kval="", val1="", val2="", val3="",
@@ -63002,7 +63002,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CNTR,%s,%s" % (str(option), str(key))
         return self.run(command, **kwargs)
 
-    def rmrplot(self, refname="", type="", mode1="", mode2="", **kwargs):
+    def rmrplot(self, refname="", type_="", mode1="", mode2="", **kwargs):
         """APDL Command: RMRPLOT
 
         Plots response surface of ROM function or its derivatives with respect
@@ -63016,7 +63016,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             definition, previously defined by means of the RMCAP command, for
             the electrostatic domain.
 
-        type
+        type_
             Type of data to be plotted. Valid types are:
 
             FUNC - Response surface (default)
@@ -63040,7 +63040,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMRPLOT,%s,%s,%s,%s" % (str(refname), str(type), str(mode1), str(mode2))
+        command = "RMRPLOT,%s,%s,%s,%s" % (str(refname), str(type_), str(mode1), str(mode2))
         return self.run(command, **kwargs)
 
     def fplist(self, **kwargs):
@@ -63592,7 +63592,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TIMP,%s,%s,%s" % (str(elem), str(chgbnd), str(implevel))
         return self.run(command, **kwargs)
 
-    def perturb(self, type="", matkey="", contkey="", loadcontrol="",
+    def perturb(self, type_="", matkey="", contkey="", loadcontrol="",
                 **kwargs):
         """APDL Command: PERTURB
 
@@ -63600,7 +63600,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type
+        type_
             Type of linear perturbation analysis to be performed:
 
             STATIC - Perform a linear perturbation static analysis.
@@ -63745,7 +63745,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "PERTURB,%s,%s,%s,%s" % (str(type), str(matkey), str(contkey), str(loadcontrol))
+        command = "PERTURB,%s,%s,%s,%s" % (str(type_), str(matkey), str(contkey), str(loadcontrol))
         return self.run(command, **kwargs)
 
     def v2dopt(self, geom="", ndiv="", hidopt="", nzone="", **kwargs):
@@ -66923,7 +66923,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFCUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(fact2))
         return self.run(command, **kwargs)
 
-    def slashtype(self, wn="", type="", **kwargs):
+    def slashtype(self, wn="", type_="", **kwargs):
         """APDL Command: /TYPE
 
         Defines the type of display.
@@ -66933,7 +66933,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type
+        type_
             Display type.  Defaults to ZBUF for raster mode displays or BASIC
             for vector mode displays:
 
@@ -67017,7 +67017,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/TYPE,%s,%s" % (str(wn), str(type))
+        command = "/TYPE,%s,%s" % (str(wn), str(type_))
         return self.run(command, **kwargs)
 
     def angle(self, wn="", theta="", axis="", kincr="", **kwargs):
