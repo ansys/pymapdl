@@ -345,7 +345,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         return self.run(f"WRITEMAP,{fname}", **kwargs)
 
-    def ewrite(self, fname="", ext="", kappnd="", format="", **kwargs):
+    def ewrite(self, fname="", ext="", kappnd="", format_="", **kwargs):
         """APDL Command: EWRITE
 
         Writes elements to a file.
@@ -369,7 +369,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             1 - Append data to the end of the existing file.
 
-        format
+        format_
             Format key:
 
             SHORT - I6 format (the default).
@@ -396,7 +396,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         having more than eight nodes, nodes nine and above are written
         on a second record with the same format.
         """
-        return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format}", **kwargs)
+        return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
     def f(self, node="", lab="", value="", value2="", nend="", ninc="",
           **kwargs):
@@ -4981,7 +4981,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FMAGSUM,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8), str(cnam9))
         return self.run(command, **kwargs)
 
-    def ui(self, func="", type_="", format="", screen="", color="", krev="",
+    def ui(self, func="", type_="", format_="", screen="", color="", krev="",
            orient="", compress="", quality="", **kwargs):
         """APDL Command: /UI
 
@@ -5047,7 +5047,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Allows you to activate specified GUI dialog boxes directly in either
         GUI or non-GUI mode.
         """
-        command = "/UI,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(func), str(type_), str(format), str(screen), str(color), str(krev), str(orient), str(compress), str(quality))
+        command = "/UI,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(func), str(type_), str(format_), str(screen), str(color), str(krev), str(orient), str(compress), str(quality))
         return self.run(command, **kwargs)
 
     def ktran(self, kcnto="", np1="", np2="", ninc="", kinc="", noelem="",
@@ -22298,7 +22298,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "WTBCREATE,%s,%s,%s" % (str(iel), str(node), str(damp))
         return self.run(command, **kwargs)
 
-    def read(self, fname="", nskip="", format="", xfield="", yfield="",
+    def read(self, fname="", nskip="", format_="", xfield="", yfield="",
              zfield="", prfield="", pifield="", **kwargs):
         """APDL Command: READ
 
@@ -22317,7 +22317,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             while it is read. Default = 0. NSKIP is ignored for FileType =
             CFXTBR or CFDPOST on the FTYPE command.
 
-        format
+        format_
             For FileType = FORMATTED on the FTYPE command, Format is the read
             format in the FORTRAN FORMAT convention enclosed in parentheses;
             for example: (3e10.0,10x,e10.0,70x,e10.0)
@@ -22338,7 +22338,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         SOURCENODES and an element component named SOURCEELEMS are created
         automatically.
         """
-        command = "READ,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(nskip), str(format), str(xfield), str(yfield), str(zfield), str(prfield), str(pifield))
+        command = "READ,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(nskip), str(format_), str(xfield), str(yfield), str(zfield), str(prfield), str(pifield))
         return self.run(command, **kwargs)
 
     def fatigue(self, **kwargs):
@@ -62575,7 +62575,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MDELE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(lab1), str(nend), str(ninc), str(lab2), str(lab3), str(lab4), str(lab5), str(lab6))
         return self.run(command, **kwargs)
 
-    def export(self, matrix="", format="", fname="", val1="", val2="", val3="",
+    def export(self, matrix="", format_="", fname="", val1="", val2="", val3="",
                **kwargs):
         """APDL Command: *EXPORT
 
@@ -62587,7 +62587,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Name of the matrix to export (must be a matrix previously created
             with *DMAT or *SMAT, or a vector previously created with *VEC).
 
-        format
+        format_
             Format of the output file:
 
             Export the matrix in the Matrix Market Format. - Export the matrix in the SUB file format.
@@ -62626,7 +62626,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         from .FULL files by means of the NOD2BCS option on the *SMAT command
         (i.e., *SMAT,,,IMPORT,FULL,,NOD2BCS).
         """
-        command = "*EXPORT,%s,%s,%s,%s,%s,%s" % (str(matrix), str(format), str(fname), str(val1), str(val2), str(val3))
+        command = "*EXPORT,%s,%s,%s,%s,%s,%s" % (str(matrix), str(format_), str(fname), str(val1), str(val2), str(val3))
         return self.run(command, **kwargs)
 
     def swadd(self, ecomp="", shrd="", ncm1="", ncm2="", ncm3="", ncm4="",
