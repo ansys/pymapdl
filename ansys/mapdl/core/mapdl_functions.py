@@ -34364,7 +34364,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DLDELE,%s,%s" % (str(line), str(lab))
         return self.run(command, **kwargs)
 
-    def pbc(self, item="", key="", min="", max="", abs="", **kwargs):
+    def pbc(self, item="", key="", min="", max="", abs_="", **kwargs):
         """APDL Command: /PBC
 
         Shows boundary condition (BC) symbols and values on displays.
@@ -34451,7 +34451,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         max
             Maximum value in a range of values plotted on screen.
 
-        abs
+        abs_
             Absolute number.  If KEY = 2 and ABS = 0, a number falling between
             the MIN and MAX is displayed.  If ABS is not specified, it defaults
             to 0.  If KEY = 2 and ABS = 1, an absolute value falling between
@@ -34492,7 +34492,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         The /PBC command is valid in any processor.
         """
-        command = f"/PBC,{item},,{key},{min},{max},{abs}"
+        command = f"/PBC,{item},,{key},{min},{max},{abs_}"
         return self.run(command, **kwargs)
 
     def lsdele(self, lsmin="", lsmax="", lsinc="", **kwargs):
