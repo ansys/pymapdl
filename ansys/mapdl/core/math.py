@@ -719,8 +719,8 @@ class MapdlMath():
 
 
 class ApdlMathObj:
-    def __init__(self, id, mapdl, type_=ObjType.GEN):
-        self.id = id
+    def __init__(self, id_, mapdl, type_=ObjType.GEN):
+        self.id = id_
         self._mapdl = mapdl
         self.type = type_
 
@@ -844,8 +844,8 @@ class ApdlMathObj:
 
 class AnsVec(ApdlMathObj):
     """APDLMath Vector Object"""
-    def __init__(self, id, mapdl, dtype=np.double, init=None):
-        ApdlMathObj.__init__(self, id, mapdl, ObjType.VEC)
+    def __init__(self, id_, mapdl, dtype=np.double, init=None):
+        ApdlMathObj.__init__(self, id_, mapdl, ObjType.VEC)
 
         if init not in ['ones', 'zeros', 'rand', None]:
             raise ValueError('Invalid init option.  Should be "ones", "zeros", "rand", or None')
@@ -918,8 +918,8 @@ class AnsVec(ApdlMathObj):
 class AnsMat(ApdlMathObj):
     """APDLMath Matrix Object"""
 
-    def __init__(self, id, mapdl, type_=ObjType.DMAT):
-        ApdlMathObj.__init__(self, id, mapdl, type_)
+    def __init__(self, id_, mapdl, type_=ObjType.DMAT):
+        ApdlMathObj.__init__(self, id_, mapdl, type_)
 
     @property
     def nrow(self):

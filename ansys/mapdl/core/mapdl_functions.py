@@ -16219,7 +16219,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDENERGY,%s,%s,%s,%s" % (str(hgen), str(swen), str(sien), str(rlen))
         return self.run(command, **kwargs)
 
-    def tbft(self, oper="", id="", option1="", option2="", option3="",
+    def tbft(self, oper="", id_="", option1="", option2="", option3="",
              option4="", option5="", option6="", option7="", **kwargs):
         """APDL Command: TBFT
 
@@ -16242,7 +16242,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Delete experimental data. - List all data associated with the material model represented by the material ID
                               number.
 
-        id
+        id_
             The material reference number (same as MAT argument used in the TB
             command). Valid entry is any number greater than zero (default = 1)
             but less than 100,000.
@@ -16283,7 +16283,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             If Oper = SOLVE, specifies the allowed tolerance in coefficient
             change to stop an iteration. Valid entry is 0 to 1 (default = 0).
         """
-        command = "TBFT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(id), str(option1), str(option2), str(option3), str(option4), str(option5), str(option6), str(option7))
+        command = "TBFT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(id_), str(option1), str(option2), str(option3), str(option4), str(option5), str(option6), str(option7))
         return self.run(command, **kwargs)
 
     def grtyp(self, kaxis="", **kwargs):
@@ -30773,7 +30773,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NORA,%s,%s" % (str(area), str(ndir))
         return self.run(command, **kwargs)
 
-    def plcint(self, action="", id="", node="", cont="", dtype="", **kwargs):
+    def plcint(self, action="", id_="", node="", cont="", dtype="", **kwargs):
         """APDL Command: PLCINT
 
         Plots the fracture parameter (CINT) result data.
@@ -30787,7 +30787,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             FRONT - Plots CINT quantities distribution along the crack front.
 
-        id
+        id_
             Crack ID number.
 
         node
@@ -30838,7 +30838,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The PLCINT command is not available for XFEM-based crack growth
         analyses results processing.
         """
-        command = "PLCINT,%s,%s,%s,%s,%s" % (str(action), str(id), str(node), str(cont), str(dtype))
+        command = "PLCINT,%s,%s,%s,%s,%s" % (str(action), str(id_), str(node), str(cont), str(dtype))
         return self.run(command, **kwargs)
 
     def stef(self, value="", **kwargs):
@@ -35004,14 +35004,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*PRINT,%s,%s" % (str(matrix), str(fname))
         return self.run(command, **kwargs)
 
-    def prcint(self, id="", node="", dtype="", **kwargs):
+    def prcint(self, id_="", node="", dtype="", **kwargs):
         """APDL Command: PRCINT
 
         Lists the fracture parameter (CINT) results data.
 
         Parameters
         ----------
-        id
+        id_
             Crack ID number.
 
         node
@@ -35070,7 +35070,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         PRCINT, ID, , STTMAX (or PSMAX)
         """
-        command = "PRCINT,%s,%s,%s" % (str(id), str(node), str(dtype))
+        command = "PRCINT,%s,%s,%s" % (str(id_), str(node), str(dtype))
         return self.run(command, **kwargs)
 
     def moper(self, parr="", par1="", oper="", val1="", val2="",
@@ -60900,7 +60900,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ANTIME,%s,%s,%s,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(autocntrky), str(rsltdat), str(min), str(max))
         return self.run(command, **kwargs)
 
-    def cisol(self, n="", id="", node="", cont="", dtype="", **kwargs):
+    def cisol(self, n="", id_="", node="", cont="", dtype="", **kwargs):
         """APDL Command: CISOL
 
         Stores fracture parameter information in a variable.
@@ -60911,7 +60911,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Arbitrary reference number or name assigned to this variable.
             Number must be >1 but </= NUMVAR.
 
-        id
+        id_
             Crack ID number.
 
         node
@@ -60953,7 +60953,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             CEXT - Crack extension
         """
-        command = "CISOL,%s,%s,%s,%s,%s" % (str(n), str(id), str(node), str(cont), str(dtype))
+        command = "CISOL,%s,%s,%s,%s,%s" % (str(n), str(id_), str(node), str(cont), str(dtype))
         return self.run(command, **kwargs)
 
     def llist(self, nl1="", nl2="", ninc="", lab="", **kwargs):
