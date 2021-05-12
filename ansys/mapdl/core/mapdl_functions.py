@@ -9512,7 +9512,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MFTOL,%s,%s,%s" % (str(key), str(value), str(toler))
         return self.run(command, **kwargs)
 
-    def light(self, wn="", num="", int="", xv="", yv="", zv="", refl="",
+    def light(self, wn="", num="", int_="", xv="", yv="", zv="", refl="",
               **kwargs):
         """APDL Command: /LIGHT
 
@@ -9530,7 +9530,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             1 - Directional light.
 
-        int
+        int_
             Light intensity factor (defaults to 0.3 for ambient, 1.0 for
             directional). This option is valid only for 3-D devices).
 
@@ -9563,7 +9563,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/LIGHT,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(num), str(int), str(xv), str(yv), str(zv), str(refl))
+        command = "/LIGHT,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(num), str(int_), str(xv), str(yv), str(zv), str(refl))
         return self.run(command, **kwargs)
 
     def gssol(self, nvar="", item="", comp="", name="", **kwargs):
