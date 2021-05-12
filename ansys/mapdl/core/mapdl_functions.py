@@ -14242,14 +14242,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ENORM,%s" % (str(enum))
         return self.run(command, **kwargs)
 
-    def delete(self, set="", nstart="", nend="", **kwargs):
+    def delete(self, set_="", nstart="", nend="", **kwargs):
         """APDL Command: DELETE
 
         Specifies sets in the results file to be deleted before postprocessing.
 
         Parameters
         ----------
-        set
+        set_
             Specifies that sets in the results file are to be deleted.
 
         nstart
@@ -14268,7 +14268,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The DELETE command is valid only in the results file editing processor
         (ANSYS auxiliary processor AUX3).
         """
-        command = "DELETE,%s,%s,%s" % (str(set), str(nstart), str(nend))
+        command = "DELETE,%s,%s,%s" % (str(set_), str(nstart), str(nend))
         return self.run(command, **kwargs)
 
     def atan(self, ir="", ia="", name="", facta="", **kwargs):
@@ -28310,7 +28310,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/CVAL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6), str(v7), str(v8))
         return self.run(command, **kwargs)
 
-    def modify(self, set="", lstep="", iter_="", cumit="", time="", ktitle="",
+    def modify(self, set_="", lstep="", iter_="", cumit="", time="", ktitle="",
                **kwargs):
         """APDL Command: MODIFY
 
@@ -28318,7 +28318,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        set
+        set_
             Set of data in results file to be modified.
 
         lstep
@@ -28352,7 +28352,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         The modified results file would look like this:
         """
-        command = "MODIFY,%s,%s,%s,%s,%s,%s" % (str(set), str(lstep), str(iter_), str(cumit), str(time), str(ktitle))
+        command = "MODIFY,%s,%s,%s,%s,%s,%s" % (str(set_), str(lstep), str(iter_), str(cumit), str(time), str(ktitle))
         return self.run(command, **kwargs)
 
     def tshap(self, shape="", **kwargs):
@@ -34127,7 +34127,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ASLL,%s,%s" % (str(type_), str(arkey))
         return self.run(command, **kwargs)
 
-    def ovcheck(self, method="", frequency="", set="", **kwargs):
+    def ovcheck(self, method="", frequency="", set_="", **kwargs):
         """APDL Command: OVCHECK
 
         Checks for overconstraint among constraint equations and Lagrange
@@ -34155,7 +34155,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             LOADSTEP - At the beginning of each load step.
 
-        set
+        set_
             Set of equations:
 
             All - Check for overconstraint between all constraint equations (default).
@@ -34201,7 +34201,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         overconstraint detection, see Constraints: Automatic Selection of Slave
         DOFs  in the Mechanical APDL Theory Reference
         """
-        command = "OVCHECK,%s,%s,%s" % (str(method), str(frequency), str(set))
+        command = "OVCHECK,%s,%s,%s" % (str(method), str(frequency), str(set_))
         return self.run(command, **kwargs)
 
     def slashexpand(self, nrepeat1="", type1="", method1="", dx1="", dy1="",
