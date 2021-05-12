@@ -28310,7 +28310,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/CVAL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6), str(v7), str(v8))
         return self.run(command, **kwargs)
 
-    def modify(self, set="", lstep="", iter="", cumit="", time="", ktitle="",
+    def modify(self, set="", lstep="", iter_="", cumit="", time="", ktitle="",
                **kwargs):
         """APDL Command: MODIFY
 
@@ -28324,7 +28324,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         lstep
             The new load step number.
 
-        iter
+        iter_
             The new load substep number.
 
         cumit
@@ -28352,7 +28352,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         The modified results file would look like this:
         """
-        command = "MODIFY,%s,%s,%s,%s,%s,%s" % (str(set), str(lstep), str(iter), str(cumit), str(time), str(ktitle))
+        command = "MODIFY,%s,%s,%s,%s,%s,%s" % (str(set), str(lstep), str(iter_), str(cumit), str(time), str(ktitle))
         return self.run(command, **kwargs)
 
     def tshap(self, shape="", **kwargs):
