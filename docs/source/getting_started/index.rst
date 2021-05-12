@@ -32,7 +32,7 @@ Install the latest release from `PyPi
 
 .. code::
 
-   pip install ansys.mapdl-core
+   pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
 <https://github.com/pyansys/pymapdl/issues>`_ via:

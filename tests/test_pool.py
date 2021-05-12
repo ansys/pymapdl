@@ -9,13 +9,8 @@ from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.launcher import get_start_instance
 
-# check for a valid MAPDL install with gRPC
-valid_rver = ['211']
-EXEC_FILE = None
-for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
-        break
+# skip entire module unless HAS_GRPC
+pytestmark = pytest.mark.skip_grpc
 
 IGNORE_POOL = os.environ.get('IGNORE_POOL', '').upper() == 'TRUE'
 
@@ -23,6 +18,13 @@ skip_launch_mapdl = pytest.mark.skipif(get_start_instance() is False or IGNORE_P
                                        reason="Must be able to launch MAPDL locally")
 
 TWAIT = 90
+
+valid_rver = ['211', '202', '201', '195', '194', '193', '192', '191']
+EXEC_FILE = None
+for rver in valid_rver:
+    if os.path.isfile(get_ansys_bin(rver)):
+        EXEC_FILE = get_ansys_bin(rver)
+        break
 
 
 @pytest.fixture(scope="module")

@@ -5,11 +5,12 @@ import numpy as np
 from ansys.mapdl.core.misc import unique_rows
 
 
-def general_plotter(title, meshes, points, labels,
+def general_plotter(meshes, points, labels,
+                    title='',
                     cpos=None,
                     show_bounds=False, show_axes=True,
                     background=None, off_screen=None,
-                    screenshot=False,
+                    savefig=None,
                     window_size=None,
                     notebook=None,
                     # add_mesh kwargs:
@@ -19,7 +20,7 @@ def general_plotter(title, meshes, points, labels,
                     lighting=None, n_colors=256,
                     interpolate_before_map=True, cmap=None,
                     render_points_as_spheres=False, render_lines_as_tubes=False,
-                    stitle=None,
+                    scalar_bar_args={},
                     smooth_shading=None,
                     # labels kwargs
                     font_size=None,
@@ -29,6 +30,9 @@ def general_plotter(title, meshes, points, labels,
 
     Parameters
     ----------
+    title : str, optional
+        Add given title to plot.
+
     cpos : list(tuple(floats)), str
         The camera position to use.  You can either use a saved camera
         position or specify one of the following strings:
@@ -59,8 +63,8 @@ def general_plotter(title, meshes, points, labels,
     show_axes : bool, optional
         Shows a vtk axes widget.  Enabled by default.
 
-    screenshot : str or bool, optional
-        Saves screenshot to file when enabled.
+    savefig : str, optional
+        Saves screenshot to a file path.
 
     color : string or 3 item list, optional, defaults to white
         Use to make the entire mesh have a single solid color.  Either
@@ -144,8 +148,8 @@ def general_plotter(title, meshes, points, labels,
 
     for mesh in meshes:
         pl.add_mesh(mesh['mesh'],
-                    scalars=mesh.get('scalars', None),
-                    stitle=mesh.get('stitle', None),
+                    scalars=mesh.get('scalars'),
+                    scalar_bar_args=scalar_bar_args,
                     color=mesh.get('color', color),
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
@@ -168,8 +172,8 @@ def general_plotter(title, meshes, points, labels,
                             font_family=font_family,
                             text_color=text_color)
 
-    if stitle is not None:
-        pl.add_scalar_bar(title=stitle)
+    # if stitle is not None:
+    #     pl.add_scalar_bar(title=stitle)
 
     if cpos:
         pl.camera_position = cpos
@@ -179,10 +183,13 @@ def general_plotter(title, meshes, points, labels,
 
     if show_axes:
         pl.show_axes()
+    if title:
+        pl.add_title(title)
 
-    if screenshot:
-        pl.show(title=title, auto_close=False, window_size=window_size)
-        pl.screenshot(screenshot)
+    if savefig:
+        pl.show(title=title, auto_close=False, window_size=window_size,
+                screenshot=True)
+        pl.screenshot(savefig)
     else:
         pl.show()
 

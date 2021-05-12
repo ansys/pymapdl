@@ -51,7 +51,7 @@ class _MapdlIoCommands():
         elif not fname:
             fname = '.' + 'PARM'
 
-        if hasattr(self, '_local'):  # gRPC mode
+        if 'Grpc' in self.__class__.__name__:  # grpc mode
             if self._local:
                 if not os.path.isfile(fname):
                     raise FileNotFoundError('Unable to locate filename "%s"' % fname)

@@ -1,12 +1,15 @@
 """Pythonic MAPDL Commands"""
 
-from .mesh_commands import _MapdlMeshingCommands
 from .geometry_commands import _MapdlGeometryCommands
 from .io_commands import _MapdlIoCommands
+from .mesh_commands import _MapdlMeshingCommands
+from .misc_commands import _MapdlMiscCommands
+
 
 class _MapdlCommands(_MapdlGeometryCommands,
+                     _MapdlIoCommands,
                      _MapdlMeshingCommands,
-                     _MapdlIoCommands):  # pragma: no cover
+                     _MapdlMiscCommands):  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -49325,38 +49328,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         order, and other fields of data may also be present.
         """
         command = "FTYPE,%s,%s" % (str(filetype), str(prestype))
-        return self.run(command, **kwargs)
-
-    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
-        """APDL Command: LSSOLVE
-
-        Reads and solves multiple load steps.
-
-        Parameters
-        ----------
-        lsmin, lsmax, lsinc
-            Range of load step files to be read and solved, from LSMIN to LSMAX
-            in steps of LSINC.  LSMAX defaults to LSMIN, and LSINC defaults to
-            1. If LSMIN is blank, a brief command description is displayed.
-            The load step files are assumed to be named Jobname.Sn, where n is
-            a number assigned by the LSWRITE command (01--09,10,11, etc.).  On
-            systems with a 3-character limit on the extension, the "S" is
-            dropped for numbers > 99.
-
-        Notes
-        -----
-        LSSOLVE invokes an ANSYS macro to read and solve multiple load steps.
-        The macro loops through a series of load step files written by the
-        LSWRITE command.  The macro file called by LSSOLVE is called
-        LSSOLVE.MAC.
-
-        LSSOLVE cannot be used with the birth-death option.
-
-        LSSOLVE is not supported for cyclic symmetry analyses.
-
-        LSSOLVE does not support restarts.
-        """
-        command = "LSSOLVE,%s,%s,%s" % (str(lsmin), str(lsmax), str(lsinc))
         return self.run(command, **kwargs)
 
     def ioptn(self, lab="", val1="", **kwargs):
