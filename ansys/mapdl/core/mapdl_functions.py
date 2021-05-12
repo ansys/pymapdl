@@ -723,7 +723,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CZMESH,%s,%s,%s,%s,%s,%s" % (str(ecomps1), str(ecomps2), str(kcn), str(kdir), str(value), str(cztol))
         return self.run(command, **kwargs)
 
-    def edsp(self, option="", min="", max="", inc="", **kwargs):
+    def edsp(self, option="", min="", max_="", inc="", **kwargs):
         """APDL Command: EDSP
 
         Specifies small penetration checking for contact entities in an
@@ -744,7 +744,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Minimum contact entity number for which to turn on/off small
             penetration check (default = 1).
 
-        max
+        max_
             Maximum contact entity number for which to turn on/off small
             penetration check (defaults to MIN).
 
@@ -770,7 +770,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDSP,%s,%s,%s,%s" % (str(option), str(min), str(max), str(inc))
+        command = "EDSP,%s,%s,%s,%s" % (str(option), str(min), str(max_), str(inc))
         return self.run(command, **kwargs)
 
     def rmclist(self, **kwargs):
@@ -6212,7 +6212,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SALLOW,%s,%s,%s,%s,%s,%s" % (str(strs1), str(strs2), str(strs3), str(strs4), str(strs5), str(strs6))
         return self.run(command, **kwargs)
 
-    def edpc(self, min="", max="", inc="", **kwargs):
+    def edpc(self, min="", max_="", inc="", **kwargs):
         """APDL Command: EDPC
 
         Selects and plots explicit dynamic contact entities.
@@ -6223,7 +6223,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
              Minimum contact entity number to be selected and plotted (default
             = 1).
 
-        max
+        max_
             Maximum contact entity number to be selected and plotted (default =
             MIN).
 
@@ -6250,7 +6250,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDPC,%s,%s,%s" % (str(min), str(max), str(inc))
+        command = "EDPC,%s,%s,%s" % (str(min), str(max_), str(inc))
         return self.run(command, **kwargs)
 
     def pscontrol(self, option="", key="", **kwargs):
@@ -8967,7 +8967,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/VUP,%s,%s" % (str(wn), str(label))
         return self.run(command, **kwargs)
 
-    def anmres(self, delay="", min="", max="", inc="", autocntrky="", freq="",
+    def anmres(self, delay="", min="", max_="", inc="", autocntrky="", freq="",
                ext="", **kwargs):
         """APDL Command: ANMRES
 
@@ -8984,7 +8984,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Minimum results file number to animate. Default = 1 (for
             Jobname.RS01).
 
-        max
+        max_
             Maximum results file number to animate. Defaults to the highest
             numbered results file, Jobname.RSnn.
 
@@ -9033,7 +9033,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "ANMRES,%s,%s,%s,%s,%s,%s,%s" % (str(delay), str(min), str(max), str(inc), str(autocntrky), str(freq), str(ext))
+        command = "ANMRES,%s,%s,%s,%s,%s,%s,%s" % (str(delay), str(min), str(max_), str(inc), str(autocntrky), str(freq), str(ext))
         return self.run(command, **kwargs)
 
     def dmpoption(self, filetype="", combine="", **kwargs):
@@ -24803,7 +24803,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MSOLVE,%s,%s,%s" % (str(numslv), str(nrmtol), str(nrmchkinc))
         return self.run(command, **kwargs)
 
-    def andata(self, delay="", ncycl="", rsltdat="", min="", max="", incr="",
+    def andata(self, delay="", ncycl="", rsltdat="", min="", max_="", incr="",
                frclst="", autocont="", autocntr="", **kwargs):
         """APDL Command: ANDATA
 
@@ -24832,7 +24832,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             The range minimum value.  If left blank or 0, defaults to the first
             data point.
 
-        max
+        max_
             The range maximum value.  If left blank or 0, defaults to the last
             data point.
 
@@ -24870,7 +24870,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command functions only in the postprocessor.
         """
-        command = f"ANDATA,{delay},{ncycl},{rsltdat},{min},{max},{incr},{frclst},{autocont},,{autocntr}"
+        command = f"ANDATA,{delay},{ncycl},{rsltdat},{min},{max_},{incr},{frclst},{autocont},,{autocntr}"
         return self.run(command, **kwargs)
 
     def dmpstr(self, coeff="", **kwargs):
@@ -34364,7 +34364,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DLDELE,%s,%s" % (str(line), str(lab))
         return self.run(command, **kwargs)
 
-    def pbc(self, item="", key="", min="", max="", abs_="", **kwargs):
+    def pbc(self, item="", key="", min="", max_="", abs_="", **kwargs):
         """APDL Command: /PBC
 
         Shows boundary condition (BC) symbols and values on displays.
@@ -34448,7 +34448,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         min
             Minimum value in a range of values plotted on screen.
 
-        max
+        max_
             Maximum value in a range of values plotted on screen.
 
         abs_
@@ -34492,7 +34492,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         The /PBC command is valid in any processor.
         """
-        command = f"/PBC,{item},,{key},{min},{max},{abs_}"
+        command = f"/PBC,{item},,{key},{min},{max_},{abs_}"
         return self.run(command, **kwargs)
 
     def lsdele(self, lsmin="", lsmax="", lsinc="", **kwargs):
@@ -44071,7 +44071,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TVAR,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def rmmrange(self, mode="", key="", min="", max="", nstep="", damp="",
+    def rmmrange(self, mode="", key="", min="", max_="", nstep="", damp="",
                  scale="", **kwargs):
         """APDL Command: RMMRANGE
 
@@ -44091,7 +44091,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         min
             Lower bound for fit range of mode.
 
-        max
+        max_
             Upper bound for fit range of mode.
 
         nstep
@@ -44115,7 +44115,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RMMRANGE,%s,%s,%s,%s,%s,%s,%s" % (str(mode), str(key), str(min), str(max), str(nstep), str(damp), str(scale))
+        command = "RMMRANGE,%s,%s,%s,%s,%s,%s,%s" % (str(mode), str(key), str(min), str(max_), str(nstep), str(damp), str(scale))
         return self.run(command, **kwargs)
 
     def hbmat(self, fname="", ext="", form="", matrx="", rhs="", mapping="",
@@ -60848,7 +60848,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         return self.run(command, **kwargs)
 
     def antime(self, nfram="", delay="", ncycl="", autocntrky="", rsltdat="",
-               min="", max="", **kwargs):
+               min="", max_="", **kwargs):
         """APDL Command: ANTIME
 
         Produces a  sequential contour animation over a range of time.
@@ -60883,7 +60883,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             The range minimum value.  If left blank defaults to the first data
             point.
 
-        max
+        max_
             The range maximum value.  If left blank defaults to the last data
             point.
 
@@ -60897,7 +60897,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command functions only in the postprocessor.
         """
-        command = "ANTIME,%s,%s,%s,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(autocntrky), str(rsltdat), str(min), str(max))
+        command = "ANTIME,%s,%s,%s,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(autocntrky), str(rsltdat), str(min), str(max_))
         return self.run(command, **kwargs)
 
     def cisol(self, n="", id_="", node="", cont="", dtype="", **kwargs):
