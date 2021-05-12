@@ -7301,7 +7301,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FK,%s,%s,%s,%s" % (str(kpoi), str(lab), str(value), str(value2))
         return self.run(command, **kwargs)
 
-    def rsopt(self, opt="", filename="", ext="", dir="", **kwargs):
+    def rsopt(self, opt="", filename="", ext="", dir_="", **kwargs):
         """APDL Command: RSOPT
 
         Creates or loads the radiosity mapping data file for SURF251 or SURF252
@@ -7323,7 +7323,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Filename extension for radiosity mapping data file (default =
             .rsm).
 
-        dir
+        dir_
             Directory path for radiosity mapping data file. If you do not
             specify a directory path, it will default to your working
             directory.
@@ -7340,7 +7340,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "RSOPT,%s,%s,%s,%s" % (str(opt), str(filename), str(ext), str(dir))
+        command = "RSOPT,%s,%s,%s,%s" % (str(opt), str(filename), str(ext), str(dir_))
         return self.run(command, **kwargs)
 
     def pnum(self, label="", key="", **kwargs):
@@ -13196,14 +13196,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "VPLOT,%s,%s,%s,%s,%s" % (str(nv1), str(nv2), str(ninc), str(degen), str(scale))
         return self.run(command, **kwargs)
 
-    def rmdir(self, dir="", **kwargs):
+    def rmdir(self, dir_="", **kwargs):
         """APDL Command: /RMDIR
 
         Removes (deletes) a directory.
 
         Parameters
         ----------
-        dir
+        dir_
             The directory to remove. If no path is provided, it will be assumed
             to be in the current working directory. All files in the directory
             are also removed.
@@ -13213,7 +13213,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Removes a directory on the computer ANSYS is currently running on. No
         warning or prompt is given, so use with extreme caution.
         """
-        command = "/RMDIR,%s" % (str(dir))
+        command = "/RMDIR,%s" % (str(dir_))
         return self.run(command, **kwargs)
 
     def jpeg(self, kywrd="", opt="", **kwargs):
@@ -47080,7 +47080,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MFCLEAR,%s,%s" % (str(option), str(value))
         return self.run(command, **kwargs)
 
-    def eorient(self, etype="", dir="", toler="", **kwargs):
+    def eorient(self, etype="", dir_="", toler="", **kwargs):
         """APDL Command: EORIENT
 
         Reorients solid element normals.
@@ -47126,7 +47126,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         limitations of the SOLID185, SOLID186, and SOLSH190 elements. (Layers
         parallel to the four-node face of the prism are not supported.)
         """
-        command = "EORIENT,%s,%s,%s" % (str(etype), str(dir), str(toler))
+        command = "EORIENT,%s,%s,%s" % (str(etype), str(dir_), str(toler))
         return self.run(command, **kwargs)
 
     def secjoint(self, kywrd="", val1="", val2="", val3="", val4="", val5="",
@@ -50269,7 +50269,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/LARC,%s,%s,%s,%s,%s" % (str(xcentr), str(ycentr), str(xlrad), str(angle1), str(angle2))
         return self.run(command, **kwargs)
 
-    def directory(self, strarray="", filename="", ext="", dir="", **kwargs):
+    def directory(self, strarray="", filename="", ext="", dir_="", **kwargs):
         """APDL Command: /DIRECTORY
 
         Put the file names in the current directory into a string parameter
@@ -50303,7 +50303,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         puts them into a string parameter array. Each file will be included in
         the array as a name-extension pair.
         """
-        command = "/DIRECTORY,%s,%s,%s,%s" % (str(strarray), str(filename), str(ext), str(dir))
+        command = "/DIRECTORY,%s,%s,%s,%s" % (str(strarray), str(filename), str(ext), str(dir_))
         return self.run(command, **kwargs)
 
     def prtime(self, tmin="", tmax="", **kwargs):
@@ -50900,7 +50900,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BFDELE,%s,%s" % (str(node), str(lab))
         return self.run(command, **kwargs)
 
-    def input(self, fname="", ext="", dir="", line="", log="", **kwargs):
+    def input(self, fname="", ext="", dir_="", line="", log="", **kwargs):
         """APDL Command: /INPUT
 
         Switches the input file for the commands that follow.
@@ -50916,7 +50916,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         ext
             Filename extension (eight-character maximum).
 
-        dir
+        dir_
             Directory path (64 characters maximum). Defaults to current
             directory.
 
@@ -50970,7 +50970,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/INPUT,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(dir), str(line), str(log))
+        command = "/INPUT,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(dir_), str(line), str(log))
         return self.run(command, **kwargs)
 
     def edge(self, wn="", key="", angle="", **kwargs):
@@ -53531,7 +53531,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*WRK,%s" % (str(num))
         return self.run(command, **kwargs)
 
-    def vfopt(self, opt="", filename="", ext="", dir="", filetype="",
+    def vfopt(self, opt="", filename="", ext="", dir_="", filetype="",
               fileformat="", **kwargs):
         """APDL Command: VFOPT
 
@@ -53559,7 +53559,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         ext
             Filename extension for view factor matrix. Default = .vf.
 
-        dir
+        dir_
             Directory path for view factor matrix. If you do not specify a
             directory path, it will default to your working directory.
 
@@ -53598,7 +53598,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         For 2-D analyses, view factors are calculated in serial mode.
         """
-        command = "VFOPT,%s,%s,%s,%s,%s,%s" % (str(opt), str(filename), str(ext), str(dir), str(filetype), str(fileformat))
+        command = "VFOPT,%s,%s,%s,%s,%s,%s" % (str(opt), str(filename), str(ext), str(dir_), str(filetype), str(fileformat))
         return self.run(command, **kwargs)
 
     def kpscale(self, np1="", np2="", ninc="", rx="", ry="", rz="", kinc="",
@@ -59308,14 +59308,14 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TB,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(ntemp), str(npts), str(tbopt), str(eosopt), str(funcname))
         return self.run(command, **kwargs)
 
-    def mkdir(self, dir="", **kwargs):
+    def mkdir(self, dir_="", **kwargs):
         """APDL Command: /MKDIR
 
         Creates a directory.
 
         Parameters
         ----------
-        dir
+        dir_
             The directory to create (248 characters maximum on Linux; 233 on
             Windows). If no path is provided, it will be created in the current
             working directory. Must be a valid name (and path) for the system
@@ -59325,7 +59325,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         -----
         Creates a directory on the computer ANSYS is currently running on.
         """
-        command = "/MKDIR,%s" % (str(dir))
+        command = "/MKDIR,%s" % (str(dir_))
         return self.run(command, **kwargs)
 
     def mptres(self, lab="", mat="", **kwargs):
