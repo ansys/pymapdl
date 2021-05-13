@@ -350,12 +350,12 @@ class MapdlMath():
         self._set_mat(name, matrix, triu)
         return AnsSparseMat(name, self._mapdl)
 
-    def load_matrix_from_file(self, type=np.double, fname="file.full", matId="STIFF"):
+    def load_matrix_from_file(self, type_=np.double, fname="file.full", matId="STIFF"):
         """Load a matrix from a file"""
         name = id_generator()
         self._mapdl._log.info("Calling MAPDL to extract the %s matrix from %s",
                               matId, fname)
-        self._mapdl.run(f"*SMAT,{name},{MYCTYPE[type]},IMPORT,FULL,{fname},{matId}",
+        self._mapdl.run(f"*SMAT,{name},{MYCTYPE[type_]},IMPORT,FULL,{fname},{matId}",
                         mute=True)
         return AnsSparseMat(name, self._mapdl)
 
@@ -435,8 +435,8 @@ class MapdlMath():
         self._set_vec(vname, data)
         return AnsVec(vname, self._mapdl)
 
-    def rhs(self, type=np.double, fname="file.full"):
-        return self.getVec(type, fname, "RHS")
+    def rhs(self, type_=np.double, fname="file.full"):
+        return self.getVec(type_, fname, "RHS")
 
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
              fmin=None, fmax=None):
@@ -590,13 +590,13 @@ class MapdlMath():
         solver.factorize(mat)
         return solver
 
-    def norm(self, obj, ord="nrm2"):
+    def norm(self, obj, ord_="nrm2"):
         """ Matrix or vector norm
 
         Parameters
         ----------
         obj : ansys.mapdl.math.AnsMat or ansys.mapdl.math.AnsVec
-        ord : Order of the norm. nrm2(default), nrminf, nrm1
+        ord_ : Order of the norm. nrm2(default), nrminf, nrm1
 
         Examples
         --------
@@ -719,10 +719,10 @@ class MapdlMath():
 
 
 class ApdlMathObj:
-    def __init__(self, id, mapdl, type=ObjType.GEN):
-        self.id = id
+    def __init__(self, id_, mapdl, type_=ObjType.GEN):
+        self.id = id_
         self._mapdl = mapdl
-        self.type = type
+        self.type = type_
 
     #def __del__(self):
     #    self._mapdl._log.debug("Deleting the MAPDL Vector Object")
@@ -844,8 +844,8 @@ class ApdlMathObj:
 
 class AnsVec(ApdlMathObj):
     """APDLMath Vector Object"""
-    def __init__(self, id, mapdl, dtype=np.double, init=None):
-        ApdlMathObj.__init__(self, id, mapdl, ObjType.VEC)
+    def __init__(self, id_, mapdl, dtype=np.double, init=None):
+        ApdlMathObj.__init__(self, id_, mapdl, ObjType.VEC)
 
         if init not in ['ones', 'zeros', 'rand', None]:
             raise ValueError('Invalid init option.  Should be "ones", "zeros", "rand", or None')
@@ -918,8 +918,8 @@ class AnsVec(ApdlMathObj):
 class AnsMat(ApdlMathObj):
     """APDLMath Matrix Object"""
 
-    def __init__(self, id, mapdl, type=ObjType.DMAT):
-        ApdlMathObj.__init__(self, id, mapdl, type)
+    def __init__(self, id_, mapdl, type_=ObjType.DMAT):
+        ApdlMathObj.__init__(self, id_, mapdl, type_)
 
     @property
     def nrow(self):

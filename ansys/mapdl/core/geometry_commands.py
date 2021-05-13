@@ -755,7 +755,7 @@ class _MapdlGeometryCommands():
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse_output_volume_area(self.run(command, **kwargs))
 
-    def kbetw(self, kp1="", kp2="", kpnew="", type="", value="", **kwargs) -> int:
+    def kbetw(self, kp1="", kp2="", kpnew="", type_="", value="", **kwargs) -> int:
         """Creates a keypoint between two existing keypoints.
 
         APDL Command: KBETW
@@ -772,7 +772,7 @@ class _MapdlGeometryCommands():
             Number assigned to the new keypoint.  Defaults to the
             lowest available keypoint number.
 
-        type
+        type_
             Type of input for VALUE.
 
             RATIO - Value is the ratio of the distances between keypoints as follows:
@@ -818,10 +818,10 @@ class _MapdlGeometryCommands():
         solid modeling in a toroidal coordinate system is not
         recommended.
         """
-        command = f"KBETW,{kp1},{kp2},{kpnew},{type},{value}"
+        command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
         return parse_kpoint(self.run(command, **kwargs))
 
-    def kcenter(self, type="", val1="", val2="", val3="", val4="", kpnew="",
+    def kcenter(self, type_="", val1="", val2="", val3="", val4="", kpnew="",
                 **kwargs) -> int:
         """Creates a keypoint at the center of a circular arc defined
         by three locations.
@@ -830,7 +830,7 @@ class _MapdlGeometryCommands():
 
         Parameters
         ----------
-        type
+        type_
             Type of entity used to define the circular arc.  The
             meaning of VAL1 through VAL4 will vary depending on Type.
 
@@ -878,7 +878,7 @@ class _MapdlGeometryCommands():
         (x)(VAL1)     (x)(KPNEW)    (x)(VAL3)
 
         """
-        command = f"KCENTER,{type},{val1},{val2},{val3},{val4},{kpnew}"
+        command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
         return parse_kpoint(self.run(command, **kwargs))
 
     def kdist(self, kp1="", kp2="", **kwargs) -> list:
