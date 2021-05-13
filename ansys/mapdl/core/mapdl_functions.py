@@ -54279,33 +54279,51 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*TAXIS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(parmloc), str(naxis), str(val1), str(val2), str(val3), str(val4), str(val5), str(val6), str(val7), str(val8), str(val9), str(val10))
         return self.run(command, **kwargs)
 
-    def coriolis(self, option="", refframe="", rotdamp="", **kwargs):
+    def coriolis(self, option="", refframe="", rotdamp="", rotmass="", **kwargs):
         """APDL Command: CORIOLIS
 
         Applies the Coriolis effect to a rotating structure.
 
         Parameters
         ----------
-        option
+        option : str, bool, optional
             Flag to activate or deactivate the Coriolis effect:
 
-            1 (ON or YES) - Activate. This value is the default.
+            ``"ON"``, ``"YES"``, or ``True`` - Activate. This value is the default.
 
-            0 (OFF or NO) - Deactivate.
+            ``"OFF"``, ``"NO"``, or ``False`` - Deactivate.
 
-        refframe
+        refframe : str, bool, optional
             Flag to activate or deactivate a stationary reference frame.
 
-            1 (ON or YES) - Activate.
+            ``"ON"``, ``"YES"``, or ``True`` - Activate.
 
-            0 (OFF or NO) - Deactivate. This value is the default.
+            ``"OFF"``, ``"NO"``, or ``False`` - Deactivate. This value is the default.
 
-        rotdamp
+        rotdamp : str, bool, optional
             Flag to activate or deactivate rotating damping effect.
 
-            1 (ON or YES) - Activate.
+            ``"ON"``, ``"YES"``, or ``True`` - Activate.
 
-            0 (OFF or NO) - Deactivate. This value is the default.
+            ``"OFF"``, ``"NO"``, or ``False`` - Deactivate. This value is the default.
+
+        rotmass : str, bool, optional
+           Flag to activate or deactivate rotor mass summary printout
+           (only supported for ``refframe='on'``).
+
+           ``"ON"``, ``"YES"``, or ``True`` - Activate.
+
+           ``"OFF"``, ``"NO"``, or ``False`` - Deactivate. This value is the default.
+
+        Examples
+        --------
+        Enable the coriolis effect with a stationary reference frame.
+
+        >>> mapdl.coriolis('ON', refframe='ON')
+
+        Alternatively, ``coriolis`` supports bool parameters.
+
+        >>> mapdl.coriolis(True, refframe=True)
 
         Notes
         -----
@@ -54314,7 +54332,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         according to the designated RefFrame value. Specific
         restrictions and elements apply to each case, as follows:
 
-        ROTATING REFERENCE FRAME (RefFrame = OFF):
+        ROTATING REFERENCE FRAME ``refframe=False``):
 
         The command applies the Coriolis effect in the following
         structural element types: MASS21, SHELL181, PLANE182,
@@ -54338,7 +54356,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         issue the CORIOLIS command. Refer to Rotating Structure
         Analysis in the Advanced Analysis Guide for more information.
 
-        STATIONARY REFERENCE FRAME (RefFrame = ON):
+        STATIONARY REFERENCE FRAME ``refframe=True``):
 
         The command activates the gyroscopic damping matrix in the
         following structural elements: MASS21, BEAM188, SHELL181,
@@ -54369,8 +54387,24 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Coriolis and gyroscopic effect element formulations, see the
         Mechanical APDL Theory Reference.
 
+        Elements with layered section properties do not support
+        Coriolis effects (rotating and stationary reference frames).
+
         This command is also valid in PREP7.
         """
+        # handle bool instead of strings
+        if isinstance(option, bool):
+            option = int(option)
+
+        if isinstance(refframe, bool):
+            refframe = int(refframe)
+
+        if isinstance(rotdamp, bool):
+            rotdamp = int(rotdamp)
+
+        if isinstance(rotmass, bool):
+            rotmass = int(rotdamp)
+
         command = f"CORIOLIS,{option},,,{refframe},{rotdamp},{rotmass}"
         return self.run(command, **kwargs)
 

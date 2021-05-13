@@ -562,3 +562,13 @@ def test_lssolve(mapdl, cleared):
     mapdl.mute = False
     out = mapdl.lssolve(1, lsnum)
     assert f'Load step file number {lsnum}.  Begin solution ...' in out
+
+
+def test_coriolis(mapdl, cleared):
+    """Simply test that we're formatting the input parm for coriolis"""
+    # must be v190 or newer
+    resp = mapdl.coriolis(True, True, True, True)
+    assert 'CORIOLIS IN STATIONARY REFERENCE FRAME' in resp
+    assert 'GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED' in resp
+    assert 'ROTATING DAMPING MATRIX ACTIVATED' in resp
+    assert 'PRINT ROTOR MASS SUMMARY ACTIVATED' in resp
