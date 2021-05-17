@@ -1534,7 +1534,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         The default behavior is to consider all directions for expansion.
         """
-        command = "MODSELOPTION,%s,%s,%s,%s,%s,%s" % (str(dir1), str(dir2), str(dir3), str(dir4), str(dir5), str(dir6 ))
+        command = "MODSELOPTION,%s,%s,%s,%s,%s,%s" % (str(dir1), str(dir2), str(dir3), str(dir4), str(dir5), str(dir6))
         return self.run(command, **kwargs)
 
     def device(self, label="", key="", **kwargs):
@@ -1862,153 +1862,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         correlations are consistent with the response surfaces.
         """
         command = "RSFIT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(slab), str(name), str(rmod), str(ytrans), str(yval), str(xfilt), str(conf))
-        return self.run(command, **kwargs)
-
-    def pdlhs(self, nsim="", nrep="", isopt="", astop="", accmean="",
-              accstdv="", check="", seed="", **kwargs):
-        """APDL Command: PDLHS
-
-        Specifies options for Monte Carlo Simulations using Latin-Hypercube
-        sampling.
-
-        Parameters
-        ----------
-        nsim
-            Number of simulation loops per repetition cycle.
-
-        nrep
-            Number of repetition cycles of the analysis.
-
-        isopt
-            Latin-Hypercube sampling divides the domain of each random input
-            variable into intervals of equal probability. The interval sampling
-            option ISopt determines where the samples are located within each
-            interval.
-
-            RAND - Picks a random location within the interval (default).
-
-            MEAN - Picks the mean value location within the interval.
-
-            MEDI - Picks the median value location within the interval.
-
-        astop
-            Autostop option label.
-
-            AUTO - Enable Autostop. When Autostop is used, the PDS
-                   feature continues the simulation loops until the
-                   convergence criteria for the mean value and the
-                   standard deviation have been met or until the
-                   number of simulations NSIM are complete, whichever
-                   comes first. The convergence criteria (mean value
-                   and standard deviations of all random output
-                   parameters) are specified by the ACCMEAN and
-                   ACCSTDEV parameters. The criteria are met if the
-                   mean value and the standard deviations converge
-                   within the accuracy specified in the ACCMEAN and
-                   ACCSTDEV options.  The convergence check is done
-                   every i-th loop, where i is specified in the CHECK
-                   parameter.
-
-            ALL - Disable Autostop option. All Monte Carlo Simulations
-                  as specified by NSIM and NREP are performed
-                  (default).
-
-        accmean
-            Accuracy of the mean values of all random output
-            parameters that must be met to activate Autostop. Default
-            is 0.01 (1%). ACCMEAN is ignored for Astop = ALL. The
-            convergence for the mean values is met if for all random
-            output parameters y the following equation is true:
-
-        accstdev
-            Accuracy of the standard deviations of all random output
-            parameters that must be met to activate Autostop. The
-            default is 0.02 (2%).  ACCSTDEV is ignored for Astop =
-            ALL. The convergence for the standard deviations is met if
-            for all random output parameters y the following equation
-            is true:
-
-        check
-            Sets how often conditions for convergence are checked for
-            Autostop.  The PDS feature checks if the convergence
-            criteria are met every i-th loop, where i is given by the
-            CHECK parameter. The default value is 10. It not
-            recommended to use CHECK = 1, because it could cause
-            Autostop to terminate the simulations prematurely. The
-            mean values and standard deviation might not show large
-            differences between all simulation loops but might still
-            have a visible "global" trend if viewed over several
-            simulations. This behavior indicates that convergence has
-            not really been achieved. If you set CHECK = 1, then
-            Autostop is not able to detect such a global trend.  CHECK
-            is ignored for Astop = ALL.
-
-        seed
-            Seed value label. Random number generators require a seed
-            value that is used to calculate the next random
-            number. After each random number generation finishes, the
-            seed value is updated and is used again to calculate the
-            next random number. ANSYS initializes the seed value with
-            the system time when the ANSYS session started.
-
-            CONT - Continues updating using the derived seed value (default).
-
-            TIME - Initializes the seed value with the system
-                   time. You can use this if you want the seed value
-                   set to a specific value for one analysis and then
-                   you want to continue with a "random" seed in the
-                   next analysis. It is not recommended to "randomize"
-                   the seed value with the Seed = TIME option for
-                   multiple analyses. If the Monte Carlo simulations
-                   requested with this command will be appended to
-                   previously existing simulations, then the Seed
-                   option is ignored and Seed = CONT is used.
-
-            INIT - Initializes the seed value using 123457 (a typical
-                   recommendation). This option leads to identical
-                   random numbers for all random input variables when
-                   the exact analysis will be repeated, making it
-                   useful for benchmarking and validation purposes
-                   (where identical random numbers are desired). If
-                   the Monte Carlo simulations requested with this
-                   command will be appended to previously existing
-                   simulations, then the Seed option is ignored and
-                   Seed = CONT is used.
-
-            Value - Uses the specified (positive) value for the
-                    initialization of the seed value.  This option has
-                    the same effect as Seed = INIT, except you can
-                    chose an arbitrary (positive) number for the
-                    initialization. If the Monte Carlo simulations
-                    requested with this command will be appended to
-                    previously existing simulations, then the Seed
-                    option is ignored and Seed = CONT is used.
-
-        Notes
-        -----
-        Defines the number of simulations per repetition cycle, number
-        of repetition cycles, specification of the Autostop option,
-        checking frequency for the Autostop option, and the seed value
-        for random number generation.
-
-        For Latin-Hypercube sampling, it is advantageous to divide the
-        total number of requested simulations into a few
-        repetitions. This adds more randomness to the sampling
-        process. If NTOT is the total number of simulations, then as a
-        rough rule of thumb NTOT should be NREP = repetitions. The
-        number obtained with this rule of thumb must be adjusted such
-        that NTOT = NREP*NSIM. For example if NTOT = 1000 then NREP =
-        = 10, so the 1000 simulations can be done in 100 simulations
-        with 10 repetitions. If for example NTOT = 100 then NREP = =
-        3.16, which means that the 100 simulations could be broken up
-        into either 2*50 or 4*25 simulations.
-
-        If Autostop is enabled then the maximum number of simulations
-        to be performed is given by NSIM*NREP. The Autostop option
-        will terminate the simulations before the NSIM*NREP
-        simulations are done if the convergence criteria are met.
-        """
-        command = f"PDLHS,{nsim},{nrep},{isopt},,{astop},{accmean},{accstdv},{check},{seed}"
         return self.run(command, **kwargs)
 
     def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
@@ -2581,7 +2434,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/FILNAME,%s,%s" % (str(fname), str(key))
         return self.run(command, **kwargs)
 
-    def cformat(self, nfirst="", nl_ast="", **kwargs):
+    def cformat(self, nfirst="", nlast="", **kwargs):
         """APDL Command: /CFORMAT
 
         Controls the graphical display of alphanumeric character strings for
@@ -2624,7 +2477,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/CFORMAT,%s,%s" % (str(nfirst), str(nl_ast))
+        command = "/CFORMAT,%s,%s" % (str(nfirst), str(nlast))
         return self.run(command, **kwargs)
 
     def radopt(self, fluxtol="", solver="", maxiter="",
@@ -3244,7 +3097,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NEQIT,%s,%s" % (str(neqit), str(forcekey))
         return self.run(command, **kwargs)
 
-    def bfescal(self, lab="", fact="", tb_ase="", **kwargs):
+    def bfescal(self, lab="", fact="", tbase="", **kwargs):
         """APDL Command: BFESCAL
 
         Scales element body force loads.
@@ -3278,7 +3131,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFESCAL,%s,%s,%s" % (str(lab), str(fact), str(tb_ase))
+        command = "BFESCAL,%s,%s,%s" % (str(lab), str(fact), str(tbase))
         return self.run(command, **kwargs)
 
     def edtp(self, option="", value1="", value2="", **kwargs):
@@ -3393,7 +3246,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ARCTRM,%s,%s,%s,%s" % (str(lab), str(val), str(node), str(dof))
         return self.run(command, **kwargs)
 
-    def bfv(self, volu="", lab="", val1="", val2="", val3="", ph_ase="",
+    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
             **kwargs):
         """APDL Command: BFV
 
@@ -3445,7 +3298,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFV,%s,%s,%s,%s,%s,%s" % (str(volu), str(lab), str(val1), str(val2), str(val3), str(ph_ase))
+        command = "BFV,%s,%s,%s,%s,%s,%s" % (str(volu), str(lab), str(val1), str(val2), str(val3), str(phase))
         return self.run(command, **kwargs)
 
     def anfile(self, lab="", fname="", ext="", **kwargs):
@@ -7889,7 +7742,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CHKMSH,%s" % (str(comp))
         return self.run(command, **kwargs)
 
-    def edasmp(self, option="", _asmid="", part1="", part2="", part3="",
+    def edasmp(self, option="", asmid="", part1="", part2="", part3="",
                part4="", part5="", part6="", part7="", part8="", part9="",
                part10="", part11="", part12="", part13="", part14="",
                part15="", part16="", **kwargs):
@@ -7927,7 +7780,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDASMP,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(_asmid), str(part1), str(part2), str(part3), str(part4), str(part5), str(part6), str(part7), str(part8), str(part9), str(part10), str(part11), str(part12), str(part13), str(part14), str(part15), str(part16))
+        command = "EDASMP,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(asmid), str(part1), str(part2), str(part3), str(part4), str(part5), str(part6), str(part7), str(part8), str(part9), str(part10), str(part11), str(part12), str(part13), str(part14), str(part15), str(part16))
         return self.run(command, **kwargs)
 
     def vput(self, par="", ir="", tstrt="", kcplx="", name="", **kwargs):
@@ -8465,7 +8318,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCNSTR,%s,%s,%s,%s,%s" % (str(option), str(ctype), str(comp1), str(comp2), str(val1))
         return self.run(command, **kwargs)
 
-    def slist(self, sfirst="", sl_ast="", sinc="", details="", type_="",
+    def slist(self, sfirst="", slast="", sinc="", details="", type_="",
               **kwargs):
         """APDL Command: SLIST
 
@@ -8519,7 +8372,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Following is example output from the SLIST,,,,BRIEF command for a
         rectangular beam section subtype (SECTYPE,,BEAM,RECT):
         """
-        command = "SLIST,%s,%s,%s,%s,%s" % (str(sfirst), str(sl_ast), str(sinc), str(details), str(type_))
+        command = "SLIST,%s,%s,%s,%s,%s" % (str(sfirst), str(slast), str(sinc), str(details), str(type_))
         return self.run(command, **kwargs)
 
     def pdinqr(self, rpar="", name="", type_="", val="", **kwargs):
@@ -9719,7 +9572,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CECHECK,%s,%s,%s" % (str(itemlab), str(tolerance), str(dof))
         return self.run(command, **kwargs)
 
-    def dcum(self, oper="", rfact="", ifact="", tb_ase="", **kwargs):
+    def dcum(self, oper="", rfact="", ifact="", tbase="", **kwargs):
         """APDL Command: DCUM
 
         Specifies that DOF constraint values are to be accumulated.
@@ -9778,7 +9631,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "DCUM,%s,%s,%s,%s" % (str(oper), str(rfact), str(ifact), str(tb_ase))
+        command = "DCUM,%s,%s,%s,%s" % (str(oper), str(rfact), str(ifact), str(tbase))
         return self.run(command, **kwargs)
 
     def display(self, **kwargs):
@@ -10019,7 +9872,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NLIST,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node1), str(node2), str(ninc), str(lcoord), str(sort1), str(sort2), str(sort3), str(kinternal))
         return self.run(command, **kwargs)
 
-    def trpoin(self, x="", y="", z="", vx="", vy="", vz="", chrg="", m_ass="",
+    def trpoin(self, x="", y="", z="", vx="", vy="", vz="", chrg="", mass="",
                **kwargs):
         """APDL Command: TRPOIN
 
@@ -10056,11 +9909,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "TRPOIN,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x), str(y), str(z), str(vx), str(vy), str(vz), str(chrg), str(m_ass))
+        command = "TRPOIN,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x), str(y), str(z), str(vx), str(vy), str(vz), str(chrg), str(mass))
         return self.run(command, **kwargs)
 
     def edcadapt(self, freq="", tol="", opt="", maxlvl="", btime="", dtime="",
-                 lcid="", adpsize="", adp_ass="", ireflg="", adpene="",
+                 lcid="", adpsize="", adpass="", ireflg="", adpene="",
                  adpth="", maxel="", **kwargs):
         """APDL Command: EDCADAPT
 
@@ -10158,7 +10011,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDCADAPT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(freq), str(tol), str(opt), str(maxlvl), str(btime), str(dtime), str(lcid), str(adpsize), str(adp_ass), str(ireflg), str(adpene), str(adpth), str(maxel))
+        command = "EDCADAPT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(freq), str(tol), str(opt), str(maxlvl), str(btime), str(dtime), str(lcid), str(adpsize), str(adpass), str(ireflg), str(adpene), str(adpth), str(maxel))
         return self.run(command, **kwargs)
 
     def pcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
@@ -10472,7 +10325,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         return self.run(f"MPWRITE,{fname},{ext},,{lib},{mat}", **kwargs)
 
-    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", ph_ase="",
+    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="",
             **kwargs):
         """APDL Command: BFK
 
@@ -10527,7 +10380,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFK,%s,%s,%s,%s,%s,%s" % (str(kpoi), str(lab), str(val1), str(val2), str(val3), str(ph_ase))
+        command = "BFK,%s,%s,%s,%s,%s,%s" % (str(kpoi), str(lab), str(val1), str(val2), str(val3), str(phase))
         return self.run(command, **kwargs)
 
     def bfklist(self, kpoi="", lab="", **kwargs):
@@ -17563,7 +17416,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PRENERGY,%s,%s,%s,%s,%s,%s,%s" % (str(energytype), str(cname1), str(cname2), str(cname3), str(cname4), str(cname5), str(cname6))
         return self.run(command, **kwargs)
 
-    def ednb(self, option="", cname="", ad="", _as="", **kwargs):
+    def ednb(self, option="", cname="", ad="", as_="", **kwargs):
         """APDL Command: EDNB
 
         Defines a nonreflecting boundary in an explicit dynamic analysis.
@@ -17592,7 +17445,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             1 - Dilatational activation flag is on.
 
-        as
+        as_
             Activation flag for shear waves (dampers tangent to waves).
 
             0 - Shear activation flag is off (default).
@@ -17619,7 +17472,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDNB,%s,%s,%s,%s" % (str(option), str(cname), str(ad), str(_as))
+        command = "EDNB,%s,%s,%s,%s" % (str(option), str(cname), str(ad), str(as_))
         return self.run(command, **kwargs)
 
     def annot(self, lab="", val1="", val2="", **kwargs):
@@ -20297,7 +20150,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         return self.run(command, **kwargs)
 
     def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
-               tintopt="",vaout="", dmpsfreq="", engcalc="", mckey="", **kwargs):
+               tintopt="", vaout="", dmpsfreq="", engcalc="", mckey="", **kwargs):
         """APDL Command: TRNOPT
 
         Specifies transient analysis options.
@@ -21848,7 +21701,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCTS,%s,%s" % (str(dtms), str(tssfac))
         return self.run(command, **kwargs)
 
-    def nsmooth(self, np_ass="", **kwargs):
+    def nsmooth(self, npass="", **kwargs):
         """APDL Command: NSMOOTH
 
         Smooths selected nodes among selected elements.
@@ -21867,7 +21720,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         undisturbed (usually desirable), the boundary nodes should be
         unselected before issuing NSMOOTH.
         """
-        command = "NSMOOTH,%s" % (str(np_ass))
+        command = "NSMOOTH,%s" % (str(npass))
         return self.run(command, **kwargs)
 
     def linv(self, nl="", nv="", **kwargs):
@@ -22103,7 +21956,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFFUN,%s,%s,%s" % (str(lab), str(par), str(par2))
         return self.run(command, **kwargs)
 
-    def bfecum(self, lab="", oper="", fact="", tb_ase="", **kwargs):
+    def bfecum(self, lab="", oper="", fact="", tbase="", **kwargs):
         """APDL Command: BFECUM
 
         Specifies whether to ignore subsequent element body force loads.
@@ -22148,7 +22001,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFECUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(tb_ase))
+        command = "BFECUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(tbase))
         return self.run(command, **kwargs)
 
     def config(self, lab="", value="", **kwargs):
@@ -27520,7 +27373,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "VGET,%s,%s,%s,%s" % (str(par), str(ir), str(tstrt), str(kcplx))
         return self.run(command, **kwargs)
 
-    def dval(self, b_aseid="", lab="", value="", value2="", keycal="",
+    def dval(self, baseid="", lab="", value="", value2="", keycal="",
              **kwargs):
         """APDL Command: DVAL
 
@@ -27575,7 +27428,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Enforced Motion Method for Transient and Harmonic Analyses in the
         Mechanical APDL Theory Reference.
         """
-        command = "DVAL,%s,%s,%s,%s,%s" % (str(b_aseid), str(lab), str(value), str(value2), str(keycal))
+        command = "DVAL,%s,%s,%s,%s,%s" % (str(baseid), str(lab), str(value), str(value2), str(keycal))
         return self.run(command, **kwargs)
 
     def rate(self, option="", **kwargs):
@@ -35804,7 +35657,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/CYCEXPAND,%s,%s,%s,%s" % (str(wn), str(option), str(value1), str(value2))
         return self.run(command, **kwargs)
 
-    def ptr(self, loc="", b_ase="", **kwargs):
+    def ptr(self, loc="", base="", **kwargs):
         """APDL Command: PTR
 
         Dumps the record of a binary file.
@@ -35820,7 +35673,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Dumps the record of the file named on the AUX2 FILEAUX2 command
         according the format specified on the FORM command.
         """
-        command = "PTR,%s,%s" % (str(loc), str(b_ase))
+        command = "PTR,%s,%s" % (str(loc), str(base))
         return self.run(command, **kwargs)
 
     def udoc(self, wind="", cl_ass="", key="", **kwargs):
@@ -37703,7 +37556,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FILLDATA,%s,%s,%s,%s,%s,%s" % (str(ir), str(lstrt), str(lstop), str(linc), str(value), str(dval))
         return self.run(command, **kwargs)
 
-    def rbe3(self, m_aster="", dof="", slaves="", wtfact="", **kwargs):
+    def rbe3(self, master="", dof="", slaves="", wtfact="", **kwargs):
         """APDL Command: RBE3
 
         Distributes the force/moment applied at the master node to a set  of
@@ -37770,7 +37623,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in SOLUTION.
         """
-        command = "RBE3,%s,%s,%s,%s" % (str(m_aster), str(dof), str(slaves), str(wtfact))
+        command = "RBE3,%s,%s,%s,%s" % (str(master), str(dof), str(slaves), str(wtfact))
         return self.run(command, **kwargs)
 
     def vscale(self, wn="", vratio="", key="", **kwargs):
@@ -40889,7 +40742,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/FORMAT,%s,%s,%s,%s,%s,%s" % (str(ndigit), str(ftype), str(nwidth), str(dsignf), str(line), str(char))
         return self.run(command, **kwargs)
 
-    def bfscale(self, lab="", fact="", tb_ase="", **kwargs):
+    def bfscale(self, lab="", fact="", tbase="", **kwargs):
         """APDL Command: BFSCALE
 
         Scales body force loads at nodes.
@@ -40924,7 +40777,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFSCALE,%s,%s,%s" % (str(lab), str(fact), str(tb_ase))
+        command = "BFSCALE,%s,%s,%s" % (str(lab), str(fact), str(tbase))
         return self.run(command, **kwargs)
 
     def reorder(self, **kwargs):
@@ -42010,7 +41863,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/GFILE,%s" % (str(size))
         return self.run(command, **kwargs)
 
-    def hrocean(self, type_="", nph_ase="", **kwargs):
+    def hrocean(self, type_="", nphase="", **kwargs):
         """APDL Command: HROCEAN
 
         Perform the harmonic ocean wave procedure (HOWP).
@@ -42075,7 +41928,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "HROCEAN,%s,%s" % (str(type_), str(nph_ase))
+        command = "HROCEAN,%s,%s" % (str(type_), str(nphase))
         return self.run(command, **kwargs)
 
     def pcgopt(self, lev_diff ="", reduceio="", strmck="", wrtfull="",
@@ -42888,7 +42741,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CMDOMEGA,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(cm_name), str(domegax), str(domegay), str(domegaz), str(x1), str(y1), str(z1), str(x2), str(y2), str(z2))
         return self.run(command, **kwargs)
 
-    def cerig(self, m_aste="", slave="", ldof="", ldof2="", ldof3="", ldof4="",
+    def cerig(self, maste="", slave="", ldof="", ldof2="", ldof3="", ldof4="",
               ldof5="", **kwargs):
         """APDL Command: CERIG
 
@@ -43001,7 +42854,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Deleting constraint equations (CEDELE,ALL) cannot always maintain the
         consistency among load steps.
         """
-        command = "CERIG,%s,%s,%s,%s,%s,%s,%s" % (str(m_aste), str(slave), str(ldof), str(ldof2), str(ldof3), str(ldof4), str(ldof5))
+        command = "CERIG,%s,%s,%s,%s,%s,%s,%s" % (str(maste), str(slave), str(ldof), str(ldof2), str(ldof3), str(ldof4), str(ldof5))
         return self.run(command, **kwargs)
 
     def gmarker(self, curve="", key="", incr="", **kwargs):
@@ -49278,7 +49131,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         if CURVNOBeg is used, up to 10 curves are displayed. CURVNOBeg is the
         beginning of the curve number range of interest.
         """
-        command = "SPGRAPH,%s,%s,%s" % (str(tblno), str(curvno), str(curvnobeg ))
+        command = "SPGRAPH,%s,%s,%s" % (str(tblno), str(curvno), str(curvnobeg))
         return self.run(command, **kwargs)
 
     def ftype(self, filetype="", prestype="", **kwargs):
@@ -50346,7 +50199,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         with the MSAVE,ON command in a modal analysis with the PCG Lanczos mode
         extraction method.
         """
-        command = "FRQSCL,%s" % (str(scaling ))
+        command = "FRQSCL,%s" % (str(scaling))
         return self.run(command, **kwargs)
 
     def fj(self, elem="", label="", value="", **kwargs):
@@ -53867,7 +53720,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BIOOPT,"
         return self.run(command, **kwargs)
 
-    def expand(self, nrepeat="", hindex="", icsys="", sctang="", ph_ase="",
+    def expand(self, nrepeat="", hindex="", icsys="", sctang="", phase="",
                **kwargs):
         """APDL Command: EXPAND
 
@@ -53942,7 +53795,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EXPAND,%s,%s,%s,%s,%s" % (str(nrepeat), str(hindex), str(icsys), str(sctang), str(ph_ase))
+        command = "EXPAND,%s,%s,%s,%s,%s" % (str(nrepeat), str(hindex), str(icsys), str(sctang), str(phase))
         return self.run(command, **kwargs)
 
     def fitem(self, nfield="", item="", itemy="", itemz="", **kwargs):
@@ -54502,7 +54355,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         return self.run(f"RESUME,{fname},{ext},,{nopar},{knoplot}", **kwargs)
 
-    def stargo(self, b_ase="", **kwargs):
+    def stargo(self, base="", **kwargs):
         """APDL Command: *GO
 
         Causes a specified line on the input file to be read next.
@@ -54526,7 +54379,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "*GO,%s" % (str(b_ase))
+        command = "*GO,%s" % (str(base))
         return self.run(command, **kwargs)
 
     def pscr(self, kywrd="", key="", **kwargs):
@@ -56351,7 +56204,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PDRESU,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def dscale(self, rfact="", ifact="", tb_ase="", **kwargs):
+    def dscale(self, rfact="", ifact="", tbase="", **kwargs):
         """APDL Command: DSCALE
 
         Scales DOF constraint values.
@@ -56391,7 +56244,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "DSCALE,%s,%s,%s" % (str(rfact), str(ifact), str(tb_ase))
+        command = "DSCALE,%s,%s,%s" % (str(rfact), str(ifact), str(tbase))
         return self.run(command, **kwargs)
 
     def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
@@ -57162,8 +57015,8 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "~CAT5IN,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(extension), str(path), str(entity), str(fmt), str(nocl), str(noan))
         return self.run(command, **kwargs)
 
-    # def if(self, val1="", oper1="", val2="", b_ase1="", val3="", oper2="",
-    #        val4="", b_ase2="", **kwargs):
+    # def if(self, val1="", oper1="", val2="", base1="", val3="", oper2="",
+    #        val4="", base2="", **kwargs):
     #     """APDL Command: *IF
 
     #     Conditionally causes commands to be read.
@@ -57500,7 +57353,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FP,%s,%s,%s,%s,%s,%s,%s" % (str(stitm), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
         return self.run(command, **kwargs)
 
-    def units(self, label="", lenfact="", m_assfact="", timefact="",
+    def units(self, label="", lenfact="", massfact="", timefact="",
               tempfact="", toffset="", chargefact="", forcefact="",
               heatfact="", **kwargs):
         """APDL Command: /UNITS
@@ -57567,7 +57420,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        command = "/UNITS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(label), str(lenfact), str(m_assfact), str(timefact), str(tempfact), str(toffset), str(chargefact), str(forcefact), str(heatfact))
+        command = "/UNITS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(label), str(lenfact), str(massfact), str(timefact), str(tempfact), str(toffset), str(chargefact), str(forcefact), str(heatfact))
         return self.run(command, **kwargs)
 
     def term(self, kywrd="", opt1="", opt2="", opt3="", **kwargs):
@@ -58500,7 +58353,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Table: 220:: : PLNSOL - Valid Item and Component Labels
         """
-        command = "PLNSOL,%s,%s,%s,%s,%s" % (str(item), str(comp), str(kund), str(fact), str(fileid ))
+        command = "PLNSOL,%s,%s,%s,%s,%s" % (str(item), str(comp), str(kund), str(fact), str(fileid))
         return self.run(command, **kwargs)
 
     def cmedit(self, aname="", oper="", cnam1="", cnam2="", cnam3="", cnam4="",
@@ -58566,7 +58419,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "AOFFST,%s,%s,%s" % (str(narea), str(dist), str(kinc))
         return self.run(command, **kwargs)
 
-    def lcoper(self, oper="", lc_ase1="", oper2="", lc_ase2="", **kwargs):
+    def lcoper(self, oper="", lcase1="", oper2="", lcase2="", **kwargs):
         """APDL Command: LCOPER
 
         Performs load case operations.
@@ -58655,7 +58508,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         If Oper2=CPXMAX, the derived stresses and strain calculation do not
         apply to line elements.
         """
-        command = "LCOPER,%s,%s,%s,%s" % (str(oper), str(lc_ase1), str(oper2), str(lc_ase2))
+        command = "LCOPER,%s,%s,%s,%s" % (str(oper), str(lcase1), str(oper2), str(lcase2))
         return self.run(command, **kwargs)
 
     def psdspl(self, tblno="", rmin="", rmax="", **kwargs):
@@ -59848,7 +59701,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "SPDAMP,%s,%s,%s" % (str(tblno), str(curvno), str(dampratio ))
+        command = "SPDAMP,%s,%s,%s" % (str(tblno), str(curvno), str(dampratio))
         return self.run(command, **kwargs)
 
     def sumtype(self, label="", **kwargs):
@@ -64095,7 +63948,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SEGEN,%s,%s,%s,%s" % (str(mode), str(nsuper), str(mdof), str(stopstage))
         return self.run(command, **kwargs)
 
-    def bfcum(self, lab="", oper="", fact="", tb_ase="", **kwargs):
+    def bfcum(self, lab="", oper="", fact="", tbase="", **kwargs):
         """APDL Command: BFCUM
 
         Specifies that nodal body force loads are to be accumulated.
@@ -64148,7 +64001,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is also valid in PREP7.
         """
-        command = "BFCUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(tb_ase))
+        command = "BFCUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(tbase))
         return self.run(command, **kwargs)
 
     def andscl(self, nfram="", delay="", ncycl="", **kwargs):
@@ -65373,7 +65226,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PLTRAC,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(analopt), str(item), str(comp), str(trpnum), str(name), str(mxloop), str(toler), str(option), str(escl), str(mscl))
         return self.run(command, **kwargs)
 
-    def sdelete(self, sfirst="", sl_ast="", sinc="", knoclean="", lchk="",
+    def sdelete(self, sfirst="", slast="", sinc="", knoclean="", lchk="",
                 **kwargs):
         """APDL Command: SDELETE
 
@@ -65417,7 +65270,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Deletes one or more specified sections and their associated data from
         the ANSYS database.
         """
-        command = "SDELETE,%s,%s,%s,%s,%s" % (str(sfirst), str(sl_ast), str(sinc), str(knoclean), str(lchk))
+        command = "SDELETE,%s,%s,%s,%s,%s" % (str(sfirst), str(slast), str(sinc), str(knoclean), str(lchk))
         return self.run(command, **kwargs)
 
     def lcsl(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
@@ -66294,7 +66147,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         return self.run(command, **kwargs)
 
     def edload(self, option="", lab="", key="", cname="", par1="", par2="",
-               ph_ase="", lcid="", scale="", btime="", dtime="", **kwargs):
+               phase="", lcid="", scale="", btime="", dtime="", **kwargs):
         """APDL Command: EDLOAD
 
         Specifies loads for an explicit dynamics analysis.
@@ -66407,7 +66260,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         element number can be specified for Par1 and Par2; if none is
         specified, array element 1 is used by default.
         """
-        command = "EDLOAD,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(lab), str(key), str(cname), str(par1), str(par2), str(ph_ase), str(lcid), str(scale), str(btime), str(dtime))
+        command = "EDLOAD,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(lab), str(key), str(cname), str(par1), str(par2), str(phase), str(lcid), str(scale), str(btime), str(dtime))
         return self.run(command, **kwargs)
 
     def dkdele(self, kpoi="", lab="", **kwargs):
