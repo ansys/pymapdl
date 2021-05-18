@@ -16,7 +16,6 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl_functions import _MapdlCommands
 from ansys.mapdl.core.misc import (random_string, supress_logging,
                                    run_as_prep7, last_created)
-from ansys.mapdl.core.element_commands import element_commands
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
@@ -66,7 +65,7 @@ def parse_to_short_cmd(command):
     try:
         short_cmd = command.split(',')[0]
         return short_cmd[:4].upper()
-    except:  # pragma: no cover
+    except Exception:  # pragma: no cover
         return
 
 
@@ -340,7 +339,7 @@ class _MapdlCore(_MapdlCommands):
             if self._exited:
                 return 'MAPDL exited'
             stats = self.slashstatus('PROD')
-        except:  # pragma: no cover
+        except Exception:  # pragma: no cover
             return 'MAPDL exited'
 
         st = stats.find('*** Products ***')
@@ -1204,12 +1203,12 @@ class _MapdlCore(_MapdlCommands):
             filename = self.inquire('RSTFILE')
             if not filename:
                 filename = self.jobname
-        except:
+        except Exception:
             filename = self.jobname
 
         try:
             ext = self.inquire('RSTEXT')
-        except:  # check if rth file exists
+        except Exception:  # check if rth file exists
             ext = ''
 
         if ext == '':
@@ -1234,7 +1233,7 @@ class _MapdlCore(_MapdlCommands):
             filename = self.inquire('RSTFILE')
             if not filename:
                 filename = self.jobname
-        except:
+        except Exception:
             filename = self.jobname
 
         # ansys decided that a jobname ended in a number needs a bonus "_"
@@ -1492,7 +1491,7 @@ class _MapdlCore(_MapdlCommands):
         value = response.split('=')[-1].strip()
         try:  # always either a float or string
             return float(value)
-        except:
+        except Exception:
             return value
 
     @property
@@ -1503,7 +1502,7 @@ class _MapdlCore(_MapdlCommands):
         """
         try:
             self._jobname = self.inquire('JOBNAME')
-        except:
+        except Exception:
             pass
         return self._jobname
 
@@ -1895,9 +1894,6 @@ class _MapdlCore(_MapdlCommands):
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
 
-        # command parsing
-        if short_cmd in element_commands:
-            return element_commands[short_cmd](self._response)
         if short_cmd in PLOT_COMMANDS:
             return self._display_plot(self._response)
 
@@ -2029,7 +2025,7 @@ class _MapdlCore(_MapdlCommands):
         # always attempt to cache the path
         try:
             self._path = self.inquire('DIRECTORY')
-        except:
+        except Exception:
             pass
 
         # os independent path format
@@ -2059,7 +2055,7 @@ class _MapdlCore(_MapdlCommands):
                 try:  # logger might be closed
                     if self._log is not None:
                         self._log.error('exit: %s', str(e))
-                except:
+                except Exception:
                     pass
 
     @supress_logging
