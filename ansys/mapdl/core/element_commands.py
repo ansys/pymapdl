@@ -1,7 +1,7 @@
 """Parse element commands"""
 import re
 from typing import Optional, Union
-from .mapdl_types import MapdlInt
+from .mapdl_types import MapdlInt, MapdlFloat
 
 
 def parse_e(msg: Optional[str]) -> Optional[int]:
@@ -130,7 +130,8 @@ class _MapdlElementCommands:
         command = "ET,{},{},{},{},{},{},{},{},{}".format(itype, ename, kop1, kop2, kop3, kop4, kop5, kop6, inopr)
         return parse_et(self.run(command, **kwargs))
 
-    def ewrite(self, fname="", ext="", kappnd="", format_="", **kwargs):
+    def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
+               format_: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EWRITE
 
         Writes elements to a file.
@@ -183,7 +184,7 @@ class _MapdlElementCommands:
         """
         return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
-    def etable(self, lab="", item="", comp="", option="", **kwargs):
+    def etable(self, lab: str = "", item: str = "", comp: str = "", option: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ETABLE
 
         Fills a table of element values for further processing.
@@ -316,7 +317,7 @@ class _MapdlElementCommands:
         command = "ETABLE,%s,%s,%s,%s" % (str(lab), str(item), str(comp), str(option))
         return self.run(command, **kwargs)
 
-    def eusort(self, **kwargs):
+    def eusort(self, **kwargs) -> Optional[str]:
         """APDL Command: EUSORT
 
         Restores original order of the element table.
@@ -329,7 +330,7 @@ class _MapdlElementCommands:
         command = "EUSORT,"
         return self.run(command, **kwargs)
 
-    def edtp(self, option="", value1="", value2="", **kwargs):
+    def edtp(self, option: MapdlInt = "", value1: MapdlInt = "", value2: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EDTP
 
         Plots explicit elements based on their time step size.
@@ -387,7 +388,7 @@ class _MapdlElementCommands:
         command = "EDTP,%s,%s,%s" % (str(option), str(value1), str(value2))
         return self.run(command, **kwargs)
 
-    def estif(self, kmult="", **kwargs):
+    def estif(self, kmult: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: ESTIF
 
         Specifies the matrix multiplier for deactivated elements.
@@ -408,8 +409,8 @@ class _MapdlElementCommands:
         command = "ESTIF,%s" % (str(kmult))
         return self.run(command, **kwargs)
 
-    def emodif(self, iel="", stloc="", i1="", i2="", i3="", i4="", i5="",
-               i6="", i7="", i8="", **kwargs):
+    def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "", i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "", i4: MapdlInt = "",
+               i5: MapdlInt = "", i6: MapdlInt = "", i7: MapdlInt = "", i8: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EMODIF
 
         Modifies a previously defined element.
@@ -426,7 +427,7 @@ class _MapdlElementCommands:
             Starting location (n) of first node to be modified or the attribute
             label.
 
-        i1, i2, i3, . . . , i8
+        i1, i2, i3, i4, i5, i6, i7, i8
             Replace the previous node numbers assigned to this element with
             these corresponding values. A (blank) retains the previous value
             (except in the I1 field, which resets the STLOC node number to
@@ -440,7 +441,8 @@ class _MapdlElementCommands:
         command = "EMODIF,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(stloc), str(i1), str(i2), str(i3), str(i4), str(i5), str(i6), str(i7), str(i8))
         return self.run(command, **kwargs)
 
-    def emore(self, q="", r="", s="", t="", u="", v="", w="", x="", **kwargs):
+    def emore(self, q: MapdlInt = "", r: MapdlInt = "", s: MapdlInt = "", t: MapdlInt = "", u: MapdlInt = "",
+              v: MapdlInt = "", w: MapdlInt = "", x: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EMORE
 
         Adds more nodes to the just-defined element.
@@ -462,8 +464,8 @@ class _MapdlElementCommands:
         command = "EMORE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(q), str(r), str(s), str(t), str(u), str(v), str(w), str(x))
         return self.run(command, **kwargs)
 
-    def esol(self, nvar="", elem="", node="", item="", comp="", name="",
-             **kwargs):
+    def esol(self, nvar: MapdlInt = "", elem: Union[str, int] = "", node: Union[str, int] = "", item: str = "",
+             comp: str = "", name: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESOL
 
         Specifies element data to be stored from the results file.
@@ -540,7 +542,7 @@ class _MapdlElementCommands:
         command = "ESOL,%s,%s,%s,%s,%s,%s" % (str(nvar), str(elem), str(node), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
-    def eshape(self, scale="", key="", **kwargs):
+    def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: /ESHAPE
 
         Displays elements with shapes determined from the real constants or
@@ -663,7 +665,7 @@ class _MapdlElementCommands:
         command = "/ESHAPE,%s,%s" % (str(scale), str(key))
         return self.run(command, **kwargs)
 
-    def etype(self, **kwargs):
+    def etype(self, **kwargs) -> Optional[str]:
         """APDL Command: ETYPE
 
         Specifies "Element types" as the subsequent status topic.
@@ -682,7 +684,7 @@ class _MapdlElementCommands:
         command = "ETYPE,"
         return self.run(command, **kwargs)
 
-    def etcontrol(self, eltech="", eldegene="", **kwargs):
+    def etcontrol(self, eltech: str = "", eldegene: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ETCONTROL
 
         Control the element technologies used in element formulation (for
@@ -730,7 +732,7 @@ class _MapdlElementCommands:
         command = "ETCONTROL,%s,%s" % (str(eltech), str(eldegene))
         return self.run(command, **kwargs)
 
-    def enorm(self, enum="", **kwargs):
+    def enorm(self, enum: Union[str, int] = "", **kwargs) -> Optional[str]:
         """APDL Command: ENORM
 
         Reorients shell element normals or line element node connectivity.
@@ -788,7 +790,7 @@ class _MapdlElementCommands:
         command = "ENORM,%s" % (str(enum))
         return self.run(command, **kwargs)
 
-    def etdele(self, ityp1="", ityp2="", inc="", **kwargs):
+    def etdele(self, ityp1: Union[str, int] = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ETDELE
 
         Deletes element types.
@@ -804,7 +806,7 @@ class _MapdlElementCommands:
         command = "ETDELE,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
         return self.run(command, **kwargs)
 
-    def edele(self, iel1="", iel2="", inc="", **kwargs):
+    def edele(self, iel1: Union[str, int] = "", iel2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EDELE
 
         Deletes selected elements from the model.
@@ -833,7 +835,8 @@ class _MapdlElementCommands:
         command = "EDELE,%s,%s,%s" % (str(iel1), str(iel2), str(inc))
         return self.run(command, **kwargs)
 
-    def extopt(self, lab="", val1="", val2="", val3="", val4="", **kwargs):
+    def extopt(self, lab: str = "", val1: Union[str, int] = "", val2: Union[str, int] = "", val3: MapdlInt = "",
+               val4: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EXTOPT
 
         Controls options relating to the generation of volume elements from
@@ -947,7 +950,7 @@ class _MapdlElementCommands:
         command = "EXTOPT,%s,%s,%s,%s,%s" % (str(lab), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
-    def ereinf(self, **kwargs):
+    def ereinf(self, **kwargs) -> Optional[str]:
         """APDL Command: EREINF
 
         Generates reinforcing elements from selected existing (base) elements.
@@ -985,9 +988,10 @@ class _MapdlElementCommands:
         command = "EREINF,"
         return self.run(command, **kwargs)
 
-    def egen(self, itime="", ninc="", iel1="", iel2="", ieinc="", minc="",
-             tinc="", rinc="", cinc="", sinc="", dx="", dy="", dz="",
-             **kwargs):
+    def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "", iel1: Union[str, int] = "", iel2: MapdlInt = "",
+             ieinc: MapdlInt = "", minc: MapdlInt = "", tinc: MapdlInt = "", rinc: MapdlInt = "", cinc: MapdlInt = "",
+             sinc: MapdlInt = "", dx: MapdlFloat = "", dy: MapdlFloat = "",
+             dz: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EGEN
 
         Generates elements from an existing pattern.
@@ -1048,10 +1052,13 @@ class _MapdlElementCommands:
         node connectivity. See the element descriptions for INTER192, INTER193,
         INTER194, and INTER195 for the correct element node definition.
         """
-        command = "EGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(itime), str(ninc), str(iel1), str(iel2), str(ieinc), str(minc), str(tinc), str(rinc), str(cinc), str(sinc), str(dx), str(dy), str(dz))
+        command = "EGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(itime), str(ninc), str(iel1),
+                                                                   str(iel2), str(ieinc), str(minc),
+                                                                   str(tinc), str(rinc), str(cinc),
+                                                                   str(sinc), str(dx), str(dy), str(dz))
         return self.run(command, **kwargs)
 
-    def ealive(self, elem="", **kwargs):
+    def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EALIVE
 
         Reactivates an element (for the birth and death capability).
@@ -1088,7 +1095,7 @@ class _MapdlElementCommands:
         command = "EALIVE,%s" % (str(elem))
         return self.run(command, **kwargs)
 
-    def escheck(self, sele="", levl="", defkey="", **kwargs):
+    def escheck(self, sele: str = "", levl: str = "", defkey: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESCHECK
 
         Perform element shape checking for a selected element set.
@@ -1129,7 +1136,7 @@ class _MapdlElementCommands:
         command = "ESCHECK,%s,%s,%s" % (str(sele), str(levl), str(defkey))
         return self.run(command, **kwargs)
 
-    def esys(self, kcn="", **kwargs):
+    def esys(self, kcn: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESYS
 
         Sets the element coordinate system attribute pointer.
@@ -1163,7 +1170,7 @@ class _MapdlElementCommands:
         command = "ESYS,%s" % (str(kcn))
         return self.run(command, **kwargs)
 
-    def eslv(self, type_="", **kwargs):
+    def eslv(self, type_: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESLV
 
         Selects elements associated with the selected volumes.
@@ -1191,7 +1198,7 @@ class _MapdlElementCommands:
         command = "ESLV,%s" % (str(type_))
         return self.run(command, **kwargs)
 
-    def esla(self, type_="", **kwargs):
+    def esla(self, type_: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESLA
 
         Selects those elements associated with the selected areas.
@@ -1219,7 +1226,7 @@ class _MapdlElementCommands:
         command = "ESLA,%s" % (str(type_))
         return self.run(command, **kwargs)
 
-    def errang(self, emin="", emax="", einc="", **kwargs):
+    def errang(self, emin: MapdlInt = "", emax: MapdlInt = "", einc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ERRANG
 
         Specifies the element range to be read from a file.
@@ -1239,8 +1246,8 @@ class _MapdlElementCommands:
         command = "ERRANG,%s,%s,%s" % (str(emin), str(emax), str(einc))
         return self.run(command, **kwargs)
 
-    def erefine(self, ne1="", ne2="", ninc="", level="", depth="", post="",
-                retain="", **kwargs):
+    def erefine(self, ne1: Union[str, int] = "", ne2: MapdlInt = "", ninc: MapdlInt = "", level: MapdlInt = "",
+                depth: MapdlInt = "", post: str = "", retain: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EREFINE
 
         Refines the mesh around specified elements.
@@ -1315,11 +1322,12 @@ class _MapdlElementCommands:
 
         This command is also valid for rezoning.
         """
-        command = "EREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(ne1), str(ne2), str(ninc), str(level), str(depth), str(post), str(retain))
+        command = "EREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(ne1), str(ne2), str(ninc), str(level), str(depth),
+                                                    str(post), str(retain))
         return self.run(command, **kwargs)
 
-    def eintf(self, toler="", k="", tlab="", kcn="", dx="", dy="", dz="",
-              knonrot="", **kwargs):
+    def eintf(self, toler: MapdlFloat = "", k: MapdlInt = "", tlab: str = "", kcn: str = "", dx: MapdlFloat = "",
+              dy: MapdlFloat = "", dz: MapdlFloat = "", knonrot: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EINTF
 
         Defines two-node elements between coincident or offset nodes.
@@ -1387,10 +1395,12 @@ class _MapdlElementCommands:
         Cartesian coordinate difference for node locations only. The angle
         differences for node orientations are not checked.
         """
-        command = "EINTF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(toler), str(k), str(tlab), str(kcn), str(dx), str(dy), str(dz), str(knonrot))
+        command = "EINTF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(toler), str(k), str(tlab), str(kcn), str(dx),
+                                                     str(dy), str(dz), str(knonrot))
         return self.run(command, **kwargs)
 
-    def ensym(self, iinc="", ninc="", iel1="", iel2="", ieinc="", **kwargs):
+    def ensym(self, iinc: MapdlInt = "", ninc: MapdlInt = "", iel1: MapdlInt = "", iel2: MapdlInt = "",
+              ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ENSYM
 
         Generates elements by symmetry reflection.
@@ -1452,7 +1462,8 @@ class _MapdlElementCommands:
         """
         return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
-    def esym(self, ninc="", iel1="", iel2="", ieinc="", **kwargs):
+    def esym(self, ninc: MapdlInt = "", iel1: MapdlInt = "", iel2: MapdlInt = "",
+             ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESYM
 
         Generates elements from a pattern by a symmetry reflection.
@@ -1505,7 +1516,7 @@ class _MapdlElementCommands:
         """
         return self.run(f"ESYM,,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
-    def esll(self, type_="", **kwargs):
+    def esll(self, type_: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESLL
 
         Selects those elements associated with the selected lines.
@@ -1533,7 +1544,7 @@ class _MapdlElementCommands:
         command = "ESLL,%s" % (str(type_))
         return self.run(command, **kwargs)
 
-    def etlist(self, ityp1="", ityp2="", inc="", **kwargs):
+    def etlist(self, ityp1: MapdlInt = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ETLIST
 
         Lists currently defined element types.
@@ -1552,8 +1563,8 @@ class _MapdlElementCommands:
         command = "ETLIST,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
         return self.run(command, **kwargs)
 
-    def elist(self, iel1="", iel2="", inc="", nnkey="", rkey="", ptkey="",
-              **kwargs):
+    def elist(self, iel1: Union[str, int] = "", iel2: MapdlInt = "", inc: MapdlInt = "", nnkey: MapdlInt = "",
+              rkey: MapdlInt = "", ptkey: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ELIST
 
         Lists the elements and their attributes.
@@ -1601,7 +1612,7 @@ class _MapdlElementCommands:
         command = "ELIST,%s,%s,%s,%s,%s,%s" % (str(iel1), str(iel2), str(inc), str(nnkey), str(rkey), str(ptkey))
         return self.run(command, **kwargs)
 
-    def eorient(self, etype="", dir_="", toler="", **kwargs):
+    def eorient(self, etype: str = "", dir_: Union[str, int] = "", toler: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EORIENT
 
         Reorients solid element normals.
@@ -1614,6 +1625,33 @@ class _MapdlElementCommands:
             LYSL - Specifies that certain solid elements (such as SOLID185 with KEYOPT(3) = 1,
                    SOLID186 with KEYOPT(3) = 1, and SOLSH190) will be oriented.
                    This value is the default.
+
+        dir_
+            The axis and direction for orientation, or an element number. If Dir is set to a positive number (n),
+            then all eligible elements are oriented as similarly as possible to element n.
+
+            NEGX - The element face with the outward normal most nearly parallel to the element coordinate system’s
+                   negative x-axis is designated (reoriented) as face 1.
+
+            POSX - The element face with the outward normal most nearly parallel to the element coordinate system’s
+                   positive x-axis is designated (reoriented) as face 1.
+
+            NEGY - The element face with the outward normal most nearly parallel to the element coordinate system’s
+                   negative y-axis is designated (reoriented) as face 1. .
+
+            POSY - The element face with the outward normal most nearly parallel to the element coordinate system’s
+                   positive y-axis is designated (reoriented) as face 1.
+
+            NEGZ - (Default) The element face with the outward normal most nearly parallel to the element coordinate
+                   system’s negative z-axis is designated (reoriented) as face 1.
+
+            POSZ - The element face with the outward normal most nearly parallel to the element coordinate system’s
+                   positive z-axis is designated (reoriented) as face 1.
+
+        toler
+            The maximum angle (in degrees) between the outward normal face and the target axis. Default is 90.0.
+            Lower toler values will reduce the number of faces that are considered as the basis of element
+            reorientation.
 
         Notes
         -----
@@ -1650,9 +1688,10 @@ class _MapdlElementCommands:
         command = "EORIENT,%s,%s,%s" % (str(etype), str(dir_), str(toler))
         return self.run(command, **kwargs)
 
-    def engen(self, iinc="", itime="", ninc="", iel1="", iel2="", ieinc="",
-              minc="", tinc="", rinc="", cinc="", sinc="", dx="", dy="", dz="",
-              **kwargs):
+    def engen(self, iinc: MapdlInt = "", itime: MapdlInt = "", ninc: MapdlInt = "", iel1: MapdlInt = "",
+              iel2: MapdlInt = "", ieinc: MapdlInt = "", minc: MapdlInt = "", tinc: MapdlInt = "",
+              rinc: MapdlFloat = "", cinc: MapdlInt = "", sinc: MapdlInt = "", dx: MapdlInt = "", dy: MapdlInt = "",
+              dz: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ENGEN
 
         Generates elements from an existing pattern.
@@ -1707,10 +1746,13 @@ class _MapdlElementCommands:
         explicitly incremented (IINC) from the generated set. Any existing
         elements already having these numbers will be redefined.
         """
-        command = "ENGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iinc), str(itime), str(ninc), str(iel1), str(iel2), str(ieinc), str(minc), str(tinc), str(rinc), str(cinc), str(sinc), str(dx), str(dy), str(dz))
+        command = "ENGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iinc), str(itime), str(ninc), str(iel1),
+                                                                       str(iel2), str(ieinc), str(minc), str(tinc),
+                                                                       str(rinc), str(cinc), str(sinc), str(dx),
+                                                                       str(dy), str(dz))
         return self.run(command, **kwargs)
 
-    def esln(self, type_="", ekey="", nodetype="", **kwargs):
+    def esln(self, type_: str = "", ekey: MapdlInt = "", nodetype: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESLN
 
         Selects those elements attached to the selected nodes.
@@ -1761,7 +1803,7 @@ class _MapdlElementCommands:
         command = "ESLN,%s,%s,%s" % (str(type_), str(ekey), str(nodetype))
         return self.run(command, **kwargs)
 
-    def ematwrite(self, key="", **kwargs):
+    def ematwrite(self, key: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EMATWRITE
 
         Forces the writing of all the element matrices to File.EMAT.
@@ -1789,8 +1831,8 @@ class _MapdlElementCommands:
         command = "EMATWRITE,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def en(self, iel="", i="", j="", k="", l="", m="", n="", o="", p="",
-           **kwargs):
+    def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "", l: MapdlInt = "",
+           m: MapdlInt = "", n: MapdlInt = "", o: MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EN
 
         Defines an element by its number and node connectivity.
@@ -1834,10 +1876,11 @@ class _MapdlElementCommands:
         may fail before the EMORE command modifies the element into an
         acceptable shape.
         """
-        command = "EN,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(i), str(j), str(k), str(l), str(m), str(n), str(o), str(p))
+        command = "EN,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(i), str(j), str(k), str(l), str(m), str(n),
+                                                     str(o), str(p))
         return self.run(command, **kwargs)
 
-    def etchg(self, cnv="", **kwargs):
+    def etchg(self, cnv: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ETCHG
 
         Changes element types to their corresponding types.
@@ -1883,7 +1926,7 @@ class _MapdlElementCommands:
         command = "ETCHG,%s" % (str(cnv))
         return self.run(command, **kwargs)
 
-    def elem(self, **kwargs):
+    def elem(self, **kwargs) -> Optional[str]:
         """APDL Command: ELEM
 
         Specifies "Elements" as the subsequent status topic.
@@ -1902,7 +1945,7 @@ class _MapdlElementCommands:
         command = "ELEM,"
         return self.run(command, **kwargs)
 
-    def einfin(self, compname="", pnode="", **kwargs):
+    def einfin(self, compname: str = "", pnode: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EINFIN
 
         Generates structural infinite elements from selected nodes.
@@ -1956,7 +1999,7 @@ class _MapdlElementCommands:
         command = "EINFIN,%s,%s" % (str(compname), str(pnode))
         return self.run(command, **kwargs)
 
-    def eread(self, fname="", ext="", **kwargs):
+    def eread(self, fname: str = "", ext: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EREAD
 
         Reads elements from a file.
@@ -1995,8 +2038,8 @@ class _MapdlElementCommands:
         command = "EREAD,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def esel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+    def esel(self, type_: str = "", item: str = "", comp: str = "", vmin: Union[str, int, float] = "",
+             vmax: Union[str, int, float] = "", vinc: MapdlInt = "", kabs: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESEL
 
         Selects a subset of elements.
@@ -2021,6 +2064,43 @@ class _MapdlElementCommands:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+        The following fields are used only with type_ = "S", "R", "A", or "U":
+
+        item
+            Label identifying data, see Table 110: ESEL - Valid Item and Component Labels. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI). Defaults to ELEM. If Item = STRA (straightened), elements are
+            selected whose midside nodes do not conform to the curved line or non-flat area on which they should lie.
+            (Such elements are sometimes formed during volume meshing (VMESH) in an attempt to avoid excessive element
+            distortion.) You should graphically examine any such elements to evaluate their possible effect on solution
+            accuracy.
+
+        comp
+            Component of the item (if required). Valid component labels are shown in Table 110: ESEL - Valid Item and
+            Component Labels below.
+
+        vmin
+            Minimum value of item range. Ranges are element numbers, attribute numbers, load values, or result values
+            as appropriate for the item. A component name (as specified via the CM command) can also be substituted for
+            VMIN (in which case VMAX and VINC are ignored).
+
+        vmax
+            Maximum value of item range. VMAX defaults to VMIN for input values.
+            For result values, VMAX defaults to infinity if VMIN is positive, or to zero if VMIN is negative.
+
+        vinc
+            Value increment within range. Used only with integer ranges (such as for element and attribute numbers).
+            Defaults to 1. VINC cannot be negative.
+
+        kabs
+            Absolute value key:
+
+                0 - Check sign of value during selection.
+
+                1 - Use absolute value during selection (sign ignored).
+
+
 
         Notes
         -----
@@ -2062,10 +2142,12 @@ class _MapdlElementCommands:
 
         Table: 133:: : ESEL - Valid Item and Component Labels
         """
-        command = "ESEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "ESEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp),
+                                                 str(vmin), str(vmax), str(vinc), str(kabs))
         return self.run(command, **kwargs)
 
-    def esort(self, item="", lab="", order="", kabs="", numb="", **kwargs):
+    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "", kabs: MapdlInt = "", numb: MapdlInt = "",
+              **kwargs) -> Optional[str]:
         """APDL Command: ESORT
 
         Sorts the element table.
@@ -2113,7 +2195,7 @@ class _MapdlElementCommands:
         command = "ESORT,%s,%s,%s,%s,%s" % (str(item), str(lab), str(order), str(kabs), str(numb))
         return self.run(command, **kwargs)
 
-    def esurf(self, xnode="", tlab="", shape="", **kwargs):
+    def esurf(self, xnode: MapdlInt = "", tlab: str = "", shape: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESURF
 
         Generates elements overlaid on the free faces of selected nodes.
@@ -2137,12 +2219,14 @@ class _MapdlElementCommands:
                      normals opposite to the underlying beam and shell
                      elements.
 
-            If target or contact elements and hydrostatic fluid elements are defined on the same underlying shell elements, you only need to use this option once to orient the normals opposite to the underlying shell elements. - REVERSE
+            If target or contact elements and hydrostatic fluid elements are defined on the same underlying shell
+            elements, you only need to use this option once to orient the normals opposite to the
+            underlying shell elements.
 
-            Reverses the direction of the normals on existing selected target elements, contact elements, and hydrostatic fluid elements. - If target or contact elements and hydrostatic fluid elements are defined on the
-                              same underlying shell elements, you only need to
-                              use this option once to reverse the normals for
-                              all selected elements.
+            REVERSE - Reverses the direction of the normals on existing selected target elements, contact elements,
+                      and hydrostatic fluid elements. - If target or contact elements and hydrostatic fluid elements
+                      are defined on the same underlying shell elements, you only need to use this option once to
+                      reverse the normals for all selected elements.
 
         shape
             Used to specify the element shape for target element TARGE170
@@ -2214,7 +2298,7 @@ class _MapdlElementCommands:
         command = "ESURF,%s,%s,%s" % (str(xnode), str(tlab), str(shape))
         return self.run(command, **kwargs)
 
-    def eplot(self, **kwargs):
+    def eplot(self, **kwargs) -> Optional[str]:
         """APDL Command: EPLOT
 
         Produces an element display.
@@ -2242,7 +2326,7 @@ class _MapdlElementCommands:
         command = "EPLOT,"
         return self.run(command, **kwargs)
 
-    def ekill(self, elem="", **kwargs):
+    def ekill(self, elem: Union[str, int] = "", **kwargs) -> Optional[str]:
         """APDL Command: EKILL
 
         Deactivates an element (for the birth and death capability).
