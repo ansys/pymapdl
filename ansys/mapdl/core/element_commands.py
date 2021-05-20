@@ -1,6 +1,8 @@
 """Parse element commands"""
+import warnings
 import re
 from typing import Optional, Union
+
 from .mapdl_types import MapdlInt, MapdlFloat
 
 
@@ -23,9 +25,62 @@ def parse_et(msg: Optional[str]) -> Optional[int]:
 
 
 class _MapdlElementCommands:
+    """MAPDL commands specific to element and meshing operations
 
-    def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "", l: MapdlInt = "", m: MapdlInt = "",
-          n: MapdlInt = "", o: MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[int]:
+    Examples
+    --------
+    Create a single SURF154 element.
+
+    >>> mapdl.prep7()
+    >>> mapdl.et(1, 'SURF154')
+    >>> mapdl.n(1, 0, 0, 0)
+    >>> mapdl.n(2, 1, 0, 0)
+    >>> mapdl.n(3, 1, 1, 0)
+    >>> mapdl.n(4, 0, 1, 0)
+    >>> mapdl.e(1, 2, 3, 4)
+    1
+
+    Create a single hexahedral SOLID185 element
+
+    >>> mapdl.et(2, 'SOLID185')
+    >>> mapdl.type(2)
+    >>> mapdl.n(5, 0, 0, 0)
+    >>> mapdl.n(6, 1, 0, 0)
+    >>> mapdl.n(7, 1, 1, 0)
+    >>> mapdl.n(8, 0, 1, 0)
+    >>> mapdl.n(9, 0, 0, 1)
+    >>> mapdl.n(10, 1, 0, 1)
+    >>> mapdl.n(11, 1, 1, 1)
+    >>> mapdl.n(12, 0, 1, 1)
+    >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
+    2
+
+    Print the volume of individual elements
+
+    >>> mapdl.clear()
+    >>> output = mapdl.input(examples.vmfiles['vm6'])
+    >>> mapdl.post1()
+    >>> label = 'MYVOLU'
+    >>> mapdl.etable(label, 'VOLU')
+    >>> print(mapdl.pretab(label))
+    PRINT ELEMENT TABLE ITEMS PER ELEMENT
+       *****ANSYS VERIFICATION RUN ONLY*****
+         DO NOT USE RESULTS FOR PRODUCTION
+      ***** POST1 ELEMENT TABLE LISTING *****
+        STAT     CURRENT
+        ELEM     XDISP
+           1  0.59135E-001
+           2  0.59135E-001
+           3  0.59135E-001
+    ...
+
+    See the individual commands for more details.
+
+    """
+
+    def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
+          l: MapdlInt = "", m: MapdlInt = "", n: MapdlInt = "", o:
+          MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[int]:
         """APDL Command: E
 
         Defines an element by node connectivity.
@@ -33,42 +88,72 @@ class _MapdlElementCommands:
         Parameters
         ----------
         i
-            Number of node assigned to first nodal position (node I). If I = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
+            Number of node assigned to first nodal position (node
+            ``i``).
 
         j, k, l, m, n, o, p
-            Number assigned to second (node J) through eighth (node P) nodal
-            position, if any.
+            Number assigned to second (node ``j``) through eighth
+            (node ``p``) nodal position, if any.
+
+        Examples
+        --------
+        Create a single SURF154 element.
+
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SURF154')
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(2, 1, 0, 0)
+        >>> mapdl.n(3, 1, 1, 0)
+        >>> mapdl.n(4, 0, 1, 0)
+        >>> mapdl.e(1, 2, 3, 4)
+        1
+
+        Create a single hexahedral SOLID185 element
+
+        >>> mapdl.et(2, 'SOLID185')
+        >>> mapdl.type(2)
+        >>> mapdl.n(5, 0, 0, 0)
+        >>> mapdl.n(6, 1, 0, 0)
+        >>> mapdl.n(7, 1, 1, 0)
+        >>> mapdl.n(8, 0, 1, 0)
+        >>> mapdl.n(9, 0, 0, 1)
+        >>> mapdl.n(10, 1, 0, 1)
+        >>> mapdl.n(11, 1, 1, 1)
+        >>> mapdl.n(12, 0, 1, 1)
+        >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
+        2
 
         Notes
         -----
-        Defines an element by its nodes and attribute values. Up to 8 nodes may
-        be specified with the E command.  If more nodes are needed for the
-        element, use the EMORE command. The number of nodes required and the
-        order in which they should be specified are described in Chapter 4 of
-        the Element Reference for each element type.  Elements are
-        automatically assigned a number [NUMSTR] as generated. The current (or
-        default) MAT, TYPE, REAL, SECNUM and ESYS attribute values are also
-        assigned to the element.
+        Defines an element by its nodes and attribute values. Up to 8
+        nodes may be specified with the E command.  If more nodes are
+        needed for the element, use the EMORE command. The number of
+        nodes required and the order in which they should be specified
+        are described in Chapter 4 of the Element Reference for each
+        element type.  Elements are automatically assigned a number
+        [NUMSTR] as generated. The current (or default) MAT, TYPE,
+        REAL, SECNUM and ESYS attribute values are also assigned to
+        the element.
 
-        When creating elements with more than 8 nodes using this command and
-        the EMORE command, it may be necessary to turn off shape checking using
-        the SHPP command before issuing this command. If a valid element type
-        can be created without using the additional nodes on the EMORE command,
-        this command will create that element. The EMORE command will then
-        modify the element to include the additional nodes. If shape checking
-        is active, it will be performed before the EMORE command is issued.
-        Therefore, if the shape checking limits are exceeded, element creation
-        may fail before the EMORE command modifies the element into an
-        acceptable shape.
+        When creating elements with more than 8 nodes using this
+        command and the EMORE command, it may be necessary to turn off
+        shape checking using the SHPP command before issuing this
+        command. If a valid element type can be created without using
+        the additional nodes on the EMORE command, this command will
+        create that element. The EMORE command will then modify the
+        element to include the additional nodes. If shape checking is
+        active, it will be performed before the EMORE command is
+        issued.  Therefore, if the shape checking limits are exceeded,
+        element creation may fail before the EMORE command modifies
+        the element into an acceptable shape.
         """
-        command = "E,{},{},{},{},{},{},{},{}".format(i, j, k, l, m, n, o, p)
+        command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
         return parse_e(self.run(command, **kwargs))
 
-    def et(self, itype: MapdlInt = "", ename: Union[str, int] = "", kop1: MapdlInt = "", kop2: MapdlInt = "",
-           kop3: MapdlInt = "", kop4: MapdlInt = "", kop5: MapdlInt = "", kop6: MapdlInt = "",
-           inopr: MapdlInt = "", **kwargs) -> Optional[int]:
+    def et(self, itype: MapdlInt = "", ename: Union[str, int] = "",
+           kop1: MapdlInt = "", kop2: MapdlInt = "", kop3: MapdlInt =
+           "", kop4: MapdlInt = "", kop5: MapdlInt = "", kop6:
+           MapdlInt = "", inopr: MapdlInt = "", **kwargs) -> Optional[int]:
         """APDL Command: ET
 
         Defines a local element type from the element library.
@@ -76,58 +161,78 @@ class _MapdlElementCommands:
         Parameters
         ----------
         itype
-            Arbitrary local element type number. Defaults to 1 + current
-            maximum.
+            Arbitrary local element type number. Defaults to 1 +
+            current maximum.
 
         ename
-            Element name (or number) as given in the element library in Chapter
-            4 of the Element Reference. The name consists of a category prefix
-            and a unique number, such as PIPE288.  The category prefix of the
-            name (PIPE for the example) may be omitted but is displayed upon
-            output for clarity. If Ename = 0, the element is defined as a null
-            element.
+            Element name (or number) as given in the element library
+            in Chapter 4 of the Element Reference. The name consists
+            of a category prefix and a unique number, such as PIPE288.
+            The category prefix of the name (PIPE for the example) may
+            be omitted but is displayed upon output for clarity. If
+            Ename = 0, the element is defined as a null element.
 
         kop1, kop2, kop3, kop4, kop5, kop6
-            KEYOPT values (1 through 6) for this element, as described in the
-            Element Reference.
+            KEYOPT values (1 through 6) for this element, as described
+            in the Element Reference.
 
         inopr
-            If 1, suppress all element solution printout for this element type.
+            If 1, suppress all element solution printout for this
+            element type.
+
+        Examples
+        --------
+        Define an element type.  Allow MAPDL to pick your the element
+        type.
+
+        >>> etype_num = mapdl.et('', 'SURF154')
+        >>> etype_num
+        1
+
+        Define an element type while specifying the element type
+        number.
+
+        >>> etype_num = mapdl.et(2, 'SOLID186')
+        >>> etype_num
+        2
 
         Notes
         -----
-        The ET command selects an element type from the element library and
-        establishes it as a local element type for the current model.
-        Information derived from the element type is used for subsequent
-        commands, so the ET command(s) should be issued early. (The Element
-        Reference describes the available elements.)
+        The ET command selects an element type from the element
+        library and establishes it as a local element type for the
+        current model.  Information derived from the element type is
+        used for subsequent commands, so the ET command(s) should be
+        issued early. (The Element Reference describes the available
+        elements.)
 
-        A special option, Ename = 0, permits the specified element type to be
-        ignored during solution without actually removing the element from the
-        model. Ename may be set to zero only after the element type has been
-        previously defined with a nonzero Ename.  The preferred method of
-        ignoring elements is to use the select commands (such as ESEL).
+        A special option, Ename = 0, permits the specified element
+        type to be ignored during solution without actually removing
+        the element from the model. Ename may be set to zero only
+        after the element type has been previously defined with a
+        nonzero Ename.  The preferred method of ignoring elements is
+        to use the select commands (such as ESEL).
 
-        KOPn are element option keys. These keys (referred to as KEYOPT(n)) are
-        used to turn on certain element options for this element. These options
-        are listed under "KEYOPT" in the input table for each element type in
-        the Element Reference.  KEYOPT values include stiffness formulation
-        options, printout controls, and various other element options. If
-        KEYOPT(7) or greater is needed, input their values with the KEYOPT
-        command.
+        KOPn are element option keys. These keys (referred to as
+        KEYOPT(n)) are used to turn on certain element options for
+        this element. These options are listed under "KEYOPT" in the
+        input table for each element type in the Element Reference.
+        KEYOPT values include stiffness formulation options, printout
+        controls, and various other element options. If KEYOPT(7) or
+        greater is needed, input their values with the KEYOPT command.
 
-        The ET command only defines an element type local to your model (from
-        the types in the element library). The TYPE or similar [KATT, LATT,
-        AATT, or VATT] command must be used to point to the desired local
-        element type before meshing.
+        The ET command only defines an element type local to your
+        model (from the types in the element library). The TYPE or
+        similar [KATT, LATT, AATT, or VATT] command must be used to
+        point to the desired local element type before meshing.
 
-        To activate the ANSYS program's LS-DYNA explicit dynamic analysis
-        capability,  use the ET command or its GUI equivalent to choose an
-        element that works only with LS-DYNA (such as SHELL163).  Choosing LS-
-        DYNA in the Preferences dialog box does not activate LS-DYNA; it simply
-        makes items and options related to LS-DYNA accessible in the GUI.
+        To activate the ANSYS program's LS-DYNA explicit dynamic
+        analysis capability, use the ET command or its GUI equivalent
+        to choose an element that works only with LS-DYNA (such as
+        SHELL163).  Choosing LS- DYNA in the Preferences dialog box
+        does not activate LS-DYNA; it simply makes items and options
+        related to LS-DYNA accessible in the GUI.
         """
-        command = "ET,{},{},{},{},{},{},{},{},{}".format(itype, ename, kop1, kop2, kop3, kop4, kop5, kop6, inopr)
+        command = f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
         return parse_et(self.run(command, **kwargs))
 
     def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
@@ -162,6 +267,10 @@ class _MapdlElementCommands:
 
             LONG - I8 format.
 
+        Examples
+        --------
+        >>> mapdl.ewrite('etable.txt', format_='LONG')
+
         Notes
         -----
         Writes the selected elements to a file. The write operation is
@@ -184,7 +293,8 @@ class _MapdlElementCommands:
         """
         return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
-    def etable(self, lab: str = "", item: str = "", comp: str = "", option: str = "", **kwargs) -> Optional[str]:
+    def etable(self, lab: str = "", item: str = "", comp: str = "",
+               option: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ETABLE
 
         Fills a table of element values for further processing.
@@ -192,191 +302,225 @@ class _MapdlElementCommands:
         Parameters
         ----------
         lab
-            Any unique user defined label for use in subsequent commands and
-            output headings (maximum of eight characters and not a General
-            predefined Item label). Defaults to an eight character label formed
-            by concatenating the first four characters of the Item and Comp
-            labels. If the same as a previous user label, this result item will
-            be included under the same label. Up to 200 different labels may be
-            defined. The following labels are predefined and are not available
-            for user-defined labels:  REFL, STAT, and ERAS.  Lab = REFL refills
-            all tables previously defined with the ETABLE commands (not the
-            CALC module commands) according to the latest ETABLE specifications
-            and is convenient for refilling tables after the load step (SET)
-            has been changed. Remaining fields will be ignored if Lab is REFL.
-            Lab = STAT displays stored table values.  Lab = ERAS erases the
-            entire table.
+            Any unique user defined label for use in subsequent
+            commands and output headings (maximum of eight characters
+            and not a General predefined Item label). Defaults to an
+            eight character label formed by concatenating the first
+            four characters of the Item and Comp labels. If the same
+            as a previous user label, this result item will be
+            included under the same label. Up to 200 different labels
+            may be defined. The following labels are predefined and
+            are not available for user-defined labels: REFL, STAT, and
+            ERAS.  Lab = REFL refills all tables previously defined
+            with the ETABLE commands (not the CALC module commands)
+            according to the latest ETABLE specifications and is
+            convenient for refilling tables after the load step (SET)
+            has been changed. Remaining fields will be ignored if Lab
+            is REFL.  Lab = STAT displays stored table values.  Lab =
+            ERAS erases the entire table.
 
         item
-            Label identifying the item. General item labels are shown in the
-            table below. Some items also require a component label. Character
-            parameters may be used. Item = ERAS erases a Lab column.
+            Label identifying the item. General item labels are shown
+            in the table below. Some items also require a component
+            label. Character parameters may be used. Item = ERAS
+            erases a Lab column.
 
         comp
-            Component of the item (if required). General component labels are
-            shown in the table below. Character parameters may be used.
+            Component of the item (if required). General component
+            labels are shown in the table below. Character parameters
+            may be used.
 
         option
             Option for storing element table data:
 
-            MIN - Store minimum element nodal value of the specified item component.
+            * MIN - Store minimum element nodal value of the specified
+                    item component.
+            * MAX - Store maximum element nodal value of the specified
+                    item component.
+            * AVG - Store averaged element centroid value of the
+                    specified item component (default).
 
-            MAX - Store maximum element nodal value of the specified item component.
+        Examples
+        --------
+        Print the volume of individual elements.
 
-            AVG - Store averaged element centroid value of the specified item component
-                  (default).
+        >>> mapdl.clear()
+        >>> output = mapdl.input(examples.vmfiles['vm6'])
+        >>> mapdl.post1()
+        >>> label = 'MYVOLU'
+        >>> mapdl.etable(label, 'VOLU')
+        >>> print(mapdl.pretab(label))
+        PRINT ELEMENT TABLE ITEMS PER ELEMENT
+           *****ANSYS VERIFICATION RUN ONLY*****
+             DO NOT USE RESULTS FOR PRODUCTION
+          ***** POST1 ELEMENT TABLE LISTING *****
+            STAT     CURRENT
+            ELEM     XDISP
+               1  0.59135E-001
+               2  0.59135E-001
+               3  0.59135E-001
+        ...
 
         Notes
         -----
-        The ETABLE command defines a table of values per element (the element
-        table) for use in further processing. The element table is organized
-        similar to spreadsheet, with rows representing all selected elements
-        and columns consisting of result items which have been moved into the
-        table (Item,Comp) via ETABLE. Each column of data is identified by a
+        The ETABLE command defines a table of values per element (the
+        element table) for use in further processing. The element
+        table is organized similar to spreadsheet, with rows
+        representing all selected elements and columns consisting of
+        result items which have been moved into the table (Item,Comp)
+        via ETABLE. Each column of data is identified by a
         user-defined label (Lab) for listings and displays.
 
-        After entering the data into the element table, you are not limited to
-        merely listing or displaying your data (PLESOL, PRESOL, etc.). You may
-        also perform many types of operations on your data, such as adding or
-        multiplying columns (SADD, SMULT), defining allowable stresses for
-        safety calculations (SALLOW), or multiplying one column by another
-        (SMULT).  See Getting Started in theBasic Analysis Guide for more
+        After entering the data into the element table, you are not
+        limited to merely listing or displaying your data (PLESOL,
+        PRESOL, etc.). You may also perform many types of operations
+        on your data, such as adding or multiplying columns (SADD,
+        SMULT), defining allowable stresses for safety calculations
+        (SALLOW), or multiplying one column by another (SMULT).  See
+        Getting Started in the Basic Analysis Guide for more
         information.
 
-        Various results data can be stored in the element table. For example,
-        many items for an element are inherently single-valued (one value per
-        element). The single-valued items include: SERR, SDSG, TERR, TDSG,
-        SENE, SEDN, TENE, KENE, AENE, JHEAT, JS, VOLU, and CENT. All other
-        items are multivalued (varying over the element, such that there is a
-        different value at each node). Because only one value is stored in the
-        element table per element, an average value (based on the number of
-        contributing nodes) is calculated for multivalued items. Exceptions to
-        this averaging procedure are FMAG and all element force items, which
-        represent the sum only of the contributing nodal values.
+        Various results data can be stored in the element table. For
+        example, many items for an element are inherently
+        single-valued (one value per element). The single-valued items
+        include: SERR, SDSG, TERR, TDSG, SENE, SEDN, TENE, KENE, AENE,
+        JHEAT, JS, VOLU, and CENT. All other items are multivalued
+        (varying over the element, such that there is a different
+        value at each node). Because only one value is stored in the
+        element table per element, an average value (based on the
+        number of contributing nodes) is calculated for multivalued
+        items. Exceptions to this averaging procedure are FMAG and all
+        element force items, which represent the sum only of the
+        contributing nodal values.
 
-        Two methods of data access can be used with the ETABLE command. The
-        method you select depends upon the type of data that you want to store.
-        Some results can be accessed via a generic label (Component Name
-        method), while others require a label and number (Sequence Number
-        method).
+        Two methods of data access can be used with the ETABLE
+        command. The method you select depends upon the type of data
+        that you want to store.  Some results can be accessed via a
+        generic label (Component Name method), while others require a
+        label and number (Sequence Number method).
 
-        The Component Name method is used to access the General element data
-        (that is, element data which is generally available to most element
-        types or groups of element types). All of the single-valued items and
-        some of the more general multivalued items are accessible with the
-        Component Name method.  Various element results depend on the
-        calculation method and the selected results location (AVPRIN, RSYS,
-        LAYER, SHELL, and ESEL).
+        The Component Name method is used to access the General
+        element data (that is, element data which is generally
+        available to most element types or groups of element
+        types). All of the single-valued items and some of the more
+        general multivalued items are accessible with the Component
+        Name method.  Various element results depend on the
+        calculation method and the selected results location (AVPRIN,
+        RSYS, LAYER, SHELL, and ESEL).
 
-        Although nodal data is readily available for listings and displays
-        (PRNSOL, PLNSOL) without using the element table, you may also use the
-        Component Name method to enter these results into the element table for
-        further "worksheet" manipulation. (See Getting Started in theBasic
-        Analysis Guide for more information.) A listing of the General Item and
-        Comp labels for the Component Name method is shown below.
+        Although nodal data is readily available for listings and
+        displays (PRNSOL, PLNSOL) without using the element table, you
+        may also use the Component Name method to enter these results
+        into the element table for further "worksheet"
+        manipulation. (See Getting Started in theBasic Analysis Guide
+        for more information.) A listing of the General Item and Comp
+        labels for the Component Name method is shown below.
 
-        The Sequence Number method allows you to view results for data that is
-        not averaged (such as pressures at nodes, temperatures at integration
-        points, etc.), or data that is not easily described in a generic
-        fashion (such as all derived data for structural line elements and
-        contact elements, all derived data for thermal line elements, layer
-        data for layered elements, etc.). A table illustrating the Items (such
-        as LS, LEPEL, LEPTH, SMISC, NMISC, SURF, etc.) and corresponding
-        sequence numbers for each element is shown in the Output Data section
-        of each element description found in the Element Reference.
+        The Sequence Number method allows you to view results for data
+        that is not averaged (such as pressures at nodes, temperatures
+        at integration points, etc.), or data that is not easily
+        described in a generic fashion (such as all derived data for
+        structural line elements and contact elements, all derived
+        data for thermal line elements, layer data for layered
+        elements, etc.). A table illustrating the Items (such as LS,
+        LEPEL, LEPTH, SMISC, NMISC, SURF, etc.) and corresponding
+        sequence numbers for each element is shown in the Output Data
+        section of each element description found in the Element
+        Reference.
 
-        Some element table data are reported in the results coordinate system.
-        These include all component results (for example, UX, UY, etc.; SX, SY,
-        etc.). The solution writes component results in the database and on the
-        results file in the solution coordinate system. When you issue the
-        ETABLE command, these results are then transformed into the results
-        coordinate system (RSYS) before being stored in the element table. The
-        default results coordinate system is global Cartesian (RSYS,0).  All
-        other data are retrieved from the database and stored in the element
-        table with no coordinate transformation.
+        Some element table data are reported in the results coordinate
+        system.  These include all component results (for example, UX,
+        UY, etc.; SX, SY, etc.). The solution writes component results
+        in the database and on the results file in the solution
+        coordinate system. When you issue the ETABLE command, these
+        results are then transformed into the results coordinate
+        system (RSYS) before being stored in the element table. The
+        default results coordinate system is global Cartesian
+        (RSYS,0).  All other data are retrieved from the database and
+        stored in the element table with no coordinate transformation.
 
-        Use the PRETAB, PLETAB, or ETABLE,STAT commands to display the stored
-        table values. Issue ETABLE,ERAS to erase the entire table. Issue
-        ETABLE,Lab,ERAS to erase a Lab column.
+        Use the PRETAB, PLETAB, or ETABLE,STAT commands to display the
+        stored table values. Issue ETABLE,ERAS to erase the entire
+        table. Issue ETABLE,Lab,ERAS to erase a Lab column.
 
-        When the GUI is on, if a Delete operation in a Define Element Table
-        Data dialog box writes this command to a log file (Jobname.LOG or
-        Jobname.LGW), you will observe that Lab is blank, Item = ERASE, and
-        Comp is an integer number. In this case, the GUI has assigned a value
-        of Comp that corresponds to the location of a chosen variable name in
-        the dialog box's list. It is not intended that you type in such a
-        location value for Comp in a session.  However, a file that contains a
-        GUI-generated ETABLE command of this form can be used for batch input
-        or for use with the /INPUT command.
+        The element table data option (Option) is not available for
+        all output items.
 
-        The element table data option (Option) is not available for all output
-        items. See the table below for supported items.
-
-        Table: 135:: : ETABLE - General Item and Component Labels
         """
-        command = "ETABLE,%s,%s,%s,%s" % (str(lab), str(item), str(comp), str(option))
+        command = f"ETABLE,{lab},{item},{comp},{option}"
         return self.run(command, **kwargs)
 
     def eusort(self, **kwargs) -> Optional[str]:
-        """APDL Command: EUSORT
+        """Restore original order of the element table.
 
-        Restores original order of the element table.
+        APDL Command: EUSORT
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.eusort()
+        'ELEMENT SORT REMOVED'
 
         Notes
         -----
         Changing the selected element set [ESEL] also restores the original
         element order.
         """
-        command = "EUSORT,"
-        return self.run(command, **kwargs)
+        return self.run("EUSORT", **kwargs)
 
-    def edtp(self, option: MapdlInt = "", value1: MapdlInt = "", value2: MapdlFloat = "", **kwargs) -> Optional[str]:
-        """APDL Command: EDTP
+    def edtp(self, option: MapdlInt = "", value1: MapdlInt = "",
+             value2: MapdlFloat = "", **kwargs) -> Optional[str]:  # pragma: no cover
+        """Plots explicit elements based on their time step size.
 
-        Plots explicit elements based on their time step size.
+        APDL Command: EDTP
 
         Parameters
         ----------
         option
              Plotting option (default = 1).
 
-            1 - Plots the elements with the smallest time step sizes. The number of elements
-                plotted and listed is equal to VALUE1 (which defaults to 100).
-                Each element is shaded red or yellow based on its time step
-                value (see "Notes" for details).
+            1 - Plots the elements with the smallest time step
+                sizes. The number of elements plotted and listed is
+                equal to VALUE1 (which defaults to 100).  Each element
+                is shaded red or yellow based on its time step value
+                (see "Notes" for details).
 
-            2 - Produces the same plot as for OPTION = 1, and also produces a list of the
-                plotted elements and their corresponding time step values.
+            2 - Produces the same plot as for OPTION = 1, and also
+                produces a list of the plotted elements and their
+                corresponding time step values.
 
-            3 - Produces a plot similar to OPTION = 1, except that all selected elements are
-                plotted. Elements beyond the first VALUE1 elements are blue and
-                translucent. The amount of translucency is specified by VALUE2.
-                This option also produces a list of the first VALUE1 elements
-                with their corresponding time step values.
+            3 - Produces a plot similar to OPTION = 1, except that all
+                selected elements are plotted. Elements beyond the
+                first VALUE1 elements are blue and translucent. The
+                amount of translucency is specified by VALUE2.  This
+                option also produces a list of the first VALUE1
+                elements with their corresponding time step values.
 
         value1
-            Number of elements to be plotted and listed (default = 100). For
-            example, if VALUE1 = 10, only the elements with the 10 smallest
-            time step sizes are plotted and listed.
+            Number of elements to be plotted and listed (default =
+            100). For example, if VALUE1 = 10, only the elements with
+            the 10 smallest time step sizes are plotted and listed.
 
         value2
-            Translucency level ranging from 0 to 1 (default = 0.9). VALUE2 is
-            only used when OPTION = 3, and only for the elements plotted in
-            blue. To plot these elements as non-translucent, set VALUE2 = 0.
+            Translucency level ranging from 0 to 1 (default =
+            0.9). VALUE2 is only used when OPTION = 3, and only for
+            the elements plotted in blue. To plot these elements as
+            non-translucent, set VALUE2 = 0.
 
         Notes
         -----
-        EDTP invokes an ANSYS macro that plots and lists explicit elements
-        based on their time step size. For OPTION = 1 or 2, the number of
-        elements plotted is equal to VALUE1 (default = 100). For OPTION = 3,
-        all selected elements are plotted.
+        EDTP invokes an ANSYS macro that plots and lists explicit
+        elements based on their time step size. For OPTION = 1 or 2,
+        the number of elements plotted is equal to VALUE1 (default =
+        100). For OPTION = 3, all selected elements are plotted.
 
-        The elements are shaded red, yellow, or blue based on their time step
-        size. Red represents the smallest time step sizes, yellow represents
-        the intermediate time step sizes, and blue represents the largest time
-        step sizes. For example, if you specify VALUE1 = 30, and if T1 is the
-        smallest critical time step of all elements and T30 is the time step of
-        the 30th smallest element, then the elements are shaded as follows:
+        The elements are shaded red, yellow, or blue based on their
+        time step size. Red represents the smallest time step sizes,
+        yellow represents the intermediate time step sizes, and blue
+        represents the largest time step sizes. For example, if you
+        specify VALUE1 = 30, and if T1 is the smallest critical time
+        step of all elements and T30 is the time step of the 30th
+        smallest element, then the elements are shaded as follows:
 
         Translucent blue elements only appear when OPTION = 3.
 
@@ -399,6 +543,12 @@ class _MapdlElementCommands:
             Stiffness matrix multiplier for deactivated elements (defaults to
             1.0E-6).
 
+        Examples
+        --------
+        >>> mapdl.prep7()
+        >>> mapdl.estif(1E-8)
+        'DEAD ELEMENT STIFFNESS MULTIPLIER= 0.10000E-07'
+
         Notes
         -----
         Specifies the stiffness matrix multiplier for elements deactivated with
@@ -409,137 +559,211 @@ class _MapdlElementCommands:
         command = "ESTIF,%s" % (str(kmult))
         return self.run(command, **kwargs)
 
-    def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "", i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "", i4: MapdlInt = "",
-               i5: MapdlInt = "", i6: MapdlInt = "", i7: MapdlInt = "", i8: MapdlInt = "", **kwargs) -> Optional[str]:
-        """APDL Command: EMODIF
+    def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "",
+               i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "",
+               i4: MapdlInt = "", i5: MapdlInt = "", i6: MapdlInt = "",
+               i7: MapdlInt = "", i8: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Modifies a previously defined element.
 
-        Modifies a previously defined element.
+        APDL Command: EMODIF
 
         Parameters
         ----------
         iel
-            Modify nodes and/or attributes for element number IEL.  If ALL,
-            modify all selected elements [ESEL].  If IEL = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI). A component name may also be substituted for IEL.
+            Modify nodes and/or attributes for element number IEL.  If
+            ALL, modify all selected elements [ESEL]. A component name
+            may also be substituted for IEL.
 
         stloc
-            Starting location (n) of first node to be modified or the attribute
-            label.
+            Starting location (n) of first node to be modified or the
+            attribute label.
 
         i1, i2, i3, i4, i5, i6, i7, i8
-            Replace the previous node numbers assigned to this element with
-            these corresponding values. A (blank) retains the previous value
-            (except in the I1 field, which resets the STLOC node number to
-            zero).
+            Replace the previous node numbers assigned to this element
+            with these corresponding values. A (blank) retains the
+            previous value (except in the I1 field, which resets the
+            STLOC node number to zero).
+
+        Examples
+        --------
+        Modify all elements to have a material number of 2.
+
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mp_num = 2
+        >>> mapdl.mp('EX', mp_num, 210E9)
+        >>> mapdl.mp('DENS', mp_num, 7800)
+        >>> mapdl.mp('NUXY', mp_num, 0.3)
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.emodif('ALL', 'MAT', i1=mp_num)
+        'MODIFY ALL SELECTED ELEMENTS TO HAVE  MAT  =         2'
 
         Notes
         -----
-        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM values)
-        of an existing element may be changed with this command.
+        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
+        values) of an existing element may be changed with this
+        command.
         """
-        command = "EMODIF,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(stloc), str(i1), str(i2), str(i3), str(i4), str(i5), str(i6), str(i7), str(i8))
+        command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
         return self.run(command, **kwargs)
 
-    def emore(self, q: MapdlInt = "", r: MapdlInt = "", s: MapdlInt = "", t: MapdlInt = "", u: MapdlInt = "",
-              v: MapdlInt = "", w: MapdlInt = "", x: MapdlInt = "", **kwargs) -> Optional[str]:
-        """APDL Command: EMORE
+    def emore(self, q: MapdlInt = "", r: MapdlInt = "", s: MapdlInt = "",
+              t: MapdlInt = "", u: MapdlInt = "", v: MapdlInt = "",
+              w: MapdlInt = "", x: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Add more nodes to the just-defined element.
 
-        Adds more nodes to the just-defined element.
+        APDL Command: EMORE
 
         Parameters
         ----------
         q, r, s, t, u, v, w, x
-            Numbers of nodes typically assigned to ninth (node Q) through
-            sixteenth (node X) nodal positions, if any. If Q = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).
+            Numbers of nodes typically assigned to ninth (node Q)
+            through sixteenth (node X) nodal positions, if any. If Q =
+            P, graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI).
+
+        Examples
+        --------
+        Generate a single quadratic element.
+
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.n(1, -1, -1, -1)
+        >>> mapdl.n(2,  1, -1, -1)
+        >>> mapdl.n(3,  1,  1, -1)
+        >>> mapdl.n(4, -1,  1, -1)
+        >>> mapdl.n(5, -1, -1,  1)
+        >>> mapdl.n(6,  1, -1,  1)
+        >>> mapdl.n(7,  1,  1,  1)
+        >>> mapdl.n(8, -1,  1,  1)
+        >>> mapdl.n(9,  0, -1, -1)
+        >>> mapdl.n(10,  1,  0, -1)
+        >>> mapdl.n(11,  0,  1, -1)
+        >>> mapdl.n(12, -1,  0, -1)
+        >>> mapdl.n(13,  0, -1,  1)
+        >>> mapdl.n(14,  1,  0,  1)
+        >>> mapdl.n(15,  0,  1,  1)
+        >>> mapdl.n(16, -1,  0,  1)
+        >>> mapdl.n(17, -1, -1,  0)
+        >>> mapdl.n(18,  1, -1,  0)
+        >>> mapdl.n(19,  1,  1,  0)
+        >>> mapdl.n(20, -1,  1,  0)
+        >>> mapdl.e(1, 2, 3, 4, 5, 6, 7, 8)
+        >>> mapdl.emore(9, 10, 11, 12, 13, 14, 15, 16)
+        >>> output = mapdl.emore(17, 18, 19, 20)
+        'ELEMENT 1  1  2  3  4  5  6  7  8
+                    9 10 11 12 13 14 15 16
+                   17 18 19 20
 
         Notes
         -----
-        Repeat EMORE command for up to 4 additional nodes (20 maximum). Nodes
-        are added after the last nonzero node of the element.  Node numbers
-        defined with this command may be zeroes.
+        Repeat EMORE command for up to 4 additional nodes (20
+        maximum). Nodes are added after the last nonzero node of the
+        element.  Node numbers defined with this command may be
+        zeroes.
         """
-        command = "EMORE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(q), str(r), str(s), str(t), str(u), str(v), str(w), str(x))
+        command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
         return self.run(command, **kwargs)
 
-    def esol(self, nvar: MapdlInt = "", elem: Union[str, int] = "", node: Union[str, int] = "", item: str = "",
-             comp: str = "", name: str = "", **kwargs) -> Optional[str]:
-        """APDL Command: ESOL
+    def esol(self, nvar: MapdlInt = "", elem: MapdlInt = "",
+             node: MapdlInt = "", item: str = "", comp: str = "",
+             name: str = "", **kwargs) -> Optional[str]:
+        """Specify element data to be stored from the results file.
 
-        Specifies element data to be stored from the results file.
+        /POST26 APDL Command: ESOL
 
         Parameters
         ----------
         nvar
-            Arbitrary reference number assigned to this variable (2 to NV
-            [NUMVAR]). Overwrites any existing results for this variable.
+            Arbitrary reference number assigned to this variable (2 to
+            NV [NUMVAR]). Overwrites any existing results for this
+            variable.
 
         elem
-            Element for which data are to be stored. If ELEM = P, graphical
-            picking is enabled (valid only in the GUI).
+            Element for which data are to be stored.
 
         node
-            Node number on this element for which data are to be stored. If
-            blank, store the average element value (except for FMAG values,
-            which are summed instead of averaged). If NODE = P, graphical
-            picking is enabled (valid only in the GUI).
+            Node number on this element for which data are to be
+            stored. If blank, store the average element value (except
+            for FMAG values, which are summed instead of averaged).
 
         item
-            Label identifying the item. General item labels are shown in
-            Table 134: ESOL - General Item and Component Labels below. Some
-            items also require a component label.
+            Label identifying the item. General item labels are shown
+            in Table 134: ESOL - General Item and Component Labels
+            below. Some items also require a component label.
 
         comp
-            Component of the item (if required). General component labels are
-            shown in Table 134: ESOL - General Item and Component Labels below.
-            If Comp is a sequence number (n), the NODE field will be ignored.
+            Component of the item (if required). General component
+            labels are shown in Table 134: ESOL - General Item and
+            Component Labels below.  If Comp is a sequence number (n),
+            the NODE field will be ignored.
 
         name
-            Thirty-two character name for identifying the item on the printout
-            and displays.  Defaults to a label formed by concatenating the
-            first four characters of the Item and Comp labels.
+            Thirty-two character name for identifying the item on the
+            printout and displays.  Defaults to a label formed by
+            concatenating the first four characters of the Item and
+            Comp labels.
+
+        Examples
+        --------
+        Switch to the time-history postprocessor
+
+        >>> mapdl.post26()
+
+        Store the stress in the X direction for element 1 at node 1
+
+        >>> nvar = 2
+        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
+
+        Move the value to an array and access it via mapdl.parameters
+
+        >>> mapdl.dim('ARR', 'ARRAY', 1)
+        >>> mapdl.vget('ARR', nvar)
+        >>> mapdl.parameters['ARR']
+        array(-1991.40234375)
 
         Notes
         -----
-        See Table: 134:: ESOL - General Item and Component Labels for a list of
-        valid item and component labels for element (except line element)
-        results.
+        See Table: 134:: ESOL - General Item and Component Labels for
+        a list of valid item and component labels for element (except
+        line element) results.
 
-        The ESOL command defines element results data to be stored from a
-        results file (FILE). Not all items are valid for all elements. To see
-        the available items for a given element, refer to the input and output
-        summary tables in the documentation for that element.
+        The ESOL command defines element results data to be stored
+        from a results file (FILE). Not all items are valid for all
+        elements. To see the available items for a given element,
+        refer to the input and output summary tables in the
+        documentation for that element.
 
-        Two methods of data access are available via the ESOL command. You can
-        access some simply by using a generic label (component name method),
-        while others require a label and number (sequence number method).
+        Two methods of data access are available via the ESOL
+        command. You can access some simply by using a generic label
+        (component name method), while others require a label and
+        number (sequence number method).
 
-        Use the component name method to access general element data (that is,
-        element data generally available to most element types or groups of
-        element types).
+        Use the component name method to access general element data
+        (that is, element data generally available to most element
+        types or groups of element types).
 
-        The sequence number method is required for data that is not averaged
-        (such as pressures at nodes and temperatures at integration points), or
-        data that is not easily described in a generic fashion (such as all
-        derived data for structural line elements and contact elements, all
-        derived data for thermal line elements, and layer data for layered
-        elements).
+        The sequence number method is required for data that is not
+        averaged (such as pressures at nodes and temperatures at
+        integration points), or data that is not easily described in a
+        generic fashion (such as all derived data for structural line
+        elements and contact elements, all derived data for thermal
+        line elements, and layer data for layered elements).
 
-        Element results are in the element coordinate system, except for
-        layered elements where results are in the layer coordinate system.
-        Element forces and moments are in the nodal coordinate system. Results
-        are obtainable for an element at a specified node. Further location
-        specifications can be made for some elements via the SHELL, LAYERP26,
-        and FORCE commands.
+        Element results are in the element coordinate system, except
+        for layered elements where results are in the layer coordinate
+        system.  Element forces and moments are in the nodal
+        coordinate system. Results are obtainable for an element at a
+        specified node. Further location specifications can be made
+        for some elements via the SHELL, LAYERP26, and FORCE commands.
 
-        Table: 134:: : ESOL - General Item and Component Labels
-
-        For more information on the meaning of contact status and its possible
-        values, see Reviewing Results in POST1 in the Contact Technology Guide.
+        For more information on the meaning of contact status and its
+        possible values, see Reviewing Results in POST1 in the Contact
+        Technology Guide.
         """
-        command = "ESOL,%s,%s,%s,%s,%s,%s" % (str(nvar), str(elem), str(node), str(item), str(comp), str(name))
+        command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
     def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "", **kwargs) -> Optional[str]:
@@ -553,287 +777,349 @@ class _MapdlElementCommands:
         scale
             Scaling factor:
 
-            0 - Use simple display of line and area elements. This value is the default.
+            * 0 - Use simple display of line and area elements. This
+              value is the default.
 
-            1 - Use real constants or section definition to form a solid shape display of the
-                applicable elements.
+            * 1 - Use real constants or section definition to form a
+                solid shape display of the applicable elements.
 
-            FAC - Multiply certain real constants, such as thickness, by FAC (where FAC > 0.01)
-                  and use them to form a solid shape display of elements.
+            FAC - Multiply certain real constants, such as thickness,
+                  by FAC (where FAC > 0.01) and use them to form a
+                  solid shape display of elements.
 
         key
             Current shell thickness key:
 
-            0 - Use current thickness in the displaced solid shape display of shell elements
-                (valid for SHELL181, SHELL208, SHELL209, and SHELL281). This
-                value is the default.
+            * 0 - Use current thickness in the displaced solid shape
+                  display of shell elements (valid for SHELL181,
+                  SHELL208, SHELL209, and SHELL281). This value is the
+                  default.
 
-            1 - Use initial thickness in the displaced solid shape display of shell elements.
+            * 1 - Use initial thickness in the displaced solid shape
+              display of shell elements.
 
         Notes
         -----
-        The /ESHAPE command allows beams, shells, current sources, and certain
-        special-purpose elements to be displayed as solids with the shape
-        determined from the real constants or section types. Elements are
-        displayed via the EPLOT command. No checks for valid or complete input
-        are made for the display.
+        The /ESHAPE command allows beams, shells, current sources, and
+        certain special-purpose elements to be displayed as solids
+        with the shape determined from the real constants or section
+        types. Elements are displayed via the EPLOT command. No checks
+        for valid or complete input are made for the display.
 
-        Following are details about using this command with various element
-        types:
+        Following are details about using this command with various
+        element types:
 
-        SOLID65 elements are displayed with internal lines that represent rebar
-        sizes and orientations (requires vector mode [/DEVICE] with a basic
-        type of display [/TYPE,,BASIC]). The rebar with the largest volume
-        ratio in each element plots as a red line, the next largest as green,
-        and the smallest as blue.
+        SOLID65 elements are displayed with internal lines that
+        represent rebar sizes and orientations (requires vector mode
+        [/DEVICE] with a basic type of display [/TYPE,,BASIC]). The
+        rebar with the largest volume ratio in each element plots as a
+        red line, the next largest as green, and the smallest as blue.
 
-        COMBIN14, COMBIN39, and MASS21 are displayed with a graphics icon, with
-        the offset determined by the real constants and KEYOPT settings.
+        COMBIN14, COMBIN39, and MASS21 are displayed with a graphics
+        icon, with the offset determined by the real constants and
+        KEYOPT settings.
 
-        BEAM188, BEAM189, PIPE288, PIPE289 and ELBOW290 are displayed as solids
-        with the shape determined via the section-definition commands (SECTYPE
-        and SECDATA). The arbitrary section option (Subtype = ASEC) has no
-        definite shape and appears as a thin rectangle to show orientation. The
-        elements are displayed with internal lines representing the cross-
-        section mesh.
+        BEAM188, BEAM189, PIPE288, PIPE289 and ELBOW290 are displayed
+        as solids with the shape determined via the section-definition
+        commands (SECTYPE and SECDATA). The arbitrary section option
+        (Subtype = ASEC) has no definite shape and appears as a thin
+        rectangle to show orientation. The elements are displayed with
+        internal lines representing the cross- section mesh.
 
-        SOLID272 and SOLID273 are displayed as solids with the shape determined
-        via the section-definition commands (SECTYPE and SECDATA).  The 2-D
-        master plane is revolved around the prescribed axis of symmetry.
+        SOLID272 and SOLID273 are displayed as solids with the shape
+        determined via the section-definition commands (SECTYPE and
+        SECDATA).  The 2-D master plane is revolved around the
+        prescribed axis of symmetry.
 
-        Contour plots are available for these elements in postprocessing for
-        PowerGraphics only (/GRAPHICS,POWER). To view 3-D deformed shapes for
-        the elements, issue OUTRES,MISC or OUTRES,ALL for static or transient
-        analyses. To view 3-D mode shapes for a modal or eigenvalue buckling
-        analysis, expand the modes with element results calculation ON (Elcalc
-        = YES for MXPAND).
+        Contour plots are available for these elements in
+        postprocessing for PowerGraphics only (/GRAPHICS,POWER). To
+        view 3-D deformed shapes for the elements, issue OUTRES,MISC
+        or OUTRES,ALL for static or transient analyses. To view 3-D
+        mode shapes for a modal or eigenvalue buckling analysis,
+        expand the modes with element results calculation ON (Elcalc =
+        YES for MXPAND).
 
-        SOURC36, CIRCU124, and TRANS126 elements always plot using /ESHAPE when
-        PowerGraphics is activated (/GRAPHICS,POWER).
+        SOURC36, CIRCU124, and TRANS126 elements always plot using
+        /ESHAPE when PowerGraphics is activated (/GRAPHICS,POWER).
 
-        In most cases, /ESHAPE renders a thickness representation of your
-        shell, plane and layered elements more readily in PowerGraphics
-        (/GRAPHICS,POWER). This type of representation employs PowerGraphics to
-        generate the enhanced representation, and will often provide no
-        enhancement in Full Graphics (/GRAPHICS,FULL). This is especially true
-        for POST1 results displays, where /ESHAPE is not supported for most
-        element types with FULL graphics.
+        In most cases, /ESHAPE renders a thickness representation of
+        your shell, plane and layered elements more readily in
+        PowerGraphics (/GRAPHICS,POWER). This type of representation
+        employs PowerGraphics to generate the enhanced representation,
+        and will often provide no enhancement in Full Graphics
+        (/GRAPHICS,FULL). This is especially true for POST1 results
+        displays, where /ESHAPE is not supported for most element
+        types with FULL graphics.
 
-        When PowerGraphics is active, /ESHAPE may degrade the image if adjacent
-        elements have overlapping material, such as shell elements which are
-        not co-planar. Additionally, if adjacent elements have different
-        thicknesses, the polygons depicting the connectivity between the
-        "thicker" and "thinner" elements along the shared element edges may not
-        always be displayed.
+        When PowerGraphics is active, /ESHAPE may degrade the image if
+        adjacent elements have overlapping material, such as shell
+        elements which are not co-planar. Additionally, if adjacent
+        elements have different thicknesses, the polygons depicting
+        the connectivity between the "thicker" and "thinner" elements
+        along the shared element edges may not always be displayed.
 
-        For POST1 results displays (such as PLNSOL), the following limitations
-        apply:
+        For POST1 results displays (such as PLNSOL), the following
+        limitations apply:
 
-        Rotational displacements for beam elements are used to create a more
-        realistic displacement display. When /ESHAPE is active, displacement
-        plots (via PLNSOL,U,X and PLDISP, for example) may disagree with your
-        PRNSOL listings. This discrepancy will become more noticeable when the
-        SCALE value is not equal to one.
+        Rotational displacements for beam elements are used to create
+        a more realistic displacement display. When /ESHAPE is active,
+        displacement plots (via PLNSOL,U,X and PLDISP, for example)
+        may disagree with your PRNSOL listings. This discrepancy will
+        become more noticeable when the SCALE value is not equal to
+        one.
 
-        When shell elements are not co-planar, the resulting PLNSOL display
-        with /ESHAPE will actually be a PLESOL display as the non-coincident
-        pseudo-nodes are not averaged. Additionally, /ESHAPE should not be used
-        with coincident elements because the plot may incorrectly average the
-        displacements of the coincident elements.
+        When shell elements are not co-planar, the resulting PLNSOL
+        display with /ESHAPE will actually be a PLESOL display as the
+        non-coincident pseudo-nodes are not averaged. Additionally,
+        /ESHAPE should not be used with coincident elements because
+        the plot may incorrectly average the displacements of the
+        coincident elements.
 
-        When nodes are initially coincident and PowerGraphics is active,
-        duplicate polygons are eliminated to conserve display time and disk
-        space. The command may degrade the image if initially coincident nodes
-        have different displacements. The tolerance for determining coincidence
-        is 1E-9 times the model’s bounding box diagonal.
+        When nodes are initially coincident and PowerGraphics is
+        active, duplicate polygons are eliminated to conserve display
+        time and disk space. The command may degrade the image if
+        initially coincident nodes have different displacements. The
+        tolerance for determining coincidence is 1E-9 times the
+        model’s bounding box diagonal.
 
-        If you want to view solution results (PLNSOL, etc.) on layered elements
-        (such as SHELL181, SOLSH190, SOLID185 Layered Solid, SOLID186 Layered
-        Solid, SHELL208, SHELL209, SHELL281, and ELBOW290), set KEYOPT(8) = 1
-        for the layer elements so that the data for all layers is stored in the
-        results file.
+        If you want to view solution results (PLNSOL, etc.) on layered
+        elements (such as SHELL181, SOLSH190, SOLID185 Layered Solid,
+        SOLID186 Layered Solid, SHELL208, SHELL209, SHELL281, and
+        ELBOW290), set KEYOPT(8) = 1 for the layer elements so that
+        the data for all layers is stored in the results file.
 
-        You can plot the through-thickness temperatures of elements SHELL131
-        and SHELL132 regardless of the thermal DOFs in use by issuing the
-        PLNSOL,TEMP command (with PowerGraphics and /ESHAPE active).
+        You can plot the through-thickness temperatures of elements
+        SHELL131 and SHELL132 regardless of the thermal DOFs in use by
+        issuing the PLNSOL,TEMP command (with PowerGraphics and
+        /ESHAPE active).
 
-        The /ESHAPE,1 and /ESHAPE,FAC commands are incompatible with the
-        /CYCEXPAND command used in cyclic symmetry analyses.
+        The /ESHAPE,1 and /ESHAPE,FAC commands are incompatible with
+        the /CYCEXPAND command used in cyclic symmetry analyses.
 
         This command is valid in any processor.
+
         """
-        command = "/ESHAPE,%s,%s" % (str(scale), str(key))
+        warnings.warn('pymapdl does not support /ESHAPE when plotting in Python using '
+                      '``mapdl.eplot()``.  Use ``mapdl.eplot(vtk=False)`` ')
+        command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
 
     def etype(self, **kwargs) -> Optional[str]:
-        """APDL Command: ETYPE
+        """Specify "Element types" as the subsequent status topic.
 
-        Specifies "Element types" as the subsequent status topic.
+        APDL Command: ETYPE
+
+        Examples
+        --------
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.etype()
+        >>> mapdl.stat()
+         ELEMENT TYPE        1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+          KEYOPT( 1- 6)=        0      0      0        0      0      0
+          KEYOPT( 7-12)=        0      0      0        0      0      0
+          KEYOPT(13-18)=        0      0      0        0      0      0
 
         Notes
         -----
-        This is a status [STAT] topic command. Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
+        This is a status [STAT] topic command. Status topic commands
+        are generated by the GUI and will appear in the log file
+        (Jobname.LOG) if status is requested for some items under
+        Utility Menu> List> Status.  This command will be immediately
+        followed by a STAT command, which will report the status for
+        the specified topic.
 
         If entered directly into the program, the STAT command should
         immediately follow this command.
         """
-        command = "ETYPE,"
-        return self.run(command, **kwargs)
+        return self.run("ETYPE", **kwargs)
 
-    def etcontrol(self, eltech: str = "", eldegene: str = "", **kwargs) -> Optional[str]:
-        """APDL Command: ETCONTROL
+    def etcontrol(self, eltech: str = "", eldegene: str = "",
+                  **kwargs) -> Optional[str]:
+        """Control the element technologies used in element
+        formulation (for applicable elements).
 
-        Control the element technologies used in element formulation (for
-        applicable elements).
+        APDL Command: ETCONTROL
 
         Parameters
         ----------
         eltech
-            Element technology control:
+            Element technology control.  One of the following:
 
-            SUGGESTION - The program offers a suggestion for the best element technology before solving.
-                         If necessary, mixed u-P (KEYOPT(6)) is also included
-                         and reset. This behavior is the default.
+            - ``"SUGGESTION"`` : The program offers a suggestion for the
+            best element technology before solving.  If necessary,
+            mixed u-P (KEYOPT(6)) is also included and reset. This
+            behavior is the default.
 
-            SET - The program informs you of the best settings and resets any applicable KEYOPT
-                  settings automatically. This action overrides any previous
-                  manual settings.
+            - ``"SET"`` : The program informs you of the best settings
+            and resets any applicable KEYOPT settings
+            automatically. This action overrides any previous manual
+            settings.
 
-            OFF - Deactivates automatic selection of element technology. No suggestions are
-                  issued, and no automatic resetting occurs.
+            - ``"OFF"`` : Deactivates automatic selection of element
+            technology. No suggestions are issued, and no
+            automatic resetting occurs.
 
         eldegene
-            Element degenerated shape control:
+            Element degenerated shape control.  One of the following:
 
-            ON - If element shapes are degenerated, the degenerated shape function is employed
-                 and enhanced strain, simplified enhanced strain, and B-bar
-                 formulations are turned off (default).
+            - ``"ON"`` - If element shapes are degenerated, the
+            degenerated shape function is employed and enhanced
+            strain, simplified enhanced strain, and B-bar formulations
+            are turned off (default).
 
-            OFF - If element shapes are degenerated, regular shape functions are still used, and
-                  the specified element technologies (e.g., enhanced strain,
-                  B-bar, uniform reduced integration) are still used.
+            - ``"OFF"`` - If element shapes are degenerated, regular shape
+            functions are still used, and the specified element
+            technologies (e.g., enhanced strain, B-bar, uniform
+            reduced integration) are still used.
+
+        Examples
+        --------
+        Enable element tech control and degenerated shape control.
+
+        >>> mapdl.et(1, 'SOLID186')
+        >>> output = mapdl.etcontrol(eltech='SET', eldegene='ON')
+        >>> print(output)
+        ELEMENT TECHNOLOGY CONTROL PARAMETER FOR APPLICABLE ELEMENTS = SET.
+         DEGENERATED ELEMENT SHAPE CONTROL PARAMETER FOR APPLICABLE ELEMENTS = ON.
 
         Notes
         -----
-        The command default is ETCONTROL,SUGGESTION,ON.
+        The command default is ``mapdl.etcontrol('SUGGESTION', 'ON')``
 
-        This command is valid for elements SHELL181, PLANE182, PLANE183,
-        SOLID185, SOLID186, SOLID187, BEAM188, BEAM189, SHELL208, SHELL209,
-        PLANE223, SOLID226, SOLID227, REINF264, SOLID272, SOLID273, SHELL281,
-        SOLID285, PIPE288, PIPE289, ELBOW290.
+        This command is valid for elements SHELL181, PLANE182,
+        PLANE183, SOLID185, SOLID186, SOLID187, BEAM188, BEAM189,
+        SHELL208, SHELL209, PLANE223, SOLID226, SOLID227, REINF264,
+        SOLID272, SOLID273, SHELL281, SOLID285, PIPE288, PIPE289,
+        ELBOW290.
 
-        For more information, see Automatic Selection of Element Technologies
-        and Formulations in the Element Reference.
+        For more information, see Automatic Selection of Element
+        Technologies and Formulations in the Element Reference.
         """
-        command = "ETCONTROL,%s,%s" % (str(eltech), str(eldegene))
-        return self.run(command, **kwargs)
+        return self.run(f"ETCONTROL,{eltech},{eldegene}", **kwargs)
 
     def enorm(self, enum: Union[str, int] = "", **kwargs) -> Optional[str]:
-        """APDL Command: ENORM
+        """Reorients shell element normals or line element node connectivity.
 
-        Reorients shell element normals or line element node connectivity.
+        APDL Command: ENORM
 
         Parameters
         ----------
         enum
-            Element number having the normal direction that the reoriented
-            elements are to match. If ENUM = P, graphical picking is enabled
-            and all remaining command fields are ignored (valid only in the
-            GUI).
+            Element number having the normal direction that the
+            reoriented elements are to match.
+
+        Examples
+        --------
+        >>> mapdl.enorm(1)
 
         Notes
         -----
-        Reorients shell elements so that their outward normals are consistent
-        with that of a specified element. ENORM can also be used to reorder
-        nodal connectivity of line elements so that their nodal ordering is
-        consistent with that of a specified element.
+        Reorients shell elements so that their outward normals are
+        consistent with that of a specified element. ENORM can also be
+        used to reorder nodal connectivity of line elements so that
+        their nodal ordering is consistent with that of a specified
+        element.
 
-        For shell elements, the operation reorients the element by reversing
-        and shifting the node connectivity pattern. For example, for a 4-node
-        shell element, the nodes in positions I, J, K and L of the original
-        element are placed in positions J, I, L and K of the reoriented
-        element. All 3-D shell elements in the selected set are considered for
-        reorientation, and no element is reoriented more than once during the
-        operation. Only shell elements adjacent to the lateral (side) faces are
-        considered.
+        For shell elements, the operation reorients the element by
+        reversing and shifting the node connectivity pattern. For
+        example, for a 4-node shell element, the nodes in positions I,
+        J, K and L of the original element are placed in positions J,
+        I, L and K of the reoriented element. All 3-D shell elements
+        in the selected set are considered for reorientation, and no
+        element is reoriented more than once during the
+        operation. Only shell elements adjacent to the lateral (side)
+        faces are considered.
 
-        The command reorients the shell element normals on the same panel as
-        the specified shell element. A panel is the geometry defined by a
-        subset of shell elements bounded by free edges or T-junctions (anywhere
-        three or more shell edges share common nodes).
+        The command reorients the shell element normals on the same
+        panel as the specified shell element. A panel is the geometry
+        defined by a subset of shell elements bounded by free edges or
+        T-junctions (anywhere three or more shell edges share common
+        nodes).
 
-        Reorientation progresses within the selected set until either of the
-        following conditions is true:
+        Reorientation progresses within the selected set until either
+        of the following conditions is true:
 
-        The edge of the model is reached.
+        - The edge of the model is reached.
 
-        More than two elements (whether selected or unselected) are adjacent to
-        a lateral face.
+        - More than two elements (whether selected or unselected) are
+        adjacent to a lateral face.
 
-        In situations where unselected elements might undesirably cause case b
-        to control, consider using ENSYM,0,,0,ALL instead of ENORM.  It is
-        recommended that reoriented elements be displayed and graphically
-        reviewed.
+        In situations where unselected elements might undesirably
+        cause case b to control, consider using ENSYM,0,,0,ALL instead
+        of ENORM.  It is recommended that reoriented elements be
+        displayed and graphically reviewed.
 
-        You cannot use the ENORM command to change the normal direction of any
-        element that has a body or surface load. We recommend that you apply
-        all of your loads only after ensuring that the element normal
-        directions are acceptable.
+        You cannot use the ENORM command to change the normal
+        direction of any element that has a body or surface load. We
+        recommend that you apply all of your loads only after ensuring
+        that the element normal directions are acceptable.
 
-        Real constant values are not reoriented and may be invalidated by an
-        element reversal.
+        Real constant values are not reoriented and may be invalidated
+        by an element reversal.
         """
-        command = "ENORM,%s" % (str(enum))
-        return self.run(command, **kwargs)
+        return self.run(f"ENORM,{enum}", **kwargs)
 
     def etdele(self, ityp1: Union[str, int] = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ETDELE
 
         Deletes element types.
 
+        Examples
+        --------
+        Create and delete an element type.
+
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.etdele(1)
+
         Parameters
         ----------
         ityp1, ityp2, inc
-            Deletes element types from ITYP1 to ITYP2 (defaults to ITYP1) in
-            steps of INC (defaults to 1). If ITYP1 = ALL, ITYP2 and INC are
-            ignored and all element types are deleted.  Element types are
-            defined with the ET command.
+            Deletes element types from ``ityp1`` to ``ityp2``
+            (defaults to ``ityp1``) in steps of ``inc`` (defaults to
+            1). If ``ityp1='ALL'``, ``ityp2`` and ``inc`` are ignored
+            and all element types are deleted.  Element types are
+            defined with the ``et`` command.
         """
         command = "ETDELE,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
         return self.run(command, **kwargs)
 
-    def edele(self, iel1: Union[str, int] = "", iel2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
-        """APDL Command: EDELE
+    def edele(self, iel1: MapdlInt = "", iel2: MapdlInt = "",
+              inc: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Deletes selected elements from the model.
 
-        Deletes selected elements from the model.
+        APDL Command: EDELE
 
         Parameters
         ----------
         iel1, iel2, inc
-            Delete elements from IEL1 to IEL2 (defaults to IEL1) in steps of
-            INC (defaults to 1). If IEL1 = ALL, IEL2 and INC are ignored and
-            all selected elements [ESEL] are deleted. If IEL1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI). A component name may also be substituted
-            for IEL1 (IEL2 and INC are ignored).
+            Delete elements from ``iel1`` to ``iel2`` (defaults to
+            ``iel1``) in steps of ``inc`` (defaults to 1). If
+            ``iel1='ALL'``, ``iel2`` and ``inc`` are ignored and all
+            selected elements [ESEL] are deleted.  A component name
+            may also be substituted for ``iel1`` (``iel2`` and ``inc``
+            are ignored).
+
+        Examples
+        --------
+        Delete the elements 10 through 25
+
+        >>> mapdl.edele(10, 25)
+        'DELETE SELECTED ELEMENTS FROM         10 TO         25 BY          1'
 
         Notes
         -----
-        Deleted elements are replaced by null or "blank" elements. Null
-        elements are used only for retaining the element numbers so that the
-        element numbering sequence for the rest of the model is not changed by
-        deleting elements. Null elements may be removed (although this is not
-        necessary) with the NUMCMP command. If related element data (pressures,
-        etc.) are also to be deleted, delete that data before deleting the
-        elements. EDELE is for unattached elements only. You can use the xCLEAR
-        family of commands to remove any attached elements from the database.
+        Deleted elements are replaced by null or "blank"
+        elements. Null elements are used only for retaining the
+        element numbers so that the element numbering sequence for the
+        rest of the model is not changed by deleting elements. Null
+        elements may be removed (although this is not necessary) with
+        the NUMCMP command. If related element data (pressures, etc.)
+        are also to be deleted, delete that data before deleting the
+        elements. EDELE is for unattached elements only. You can use
+        the xCLEAR family of commands to remove any attached elements
+        from the database.
         """
-        command = "EDELE,%s,%s,%s" % (str(iel1), str(iel2), str(inc))
-        return self.run(command, **kwargs)
+        return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
 
     def extopt(self, lab: str = "", val1: Union[str, int] = "", val2: Union[str, int] = "", val3: MapdlInt = "",
                val4: MapdlInt = "", **kwargs) -> Optional[str]:
@@ -988,8 +1274,10 @@ class _MapdlElementCommands:
         command = "EREINF,"
         return self.run(command, **kwargs)
 
-    def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "", iel1: Union[str, int] = "", iel2: MapdlInt = "",
-             ieinc: MapdlInt = "", minc: MapdlInt = "", tinc: MapdlInt = "", rinc: MapdlInt = "", cinc: MapdlInt = "",
+    def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "",
+             iel1: Union[str, int] = "", iel2: MapdlInt = "",
+             ieinc: MapdlInt = "", minc: MapdlInt = "",
+             tinc: MapdlInt = "", rinc: MapdlInt = "", cinc: MapdlInt = "",
              sinc: MapdlInt = "", dx: MapdlFloat = "", dy: MapdlFloat = "",
              dz: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EGEN
@@ -1059,9 +1347,9 @@ class _MapdlElementCommands:
         return self.run(command, **kwargs)
 
     def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
-        """APDL Command: EALIVE
+        """Reactivates an element (for the birth and death capability).
 
-        Reactivates an element (for the birth and death capability).
+        APDL Command: EALIVE
 
         Parameters
         ----------
@@ -1070,25 +1358,23 @@ class _MapdlElementCommands:
 
             ALL  - Reactivates all selected elements (ESEL).
 
-            P  - Enables graphical picking of elements. All remaining command fields are
-                 ignored. (Valid only in the ANSYS GUI.)
-
             Comp - Specifies a component name.
 
         Notes
         -----
-        Reactivates the specified element when the birth and death capability
-        is being used. An element can be reactivated only after it has been
-        deactivated (EKILL).
+        Reactivates the specified element when the birth and death
+        capability is being used. An element can be reactivated only
+        after it has been deactivated (EKILL).
 
-        Reactivated elements have a zero strain (or thermal heat storage, etc.)
-        state.
+        Reactivated elements have a zero strain (or thermal heat
+        storage, etc.)  state.
 
-        ANSYS, Inc. recommends using the element deactivation/reactivation
-        procedure for analyses involving linear elastic materials only. Do not
-        use element deactivation/reactivation in analyses involving time-
-        dependent materials, such as viscoelasticity, viscoplasticity, and
-        creep analysis.
+        ANSYS, Inc. recommends using the element
+        deactivation/reactivation procedure for analyses involving
+        linear elastic materials only. Do not use element
+        deactivation/reactivation in analyses involving time-
+        dependent materials, such as viscoelasticity, viscoplasticity,
+        and creep analysis.
 
         This command is also valid in PREP7.
         """

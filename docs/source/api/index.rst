@@ -21,4 +21,12 @@ classes, functions, and attributes.
    pool
    post
    solution
-   xpl
+
+
+MAPDL Command Reference
+=======================
+
+.. toctree::
+   :maxdepth: 1
+
+   element_commands
