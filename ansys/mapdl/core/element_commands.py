@@ -2244,24 +2244,25 @@ class _MapdlElementCommands:
         existing element already having this number will be redefined.
 
         Up to 8 nodes may be specified with the EN command. If more
-        nodes are needed for the element, use the EMORE command. The
-        number of nodes required and the order in which they should
-        be specified are described in the Element Reference for each
-        element type.  The current (or default) MAT, TYPE, REAL,
-        SECNUM, and ESYS attribute values are also assigned to the
-        element.
+        nodes are needed for the element, use the
+        :meth:`emore` command. The number of nodes required and the
+        order in which they should be specified are described in the
+        Element Reference for each element type.  The current (or
+        default) MAT, TYPE, REAL, SECNUM, and ESYS attribute values
+        are also assigned to the element.
 
         When creating elements with more than 8 nodes using this
-        command and the EMORE command, it may be necessary to turn
-        off shape checking using the SHPP command before issuing this
-        command. If a valid element type can be created without using
-        the additional nodes on the EMORE command, this command will
-        create that element. The EMORE command will
-        then modify the element to include the additional nodes. If
-        shape checking is active, it will be performed before the
-        EMORE command is issued. Therefore, if the shape checking
-        limits are exceeded, element creation may fail before the
-        EMORE command modifies the element into an acceptable shape.
+        command and the :meth:`emore` command, it may be necessary to
+        turn off shape checking using the SHPP command before
+        issuing this command. If a valid element type can be created
+        without using the additional nodes on the :meth:`emore`
+        command, this command will create that element. The
+        :meth:`emore` command will then modify the element to include
+        the additional nodes. If shape checking is active, it will be
+        performed before the :meth:`emore` command is issued.
+        Therefore, if the shape checking limits are exceeded, element
+        creation may fail before the :meth:`emore` command modifies
+        the element into an acceptable shape.
         """
         command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
         return self.run(command, **kwargs)
