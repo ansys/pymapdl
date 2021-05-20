@@ -232,7 +232,8 @@ class _MapdlElementCommands:
         does not activate LS-DYNA; it simply makes items and options
         related to LS-DYNA accessible in the GUI.
         """
-        command = f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
+        command = f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4}," \
+                  f"{kop5},{kop6},{inopr}"
         return parse_et(self.run(command, **kwargs))
 
     def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
@@ -529,7 +530,7 @@ class _MapdlElementCommands:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "EDTP,%s,%s,%s" % (str(option), str(value1), str(value2))
+        command = f"EDTP,{option},{value1},{value2}"
         return self.run(command, **kwargs)
 
     def estif(self, kmult: MapdlFloat = "", **kwargs) -> Optional[str]:
@@ -556,13 +557,14 @@ class _MapdlElementCommands:
 
         This command is also valid in PREP7.
         """
-        command = "ESTIF,%s" % (str(kmult))
+        command = f"ESTIF,{kmult}"
         return self.run(command, **kwargs)
 
     def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "",
                i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "",
                i4: MapdlInt = "", i5: MapdlInt = "", i6: MapdlInt = "",
-               i7: MapdlInt = "", i8: MapdlInt = "", **kwargs) -> Optional[str]:
+               i7: MapdlInt = "", i8: MapdlInt = "",
+               **kwargs) -> Optional[str]:
         """Modifies a previously defined element.
 
         APDL Command: EMODIF
@@ -766,7 +768,8 @@ class _MapdlElementCommands:
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "", **kwargs) -> Optional[str]:
+    def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "",
+               **kwargs) -> Optional[str]:
         """APDL Command: /ESHAPE
 
         Displays elements with shapes determined from the real constants or
@@ -899,8 +902,9 @@ class _MapdlElementCommands:
         This command is valid in any processor.
 
         """
-        warnings.warn('pymapdl does not support /ESHAPE when plotting in Python using '
-                      '``mapdl.eplot()``.  Use ``mapdl.eplot(vtk=False)`` ')
+        warnings.warn('pymapdl does not support /ESHAPE when plotting in '
+                      'Python using ``mapdl.eplot()``.  '
+                      'Use ``mapdl.eplot(vtk=False)`` ')
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
 
@@ -997,8 +1001,10 @@ class _MapdlElementCommands:
         """
         return self.run(f"ETCONTROL,{eltech},{eldegene}", **kwargs)
 
-    def enorm(self, enum: Union[str, int] = "", **kwargs) -> Optional[str]:
-        """Reorients shell element normals or line element node connectivity.
+    def enorm(self, enum: Union[str, int] = "",
+              **kwargs) -> Optional[str]:
+        """Reorients shell element normals or line element node
+        connectivity.
 
         APDL Command: ENORM
 
@@ -1059,7 +1065,8 @@ class _MapdlElementCommands:
         """
         return self.run(f"ENORM,{enum}", **kwargs)
 
-    def etdele(self, ityp1: Union[str, int] = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def etdele(self, ityp1: Union[str, int] = "", ityp2: MapdlInt = "",
+               inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ETDELE
 
         Deletes element types.
@@ -1080,7 +1087,7 @@ class _MapdlElementCommands:
             and all element types are deleted.  Element types are
             defined with the ``et`` command.
         """
-        command = "ETDELE,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
+        command = f"ETDELE,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
 
     def edele(self, iel1: MapdlInt = "", iel2: MapdlInt = "",
@@ -1121,155 +1128,182 @@ class _MapdlElementCommands:
         """
         return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
 
-    def extopt(self, lab: str = "", val1: Union[str, int] = "", val2: Union[str, int] = "", val3: MapdlInt = "",
+    def extopt(self, lab: str = "", val1: Union[str, int] = "",
+               val2: Union[str, int] = "", val3: MapdlInt = "",
                val4: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EXTOPT
 
-        Controls options relating to the generation of volume elements from
-        area elements.
+        Controls options relating to the generation of volume elements
+        from area elements.
 
         Parameters
         ----------
         lab
-            Label identifying the control option. The meanings of Val1, Val2,
-            and Val3 will vary depending on Lab.
+            Label identifying the control option. The meanings of
+            Val1, Val2, and Val3 will vary depending on Lab.
 
-            ON - Sets carryover of the material attributes, real constant attributes, and
-                 element coordinate system attributes of the pattern area
-                 elements to the generated volume elements.  Sets the pattern
-                 area mesh to clear when volume generations are done. Val1,
-                 Val2, and Val3 are ignored.
+            ON - Sets carryover of the material attributes, real
+                 constant attributes, and element coordinate system
+                 attributes of the pattern area elements to the
+                 generated volume elements.  Sets the pattern
+                 area mesh to clear when volume generations are done.
+                 Val1, Val2, and Val3 are ignored.
 
-            OFF - Removes all settings associated with this command. Val1, Val2, and Val3 are
-                  ignored.
+            OFF - Removes all settings associated with this command.
+                  Val1, Val2, and Val3 are ignored.
 
-            STAT - Shows all settings associated with this command. Val1, Val2, Val3, and Val4 are
-                   ignored.
+            STAT - Shows all settings associated with this command.
+                   Val1, Val2, Val3, and Val4 are ignored.
 
-            ATTR - Sets carryover of particular pattern area attributes (materials, real
-                   constants, and element coordinate systems) of the pattern
-                   area elements to the generated volume elements. (See 2.)
-                   Val1 can be:
+            ATTR - Sets carryover of particular pattern area attributes
+                   (materials, real constants, and element coordinate
+                   systems) of the pattern area elements to the
+                   generated volume elements. (See 2.) Val1 can be:
 
-            0 - Sets volume elements to use current MAT command settings.
+                0 - Sets volume elements to use
+                    current MAT command settings.
 
-            1 - Sets volume elements to use material attributes of the pattern area elements.
+                1 - Sets volume elements to use material
+                    attributes of the pattern area elements.
 
-            Val2 can be:  - 0
+            Val2 can be:
 
-            Sets volume elements to use current REAL command settings. - 1
+                0 - Sets volume elements to use current REAL
+                    command settings.
 
-            Sets volume elements to use real constant attributes of the pattern area elements. - Val3 can be:
+                1 - Sets volume elements to use real constant attributes
+                    of the pattern area elements.
 
-            0 - Sets volume elements to use current ESYS command settings.
+            Val3 can be:
 
-            1 - Sets volume elements to use element coordinate system attributes of the pattern
-                area elements.
+                0 - Sets volume elements to use current ESYS command
+                    settings.
 
-            Val4 can be:  - 0
+                1 - Sets volume elements to use element coordinate
+                    system attributes of the pattern area elements.
 
-            Sets volume elements to use current SECNUM command settings. - 1
+            Val4 can be:
 
-            Sets volume elements to use section attributes of the pattern area elements. -
+                0 - Sets volume elements to use current SECNUM command
+                    settings.
 
-            ESIZE - Val1 sets the number of element divisions in the direction of volume generation
-                    or volume sweep. For VDRAG and VSWEEP, Val1 is overridden
-                    by the LESIZE command NDIV setting. Val2 sets the spacing
-                    ratio (bias) in the direction of volume generation or
-                    volume sweep. If positive, Val2 is the nominal ratio of
-                    last division size to first division size (if > 1.0, sizes
-                    increase, if < 1.0, sizes decrease). If negative, Val2 is
-                    the nominal ratio of center division(s) size to end
-                    divisions size. Ratio defaults to 1.0 (uniform spacing).
+                1 - Sets volume elements to use section attributes of
+                    the pattern area elements.
+
+            ESIZE - Val1 sets the number of element divisions in the
+                    direction of volume generation or volume sweep.
+                    For VDRAG and VSWEEP, Val1 is overridden by the
+                    LESIZE command NDIV setting. Val2 sets the spacing
+                    ratio (bias) in the direction of volume generation
+                    or volume sweep. If positive, Val2 is the nominal
+                    ratio of last division size to first division size
+                    (if > 1.0, sizes increase, if < 1.0, sizes
+                    decrease). If negative, Val2 is the nominal ratio of
+                    center division(s) size to end divisions size. Ratio
+                    defaults to 1.0 (uniform spacing).
                     Val3 and Val4 are ignored.
 
-            ACLEAR - Sets clearing of pattern area mesh. (See 3.) Val1 can be:
+            ACLEAR - Sets clearing of pattern area mesh.
+                     (See 3.) Val1 can be:
 
-            0 - Sets pattern area to remain meshed when volume generation is done.
+                0 - Sets pattern area to remain meshed when volume
+                    generation is done.
 
-            1 - Sets pattern area mesh to clear when volume generation is done. Val2, Val3 ,
-                and Val4 are ignored.
+                1 - Sets pattern area mesh to clear when volume
+                    generation is done. Val2, Val3, and Val4 are
+                    ignored.
 
-            VSWE - Indicates that volume sweeping options will be set using Val1 and Val2.
-                   Settings specified with EXTOPT,VSWE will be used the next
-                   time the VSWEEP command is invoked. If Lab = VSWE, Val1
-                   becomes a label. Val1 can be:
+            VSWE - Indicates that volume sweeping options will be set
+                   using Val1 and Val2. Settings specified with EXTOPT,
+                   VSWE will be used the next time the VSWEEP command
+                   is invoked. If Lab = VSWE, Val1 becomes a label.
+                   Val1 can be:
 
-            AUTO - Indicates whether you will be prompted for the source and target used by VSWEEP
-                   or if VSWE should automatically determine the source and
-                   target. If Val1 = AUTO, Val2 is ON by default. VSWE will
-                   automatically determine the source and target for VSWEEP.
-                   You will be allowed to pick more than one volume for
-                   sweeping. When Val2 = OFF, the user will be prompted for the
-                   source and target for VSWEEP. You will only be allowed to
-                   pick one volume for sweeping.
+            AUTO - Indicates whether you will be prompted for the source
+                   and target used by VSWEEP or if VSWE should
+                   automatically determine the source and target.
+                   If Val1 = AUTO, Val2 is ON by default. VSWE will
+                   automatically determine the source and target for
+                   VSWEEP. You will be allowed to pick more than one
+                   volume for sweeping. When Val2 = OFF, the user will
+                   be prompted for the source and target for VSWEEP.
+                   You will only be allowed to pick one volume for
+                   sweeping.
 
-            TETS - Indicates whether VSWEEP will tet mesh non-sweepable volumes or leave them
-                   unmeshed. If Val1 = TETS, Val2 is OFF by default. Non-
-                   sweepable volumes will be left unmeshed. When Val2 = ON, the
-                   non-sweepable volumes will be tet meshed if the assigned
-                   element type supports tet shaped elements.
+            TETS - Indicates whether VSWEEP will tet mesh non-sweepable
+                   volumes or leave them unmeshed. If Val1 = TETS,
+                   Val2 is OFF by default. Non-sweepable volumes will be
+                   left unmeshed. When Val2 = ON, the non-sweepable
+                   volumes will be tet meshed if the assigned element
+                   type supports tet shaped elements.
 
         val1, val2, val3, val4
-            Additional input values as described under each option for Lab.
+            Additional input values as described under each option for
+            Lab.
 
         Notes
         -----
-        EXTOPT controls options relating to the generation of volume elements
-        from pattern area elements using the VEXT, VROTAT, VOFFST, VDRAG, and
-        VSWEEP commands.  (When using VSWEEP,  the pattern area is referred to
-        as the source area.)
+        EXTOPT controls options relating to the generation of volume
+        elements from pattern area elements using the VEXT, VROTAT,
+        VOFFST, VDRAG, and VSWEEP commands.  (When using VSWEEP,
+        the pattern area is referred to as the source area.)
 
-        Enables carryover of the attributes  of the pattern area elements to
-        the generated volume elements when you are using VEXT, VROTAT, VOFFST,
-        or VDRAG. (When using VSWEEP, since the volume already exists, use the
-        VATT command to assign attributes before sweeping.)
+        Enables carryover of the attributes  of the pattern area
+        elements to the generated volume elements when you are using
+        VEXT, VROTAT, VOFFST, or VDRAG. (When using VSWEEP, since the
+        volume already exists, use the VATT command to assign attributes
+        before sweeping.)
 
-        When you are using VEXT, VROTAT, VOFFST, or VDRAG, enables clearing of
-        the pattern area mesh when volume generations are done. (When you are
-        using VSWEEP, if selected, the area meshes on the pattern (source),
-        target, and/or side areas clear when volume sweeping is done.)
+        When you are using VEXT, VROTAT, VOFFST, or VDRAG, enables
+        clearing of the pattern area mesh when volume generations are
+        done. (When you are using VSWEEP, if selected, the area meshes
+        on the pattern (source), target, and/or side areas clear when
+        volume sweeping is done.)
 
-        Neither EXTOPT,VSWE,AUTO nor EXTOPT,VSWE,TETS will be affected by
-        EXTOPT,ON or EXTOPT, OFF.
+        Neither EXTOPT,VSWE,AUTO nor EXTOPT,VSWE,TETS will be affected
+        by EXTOPT,ON or EXTOPT, OFF.
         """
-        command = "EXTOPT,%s,%s,%s,%s,%s" % (str(lab), str(val1), str(val2), str(val3), str(val4))
+        command = f"EXTOPT,{lab},{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
 
     def ereinf(self, **kwargs) -> Optional[str]:
         """APDL Command: EREINF
 
-        Generates reinforcing elements from selected existing (base) elements.
+        Generates reinforcing elements from selected existing (base)
+        elements.
 
         Notes
         -----
         The EREINF command generates reinforcing elements (REINF264 and
-        REINF265) directly from selected base elements (that is, existing
-        standard elements in your model). The command scans all selected base
-        elements and generates (if necessary) a compatible reinforcing element
-        type for each base element. (ANSYS allows a combination of different
-        base element types.)
+        REINF265) directly from selected base elements (that is,
+        existing standard elements in your model). The command scans all
+        selected base elements and generates (if necessary) a compatible
+        reinforcing element type for each base element. (ANSYS
+        allows a combination of different base element types.)
 
-        Although predefining the reinforcing element type (ET) is not required,
-        you must define the reinforcing element section type (SECTYPE);
-        otherwise, ANSYS cannot generate the reinforcing element.
+        Although predefining the reinforcing element type (ET) is not
+        required, you must define the reinforcing element section type
+        (SECTYPE); otherwise, ANSYS cannot generate the
+        reinforcing element.
 
-        The EREINF command does not create new nodes. The reinforcing elements
-        and the base elements share the common nodes.
+        The EREINF command does not create new nodes. The reinforcing
+        elements and the base elements share the common nodes.
 
-        Elements generated by this command are not associated with the solid
-        model.
+        Elements generated by this command are not associated with
+        the solid model.
 
-        After the EREINF command executes, you can issue ETLIST, ELIST, and
-        EPLOT commands to verify the newly created reinforcing element types
-        and elements.
+        After the EREINF command executes, you can issue ETLIST, ELIST,
+        and EPLOT commands to verify the newly created reinforcing
+        element types and elements.
 
-        Reinforcing elements do not account for any subsequent modifications
-        made to the base elements. ANSYS, Inc. recommends issuing the EREINF
-        command only after the base elements are finalized. If you delete or
-        modify base elements (via EDELE, EMODIF, ETCHG, EMID, EORIENT, NUMMRG,
-        or NUMCMP commands, for example), remove all affected reinforcing
-        elements and reissue the EREINF command to avoid inconsistencies.
+        Reinforcing elements do not account for any subsequent
+        modifications made to the base elements. ANSYS,
+        Inc. recommends issuing the EREINF command only after the
+        base elements are finalized. If you delete or modify base
+        elements (via EDELE, EMODIF, ETCHG, EMID, EORIENT, NUMMRG,
+        or NUMCMP commands, for example), remove all affected
+        reinforcing elements and reissue the EREINF command to avoid
+        inconsistencies.
         """
         command = "EREINF,"
         return self.run(command, **kwargs)
@@ -1277,8 +1311,9 @@ class _MapdlElementCommands:
     def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "",
              iel1: Union[str, int] = "", iel2: MapdlInt = "",
              ieinc: MapdlInt = "", minc: MapdlInt = "",
-             tinc: MapdlInt = "", rinc: MapdlInt = "", cinc: MapdlInt = "",
-             sinc: MapdlInt = "", dx: MapdlFloat = "", dy: MapdlFloat = "",
+             tinc: MapdlInt = "", rinc: MapdlInt = "",
+             cinc: MapdlInt = "", sinc: MapdlInt = "",
+             dx: MapdlFloat = "", dy: MapdlFloat = "",
              dz: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EGEN
 
@@ -1287,25 +1322,30 @@ class _MapdlElementCommands:
         Parameters
         ----------
         itime, ninc
-            Do this generation operation a total of ITIMEs, incrementing all
-            nodes in the given pattern by NINC each time after the first. ITIME
-            must be >1 if generation is to occur. NINC may be positive, zero,
-            or negative. If DX, DY, and/or DZ is specified, NINC should be set
+            Do this generation operation a total of ITIMEs,
+            incrementing all nodes in the given pattern by NINC each
+            time after the first. ITIME must be >1 if generation is
+            to occur. NINC may be positive, zero, or negative.
+            If DX, DY, and/or DZ is specified, NINC should be set
             so any existing nodes (as on NGEN) are not overwritten.
 
         iel1, iel2, ieinc
-            Generate elements from selected pattern beginning with IEL1 to IEL2
-            (defaults to IEL1) in steps of IEINC (defaults to 1). If IEL1 is
-            negative, IEL2 and IEINC are ignored and the last |IEL1| elements
-            (in sequence backward from the maximum element number) are used as
-            the pattern to be repeated.  If IEL1 = ALL, IEL2 and IEINC are
-            ignored and use all selected elements [ESEL] as pattern to be
-            repeated. If P1 = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).  A component
-            name may also be substituted for IEL1 (IEL2 and INC are ignored).
+            Generate elements from selected pattern beginning with
+            IEL1 to IEL2 (defaults to IEL1) in steps of IEINC (
+            defaults to 1). If IEL1 is negative, IEL2 and IEINC are
+            ignored and the last |IEL1| elements
+            (in sequence backward from the maximum element number)
+            are used as the pattern to be repeated.  If IEL1 = ALL,
+            IEL2 and IEINC are ignored and use all selected elements
+            [ESEL] as pattern to be repeated. If P1 = P, graphical
+            picking is enabled and all remaining command fields are
+            ignored (valid only in the GUI). A component name may
+            also be substituted for IEL1 (IEL2 and INC are
+            ignored).
 
         minc
-            Increment material number of all elements in the given pattern by
+            Increment material number of all elements in the given
+            pattern by
             MINC each time after the first.
 
         tinc
@@ -1321,29 +1361,31 @@ class _MapdlElementCommands:
             Increment section ID number by SINC.
 
         dx, dy, dz
-            Define nodes that do not already exist but are needed by generated
-            elements (as though the NGEN,ITIME,INC,NODE1,,,DX,DY,DZ were issued
-            before EGEN). Zero is a valid value. If blank, DX, DY, and DZ are
+            Define nodes that do not already exist but are needed by
+            generated
+            elements (as though the NGEN,ITIME,INC,NODE1,,,DX,DY,
+            DZ were issued
+            before EGEN). Zero is a valid value. If blank, DX, DY,
+            and DZ are
             ignored.
 
         Notes
         -----
-        A pattern may consist of any number of previously defined elements. The
-        MAT, TYPE, REAL, ESYS, and SECNUM numbers of the new elements are based
-        upon the elements in the pattern and not upon the current specification
-        settings.
+        A pattern may consist of any number of previously defined
+        elements. The MAT, TYPE, REAL, ESYS, and SECNUM numbers of
+        the new elements are based upon the elements in the pattern
+        and not upon the current specification settings.
 
-        You can use the EGEN command to generate interface elements (INTER192,
-        INTER193, INTER194, and INTER195) directly. However, because interface
-        elements require that the element connectivity be started from the
-        bottom surface, you must make sure that you use the correct element
-        node connectivity. See the element descriptions for INTER192, INTER193,
+        You can use the EGEN command to generate interface elements (
+        INTER192, INTER193, INTER194, and INTER195) directly.
+        However, because interface elements require that the element
+        connectivity be started from the bottom surface, you must
+        make sure that you use the correct element node connectivity.
+        See the element descriptions for INTER192, INTER193,
         INTER194, and INTER195 for the correct element node definition.
         """
-        command = "EGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(itime), str(ninc), str(iel1),
-                                                                   str(iel2), str(ieinc), str(minc),
-                                                                   str(tinc), str(rinc), str(cinc),
-                                                                   str(sinc), str(dx), str(dy), str(dz))
+        command = f"EGEN,{itime},{ninc},{iel1},{iel2},{ieinc},{minc}," \
+                  f"{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
         return self.run(command, **kwargs)
 
     def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
@@ -1378,10 +1420,11 @@ class _MapdlElementCommands:
 
         This command is also valid in PREP7.
         """
-        command = "EALIVE,%s" % (str(elem))
+        command = f"EALIVE,{elem}"
         return self.run(command, **kwargs)
 
-    def escheck(self, sele: str = "", levl: str = "", defkey: MapdlInt = "", **kwargs) -> Optional[str]:
+    def escheck(self, sele: str = "", levl: str = "",
+                defkey: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESCHECK
 
         Perform element shape checking for a selected element set.
@@ -1391,35 +1434,39 @@ class _MapdlElementCommands:
         sele
             Specifies whether to select elements for checking:
 
-            (blank) - List all warnings/errors from element shape checking.
+            (blank) - List all warnings/errors from element shape
+            checking.
 
-            ESEL - Select the elements based on the .Levl criteria specified below.
+            ESEL - Select the elements based on the .Levl criteria
+            specified below.
 
         levl
-            WARN
-
             WARN - Select elements producing warning and error messages.
 
-            ERR - Select only elements producing error messages (default).
+            ERR - Select only elements producing error messages (
+            default).
 
         defkey
-            Specifies whether check should be performed on deformed element
+            Specifies whether check should be performed on deformed
+            element
             shapes. .
 
-            0 - Do not update node coordinates before performing shape checks (default).
+            0 - Do not update node coordinates before performing
+            shape checks (default).
 
-            1 - Update node coordinates using the current set of deformations in the database.
+            1 - Update node coordinates using the current set of
+            deformations in the database.
 
         Notes
         -----
-        Shape checking will occur according to the current SHPP settings.
-        Although ESCHECK is valid in all processors, Defkey  uses the current
-        results in the database. If no results are available a warning will be
-        issued.
+        Shape checking will occur according to the current SHPP
+        settings. Although ESCHECK is valid in all processors,
+        Defkey  uses the current results in the database. If no
+        results are available a warning will be issued.
 
         This command is also valid in PREP7, SOLUTION and POST1.
         """
-        command = "ESCHECK,%s,%s,%s" % (str(sele), str(levl), str(defkey))
+        command = f"ESCHECK,{sele},{levl},{defkey}"
         return self.run(command, **kwargs)
 
     def esys(self, kcn: MapdlInt = "", **kwargs) -> Optional[str]:
@@ -1432,28 +1479,32 @@ class _MapdlElementCommands:
         kcn
             Coordinate system number:
 
-            0 - Use element coordinate system orientation as defined (either by default or by
-                KEYOPT setting) for the element (default).
+            0 - Use element coordinate system orientation as defined
+                (either by default or by KEYOPT setting) for the
+                element (default).
 
-            N - Use element coordinate system orientation based on local coordinate system N
-                (where N must be greater than 10). For global system 0, 1, or
-                2, define a local system N parallel to appropriate system with
+            N - Use element coordinate system orientation based on
+                local coordinate system N (where N must be greater
+                than 10). For global system 0, 1, or 2, define a
+                local system N parallel to appropriate system with
                 the LOCAL or CS command (for example: LOCAL,11,1).
 
         Notes
         -----
-        Identifies the local coordinate system to be used to define the element
-        coordinate system of subsequently defined elements. Used only with area
-        and volume elements. For non-layered volume elements, the local
-        coordinate system N is simply assigned to be the element coordinate
-        system. For shell and layered volume elements, the x and y axes of the
-        local coordinate system N are projected onto the shell or layer plane
-        to determine the element coordinate system. See Understanding the
-        Element Coordinate System for more details. N refers to the coordinate
-        system reference number (KCN) defined using the LOCAL (or similar)
-        command. Element coordinate system numbers may be displayed [/PNUM].
+        Identifies the local coordinate system to be used to define
+        the element coordinate system of subsequently defined
+        elements. Used only with area and volume elements. For
+        non-layered volume elements, the local coordinate system N is
+        simply assigned to be the element coordinate system. For
+        shell and layered volume elements, the x and y axes of the
+        local coordinate system N are projected onto the shell or
+        layer plane to determine the element coordinate system. See
+        Understanding the Element Coordinate System for more details.
+        N refers to the coordinate system reference number (KCN)
+        defined using the LOCAL (or similar) command. Element
+        coordinate system numbers may be displayed [/PNUM].
         """
-        command = "ESYS,%s" % (str(kcn))
+        command = f"ESYS,{kcn}"
         return self.run(command, **kwargs)
 
     def eslv(self, type_: str = "", **kwargs) -> Optional[str]:
@@ -1476,12 +1527,13 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Selects volume elements belonging to meshed [VMESH], selected [VSEL]
+        Selects volume elements belonging to meshed [VMESH], selected
+        [VSEL]
         volumes.
 
         This command is valid in any processor.
         """
-        command = "ESLV,%s" % (str(type_))
+        command = f"ESLV,{type_}"
         return self.run(command, **kwargs)
 
     def esla(self, type_: str = "", **kwargs) -> Optional[str]:
@@ -1504,15 +1556,16 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Selects area elements belonging to meshed [AMESH], selected [ASEL]
-        areas.
+        Selects area elements belonging to meshed [AMESH], selected
+        [ASEL] areas.
 
         This command is valid in any processor.
         """
-        command = "ESLA,%s" % (str(type_))
+        command = f"ESLA,{type_}"
         return self.run(command, **kwargs)
 
-    def errang(self, emin: MapdlInt = "", emax: MapdlInt = "", einc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def errang(self, emin: MapdlInt = "", emax: MapdlInt = "",
+               einc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ERRANG
 
         Specifies the element range to be read from a file.
@@ -1520,20 +1573,24 @@ class _MapdlElementCommands:
         Parameters
         ----------
         emin, emax, einc
-            Elements with numbers from EMIN (defaults to 1) to EMAX (defaults
-            to 99999999) in steps of EINC (defaults to 1) will be read.
+            Elements with numbers from EMIN (defaults to 1) to EMAX
+            (defaults to 99999999) in steps of EINC (defaults to 1)
+            will be read.
 
         Notes
         -----
-        Defines the element number range to be read [EREAD] from the element
-        file. If a range is also implied from the NRRANG command, only those
-        elements satisfying both ranges will be read.
+        Defines the element number range to be read [EREAD] from the
+        element file. If a range is also implied from the NRRANG
+        command, only those elements satisfying both ranges will be
+        read.
         """
-        command = "ERRANG,%s,%s,%s" % (str(emin), str(emax), str(einc))
+        command = f"ERRANG,{emin},{emax},{einc}"
         return self.run(command, **kwargs)
 
-    def erefine(self, ne1: Union[str, int] = "", ne2: MapdlInt = "", ninc: MapdlInt = "", level: MapdlInt = "",
-                depth: MapdlInt = "", post: str = "", retain: str = "", **kwargs) -> Optional[str]:
+    def erefine(self, ne1: Union[str, int] = "", ne2: MapdlInt = "",
+                ninc: MapdlInt = "", level: MapdlInt = "",
+                depth: MapdlInt = "", post: str = "", retain: str = "",
+                **kwargs) -> Optional[str]:
         """APDL Command: EREFINE
 
         Refines the mesh around specified elements.
@@ -1541,79 +1598,89 @@ class _MapdlElementCommands:
         Parameters
         ----------
         ne1, ne2, ninc
-            Elements (NE1 to NE2 in increments of NINC) around which the mesh
-            is to be refined. NE2 defaults to NE1, and NINC defaults to 1. If
-            NE1 = ALL, NE2 and NINC are ignored and all selected elements are
-            used for refinement. If NE1 = P, graphical picking is enabled and
-            all remaining command fields are ignored (valid only in the GUI). A
-            component name may also be substituted for NE1 (NE2 and NINC are
+            Elements (NE1 to NE2 in increments of NINC) around which
+            the mesh is to be refined. NE2 defaults to NE1, and NINC
+            defaults to 1. If NE1 = ALL, NE2 and NINC are ignored and
+            all selected elements are used for refinement. If NE1 =
+            P, graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI). A component
+            name may also be substituted for NE1 (NE2 and NINC are
             ignored).
 
         level
-            Amount of refinement to be done. Specify the value of LEVEL as an
-            integer from 1 to 5, where a value of 1 provides minimal
-            refinement, and a value of 5 provides maximum refinement (defaults
-            to 1).
+            Amount of refinement to be done. Specify the value of
+            LEVEL as an integer from 1 to 5, where a value of 1
+            provides minimal refinement, and a value of 5 provides
+            maximum refinement (defaults to 1).
 
         depth
-            Depth of mesh refinement in terms of number of elements outward
-            from the indicated elements, NE1 to NE2 (defaults to 0).
+            Depth of mesh refinement in terms of number of elements
+            outward from the indicated elements, NE1 to NE2
+            (defaults to 0).
 
         post
-            Type of postprocessing to be done after element splitting, in order
-            to improve element quality:
+            Type of postprocessing to be done after element
+            splitting, in order to improve element quality:
 
             OFF - No postprocessing will be done.
 
             SMOOTH - Smoothing will be done. Node locations may change.
 
-            CLEAN - Smoothing and cleanup will be done. Existing elements may be deleted, and node
+            CLEAN - Smoothing and cleanup will be done. Existing
+                    elements may be deleted, and node
                     locations may change (default).
 
         retain
-            Flag indicating whether quadrilateral elements must be retained in
-            the refinement of an all-quadrilateral mesh. (The ANSYS program
-            ignores the RETAIN argument when you are refining anything other
-            than a quadrilateral mesh.)
+            Flag indicating whether quadrilateral elements must be
+            retained in the refinement of an all-quadrilateral mesh.
+            (The ANSYS program ignores the RETAIN argument when you
+            are refining anything other than a quadrilateral mesh.)
 
-            ON - The final mesh will be composed entirely of quadrilateral elements, regardless
+            ON - The final mesh will be composed entirely of
+                 quadrilateral elements, regardless
                  of the element quality (default).
 
-            OFF - The final mesh may include some triangular elements in order to maintain
+            OFF - The final mesh may include some triangular elements
+                  in order to maintain
                   element quality and provide transitioning.
 
         Notes
         -----
-        EREFINE performs local mesh refinement around the specified elements.
-        By default, the surrounding elements are split to create new elements
-        with 1/2 the edge length of the original elements (LEVEL = 1).
+        EREFINE performs local mesh refinement around the specified
+        elements. By default, the surrounding elements are split to
+        create new elements with 1/2 the edge length of the original
+        elements (LEVEL = 1).
 
-        EREFINE refines all area elements and tetrahedral volume elements that
-        are adjacent to the specified elements. Any volume elements that are
-        adjacent to the specified elements, but are not tetrahedra (for
-        example, hexahedra, wedges, and pyramids), are not refined.
+        EREFINE refines all area elements and tetrahedral volume
+        elements that are adjacent to the specified elements. Any
+        volume elements that are adjacent to the specified elements,
+        but are not tetrahedra (for example, hexahedra, wedges,
+        and pyramids), are not refined.
 
-        You cannot use mesh refinement on a solid model that contains initial
-        conditions at nodes [IC], coupled nodes [CP family of commands],
-        constraint equations [CE family of commands], or boundary conditions or
-        loads applied directly to any of its nodes or elements. This applies to
-        nodes and elements anywhere in the model, not just in the region where
-        you want to request mesh refinement.   If you have detached the mesh
-        from the solid model, you must disable postprocessing cleanup or
-        smoothing (POST = OFF) after the refinement to preserve the element
-        attributes.
+        You cannot use mesh refinement on a solid model that contains
+        initial conditions at nodes [IC], coupled nodes
+        [CP family of commands], constraint equations [CE family of
+        commands], or boundary conditions or loads applied directly
+        to any of its nodes or elements. This applies to nodes and
+        elements anywhere in the model, not just in the
+        region where you want to request mesh refinement. If you have
+        detached the mesh from the solid model, you must disable
+        postprocessing cleanup or smoothing (POST = OFF) after the
+        refinement to preserve the element attributes.
 
-        For additional restrictions on mesh refinement, see Revising Your Model
-        in the Modeling and Meshing Guide.
+        For additional restrictions on mesh refinement, see Revising
+        Your Model in the Modeling and Meshing Guide.
 
         This command is also valid for rezoning.
         """
-        command = "EREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(ne1), str(ne2), str(ninc), str(level), str(depth),
-                                                    str(post), str(retain))
+        command = f"EREFINE,{ne1},{ne2},{ninc}," \
+                  f"{level},{depth},{post},{retain}"
         return self.run(command, **kwargs)
 
-    def eintf(self, toler: MapdlFloat = "", k: MapdlInt = "", tlab: str = "", kcn: str = "", dx: MapdlFloat = "",
-              dy: MapdlFloat = "", dz: MapdlFloat = "", knonrot: MapdlInt = "", **kwargs) -> Optional[str]:
+    def eintf(self, toler: MapdlFloat = "", k: MapdlInt = "",
+              tlab: str = "", kcn: str = "", dx: MapdlFloat = "",
+              dy: MapdlFloat = "", dz: MapdlFloat = "",
+              knonrot: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EINTF
 
         Defines two-node elements between coincident or offset nodes.
@@ -1621,71 +1688,80 @@ class _MapdlElementCommands:
         Parameters
         ----------
         toler
-            Tolerance for coincidence (based on maximum Cartesian coordinate
-            difference for node locations and on angle differences for node
-            orientations). Defaults to 0.0001. Only nodes within the tolerance
-            are considered to be coincident.
+            Tolerance for coincidence (based on maximum Cartesian
+            coordinate difference for node locations and on angle
+            differences for node orientations). Defaults to 0.0001.
+            Only nodes within the tolerance are considered to be
+            coincident.
 
         k
             Only used when the type of the elements to be generated is
-            PRETS179. K is the pretension node that is common to the pretension
-            section that is being created. If K is not specified, it will be
-            created by ANSYS automatically and will have an ANSYS-assigned node
-            number. If K is specified but does not already exist, it will be
-            created automatically but will have the user-specified node number.
-            K cannot be connected to any existing element.
+            PRETS179. K is the pretension node that is common to the
+            pretension section that is being created. If K is not
+            specified, it will be created by ANSYS automatically and
+            will have an ANSYS-assigned node number. If K is
+            specified but does not already exist, it will be
+            created automatically but will have the user-specified
+            node number. K cannot be connected to any existing element.
 
         tlab
             Nodal number ordering. Allowable values are:
 
-            LOW - The 2-node elements are generated from the lowest numbered node to the highest
-                  numbered node.
+            LOW - The 2-node elements are generated from the lowest
+                  numbered node to the highest numbered node.
 
-            HIGH - The 2-node elements are generated from the highest numbered node to the lowest
-                   numbered node.
+            HIGH - The 2-node elements are generated from the highest
+                   numbered node to the lowest numbered node.
 
-            REVE - Reverses the orientation of the selected 2-node element.
+            REVE - Reverses the orientation of the selected 2-node
+                   element.
 
         kcn
-            In coordinate system KCN, elements are created between node 1 and
-            node 2 (= node 1 + dx dy dz).
+            In coordinate system KCN, elements are created between
+            node 1 and node 2 (= node 1 + dx dy dz).
 
         dx, dy, dz
-            Node location increments that define the node offset in the active
-            coordinate system (DR, Dθ, DZ for cylindrical and DR, Dθ, DΦ for
-            spherical or toroidal).
+            Node location increments that define the node offset in
+            the active coordinate system (DR, Dθ, DZ for cylindrical
+            and DR, Dθ, DΦ for spherical or toroidal).
 
         knonrot
-            When KNONROT = 0, the nodes coordinate system is not rotated. When
-            KNONROT = 1, the nodes belonging to the elements created are
-            rotated into coordinate system KCN (see NROTAT command
-            description).
+            When KNONROT = 0, the nodes coordinate system is not
+            rotated. When KNONROT = 1, the nodes belonging to the
+            elements created are rotated into coordinate system KCN
+            (see NROTAT command description).
 
         Notes
         -----
-        Defines 2-node elements (such as gap elements) between coincident or
-        offset nodes (within a tolerance). May be used, for example, to "hook"
-        together elements interfacing at a seam, where the seam consists of a
-        series of node pairs. One element is generated for each set of two
-        coincident nodes. For more than two coincident or offset nodes in a
-        cluster, an element is generated from the lowest numbered node to each
-        of the other nodes in the cluster. If fewer than all nodes are to be
-        checked for coincidence, use the NSEL command to select the nodes.
-        Element numbers are incremented by one from the highest previous
-        element number. The element type must be set [ET] to a 2-node element
-        before issuing this command. Use the CPINTF command to connect nodes by
-        coupling instead of by elements. Use the CEINTF command to connect the
-        nodes by constraint equations instead of by elements.
+        Defines 2-node elements (such as gap elements) between
+        coincident or offset nodes (within a tolerance). May be used,
+        for example, to "hook" together elements interfacing at a
+        seam, where the seam consists of a series of node pairs. One
+        element is generated for each set of two coincident nodes.
+        For more than two coincident or offset nodes in a cluster,
+        an element is generated from the lowest numbered
+        node to each of the other nodes in the cluster. If fewer than
+        all nodes are to be checked for coincidence, use the NSEL
+        command to select the nodes. Element numbers are incremented
+        by one from the highest previous element number. The element
+        type must be set [ET] to a 2-node element before issuing this
+        command. Use the CPINTF command to connect nodes by
+        coupling instead of by elements. Use the CEINTF command to
+        connect the nodes by constraint equations instead of by
+        elements.
 
-        For contact element CONTA178, the tolerance is based on the maximum
-        Cartesian coordinate difference for node locations only. The angle
-        differences for node orientations are not checked.
+        For contact element CONTA178, the tolerance is based on the
+        maximum Cartesian coordinate difference for node locations
+        only. The angle differences for node orientations are not
+        checked.
         """
-        command = "EINTF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(toler), str(k), str(tlab), str(kcn), str(dx),
-                                                     str(dy), str(dz), str(knonrot))
+        command = f"EINTF,{toler},{k},{tlab}," \
+                  f"{kcn},{dx},{dy}," \
+                  f"{dz},{knonrot}"
         return self.run(command, **kwargs)
 
-    def ensym(self, iinc: MapdlInt = "", ninc: MapdlInt = "", iel1: MapdlInt = "", iel2: MapdlInt = "",
+    def ensym(self, iinc: MapdlInt = "", ninc: MapdlInt = "",
+              iel1: MapdlInt = "", iel2: MapdlInt = "",
               ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ENSYM
 
@@ -1746,9 +1822,11 @@ class _MapdlElementCommands:
         Revising Your Model in the Modeling and Meshing Guide for more
         information about controlling element normals.
         """
-        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
+        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}",
+                        **kwargs)
 
-    def esym(self, ninc: MapdlInt = "", iel1: MapdlInt = "", iel2: MapdlInt = "",
+    def esym(self, ninc: MapdlInt = "", iel1: MapdlInt = "",
+             iel2: MapdlInt = "",
              ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESYM
 
@@ -1760,45 +1838,51 @@ class _MapdlElementCommands:
             Increment nodes in the given pattern by NINC.
 
         iel1, iel2, ieinc
-            Reflect elements from pattern beginning with IEL1 to IEL2 (defaults
-            to IEL1) in steps of IEINC (defaults to 1). If IEL1 = ALL, IEL2 and
-            IEINC are ignored and pattern is all selected elements [ESEL].  If
-            IEL1 = P, graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI). A component name may
+            Reflect elements from pattern beginning with IEL1 to IEL2
+            (defaults to IEL1) in steps of IEINC (defaults to 1). If
+            IEL1 = ALL, IEL2 and IEINC are ignored and pattern is all
+            selected elements [ESEL]. If IEL1 = P, graphical picking
+            is enabled and all remaining command fields are ignored (
+            valid only in the GUI). A component name may
             also be substituted for IEL1 (IEL2 and IEINC are ignored).
 
         Notes
         -----
-        Generates additional elements from a given pattern (similar to EGEN)
-        except with a "symmetry" reflection. The operation generates a new
-        element by incrementing the nodes on the original element, and
-        reversing and shifting  the node connectivity pattern. For example, for
-        a 4-node 2-D element, the nodes in positions I, J, K, and L of the
-        original element are placed in positions J, I, L, and K of the
-        reflected element.
+        Generates additional elements from a given pattern (similar
+        to EGEN) except with a "symmetry" reflection. The operation
+        generates a new element by incrementing the nodes on the
+        original element, and reversing and shifting  the node
+        connectivity pattern. For example, for a 4-node 2-D element,
+        the nodes in positions I, J, K, and L of the original element
+        are placed in positions J, I, L, and K of the reflected element.
 
         Similar permutations occur for all other element types. For line
-        elements, the nodes in positions I and J of the original element are
-        placed in positions J and I of the reflected element. In releases prior
-        to ANSYS 5.5, no node pattern reversing and shifting occurred for line
-        elements generated by ESYM. To achieve the same results with ANSYS 5.5
-        as you did in prior releases, use the EGEN command instead.
+        elements, the nodes in positions I and J of the original
+        element are placed in positions J and I of the reflected
+        element. In releases prior
+        to ANSYS 5.5, no node pattern reversing and shifting occurred
+        for line elements generated by ESYM. To achieve the same
+        results with ANSYS 5.5 as you did in prior releases, use the
+        EGEN command instead.
 
-        It is recommended that symmetry elements be displayed and graphically
-        reviewed.
+        It is recommended that symmetry elements be displayed and
+        graphically reviewed.
 
-        If the nodes are also reflected (as with the NSYM command) this pattern
-        is such that the orientation of the symmetry element remains similar to
-        the original element (i.e., clockwise elements are generated from
+        If the nodes are also reflected (as with the NSYM command)
+        this pattern is such that the orientation of the symmetry
+        element remains similar to the original element (i.e.,
+        clockwise elements are generated from
         clockwise elements).
 
-        For a non-reflected node pattern, the reversed orientation has the
-        effect of reversing the outward normal direction (clockwise elements
-        are generated from counterclockwise elements).
+        For a non-reflected node pattern, the reversed orientation
+        has the effect of reversing the outward normal direction (
+        clockwise elements are generated from counterclockwise
+        elements).
 
-        Note:: : Since nodes may be defined anywhere in the model independently
-        of this command, any orientation of the "symmetry" elements is
-        possible. See also the ENSYM command for modifying existing elements.
+        Note:: : Since nodes may be defined anywhere in the model
+        independently of this command, any orientation of the
+        "symmetry" elements is possible. See also the ENSYM command
+        for modifying existing elements.
         """
         return self.run(f"ESYM,,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
@@ -1822,15 +1906,16 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Selects line elements belonging to meshed [LMESH], selected [LSEL]
-        lines.
+        Selects line elements belonging to meshed [LMESH], selected
+        [LSEL] lines.
 
         This command is valid in any processor.
         """
-        command = "ESLL,%s" % (str(type_))
+        command = f"ESLL,{type_}"
         return self.run(command, **kwargs)
 
-    def etlist(self, ityp1: MapdlInt = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def etlist(self, ityp1: MapdlInt = "", ityp2: MapdlInt = "",
+               inc: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ETLIST
 
         Lists currently defined element types.
@@ -1838,19 +1923,22 @@ class _MapdlElementCommands:
         Parameters
         ----------
         ityp1, ityp2, inc
-            Lists element types from ITYP1 to ITYP2 (defaults to ITYP1) in
-            steps of INC (defaults to 1). If ITYP1 = ALL (default), ITYP2 and
-            INC are ignored and all element types are listed.
+            Lists element types from ITYP1 to ITYP2 (defaults to
+            ITYP1) in steps of INC (defaults to 1). If ITYP1 = ALL (
+            default), ITYP2 and INC are ignored and all element types
+            are listed.
 
         Notes
         -----
         This command is valid in any processor.
         """
-        command = "ETLIST,%s,%s,%s" % (str(ityp1), str(ityp2), str(inc))
+        command = f"ETLIST,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
 
-    def elist(self, iel1: Union[str, int] = "", iel2: MapdlInt = "", inc: MapdlInt = "", nnkey: MapdlInt = "",
-              rkey: MapdlInt = "", ptkey: MapdlInt = "", **kwargs) -> Optional[str]:
+    def elist(self, iel1: Union[str, int] = "", iel2: MapdlInt = "",
+              inc: MapdlInt = "", nnkey: MapdlInt = "",
+              rkey: MapdlInt = "", ptkey: MapdlInt = "",
+              **kwargs) -> Optional[str]:
         """APDL Command: ELIST
 
         Lists the elements and their attributes.
@@ -1858,11 +1946,12 @@ class _MapdlElementCommands:
         Parameters
         ----------
         iel1, iel2, inc
-            Lists elements from IEL1 to IEL2 (defaults to IEL1) in steps of INC
-            (defaults to 1). If IEL1 = ALL (default), IEL2 and INC are ignored
-            and all selected elements [ESEL] are listed. If IEL1 = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI). A component name may also be substituted
+            Lists elements from IEL1 to IEL2 (defaults to IEL1) in
+            steps of INC (defaults to 1). If IEL1 = ALL (default),
+            IEL2 and INC are ignored and all selected elements [ESEL]
+            are listed. If IEL1 = P, graphical picking is enabled and
+            all remaining command fields are ignored (valid only in
+            the GUI). A component name may also be substituted
             for IEL1 (IEL2 and INC are ignored).
 
         nnkey
@@ -1877,11 +1966,13 @@ class _MapdlElementCommands:
 
             0 - Do not show real constants for each element.
 
-            1 - Show real constants for each element. This includes default values chosen for
+            1 - Show real constants for each element. This includes
+                default values chosen for
                 the element.
 
         ptkey
-            LS-DYNA part number listing key (applicable to ANSYS LS-DYNA only):
+            LS-DYNA part number listing key (applicable to ANSYS
+            LS-DYNA only):
 
             0 - Do not show part ID number for each element.
 
@@ -1889,16 +1980,17 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Lists the elements with their nodes and attributes (MAT, TYPE, REAL,
-        ESYS, SECNUM, PART). See also the LAYLIST command for listing layered
-        elements.
+        Lists the elements with their nodes and attributes (MAT,
+        TYPE, REAL, ESYS, SECNUM, PART). See also the LAYLIST command
+        for listing layered elements.
 
         This command is valid in any processor.
         """
-        command = "ELIST,%s,%s,%s,%s,%s,%s" % (str(iel1), str(iel2), str(inc), str(nnkey), str(rkey), str(ptkey))
+        command = f"ELIST,{iel1},{iel2},{inc},{nnkey},{rkey},{ptkey}"
         return self.run(command, **kwargs)
 
-    def eorient(self, etype: str = "", dir_: Union[str, int] = "", toler: MapdlFloat = "", **kwargs) -> Optional[str]:
+    def eorient(self, etype: str = "", dir_: Union[str, int] = "",
+                toler: MapdlFloat = "", **kwargs) -> Optional[str]:
         """APDL Command: EORIENT
 
         Reorients solid element normals.
@@ -1908,75 +2000,92 @@ class _MapdlElementCommands:
         etype
             Specifies which elements to orient.
 
-            LYSL - Specifies that certain solid elements (such as SOLID185 with KEYOPT(3) = 1,
-                   SOLID186 with KEYOPT(3) = 1, and SOLSH190) will be oriented.
-                   This value is the default.
+            LYSL - Specifies that certain solid elements (such as
+                   SOLID185 with KEYOPT(3) = 1,
+                   SOLID186 with KEYOPT(3) = 1, and SOLSH190) will be
+                   oriented. This value is the default.
 
         dir_
-            The axis and direction for orientation, or an element number. If Dir is set to a positive number (n),
-            then all eligible elements are oriented as similarly as possible to element n.
+            The axis and direction for orientation, or an element
+            number. If Dir is set to a positive number (n),
+            then all eligible elements are oriented as similarly as
+            possible to element n.
 
-            NEGX - The element face with the outward normal most nearly parallel to the element coordinate system’s
+            NEGX - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
                    negative x-axis is designated (reoriented) as face 1.
 
-            POSX - The element face with the outward normal most nearly parallel to the element coordinate system’s
+            POSX - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
                    positive x-axis is designated (reoriented) as face 1.
 
-            NEGY - The element face with the outward normal most nearly parallel to the element coordinate system’s
-                   negative y-axis is designated (reoriented) as face 1. .
+            NEGY - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   negative y-axis is designated (reoriented) as face
+                   1. .
 
-            POSY - The element face with the outward normal most nearly parallel to the element coordinate system’s
+            POSY - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
                    positive y-axis is designated (reoriented) as face 1.
 
-            NEGZ - (Default) The element face with the outward normal most nearly parallel to the element coordinate
-                   system’s negative z-axis is designated (reoriented) as face 1.
+            NEGZ - (Default) The element face with the outward normal
+                   most nearly parallel to the element coordinate
+                   system’s negative z-axis is designated (reoriented)
+                   as face 1.
 
-            POSZ - The element face with the outward normal most nearly parallel to the element coordinate system’s
+            POSZ - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
                    positive z-axis is designated (reoriented) as face 1.
 
         toler
-            The maximum angle (in degrees) between the outward normal face and the target axis. Default is 90.0.
-            Lower toler values will reduce the number of faces that are considered as the basis of element
-            reorientation.
+            The maximum angle (in degrees) between the outward normal
+            face and the target axis. Default is 90.0.
+            Lower toler values will reduce the number of faces that
+            are considered as the basis of element reorientation.
 
         Notes
         -----
         EORIENT renumbers the element faces, designating the face  most
-        parallel to the XY plane of the element coordinate system (set with
-        ESYS) as face 1 (nodes I-J-K-L, parallel to the layers in layered
-        elements). It calculates the outward normal of each face and changes
-        the node designation  of the elements so the face with a normal most
-        nearly parallel with and in the same general direction as the target
-        axis becomes face 1.
+        parallel to the XY plane of the element coordinate system (set
+        with ESYS) as face 1 (nodes I-J-K-L, parallel to the layers
+        in layered elements). It calculates the outward normal of
+        each face and changes the node designation  of the elements
+        so the face with a normal most nearly parallel with and in
+        the same general direction as the target axis becomes face 1.
 
-        The target axis, defined by Dir, is either the negative or positive
-        indicated axis or the outward normal of face 1 of that element.
+        The target axis, defined by Dir, is either the negative or
+        positive indicated axis or the outward normal of face 1 of
+        that element.
 
-        All SOLID185 Layered Structural Solid, SOLID186 Layered Structural
-        Solid, and SOLSH190 solid shell elements in the selected set are
-        considered for reorientation.
+        All SOLID185 Layered Structural Solid, SOLID186 Layered
+        Structural Solid, and SOLSH190 solid shell elements in the
+        selected set are considered for reorientation.
 
-        After reorienting elements, you should always display and graphically
-        review results using the /ESHAPE command. When plotting models with
-        many or symmetric layers, it may be useful to temporarily reduce the
-        number of layers to two, with one layer being much thicker than the
-        other.
+        After reorienting elements, you should always display and
+        graphically review results using the /ESHAPE command. When
+        plotting models with many or symmetric layers, it may be
+        useful to temporarily reduce the number of layers to two,
+        with one layer being much thicker than the other.
 
-        You cannot use EORIENT to change the normal direction of any element
-        that has a body or surface load.  We recommend that you apply all of
-        your loads only after ensuring that the element normal directions are
-        acceptable.
+        You cannot use EORIENT to change the normal direction of any
+        element that has a body or surface load.  We recommend that
+        you apply all of your loads only after ensuring that the
+        element normal directions are acceptable.
 
         Prisms and tetrahedrals are also supported, within the current
-        limitations of the SOLID185, SOLID186, and SOLSH190 elements. (Layers
-        parallel to the four-node face of the prism are not supported.)
+        limitations of the SOLID185, SOLID186, and SOLSH190 elements.
+        (Layers parallel to the four-node face of the prism are not
+        supported.)
         """
-        command = "EORIENT,%s,%s,%s" % (str(etype), str(dir_), str(toler))
+        command = f"EORIENT,{etype},{dir_},{toler}"
         return self.run(command, **kwargs)
 
-    def engen(self, iinc: MapdlInt = "", itime: MapdlInt = "", ninc: MapdlInt = "", iel1: MapdlInt = "",
-              iel2: MapdlInt = "", ieinc: MapdlInt = "", minc: MapdlInt = "", tinc: MapdlInt = "",
-              rinc: MapdlFloat = "", cinc: MapdlInt = "", sinc: MapdlInt = "", dx: MapdlInt = "", dy: MapdlInt = "",
+    def engen(self, iinc: MapdlInt = "", itime: MapdlInt = "",
+              ninc: MapdlInt = "", iel1: MapdlInt = "",
+              iel2: MapdlInt = "", ieinc: MapdlInt = "",
+              minc: MapdlInt = "", tinc: MapdlInt = "",
+              rinc: MapdlFloat = "", cinc: MapdlInt = "",
+              sinc: MapdlInt = "", dx: MapdlInt = "", dy: MapdlInt = "",
               dz: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ENGEN
 
@@ -1988,26 +2097,27 @@ class _MapdlElementCommands:
             Increment to be added to element numbers in pattern.
 
         itime, ninc
-            Do this generation operation a total of ITIMEs, incrementing all
-            nodes in the given pattern by NINC each time after the first. ITIME
-            must be > 1 if generation is to occur. NINC may be positive, zero,
-            or negative.
+            Do this generation operation a total of ITIMEs,
+            incrementing all nodes in the given pattern by NINC each
+            time after the first. ITIME must be > 1 if generation is
+            to occur. NINC may be positive, zero, or negative.
 
         iel1, iel2, ieinc
-            Generate elements from the pattern that begins with IEL1 to IEL2
-            (defaults to IEL1) in steps of IEINC (defaults to 1). If IEL1 is
-            negative, IEL2 and IEINC are ignored and use the last |IEL1|
-            elements (in sequence backward from the maximum element number) as
-            the pattern to be repeated.  If IEL1 = ALL, IEL2 and IEINC are
-            ignored and all selected elements [ESEL] are used as the pattern to
-            be repeated. If IEL1 = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI). A
-            component name may also be substituted for IEL1 (IEL2 and IEINC are
-            ignored).
+            Generate elements from the pattern that begins with IEL1
+            to IEL2 (defaults to IEL1) in steps of IEINC (defaults to
+            1). If IEL1 is negative, IEL2 and IEINC are ignored and
+            use the last |IEL1| elements (in sequence backward from
+            the maximum element number) as the pattern to be
+            repeated.  If IEL1 = ALL, IEL2 and IEINC are ignored and
+            all selected elements [ESEL] are used as the
+            pattern to be repeated. If IEL1 = P, graphical picking is
+            enabled and all remaining command fields are ignored (
+            valid only in the GUI). A component name may also be
+            substituted for IEL1 (IEL2 and IEINC are ignored).
 
         minc
-            Increment material number of all elements in the given pattern by
-            MINC each time after the first.
+            Increment material number of all elements in the given
+            pattern by MINC each time after the first.
 
         tinc
             Increment type number by TINC.
@@ -2022,23 +2132,25 @@ class _MapdlElementCommands:
             Increment section ID number by SINC.
 
         dx, dy, dz
-            Define nodes that do not already exist but are needed by generated
-            elements (NGEN,ITIME,INC,NODE1,,,DX,DY,DZ). Zero is a valid value.
-            If blank, DX, DY, and DZ are ignored.
+            Define nodes that do not already exist but are needed by
+            generated elements (NGEN,ITIME,INC,NODE1,,,DX,DY,
+            DZ). Zero is a valid value. If blank, DX, DY, and DZ are
+            ignored.
 
         Notes
         -----
         Same as the EGEN command except it allows element numbers to be
-        explicitly incremented (IINC) from the generated set. Any existing
-        elements already having these numbers will be redefined.
+        explicitly incremented (IINC) from the generated set. Any
+        existing elements already having these numbers will be
+        redefined.
         """
-        command = "ENGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iinc), str(itime), str(ninc), str(iel1),
-                                                                       str(iel2), str(ieinc), str(minc), str(tinc),
-                                                                       str(rinc), str(cinc), str(sinc), str(dx),
-                                                                       str(dy), str(dz))
+        command = f"ENGEN,{iinc},{itime},{ninc},{iel1},{iel2}," \
+                  f"{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx}," \
+                  f"{dy},{dz}"
         return self.run(command, **kwargs)
 
-    def esln(self, type_: str = "", ekey: MapdlInt = "", nodetype: str = "", **kwargs) -> Optional[str]:
+    def esln(self, type_: str = "", ekey: MapdlInt = "",
+             nodetype: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESLN
 
         Selects those elements attached to the selected nodes.
@@ -2059,34 +2171,40 @@ class _MapdlElementCommands:
         ekey
             Node set key:
 
-            0 - Select element if any of its nodes are in the selected nodal set (default).
+            0 - Select element if any of its nodes are in the
+            selected nodal set (default).
 
-            1 - Select element only if all of its nodes are in the selected nodal set.
+            1 - Select element only if all of its nodes are in the
+            selected nodal set.
 
         nodetype
             Label identifying type of nodes to consider when selecting:
 
-            ALL - Select elements considering all of their nodes (default).
+            ALL - Select elements considering all of their nodes (
+                  default).
 
-            ACTIVE - Select elements considering only their active nodes. An active node is a node
+            ACTIVE - Select elements considering only their active
+                     nodes. An active node is a node
                      that contributes DOFs to the model.
 
-            INACTIVE - Select elements considering only their inactive nodes (such as orientation or
+            INACTIVE - Select elements considering only their
+                       inactive nodes (such as orientation or
                        radiation nodes).
 
-            CORNER - Select elements considering only their corner nodes.
+            CORNER - Select elements considering only their corner
+                     nodes.
 
             MID - Select elements considering only their midside nodes.
 
         Notes
         -----
-        ESLN selects elements which have any (or all EKEY) NodeType nodes in
-        the currently-selected set of nodes. Only elements having nodes in the
-        currently-selected set can be selected.
+        ESLN selects elements which have any (or all EKEY) NodeType
+        nodes in the currently-selected set of nodes. Only elements
+        having nodes in the currently-selected set can be selected.
 
         This command is valid in any processor.
         """
-        command = "ESLN,%s,%s,%s" % (str(type_), str(ekey), str(nodetype))
+        command = f"ESLN,{type_},{ekey},{nodetype}"
         return self.run(command, **kwargs)
 
     def ematwrite(self, key: str = "", **kwargs) -> Optional[str]:
@@ -2099,26 +2217,31 @@ class _MapdlElementCommands:
         key
             Write key:
 
-            YES - Forces the writing of the element matrices to File.EMAT even if not normally
+            YES - Forces the writing of the element matrices to
+                  File.EMAT even if not normally
                   done.
 
-            NO - Element matrices are written only if required. This value is the default.
+            NO - Element matrices are written only if required. This
+                 value is the default.
 
         Notes
         -----
-        The EMATWRITE command forces ANSYS to write the File.EMAT file. The
-        file is necessary if you intend to follow the initial load step with a
-        subsequent inertia relief calculation (IRLF). If used in the solution
-        processor (/SOLU), this command is only valid within the first load
-        step.
+        The EMATWRITE command forces ANSYS to write the File.EMAT
+        file. The file is necessary if you intend to follow the
+        initial load step with a subsequent inertia relief
+        calculation (IRLF). If used in the solution
+        processor (/SOLU), this command is only valid within the
+        first load step.
 
         This command is also valid in PREP7.
         """
-        command = "EMATWRITE,%s" % (str(key))
+        command = f"EMATWRITE,{key}"
         return self.run(command, **kwargs)
 
-    def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "", l: MapdlInt = "",
-           m: MapdlInt = "", n: MapdlInt = "", o: MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[str]:
+    def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "",
+           k: MapdlInt = "", l: MapdlInt = "",
+           m: MapdlInt = "", n: MapdlInt = "", o: MapdlInt = "",
+           p: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: EN
 
         Defines an element by its number and node connectivity.
@@ -2126,44 +2249,46 @@ class _MapdlElementCommands:
         Parameters
         ----------
         iel
-            Number assigned to element being defined. If IEL = P, graphical
-            picking is enabled and all remaining command fields are ignored
+            Number assigned to element being defined. If IEL = P,
+            graphical picking is enabled and all remaining command
+            fields are ignored
             (valid only in the GUI).
 
         i
             Number of node assigned to first nodal position (node I).
 
         j, k, l, m, n, o, p
-            Number assigned to second (node J) through eighth (node P) nodal
-            position, if any.
+            Number assigned to second (node J) through eighth (node
+            P) nodal position, if any.
 
         Notes
         -----
-        Defines an element by its nodes and attribute values. Similar to the E
-        command except it allows the element number (IEL) to be defined
-        explicitly.  Element numbers need not be consecutive. Any existing
-        element already having this number will be redefined.
+        Defines an element by its nodes and attribute values. Similar
+        to the E command except it allows the element number (IEL) to be defined
+        explicitly. Element numbers need not be consecutive. Any
+        existing element already having this number will be redefined.
 
-        Up to 8 nodes may be specified with the EN command. If more nodes are
-        needed for the element, use the EMORE command. The number of nodes
-        required and the order in which they should be specified are described
-        in the Element Reference for each element type.  The current (or
-        default) MAT, TYPE, REAL, SECNUM, and ESYS attribute values are also
-        assigned to the element.
+        Up to 8 nodes may be specified with the EN command. If more
+        nodes are needed for the element, use the EMORE command. The
+        number of nodes required and the order in which they should
+        be specified are described in the Element Reference for each
+        element type.  The current (or default) MAT, TYPE, REAL,
+        SECNUM, and ESYS attribute values are also assigned to the
+        element.
 
-        When creating elements with more than 8 nodes using this command and
-        the EMORE command, it may be necessary to turn off shape checking using
-        the SHPP command before issuing this command. If a valid element type
-        can be created without using the additional nodes on the EMORE command,
-        this command will create that element. The EMORE command will then
-        modify the element to include the additional nodes. If shape checking
-        is active, it will be performed before the EMORE command is issued.
-        Therefore, if the shape checking limits are exceeded, element creation
-        may fail before the EMORE command modifies the element into an
-        acceptable shape.
+        When creating elements with more than 8 nodes using this
+        command and the EMORE command, it may be necessary to turn
+        off shape checking using the SHPP command before issuing this
+        command. If a valid element type can be created without using
+        the additional nodes on the EMORE command, this command will
+        create that element. The EMORE command will
+        then modify the element to include the additional nodes. If
+        shape checking is active, it will be performed before the
+        EMORE command is issued. Therefore, if the shape checking
+        limits are exceeded, element creation may fail before the
+        EMORE command modifies the element into an acceptable shape.
         """
-        command = "EN,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(iel), str(i), str(j), str(k), str(l), str(m), str(n),
-                                                     str(o), str(p))
+        command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
         return self.run(command, **kwargs)
 
     def etchg(self, cnv: str = "", **kwargs) -> Optional[str]:
@@ -2174,7 +2299,8 @@ class _MapdlElementCommands:
         Parameters
         ----------
         cnv
-            Converts the element types to the corresponding type. Valid labels
+            Converts the element types to the corresponding type.
+            Valid labels
             are:
 
             ETI - Explicit to Implicit
@@ -2197,19 +2323,21 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Changes the currently defined element types to their corresponding
-        types.  Elements without a companion element (listed above) are not
-        switched and should be switched with the ET command to an appropriate
-        element type or to a null element. The KEYOPT values for the switched
-        element types are reset to zero or to their default values. You must
-        check these values to see if they are still meaningful. Additionally,
-        if Cnv = ETI, ITE, or TTE, all real constants are set to zero.
+        Changes the currently defined element types to their
+        corresponding types.  Elements without a companion element
+        (listed above) are not switched and should be switched with
+        the ET command to an appropriate element type or to a null
+        element. The KEYOPT values for the switched element types are
+        reset to zero or to their default values. You must
+        check these values to see if they are still meaningful.
+        Additionally, if Cnv = ETI, ITE, or TTE, all real constants
+        are set to zero.
 
-        If Cnv = ITE, you will need to choose a material model that corresponds
-        to your previously-defined material properties. If working
-        interactively, you will be prompted to do so.
+        If Cnv = ITE, you will need to choose a material model that
+        corresponds to your previously-defined material properties.
+        If working interactively, you will be prompted to do so.
         """
-        command = "ETCHG,%s" % (str(cnv))
+        command = f"ETCHG,{cnv}"
         return self.run(command, **kwargs)
 
     def elem(self, **kwargs) -> Optional[str]:
@@ -2220,10 +2348,11 @@ class _MapdlElementCommands:
         Notes
         -----
         This is a status [STAT] topic command. Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu>: List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
+        generated by the GUI and will appear in the log file
+        (Jobname.LOG) if status is requested for some items under
+        Utility Menu>: List> Status. This command will be immediately
+        followed by a STAT command, which will report the status for
+        the specified topic.
 
         If entered directly into the program, the STAT command should
         immediately follow this command.
@@ -2231,7 +2360,8 @@ class _MapdlElementCommands:
         command = "ELEM,"
         return self.run(command, **kwargs)
 
-    def einfin(self, compname: str = "", pnode: MapdlInt = "", **kwargs) -> Optional[str]:
+    def einfin(self, compname: str = "", pnode: MapdlInt = "",
+               **kwargs) -> Optional[str]:
         """APDL Command: EINFIN
 
         Generates structural infinite elements from selected nodes.
@@ -2239,53 +2369,61 @@ class _MapdlElementCommands:
         Parameters
         ----------
         compname
-            Component name containing one node to be used as the pole node for
-            generating INFIN257 structural infinite elements. The pole node is
-            generally located at or near the geometric center of the finite
-            element domain.
+            Component name containing one node to be used as the pole
+            node for generating INFIN257 structural infinite
+            elements. The pole node is generally located at or near
+            the geometric center of the finite element domain.
 
         pnode
-            Node number for the direct input of the pole node. A parameter or
-            parametric expression is also valid. Specify this value when no
-            CompName has been specified. If CompName is specified, this value
-            is ignored.
+            Node number for the direct input of the pole node. A
+            parameter or parametric expression is also valid. Specify
+            this value when no CompName has been specified. If
+            CompName is specified, this value is ignored.
 
         Notes
         -----
-        The EINFIN command generates structural infinite elements (INFIN257)
-        directly from the selected face of valid base elements (existing
-        standard elements in your model). The command scans all base elements
-        for the selected nodes and generates a compatible infinite element type
-        for each base element. A combination of different base element types is
-        allowed if the types are all compatible with the infinite elements.
+        The EINFIN command generates structural infinite elements
+        (INFIN257) directly from the selected face of valid base
+        elements (existing standard elements in your model). The
+        command scans all base elements for the selected nodes and
+        generates a compatible infinite element type for each base
+        element. A combination of different base element types is
+        allowed if the types are all compatible with the infinite
+        elements.
 
         The infinite element type requires no predefinition (ET).
 
-        The faces of base elements are determined from the selected node set
-        (NSEL), and the geometry of the infinite element is determined based on
-        the shape of the face. Element characteristics and options are
-        determined according to the base element. For the face to be used, all
-        nodes on the face of a base element must be selected
+        The faces of base elements are determined from the selected
+        node set (NSEL), and the geometry of the infinite element is
+        determined based on the shape of the face. Element
+        characteristics and options are determined according to the
+        base element. For the face to be used, all nodes on the face
+        of a base element must be selected
 
-        Use base elements to model the near-field domain that interacts with
-        the solid structures or applied loads. To apply the truncated far-field
-        effect, a single layer of infinite elements must be attached to the
-        near-field domain. The outer surface of the near-field domain must be
-        convex.
+        Use base elements to model the near-field domain that
+        interacts with the solid structures or applied loads. To
+        apply the truncated far-field effect, a single layer of
+        infinite elements must be attached to the near-field domain.
+        The outer surface of the near-field domain
+        must be convex.
 
-        After the EINFIN command executes, you can verify the newly created
-        infinite element types and elements (ETLIST, ELIST, EPLOT).
+        After the EINFIN command executes, you can verify the newly
+        created infinite element types and elements (ETLIST, ELIST,
+        EPLOT).
 
-        Infinite elements do not account for any subsequent modifications made
-        to the base elements. It is good practice to issue the EINFIN command
-        only after the base elements are finalized. If you delete or modify
-        base elements, remove all affected infinite elements and reissue the
-        EINFIN command; doing so prevents inconsistencies.
+        Infinite elements do not account for any subsequent
+        modifications made to the base elements. It is good practice
+        to issue the EINFIN
+        command only after the base elements are finalized. If you
+        delete or modify base elements, remove all affected infinite
+        elements and reissue the EINFIN command; doing so prevents
+        inconsistencies.
         """
-        command = "EINFIN,%s,%s" % (str(compname), str(pnode))
+        command = f"EINFIN,{compname},{pnode}"
         return self.run(command, **kwargs)
 
-    def eread(self, fname: str = "", ext: str = "", **kwargs) -> Optional[str]:
+    def eread(self, fname: str = "",
+              ext: str = "", **kwargs) -> Optional[str]:
         """APDL Command: EREAD
 
         Reads elements from a file.
@@ -2321,11 +2459,13 @@ class _MapdlElementCommands:
         rewound before and after reading. Reading continues until the
         end of the file.
         """
-        command = "EREAD,%s,%s" % (str(fname), str(ext))
+        command = f"EREAD,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def esel(self, type_: str = "", item: str = "", comp: str = "", vmin: Union[str, int, float] = "",
-             vmax: Union[str, int, float] = "", vinc: MapdlInt = "", kabs: MapdlInt = "", **kwargs) -> Optional[str]:
+    def esel(self, type_: str = "", item: str = "", comp: str = "",
+             vmin: Union[str, int, float] = "",
+             vmax: Union[str, int, float] = "", vinc: MapdlInt = "",
+             kabs: MapdlInt = "", **kwargs) -> Optional[str]:
         """APDL Command: ESEL
 
         Selects a subset of elements.
@@ -2347,36 +2487,50 @@ class _MapdlElementCommands:
 
             NONE - Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE - Invert the current set (selected becomes
+            unselected and vice versa).
 
             STAT - Display the current select status.
 
-        The following fields are used only with type_ = "S", "R", "A", or "U":
+        The following fields are used only with type_ = "S", "R",
+        "A", or "U":
 
         item
-            Label identifying data, see Table 110: ESEL - Valid Item and Component Labels. Some items also require a
-            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI). Defaults to ELEM. If Item = STRA (straightened), elements are
-            selected whose midside nodes do not conform to the curved line or non-flat area on which they should lie.
-            (Such elements are sometimes formed during volume meshing (VMESH) in an attempt to avoid excessive element
-            distortion.) You should graphically examine any such elements to evaluate their possible effect on solution
+            Label identifying data, see Table 110: ESEL - Valid Item
+            and Component Labels. Some items also require a
+            component label. If Item = PICK (or simply "P"),
+            graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI). Defaults to
+            ELEM. If Item = STRA (straightened), elements are
+            selected whose midside nodes do not conform to the curved
+            line or non-flat area on which they should lie.
+            (Such elements are sometimes formed during volume meshing
+            (VMESH) in an attempt to avoid excessive element
+            distortion.) You should graphically examine any such
+            elements to evaluate their possible effect on solution
             accuracy.
 
         comp
-            Component of the item (if required). Valid component labels are shown in Table 110: ESEL - Valid Item and
+            Component of the item (if required). Valid component
+            labels are shown in Table 110: ESEL - Valid Item and
             Component Labels below.
 
         vmin
-            Minimum value of item range. Ranges are element numbers, attribute numbers, load values, or result values
-            as appropriate for the item. A component name (as specified via the CM command) can also be substituted for
+            Minimum value of item range. Ranges are element numbers,
+            attribute numbers, load values, or result values
+            as appropriate for the item. A component name (as
+            specified via the CM command) can also be substituted for
             VMIN (in which case VMAX and VINC are ignored).
 
         vmax
-            Maximum value of item range. VMAX defaults to VMIN for input values.
-            For result values, VMAX defaults to infinity if VMIN is positive, or to zero if VMIN is negative.
+            Maximum value of item range. VMAX defaults to VMIN for
+            input values.
+            For result values, VMAX defaults to infinity if VMIN is
+            positive, or to zero if VMIN is negative.
 
         vinc
-            Value increment within range. Used only with integer ranges (such as for element and attribute numbers).
+            Value increment within range. Used only with integer
+            ranges (such as for element and attribute numbers).
             Defaults to 1. VINC cannot be negative.
 
         kabs
@@ -2390,32 +2544,35 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Selects elements based on values of a labeled item and component. For
-        example, to select a new set of elements based on element numbers 1
-        through 7, use ESEL,S,ELEM,,1,7.  The subset is used when the ALL label
-        is entered (or implied) on other commands, such as ELIST,ALL.  Only
-        data identified by element number are selected. Selected data are
-        internally flagged; no actual removal of data from the database occurs.
-        Different element subsets cannot be used for different load steps
-        [SOLVE] in a /SOLU sequence.  The subset used in the first load step
-        will be used for all subsequent load steps regardless of subsequent
-        ESEL specifications.
+        Selects elements based on values of a labeled item and
+        component. For example, to select a new set of elements
+        based on element numbers 1
+        through 7, use ESEL,S,ELEM,,1,7.  The subset is used when the
+        ALL label is entered (or implied) on other commands, such as
+        ELIST, ALL. Only data identified by element number are
+        selected. Selected data are internally flagged; no actual
+        removal of data from the database occurs. Different element
+        subsets cannot be used for different load steps [SOLVE] in a
+        /SOLU sequence.  The subset used in the first load step
+        will be used for all subsequent load steps regardless of
+        subsequent ESEL specifications.
 
         This command is valid in any processor.
 
-        Elements crossing the named path (see PATH command) will be selected.
-        This option is only available in PREP7 and POST1. If no geometry data
-        has been mapped to the path (i.e., via PMAP and PDEF commands), the
-        path will assume the default mapping option (PMAP,UNIFORM) to map the
-        geometry prior to selecting the elements. If an invalid path name is
-        given, the ESEL command is ignored (status of selected elements is
-        unchanged). If there are no elements crossing the path, the ESEL
-        command will return zero elements selected.
+        Elements crossing the named path (see PATH command) will be
+        selected. This option is only available in PREP7 and POST1.
+        If no geometry data has been mapped to the path (i.e.,
+        via PMAP and PDEF commands), the path will assume the default
+        mapping option (PMAP,UNIFORM) to map the geometry prior to
+        selecting the elements. If an invalid path name is
+        given, the ESEL command is ignored (status of selected
+        elements is unchanged). If there are no elements crossing the
+        path, the ESEL command will return zero elements selected.
 
-        For selections based on non-integer numbers (coordinates, results,
-        etc.), items that are within the range VMIN -Toler and VMAX + Toler are
-        selected. The default tolerance Toler is based on the relative values
-        of VMIN and VMAX as follows:
+        For selections based on non-integer numbers (coordinates,
+        results, etc.), items that are within the range VMIN -Toler
+        and VMAX + Toler are selected. The default tolerance Toler is
+        based on the relative values of VMIN and VMAX as follows:
 
         If VMIN = VMAX, Toler = 0.005 x VMIN.
 
@@ -2423,16 +2580,17 @@ class _MapdlElementCommands:
 
         If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX - VMIN).
 
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
+        Use the SELTOL command to override this default and specify
+        Toler explicitly.
 
         Table: 133:: : ESEL - Valid Item and Component Labels
         """
-        command = "ESEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp),
-                                                 str(vmin), str(vmax), str(vinc), str(kabs))
+        command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc}," \
+                  f"{kabs}"
         return self.run(command, **kwargs)
 
-    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "", kabs: MapdlInt = "", numb: MapdlInt = "",
+    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "",
+              kabs: MapdlInt = "", numb: MapdlInt = "",
               **kwargs) -> Optional[str]:
         """APDL Command: ESORT
 
@@ -2448,7 +2606,8 @@ class _MapdlElementCommands:
         lab
             element table label:
 
-            Lab - Any user-defined label from the ETABLE command (input in the Lab field of the
+            Lab - Any user-defined label from the ETABLE command (
+            input in the Lab field of the
                   ETABLE command).
 
         order
@@ -2466,22 +2625,25 @@ class _MapdlElementCommands:
             1 - Sort according to absolute value.
 
         numb
-            Number of elements (element table rows) to be sorted in ascending
-            or descending order (ORDER) before sort is stopped (remainder will
-            be in unsorted sequence) (defaults to all elements).
+            Number of elements (element table rows) to be sorted in
+            ascending or descending order (ORDER) before sort is
+            stopped (remainder will be in unsorted sequence)
+            (defaults to all elements).
 
         Notes
         -----
-        The element table rows are sorted based on the column containing the
-        Lab values. Use EUSORT to restore the original order. If ESORT is
-        specified with PowerGraphics on [/GRAPHICS,POWER], then the nodal
-        solution results listing [PRNSOL] will be the same as with the full
-        graphics mode [/GRAPHICS,FULL].
+        The element table rows are sorted based on the column
+        containing the Lab values. Use EUSORT to restore the original
+        order. If ESORT is specified with PowerGraphics on
+        [/GRAPHICS,POWER], then the nodal solution results listing
+        [PRNSOL] will be the same as with the full graphics mode
+        [/GRAPHICS,FULL].
         """
-        command = "ESORT,%s,%s,%s,%s,%s" % (str(item), str(lab), str(order), str(kabs), str(numb))
+        command = f"ESORT,{item},{lab},{order},{kabs},{numb}"
         return self.run(command, **kwargs)
 
-    def esurf(self, xnode: MapdlInt = "", tlab: str = "", shape: str = "", **kwargs) -> Optional[str]:
+    def esurf(self, xnode: MapdlInt = "", tlab: str = "",
+              shape: str = "", **kwargs) -> Optional[str]:
         """APDL Command: ESURF
 
         Generates elements overlaid on the free faces of selected nodes.
@@ -2492,96 +2654,113 @@ class _MapdlElementCommands:
             Node number that is used only in the following two cases:
 
         tlab
-            Generates target, contact, and hydrostatic fluid elements with
-            correct direction of normals.
+            Generates target, contact, and hydrostatic fluid elements
+            with correct direction of normals.
 
-            TOP - Generates target and contact elements over beam and shell elements, or
-                  hydrostatic fluid elements over shell elements, with the
-                  normals the same as the underlying beam and shell elements
-                  (default).
+            TOP - Generates target and contact elements over beam and
+                  shell elements, or hydrostatic fluid elements over
+                  shell elements, with the normals the same as the
+                  underlying beam and shell elements (default).
 
-            BOTTOM - Generates target and contact elements over beam and shell elements, or
-                     hydrostatic fluid elements over shell elements, with the
+            BOTTOM - Generates target and contact elements over beam
+                     and shell elements, or hydrostatic fluid
+                     elements over shell elements, with the
                      normals opposite to the underlying beam and shell
                      elements.
 
-            If target or contact elements and hydrostatic fluid elements are defined on the same underlying shell
-            elements, you only need to use this option once to orient the normals opposite to the
+            If target or contact elements and hydrostatic fluid
+            elements are defined on the same underlying shell
+            elements, you only need to use this option once to orient
+            the normals opposite to the
             underlying shell elements.
 
-            REVERSE - Reverses the direction of the normals on existing selected target elements, contact elements,
-                      and hydrostatic fluid elements. - If target or contact elements and hydrostatic fluid elements
-                      are defined on the same underlying shell elements, you only need to use this option once to
-                      reverse the normals for all selected elements.
+            REVERSE - Reverses the direction of the normals on
+                      existing selected target elements, contact
+                      elements, and hydrostatic fluid elements. - If
+                      target or contact elements and hydrostatic
+                      fluid elements are defined on the same
+                      underlying shell elements, you only need to use
+                      this option once to reverse the normals for all
+                      selected elements.
 
         shape
-            Used to specify the element shape for target element TARGE170
-            (Shape = LINE or POINT) or TARGE169 elements (Shape = POINT).
+            Used to specify the element shape for target element
+            TARGE170 (Shape = LINE or POINT) or TARGE169 elements
+            (Shape = POINT).
 
-            (blank) - The target element takes the same shape as the external surface of the
-                      underlying element (default).
+            (blank) - The target element takes the same shape as the
+                      external surface of the underlying element
+                      (default).
 
-            LINE - Generates LINE or PARA (parabolic) segments on exterior of selected 3-D
-                   elements.
+            LINE - Generates LINE or PARA (parabolic) segments on
+                   exterior of selected 3-D elements.
 
             POINT - Generates POINT segments on selected nodes.
 
         Notes
         -----
-        The ESURF command generates elements of the currently active element
-        type overlaid on the free faces of existing elements. For example,
-        surface elements (such as SURF151, SURF152, SURF153, SURF154, or
-        SURF159) can be generated over solid elements (such as PLANE55,
-        SOLID70, PLANE182, SOLID185, or SOLID272, respectively).
+        The ESURF command generates elements of the currently active
+        element type overlaid on the free faces of existing elements.
+        For example, surface elements (such as SURF151, SURF152,
+        SURF153, SURF154, or SURF159) can be generated over solid
+        elements (such as PLANE55, SOLID70, PLANE182, SOLID185,
+        or SOLID272, respectively).
 
-        Element faces are determined from the selected node set (NSEL) and the
-        load faces for that element type. The operation is similar to that used
-        for generating element loads from selected nodes via the SF,ALL
-        command, except that elements (instead of loads) are generated. All
-        nodes on the face must be selected for the face to be used. For shell
-        elements, only face one of the element is available. If nodes are
-        shared by adjacent selected element faces, the faces are not free and
-        no element is generated.
+        Element faces are determined from the selected node set
+        (NSEL) and the load faces for that element type. The
+        operation is similar to that used for generating element
+        loads from selected nodes via the SF,ALL command, except that
+        elements (instead of loads) are generated. All nodes on the
+        face must be selected for the face to be used. For shell
+        elements, only face one of the element is available. If nodes
+        are shared by adjacent selected element faces, the faces are not
+        free and no element is generated.
 
-        Elements created by ESURF are oriented such that their surface load
-        directions are consistent with those of the underlying elements.
-        Carefully check generated elements and their orientations.
+        Elements created by ESURF are oriented such that their
+        surface load directions are consistent with those of the
+        underlying elements. Carefully check generated elements and
+        their orientations.
 
-        Generated elements use the existing nodes and the active MAT, TYPE,
-        REAL, and ESYS attributes. The exception is when Tlab = REVERSE. The
-        reversed target and contact elements have the same attributes as the
-        original elements. If the underlying elements are solid elements, Tlab
-        = TOP or BOTTOM has no effect.
+        Generated elements use the existing nodes and the active MAT,
+        TYPE, REAL, and ESYS attributes. The exception is when Tlab =
+        REVERSE. The reversed target and contact elements have the
+        same attributes as the original elements. If the underlying
+        elements are solid elements, Tlab = TOP or BOTTOM has no effect.
 
-        When the command generates a target element, the shape is by default
-        the same as that of the underlying element. Issue  ESURF,,,LINE or
-        ESURF,,,POINT to generate LINE, PARA, and POINT segments.
+        When the command generates a target element, the shape is by
+        default the same as that of the underlying element. Issue
+        ESURF,,, LINE or ESURF,,,POINT to generate LINE, PARA,
+        and POINT segments.
 
-        The ESURF command can also generate the 2-D or 3-D node-to-surface
-        element CONTA175, based on the selected node components of the
-        underlying solid elements. When used to generate CONTA175 elements, all
-        ESURF arguments are ignored. (If CONTA175 is the active element type,
-        the path Main Menu> Preprocessor> Modeling> Create> Elements> Node-to-
-        Surf uses ESURF to generate elements.)
+        The ESURF command can also generate the 2-D or 3-D
+        node-to-surface element CONTA175, based on the selected node
+        components of the underlying solid elements. When used to
+        generate CONTA175 elements, all ESURF arguments are ignored.
+        (If CONTA175 is the active element type, the path Main Menu>
+        Preprocessor> Modeling> Create> Elements> Node-to-Surf uses
+        ESURF to generate elements.)
 
-        To generate SURF151 or SURF152 elements that have two extra nodes from
-        FLUID116 elements, KEYOPT(5) for SURF151 or SURF152 is first set to 0
-        and ESURF is issued. Then KEYOPT(5) for SURF151 or SURF152 is set to 2
-        and MSTOLE is issued. For more information, see Using the Surface
-        Effect Elements in the Thermal Analysis Guide.
+        To generate SURF151 or SURF152 elements that have two extra
+        nodes from FLUID116 elements, KEYOPT(5) for SURF151 or
+        SURF152 is first set to 0 and ESURF is issued. Then KEYOPT(5)
+        for SURF151 or SURF152 is set to 2 and MSTOLE is issued. For
+        more information, see Using the Surface Effect Elements in
+        the Thermal Analysis Guide.
 
-        For hydrostatic fluid elements HSFLD241 and HSFLD242, the ESURF command
-        generates triangular (2-D) or pyramid-shaped (3-D) elements with bases
-        that are overlaid on the faces of selected 2-D or 3-D solid or shell
-        elements. The single vertex for all generated elements is at the
-        pressure node specified as XNODE. The generated elements fill the
-        volume enclosed by the solid or shell elements. The nodes on the
-        overlaid faces have translational degrees of freedom, while the
-        pressure node shared by all generated elements has a single hydrostatic
-        pressure degree of freedom, HDSP (see HSFLD241 and HSFLD242 for more
-        information about the pressure node).
+        For hydrostatic fluid elements HSFLD241 and HSFLD242,
+        the ESURF command generates triangular (2-D) or
+        pyramid-shaped (3-D) elements with bases that are overlaid on
+        the faces of selected 2-D or 3-D solid or shell elements.
+        The single vertex for all generated elements is at the
+        pressure node specified as XNODE. The generated elements fill
+        the volume enclosed by the solid or shell elements. The nodes
+        on the overlaid faces have translational degrees of freedom,
+        while the pressure node shared by all generated elements has
+        a single hydrostatic pressure degree of freedom, HDSP (see
+        HSFLD241 and HSFLD242 for more information about the pressure
+        node).
         """
-        command = "ESURF,%s,%s,%s" % (str(xnode), str(tlab), str(shape))
+        command = f"ESURF,{xnode},{tlab},{shape}"
         return self.run(command, **kwargs)
 
     def eplot(self, **kwargs) -> Optional[str]:
@@ -2591,28 +2770,32 @@ class _MapdlElementCommands:
 
         Notes
         -----
-        Produces an element display of the selected elements. In full graphics,
-        only those elements faces with all of their corresponding nodes
-        selected are plotted. In PowerGraphics, all element faces of the
-        selected element set are plotted irrespective of the nodes selected.
-        However, for both full graphics and PowerGraphics, adjacent or
-        otherwise duplicated faces of 3-D solid elements will not be displayed
-        in an attempt to eliminate plotting of interior facets. See the DSYS
-        command for display coordinate system issues.
+        Produces an element display of the selected elements. In full
+        graphics, only those elements faces with all of their
+        corresponding nodes selected are plotted. In PowerGraphics,
+        all element faces of the selected element set are plotted
+        irrespective of the nodes selected. However, for both full
+        graphics and PowerGraphics, adjacent or otherwise duplicated
+        faces of 3-D solid elements will not be
+        displayed in an attempt to eliminate plotting of interior
+        facets. See the DSYS command for display coordinate system
+        issues.
 
-        This command will display curvature in midside node elements when
-        PowerGraphics is activated [/GRAPHICS,POWER] and /EFACET,2 or /EFACET,4
-        are enabled.  (To display curvature, two facets per edge is recommended
-        [/EFACET,2]).  When you specify /EFACET,1, PowerGraphics does not
-        display midside nodes. /EFACET has no effect on EPLOT for non-midside
-        node elements.
+        This command will display curvature in midside node elements
+        when PowerGraphics is activated [/GRAPHICS,POWER] and /EFACET,
+        2 or /EFACET,4 are enabled.  (To display curvature,
+        two facets per edge is recommended [/EFACET,2]).  When you
+        specify /EFACET,1, PowerGraphics does not display midside
+        nodes. /EFACET has no effect on EPLOT for non-midside node
+        elements.
 
         This command is valid in any processor.
         """
         command = "EPLOT,"
         return self.run(command, **kwargs)
 
-    def ekill(self, elem: Union[str, int] = "", **kwargs) -> Optional[str]:
+    def ekill(self, elem: Union[str, int] = "",
+              **kwargs) -> Optional[str]:
         """APDL Command: EKILL
 
         Deactivates an element (for the birth and death capability).
@@ -2620,19 +2803,21 @@ class _MapdlElementCommands:
         Parameters
         ----------
         elem
-            Element to be deactivated. If ALL, deactivate all selected elements
-            [ESEL]. If ELEM = P, graphical picking is enabled and all remaining
-            command fields are ignored  (valid only in the GUI). A component
-            name may also be substituted for ELEM.
+            Element to be deactivated. If ALL, deactivate all
+            selected elements [ESEL]. If ELEM = P, graphical picking
+            is enabled and all remaining command fields are ignored
+            (valid only in the GUI). A component name may also be
+            substituted for ELEM.
 
         Notes
         -----
-        Deactivates the specified element when the birth and death capability
-        is being used. A deactivated element remains in the model but
-        contributes a near-zero stiffness (or conductivity, etc.) value (ESTIF)
-        to the overall matrix. Any solution-dependent state variables (such as
-        stress, plastic strain, creep strain, etc.) are set to zero.
-        Deactivated elements contribute nothing to the overall mass (or
+        Deactivates the specified element when the birth and death
+        capability is being used. A deactivated element remains in
+        the model but contributes a near-zero stiffness (or
+        conductivity, etc.) value (ESTIF) to the overall matrix. Any
+        solution-dependent state variables (such as stress, plastic
+        strain, creep strain, etc.) are set to zero. Deactivated
+        elements contribute nothing to the overall mass (or
         capacitance, etc.) matrix.
 
         The element can be reactivated with the EALIVE command.
@@ -2643,5 +2828,5 @@ class _MapdlElementCommands:
 
         This command is also valid in PREP7.
         """
-        command = "EKILL,%s" % (str(elem))
+        command = f"EKILL,{elem}"
         return self.run(command, **kwargs)
