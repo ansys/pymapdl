@@ -1491,7 +1491,7 @@ class _MapdlCore(_MapdlCommands):
         value = response.split('=')[-1].strip()
         try:  # always either a float or string
             return float(value)
-        except Exception:
+        except ValueError:
             return value
 
     @property
