@@ -940,31 +940,31 @@ class _MapdlElementCommands:
             Element technology control.  One of the following:
 
             - ``"SUGGESTION"`` : The program offers a suggestion for the
-            best element technology before solving.  If necessary,
-            mixed u-P (KEYOPT(6)) is also included and reset. This
-            behavior is the default.
+              best element technology before solving.  If necessary,
+              mixed u-P (KEYOPT(6)) is also included and reset. This
+              behavior is the default.
 
             - ``"SET"`` : The program informs you of the best settings
-            and resets any applicable KEYOPT settings
-            automatically. This action overrides any previous manual
-            settings.
+              and resets any applicable KEYOPT settings
+              automatically. This action overrides any previous manual
+              settings.
 
             - ``"OFF"`` : Deactivates automatic selection of element
-            technology. No suggestions are issued, and no
-            automatic resetting occurs.
+              technology. No suggestions are issued, and no
+              automatic resetting occurs.
 
         eldegene
             Element degenerated shape control.  One of the following:
 
             - ``"ON"`` - If element shapes are degenerated, the
-            degenerated shape function is employed and enhanced
-            strain, simplified enhanced strain, and B-bar formulations
-            are turned off (default).
+              degenerated shape function is employed and enhanced
+              strain, simplified enhanced strain, and B-bar formulations
+              are turned off (default).
 
-            - ``"OFF"`` - If element shapes are degenerated, regular shape
-            functions are still used, and the specified element
-            technologies (e.g., enhanced strain, B-bar, uniform
-            reduced integration) are still used.
+            - ``"OFF"`` - If element shapes are degenerated, regular
+              shape functions are still used, and the specified element
+              technologies (e.g., enhanced strain, B-bar, uniform
+              reduced integration) are still used.
 
         Examples
         --------
@@ -1038,7 +1038,7 @@ class _MapdlElementCommands:
         - The edge of the model is reached.
 
         - More than two elements (whether selected or unselected) are
-        adjacent to a lateral face.
+          adjacent to a lateral face.
 
         In situations where unselected elements might undesirably
         cause case b to control, consider using ENSYM,0,,0,ALL instead
@@ -1323,7 +1323,7 @@ class _MapdlElementCommands:
             Generate elements from selected pattern beginning with
             IEL1 to IEL2 (defaults to IEL1) in steps of IEINC (
             defaults to 1). If IEL1 is negative, IEL2 and IEINC are
-            ignored and the last |IEL1| elements
+            ignored and the last \|IEL1\| elements
             (in sequence backward from the maximum element number)
             are used as the pattern to be repeated.  If IEL1 = ALL,
             IEL2 and IEINC are ignored and use all selected elements
@@ -2086,7 +2086,7 @@ class _MapdlElementCommands:
             Generate elements from the pattern that begins with IEL1
             to IEL2 (defaults to IEL1) in steps of IEINC (defaults to
             1). If IEL1 is negative, IEL2 and IEINC are ignored and
-            use the last |IEL1| elements (in sequence backward from
+            use the last \|IEL1\| elements (in sequence backward from
             the maximum element number) as the pattern to be
             repeated.  If IEL1 = ALL, IEL2 and IEINC are ignored and
             all selected elements [ESEL] are used as the
@@ -2441,28 +2441,18 @@ class _MapdlElementCommands:
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes
-            unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        The following fields are used only with type_ = "S", "R",
-        "A", or "U":
+            - S - Select a new set (default).
+            - R - Reselect a set from the current set.
+            - A - Additionally select a set and extend the current set.
+            - U - Unselect a set from the current set.
+            - ALL - Restore the full set.
+            - NONE - Unselect the full set.
+            - INVE - Invert the current set (selected becomes
+              unselected and vice versa).
+            - STAT - Display the current select status.
 
         item
             Label identifying data, see Table 110: ESEL - Valid Item
@@ -2490,8 +2480,7 @@ class _MapdlElementCommands:
 
         vmax
             Maximum value of item range. VMAX defaults to VMIN for
-            input values.
-            For result values, VMAX defaults to infinity if VMIN is
+            input values. For result values, VMAX defaults to infinity if VMIN is
             positive, or to zero if VMIN is negative.
 
         vinc
@@ -2502,14 +2491,15 @@ class _MapdlElementCommands:
         kabs
             Absolute value key:
 
-                0 - Check sign of value during selection.
-
-                1 - Use absolute value during selection (sign ignored).
-
-
+                - `kabs = 0` - Check sign of value during selection.
+                - `kabs = 1` - Use absolute value during selection (sign
+                  ignored).
 
         Notes
         -----
+        The fields `item`, `comp`, `vmin`, `vmax`, `vinc` and `kabs` are
+        used only with `type_` = `"S"`, `"R"`, `"A"`, or `"U"`.
+
         Selects elements based on values of a labeled item and
         component. For example, to select a new set of elements
         based on element numbers 1
@@ -2566,15 +2556,12 @@ class _MapdlElementCommands:
         ----------
         item
             Label identifying the item:
-
             ETAB - (currently the only Item available)
 
         lab
-            element table label:
-
-            Lab - Any user-defined label from the ETABLE command (
-            input in the Lab field of the
-                  ETABLE command).
+            element table label: Lab - Any user-defined label from
+            the ETABLE command (input in the Lab field of the ETABLE
+            command).
 
         order
             Order of sort operation:
