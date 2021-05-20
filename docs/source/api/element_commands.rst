@@ -5,4 +5,3 @@ Element Commands
 ****************
 .. autoclass:: ansys.mapdl.core.element_commands._MapdlElementCommands
     :members:
-    :noindex:
