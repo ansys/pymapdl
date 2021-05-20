@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.element_commands import parse_et, parse_e
 
 
 @pytest.fixture
@@ -112,3 +113,40 @@ def test_edele(mapdl, cleared):
     mapdl.modmsh('DETACH')
     output = mapdl.edele(1, 10)
     assert 'DELETE SELECTED ELEMENTS' in output
+
+
+class TestParseElementCommands:
+    @pytest.mark.parametrize('message', [('ELEMENT 8', 8),
+                                         ('ELEMENT 0', 0),
+                                         ('ELEMENT -1', None),
+                                         ('ELEMENT 23', 23),
+                                         (None, None)])
+    def test_parse_e_happy(self, message):
+        response = parse_e(message[0])
+        assert response is message[1]
+
+    @pytest.mark.parametrize('message', ['Element 8',
+                                         'eLEMENT 0',
+                                         'other thing entirely',
+                                         'ELEMENT  8',
+                                         'ELEMENT TYPE 8'])
+    def test_parse_e_unhappy(self, message):
+        response = parse_e(message[0])
+        assert response is None
+
+    @pytest.mark.parametrize('message', [('ELEMENT TYPE 8', 8),
+                                         ('ELEMENT TYPE 0', 0),
+                                         ('ELEMENT TYPE -1', None),
+                                         ('ELEMENT TYPE 23', 23),
+                                         (None, None)])
+    def test_parse_et_happy(self, message):
+        response = parse_et(message[0])
+        assert response == message[1]
+
+    @pytest.mark.parametrize('message', ['Element Type 8',
+                                         'eLEMENT TyPe 0',
+                                         'other thing entirely',
+                                         'ELEMENT TYPE  8'])
+    def test_parse_et_unhappy(self, message):
+        response = parse_e(message[0])
+        assert response is None
