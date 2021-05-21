@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.list\_files
+==================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.list_files

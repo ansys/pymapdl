@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sort
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sort
