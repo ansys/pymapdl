@@ -22,8 +22,23 @@ are grouped by functionality.
    files
    list_controls
 
-..
-   Database - TODO
+
+********
+Database
+********
+
+These commands are used to operate on the database in a global
+sense.
+
+.. toctree::
+   :maxdepth: 1
+
+   database/setup
+   database/selecting
+   database/components
+   database/working_plane
+   database/coord_sys
+   database/picking
 
 ..
    Graphics - N/A Not Documented
@@ -32,7 +47,7 @@ are grouped by functionality.
 APDL
 ****
 These commands make up the ANSYS Parametric Design Language
-(APDL). The commands are grouped by functionality.
+(APDL).
 
 .. toctree::
    :maxdepth: 1
@@ -48,8 +63,7 @@ These commands make up the ANSYS Parametric Design Language
 Preprocessing
 *************
 
-These commands are used to create and set up the model. The commands
-are grouped by functionality.
+These commands are used to create and set up the model.
 
 
 .. toctree::
@@ -89,8 +103,7 @@ are grouped by functionality.
 ********
 Solution
 ********
-These commands are used to load and solve the model. The commands are
-grouped by functionality.
+These commands are used to load and solve the model.
 
 .. toctree::
    :maxdepth: 1
@@ -127,6 +140,22 @@ grouped by functionality.
    multi_field_solver_convergence_controls
    multi_field_solver_interface_mapping
    
+*****
+POST1
+*****
+These commands are used to postprocess the results with the database processor.
 
-..
-   Miscellaneous
+   post1/setup
+   post1/controls
+   post1/results
+   post1/element_table
+   post1/listing
+   post1/animation
+   post1/path_operations
+   post1/surface_operations
+   post1/load_case
+   post1/magnetics_calc
+   post1/trace_points
+   post1/special
+   post1/status
+   post1/failure_criteria

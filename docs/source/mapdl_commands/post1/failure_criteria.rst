@@ -1,0 +1,18 @@
+.. _ref_failure Criteria_api:
+
+****************
+Failure Criteria
+****************
+
+.. currentmodule:: ansys.mapdl.core
+
+These POST1 commands are for use with the failure criteria.
+
+..autosummary::
+   :toctree: api/
+
+   Mapdl.fc
+   Mapdl.fccheck
+   Mapdl.fcdele
+   Mapdl.fclist
+   Mapdl.fctyp

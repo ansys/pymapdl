@@ -671,8 +671,9 @@ not cause MAPDL to die, and will generally simply be ignored by MAPDL.
 Ignored commands:
 
 * ``/BATCH``
-* ``*VEDIT``
 * ``*DEL``
+* ``UNDO``
+* ``*VEDIT``
 
 
 Unsupported "Interactive" Commands

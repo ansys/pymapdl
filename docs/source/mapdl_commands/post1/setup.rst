@@ -1,0 +1,24 @@
+.. _ref_setup_api:
+
+*****
+Setup
+*****
+
+.. currentmodule:: ansys.mapdl.core
+
+These POST1 commands are used to put data into the database for
+postprocessing.
+
+..autosummary::
+   :toctree: api/
+
+   Mapdl.append
+   Mapdl.desol
+   Mapdl.dnsol
+   Mapdl.file
+   Mapdl.hrcplx
+   Mapdl./post1
+   Mapdl.rescombine
+   Mapdl.reset
+   Mapdl.set
+   Mapdl.subset

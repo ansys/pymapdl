@@ -28214,6 +28214,10 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Specifies the number of facets per element edge for PowerGraphics
         displays.
 
+        .. warning::
+           This will not change element plotting within PyMapdl with
+           ``eplot(vtk=True)``
+
         Parameters
         ----------
         num
@@ -34820,39 +34824,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         analysis.
         """
         command = "OCTABLE,%s,%s,%s,%s,%s,%s,%s" % (str(val1), str(val2), str(val3), str(val4), str(val5), str(val6), str(val7))
-        return self.run(command, **kwargs)
-
-    def undo(self, kywrd="", **kwargs):
-        """APDL Command: UNDO
-
-        Allows the user to modify or save commands issued since the last RESUME
-        or SAVE command.
-
-        Parameters
-        ----------
-        kywrd
-
-            NEW - Create an editable GUI window that allows the user
-                  to alter the commands issued since the most recent
-                  SAVE or RESUME operations (GUI only).
-
-        Notes
-        -----
-        The UNDO command brings up the session editor, a text window that
-        displays all of the program operations since the last SAVE or RESUME
-        command. You can modify command parameters, delete whole sections of
-        text and even save a portion of the command string to a separate file.
-        The file is named jobname000.cmds, with each subsequent save operation
-        incrementing the filename by one digit.
-
-        Note: The session editor file can be changed only by the session
-        editor. If you rename your database file outside of ANSYS and then
-        resume that database, the session editor will display the old filename.
-
-        For more information on the session editor, see Using the Session
-        Editor in the Operations Guide.
-        """
-        command = "UNDO,%s" % (str(kywrd))
         return self.run(command, **kwargs)
 
     def gthk(self, label="", thick="", **kwargs):

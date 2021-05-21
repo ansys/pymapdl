@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rmdir
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rmdir
