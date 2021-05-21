@@ -3,7 +3,8 @@ import pytest
 import numpy as np
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.element_commands import parse_et, parse_e
+from ansys.mapdl.core._commands.element import parse_e
+from ansys.mapdl.core._commands.element_type import parse_et
 
 
 @pytest.fixture
@@ -121,7 +122,7 @@ class TestParseElementCommands:
                                          ('ELEMENT -1', None),
                                          ('ELEMENT 23', 23),
                                          (None, None)])
-    def test_parse_e_happy(self, message):
+    def test_parse_e_valid(self, message):
         response = parse_e(message[0])
         assert response is message[1]
 
@@ -130,7 +131,7 @@ class TestParseElementCommands:
                                          'other thing entirely',
                                          'ELEMENT  8',
                                          'ELEMENT TYPE 8'])
-    def test_parse_e_unhappy(self, message):
+    def test_parse_e_invalid(self, message):
         response = parse_e(message[0])
         assert response is None
 
@@ -139,7 +140,7 @@ class TestParseElementCommands:
                                          ('ELEMENT TYPE -1', None),
                                          ('ELEMENT TYPE 23', 23),
                                          (None, None)])
-    def test_parse_et_happy(self, message):
+    def test_parse_et_valid(self, message):
         response = parse_et(message[0])
         assert response == message[1]
 
@@ -147,6 +148,6 @@ class TestParseElementCommands:
                                          'eLEMENT TyPe 0',
                                          'other thing entirely',
                                          'ELEMENT TYPE  8'])
-    def test_parse_et_unhappy(self, message):
+    def test_parse_et_invalid(self, message):
         response = parse_e(message[0])
         assert response is None

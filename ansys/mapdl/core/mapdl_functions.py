@@ -4,14 +4,12 @@ from .geometry_commands import _MapdlGeometryCommands
 from .io_commands import _MapdlIoCommands
 from .mesh_commands import _MapdlMeshingCommands
 from .misc_commands import _MapdlMiscCommands
-from .element_commands import _MapdlElementCommands
 
 
 class _MapdlCommands(_MapdlGeometryCommands,
                      _MapdlIoCommands,
                      _MapdlMeshingCommands,
-                     _MapdlMiscCommands,
-                     _MapdlElementCommands):  # pragma: no cover
+                     _MapdlMiscCommands):  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -1950,26 +1948,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PPATH,%s,%s,%s,%s,%s,%s" % (str(point), str(node), str(x), str(y), str(z), str(cs))
         return self.run(command, **kwargs)
 
-    def fclist(self, mat="", temp="", **kwargs):
-        """APDL Command: FCLIST
-
-        To list what the failure criteria is that you have input.
-
-        Parameters
-        ----------
-        mat
-             Material number (defaults to ALL for all materials).
-
-        temp
-            Temperature to be evaluated at (defaults to TUNIF).
-
-        Notes
-        -----
-        This command allows you to see what you have already input for failure
-        criteria using the FC commands.
-        """
-        return self.run(f"FCLIST,{mat},,{temp}", **kwargs)
-
     def d(self, node="", lab="", value="", value2="", nend="", ninc="",
           lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
         """APDL Command: D
@@ -2782,50 +2760,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SMIN,%s,%s,%s,%s,%s" % (str(labr), str(lab1), str(lab2), str(fact1), str(fact2))
         return self.run(command, **kwargs)
 
-    def mplib(self, r_w_opt="", path="", **kwargs):
-        """APDL Command: /MPLIB
-
-        Sets the default material library read and write paths.
-
-        Parameters
-        ----------
-        r-w_opt
-            Determines what path is being set.  Possible values are:
-
-            READ - Set the read path.
-
-            WRITE - Set the write path.
-
-            STAT - Report what read and write paths are currently in use.
-
-        path
-            The directory path to be used for material library files.
-
-        Notes
-        -----
-        The /MPLIB command sets two path strings used in conjunction with the
-        material library feature and the MPREAD and MPWRITE commands.
-
-        For MPREAD, when you use the LIB option and no directory path is given
-        in the file name, the command searches for the file in these locations:
-        the current working directory, the user's home directory, the user-
-        specified material library directory (as defined by the
-        /MPLIB,READ,PATH command), and /ansys_dir/matlib.
-
-        For MPWRITE, when you use the LIB option and the directory portion of
-        the specification for the material library file is blank, the command
-        writes the material  library file to the directory specified by the
-        /MPLIB,WRITE,PATH command (if that path has been set).  If the path has
-        not been set, the default is to write the file to the current working
-        directory.
-
-        The Material Library files supplied with the distribution disks are
-        meant for demonstration purposes only.  These files are not intended
-        for use in customer applications.
-        """
-        command = "/MPLIB,%s,%s" % (str(r_w_opt), str(path))
-        return self.run(command, **kwargs)
-
     def asbl(self, na="", nl="", keepa="", keepl="", **kwargs):
         """APDL Command: ASBL
 
@@ -3079,71 +3013,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         processor.
         """
         command = "/ANFILE,%s,%s,%s" % (str(lab), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
-    def mptgen(self, stloc="", num="", tstrt="", tinc="", **kwargs):
-        """APDL Command: MPTGEN
-
-        Adds temperatures to the temperature table by generation.
-
-        Parameters
-        ----------
-        stloc
-            Starting location in table for generating temperatures.  Defaults
-            to last location filled + 1.
-
-        num
-            Number of temperatures to be generated (1-100).
-
-        tstrt
-            Temperature assigned to STLOC location.
-
-        tinc
-            Increment previous temperature by TINC and assign to next location
-            until all NUM locations are filled.
-
-        Notes
-        -----
-        Adds temperatures to the temperature table by generation.  May be used
-        in combination (or in place of) the MPTEMP command.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPTGEN,%s,%s,%s,%s" % (str(stloc), str(num), str(tstrt), str(tinc))
-        return self.run(command, **kwargs)
-
-    def mpdres(self, labf="", matf="", labt="", matt="", **kwargs):
-        """APDL Command: MPDRES
-
-        Reassembles existing material data with the temperature table.
-
-        Parameters
-        ----------
-        labf
-            Material property label associated with MATF.
-
-        matf
-            Material reference number of property to restore from virtual
-            space.
-
-        labt
-            Material property label associated with MATT (defaults to label
-            associated with MATF).
-
-        matt
-            Material reference number assigned to generated property (defaults
-            to MATF).
-
-        Notes
-        -----
-        Restores into the database (from virtual space) a data table previously
-        defined [MP] for a particular property, assembles data with current
-        database temperature table, and stores back in virtual space as a new
-        property.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
         return self.run(command, **kwargs)
 
     def hptcreate(self, type_="", entity="", nhp="", label="", val1="", val2="",
@@ -3880,122 +3749,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "WRITE,%s" % (str(fname))
         return self.run(command, **kwargs)
 
-    def mpdata(self, lab="", mat="", sloc="", c1="", c2="", c3="", c4="",
-               c5="", c6="", **kwargs):
-        """APDL Command: MPDATA
-
-        Defines property data to be associated with the temperature table.
-
-        Parameters
-        ----------
-        lab
-            Valid property label.  Applicable labels are listed under "Material
-            Properties" in the input table for each element type in the Element
-            Reference.  See Linear Material Properties in the Mechanical APDL
-            Material Reference for more complete property label definitions:
-
-            ALPD - Mass matrix multiplier for damping.
-
-            ALPX - Secant coefficients of thermal expansion (also ALPY, ALPZ).  (See also MPAMOD
-                   command for adjustment to reference temperature).
-
-            BETD - Stiffness matrix multiplier for damping.
-
-            BETX - Coefficient of diffusion expansion (also BETY, BETZ)
-
-            C - Specific heat.
-
-            CREF - Reference concentration (may not be temperature dependent)
-
-            CSAT - Saturated concentration
-
-            CTEX - Instantaneous coefficients of thermal expansion (also CTEY, CTEZ).
-
-            DENS - Mass density.
-
-            DMPR - Constant material damping coefficient.
-
-            DXX - Diffusivity coefficients (also DYY, DZZ)
-
-            EMIS - Emissivity.
-
-            ENTH - Enthalpy.
-
-            EX - Elastic moduli (also EY, EZ).
-
-            GXY - Shear moduli (also GYZ, GXZ).
-
-            HF - Convection or film coefficient.
-
-            KXX - Thermal conductivities (also KYY, KZZ).
-
-            LSST - Dielectric loss tangent.
-
-            MGXX - Magnetic coercive forces (also MGYY, MGZZ).
-
-            MU - Coefficient of friction.
-
-            MURX - Magnetic relative permeabilities (also MURY, MURZ).
-
-            NUXY - Minor Poisson's ratios (also NUYZ, NUXZ).
-
-            PERX - Electric relative permittivities (also PERY, PERZ).
-
-            PRXY - Major Poisson's ratios (also PRYZ, PRXZ).
-
-            QRATE - Heat generation rate.
-
-            REFT - Reference temperature (may not be temperature dependent).
-
-            RH - Hall Coefficient.
-
-            RSVX - Electrical resistivities (also RSVY, RSVZ).
-
-            SBKX - Seebeck coefficients (also SBKY, SBKZ).
-
-            SONC - Sonic velocity.
-
-            THSX - Thermal strain (also THSY, THSZ).
-
-            VISC - Viscosity.
-
-        mat
-            Material reference number to be associated with the elements
-            (defaults to 1 if you specify zero or no material number).
-
-        sloc
-            Starting location in table for generating data.  For example, if
-            SLOC = 1, data input in the C1 field is the first constant in the
-            table.  If SLOC = 7, data input in the C1 field is the seventh
-            constant in the table, etc.  Defaults to the last location filled +
-            1.
-
-        c1, c2, c3, . . . , c6
-            Property data values assigned to six locations starting with SLOC.
-            If a value is already in this location, it is redefined.  A blank
-            (or zero) value for C1 resets the previous value in SLOC to zero.
-            A value of zero can only be assigned by C1.  Blank (or zero) values
-            for C2 to C6 leave the corresponding previous values unchanged.
-
-        Notes
-        -----
-        Defines a table of property data to be associated with the temperature
-        table.  Repeat MPDATA command for additional values (100 maximum).
-        Temperatures must be defined first [MPTEMP].  Also stores assembled
-        property function table (temperature and data) in virtual space.
-
-        This command is also valid in SOLUTION.
-
-        Without Emag enabled, the MUR_ and MG__ properties are not allowed.  In
-        ANSYS Professional, all structural and thermal properties are allowed
-        except ALPD, BETD, and MU.  In ANSYS Emag, only the RSV_, PER_, MUR_,
-        and MG__ properties are allowed. Only products that include ANSYS Emag
-        can use the LSST property. The SBK_ property is only available in ANSYS
-        Multiphysics and ANSYS PrepPost.
-        """
-        command = "MPDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(sloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
-        return self.run(command, **kwargs)
-
     def mfrc(self, freq="", maxfiles="", **kwargs):
         """APDL Command: MFRC
 
@@ -4686,36 +4439,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         recommended.
         """
         command = "KTRAN,%s,%s,%s,%s,%s,%s,%s" % (str(kcnto), str(np1), str(np2), str(ninc), str(kinc), str(noelem), str(imove))
-        return self.run(command, **kwargs)
-
-    def keyopt(self, itype="", knum="", value="", **kwargs):
-        """APDL Command: KEYOPT
-
-        Sets element key options.
-
-        Parameters
-        ----------
-        itype
-            Element type number as defined on the ET command. The label GCN is
-            also valid input for general contact elements (see Notes).
-
-        knum
-            Number of the KEYOPT to be defined (KEYOPT(KNUM)).
-
-        value
-            Value of this KEYOPT.
-
-        Notes
-        -----
-        Alternative to inputting KEYOPT values on ET command.  Must be used if
-        KEYOPT(7) or greater values are to be input. ITYPE must first be
-        defined with the ET command.
-
-        Specify ITYPE = GCN to set element key options for all contact elements
-        types used in any existing general contact definitions (that is,
-        contact elements having a real constant set number = 0).
-        """
-        command = "KEYOPT,%s,%s,%s" % (str(itype), str(knum), str(value))
         return self.run(command, **kwargs)
 
     def hemiopt(self, hres="", **kwargs):
@@ -6594,69 +6317,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "*ENDDO,"
-        return self.run(command, **kwargs)
-
-    def numcmp(self, label="", **kwargs):
-        """APDL Command: NUMCMP
-
-        Compresses the numbering of defined items.
-
-        Parameters
-        ----------
-        label
-            Items to be compressed:
-
-            NODE - Node numbers
-
-            ELEM - Element numbers
-
-            KP - Keypoint numbers
-
-            LINE - Line numbers
-
-            AREA - Area numbers
-
-            VOLU - Volume numbers
-
-            MAT - Material numbers
-
-            TYPE - Element type numbers
-
-            REAL - Real constant numbers
-
-            CP - Coupled set numbers
-
-            SECN - Section numbers
-
-            CE - Constraint equation numbers
-
-            ALL - All item numbers
-
-        Notes
-        -----
-        The NUMCMP command effectively compresses out unused item
-        numbers by renumbering all the items, beginning with one and
-        continuing throughout the model.  The renumbering order
-        follows the initial item numbering order (that is, compression
-        lowers the maximum number by "sliding" numbers down to take
-        advantage of unused or skipped numbers).  All defined items
-        are renumbered, regardless of whether or not they are actually
-        used or selected.  Applicable related items are also checked
-        for renumbering as described for the merge operation (NUMMRG).
-
-        Compressing material numbers (NUMCMP,ALL or NUMCMP,MAT) does
-        not update the material number referenced by either of the
-        following:
-
-        A temperature-dependent convection or surface-to-surface
-        radiation load (SF, SFE, SFL, SFA)
-
-        Real constants for multi-material elements (such as SOLID65)
-
-        Compression is usually not required unless memory space is limited and
-        there are large gaps in the numbering sequence.
-        """
-        command = "NUMCMP,%s" % (str(label))
         return self.run(command, **kwargs)
 
     def add(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
@@ -8635,41 +8295,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PASAVE,%s,%s,%s" % (str(lab), str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def mpcopy(self, matf="", matt="", **kwargs):
-        """APDL Command: MPCOPY
-
-        Copies linear material model data from one material reference number to
-        another.
-
-        Parameters
-        ----------
-        matf
-            Material reference number from where material property data will be
-            copied.
-
-        matt
-            Material reference number to where material property data will be
-            copied.
-
-        Notes
-        -----
-        The MPCOPY command copies linear material properties only, which are
-        all properties defined through the MP command. If you copy a model that
-        includes both linear and yield behavior constants (for example, a BKIN
-        model), the MPCOPY and TBCOPY, ALL commands are used together to copy
-        the entire model.  All input data associated with the model is copied,
-        that is, all data defined through the MP and TB commands.
-
-        Also, if you copy a material model using the Material Model Interface
-        (Edit> Copy), both the commands MPCOPY and TBCOPY, ALL are issued,
-        regardless of whether the model includes linear constants only, or if
-        it includes a combination of linear and yield behavior constants.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPCOPY,%s,%s" % (str(matf), str(matt))
-        return self.run(command, **kwargs)
-
     def tbfield(self, type_="", value="", **kwargs):
         """APDL Command: TBFIELD
 
@@ -8979,47 +8604,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "/FOCUS,%s,%s,%s,%s,%s" % (str(wn), str(xf), str(yf), str(zf), str(ktrans))
-        return self.run(command, **kwargs)
-
-    def cecheck(self, itemlab="", tolerance="", dof="", **kwargs):
-        """APDL Command: CECHECK
-
-        Check constraint equations and couplings for rigid body motions.
-
-        Parameters
-        ----------
-        itemlab
-            Item indicating what is to be checked:
-
-            CE - Check constraint equations only
-
-            CP - Check couplings only
-
-            ALL - Check both CE and CP
-
-        tolerance
-            Allowed amount of out-of-balance for any constraint equation or
-            coupled set. The default value of 1.0e-6 is usually good.
-
-        dof
-            Specifies which DOF is to be checked. Default is RIGID, the usual
-            option. Other choices are individual DOF such as UX, ROTZ, etc. or
-            THERM. The THERM option will check the constraint equations or
-            coupled sets for free thermal expansions, whereas the individual
-            DOFs check under rigid body motions. ALL is RIGID and THERM.
-
-        Notes
-        -----
-        This command imposes a rigid body motion on the nodes attached to the
-        constraint equation or coupled set and makes sure that no internal
-        forces are generated for such rigid body motions. Generation of
-        internal forces by rigid body motions usually indicates an error in the
-        equation specification (possibly due to nodal coordinate rotations).
-        The THERM option does a similar check to see that no internal forces
-        are created by the equations if the body does a free thermal expansion
-        (this check assumes a single isotropic coefficient of expansion).
-        """
-        command = "CECHECK,%s,%s,%s" % (str(itemlab), str(tolerance), str(dof))
         return self.run(command, **kwargs)
 
     def dcum(self, oper="", rfact="", ifact="", tbase="", **kwargs):
@@ -9711,70 +9295,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "LSSCALE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(ninc), str(rx), str(ry), str(rz), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def mpwrite(self, fname="", ext="", lib="", mat="", **kwargs):
-        """APDL Command: MPWRITE
-
-        Writes linear material properties in the database to a file
-        (if the LIB option is not specified) or writes both linear and
-        nonlinear material properties (if LIB is specified) from the
-        database to a file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including
-            directory). If you do not specify the LIB option, the default
-            directory is the current working directory. If you specify LIB and
-            you have specified a material library directory (via the /MPLIB
-            command), that directory is the default. Otherwise, the default is
-            the current working directory. If you use the default for your
-            directory, you can use all 248 characters for the file name.
-
-            The file name defaults to Jobname.
-
-        ext
-            Filename extension (eight-character maximum).
-
-            If you omit the LIB option, the default extension is
-            MP. If you specify the LIB option, the default extension
-            is units_MPL, where units is the system of units currently
-            in use. (See the description of the /UNITS command.) For
-            example, if /UNITS is set to BIN, the extension defaults
-            to BIN_MPL.
-
-        lib
-            The only value allowed for this field is the string "LIB."
-
-            The LIB option indicates that you wish to have properties
-            associated with the material (MAT) written to the
-            specified material library file using the material library
-            file format. The material library file format is
-            ASCII-text-based ANSYS command input. Certain commands
-            associated with this format have been modified to
-            interpret the string "_MATL" to mean the currently
-            selected material. This feature makes the material library
-            file independent of the material number in effect when the
-            file was written; this enables you to restore the
-            properties into the ANSYS database using the material
-            number of your choice. The LIB option also enables you to
-            save both linear and nonlinear properties. If you omit the
-            LIB option, you can save linear properties only.
-
-        mat
-            Specifies the material to be written to the named material library
-            file.  There is no default; you must either specify a material or
-            omit the MAT argument.  Even if you specify a MAT value, the ANSYS
-            program ignores it if the LIB argument is not specified.
-
-        Notes
-        -----
-        Writes linear material properties currently in the database to a file.
-        The file is rewound before and after writing.
-
-        This command is also valid in SOLUTION.
-        """
-        return self.run(f"MPWRITE,{fname},{ext},,{lib},{mat}", **kwargs)
-
     def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="",
             **kwargs):
         """APDL Command: BFK
@@ -9861,33 +9381,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "BFKLIST,%s,%s" % (str(kpoi), str(lab))
-        return self.run(command, **kwargs)
-
-    def cdopt(self, option="", **kwargs):
-        """APDL Command: CDOPT
-
-        Specifies format to be used for archiving geometry.
-
-        Parameters
-        ----------
-        option
-            IGES
-
-            IGES - Write solid model geometry information using IGES format (default).
-
-            ANF - Write solid model geometry information using ANSYS Neutral File format.
-
-            STAT - Print out the current format setting.
-
-        Notes
-        -----
-        This command controls your solid model geometry format for CDWRITE
-        operations. The ANF option affects only the COMB and SOLID options of
-        the CDWRITE command. All other options remain unaffected.
-
-        This option setting is saved in the database.
-        """
-        command = "CDOPT,%s" % (str(option))
         return self.run(command, **kwargs)
 
     def nslk(self, type_="", **kwargs):
@@ -13706,47 +13199,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SADD,%s,%s,%s,%s,%s,%s" % (str(labr), str(lab1), str(lab2), str(fact1), str(fact2), str(const))
         return self.run(command, **kwargs)
 
-    def rmodif(self, nset="", stloc="", v1="", v2="", v3="", v4="", v5="",
-               v6="", **kwargs):
-        """APDL Command: RMODIF
-
-        Modifies real constant sets.
-
-        Parameters
-        ----------
-        nset
-            Number of existing real constant set to be modified.
-
-        stloc
-            Starting location in table for modifying data.  For example, if
-            STLOC = 1, data input in the V1 field is the first constant in the
-            set.  If STLOC = 7, data input in the V1 field is the seventh
-            constant in the set, etc.  Must be greater than zero.
-
-        v1
-            New value assigned to constant in location STLOC.  If zero (or
-            blank), a zero value will be assigned.
-
-        v2, v3, v4, . . . , v6
-            New values assigned to constants in the next five locations.  If
-            blank, the value remains unchanged.
-
-        Notes
-        -----
-        Allows modifying (or adding) real constants to an existing set [R] at
-        any location.
-
-        Specify NSET = GCN to define/modify real constants for real constant
-        sets that were previously assigned by the GCDEF command (that is, real
-        constants used in general contact interactions).
-
-        This command is also valid in SOLUTION. For important information about
-        using this command within the solution phase, see What Are Nonstandard
-        Uses? in the Advanced Analysis Guide.
-        """
-        command = "RMODIF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(stloc), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6))
-        return self.run(command, **kwargs)
-
     def eof(self, **kwargs):
         """APDL Command: /EOF
 
@@ -14174,19 +13626,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "EDOUT,%s" % (str(option))
-        return self.run(command, **kwargs)
-
-    def aflist(self, **kwargs):
-        """APDL Command: AFLIST
-
-        Lists the current data in the database.
-
-        Notes
-        -----
-        Lists the current data and specifications in the database.  If batch,
-        lists all appropriate data.  If interactive, lists only summaries.
-        """
-        command = "AFLIST,"
         return self.run(command, **kwargs)
 
     def trtime(self, time="", spacing="", offset="", size="", length="",
@@ -14688,57 +14127,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PDVAR,%s,%s,%s,%s,%s,%s" % (str(name), str(type_), str(par1), str(par2), str(par3), str(par4))
         return self.run(command, **kwargs)
 
-    def mfimport(self, fnumb="", option="", fname="", ext="", **kwargs):
-        """APDL Command: MFIMPORT
-
-        Imports a new field into a current ANSYS Multi-field solver analysis.
-
-        Parameters
-        ----------
-        fnumb
-            Field number specified by the MFELEM command.
-
-        option
-            Selects data to read.
-
-            DB - Reads a CDB file. The CDB file name and extension are specified by Fname and
-                 Ext.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        The field to be imported should be written to a CDB file (CDWRITE
-        command). This file is read into the database, offsetting all existing
-        element type numbers, node numbers, etc. in order to accommodate the
-        imported field. (See the NUMOFF command for information on offset
-        capabilities.) It then updates all of the previously issued MFxx
-        commands to the new element type numbers. A new field is created using
-        the specified field number, which must not currently exist. If there
-        are no ANSYS Multi-field solver command files written for the existing
-        fields in the database, one will be written for each field with the
-        default name (see the MFCMMAND command). A MFCMMAND will be issued for
-        the imported field as well.
-
-        Repeat the MFIMPORT command to import additional fields.
-
-        See Multi-field Commands in the Coupled-Field Analysis Guide for a list
-        of all ANSYS Multi-field solver commands and their availability for MFS
-        and MFX analyses.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "MFIMPORT,%s,%s,%s,%s" % (str(fnumb), str(option), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
     def mcheck(self, lab="", **kwargs):
         """APDL Command: MCHECK
 
@@ -15154,73 +14542,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "EDENERGY,%s,%s,%s,%s" % (str(hgen), str(swen), str(sien), str(rlen))
-        return self.run(command, **kwargs)
-
-    def tbft(self, oper="", id_="", option1="", option2="", option3="",
-             option4="", option5="", option6="", option7="", **kwargs):
-        """APDL Command: TBFT
-
-        Performs material curve-fitting operations.
-
-        Parameters
-        ----------
-        oper
-            The specific curve-fitting operation:
-
-            Define a constitutive model. - Delete a constitutive model.
-
-            Write data related to a constitutive model to the database (same as TB command). - Initialize coefficients of a constitutive model for nonlinear curve-fitting
-                              procedure.
-
-            Deletes coefficients at current reference temperature. Applicable only for temperature dependent coefficients.  - Solve for coefficients.
-
-            Fix (hold constant) the coefficient you specify in Option4. - Add experimental data.
-
-            Delete experimental data. - List all data associated with the material model represented by the material ID
-                              number.
-
-        id_
-            The material reference number (same as MAT argument used in the TB
-            command). Valid entry is any number greater than zero (default = 1)
-            but less than 100,000.
-
-        option1
-            For curve-fit function operations (Oper = FADD, FDEL, FSET, SET,
-            CDEL, SOLVE or FIX) this field specifies the category (HYPER).
-
-        option2
-            For curve-fit function operations (Oper = FADD, FDEL, FSET, SET,
-            CDEL, SOLVE, or FIX), this field specifies constitutive model type.
-            The valid entries are listed in Table 231: Hyperelastic Options
-            below.
-
-        option3
-            For Oper = FADD, FDEL, FSET, CDEL, SET, SOLVE or FIX, some of the
-            cases specified in Option2 will require that the polynomial order
-            be specified. The applicable values for the order specification are
-            listed in Table 231: Hyperelastic Options.
-
-        option4
-            When you are working on a specific coefficient (Oper = FIX), this
-            field specifies the index of that coefficient. Valid entries vary
-            from 1 to n, where n is the total number of coefficients (default =
-            1).
-
-        option5
-            When you are working on a specific coefficient (Oper = FIX), this
-            field specifies the index of that coefficient. Valid entries vary
-            from 1 to N, where N is the total number of coefficients (default =
-            1)
-
-        option6
-            If Oper = SOLVE, specifies the allowed tolerance in residual change
-            to stop an iteration. Valid entry is 0.0 to 1.0 (default = 0.0).
-
-        option7
-            If Oper = SOLVE, specifies the allowed tolerance in coefficient
-            change to stop an iteration. Valid entry is 0 to 1 (default = 0).
-        """
-        command = "TBFT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(id_), str(option1), str(option2), str(option3), str(option4), str(option5), str(option6), str(option7))
         return self.run(command, **kwargs)
 
     def grtyp(self, kaxis="", **kwargs):
@@ -16840,57 +16161,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/XRANGE,%s,%s" % (str(xmin), str(xmax))
         return self.run(command, **kwargs)
 
-    def numstr(self, label="", value="", **kwargs):
-        """APDL Command: NUMSTR
-
-        Establishes starting numbers for automatically numbered items.
-
-        Parameters
-        ----------
-        label
-            Apply starting number to one of the following sets of items:
-
-            NODE - Node numbers.  Value defaults (and is continually reset) to 1 + maximum node
-                   number in model.  Cannot be reset lower.
-
-            ELEM - Element numbers.  Value defaults (and is continually reset) to 1 + maximum
-                   element number in model.  Cannot be reset lower.
-
-            KP - Keypoint numbers.  Value defaults to 1.  Only undefined numbers are used.
-                 Existing keypoints are not overwritten.
-
-            LINE - Line numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
-                   lines are not overwritten.
-
-            AREA - Area numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
-                   areas are not overwritten.
-
-            VOLU - Volume numbers.  Value defaults to 1.  Only undefined numbers are used.
-                   Existing volumes are not overwritten.
-
-            DEFA - Default.  Returns all starting numbers to their default values.
-
-        value
-            Starting number value.
-
-        Notes
-        -----
-        Establishes starting numbers for various items that may have numbers
-        automatically assigned (such as element numbers with the EGEN command,
-        and node and solid model entity numbers with the mesh [AMESH, VMESH,
-        etc.] commands).  Use NUMSTR,STAT to display settings.  Use NUMSTR,DEFA
-        to reset all specifications back to defaults.  Defaults may be lowered
-        by deleting and compressing items (i.e., NDELE and NUMCMP,NODE for
-        nodes, etc.).
-
-        Note:: : A mesh clear operation (VCLEAR, ACLEAR, LCLEAR, and KCLEAR)
-        automatically sets starting node and element numbers to the highest
-        unused numbers.  If a specific starting node or element number is
-        desired, issue NUMSTR after the clear operation.
-        """
-        command = "NUMSTR,%s,%s" % (str(label), str(value))
-        return self.run(command, **kwargs)
-
     def edcrb(self, option="", neqn="", partm="", parts="", **kwargs):
         """APDL Command: EDCRB
 
@@ -18262,100 +17532,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = f"SETRAN,{sename},{kcnto},{inc},{file},{ext},,{dx},{dy},{dz},{norot}"
-        return self.run(command, **kwargs)
-
-    def fc(self, mat="", lab1="", lab2="", data1="", data2="", data3="",
-           data4="", data5="", data6="", **kwargs):
-        """APDL Command: FC
-
-        Provides failure criteria information and activates a data
-        table to input temperature-dependent stress and strain limits.
-
-        Parameters
-        ----------
-        mat
-            Material reference number. You can define failure criteria
-            for up to 250 different materials.
-
-        lab1
-            Type of data.
-
-            TEMP - Temperatures. Each of the materials you define can
-            have a different set of temperatures to define the failure
-            criteria.
-
-            EPEL - Strains.
-
-            S - Stresses.
-
-        lab2
-            Specific criteria. Not used if Lab1 = TEMP.
-
-            XTEN - Allowable tensile stress or strain in the
-            x-direction. (Must be positive.)
-
-            XCMP - Allowable compressive stress or strain in the
-            x-direction. (Defaults to negative of XTEN.)
-
-            YTEN - Allowable tensile stress or strain in the
-            y-direction. (Must be positive.)
-
-            YCMP - Allowable compressive stress or strain in the
-            y-direction. (Defaults to negative of YTEN.)
-
-            ZTEN - Allowable tensile stress or strain in the
-            z-direction. (Must be positive.)
-
-            ZCMP - Allowable compressive stress or strain in the
-            z-direction. (Defaults to negative of ZTEN.)
-
-            XY - Allowable XY stress or shear strain. (Must be
-            positive.)
-
-            YZ - Allowable YZ stress or shear strain. (Must be
-            positive.)
-
-            XZ - Allowable XZ stress or shear strain. (Must be
-            positive.)
-
-            XYCP - XY coupling coefficient (Used only if Lab1 =
-            S). Defaults to -1.0. [1]
-
-            YZCP - YZ coupling coefficient (Used only if Lab1 =
-            S). Defaults to -1.0. [1]
-
-            XZCP - XZ coupling coefficient (Used only if Lab1 =
-            S). Defaults to -1.0. [1]
-
-        data1, data2, data3, . . . , data6
-            Description of DATA1 through DATA6.
-
-            T1, T2, T3, T4, T5, T6 - Temperature at which limit data
-            is input. Used only when Lab1 = TEMP.
-
-            V1, V2, V3, V4, V5, V6 - Value of limit stress or strain
-            at temperature T1 through T6. Used only when Lab1 = S or
-            EPEL.
-
-        Notes
-        -----
-        The data table can be input in either PREP7 or POST1. This
-        table is used only in POST1. When you postprocess failure
-        criteria results defined via the FC command (PLESOL, PRESOL,
-        PLNSOL, PRNSOL, PRRSOL, etc.), the active coordinate system
-        must be the coordinate system of the material being
-        analyzed. You do this using RSYS, SOLU. For layered
-        applications, you also use the LAYER command. See the specific
-        element documentation in the Element Reference for information
-        on defining your coordinate system for layers.
-
-        Some plotting and printing functions will not support Failure
-        Criteria for your PowerGraphics displays. This could result in
-        minor changes to other data when Failure Criteria are
-        applied. See the appropriate plot or print command
-        documentation for more information.
-        """
-        command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(lab2), str(data1), str(data2), str(data3), str(data4), str(data5), str(data6))
         return self.run(command, **kwargs)
 
     def bcsoption(self, memory_option="", memory_size="", solve_info="",
@@ -20098,54 +19274,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         calculations to occur.
         """
         command = "CVAR,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(itype), str(datum), str(name))
-        return self.run(command, **kwargs)
-
-    def r(self, nset="", r1="", r2="", r3="", r4="", r5="", r6="", **kwargs):
-        """APDL Command: R
-
-        Defines the element real constants.
-
-        Parameters
-        ----------
-        nset
-            Real constant set identification number (arbitrary).  If same as a
-            previous set number, set is redefined. Set number relates to that
-            defined with the element [REAL]. Note that the GUI automatically
-            assigns this value.
-
-        r1, r2, r3, . . . , r6
-            Real constant values (interpreted as area, moment of inertia,
-            thickness, etc., as required for the particular element type using
-            this set), or table names for tabular input of boundary conditions.
-            Use RMORE command if more than six real constants per set are to be
-            input.
-
-        Notes
-        -----
-        Defines the element real constants.  The real constants required for an
-        element are shown in the Input Summary of each element description in
-        the Element Reference.  Constants must be input in the same order as
-        shown in that table.  If more than the required number of element real
-        constants are specified in a set, only those required are used.  If
-        fewer than the required number are specified, zero values are assumed
-        for the unspecified constants.
-
-        If using table inputs (SURF151, SURF152, FLUID116, CONTA171, CONTA172,
-        CONTA173, CONTA174, and CONTA175 only), enclose the table name in %
-        signs (e.g., %tabname%).
-
-        Specify NSET = GCN to define real constants for real constant sets that
-        were previously assigned by the GCDEF command (that is, real constants
-        used in general contact interactions).
-
-        When copying real constants to new sets, ANSYS, Inc. recommends that
-        you use the command input. If you do use the GUI, restrict the real
-        constant copy to only the first six real constants (real constants
-        seven and greater will be incorrect for both the master and copy set).
-
-        This command is also valid in SOLUTION.
-        """
-        command = "R,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(r1), str(r2), str(r3), str(r4), str(r5), str(r6))
         return self.run(command, **kwargs)
 
     def ancyc(self, numframes="", kcycl="", delay="", **kwargs):
@@ -21909,166 +21037,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "GRP,%s,%s,%s" % (str(signif), str(label), str(forcetype))
         return self.run(command, **kwargs)
 
-    def nummrg(self, label="", toler="", gtoler="", action="", switch="",
-               **kwargs):
-        """APDL Command: NUMMRG
-
-        Merges coincident or equivalently defined items.
-
-        Parameters
-        ----------
-        label
-            Items to be merged:
-
-            NODE - Nodes
-
-            ELEM - Elements
-
-            KP - Keypoints (will also merge lines, areas, and volumes)
-
-            MAT - Materials
-
-            TYPE - Element types
-
-            REAL - Real constants
-
-            CP - Coupled sets
-
-            CE - Constraint equations
-
-            ALL - All items
-
-        toler
-            Range of coincidence.  For Label = NODE and KP, defaults to 1.0E-4
-            (based on maximum Cartesian coordinate difference between nodes or
-            keypoints).  For Label = MAT, REAL, and CE, defaults to 1.0E-7
-            (based on difference of the values normalized by the values).  Only
-            items within range are merged.  (For keypoints attached to lines,
-            further restrictions apply.  See the GTOLER field and Merging Solid
-            Model Entities below.)
-
-        gtoler
-            Global solid model tolerance -- used only when merging keypoints
-            attached to lines.  If specified, GTOLER will override the internal
-            relative solid model tolerance.  See Merging Solid Model Entities
-            below.
-
-        action
-            Specifies whether to merge or select coincident items.
-
-            SELE - Select coincident items but do not merge. Action = SELE is only valid for Label
-                   = NODE.
-
-            (Blank) - Merge the coincident items (default).
-
-        switch
-            Specifies whether the lowest or highest numbered coincident item is
-            retained after the merging operation.  This option does not apply
-            to keypoints; i.e., for Label = KP, the lowest numbered keypoint is
-            retained regardless of the Switch setting.
-
-            LOW - Retain the lowest numbered coincident item after the merging operation
-                  (default).
-
-            HIGH - Retain the highest numbered coincident item after the merging operation.
-
-        Notes
-        -----
-        After issuing the command, the area and volume sizes (ASUM and VSUM)
-        may give slightly different results. In order to obtain the same
-        results as before, use /FACET, /NORMAL, and ASUM / VSUM.
-
-        The merge operation is useful for tying separate, but coincident, parts
-        of a model together. If not all items are to be checked for merging,
-        use the select commands (NSEL, ESEL, etc.) to select items.  Only
-        selected items are included in the merge operation for nodes,
-        keypoints, and elements.
-
-        By default, the merge operation retains the lowest numbered coincident
-        item.  Higher numbered coincident items are deleted.  Set Switch to
-        HIGH to retain the highest numbered coincident item after the merging
-        operation.  Applicable related items are also checked for deleted item
-        numbers and if found, are replaced with the retained item number.  For
-        example, if nodes are merged, element connectivities (except
-        superelements), mesh item range associativity, coupled degrees of
-        freedom, constraint equations, master degrees of freedom, gap
-        conditions, degree of freedom constraints, nodal force loads, nodal
-        surface loads, and nodal body force loads are checked.  Merging
-        material numbers [NUMMRG,ALL or NUMMRG,MAT] does not update the
-        material number referenced:
-
-        By temperature-dependent film coefficients as part of convection load
-        or a temperature-dependent emissivity as part of a surface-to-surface
-        radiation load [SF, SFE, SFL, SFA]
-
-        By real constants for multi-material elements (such as SOLID65)
-
-        If a unique load is defined among merged nodes, the value is kept and
-        applied to the retained node.  If loads are not unique (not
-        recommended), only the value on the lowest node (or highest if Switch =
-        HIGH) will be kept, except for "force" loads for which the values will
-        be summed if they are not defined using tabular boundary conditions.
-
-        Note:: The unused nodes (not recommended) in elements, couplings,
-        constraint equations, etc. may become active after the merge operation.
-
-        The Action field provides the option of visualizing the coincident
-        items before the merging operation.
-
-        Caution:: When merging entities in a model that has already been
-        meshed, the order in which you issue multiple NUMMRG commands is
-        significant.  If you want to merge two adjacent meshed regions that
-        have coincident nodes and keypoints, always merge nodes [NUMMRG,NODE]
-        before merging keypoints [NUMMRG,KP].  Merging keypoints before nodes
-        can result in some of the nodes becoming "orphaned"; that is, the nodes
-        lose their association with the solid model.  Orphaned nodes can cause
-        certain operations (such as boundary condition transfers, surface load
-        transfers, and so on) to fail. However, using NUMMRG should be avoided
-        if at all possible, as the procedure outlined above may even cause
-        meshing failure, especially after multiple merging and meshing
-        operations.
-
-        After a NUMMRG,NODE, is issued, some nodes may be attached to more than
-        one solid entity. As a result, subsequent attempts to transfer solid
-        model loads to the elements may not be successful. Issue NUMMRG,KP to
-        correct this problem. Do NOT issue VCLEAR before issuing NUMMRG,KP.
-
-        For NUMMRG,ELEM, elements must be identical in all aspects, including
-        the direction of the element coordinate system.
-
-        For certain solid and shell elements (181, 185, 190, etc) ANSYS will
-        interpret coincident faces as internal and eliminate them. To prevent
-        this from occurring, shrink the entities by a very small factor to
-        delineate coincident items (/SHRINK, 0.0001) and no internal nodes,
-        lines, areas or elements will be eliminated.
-
-        When working with solid models, you may have better success with the
-        gluing operations (AGLUE, LGLUE, VGLUE). Please read the following
-        information when attempting to merge solid model entities.
-
-        Gluing Operations vs. Merging Operations
-
-        Adjacent, touching regions can be joined by gluing them (AGLUE, LGLUE,
-        VGLUE) or by merging coincident keypoints (NUMMRG,KP, which also causes
-        merging of identical lines, areas, and volumes).  In many situations,
-        either approach will work just fine. Some factors, however, may lead to
-        a preference for one method over the other.
-
-        Geometric Configuration
-
-        Gluing is possible regardless of the initial alignment or offset of the
-        input entities. Keypoint merging is  possible only if each keypoint on
-        one side of the face to be joined is matched by a coincident keypoint
-        on the other side. This is commonly the case after a symmetry
-        reflection (ARSYM or VSYMM) or a copy (AGEN or VGEN),  especially for a
-        model built entirely in ANSYS rather than imported from a CAD system.
-        When the geometry is  extremely precise, and the configuration is
-        correct for  keypoint merging, NUMMRG is more efficient and robust than
-        AGLUE or VGLUE.
-        """
-        command = "NUMMRG,%s,%s,%s,%s,%s" % (str(label), str(toler), str(gtoler), str(action), str(switch))
-        return self.run(command, **kwargs)
-
     def nkpt(self, node="", npt="", **kwargs):
         """APDL Command: NKPT
 
@@ -22927,20 +21895,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ACCAT,%s,%s" % (str(na1), str(na2))
         return self.run(command, **kwargs)
 
-    def prep7(self, **kwargs):
-        """APDL Command: /PREP7
-
-        Enters the model creation preprocessor.
-
-        Notes
-        -----
-        Enters the general input data preprocessor (PREP7).
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/PREP7,"
-        return self.run(command, **kwargs)
-
     def force(self, lab="", **kwargs):
         """APDL Command: FORCE
 
@@ -23770,86 +22724,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         command = "SPLOT,%s,%s,%s,%s" % (str(na1), str(na2), str(ninc), str(mesh))
         return self.run(command, **kwargs)
-
-    def cdread(self, option="", fname="", ext="", fnamei="", exti="",
-               **kwargs):
-        """APDL Command: CDREAD
-
-        Reads a file of solid model and database information into the database.
-
-        Parameters
-        ----------
-        option
-            Selects which data to read:
-
-            ALL - Read all geometry, material property, load, and
-            component data (default).  Solid model geometry and loads
-            will be read from the file Fnamei.Exti.  All other data
-            will be read from the file Fname.Ext.
-
-            DB - Read all database information contained in file
-            Fname.Ext. This file should contain all information
-            mentioned above except the solid model loads. If reading a
-            .CDB file written with the GEOM option of the CDWRITE
-            command, element types [ET] compatible with the
-            connectivity of the elements on the file must be defined
-            prior to reading.
-
-            SOLID - Read the solid model geometry and solid model
-            loads from the file Fnamei.Exti.  This file could have
-            been written by the CDWRITE or IGESOUT command.
-
-            COMB - Read the combined solid model and database
-            information from the file Fname.Ext.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        fnamei
-            Name of the IGES file and its directory path (248 characters
-            maximum, including directory). If you do not specify a directory
-            path, it will default to your working directory and you can use all
-            248 characters for the file name.
-
-        exti
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        This command causes coded files of solid model (in IGES format) and
-        database (in command format) information to be read.  These files are
-        normally written by the CDWRITE or IGESOUT command.  Note that the
-        active coordinate system in these files has been reset to Cartesian
-        (CSYS,0).
-
-        If a set of data exists prior to the CDREAD operation, that data set is
-        offset upward to allow the new data to fit without overlap. The
-        NOOFFSET command allows this offset to be ignored on a set-by-set
-        basis, causing the existing data set to be overwritten with the new
-        data set.
-
-        When you write the geometry data using the CDWRITE,GEOM option, you use
-        the CDREAD,DB option to read the geometry information.
-
-        Using the CDREAD,COMB option will not write NUMOFF commands to offset
-        entity ID numbers if there is no solid model in the database.
-
-        Multiple CDB file imports cannot have elements with real constants in
-        one file and section definitions in another. The section attributes
-        will override the real constant attributes.  If you use CDREAD to
-        import multiple CDB files, define all of the elements using only real
-        constants, or using only section definitions.  Combining real constants
-        and section definitions is not recommended.
-
-        This command is valid in any processor.
-        """        
-        return self.run(f"CDREAD,{option},{fname},{ext},,{fnamei},{exti}", **kwargs)
 
     def edpart(self, option="", partid="", cname="", **kwargs):
         """APDL Command: EDPART
@@ -26248,42 +25122,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         immediately follow this command.
         """
         command = "PRINT,"
-        return self.run(command, **kwargs)
-
-    def mpplot(self, lab="", mat="", tmin="", tmax="", pmin="", pmax="",
-               **kwargs):
-        """APDL Command: MPPLOT
-
-        Plots linear material properties as a function of temperature.
-
-        Parameters
-        ----------
-        lab
-            Linear material property label (EX, EY, etc.) [MP].
-
-        mat
-            Material reference number. Defaults to 1.
-
-        tmin
-            Minimum abscissa value to be displayed.
-
-        tmax
-            Maximum abscissa value.
-
-        pmin
-            Minimum property (ordinate) value to be displayed.
-
-        pmax
-            Maximum property value.
-
-        Notes
-        -----
-        When the property is from tables, the MPPLOT command will not be valid
-        because the property could be a function of more than temperature.
-
-        This command is valid in any processor.
-        """
-        command = "MPPLOT,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(tmin), str(tmax), str(pmin), str(pmax))
         return self.run(command, **kwargs)
 
     def reset(self, **kwargs):
@@ -29748,29 +28586,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "FELIST,%s,%s,%s" % (str(nev1), str(nev2), str(ninc))
         return self.run(command, **kwargs)
 
-    def nsvr(self, itype="", nstv="", **kwargs):
-        """APDL Command: NSVR
-
-        Defines the number of variables for user-programmable element options.
-
-        Parameters
-        ----------
-        itype
-            Element type number as defined on the ET command.
-
-        nstv
-            Number of extra state variables to save (must be no more than 840).
-
-        Notes
-        -----
-        Defines the number of extra variables that need to be saved for user-
-        programmable (system-dependent) element options, e.g., material laws
-        through user subroutine USERPL.  ITYPE must first be defined with the
-        ET command.
-        """
-        command = "NSVR,%s,%s" % (str(itype), str(nstv))
-        return self.run(command, **kwargs)
-
     def anpres(self, nfram="", delay="", ncycl="", refframe="", **kwargs):
         """APDL Command: ANPRES
 
@@ -30735,35 +29550,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         SOLID279.
         """
         command = "SECOFFSET,%s,%s,%s,%s,%s,%s,%s" % (str(location), str(offset1), str(offset2), str(cg_y), str(cg_z), str(sh_y), str(sh_z))
-        return self.run(command, **kwargs)
-
-    def dof(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-            lab7="", lab8="", lab9="", lab10="", **kwargs):
-        """APDL Command: DOF
-
-        Adds degrees of freedom to the current DOF set.
-
-        Parameters
-        ----------
-        lab1, lab2, lab3, . . . , lab10
-            Valid labels are: UX, UY, UZ (structural displacements); ROTX,
-            ROTY, ROTZ (structural rotations); TEMP, TBOT, TE2, TE3, . . .,
-            TTOP (temperatures);  PRES (pressure);  VOLT (voltage); MAG
-            (magnetic scalar potential);  AX, AY, AZ (magnetic vector
-            potentials);  CURR (current);  EMF (electromotive force drop); CONC
-            (concentration); DELETE.
-
-        Notes
-        -----
-        The degree of freedom (DOF) set for the model is determined from all
-        element types defined. This command may be used to add to the current
-        set.  The ALL label may be used on some commands to represent all
-        labels of the current degree of freedom set for the model.  Issue the
-        DOF command with no arguments to list the current set.  Use the DELETE
-        label to delete any previously added DOFs and return to the default DOF
-        set.
-        """
-        command = "DOF,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab1), str(lab2), str(lab3), str(lab4), str(lab5), str(lab6), str(lab7), str(lab8), str(lab9), str(lab10))
         return self.run(command, **kwargs)
 
     def aovlap(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
@@ -33288,43 +32074,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CEDELE,%s,%s,%s,%s" % (str(neqn1), str(neqn2), str(ninc), str(nsel))
         return self.run(command, **kwargs)
 
-    def mpdele(self, lab="", mat1="", mat2="", inc="", lchk="", **kwargs):
-        """APDL Command: MPDELE
-
-        Deletes linear material properties.
-
-        Parameters
-        ----------
-        lab
-            Material property label (see MP command for valid labels).  If ALL,
-            delete properties for all applicable labels.
-
-        mat1, mat2, inc
-            Delete materials from MAT1 to MAT2 (defaults to MAT1) in steps of
-            INC (defaults to 1).  If MAT1 = ALL, MAT2 and INC are ignored and
-            the properties for all materials are deleted.
-
-        lchk
-            Specifies the level of element-associativity checking:
-
-            NOCHECK - No element-associativity check occurs. This option is the default.
-
-            WARN - When a section, material, or real constant is associated with an element, ANSYS
-                   issues a message warning that the necessary entity has been
-                   deleted.
-
-            CHECK - The command terminates, and no section, material, or real constant is deleted
-                    if it is associated with an element.
-
-        Notes
-        -----
-        This command is also valid in SOLUTION.
-
-        The LCHK argument is valid only when Lab = ALL.
-        """
-        command = "MPDELE,%s,%s,%s,%s,%s" % (str(lab), str(mat1), str(mat2), str(inc), str(lchk))
-        return self.run(command, **kwargs)
-
     def psmat(self, fname="", ext="", matrix="", color="", **kwargs):
         """APDL Command: PSMAT
 
@@ -33735,111 +32484,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
             operation. See the description of Oper for details.
         """
         command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
-        return self.run(command, **kwargs)
-
-    def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
-                trlevel="", cgap="", cpen="", ioff="", **kwargs):
-        """APDL Command: CNCHECK
-
-        Provides and/or adjusts the initial status of contact pairs.
-
-        Parameters
-        ----------
-        option
-            Option to be performed:
-
-            DETAIL - List all contact pair properties (default).
-
-            SUMMARY - List only the open/closed status for each contact pair.
-
-            POST - Execute a partial solution to write the initial
-                   contact configuration to the Jobname.RCN file.
-
-            ADJUST - Physically move contact nodes to the target in
-                     order to close a gap or reduce penetration. The
-                     initial adjustment is converted to structural
-                     displacement values (UX, UY, UZ) and stored in
-                     the Jobname.RCN file.
-
-            RESET - Reset target element and contact element key
-                    options and real constants to their default
-                    values. This option is not valid for general
-                    contact.
-
-            AUTO - Automatically sets certain real constants and key
-                   options to recommended values or settings in order
-                   to achieve better convergence based on overall
-                   contact pair behaviors. This option is not valid
-                   for general contact.
-
-            TRIM - Trim contact pair (remove certain contact and target elements).
-
-            UNSE - Unselect certain contact and target elements.
-
-        rid1, rid2, rinc
-            For pair-based contact, the range of real constant pair
-            ID's for which Option will be performed. If RID2 is not
-            specified, it defaults to RID1. If no value is specified,
-            all contact pairs in the selected set of elements are
-            considered.
-
-        intertype
-            The type of contact interface (pair-based versus general
-            contact) to be considered; or the type of contact pair to
-            be trimmed/unselected/auto-set.
-
-            (blank) - Include all contact definitions (pair-based and general contact).
-
-            GCN - Include general contact definitions only (not valid
-                  when Option = RESET or AUTO).
-
-        trlevel
-            Trimming level (used only when Option = TRIM or UNSE):
-
-            (blank) - Normal trimming (default): remove/unselect
-                      contact and target elements which are in
-                      far-field.
-
-            AGGRE - Aggressive trimming: remove/unselect contact and
-                    target elements which are in far-field, and
-                    certain elements in near-field.
-
-        Notes
-        -----
-        The CNCHECK command provides information for
-        surface-to-surface, node- to-surface, and line-to-line contact
-        pairs (element types TARGE169, TARGE170, CONTA171, CONTA172,
-        CONTA173, CONTA174, CONTA175, CONTA176, CONTA177). All contact
-        and target elements of interest, along with the solid elements
-        and nodes attached to them, must be selected for the command
-        to function properly. For performance reasons, the program
-        uses a subset of nodes and elements based on the specified
-        contact regions (RID1, RID2, RINC) when executing the CNCHECK
-        command.
-
-        CNCHECK is available in both the PREP7 and SOLUTION
-        processors, but only before the first solve operation (that
-        is, only before the first load step or the first substep).
-
-        If the contact and target elements were generated through mesh
-        commands (AMESH, LMESH, etc.) instead of the ESURF command,
-        you must issue MODMSH,DETACH before CNCHECK. Otherwise,
-        CNCHECK will not work correctly.
-
-        The following additional notes are available:
-
-        The command CNCHECK,POST solves the initial contact configuration in
-        one substep. After issuing this command, you can postprocess the
-        contact result items as you would for any other converged load step;
-        however, only the contact status, contact penetration or gap, and
-        contact pressure will have meaningful values. Other contact quantities
-        (friction stress, sliding distance, chattering) will be available but
-        are not useful.
-
-        Because Option = POST forces a solve operation, the PrepPost (PP)
-        license does not work with CNCHECK,POST.
-        """
-        command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(rid1), str(rid2), str(rinc), str(intertype), str(trlevel), str(cgap), str(cpen), str(ioff))
         return self.run(command, **kwargs)
 
     def rmsmple(self, nlgeom="", cap="", seqslv="", eeqslv="", **kwargs):
@@ -34729,75 +33373,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFADELE,%s,%s,%s" % (str(area), str(lkey), str(lab))
         return self.run(command, **kwargs)
 
-    def igesout(self, fname="", ext="", att="", **kwargs):
-        """APDL Command: IGESOUT
-
-        Writes solid model data to a file in IGES Version 5.1 format.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        att
-            Attribute key:
-
-            0 - Do not write assigned numbers and attributes of the
-                solid model entities to the IGES file (default).
-
-            1 - Write assigned numbers and attributes of solid model
-                entities (keypoints, lines, areas, volumes) to the
-                IGES file.  Attributes include MAT, TYPE, REAL, and
-                ESYS specifications as well as associated solid model
-                loads and meshing (keypoint element size, number of
-                line divisions and spacing ratio) specifications.
-
-        Notes
-        -----
-        Causes the selected solid model data to be written to a coded
-        file in the IGES Version 5.1 format.  Previous data on this
-        file, if any, are overwritten.  Keypoints that are not
-        attached to any line are written to the output file as IGES
-        entity 116 (Point).  Lines that are not attached to any area
-        are written to the output file as either IGES Entity 100
-        (Circular Arc), 110 (Line), or 126 (Rational B-Spline Curve)
-        depending upon whether the ANSYS entity was defined as an arc,
-        straight line, or spline.  Areas are written to the output
-        file as IGES Entity 144 (Trimmed Parametric Surface).  Volumes
-        are written to the output file as IGES entity 186 (Manifold
-        Solid B-Rep Object).  Solid model entities to be written must
-        have all corresponding lower level entities selected (use
-        ALLSEL,BELOW,ALL) before issuing command.  Concatenated lines
-        and areas are not written to the IGES file; however, the
-        entities that make up these concatenated entities are written.
-
-        Caution:: : Section properties assigned to areas, lines and
-        other solid model entities will not be maintained when the
-        model is exported using IGESOUT.
-
-        If you issue the IGESOUT command after generating a beam mesh
-        with orientation nodes, the orientation keypoints that were
-        specified for the line (LATT) are no longer associated with
-        the line and are not written out to the IGES file.  The line
-        does not recognize that orientation keypoints were ever
-        assigned to it, and the orientation keypoints do not "know"
-        that they are orientation keypoints.  Thus the IGESOUT command
-        does not support (for beam meshing) any line operation that
-        relies on solid model associativity.  For example, meshing the
-        areas adjacent to the meshed line, plotting the line that
-        contains the orientation nodes, or clearing the mesh from the
-        line that contains orientation nodes may not work as expected.
-        See Meshing Your Solid Model in the Modeling and Meshing Guide
-        for more information about beam meshing.
-        """
-        return self.run(f"IGESOUT,{fname},{ext},,{att}", **kwargs)
-
     def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
              kabs="", **kwargs):
         """APDL Command: NSEL
@@ -35191,39 +33766,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "OCDELETE,%s,%s" % (str(datatype), str(zonename))
-        return self.run(command, **kwargs)
-
-    def rdele(self, nset1="", nset2="", ninc="", lchk="", **kwargs):
-        """APDL Command: RDELE
-
-        Deletes real constant sets.
-
-        Parameters
-        ----------
-        nset1, nset2, ninc
-            Delete real constant sets from NSET1 to NSET2 (defaults to NSET1)
-            in steps of NINC (defaults to 1).  If NSET1 = ALL, ignore NSET2 and
-            NINC and all real constant sets are deleted.
-
-        lchk
-            Specifies the level of element-associativity checking:
-
-            NOCHECK - No element-associativity check occurs. This option is the default.
-
-            WARN - When a section, material, or real constant is associated with an element, ANSYS
-                   issues a message warning that the necessary entity has been
-                   deleted.
-
-            CHECK - The command terminates, and no section, material, or real constant is deleted
-                    if it is associated with an element.
-
-        Notes
-        -----
-        Deletes real constant sets defined with the R command.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "RDELE,%s,%s,%s,%s" % (str(nset1), str(nset2), str(ninc), str(lchk))
         return self.run(command, **kwargs)
 
     def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
@@ -38042,24 +36584,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PFACT,%s,%s,%s" % (str(tblno), str(excit), str(parcor))
         return self.run(command, **kwargs)
 
-    def fcdele(self, mat="", **kwargs):
-        """APDL Command: FCDELE
-
-        Deletes previously defined failure criterion data for the given
-        material.
-
-        Parameters
-        ----------
-        mat
-            Material number. Deletes all FC command input for this material.
-
-        Notes
-        -----
-        This command is also valid in POST1.
-        """
-        command = "FCDELE,%s" % (str(mat))
-        return self.run(command, **kwargs)
-
     def lcsel(self, type_="", lcmin="", lcmax="", lcinc="", **kwargs):
         """APDL Command: LCSEL
 
@@ -39933,29 +38457,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "NOORDER,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
-    def rlist(self, nset1="", nset2="", ninc="", **kwargs):
-        """APDL Command: RLIST
-
-        Lists the real constant sets.
-
-        Parameters
-        ----------
-        nset1, nset2, ninc
-            List real constant sets from NSET1 to NSET2 (defaults to NSET1) in
-            steps of NINC (defaults to 1).  If NSET1 = ALL (default), ignore
-            NSET2  and NINC and list all real constant sets [R].
-
-        Notes
-        -----
-        The real constant sets listed contain only those values specifically
-        set by the user.  Default values for real constants set automatically
-        within the various elements are not listed.
-
-        This command is valid in any processor.
-        """
-        command = "RLIST,%s,%s,%s" % (str(nset1), str(nset2), str(ninc))
         return self.run(command, **kwargs)
 
     def anisos(self, nfram="", delay="", ncycl="", **kwargs):
@@ -43722,42 +42223,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "LOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(xc), str(yc), str(zc), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
         return self.run(command, **kwargs)
 
-    def mpamod(self, mat="", deftemp="", **kwargs):
-        """APDL Command: MPAMOD
-
-        Modifies temperature-dependent secant coefficients of thermal
-        expansion.
-
-        Parameters
-        ----------
-        mat
-            Material number for which the secant coefficients of thermal
-            expansion (SCTE's) are to be modified.  Defaults to 1.
-
-        deftemp
-            Definition temperature at which the existing SCTE-versus-
-            temperature tables were defined.  Defaults to zero.
-
-        Notes
-        -----
-        This command converts temperature-dependent SCTE data (properties ALPX,
-        ALPY, ALPZ)  from the definition temperature (DEFTEMP) to the reference
-        temperature defined by MP,REFT or TREF.  If both the MP,REFT and TREF
-        commands have been issued, the reference temperature defined by the
-        MP,REFT command will be used.
-
-        This command does not apply to the instantaneous coefficients of
-        thermal expansion (properties CTEX, CTEY, CTEZ) or to the thermal
-        strains (properties THSX, THSY, THSZ).
-
-        See Linear Material Properties in the Mechanical APDL Material
-        Reference and the Mechanical APDL Theory Reference for more details.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPAMOD,%s,%s" % (str(mat), str(deftemp))
-        return self.run(command, **kwargs)
-
     def lwplan(self, wn="", nl1="", ratio="", **kwargs):
         """APDL Command: LWPLAN
 
@@ -44676,88 +43141,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "DOMEGA,%s,%s,%s" % (str(domgx), str(domgy), str(domgz))
-        return self.run(command, **kwargs)
-
-    def elbow(self, transkey="", tol="", dof="", cons1="", cons2="", cons3="",
-              cons4="", **kwargs):
-        """APDL Command: ELBOW
-
-        Specifies degrees of freedom to be coupled for end release and applies
-        section constraints to elbow elements.
-
-        Parameters
-        ----------
-        transkey
-            Pipe-to-elbow transition flag:
-
-            OFF - Do not automatically transition pipes to elbows. (This behavior is the
-                  default.)
-
-            ON - Automatically convert straight PIPE289 elements to ELBOW290 elements where it
-                 is beneficial. The program converts elements in transition
-                 regions where curved ELBOW290 elements are connected to
-                 straight PIPE289 elements.
-
-        tol
-            Angle tolerance (in degrees) between adjacent ELBOW290 elements.
-            The default value is 20. A value of -1 specifies all selected
-            ELBOW290 elements.
-
-        dof
-            Degrees of freedom to couple:
-
-            ALL - Couple all nodal degrees of freedom (UX, UY, UZ, ROTX, ROTY, and ROTZ). This
-                  behavior is the default.
-
-            BALL - Create ball joints (equivalent to releasing ROTX, ROTY, and ROTZ).
-
-        cons1, cons2, cons3, cons4
-            Section degrees of freedoms to constrain. If Cons1 through Cons4
-            are unspecified, no section constraints are applied:
-
-            SECT  - All section deformation
-
-            SE - Section radial expansion
-
-            SO - Section ovalization
-
-            SW - Section warping
-
-            SRA - Local shell normal rotation about cylindrical axis t2
-
-            SRT - Local shell normal rotation about cylindrical axis t1
-
-        Notes
-        -----
-        The ELBOW command specifies end releases and section constraints for
-        ELBOW290 elements and converts straight PIPE289 elements to ELBOW290
-        elements.
-
-        Curved PIPE289 elements are not converted to ELBOW290 elements.
-
-        ELBOW290 elements are generated only if there are existing ELBOW290
-        elements in the curved areas.
-
-        The command works on currently selected nodes and elements. It creates
-        end releases on any two connected elbow elements whose angle at
-        connection exceeds the specified tolerance. From within the GUI, the
-        Picked node option generates an end release and section constraints at
-        the selected node regardless of the angle of connection (that is, the
-        angle tolerance [TOL ] is set to -1).
-
-        Elbow and pipe elements must share the same section ID in order for the
-        pipe-to-elbow transition to occur.
-
-        To list the elements altered by the ELBOW command, issue an ELIST
-        command.
-
-        To list the coupled sets generated by the ELBOW command, issue a CPLIST
-        command.
-
-        To list the section constraints generated by the ELBOW command, issue a
-        DLIST command.
-        """
-        command = "ELBOW,%s,%s,%s,%s,%s,%s,%s" % (str(transkey), str(tol), str(dof), str(cons1), str(cons2), str(cons3), str(cons4))
         return self.run(command, **kwargs)
 
     def ddoption(self, decomp="", **kwargs):
@@ -45949,81 +44332,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MFVOLUME,%s,%s,%s,%s" % (str(inumb), str(fnumb1), str(label), str(fnumb2))
         return self.run(command, **kwargs)
 
-    def rmore(self, r7="", r8="", r9="", r10="", r11="", r12="", **kwargs):
-        """APDL Command: RMORE
-
-        Adds real constants to a set.
-
-        Parameters
-        ----------
-        r7, r8, r9, . . . , r12
-            Add real constants 7 to 12 (numerical values or table names) to the
-            most recently defined set.
-
-        Notes
-        -----
-        Adds six more real constants to the most recently defined set.  Repeat
-        the RMORE command for constants 13 to 18, again for 19-24, etc.
-
-        If using table inputs (SURF151, SURF152, FLUID116, CONTA171, CONTA172,
-        CONTA173, CONTA174, and CONTA175 only), enclose the table name in %
-        signs (e.g., %tabname%).
-
-        When copying real constants to new sets, ANSYS, Inc. recommends that
-        you use the command input. If you do use the GUI, restrict the real
-        constant copy to only the first six real constants (real constants
-        seven and greater will be incorrect for both the master and copy set).
-
-        This command is also valid in SOLUTION.
-        """
-        command = "RMORE,%s,%s,%s,%s,%s,%s" % (str(r7), str(r8), str(r9), str(r10), str(r11), str(r12))
-        return self.run(command, **kwargs)
-
-    def check(self, sele="", levl="", **kwargs):
-        """APDL Command: CHECK
-
-        Checks current database items for completeness.
-
-        Parameters
-        ----------
-        sele
-            Specifies which elements are to be checked:
-
-            (blank) - Check all data.
-
-            ESEL - Check only elements in the selected set and unselect any elements not producing
-                   geometry check messages.  The remaining elements (those
-                   producing check messages) can then be displayed and
-                   corrected.  A null set results if no elements produce a
-                   message.  Issue ESEL,ALL to select all elements before
-                   proceeding.
-
-        levl
-            Used only with Sele = ESEL:
-
-            WARN - Select elements producing warning and error messages.
-
-            ERR - Select only elements producing error messages (default).
-
-        Notes
-        -----
-        This command will not work if SHPP,OFF has been set. A similar,
-        automatic check of all data is done before the solution begins.
-
-        If the "Check Elements" option is invoked through the GUI (menu path
-        Main Menu> Preprocessor> Meshing> Check Elems), the CHECK,ESEL logic is
-        used to highlight elements in the following way:  good elements are
-        blue, elements having warnings are yellow, and bad (error) elements are
-        red.
-
-        Note:: : The currently selected set of elements is not changed by this
-        GUI function.
-
-        This command is also valid in PREP7.
-        """
-        command = "CHECK,%s,%s" % (str(sele), str(levl))
-        return self.run(command, **kwargs)
-
     def bfvdele(self, volu="", lab="", **kwargs):
         """APDL Command: BFVDELE
 
@@ -46666,54 +44974,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         used to compute the result (Par_Real, Par_Imag).
         """
         command = "*DOT,%s,%s,%s,%s" % (str(vector1), str(vector2), str(par_real), str(par_imag))
-        return self.run(command, **kwargs)
-
-    def setfgap(self, gap="", ropt="", pamb="", acf1="", acf2="", pref="",
-                mfp="", **kwargs):
-        """APDL Command: SETFGAP
-
-        Updates or defines the real constant table for squeeze film elements.
-
-        Parameters
-        ----------
-        gap
-            Gap separation.
-
-        ropt
-            Real constant set option.
-
-            0 - Creates separate real constant sets for each selected element with the
-                specified real constant values (default).
-
-            1 - Updates existing real constant sets. The gap separation is updated from
-                displacement results in the database. Other real constants are
-                updated as specified in the command input parameters.
-
-        pamb
-            Ambient pressure.
-
-        acf1, acf2
-            Accommodation factor 1 and 2.
-
-        pref
-            Reference pressure for mean free path.
-
-        mfp
-            Mean free path.
-
-        Notes
-        -----
-        This command is used for large signal cases to update the gap
-        separation real constant on a per-element basis.  Issue this command
-        prior to solution using the default ROPT value to initialize real
-        constant sets for every fluid element.  After a solution, you can re-
-        issue the command to update the real constant set for a subsequent
-        analysis. See Introduction for more information on thin film analyses.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = f"SETFGAP,{gap},{ropt},,{pamb},{acf1},{acf2},{pref},{mfp}"
         return self.run(command, **kwargs)
 
     def bstq(self, val1="", val2="", t="", **kwargs):
@@ -49559,54 +47819,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "EDBOUND,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(lab), str(cname), str(xc), str(yc), str(zc), str(cname2), str(copt))
-        return self.run(command, **kwargs)
-
-    def nooffset(self, label="", **kwargs):
-        """APDL Command: NOOFFSET
-
-        Prevents the CDREAD command from offsetting specified data items
-
-        Parameters
-        ----------
-        label
-            Specifies items not to be offset.
-
-            NODE - Node numbers
-
-            ELEM - Element numbers
-
-            KP - Keypoint numbers
-
-            LINE - Line numbers
-
-            AREA - Area numbers
-
-            VOLU - Volume numbers
-
-            MAT - Material numbers
-
-            TYPE - Element type numbers
-
-            REAL - Real constant numbers
-
-            CSYS - Coordinate system numbers
-
-            SECN - Section numbers
-
-            CP - Coupled set numbers
-
-            CE - Constraint equation numbers
-
-            CLEAR - All items will be offset
-
-            STATUS - Shows which items are specified notto be offset.
-
-        Notes
-        -----
-         The NOOFFSET command specifies data items not to be offset by a set of
-        data read from a CDREAD command.
-        """
-        command = "NOOFFSET,%s" % (str(label))
         return self.run(command, **kwargs)
 
     def cplgen(self, nsetf="", lab1="", lab2="", lab3="", lab4="", lab5="",
@@ -55638,52 +53850,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SOLUOPT,"
         return self.run(command, **kwargs)
 
-    def emunit(self, lab="", value="", **kwargs):
-        """APDL Command: EMUNIT
-
-        Specifies the system of units for magnetic field problems.
-
-        Parameters
-        ----------
-        lab
-            Label specifying the type of units:
-
-            MKS - Rationalized MKS system of units (meters, amperes, henries, webers, etc.).
-                  Free-space permeability is set to 4 πe-7 henries/meter. Free-
-                  space permittivity is set to 8.85 e-12 F/m.
-
-            MUZRO - User defined system of units. Free-space permeability is set to the value input
-                    for VALUE. Other units must correspond to the permeability
-                    units. Relative permeability may be altered to absolute
-                    values.
-
-            EPZRO - User defined system of units. Free-space permittivity is set to the value input
-                    for VALUE. Other units must correspond to the permittivity
-                    units.
-
-        value
-            User value of free-space permeability (defaults to 1) if Lab =
-            MUZRO, or free-space permittivity (defaults to 1) if Lab = EPZRO.
-
-        Notes
-        -----
-        Specifies the system of units to be used for electric and magnetic
-        field problems. The free-space permeability and permittivity values may
-        be set as desired. These values are used with the relative property
-        values [MP] to establish absolute property values.
-
-        Note:: : If the magnetic source field strength (Hs) has already been
-        calculated [BIOT], switching EMUNIT will not change the values.
-
-        For micro-electromechanical systems (MEMS), where dimensions are on the
-        order of microns, see the conversion factors in System of Units in the
-        Coupled-Field Analysis Guide.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "EMUNIT,%s,%s" % (str(lab), str(value))
-        return self.run(command, **kwargs)
-
     def line(self, **kwargs):
         """APDL Command: LINE
 
@@ -57258,30 +55424,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/MKDIR,%s" % (str(dir_))
         return self.run(command, **kwargs)
 
-    def mptres(self, lab="", mat="", **kwargs):
-        """APDL Command: MPTRES
-
-        Restores a temperature table previously defined.
-
-        Parameters
-        ----------
-        lab
-            Material property label [MP].
-
-        mat
-            Material reference number.
-
-        Notes
-        -----
-        Restores into the database (from virtual space) a temperature table
-        previously defined [MP] for a particular property.  The existing
-        temperature table in the database is erased before this operation.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPTRES,%s,%s" % (str(lab), str(mat))
-        return self.run(command, **kwargs)
-
     def edlcs(self, option="", cid="", x1="", y1="", z1="", x2="", y2="",
               z2="", x3="", y3="", z3="", **kwargs):
         """APDL Command: EDLCS
@@ -57623,19 +55765,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         rotated.
         """
         command = "VSBW,%s,%s,%s" % (str(nv), str(sepo), str(keep))
-        return self.run(command, **kwargs)
-
-    def fccheck(self, **kwargs):
-        """APDL Command: FCCHECK
-
-         Checks both the strain and stress input criteria for all materials.
-
-        Notes
-        -----
-        Issue the FCCHECK command to check the completeness of the input during
-        the input phase.
-        """
-        command = "FCCHECK,"
         return self.run(command, **kwargs)
 
     def nsol(self, nvar="", node="", item="", comp="", name="", sector="",
@@ -58474,67 +56603,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "PERBC2D,%s,%s,%s,%s,%s,%s,%s,%s" % (str(loc1), str(loc2), str(loctol), str(r1), str(r2), str(tolr), str(opt), str(plnopt))
-        return self.run(command, **kwargs)
-
-    def numoff(self, label="", value="", **kwargs):
-        """APDL Command: NUMOFF
-
-        Adds a number offset to defined items.
-
-        Parameters
-        ----------
-        label
-            Apply offset number to one of the following sets of items:
-
-            NODE - Nodes
-
-            ELEM - Elements
-
-            KP - Keypoints
-
-            LINE - Lines
-
-            AREA - Areas
-
-            VOLU - Volumes
-
-            MAT - Materials
-
-            TYPE - Element types
-
-            REAL - Real constants
-
-            CP - Coupled sets
-
-            SECN - Section numbers
-
-            CE - Constraint equations
-
-            CSYS - Coordinate systems
-
-        value
-            Offset number value (cannot be negative).
-
-        Notes
-        -----
-        Useful for offsetting current model data to prevent overlap if another
-        model is read in. CDWRITE automatically writes the appropriate NUMOFF
-        commands followed by the model data to File.CDB.  Therefore, when the
-        file is read, any model already existing in the database is offset
-        before the model data on the file is read.
-
-        Offsetting material numbers with this command  [NUMOFF,MAT] does not
-        update the material number referenced by either of the following:
-
-        A temperature-dependent convection or surface-to-surface radiation load
-        [SF, SFE, SFL, SFA]
-
-        Real constants for multi-material elements (such as SOLID65).
-
-        Therefore, a mismatch may exist between the material definitions and
-        the material numbers referenced.
-        """
-        command = "NUMOFF,%s,%s" % (str(label), str(value))
         return self.run(command, **kwargs)
 
     def mfsorder(self, gname1="", gname2="", **kwargs):
@@ -61756,35 +59824,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SMOOTH,%s,%s,%s,%s,%s,%s,%s" % (str(vect1), str(vect2), str(datap), str(fitpt), str(vect3), str(vect4), str(disp))
         return self.run(command, **kwargs)
 
-    def mpchg(self, mat="", elem="", **kwargs):
-        """APDL Command: MPCHG
-
-        Changes the material number attribute of an element.
-
-        Parameters
-        ----------
-        mat
-            Assign this material number to the element.  Material numbers are
-            defined with the material property commands [MP].
-
-        elem
-            Element for material change.  If ALL, change materials for all
-            selected elements [ESEL].
-
-        Notes
-        -----
-        Changes the material number of the specified element.  Between load
-        steps in SOLUTION, material properties cannot be changed from linear to
-        nonlinear, or from one nonlinear option to another.
-
-        If you change from one MKIN model to another MKIN model, the different
-        MKIN models need to have the same number of data points. This
-        requirement also applies if you change from one KINH model to another
-        KINH model, or from one CHABOCHE model to another CHABOCHE model.
-        """
-        command = "MPCHG,%s,%s" % (str(mat), str(elem))
-        return self.run(command, **kwargs)
-
     def sfscale(self, lab="", fact="", fact2="", **kwargs):
         """APDL Command: SFSCALE
 
@@ -62076,58 +60115,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         command = "*COMP,%s,%s,%s" % (str(matrix), str(algorithm), str(threshold))
         return self.run(command, **kwargs)
-
-    def mpread(self, fname="", ext="", lib="", **kwargs):
-        """APDL Command: MPREAD
-
-        Reads a file containing material properties.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including directory). If you do not specify the LIB
-            option, the default directory is the current working
-            directory. If you specify the LIB option, the default is
-            the following search path: the current working directory,
-            the user's home directory, MPLIB_DIR (as specified by the
-            /MPLIB,READ,PATH command) and /ansys_dir/matlib (as
-            defined by installation). If you use the default for your
-            directory, you can use all 248 characters for the file
-            name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        lib
-            Reads material library files previously written with the
-            MPWRITE command.  (See the description of the LIB option
-            for the MPWRITE command.)  The only allowed value for LIB
-            is LIB.
-
-        Notes
-        -----
-        Material properties written to a file without the LIB option
-        do not support nonlinear properties.  Also, properties written
-        to a file without the LIB option are restored in the same
-        material number as originally defined.  To avoid errors, use
-        MPREAD with the LIB option only when reading files written
-        using MPWRITE with the LIB option.
-
-        If you omit the LIB option for MPREAD, this command supports
-        only linear properties.
-
-        Material numbers are hardcoded.  If you write a material file
-        without specifying the LIB option, then read that file in
-        using the MPREAD command with the LIB option, the ANSYS
-        program will not write the file to a new material number.
-        Instead, it will write the file to the "old" material number
-        (the number specified on the MPWRITE command that created the
-        file.)
-
-        This command is also valid in SOLUTION.
-        """
-        return self.run(f"MPREAD,{fname},{ext},,{lib}", **kwargs)
 
     def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
         """APDL Command: /PSF
@@ -63446,35 +61433,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "OMEGA,%s,%s,%s" % (str(omegx), str(omegy), str(omegz))
-        return self.run(command, **kwargs)
-
-    def uimp(self, mat="", lab1="", lab2="", lab3="", val1="", val2="",
-             val3="", **kwargs):
-        """APDL Command: UIMP
-
-        Defines constant material properties (GUI).
-
-        Parameters
-        ----------
-        mat
-            Material number.
-
-        lab1, lab2, lab3
-            Material property labels (see the MP command for valid labels).
-
-        val1, val2, val3
-            Values corresponding to three labels.
-
-        Notes
-        -----
-        Defines constant material properties.  This is a command generated by
-        the Graphical User Interface (GUI) and will appear in the log file
-        (Jobname.LOG) if material properties are specified using the Material
-        Properties dialog box. This command is not intended to be typed in
-        directly in an ANSYS session (although it can be included in an input
-        file for batch input or for use with the /INPUT command).
-        """
-        command = "UIMP,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(lab2), str(lab3), str(val1), str(val2), str(val3))
         return self.run(command, **kwargs)
 
     def csdele(self, kcn1="", kcn2="", kcinc="", **kwargs):
@@ -65578,146 +63536,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PDANL,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def mp(self, lab="", mat="", c0="", c1="", c2="", c3="", c4="", **kwargs):
-        """APDL Command: MP
-
-        Defines a linear material property as a constant or a function of
-        temperature.
-
-        Parameters
-        ----------
-        lab
-            Valid material property label.  Applicable labels are listed under
-            "Material Properties" in the input table for each element type in
-            the Element Reference.  See Linear Material Properties in the
-            Material Reference for more complete property label definitions:
-
-            ALPD - Mass matrix multiplier for damping.
-
-            ALPX - Secant coefficients of thermal expansion (also ALPY, ALPZ).
-
-            BETD - Stiffness matrix multiplier for damping.
-
-            Note:If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain. - BETX
-
-            Coefficient of diffusion expansion (also BETY, BETZ) - BVIS
-
-            Bulk viscosity - C
-
-            Specific heat - CREF
-
-            Reference concentration (may not be temperature dependent) - CSAT
-
-            Saturated concentration - CTEX
-
-            Instantaneous coefficients of thermal expansion (also CTEY, CTEZ) - CVH
-
-            Heat coefficient at constant volume per unit of mass - DENS
-
-            Mass density. - DMPR
-
-            Constant structural damping coefficient in full harmonic analysis or damping ratio in mode-superposition analysis. - DXX
-
-            Diffusivity coefficients (also DYY, DZZ) - EMIS
-
-            Emissivity. - ENTH
-
-            Enthalpy. - EX
-
-            Elastic moduli (also EY, EZ) - GXY
-
-            Shear moduli (also GYZ, GXZ) - HF
-
-            Convection or film coefficient - KXX
-
-            Thermal conductivities (also KYY, KZZ) - LSST
-
-            Electric loss tangent - LSSM
-
-            Magnetic loss tangent - MGXX
-
-            Magnetic coercive forces (also MGYY, MGZZ) - MURX
-
-            Magnetic relative permeabilities (also MURY, MURZ) - MU
-
-            Coefficient of friction - NUXY
-
-            Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = νyx, as described in Stress-Strain Relationships in the Mechanical APDL Theory Reference) - PERX
-
-            Electric relative permittivities (also PERY, PERZ) - Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or
-                              SOLID98, the program interprets the values as
-                              absolute permittivity. Values input for PLANE223,
-                              SOLID226, or SOLID227 are always interpreted as
-                              relative permittivity.
-
-            PRXY - Major Poisson's ratios (also PRYZ, PRXZ) (PRXY = νxy, as described in Stress-
-                   Strain Relationships in the Mechanical APDL Theory
-                   Reference)
-
-            QRATE - Heat generation rate for thermal mass element MASS71. Fraction of plastic work
-                    converted to heat (Taylor-Quinney coefficient) for coupled-
-                    field elements PLANE223, SOLID226, and SOLID227.
-
-            REFT - Reference temperature.  Must be defined as a constant; C1 through C4 are
-                   ignored.
-
-            RH - Hall Coefficient.
-
-            RSVX - Electrical resistivities (also RSVY, RSVZ).
-
-            SBKX - Seebeck coefficients (also SBKY, SBKZ).
-
-            SONC - Sonic velocity.
-
-            THSX - Thermal strain (also THSY, THSZ).
-
-            VISC - Viscosity.
-
-        mat
-            Material reference number to be associated with the elements
-            (defaults to the current MAT setting [MAT]).
-
-        c0
-            Material property value, or if a property-versus-temperature
-            polynomial is being defined, the constant term in the polynomial.
-            C0 can also be a table name (%tabname%); if C0 is a table name, C1
-            through C4 are ignored.
-
-        c1, c2, c3, c4
-            Coefficients of the linear, quadratic, cubic, and quartic terms,
-            respectively, in the property-versus-temperature polynomial.  Leave
-            blank (or set to zero) for a constant material property.
-
-        Notes
-        -----
-        MP defines a linear material property as a constant or in terms of a
-        fourth order polynomial as a function of temperature. (See the TB
-        command for nonlinear material property input.) Linear material
-        properties typically require a single substep for solution, whereas
-        nonlinear material properties require multiple substeps;  see Linear
-        Material Properties in the Material Reference for details.
-
-        If the constants C1 - C4 are input, the polynomial
-
-        Property = C0 + C1(T) + C2(T)2 + C3(T)3 + C4(T)4
-
-        is evaluated at discrete temperature points with linear interpolation
-        between points (that is, a piecewise linear representation) and a
-        constant-valued extrapolation beyond the extreme points. First-order
-        properties use two discrete points (±9999°). The MPTEMP or MPTGEN
-        commands must be used for second and higher order properties to define
-        appropriate temperature steps. To ensure that the number of
-        temperatures defined via the MPTEMP and MPTGEN commands is minimally
-        sufficient for a reasonable representation of the curve, ANSYS
-        generates an error message if the number is less than N, and a warning
-        message if the number is less than 2N. The value N represents the
-        highest coefficient used; for example, if C3 is nonzero and C4 is zero,
-        a cubic curve is being used which is defined using 4 coefficients so
-        that N = 4.
-        """
-        command = "MP,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(c0), str(c1), str(c2), str(c3), str(c4))
-        return self.run(command, **kwargs)
-
     def vglue(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
               nv8="", nv9="", **kwargs):
         """APDL Command: VGLUE
@@ -65902,37 +63720,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         the VFQUERY command.
         """
         command = "VFQUERY,%s,%s" % (str(srcelem), str(tarelem))
-        return self.run(command, **kwargs)
-
-    def mplist(self, mat1="", mat2="", inc="", lab="", tevl="", **kwargs):
-        """APDL Command: MPLIST
-
-        Lists linear material properties.
-
-        Parameters
-        ----------
-        mat1, mat2, inc
-            List materials from MAT1 to MAT2 (defaults to MAT1) in steps of INC
-            (defaults to 1).  If MAT1= ALL (default), MAT2 and INC are ignored
-            and properties for all material numbers are listed.
-
-        lab
-            Material property label (see the MP command for labels).  If ALL
-            (or blank), list properties for all labels.  If EVLT, list
-            properties for all labels evaluated at TEVL.
-
-        tevl
-            Evaluation temperature for Lab = EVLT listing (defaults to BFUNIF).
-
-        Notes
-        -----
-        For Lab = EVLT, when the property is from tables, the MPPLOT command
-        will not be valid because the property could be a function of more than
-        temperature.
-
-        This command is valid in any processor.
-        """
-        command = "MPLIST,%s,%s,%s,%s,%s" % (str(mat1), str(mat2), str(inc), str(lab), str(tevl))
         return self.run(command, **kwargs)
 
     def dsys(self, kcn="", **kwargs):
@@ -66729,53 +64516,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "/USER,%s" % (str(wn))
-        return self.run(command, **kwargs)
-
-    def mptemp(self, sloc="", t1="", t2="", t3="", t4="", t5="", t6="",
-               **kwargs):
-        """APDL Command: MPTEMP
-
-        Defines a temperature table for material properties.
-
-        Parameters
-        ----------
-        sloc
-            Starting location in table for entering temperatures.  For example,
-            if SLOC = 1, data input in the T1 field applies to the first
-            constant in the table.  If SLOC = 7, data input in the T1 field
-            applies to the seventh constant in the table, etc.  Defaults to the
-            last location filled + 1.
-
-        t1, t2, t3, . . . , t6
-            Temperatures assigned to six locations starting with SLOC.  If a
-            value is already in this location, it will be redefined.  A blank
-            (or zero) value for T1 resets the previous value in SLOC to zero.
-            A value of zero can only be assigned by T1.  Blank (or zero) values
-            for T2 to T6 leave the corresponding previous values unchanged.
-
-        Notes
-        -----
-        Defines a temperature table to be associated with the property data
-        table [MPDATA].  These temperatures are also used for polynomial
-        property evaluation, if defined [MP].  Temperatures must be defined in
-        non-descending order.  Issue MATER $ STAT to list the current
-        temperature table.  Repeat MPTEMP command for additional temperatures
-        (100 maximum).  If all arguments are blank, the temperature table is
-        erased.
-
-        For clear definition, the temperature range you define with the MPTEMP
-        command should include the entire range you'll use in subsequently
-        defined materials.  To assist the user in this, the first (and only the
-        first) excursion out of the temperature range defined by the MPTEMP
-        commands is flagged with a warning message.  Similarly, the reference
-        temperature (TREF or MP,reft commands) should also fall in this same
-        temperature range.  If not and MP,alpx was used, a note will be output.
-        If not, and MP,ctex or MP,thsx was used, an error message will be
-        output.
-
-        This command is also valid in SOLUTION.
-        """
-        command = "MPTEMP,%s,%s,%s,%s,%s,%s,%s" % (str(sloc), str(t1), str(t2), str(t3), str(t4), str(t5), str(t6))
         return self.run(command, **kwargs)
 
     def dfswave(self, kcn="", radius="", psdref="", dens="", sonic="",

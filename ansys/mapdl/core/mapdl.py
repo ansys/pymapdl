@@ -19,7 +19,8 @@ from ansys.mapdl.core.misc import (random_string, supress_logging,
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-
+from ansys.mapdl.core import commands
+from .commands import Commands
 
 _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
@@ -103,7 +104,7 @@ def setup_logger(loglevel='INFO'):
     return log
 
 
-class _MapdlCore(_MapdlCommands):
+class _MapdlCore(Commands, _MapdlCommands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
@@ -935,70 +936,6 @@ class _MapdlCore(_MapdlCommands):
             self._log.info(self._response)
         else:
             raise Exception('Cannot run:\n{command}\n\nFile does not exist')
-
-    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
-        """Plots the currently selected elements.
-
-        APDL Command: EPLOT
-
-        Parameters
-        ----------
-        vtk : bool, optional
-            Plot the currently selected elements using ``pyvista``.
-            Defaults to current ``use_vtk`` setting.
-
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        **kwargs
-            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
-            keyword arguments related to visualizing using ``vtk``.
-
-        Examples
-        --------
-        >>> mapdl.clear()
-        >>> mapdl.prep7()
-        >>> mapdl.block(0, 1, 0, 1, 0, 1)
-        >>> mapdl.et(1, 186)
-        >>> mapdl.esize(0.1)
-        >>> mapdl.vmesh('ALL')
-        >>> mapdl.vgen(2, 'all')
-        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
-                        show_node_numbering=True)
-
-        Save a screenshot to disk without showing the plot
-
-        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                        window_size=[1920, 1080], savefig='screenshot.png',
-                        off_screen=True)
-
-        """
-        if vtk is None:
-            vtk = self._use_vtk
-
-        if vtk:
-            kwargs.setdefault('title', 'MAPDL Element Plot')
-            if not self._mesh.n_elem:
-                warnings.warn('There are no elements to plot.')
-                return general_plotter([], [], [], **kwargs)
-
-            # TODO: Consider caching the surface
-            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
-            kwargs.setdefault('show_edges', True)
-
-            # if show_node_numbering:
-            labels = []
-            if show_node_numbering:
-                labels = [{'points': esurf.points, 'labels': esurf['ansys_node_num']}]
-
-            return general_plotter([{'mesh': esurf}],
-                                   [],
-                                   labels,
-                                   **kwargs)
-
-        # otherwise, use MAPDL plotter
-        self._enable_interactive_plotting()
-        return super().eplot(**kwargs)
 
     def lplot(self, nl1="", nl2="", ninc="", vtk=None,
               show_line_numbering=True,

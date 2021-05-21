@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.numcmp
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.numcmp
