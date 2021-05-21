@@ -38,7 +38,9 @@ if os.name == 'linux':
 
 setup(
     name='ansys-mapdl-core',
-    packages=['ansys.mapdl.core', 'ansys.mapdl.core.examples'],
+    packages=['ansys.mapdl.core',
+              'ansys.mapdl.core._commands',
+              'ansys.mapdl.core.examples'],
     version=__version__,
     description='Python interface to MAPDL Service',
     long_description=open('README.rst').read(),
