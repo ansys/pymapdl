@@ -62,7 +62,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable or a random output parameter using the
             PDVAR command.
 
-        type_
+        type\_
             Keyword to identify which type of data is to be plotted:
 
             SAMP - Sampled values (default).
@@ -249,7 +249,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         labt
             Labeled result item corresponding to the element temperature.
 
-        type_
+        type\_
             Type of calculation:
 
             0 or 1 - Use safety factor (SF) calculation.
@@ -634,11 +634,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             LIST   - List current setting for penetration checking.
 
-        min_
+        min\_
             Minimum contact entity number for which to turn on/off small
             penetration check (default = 1).
 
-        max_
+        max\_
             Maximum contact entity number for which to turn on/off small
             penetration check (defaults to MIN).
 
@@ -688,7 +688,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        mat, real, type_
+        mat, real, type\_
             Material number, real constant set number, and type number
             to be associated with selected, unmeshed lines.
 
@@ -1215,7 +1215,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -1683,7 +1683,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -2934,7 +2934,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Type of entity on which the hard point will be created.
 
             LINE - Hard point will be created on a line.
@@ -3178,7 +3178,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -4274,7 +4274,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             COLL - Controls the collapse of the ANSYS Main Menu when a FINISH command is issued.
                    See Type below for a discussion of the arguments.
 
-        type_
+        type\_
             Label identifying the type of select operation.  Valid only for the
             following Func labels; NSEL, ESEL, KSEL, LSEL, ASEL, and VSEL:
 
@@ -4401,7 +4401,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set (default)
@@ -5150,7 +5150,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Selects a new set (default).
@@ -5401,11 +5401,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        min_
+        min\_
              Minimum contact entity number to be selected and plotted (default
             = 1).
 
-        max_
+        max\_
             Maximum contact entity number to be selected and plotted (default =
             MIN).
 
@@ -6156,7 +6156,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Type of calculation:
 
             0 - No nodal safety factor or margin of safety calculations.
@@ -6404,7 +6404,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Filename extension for radiosity mapping data file (default =
             .rsm).
 
-        dir_
+        dir\_
             Directory path for radiosity mapping data file. If you do not
             specify a directory path, it will default to your working
             directory.
@@ -7294,7 +7294,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -7505,7 +7505,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             GROUP - If a section calls other sections, this option lists those sections too.
 
-        type_
+        type\_
             The section type. Valid arguments are ALL (the default) and the
             types available on the SECTYPE command.
 
@@ -7537,7 +7537,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Parameter name. The parameter must have been previously defined as
             a random input variable using the PDVAR command.
 
-        type_
+        type\_
             Keyword for the type of information you need to retrieve.
 
             MEAN - Mean value of the random input variable specified in Name.
@@ -7983,11 +7983,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
         delay
             Time delay during animation (default = 0.5 seconds).
 
-        min_
+        min\_
             Minimum results file number to animate. Default = 1 (for
             Jobname.RS01).
 
-        max_
+        max\_
             Maximum results file number to animate. Defaults to the highest
             numbered results file, Jobname.RSnn.
 
@@ -8264,7 +8264,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             1 - Directional light.
 
-        int_
+        int\_
             Light intensity factor (defaults to 0.3 for ambient, 1.0 for
             directional). This option is valid only for 3-D devices).
 
@@ -9196,7 +9196,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -11284,7 +11284,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -11737,7 +11737,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        dir_
+        dir\_
             The directory to remove. If no path is provided, it will be assumed
             to be in the current working directory. All files in the directory
             are also removed.
@@ -12722,7 +12722,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        set_
+        set\_
             Specifies that sets in the results file are to be deleted.
 
         nstart
@@ -12800,7 +12800,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Specifies the algorithm to be used:
 
             Boeing sparse solver (default if applied to sparse matrices). - MKL sparse linear solver (Intel Windows and Linux systems only).
@@ -13819,7 +13819,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             random output parameter with the PDVAR command. See the *SET
             command for restrictions about ANSYS parameters.
 
-        type_
+        type\_
             Probabilistic design variable type. This is the statistical
             distribution type. For more information on each of these types, see
             Probabilistic Design in the Advanced Analysis Guide.
@@ -16120,7 +16120,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             The real constant set number to be associated with selected,
             unmeshed areas.
 
-        type_
+        type\_
             The type number to be associated with selected, unmeshed areas.
 
         esys
@@ -17806,7 +17806,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Specifies the algorithm to be used:
 
         enginename
@@ -17980,7 +17980,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Specifies the part of the probabilistic database to be cleared.
 
             ALL - Clear the entire probabilistic database. Both the preprocessing and
@@ -19986,7 +19986,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             while it is read. Default = 0. NSKIP is ignored for FileType =
             CFXTBR or CFDPOST on the FTYPE command.
 
-        format_
+        format\_
             For FileType = FORMATTED on the FTYPE command, Format is the read
             format in the FORTRAN FORMAT convention enclosed in parentheses;
             for example: (3e10.0,10x,e10.0,70x,e10.0)
@@ -22165,7 +22165,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         vector
             Name used to identify the vector. Must be specified.
 
-        type_
+        type\_
             Vector type:
 
             Double precision real values (default). - Complex double precision values.
@@ -22256,11 +22256,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             2 - Range of results data.
 
-        min_
+        min\_
             The range minimum value.  If left blank or 0, defaults to the first
             data point.
 
-        max_
+        max\_
             The range maximum value.  If left blank or 0, defaults to the last
             data point.
 
@@ -22594,7 +22594,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -23034,7 +23034,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
@@ -23614,7 +23614,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        mat, real, type_, esys, secnum
+        mat, real, type\_, esys, secnum
             Material number, real constant set number, type number, coordinate
             system number, and section number to be associated with selected,
             unmeshed volumes.
@@ -25440,13 +25440,13 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        set_
+        set\_
             Set of data in results file to be modified.
 
         lstep
             The new load step number.
 
-        iter_
+        iter\_
             The new load substep number.
 
         cumit
@@ -27850,7 +27850,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             FRONT - Plots CINT quantities distribution along the crack front.
 
-        id_
+        id\_
             Crack ID number.
 
         node
@@ -28979,7 +28979,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new path.
@@ -31088,7 +31088,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -31141,7 +31141,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             LOADSTEP - At the beginning of each load step.
 
-        set_
+        set\_
             Set of equations:
 
             All - Check for overconstraint between all constraint equations (default).
@@ -31434,13 +31434,13 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             2 - Plot value next to symbol.
 
-        min_
+        min\_
             Minimum value in a range of values plotted on screen.
 
-        max_
+        max\_
             Maximum value in a range of values plotted on screen.
 
-        abs_
+        abs\_
             Absolute number.  If KEY = 2 and ABS = 0, a number falling between
             the MIN and MAX is displayed.  If ABS is not specified, it defaults
             to 0.  If KEY = 2 and ABS = 1, an absolute value falling between
@@ -31963,7 +31963,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        id_
+        id\_
             Crack ID number.
 
         node
@@ -32482,7 +32482,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         tblno
             Input table number.
 
-        type_
+        type\_
             Label identifying the type of spectrum:
 
             DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of
@@ -33089,7 +33089,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -33484,7 +33484,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set of labels.
@@ -34144,7 +34144,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -35193,7 +35193,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        mat, real, type_, esys
+        mat, real, type\_, esys
             Material number, real constant set number, type number, and
             coordinate system number to be associated with selected, unmeshed
             keypoints.
@@ -35660,7 +35660,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Type of FFT transformation:
 
             Forward FFT computation (default). - Backward FFT computation.
@@ -36265,7 +36265,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set.
@@ -38438,7 +38438,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             BOTH - Both pie and bar charts plotted side by side (default).
 
-        type_
+        type\_
             Keyword for the type of correlation coefficients used to evaluate
             the sensitivities.
 
@@ -38631,7 +38631,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Specifies how to include ocean wave information in a harmonic
             analysis:
 
@@ -40622,10 +40622,10 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             DOMINANT - Dominant mode
 
-        min_
+        min\_
             Lower bound for fit range of mode.
 
-        max_
+        max\_
             Upper bound for fit range of mode.
 
         nstep
@@ -40827,7 +40827,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             and the parameter data for Name2 is shown on the Y-axis in the
             plot.
 
-        type_
+        type\_
             Keyword for the type of trendline curve.
 
             POLY - Polynomial trendline (default).
@@ -42164,7 +42164,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             equal width and determines the histogram frequencies by counting
             the number of hits that fall in the classes.
 
-        type_
+        type\_
             Type of histogram.
 
             ABS - Absolute frequency histogram. This is the actual number of hits in each class.
@@ -42398,7 +42398,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         narg
             Number of items in the picked list.
 
-        type_
+        type\_
             Type of items picked:
 
             1 - Node numbers
@@ -42933,7 +42933,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type_
+        type\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -43585,7 +43585,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -43716,7 +43716,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type_
+        type\_
             Shading type:
 
             FACET or 0 - Facet shading (one color per area face) (default).
@@ -43752,7 +43752,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             number is available; ANSYS will substitute the lowest available
             number in place of any user-specified higher number.
 
-        type_
+        type\_
             Annotation internal type number.  If TYPE = DELE, delete annotation
             NUM.
 
@@ -44518,7 +44518,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable with the PDVAR command. X2Name must be
             different than X1Name.
 
-        type_
+        type\_
             Type of the response surface visualization.
 
             2D - 2-D contour plot.
@@ -46087,7 +46087,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             a random input variable or a random output parameter with the PDVAR
             command.
 
-        type_
+        type\_
             Type of cumulative distribution curve to be displayed.
 
             EMP - Show an empirical cumulative distribution curve.
@@ -46886,7 +46886,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         ext
             Filename extension (eight-character maximum).
 
-        dir_
+        dir\_
             Directory path (64 characters maximum). Defaults to current
             directory.
 
@@ -47620,7 +47620,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying type of select. Because PARTSEL is a command
             macro, the label must be enclosed in single quotes.
 
@@ -47643,10 +47643,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
         PARTSEL invokes an ANSYS macro that selects parts in an explicit
         dynamic analysis. When PARTSEL is executed, an element component is
         automatically created for each existing part. For example, the elements
-        that make up PART 1 are grouped into the element component _PART1. Each
-        time the PARTSEL command is executed, components for unselected parts
-        will be unselected. To plot selected parts, choose Utility Menu> Plot>
-        Parts in the GUI or issue the command PARTSEL,'PLOT'.
+        that make up PART 1 are grouped into the element component
+        _PART1. Each time the PARTSEL command is executed, components
+        for unselected parts will be unselected. To plot selected parts,
+        choose Utility Menu> Plot> Parts in the GUI or issue the
+        command PARTSEL,'PLOT'.
 
         After selecting parts, if you change the selected set of nodes or
         elements and then plot parts, the nodes and elements associated with
@@ -48229,7 +48230,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -48902,7 +48903,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             capacitance reference name previously defined by means of RMCAP
             command for the electrostatic domain.
 
-        type_
+        type\_
             Type of fitting function to be applied for regression analysis.
             Valid types are:
 
@@ -49359,7 +49360,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         ext
             Filename extension for view factor matrix. Default = .vf.
 
-        dir_
+        dir\_
             Directory path for view factor matrix. If you do not specify a
             directory path, it will default to your working directory.
 
@@ -49868,7 +49869,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         secid
             Section identification number.
 
-        type_
+        type\_
             BEAM
 
             BEAM - Defines a beam section.
@@ -50519,7 +50520,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
              Set to SURF for a surface load transfer. Only surface load
             transfers are available for MFX.
 
@@ -50933,7 +50934,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             The type of operation requested:
 
             DISP - Calculate the maximum and minimum possible displacement at each node in the
@@ -51169,7 +51170,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -51618,7 +51619,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -52969,7 +52970,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -53363,7 +53364,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Name of parameter to be dimensioned.  See *SET for name
             restrictions.
 
-        type_
+        type\_
             Array type:
 
             Arrays are similar to standard FORTRAN arrays (indices are integers) (default).  Index numbers for the rows, columns, and planes are sequential values beginning with one. Used for 1-, 2-, or 3-D arrays. - Same as ARRAY, but used to specify 4-D arrays.
@@ -53799,7 +53800,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type_
+        type\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -54791,7 +54792,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        dir_
+        dir\_
             The directory to create (248 characters maximum on Linux;
             233 on Windows). If no path is provided, it will be
             created in the current working directory. Must be a valid
@@ -54948,7 +54949,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
@@ -55633,7 +55634,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         tblno
             Input table number.
 
-        type_
+        type\_
             Label identifying the type of spectrum:
 
             DISP - Displacement spectrum (in terms of displacement2/Hz ).
@@ -56220,11 +56221,11 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
             2 - Range of time data.
 
-        min_
+        min\_
             The range minimum value.  If left blank defaults to the first data
             point.
 
-        max_
+        max\_
             The range maximum value.  If left blank defaults to the last data
             point.
 
@@ -56252,7 +56253,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Arbitrary reference number or name assigned to this variable.
             Number must be >1 but </= NUMVAR.
 
-        id_
+        id\_
             Crack ID number.
 
         node
@@ -57438,7 +57439,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             DYNA - Get initial stresses from an earlier explicit
             (ANSYS LS-DYNA) run (default).
 
-        type_
+        type\_
             Type of data imported.  Note that this is an ANSYS-defined
             field; the only valid value is STRESS.
 
@@ -57928,7 +57929,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             Name of the matrix to export (must be a matrix previously created
             with *DMAT or *SMAT, or a vector previously created with *VEC).
 
-        format_
+        format\_
             Format of the output file:
 
             Export the matrix in the Matrix Market Format. - Export the matrix in the SUB file format.
@@ -58287,7 +58288,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
             definition, previously defined by means of the RMCAP command, for
             the electrostatic domain.
 
-        type_
+        type\_
             Type of data to be plotted. Valid types are:
 
             FUNC - Response surface (default)
@@ -58842,7 +58843,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Parameters
         ----------
-        type_
+        type\_
             Type of linear perturbation analysis to be performed:
 
             STATIC - Perform a linear perturbation static analysis.
@@ -61785,7 +61786,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type_
+        type\_
             Display type.  Defaults to ZBUF for raster mode displays or BASIC
             for vector mode displays:
 

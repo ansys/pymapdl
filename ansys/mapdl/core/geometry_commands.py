@@ -772,7 +772,7 @@ class _MapdlGeometryCommands():
             Number assigned to the new keypoint.  Defaults to the
             lowest available keypoint number.
 
-        type_
+        type\_
             Type of input for VALUE.
 
             RATIO - Value is the ratio of the distances between keypoints as follows:
@@ -830,7 +830,7 @@ class _MapdlGeometryCommands():
 
         Parameters
         ----------
-        type_
+        type\_
             Type of entity used to define the circular arc.  The
             meaning of VAL1 through VAL4 will vary depending on Type.
 
