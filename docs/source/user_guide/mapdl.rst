@@ -656,7 +656,7 @@ handled in the MAPDL server.
 Unapplicable Commands
 ~~~~~~~~~~~~~~~~~~~~~
 
-Some commands are quitely ignored by MAPDL and you are still free to
+Some commands are quietly ignored by MAPDL and you are still free to
 use them.  For example ``/BATCH``, implemented as ``mapdl.batch()`` returns:
 
 .. code::
