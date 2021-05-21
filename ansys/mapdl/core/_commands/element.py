@@ -151,29 +151,24 @@ def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
     Notes
     -----
     Defines an element by its nodes and attribute values. Up to 8
-    nodes may be specified with the :meth:`e` command.  If more
-    nodes are needed for the element, use the :meth:`emore`
-    command. The number of nodes required and the order in which
-    they should be specified are described in Chapter 4 of the
-    Element Reference for each element type.  Elements are
-    automatically assigned a number [NUMSTR] as generated. The
-    current (or default) MAT, TYPE, REAL, SECNUM and ESYS
-    attribute values are also assigned to the element.
+    nodes may be specified with the :meth:`e` command.  If more nodes
+    are needed for the element, use the :meth:`emore` command. The
+    number of nodes required and the order in which they should be
+    specified are described in Chapter 4 of the Element Reference for
+    each element type.  Elements are automatically assigned a number
+    [NUMSTR] as generated. The current (or default) MAT, TYPE, REAL,
+    SECNUM and ESYS attribute values are also assigned to the element.
 
-    When creating elements with more than 8 nodes using this
-    command and the EMORE command, it may be necessary to turn off
-    shape checking using the
-    :func:`~ansys.mapdl.core.mapdl_functions._MapdlCommands.shpp`
-    command before issuing this command. If a valid element type
-    can be created without using the additional nodes on the
-    :meth:`emore` command, this command will create that
-    element. The :meth:`emore` command will
-    then modify the element to include the additional nodes. If
-    shape checking is active, it will be performed before the
-    :meth:`emore` command is issued.
+    When creating elements with more than 8 nodes using this command
+    and the EMORE command, it may be necessary to turn off shape
+    checking using the SHPP command before issuing this command. If a
+    valid element type can be created without using the additional
+    nodes on the :meth:`emore` command, this command will create that
+    element. The :meth:`emore` command will then modify the element to
+    include the additional nodes. If shape checking is active, it will
+    be performed before the :meth:`emore` command is issued.
     Therefore, if the shape checking limits are exceeded, element
-    creation may fail before the
-    :meth:`emore` command modifies the
+    creation may fail before the :meth:`emore` command modifies the
     element into an acceptable shape.
 
     """
@@ -218,25 +213,22 @@ def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
 
     Notes
     -----
-    Writes the selected elements to a file. The write operation is
-    not necessary in a standard ANSYS run but is provided as
-    convenience to users wanting a coded element file. If issuing
-    :meth:`ewrite` from ANSYS to be used in ANSYS, you must also
-    issue
-    :func:`~ansys.mapdl.core.mapdl_functions._MapdlCommands.nwrite`
-    to store nodal information for later use. Only elements having
-    all of their nodes defined (and selected) are written. Data
-    are written in a coded format. The data description of each
-    record is: I, J, K, L, M, N, O, P, MAT, TYPE, REAL, SECNUM,
-    ESYS, IEL, where MAT, TYPE, REAL, and ESYS are attribute
-    numbers, SECNUM is the beam section number, and IEL is the
-    element number.
+    Writes the selected elements to a file. The write operation is not
+    necessary in a standard ANSYS run but is provided as convenience
+    to users wanting a coded element file. If issuing :meth:`ewrite`
+    from ANSYS to be used in ANSYS, you must also issue NWRITE to
+    store nodal information for later use. Only elements having all of
+    their nodes defined (and selected) are written. Data are written
+    in a coded format. The data description of each record is: I, J,
+    K, L, M, N, O, P, MAT, TYPE, REAL, SECNUM, ESYS, IEL, where MAT,
+    TYPE, REAL, and ESYS are attribute numbers, SECNUM is the beam
+    section number, and IEL is the element number.
 
-    The format is (14I6) if Format is set to SHORT and (14I8) if
-    the Format is set to LONG, with one element description per
-    record for elements having eight nodes of less. For elements
-    having more than eight nodes, nodes nine and above are written
-    on a second record with the same format.
+    The format is (14I6) if Format is set to SHORT and (14I8) if the
+    Format is set to LONG, with one element description per record for
+    elements having eight nodes of less. For elements having more than
+    eight nodes, nodes nine and above are written on a second record
+    with the same format.
     """
     return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
