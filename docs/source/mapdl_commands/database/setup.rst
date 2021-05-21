@@ -12,7 +12,7 @@ it to a file, or annotate it with titles and systems of units.
 .. autosummary::
    :toctree: api/
 
-   mapdl.clear
+   Mapdl.clear
    Mapdl.resume
    Mapdl.save
    Mapdl.smbc

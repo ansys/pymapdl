@@ -28,4 +28,4 @@ These SOLUTION commands are used to define options for nonlinear analyses.
    Mapdl.nlmesh
    Mapdl.nropt
    Mapdl.pred
-   Mapdl.mapdl.pstres
+   Mapdl.pstres

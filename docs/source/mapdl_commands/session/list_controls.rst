@@ -12,7 +12,6 @@ These SESSION commands are used to control listings and printed program output.
    :toctree: api/
 
    Mapdl.com
-   Mapdl.go
    Mapdl.golist
    Mapdl.gopr
    Mapdl.nolist
