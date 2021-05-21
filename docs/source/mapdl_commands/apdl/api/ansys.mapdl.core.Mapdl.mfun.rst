@@ -1,6 +1,0 @@
-﻿ansys.mapdl.core.Mapdl.mfun
-===========================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfun

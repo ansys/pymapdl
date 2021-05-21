@@ -1,6 +1,0 @@
-﻿ansys.mapdl.core.Mapdl.tee
-==========================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tee
