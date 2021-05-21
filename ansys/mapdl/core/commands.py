@@ -4,7 +4,7 @@ from ._commands import (element, element_type, real_constants,
 )
 
 
-class Commands():
+class Commands:
     """Wrapped MAPDL commands"""
 
     # database
