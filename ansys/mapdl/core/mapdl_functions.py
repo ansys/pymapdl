@@ -5722,6 +5722,9 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Opens (creates) a macro file.
 
+        .. warning::
+           This command must be run using ``mapdl.non_interactive``
+
         Parameters
         ----------
         fname
@@ -46183,43 +46186,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "/LARC,%s,%s,%s,%s,%s" % (str(xcentr), str(ycentr), str(xlrad), str(angle1), str(angle2))
-        return self.run(command, **kwargs)
-
-    def directory(self, strarray="", filename="", ext="", dir_="", **kwargs):
-        """APDL Command: /DIRECTORY
-
-        Put the file names in the current directory into a string parameter
-        array.
-
-        Parameters
-        ----------
-        strarray
-            Name of the "string array" parameter which will hold the returned
-            values. String array parameters are similar to character arrays,
-            but each array element can be as long as 128 characters. If the
-            string parameter does not exist, it will be created. The array will
-            be created as: *DIM,StrArray,STRING,64,2,numFileName
-
-        filename
-            File name (64 characters maximum). Only files matching this name
-            will be returned. The FileName ALL may match any file name.
-
-        ext
-            File name extension (8 characters maximum). Only files with an
-            extension matching this name will be returned. A blank or ALL will
-            match any extension.
-
-        directory
-            The directory in which the files reside. The default is the current
-            working directory.
-
-        Notes
-        -----
-        The /DIRECTORY command gets the file names in the current directory and
-        puts them into a string parameter array. Each file will be included in
-        the array as a name-extension pair.
-        """
-        command = "/DIRECTORY,%s,%s,%s,%s" % (str(strarray), str(filename), str(ext), str(dir_))
         return self.run(command, **kwargs)
 
     def prtime(self, tmin="", tmax="", **kwargs):

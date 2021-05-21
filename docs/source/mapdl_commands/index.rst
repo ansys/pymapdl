@@ -38,6 +38,10 @@ These commands make up the ANSYS Parametric Design Language
    :maxdepth: 1
 
    apdl/parameter_definition
+   apdl/macro_files
+   apdl/abbreviations
+   apdl/array_parm
+   apdl/matrix_op
 
 
 *************

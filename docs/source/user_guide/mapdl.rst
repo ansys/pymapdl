@@ -689,10 +689,19 @@ be run in ``non_interactive`` mode if applicable.  Others simply are
 not supported.
 
 * ``*ASK``
-* ``/EOF``
-* ``*IF``
-* ``CFOPEN``
 * ``*CREATE``
+* ``CFOPEN``
+* ``*CYCLE``
+* ``*DO``
+* ``*DOWHILE``
+* ``*ELSE``
+* ``*ELSEIF``
+* ``*ENDDO``
+* ``/EOF``
+* ``*GO``
+* ``*IF``
+* ``*REPEAT``
+* ``*RETURN``
 * ``*VWRITE``
 
 Note, many of these commands do not make sense in a Python context.
