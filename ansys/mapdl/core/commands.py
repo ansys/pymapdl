@@ -1,5 +1,6 @@
 from ._commands import (element, element_type, real_constants,
                         database, materials, material_data_tables,
+                        hidden,
 )
 
 
@@ -123,3 +124,5 @@ class Commands():
     ewrite = element.ewrite
     extopt = element.extopt
 
+    # hidden
+    _batch = hidden.batch

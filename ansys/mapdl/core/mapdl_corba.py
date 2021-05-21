@@ -172,7 +172,7 @@ class MapdlCorba(_MapdlCore):
 
         # must set to non-interactive in linux
         if os.name == 'posix':
-            self.batch()
+            self._batch()
 
         self._log.debug('Connected to ANSYS using CORBA interface with key %s',
                         corba_key)

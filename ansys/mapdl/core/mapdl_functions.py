@@ -5749,7 +5749,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         This command is valid in any processor.
         """
-        return self.run(f"CREATE,{fname},{ext}", **kwargs)
+        return self.run(f"*CREATE,{fname},{ext}", **kwargs)
 
     def clocal(self, kcn="", kcs="", xl="", yl="", zl="", thxy="", thyz="",
                thzx="", par1="", par2="", **kwargs):
@@ -6886,9 +6886,12 @@ class _MapdlCommands(_MapdlGeometryCommands,
         return self.run(command, **kwargs)
 
     def cfopen(self, fname="", ext="", loc="", **kwargs):
-        """APDL Command: *CFOPEN
+        """Opens a "command" file.
 
-        Opens a "command" file.
+        APDL Command: *CFOPEN
+
+        .. warning::
+           This command must be run using ``mapdl.non_interactive``
 
         Parameters
         ----------
@@ -12980,25 +12983,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Lab2 are used.
         """
         command = "SADD,%s,%s,%s,%s,%s,%s" % (str(labr), str(lab1), str(lab2), str(fact1), str(fact2), str(const))
-        return self.run(command, **kwargs)
-
-    def eof(self, **kwargs):
-        """APDL Command: /EOF
-
-        Exits the file being read.
-
-        Notes
-        -----
-        Causes an end-of-file exit when encountered on a switched file (see
-        /INPUT, *USE, etc.). Commands are then read continuing from the file
-        that contained the file switching command (or from the terminal if the
-        switch was made from the terminal). Use the /EXIT command to terminate
-        an ANSYS run. This command cannot be used in a do-loop or if-then-else
-        construct.
-
-        This command is valid in any processor.
-        """
-        command = "/EOF,"
         return self.run(command, **kwargs)
 
     def mflist(self, option="", value="", **kwargs):
@@ -36943,44 +36927,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "AGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(na1), str(na2), str(na3), str(na4), str(na5), str(na6), str(na7), str(na8), str(na9))
         return self.run(command, **kwargs)
 
-    def batch(self, lab="", **kwargs):
-        """APDL Command: /BATCH
-
-        Sets the program mode to "batch."
-
-        Parameters
-        ----------
-        lab
-            Specifies listing mode during a batch run:
-
-            LIST - The batch output will include a listing of the input file.
-
-            (blank) - Suppress input data listing.
-
-        Notes
-        -----
-        Sets the program mode to "batch" when included as the first line on an
-        input file of ANSYS commands.  For convenience, this command is
-        automatically recorded on the log file (Jobname.LOG) at the beginning
-        of an interactive ANSYS session so that the log file can be reused
-        later for batch input.
-
-        Caution:: : This command  should not be entered directly in an
-        interactive ANSYS session since all subsequent keyboard input is simply
-        copied to a file, without further processing or prompts from the
-        program (use the "system break" to exit the ANSYS program if this
-        occurs).
-
-        The recommended method for choosing batch mode, rather than using the
-        /BATCH command, is to select the Batch simulation environment from the
-        ANSYS Product Launcher  task in the ANSYS launcher, or the batch mode
-        entry option on the ANSYS execution command when entering the program.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/BATCH,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
     def voffst(self, narea="", dist="", kinc="", **kwargs):
         """APDL Command: VOFFST
 
@@ -47976,7 +47922,8 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "*USE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(arg1), str(arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8), str(arg9), str(ar10), str(ar11), str(ar12), str(ar13), str(ar14), str(ag15), str(ar16), str(ar17), str(ar18))
-        return self.run(command, **kwargs)
+        with self.non_interactive:
+            return self.run(command, **kwargs)
 
     def xflist(self, enrichmentid="", **kwargs):
         """APDL Command: XFLIST
@@ -62853,37 +62800,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         it.
         """
         command = "UNDELETE,%s,%s,%s" % (str(option), str(nstart), str(nend))
-        return self.run(command, **kwargs)
-
-    def vedit(self, par="", **kwargs):
-        """APDL Command: *VEDIT
-
-        Allows numerical array parameters to be graphically edited.
-
-        Parameters
-        ----------
-        par
-            Name of the array parameter to be edited.
-
-        Notes
-        -----
-        Invokes a graphical editing system that displays array parameter values
-        in matrix form, and allows the use of the mouse to edit individual
-        values.  The starting array subscripts must be defined, such as
-        *VEDIT,A(4,6,1), to indicate the section of the array to be edited.
-        The array section starts at the specified array element and continues
-        to the maximum extent of the array parameter.  Row and column index
-        values may be set or changed in any plane, and those values will be
-        applied to all planes. The menu system must be on [/MENU] when this
-        command is issued.  Graphical editing is not available for character
-        array parameters.  The *VEDIT command can not be used in a macro or
-        other secondary input file.
-
-        This command is not applicable to 4- or 5-D arrays.
-
-        This command is valid in any processor.
-        """
-        command = "*VEDIT,%s" % (str(par))
         return self.run(command, **kwargs)
 
     def cqc(self, signif="", label="", forcetype="", **kwargs):

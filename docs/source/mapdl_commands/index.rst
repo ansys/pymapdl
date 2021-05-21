@@ -4,7 +4,9 @@
 MAPDL Commands
 ==============
 This section gives an overview of the classic MAPDL commands that have
-been wrapped pythonically via PyMapdl.
+been wrapped pythonically via PyMapdl.  Not all commands have been
+wrapped, most notably there are a variety of commands that are not
+supported natively or only have partial support within PyMAPDL.  
 
 *******
 Session
@@ -21,8 +23,22 @@ are grouped by functionality.
    list_controls
 
 ..
+   Database - TODO
+
+..
    Graphics - N/A Not Documented
-   
+
+****
+APDL
+****
+These commands make up the ANSYS Parametric Design Language
+(APDL). The commands are grouped by functionality.
+
+.. toctree::
+   :maxdepth: 1
+
+   apdl/parameter_definition
+
 
 *************
 Preprocessing

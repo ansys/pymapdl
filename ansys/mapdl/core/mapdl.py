@@ -42,10 +42,12 @@ with self.non_interactive:
 """
 
 INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
-                  '*CFO': 'Run CFOPEN as non_interactive',
+                  '*CFO': 'Run CFOPEN as ``non_interactive``',
                   '*CRE': 'Create a function within python or run as non_interactive',
                   '*END': 'Create a function within python or run as non_interactive',
-                  '*IF': 'Use a python if or run as non_interactive'}
+                  '/EOF': 'Unsupported command.  Use ``exit`` to stop the server.',
+                  '*ASK': 'Unsupported command.  Use python ``input`` instead.',
+                  '*IF': 'Use a python ``if`` or run as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
