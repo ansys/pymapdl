@@ -1,5 +1,5 @@
 from ._commands import (element, element_type, real_constants,
-                        database, materials,
+                        database, materials, material_data_tables,
 )
 
 
@@ -65,6 +65,20 @@ class Commands():
     mpwrite = materials.mpwrite
     tbft = materials.tbft
     uimp = materials.uimp
+
+    # material_data_tables
+    tb = material_data_tables.tb
+    tbcopy = material_data_tables.tbcopy
+    tbdata = material_data_tables.tbdata
+    tbdele = material_data_tables.tbdele
+    tbeo = material_data_tables.tbeo
+    tbfield = material_data_tables.tbfield
+    tbin = material_data_tables.tbin
+    tblist = material_data_tables.tblist
+    tbmodif = material_data_tables.tbmodif
+    tbplot = material_data_tables.tbplot
+    tbpt = material_data_tables.tbpt
+    tbtemp = material_data_tables.tbtemp
 
     # Element commands
     e = element.e

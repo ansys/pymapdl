@@ -19,5 +19,32 @@ are grouped by functionality.
    element_type
    real_constants
    materials
-   element
+   material_data_tables
+
+   
+   primitives
+   keypoints
+   hard_points
+   lines
+   areas
+   volumes
+   booleans
+   meshing
+   nodes
+
+   ..
+      Left off here
+
+   elements
+   superelements
+   digitizing
+   coupled_dof
+   constraint_equations
+   status
+   explicit_dynamics
+   sections
+   morphing
+   artificially_matched_layers
+   special_purpose
+
    all_others
