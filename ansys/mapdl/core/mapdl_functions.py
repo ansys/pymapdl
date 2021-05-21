@@ -6214,22 +6214,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MMF,"
         return self.run(command, **kwargs)
 
-    def enddo(self, **kwargs):
-        """APDL Command: *ENDDO
-
-        Ends a do-loop and starts the looping action.
-
-        Notes
-        -----
-        One *ENDDO  is required for each nested do-loop. The *ENDDO command
-        must appear on the same file as the  *DO command, and all six
-        characters must be input.
-
-        This command is valid in any processor.
-        """
-        command = "*ENDDO,"
-        return self.run(command, **kwargs)
-
     def add(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
             factc="", **kwargs):
         """APDL Command: ADD
@@ -13069,6 +13053,8 @@ class _MapdlCommands(_MapdlGeometryCommands,
 
         Notes
         -----
+        You should consider using ``time.sleep(dtime)``
+
         The command following the /WAIT will not be processed until the
         specified wait time increment has elapsed.  Useful when reading from a
         prepared input file to cause a pause, for example, after a display
@@ -21746,25 +21732,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The FORCE command is not supported in a modal analysis.
         """
         command = "FORCE,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
-    def endif(self, **kwargs):
-        """APDL Command: *ENDIF
-
-        Ends an if-then-else.
-
-        Notes
-        -----
-        Required terminator for the if-then-else construct. See the *IF  for
-        details.  If a batch input stream hits an end-of-file during a false
-        *IF condition, the ANSYS run will not terminate normally. You will need
-        to terminate it externally (use either the Linux "kill" function or the
-        Windows task manager). The *ENDIF command must appear on the same file
-        as the *IF command, and all six characters must be input.
-
-        This command is valid in any processor.
-        """
-        command = "*ENDIF,"
         return self.run(command, **kwargs)
 
     def torq2d(self, **kwargs):
@@ -43013,28 +42980,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*DMAT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4), str(val5))
         return self.run(command, **kwargs)
 
-    # def return(self, level="", **kwargs):
-    #     """APDL Command: *RETURN
-
-    #     Returns input stream to a higher level.
-
-    #     Parameters
-    #     ----------
-    #     level
-    #         Number of levels to move up from the current level.
-
-    #         Move relative to current level. For example: *Return,-2 will go up two levels from the current level. - Move to absolute level. For example: *Return,2 will go to level 2.
-
-    #     Notes
-    #     -----
-    #     This command is used to jump to the macro call sequence, ending the
-    #     current macro file, and returning to the line after the calling line in
-    #     the previous file. Unlike the *GO command, this command may be used
-    #     inside *IF or *DO constructs.
-    #     """
-    #     command = "*RETURN,%s" % (str(level))
-    #     return self.run(command, **kwargs)
-
     def slashgo(self, **kwargs):
         """APDL Command: /GO
 
@@ -44877,34 +44822,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "WPLANE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(xorig), str(yorig), str(zorig), str(xxax), str(yxax), str(zxax), str(xplan), str(yplan), str(zplan))
-        return self.run(command, **kwargs)
-
-    def dowhile(self, par="", **kwargs):
-        """APDL Command: *DOWHILE
-
-        Loops repeatedly through the next *ENDDO command.
-
-        Parameters
-        ----------
-        par
-            The name of the scalar parameter to be used as the loop index.
-            There is no character parameter substitution for the Par field.
-
-        Notes
-        -----
-        *DOWHILE loops repeatedly through the next *ENDDO command as long as
-        Par is greater than zero. The block of commands following the *DOWHILE
-        command (up to the *ENDDO command) is executed repeatedly until some
-        loop control is satisfied.  Printout is automatically suppressed on all
-        loops after the first (include a /GOPR command to restore the
-        printout).  The command line loop control (Par) must be input; however,
-        *IF within the block can also be used to control looping [*EXIT,
-        *CYCLE].  One level of internal file switching is used for each nested
-        *DOWHILE.  Twenty levels of nested do-loops are allowed.
-
-        This command is valid in any processor.
-        """
-        command = "*DOWHILE,%s" % (str(par))
         return self.run(command, **kwargs)
 
     def prrsol(self, lab="", **kwargs):
@@ -50038,37 +49955,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SECTYPE,%s,%s,%s,%s,%s" % (str(secid), str(type_), str(subtype), str(name), str(refinekey))
         return self.run(command, **kwargs)
 
-    def mail(self, address="", fname="", ext="", **kwargs):
-        """APDL Command: /MAIL
-
-        Mails file to the specified address.
-
-        Parameters
-        ----------
-        address
-            Email address (up to 64 characters) of the intended
-            recipient of the file.
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Issue the /MAIL command to alert someone when a long-running
-        job has completed, as shown in this example:
-
-        If you are running ANSYS in a Microsoft Windows environment,
-        you must cofigure BLAT.
-        """
-        return self.run(f"/MAIL,,{address},{fname},{ext}", **kwargs)
-
     def replot(self, label="", **kwargs):
         """APDL Command: /REPLOT
 
@@ -52770,49 +52656,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "KEYW,%s,%s" % (str(keyword), str(key))
         return self.run(command, **kwargs)
 
-    def do(self, par="", ival="", fval="", inc="", **kwargs):
-        """APDL Command: *DO
-
-        Defines the beginning of a do-loop.
-
-        Parameters
-        ----------
-        par
-            The name of the scalar parameter to be used as the loop index.  See
-            *SET for name restrictions.  Any existing parameter of the same
-            name will be redefined.  There is no character parameter
-            substitution for the Par field.
-
-        ival, fval, inc
-            Initially assign IVAL to Par.  Increment IVAL by INC for each
-            successive loop.  If IVAL exceeds FVAL and INC is positive, the
-            loop is not executed.  INC defaults to 1.  Negative increments and
-            non-integer numbers are allowed.
-
-        Notes
-        -----
-        The block of commands following the *DO command (up to the *ENDDO
-        command) is executed repeatedly until some loop control is satisfied.
-        Printout is automatically suppressed on all loops after the first
-        (include a /GOPR command to restore the printout).  The command line
-        loop control (Par,IVAL,FVAL,INC) must be input; however, a Use the *IF
-        within the block can also be used to control looping [*EXIT, *CYCLE].
-        One level of internal file switching is used for each nested *DO.
-        Twenty levels of nested do-loops are allowed.
-
-        Note:: : Do-loops that include /INPUT, *USE, or an "Unknown Command"
-        macro, have less nesting available because each of these operations
-        also uses a level of file switching.  The *DO, *ENDDO, and any  *CYCLE
-        and *EXIT commands for a do-loop must all be read from the same file
-        (or keyboard).  You cannot use the MULTIPRO or *CREATE commands within
-        a *DO-loop. Picking operations should also not be used within a *DO-
-        loop.
-
-        This command is valid in any processor.
-        """
-        command = "*DO,%s,%s,%s,%s" % (str(par), str(ival), str(fval), str(inc))
-        return self.run(command, **kwargs)
-
     def damorph(self, area="", xline="", rmshky="", **kwargs):
         """APDL Command: DAMORPH
 
@@ -54949,13 +54792,15 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Parameters
         ----------
         dir_
-            The directory to create (248 characters maximum on Linux; 233 on
-            Windows). If no path is provided, it will be created in the current
-            working directory. Must be a valid name (and path) for the system
-            you are working on.
+            The directory to create (248 characters maximum on Linux;
+            233 on Windows). If no path is provided, it will be
+            created in the current working directory. Must be a valid
+            name (and path) for the system you are working on.
 
         Notes
         -----
+        It is recommended to just use ``os.mkdir``
+
         Creates a directory on the computer ANSYS is currently running on.
         """
         command = "/MKDIR,%s" % (str(dir_))
@@ -59178,23 +59023,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "V2DOPT,%s,%s,%s,%s" % (str(geom), str(ndiv), str(hidopt), str(nzone))
         return self.run(command, **kwargs)
 
-    def cycle(self, **kwargs):
-        """APDL Command: *CYCLE
-
-        Bypasses commands within a do-loop.
-
-        Notes
-        -----
-        Bypasses all commands between this command and the  *ENDDO command
-        within a do-loop.  The next loop (if applicable) is initiated.  The
-        cycle option may also be conditionally executed [Use the *IF].  The
-        *CYCLE command must appear on the same file as the *DO command.
-
-        This command is valid in any processor.
-        """
-        command = "*CYCLE,"
-        return self.run(command, **kwargs)
-
     def modmsh(self, lab="", **kwargs):
         """APDL Command: MODMSH
 
@@ -60925,56 +60753,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "CSDELE,%s,%s,%s" % (str(kcn1), str(kcn2), str(kcinc))
-        return self.run(command, **kwargs)
-
-    def ask(self, par="", query="", dval="", **kwargs):
-        """APDL Command: *ASK
-
-        Prompts the user to input a parameter value.
-
-        Parameters
-        ----------
-        par
-            An alphanumeric name used to identify the scalar parameter.  See
-            *SET for name restrictions.
-
-        query
-            Text string to be displayed on the next line as the query (32
-            characters maximum).  Characters having special meaning (such as $
-            ! ,) should not be included.
-
-        dval
-            Default value assigned to the parameter if the user issues a blank
-            response.  May be a number or character string (up to 8 characters
-            enclosed in single quotes).  If a default is not assigned, a blank
-            response will delete the parameter.
-
-        Notes
-        -----
-        Intended primarily for use in macros, the command prints the query
-        (after the word ENTER) on the next line and waits for a response.  The
-        response is read from the keyboard, except in batch mode [/BATCH], when
-        the response(s) must be the next-read input line(s).  The response may
-        be a number, a character string (up to 8 characters enclosed in single
-        quotes), a parameter (numeric or character) or an expression that
-        evaluates to a number.  The scalar parameter is then set to the
-        response value.  For example,  *ASK,NN,PARAMETER NN  will set NN to the
-        value entered on the next line (after the prompt ENTER PARAMETER NN).
-
-        The *ASK command is not written to File.LOG,  but the responses are
-        written there as follows:  If *ASK is contained in a macro, the
-        response(s) (only) is written to File.LOG on the line(s) following the
-        macro name.   If not contained in a macro, the response is written to
-        File.LOG as a parameter assignment (i.e., Par = "user-response").
-
-        If used within a do-loop that is executed interactively, *ASK should be
-        contained in a macro.  If not contained in a macro, *ASK will still
-        query the user as intended, but the resulting log file will not
-        reproduce the effects of the original run.
-
-        This command is valid in any processor.
-        """
-        command = "*ASK,%s,%s,%s" % (str(par), str(query), str(dval))
         return self.run(command, **kwargs)
 
     def vmesh(self, nv1="", nv2="", ninc="", **kwargs):

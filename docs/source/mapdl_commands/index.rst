@@ -6,7 +6,27 @@ MAPDL Commands
 This section gives an overview of the classic MAPDL commands that have
 been wrapped pythonically via PyMapdl.
 
-PREP7 Commands
+*******
+Session
+*******
+These commands provide general control to the session. The commands
+are grouped by functionality.
+
+.. toctree::
+   :maxdepth: 1
+
+   run_controls
+   processor_entry
+   files
+   list_controls
+
+..
+   Graphics - N/A Not Documented
+   
+
+*************
+Preprocessing
+*************
 
 These commands are used to create and set up the model. The commands
 are grouped by functionality.
@@ -21,7 +41,9 @@ are grouped by functionality.
    materials
    material_data_tables
 
-   
+   ..
+      Left off here
+
    primitives
    keypoints
    hard_points
@@ -31,10 +53,6 @@ are grouped by functionality.
    booleans
    meshing
    nodes
-
-   ..
-      Left off here
-
    elements
    superelements
    digitizing
@@ -47,4 +65,48 @@ are grouped by functionality.
    artificially_matched_layers
    special_purpose
 
-   all_others
+
+********
+Solution
+********
+These commands are used to load and solve the model. The commands are
+grouped by functionality.
+
+.. toctree::
+   :maxdepth: 1
+
+   analysis_options
+   nonlinear_options
+   dynamic_options
+   spectrum_options
+   load_step_options
+   solid_constraints
+   solid_forces
+   solid_surface_loads
+   solid_body_loads
+   inertia
+   miscellaneous_loads
+   load_step_operations
+   master_dof
+   gap_conditions
+   rezoning
+   2d_to_3d_analysis
+   birth_and_death
+   fe_constraints
+   fe_forces
+   fe_surface_loads
+   fe_body_loads
+   ocean
+   solution_status
+   explicit_dynamics
+   radiosity
+   multi_field_solver_definition_commands
+   multi_field_solver_global_controls
+   multi_field_solver_time_controls
+   multi_field_solver_load_transfer
+   multi_field_solver_convergence_controls
+   multi_field_solver_interface_mapping
+   
+
+..
+   Miscellaneous

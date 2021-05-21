@@ -106,9 +106,9 @@ def ekill(self, elem: Union[str, int] = "",
 def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
       l: MapdlInt = "", m: MapdlInt = "", n: MapdlInt = "", o:
       MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[int]:
-    """APDL Command: E
+    """Defines an element by node connectivity.
 
-    Defines an element by node connectivity.
+    APDL Command: E
 
     Parameters
     ----------
