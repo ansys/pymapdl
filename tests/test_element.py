@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core._commands.element import parse_e
+from ansys.mapdl.core.mapdl_functions import parse_e
 from ansys.mapdl.core._commands.preproc.element_type import parse_et
 
 
