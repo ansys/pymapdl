@@ -12,6 +12,6 @@ files.
 .. autosummary::
    :toctree: api/
 
-   mapdl.combine	
-   mapdl.hbmat
-   mapdl.psmat
+   Mapdl.combine
+   Mapdl.hbmat
+   Mapdl.psmat

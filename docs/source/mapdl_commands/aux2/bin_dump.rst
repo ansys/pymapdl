@@ -11,8 +11,7 @@ These AUX2 commands are used to dump the contents of binary files.
 .. autosummary::
    :toctree: api/
 
-   mapdl.aux2
-   mapdl.dump
-   mapdl.fileaux2
-   mapdl.form
-   mapdl.ptr
+   Mapdl.dump
+   Mapdl.fileaux2
+   Mapdl.form
+   Mapdl.ptr

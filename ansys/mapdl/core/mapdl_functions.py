@@ -1969,100 +1969,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/CFORMAT,%s,%s" % (str(nfirst), str(nlast))
         return self.run(command, **kwargs)
 
-    def radopt(self, fluxtol="", solver="", maxiter="",
-               toler="", overrlex="", maxfluxiter="", **kwargs):
-        """APDL Command: RADOPT
-
-        Specifies Radiosity Solver options.
-
-        Parameters
-        ----------
-        fluxtol
-            Convergence tolerance for radiation flux. Defaults to 0.0001. This
-            value is a relative tolerance.
-
-        solver
-            Choice of solver for radiosity calculation:
-
-            0 - Gauss-Seidel iterative solver (default).
-
-            1 - Direct solver.
-
-            2 - Jacobi solver.
-
-        maxiter
-            Maximum number of iterations for iterative solver (SOLVER = 0 or
-            2). Defaults to 1000.
-
-        toler
-            Convergence tolerance for the iterative solver (SOLVER = 0 or 2).
-            Defaults to 0.1.
-
-        overrlex
-            Over-relaxation factor applied to the iterative solver (SOLVER = 0
-            or 2). Defaults to 0.1.
-
-        maxfluxiter
-            Maximum number of flux iterations to be performed according to the
-            specified solver type:
-
-            0 - If the FULL solver is specified (THOPT,FULL), convergence criteria are
-                monitored and iterations are performed until convergence
-                occurs. If the QUASI solver is specified (THOPT,QUASI),
-                convergence criteria are ignored and one iteration is
-                performed. This value is the default.
-
-            1, 2, 3, ...N  - If the FULL solver is specified
-                             (THOPT,FULL), convergence criteria are
-                             monitored and iterations are performed
-                             until convergence occurs, or until the
-                             specified number of iterations has been
-                             completed, whichever comes first. If the
-                             QUASI solver is specified (THOPT,QUASI),
-                             convergence criteria are ignored and the
-                             specified number of iterations are
-                             completed.
-
-        Notes
-        -----
-        The radiation heat flux is linearized, resulting in robust convergence.
-
-        The radiation flux norm for FLUXTOL is expressed as:
-
-        where i is the pass or iteration number and j is the surface facet for
-        radiation.
-
-        For a sufficiently small absolute tolerance value, relative tolerance
-        converges in fewer iterations than absolute tolerance. For a
-        sufficiently large absolute tolerance value, relative tolerance may
-        cause convergence difficulties.
-
-        For more information about FLUXTOL and MAXFLUXITER usage, see Figure:
-        3.5:: FULL Solution Method When Radiosity Is Present and Figure: 3.6::
-        QUASI Solution Method When Radiosity Is Present in the Thermal Analysis
-        Guide.
-
-        In Figure: 3.5:: FULL Solution Method When Radiosity Is Present and
-        Figure: 3.6:: QUASI Solution Method When Radiosity Is Present (under
-        Solving for Temperature and Radiosity in the Thermal Analysis Guide),
-        refer to the KQQ = FQ equation system via the iterative method:
-
-        If TOLER ≥ 0, the iterative solver is converged for maximum value over
-        a different j as shown:
-
-        If TOLER < 0, the iterative solver is converged for maximum value over
-        a different j as shown:
-
-        where:
-
-        The Jacobi solver (SOLVER = 2) is suitable when using Distributed
-        ANSYS. This option is only available for 3-D models; if SOLVER is set
-        to 2 for a 2-D analysis, the Gauss-Seidel iterative solver (SOLVER = 0)
-        is used.
-        """
-        command = "RADOPT,,%s,%s,%s,%s,%s,,,,,%s" % (str(fluxtol), str(solver), str(maxiter), str(toler), str(overrlex), str(maxfluxiter))
-        return self.run(command, **kwargs)
-
+    
     def tiff(self, kywrd="", opt="", **kwargs):
         """APDL Command: TIFF
 
@@ -3296,28 +3203,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ADAMS,%s,%s,%s" % (str(nmodes), str(kstress), str(kshell))
         return self.run(command, **kwargs)
 
-    def write(self, fname="", **kwargs):
-        """APDL Command: WRITE
-
-        Writes the radiation matrix file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        Notes
-        -----
-        Writes radiation matrix file (File.SUB) for input to the substructure
-        thermal "use" pass.  Subsequent WRITE operations to the same file
-        overwrite the file.
-        """
-        command = "WRITE,%s" % (str(fname))
-        return self.run(command, **kwargs)
-
+    
     def mfrc(self, freq="", maxfiles="", **kwargs):
         """APDL Command: MFRC
 
@@ -3636,29 +3522,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DLIST,%s,%s,%s" % (str(node1), str(node2), str(ninc))
         return self.run(command, **kwargs)
 
-    def vtype(self, nohid="", nzone="", **kwargs):
-        """APDL Command: VTYPE
-
-        Specifies the viewing procedure used to determine the form factors for
-        the Radiation Matrix method.
-
-        Parameters
-        ----------
-        nohid
-            Type of viewing procedure:
-
-            0 - Hidden procedure.
-
-            1 - Non-hidden (faster, but less general) procedure.
-
-        nzone
-            Number of sampling zones for the hidden procedure (100 maximum for
-            3-D, 1000 maximum for 2-D).  Defaults to 20 for 3-D, 200 for 2-D.
-            Number of points is 2*NZONE for 2-D and 2*NZONE*(NZONE+1) for 3-D.
-        """
-        command = "VTYPE,%s,%s" % (str(nohid), str(nzone))
-        return self.run(command, **kwargs)
-
+    
     def edcontact(self, sfsi="", rwpn="", ipck="", shtk="", peno="", stcc="",
                   orie="", cspc="", penchk="", **kwargs):
         """APDL Command: EDCONTACT
@@ -3927,20 +3791,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "KTRAN,%s,%s,%s,%s,%s,%s,%s" % (str(kcnto), str(np1), str(np2), str(ninc), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def hemiopt(self, hres="", **kwargs):
-        """APDL Command: HEMIOPT
-
-        Specifies options for Hemicube view factor calculation.
-
-        Parameters
-        ----------
-        hres
-            Hemicube resolution.  Increase value to increase the accuracy of
-            the view factor calculation.  Defaults to 10.
-        """
-        command = "HEMIOPT,%s" % (str(hres))
-        return self.run(command, **kwargs)
-
+    
     def rmflvec(self, **kwargs):
         """APDL Command: RMFLVEC
 
@@ -16296,47 +16147,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*ITENGINE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(enginename), str(precondname), str(matrix), str(rhsvector), str(solvector), str(maxiter), str(toler))
         return self.run(command, **kwargs)
 
-    def wpcsys(self, wn="", kcn="", **kwargs):
-        """APDL Command: WPCSYS
-
-        Defines the working plane location based on a coordinate system.
-
-        Parameters
-        ----------
-        wn
-            Window number whose viewing direction will be modified to be normal
-            to the working plane (defaults to 1).  If WN is a negative value,
-            the viewing direction will not be modified.
-
-        kcn
-            Coordinate system number.  KCN may be 0,1,2 or any previously
-            defined local coordinate system number (defaults to the active
-            system).
-
-        Notes
-        -----
-        Defines a working plane location and orientation based on an existing
-        coordinate system.  If a Cartesian system is used as the basis (KCN)
-        for the working plane, the working plane will also be Cartesian, in the
-        X-Y plane of the base system.  If a cylindrical, spherical, or toroidal
-        base system is used, the working plane will be a polar system in the
-        R-θ plane of the base system.
-
-        If working plane tracking has been activated (CSYS,WP or CSYS,4), the
-        updated active coordinate system will be of a similar type, except that
-        a toroidal system will be updated to a cylindrical system.  See the
-        Modeling and Meshing Guide for more information on working plane
-        tracking.
-
-        This command is valid in any processor.
-
-        Some primitive generation commands will not honor R-theta
-        transformations for non-cartesian coordinate systems. Refer to the
-        primitive commands table for more information.
-        """
-        command = "WPCSYS,%s,%s" % (str(wn), str(kcn))
-        return self.run(command, **kwargs)
-
+    
     def vwrite(self, par1="", par2="", par3="", par4="", par5="", par6="",
                par7="", par8="", par9="", par10="", par11="", par12="",
                par13="", par14="", par15="", par16="", par17="", par18="",
@@ -18592,29 +18403,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*MWRITE,%s,%s,%s,,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
         return self.run(command, **kwargs)
 
-    def kwpave(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
-               p9="", **kwargs):
-        """APDL Command: KWPAVE
-
-        Moves the working plane origin to the average location of keypoints.
-
-        Parameters
-        ----------
-        p1, p2, p3, . . . , p9
-            Keypoints used in calculation of the average.  At least one must be
-            defined.  If P1 = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        Moves the origin of the working plane to the average of the specified
-        keypoints.  Averaging is based on the active coordinate system.
-
-        This command is valid in any processor.
-        """
-        command = "KWPAVE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(p7), str(p8), str(p9))
-        return self.run(command, **kwargs)
-
+    
     def gmatrix(self, symfac="", condname="", numcond="", matrixname="",
                 **kwargs):
         """APDL Command: GMATRIX
@@ -22610,33 +22399,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MAGOPT,%s" % (str(value))
         return self.run(command, **kwargs)
 
-    def wprota(self, thxy="", thyz="", thzx="", **kwargs):
-        """APDL Command: WPROTA
-
-        Rotates the working plane.
-
-        Parameters
-        ----------
-        thxy
-            First rotation about the working plane Z axis (positive X toward
-            Y).
-
-        thyz
-            Second rotation about working plane X axis (positive Y toward Z).
-
-        thzx
-            Third rotation about working plane Y axis (positive Z toward X).
-
-        Notes
-        -----
-        The specified angles (in degrees) are relative to the orientation of
-        the working plane.
-
-        This command is valid in any processor.
-        """
-        command = "WPROTA,%s,%s,%s" % (str(thxy), str(thyz), str(thzx))
-        return self.run(command, **kwargs)
-
+    
     def nmodif(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
                **kwargs):
         """APDL Command: NMODIF
@@ -23603,43 +23366,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/IMAGE,%s,%s,%s" % (str(label), str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def spcnod(self, encl="", node="", **kwargs):
-        """APDL Command: SPCNOD
-
-        Defines a space node for radiation using the Radiosity method.
-
-        Parameters
-        ----------
-        encl
-            Radiating surface enclosure number.  Defaults to 1. If ENCL = STAT,
-            the command lists all enclosure space nodes. If  ENCL =  DELE, the
-            command deletes all enclosure space nodes.
-
-        node
-            Node defined to be the space node.
-
-        Notes
-        -----
-        For open systems, an enclosure may radiate to a space node (NODE).
-
-        Open systems may be characterized by one or more enclosures (ENCL).
-        Each enclosure may radiate to a different space node (NODE).
-
-        For a space node that is not part of the finite element model, specify
-        the temperature using the D command. For the first load step, the space
-        node temperature ramps from the uniform temperature specified by the
-        TUNIF command to the temperature specified by the D command. For
-        subsequent load steps, it ramps from the previous value of the space
-        node temperature. For intermediate load steps, use the SPCNOD,DELETE
-        command and specify the space node temperature again to ramp from the
-        uniform temperature.
-
-        For a space node that is part of the finite element model, the
-        temperature is that calculated during the finite element solution.
-        """
-        command = "SPCNOD,%s,%s" % (str(encl), str(node))
-        return self.run(command, **kwargs)
-
+    
     def pltime(self, tmin="", tmax="", **kwargs):
         """APDL Command: PLTIME
 
@@ -24283,49 +24010,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SHPP,%s,%s,%s" % (str(lab), str(value1), str(value2))
         return self.run(command, **kwargs)
 
-    def nwplan(self, wn="", norig="", nxax="", nplan="", **kwargs):
-        """APDL Command: NWPLAN
-
-        Defines the working plane using three nodes.
-
-        Parameters
-        ----------
-        wn
-            Window number whose viewing direction will be modified to be normal
-            to the working plane (defaults to 1).  If WN is a negative value,
-            the viewing direction will not be modified.  If fewer than three
-            points are used, the viewing direction of window WN will be used
-            instead to define the normal to the working plane.
-
-        norig
-            Node number defining the origin of the working plane coordinate
-            system.  If NORIG = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        nxax
-            Node number defining the x-axis orientation (defaults to the x-axis
-            being parallel to the global X-axis; or if the normal to the
-            working plane is parallel to the global X-axis, then defaults to
-            being parallel to the global Y-axis).
-
-        nplan
-            Node number defining the working plane (the normal defaults to the
-            present display view [/VIEW] of window WN).
-
-        Notes
-        -----
-        Defines a working plane to assist in picking operations using three
-        nodes as an alternate to the WPLANE command.  The three nodes also
-        define the working plane coordinate system.  A minimum of one node (at
-        the working plane origin) is required.  Immediate mode may also be
-        active.  See the WPSTYL command to set the style of the working plane
-        display.
-
-        This command is valid in any processor.
-        """
-        command = "NWPLAN,%s,%s,%s,%s" % (str(wn), str(norig), str(nxax), str(nplan))
-        return self.run(command, **kwargs)
-
+    
     def paresu(self, lab="", fname="", ext="", **kwargs):
         """APDL Command: PARESU
 
@@ -25406,27 +25091,7 @@ class _MapdlCommands():  # pragma: no cover
         else:
             return self.run(f"/OUTPUT,{fname},{ext}", **kwargs)
 
-    def dump(self, nstrt="", nstop="", **kwargs):
-        """APDL Command: DUMP
-
-        Dumps the contents of a binary file.
-
-        Parameters
-        ----------
-        nstrt, nstop
-            Dump file from record NSTRT (defaults to 1) to NSTOP (defaults to
-            NSTRT).  If NSTRT = HEAD, dump only record 1 of the file (NSTOP and
-            the format specification are ignored).  If NSTRT = ALL, dump the
-            entire file.
-
-        Notes
-        -----
-        Dumps the file named on the AUX2 FILEAUX2 command according the format
-        specified on the FORM command.
-        """
-        command = "DUMP,%s,%s" % (str(nstrt), str(nstop))
-        return self.run(command, **kwargs)
-
+    
     def catiain(self, name="", extension="", path="", blank="", **kwargs):
         """APDL Command: ~CATIAIN
 
@@ -25463,94 +25128,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"~CATIAIN,{name},{extension},{path},,,{blank}", **kwargs)
 
-    def wpstyl(self, snap="", grspac="", grmin="", grmax="", wptol="",
-               wpctyp="", grtype="", wpvis="", snapang="", **kwargs):
-        """APDL Command: WPSTYL
-
-        Controls the display and style of the working plane.
-
-        Parameters
-        ----------
-        snap
-            Snap increment for a locational pick (1E-6 minimum).  If -1, turn
-            off snap capability.  For example, a picked location of 1.2456 with
-            a snap of 0.1 gives 1.2, with 0.01 gives 1.25, with 0.001 gives
-            1.246, and with 0.025 gives 1.250 (defaults to 0.05).
-
-        grspac
-            Graphical spacing between grid points.  For graphical
-            representation only and not related to snap points  (defaults to
-            0.1).
-
-        grmin, grmax
-            Defines the size of a square grid (if WPCTYP = 0) to be displayed
-            over a portion of the working plane.  The opposite corners of the
-            grid will be located at grid points nearest the working plane
-            coordinates of (GRMIN,GRMIN) and (GRMAX,GRMAX).  If a polar system
-            (WPCTYP = 1), GRMAX is the outside radius of grid and GRMIN is
-            ignored.  If GRMIN = GRMAX, no grid will be displayed (defaults to
-            -1.0 and 1.0 for GRMIN and GRMAX respectively).
-
-        wptol
-            The tolerance that an entity's location can deviate from the
-            specified working plane, while still being considered on the plane.
-            Used only for locational picking of vertices for polygons and
-            prisms (defaults to 0.003).
-
-        wpctyp
-            Working plane coordinate system type:
-
-            0 - Cartesian (default).  If working plane tracking is on [CSYS,4], the updated
-                active coordinate system will also be Cartesian.
-
-            1 - Polar.  If working plane tracking is on, the updated active coordinate system
-                will be cylindrical.
-
-            2 - Polar.  If working plane tracking is on, the updated active coordinate system
-                will be spherical.
-
-        grtype
-            Grid type:
-
-            0 - Grid and WP triad.
-
-            1 - Grid only.
-
-            2 - WP triad only (default).
-
-        wpvis
-            Grid visibility:
-
-            0 - Do not show GRTYPE entities (grid and/or triad) (default).
-
-            1 - Show GRTYPE entities.  Cartesian working planes will be displayed with a
-                Cartesian grid, polar with a polar grid.
-
-        snapang
-            Snap angle (0--180) in degrees.  Used only if WPCTYP = 1 or 2.
-            Defaults to 5 degrees.
-
-        Notes
-        -----
-        Use WPSTYL,DEFA to reset the working plane to its default location and
-        style.  Use WPSTYL,STAT to list the status of the working plane.  Blank
-        fields will keep present settings.
-
-        It is possible to specify SNAP and WPTOL values that will cause
-        conflicts during picking operations. Check your values carefully, and
-        if problems are noted, revert to the default values.
-
-        WPSTYL with no arguments will toggle the grid on and off.  The working
-        plane can be displayed in the non-GUI interactive mode only after
-        issuing a /PLOPTS,WP,1 command.  See the Modeling and Meshing Guide for
-        more information on working plane tracking.  See /PLOPTS command for
-        control of hidden line working plane.
-
-        This command is valid in any processor.
-        """
-        command = "WPSTYL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(snap), str(grspac), str(grmin), str(grmax), str(wptol), str(wpctyp), str(grtype), str(wpvis), str(snapang))
-        return self.run(command, **kwargs)
-
+    
     def areas(self, **kwargs):
         """APDL Command: AREAS
 
@@ -25810,26 +25388,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PLCINT,%s,%s,%s,%s,%s" % (str(action), str(id_), str(node), str(cont), str(dtype))
         return self.run(command, **kwargs)
 
-    def stef(self, value="", **kwargs):
-        """APDL Command: STEF
-
-        Specifies Stefan-Boltzmann radiation constant.
-
-        Parameters
-        ----------
-        value
-            Stefan-Boltzmann constant (defaults to 0.119E-10 Btu/hr/in2/ °R4).
-
-        Notes
-        -----
-        You can use this command in the general preprocessor (PREP7) and in the
-        Solution processor to specify the Stefan-Boltzmann constant in analyses
-        using the radiation matrix method or the radiosity solver to model
-        radiation.
-        """
-        command = "STEF,%s" % (str(value))
-        return self.run(command, **kwargs)
-
+    
     def mfrstart(self, time="", **kwargs):
         """APDL Command: MFRSTART
 
@@ -29488,110 +29047,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CEDELE,%s,%s,%s,%s" % (str(neqn1), str(neqn2), str(ninc), str(nsel))
         return self.run(command, **kwargs)
 
-    def psmat(self, fname="", ext="", matrix="", color="", **kwargs):
-        """APDL Command: PSMAT
-
-        Writes an assembled global matrix to a postscript format that
-        graphically displays nonzero matrix values.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        matrix
-            Specify which matrix to write to the output postscript file:
-
-            STIFF - Write stiffness matrix to output postscript file. Valid for all types of
-                    analyses that write a .FULL file.
-
-            MASS - Write mass matrix to output postscript file. Valid for buckling, substructure,
-                   and modal analyses. If the .FULL file was generated in a
-                   buckling analysis, then this label will write the stress
-                   stiffening matrix to the output postscript file.
-
-            DAMP - Write damping matrix to output postscript file. Only valid for damped modal
-                   analyses.
-
-        color
-            Specifies whether to display the grid in black and white or in
-            color:
-
-            BLACK  - Each nonzero coefficient is symbolized by a black square (default).
-
-            COLOR  - Each nonzero coefficient is symbolized by a colored square. The color depends
-                     on the module of the coefficient; the range is from blue
-                     for the smallest values to red for the largest values. The
-                     color map is:
-
-        Notes
-        -----
-        This command is used to copy a matrix from the assembled global matrix
-        file (.FULL file) as specified on the FILE command and write it in a
-        postscript format to a new file named Fname.Ext (defaults to
-        Jobname.PS). The matrix is symbolized by a grid in which the black or
-        colored squares represent the nonzero coefficients of the matrix. The
-        .FULL file must be available for this command to work properly.
-
-        If the matrix is large, it may be difficult to display the postscript
-        file. In this case, use Color = BLACK to reduce the postscript file
-        size.
-
-        The assembled global matrix file is created during solution depending
-        on the analysis type, equation solver, and other solution options. By
-        default, the assembled global matrix file is never deleted at the end
-        of solution. For most analysis types, the Sparse direct solver and the
-        ICCG solver write a .FULL file. All mode extraction methods used for
-        buckling and modal analyses write a properly formatted .FULL file to be
-        used with the PSMAT command.
-
-        When copying the stiffness matrix for transient and harmonic analyses,
-        be aware that the element mass matrix values (and possibly element
-        damping matrix values) are incorporated into the globally assembled
-        stiffness matrix.  Thus, the globally assembled stiffness matrix
-        represents more than the stiffness of the model for these analysis
-        types.  Please refer to the Mechanical APDL Theory Reference for more
-        details.
-
-        The PSMAT command is not able to display a lumped mass matrix from a
-        .FULL file generated by a harmonic analysis.
-
-        When copying a .FULL file, the rows and columns corresponding to
-        specified constraints (e.g., D commands) are eliminated from the system
-        of equations and therefore are not written to the .PS file. In
-        addition, rows and columns corresponding to eliminated (slave) degrees
-        of freedom from coupling and/or constraint equations (e.g., CE, CP
-        commands) are eliminated from the system of equations and are not
-        written to the .PS file. The DOFs that are eliminated from any coupling
-        and/or constraint equations are determined internally by the solution
-        code and may not match what you specified via the CE/CP (or similar)
-        commands.
-
-        When copying a .FULL file, only the upper triangular part of the matrix
-        will be written to the .PS  file if the matrix is symmetric; the full
-        matrix is written if the matrix is unsymmetric. Only matrix
-        coefficients that are greater than zero will be written.
-
-        The WRFULL command, in conjunction with the SOLVE command, can be used
-        to generate the assembled global matrix file and eliminate the equation
-        solution process and results output process.
-
-        The following command sequence shows typical usage of this command.
-
-        Below is an example of an export of the stiffness matrix to a
-        postscript format using the COLOR option.
-
-        :
-        """
-        command = "PSMAT,%s,%s,%s,%s" % (str(fname), str(ext), str(matrix), str(color))
-        return self.run(command, **kwargs)
-
+    
     def store(self, lab="", npts="", **kwargs):
         """APDL Command: STORE
 
@@ -29956,31 +29412,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FSCALE,%s,%s" % (str(rfact), str(ifact))
         return self.run(command, **kwargs)
 
-    def emis(self, mat="", evalu="", **kwargs):
-        """APDL Command: EMIS
-
-        Specifies emissivity as a material property for the Radiation Matrix
-        method.
-
-        Parameters
-        ----------
-        mat
-            Material number associated with this emissivity (500 maximum).
-            Defaults to 1.
-
-        evalu
-            Emissivity for this material (0.0 < EVALU   1.0).  Enter a very
-            small number for zero.
-
-        Notes
-        -----
-        Specifies emissivity as a material property for the Radiation Matrix
-        method. This material property can then be associated with each
-        element.
-        """
-        command = "EMIS,%s,%s" % (str(mat), str(evalu))
-        return self.run(command, **kwargs)
-
+    
     def repeat(self, ntot="", vinc1="", vinc2="", vinc3="", vinc4="", vinc5="",
                vinc6="", vinc7="", vinc8="", vinc9="", vinc10="", vinc11="",
                **kwargs):
@@ -30305,25 +29737,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/CYCEXPAND,%s,%s,%s,%s" % (str(wn), str(option), str(value1), str(value2))
         return self.run(command, **kwargs)
 
-    def ptr(self, loc="", base="", **kwargs):
-        """APDL Command: PTR
-
-        Dumps the record of a binary file.
-
-        Parameters
-        ----------
-        loc, base
-            Dump the file record starting at pointer LOC. BASE is the base
-            pointer, and would be used if LOC is a relative pointer.
-
-        Notes
-        -----
-        Dumps the record of the file named on the AUX2 FILEAUX2 command
-        according the format specified on the FORM command.
-        """
-        command = "PTR,%s,%s" % (str(loc), str(base))
-        return self.run(command, **kwargs)
-
+    
     def udoc(self, wind="", cl_ass="", key="", **kwargs):
         """APDL Command: /UDOC
 
@@ -31166,38 +30580,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "WRFULL,%s" % (str(ldstep))
         return self.run(command, **kwargs)
 
-    def wpave(self, x1="", y1="", z1="", x2="", y2="", z2="", x3="", y3="",
-              z3="", **kwargs):
-        """APDL Command: WPAVE
-
-        Moves the working plane origin to the average of specified points.
-
-        Parameters
-        ----------
-        x1, y1, z1
-            Coordinates (in the active coordinate system) of the first point.
-            If X1 = P, graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI).
-
-        x2, y2, z2
-            Coordinates (in the active coordinate system) of the second point.
-
-        x3, y3, z3
-            Coordinates (in the active coordinate system) of the third point.
-
-        Notes
-        -----
-        Moves the origin of the working plane to the average of the specified
-        points.  A point is considered specified only if at least one of its
-        coordinates is non-blank, and at least one point (1, 2, or 3) must be
-        specified.  Blank coordinates of a specified point are assumed to be
-        zero.  Averaging is based on the active coordinate system.
-
-        This command is valid in any processor.
-        """
-        command = "WPAVE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x1), str(y1), str(z1), str(x2), str(y2), str(z2), str(x3), str(y3), str(z3))
-        return self.run(command, **kwargs)
-
+    
     def immed(self, key="", **kwargs):
         """APDL Command: IMMED
 
@@ -33674,29 +33057,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SHELL,%s" % (str(loc))
         return self.run(command, **kwargs)
 
-    def mprint(self, key="", **kwargs):
-        """APDL Command: MPRINT
-
-        Specifies that radiation matrices are to be printed.
-
-        Parameters
-        ----------
-        key
-            Print key:
-
-            0 - Do not print matrices.
-
-            1 - Print matrices.
-
-        Notes
-        -----
-        Specifies that the element and node radiation matrices are to be
-        printed when the WRITE command is issued.  If KEY = 1, form factor
-        information for each element will also be printed.
-        """
-        command = "MPRINT,%s" % (str(key))
-        return self.run(command, **kwargs)
-
+    
     def slashstatus(self, lab="", **kwargs):
         """APDL Command: /STATUS
 
@@ -34318,28 +33679,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FMAGBC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8), str(cnam9))
         return self.run(command, **kwargs)
 
-    def wpoffs(self, xoff="", yoff="", zoff="", **kwargs):
-        """APDL Command: WPOFFS
-
-        Offsets the working plane.
-
-        Parameters
-        ----------
-        xoff, yoff, zoff
-            Offset increments defined in the working plane coordinate system.
-            If only ZOFF is used, the working plane will be redefined parallel
-            to the present plane and offset by ZOFF.
-
-        Notes
-        -----
-        Changes the origin of the working plane by translating the working
-        plane along its coordinate system axes.
-
-        This command is valid in any processor.
-        """
-        command = "WPOFFS,%s,%s,%s" % (str(xoff), str(yoff), str(zoff))
-        return self.run(command, **kwargs)
-
+    
     def torqc2d(self, rad="", numn="", lcsys="", **kwargs):
         """APDL Command: TORQC2D
 
@@ -34972,48 +34312,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MFELEM,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fnumb), str(itype1), str(itype2), str(itype3), str(itype4), str(itype5), str(itype6), str(itype7), str(itype8), str(itype9), str(itype10))
         return self.run(command, **kwargs)
 
-    def spctemp(self, encl="", temp="", **kwargs):
-        """APDL Command: SPCTEMP
-
-        Defines a free-space ambient temperature for radiation using the
-        Radiosity method.
-
-        Parameters
-        ----------
-        encl
-            Radiating surface enclosure number. Defaults to 1. If ENCL = STAT,
-            the command lists all enclosure space temperatures.  If ENCL =
-            DELE, the command deletes all enclosure space temperatures.
-
-        temp
-            Temperature of free-space in the reference temperature system.  The
-            temperature will be offset by the value specified in the TOFFST
-            command for internal calculations.
-
-        Notes
-        -----
-        For open systems, an enclosure may radiate to the free-space ambient
-        temperature (TEMP).
-
-        Open systems may be characterized by one or more enclosures (ENCL).
-        Each enclosure may radiate to a different free-space ambient
-        temperature  (TEMP).
-
-        For the first load step, the space temperature ramps from the uniform
-        temperature specified by the TUNIF command to the temperature specified
-        by the SPCTEMP command. For subsequent load steps, it ramps from the
-        previous value of the space temperature. For intermediate load steps,
-        use the SPCTEMP,DELETE command and specify the space temperature again
-        to ramp from the uniform temperature.
-
-        If using SPCTEMP with the ANSYS Multi-field solver (MFS),  you must
-        capture this command in the command file using MFCMMAND. This step is
-        necessary because at the end of each field computation, this command is
-        unset.
-        """
-        command = "SPCTEMP,%s,%s" % (str(encl), str(temp))
-        return self.run(command, **kwargs)
-
+    
     def edhtime(self, nstep="", dt="", **kwargs):
         """APDL Command: EDHTIME
 
@@ -37638,127 +36937,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def hbmat(self, fname="", ext="", form="", matrx="", rhs="", mapping="",
-              **kwargs):
-        """APDL Command: HBMAT
-
-        Writes an assembled global matrix in Harwell-Boeing format.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        form
-            Specifies format of output matrix file:
-
-            ASCII - Write output matrix file in ASCII form.
-
-            BIN - Write output matrix file in binary form.
-
-        matrx
-            Specify which matrix to write to the output matrix file:
-
-            STIFF - Write stiffness matrix to output matrix file.  Valid for all types of analyses
-                    that write a .FULL file.
-
-            MASS - Write mass matrix to output matrix file.  Valid for buckling, substructure, and
-                   modal analyses.  If .FULL file was generated in a buckling
-                   analysis, then this label will write stress stiffening
-                   matrix to output matrix file.
-
-            DAMP - Write damping matrix to output matrix file.  Only valid for damped modal
-                   analyses.
-
-        rhs
-            Specifies whether to write the right-hand side vector to output
-            matrix file:
-
-            YES - Write right-hand side vector to output matrix file.
-
-            NO - Do not write right-hand side vector to output matrix file.
-
-        mapping
-            Specifies whether to write the mapping file. This file is always
-            named Fname.MAPPING.
-
-            YES - Write the mapping file.
-
-            NO - Do not write the mapping file (default).
-
-        Notes
-        -----
-        This command is used to copy a matrix from the assembled global matrix
-        file (.FULL file) or from the superelement matrix file (.SUB file) as
-        specified on the FILEAUX2 command and write it in Harwell-Boeing format
-        to a new file, named jobname.MATRIX.  The Harwell-Boeing format is
-        widely used by other applications that deal with matrices.
-
-        The assembled global matrix file is created during solution depending
-        on the analysis type, equation solver, and other solution options.  By
-        default, the assembled global matrix file is never deleted at the end
-        of solution. For most analysis types, the Sparse direct solver and the
-        ICCG solver will write a .FULL file. All mode extraction methods used
-        for buckling and modal analyses will write a properly formatted .FULL
-        file to be used with the HBMAT command. However, when using Distributed
-        ANSYS, a majority of analyses will write a distributed (or local) form
-        of the .FULL file which is not currently supported by the HBMAT
-        command.
-
-        When dumping the stiffness matrix for transient and harmonic analyses,
-        be aware that the element mass matrix values (and possibly element
-        damping matrix values) are incorporated into the globally assembled
-        stiffness matrix.  Thus, the globally assembled stiffness matrix
-        represents more than the stiffness of the model for these analysis
-        types.  Please refer to the Mechanical APDL Theory Reference for more
-        details.
-
-        When dumping a .FULL file, the rows and columns corresponding to
-        specified constraints (e.g., D commands) are eliminated from the system
-        of equations and therefore are not written to the .MATRIX file. Also,
-        rows and columns corresponding to eliminated (slave) degrees of freedom
-        from coupling and/or constraint equations (e.g., CE, CP commands) are
-        also eliminated from the system of equations and are not written to the
-        .MATRIX file. The DOFs that are eliminated from any coupling and/or
-        constraint equations are determined internally by the solution code and
-        may not match what you specified via the CE/CP (or similar) commands.
-
-        When dumping a .SUB file, the full nxn matrix will be written to the
-        .MATRIX file for either symmetric or unsymmetric matrices, regardless
-        of whether any of the matrix coefficients are zero-valued. When dumping
-        a .FULL file, only the lower triangular part of the matrix will be
-        written to the .MATRIX file if the matrix is symmetric; the full matrix
-        is written if the matrix is unsymmetric. Only matrix coefficients that
-        are greater than zero will be written.
-
-        The Harwell-Boeing format is column-oriented.  That is, non-zero matrix
-        values are stored with their corresponding row indices in a sequence of
-        columns.  However, since the ANSYS matrix files are stored by row and
-        not column, when the HBMAT command is used with a non-symmetric matrix,
-        the transpose of the matrix is, in fact, written.
-
-        The WRFULL command, in conjunction with the SOLVE command, can be used
-        to generate the assembled global matrix file and eliminate the equation
-        solution process and results output process.
-
-        The mapping file can be used to map the matrix equation numbers found
-        in the .MATRIX file directly to the corresponding node numbers and
-        degrees of freedom.
-
-        When dumping a CMS .SUB file, the last rows/columns of the matrix are
-        non-physical degrees of freedom added internally by the CMS process and
-        cannot be mapped directly to a node number or particular degree of
-        freedom.
-        """
-        command = "HBMAT,%s,%s,,%s,%s,%s,%s" % (str(fname), str(ext), str(form), str(matrx), str(rhs), str(mapping))
-        return self.run(command, **kwargs)
-
+    
     def sfdele(self, nlist="", lab="", **kwargs):
         """APDL Command: SFDELE
 
@@ -38785,39 +37964,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ACLEAR,%s,%s,%s" % (str(na1), str(na2), str(ninc))
         return self.run(command, **kwargs)
 
-    def lwplan(self, wn="", nl1="", ratio="", **kwargs):
-        """APDL Command: LWPLAN
-
-        Defines the working plane normal to a location on a line.
-
-        Parameters
-        ----------
-        wn
-            Window number whose viewing direction will be modified to be normal
-            to the working plane (defaults to 1).  If WN is a negative value,
-            the viewing direction will not be modified.
-
-        nl1
-            Number of line to be used.  If NL1 = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).
-
-        ratio
-            Location on NL1, specified as a ratio of the line length.  Must be
-            between 0.0 and 1.0.  If RATIO = P, use graphical picking to
-            specify location on the line.
-
-        Notes
-        -----
-        Defines a working plane (to assist in picking operations) normal to a
-        location on a line.  See WPSTYL command to set the style of working
-        plane display.
-
-        This command is valid in any processor.
-        """
-        command = "LWPLAN,%s,%s,%s" % (str(wn), str(nl1), str(ratio))
-        return self.run(command, **kwargs)
-
+    
     def free(self, name="", **kwargs):
         """APDL Command: *FREE
 
@@ -41446,48 +40593,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "LREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(ninc), str(level), str(depth), str(post), str(retain))
         return self.run(command, **kwargs)
 
-    def wplane(self, wn="", xorig="", yorig="", zorig="", xxax="", yxax="",
-               zxax="", xplan="", yplan="", zplan="", **kwargs):
-        """APDL Command: WPLANE
-
-        Defines a working plane to assist in picking operations.
-
-        Parameters
-        ----------
-        wn
-            Window number whose viewing direction will be modified to be normal
-            to the working plane (defaults to 1).  If WN is a negative value,
-            the viewing direction will not be modified.  If fewer than three
-            points are used, the viewing direction of window WN will be used
-            instead to define the normal to the working plane.
-
-        xorig, yorig, zorig
-            Global Cartesian coordinates of the origin of the working plane
-            coordinate system.
-
-        xxax, yxax, zxax
-            Global Cartesian coordinates of a point defining the x-axis
-            orientation.  The x-axis aligns with the projection of the line
-            from this orientation point to the origin.
-
-        xplan, yplan, zplan
-            Global Cartesian coordinates of the third point defining the
-            working plane.  This point will also define the location of the
-            positive XY-sector of the working plane coordinate system.
-
-        Notes
-        -----
-        Defines a working plane to assist in picking operations using the
-        coordinates of three noncolinear points.  The three points also define
-        the working plane coordinate system.  A minimum of one point (the
-        working plane origin) is required.  Immediate mode may also be active.
-        See WPSTYL command to set the style of working plane display.
-
-        This command is valid in any processor.
-        """
-        command = "WPLANE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(xorig), str(yorig), str(zorig), str(xxax), str(yxax), str(zxax), str(xplan), str(yplan), str(zplan))
-        return self.run(command, **kwargs)
-
+    
     def prrsol(self, lab="", **kwargs):
         """APDL Command: PRRSOL
 
@@ -44192,31 +43298,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "GMFACE,%s,%s" % (str(lab), str(n))
         return self.run(command, **kwargs)
 
-    def geom(self, k2d="", ndiv="", **kwargs):
-        """APDL Command: GEOM
-
-        Defines the geometry specifications for the radiation matrix
-        calculation.
-
-        Parameters
-        ----------
-        k2d
-            Dimensionality key:
-
-            0 - 3-D geometry (default)
-
-            1 - 2-D geometry (plane or axisymmetric)
-
-        ndiv
-            Number of divisions in an axisymmetric model.  Used only with K2D =
-            1.  Defaults to 0 (2-D plane).  The 2-D model is internally
-            expanded to a 3-D model based on the number of divisions specified
-            (6   NDIV   90).  For example, NDIV of 6 is internally represented
-            by six 60° sections.
-        """
-        command = "GEOM,%s,%s" % (str(k2d), str(ndiv))
-        return self.run(command, **kwargs)
-
+    
     def polygon(self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="",
                 x4="", y4="", **kwargs):
         """APDL Command: /POLYGON
@@ -44589,34 +43671,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDDUMP,%s,%s" % (str(num), str(dt))
         return self.run(command, **kwargs)
 
-    def toffst(self, value="", **kwargs):
-        """APDL Command: TOFFST
-
-        Specifies the temperature offset from absolute zero to zero.
-
-        Parameters
-        ----------
-        value
-            Degrees between absolute zero and zero of temperature system used
-            (should be positive).
-
-        Notes
-        -----
-        Specifies the difference (in degrees) between absolute zero and the
-        zero of the temperature system used.  Absolute temperature values are
-        required in evaluating certain expressions, such as for creep,
-        swelling, radiation heat transfer, MASS71, etc.  (The offset
-        temperature is not used in evaluating emissivity.) Examples are 460°
-        for the Fahrenheit system and 273° for the Celsius system.  The offset
-        temperature is internally included in the element calculations and does
-        not affect the temperature input or output.  If used in SOLUTION, this
-        command is valid only within the first load step.
-
-        This command is also valid in PREP7.
-        """
-        command = "TOFFST,%s" % (str(value))
-        return self.run(command, **kwargs)
-
+    
     def mfbucket(self, key="", value="", **kwargs):
         """APDL Command: MFBUCKET
 
@@ -45316,76 +44371,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*WRK,%s" % (str(num))
         return self.run(command, **kwargs)
 
-    def vfopt(self, opt="", filename="", ext="", dir_="", filetype="",
-              fileformat="", **kwargs):
-        """APDL Command: VFOPT
-
-        Specifies options for the view factor file and calculates view factors.
-
-        Parameters
-        ----------
-        opt
-            View factor option:
-
-            NEW - Calculate view factors and write them to a file.
-
-            OFF - Do not recalculate view factors it they already exist in the database,
-                  otherwise calculate compute them. This option is the default
-                  behavior.
-
-            READ - Read view factors from a binary file. For subsequent SOLVE commands, switch to
-                   the default option (OFF).
-
-            NONE - Do not write view factors to a file.
-
-        fname
-            File name for view factor matrix. Default = Jobname.
-
-        ext
-            Filename extension for view factor matrix. Default = .vf.
-
-        dir\_
-            Directory path for view factor matrix. If you do not specify a
-            directory path, it will default to your working directory.
-
-        filetype
-            View factor file type:
-
-            BINA - Binary (default).
-
-            ASCI - ASCII.
-
-        fileformat
-            Format for the specified Filetype:
-
-            Binary files (Filetype = BINA): - 0
-
-            No compression. (View factor file size may be very large.) - 1
-
-        Notes
-        -----
-        The VFOPT command allows you to deactivate the view factor computation
-        (Opt = OFF) if the view factors already exist in the database. The
-        default behavior is OFF upon encountering the second and subsequent
-        SOLVE commands in the solution processor.
-
-        When Opt = READ, only a previously calculated view factor binary file
-        is valid.
-
-        For 3-D analyses, two options are available for calculating view
-        factors when running Distributed ANSYS:
-
-        Issue a SOLVE command -- View factors are calculated in parallel mode
-        if no view factors were previously calculated.
-
-        Issue a VFOPT,NEW command -- View factors are calculated in serial
-        mode.
-
-        For 2-D analyses, view factors are calculated in serial mode.
-        """
-        command = "VFOPT,%s,%s,%s,%s,%s,%s" % (str(opt), str(filename), str(ext), str(dir_), str(filetype), str(fileformat))
-        return self.run(command, **kwargs)
-
+    
     def kpscale(self, np1="", np2="", ninc="", rx="", ry="", rz="", kinc="",
                 noelem="", imove="", **kwargs):
         """APDL Command: KPSCALE
@@ -50216,49 +49202,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ANORM,%s,%s" % (str(anum), str(noeflip))
         return self.run(command, **kwargs)
 
-    def kwplan(self, wn="", korig="", kxax="", kplan="", **kwargs):
-        """APDL Command: KWPLAN
-
-        Defines the working plane using three keypoints.
-
-        Parameters
-        ----------
-        wn
-            Window number whose viewing direction will be modified to be normal
-            to the working plane (defaults to 1).  If WN is a negative value,
-            the viewing direction will not be modified.  If fewer than three
-            points are used, the viewing direction of window WN will be used
-            instead to define the normal to the working plane.
-
-        korig
-            Keypoint number defining the origin of the working plane coordinate
-            system.  If KORIG = P, graphical picking is enabled and all
-            remaining command fields are ignored (valid only in the GUI).
-
-        kxax
-            Keypoint number defining the x-axis orientation (defaults to the
-            x-axis being parallel to the global X-axis; or if the normal to the
-            working plane is parallel to the global X-axis, then defaults to
-            being parallel to the global Y-axis).
-
-        kplan
-            Keypoint number defining the working plane (the normal defaults to
-            the present display view [/VIEW] of window WN).
-
-        Notes
-        -----
-        Defines a working plane to assist in picking operations using three
-        keypoints as an alternate to the WPLANE command.  The three keypoints
-        also define the working plane coordinate system.  A minimum of one
-        keypoint (at the working plane origin) is required.  Immediate mode may
-        also be active.  See WPSTYL command to set the style of working plane
-        display.
-
-        This command is valid in any processor.
-        """
-        command = "KWPLAN,%s,%s,%s,%s" % (str(wn), str(korig), str(kxax), str(kplan))
-        return self.run(command, **kwargs)
-
+    
     def seccontrol(self, val1="", val2="", val3="", val4="", val5="", val6="",
                    val7="", val8="", val9="", val10="", val11="", val12="",
                    val13="", **kwargs):
@@ -54135,39 +53079,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PERTURB,%s,%s,%s,%s" % (str(type_), str(matkey), str(contkey), str(loadcontrol))
         return self.run(command, **kwargs)
 
-    def v2dopt(self, geom="", ndiv="", hidopt="", nzone="", **kwargs):
-        """APDL Command: V2DOPT
-
-        Specifies 2-D/axisymmetric view factor calculation options.
-
-        Parameters
-        ----------
-        geom
-            Choice of geometry:
-
-            0 - Planar (default).
-
-            1 - Axisymmetric
-
-        ndiv
-             Number of divisions for axisymmetric geometry (that is, the number
-            of circumferential segments). Default is 20. Maximum is 90.
-
-        hidopt
-            Viewing option:
-
-            0 - Hidden (default).
-
-            1 - Non-hidden
-
-        nzone
-            Number of zones (that is, the number of rays emanating from a
-            surface) for view factor calculation. Default is 200. Maximum is
-            1000.
-        """
-        command = "V2DOPT,%s,%s,%s,%s" % (str(geom), str(ndiv), str(hidopt), str(nzone))
-        return self.run(command, **kwargs)
-
+    
     def modmsh(self, lab="", **kwargs):
         """APDL Command: MODMSH
 
@@ -56078,55 +54990,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FKLIST,%s,%s" % (str(kpoi), str(lab))
         return self.run(command, **kwargs)
 
-    def form(self, lab="", **kwargs):
-        """APDL Command: FORM
-
-        Specifies the format of the file dump.
-
-        Parameters
-        ----------
-        lab
-            Format:
-
-            RECO - Basic record description only (minimum output) (default).
-
-            TEN - Same as RECO plus the first ten words of each record.
-
-            LONG - Same as RECO plus all words of each record.
-
-        Notes
-        -----
-        Specifies the format of the file dump (from the DUMP command).
-        """
-        command = "FORM,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
-    def fileaux2(self, fname="", ident="", **kwargs):
-        """APDL Command: FILEAUX2
-
-        Specifies the binary file to be dumped.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ident
-            ANSYS filename identifier.  See the Basic Analysis Guide
-            for file descriptions and identifiers.  If not an ANSYS
-            identifier, Ident will be used as the filename extension.
-
-        Notes
-        -----
-        Specifies the binary file to be dumped with the DUMP command.
-        """
-        command = "FILEAUX2,%s,%s" % (str(fname), str(ident))
-        return self.run(command, **kwargs)
-
+    
     def starvget(self, parr="", entity="", entnum="", item1="", it1num="",
                  item2="", it2num="", kloop="", **kwargs):
         """APDL Command: *VGET
@@ -57302,28 +56166,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "BUCOPT,%s,%s,%s,%s,%s" % (str(method), str(nmode), str(shift), str(ldmulte), str(rangekey))
         return self.run(command, **kwargs)
 
-    def nwpave(self, n1="", n2="", n3="", n4="", n5="", n6="", n7="", n8="",
-               n9="", **kwargs):
-        """APDL Command: NWPAVE
-
-        Moves the working plane origin to the average location of nodes.
-
-        Parameters
-        ----------
-        n1, n2, n3, . . . , n9
-            Nodes used in calculation of the average.  At least one must be
-            defined.  If N1 = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).
-
-        Notes
-        -----
-        Averaging is based on the active coordinate system.
-
-        This command is valid in any processor.
-        """
-        command = "NWPAVE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(n1), str(n2), str(n3), str(n4), str(n5), str(n6), str(n7), str(n8), str(n9))
-        return self.run(command, **kwargs)
-
+    
     def icdele(self, **kwargs):
         """APDL Command: ICDELE
 
@@ -57881,46 +56724,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CQC,%s,%s,%s" % (str(signif), str(label), str(forcetype))
         return self.run(command, **kwargs)
 
-    def vfquery(self, srcelem="", tarelem="", **kwargs):
-        """APDL Command: VFQUERY
-
-        Queries and prints element Hemicube view factors and average view
-        factor.
-
-        Parameters
-        ----------
-        srcelem
-            Elements representing the source radiating surfaces used to query
-            the view factor at the target element(s). If SRCELEM = P, graphical
-            picking is enabled (valid only in the GUI). If SRCELEM = ALL, all
-            selected elements will have their view factors queried. A component
-            name may also be substituted for SRCELEM. Selected elements must be
-            flagged for surface to surface radiation in order to query view
-            factors (SF, SFA, or SFE with Lab = RDSF). The view factors must
-            have been previously computed.
-
-        tarelem
-            Element for view factor query. If TARELEM = P, graphical picking is
-            enabled (valid only in the GUI). If TARELEM = ALL, all selected
-            elements will have their view factors queried. A component name may
-            also be substituted for TARELEM. Selected elements must be flagged
-            for surface to surface radiation in order to query view factors
-            (SF, SFA, or SFE with Lab = RDSF). The view factors must have been
-            previously computed.
-
-        Notes
-        -----
-        View factors for each target element will be printed.
-
-        An average view factor for all target elements will be computed.  (Use
-        *GET  to retrieve the average value).
-
-        When resuming a database, issue the command VFOPT,READ before issuing
-        the VFQUERY command.
-        """
-        command = "VFQUERY,%s,%s" % (str(srcelem), str(tarelem))
-        return self.run(command, **kwargs)
-
+    
     def dsys(self, kcn="", **kwargs):
         """APDL Command: DSYS
 
@@ -58900,76 +57704,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*GET,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(entity), str(entnum), str(item1), str(it1num), str(item2), str(it2num))
         return self.run(command, **kwargs)
 
-    def combine(self, filetype="", **kwargs):
-        """APDL Command: COMBINE
-
-        Combines distributed memory parallel (Distributed ANSYS) files.
-
-        Parameters
-        ----------
-        filetype
-            Type of solution file to combine. There is no default; if (blank),
-            the command is ignored.
-
-            RST - Structural results file (.RST)
-
-            RTH - Thermal results file (.RTH)
-
-            RMG - Magnetics results file (.RMG)
-
-            RSTP - Linear perturbation results file (.RSTP)
-
-            EMAT - Element matrix file (.EMAT).
-
-            ESAV - Element saved data file (.ESAV)
-
-            MODE - Modal results file (.MODE)
-
-            MLV - Modal load vector file (.MLV)
-
-            IST - Initial state file (.IST)
-
-            FULL - Full matrix file (.FULL)
-
-            RFRQ - Reduced complex displacement file (.RFRQ)
-
-            RDSP - Reduced displacement file (.RDSP)
-
-        Notes
-        -----
-        The COMBINE command is used within the AUX2 auxiliary processor to
-        combine local solution files from a distributed memory parallel
-        solution into a single, global file. Before using this command, you
-        must enter the AUX2 processor by issuing the /AUX2 command.
-
-        In a distributed memory parallel (Distributed ANSYS) solution, you can
-        use the DMPOPTION command to bypass the file combination step, causing
-        all individual local files to be kept on the local disks in the current
-        working directory. Later on, you can start a new distributed memory
-        parallel solution and use the COMBINE command to combine local files
-        into a global file for a downstream solution or another operation
-        (e.g., postprocessing with /POST1). For example, the command
-        COMBINE,RST will combine local results files (JobnameN.RST) into a
-        global results file (Jobname.RST).
-
-        When the COMBINE command is used in a subsequent Distributed ANSYS
-        session, the number of processors must be the same as in the
-        distributed memory parallel solution that generated the files.
-
-        When running on a cluster, the local solution files must be available
-        in the working directory on each node in the subsequent session. As an
-        example, consider the following command line used to generate local
-        solution files:
-
-        Different machines can be used in the subsequent session to combine
-        these files. However, the total number of cores must remain unchanged
-        (seven in the above case), and the local files must be copied to the
-        working directory (or directories) on each of the machines used in the
-        subsequent session.
-        """
-        command = "COMBINE,%s" % (str(filetype))
-        return self.run(command, **kwargs)
-
+    
     def datadef(self, **kwargs):
         """APDL Command: DATADEF
 
@@ -59390,29 +58125,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SFBEAM,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(elem), str(lkey), str(lab), str(vali), str(valj), str(val2i), str(val2j), str(ioffst), str(joffst), str(lenrat))
         return self.run(command, **kwargs)
 
-    def space(self, node="", **kwargs):
-        """APDL Command: SPACE
-
-        Defines a space node for radiation using the Radiation Matrix method.
-
-        Parameters
-        ----------
-        node
-            Node defined to be the space node.
-
-        Notes
-        -----
-        A space node is required in an open system to account for radiation
-        losses.
-
-        If using SPACE with the ANSYS Multi-field solver (MFS),  you must
-        capture this command in the command file using MFCMMAND. This step is
-        necessary because at the end of each field computation, this command is
-        unset.
-        """
-        command = "SPACE,%s" % (str(node))
-        return self.run(command, **kwargs)
-
+    
     def dalist(self, area="", **kwargs):
         """APDL Command: DALIST
 

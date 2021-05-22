@@ -12,9 +12,9 @@ to create a radiation substructure for the Radiation Matrix method.
 .. autosummary::
    :toctree: api/
 
-   mapdl.emis
-   mapdl.geom
-   mapdl.mprint
-   mapdl.space
-   mapdl.vtype
-   mapdl.write
+   Mapdl.emis
+   Mapdl.geom
+   Mapdl.mprint
+   Mapdl.space
+   Mapdl.vtype
+   Mapdl.write

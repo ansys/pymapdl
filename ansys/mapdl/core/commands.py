@@ -1,5 +1,5 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
-                        aux3_, reduced,
+                        aux2_, aux3_, aux12_, reduced,
 )
 
 class Commands:
@@ -110,6 +110,18 @@ class Commands:
     title = database.setup.title
     units = database.setup.units
 
+    kwpave = database.working_plane.kwpave
+    kwplan = database.working_plane.kwplan
+    lwplan = database.working_plane.lwplan
+    nwpave = database.working_plane.nwpave
+    nwplan = database.working_plane.nwplan
+    wpave = database.working_plane.wpave
+    wpcsys = database.working_plane.wpcsys
+    wplane = database.working_plane.wplane
+    wpoffs = database.working_plane.wpoffs
+    wprota = database.working_plane.wprota
+    wpstyl = database.working_plane.wpstyl
+
     # mapping processor
     ftype = map_cmd.ftype
     map_ = map_cmd.map_
@@ -124,11 +136,37 @@ class Commands:
     igesin = aux15_.igesin
     ioptn = aux15_.ioptn
 
-    # aux3
+    # AUX2
+    combine = aux2_.bin_manip.combine
+    hbmat = aux2_.bin_manip.hbmat
+    psmat = aux2_.bin_manip.psmat
+    dump = aux2_.bin_dump.dump
+    fileaux2 = aux2_.bin_dump.fileaux2
+    form = aux2_.bin_dump.form
+    ptr = aux2_.bin_dump.ptr
+
+    # AUX3
     compress = aux3_.compress
     fileaux3 = aux3_.fileaux3
     modify = aux3_.modify
     undelete = aux3_.undelete
+
+    # AUX12
+    emis = aux12_.radiation_mat.emis
+    geom = aux12_.radiation_mat.geom
+    mprint = aux12_.radiation_mat.mprint
+    space = aux12_.radiation_mat.space
+    vtype = aux12_.radiation_mat.vtype
+    write = aux12_.radiation_mat.write
+    stef = aux12_.general_radiation.stef
+    toffst = aux12_.general_radiation.toffst
+    hemiopt = aux12_.radiosity_solver.hemiopt
+    radopt = aux12_.radiosity_solver.radopt
+    spcnod = aux12_.radiosity_solver.spcnod
+    spctemp = aux12_.radiosity_solver.spctemp
+    v2dopt = aux12_.radiosity_solver.v2dopt
+    vfopt = aux12_.radiosity_solver.vfopt
+    vfquery = aux12_.radiosity_solver.vfquery
 
     # reduced processor
     rmndisp = reduced.preparation.rmndisp

@@ -13,10 +13,10 @@ method.
 .. autosummary::
    :toctree: api/
 
-   mapdl.hemiopt
-   mapdl.radopt
-   mapdl.spcnod
-   mapdl.spctemp
-   mapdl.v2dopt
-   mapdl.vfopt
-   mapdl.vfquery
+   Mapdl.hemiopt
+   Mapdl.radopt
+   Mapdl.spcnod
+   Mapdl.spctemp
+   Mapdl.v2dopt
+   Mapdl.vfopt
+   Mapdl.vfquery
