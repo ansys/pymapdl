@@ -12,5 +12,5 @@ Generation Pass.
 .. autosummary::
    :toctree: api/
 
-   mapdl.rmndisp
-   mapdl.rmnevec
+   Mapdl.rmndisp
+   Mapdl.rmnevec

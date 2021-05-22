@@ -11,5 +11,5 @@ These commands are used to save or resume the ROM database.
 .. autosummary::
    :toctree: api/
 
-   mapdl.rmresume
-   mapdl.rmsave
+   Mapdl.rmresume
+   Mapdl.rmsave

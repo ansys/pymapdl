@@ -11,6 +11,6 @@ These commands use the reduced order model in an analysis.
 .. autosummary::
    :toctree: api/
 
-   mapdl.dcvswp
-   mapdl.rmlvscale
-   mapdl.rmuse
+   Mapdl.dcvswp
+   Mapdl.rmlvscale
+   Mapdl.rmuse
