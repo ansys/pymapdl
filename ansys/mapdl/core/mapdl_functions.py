@@ -303,29 +303,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SFCALC,%s,%s,%s,%s" % (str(labr), str(labs), str(labt), str(type_))
         return self.run(command, **kwargs)
 
-    def writemap(self, fname="", **kwargs):
-        """APDL Command: WRITEMAP
-
-        Writes interpolated pressure data to a file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        Notes
-        -----
-        Writes the interpolated pressure data to the specified
-        file. The data is written as SFE commands applied to the
-        SURF154 elements that are on the target surface. You may read
-        this data for inclusion in an analysis by using /INPUT,Fname.
-        """
-        return self.run(f"WRITEMAP,{fname}", **kwargs)
-
+    
     def f(self, node="", lab="", value="", value2="", nend="", ninc="",
           **kwargs):
         """APDL Command: F
@@ -6205,40 +6183,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EMF,"
         return self.run(command, **kwargs)
 
-    def igesin(self, fname="", ext="", **kwargs):
-        """APDL Command: IGESIN
-
-        Transfers IGES data from a file into ANSYS.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Reads a file containing IGES data and transfers it into the ANSYS
-        database.  The file transferred is the IGES Version 5.1, ASCII format
-        file.  IGES (Initial Graphics Exchange Specification) is a neutral
-        format developed by the U.S. Dept. of Commerce, National Institute of
-        Standards and Technology.  There is no output transfer file written
-        since the transferred data is read directly into the ANSYS database.
-
-        You can import multiple files into a single database, but you must use
-        the same import option (set with the IOPTN command) for each file.
-
-        The IOPTN command sets the parameters for reading the file.  Files read
-        via the SMOOTH method (the only available method) use the standard
-        database.
-        """
-        return self.run(f"IGESIN,{fname},{ext}", **kwargs)
-
+    
     def mater(self, **kwargs):
         """APDL Command: MATER
 
@@ -9089,37 +9034,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SPMWRITE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(method), str(nmode), str(inputs), str(inputlabels), str(outputs), str(outputlabels), str(nic), str(velacckey), str(fileformat))
         return self.run(command, **kwargs)
 
-    def plgeom(self, item="", nodekey="", **kwargs):
-        """APDL Command: PLGEOM
-
-        Plots target and source geometries.
-
-        Parameters
-        ----------
-        item
-            Items to plot:
-
-            BOTH - Plot both target and source geometries (default).
-
-            TARGET - Plot only the target geometry.
-
-            SOURCE - Plot only the source geometry.
-
-        nodekey
-            If the source data contains faces (that is, surface elements were
-            created upon the READ command), set NODEkey = 1 to plot only the
-            source nodes rather than both the nodes and the elements.
-
-        Notes
-        -----
-        Target faces are displayed in gray and source points in yellow. If the
-        source data contains faces (that is, surface elements were created upon
-        the READ command), the source faces are also displayed in blue (unless
-        NODEkey = 1), and both surfaces are made translucent.
-        """
-        command = "PLGEOM,%s,%s" % (str(item), str(nodekey))
-        return self.run(command, **kwargs)
-
+    
     def adele(self, na1="", na2="", ninc="", kswp="", **kwargs):
         """APDL Command: ADELE
 
@@ -18585,49 +18500,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "WTBCREATE,%s,%s,%s" % (str(iel), str(node), str(damp))
         return self.run(command, **kwargs)
 
-    def read(self, fname="", nskip="", format_="", xfield="", yfield="",
-             zfield="", prfield="", pifield="", **kwargs):
-        """APDL Command: READ
-
-        Reads coordinate and pressure data from a file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        nskip
-            Number of lines at the beginning of the file that will be skipped
-            while it is read. Default = 0. NSKIP is ignored for FileType =
-            CFXTBR or CFDPOST on the FTYPE command.
-
-        format\_
-            For FileType = FORMATTED on the FTYPE command, Format is the read
-            format in the FORTRAN FORMAT convention enclosed in parentheses;
-            for example: (3e10.0,10x,e10.0,70x,e10.0)
-
-        xfield, yfield, zfield, prfield, pifield
-            For FileType = CSV on the FTYPE command, these are field numbers
-            locating the coordinates and real and imaginary (if present)
-            pressures. The field value may not exceed 20.
-
-        Notes
-        -----
-        Reads coordinate and pressure data from the specified file. The file
-        type must have been previously specified on the FTYPE command.
-
-        Upon reading the file, nodes are created for the source points. For
-        FileType = CFXTBR or CFDPOST on the FTYPE command, if face data is
-        available, SURF154 elements are also created. A nodal component named
-        SOURCENODES and an element component named SOURCEELEMS are created
-        automatically.
-        """
-        command = "READ,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(nskip), str(format_), str(xfield), str(yfield), str(zfield), str(prfield), str(pifield))
-        return self.run(command, **kwargs)
-
+    
     def fatigue(self, **kwargs):
         """APDL Command: FATIGUE
 
@@ -27375,27 +27248,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SBCLIST,"
         return self.run(command, **kwargs)
 
-    def slashmap(self, **kwargs):
-        """APDL Command: /MAP
-
-        Enters the mapping processor.
-
-        Notes
-        -----
-        Enters the mapping processor. This processor is used to read in source
-        data from an external file and map it to the existing geometry.
-
-        The current database is saved (to BeforeMapping.DB) upon entering the
-        processor, and it is resumed upon exiting (FINISH command). Any nodes
-        or elements not on the target surface are deleted for easier viewing of
-        the mapping quantities. A database of this mapping geometry
-        (Mapping.DB) is also saved at the FINISH command.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/MAP,"
-        return self.run(command, **kwargs)
-
+    
     def starset(self, par="", value="", val2="", val3="", val4="", val5="",
                 val6="", val7="", val8="", val9="", val10="", **kwargs):
         """APDL Command: *SET
@@ -42680,158 +42533,8 @@ class _MapdlCommands():  # pragma: no cover
         command = "SPGRAPH,%s,%s,%s" % (str(tblno), str(curvno), str(curvnobeg))
         return self.run(command, **kwargs)
 
-    def ftype(self, filetype="", prestype="", **kwargs):
-        """APDL Command: FTYPE
-
-        Specifies the file type and pressure type for the subsequent import of
-        source points and pressures.
-
-        Parameters
-        ----------
-        filetype
-            Type of file from which the pressure data will be retrieved (no
-            default):
-
-            CFXTBR - File from a CFX Transient Blade Row (TBR) analysis export.
-
-            CFDPOST - File from a CFD-Post BC Profile export.
-
-            FORMATTED - Formatted file.
-
-            CSV - Comma-Separated Values file.
-
-        prestype
-            Type of pressure data contained in the file:
-
-            0 - Only real-valued pressures are on the file.
-
-            1 - Real-valued and imaginary-valued pressures are on the file (default).
-
-        Notes
-        -----
-        CFX Transient Blade Row files (FileType = CFXTBR) are obtained from the
-        Export Results Tab in CFX-Pre, with [Export Surface Name]: Option set
-        to Harmonic Forced Response.
-
-        CFD-Post files (FileType = CFDPOST) are obtained from the Export action
-        in CFD-Post with Type set to BC Profile.
-
-        Formatted files (FileType = FORMATTED) contain the coordinates and
-        pressure data in fixed-format columns in the order  x, y, z, pressure.
-        You may have other columns of data in the file which can be skipped
-        over in the Format specifier on the READ command, but the data must be
-        in that order.
-
-        Comma-separated values files (FileType = CSV) contain the coordinates
-        and pressure data in comma-separated fields. The data can be in any
-        order, and other fields of data may also be present.
-        """
-        command = "FTYPE,%s,%s" % (str(filetype), str(prestype))
-        return self.run(command, **kwargs)
-
-    def ioptn(self, lab="", val1="", **kwargs):
-        """APDL Command: IOPTN
-
-        Controls options relating to importing a model.
-
-        Parameters
-        ----------
-        lab
-            Label identifying the import option.  The meaning of VAL1 varies
-            depending on Lab.
-
-            STAT - List overall status of import facilities, including current option values.
-                   VAL1 is ignored.
-
-            DEFA - Set default values for all import options.  VAL1is ignored.
-
-            MERG - Entity merge option.  VAL1 can be:
-
-            YES - Automatic merging is performed (default).
-
-            NO - No merging of entities.
-
-            SOLID - Solid option.  VAL1 can be:
-
-            YES - Solid is created automatically (default).
-
-            NO - No solid created.
-
-            GTOLER - Entity merging tolerance. If IGES = SMOOTH, the GTOLER,VAL1 can be:
-
-            DEFA - Use system defaults (default).
-
-            FILE - Use tolerance from the imported file.
-
-            n - A user-specified tolerance value.
-
-            IGES - IGES import option.  VAL1 can be:
-
-            STAT - List status of IGES related options in the output window.
-
-            SMOOTH (or RV52) - Use more robust IGES revision 5.2 import function (default).
-
-            SMALL - Small areas option.   VAL1 can be:
-
-            YES - Small areas are deleted (default).
-
-            NO - Small areas are retained.
-
-        val1
-            Additional input value as described under each Lab option.
-
-        Notes
-        -----
-        Controls various options during a model file transfer.  A global solid
-        model tolerance (GTOLER) can be specified.
-
-        The SMALL,YES option (default) delete small areas  and can cause
-        geometrical inconsistencies that could cause the import process to
-        abort.  Retaining the small areas increases processor time and memory
-        usage.
-
-        The data is stored in the standard ANSYS graphics database.
-
-        The IGES,SMOOTH (default) option is capable of reading in any rational
-        B-spline curve entity (type 126), or rational B-spline surface entity
-        (type 128) with a degree less than or equal to 20.  Attempts to read in
-        B-spline curve or surface entities of degree higher than 20 may result
-        in error messages.
-
-        If you issue the /CLEAR command, the IOPTN settings return to their
-        defaults.
-
-        For MERG,YES, merging of coincident geometry items is performed
-        automatically when the IGESIN command is issued (that is, an internal
-        NUMMRG,KP command is issued).  The model is merged with the
-        consideration tolerance (TOLER on NUMMRG) set equal to 0.75 * the
-        shortest distance between the endpoints of any active line. See the
-        NUMMRG command for more information about the tolerances. In most
-        cases, the default merging is appropriate.  Use the IOPTN command when
-        you want to:
-
-        Disable merging operations.
-
-        Override the default merging and specify a global solid model tolerance
-        value (GTOLER).
-
-        Disable the automatic creation of solids (SOLID).
-
-        The IOPTN command should be issued before the IGESIN command. You
-        cannot change these options after your model has been imported or
-        created. If you must change the options:
-
-        Clear the database (/CLEAR) or exit and restart the program.
-
-        Set the correct options.
-
-        Reimport or recreate the model.
-
-        This command is valid in any processor.
-        """
-        command = "IOPTN,%s,%s" % (str(lab), str(val1))
-        return self.run(command, **kwargs)
-
+    
+    
     def ncnv(self, kstop="", dlim="", itlim="", etlim="", cplim="", **kwargs):
         """APDL Command: NCNV
 
@@ -48307,29 +48010,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PDUSER,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def target(self, nlist="", **kwargs):
-        """APDL Command: TARGET
-
-        Specifies the target nodes for mapping pressures onto surface effect
-        elements.
-
-        Parameters
-        ----------
-        nlist
-            Nodes defining the surface upon which the pressures will be mapped.
-            Use the label ALL or specify a nodal component name. If ALL, all
-            selected nodes [NSEL] are used (default). Individual nodes may not
-            be entered.
-
-        Notes
-        -----
-        The node list specified by Nlist must contain a sufficient number of
-        nodes to define an element surface. The surface must be meshed (ESURF
-        command) with SURF154 elements prior to issuing this command.
-        """
-        command = "TARGET,%s" % (str(nlist))
-        return self.run(command, **kwargs)
-
+    
     def numexp(self, num="", begrng="", endrng="", elcalc="", **kwargs):
         """APDL Command: NUMEXP
 
@@ -48451,45 +48132,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/CTYPE,%s,%s,%s,%s,%s" % (str(key), str(dotd), str(dots), str(dshp), str(tlen))
         return self.run(command, **kwargs)
 
-    def plmap(self, item="", nodekey="", imagkey="", **kwargs):
-        """APDL Command: PLMAP
-
-        Plots target and source pressures.
-
-        Parameters
-        ----------
-        item
-            Items to plot:
-
-            BOTH - Plot both target and source pressures (default).
-
-            TARGET - Plot only the target pressures.
-
-            SOURCE - Plot only the source pressures.
-
-        nodekey
-            If the source data contains faces (that is, surface
-            elements were created upon the READ command), set NODEkey
-            = 1 to plot only the source nodes rather than both the
-            nodes and the elements.
-
-        imagkey
-            1 - Plot the real pressures (default).
-
-            0 - Plot the imaginary pressures.
-
-        Notes
-        -----
-        Pressures on the target faces are displayed as a color contour
-        plot using the command /PSF,PRES,,3. If the source data
-        contains faces (that is, surface elements were created upon
-        the READ command), the source faces are also displayed using a
-        color contour plot by default. If NODEkey = 1 or no source
-        faces are available, the source pressures are displayed as
-        colored node symbols (/PSYMB,DOT,1 command).
-        """
-        return self.run(f"PLMAP,{item},,{nodekey},{imagkey}", **kwargs)
-
+    
     def wmid(self, key="", **kwargs):
         """APDL Command: WMID
 
@@ -66584,37 +66227,4 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run('ECPCHG', **kwargs)
 
-    def map(self, kdim="", kout="", limit="", **kwargs):
-        """Maps pressures from source points to target surface elements.
-
-        APDL Command: MAP
-
-        kdim
-            Interpolation key:
-
-            * ``"0 or 2"`` : Interpolation is done on a surface (default).
-
-            * ``"3"`` : Interpolation is done within a volume. This option
-              is useful if the supplied source data is volumetric field
-              data rather than surface data.
-
-        kout
-            Key to control how pressure is applied when a target node is
-            outside of the source region:
-
-            * ``"0"`` : Use the pressure(s) of the nearest source point for target nodes outside of the region (default).
-
-            * ``"1"`` : Set pressures outside of the region to zero.
-
-        limit
-            Number of nearby points considered for interpolation. The minimum
-            is 5; the default is 20. Lower values reduce processing
-            time. However, some distorted or irregular meshes will require a
-            higher LIMIT value to find the points encompassing the target node
-            in order to define the region for interpolation.
-
-        Notes
-        -----
-        Maps pressures from source points to target surface elements.
-        """
-        return self.run(f"MAP,,{kdim},,{kout},{limit}", **kwargs)
+    
