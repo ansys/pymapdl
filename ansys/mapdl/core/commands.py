@@ -1,5 +1,6 @@
-from ._commands import (hidden, session, database, preproc, aux15_, map_cmd)
-
+from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
+                        aux3_
+)
 
 class Commands:
     """Wrapped MAPDL commands"""
@@ -122,6 +123,12 @@ class Commands:
     # AUX15
     igesin = aux15_.igesin
     ioptn = aux15_.ioptn
+
+    # aux3
+    compress = aux3_.compress
+    fileaux3 = aux3_.fileaux3
+    modify = aux3_.modify
+    undelete = aux3_.undelete
 
     ################
     # PREP7 commands

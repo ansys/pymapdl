@@ -23706,51 +23706,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/CVAL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6), str(v7), str(v8))
         return self.run(command, **kwargs)
 
-    def modify(self, set_="", lstep="", iter_="", cumit="", time="", ktitle="",
-               **kwargs):
-        """APDL Command: MODIFY
-
-        Changes the listed values of the data in a set.
-
-        Parameters
-        ----------
-        set\_
-            Set of data in results file to be modified.
-
-        lstep
-            The new load step number.
-
-        iter\_
-            The new load substep number.
-
-        cumit
-            The new cumulative iteration.
-
-        time
-            The new time/frequency value.
-
-        ktitle
-            Indicates if the set title should be modified.
-
-            0 - Keep the original title.
-
-            1 - Change the title to the title specified with the most current /TITLE command.
-
-        Notes
-        -----
-        Use this command to change the listed values in a data set in a results
-        file. Using this command does not change any actual model data; it
-        affects only the values listed in the results file.
-
-        For example, if you start with the following results file:
-
-        and you then issue the following commands:
-
-        The modified results file would look like this:
-        """
-        command = "MODIFY,%s,%s,%s,%s,%s,%s" % (str(set_), str(lstep), str(iter_), str(cumit), str(time), str(ktitle))
-        return self.run(command, **kwargs)
-
+    
     def tshap(self, shape="", **kwargs):
         """APDL Command: TSHAP
 
@@ -23805,30 +23761,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "TSHAP,%s" % (str(shape))
         return self.run(command, **kwargs)
 
-    def fileaux3(self, fname="", ext="", **kwargs):
-        """APDL Command: FILEAUX3
-
-        Specifies the results file to be edited.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Specifies the results file to be edited.
-        """
-        command = "FILEAUX3,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def image(self, label="", fname="", ext="", **kwargs):
         """APDL Command: /IMAGE
 
@@ -37530,19 +37463,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*VABS,%s,%s,%s,%s" % (str(kabsr), str(kabs1), str(kabs2), str(kabs3))
         return self.run(command, **kwargs)
 
-    def compress(self, **kwargs):
-        """APDL Command: COMPRESS
-
-        Deletes all specified sets.
-
-        Notes
-        -----
-        Issue this command to delete all sets specified with the DELETE
-        command.
-        """
-        command = "COMPRESS,"
-        return self.run(command, **kwargs)
-
+    
     def rmanl(self, fname="", ext="", dimn="", oper="", **kwargs):
         """APDL Command: RMANL
 
@@ -58573,38 +58494,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "VGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nv1), str(nv2), str(nv3), str(nv4), str(nv5), str(nv6), str(nv7), str(nv8), str(nv9))
         return self.run(command, **kwargs)
 
-    def undelete(self, option="", nstart="", nend="", **kwargs):
-        """APDL Command: UNDELETE
-
-        Removes results sets from the group of sets selected for editing.
-
-        Parameters
-        ----------
-        option
-            Specifies which sets are to be removed from the selected sets.
-
-            SET - Specifies one or more particular sets in the results file that are to be
-                  removed from the group of sets selected for deletion.
-
-            ALL - Removes all selected sets that are currently selected for deletion.
-
-        nstart
-            The first set to be removed from the set selected for deletion.
-
-        nend
-            The final set to be removed from the set selected for deletion.
-            This field is used only if operating on more than one sequential
-            set.
-
-        Notes
-        -----
-        Use this command if you have previously marked a set for deletion (with
-        the DELETE command) and now wish to keep that set instead of deleting
-        it.
-        """
-        command = "UNDELETE,%s,%s,%s" % (str(option), str(nstart), str(nend))
-        return self.run(command, **kwargs)
-
+    
     def cqc(self, signif="", label="", forcetype="", **kwargs):
         """APDL Command: CQC
 
