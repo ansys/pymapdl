@@ -405,125 +405,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "BFADELE,%s,%s" % (str(area), str(lab))
         return self.run(command, **kwargs)
 
-    def voper(self, parr="", par1="", oper="", par2="", con1="", con2="",
-              **kwargs):
-        """APDL Command: *VOPER
-
-        Operates on two array parameters.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting array parameter vector.  See *SET  for
-            name restrictions.
-
-        par1
-            First array parameter vector in the operation.  May also be a
-            scalar parameter or a literal constant.
-
-        oper
-            Operations:
-
-            Addition: Par1+Par2. - Subtraction: Par1-Par2.
-
-            Multiplication: Par1*Par2. - Division: Par1/Par2  (a divide by zero results in a value of zero).
-
-            Minimum: minimum of Par1 and Par2. - Maximum: maximum of Par1 and Par2.
-
-            Less than comparison: Par1<Par2 gives 1.0 if true, 0.0 if false. - Less than or equal comparison: Par1 Par2 gives 1.0 if true, 0.0 if false.
-
-            Equal comparison: Par1 = Par2 gives 1.0 if true, 0.0 if false. - Not equal comparison: Par1 ≠ Par2 gives 1.0 if true, 0.0 if false.
-
-            Greater than or equal comparison: Par1 Par2 gives 1.0 if true, 0.0 if false. - Greater than comparison: Par1>Par2 gives 1.0 if true, 0.0 if false.
-
-            First derivative: d(Par1)/d(Par2).  The derivative at a point is determined  over points half way between the previous and next points (by linear  interpolation). Par1 must be a function (a unique Par1 value for each Par2 value) and Par2 must be in ascending order. - Second derivative: d2(Par1)/d(Par2)2.  See also DER1.
-
-            Single integral:    Par1 d(Par2), where CON1 is the integration constant.  The integral at a point is determined by using the single integration procedure described in the Mechanical APDL Theory Reference. - Double integral:       Par1 d(Par2), where CON1 is the integration constant of
-                              the first integral and CON2 is the integration
-                              constant of the second integral.  If Par1
-                              contains acceleration data, CON1 is the initial
-                              velocity and CON2 is the initial displacement.
-                              See also INT1.
-
-            Dot product: Par1  . Par2.  Par1 and Par2 must each have three consecutive columns of data, with the columns containing the i, j, and k vector components, respectively.  Only the starting row index and the column index for the i components are specified for Par1 and Par2, such as A(1,1).  The j and k components of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3). - Cross product: Par1 x Par2.  Par1, Par2, and ParR must each have 3 components,
-                              respectively.  Only the starting row index and
-                              the column index for the i components are
-                              specified for Par1, Par2, and ParR, such as
-                              A(1,1).  The j and k components of the vector are
-                              assumed to begin in the corresponding next
-                              columns, such as A(1,2) and A(1,3).
-
-            Gather:  For a vector of position numbers, Par2, copy the value of Par1 at each position number to ParR.  Example:  for Par1 = 10,20,30,40 and Par2 = 2,4,1;  ParR = 20,40,10. - Scatter:  Opposite of GATH operation.  For a vector of position numbers, Par2,
-                              copy the value of Par1 to that position number in
-                              ParR.  Example: for Par1 = 10,20,30,40,50 and
-                              Par2 = 2,1,0,5,3; ParR = 20,10,50,0,40.
-
-            Arctangent: arctangent of Par1/Par2 with the sign of each component considered. - Transform the data in Par1 from the global Cartesian coordinate system to the
-                              local coordinate system given in CON1. Par1 must
-                              be an N x 3 (i.e., vector) or an N x 6 (i.e.,
-                              stress or strain tensor) array. If the local
-                              coordinate system is a cylindrical, spherical, or
-                              toroidal system, then you must provide the global
-                              Cartesian coordinates in Par2 as an N x 3 array.
-                              Set CON2 = 1 if the data is strain data.
-
-        par2
-            Second array parameter vector in the operation.  May also be a
-            scalar parameter or a literal constant.
-
-        con1
-            First constant (used only with the INT1 and INT2 operations).
-
-        con2
-            Second constant (used only with the INT2 operation).
-
-        Notes
-        -----
-        Operates on two input array parameter vectors and produces one output
-        array parameter vector according to:
-
-        ParR = Par1 o Par2
-
-        where the operations (o) are described below.  ParR may be the same as
-        Par1 or Par2.  Absolute values and scale factors may be applied to all
-        parameters [*VABS, *VFACT].  Results may be cumulative [*VCUM].
-        Starting array element numbers must be defined for each array parameter
-        vector if it does not start at the first location, such as
-        *VOPER,A,B(5),ADD,C(3) which adds the third element of C to the fifth
-        element of B and stores the result in the first element of A.
-        Operations continue on successive array elements [*VLEN, *VMASK] with
-        the default being all successive elements.  Skipping array elements via
-        *VMASK or *VLEN for the DER_ and INT_ functions skips only the writing
-        of the results (skipped array element data are used in all
-        calculations).
-
-        Parameter functions and operations are available to operate on a scalar
-        parameter or a single element of an array parameter, such as SQRT(B) or
-        SQRT(A(4)).  See the *SET command for details.  Operations on a
-        sequence of array elements can be done by repeating the desired
-        function or operation in a do-loop [*DO].  The vector operations within
-        the ANSYS program (*VXX commands) are internally programmed do-loops
-        that conveniently perform the indicated operation over a sequence of
-        array elements.  If the array is multidimensional, only the first
-        subscript is incremented in the do-loop, that is, the operation repeats
-        in column vector fashion "down" the array.  For example, for A(1,5),
-        A(2,5), A(3,5), etc.  The starting location of the row index must be
-        defined for each parameter read and for the result written.
-
-        The default number of loops is from the starting result location to the
-        last result location and can be altered with the *VLEN command.  A
-        logical mask vector may be defined to control at which locations the
-        operations are to be skipped [*VMASK].  The default is to skip no
-        locations.  Repeat operations automatically terminate at the last array
-        element of the result array column if the number of loops is undefined
-        or if it exceeds the last result array element.  Zeroes are used in
-        operations for values read beyond the last array element of an input
-        array column.  Existing values in the rows and columns of the results
-        matrix
-        """
-        command = "*VOPER,%s,%s,%s,%s,%s,%s" % (str(parr), str(par1), str(oper), str(par2), str(con1), str(con2))
-        return self.run(command, **kwargs)
-
+    
     def keep(self, key="", **kwargs):
         """APDL Command: KEEP
 
@@ -1012,46 +894,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "BFALIST,%s,%s" % (str(area), str(lab))
         return self.run(command, **kwargs)
 
-    def mult(self, m1="", t1="", m2="", t2="", m3="", **kwargs):
-        """APDL Command: *MULT
-
-        Performs the matrix multiplication M3 = M1(T1)*M2(T2).
-
-        Parameters
-        ----------
-        m1
-            Name of matrix M1. Must have been previously specified by a *DMAT
-            or *SMAT command.
-
-        t1
-            Transpose key. Set T1 = TRANS to use the transpose of M1. If blank,
-            transpose will not be used.
-
-        m2
-            Name of matrix M2. Must have been previously specified by a *DMAT
-            command.
-
-        t2
-            Transpose key. Set T2 = TRANS to use the transpose of M2. If blank,
-            transpose will not be used.
-
-        m3
-            Name of resulting matrix, M3. Must be specified.
-
-        Notes
-        -----
-        The matrices must be dimensionally consistent such that the number of
-        columns of M1 (or the transposed matrix, if requested) is equal to the
-        number of rows of M2 (or the transposed matrix, if requested).
-
-        You cannot multiply two sparse matrices with this command (that is, M1
-        and M2 cannot both be sparse). The resulting matrix, M3, will always be
-        a dense matrix, no matter what combination of input matrices is used
-        (dense*sparse, sparse*dense, or dense*dense).
-        """
-        command = "*MULT,%s,%s,%s,%s,%s" % (str(m1), str(t1), str(m2), str(t2), str(m3))
-        return self.run(command, **kwargs)
-
+    
     def norl(self, line="", area="", ndir="", **kwargs):
         """APDL Command: NORL
 
@@ -4928,43 +4771,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PLMC,%s,%s,%s,%s,%s,%s" % (str(lstep), str(sbstep), str(timfrq), str(kimg), str(hibeg), str(hiend))
         return self.run(command, **kwargs)
 
-    def create(self, fname="", ext="", **kwargs):
-        """APDL Command: *CREATE
-
-        Opens (creates) a macro file.
-
-        .. warning::
-           This command must be run using ``mapdl.non_interactive``
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        See the *USE command for a discussion of macros.  All commands
-        following the *CREATE command, up to the *END command, are written to
-        the specified file without being executed.  An existing file of the
-        same name, if any, will be overwritten.  Parameter values are not
-        substituted for parameter names in the commands when the commands are
-        written to the file.  Use *CFWRITE to create a file if this is desired.
-        The resulting macro may be executed with a *USE command (which also
-        allows parameters to be passed into the macro) or a /INPUT command
-        (which does not allow parameters to be passed in).  Several macros may
-        be stacked into a library file [*ULIB]. You cannot use *CREATE within a
-        DO loop.
-
-        This command is valid in any processor.
-        """
-        return self.run(f"*CREATE,{fname},{ext}", **kwargs)
-
+    
     def pmgtran(self, fname="", freq="", fcnam1="", fcnam2="", pcnam1="",
                 pcnam2="", ecnam1="", ccnam1="", **kwargs):
         """APDL Command: PMGTRAN
@@ -5445,21 +5252,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "JSOL,%s,%s,%s,%s,%s" % (str(nvar), str(elem), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
-    def pmacro(self, **kwargs):
-        """APDL Command: /PMACRO
-
-        Specifies that macro contents be written to the session log file.
-
-        Notes
-        -----
-        This command forces the contents of a macro or other input file to be
-        written to Jobname.LOG.  It is valid only within a macro or input file,
-        and should be placed at the top of the file.  /PMACRO should be
-        included in any macro or input file that calls GUI functions.
-        """
-        command = "/PMACRO,"
-        return self.run(command, **kwargs)
-
+    
     def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
         """APDL Command: FK
 
@@ -5957,41 +5750,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MATER,"
         return self.run(command, **kwargs)
 
-    def cfopen(self, fname="", ext="", loc="", **kwargs):
-        """Opens a "command" file.
-
-        APDL Command: *CFOPEN
-
-        .. warning::
-           This command must be run using ``mapdl.non_interactive``
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        loc
-            Determines whether existing file will be overwritten or appended:
-
-            (blank) : The existing file will be overwritten.
-            APPEND :  The file will be appended to the existing file.
-
-        Notes
-        -----
-        Data processed with the *VWRITE command will also be written to this
-        file if the file is open when the *VWRITE command is issued.
-
-        This command is valid in any processor.
-        """
-        return self.run(f"*CFOPEN,{fname},{ext},,{loc}", **kwargs)
-
+    
     def pldisp(self, kund="", **kwargs):
         """APDL Command: PLDISP
 
@@ -6083,51 +5842,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDASMP,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(asmid), str(part1), str(part2), str(part3), str(part4), str(part5), str(part6), str(part7), str(part8), str(part9), str(part10), str(part11), str(part12), str(part13), str(part14), str(part15), str(part16))
         return self.run(command, **kwargs)
 
-    def vput(self, par="", ir="", tstrt="", kcplx="", name="", **kwargs):
-        """APDL Command: VPUT
-
-        Moves an array parameter vector into a variable.
-
-        Parameters
-        ----------
-        par
-            Array parameter vector in the operation.
-
-        ir
-            Arbitrary reference number assigned to this variable (1 to NV
-            [NUMVAR]).  Overwrites any existing results for this variable.
-
-        tstrt
-            Time (or frequency) corresponding to start of IR data.  If between
-            values, the nearer value is used.
-
-        kcplx
-            Complex number key:
-
-            0 - Use the real part of the IR data.
-
-            1 - Use the imaginary part of the IR data.
-
-        name
-            Thirty-two character name identifying the item on printouts and
-            displays. Defaults to the label formed by concatenating VPUT with
-            the reference number IR.
-
-        Notes
-        -----
-        At least one variable should be defined (NSOL, ESOL, RFORCE, etc.)
-        before using this command.  The starting array element number must be
-        defined.  For example, VPUT,A(1),2 moves array parameter A to variable
-        2 starting at time 0.0.  Looping continues from array element A(1) with
-        the index number incremented by one until the variable is filled.
-        Unfilled variable locations are assigned a zero value.  The number of
-        loops may be controlled with the *VLEN command (except that loop
-        skipping (NINC) is not allowed).  For multi-dimensioned array
-        parameters, only the first (row) subscript is incremented.
-        """
-        command = "VPUT,%s,%s,%s,%s,%s" % (str(par), str(ir), str(tstrt), str(kcplx), str(name))
-        return self.run(command, **kwargs)
-
+    
     def int1(self, ir="", iy="", ix="", name="", facta="", factb="", const="",
              **kwargs):
         """APDL Command: INT1
@@ -7342,56 +7057,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "GSSOL,%s,%s,%s,%s" % (str(nvar), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
-    def inquire(self, func):
-        """Returns system information.
-
-        Parameters
-        ----------
-        func : str
-           Specifies the type of system information returned.  See the
-           notes section for more information.
-
-        Returns
-        -------
-        value : str
-            Value of the inquired item.
-
-        Notes
-        -----
-        Allowable func entries
-        LOGIN - Returns the pathname of the login directory on Linux
-        systems or the pathname of the default directory (including
-        drive letter) on Windows systems.
-
-        - ``DOCU`` - Pathname of the ANSYS docu directory.
-        - ``APDL`` - Pathname of the ANSYS APDL directory.
-        - ``PROG`` - Pathname of the ANSYS executable directory.
-        - ``AUTH`` - Pathname of the directory in which the license file resides.
-        - ``USER`` - Name of the user currently logged-in.
-        - ``DIRECTORY`` - Pathname of the current directory.
-        - ``JOBNAME`` - Current Jobname.
-        - ``RSTDIR`` - Result file directory
-        - ``RSTFILE`` - Result file name
-        - ``RSTEXT`` - Result file extension
-        - ``OUTPUT`` - Current output file name
-
-        Examples
-        --------
-        Return the job name
-
-        >>> mapdl.inquire('JOBNAME')
-        file
-
-        Return the result file name
-
-        >>> mapdl.inquire('RSTFILE')
-        'file.rst'
-        """
-        response = self.run(f'/INQUIRE,,{func}', mute=False)
-        if '=' in response:
-            return response.split('=')[1].strip()
-        return ''
-
+    
     def focus(self, wn="", xf="", yf="", zf="", ktrans="", **kwargs):
         """APDL Command: /FOCUS
 
@@ -8215,41 +7881,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DSYM,%s,%s,%s" % (str(lab), str(normal), str(kcn))
         return self.run(command, **kwargs)
 
-    def abbsav(self, lab="", fname="", ext="", **kwargs):
-        """APDL Command: ABBSAV
-
-        Writes the current abbreviation set to a coded file.
-
-        Parameters
-        ----------
-        lab
-            Label that specifies the write operation.
-
-            ALL - Write all abbreviations (default).
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-            The file name defaults to Jobname.
-
-        ext
-            Filename extension (eight-character maximum).  The
-            extension defaults to ABBR if Fname is blank.
-
-        Notes
-        -----
-        Existing abbreviations on this file, if any, will be overwritten.  The
-        abbreviation file may be read with the ABBRES command.
-
-        This command is valid in any processor.
-        """
-        command = "ABBSAV,%s,%s,%s" % (str(lab), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def nocolor(self, key="", **kwargs):
         """APDL Command: NOCOLOR
 
@@ -8406,42 +8038,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "RSYS,%s" % (str(kcn))
         return self.run(command, **kwargs)
 
-    def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
-        """APDL Command: *NRM
-
-        Computes the norm of the specified matrix or vector.
-
-        Parameters
-        ----------
-        name
-            Matrix or vector for which the norm will be computed. This can be a
-            dense matrix (created by the *DMAT command), a sparse matrix
-            (created by the *SMAT command) or a vector (created by the *VEC
-            command)
-
-        normtype
-            Mathematical norm to use:
-
-            L2 (Euclidian or SRSS) norm (default). - L1 (absolute sum) norm (vectors only).
-
-        parr
-            Parameter name that contains the result.
-
-        normalize
-            Normalization key; to be used only for vectors created by *VEC:
-
-            Normalize the vector such that the norm is 1.0. - Do not normalize the vector (default).
-
-        Notes
-        -----
-        The NRM2 option corresponds to the Euclidian or L2 norm and is
-        applicable to either vectors or matrices. The NRM1 option corresponds
-        to the L1 norm and is applicable to vectors only. The NRMINF option is
-        the maximum norm and is applicable to either vectors or matrices.
-        """
-        command = "*NRM,%s,%s,%s,%s" % (str(name), str(normtype), str(parr), str(normalize))
-        return self.run(command, **kwargs)
-
+    
     def sfgrad(self, lab="", slkcn="", sldir="", slzer="", slope="", **kwargs):
         """APDL Command: SFGRAD
 
@@ -10036,36 +9633,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PLF2D,%s,%s,%s,%s" % (str(ncont), str(olay), str(anum), str(win))
         return self.run(command, **kwargs)
 
-    def dflab(self, dof="", displab="", forcelab="", **kwargs):
-        """APDL Command: /DFLAB
-
-        Changes degree-of-freedom labels for user custom elements.
-
-        Parameters
-        ----------
-        dof
-            Number between 1 and 32 indicating which degree of freedom is to
-            have its labels changed. For a list of these quantities, see the
-            degree-of-freedom table in the echprm.inc file. The first few
-            quantities follow:
-
-        displab
-            New label (four-character maximum) for the displacement label. The
-            prior label is no longer valid.
-
-        forcelab
-            New label (four-character maximum) for the force label for this
-            degree of freedom. The prior label is no longer valid.
-
-        Notes
-        -----
-        The /DFLAB command is rarely used. Use it if you are writing a custom
-        element and want to use degrees of freedom that are not part of the
-        standard element set.
-        """
-        command = "/DFLAB,%s,%s,%s" % (str(dof), str(displab), str(forcelab))
-        return self.run(command, **kwargs)
-
+    
     def sspa(self, a11="", a21="", a31="", a22="", a32="", a33="", t="",
              **kwargs):
         """APDL Command: SSPA
@@ -10435,26 +10003,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "VPLOT,%s,%s,%s,%s,%s" % (str(nv1), str(nv2), str(ninc), str(degen), str(scale))
         return self.run(command, **kwargs)
 
-    def rmdir(self, dir_="", **kwargs):
-        """APDL Command: /RMDIR
-
-        Removes (deletes) a directory.
-
-        Parameters
-        ----------
-        dir\_
-            The directory to remove. If no path is provided, it will be assumed
-            to be in the current working directory. All files in the directory
-            are also removed.
-
-        Notes
-        -----
-        Removes a directory on the computer ANSYS is currently running on. No
-        warning or prompt is given, so use with extreme caution.
-        """
-        command = "/RMDIR,%s" % (str(dir_))
-        return self.run(command, **kwargs)
-
+    
     def jpeg(self, kywrd="", opt="", **kwargs):
         """APDL Command: JPEG
 
@@ -11423,42 +10972,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"ATAN,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)
 
-    def lsengine(self, type_="", enginename="", matrix="", option="", **kwargs):
-        """APDL Command: *LSENGINE
-
-        Creates a linear solver engine.
-
-        Parameters
-        ----------
-        type\_
-            Specifies the algorithm to be used:
-
-            Boeing sparse solver (default if applied to sparse matrices). - MKL sparse linear solver (Intel Windows and Linux systems only).
-
-            LAPACK dense matrix linear solver (default if applied to dense matrices). - Distributed sparse solver.
-
-        enginename
-            Name used to identify this engine. Must be specified.
-
-        matrix
-            Name of the matrix to solve.
-
-        option
-            Option to control the memory mode of the DSS solver (used only if
-            Type = DSS):
-
-            In-core memory mode. - Out-of-core memory mode.
-
-        Notes
-        -----
-        This command creates a linear solver engine.
-
-        The BCS, DSS, and DSP solvers can only be used with sparse matrices.
-        For dense matrices, use the LAPACK solver.
-        """
-        command = "*LSENGINE,%s,%s,%s,%s" % (str(type_), str(enginename), str(matrix), str(option))
-        return self.run(command, **kwargs)
-
+    
     def prcplx(self, key="", **kwargs):
         """APDL Command: PRCPLX
 
@@ -14706,65 +14220,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PHYSICS,%s,%s,%s,%s" % (str(option), str(title), str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="",
-               **kwargs):
-        """APDL Command: *MFOURI
-
-        Calculates the coefficients for, or evaluates, a Fourier series.
-
-        Parameters
-        ----------
-        oper
-            Type of Fourier operation:
-
-            Calculate Fourier coefficients COEFF from MODE, ISYM, THETA, and CURVE. - Evaluate the Fourier curve CURVE from COEFF, MODE, ISYM andTHETA
-
-        coeff
-            Name of the array parameter vector containing the Fourier
-            coefficients (calculated if Oper = FIT, required as input if Oper =
-            EVAL).  See *SET for name restrictions.
-
-        mode
-            Name of the array parameter vector containing the mode numbers of
-            the desired Fourier terms.
-
-        isym
-            Name of the array parameter vector containing the symmetry key for
-            the corresponding Fourier terms.  The vector should contain keys
-            for each term as follows:
-
-            Symmetric (cosine) term - Antisymmetric (sine) term.
-
-        theta, curve
-            Names of the array parameter vectors containing the theta vs. curve
-            description, respectively.  Theta values should be input in
-            degrees.  If Oper = FIT, one curve value should be supplied with
-            each theta value.  If Oper = EVAL, one curve value will be
-            calculated for each theta value.
-
-        Notes
-        -----
-        Calculates the coefficients of a Fourier series for a given curve, or
-        evaluates the Fourier curve from the given (or previously calculated)
-        coefficients.  The lengths of the COEFF, MODE, and ISYM vectors must be
-        the same--typically two times the number of modes desired, since two
-        terms (sine and cosine) are generally required for each mode.  The
-        lengths of the CURVE and THETA vectors should be the same or the
-        smaller of the two will be used.  There should be a sufficient number
-        of points to adequately define the curve--at least two times the number
-        of coefficients.  A starting array element number (1) must be defined
-        for each array parameter vector.  The vector specifications *VLEN,
-        *VCOL, *VABS, *VFACT, and *VCUM do not apply to this command.  Array
-        elements should not be skipped with the *VMASK and the NINC value of
-        the *VLEN specifications.  The vector being calculated (COEFF if Oper
-        is FIT, or CURVE if Oper is EVAL) must exist as a dimensioned array
-        [*DIM].
-
-        This command is valid in any processor.
-        """
-        command = "*MFOURI,%s,%s,%s,%s,%s,%s" % (str(oper), str(coeff), str(mode), str(isym), str(theta), str(curve))
-        return self.run(command, **kwargs)
-
+    
     def betad(self, value="", **kwargs):
         """APDL Command: BETAD
 
@@ -16101,141 +15557,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SPFREQ,%s,%s,%s,%s,%s,%s,%s,%s" % (str(tblno), str(freq1), str(freq2), str(freq3), str(freq4), str(freq5), str(freq6), str(freq7))
         return self.run(command, **kwargs)
 
-    def itengine(self, type_="", enginename="", precondname="", matrix="",
-                 rhsvector="", solvector="", maxiter="", toler="", **kwargs):
-        """APDL Command: *ITENGINE
-
-        Performs a solution using an iterative solver.
-
-        Parameters
-        ----------
-        type\_
-            Specifies the algorithm to be used:
-
-        enginename
-            Name used to identify this iterative solver engine. Must be
-            specified.
-
-        precondname
-            Linear solver engine name (*LSENGINE) identifying the factored
-            matrix to be used as the preconditioner.
-
-        matrix
-            Name of the matrix to solve.
-
-        rhsvector
-            Matrix (load vector) name.
-
-        solvector
-            Solution vector name. If non-zero, it will be taken as the initial
-            vector for the iterative process.
-
-        maxiter
-            Maximum number of iterations allowed. Default is 2 times the number
-            of rows in the matrix.
-
-        toler
-            Convergence tolerance. Default is 1.0E-8.
-
-        Notes
-        -----
-        This command solves Ax = b using a preconditioned conjugate gradient
-        algorithm. It uses an existing factored system as the preconditioner.
-        This solution method is useful if an existing matrix has been solved
-        and minor changes have been made to the matrix.
-        """
-        command = "*ITENGINE,%s,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(enginename), str(precondname), str(matrix), str(rhsvector), str(solvector), str(maxiter), str(toler))
-        return self.run(command, **kwargs)
-
     
-    def vwrite(self, par1="", par2="", par3="", par4="", par5="", par6="",
-               par7="", par8="", par9="", par10="", par11="", par12="",
-               par13="", par14="", par15="", par16="", par17="", par18="",
-               par19="", **kwargs):
-        """APDL Command: *VWRITE
-
-        Writes data to a file in a formatted sequence.
-
-        Parameters
-        ----------
-        par1, par2, par3, . . . , par19
-            You can write up to 19 parameters (or constants) at a time. Any Par
-            values after a blank  Par value are ignored.  If you leave them all
-            blank, one line will be written (to write a title or a blank line).
-            If you input the keyword SEQU, a sequence of numbers (starting from
-            1) will be written for that item.
-
-        Notes
-        -----
-        You use *VWRITE to write data to a file in a formatted sequence. Data
-        items (Par1, Par2, etc.) may be array parameters, scalar parameters,
-        character parameters (scalar or array), or constants.  You must
-        evaluate expressions and functions in the data item fields before using
-        the *VWRITE command, since initially they will be evaluated to a
-        constant and remain constant throughout the operation.  Unless a file
-        is defined with the *CFOPEN  command, data is written to the standard
-        output file. Data written to the standard output file may be diverted
-        to a different file by first switching the current output file with the
-        /OUTPUT command. You can also use the *MWRITE command to write data to
-        a specified file. Both commands contain format descriptors on the line
-        immediately following the command. The format descriptors can be in
-        either Fortran or C format.
-
-        You must enclose Fortran format descriptors in parentheses. They must
-        immediately follow the *VWRITE command on a separate line of the same
-        input file.  Do not include the word FORMAT. The format must specify
-        the number of fields to be written per line, the field width, the
-        placement of the decimal point, etc.  You should use one field
-        descriptor for each data item written.  The write operation uses your
-        system's available FORTRAN FORMAT conventions (see your system FORTRAN
-        manual).  You can use any standard FORTRAN real format (such as
-        (4F6.0), (E10.3,2X,D8.2), etc.) and alphanumeric format (A).
-        Alphanumeric strings are limited to a maximum of 8 characters for any
-        field (A8) using the Fortran format. Use the "C" format for string
-        arrays larger than 8 characters. Integer (I) and list-directed (*)
-        descriptors may not be used.  You can include text in the format as a
-        quoted string.  The parentheses must be included in the format and the
-        format must not exceed 80 characters (including parentheses).  The
-        output line length is limited to 128 characters.
-
-        The "C" format descriptors are used if the first character of the
-        format descriptor line is not a left parenthesis. "C" format
-        descriptors are up to 80 characters long, consisting of text strings
-        and predefined "data descriptors" between the strings where numeric or
-        alphanumeric character data will be inserted.  The normal descriptors
-        are %I for integer data, %G for double precision data, %C for
-        alphanumeric character data, and %/ for a line break. There must be one
-        data descriptor for each specified value (8 maximum) in the order of
-        the specified values. The enhanced formats described in *MSG may also
-        be used.
-
-        For array parameter items, you must define the starting array element
-        number. Looping continues (incrementing the vector index number of each
-        array parameter by one) each time you output a line, until the maximum
-        array vector element is written.  For example, *VWRITE,A(1) followed by
-        (F6.0) will write one value per output line, i.e., A(1), A(2), A(3),
-        A(4), etc.  You write constants and scalar parameters with the same
-        values for each loop.  You can also control the number of loops and
-        loop skipping with the *VLEN and *VMASK commands.  The vector
-        specifications *VABS,  *VFACT, and *VCUM  do not apply to this command.
-        If looping continues beyond the supplied data array's length, zeros
-        will be output for numeric array parameters and blanks for character
-        array parameters.  For multi-dimensioned array parameters, only the
-        first (row) subscript is incremented.  See the *VOPER command for
-        details.  If you are in the GUI, the *VWRITE command must be contained
-        in an externally prepared file and read into ANSYS (i.e., *USE, /INPUT,
-        etc.).
-
-        This command is valid in any processor.
-        """
-        # cannot be in interactive mode
-        if not self._store_commands:
-            raise RuntimeError('VWRTIE cannot run interactively.  \n\nPlease use '
-                               '``with mapdl.non_interactive:``')
-
-        command = "*VWRITE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par1), str(par2), str(par3), str(par4), str(par5), str(par6), str(par7), str(par8), str(par9), str(par10), str(par11), str(par12), str(par13), str(par14), str(par15), str(par16), str(par17), str(par18), str(par19))
-        return self.run(command, **kwargs)
-
     def pdclr(self, type_="", **kwargs):
         """APDL Command: PDCLR
 
@@ -17110,30 +16432,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "BFVLIST,%s,%s" % (str(volu), str(lab))
         return self.run(command, **kwargs)
 
-    def lsfactor(self, enginename="", option="", **kwargs):
-        """APDL Command: *LSFACTOR
-
-        Performs the numerical factorization of a linear solver system.
-
-        Parameters
-        ----------
-        enginename
-            Name used to identify this engine. Must have been previously
-            created using *LSENGINE.
-
-        option
-            Option to invert the matrix, used only with an LAPACK engine
-            (*LSENGINE,LAPACK):
-
-        Notes
-        -----
-        Performs the computationally intensive, memory intensive factorization
-        of a matrix specified by *LSENGINE, using the solver engine also
-        specified by *LSENGINE.
-        """
-        command = "*LSFACTOR,%s,%s" % (str(enginename), str(option))
-        return self.run(command, **kwargs)
-
+    
     def linl(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
              nl8="", nl9="", **kwargs):
         """APDL Command: LINL
@@ -17815,34 +17114,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "LINV,%s,%s" % (str(nl), str(nv))
         return self.run(command, **kwargs)
 
-    def axpy(self, vr="", vi="", m1="", wr="", wi="", m2="", **kwargs):
-        """APDL Command: *AXPY
-
-        Performs the matrix operation M2= v*M1 + w*M2.
-
-        Parameters
-        ----------
-        vr, vi
-            The real and imaginary parts of the scalar v. Default value is 0.
-
-        m1
-            Name of matrix M1. If not specified, the operation M2 = w*M2 will
-            be performed.
-
-        wr, wi
-            The real and imaginary parts of the scalar w. Default value is 0.
-
-        m2
-            Name of matrix M2. Must be specified.
-
-        Notes
-        -----
-        The matrices M1 and M2 must have the same dimensions and same type
-        (dense or sparse). If M2 is real, vi and wi are ignored.
-        """
-        command = "*AXPY,%s,%s,%s,%s,%s,%s" % (str(vr), str(vi), str(m1), str(wr), str(wi), str(m2))
-        return self.run(command, **kwargs)
-
+    
     def deriv(self, ir="", iy="", ix="", name="", facta="", **kwargs):
         """APDL Command: DERIV
 
@@ -18327,82 +17599,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDWRITE,%s,%s,%s" % (str(option), str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
-               **kwargs):
-        """APDL Command: *MWRITE
-
-        Writes a matrix to a file in a formatted sequence.
-
-        Parameters
-        ----------
-        parr
-            The name of the array parameter. See *SET for name restrictions.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        label
-            Can use a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (JIK).
-
-        n1, n2, n3
-            Write as (((ParR(i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for
-            Label = KIJ. n1, n2, and n3 default to the corresponding dimensions
-            of the array parameter ParR.
-
-        Notes
-        -----
-        Writes a matrix or vector to a specified file in a formatted sequence.
-        You can also use the *VWRITE command to write data to a specified file.
-        Both commands contain format descriptors on the line immediately
-        following the command. The format descriptors can be in either Fortran
-        or C format.
-
-        Fortran format descriptors are enclosed in parentheses. They must
-        immediately follow the *MWRITE command on a separate line of the same
-        input file. The word FORMAT should not be included. The format must
-        specify the number of fields to be written per line, the field width,
-        the placement of the decimal point, etc. There should be one field
-        descriptor for each data item written. The write operation uses the
-        available system FORTRAN FORMAT conventions (see your system FORTRAN
-        manual). Any standard FORTRAN real format (such as (4F6.0),
-        (E10.3,2X,D8.2), etc.) and character format (A) may be used.  Integer
-        (I) and list-directed (*) descriptors may not be used. Text may be
-        included in the format as a quoted string. The FORTRAN descriptor must
-        be enclosed in parentheses and the format must not exceed 80 characters
-        (including parentheses).
-
-        The "C" format descriptors are used if the first character of the
-        format descriptor line is not a left parenthesis. "C" format
-        descriptors may be up to 80 characters long, consisting of text strings
-        and predefined "data descriptors" between the strings where numeric or
-        alphanumeric character data are to be inserted. The normal descriptors
-        are %I for integer data, %G for double precision data, %C for
-        alphanumeric character data, and %/ for a line break. There must be one
-        data descriptor for each specified value in the order of the specified
-        values. The enhanced formats described in *MSG may also be used.
-
-        The starting array element number must be defined. Looping continues in
-        the directions indicated by the Label argument. The number of loops and
-        loop skipping may also be controlled with the *VLEN and *VMASK
-        commands, which work in the n2 direction (by row on the output file),
-        and by  the *VCOL command, which works in the n1 direction (by column
-        in the output file).  The vector specifications *VABS and *VFACT apply
-        to this command, while *VCUM does not apply to this command. See the
-        *VOPER command for details. If you are in the GUI, the *MWRITE command
-        must be contained in an externally prepared file and read into ANSYS
-        (i.e., *USE, /INPUT, etc.).
-
-        This command is valid in any processor.
-        """
-        command = "*MWRITE,%s,%s,%s,,%s,%s,%s,%s" % (str(parr), str(fname), str(ext), str(label), str(n1), str(n2), str(n3))
-        return self.run(command, **kwargs)
-
     
     def gmatrix(self, symfac="", condname="", numcond="", matrixname="",
                 **kwargs):
@@ -18810,47 +18006,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GST,%s,%s" % (str(lab), str(lab2))
         return self.run(command, **kwargs)
 
-    def parsav(self, lab="", fname="", ext="", **kwargs):
-        """APDL Command: PARSAV
-
-        Writes parameters to a file.
-
-        Parameters
-        ----------
-        lab
-            Write operation:
-
-            - ``'SCALAR'`` : Write only scalar parameters (default). 
-            - ``'ALL'`` : Write scalar and array parameters.
-              Parameters may be numeric or alphanumeric.
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Writes the current parameters to a coded file.  Previous
-        parameters on this file, if any, will be overwritten.  The
-        parameter file may be read with the PARRES command.
-
-        PARSAV/PARRES operations truncate some long decimal strings,
-        and can cause differing values in your solution data when
-        other operations are performed. A good practice is to limit
-        the number of decimal places you will use before and after
-        these operations.
-
-        This command is valid in any processor.
-        """
-        command = "PARSAV,%s,%s,%s" % (str(lab), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def grp(self, signif="", label="", forcetype="", **kwargs):
         """APDL Command: GRP
 
@@ -20212,47 +19368,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GRAPHICS,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def vec(self, vector="", type_="", method="", val1="", val2="", val3="",
-            val4="", **kwargs):
-        """APDL Command: *VEC
-
-        Creates a vector.
-
-        Parameters
-        ----------
-        vector
-            Name used to identify the vector. Must be specified.
-
-        type\_
-            Vector type:
-
-            Double precision real values (default). - Complex double precision values.
-
-        method
-            Method used to create the vector:
-
-            Allocate space for a vector (default). - Resize an existing vector to a new length. Values are kept from the original
-                              vector. If the length specified by Val1 is
-                              greater than the original vector length, the
-                              additional rows are assigned a value of zero.
-
-            Copy an existing vector. - Import the vector from a file.
-
-        val1, val2, val3, val4, val5
-            Additional input. The meaning of Val1 through Val5 will vary
-            depending on the specified Method. See details below.
-
-        Notes
-        -----
-        Use the *DMAT command to create a matrix.
-
-        For more information on the BACK and FORWARD nodal mapping vectors, see
-        Degree of Freedom Ordering in the ANSYS Parametric Design Language
-        Guide.
-        """
-        command = "*VEC,%s,%s,%s,%s,%s,%s,%s" % (str(vector), str(type_), str(method), str(val1), str(val2), str(val3), str(val4))
-        return self.run(command, **kwargs)
-
+    
     def msolve(self, numslv="", nrmtol="", nrmchkinc="", **kwargs):
         """APDL Command: MSOLVE
 
@@ -21088,88 +20204,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ANMODE,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(kaccel))
         return self.run(command, **kwargs)
 
-    def vread(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
-              nskip="", **kwargs):
-        """APDL Command: *VREAD
-
-        Reads data and produces an array parameter vector or matrix.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting array parameter vector.  See *SET for
-            name restrictions.  The parameter must exist as a dimensioned array
-            [*DIM]. String arrays are limited to a maximum of 8 characters.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        label
-            Can take a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (IJK).
-
-        n1, n2, n3
-            Read as (((ParR (i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for
-            Label = KIJ. n2 and n3 default to 1.
-
-        nskip
-            Number of lines at the beginning of the file being read that will
-            be skipped during the reading.  Default = 0.
-
-        Notes
-        -----
-        Reads data from a file and fills in an array parameter vector or
-        matrix.  Data are read from a formatted file or, if the menu is off
-        [/MENU,OFF] and Fname is blank, from the next input lines.  The format
-        of the data to be read must be input immediately following the *VREAD
-        command.  The format specifies the number of fields to be read per
-        record, the field width, and the placement of the decimal point (if
-        none specified in the value).  The read operation follows the available
-        FORTRAN FORMAT conventions of the system (see your system FORTRAN
-        manual).  Any standard FORTRAN real format (such as (4F6.0),
-        (E10.3,2X,D8.2), etc.) or alphanumeric format (A) may be used.
-        Alphanumeric strings are limited to a maximum of 8 characters for any
-        field (A8). For storage of string arrays greater than 8 characters, the
-        *SREAD command can be used. Integer (I) and list-directed (*)
-        descriptors may not be used.  The parentheses must be included in the
-        format and the format must not exceed 80 characters (including
-        parentheses).  The input line length is limited to 128 characters.
-
-        A starting array element number must be defined for the result array
-        parameter vector (numeric or character).  For example, entering these
-        two lines:
-
-        will read two values from each line of file ARRAYVAL and assign the
-        values to A(1), A(2), A(3), etc.  Reading continues until successive
-        row elements [*VLEN, *VMASK, *DIM] are filled.
-
-        For an array parameter matrix, a starting array element row and column
-        number must be defined.  For example, entering these two lines:
-
-        will read two values from each line of file ARRAYVAL and assign the
-        values to A(1,1), A(2,1), A(3,1), etc.  Reading continues until n1 (10)
-        successive row elements are filled.  Once the maximum row number is
-        reached, subsequent data will be read into the next column (e.g.,
-        A(1,2), A(2,2), A(3,2), etc.)
-
-        For numerical parameters, absolute values and scale factors may be
-        applied to the result parameter [*VABS, *VFACT].  Results may be
-        cumulative [*VCUM].  See the *VOPER command for details.  If you are in
-        the GUI the *VREAD command must be contained in an externally prepared
-        file read into the ANSYS program (i.e., *USE, /INPUT, etc.).
-
-        This command is not applicable to 4- or 5-D arrays.
-
-        This command is valid in any processor.
-        """
-        command = f"*VREAD,{parr},{fname},{ext},,{label},{n1},{n2},{n3},{nskip}"
-        return self.run(command, **kwargs)
-
+    
     def mat(self, mat="", **kwargs):
         """APDL Command: MAT
 
@@ -21607,44 +20642,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDRD,%s,%s,%s" % (str(option), str(part), str(mrb))
         return self.run(command, **kwargs)
 
-    def tread(self, par="", fname="", ext="", nskip="", **kwargs):
-        """APDL Command: *TREAD
-
-        Reads data from an external file into a table array parameter.
-
-        Parameters
-        ----------
-        par
-            Table array parameter name as defined by the *DIM command.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        nskip
-            Number of comment lines at the beginning of the file being read
-            that will be skipped during the reading.  Default = 0.
-
-        Notes
-        -----
-        Use this command to read in a table of data from an external file into
-        an ANSYS table array parameter.  The external file may be created using
-        a text editor or by an external application or program.  The external
-        file must be in tab-delimited, blank-delimited, or comma-delimited
-        format to be used by *TREAD. The ANSYS TABLE type array parameter must
-        be defined before you can read in an external file.  See *DIM  for more
-        information.
-
-        This command is not applicable to 4- or 5-D tables.
-        """
-        command = "*TREAD,%s,%s,%s,,%s" % (str(par), str(fname), str(ext), str(nskip))
-        return self.run(command, **kwargs)
-
+    
     def outres(self, item="", freq="", cname="", nsvar="", dsubres="",
                **kwargs):
         """APDL Command: OUTRES
@@ -22605,44 +21603,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/PAGE,%s,%s,%s,%s,%s" % (str(iline), str(ichar), str(bline), str(bchar), str(comma))
         return self.run(command, **kwargs)
 
-    def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
-        """APDL Command: VGET
-
-        Moves a variable into an array parameter vector.
-
-        Parameters
-        ----------
-        par
-            Array parameter vector in the operation.
-
-        ir
-            Reference number of the variable (1 to NV [NUMVAR]).
-
-        tstrt
-            Time (or frequency) corresponding to start of IR data.  If between
-            values, the nearer value is used.
-
-        kcplx
-            Complex number key:
-
-            0 - Use the real part of the IR data.
-
-            1 - Use the imaginary part of the IR data.
-
-        Notes
-        -----
-        Moves a variable into an array parameter vector.  The starting array
-        element number must be defined.  For example, VGET,A(1),2 moves
-        variable 2 (starting at time 0.0) to array parameter A.  Looping
-        continues from array element A(1) with the index number incremented by
-        one until the variable is filled.  The number of loops may be
-        controlled with the *VLEN command (except that loop skipping (NINC) is
-        not allowed).  For multi-dimensioned array parameters, only the first
-        (row) subscript is incremented.
-        """
-        command = "VGET,%s,%s,%s,%s" % (str(par), str(ir), str(tstrt), str(kcplx))
-        return self.run(command, **kwargs)
-
+    
     def dval(self, baseid="", lab="", value="", value2="", keycal="",
              **kwargs):
         """APDL Command: DVAL
@@ -22902,48 +21863,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "HFANG,%s,%s,%s,%s,%s" % (str(lab), str(phi1), str(phi2), str(theta1), str(theta2))
         return self.run(command, **kwargs)
 
-    def eigen(self, kmatrix="", mmatrix="", cmatrix="", evals="", evects="",
-              **kwargs):
-        """APDL Command: *EIGEN
-
-        Performs a modal solution with unsymmetric or damping matrices.
-
-        Parameters
-        ----------
-        kmatrix
-            Name of the stiffness matrix. May be a real or complex-valued
-            matrix.
-
-        mmatrix
-            Name of the mass matrix.
-
-        cmatrix
-            Name of the damping matrix (used only for MODOPT,DAMP).
-
-        evals
-            Name of the output eigenvalues vector. It will be an m-long *VEC
-            vector of complex values, where m is the number of eigenvalues
-            requested (MODOPT).
-
-        evects
-            Name of the output eigenvector matrix. It will be a n x m *DMAT
-            (dense) matrix of complex values, where n is the size of the matrix
-            and m is the number of eigenvalues requested (MODOPT).
-
-        Notes
-        -----
-        Use the command ANTYPE,MODAL and the MODOPT command to specify the
-        modal solution options. Only MODOPT,DAMP, MODOPT,UNSYM, MODOPT,LANB,
-        and MODOPT,SUBSP are supported.
-
-        *EIGEN with Block Lanczos (LANB) only supports sparse matrices.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "*EIGEN,%s,%s,%s,%s,%s" % (str(kmatrix), str(mmatrix), str(cmatrix), str(evals), str(evects))
-        return self.run(command, **kwargs)
-
+    
     def kdele(self, np1="", np2="", ninc="", **kwargs):
         """APDL Command: KDELE
 
@@ -27944,49 +26864,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "TUNIF,%s" % (str(temp))
         return self.run(command, **kwargs)
 
-    def abbr(self, abbr="", string="", **kwargs):
-        """APDL Command: *ABBR
-
-        Defines an abbreviation.
-
-        Parameters
-        ----------
-        abbr
-            The abbreviation (up to 8 alphanumeric characters) used to
-            represent the string String.  If Abbr is the same as an existing
-            ANSYS command, the abbreviation overrides.  Avoid using an Abbr
-            which is the same as an ANSYS command.
-
-        string
-            String of characters (60 maximum) represented by Abbr.  Cannot
-            include a $ or any of the commands C***,  /COM,  /GOPR,  /NOPR,
-            /QUIT,  /UI, or  *END.  Parameter names and commands of the *DO and
-            Use the *IF groups may not be abbreviated. If String is blank, the
-            abbreviation is deleted. To abbreviate multiple commands, create an
-            "unknown command" macro or define String to execute a macro file
-            [*USE] containing the desired commands.
-
-        Notes
-        -----
-        Once the abbreviation Abbr is defined, you can issue it at the
-        beginning of a command line and follow it with a blank (or with a comma
-        and appended data), and the program will substitute the string  String
-        for Abbr as the line is executed. Up to 100 abbreviations may exist at
-        any time and are available throughout the program. Abbreviations may be
-        redefined or deleted at any time.
-
-        Use *STATUS to display the current list of abbreviations. For
-        abbreviations repeated with *REPEAT, substitution occurs before the
-        repeat increments are applied. There are a number of abbreviations that
-        are predefined by the program (these can be deleted by using the blank
-        String option described above). Note that String will be written to the
-        File.LOG.
-
-        This command is valid in any processor.
-        """
-        command = "*ABBR,%s,%s" % (str(abbr), str(string))
-        return self.run(command, **kwargs)
-
+    
     def gplot(self, **kwargs):
         """APDL Command: GPLOT
 
@@ -29097,27 +27975,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "STORE,%s,%s" % (str(lab), str(npts))
         return self.run(command, **kwargs)
 
-    def starprint(self, matrix="", fname="", **kwargs):
-        """APDL Command: *PRINT
-
-        Prints the matrix values to a file.
-
-        Parameters
-        ----------
-        matrix
-            Name of matrix or vector to print. Must be specified.
-
-        fname
-            File name. If blank, matrix is written to the output file.
-
-        Notes
-        -----
-        The matrix may be a dense matrix (*DMAT), a sparse matrix (*SMAT), or a
-        vector (*VEC). Only the non-zero entries of the matrix are printed.
-        """
-        command = "*PRINT,%s,%s" % (str(matrix), str(fname))
-        return self.run(command, **kwargs)
-
+    
     def prcint(self, id_="", node="", dtype="", **kwargs):
         """APDL Command: PRCINT
 
@@ -29185,175 +28043,6 @@ class _MapdlCommands():  # pragma: no cover
         PRCINT, ID, , STTMAX (or PSMAX)
         """
         command = "PRCINT,%s,%s,%s" % (str(id_), str(node), str(dtype))
-        return self.run(command, **kwargs)
-
-    def moper(self, parr="", par1="", oper="", val1="", val2="",
-            val3="", val4="", val5="", val6="", **kwargs):
-        """APDL Command: *MOPER
-
-         Performs matrix operations on array parameter matrices.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting array parameter matrix.  See *SET for
-            name restrictions.
-
-        par1
-            First array parameter matrix input to the operation. For Oper =
-            MAP, this is an N x 3 array of coordinate locations at which to
-            interpolate. ParR will then be an N(out) x M array containing the
-            interpolated values.
-
-        oper
-            Matrix operations:
-
-            INVERT - (*MOPER, ParR, Par1, INVERT)
-            Square matrix invert: Inverts the n x n matrix in Par1
-            into ParR. The matrix must be well conditioned.
-
-            Warning: Non-independent or ill-conditioned equations can
-            cause erroneous results. - For large matrices, use the
-            APDL Math operation *LSFACTOR for efficiency (see APDL
-            Math).
-
-            MULT - (*MOPER, ParR, Par1, MULT, Par2)
-            Matrix multiply: Multiplies Par1 by Par2.  The number of
-            rows of Par2 must equal the number of columns of Par1 for
-            the operation. If Par2 is input with a number of rows
-            greater than the number of columns of Par1, matrices are
-            still multiplied. However, the operation only uses a
-            number of rows of Par2 equal to the number of columns of
-            Par1.
-
-            COVAR - (*MOPER, ParR, Par1, COVAR, Par2)
-            Covariance: The measure of association between two columns
-            of the input matrix (Par1).  Par1, of size m runs (rows)
-            by n data (columns) is first processed to produce a row
-            vector containing the mean of each column which is
-            transposed to a column vector (Par2) of n array elements.
-            The Par1 and Par2 operation then produces a resulting n x
-            n matrix (ParR) of covariances (with the variances as the
-            diagonal terms).
-
-            CORR - (*MOPER, ParR, Par1, CORR, Par2)
-            Correlation: The correlation coefficient between two
-            variables.  The input matrix (Par1), of size m runs (rows)
-            by n data (columns), is first processed to produce a row
-            vector containing the mean of each column which is then
-            transposed to a column vector (Par2) of n array elements.
-            The Par1 and Par2 operation then produces a resulting n x
-            n matrix (ParR) of correlation coefficients (with a value
-            of 1.0 for the diagonal terms).
-
-            SOLV - (*MOPER, ParR, Par1, SOLV, Par2)
-            Solution of simultaneous equations: Solves the set of n
-            equations of n terms of the form an1x1 + an2x2 + ... +
-            annxn = bn where Par1 contains the matrix of
-            a-coefficients, Par2 the vector(s) of b-values, and ParR
-            the vector(s) of x-results.  Par1 must be a square matrix.
-            The equations must be linear, independent, and well
-            conditioned.
-
-            Warning: Non-independent or ill-conditioned equations can
-            cause erroneous results. - For large matrices, use the
-            APDL Math operation *LSFACTOR for efficiency (see APDL
-            Math).
-
-            SORT - (*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)
-            Matrix sort: Sorts matrix Par1 according to sort vector
-            Par2 and places the result back in Par1. Rows of Par1 are
-            moved to the corresponding positions indicated by the
-            values of Par2. Par2 may be a column of Par1 (in which
-            case it will also be reordered). Alternatively, you may
-            specify the column of Par1 to sort using n1 (leaving Par2
-            blank). A secondary sort can be specified by column n2,
-            and a third sort using n3. ParR is the vector of initial
-            row positions (the permutation vector).  Sorting Par1
-            according to ParR should reproduce the initial ordering.
-
-            NNEAR - (*MOPER, ParR, Par1, NNEAR, Toler)
-            Nearest Node: Quickly determine all the nodes within a
-            specified tolerance of a given array.  ParR is a vector of
-            the nearest selected nodes, or 0 if no nodes are nearer
-            than Toler. Par1 is the n x 3 array of coordinate
-            locations. Toler defaults to 1 and is limited to the
-            maximum model size. - (*MOPER, ParR, Par1, ENEAR, Toler)
-
-            ENEAR - (*MOPER, ParR, Par1, ENEAR, Toler)
-            Nearest Element: Quickly determine the elements with
-            centroids that are within a specified tolerance of the
-            points in a given array. - ParR is a vector of the nearest
-            selected elements, or 0 if no element centroids are nearer
-            than Toler. Par1 is the n x 3 array of coordinate
-            locations.
-
-            MAP - (*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)
-
-            Maps the results from one set of points to another. For
-            example, you can map pressures from a CFD analysis onto
-            your model for a structural analysis.
-
-            Par1 is the Nout x 3 array of points that will be mapped
-            to. Par2 is the Nin x M array that contains M values of
-            data to be interpolated at each point and corresponds to
-            the Nin x 3 points in Par3. The resulting ParR is the Nout
-            x M array of mapped data points.
-
-            For each point in the destination mesh, all possible
-            triangles in the source mesh are searched to find the best
-            triangle containing each point. It then does a linear
-            interpolation inside this triangle. You should carefully
-            specify your interpolation method and search criteria in
-            order to provide faster and more accurate results (see
-            LIMIT, below).
-
-            kDim is the interpolation criteria. If kDim = 2 or 0, two
-            dimensional interpolation is applied (interpolate on a
-            surface). If kDim = 3, three dimensional interpolation is
-            applied (interpolate on a volume).
-
-            kOut specified how points outside of the domain are
-            handled. If kOut = 0, use the value(s) of the nearest
-            region point for points outside of the region. If kOut =
-            1, set results outside of the region to zero.
-
-            LIMIT specifies the number of nearby points considered for
-            interpolation. The default is 20, and the minimum is
-            5. Lower values will reduce processing time; however, some
-            distorted or irregular sets of points will require a
-            higher LIMIT value to encounter three nodes for
-            triangulation.
-
-            Output points are incorrect if they are not within the
-            domain (area or volume) defined by the specified input
-            points. Also, calculations for out-of-bound points require
-            much more processing time than do points that are within
-            bounds. Results mapping is available from the command line
-            only.
-
-            INTP - (*MOPER, ParR, Par1, INTP, Par2)
-            Finds the elements that contain each point in the array of
-            n x 3 points in Par1. Par2 will contain the set of element
-            ID numbers and ParR will contain their n x 3 set of
-            natural element coordinates (values between -1 and
-            1). Par1 must be in global Cartesian coordinates.
-
-            SGET - (*MOPER, ParR, Par1, SGET, Par2, Label, Comp)
-            Gets the nodal solution item corresponding to Label and
-            Comp (see the PLNSOL command) and interpolates it to the
-            given element locations. Par1 contains the n x 3 array of
-            natural element coordinates (values between -1 and 1) of
-            the n element ID numbers in Par2. Par1 and Par2 are
-            usually the output of the *MOPER,,,INTP operation. ParR
-            contains the n interpolated results.
-
-            Val1, Val2, ..., Val6
-            Additional input used in the operation. The meanings of
-            Val1 through Val6 vary depending on the specified matrix
-            operation. See the description of Oper for details.
-        """
-        command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
     
@@ -30511,33 +29200,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/WINDOW,%s,%s,%s,%s,%s,%s" % (str(wn), str(xmin), str(xmax), str(ymin), str(ymax), str(ncopy))
         return self.run(command, **kwargs)
 
-    def psearch(self, pname="", **kwargs):
-        """APDL Command: /PSEARCH
-
-        Specifies a directory to be searched for "unknown command" macro files.
-
-        Parameters
-        ----------
-        pname
-            Path name (64 characters maximum, and must include the final
-            delimiter) of the middle directory to be searched.  Defaults to the
-            user home directory.  If Pname = OFF, search only the ANSYS and
-            current working directories.  If Pname = STAT, list the current
-            middle directory and show the ANSYS_MACROLIB setting.
-
-        Notes
-        -----
-        Specifies the pathname of a directory for file searches when reading
-        "unknown command" macro files.  The search for the files is typically
-        from the ANSYS directory, then from the user home directory, and then
-        from the current working directory.  This command allows the middle
-        directory searched to be other than the user home directory.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/PSEARCH,%s" % (str(pname))
-        return self.run(command, **kwargs)
-
+    
     def wrfull(self, ldstep="", **kwargs):
         """APDL Command: WRFULL
 
@@ -31356,58 +30019,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DDASPEC,%s,%s,%s,%s,%s" % (str(keyref), str(shptyp), str(mountloc), str(deftyp), str(amin))
         return self.run(command, **kwargs)
 
-    def ucmd(self, cmd="", srnum="", **kwargs):
-        """APDL Command: /UCMD
-
-        Assigns a user-defined command name.
-
-        Parameters
-        ----------
-        cmd
-            User-defined command name.  Only the first four characters are
-            significant.  Must not conflict with any ANSYS command name or any
-            user "unknown command" macro name.
-
-        srnum
-            User subroutine number (1 to 10) programmed for this command.  For
-            example, the command /UCMD,MYCMD,3 will execute subroutine USER03
-            whenever the command MYCMD is entered.  Use a blank command name to
-            disassociate SRNUM from its command.  For example, /UCMD,,3 removes
-            MYCMD as a command.
-
-        Notes
-        -----
-        Assigns a user-defined command name to a user-programmable (system-
-        dependent) subroutine.  This feature allows user-defined commands to be
-        programmed into the ANSYS program.  Once programmed, this command can
-        be input to the program like other commands, and can also be included
-        in the ANSYS start-up file.  See *ULIB for another way of defining user
-        commands.
-
-        Up to 10 subroutines are available for user-defined commands (USER01 to
-        USER10).  Users must have system permission, system access, and
-        knowledge to write, compile, and link the appropriate subprocessors
-        into the ANSYS program at the site where it is to be run.  All routines
-        should be written in FORTRAN. For more information on FORTRAN compilers
-        please refer to either the ANSYS, Inc. Windows Installation Guide or
-        the ANSYS, Inc. Linux Installation Guide for details specific to your
-        platform or operating system. The USER01 routine is commented and
-        should be listed from the distribution media (system dependent) for
-        more details.  Issue /UCMD,STAT to list all user-defined command names.
-        Since a user-programmed command is a nonstandard use of the program,
-        the verification of any ANSYS run incorporating these commands is
-        entirely up to the user.  In any contact with ANSYS customer support
-        regarding the performance of a custom version of the ANSYS program, you
-        should explicitly state that a user programmable feature has been used.
-        See the Advanced Analysis Guide for a general description of user-
-        programmable features and Guide to User-Programmable Features for a
-        detailed description of these features.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/UCMD,%s,%s" % (str(cmd), str(srnum))
-        return self.run(command, **kwargs)
-
+    
     def pbf(self, item="", key="", **kwargs):
         """APDL Command: /PBF
 
@@ -32059,52 +30671,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FEBODY,"
         return self.run(command, **kwargs)
 
-    def tee(self, label="", fname="", ext="", **kwargs):
-        """APDL Command: /TEE
-
-        Writes a list of commands to a specified file at the same time that the
-        commands are being executed.
-
-        Parameters
-        ----------
-        label
-            Indicates how ANSYS is to interpret this /TEE command:
-
-            Signals the beginning of the command text that is to be
-            written to Fname. If Fname already exists, specifying NEW
-            causes the contents of Fname to be overwritten. -
-            Indicates that you want to append to Fname the command
-            text that follows.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        You can use the /TEE command to record a macro to a specified file at
-        the same time that the macro is being executed. It is similar to the
-        Linux tee command.
-
-        For more information about the /TEE command, see the Introducing APDL
-        of the ANSYS Parametric Design Language Guide.
-
-        The following example illustrates the use of the /TEE command. If you
-        issue these commands:
-
-        the content of myfile.mac is:
-
-        This command is valid in any processor, but only during an interactive
-        run.
-        """
-        command = "/TEE,%s,%s,%s" % (str(label), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def hrout(self, reimky="", clust="", mcont="", **kwargs):
         """APDL Command: HROUT
 
@@ -32355,57 +30922,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CESGEN,%s,%s,%s,%s,%s" % (str(itime), str(inc), str(nset1), str(nset2), str(ninc))
         return self.run(command, **kwargs)
 
-    def fft(self, type_="", inputdata="", outputdata="", dim1="", dim2="",
-            resultformat="", **kwargs):
-        """APDL Command: *FFT
-
-        Computes the fast Fourier transformation of a specified matrix or
-        vector.
-
-        Parameters
-        ----------
-        type\_
-            Type of FFT transformation:
-
-            Forward FFT computation (default). - Backward FFT computation.
-
-        inputdata
-            Name of matrix or vector for which the FFT will be computed. This
-            can be a dense matrix (created by the *DMAT command) or a vector
-            (created by the *VEC command). Data can be real or complex values.
-            There is no default value for this argument.
-
-        outputdata
-            Name of matrix or vector where the FFT results will be stored. The
-            type of this argument must be consistent with InputData (see table
-            below). There is no default value for this argument.
-
-        dim1
-            The number of terms to consider for a vector, or the number of rows
-            for a matrix. Defaults to the whole input vector or all the rows of
-            the matrix.
-
-        dim2
-            The number of columns to consider for a matrix. Defaults to all the
-            columns of the matrix. (Valid only for matrices.)
-
-        resultformat
-            Specifies the result format:
-
-            Returns the full result. That is, the result matches the dimension specified on this command (DIM1, DIM2). - Returns partial results. For real input data, there is a symmetry in the
-                              results of the Fourier transform as some
-                              coefficients are conjugated. The partial format
-                              uses this symmetry to optimize the storage of the
-                              results. (Valid only for real data.)
-
-        Notes
-        -----
-        In the example that follows, the fast Fourier transformation is used to
-        filter frequencies from a noisy input signal.
-        """
-        command = "*FFT,%s,%s,%s,%s,%s,%s" % (str(type_), str(inputdata), str(outputdata), str(dim1), str(dim2), str(resultformat))
-        return self.run(command, **kwargs)
-
+    
     def view(self, wn="", xv="", yv="", zv="", **kwargs):
         """APDL Command: /VIEW
 
@@ -32789,39 +31306,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PLORB,"
         return self.run(command, **kwargs)
 
-    def abbres(self, lab="", fname="", ext="", **kwargs):
-        """APDL Command: ABBRES
-
-        Reads abbreviations from a coded file.
-
-        Parameters
-        ----------
-        lab
-            Label that specifies the read operation:
-
-            Replace current abbreviation set with these abbreviations (default). - Extend current abbreviation set with these abbreviations, replacing any of the
-                              same name that already exist.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        The abbreviation file may have been written with the ABBSAV command. Do
-        not issue ABBRES,NEW while inside an executing abbreviation. Doing so
-        will cause all data for the executing abbreviation to be deleted.
-
-        This command is valid in any processor.
-        """
-        command = "ABBRES,%s,%s,%s" % (str(lab), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def arefine(self, na1="", na2="", ninc="", level="", depth="", post="",
                 retain="", **kwargs):
         """APDL Command: AREFINE
@@ -33116,38 +31601,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "NLOPT,"
         return self.run(command, **kwargs)
 
-    def init(self, name="", method="", val1="", val2="", val3="", **kwargs):
-        """APDL Command: *INIT
-
-        Initializes a vector or dense matrix.
-
-        Parameters
-        ----------
-        name
-            Vector or matrix which will be initialized. This can be a vector
-            (created by the *VEC command) or a dense matrix (created by the
-            *DMAT command).
-
-        method
-            Initialization method to use:
-
-            Fill the vector/matrix with zeros (default). - Fill the vector/matrix with a constant value.
-
-            Fill the vector/matrix with random values. - Fill the nth diagonal of the matrix with a constant value. Other values are not
-                              overwritten.
-
-        val1, val2, val3
-            Additional input. The meaning of Val1 through Val3 will vary
-            depending on the specified Method. See details below.
-
-        Notes
-        -----
-        This command initializes a previously defined vector (*VEC) or dense
-        matrix (*DMAT).
-        """
-        command = "*INIT,%s,%s,%s,%s,%s" % (str(name), str(method), str(val1), str(val2), str(val3))
-        return self.run(command, **kwargs)
-
+    
     def edsolv(self, **kwargs):
         """APDL Command: EDSOLV
 
@@ -34958,81 +33412,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PTXY,%s,%s,%s,%s,%s,%s,%s,%s" % (str(x1), str(y1), str(x2), str(y2), str(x3), str(y3), str(x4), str(y4))
         return self.run(command, **kwargs)
 
-    def msg(self, lab="", val1="", val2="", val3="", val4="", val5="", val6="",
-            val7="", val8="", **kwargs):
-        """APDL Command: *MSG
-
-        Writes an output message via the ANSYS message subroutine.
-
-        Parameters
-        ----------
-        lab
-            Label for output and termination control:
-
-            Writes the message with no heading (default). - Writes the message with a "NOTE" heading.
-
-            Writes the message with a "WARNING" heading.  Also writes the message to the errors file, Jobname.ERR. - Writes the message with a "ERROR" heading and causes run termination (if batch)
-                              at earliest "clean exit" point.  Also writes the
-                              message to the errors file, Jobname.ERR.
-
-            Writes the message with a "FATAL ERROR" heading and causes run termination immediately.  Also writes the message to the errors file, Jobname.ERR. - Writes the message with a "NOTE" heading and displays it in the message dialog
-                              box.  This option is most useful in GUI mode.
-
-        val1, val2, val3, . . . , val8
-            Numeric or alphanumeric character values to be included in message.
-            Values may be the results of parameter evaluations.  All numeric
-            values are assumed to be double precision. The FORTRAN nearest
-            integer (NINT) function is used to form integers for the %I
-            specifier.
-
-        Notes
-        -----
-        Allows writing an output message via the ANSYS message subroutine.
-        Also allows run termination control.  This command is used only when
-        contained in a prepared file read into the ANSYS program (i.e.,
-        *USE,/INPUT, etc.).  A message format must immediately follow the *MSG
-        command (on a separate line, without parentheses, as described below).
-
-        The message format may be up to 80 characters long, consisting of text
-        strings and predefined "data descriptors" between the strings where
-        numeric or alphanumeric character data are to be inserted.  The normal
-        descriptors are %I for integer data, %G for double precision data, %C
-        for alphanumeric character data, and %/ for a line break.  The
-        corresponding FORTRAN data descriptors are I9, 1PG16.9 and A8,
-        respectively.  Each descriptor must be preceded by a blank.  There must
-        be one data descriptor for each specified value (8 maximum) in the
-        order of the specified values.
-
-        Enhanced descriptions may also be used:
-
-        Do not begin *MSG format lines with *IF, *ELSE , *ELSEIF , or *ENDIF .
-        If the last nonblank character of the message format is an ampersand
-        (&), a second line will also be read as a continuation of the format.
-        Up to nine continuations (ten total lines) may be read.  If normal
-        descriptions are used, then consecutive blanks are condensed into one
-        blank upon output, and a period is appended.  Up to ten lines of output
-        of 72 characters each may be produced (using the %/ descriptor).  Two
-        examples follow.
-
-        Here is an example of the *MSG command and a format to print a message
-        with two integer values and one real value:
-
-        The output line is:
-
-        Here is an example illustrating multiline displays in GUI message
-        windows:
-
-        Note:: : The /UIS,MSGPOP command controls which messages are displayed
-        in the message dialog box when the GUI is active.  All messages
-        produced by the *MSG command are subject to the /UIS specification,
-        with one exception,  If Lab = UI, the message will be displayed in the
-        dialog box regardless of the /UIS specification.
-
-        This command is valid in any processor.
-        """
-        command = "*MSG,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(val1), str(val2), str(val3), str(val4), str(val5), str(val6), str(val7), str(val8))
-        return self.run(command, **kwargs)
-
+    
     def edpl(self, ldnum="", **kwargs):
         """APDL Command: EDPL
 
@@ -35441,18 +33821,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDRST,%s,%s" % (str(nstep), str(dt))
         return self.run(command, **kwargs)
 
-    def cfclos(self, **kwargs):
-        """APDL Command: *CFCLOS
-
-        Closes the "command" file.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "*CFCLOS,"
-        return self.run(command, **kwargs)
-
+    
     def krefine(self, np1="", np2="", ninc="", level="", depth="", post="",
                 retain="", **kwargs):
         """APDL Command: KREFINE
@@ -36333,166 +34702,8 @@ class _MapdlCommands():  # pragma: no cover
         command = "AFILLT,%s,%s,%s" % (str(na1), str(na2), str(rad))
         return self.run(command, **kwargs)
 
-    def vabs(self, kabsr="", kabs1="", kabs2="", kabs3="", **kwargs):
-        """APDL Command: *VABS
-
-        Applies the absolute value function to array parameters.
-
-        Parameters
-        ----------
-        kabsr
-            Absolute value of results parameter:
-
-            Do not take absolute value of results parameter (ParR). - Take absolute value.
-
-        kabs1
-            Absolute value of first parameter:
-
-            Do not take absolute value of first parameter (Par1 or ParI). - Take absolute value.
-
-        kabs2
-            Absolute value of second parameter:
-
-            Do not take absolute value of second parameter (Par2 or ParJ). - Take absolute value.
-
-        kabs3
-            Absolute value of third parameter:
-
-            Do not take absolute value of third parameter (Par3 or ParK). - Take absolute value.
-
-        Notes
-        -----
-        Applies an absolute value to parameters used in certain  *VXX and  *MXX
-        operations.  Typical absolute value applications are of the form:
-
-        ParR = |f(|Par1|)|
-
-        or
-
-        ParR = |(|Par1| o |Par2|)|
-
-        The absolute values are applied to each input parameter value before
-        the operation and to the result value after the operation.  Absolute
-        values are applied before the scale factors so that negative scale
-        factors may be used.  The absolute value settings are reset to the
-        default (no absolute value) after each *VXX or *MXX operation.  Use
-        *VSTAT to list settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VABS,%s,%s,%s,%s" % (str(kabsr), str(kabs1), str(kabs2), str(kabs3))
-        return self.run(command, **kwargs)
-
     
     
-    def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
-              con5="", con6="", con7="", con8="", con9="", con10="", **kwargs):
-        """APDL Command: *VFILL
-
-        Fills an array parameter.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting numeric array parameter vector.  See *SET
-            for name restrictions.
-
-        func
-            Fill function:
-
-            DATA - Assign specified values CON1, CON2, etc. to successive
-            array elements.  Up to 10 assignments may be made at a
-            time.  Any CON values after a blank CON value are
-            ignored. - Assign ramp function values: CON1+((n-1)*CON2)
-            , where n is the loop number [*VLEN].  To specify a
-            constant function (no ramp), set CON2 to zero.
-
-            RAMP - Assign random number values based on a uniform
-            distribution RAND(CON1,CON2), where: - Assign random
-            sample of Gaussian distributions GDIS(CON1,CON2).
-
-            RAND - Assign random number values based on a uniform
-            distribution RAND(CON1,CON2), where CON1 is the lower
-            bound (defaults to 0.0) and CON2 is the upper bound
-            (defaults to 1.0)
-
-            GDIS - Assign random sample of Gaussian distributions
-            GDIS(CON1,CON2) where CON1 is the mean (defaults to 0.0),
-            and CON2 is the standard deviation (defaults to 1.0)
-
-            TRIA - Assigns random number values based on a triangular
-            distribution TRIA(CON1,CON2,CON3) where CON1 is the lower
-            bound (defaults to 0.0), CON2 is the location of the peak
-            value (CON1 ≤ CON2 ≤CON3; CON2 defaults to 0 if CON1 ≤ 0 ≤
-            CON3, CON1 if 0 ≤ CON1, or CON3 if CON3 ≤ 0), and CON3 is
-            the upper bound (defaults to 1.0 + CON1 if CON1 ≥ 0 or 0.0
-            if CON1 ≤ 0)
-
-            BETA - Assigns random number values based on a beta
-            distribution BETA(CON1,CON2,CON3,CON4) where: CON1 is the
-            lower bound (defaults to 0.0), CON2 is the upper bound
-            (defaults to 1.0 + CON1 if CON1 ≥ 0 or 0.0 if CON1 ≤ 0), and CON3
-            and CON4 are the alpha and beta parameters, respectively,
-            of the beta function. Alpha and beta must both be
-            positive; they default to 1.0.
-
-            GAMM - Assigns random number values based on a gamma
-            distribution: GAMM(CON1,CON2,CON3) where: CON1 is the
-            lower bound (defaults to 0.0), CON2 and CON3 are the alpha
-            and beta parameters, respectively, of the gamma
-            function. Alpha and beta must both be positive; they
-            default to 1.0.
-
-            RIGID - Generates the rigid body modes with respect to the
-            reference point coordinates (CON1, CON2, CON3). The
-            dimensions of the array parameter ParR are (dim1,dim2)
-            where dim1 is the maximum node number (including internal
-            nodes but excluding orientation nodes) multiplied by the
-            number of degrees of freedom, and dim2 is the number of
-            rigid body modes (which corresponds to the number of
-            structural degrees of freedom).
-
-            CLUSTER - Generates excitation frequencies with clustering
-            option CLUSTER(CON1,CON2,CON3,CON4,%CON5%) where:
-
-            - CON1 is the lower end of the frequency range in Hz (0 < CON1)
-            - CON2 is the upper end of the frequency range in Hz (CON1 < CON2)
-            - CON3 is the number of points on each side of the natural
-              frequency (4 ≤ CON3 ≤ 20, defaults to 4)
-            - CON4 is the constant damping ratio value or an array
-              parameter (size NFR) specifying the damping ratios (if
-              zero or blank, defaults to constant damping ratio of
-              0.005)
-            - CON5 is an array parameter (size NFR) specifying the
-              natural frequencies in Hz
-        
-            The dimension of the resulting array parameter ParR is
-            less than 2+NFR*(2*CON3+1) where NFR is the number of
-            natural frequencies defined in CON5.
-
-        con1, con2, con3, . . . , con10
-            Constants used with above functions.
-
-        Notes
-        -----
-        Operates on input data and produces one output array parameter vector
-        according to:
-
-        ParR = f(CON1, CON2, : ...)
-
-        where the functions (f) are described above. Operations use successive
-        array elements [*VLEN, *VMASK] with the default being all successive
-        elements.  For example, *VFILL,A,RAMP,1,10 assigns A(1) = 1.0, A(2) =
-        11.0, A(3) = 21.0, etc.  *VFILL,B(5,1),DATA,1.5,3.0 assigns B(5,1) =
-        1.5 and B(6,1) = 3.0.  Absolute values and scale factors may be applied
-        to the result parameter [*VABS, *VFACT].  Results may be cumulative
-        [*VCUM].  See the *VOPER command for details.
-
-        This command is valid in any processor.
-        """
-        command = "*VFILL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(func), str(con1), str(con2), str(con3), str(con4), str(con5), str(con6), str(con7), str(con8), str(con9), str(con10))
-        return self.run(command, **kwargs)
-
     def djdele(self, elem="", lab="", **kwargs):
         """APDL Command: DJDELE
 
@@ -37068,38 +35279,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FILEDISP,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def cfwrite(self, command="", **kwargs):
-        """APDL Command: *CFWRITE
-
-        Writes an ANSYS command (or similar string) to a "command" file.
-
-        Parameters
-        ----------
-        command
-            Command or string to be written.  The standard command form of a
-            label followed by arguments separated by commas is assumed.
-            Command may be a parameter assignment (e.g.,  *CFWRITE, A = 5).
-
-        Notes
-        -----
-        Writes an ANSYS command (or similar string) to the file opened with
-        *CFOPEN.  The Command string is not executed (except that numeric and
-        character parameter substitution and operations (with imbedded *, /, >,
-        etc. characters) are performed before writing).  When used with *GET
-        results and parameter substitution, an ANSYS command can be created
-        from results and then read back into the ANSYS program (or used
-        elsewhere).  For example, if the command *CFWRITE,BF,NNUM,TEMP,TVAL is
-        used in a do-loop, where TVAL is a parameter value returned from the
-        *GET operation and NNUM is a specified or returned parameter value, a
-        series of BF  commands, with numerical values substituted for the two
-        parameters, will be written.  To create a file without parameter
-        substitution, use *CREATE.
-
-        This command is valid in any processor.
-        """
-        command = "*CFWRITE,%s" % (str(command))
-        return self.run(command, **kwargs)
-
+    
     def dklist(self, kpoi="", **kwargs):
         """APDL Command: DKLIST
 
@@ -37274,46 +35454,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PDEF,%s,%s,%s,%s" % (str(lab), str(item), str(comp), str(avglab))
         return self.run(command, **kwargs)
 
-    def vcol(self, ncol1="", ncol2="", **kwargs):
-        """APDL Command: *VCOL
-
-        Specifies the number of columns in matrix operations.
-
-        Parameters
-        ----------
-        ncol1
-            Number of columns to be used for Par1 with *MXX operations.
-            Defaults to whatever is needed to fill the result array.
-
-        ncol2
-            Number of columns to be used for Par2 with *MXX operations.
-            Defaults to whatever is needed to fill the result array.
-
-        Notes
-        -----
-        Specifies the number of columns to be used in array parameter matrix
-        operations.  The size of the submatrix used is determined from the
-        upper left starting array element (defined on the operation command) to
-        the lower right array element (defined by the number of columns on this
-        command and the number of rows on the *VLEN command).
-
-        The default NCOL is calculated from the maximum number of columns of
-        the result array (the *DIM column dimension) minus the starting
-        location + 1.  For example, *DIM,R,,1,10 and a starting location of
-        R(1,7) gives a default of 4 columns ( starting with R(1,7), R(1,8),
-        R(1,9), and R(1,10)).  Repeat operations automatically terminate at the
-        last column of the result array.  Existing values in the rows and
-        columns of the results matrix remain unchanged where not overwritten by
-        the requested input or operation values.
-
-        The column control settings are reset to the defaults after each *MXX
-        operation.  Use *VSTAT to list settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VCOL,%s,%s" % (str(ncol1), str(ncol2))
-        return self.run(command, **kwargs)
-
+    
     def xfrm(self, lab="", x1="", y1="", z1="", x2="", y2="", z2="", **kwargs):
         """APDL Command: /XFRM
 
@@ -37965,30 +36106,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def free(self, name="", **kwargs):
-        """APDL Command: *FREE
-
-        Deletes a matrix or a solver object and frees its memory allocation.
-
-        Parameters
-        ----------
-        name
-            Name of the matrix or solver object to delete. Use Name = ALL to
-            delete all APDL Math matrices and solver objects.  Use Name = WRK
-            to delete all APDL Math matrices and solver objects that belong to
-            a given workspace.
-
-        val1
-            If Name = WRK, Val1 is to set the memory workspace number.
-
-        Notes
-        -----
-        A /CLEAR command will automatically delete all the current APDL Math
-        objects.
-        """
-        command = "*FREE,%s" % (str(name))
-        return self.run(command, **kwargs)
-
+    
     def irlf(self, key="", **kwargs):
         """APDL Command: IRLF
 
@@ -38100,113 +36218,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CPCYC,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(toler), str(kcn), str(dx), str(dy), str(dz), str(knonrot))
         return self.run(command, **kwargs)
 
-    def set(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
-            nset="", order="", **kwargs):
-        """APDL Command: SET
-
-        Defines the data set to be read from the results file.
-
-        Parameters
-        ----------
-        lstep
-            Load step number of the data set to be read (defaults to 1):
-
-            N - Read load step N.
-
-            FIRST - Read the first data set (Sbstep and TIME are ignored).
-
-            LAST - Read the last data set (Sbstep and TIME are ignored).
-
-            NEXT - Read the next data set (Sbstep and TIME are ignored).  If at the last data set,
-                   the first data set will be read as the next.
-
-            PREVIOUS - Read the previous data set (Sbstep and TIME are ignored).  If at the first data
-                       set, the last data set will be read as the previous.
-
-            NEAR - Read the data set nearest to TIME (Sbstep is ignored).  If TIME is blank, read
-                   the first data set.
-
-            LIST - Scan the results file and list a summary of each load step.  (KIMG, TIME,
-                   ANGLE, and NSET are ignored.)
-
-        sbstep
-            Substep number (within Lstep). Defaults to the last substep of the
-            load step (except in a buckling or modal analysis). For a buckling
-            (ANTYPE,BUCKLE) or modal (ANTYPE,MODAL) analysis, Sbstep
-            corresponds to the mode number. Specify Sbstep = LAST to store the
-            last substep for the specified load step (that is, issue a
-            SET,Lstep,LAST command).
-
-        fact
-            Scale factor applied to data read from the file. If zero (or
-            blank), a value of 1.0 is used. This scale factor is only applied
-            to displacement and stress results. A nonzero factor excludes non-
-            summable items.
-
-        kimg
-            Used only with complex results (harmonic and complex modal
-            analyses).
-
-            0 or REAL - Store the real part of complex solution (default).
-
-            1, 2 or IMAG - Store the imaginary part of a complex solution.
-
-            3 or AMPL - Store the amplitude
-
-            4 or PHAS - Store the phase angle. The angle value, expressed in degrees, will be between
-                        -180°  and +180°.
-
-        time
-            Time-point identifying the data set to be read.  For a harmonic
-            analyses, time corresponds to the frequency.
-
-        angle
-            Circumferential location (0.0 to 360°).  Defines the
-            circumferential location for the harmonic calculations used when
-            reading from the results file.
-
-        nset
-            Data set number of the data set to be read.  If a positive value
-            for NSET is entered, Lstep, Sbstep, KIMG, and TIME are ignored.
-            Available set numbers can be determined by SET,LIST.
-
-        order
-            Key to sort the harmonic index results. This option applies to
-            cyclic symmetry buckling and modal analyses only, and is valid only
-            when Lstep = FIRST, LAST, NEXT, PREVIOUS, NEAR or LIST.
-
-            ORDER  - Sort the harmonic index results in ascending order of eigenfrequencies or
-                     buckling load multipliers.
-
-            (blank)  - No sorting takes place.
-
-        Notes
-        -----
-        Defines the data set to be read from the results file into the
-        database.  Various operations may also be performed during the read
-        operation.  The database must have the model geometry available (or use
-        the RESUME command before the SET command to restore the geometry from
-        Jobname.DB).  Values for applied constraints [D] and loads [F] in the
-        database will be replaced by their corresponding values on the results
-        file, if available. (See the description of the OUTRES command.)  In a
-        single load step analysis, these values are usually the same, except
-        for results from harmonic elements. (See the description of the ANGLE
-        value above.)
-
-        In an interactive run, the sorted list (ORDER option) is also available
-        for results-set reading via a GUI pick option.
-
-        You can postprocess results without issuing a SET command if the
-        solution results were saved to the database file (Jobname.DB).
-        Distributed ANSYS, however, can only postprocess using the results file
-        (for example, Jobname.RST) and cannot use the Jobname.DB file since no
-        solution results are written to the database. Therefore, you must issue
-        a SET command or a RESCOMBINE command before postprocessing in
-        Distributed ANSYS.
-        """
-        command = "SET,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lstep), str(sbstep), str(fact), str(kimg), str(time), str(angle), str(nset), str(order))
-        return self.run(command, **kwargs)
-
+    
     def pdhist(self, rlab="", name="", ncl="", type_="", **kwargs):
         """APDL Command: PDHIST
 
@@ -38411,48 +36423,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "BFUNIF,%s,%s" % (str(lab), str(value))
         return self.run(command, **kwargs)
 
-    def sread(self, strarray="", fname="", ext="", nchar="", nskip="",
-              nread="", **kwargs):
-        """APDL Command: *SREAD
-
-        Reads a file into a string array parameter.
-
-        Parameters
-        ----------
-        strarray
-            Name of the "string array" parameter which will hold the read file.
-            String array parameters are similar to character arrays, but each
-            array element can be as long as 128 characters. If the string
-            parameter does not exist, it will be created. The array will be
-            created as: *DIM,StrArray,STRING,nChar,nRead
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        nchar
-            Number of characters per line to read (default is length of the
-            longest line in the file).
-
-        nskip
-            Number of lines to skip at the start of the file (default is 0).
-
-        nread
-            Number of lines to read from the file (default is the entire file).
-
-        Notes
-        -----
-        The *SREAD command reads from a file into a string array
-        parameter. The file must be an ASCII text file.
-        """
-        command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
-        return self.run(command, **kwargs)
-
+    
     def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
              z2="", z3="", **kwargs):
         """APDL Command: NANG
@@ -38924,64 +36895,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FECONS,"
         return self.run(command, **kwargs)
 
-    def dmat(self, matrix="", type_="", method="", val1="", val2="", val3="",
-             val4="", val5="", **kwargs):
-        """APDL Command: *DMAT
-
-        Creates a dense matrix.
-
-        Parameters
-        ----------
-        matrix
-            Name used to identify the matrix. Must be specified.
-
-        type\_
-            Matrix type:
-
-            Double precision real values (default). - Complex double precision values.
-
-        method
-            Method used to create the matrix:
-
-            Allocate space for a matrix (default). - Resize an existing matrix to new row and column dimensions. Values are kept
-                              from the original matrix. If the dimensions
-                              specified by Val1 (rows) and Val2 (columns) are
-                              greater than the original matrix size, the
-                              additional entries are assigned a value of zero.
-
-            Copy an existing matrix. - Link to an existing matrix. The memory will be shared between the original
-                              matrix and the new matrix. This is useful for
-                              manipulating a submatrix of a larger matrix. The
-                              Val1 through Val5 arguments will be used to
-                              specify the lower and upper bounds of row and
-                              column numbers from the original matrix.
-
-        val1, val2, val3, val4, val5
-            Additional input. The meaning of Val1 through Val5 will vary
-            depending on the specified Method. See details below.
-
-        Notes
-        -----
-        This command allows you to create a dense matrix. To create a sparse
-        matrix, use the *SMAT command. *SMAT is recommended for large matrices
-        obtained from the .FULL or .HBMAT file. Refer to the HBMAT command
-        documentation for more information about .FULL file contents.
-
-        Use the *VEC command to create a vector.
-
-        For very large matrices, use the OUTOFCORE option (Method = ALLOC or
-        COPY) to keep some of the matrix on disk if there is insufficient
-        memory.
-
-        When importing a dense matrix from a DMIG file, you can define the
-        formatting of the file using the Val3 and Val4 fields. Here are a few
-        different example of formats:
-
-        A formatted file (using Val3=’F’, and Val4=8):
-        """
-        command = "*DMAT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4), str(val5))
-        return self.run(command, **kwargs)
-
+    
     def kclear(self, np1="", np2="", ninc="", **kwargs):
         """APDL Command: KCLEAR
 
@@ -39386,25 +37300,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SECJOINT,%s,%s,%s,%s,%s,%s,%s" % (str(kywrd), str(val1), str(val2), str(val3), str(val4), str(val5), str(val6))
         return self.run(command, **kwargs)
 
-    def sort(self, **kwargs):
-        """APDL Command: SORT
-
-        Specifies "Sort settings" as the subsequent status topic.
-
-        Notes
-        -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
-
-        If entered directly into the program, the STAT command should
-        immediately follow this command.
-        """
-        command = "SORT,"
-        return self.run(command, **kwargs)
-
+    
     def asub(self, na1="", p1="", p2="", p3="", p4="", **kwargs):
         """APDL Command: ASUB
 
@@ -39971,143 +37867,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "LSBA,%s,%s,%s,%s,%s" % (str(nl), str(na), str(sepo), str(keepl), str(keepa))
         return self.run(command, **kwargs)
 
-    def vfun(self, parr="", func="", par1="", con1="", con2="", con3="",
-             **kwargs):
-        """APDL Command: *VFUN
-
-        Performs a function on a single array parameter.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting numeric array parameter vector.  See *SET
-            for name restrictions.
-
-        func
-            Function to be performed:
-
-            Arccosine: ACOS(Par1). - Arcsine: ASIN(Par1).
-
-            Par1 is sorted in ascending order.  *VCOL, *VMASK, *VCUM, and *VLEN,,NINC do not apply.  *VLEN,NROW does apply. - Arctangent: ATAN(Par1).
-
-            Compress:  Selectively compresses data set.  "True" (*VMASK) values of Par1 (or row positions to be considered according to the NINC value on the *VLEN command) are written in  compressed form to ParR, starting at the specified position. - Copy: Par1 copied to ParR.
-
-            Cosine: COS(Par1). - Hyperbolic cosine: COSH(Par1).
-
-            Direction cosines of the principal stresses (nX9).  Par1 contains the nX6 component stresses for the n locations of the calculations. - Par1 is sorted in descending order.  *VCOL, *VMASK, *VCUM, and *VLEN,,NINC do
-                              not apply.  *VLEN,NROW does apply.
-
-            Euler angles of the principal stresses (nX3).  Par1 contains the nX6 component stresses for the n locations of the calculations. - Exponential: EXP(Par1).
-
-            Expand:  Reverse of the COMP function.  All elements of Par1 (starting at the position specified) are written in expanded form to corresponding "true" (*VMASK) positions (or row positions to be considered according to the NINC value on the *VLEN command) of ParR. - Natural logarithm: LOG(Par1).
-
-            Common logarithm: LOG10(Par1). - Nearest integer: 2.783 becomes 3.0, -1.75 becomes -2.0.
-
-            Logical complement: values   0.0 (false) become 1.0 (true).  Values > 0.0 (true) become 0.0 (false). - Principal stresses (nX5). Par1 contains the nX6 component stresses for the n
-                              locations of the calculations.
-
-            Power function: Par1**CON1. Exponentiation of any negative number in the vector Par1 to a non-integer power is performed by exponentiating the positive number and prepending the minus sign. For example, -4**2.3 is -(4**2.3). - Sine: SIN(Par1).
-
-            Hyperbolic sine: SINH(Par1). - Square root: SQRT(Par1).
-
-            Tangent: TAN(Par1). - Hyperbolic tangent: TANH(Par1).
-
-            Tangent to a path at a point:  the slope at a point is determined by linear interpolation half way between the previous and next points.  Points are assumed to be in the global Cartesian coordinate system.  Path points are specified in array Par1 (having 3 consecutive columns of data, with the columns containing the x, y, and z coordinate locations, respectively, of the points).  Only the starting row index and the column index for the x coordinates are specified, such as A(1,1).  The y and z coordinates of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3).  The tangent result, ParR, must also have 3 consecutive columns of data and will contain the tangent direction vector (normalized to 1.0); such as 1,0,0 for an x-direction vector. - Normal to a path and an input vector at a point: determined from the cross-
-                              product of the calculated tangent vector (see
-                              TANG) and the input direction vector (with the i,
-                              j, and k components input as CON1, CON2, and
-                              CON3).  Points are assumed to be in the global
-                              Cartesian coordinate system.  Path points are
-                              specified in array Par1 (having 3 consecutive
-                              columns of data, with the columns containing the
-                              x, y, and z coordinate locations, respectively,
-                              of the points).  Only the starting row index and
-                              the column index for the x coordinates are
-                              specified, such as A(1,1).  The y and z
-                              coordinates of the vector are assumed to begin in
-                              the corresponding next columns, such as A(1,2)
-                              and A(1,3).  The normal result, ParR, must also
-                              have 3 consecutive columns of data and will
-                              contain the normal direction vector (normalized
-                              to 1.0); such as 1,0,0 for an x-direction vector.
-
-            Transforms global Cartesian coordinates of a point to the coordinates of a specified system: points to be transformed are specified in array Par1 (having 3 consecutive columns of data, with the columns containing the x, y, and z global Cartesian coordinate locations, respectively, of the points).  Only the starting row index and the column index for the x coordinates are specified, such as A(1,1).  The y and z coordinates of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3).  Results are transformed to coordinate system CON1 (which may be any valid coordinate system number, such as 1,2,11,12, etc.).  The transformed result, ParR, must also have 3 consecutive columns of data and will contain the corresponding transformed coordinate locations. - Transforms specified coordinates of a point to global Cartesian coordinates:
-                              points to be transformed are specified in array
-                              Par1 (having 3 consecutive columns of data, with
-                              the columns containing the local coordinate
-                              locations (x, y, z or r, θ, z or etc.) of the
-                              points).  Only the starting row index and the
-                              column index for the x coordinates are specified,
-                              such as A(1,1).  The y and z coordinates (or θ
-                              and z, or etc.) of the vector are assumed to
-                              begin in the corresponding next columns, such as
-                              A(1,2) and A(1,3).  Local coordinate locations
-                              are assumed to be in coordinate system CON1
-                              (which may be any valid coordinate system number,
-                              such as 1,2,11,12, etc.).  The transformed
-                              result, ParR, must also have 3 consecutive
-                              columns of data, with the columns containing the
-                              global Cartesian x, y, and z coordinate
-                              locations, respectively.
-
-        par1
-            Array parameter vector in the operation.
-
-        con1, con2, con3
-            Constants (used only with the PWR, NORM, LOCAL, and GLOBAL
-            functions).
-
-        Notes
-        -----
-        Operates on one input array parameter vector and produces one output
-        array parameter vector according to:
-
-        ParR = f(Par1)
-
-        where the functions (f) are described below.  Functions are based on
-        the standard FORTRAN definitions where possible.  Out-of-range function
-        results (or results with exponents whose magnitudes are approximately
-        greater than 32 or less than -32) produce a zero value.  Input and
-        output for angular functions may be radians (default) or degrees
-        [*AFUN].  ParR may be the same as Par1.  Starting array element numbers
-        must be defined for each array parameter vector if it does not start at
-        the first location. For example, *VFUN,A,SQRT,B(5) takes the square
-        root of the fifth element of B and stores the result in the first
-        element of A.  Operations continue on successive array elements [*VLEN,
-        *VMASK] with the default being all successive elements.  Absolute
-        values and scale factors may be applied to all parameters [*VABS,
-        *VFACT].  Results may be cumulative [*VCUM].  Skipping array elements
-        via *VMASK or *VLEN for the TANG and NORM functions skips only the
-        writing of the results (skipped array element data are used in all
-        calculations).  See the *VOPER command for detail   s   .   /   p   >
-        p   >   T   h   i   s       c   o   m   m   a   n   d       i   s
-        v   a   l   i   d       i   n       a   n   y       p   r   o   c   e
-        s   s   o   r   .   /   p   >   /   d   i   v   >   d   i   v       c
-        l   a   s   s   =   "   r   e   f   s   e   c   t   1   "       t   i
-        t   l   e   =   "   M   e   n   u       P   a   t   h   s   "   >   a
-        n   a   m   e   =   "   d   0   e   2   9   2   8   5   8   "   >   /
-        a   >   h   2   >   M   e   n   u       P   a   t   h   s   /   h   2
-        >   t   a   b   l   e       b   o   r   d   e   r   =   "   0   "
-        s   u   m   m   a   r   y   =   "   S   i   m   p   l   e       l   i
-        s   t   "       c   l   a   s   s   =   "   s   i   m   p   l   e   l
-        i   s   t   "   >   t   r   >   t   d   >   s   p   a   n       c   l
-        a   s   s   =   "   g   u   i   m   e   n   u   "   >   s   t   r   o
-        n   g   >   U   t   i   l   i   t   y       M   e   n   u   &g   t   ;
-        P   a   r   a   m   e   t   e   r   s   &g   t   ;   A   r   r   a   y
-        O   p   e   r   a   t   i   o   n   s   &g   t   ;   V   e   c   t   o
-        r       F   u   n   c   t   i   o   n   s   /   s   t   r   o   n   g
-        >   /   s   p   a   n   >   /   t   d   >   /   t   r   >   /   t   a
-        b   l   e   >   /   d   i   v   >   /   d   i   v   >   h   r   >   p
-        c   l   a   s   s   =   "   l   e   g   a   l   f   o   o   t   e   r
-        "   >   s   m   a   l   l   >   i   >   R   e   l   e   a   s   e
-        1   6   .   2       -       &c   o   p   y   ;       S   A   S       I
-        P   ,       I   n   c   .       A   l   l       r   i   g   h   t   s
-        r   e   s   e   r   v   e   d   .   /   i   >   /   s   m   a   l   l
-        >   /   p   >   /   b   o   d   y   >   /   h   t   m   l   >
-        """
-        command = "*VFUN,%s,%s,%s,%s,%s,%s" % (str(parr), str(func), str(par1), str(con1), str(con2), str(con3))
-        return self.run(command, **kwargs)
-
     
     def lmatrix(self, symfac="", coilname="", curname="", indname="",
                 **kwargs):
@@ -40373,36 +38132,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "RSPLOT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(yname), str(x1name), str(x2name), str(type_), str(npts), str(plow), str(pup))
         return self.run(command, **kwargs)
 
-    def dot(self, vector1="", vector2="", par_real="", par_imag="", **kwargs):
-        """APDL Command: *DOT
-
-        Computes the dot (or inner) product of two vectors.
-
-        Parameters
-        ----------
-        vector1
-            Name of first vector; must have been previously specified by a *VEC
-            command.
-
-        vector2
-            Name of second vector; must have been previously specified by a
-            *VEC command.
-
-        par_real
-            Parameter name that contains the result.
-
-        par_imag
-            Parameter name that contains the imaginary part of the result (used
-            only for complex vectors).
-
-        Notes
-        -----
-        If Vector1 and Vector2 are complex, the complex conjugate of Vector1 is
-        used to compute the result (Par_Real, Par_Imag).
-        """
-        command = "*DOT,%s,%s,%s,%s" % (str(vector1), str(vector2), str(par_real), str(par_imag))
-        return self.run(command, **kwargs)
-
+    
     def bstq(self, val1="", val2="", t="", **kwargs):
         """APDL Command: BSTQ
 
@@ -41957,58 +39687,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PRVAR,%s,%s,%s,%s,%s,%s" % (str(nvar1), str(nvar2), str(nvar3), str(nvar4), str(nvar5), str(nvar6))
         return self.run(command, **kwargs)
 
-    def mfun(self, parr="", func="", par1="", **kwargs):
-        """APDL Command: *MFUN
-
-        Copies or transposes an array parameter matrix.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting array parameter matrix.  See *SET for
-            name restrictions.
-
-        func
-            Copy or transpose function:
-
-            Par1 is copied to ParR - Par1 is transposed to ParR.  Rows (m) and columns (n) of Par1 matrix are
-                              transposed to resulting ParR matrix of shape
-                              (n,m).
-
-        par1
-            Array parameter matrix input to the operation.
-
-        Notes
-        -----
-        Operates on one input array parameter matrix and produces one output
-        array parameter matrix according to:
-
-        ParR = f(Par1)
-
-        where the function (f) is either a copy or transpose, as described
-        above.
-
-        Functions are based on the standard FORTRAN definitions where possible.
-        ParR may be the same as Par1.  Starting array element numbers must be
-        defined for each array parameter matrix if it does not start at the
-        first location. For example, *MFUN,A(1,5),COPY,B(2,3) copies matrix B
-        (starting at element (2,3)) to matrix A (starting at element (1,5)).
-        The diagonal corner elements for each submatrix must be defined: the
-        upper left corner by the array starting element (on this command), the
-        lower right corner by the current values from the *VCOL and *VLEN
-        commands.  The default values are the (1,1) element and the last
-        element in the matrix.  No operations progress across matrix planes (in
-        the 3rd dimension).  Absolute values and scale factors may be applied
-        to all parameters [*VABS, *VFACT].  Results may be cumulative [*VCUM].
-        Array elements should not be skipped with the *VMASK and the NINC value
-        of the *VLEN specifications.  The number of rows [*VLEN] applies to the
-        Par1 array.  See the *VOPER command for details.
-
-        This command is valid in any processor.
-        """
-        command = "*MFUN,%s,%s,%s" % (str(parr), str(func), str(par1))
-        return self.run(command, **kwargs)
-
+    
     def lsrestore(self, enginename="", filename="", **kwargs):
         """APDL Command: *LSRESTORE
 
@@ -42719,33 +40398,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "LCCAT,%s,%s" % (str(nl1), str(nl2))
         return self.run(command, **kwargs)
 
-    def vcum(self, key="", **kwargs):
-        """APDL Command: *VCUM
-
-        Allows array parameter results to add to existing results.
-
-        Parameters
-        ----------
-        key
-            Accumulation key:
-
-            Overwrite results. - Add results to the current value of the results parameter.
-
-        Notes
-        -----
-        Allows results from certain *VXX and *MXX operations to overwrite or
-        add to existing results.  The cumulative operation is of the form:
-
-        ParR = ParR + ParR(Previous)
-
-        The cumulative setting is reset to the default (overwrite) after each
-        *VXX or *MXX operation.  Use *VSTAT to list settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VCUM,%s" % (str(key))
-        return self.run(command, **kwargs)
-
+    
     def vptn(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
              nv8="", nv9="", **kwargs):
         """APDL Command: VPTN
@@ -43051,113 +40704,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ABEXTRACT,%s,%s" % (str(mode1), str(mode2))
         return self.run(command, **kwargs)
 
-    def use(self, name="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", arg9="", ar10="", ar11="", ar12="",
-            ar13="", ar14="", ag15="", ar16="", ar17="", ar18="", **kwargs):
-        """APDL Command: *USE
-
-        Executes a macro file.
-
-        Parameters
-        ----------
-        name
-            Name (32 characters maximum, beginning with a letter) identifying
-            the macro file or a macro block on a macro library file.
-
-        arg1, arg2, arg3, . . . , ar18
-            Values passed into the file or block where the parameters ARG1
-            through ARG9 and AR10 through AR18 are referenced.  Values may be
-            numbers, alphanumeric character strings (up to 32 characters
-            enclosed in single quotes), parameters (numeric or character) or
-            parametric expressions.  See below for additional details.
-
-        Notes
-        -----
-        Causes execution of a macro file called Name, or, if not found, a macro
-        block "Name" on the macro library file [*ULIB].  Argument values
-        (numeric or character) are passed into the file or block and
-        substituted for local parameters ARG1, ARG2, ..., AR18.  The file Name
-        may also be executed as an "unknown command" (i.e., without the *USE
-        command name) as described below.
-
-        A macro is a sequence of ANSYS commands (as many as needed) recorded in
-        a file or in a macro block in a library file (specified with the *ULIB
-        command).  The file or block is typically executed with the *USE
-        command.  In addition to command, numerical and alphanumeric data, the
-        macro may include parameters which will be assigned numerical or
-        alphanumerical character values when the macro is used.  Use of the
-        macro may be repeated (within a do-loop, for example) with the
-        parameters incremented.  A macro is defined within a run by "enclosing"
-        a sequence of data input commands between a *CREATE and a *END
-        command.  The data input commands are passive (not executed) while
-        being written to the macro file.  The macro file (without *CREATE and
-        *END ) can also be created external to ANSYS.
-
-        Up to 99 specially named scalar parameters called ARG1 to AR99 are
-        locally available to each macro.  Note that the prefix for the first 9
-        parameters is "ARG," while the prefix for the last 90 is "AR."  A local
-        parameter is one which is not affected by, nor does it affect, other
-        parameters, even those of the same name, which are used outside of the
-        macro.  The only way a local parameter can affect, or be affected by,
-        parameters outside the macro is if values are passed out of, or into,
-        the macro by an argument list.  Parameters ARG1 through AR18 can have
-        their values (numeric or character) passed via the argument list on the
-        *USE command (ARG1 through AR19 can be passed as arguments on the
-        "unknown command" macro).  Parameters AR19 through AR99 (AR20 through
-        AR99 in the "unknown command" macro) are available solely for use
-        within the macro; they cannot be passed via an argument list.  Local
-        parameters are available to do-loops and to /INPUT files processed
-        within the macro.  In addition to an ARG1--AR99 set for each macro,
-        another ARG1--AR99 set is available external to all macros, local to
-        "non-macro" space.
-
-        A macro is exited after its last line is executed.  Macros may be
-        nested (such as a *USE or an "unknown command" within a macro).  Each
-        nested macro has its own set of 99 local parameters.  Only one set of
-        local parameters can be active at a time and that is the set
-        corresponding to the macro currently being executed or to the set
-        external to all macros (if any).  When a nested macro completes
-        execution, the previous set of local parameters once again becomes
-        available.  Use *STATUS,ARGX to view current macro parameter values.
-
-        An alternate way of executing a macro file is via the "unknown command"
-        route.  If a command unknown to the ANSYS program is entered, a search
-        for a file of that name (plus a .MAC suffix) is made.  If the file
-        exists, it is executed, if not, the "unknown command" message is
-        output.  Thus, users can write their own commands in terms of other
-        ANSYS commands.  The procedure is similar to issuing the *USE command
-        with the unknown command in the Name field.  For example, the command
-        CMD,10,20,30 is internally similar to *USE,CMD,10,20,30.  The macro
-        file named CMD.MAC will be executed with the three parameters.  The
-        *USE macro description also applies to the "unknown command" macro,
-        except that various directories are searched and a suffix (.MAC) is
-        assumed.  Also, a macro library file is not searched.
-
-        A three-level directory search for the "unknown command" macro file may
-        be available (see the Operations Guide).  The search order may be: 1) a
-        high-level system directory, 2) the login directory, and 3) the local
-        (working) directory.  Use the /PSEARCH command to change the directory
-        search path.  For an "unknown command" CMD, the first file named
-        CMD.MAC found to exist in the search order will be executed.  The
-        command may be input as upper or lower case, however, it is converted
-        to upper case before the file name search occurs.  On systems that
-        uniquely support both upper and lower case file names, the file with
-        the matching lower case name will be used if it exists, otherwise, the
-        file with the matching upper case name will be used. All macro files
-        placed in the apdl directory must be upper case.
-
-         Note, since undocumented commands exist in the ANSYS program, the user
-        should issue the command intended for the macro file name to be sure
-        the "unknown command" message is output in the processor where it's to
-        be used.  If the macro is to be used in other processors, the other
-        processors must also be checked.
-
-        This command is valid in any processor.
-        """
-        command = "*USE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(arg1), str(arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8), str(arg9), str(ar10), str(ar11), str(ar12), str(ar13), str(ar14), str(ag15), str(ar16), str(ar17), str(ar18))
-        with self.non_interactive:
-            return self.run(command, **kwargs)
-
+    
     def xflist(self, enrichmentid="", **kwargs):
         """APDL Command: XFLIST
 
@@ -44943,47 +42490,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/REPLOT,%s" % (str(label))
         return self.run(command, **kwargs)
 
-    def taxis(self, parmloc="", naxis="", val1="", val2="", val3="", val4="",
-              val5="", val6="", val7="", val8="", val9="", val10="", **kwargs):
-        """APDL Command: *TAXIS
-
-        Defines table index numbers.
-
-        Parameters
-        ----------
-        parmloc
-            Name and starting location in the table array parameter for
-            indexing. Indexing occurs along the axis defined with nAxis.
-
-        naxis
-            Axis along which indexing occurs.  Valid labels are:
-
-            Corresponds to Row. Default. - Corresponds to Column.
-
-            Corresponds to Plane. - Corresponds to Book.
-
-            Corresponds to Shelf. - Lists all index numbers. Valid only if Val1 = LIST.
-
-        val1, val2, val3, . . . , val10
-            Values of the index numbers for the axis nAxis, starting from the
-            table array parameter location ParmLoc. You can define up to ten
-            values.
-
-        Notes
-        -----
-        *TAXIS is a convenient method to define table index values. These
-        values reside in the zero column, row, etc. Instead of filling values
-        in these zero location spots, use the *TAXIS command. For example,
-
-         would fill index values 1.0, 2.2, 3.5, 4.7, and 5.9 in nAxis 2 (column
-        location), starting at location 4.
-
-        To list index numbers, issue *TAXIS,ParmLoc, nAxis, LIST, where nAxis =
-        1 through 5 or ALL.
-        """
-        command = "*TAXIS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(parmloc), str(naxis), str(val1), str(val2), str(val3), str(val4), str(val5), str(val6), str(val7), str(val8), str(val9), str(val10))
-        return self.run(command, **kwargs)
-
+    
     def coriolis(self, option="", refframe="", rotdamp="", rotmass="", **kwargs):
         """APDL Command: CORIOLIS
 
@@ -45289,41 +42796,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PRNSOL,%s,%s" % (str(item), str(comp))
         return self.run(command, **kwargs)
 
-    def lsbac(self, enginename="", rhsvector="", solvector="", **kwargs):
-        """APDL Command: *LSBAC
-
-        Performs the solve (forward/backward substitution) of a factorized
-        linear system.
-
-        Parameters
-        ----------
-        enginename
-            Name used to identify this engine. Must have been previously
-            created using *LSENGINE and factorized using *LSFACTOR.
-
-        rhsvector
-            Name of vector containing the right-hand side (load) vectors as
-            input. Must have been previously defined as a *VEC vector or a
-            *DMAT matrix.
-
-        solvector
-            Name of vector that will contain the solution vectors upon
-            completion. Must be predefined as a *VEC vector or *DMAT matrix.
-
-        Notes
-        -----
-        This command performs forward and back substitution to obtain the
-        solution to the linear matrix equation Ax = b. The matrix engine must
-        have been previously defined using *LSENGINE, and the matrix factored
-        using *LSFACTOR.
-
-        You can use the *DMAT,,,COPY (or *VEC,,,COPY) command to copy the load
-        vector to the solution vector in order to predefine it with the
-        appropriate size.
-        """
-        command = "*LSBAC,%s,%s,%s" % (str(enginename), str(rhsvector), str(solvector))
-        return self.run(command, **kwargs)
-
+    
     def ednrot(self, option="", cid="", cname="", dof1="", dof2="", dof3="",
                dof4="", dof5="", dof6="", **kwargs):
         """APDL Command: EDNROT
@@ -47739,143 +45212,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "LINE,"
         return self.run(command, **kwargs)
 
-    def dim(self, par="", type_="", imax="", jmax="", kmax="", var1="", var2="",
-            var3="", csysid="", **kwargs):
-        """APDL Command: *DIM
-
-        Defines an array parameter and its dimensions.
-
-        Parameters
-        ----------
-        par
-            Name of parameter to be dimensioned.  See *SET for name
-            restrictions.
-
-        type\_
-            Array type:
-
-            Arrays are similar to standard FORTRAN arrays (indices are integers) (default).  Index numbers for the rows, columns, and planes are sequential values beginning with one. Used for 1-, 2-, or 3-D arrays. - Same as ARRAY, but used to specify 4-D arrays.
-
-            Same as ARRAY, but used to specify 5-D arrays. - Array entries are character strings (up to 8 characters each).  Index numbers
-                              for rows, columns, and planes are sequential
-                              values beginning with one.
-
-            Array indices are real (non-integer) numbers which must be defined when filling the table.  Index numbers for the rows and columns are stored in the zero column and row "array elements" and are initially assigned a near-zero value.  Index numbers must be in ascending order and are used only for retrieving an array element.  When retrieving an array element with a real index that does not match a specified index, linear interpolation is done among the nearest indices and the corresponding array element values [*SET]. Used for 1-, 2-, or 3-D tables. - Same as TABLE, but used to specify 4-D tables.
-
-            Same as TABLE, but used to specify 5-D tables. - Array entries are character strings (up to IMAX each). Index numbers for
-                              columns and planes are sequential values
-                              beginning with 1. Row index is character position
-                              in string.
-
-        imax
-            Extent of first dimension (row). (For Type = STRING, IMAX is
-            rounded up to the next multiple of eight and has a limit of 248).
-            Defaults to 1.
-
-        jmax
-            Extent of second dimension (column).  Defaults to 1.
-
-        kmax
-            Extent of third dimension (plane).  Defaults to 1.
-
-        var1
-            Variable name corresponding to the first dimension (row) for Type =
-            TABLE.  Defaults to Row.
-
-        var2
-            Variable name corresponding to the second dimension (column) for
-            Type = TABLE.  Defaults to Column.
-
-        var3
-            Variable name corresponding to the third dimension (plane) for Type
-            = TABLE.  Defaults to Plane.
-
-        csysid
-            An integer corresponding to the coordinate system ID Number.
-
-        Notes
-        -----
-        Up to three dimensions (row, column, and plane) may be defined using
-        ARRAY and TABLE.  Use ARR4, ARR5, TAB4, and TAB5 to define up to five
-        dimensions (row, column, plane, book, and shelf). An index number is
-        associated with each row, column, and plane.  For array and table type
-        parameters, element values are initialized to zero.  For character and
-        string parameters, element values are initialized to (blank).  A
-        defined parameter must be deleted [*SET] before its dimensions can be
-        changed.  Scalar (single valued) parameters should not be dimensioned.
-        *DIM,A,,3 defines a vector array with elements A(1), A(2), and A(3).
-        *DIM,B,,2,3 defines a 2x3 array with elements B(1,1), B(2,1), B(1,2),
-        B(2,2), B(1,3), and B(2,3).  Use *STATUS,Par to display elements of
-        array Par. You can write formatted data files (tabular formatting) from
-        data held in arrays through the *VWRITE command.
-
-        If you use table parameters to define boundary conditions, then Var1,
-        Var2, and/or Var3 can either specify a primary variable (listed in
-        Table: 130:: *DIM - Primary Variables) or can be an independent
-        parameter.  If specifying an independent parameter, then you must
-        define an additional table for the independent parameter.  The
-        additional table must have the same name as the independent parameter
-        and may be a function of one or more primary variables or another
-        independent parameter.  All independent parameters must relate to a
-        primary variable.
-
-        Tabular load arrays can be defined in both global Cartesian (default)
-        or local (see below) coordinate systems by specifying CSYSID, as
-        defined in LOCAL. For batch operations, you must specify your
-        coordinate system first.
-
-        The following constraints apply when you specify a local coordinate
-        system for your tabular loads:
-
-        If you are specifying a 4- or 5-D array or table, four additional
-        fields (LMAX, MMAX, Var4, and Var5) are available. Thus, for a 4-D
-        table, the command syntax would be:
-
-        For a 5-D table, the command syntax would be:
-
-        You cannot create or edit 4- or 5-D arrays or tables using the GUI.
-
-        See Array Parameters for a detailed discussion on and examples for
-        using array parameters.
-
-        Table: 130:: : *DIM - Primary Variables
-
-        Specify PRESSURE as the independent variable (not PRES).
-
-        The X, Y, and Z coordinate locations listed above are valid in global
-        Cartesian, or local (Cartesian, cylindrical and spherical) coordinate
-        systems. The VELOCITY label is applicable only to the calculated fluid
-        velocity in element FLUID116.
-
-        When using PRESSURE as a primary variable, the underlying element must
-        have the pressure DOF associated with it, or it must be a supported
-        contact element.
-
-        The gap/penetration label (GAP) is only used for defining certain
-        contact element real constants.
-
-        The frequency label (FREQ) is valid for harmonic analyses only.
-
-        The OMEGS, ECCENT, and THETA primary variables only apply to the
-        COMBI214 element. The amplitude of the rotational velocity (OMEGS) is
-        an absolute value, so only positive values of OMEGS are valid. The
-        eccentricity (ECCENT) and phase shift (THETA) labels are only valid for
-        nonlinear analyses.
-
-        If you use table parameters to define boundary conditions, the table
-        names (Par) must not exceed 32 characters.
-
-        In thermal analyses, if you apply tabular loads as a function of
-        temperature but the rest of the model is linear (e.g., includes no
-        temperature-dependent material properties or radiation ), you should
-        turn on Newton-Raphson iterations (NROPT,FULL) to evaluate the
-        temperature-dependent tabular boundary conditions correctly.
-
-        This command is valid in any processor.
-        """
-        command = "*DIM,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(type_), str(imax), str(jmax), str(kmax), str(var1), str(var2), str(var3), str(csysid))
-        return self.run(command, **kwargs)
-
+    
     def emtgen(self, ncomp="", ecomp="", pncomp="", dof="", gap="", gapmin="",
                fkn="", epzero="", **kwargs):
         """APDL Command: EMTGEN
@@ -48176,102 +45513,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDHGLS,%s" % (str(hgco))
         return self.run(command, **kwargs)
 
-    def smat(self, matrix="", type_="", method="", val1="", val2="", val3="", val4="",
-             **kwargs):
-        """APDL Command: *SMAT
-
-        Creates a sparse matrix.
-
-        Parameters
-        ----------
-        matrix
-            Name used to identify the matrix. Must be specified.
-
-        type\_
-            Matrix type:
-
-            Double precision real values (default). - Complex double precision values.
-
-        method
-            Method used to create the matrix:
-
-            Copy an existing matrix. - Import the matrix from a file.
-
-        val1, val2, val3, val4
-            Additional input. The meaning of Val1 through Val3 will
-            vary depending on the specified Method. See in your ansys
-            documentation.
-
-        Notes
-        -----
-        Use the *DMAT command to create a dense matrix.
-
-        Unlike the *DMAT command, the *SMAT command cannot be used to allocate
-        a sparse matrix.
-
-        For more information on the NOD2BCS and USR2BCS mapping vectors, see
-        Degree of Freedom Ordering in the ANSYS Parametric Design Language
-        Guide.
-
-        For more information about .FULL file contents, see the HBMAT in the
-        Command Reference.
-        """
-        command = "*SMAT,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4))
-        return self.run(command, **kwargs)
-
-    def vscfun(self, parr="", func="", par1="", **kwargs):
-        """APDL Command: *VSCFUN
-
-        Determines properties of an array parameter.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting scalar parameter.  See *SET for name
-            restrictions.
-
-        func
-            Functions:
-
-            Maximum: the maximum Par1 array element value. - Minimum: the minimum Par1 array element value.
-
-            Index location of the maximum Par1 array element value.  Array Par1 is searched starting from its specified index. - Index location of the minimum Par1 array element value.  Array Par1 is searched
-                              starting from its specified index.
-
-            Index location of the first nonzero value in array Par1.  Array Par1 is searched starting from its specified index. - Index location of the last nonzero value in array Par1.  Array Par1 is searched
-                              starting from its specified index.
-
-            Sum:  Par1 (the summation of the Par1 array element values). - Median: value of Par1 at which there are an equal number of values above and
-                              below.
-
-            Mean: (σ Par1)/NUM, where NUM is the number of summed values. - Variance: (σ ((Par1-MEAN)**2))/NUM.
-
-            Standard deviation: square root of VARI. - Root-mean-square: square root of (σ (Par1**2))/NUM.
-
-        par1
-            Array parameter vector in the operation.
-
-        Notes
-        -----
-        Operates on one input array parameter vector and produces one output
-        scalar parameter according to:
-
-        ParR = f(Par1)
-
-        where the functions (f) are described below. The starting array element
-        number must be defined for the array parameter vector.  For example,
-        *VSCFUN,MU,MEAN,A(1) finds the mean of the A vector values, starting
-        from the first value and stores the result as parameter MU.  Operations
-        use successive array elements [*VLEN, *VMASK] with the default being
-        all successive array elements.  Absolute values and scale factors may
-        be applied to all parameters [*VABS, *VFACT].  Results may be
-        cumulative [*VCUM].  See the *VOPER command for details.
-
-        This command is valid in any processor.
-        """
-        command = "*VSCFUN,%s,%s,%s" % (str(parr), str(func), str(par1))
-        return self.run(command, **kwargs)
-
+    
     def bflist(self, node="", lab="", **kwargs):
         """APDL Command: BFLIST
 
@@ -48986,43 +46228,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SPVAL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(tblno), str(curvno), str(sv1), str(sv2), str(sv3), str(sv4), str(sv5), str(sv6), str(sv7))
         return self.run(command, **kwargs)
 
-    def vstat(self, **kwargs):
-        """APDL Command: *VSTAT
-
-        Lists the current specifications for the array parameters.
-
-        Notes
-        -----
-        Lists the current specifications for the *VABS, *VCOL, *VCUM, *VFACT,
-        *VLEN, and *VMASK commands.
-
-        This command is valid in any processor.
-        """
-        command = "*VSTAT,"
-        return self.run(command, **kwargs)
-
-    def mkdir(self, dir_="", **kwargs):
-        """APDL Command: /MKDIR
-
-        Creates a directory.
-
-        Parameters
-        ----------
-        dir\_
-            The directory to create (248 characters maximum on Linux;
-            233 on Windows). If no path is provided, it will be
-            created in the current working directory. Must be a valid
-            name (and path) for the system you are working on.
-
-        Notes
-        -----
-        It is recommended to just use ``os.mkdir``
-
-        Creates a directory on the computer ANSYS is currently running on.
-        """
-        command = "/MKDIR,%s" % (str(dir_))
-        return self.run(command, **kwargs)
-
+    
     def edlcs(self, option="", cid="", x1="", y1="", z1="", x2="", y2="",
               z2="", x3="", y3="", z3="", **kwargs):
         """APDL Command: EDLCS
@@ -50208,24 +47414,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FSLIST,%s,%s,%s,%s,%s" % (str(nloc1), str(nloc2), str(ninc), str(nev), str(nlod))
         return self.run(command, **kwargs)
 
-    def end(self, **kwargs):
-        """APDL Command: *END
-
-        Closes a macro file.
-
-        Notes
-        -----
-        Closes a file opened with *CREATE. The *END command is an 8-character
-        command (to differentiate it from *ENDIF).   If you add commented text
-        on that same line but do not allow enough spaces between *END and the
-        "!" that indicates the comment text, the *END will attempt to interpret
-        the "!" as the 8th character and will fail.
-
-        This command is valid in any processor.
-        """
-        command = "*END,"
-        return self.run(command, **kwargs)
-
+    
     def nrlsum(self, signif="", label="", labelcsm="", forcetype="", **kwargs):
         """APDL Command: NRLSUM
 
@@ -51465,61 +48654,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"RACE,{xc},{yc},{rad},{tcur},{dy},{dz},,,{cname}", **kwargs)
 
-    def vitrp(self, parr="", part="", pari="", parj="", park="", **kwargs):
-        """APDL Command: *VITRP
-
-        Forms an array parameter by interpolation of a table.
-
-        Parameters
-        ----------
-        parr
-            The name of the resulting array parameter.  See *SET for name
-            restrictions.
-
-        part
-            The name of the TABLE array parameter.  The parameter must exist as
-            a dimensioned array of type TABLE [*DIM].
-
-        pari
-            Array parameter vector of I (row) index values for interpolation in
-            ParT.
-
-        parj
-            Array parameter vector of J (column) index values for interpolation
-            in ParT (which must be at least 2-D).
-
-        park
-            Array parameter vector of K (depth) index values for interpolation
-            in ParT (which must be 3-D).
-
-        Notes
-        -----
-        Forms an array parameter (of type ARRAY) by interpolating values of an
-        array parameter (of type TABLE) at specified table index locations
-        according to:
-
-        ParR = f(ParT, Parl, ParJ, ParK)
-
-        where ParT is the type TABLE array parameter, and ParI, ParJ, ParK are
-        the type ARRAY array parameter vectors of index values for
-        interpolation in ParT.  See the *DIM command for TABLE and ARRAY
-        declaration types.  Linear interpolation is used.  The starting array
-        element number for the TABLE array (ParT) is not used (but a value must
-        be input).  Starting array element numbers must be defined for each
-        array parameter vector if it does not start at the first location. For
-        example, *VITRP,R(5),TAB(1,1),X(2),Y(4) uses the second element of X
-        and the fourth element of Y as index values (row and column) for a 2-D
-        interpolation in TAB and stores the result in the fifth element of R.
-        Operations continue on successive array elements [*VLEN, *VMASK] with
-        the default being all successive elements.  Absolute values and scale
-        factors may be applied to the result parameter [*VABS, *VFACT].
-        Results may be cumulative [*VCUM].  See the *VOPER command for details.
-
-        This command is valid in any processor.
-        """
-        command = "*VITRP,%s,%s,%s,%s,%s" % (str(parr), str(part), str(pari), str(parj), str(park))
-        return self.run(command, **kwargs)
-
+    
     def mapsolve(self, maxsbstep="", **kwargs):
         """APDL Command: MAPSOLVE
 
@@ -52045,60 +49180,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MDELE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(lab1), str(nend), str(ninc), str(lab2), str(lab3), str(lab4), str(lab5), str(lab6))
         return self.run(command, **kwargs)
 
-    def export(self, matrix="", format_="", fname="", val1="", val2="", val3="",
-               **kwargs):
-        """APDL Command: *EXPORT
-
-        Exports a matrix to a file in the specified format.
-
-        Parameters
-        ----------
-        matrix
-            Name of the matrix to export (must be a matrix previously created
-            with *DMAT or *SMAT, or a vector previously created with *VEC).
-
-        format\_
-            Format of the output file:
-
-            Export the matrix in the Matrix Market Format. - Export the matrix in the SUB file format.
-
-            Export the matrix in the Harwell-Boeing file format. - Export the matrix in a native format, to be re-imported using the *DMAT or
-                              *SMAT command.
-
-            Export the matrix to an existing EMAT file. - Export the matrix to an APDL array parameter.
-
-            Export the matrix profile to a Postscript file. - Export the matrix in the DMIG file format.
-
-        fname
-            Name of the file, or name of the array parameter if Format = APDL.
-
-        val1, val2, val3
-            Additional input. The meaning of Val1 through Val3 will vary
-            depending on the specified Format. See table below for details.
-
-        Notes
-        -----
-        Only sparse matrices can be exported to Postscript files. This option
-        plots the matrix profile as a series of dots.
-
-        If you want to create a .SUB file from several matrices, you need to
-        set Val3 = WAIT for all matrices but the last, and Val3 = DONE for the
-        last one. The export will be effective at the last *EXPORT command.
-
-        To create a .SUB file or .DMIG file from scratch, you must supply the
-        row information array. (Specify this array in the Val2 field for .SUB
-        or in the Val1 field for .DMIG.) This must be an m x 2 array, where m
-        is the size of the matrix. The first column is the node number and the
-        second column is the DOF number corresponding to each row of the
-        matrix.
-
-        The *EXPORT command is not applicable to sparse matrices initialized
-        from .FULL files by means of the NOD2BCS option on the *SMAT command
-        (i.e., *SMAT,,,IMPORT,FULL,,NOD2BCS).
-        """
-        command = "*EXPORT,%s,%s,%s,%s,%s,%s" % (str(matrix), str(format_), str(fname), str(val1), str(val2), str(val3))
-        return self.run(command, **kwargs)
-
+    
     def swadd(self, ecomp="", shrd="", ncm1="", ncm2="", ncm3="", ncm4="",
               ncm5="", ncm6="", ncm7="", ncm8="", ncm9="", **kwargs):
         """APDL Command: SWADD
@@ -52689,54 +49771,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run("SPREAD,%s" % (str(value)), **kwargs)
 
-    def vlen(self, nrow="", ninc="", **kwargs):
-        """APDL Command: *VLEN
-
-        Specifies the number of rows to be used in array parameter operations.
-
-        Parameters
-        ----------
-        nrow
-            Number of rows to be used with the *VXX or *MXX operations.
-            Defaults to the number of rows needed to fill the result array.
-
-        ninc
-            Perform the operation on every NINC row (defaults to 1).
-
-        Notes
-        -----
-        Specifies the number of rows to be used in array parameter operations.
-        The size of the submatrix used is determined from the upper left
-        starting array element (defined on the operation command) to the lower
-        right array element (defined by the number of rows on this command and
-        the number of columns on the *VCOL command).  NINC allows skipping row
-        operations for some operation commands.  Skipped rows are included in
-        the row count.  The starting row number must be defined on the
-        operation command for each parameter read and for the result written.
-
-        The default NROW is calculated from the maximum number of rows of the
-        result array (the *DIM row dimension) minus the starting location + 1.
-        For example, *DIM,R,,10 and a starting location of R(7) gives a default
-        of 4 loops (filling R(7), R(8), R(9), and R(10)).  Repeat operations
-        automatically terminate at the last row of the result array.  Existing
-        values in the rows and columns of the results matrix remain unchanged
-        where not overwritten by the requested input or operation values.
-
-        The stride (NINC) allows operations to be performed at regular
-        intervals.  It has no effect on the total number of row operations.
-        Skipped operations retain the previous result.  For example, *DIM,R,,6,
-        with a starting location of R(1), NROW = 10, and NINC = 2 calculates
-        values for locations R(1), R(3), and R(5) and retains values for
-        locations R(2), R(4), and R(6).  A more general skip control may be
-        done by masking [*VMASK].  The row control settings are reset to the
-        defaults after each *VXX or *MXX operation.  Use *VSTAT to list
-        settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VLEN,%s,%s" % (str(nrow), str(ninc))
-        return self.run(command, **kwargs)
-
+    
     def cgloc(self, xloc="", yloc="", zloc="", **kwargs):
         """APDL Command: CGLOC
 
@@ -53429,86 +50464,8 @@ class _MapdlCommands():  # pragma: no cover
         command = "ANDSCL,%s,%s,%s" % (str(nfram), str(delay), str(ncycl))
         return self.run(command, **kwargs)
 
-    def toper(self, parr="", par1="", oper="", par2="", fact1="", fact2="",
-              con1="", **kwargs):
-        """APDL Command: *TOPER
-
-        Operates on table parameters.
-
-        Parameters
-        ----------
-        parr
-            Name of the resulting table parameter. The command will create a
-            table array parameter with this name.  Any existing parameter with
-            this name will be overwritten.
-
-        par1
-            Name of the first table parameter.
-
-        oper
-            The operation to be performed: ADD.  The operation is:  ParR(i,j,k)
-            =   FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1
-
-        par2
-            Name of the second table parameter.
-
-        fact1
-            The first table parameter multiplying constant. Defaults to 1.
-
-        fact2
-            The second table parameter multiplying constant.  Defaults to 1.
-
-        con1
-            The constant increment for offset.  Defaults to 0.
-
-        Notes
-        -----
-        *TOPER operates on table parameters according to: ParR(i,j,k) =
-        FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1
-
-        Par1 and Par2 must have the same dimensions and the same variable names
-        corresponding to those dimensions. Par1 and Par2 must also have
-        identical index values for rows, columns, etc.
-
-        If you want a local coordinate system for the resulting array, you must
-        dimension it as such using the *DIM command before issuing *TOPER.
-
-        This command is valid in any processor.
-        """
-        command = "*TOPER,%s,%s,%s,%s,%s,%s,%s" % (str(parr), str(par1), str(oper), str(par2), str(fact1), str(fact2), str(con1))
-        return self.run(command, **kwargs)
-
-    def comp(self, matrix="", algorithm="", threshold="", **kwargs):
-        """APDL Command: *COMP
-
-        Compresses the columns of a matrix using a specified algorithm.
-
-        Parameters
-        ----------
-        matrix
-            Name of the matrix to compress.
-
-        algorithm
-            Algorithm to use:
-
-            Singular value decomposition algorithm (default). - Modified Gram-Schmidt algorithm.
-
-        threshold
-            Numerical threshold value used to manage the compression. Default
-            value for SVD is 1E-7; default value for MGS is 1E-14.
-
-        Notes
-        -----
-        The algorithms available through this command are only applicable to
-        dense matrices that were created using the *DMAT command.
-
-        Columns which are linearly dependent on others are removed, leaving the
-        independent or basis vectors. The matrix is resized according to the
-        new size determined by the algorithm.
-        """
-        command = "*COMP,%s,%s,%s" % (str(matrix), str(algorithm), str(threshold))
-        return self.run(command, **kwargs)
-
+    
+    
     def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
         """APDL Command: /PSF
 
@@ -53871,49 +50828,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ROCK,%s,%s,%s,%s,%s,%s" % (str(cgx), str(cgy), str(cgz), str(omx), str(omy), str(omz))
         return self.run(command, **kwargs)
 
-    def vfact(self, factr="", fact1="", fact2="", fact3="", **kwargs):
-        """APDL Command: *VFACT
-
-        Applies a scale factor to array parameters.
-
-        Parameters
-        ----------
-        factr
-            Scale factor applied to results (ParR) parameter.  Defaults to 1.0.
-
-        fact1
-            Scale factor applied to first parameter (Par1 or ParI).  Defaults
-            to 1.0.
-
-        fact2
-            Scale factor applied to second parameter (Par2 or ParJ).  Defaults
-            to 1.0.
-
-        fact3
-            Scale factor applied to third parameter (Par3 or ParK).  Defaults
-            to 1.0.
-
-        Notes
-        -----
-        Applies a scale factor to parameters used in certain *VXX and *MXX
-        operations.   Typical scale factor applications are of the form:
-
-        ParR = FACTR*f(FACT1*Par1)
-
-        or
-
-        ParR = FACTR*((FACT1*Par1) o (FACT2*Par2))
-
-        The factors are applied to each input parameter value before the
-        operation and to the result value after the operation.  The scale
-        factor settings are reset to the default (1.0) after each *VXX or *MXX
-        operation.  Use *VSTAT to list settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VFACT,%s,%s,%s,%s" % (str(factr), str(fact1), str(fact2), str(fact3))
-        return self.run(command, **kwargs)
-
+    
     def pmlopt(self, esys="", lab="", xminus="", xplus="", yminus="", yplus="",
                zminus="", zplus="", **kwargs):
         """APDL Command: PMLOPT
@@ -56002,44 +52917,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "PRVECT,%s,%s,%s,%s" % (str(item), str(lab2), str(lab3), str(labp))
         return self.run(command, **kwargs)
 
-    def vmask(self, par="", **kwargs):
-        """APDL Command: *VMASK
-
-        Specifies an array parameter as a masking vector.
-
-        Parameters
-        ----------
-        par
-            Name of the mask parameter.  The starting subscript must also be
-            specified.
-
-        Notes
-        -----
-        Specifies the name of the parameter whose values are to be checked for
-        each resulting row operation.  The mask vector usually contains only 0
-        (for false) and 1 (for true) values.  For each row operation the
-        corresponding mask vector value is checked.  A true value allows the
-        operation to be done.  A false value skips the operation (and retains
-        the previous results).  A mask vector can be created from direct input,
-        such as M(1) = 1,0,0,1,1,0,1; or from the DATA function of the *VFILL
-        command.  The NOT function of the *VFUN command can be used to reverse
-        the logical sense of the mask vector.  The logical compare operations
-        (LT, LE, EQ, NE, GE, and GT) of the *VOPER command also produce a mask
-        vector by operating on two other vectors.  Any numeric vector can be
-        used as a mask vector since the actual interpretation assumes values
-        less than 0.0 are 0.0 (false) and values greater than 0.0 are 1.0
-        (true).  If the mask vector is not specified (or has fewer values than
-        the result vector), true (1.0) values are assumed for the unspecified
-        values.  Another skip control may be input with NINC on the *VLEN
-        command.  If both are present, operations occur only when both are
-        true.  The mask setting is reset to the default (no mask) after each
-        *VXX or *MXX operation.  Use *VSTAT to list settings.
-
-        This command is valid in any processor.
-        """
-        command = "*VMASK,%s" % (str(par))
-        return self.run(command, **kwargs)
-
     
     def lsclear(self, lab="", **kwargs):
         """APDL Command: LSCLEAR
@@ -56756,26 +53633,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DSYS,%s" % (str(kcn))
         return self.run(command, **kwargs)
 
-    def afun(self, lab="", **kwargs):
-        """APDL Command: *AFUN
-
-        Specifies units for angular functions in parameter expressions.
-
-        Parameters
-        ----------
-        lab
-            Specifies the units to be used:
-
-            Use radians for input and output of parameter angular functions (default). - Use degrees for input and output of parameter angular functions.
-
-        Notes
-        -----
-        Only the SIN, COS, TAN, ASIN, ACOS, ATAN, ATAN2, ANGLEK, and ANGLEN
-        functions [*SET, *VFUN] are affected by this command.
-        """
-        command = "*AFUN,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
+    
     def lplot(self, nl1="", nl2="", ninc="", **kwargs):
         """APDL Command: LPLOT
 
@@ -57354,55 +54212,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "GCDEF,%s,%s,%s,%s,%s" % (str(option), str(sect1), str(sect2), str(matid), str(realid))
         return self.run(command, **kwargs)
 
-    def ulib(self, fname="", ext="", **kwargs):
-        """APDL Command: *ULIB
-
-        Identifies a macro library file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Identifies a macro library file for the *USE command.  A
-        library of macros allows blocks of often used ANSYS commands
-        to be stacked and executed from a single file.  The macro
-        blocks must be enclosed within block identifier and terminator
-        lines as shown in the example below.  If you want to add
-        comment lines to a macro block, you may place them anywhere
-        within the macro block.  (This includes placing them directly
-        on the lines where the macro block identifier and the macro
-        block terminator appear, as shown in the example.)  Do not
-        place comment lines (or any other lines) outside of a macro
-        block.
-
-        The name of the macro library file is identified for reading
-        on the *ULIB command.  The name of the macro block is
-        identified on the *USE command.  The commands within the macro
-        block are copied to a temporary file (of the macro block name)
-        during the *USE operation and executed as if a macro file of
-        that name had been created by the user.  The temporary file is
-        deleted after it has been used.  Macro block names should be
-        acceptable filenames (system dependent) and should not match
-        user created macro file names, since the user macro file will
-        be used first (if it exists) before the library file is
-        searched.  Macro blocks may be stacked in any order.
-        Branching [*GO or *IF] external to the macro block is not
-        allowed.
-
-        This command is valid in any processor.
-        """
-        command = "*ULIB,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def exprofile(self, ldtype="", load="", value="", pname="", fname="",
                   fext="", fdir="", **kwargs):
         """APDL Command: EXPROFILE
@@ -57619,89 +54429,6 @@ class _MapdlCommands():  # pragma: no cover
             the symbols .
         """
         command = "/HBC,%s,%s" % (str(wn), str(key))
-        return self.run(command, **kwargs)
-
-    def get(self, par="", entity="", entnum="", item1="", it1num="", item2="",
-            it2num="", **kwargs):
-        """APDL Command: *GET
-
-        Retrieves a value and stores it as a scalar parameter or part of an
-        array parameter.
-
-        Parameters
-        ----------
-        par
-            The name of the resulting parameter. See *SET for name
-            restrictions.
-
-        entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc., as shown for Entity = in the tables below.
-
-        entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
-
-        item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
-
-        it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
-
-        item2, it2num
-            A second set of item labels and numbers to further qualify the item
-            for which data are to be retrieved. Most items do not require this
-            level of information.
-
-        Notes
-        -----
-        *GET retrieves a value for a specified item and stores the value as a
-        scalar parameter, or as a value in a user-named array parameter. An
-        item is identified by various keyword, label, and number combinations.
-        Usage is similar to the *SET command except that the parameter values
-        are retrieved from previously input or calculated results. For example,
-        *GET,A,ELEM,5,CENT,X returns the centroid x-location of element 5 and
-        stores the result as parameter A. *GET command operations, along with
-        the associated Get functions return values in the active coordinate
-        system unless stated otherwise. A Get function is an alternative in-
-        line function that can be used to retrieve a value instead of the *GET
-        command (see Using In-line Get Functions for more information).
-
-        Both *GET and *VGET retrieve information from the active data stored in
-        memory. The database is often the source, and sometimes the information
-        is retrieved from common memory blocks that the program uses to
-        manipulate information. Although POST1 and POST26 operations use a
-        *.rst file, *GET data is accessed from the database or from the common
-        blocks. Get operations do not access the *.rst file directly. For
-        repeated gets of sequential items, such as from a series of elements,
-        see the *VGET command.
-
-        Most items are stored in the database after they are calculated and are
-        available anytime thereafter. Items are grouped according to where they
-        are usually first defined or calculated. Preprocessing data will often
-        not reflect the calculated values generated from section data. Do not
-        use *GET to obtain data from elements that use calculated section data,
-        such as beams or shells. Most of the general items listed below are
-        available from all modules. Each of the sections for accessing *GET
-        parameters are shown in the following order:
-
-        *GET General Entity Items
-
-        *GET Preprocessing Entity Items
-
-        *GET Solution Entity Items
-
-        *GET Postprocessing Entity Items
-
-        *GET Probabilistic Design Entity Items
-
-        The *GET command is valid in any processor.
-        """
-        command = "*GET,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(entity), str(entnum), str(item1), str(it1num), str(item2), str(it2num))
         return self.run(command, **kwargs)
 
     
@@ -63045,76 +59772,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
         return parse_output_volume_area(self.run(command, **kwargs))
 
-    def parres(self, lab="", fname="", ext="", **kwargs):
-        """APDL Command: PARRES
-
-        Reads parameters from a file.
-
-        Parameters
-        ----------
-        lab
-            Read operation.
-
-            NEW - Replace current parameter set with these parameters (default).
-
-            CHANGE - Extend current parameter set with these
-            parameters, replacing any that already exist.
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-            The file name defaults to Jobname.
-
-        ext
-            Filename extension (eight-character maximum).  The
-            extension defaults to PARM if Fname is blank.
-
-        Examples
-        --------
-        Read a local parameter file.
-
-        >>> mapdl.parres('parm.PARM')
-
-        Notes
-        -----
-        Reads parameters from a coded file.  The parameter file may
-        have been written with the PARSAV command.  The parameters
-        read may replace or change the current parameter set.
-
-        This command is valid in any processor.
-        """
-        if ext:
-            fname = fname + '.' + ext
-        elif not fname:
-            fname = '.' + 'PARM'
-
-        if 'Grpc' in self.__class__.__name__:  # grpc mode
-            if self._local:
-                if not os.path.isfile(fname):
-                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
-
-                if not os.path.dirname(fname):
-                    filename = os.path.join(os.getcwd(), fname)
-                else:
-                    filename = fname
-            else:
-                if not os.path.dirname(fname):
-                    # might be trying to run a local file.  Check if the
-                    # file exists remotely.
-                    if fname not in self.list_files():
-                        self.upload(fname, progress_bar=False)
-                else:
-                    self.upload(fname, progress_bar=False)
-                filename = os.path.basename(fname)
-        else:
-            filename = fname
-
-        return self.input(filename)
-
+    
     def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
           **kwargs) -> int:
         """Define a node.
@@ -63445,53 +60103,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
         return self.run(command, **kwargs)
 
-    def merge(self, name1="", name2="", val1="", val2="", **kwargs):
-        """Merges two dense matrices or vectors into one.
-
-        APDL Command: *MERGE
-
-        Parameters
-        ----------
-        name1
-            Name of the matrix or vector to extend.
-
-        name2
-            Name of the matrix or vector to be merged into ``name1``.
-
-        val1
-            If ``name1`` refers to a dense matrix created by the *DMAT
-            command then the column or row number indicating where the new values
-            are to be inserted into the Name1 matrix.
-
-            If ``name` refers to a vector created by *VEC then this is the
-            row number indicating where the new values are to be inserted
-            into the ``name1`` vector.
-
-        val2
-            Specifies how the ``name2`` matrix or vector is copied into
-            the ``name1`` matrix.
-
-            * ``"COL"`` : Insert the new values at the column location
-              specified by ``val1`` (default).
-            * ``"row"`` : Insert the new values at the row location specified by ``val1``.
-
-        Notes
-        -----
-        ``merge`` can be used to add new columns or rows to a dense matrix
-        that was created by the *DMAT command. In this case, ``name1`` must
-        be the name of the dense matrix and ``name2`` must refer to a vector
-        or another dense matrix.
-
-        *MERGE can also be used to add new rows to a vector that was
-         created by the *VEC command. In this case, ``name1`` and
-         ``name2`` must both refer to vectors.
-
-        In all cases, the values of the original matrix or vector are
-        retained, and the matrix or vector is resized to accommodate the
-        additional rows or columns.
-        """
-        return self.run(f"MERGE,{name1},{name2},{val1},{val2}", **kwargs)
-
+    
     def aport(self, portnum="", label="", kcn="", pres="", phase="", val1="",
               val2="", val3="", val4="", **kwargs):
         """Specifies input data for plane wave and acoustic duct ports.
@@ -64042,67 +60654,8 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"SHSD,{rid},{action}", **kwargs)
 
-    def remove(self, name="", val1="", val2="", val3="", **kwargs):
-        """Suppresses rows or columns of a dense matrix or a vector.
-
-        APDL Command: *REMOVE
-
-        Parameters
-        ----------
-        name
-            Name of the matrix or vector to be revised.
-
-        val1
-            First row or column number to suppress if ``name`` is a dense
-            matrix.  First value index to suppress if ``name`` is a
-            vector.
-
-        Val2
-            Last row or column number to suppress if ``name`` is a dense
-            matrix.  Last value index to suppress if ``name`` is a
-            vector.
-
-        Val3
-            Specifies what to remove if ``name`` is a dense matrix.
-
-            * ``"COL"`` : Remove columns of the matrix (default).
-
-            * ``"ROW"`` : Remove rows of the matrix.
-
-        Notes
-        -----
-        The values of the original matrix or vector specified by Name are
-        retained. The matrix or vector is resized to the new number of
-        rows and columns.
-        """
-        return self.run(f"REMOVE,{name},{val1},{val2},{val3}", **kwargs)
-
-    def scal(self, name="", val1="", val2="", **kwargs):
-        """Scales a vector or matrix by a constant.
-
-        APDL Command: *SCAL
-
-        Parameters
-        ----------
-        name
-            Name used to identify the vector or matrix to be scaled. Must
-            be specified.
-
-        val1
-            The real part of the constant to use (default = 1).
-
-        val2
-            The imaginary part of the constant to use (default = 0). This
-            value is used only if the vector or matrix specified by Name
-            is complex.
-
-        Notes
-        -----
-        This command can be applied to vectors and matrices created by the
-        *VEC, *DMAT and *SMAT commands.
-        """
-        return self.run(f"*SCAL,{name},{val1},{val2}", **kwargs)
-
+    
+    
     def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
         """Forms the common log of a variable
 

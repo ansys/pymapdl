@@ -1,5 +1,5 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
-                        aux2_, aux3_, aux12_, reduced,
+                        aux2_, aux3_, aux12_, reduced, apdl
 )
 
 class Commands:
@@ -266,6 +266,79 @@ class Commands:
     tbplot = preproc.material_data_tables.tbplot
     tbpt = preproc.material_data_tables.tbpt
     tbtemp = preproc.material_data_tables.tbtemp
+
+    # APDL commands
+    cfclos = apdl.macro_files.cfclos
+    cfopen = apdl.macro_files.cfopen
+    cfwrite = apdl.macro_files.cfwrite
+    create = apdl.macro_files.create
+    dflab = apdl.macro_files.dflab
+    end = apdl.macro_files.end
+    mkdir = apdl.macro_files.mkdir
+    msg = apdl.macro_files.msg
+    pmacro = apdl.macro_files.pmacro
+    psearch = apdl.macro_files.psearch
+    rmdir = apdl.macro_files.rmdir
+    tee = apdl.macro_files.tee
+    ulib = apdl.macro_files.ulib
+    use = apdl.macro_files.use
+    mfouri = apdl.array_parm.mfouri
+    mfun = apdl.array_parm.mfun
+    moper = apdl.array_parm.moper
+    mwrite = apdl.array_parm.mwrite
+    sread = apdl.array_parm.sread
+    toper = apdl.array_parm.toper
+    vabs = apdl.array_parm.vabs
+    vcol = apdl.array_parm.vcol
+    vcum = apdl.array_parm.vcum
+    vfact = apdl.array_parm.vfact
+    vfun = apdl.array_parm.vfun
+    vitrp = apdl.array_parm.vitrp
+    vlen = apdl.array_parm.vlen
+    vmask = apdl.array_parm.vmask
+    voper = apdl.array_parm.voper
+    vput = apdl.array_parm.vput
+    vscfun = apdl.array_parm.vscfun
+    vstat = apdl.array_parm.vstat
+    vwrite = apdl.array_parm.vwrite
+    afun = apdl.parameter_definition.afun
+    dim = apdl.parameter_definition.dim
+    get = apdl.parameter_definition.get
+    inquire = apdl.parameter_definition.inquire
+    parres = apdl.parameter_definition.parres
+    parsav = apdl.parameter_definition.parsav
+    set = apdl.parameter_definition.set
+    taxis = apdl.parameter_definition.taxis
+    tread = apdl.parameter_definition.tread
+    vfill = apdl.parameter_definition.vfill
+    vget = apdl.parameter_definition.vget
+    vread = apdl.parameter_definition.vread
+    abbr = apdl.abbreviations.abbr
+    abbres = apdl.abbreviations.abbres
+    abbsav = apdl.abbreviations.abbsav
+    ucmd = apdl.abbreviations.ucmd
+    axpy = apdl.matrix_op.axpy
+    comp = apdl.matrix_op.comp
+    dmat = apdl.matrix_op.dmat
+    dot = apdl.matrix_op.dot
+    eigen = apdl.matrix_op.eigen
+    export = apdl.matrix_op.export
+    fft = apdl.matrix_op.fft
+    free = apdl.matrix_op.free
+    init = apdl.matrix_op.init
+    itengine = apdl.matrix_op.itengine
+    lsbac = apdl.matrix_op.lsbac
+    lsengine = apdl.matrix_op.lsengine
+    lsfactor = apdl.matrix_op.lsfactor
+    merge = apdl.matrix_op.merge
+    mult = apdl.matrix_op.mult
+    nrm = apdl.matrix_op.nrm
+    remove = apdl.matrix_op.remove
+    scal = apdl.matrix_op.scal
+    smat = apdl.matrix_op.smat
+    starprint = apdl.matrix_op.starprint
+    sort = apdl.matrix_op.sort
+    vec = apdl.matrix_op.vec
 
     # hidden
     _batch = hidden.batch
