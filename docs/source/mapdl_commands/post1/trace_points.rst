@@ -9,7 +9,7 @@ Trace Points
 These POST1 commands are used to trace particle motions in a flow
 stream.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.pltrac

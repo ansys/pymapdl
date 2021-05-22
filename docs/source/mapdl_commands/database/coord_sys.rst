@@ -8,7 +8,7 @@ Coordinate System
 
 These DATABASE commands define and manipulate coordinate systems.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.clocal

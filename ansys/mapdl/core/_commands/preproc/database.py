@@ -1187,18 +1187,3 @@ def numstr(self, label="", value="", **kwargs):
     """
     command = "NUMSTR,%s,%s" % (str(label), str(value))
     return self.run(command, **kwargs)
-
-
-def prep7(self, **kwargs):
-    """Enters the model creation preprocessor.
-
-    APDL Command: /PREP7
-
-    Notes
-    -----
-    Enters the general input data preprocessor (PREP7).
-
-    This command is valid only at the Begin Level.
-    """
-    command = "/PREP7,"
-    return self.run(command, **kwargs)

@@ -9,7 +9,7 @@ Setup
 These POST1 commands are used to put data into the database for
 postprocessing.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.append

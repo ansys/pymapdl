@@ -17,13 +17,12 @@ file switching.
    Mapdl.cwd
    Mapdl.exit
    Mapdl.filname
-   Mapdl.help
    Mapdl.input
    Mapdl.keyw
    Mapdl.memm
-   Mapdl./nerr
+   Mapdl.nerr
    Mapdl.pause
-   Mapdl.status
+   Mapdl.starstatus
    Mapdl.syp
    Mapdl.sys
-   Mapdl.mapdl.unpause
+   Mapdl.unpause

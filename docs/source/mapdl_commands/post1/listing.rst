@@ -8,7 +8,7 @@ Listing
 
 These POST1 commands are used to control printed listings of results.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.format

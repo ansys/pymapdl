@@ -9,7 +9,7 @@ Surface Operations
 These POST1 commands are used to define an arbitrary surface and to
 develop results information for that surface.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.sucalc

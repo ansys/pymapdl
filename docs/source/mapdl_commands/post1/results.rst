@@ -10,7 +10,7 @@ These POST1 commands are used to process results, such as
 degree-of-freedom results, nodal stresses, and element summable and
 nonsummable miscellaneous data.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.nsort

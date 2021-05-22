@@ -672,6 +672,11 @@ Ignored commands:
 
 * ``/BATCH``
 * ``*DEL``
+* ``/ERASE``
+* ``ERASE``
+* ``HELP``
+* ``HELPDISP``
+* ``NOERASE``
 * ``UNDO``
 * ``*VEDIT``
 

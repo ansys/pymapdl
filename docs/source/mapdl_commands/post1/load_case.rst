@@ -9,7 +9,7 @@ Load Case Calculations
 These POST1 commands are used for combining results from different
 load steps.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.lcabs

@@ -4,7 +4,7 @@ These PREP7 commands define the type of elements to be used in the model.
 import re
 from typing import Optional, Union
 
-from ..mapdl_types import MapdlInt, MapdlFloat
+from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 def parse_et(msg: Optional[str]) -> Optional[int]:

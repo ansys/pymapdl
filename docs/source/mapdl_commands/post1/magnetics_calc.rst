@@ -9,7 +9,7 @@ Magnetics Calculations
 These POST1 commands are used for special purpose magnetics
 postprocessing.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.curr2d

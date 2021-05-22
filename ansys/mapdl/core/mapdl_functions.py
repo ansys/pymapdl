@@ -112,49 +112,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PDSHIS,%s,%s,%s,%s" % (str(rlab), str(name), str(type_), str(conf))
         return self.run(command, **kwargs)
 
-    def cscir(self, kcn="", kthet="", kphi="", **kwargs):
-        """APDL Command: CSCIR
-
-        Locates the singularity for non-Cartesian local coordinate systems.
-
-        Parameters
-        ----------
-        kcn
-            Number of the local coordinate system in which singularity location
-            is to be changed.  Must be greater than 10.
-
-        kthet
-            Theta singularity location for cylindrical, spherical, and toroidal
-            systems:
-
-            0 - Singularity at ±180°.
-
-            1 - Singularity at 0° (360°).
-
-        kphi
-            Phi singularity location for toroidal systems:
-
-            0 - Singularity in phi direction at ±180°.
-
-            1 - Singularity in phi direction at 0° (360°).
-
-        Notes
-        -----
-        Continuous closed surfaces (circles, cylinders, spheres, etc.) have a
-        singularity (discontinuity) at θ = ±180°. For local cylindrical,
-        spherical, and toroidal coordinate systems, this singularity location
-        may be changed to 0° (360°).
-
-        An additional, similar singularity occurs in the toroidal coordinate
-        system at: Φ = ±180° and can be moved with KPHI.  Additional
-        singularities occur in the spherical coordinate system at: Φ = ±90°,
-        but cannot be moved.
-
-        This command is valid in any processor.
-        """
-        command = "CSCIR,%s,%s,%s" % (str(kcn), str(kthet), str(kphi))
-        return self.run(command, **kwargs)
-
     def pras(self, quantity="", loadstep="", substep="", **kwargs):
         """APDL Command: PRAS
 
@@ -749,60 +706,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = f"LATT,{mat},{real},{type_},,{kb},{ke},{secnum}"
         return self.run(command, **kwargs)
 
-    def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
-        """APDL Command: FDELE
-
-        Deletes force loads on nodes.
-
-        Parameters
-        ----------
-        node
-            Node for which force is to be deleted.  If ALL, NEND and NINC are
-            ignored and forces are deleted on all selected nodes [NSEL].  If
-            NODE = P, graphical picking is enabled and all remaining command
-            fields are ignored (valid only in the GUI).  A component name may
-            also be substituted for NODE.
-
-        lab
-            Valid force label.  If ALL, use all appropriate labels.  Structural
-            labels:  FX, FY, or FZ (forces); MX, MY, or MZ (moments).  Thermal
-            labels:  HEAT, HBOT, HE2, HE3, . . ., HTOP (heat flow).  Fluid
-            labels:  FLOW (fluid flow).  Electric labels:  AMPS (current flow),
-            CHRG (electric charge).  Magnetic labels:  FLUX (magnetic flux);
-            CSGX, CSGY, or CSGZ (magnetic current segments).  Diffusion labels:
-            RATE (diffusion flow rate).
-
-        nend, ninc
-            Delete forces from NODE to NEND (defaults to NODE) in steps of NINC
-            (defaults to 1).
-
-        lkey
-            Lock key:
-
-            (blank) - The DOF is not locked (default).
-
-            FIXED - Displacement on the specified degrees of freedom (Lab) is locked. The program
-                    prescribes the degree of freedom to the "current" relative
-                    displacement value in addition to deleting the force. If a
-                    displacement constraint (for example, D command) is applied
-                    in conjunction with this option, the actual applied
-                    displacement will be ramped during the next load step. The
-                    displacement is ramped from the current value to the newly
-                    defined value. This option is only valid for the following
-                    labels: FX, FY, FZ, MX, MY, MZ. This option is intended
-                    primarily for use in the ANSYS Workbench interface to apply
-                    an increment length adjustment (bolt pretension loading).
-
-        Notes
-        -----
-        The node and the degree of freedom label corresponding to the force
-        must be selected [NSEL, DOFSEL].
-
-        This command is also valid in PREP7.
-        """
-        command = "FDELE,%s,%s,%s,%s,%s" % (str(node), str(lab), str(nend), str(ninc), str(lkey))
-        return self.run(command, **kwargs)
-
     def edri(self, option="", part="", xc="", yc="", zc="", tm="", ixx="",
              iyy="", izz="", ixy="", iyz="", ixz="", **kwargs):
         """APDL Command: EDRI
@@ -1205,64 +1108,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "MFEM,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fnumb), str(itype1), str(itype2), str(itype3), str(itype4), str(itype5), str(itype6), str(itype7), str(itype8), str(itype9), str(itype10))
-        return self.run(command, **kwargs)
-
-    def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
-        """APDL Command: KSEL
-
-        Selects a subset of keypoints or hard points.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        Notes
-        -----
-        Selects a subset of keypoints or hard points.  For example, to select a
-        new set of keypoints based on keypoint numbers 1 through 7, use
-        KSEL,S,KP,,1,7.  The selected subset is used when the ALL label is
-        entered (or implied) on other commands, such as KLIST,ALL.  Only data
-        identified by keypoint number are selected.  Data are flagged as
-        selected and unselected; no data are actually deleted from the
-        database.
-
-        This command is valid in any processor.
-
-        For selections based on non-integer numbers (coordinates, results,
-        etc.), items that are within the range VMIN -Toler and VMAX + Toler are
-        selected. The default tolerance Toler is based on the relative values
-        of VMIN and VMAX as follows:
-
-        If VMIN = VMAX, Toler = 0.005 x VMIN.
-
-        If VMIN = VMAX = 0.0, Toler = 1.0E-6.
-
-         If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX - VMIN).
-
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
-
-        Table: 203:: : KSEL - Valid Item and Component Labels
-        """
-        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
         return self.run(command, **kwargs)
 
     def modseloption(self, dir1="", dir2="", dir3="", dir4="", dir5="", dir6
@@ -1676,71 +1521,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DSURF,%s,%s,%s,%s" % (str(kcn), str(xsurf), str(ysurf), str(zsurf))
         return self.run(command, **kwargs)
 
-    def cmsel(self, type_="", name="", entity="", **kwargs):
-        """APDL Command: CMSEL
-
-        Selects a subset of components and assemblies.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Also select all components.
-
-            NONE - Unselect all components.
-
-        name
-            Name of component or assembly whose items are to be selected (valid
-            only if Type = S, R, A, or U).
-
-        entity
-            If Name is blank, then the following entity types can be specified:
-
-            VOLU - Select the volume components only.
-
-            AREA - Select the area components only.
-
-            LINE - Select the line components only.
-
-            KP - Select the keypoint components only.
-
-            ELEM - Select the element components only.
-
-            NODE - Select the node components only.
-
-        Notes
-        -----
-        Selecting by component is a convenient adjunct to individual item
-        selection (e.g., VSEL, ESEL, etc.). CMSEL, ALL allows you to select
-        components in addition to other items you have already selected.
-
-        If Type = R for an assembly selection [CMSEL,R,<assembly-name>], the
-        reselect operation is performed on each component in the assembly in
-        the order in which the components make up the assembly.  Thus, if one
-        reselect operation results in an empty set, subsequent operations will
-        also result in empty sets.  For example, if the first reselect
-        operation tries to reselect node 1 from the selected set of nodes 3, 4,
-        and 5, the operation results in an empty set (that is, no nodes are
-        selected).  Since the current set is now an empty set, if the second
-        reselect operation tries to reselect any nodes, the second operation
-        also results in an empty set, and so on.  This is equivalent to
-        repeating the command CMSEL,R,<component-name> once for each component
-        making up the assembly.
-
-        This command is valid in any processor.
-        """
-        command = "CMSEL,%s,%s,%s" % (str(type_), str(name), str(entity))
-        return self.run(command, **kwargs)
-
     def pvect(self, oper="", labxr="", labyr="", labzr="", **kwargs):
         """APDL Command: PVECT
 
@@ -2098,45 +1878,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         particular fatigue location and event.
         """
         command = "FSPLOT,%s,%s,%s" % (str(nloc), str(nev), str(item))
-        return self.run(command, **kwargs)
-
-    def filname(self, fname="", key="", **kwargs):
-        """APDL Command: /FILNAME
-
-        Changes the Jobname for the analysis.
-
-        Parameters
-        ----------
-        fname
-            Name (32 characters maximum) to be used as the Jobname.  Defaults
-            to the initial Jobname as specified on the ANSYS execution command,
-            or to file if none specified.
-
-        key
-            Specify whether to use the existing log, error, lock, page, and
-            output files (.LOG, .ERR, .LOCK, .PAGE and .OUT) or start new
-            files.
-
-            0, OFF - Continue using current log, error, lock, page, and output files.
-
-            1, ON - Start new log, error, lock, page, and output files (old log and error files are
-                    closed and saved, but old lock, page, and output files are
-                    deleted). Existing log and error files are appended.
-
-        Notes
-        -----
-        All subsequently created files will be named with this Jobname if Key =
-        0.  Use Key = 1 to start new log, error, lock, page, and output files.
-        The previous Jobname is typically defined on the ANSYS program
-        execution line (see the Operations Guide).  This command is useful when
-        different groups of files created throughout the run are to have
-        different names.  For example, the command may be used before each
-        substructure pass to avoid overwriting files or having to rename each
-        file individually.
-
-        This command is valid only at the Begin level.
-        """
-        command = "/FILNAME,%s,%s" % (str(fname), str(key))
         return self.run(command, **kwargs)
 
     def cformat(self, nfirst="", nlast="", **kwargs):
@@ -3171,124 +2912,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = f"CBDOF,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt},{tolthk}"
         return self.run(command, **kwargs)
 
-    def nsll(self, type_="", nkey="", **kwargs):
-        """APDL Command: NSLL
-
-        Selects those nodes associated with the selected lines.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of node select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        nkey
-            Specifies whether only interior line nodes are to be selected:
-
-            0 - Select only nodes interior to selected lines.
-
-            1 - Select all nodes (interior to line and at keypoints)
-                associated with the selected lines.
-
-        Notes
-        -----
-        Valid only if the nodes were generated by a line meshing
-        operation [LMESH, AMESH, VMESH] on a solid model that contains
-        the associated lines.
-
-        This command is valid in any processor.
-        """
-        command = "NSLL,%s,%s" % (str(type_), str(nkey))
-        return self.run(command, **kwargs)
-
-    def cs(self, kcn="", kcs="", norig="", nxax="", nxypl="", par1="", par2="",
-           **kwargs):
-        """APDL Command: CS
-
-        Defines a local coordinate system by three node locations.
-
-        Parameters
-        ----------
-        kcn
-            Arbitrary reference number assigned to this coordinate system.
-            Must be greater than 10.  A coordinate system previously defined
-            with this number will be redefined.
-
-        kcs
-            Coordinate system type:
-
-            0 or CART - Cartesian
-
-            1 or CYLIN - Cylindrical (circular or elliptical)
-
-            2 or SPHE - Spherical (or spheroidal)
-
-            3 or TORO - Toroidal
-
-        norig
-            Node defining the origin of this coordinate system.  If NORIG = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).
-
-        nxax
-            Node defining the positive x-axis orientation of this coordinate
-            system.
-
-        nxypl
-            Node defining the x-y plane (with NORIG and NXAX) in the first or
-            second quadrant of this coordinate system.
-
-        par1
-            Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
-            or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).  If KCS  = 3, PAR1 is the major
-            radius of the torus.
-
-        par2
-            Used for spheroidal systems.  If KCS = 2, PAR2 = ratio of ellipse
-            Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-        Defines and activates a local right-handed coordinate system by
-        specifying three existing nodes: to locate the origin, to locate the
-        positive x-axis, and to define the positive x-y plane.  This local
-        system becomes the active coordinate system.  See the CLOCAL, CSKP,
-        CSWPLA, and LOCAL commands for alternate definitions.  Local coordinate
-        systems may be displayed with the /PSYMB command.
-
-        This command is valid in any processor.
-        """
-        command = "CS,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(norig), str(nxax), str(nxypl), str(par1), str(par2))
-        return self.run(command, **kwargs)
-
-    # def else(self, **kwargs):
-    #     """APDL Command: *ELSE
-
-    #     Separates the final if-then-else block.
-
-    #     Notes
-    #     -----
-    #     Optional final block separator within an if-then-else construct. See
-    #     the *IF for details.  If a batch input stream hits an end-of-file
-    #     during a false *IF  condition, the ANSYS run will not terminate
-    #     normally. You will need to terminate it externally (use either the
-    #     Linux "kill" function or the Windows task manager). The *ELSE command
-    #     must appear on the same file as the *IF  command, and all five
-    #     characters must be input.
-
-    #     This command is valid in any processor.
-    #     """
-    #     command = "*ELSE,"
-    #     return self.run(command, **kwargs)
-
     def nladaptive(self, component="", action="", criterion="", option="",
                    val1="", val2="", val3="", **kwargs):
         """APDL Command: NLADAPTIVE
@@ -3892,36 +3515,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCLIST,%s" % (str(num))
         return self.run(command, **kwargs)
 
-    def noerase(self, **kwargs):
-        """APDL Command: /NOERASE
-
-        Prevents the screen erase between displays.
-
-        Notes
-        -----
-        Preventing the normal screen erase between requested displays allows
-        you to overlay multiple views.
-
-        Clearing the screen with the ERASE command (Utility Menu> PlotCtrls>
-        Erase Options> Erase screen) active simply clears the display area.
-        Subsequent replots will provide the cumulative plots previously
-        generated by the /NOERASE command.
-
-        For 3-D devices, you can issue /DV3D,DELS to suppress repeated screen
-        overlays and generate clear contour plots.
-
-        Use the /ERASE command to reactivate automatic screen erase.
-
-        For 3-D devices (/SHOW,3D), the model in all active windows will be the
-        same, even if you issue a different display command (NPLOT, EPLOT,
-        etc.) for each active window.  Use the Multi-Plot command (GPLOT) to
-        display different entities, in different windows, on 3-D devices.
-
-        This command is valid in any processor.
-        """
-        command = "/NOERASE,"
-        return self.run(command, **kwargs)
-
     def spopt(self, sptype="", nmode="", elcalc="", modereusekey="", **kwargs):
         """APDL Command: SPOPT
 
@@ -4136,59 +3729,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCONTACT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(sfsi), str(rwpn), str(ipck), str(shtk), str(peno), str(stcc), str(orie), str(cspc), str(penchk))
         return self.run(command, **kwargs)
 
-    def cmmod(self, cname="", keyword="", value="", **kwargs):
-        """APDL Command: CMMOD
-
-        Modifies the specification of a component.
-
-        Parameters
-        ----------
-        cname
-            Name of the existing component or assembly to be modified.
-
-        keyword
-            The label identifying the type of value to be modified.
-
-        value
-            If Keyword is NAME, then the value is the alphanumeric label to be
-            applied. See the CM command for naming convention details. If a
-            component named Value already exists, the command will be ignored
-            and an error message will be generated.
-
-        Notes
-        -----
-        The naming conventions for components, as specified in the CM command,
-        apply for CMMOD (32 characters, "ALL", "STAT" and "DEFA" are not
-        allowed, etc.). However, if you choose a component name that is already
-        designated for another component, an error message will be issued and
-        the command will be ignored.
-
-        This command is valid in any processor.
-        """
-        command = "CMMOD,%s,%s,%s" % (str(cname), str(keyword), str(value))
-        return self.run(command, **kwargs)
-
-    def unpause(self, **kwargs):
-        """APDL Command: UNPAUSE
-
-        Restores use of a temporarily released product license.
-
-        Notes
-        -----
-        The UNPAUSE command restores use of a temporarily released (paused)
-        product license. The command is valid only after a previously issued
-        PAUSE command.
-
-        When use of the product license is paused via the PAUSE command, no
-        other operation (other than SAVE or /EXIT) is possible until you issue
-        the UNPAUSE command.
-
-        For more information, see the documentation for the PAUSE command and
-        the ANSYS, Inc. Licensing Guide.
-        """
-        command = "UNPAUSE,"
-        return self.run(command, **kwargs)
-
     def fmagsum(self, cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
                 cnam6="", cnam7="", cnam8="", cnam9="", **kwargs):
         """APDL Command: FMAGSUM
@@ -4391,71 +3931,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "RMFLVEC,"
-        return self.run(command, **kwargs)
-
-    def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
-        """APDL Command: ASEL
-
-        Selects a subset of areas.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set (default)
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        Notes
-        -----
-        Selects a subset of areas. For example, to select those areas with area
-        numbers 1 through 7, use ASEL,S,AREA,,1,7.  The selected subset is then
-        used when the ALL label is entered (or implied) on other commands, such
-        as ALIST,ALL.  Only data identified by area number are selected.  Data
-        are flagged as selected and unselected; no data are actually deleted
-        from the database.
-
-        In a cyclic symmetry analysis, area hot spots can be modified.
-        Consequently, the result of an area selection may be different before
-        and after the CYCLIC command.
-
-        If Item = ACCA, the command selects only those areas that were created
-        by concatenation.  The KSWP field is processed, but the Comp, VMIN,
-        VMAX, and VINC fields are ignored.
-
-        This command is valid in any processor.
-
-        For Selects based on non-integer numbers (coordinates, results, etc.),
-        items that are within the range VMIN-Toler and VMAX+Toler are selected.
-        The default tolerance Toler is based on the relative values of VMIN and
-        VMAX as follows:
-
-        If VMIN = VMAX, Toler = 0.005 x VMIN.
-
-        If VMIN = VMAX = 0.0, Toler = 1.0E-6.
-
-         If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
-
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
-
-        Table: 127:: : ASEL - Valid Item and Component Labels
-        """
-        command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
         return self.run(command, **kwargs)
 
     def mfrelax(self, lab="", value="", option="", **kwargs):
@@ -4876,67 +4351,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "KUSE,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def cskp(self, kcn="", kcs="", porig="", pxaxs="", pxypl="", par1="",
-             par2="", **kwargs):
-        """APDL Command: CSKP
-
-        Defines a local coordinate system by three keypoint locations.
-
-        Parameters
-        ----------
-        kcn
-            Arbitrary reference number assigned to this coordinate system.
-            Must be greater than 10.  A coordinate system previously defined
-            with this number will be redefined.
-
-        kcs
-            Coordinate system type:
-
-            0 or CART - Cartesian
-
-            1 or CYLIN - Cylindrical (circular or elliptical)
-
-            2 or SPHE - Spherical (or spheroidal)
-
-            3 or TORO - Toroidal
-
-        porig
-            Keypoint defining the origin of this coordinate system.  If PORIG =
-            P, graphical picking is enabled and all remaining command fields
-            are ignored (valid only in the GUI).
-
-        pxaxs
-            Keypoint defining the positive x-axis orientation of this
-            coordinate system.
-
-        pxypl
-            Keypoint defining the x-y plane (with PORIG and PXAXS) in the first
-            or second quadrant of this coordinate system.
-
-        par1
-            Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
-            or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).  If KCS = 3, PAR1 is the major
-            radius of the torus.
-
-        par2
-            Used for spheroidal systems.  If KCS = 2, PAR2 = ratio of ellipse
-            Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-        Defines and activates a local right-handed coordinate system by
-        specifying three existing keypoints: to locate the origin, to locate
-        the positive x-axis, and to define the positive x-y plane.  This local
-        system becomes the active coordinate system.  See the CLOCAL, CS,
-        CSWPLA, and LOCAL commands for alternate definitions.  Local coordinate
-        systems may be displayed with the /PSYMB command.
-
-        This command is valid in any processor.
-        """
-        command = "CSKP,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(porig), str(pxaxs), str(pxypl), str(par1), str(par2))
-        return self.run(command, **kwargs)
-
     def bsm2(self, val1="", val2="", t="", **kwargs):
         """APDL Command: BSM2
 
@@ -5116,30 +4530,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         in a toroidal coordinate system is not recommended.
         """
         command = "KSYMM,%s,%s,%s,%s,%s,%s,%s" % (str(ncomp), str(np1), str(np2), str(ninc), str(kinc), str(noelem), str(imove))
-        return self.run(command, **kwargs)
-
-    def cmdele(self, name="", **kwargs):
-        """APDL Command: CMDELE
-
-        Deletes a component or assembly definition.
-
-        Parameters
-        ----------
-        name
-            Name of the component or assembly whose definition is to be
-            removed.
-
-        Notes
-        -----
-        Entities contained in the component, or the components within the
-        assembly, are unaffected.  Only the grouping relationships are deleted.
-        Assemblies are automatically updated to reflect deletion of their
-        components or subassemblies, but they are not automatically deleted
-        when all their components or subassemblies are deleted.
-
-        This command is valid in any processor.
-        """
-        command = "CMDELE,%s" % (str(name))
         return self.run(command, **kwargs)
 
     def susel(self, type_="", name1="", name2="", name3="", name4="", name5="",
@@ -5753,71 +5143,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         return self.run(f"*CREATE,{fname},{ext}", **kwargs)
-
-    def clocal(self, kcn="", kcs="", xl="", yl="", zl="", thxy="", thyz="",
-               thzx="", par1="", par2="", **kwargs):
-        """APDL Command: CLOCAL
-
-        Defines a local coordinate system relative to the active coordinate
-        system.
-
-        Parameters
-        ----------
-        kcn
-            Arbitrary reference number assigned to this coordinate system.
-            Must be greater than 10.  A coordinate system previously defined
-            with this number will be redefined.
-
-        kcs
-            Coordinate system type:
-
-            0 or CART - Cartesian
-
-            1 or CYLIN - Cylindrical (circular or elliptical)
-
-            2 or SPHE - Spherical (or spheroidal)
-
-            3 or TORO - Toroidal
-
-        xl, yl, zl
-            Location (in the active coordinate system) of the origin of the new
-            coordinate system (R, θ, Z for cylindrical, R, θ,Φ for spherical or
-            toroidal).
-
-        thxy
-            First rotation about local Z (positive X toward Y).
-
-        thyz
-            Second rotation about local X (positive Y toward Z).
-
-        thzx
-            Third rotation about local Y (positive Z toward X).
-
-        par1
-            Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
-            or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).  If KCS = 3, PAR1 is the major
-            radius of the torus.
-
-        par2
-            Used for spheroidal systems.  If KCS = 2, PAR2 = ratio of ellipse
-            Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-        Defines and activates a local coordinate system by origin location and
-        orientation angles relative to the active coordinate system.  This
-        local system becomes the active coordinate system, and is automatically
-        aligned with the active system (i.e., x is radial if a cylindrical
-        system is active, etc.).  Nonzero rotation angles (degrees) are
-        relative to this automatic rotation.  See the CS, CSKP, CSWPLA, and
-        LOCAL commands for alternate definitions.  Local coordinate systems may
-        be displayed with the /PSYMB command.
-
-        This command is valid in any processor.
-        """
-        command = "CLOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(xl), str(yl), str(zl), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
-        return self.run(command, **kwargs)
 
     def pmgtran(self, fname="", freq="", fcnam1="", fcnam2="", pcnam1="",
                 pcnam2="", ecnam1="", ccnam1="", **kwargs):
@@ -7293,42 +6618,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "NPRINT,%s" % (str(n))
         return self.run(command, **kwargs)
 
-    def nsla(self, type_="", nkey="", **kwargs):
-        """APDL Command: NSLA
-
-        Selects those nodes associated with the selected areas.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of node select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        nkey
-            Specifies whether only interior area nodes are to be selected:
-
-            0 - Select only nodes interior to selected areas.
-
-            1 - Select all nodes (interior to area, interior to lines, and at keypoints)
-                associated with the selected areas.
-
-        Notes
-        -----
-        Valid only if the nodes were generated by an area meshing operation
-        [AMESH, VMESH] on a solid model that contains the selected areas.
-
-        This command is valid in any processor.
-        """
-        command = "NSLA,%s,%s" % (str(type_), str(nkey))
-        return self.run(command, **kwargs)
-
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """APDL Command: ADDAM
 
@@ -7367,24 +6656,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "ADDAM,%s,%s,%s,%s,%s,%s" % (str(af), str(aa), str(ab), str(ac), str(ad), str(amin))
-        return self.run(command, **kwargs)
-
-    def quit(self, **kwargs):
-        """APDL Command: /QUIT
-
-        Exits a processor.
-
-        Notes
-        -----
-        This is an alternative to the FINISH command.  If any cleanup or file
-        writing is normally done by the FINISH command, it is bypassed if the
-        /QUIT command is used instead.  A new processor may be entered after
-        this command.  See the /EXIT command to terminate the run.
-
-        This command is valid in any processor.  This command is not valid at
-        the Begin level.
-        """
-        command = "/QUIT,"
         return self.run(command, **kwargs)
 
     def edcnstr(self, option="", ctype="", comp1="", comp2="", val1="",
@@ -8145,21 +7416,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DMPOPTION,%s,%s" % (str(filetype), str(combine))
         return self.run(command, **kwargs)
 
-    def golist(self, **kwargs):
-        """APDL Command: /GOLIST
-
-        Reactivates the suppressed data input listing.
-
-        Notes
-        -----
-        Reactivates printout of the data input listing suppressed with /NOLIST.
-
-        This command is valid in any processor, but only within a batch run
-        [/BATCH].
-        """
-        command = "/GOLIST,"
-        return self.run(command, **kwargs)
-
     def pasave(self, lab="", fname="", ext="", **kwargs):
         """APDL Command: PASAVE
 
@@ -8497,172 +7753,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         immediately follow this command.
         """
         command = "DISPLAY,"
-        return self.run(command, **kwargs)
-
-    def cmwrite(self, option="", fname="", ext="", fnamei="", exti="",
-                fmat="", **kwargs):
-        """APDL Command: CMWRITE
-
-        Writes node and element components and assemblies to a file.
-
-        Parameters
-        ----------
-        option
-            Selects which data to write:
-
-            ALL - Write all appropriate geometry, material property,
-                  load, and component data (default). Two files will
-                  be produced. Fname.Ext will contain all data items
-                  mentioned in "Notes", except the solid model
-                  data. Fnamei.Exti will contain the solid model
-                  geometry and solid model loads data in the form of
-                  IGES commands. This option is not valid when
-                  CDOPT,ANF is active.
-
-            COMB - Write all data mentioned, but to a single file,
-                   Fname.Ext. Solid model geometry data will be
-                   written in either IGES or ANF format as specified
-                   in the CDOPT command, followed by the remainder of
-                   the data in the form of ANSYS commands. More
-                   information on these (IGES/ANF) file formats is
-                   provided in "Notes".
-
-            DB - Write all database information except the solid model
-                 and solid model loads to Fname.Ext in the form of
-                 ANSYS commands. This option is not valid when
-                 CDOPT,ANF is active.
-
-            SOLID - Write only the solid model geometry and solid
-                    model load data. This output will be in IGES or
-                    ANF format, as specified in the CDOPT
-                    command. More information on these (IGES/ANF) file
-                    formats is provided in "Notes".
-
-            GEOM - Write only element and nodal geometry data. Neither
-                   solid model geometry nor element attribute data
-                   will be written. One file, Fname.Ext, will be
-                   produced. Use CDREAD,DB to read in a file written
-                   with this option. Element types [ET] compatible
-                   with the connectivity of the elements on the file
-                   must first be defined before reading the file in
-                   with CDREAD,DB.
-
-            CM - Write only node and element component and geometry
-                 data to Fname.Ext.
-
-            MAT - Write only material property data (both linear and
-                  nonlinear) to Fname.Ext .
-
-            LOAD - Write only loads for current load step to
-                   Fname.Ext.
-
-            SECT - Write only section data to Fname.Ext. Pretension
-                   sections are not included.
-
-
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).  The
-            extension defaults to CDB if Fname is blank.
-
-        fnamei
-            Name of the IGES file and its directory path (248
-            characters maximum, including directory). If you do not
-            specify a directory path, it will default to your working
-            directory and you can use all 248 characters for the file
-            name.
-
-            The file name defaults to Fname. Used only if
-            Option = ALL or SOLID. Previous data on this file, if any,
-            is overwritten.
-
-        Exti
-            Filename extension (eight-character maximum).  The
-            extension defaults to IGES in all cases, except when
-            CDOPT,ANF is active and CDWRITE, Option = SOLID. In this
-            case Exti = ANF.
-
-        fmat
-            Format of the output file (defaults to BLOCKED).
-
-            BLOCKED - Blocked format. This format allows faster
-                      reading of the output file. The time savings is
-                      most significant when BLOCKED is used to read
-                      .cdb files associated with very large models.
-
-            UNBLOCKED - Unblocked format.
-
-        Notes
-        -----
-        Load data includes the current load step only. Loads applied
-        to the solid model (if any) are automatically transferred to
-        the finite element model when this command is issued. CDWRITE
-        writes out solid model loads for meshed models only. If the
-        model is not meshed, the solid model loads cannot be
-        saved. Component data include component definitions, but not
-        assembly definitions. Appropriate NUMOFF commands are included
-        at the beginning of the file; this is to avoid overlap of an
-        existing database when the file is read in.
-
-        Solution control commands are typically not written to the
-        file unless you specifically change a default solution
-        setting.
-
-        CDWRITE does not support the GSBDATA and GSGDATA commands, and
-        these commands are not written to the file.
-
-        The data may be reread (on a different machine, for example)
-        with the CDREAD command. Caution: When the file is read in,
-        the NUMOFF,MAT command may cause a mismatch between material
-        definitions and material numbers referenced by certain loads
-        and element real constants. See NUMOFF for details. Also, be
-        aware that the files created by the CDWRITE command explicitly
-        set the active coordinate system to Cartesian (CSYS,0).
-
-        You should generally use the blocked format (Fmat = BLOCKED)
-        when writing out model data with CDWRITE. This is a compressed
-        data format that greatly reduces the time required to read
-        large models through the CDREAD command. The blocked and
-        unblocked formats are described in Chapter 3 of the Guide to
-        Interfacing with ANSYS.
-
-        If you use CDWRITE in any of the derived products (ANSYS
-        Mechanical Pro, ANSYS Mechanical Premium), then before reading
-        the file, you must edit the Jobname.cdb file to remove
-        commands that are not available in the respective component
-        product.
-
-        The CDWRITE command writes PART information for any ANSYS
-        LS-DYNA input file to the Jobname.cdb file via the EDPREAD
-        command. (EDPREAD is not a documented command; it is written
-        only when the CDWRITE command is issued.) The PART information
-        can be automatically read in via the CDREAD command; however,
-        if more than one Jobname.cdb file is read, the PART list from
-        the last Jobname.cdb file overwrites the existing PART list of
-        the total model. This behavior affects all PART-related
-        commands contained in the Jobname.cdb file. You can join
-        models, but not PART-related inputs, which you must modify
-        using the newly-created PART numbers. In limited cases, an
-        update of the PART list (EDWRITE,PUPDATE) is possible; doing
-        so requires that no used combination of MAT/TYPE/REAL appears
-        more than once in the list.
-
-        The CDWRITE command does not support (for beam meshing) any
-        line operation that relies on solid model associativity. For
-        example, meshing the areas adjacent to the meshed line,
-        plotting the line that contains the orientation nodes, or
-        clearing the mesh from the line that contains orientation
-        nodes may not work as expected. For more information about
-        beam meshing, see Meshing Your Solid Model in the Modeling and
-        Meshing Guide.
-        """
-        command = f"CDWRITE,{option},{fname},{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)
 
     def nlist(self, node1="", node2="", ninc="", lcoord="", sort1="", sort2="",
@@ -9193,35 +8283,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "BFKLIST,%s,%s" % (str(kpoi), str(lab))
-        return self.run(command, **kwargs)
-
-    def nslk(self, type_="", **kwargs):
-        """APDL Command: NSLK
-
-        Selects those nodes associated with the selected keypoints.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of node select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        Notes
-        -----
-        Valid only if the nodes were generated by a keypoint meshing operation
-        [KMESH, LMESH, AMESH, VMESH] on a solid model that contains the
-        selected keypoints.
-
-        This command is valid in any processor.
-        """
-        command = "NSLK,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def mlist(self, node1="", node2="", ninc="", **kwargs):
@@ -10350,30 +9411,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CECYC,%s,%s,%s,%s,%s,%s,%s" % (str(lowname), str(highname), str(nsector), str(hindex), str(tolerance), str(kmove), str(kpairs))
         return self.run(command, **kwargs)
 
-    def title(self, title="", **kwargs):
-        """APDL Command: /TITLE
-
-        Defines a main title.
-
-        Parameters
-        ----------
-        title
-            Input up to 72 alphanumeric characters.  Parameter substitution may
-            be forced within the title by enclosing the parameter name or
-            parametric expression within percent (%) signs.
-
-        Notes
-        -----
-        The title is carried through the printout and written on various files.
-        The title written to a file is the title defined at that time.  Special
-        characters may be used within the title text.  Subtitles may also be
-        defined [/STITLE].
-
-        This command is valid in any processor.
-        """
-        command = "/TITLE,%s" % (str(title))
-        return self.run(command, **kwargs)
-
     def arotat(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", pax1="",
                pax2="", arc="", nseg="", **kwargs):
         """APDL Command: AROTAT
@@ -11189,22 +10226,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DDELE,%s,%s,%s,%s,%s" % (str(node), str(lab), str(nend), str(ninc), str(rkey))
         return self.run(command, **kwargs)
 
-    def nolist(self, **kwargs):
-        """APDL Command: /NOLIST
-
-        Suppresses the data input listing.
-
-        Notes
-        -----
-        Printout is suppressed until a /GOLIST command is read or the end of
-        the listing is encountered.
-
-        This command is valid in any processor, but only within a batch run
-        [/BATCH].
-        """
-        command = "/NOLIST,"
-        return self.run(command, **kwargs)
-
     def thexpand(self, key="", **kwargs):
         """APDL Command: THEXPAND
 
@@ -11281,60 +10302,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "PLF2D,%s,%s,%s,%s" % (str(ncont), str(olay), str(anum), str(win))
-        return self.run(command, **kwargs)
-
-    def nsle(self, type_="", nodetype="", num="", **kwargs):
-        """APDL Command: NSLE
-
-        Selects those nodes attached to the selected elements.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of node select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        nodetype
-            Label identifying type of nodes to consider when selecting:
-
-            ALL - Select all nodes of the selected elements (default).
-
-            ACTIVE - Select only the active nodes. An active node is a node that contributes DOFs to
-                     the model.
-
-            INACTIVE - Select only inactive  nodes (such as orientation or radiation).
-
-            CORNER - Select only corner nodes.
-
-            MID - Select only midside nodes.
-
-            POS - Select nodes in position Num.
-
-            FACE - Select nodes on face Num.
-
-        num
-            Position or face number for NodeType = POS or FACE.
-
-        Notes
-        -----
-        NSLE selects NodeType nodes attached to the currently-selected set of
-        elements. Only nodes on elements in the currently-selected element set
-        can be selected.
-
-        Note:: : When using degenerate hexahedral elements, NSLE, U,CORNER and
-        NSLE,S,MID will not select the same set of nodes because some nodes
-        appear as both corner and midside nodes.
-
-        This command is valid in any processor.
-        """
-        command = "NSLE,%s,%s,%s" % (str(type_), str(nodetype), str(num))
         return self.run(command, **kwargs)
 
     def dflab(self, dof="", displab="", forcelab="", **kwargs):
@@ -12045,52 +11012,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ADAPT,%s,%s,%s,%s,%s,%s,%s" % (str(nsoln), str(stargt), str(ttargt), str(facmn), str(facmx), str(kykps), str(kymac))
         return self.run(command, **kwargs)
 
-    def lgwrite(self, fname="", ext="", kedit="", **kwargs):
-        """APDL Command: LGWRITE
-
-        Writes the database command log to a file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-            The file name defaults to Jobname.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        kedit
-            Flag to suppress nonessential commands:
-
-            NONE - Do not suppress any commands (default).
-
-            COMMENT - Write nonessential commands as comments (starting with !).
-
-            REMOVE - Do not write nonessential commands or comments.
-
-        Notes
-        -----
-        Writes the database command log to a named file.  The database
-        command log contains all commands that were used to create the
-        current database.  These commands are recorded in the database
-        as they are issued, and saved in the database file (File.DB)
-        whenever the database is saved.  The LGWRITE command extracts
-        these commands from the database and writes them to a file.
-        Nonessential commands (for listing, graphics displays, help,
-        etc.) can be excluded from the file by using the Kedit field.
-        The file resulting from LGWRITE can be used as command input
-        to the program.  This command is most useful if the session
-        log file (File.LOG), which is normally saved during an
-        interactive session, has been lost or corrupted.
-
-        This command is valid in any processor.
-        """
-        return self.run(f"LGWRITE,{fname},{ext},,{kedit}", **kwargs)
-
     def ainv(self, na="", nv="", **kwargs):
         """APDL Command: AINV
 
@@ -12719,35 +11640,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         instead of by coupling.
         """
         command = "CPINTF,%s,%s" % (str(lab), str(toler))
-        return self.run(command, **kwargs)
-
-    def delete(self, set_="", nstart="", nend="", **kwargs):
-        """APDL Command: DELETE
-
-        Specifies sets in the results file to be deleted before postprocessing.
-
-        Parameters
-        ----------
-        set\_
-            Specifies that sets in the results file are to be deleted.
-
-        nstart
-            The first set in a results file to be deleted.
-
-        nend
-            The final set in a results file to be deleted. This field is used
-            only if deleting more than one sequential sets.
-
-        Notes
-        -----
-        DELETE is a specification command that flags sets in the results file
-        for deletion. It should be followed by a COMPRESS command, the
-        corresponding action command that deletes the specified sets.
-
-        The DELETE command is valid only in the results file editing processor
-        (ANSYS auxiliary processor AUX3).
-        """
-        command = "DELETE,%s,%s,%s" % (str(set_), str(nstart), str(nend))
         return self.run(command, **kwargs)
 
     def atan(self, ir="", ia="", name="", facta="", **kwargs):
@@ -14151,70 +13043,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CMSOPT,%s,%s,%s,%s,%s,%s,%s" % (str(cmsmeth), str(nmode), str(freqb), str(freqe), str(fbddef), str(fbdval), str(iokey))
         return self.run(command, **kwargs)
 
-    def cm(self, cname="", entity="", **kwargs):
-        """APDL Command: CM
-
-        Groups geometry items into a component.
-
-        Parameters
-        ----------
-        cname
-            An alphanumeric name used to identify this component. Cname may be
-            up to 32 characters, beginning with a letter and containing only
-            letters, numbers, and underscores.  Component names beginning with
-            an underscore (e.g., _LOOP) are reserved for use by ANSYS and
-            should be avoided.  Components named "ALL," "STAT," and "DEFA" are
-            not permitted. Overwrites a previously defined name.
-
-        entity
-            Label identifying the type of geometry items to be grouped:
-
-            VOLU - Volumes.
-
-            AREA - Areas.
-
-            LINE - Lines.
-
-            KP - Keypoints.
-
-            ELEM - Elements.
-
-            NODE - Nodes.
-
-        Notes
-        -----
-        Components may be further grouped into assemblies [CMGRP].  The
-        selected items of the specified entity type will be stored as the
-        component.  Use of this component in the select command [CMSEL] causes
-        all these items to be selected at once, for convenience.
-
-        A component is a grouping of some geometric entity that can then be
-        conveniently selected or unselected.  A component may be redefined by
-        reusing a previous component name.  The following entity types may
-        belong to a component: nodes, elements, keypoints, lines, areas, and
-        volumes.  A component may contain only 1 entity type, but an individual
-        item of any entity may belong to any number of components.  Once
-        defined, the items contained in a component may then be easily selected
-        or unselected [CMSEL].  Components may be listed [CMLIST], modified
-        [CMMOD] and deleted [CMDELE].  Components may also be further grouped
-        into assemblies [CMGRP].  Other entities associated with the entities
-        in a component (e.g., the lines and keypoints associated with areas)
-        may be selected by the ALLSEL command.
-
-        An item will be deleted from a component if it has been deleted by
-        another operation (see the KMODIF command for an example).  Components
-        are automatically updated to reflect deletions of one or more of their
-        items.  Components are automatically deleted and a warning message is
-        issued if all their items are deleted.  Assemblies are also
-        automatically updated to reflect deletions of one or more of their
-        components or subassemblies, but are not deleted if all their
-        components and subassemblies are deleted.
-
-        This command is valid in any processor.
-        """
-        command = "CM,%s,%s" % (str(cname), str(entity))
-        return self.run(command, **kwargs)
-
     def del_(self, val1="", val2="", **kwargs):
         """APDL Command: *DEL
 
@@ -14669,60 +13497,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         The command functions only in the postprocessor.
         """
         command = "ANCNTR,%s,%s,%s" % (str(nfram), str(delay), str(ncycl))
-        return self.run(command, **kwargs)
-
-    def starstatus(self, par="", imin="", imax="", jmin="", jmax="", kmin="",
-                   kmax="", lmin="", lmax="", mmin="", mmax="", kpri="",
-                   **kwargs):
-        """APDL Command: *STATUS
-
-        Lists the current parameters and abbreviations.
-
-        Parameters
-        ----------
-        par
-            Specifies the parameter or sets of parameters listed. For array
-            parameters, use IMIN, IMAX, etc. to specify ranges.  Use *DIM to
-            define array parameters. Use *VEDIT to review array parameters
-            interactively. Use *VWRITE to print array values in a formatted
-            output. If Par is blank, list all scalar parameter values, array
-            parameter dimensions, and abbreviations.  If ARGX, list the active
-            set of local macro parameters (ARG1 to ARG9 and AR10 to AR99)
-            [*USE].
-
-            Lists all parameters (except local macro parameters and those with names beginning or ending with an underbar) and toolbar abbreviations. - Lists only parameters with names beginning with an underbar (_). These are
-                              ANSYS internal parameters.
-
-            Lists only parameters with names ending with an underbar (_). A good APDL programming convention is to ensure that all parameters created by your system programmer are named with a trailing underbar. - Lists all toolbar abbreviations.
-
-            Lists all parameters (except local macro parameters and those with names beginning or ending with an underbar). - Lists all APDL Math parameters, including vectors, matrices, and linear
-                              solvers.
-
-            Lists only the parameter specified. PARNAME cannot be a local macro parameter name. - Lists all local macro parameter values (ARG1- AR99) that are non-zero or non-
-                              blank.
-
-        imin, imax, jmin, jmax, kmin, kmax, lmin, lmax, mmin, mmax
-            Range of array elements to display (in terms of the dimensions
-            (row, column, plane, book, and shelf).   Minimum values default to
-            1.  Maximum values default to the maximum dimension values.  Zero
-            may be input for IMIN, JMIN, and KMIN to display the index numbers.
-            See *TAXIS  command to list index numbers of 4- and 5-D tables.
-
-        kpri
-            Use this field to list your primary variable labels (X, Y, Z, TIME,
-            etc.).
-
-            List the labels (default). YES, Y, or ON are also valid entries.  - Do not list the labels. NO, N, or OFF are also valid entries.
-
-        Notes
-        -----
-        You cannot obtain the value for a single local parameter (e.g.,
-        *STATUS,ARG2). You can only request all local parameters simultaneously
-        using *STATUS,ARGX.
-
-        This command is valid in any processor.
-        """
-        command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(imin), str(imax), str(jmin), str(jmax), str(kmin), str(kmax), str(lmin), str(lmax), str(mmin), str(mmax), str(kpri))
         return self.run(command, **kwargs)
 
     def magsolv(self, opt="", nramp="", cnvcsg="", cnvflux="", neqit="",
@@ -15193,128 +13967,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         coordinates of the nodes are stored.
         """
         command = "DIG,%s,%s,%s" % (str(node1), str(node2), str(ninc))
-        return self.run(command, **kwargs)
-
-    def anstoasas(self, fname="", key="", **kwargs):
-        """APDL Command: ANSTOASAS
-
-        Creates an ASAS input file from the current ANSYS model.
-
-        Parameters
-        ----------
-        fname
-            ASAS file name. Defaults to Jobname.
-
-        key
-            Key indicating type of file to produce:
-
-            0 - ASAS file for use by ANSYS Aqwa (no loads written). Creates the file
-                Fname.asas.
-
-            1 - ASAS file (all data written, including loads). Creates the file Fname.asas.
-
-            2 - ASAS(NL) file. Creates the file Fname.asnl.
-
-        Notes
-        -----
-        This command creates an input file for the ANSYS Asas Finite Element
-        Analysis System from the model and loads currently in the database,
-        based on the currently selected set of elements. Most common structural
-        element types are written, as well as sections (or real constants),
-        materials, boundary conditions and loads, and solution and load step
-        options.
-
-        Data Written
-
-        The following data is written:
-
-        Solution control options
-
-        Nodes
-
-        Elements
-
-        Material data
-
-        Geometry data
-
-        Section data
-
-        ANSYS element components (ASAS sets)
-
-        Boundary conditions
-
-        Loads
-
-        Added mass (via MASS21 element)
-
-        Details are provided in the following sections.
-
-        Not all data is written. You must verify the completeness and accuracy
-        of the data. Only loading at the current step is transferred; hence, no
-        load step history is captured.
-
-        Solution Control Options
-
-        The ASAS project name is defined as "ANSYS".
-
-        The solution control options are converted as follows:
-
-        JOB: STAT SPIT: KGEOM
-
-        JOB: STAT SPIT: KGEOM
-
-        For conversion to ASAS(NL), the large displacement option is set based
-        on NLGEOM, final load solution time is set based on TIME, and sub-step
-        times are set based on DELTIM or NSUBST (assuming constant step size).
-
-        Element Data
-
-        If you intend to use the data only with AQWA-WAVE, only the elements
-        that form the wetted surface are required.  Selecting these elements
-        before invoking the ANSTOASAS command will improve performance.  In
-        order for AQWA-WAVE to identify the direction of the wave loading, all
-        elements must be defined by nodes in a clockwise direction. For further
-        information, refer to the AQWA-WAVE manual.
-
-        The element types are converted as follows:
-
-        SPR1:  SPR2: if: rotational: spring:  FLA2: (ASAS(L): only):  if:
-        nodes: are: not: coincident:  and: longitudinal: spring:
-
-        QUM4:  TRM3: -: if: Triangular
-
-        BRK8:  TET4: -: if: Tetrahedral:  BRK6: -: if: Prism
-
-        QUS4:  TBC3: -: if: Triangular
-
-        QUM8:  TRM6: -: if: Triangular
-
-        BR20:  TE10: -: if: Tetrahedral: :  BR15: -: if: Prism
-
-        QUS4:  TBC3: -: if: Triangular
-
-        QUM4:  TRM3: -: if: Triangular
-
-        QUM8:  TRM6: -: if: Triangular
-
-        BRK8:  TET4: -: if: Tetrahedral:  BRK6: -: if: Prism
-
-        BR20:  TE10: -: if: Tetrahedral:  BR15: -: if: Prism
-
-        TCBM: -: if: ASAS(L):  STF4: -: if: ASAS(NL)
-
-        Documentation for this legacy element type appears in the Feature
-        Archive.
-
-        Material Data
-
-        Linear isotropic material conversion is supported for ASAS and
-        ASAS(NL).
-
-        Geometry Data
-        """
-        command = "ANSTOASAS,%s,%s" % (str(fname), str(key))
         return self.run(command, **kwargs)
 
     def mshcopy(self, keyla="", laptrn="", lacopy="", kcn="", dx="", dy="",
@@ -19804,102 +18456,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BFECUM,%s,%s,%s,%s" % (str(lab), str(oper), str(fact), str(tbase))
         return self.run(command, **kwargs)
 
-    def config(self, lab="", value="", **kwargs):
-        """APDL Command: /CONFIG
-
-        Assigns values to ANSYS configuration parameters.
-
-        Parameters
-        ----------
-        lab
-            Configuration parameter to be changed:
-
-            NORSTGM - Option to write or not write geometry data to the results file. VALUE is either
-                      0 (write geometry data) or 1 (do not write geometry
-                      data). Useful when complex analyses will create
-                      abnormally large files. Default is 0.
-
-            NBUF - VALUE is the number of buffers (1 to 32) per file in the solver.  Defaults to
-                   4.
-
-            LOCFL - File open and close actions.  For VALUE use: 0 for global (default); 1 for
-                    local.  Applicable to File.EROT, File.ESAV, and File.EMAT.
-                    Typically  used for large problems where locally closed
-                    files may be deleted  earlier in the run with the /FDELE
-                    command.
-
-            SZBIO - VALUE is the record size (1024 to 4194304) of binary files (in integer words).
-                    Defaults to 16384 (system dependent).
-
-            ORDER - Automatic reordering scheme.  For VALUE use: 0 for WSORT,ALL; 1 for WAVES; 2
-                    for both WSORT,ALL and WAVES (default).
-
-            FSPLIT - Defines split points for binary files.  VALUE is the file split point in
-                     megawords and defaults to the maximum file size for the
-                     system.
-
-            MXND - Maximum number of nodes. If not specified, defaults to 100 at first encounter.
-                   Dynamically expanded by doubling, even at first encounter,
-                   when maximum is exceeded.
-
-            MXEL - Maximum number of elements.  Default and expansion as for MXND.
-
-            MXKP - Maximum number of keypoints.  Default and expansion as for MXND.
-
-            MXLS - Maximum number of lines.  Default and expansion as for MXND.
-
-            MXAR - Maximum number of areas.  Default and expansion as for MXND.
-
-            MXVL - Maximum number of volumes.  Default and expansion as for MXND.
-
-            MXRL - Maximum number of sets of real constants (element attributes).  Default and
-                   expansion as for MXND.
-
-            MXCP - Maximum number of sets of coupled degrees of freedom.  Default and expansion as
-                   for MXND.
-
-            MXCE - Maximum number of constraint equations.  Default and expansion as for MXND.
-
-            NOELDB - Option to write or not write results into the database after a solution.  When
-                     VALUE = 0 (default), write results into the database.
-                     When VALUE = 1, do not write results into the database.
-
-            DYNA_DBL - Option to invoke the double precision version of the explicit dynamics solver
-                       LS-DYNA. When VALUE = 0 (default), the single precision
-                       version is used. When VALUE = 1, the double precision
-                       version is used.
-
-            STAT - Displays current values set by the /CONFIG command.
-
-        value
-            Value (an integer number) assigned to the configuration parameter.
-
-        Notes
-        -----
-        All configuration parameters have initial defaults, which in most cases
-        do not need to be changed.  Where a specially configured version of the
-        ANSYS program is desired, the parameters may be changed with this
-        command.  Issue /CONFIG,STAT to display current values.  Changes must
-        be defined before the parameter is required.  These changes (and
-        others) may also be incorporated into the config162.ans file which is
-        read upon execution of the program (see The Configuration File in the
-        Basic Analysis Guide).  If the same configuration parameter appears in
-        both the  configuration file and this command, this command overrides.
-
-        Distributed ANSYS uses the default FSPLIT value, and forces NOELDB = 1
-        and NORSTGM = 0 for all results files. The FSPLIT, NOELDB, and NORSTGM
-        options cannot be changed when using Distributed ANSYS.
-
-        The /CONFIG command is not valid for the ANSYS Multiphysics 1, 2, or 3
-        products.
-
-        The ANSYS Multi-field solver (MFS and MFX) does not support
-        /CONFIG,NOELDB,1. The ANSYS Multi-field solver needs the updated ANSYS
-        database.
-        """
-        command = "/CONFIG,%s,%s" % (str(lab), str(value))
-        return self.run(command, **kwargs)
-
     def wtbcreate(self, iel="", node="", damp="", **kwargs):
         """APDL Command: WTBCREATE
 
@@ -20199,20 +18755,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "EDWRITE,%s,%s,%s" % (str(option), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
-    def post26(self, **kwargs):
-        """APDL Command: /POST26
-
-        Enters the time-history results postprocessor.
-
-        Notes
-        -----
-        Enters the time-history results postprocessor (POST26).
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/POST26,"
         return self.run(command, **kwargs)
 
     def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
@@ -21059,25 +19601,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         moved during intersection calculations [MOVE or KMOVE].
         """
         command = "SOURCE,%s,%s,%s" % (str(x), str(y), str(z))
-        return self.run(command, **kwargs)
-
-    def cwd(self, dirpath="", **kwargs):
-        """APDL Command: /CWD
-
-        Changes the current working directory.
-
-        Parameters
-        ----------
-        dirpath
-            The full path name of the new working directory.
-
-        Notes
-        -----
-         After issuing the /CWD command, all new files opened with no default
-        directory specified (via the FILE, /COPY, or RESUME commands, for
-        example) default to the new DIRPATH directory.
-        """
-        command = "/CWD,%s" % (str(dirpath))
         return self.run(command, **kwargs)
 
     def prnld(self, lab="", tol="", item="", **kwargs):
@@ -22574,39 +21097,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDPART,%s,%s,%s" % (str(option), str(partid), str(cname))
         return self.run(command, **kwargs)
 
-    def lslk(self, type_="", lskey="", **kwargs):
-        """APDL Command: LSLK
-
-        Selects those lines containing the selected keypoints.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of line select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        lskey
-            Specifies whether all contained line keypoints must be selected
-            [KSEL]:
-
-            0 - Select line if any of its keypoints are in the selected keypoint set.
-
-            1 - Select line only if all of its keypoints are in the selected keypoint set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "LSLK,%s,%s" % (str(type_), str(lskey))
-        return self.run(command, **kwargs)
-
     def gcgen(self, option="", featureangle="", edgekey="", splitkey="",
               selopt="", **kwargs):
         """APDL Command: GCGEN
@@ -23013,64 +21503,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "MXPAND,%s,%s,%s,%s,%s,%s,%s" % (str(nmode), str(freqb), str(freqe), str(elcalc), str(signif), str(msupkey), str(modeselmethod))
         return self.run(command, **kwargs)
 
-    def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
-        """APDL Command: VSEL
-
-        Selects a subset of volumes.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of volume select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        Notes
-        -----
-        Selects volumes based on values of a labeled item and component.  For
-        example, to select a new set of volumes based on volume numbers 1
-        through 7, use VSEL,S,VOLU,,1,7.  The subset is used when the ALL label
-        is entered (or implied) on other commands, such as VLIST,ALL.  Only
-        data identified by volume number are selected.  Data are flagged as
-        selected and unselected; no data are actually deleted from the
-        database.
-
-        This command is valid in any processor.
-
-        For Selects based on non-integer numbers (coordinates, results, etc.),
-        items that are within the range VMIN-Toler and VMAX+Toler are selected.
-        The default tolerance Toler is based on the relative values of VMIN and
-        VMAX as follows:
-
-        If VMIN = VMAX, Toler = 0.005 x VMIN.
-
-        If VMIN = VMAX = 0.0, Toler = 1.0E-6.
-
-         If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
-
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
-
-        Table: 251:: : VSEL - Valid Item and Component Labels
-        """
-        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
-        return self.run(command, **kwargs)
-
     def anmode(self, nfram="", delay="", ncycl="", kaccel="", **kwargs):
         """APDL Command: ANMODE
 
@@ -23425,54 +21857,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         poor element shapes, the meshing operation is aborted.
         """
         command = "AMAP,%s,%s,%s,%s,%s" % (str(area), str(kp1), str(kp2), str(kp3), str(kp4))
-        return self.run(command, **kwargs)
-
-    def cswpla(self, kcn="", kcs="", par1="", par2="", **kwargs):
-        """APDL Command: CSWPLA
-
-        Defines a local coordinate system at the origin of the working plane.
-
-        Parameters
-        ----------
-        kcn
-            Arbitrary reference number assigned to this coordinate system.
-            Must be greater than 10.  A coordinate system previously defined
-            with this number will be redefined.
-
-        kcs
-            Coordinate system type:
-
-            0 or CART - Cartesian
-
-            1 or CYLIN - Cylindrical (circular or elliptical)
-
-            2 or SPHE - Spherical (or spheroidal)
-
-            3 or TORO - Toroidal
-
-        par1
-            Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
-            or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).  If KCS = 3, PAR1 is the major
-            radius of the torus.
-
-        par2
-            Used for spheroidal systems.  If KCS = 2, PAR2 = ratio of ellipse
-            Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-        Defines and activates a local right-handed coordinate system centered
-        at the origin of the working plane.  The coordinate system's local x-y
-        plane (for a Cartesian system) or R-θ plane (for a cylindrical or
-        spherical system) corresponds to the working plane.  This local system
-        becomes the active coordinate system.  See the CS, LOCAL, CLOCAL, and
-        CSKP commands for alternate ways to define a local coordinate system.
-        Local coordinate systems may be displayed with the /PSYMB command.
-
-        This command is valid in any processor.
-        """
-        command = "CSWPLA,%s,%s,%s,%s" % (str(kcn), str(kcs), str(par1), str(par2))
         return self.run(command, **kwargs)
 
     def seopt(self, sename="", sematr="", sepr="", sesst="", expmth="",
@@ -25343,51 +23727,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "~PROEIN,%s,%s,%s,%s" % (str(name), str(extension), str(path), str(proecomm))
         return self.run(command, **kwargs)
 
-    def cmlist(self, name="", key="", entity="", **kwargs):
-        """APDL Command: CMLIST
-
-        Lists the contents of a component or assembly.
-
-        Parameters
-        ----------
-        name
-            Name of the component or assembly to be listed (if blank, list all
-            selected components and assemblies). If Name is specified, then
-            Entity  is ignored.
-
-        key
-            Expansion key:
-
-            0 - Do not list individual entities in the component.
-
-            1 or EXPA - List individual entities in the component.
-
-        entity
-            If Name is blank, then the following entity types can be specified:
-
-            VOLU - List the volume components only.
-
-            AREA - List the area components only.
-
-            LINE - List the line components only.
-
-            KP - List the keypoint components only
-
-            ELEM - List the element components only.
-
-            NODE - List the node components only.
-
-        Notes
-        -----
-        This command is valid in any processor.  For components, it lists the
-        type of geometric entity. For assemblies, it lists the components
-        and/or assemblies that make up the assembly.
-
-        Examples of possible usage:
-        """
-        command = "CMLIST,%s,%s,%s" % (str(name), str(key), str(entity))
-        return self.run(command, **kwargs)
-
     def cval(self, wn="", v1="", v2="", v3="", v4="", v5="", v6="", v7="",
              v8="", **kwargs):
         """APDL Command: /CVAL
@@ -26544,42 +24883,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         For complete information, see Using Nonlinear General Beam Sections.
         """
         command = "BSM1,%s,%s,%s" % (str(val1), str(val2), str(t))
-        return self.run(command, **kwargs)
-
-    def memm(self, lab="", kywrd="", **kwargs):
-        """APDL Command: MEMM
-
-        Allows the current session to keep allocated memory
-
-        Parameters
-        ----------
-        lab
-             When Lab = KEEP, the memory manager's ability to acquire and keep
-            memory is controlled by Kywrd
-
-        kywrd
-            Turns the memory "keep" mode on or off
-
-            ON - Keep any memory allocated during the analysis.
-
-            OFF - Use memory dynamically and free it up to other users after use (default).
-
-        Notes
-        -----
-        You can use the MEMM command to ensure that memory intensive operations
-        will always have the same memory available when the operations occur
-        intermittently. Normally, if a large amount of memory is allocated for
-        a specific operation, it will be returned to the system once the
-        operation is finished. This option always maintains the highest level
-        used during the analysis until the analysis is finished.
-
-        The MEMM command does not affect the value you specify with the -m
-        switch. When you allocate memory with the -m switch, that amount will
-        always be available. However, if dynamic memory allocation in excess of
-        the-m value occurs, you can use the MEMM command to ensure that amount
-        is retained until the end of your analysis.
-        """
-        command = "MEMM,%s,%s" % (str(lab), str(kywrd))
         return self.run(command, **kwargs)
 
     def trans(self, fname="", ext="", **kwargs):
@@ -28389,25 +26692,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "VOLUMES,"
         return self.run(command, **kwargs)
 
-    def cslist(self, kcn1="", kcn2="", kcinc="", **kwargs):
-        """APDL Command: CSLIST
-
-        Lists coordinate systems.
-
-        Parameters
-        ----------
-        kcn1, kcn2, kcinc
-            List coordinate systems from KCN1 to KCN2 (defaults to KCN1) in
-            steps of KCINC (defaults to 1).  If KCN1 = ALL (default), KCN2 and
-            KCINC are ignored and all coordinate systems are listed.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "CSLIST,%s,%s,%s" % (str(kcn1), str(kcn2), str(kcinc))
-        return self.run(command, **kwargs)
-
     def secnum(self, secid="", **kwargs):
         """APDL Command: SECNUM
 
@@ -29202,20 +27486,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         transient analysis. All other analyses print zeros for the data.
         """
         command = "PRITER,"
-        return self.run(command, **kwargs)
-
-    def helpdisp(self, commandname="", **kwargs):
-        """APDL Command: HELPDISP
-
-        Displays help information on DISPLAY program commands.
-
-        Parameters
-        ----------
-        commandname
-            Any DISPLAY command.  If blank, a list of DISPLAY commands is
-            produced.
-        """
-        command = "HELPDISP,%s" % (str(commandname))
         return self.run(command, **kwargs)
 
     def secoffset(self, location="", offset1="", offset2="", cg_y="", cg_z="",
@@ -30559,34 +28829,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TUNIF,%s" % (str(temp))
         return self.run(command, **kwargs)
 
-    def post1(self, **kwargs):
-        """APDL Command: /POST1
-
-        Enters the database results postprocessor.
-
-        Notes
-        -----
-        Enters the general database results postprocessor (POST1).  All load
-        symbols (/PBC, /PSF, or /PBF) are automatically turned off with this
-        command.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/POST1,"
-        return self.run(command, **kwargs)
-
-    def slashsolu(self, **kwargs):
-        """APDL Command: /SOLU
-
-        Enters the solution processor.
-
-        Notes
-        -----
-        This command is valid only at the Begin Level.
-        """
-        command = "/SOLU,"
-        return self.run(command, **kwargs)
-
     def abbr(self, abbr="", string="", **kwargs):
         """APDL Command: *ABBR
 
@@ -30862,57 +29104,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "AESIZE,%s,%s" % (str(anum), str(size))
         return self.run(command, **kwargs)
 
-    def csys(self, kcn="", **kwargs):
-        """APDL Command: CSYS
-
-        Activates a previously defined coordinate system.
-
-        Parameters
-        ----------
-        kcn
-            Specifies the active coordinate system, as follows:
-
-            0 (default) - Cartesian
-
-            1 - Cylindrical with global Cartesian Z as the axis of rotation
-
-            2 - Spherical
-
-            4 or WP - Working Plane
-
-            5 - Cylindrical with global Cartesian Y as the axis of rotation
-
-            11 or greater - Any previously defined local coordinate system
-
-        Notes
-        -----
-        The CSYS command activates a previously defined coordinate system for
-        geometry input and generation.  The LOCAL, CLOCAL, CS, CSKP, and CSWPLA
-        commands also activate coordinate systems as they are defined. To set
-        the active element coordinate system attribute pointer, issue the ESYS
-        command.
-
-        The active coordinate system for files created via the CDWRITE command
-        is Cartesian (CSYS,0).
-
-        This command is valid in any processor.
-
-        CSYS,4 (or CSYS,WP) activates working plane tracking, which updates the
-        coordinate system to follow working plane changes. To deactivate
-        working plane tracking, activate any other coordinate system (for
-        example, CSYS,0 or CSYS,11).
-
-        CSYS,5 is a cylindrical coordinate system with global Cartesian Y as
-        the axis. The local x, y and z axes are radial, θ, and axial
-        (respectively). The R-Theta plane is the global X-Z plane, as it is for
-        an axisymmetric model. Thus, at θ = 0.0, CSYS,5 has a specific
-        orientation: the local x is in the global +X direction, local y is in
-        the global -Z direction, and local z (the cylindrical axis) is in the
-        global +Y direction.
-        """
-        command = "CSYS,%s" % (str(kcn))
-        return self.run(command, **kwargs)
-
     def ndele(self, node1="", node2="", ninc="", **kwargs):
         """APDL Command: NDELE
 
@@ -31070,38 +29261,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         less aggressive exploration with VAL1 = 1.
         """
         command = "NLMESH,%s,%s,%s,%s,%s" % (str(control), str(val1), str(val2), str(val3), str(val4))
-        return self.run(command, **kwargs)
-
-    def asll(self, type_="", arkey="", **kwargs):
-        """APDL Command: ASLL
-
-        Selects those areas containing the selected lines.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of area select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        arkey
-            Specifies whether all contained area lines must be selected [LSEL]:
-
-            0 - Select area if any of its lines are in the selected line set.
-
-            1 - Select area only if all of its lines are in the selected line set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "ASLL,%s,%s" % (str(type_), str(arkey))
         return self.run(command, **kwargs)
 
     def ovcheck(self, method="", frequency="", set_="", **kwargs):
@@ -33072,81 +31231,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SFADELE,%s,%s,%s" % (str(area), str(lkey), str(lab))
         return self.run(command, **kwargs)
 
-    def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
-        """APDL Command: NSEL
-
-        Selects a subset of nodes.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        Notes
-        -----
-        Selects a subset of nodes.  For example, to select a new set of nodes
-        based on node numbers 1 through 7, use NSEL,S,NODE,,1,7.  The subset is
-        used when the ALL label is entered (or implied) on other commands, such
-        as NLIST,ALL.  Only data identified by node number are selected.  Data
-        are flagged as selected and unselected; no data are actually deleted
-        from the database.
-
-        When selecting nodes by results, the full graphics value is used,
-        regardless of whether PowerGraphics is on.
-
-        Solution result data consists of two types, 1) nodal degree of freedom
-        --results initially calculated at the nodes (such as displacement,
-        temperature, pressure, etc.), and 2) element--results initially
-        calculated elsewhere (such as at an element integration point or
-        thickness location) and then recalculated at the nodes (such as
-        stresses, strains, etc.).  Various element results also depend upon the
-        recalculation method and the selected results location [AVPRIN, RSYS,
-        FORCE, LAYER and SHELL].
-
-        You must have all the nodes (corner and midside nodes) on the external
-        face of the element selected to use Item = EXT.
-
-        This command is valid in any processor.
-
-        For Selects based on non-integer numbers (coordinates, results, etc.),
-        items that are within the range VMIN-Toler and VMAX+Toler are selected.
-        The default tolerance Toler is based on the relative values of VMIN and
-        VMAX as follows:
-
-        If VMIN = VMAX, Toler = 0.005 x VMIN.
-
-        If VMIN = VMAX = 0.0, Toler = 1.0E-6.
-
-         If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
-
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
-
-        Table: 208:: : NSEL - Valid Item and Component Labels
-
-        Table: 209:: : NSEL - Valid Item and Component Labels for Nodal DOF
-        Result Values
-        """
-        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
-        return self.run(command, **kwargs)
-
     def slashreset(self, **kwargs):
         """APDL Command: /RESET
 
@@ -33465,65 +31549,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "OCDELETE,%s,%s" % (str(datatype), str(zonename))
-        return self.run(command, **kwargs)
-
-    def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", **kwargs):
-        """APDL Command: DOFSEL
-
-        Selects a DOF label set for reference by other commands.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set of labels.
-
-            A - Add labels to the current set.
-
-            U - Unselect (remove) labels from the current set.
-
-            ALL - Restore the full set of labels.
-
-            STAT - Display the current select status.
-
-        dof1, dof2, dof3, . . . , dof6
-            Used only with Type = S, A, or U.  Valid structural labels:  UX,
-            UY, or UZ (displacements); U (UX, UY, and UZ);  ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX, ROTY, and ROTZ);  DISP (U and ROT); HDSP
-            (Hydrostatic pressure). Valid thermal labels: TEMP, TBOT, TE2, TE3,
-            . . ., TTOP (temperature).  Valid acoustic labels:  PRES
-            (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            Valid electric labels:  VOLT (voltage); EMF (electromotive force
-            drop); CURR (current).  Valid magnetic labels:  MAG (scalar
-            magnetic potential); AX, AY or AZ (vector magnetic potentials); A
-            (AX, AY and AZ); CURR (current).  Valid structural force labels:
-            FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ
-            (moments); M (MX, MY, and MZ);  FORC (F and M); DVOL (fluid mass
-            flow rate).  Valid thermal force labels:  HEAT, HBOT, HE2, HE3, . .
-            ., HTOP (heat flow).  Valid fluid flow force labels:  FLOW (fluid
-            flow).  Valid electric force labels:  AMPS (current flow); CHRG
-            (electric charge).  Valid magnetic force labels:  FLUX (scalar
-            magnetic flux); CSGX, CSGY, or CSGZ (magnetic current segments);
-            CSG (CSGX, CSGY, and CSGZ). Valid diffusion labels: CONC
-            (concentration); RATE (diffusion flow rate).
-
-        Notes
-        -----
-        Selects a degree of freedom label set for reference by other commands.
-        The label set is used on certain commands where ALL is either input in
-        the degree of freedom label field or implied.  The active label set has
-        no effect on the solution degrees of freedom.  Specified labels which
-        are not active in the model (from the ET or DOF command) are ignored.
-        As a convenience, a set of force labels corresponding to the degree of
-        freedom labels is also selected.  For example, selecting UX also causes
-        FX to be selected (and vice versa).  The force label set is used on
-        certain commands where ALL is input in the force label field.
-
-        This command is valid in any processor.
-        """
-        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
         return self.run(command, **kwargs)
 
     def window(self, wn="", xmin="", xmax="", ymin="", ymax="", ncopy="",
@@ -33981,104 +32006,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "/CPLANE,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def anstoaqwa(self, fname="", vertaxis="", gc="", rho="", hwl="",
-                  diffkey="", symxkey="", symykey="", **kwargs):
-        """APDL Command: ANSTOAQWA
-
-        Creates an AQWA-LINE input file from the current ANSYS model.
-
-        Parameters
-        ----------
-        fname
-            AQWA file name. Defaults to Jobname.
-
-        vertaxis
-            Axis in the vertical direction:
-
-            Y (or 2)  - Global Y axis.
-
-            Z (or 3)  - Global Z axis (default).
-
-        gc
-            Gravitational acceleration. Defaults to 9.81.
-
-        rho
-            Density of water. Defaults to 1025.0.
-
-        hwl
-            Waterline height in model coordinates. Defaults to 0.0.
-
-        diffkey
-            Diffracting model key:
-
-            0 - Create a non-diffracting AQWA model.
-
-            1 - Create a diffracting AQWA model (default).
-
-        symxkey
-            Key indicating if model is symmetric about the global XZ plane:
-
-            0 - No symmetry about XZ plane (default).
-
-            1 - Use symmetry about XZ plane. Only include (or select) half the model.
-
-        symykey
-            Key indicating if model is symmetric about the global YZ plane:
-
-            0 - No symmetry about YZ plane (default).
-
-            1 - Use symmetry about YZ plane. Only include (or select) half the model.
-
-        Notes
-        -----
-        This command creates the input file Fname.aqwa for the ANSYS Aqwa
-        Multi-Body Hydrodynamics System for diffraction analysis in AQWA-LINE
-        from the model currently in the database, based on the currently
-        selected set of elements. The selected set must only include the hull
-        envelope; no internal structure should be selected.
-
-        There should be a line of nodes defined at the waterline. Only those
-        elements that are entirely below the waterline will be specified as
-        diffracting. If there are no waterline nodes, there will be no
-        diffracting elements at the waterline, which will severely reduce the
-        accuracy of the diffraction analysis.
-
-        The translator maps PLANE42, SHELL41, SHELL63, and SHELL181 elements to
-        PANELs, and maps PIPE16 and PIPE59 elements to TUBEs. It does not
-        recognize any other element types. Any material or geometric properties
-        can be used for the shell elements, as AQWA does not need any
-        properties at all and the command does not use them. All the shell
-        elements below the water must have their normals pointing outward.
-
-        TUBE elements in AQWA have material density, outside diameter, wall
-        thickness, added mass, and drag coefficients, so appropriate properties
-        should be used in the ANSYS model. PIPE59 elements can have added mass
-        and damping coefficients; these will be written to the file. The ANSYS
-        program uses the inertia coefficient CM, whereas AQWA uses the added
-        mass coefficient CA, where CM = (1 + CA). This correction is made
-        automatically.
-
-        In AQWA the vertical axis is always the Z-axis. The command can convert
-        a model built with either the Y or Z-axis vertical, but the X-axis must
-        be horizontal and should preferably be along the fore/aft axis of the
-        vessel.  If the structure is symmetric and you wish to use the symmetry
-        options, you must only select one half or one quarter of the model, as
-        appropriate. If you model a complete vessel and specify X symmetry, the
-        AQWA model will contain two sets of coincident elements.
-
-        If you are working from a model created for a structural analysis, it
-        will probably be necessary to remesh the model as the structural mesh
-        is most likely finer than needed for a diffraction analysis.
-
-        If you enter this command interactively (with the GUI active) and no
-        data is provided for the command options, you will be prompted for
-        their values.
-
-        You must verify the completeness and accuracy of the data written.
-        """
-        command = "ANSTOAQWA,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(vertaxis), str(gc), str(rho), str(hwl), str(diffkey), str(symxkey), str(symykey))
-        return self.run(command, **kwargs)
-
     def bfl(self, line="", lab="", val1="", val2="", val3="", val4="",
             **kwargs):
         """APDL Command: BFL
@@ -34126,35 +32053,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "BFL,%s,%s,%s,%s,%s,%s" % (str(line), str(lab), str(val1), str(val2), str(val3), str(val4))
-        return self.run(command, **kwargs)
-
-    def ksln(self, type_="", **kwargs):
-        """APDL Command: KSLN
-
-        Selects those keypoints associated with the selected nodes.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of keypoint select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        Notes
-        -----
-        Valid only if the nodes were generated by a meshing operation [KMESH,
-        LMESH, AMESH, VMESH] on a solid model that contains the associated
-        keypoints.
-
-        This command is valid in any processor.
-        """
-        command = "KSLN,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def bfe(self, elem="", lab="", stloc="", val1="", val2="", val3="",
@@ -34978,48 +32876,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
             displays.  Embedded blanks are compressed for output.
         """
         command = "VARNAM,%s,%s" % (str(ir), str(name))
-        return self.run(command, **kwargs)
-
-    def cmgrp(self, aname="", cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
-              cnam6="", cnam7="", cnam8="", **kwargs):
-        """APDL Command: CMGRP
-
-        Groups components and assemblies into an assembly.
-
-        Parameters
-        ----------
-        aname
-            An alphanumeric name used to identify this assembly.  Aname may be
-            up to 32 characters, beginning with a letter and containing only
-            letters, numbers, and underscores.  Overwrites a previously defined
-            Aname (and removes it from higher level assemblies, if any).
-
-        cnam1, cnam2, cnam3, . . . , cnam8
-            Names of existing components or other assemblies to be included in
-            this assembly.
-
-        Notes
-        -----
-        Groups components and other assemblies into an assembly identified by a
-        name.  CMGRP is used for the initial definition of an assembly.  An
-        assembly is used in the same manner as a component.  Up to 5 levels of
-        assemblies within assemblies may be used.
-
-        An assembly is a convenient grouping of previously defined components
-        and other assemblies.  Assemblies may contain components only, other
-        assemblies, or any combination.  A component may belong to any number
-        of assemblies.  Up to 5 levels of nested assemblies may be defined.
-        Components and assemblies may be added to or deleted from an existing
-        assembly by the CMEDIT command.  Once defined, an assembly may be
-        listed, deleted, selected, or unselected using the same commands as for
-        a component.  Assemblies are automatically updated to reflect deletions
-        of one or more of their components or lower-level assemblies.
-        Assemblies are not automatically deleted when all their components or
-        subassemblies are deleted.
-
-        This command is valid in any processor.
-        """
-        command = "CMGRP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8))
         return self.run(command, **kwargs)
 
     def antype(self, antype="", status="", ldstep="", substep="", action="",
@@ -37310,35 +35166,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "RSPRNT,%s,%s,%s" % (str(rslab), str(yname), str(xout))
         return self.run(command, **kwargs)
 
-    def stitle(self, nline="", title="", **kwargs):
-        """APDL Command: /STITLE
-
-        Defines subtitles.
-
-        Parameters
-        ----------
-        nline
-            Subtitle line number (1 to 4).  Defaults to 1.
-
-        title
-            Input up to 70 alphanumeric characters.  Parameter substitution may
-            be forced within the title by enclosing the parameter name or
-            parametric expression within percent (%) signs.  If Title is blank,
-            this subtitle is deleted.
-
-        Notes
-        -----
-        Subtitles (4 maximum) are displayed in the output along with the main
-        title [/TITLE].  Subtitles do not appear in GUI windows or in ANSYS
-        plot displays.  The first subtitle is also written to various ANSYS
-        files along with the main title.  Previous subtitles may be overwritten
-        or deleted.  Issue /STATUS to display titles.
-
-        This command is valid in any processor.
-        """
-        command = "/STITLE,%s,%s" % (str(nline), str(title))
-        return self.run(command, **kwargs)
-
     def file(self, fname="", ext="", **kwargs):
         """APDL Command: FILE
 
@@ -37826,77 +35653,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Distributed ANSYS.
         """
         command = "SENERGY,%s,%s" % (str(opt), str(antype))
-        return self.run(command, **kwargs)
-
-    def map(self, kdim="", kout="", limit="", **kwargs):
-        """APDL Command: MAP
-
-        Maps pressures from source points to target surface elements.
-
-        Parameters
-        ----------
-        kdim
-            Interpolation key:
-
-            0 or 2 - Interpolation is done on a surface (default).
-
-            3 - Interpolation is done within a volume. This option is
-                useful if the supplied source data is volumetric field
-                data rather than surface data.
-
-        kout
-            Key to control how pressure is applied when a target node is
-            outside of the source region:
-
-            0 - Use the pressure(s) of the nearest source point for
-                target nodes outside of the region (default).
-
-            1 - Set pressures outside of the region to zero.
-
-        limit
-            Number of nearby points considered for interpolation. The
-            minimum is 5; the default is 20. Lower values reduce
-            processing time.  However, some distorted or irregular
-            meshes will require a higher LIMIT value to find the
-            points encompassing the target node in order to define the
-            region for interpolation.
-
-        Notes
-        -----
-        Maps pressures from source points to target surface elements.
-        """
-        return self.run(f"MAP,,{kdim},,{kout},{limit}", **kwargs)
-
-    def smbc(self, mode="", **kwargs):
-        """APDL Command: /SMBC
-
-        Controls the display of solid model boundary condition symbols and
-        labels.
-
-        Parameters
-        ----------
-        mode
-            CENT
-
-            CENT - Solid model boundary condition symbols and labels appear at the centroid of the
-                   solid model entity (default).
-
-            TESS - Solid model boundary condition symbols and labels appear inside each
-                   constituent element of the tessellation.
-
-        Notes
-        -----
-        Mode = CENT is designed to reduce the clutter of boundary condition
-        symbols in solid model plots. For example, if you have assigned normal
-        pressure loads to an area, you may choose to display the pressures as
-        arrows with the /PSF command using /PSF,PRES,NORM,2. When Mode = CENT,
-        the pressure arrow is displayed at the centroid of the area. When Mode
-        = TESS, a pressure arrow is displayed at the centroid of each polygon
-        of the area's tessellation.
-
-        This command is valid in any processor.
-        """
-        command = "/SMBC,%s" % (str(mode))
         return self.run(command, **kwargs)
 
     def sucalc(self, rsetname="", lab1="", oper="", lab2="", fact1="",
@@ -38916,60 +36672,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*CFCLOS,"
         return self.run(command, **kwargs)
 
-    def assign(self, ident="", fname="", ext="", lgkey="", **kwargs):
-        """APDL Command: /ASSIGN
-
-        Reassigns a file name to an ANSYS file identifier.
-
-        Parameters
-        ----------
-        ident
-            ANSYS file name identifier.  Valid identifiers are: CMS, EMAT,
-            EROT,  ESAV, FULL, LN07, LN09, LN11, LN20, LN21, LN22, LN25, LN31,
-            LN32, MODE, OSAV, RDSP, RFRQ, RMG, RST, RSTP, RTH, SELD, and SSCR.
-            See File Management and Files for file descriptions.  If blank,
-            list currently reassigned files.
-
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        lgkey
-            Key to specify local or global file name control for the specified
-            file identifier in a distributed-memory parallel processing
-            (Distributed ANSYS) run. For more information on local and global
-            files, see File Handling Conventions in the Parallel Processing
-            Guide.
-
-            BOTH - Reassign the file name for both the local and global files (default).
-
-            LOCAL - Reassign the file name for only the local files.
-
-            GLOBAL - Reassign the file name for only the global file.
-
-        Notes
-        -----
-        The reassignment of file names is valid only if it is done before the
-        file is used.  All file reassignments are retained (not cleared) even
-        if the database is cleared [/CLEAR] or the Jobname is changed
-        [/FILNAME].  Assigned files may be overwritten.  If file name arguments
-        (Fname, Ext, --) are blank, the default ANSYS assignment is restored.
-        Use SEOPT for SUB files and SEEXP for DSUB files.
-
-        This command is valid only at the Begin Level.
-
-        This command also checks to ensure that the path/file is valid and can
-        be written by the user. If it is not valid, an error message will be
-        returned. Ensure that the directory exists prior to using /ASSIGN
-        command.
-        """
-        return self.run(f"/ASSIGN,{ident},{fname},{ext},,{lgkey}", **kwargs)
-
     def krefine(self, np1="", np2="", ninc="", level="", depth="", post="",
                 retain="", **kwargs):
         """APDL Command: KREFINE
@@ -39547,27 +37249,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         curve is color-filled (/GROPT, FILL).
         """
         command = "/GMARKER,%s,%s,%s" % (str(curve), str(key), str(incr))
-        return self.run(command, **kwargs)
-
-    def erase(self, **kwargs):
-        """APDL Command: ERASE
-
-        Explicitly erases the current display.
-
-        Notes
-        -----
-        Similar to a hardware screen erase key. Useful during an "immediate"
-        display to erase the screen without a replot so that the display
-        continues on a clean screen. This action is automatically included in
-        commands such as NPLOT and EPLOT.
-
-        If the /NOERASE command is active, issuing the erase command will
-        simply clear the display area. Subsequent replots will provide the
-        display previously generated by the /NOERASE command.
-
-        This command is valid in any processor.
-        """
-        command = "ERASE,"
         return self.run(command, **kwargs)
 
     def alist(self, na1="", na2="", ninc="", lab="", **kwargs):
@@ -41719,68 +39400,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ACLEAR,%s,%s,%s" % (str(na1), str(na2), str(ninc))
         return self.run(command, **kwargs)
 
-    def local(self, kcn="", kcs="", xc="", yc="", zc="", thxy="", thyz="",
-              thzx="", par1="", par2="", **kwargs):
-        """APDL Command: LOCAL
-
-        Defines a local coordinate system by a location and orientation.
-
-        Parameters
-        ----------
-        kcn
-            Arbitrary reference number assigned to this coordinate system.
-            Must be greater than 10.  A coordinate system previously defined
-            with this number will be redefined.
-
-        kcs
-            Coordinate system type:
-
-            0 or CART - Cartesian
-
-            1 or CYLIN - Cylindrical (circular or elliptical)
-
-            2 or SPHE - Spherical (or spheroidal)
-
-            3 or TORO - Toroidal
-
-        xc, yc, zc
-            Location (in the global Cartesian coordinate system) of the origin
-            of the new coordinate system.
-
-        thxy
-            First rotation about local Z (positive X toward Y).
-
-        thyz
-            Second rotation about local X (positive Y toward Z).
-
-        thzx
-            Third rotation about local Y (positive Z toward X).
-
-        par1
-            Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
-            or 2, PAR1 is the ratio of the ellipse Y-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).  If KCS = 3, PAR1 is the major
-            radius of the torus.
-
-        par2
-            Used for spheroidal systems.  If KCS = 2, PAR2 = ratio of ellipse
-            Z-axis radius to X-axis radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-        Defines a local coordinate system by origin location and orientation
-        angles.  The local coordinate system is parallel to the global
-        Cartesian system unless rotated.  Rotation angles are in degrees and
-        redefine any previous rotation angles.  See the CLOCAL, CS, CSWPLA, and
-        CSKP commands for alternate definitions.  This local system becomes the
-        active coordinate system [CSYS].  Local coordinate systems may be
-        displayed with the /PSYMB command.
-
-        This command is valid in any processor.
-        """
-        command = "LOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(xc), str(yc), str(zc), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
-        return self.run(command, **kwargs)
-
     def lwplan(self, wn="", nl1="", ratio="", **kwargs):
         """APDL Command: LWPLAN
 
@@ -42300,75 +39919,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         parameter. The file must be an ASCII text file.
         """
         command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
-        return self.run(command, **kwargs)
-
-    def flst(self, nfield="", narg="", type_="", otype="", leng="", **kwargs):
-        """APDL Command: FLST
-
-        Specifies data required for a picking operation (GUI).
-
-        Parameters
-        ----------
-        nfield
-            Field number on the command which uses the picking data.  (Count
-            the command name as a field, so that a 2 indicates the first
-            command argument, 3 for the second command argument, etc.)  The
-            corresponding field on the command will have a P51X label.
-
-        narg
-            Number of items in the picked list.
-
-        type\_
-            Type of items picked:
-
-            1 - Node numbers
-
-            2 - Element numbers
-
-            3 - Keypoint numbers
-
-            4 - Line numbers
-
-            5 - Area numbers
-
-            6 - Volume numbers
-
-            7 - Trace points
-
-            8 - Coordinate locations (in Global Cartesian coordinates)
-
-            9 - Screen picks (in X, Y screen coordinates (-1 to 1))
-
-        otype
-            Data order:
-
-            NOOR - Data is not ordered (default).
-
-            ORDER - Data is in an ordered list (such as for the E,P51X and A,P51X commands, in
-                    which the order of the data items is significant for the
-                    picking operation).
-
-        leng
-            Length of number of items describing the list (should equal NARG if
-            Otype = NOOR; default).
-
-        Notes
-        -----
-        Specifies data required for the FITEM command during a picking
-        operation.  This is a command generated by the GUI and will appear in
-        the log file (Jobname.LOG) if graphical picking is used.  This command
-        is not intended to be typed in directly in an ANSYS session (although
-        it can be included in an input file for batch input or for use with the
-        /INPUT command).
-
-        On the log file, FLST will always be followed by one or more FITEM
-        commands which in turn are followed by the ANSYS command that contains
-        a P51X label in one of its fields. This set of commands should not be
-        edited.
-
-        This command is valid in any processor.
-        """
-        command = "FLST,%s,%s,%s,%s,%s" % (str(nfield), str(narg), str(type_), str(otype), str(leng))
         return self.run(command, **kwargs)
 
     def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
@@ -42900,22 +40450,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*DMAT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4), str(val5))
         return self.run(command, **kwargs)
 
-    def slashgo(self, **kwargs):
-        """APDL Command: /GO
-
-        Reactivates suppressed printout.
-
-        Notes
-        -----
-        Reactivates printout suppressed with the /NOPR command without
-        producing any output.  The /GOPR command has the same function except
-        that it also produces a command response from the program.
-
-        This command is valid in any processor.
-        """
-        command = "/GO,"
-        return self.run(command, **kwargs)
-
     def kclear(self, np1="", np2="", ninc="", **kwargs):
         """APDL Command: KCLEAR
 
@@ -42985,69 +40519,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "NSUBST,%s,%s,%s,%s" % (str(nsbstp), str(nsbmx), str(nsbmn), str(carry))
-        return self.run(command, **kwargs)
-
-    def cmplot(self, label="", entity="", keyword="", **kwargs):
-        """APDL Command: CMPLOT
-
-        Plots the entities contained in a component or assembly.
-
-        Parameters
-        ----------
-        label
-            Name of the component or assembly to be plotted.
-
-            (blank) - All selected components and assemblies are plotted (default).  If fewer than 11
-                      components are selected, then all  are plotted.  If more
-                      than 11 components are selected, then only the first 11
-                      are plotted.
-
-            ALL - All selected components are plotted. If number of selected components is
-                  greater than 11, then the legend showing component names will
-                  not be shown.
-
-            N - Next set of defined components and assemblies is plotted.
-
-            P - Previous set of defined components and assemblies is plotted.
-
-            Cname - The specified component or assembly is plotted.
-
-            SetNo. - The specified set number is plotted.
-
-        entity
-            If Label is BLANK or ALL, then the following entity types can be
-            specified:
-
-            VOLU - Plot the volume components only.
-
-            AREA - Plot the area components only.
-
-            LINE - Plot the line components only.
-
-            KP - Plot the keypoint components only.
-
-            ELEM - Plot the element components only.
-
-            NODE - Plot the node components only.
-
-        keyword
-            For Keyword = ALL, plot the specified component name in the Label
-            field in the context of all entities of the same type. Not valid if
-            Label field is BLANK or ALL.
-
-        Notes
-        -----
-        Components are plotted with their native entities.  For assemblies, all
-        native entities for the underlying component types are plotted
-        simultaneously.  Although more components can be plotted, the legend
-        displays only 11 at a time. When more than eleven are plotted, the
-        legend is not displayed.
-
-        Possible usage:
-
-        This command is valid in any processor.
-        """
-        command = "CMPLOT,%s,%s,%s" % (str(label), str(entity), str(keyword))
         return self.run(command, **kwargs)
 
     def txtre(self, lab="", num="", n1="", n2="", ninc="", **kwargs):
@@ -43495,72 +40966,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "/GRID,%s" % (str(key))
-        return self.run(command, **kwargs)
-
-    def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
-        """APDL Command: LSEL
-
-        Selects a subset of lines.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-            ALL - Restore the full set.
-
-            NONE - Unselect the full set.
-
-            INVE - Invert the current set (selected becomes unselected and vice versa).
-
-            STAT - Display the current select status.
-
-        Notes
-        -----
-        Selects lines based on values of a labeled item and component.  For
-        example, to select a new set of lines based on line numbers 1 through
-        7, use LSEL,S,LINE,,1,7.  The subset is used when the ALL label is
-        entered (or implied) on other commands, such as LLIST,ALL.  Only data
-        identified by line number are selected.  Data are flagged as selected
-        and unselected; no data are actually deleted from the database.
-
-        If Item = LCCA, the command selects only those lines that were created
-        by concatenation.  The KSWP field is processed, but the Comp, VMIN,
-        VMAX, and VINC fields are ignored.
-
-        If Item = HPT, the command selects only those lines that contain hard
-        points.
-
-        Item = RADIUS is only valid for lines that are circular arcs.
-
-        LSEL is valid in any processor.
-
-        For selections based on non-integer numbers (coordinates, results,
-        etc.), items that are within the range VMIN -Toler and VMAX +Toler are
-        selected. The default tolerance Toler is based on the relative values
-        of VMIN and VMAX as follows:
-
-        If VMIN = VMAX, Toler = 0.005 x VMIN.
-
-        If VMIN = VMAX = 0.0, Toler = 1.0E-6.
-
-        If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX - VMIN).
-
-        Use the SELTOL command to override this default and specify Toler
-        explicitly.
-
-        Table: 204:: : LSEL - Valid Item and Component Labels
-        """
-        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
         return self.run(command, **kwargs)
 
     def timerange(self, tmin="", tmax="", **kwargs):
@@ -45625,33 +43030,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "ANFLOW,%s,%s,%s,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(time), str(spacing), str(size), str(length))
         return self.run(command, **kwargs)
 
-    def pause(self, **kwargs):
-        """APDL Command: PAUSE
-
-        Temporarily releases the current product license.
-
-        Notes
-        -----
-        The PAUSE command temporarily releases (or pauses) the current product
-        license so that another application can use it.
-
-        This application consumes a license as soon as you launch it, and
-        retains that license until it is finished. If you launch the product
-        interactively, the license is retained until you either close the
-        application or issue a PAUSE command via the command line.
-
-        No other operation (other than SAVE or /EXIT) is possible in the
-        current application while use of the product license is paused.
-
-        When the second application has finished and releases the license,
-        issue an UNPAUSE command via the command line to restore use of the
-        license to the current application.
-
-        For more information, see the ANSYS, Inc. Licensing Guide.
-        """
-        command = "PAUSE,"
-        return self.run(command, **kwargs)
-
     def psdres(self, lab="", relkey="", **kwargs):
         """APDL Command: PSDRES
 
@@ -45766,36 +43144,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         see Meshing Your Solid Model in the Modeling and Meshing Guide
         """
         command = "TCHG,%s,%s,%s" % (str(ename1), str(ename2), str(etype2))
-        return self.run(command, **kwargs)
-
-    def com(self, comment="", **kwargs):
-        """APDL Command: /COM
-
-        Places a comment in the output.
-
-        Parameters
-        ----------
-        comment
-            Comment string, up to 75 characters.
-
-        Notes
-        -----
-        The output from this command consists of the comment string.  This
-        command is similar to C*** except that the comment produced by C*** is
-        more easily identified in the output. Parameter substitution within the
-        comment occurs for every valid expression delimited by percent (%)
-        signs. Enclosing such an expression in single quotes prevents parameter
-        substitution.
-
-        Another way to include a comment is to precede it with a ! character
-        (on the same line).  The ! may be placed anywhere on the line, and any
-        input following it is ignored as a comment.  No output is produced by
-        such a comment, but the comment line is included on the log file.  This
-        is a convenient way to annotate the log file.
-
-        This command is valid anywhere.
-        """
-        command = "/COM,%s" % (str(comment))
         return self.run(command, **kwargs)
 
     def vcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
@@ -46056,67 +43404,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PDCDF,%s,%s,%s,%s,%s" % (str(rlab), str(name), str(type_), str(conf), str(nmax))
         return self.run(command, **kwargs)
 
-    def help(self, name="", **kwargs):
-        """APDL Command: HELP
-
-        Displays help information on ANSYS commands and element types.
-
-        Parameters
-        ----------
-        name
-            Command name or element type. Examples are: HELP,MP or
-            HELP,SOLID185 (or HELP,185).  For a list of elements of a
-            particular type, enter HELP,BEAM, HELP,SOLID, HELP,HYPER, etc.
-
-        Notes
-        -----
-        If Name uniquely matches a command or element name, the description for
-        that command or element will be displayed in the Help Window.  For
-        command help, you must type the complete command name (including the *
-        or /). The help system cannot find partial matches.  If * is used at
-        the beginning of the string, it will be interpreted as an ANSYS *
-        command.
-
-        For help on topics that are not ANSYS commands or element types (for
-        example, help for the word "material"), use the index or full text
-        search features of the ANSYS online help system.
-
-        The HELP command is valid only in GUI mode.  To obtain help when not in
-        GUI mode, you can either activate the GUI by typing /MENU,ON, or you
-        can activate the help system directly by issuing /UI,HELP.
-
-        This command is valid in any processor.
-        """
-        command = "HELP,%s" % (str(name))
-        return self.run(command, **kwargs)
-
-    def sys(self, string="", **kwargs):
-        """APDL Command: /SYS
-
-        Passes a command string to the operating system.
-
-        Parameters
-        ----------
-        string
-            Command string, up to 639 characters (including blanks, commas,
-            etc.). The specified string is passed verbatim to the operating
-            system, i.e., no parameter substitution is performed.
-
-        Notes
-        -----
-        Passes a command string to the operating system for execution (see the
-        Operations Guide).  Typical strings are system commands such as list,
-        copy, rename, etc.  Control returns to the ANSYS program after the
-        system procedure is completed.   ANSYS may not be aware of your
-        specific user environment. For example, on Linux this command may not
-        recognize aliases, depending on the hardware platform and user
-        environment.
-
-        This command is valid in any processor.
-        """
-        command = "/SYS,%s" % (str(string))
-        return self.run(command, **kwargs)
-
     def slashlarc(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="",
                   **kwargs):
         """APDL Command: /LARC
@@ -46352,36 +43639,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "LGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nl7), str(nl8), str(nl9))
         return self.run(command, **kwargs)
 
-    def syp(self, string="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", **kwargs):
-        """APDL Command: /SYP
-
-        Passes a command string and arguments to the operating system.
-
-        Parameters
-        ----------
-        string
-            Command string (cannot include commas).  See also the /SYS command.
-
-        arg1, arg2, arg3, . . . , arg8
-            Arguments to be appended to the command string, separated by
-            blanks, commas, or other delimiter characters (see the Operations
-            Guide).  The arguments may be numbers, parameters, or parametric
-            expressions.
-
-        Notes
-        -----
-        Passes a command string to the operating system for execution, along
-        with arguments to be appended to the command string.  See the
-        Operations Guide for details.  ANSYS may not be aware of your specific
-        user environment. For example, on Linux this command may not recognize
-        aliases, depending on the hardware platform and user environment.
-
-        This command is valid in any processor.
-        """
-        command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(string), str(arg1), str(arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8))
-        return self.run(command, **kwargs)
-
     def prvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
               **kwargs):
         """APDL Command: PRVAR
@@ -46455,103 +43712,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "*MFUN,%s,%s,%s" % (str(parr), str(func), str(par1))
-        return self.run(command, **kwargs)
-
-    def stat(self, **kwargs):
-        """APDL Command: STAT
-
-        Displays the status of database settings.
-
-        Notes
-        -----
-        In the DISPLAY program, STAT will show the current status of the
-        program settings.
-
-        In the ANSYS program, STAT is a command generated by the GUI and will
-        appear in the log file (Jobname.LOG) if status is requested for some
-        items under Utility Menu> List> Status.  Generally, STAT will be
-        preceded by one of the commands listed below, which specifies the
-        particular topic that status was requested for.
-
-        If entered directly into the program, the STAT command should be
-        immediately preceded by the desired topic command listed below.  In
-        processors other than those listed below (e.g., AUX12), no topic
-        command should proceed STAT.
-
-        This command is valid in any processor.
-
-        PREP7 topic commands (and their corresponding topics) are:
-
-        SOLUTION topic commands (and their corresponding topics) are:
-
-        POST1 topic commands (and their corresponding topics) are:
-
-        POST26 topic commands (and their corresponding topics) are:
-        """
-        command = "STAT,"
-        return self.run(command, **kwargs)
-
-    def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
-             **kwargs):
-        """APDL Command: /COPY
-
-        Copies a file.
-
-        Parameters
-        ----------
-        fname1
-            File name to be copied and its directory path (248
-            characters maximum for both file name and directory). If
-            you do not specify a directory path, it will default to
-            your working directory and you can use all 248 characters
-            for the file name.
-
-        ext1
-            Filename extension (eight-character maximum).
-
-        fname2
-            File name to be created and its directory path (248
-            characters maximum for both file name and directory). If
-            you do not specify a directory path, it will default to
-            your working directory and you can use all 248 characters
-            for the file name.
-
-        ext2
-            Filename extension (eight-character maximum).
-
-        distkey
-            Key that specifies whether the copy operation is performed
-            on all processes in distributed parallel mode (Distributed
-            ANSYS):
-
-            0 (OFF or NO) - The program performs the copy operation
-            only on the master process (default).
-
-            1 (ON or YES) - The program performs the copy operation
-            locally on each process.
-
-            2 or BOTH - The program performs the copy operation for
-            Fname.Ext on the master process and for FnameN.Ext on all
-            processes.
-
-        Notes
-        -----
-        The original file is untouched.  Ex: /COPY,A,,,B copies file A
-        to B in the same directory.  /COPY,A,DAT,,,INP copies the file
-        A.DAT to A.INP.  See the Operations Guide for details.  ANSYS
-        binary and ASCII files can be copied.
-
-        In distributed parallel mode (Distributed ANSYS), only the
-        master process will copy Fname1.Ext1 to Fname2.Ext2 by
-        default. However, when DistKey is set to 1 (or ON or YES), the
-        command is executed by all processes. In this case, Fname1 and
-        Fname2 will automatically have the process rank appended to
-        them. This means Fname1N.Ext1 will be copied to Fname2N.Ext2
-        by all processes, where N is the Distributed ANSYS process
-        rank.  For more information see Differences in General
-        Behavior in the Parallel Processing Guide.
-        """
-        command = f"/COPY,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
         return self.run(command, **kwargs)
 
     def lsrestore(self, enginename="", filename="", **kwargs):
@@ -46751,79 +43911,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "BFDELE,%s,%s" % (str(node), str(lab))
-        return self.run(command, **kwargs)
-
-    def input(self, fname="", ext="", dir_="", line="", log="", **kwargs):
-        """APDL Command: /INPUT
-
-        Switches the input file for the commands that follow.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        dir\_
-            Directory path (64 characters maximum). Defaults to current
-            directory.
-
-        line
-            A value indicating either a line number in the file or a user-
-            defined label in the file from which to begin reading the input
-            file.
-
-            (blank), 0, or 1 - Begins reading from the top of the file (default).
-
-            LINE_NUMBER - Begins reading from the specified line number in the file.
-
-            :label - Begins reading from the first line beginning with the matching user-defined
-                     label :label (beginning with a colon (:), 8 characters
-                     maximum).
-
-        log
-            Indicates whether secondary input from this command should be
-            recorded in the command log (File.LOG) and the database log:
-
-            0 - Record only the /INPUT command on the log (default).
-
-            1 - Record commands in the specified secondary file as they are executed.
-
-        Notes
-        -----
-        Switches the input file for the next commands.  Commands are read from
-        this file until an end-of-file or another file switching directive is
-        read.  An end-of-file occurs after the last record of the file or when
-        a /EOF command is read.  An automatic switch back one level (to the
-        previous file) occurs when an end-of-file is encountered.  Twenty
-        levels of nested file switching are allowed.  Note that files including
-        *DO, *USE, *ULIB, and the "Unknown Command" Macro have less nesting
-        available because each of these operations also uses a level of file
-        switching.  For an interactive run, a /INPUT,TERM switches to the
-        terminal for the next input.  A /EOF read from the terminal then
-        switches back to the previous file.  A /INPUT (with a blank second
-        field) switches back to the primary input file.
-
-        Setting LOG = 1 on /INPUT causes all commands read from the specified
-        file to be recorded in the command log (File.LOG) and the internal
-        database command log [LGWRITE].  This option is recommended if the log
-        file will be used later .  The LOG = 1 option is only valid when the
-        /INPUT occurs in the primary input file.  Using LOG = 1 on a nested
-        /INPUT or on a /INPUT within a do-loop will have no effect (i.e.,
-        commands in the secondary input file are not written to the command
-        log).
-
-        The Dir option is optional as the directory path can be included
-        directly in Fname.
-
-        This command is valid in any processor.
-        """
-        command = "/INPUT,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(dir_), str(line), str(log))
         return self.run(command, **kwargs)
 
     def edge(self, wn="", key="", angle="", **kwargs):
@@ -47496,69 +44583,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CAMPBELL,%s" % (str(action))
         return self.run(command, **kwargs)
 
-    def partsel(self, type_="", pmin="", pmax="", pinc="", **kwargs):
-        """APDL Command: PARTSEL
-
-        Selects a subset of parts in an explicit dynamic analysis.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying type of select. Because PARTSEL is a command
-            macro, the label must be enclosed in single quotes.
-
-            'S' - Select a new set (default).
-
-            'R' - Reselect a set from the current set.
-
-            'A' - Additionally select a set and extend the current set.
-
-            'U' - Unselect a set from the current set.
-
-            'ALL' - Select all parts.
-
-            'NONE' - Unselect all parts.
-
-            'INVE' - Invert the current selected set.
-
-        Notes
-        -----
-        PARTSEL invokes an ANSYS macro that selects parts in an explicit
-        dynamic analysis. When PARTSEL is executed, an element component is
-        automatically created for each existing part. For example, the elements
-        that make up PART 1 are grouped into the element component
-        _PART1. Each time the PARTSEL command is executed, components
-        for unselected parts will be unselected. To plot selected parts,
-        choose Utility Menu> Plot> Parts in the GUI or issue the
-        command PARTSEL,'PLOT'.
-
-        After selecting parts, if you change the selected set of nodes or
-        elements and then plot parts, the nodes and elements associated with
-        the previously selected parts (from the last PARTSEL command) will
-        become the currently selected set.
-
-        Note:: : A more efficient way to select and plot parts is to use the
-        ESEL (with ITEM = PART) and EPLOT commands. We recommend using ESEL
-        instead of PARTSEL since PARTSEL will be phased out in a future
-        release. Note that the menu path mentioned above for plotting parts
-        does not work with the ESEL command; use Utility Menu> Plot> Elements
-        instead.
-
-        In an explicit dynamic small restart analysis (EDSTART,2), PARTSEL can
-        be used to unselect a part during the solution even if it is referenced
-        in some way (such as in a contact definition). (Note that ESEL cannot
-        be used for this purpose.) However, in a new analysis or a full restart
-        analysis (EDSTART,3), all parts that are used in some type of
-        definition must be selected at the time of solution.
-
-        This command is valid in any processor.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
-        return self.run(command, **kwargs)
-
     def pdplot(self, name="", plow="", pup="", **kwargs):
         """APDL Command: PDPLOT
 
@@ -48105,31 +45129,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         and VSUM commands.
         """
         command = "GSUM,"
-        return self.run(command, **kwargs)
-
-    def ksll(self, type_="", **kwargs):
-        """APDL Command: KSLL
-
-        Selects those keypoints contained in the selected lines.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of keypoint select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "KSLL,%s" % (str(type_))
         return self.run(command, **kwargs)
 
     def remesh(self, action="", filename="", ext="", opt1="", opt2="",
@@ -48743,35 +45742,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         filled within a range.  Previous data in the range will be overwritten.
         """
         command = "DATA,%s,%s,%s,%s,%s,%s" % (str(ir), str(lstrt), str(lstop), str(linc), str(name), str(kcplx))
-        return self.run(command, **kwargs)
-
-    def finish(self, **kwargs):
-        """APDL Command: FINISH
-
-        Exits normally from a processor.
-
-        Notes
-        -----
-        Exits any of the ANSYS processors or the DISPLAY program.  For the
-        ANSYS processors, data will remain intact in the database but the
-        database is not automatically written to a file (use the SAVE command
-        to write the database to a file).  See also the /QUIT command for an
-        alternate processor exit command.  If exiting POST1, POST26, or OPT,
-        see additional notes below.
-
-        POST1:  Data in the database will remain intact, including the POST1
-        element table data, the path table data, the fatigue table data, and
-        the load case pointers.
-
-        POST26:  Data in the database will remain intact, except that POST26
-        variables are erased and specification commands (such as FILE, PRTIME,
-        NPRINT, etc.) are reset.  Use the /QUIT command to exit the processor
-        and bypass these exceptions.
-
-        This command is valid in any processor.  This command is not valid at
-        the Begin level.
-        """
-        command = "FINISH,"
         return self.run(command, **kwargs)
 
     def rmroptions(self, refname="", type_="", invert="", **kwargs):
@@ -49659,51 +46629,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EXPAND,%s,%s,%s,%s,%s" % (str(nrepeat), str(hindex), str(icsys), str(sctang), str(phase))
         return self.run(command, **kwargs)
 
-    def fitem(self, nfield="", item="", itemy="", itemz="", **kwargs):
-        """APDL Command: FITEM
-
-        Identifies items chosen by a picking operation (GUI).
-
-        Parameters
-        ----------
-        nfield
-            Field number on the command which uses the picking data.  (Count
-            the command name as a field, so that a 2 indicates the first
-            command argument, 3 the second command argument, etc.)  The
-            corresponding field on the command will have a P51X label.
-
-        item
-            Entity number of the entity picked.  Negative entity numbers are
-            used to indicate a range of entities.  If the item picked is a
-            coordinate location, then this field represents the X-coordinate.
-            See also the FLST command.
-
-        itemy, itemz
-            Y and Z coordinates of a picked coordinate location.  ITEM
-            represents the X coordinate.  See also the FLST  command.
-
-        Notes
-        -----
-        This is a command generated by the GUI and will appear in the log file
-        (Jobname.LOG) if graphical picking is used.  This command is not
-        intended to be typed in directly in an ANSYS session (although it can
-        be included in an input file for batch input or for use with the /INPUT
-        command).
-
-        On the log file, a set of FITEM commands is preceded by one FLST
-        command which defines the picking specifications for that pick
-        operation.  The data listed in the FITEM commands are used by the first
-        subsequent command containing a P51X label in one of its fields.
-
-        Caution:: : For a given entity type, a list containing an ITEM that is
-        larger than the maximum defined entity, could deplete the system memory
-        and produce unpredictable results.
-
-        This command is valid in any processor.
-        """
-        command = "FITEM,%s,%s,%s,%s" % (str(nfield), str(item), str(itemy), str(itemz))
-        return self.run(command, **kwargs)
-
     def prod(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
              factc="", **kwargs):
         """APDL Command: PROD
@@ -50099,72 +47024,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         command = "MFANALYSIS,%s" % (str(key))
         return self.run(command, **kwargs)
-
-    def resume(self, fname="", ext="", nopar="", knoplot="", **kwargs):
-        """APDL Command: RESUME
-
-        Resumes the database from the database file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        nopar
-            Parameter resume key:
-
-            0 - All data in the database, including the scalar
-                parameters, are replaced with the data saved on
-                File.DB (default).
-
-            1 - All data in the database, except the scalar
-                parameters, are replaced with the data saved on
-                File.DB.
-
-        knoplot
-            If equal to 1, will suppress automatic plot. Otherwise, if
-            the GUI is on and this RESUME command was not read from a
-            file, the selected elements from Fname are plotted. (If
-            there are no selected elements, selected nodes are
-            plotted. If no nodes, volumes; if no volumes, areas; if no
-            areas, lines; if no lines, keypoints. If there are no
-            selected keypoints, the screen is erased.)
-
-        Notes
-        -----
-        The RESUME command resumes a database file into the ANSYS program. The
-        command causes the database file (File.DB) to be read, thereby
-        resetting the database (including any geometry settings) either a) as
-        it was at the last SAVE command, or b) as it was saved with the last
-        /EXIT command, whichever was last.
-
-        For multiple load step analyses (because only the data for one load
-        step at a time may reside in the database), the load step data restored
-        to the database will correspond to the load step data written when the
-        save occurred.
-
-        If the database file was saved in another ANSYS, Inc. product, it may
-        contain element type and KEYOPT specifications which are invalid in the
-        resuming product. Immediately after the database resume is completed,
-        you should redefine these invalid element types and KEYOPT settings to
-        valid ones (ET, KEYOPT).
-
-        The NOPAR = 1 option should not be used if array parameters are
-        defined, as existing array parameters might be redefined with arbitrary
-        values. For a more general method of preventing the replacement of both
-        scalar and array parameters, see PARSAV and PARRES.)
-
-        This command is valid in any processor.  If used in the solution
-        processor, this command is valid only within the first load step.
-        """
-        return self.run(f"RESUME,{fname},{ext},,{nopar},{knoplot}", **kwargs)
 
     def stargo(self, base="", **kwargs):
         """APDL Command: *GO
@@ -50650,70 +47509,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "EDCSC,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def rename(self, fname1="", ext1="", fname2="", ext2="", distkey="",
-               **kwargs):
-        """APDL Command: /RENAME
-
-        Renames a file.
-
-        Parameters
-        ----------
-        fname1
-            The file to be renamed. You can also include an optional
-            directory path as part of the specified file name; if not,
-            the default file location is the working directory.
-
-        ext1
-            Filename extension (eight-character maximum).
-
-        fname2
-            The new name for the file. You can also include an
-            optional directory path as part of the new file name; if
-            not, the default is the working directory. A maximum of
-            248 characters is allowed for the file name (or combined
-            file name and directory path, if both are specified).
-
-        ext2
-            Filename extension (eight-character maximum).
-
-        distkey
-            Key that specifies whether the rename operation is
-            performed on all processes in distributed parallel mode
-            (Distributed ANSYS):
-
-            1 (ON or YES) - The program performs the rename operation
-            locally on each process.
-
-            0 (OFF or NO) - The program performs the rename operation
-            only on the master process (default).
-
-        Notes
-        -----
-        Renames a file.  Ex: /RENAME,A,,,B renames file A to B in the
-        same directory.  /RENAME,A,DAT,,,INP renames file A.DAT to
-        A.INP. On all systems, this command will overwrite any
-        existing file named B. See the Operations Guide for
-        details. Only ANSYS binary files should be renamed. Use /SYS
-        and system renaming commands for other files.
-
-        In distributed parallel mode (Distributed ANSYS), only the
-        master process will rename Fname1.Ext1 to Fname2.Ext2 by
-        default. However, when DistKey is set to 1 (or ON or YES), the
-        command is executed by all processes. In this case, Fname1 and
-        Fname2 will automatically have the process rank appended to
-        them. This means Fname1N.Ext1 will be renamed to Fname2N.Ext2
-        by all processes, where N is the Distributed ANSYS process
-        rank. For more information see Differences in General Behavior
-        in the Parallel Processing Guide.
-
-        Renaming across system partitions may be internally done by a
-        copy and delete operation on some systems.
-
-        This command is valid only at the Begin Level.
-        """
-        return self.run(f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}",
-                        **kwargs)
-
     def lesize(self, nl1="", size="", angsiz="", ndiv="", space="", kforc="",
                layer1="", layer2="", kyndiv="", **kwargs):
         """APDL Command: LESIZE
@@ -51045,42 +47840,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "SFLLIST,%s,%s" % (str(line), str(lab))
-        return self.run(command, **kwargs)
-
-    def nslv(self, type_="", nkey="", **kwargs):
-        """APDL Command: NSLV
-
-        Selects those nodes associated with the selected volumes.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of node select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        nkey
-            Specifies whether only interior volume nodes are to be selected:
-
-            0 - Select only nodes interior to selected volumes.
-
-            1 - Select all nodes (interior to volume, interior to areas, interior to lines, and
-                at keypoints) associated with the selected volumes.
-
-        Notes
-        -----
-        Valid only if the nodes were generated by a volume meshing operation
-        [VMESH] on a solid model that contains the selected volumes.
-
-        This command is valid in any processor.
-        """
-        command = "NSLV,%s,%s" % (str(type_), str(nkey))
         return self.run(command, **kwargs)
 
     def plcfreq(self, spec="", sectbeg="", sectend="", **kwargs):
@@ -51496,31 +48255,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "TARGET,%s" % (str(nlist))
         return self.run(command, **kwargs)
 
-    def aslv(self, type_="", **kwargs):
-        """APDL Command: ASLV
-
-        Selects those areas contained in the selected volumes.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of area select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "ASLV,%s" % (str(type_))
-        return self.run(command, **kwargs)
-
     def numexp(self, num="", begrng="", endrng="", elcalc="", **kwargs):
         """APDL Command: NUMEXP
 
@@ -51587,88 +48321,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "NUMEXP,%s,%s,%s,%s" % (str(num), str(begrng), str(endrng), str(elcalc))
-        return self.run(command, **kwargs)
-
-    def nerr(self, nmerr="", nmabt="", abort="", ifkey="", num="", **kwargs):
-        """APDL Command: /NERR
-
-        Limits the number of warning and error messages displayed.
-
-        Parameters
-        ----------
-        nmerr
-            Maximum number of warning and error messages displayed per
-            command.  Defaults to 5 for interactive runs with the GUI
-            turned on, 20 for interactive runs with the GUI turned
-            off, 200 for batch runs.  If NMERR is negative, the
-            absolute value of NMERR is used as the maximum number of
-            warning and error messages written to the error file
-            (file.ERR) per command, as well as the maximum number of
-            messages displayed per command.
-
-        nmabt
-            Maximum number of warning and error messages allowed per
-            command before run aborts (must be greater than zero).
-            Maximum value is 99,999,999. Defaults to 10,000.
-
-        abort
-            Abort level key.  Set to 0 for default abort behavior, -1
-            to never abort, and -2 to abort after ``nmabt`` errors.
-            Altering the abort level key is not recommended, but can
-            be helpful for avoiding an abort within /BATCH mode but
-            using ``pyansys`` interactively.
-
-        ifkey
-            Specifies whether or not to abort if an error occurs during a
-            /INPUT operation:
-
-            0 or OFF - Do not abort. This option is the default.
-
-            1 or ON - Abort.
-
-        num
-            The number of invalid command warnings before a stop warning will
-            be issued:
-
-            0 - Disables the stop warning/error function.
-
-            n - An integer value representing the number of warnings that will be encountered
-                before prompting the user to stop (default = 5). The first
-                error encountered will ALWAYS result in a prompt.
-
-        Notes
-        -----
-        Limits the number of warning and error messages displayed for any one
-        command in an interactive run.
-
-        Warning and error messages continue to be written to Jobname.ERR
-        regardless of these limits (unless NMERR is negative).
-
-        Issue this command with NUM = n to specify the number of "invalid
-        command" warnings to be encountered before the user is prompted to
-        stop. You can then continue or abort the run. If you choose to abort
-        the run, the log file can be saved so that any of the processing up to
-        that point can be appended to an input that rectifies the condition. A
-        batch run always aborts on the first error.  Issue /NERR,STAT to list
-        current settings.
-
-        Issue /NERR,DEFA to reset values to initial defaults.
-
-        An IFKEY value of 1 or ON causes the ANSYS program to abort immediately
-        upon encountering an error during a file /INPUT operation. However, use
-        of this option may cause the following conditions to occur:
-
-        The /INPUT command may abort if issued for a log file (jobname.log).
-
-        Some macros may abort.
-
-        A CAD connection may fail after reading only a small portion of a CAD
-        model.
-
-        The command is valid in any processor.
-        """
-        command = "/NERR,%s,%s,%s,%s,%s" % (str(nmerr), str(nmabt), str(abort),
-                                            str(ifkey), str(num))
         return self.run(command, **kwargs)
 
     def ctype(self, key="", dotd="", dots="", dshp="", tlen="", **kwargs):
@@ -51820,28 +48472,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "PSDGRAPH,%s,%s" % (str(tblno1), str(tblno2))
         return self.run(command, **kwargs)
 
-    def nopr(self, **kwargs):
-        """APDL Command: /NOPR
-
-        Suppresses the expanded interpreted input data listing.
-
-        Notes
-        -----
-        Suppresses printout of interpreted input data, including information
-        labeled as "Notes."  When this printout is not suppressed, the data
-        input to the analysis is echoed to the output file in an expanded
-        format.  Printout is suppressed until a /GOPR or /GO command is read.
-
-        Use of /NOPR is not recommended when the graphical user interface (GUI)
-        is active.  The GUI sometimes issues "hidden" /NOPR and /GOPR command
-        sequences, which will countermand user-issued /NOPR commands, thus
-        making the use of /NOPR in the GUI environment unpredictable.
-
-        This command is valid in any processor.
-        """
-        command = "/NOPR,"
-        return self.run(command, **kwargs)
-
     def lcfile(self, lcno="", fname="", ext="", **kwargs):
         """APDL Command: LCFILE
 
@@ -51874,64 +48504,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         solution phase).
         """
         command = "LCFILE,%s,%s,%s" % (str(lcno), str(fname), str(ext))
-        return self.run(command, **kwargs)
-
-    def allsel(self, labt="", entity="", **kwargs):
-        """APDL Command: ALLSEL
-
-        Selects all entities with a single command.
-
-        Parameters
-        ----------
-        labt
-            Type of selection to be made:
-
-            ALL - Selects all items of the specified entity type and all items of lower entity
-                  types (default).
-
-            BELOW - Selects all items directly associated with and below the selected items of the
-                    specified entity type.
-
-        entity
-            Entity type on which selection is based:
-
-            ALL - All entity types (default).
-
-            VOLU - Volumes.
-
-            AREA - Areas.
-
-            LINE - Lines.
-
-            KP - Keypoints.
-
-            ELEM - Elements.
-
-            NODE - Nodes.
-
-        Notes
-        -----
-        ALLSEL is a convenience command that allows the user to select all
-        items of a specified entity type or to select items associated with the
-        selected items of a higher entity.
-
-        An entity hierarchy is used to decide what entities will be available
-        in the selection process.  This hierarchy from top to bottom is as
-        follows:  volumes, areas, lines, keypoints, elements, and nodes.  The
-        hierarchy may also be divided into two branches:  the solid model and
-        the finite element model.  The label ALL selects items based on one
-        branch only, while BELOW uses the entire entity hierarchy.  For
-        example, ALLSEL,ALL,VOLU selects all volumes, areas, lines, and
-        keypoints in the data base.  ALLSEL,BELOW,AREA selects all lines
-        belonging to the selected areas; all keypoints belonging to those
-        lines; all elements belonging to those areas, lines, and keypoints; and
-        all nodes belonging to those elements.
-
-        The $ character should not be used after the  ALLSEL  command.
-
-        This command is valid in any processor.
-        """
-        command = "ALLSEL,%s,%s" % (str(labt), str(entity))
         return self.run(command, **kwargs)
 
     def pdresu(self, fname="", ext="", **kwargs):
@@ -52511,36 +49083,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "DNSOL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(item), str(comp), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6))
         return self.run(command, **kwargs)
 
-    def keyw(self, keyword="", key="", **kwargs):
-        """APDL Command: KEYW
-
-        Sets a keyword used by the GUI for context filtering (GUI).
-
-        Parameters
-        ----------
-        keyword
-            A keyword which, when set to either true or false, changes the
-            behavior of the GUI.
-
-        key
-            Keyword switch:
-
-            0 - Sets the keyword to "false."
-
-            1 - Sets the keyword to "true."
-
-        Notes
-        -----
-        Defines a keyword used by the GUI for context filtering.  This is a
-        command generated by the GUI and may appear in the log file
-        (Jobname.LOG) if the GUI is used.  This command is usually not typed in
-        directly in an ANSYS session.
-
-        This command is valid in any processor.
-        """
-        command = "KEYW,%s,%s" % (str(keyword), str(key))
-        return self.run(command, **kwargs)
-
     def damorph(self, area="", xline="", rmshky="", **kwargs):
         """APDL Command: DAMORPH
 
@@ -52847,31 +49389,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
     #     command = "*IF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(val1), str(oper1), str(val2), str(b_ase1), str(val3), str(oper2), str(val4), str(b_ase2))
     #     return self.run(command, **kwargs)
 
-    def lsla(self, type_="", **kwargs):
-        """APDL Command: LSLA
-
-        Selects those lines contained in the selected areas.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of line select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "LSLA,%s" % (str(type_))
-        return self.run(command, **kwargs)
-
     def sload(self, secid="", plnlab="", kinit="", kfd="", fdvalue="",
               lsload="", lslock="", **kwargs):
         """APDL Command: SLOAD
@@ -53065,76 +49582,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         details.
         """
         command = "FP,%s,%s,%s,%s,%s,%s,%s" % (str(stitm), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
-        return self.run(command, **kwargs)
-
-    def units(self, label="", lenfact="", massfact="", timefact="",
-              tempfact="", toffset="", chargefact="", forcefact="",
-              heatfact="", **kwargs):
-        """APDL Command: /UNITS
-
-        Annotates the database with the system of units used.
-
-        Parameters
-        ----------
-        label
-            Label to denote the system of units used in this job:
-
-            USER - User-defined system (default).
-
-            SI - International system (m, kg, s, K).
-
-            MKS - MKS system (m, kg, s, °C).
-
-            uMKS - μMKS system (μm, kg, s, °C).
-
-            CGS - CGS system (cm, g, s, °C).
-
-            MPA - MPA system (mm, Mg, s, °C).
-
-            BFT - U. S. Customary system using feet (ft, slug, s, °F).
-
-            BIN - U. S. Customary system using inches (in, lbf*s2/in, s, °F).
-
-        Notes
-        -----
-        Allows the user to set a marker in the database indicating the system
-        of units used.  The setting may be reviewed with the /STATUS command at
-        the Begin level.  The units label and conversion factors on this
-        command are for user convenience only and have no effect on the
-        analysis or data.  That is, /UNITS will not convert database items from
-        one system to another (e.g., from U. S. Customary to SI, etc.).  The
-        units setting will be written to the file of IGES data [IGESOUT or
-        CDWRITE], which can then be read by many programs that read IGES files.
-        The user must still use consistent units for the results to be valid.
-
-        If you choose the MKS system of units, the EPZRO option for the EMUNIT
-        command is set to 8.85 e-12 F/m.  (EPZRO specifies alternate free-space
-        permittivity.)
-
-        For micro-electromechanical systems (MEMS), where dimensions are on the
-        order of microns, see the conversion factors in System of Units in the
-        Coupled-Field Analysis Guide.
-
-        If you use the ANSYS ADAMS Interface to export model information to the
-        ADAMS program, the /UNITS command is required to ensure the correct
-        transfer of data between ANSYS and ADAMS. You may choose a predefined
-        unit system label (Label = SI, CGS, etc.) or you can select the user-
-        defined system option (Label = USER) and input the appropriate
-        conversion factors (LENFACT, MASSFACT, TIMEFACT, and FORCEFACT). The
-        conversion factors will be written to the ADAMS input file Jobname.MNF
-        in order to correctly generate the load. For more information, see
-        Export to ADAMS in the Substructuring Analysis Guide.
-
-        All differences between the base solution units used by the ANSYS and
-        CFX solvers will be noted in the ANSYS output file.   Unit conversions
-        are automatically applied to all loads transferred unless Label = USER.
-        Unit conversions are not applied to any of the loads transferred
-        between the ANSYS and CFX solvers if they use a user-defined unit
-        system.
-
-        This command is valid in any processor.
-        """
-        command = "/UNITS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(label), str(lenfact), str(massfact), str(timefact), str(tempfact), str(toffset), str(chargefact), str(forcefact), str(heatfact))
         return self.run(command, **kwargs)
 
     def term(self, kywrd="", opt1="", opt2="", opt3="", **kwargs):
@@ -53716,33 +50163,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "*SMAT,%s,%s,%s,%s,%s,%s,%s" % (str(matrix), str(type_), str(method), str(val1), str(val2), str(val3), str(val4))
         return self.run(command, **kwargs)
 
-    def hpgl(self, kywrd="", opt1="", opt2="", **kwargs):
-        """APDL Command: HPGL
-
-        Specifies various HP options.
-
-        Parameters
-        ----------
-        pmod
-            Valid plotter model:  7475A (default), 7550A, 7580B, 7585B, 7586B,
-            COLORPRO, DRAFTPRO, or DRAFTMASTER.
-
-        Notes
-        -----
-        This command is available in both the ANSYS and DISPLAY programs.  It
-        is valid for Hewlett Packard Graphics Language (HPGL) format files
-        selected in the ANSYS program with /SHOW,HPGL (or HPGL2), or with
-        /SHOWDISP,HPGL (or HPGL2) in the DISPLAY program.
-
-        An output file is generated for each plot.  The ANSYS file is named
-        JobnameNN.HPGL.  In the DISPLAY program, this file is named HPGLnn.
-        This file remains open for a subsequent /NOERASE plot, and will be
-        incomplete until the program is closed (/EXIT), or until the next file
-        is opened by the next /ERASE plot request.
-        """
-        command = "HPGL,%s,%s,%s" % (str(kywrd), str(opt1), str(opt2))
-        return self.run(command, **kwargs)
-
     def vscfun(self, parr="", func="", par1="", **kwargs):
         """APDL Command: *VSCFUN
 
@@ -53794,21 +50214,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is valid in any processor.
         """
         command = "*VSCFUN,%s,%s,%s" % (str(parr), str(func), str(par1))
-        return self.run(command, **kwargs)
-
-    def aux3(self, **kwargs):
-        """APDL Command: /AUX3
-
-        Enters the results file editing processor.
-
-        Notes
-        -----
-        Enters the results file editing processor (ANSYS auxiliary processor
-        AUX3).  This processor is used to edit ANSYS results files.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX3,"
         return self.run(command, **kwargs)
 
     def bflist(self, node="", lab="", **kwargs):
@@ -53903,69 +50308,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "CBTE,%s" % (str(alpha))
         return self.run(command, **kwargs)
 
-    def save(self, fname="", ext="", slab="", **kwargs):
-        """APDL Command: SAVE
-
-        Saves all current database information.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum,
-            including the characters needed for the directory path).
-            An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters
-            for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        slab
-            Mode for saving the database:
-
-            ALL - Save the model data, solution data and post data
-                  (element tables, etc.). This value is the default.
-
-            MODEL - Save the model data (solid model, finite element
-            model, loadings, etc.) only.
-
-            SOLU - Save the model data and the solution data (nodal
-            and element results).
-
-        Notes
-        -----
-        Saves all current database information to a file (File.DB).
-        In interactive mode, an existing File.DB is first written to a
-        backup file (File.DBB).  In batch mode, an existing File.DB is
-        replaced by the current database information with no backup.
-        The command should be issued periodically to ensure a current
-        file backup in case of a system "crash" or a "line drop."  It
-        may also be issued before a "doubtful" command so that if the
-        result is not what was intended the database may be easily
-        restored to the previous state.  A save may be time consuming
-        for large models.  Repeated use of this command overwrites the
-        previous data on the file (but a backup file is first written
-        during an interactive run).  When issued from within POST1,
-        the nodal boundary conditions in the database (which were read
-        from the results file) will overwrite the nodal boundary
-        conditions existing on the database file.
-
-        Internal nodes may be created during solution (for example,
-        via the mixed u-P formulation or generalized plane strain
-        option for current- technology elements, the Lagrangian
-        multiplier method for contact elements or the MPC184 elements,
-        or the quadratic or cubic option of the BEAM188 and PIPE288
-        elements). It is sometimes necessary to save the internal
-        nodes in the database for later operations, such as cutting
-        boundary interpolations (CBDOF) for submodeling. To do so,
-        issue the SAVE command after the first SOLVE command.
-
-        In general, saving after solving is always a good practice.
-
-        This command is valid in any processor.
-        """
-        return self.run(f"SAVE,{fname},{ext},,{slab}", **kwargs)
-
     def plnsol(self, item="", comp="", kund="", fact="", fileid ="", **kwargs):
         """APDL Command: PLNSOL
 
@@ -54022,36 +50364,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         Table: 220:: : PLNSOL - Valid Item and Component Labels
         """
         command = "PLNSOL,%s,%s,%s,%s,%s" % (str(item), str(comp), str(kund), str(fact), str(fileid))
-        return self.run(command, **kwargs)
-
-    def cmedit(self, aname="", oper="", cnam1="", cnam2="", cnam3="", cnam4="",
-               cnam5="", cnam6="", cnam7="", **kwargs):
-        """APDL Command: CMEDIT
-
-        Edits an existing assembly.
-
-        Parameters
-        ----------
-        aname
-            Name of the assembly to be edited.
-
-        oper
-            Operation label:
-
-            ADD - To add more components.  The level of any assembly to be added must be lower
-                  than that of the assembly Aname (see CMGRP command).
-
-            DELE - To remove components.
-
-        cnam1, cnam2, cnam3, . . . , cnam7
-            Names of components and assemblies to be added to or deleted from
-            the assembly.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "CMEDIT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(oper), str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7))
         return self.run(command, **kwargs)
 
     def aoffst(self, narea="", dist="", kinc="", **kwargs):
@@ -54618,42 +50930,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SPVAL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(tblno), str(curvno), str(sv1), str(sv2), str(sv3), str(sv4), str(sv5), str(sv6), str(sv7))
         return self.run(command, **kwargs)
 
-    def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
-        """APDL Command: CLOG
-
-        Forms the common log of a variable
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on
-            printouts and displays.  Embedded blanks are compressed
-            for output.
-
-        facta
-            Scaling factor applied to variable IA (defaults to 1.0).
-
-        factb
-            Scaling factor (positive or negative) applied to the operation
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms the common log of a variable according to the operation:
-
-        IR = FACTB*LOG(FACTA x IA)
-        """
-        return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
-
     def vstat(self, **kwargs):
         """APDL Command: *VSTAT
 
@@ -54824,39 +51100,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         divisions specified for them [LESIZE]).
         """
         command = "VIMP,%s,%s,%s" % (str(vol), str(chgbnd), str(implevel))
-        return self.run(command, **kwargs)
-
-    def vsla(self, type_="", vlkey="", **kwargs):
-        """APDL Command: VSLA
-
-        Selects those volumes containing the selected areas.
-
-        Parameters
-        ----------
-        type\_
-            Label identifying the type of volume select:
-
-            S - Select a new set (default).
-
-            R - Reselect a set from the current set.
-
-            A - Additionally select a set and extend the current set.
-
-            U - Unselect a set from the current set.
-
-        vlkey
-            Specifies whether all contained volume areas must be selected
-            [ASEL]:
-
-            0 - Select volume if any of its areas are in the selected area set.
-
-            1 - Select volume only if all of its areas are in the selected area set.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "VSLA,%s,%s" % (str(type_), str(vlkey))
         return self.run(command, **kwargs)
 
     def anorm(self, anum="", noeflip="", **kwargs):
@@ -56058,19 +52301,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "SFLDELE,%s,%s" % (str(line), str(lab))
-        return self.run(command, **kwargs)
-
-    def list(self, level="", **kwargs):
-        """APDL Command: LIST
-
-        Lists out the sets in the results file.
-
-        Notes
-        -----
-        This command lists the results set number, the load step, substep, and
-        time step for each set. It also shows all sets marked for deletion.
-        """
-        command = "LIST,%s" % (str(level))
         return self.run(command, **kwargs)
 
     def antime(self, nfram="", delay="", ncycl="", autocntrky="", rsltdat="",
@@ -59670,22 +55900,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BSTE,%s" % (str(alpha))
         return self.run(command, **kwargs)
 
-    def aux2(self, **kwargs):
-        """APDL Command: /AUX2
-
-        Enters the binary file dumping processor.
-
-        Notes
-        -----
-        Enters the binary file dumping processor (ANSYS auxiliary processor
-        AUX2).  This processor is used to dump the contents of certain ANSYS
-        binary files for visual examination.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX2,"
-        return self.run(command, **kwargs)
-
     def rock(self, cgx="", cgy="", cgz="", omx="", omy="", omz="", **kwargs):
         """APDL Command: ROCK
 
@@ -60386,22 +56600,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "LCSL,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nl7), str(nl8), str(nl9))
         return self.run(command, **kwargs)
 
-    def aux12(self, **kwargs):
-        """APDL Command: /AUX12
-
-        Enters the radiation processor.
-
-        Notes
-        -----
-        Enters the radiation processor (ANSYS auxiliary processor AUX12).  This
-        processor supports the Radiation Matrix and the Radiosity Solver
-        methods.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX12,"
-        return self.run(command, **kwargs)
-
     def suget(self, surfname="", rsetname="", parm="", geom="", **kwargs):
         """APDL Command: SUGET
 
@@ -60520,22 +56718,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "SUPR,%s,%s" % (str(surfname), str(rsetname))
         return self.run(command, **kwargs)
 
-    def gopr(self, **kwargs):
-        """APDL Command: /GOPR
-
-        Reactivates suppressed printout.
-
-        Notes
-        -----
-        Reactivates printout suppressed with the /NOPR command.  The /GO
-        command has the same function except that it does not produce a command
-        response from the program.
-
-        This command is valid in any processor.
-        """
-        command = "/GOPR,"
-        return self.run(command, **kwargs)
-
     def plchist(self, spec="", freqpt="", **kwargs):
         """APDL Command: PLCHIST
 
@@ -60618,26 +56800,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "OMEGA,%s,%s,%s" % (str(omegx), str(omegy), str(omegz))
-        return self.run(command, **kwargs)
-
-    def csdele(self, kcn1="", kcn2="", kcinc="", **kwargs):
-        """APDL Command: CSDELE
-
-        Deletes local coordinate systems.
-
-        Parameters
-        ----------
-        kcn1, kcn2, kcinc
-            Delete coordinate systems from KCN1 (must be greater than 10) to
-            KCN2 (defaults to KCN1) in steps of KCINC (defaults to 1).  If KCN1
-            = ALL, KCN2 and KCINC are ignored and all coordinate systems are
-            deleted.
-
-        Notes
-        -----
-        This command is valid in any processor.
-        """
-        command = "CSDELE,%s,%s,%s" % (str(kcn1), str(kcn2), str(kcinc))
         return self.run(command, **kwargs)
 
     def vmesh(self, nv1="", nv2="", ninc="", **kwargs):
@@ -61201,21 +57363,6 @@ class _MapdlCommands(_MapdlGeometryCommands,
         This command is also valid in PREP7.
         """
         command = "DKDELE,%s,%s" % (str(kpoi), str(lab))
-        return self.run(command, **kwargs)
-
-    def aux15(self, **kwargs):
-        """APDL Command: /AUX15
-
-        Enters the IGES file transfer processor.
-
-        Notes
-        -----
-        Enters the IGES file transfer processor (ANSYS auxiliary processor
-        AUX15), used to read an IGES data file into the ANSYS program.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX15,"
         return self.run(command, **kwargs)
 
     def secmodif(self, secid="", kywrd="", **kwargs):

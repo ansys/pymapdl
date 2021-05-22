@@ -11,7 +11,7 @@ operations are performed.  They can also be used to add additional
 parameters to a command.  For example, more points to a spline than
 would be normally supported.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.fitem

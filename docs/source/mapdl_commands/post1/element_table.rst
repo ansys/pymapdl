@@ -10,7 +10,7 @@ These POST1 commands are used to operate with the element table, which
 in turn is used to process results stored for each element, such as
 average stresses, heat fluxes, etc.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.detab

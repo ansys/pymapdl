@@ -8,7 +8,7 @@ Special Purpose
 
 These POST1 commands are used for various special purposes.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.bfint

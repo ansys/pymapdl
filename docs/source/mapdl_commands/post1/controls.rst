@@ -9,7 +9,7 @@ Controls
 These POST1 commands are used to control the calculations done for
 other commands.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.avprin

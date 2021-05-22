@@ -8,7 +8,7 @@ Status
 
 These POST1 commands are for use with the STAT command.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.calc

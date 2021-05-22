@@ -8,7 +8,7 @@ Animation
 
 These POST1 commands are used to animate results.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
    Mapdl.ancntr

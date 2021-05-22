@@ -26,9 +26,7 @@ are grouped by functionality.
 ********
 Database
 ********
-
-These commands are used to operate on the database in a global
-sense.
+These commands are used to operate on the database globally.
 
 .. toctree::
    :maxdepth: 1
@@ -40,8 +38,22 @@ sense.
    database/coord_sys
    database/picking
 
-..
-   Graphics - N/A Not Documented
+********
+Graphics
+********
+These commands are used to control the graphics of the program.
+
+.. toctree::
+   :maxdepth: 1
+
+   graphics/setup
+   graphics/views
+   graphics/scaling
+   graphics/style
+   graphics/labeling
+   graphics/graphs
+   graphics/annotation
+
 
 ****
 APDL
@@ -74,10 +86,6 @@ These commands are used to create and set up the model.
    prep7/real_constants
    prep7/materials
    prep7/material_data_tables
-
-   ..
-      Left off here
-
    prep7/primitives
    prep7/keypoints
    prep7/hard_points
@@ -143,7 +151,11 @@ These commands are used to load and solve the model.
 *****
 POST1
 *****
-These commands are used to postprocess the results with the database processor.
+These commands are used to postprocess the results with the database
+processor.
+
+.. toctree::
+   :maxdepth: 1
 
    post1/setup
    post1/controls
@@ -159,3 +171,120 @@ These commands are used to postprocess the results with the database processor.
    post1/special
    post1/status
    post1/failure_criteria
+
+
+******
+POST26
+******
+These commands are used to postprocess the results with the
+time-history processor.
+
+.. toctree::
+   :maxdepth: 1
+
+   post26/setup
+   post26/controls
+   post26/operations
+   post26/display
+   post26/listing
+   post26/special
+   post26/status
+
+
+****
+AUX2
+****
+These commands are used to examine or manipulate the contents of
+binary files produced by the program.
+
+.. toctree::
+   :maxdepth: 1
+
+   aux2/bin_dump
+   aux2/bin_manip
+
+
+****
+AUX3
+****
+The auxiliary processor ``/AUX3`` allows you to operate on results
+files by deleting sets or by changing values.
+
+.. toctree::
+   :maxdepth: 1
+
+   aux3.rst
+
+
+*****
+AUX12
+*****
+These commands are used to define radiation options for use in thermal
+analyses.
+
+.. toctree::
+   :maxdepth: 1
+
+   aux12/general_radiation
+   aux12/radiation_mat
+   aux12/radiosity_solver
+
+
+*****
+AUX15
+*****
+These commands are used to read in an IGES file for analysis in ANSYS.
+
+.. toctree::
+   :maxdepth: 1
+
+   aux15.rst
+
+
+*****************
+Mapping Processor
+*****************
+The ``/MAP`` processor allows you to map data from an external file
+onto the existing geometry.
+
+.. toctree::
+   :maxdepth: 1
+
+   map
+
+
+***************
+DISPLAY Program
+***************
+These commands are used for the DISPLAY program. The DISPLAY program
+is a companion program to ANSYS, used for recovering graphics displays
+produced within ANSYS.
+
+.. note::
+   Many of these commands will not be applicable when using PyMAPDL.
+
+.. toctree::
+   :maxdepth: 1
+
+   display/setup
+   display/driver
+   display/action
+
+
+**********************
+REDUCED Order Modeling
+**********************
+These commands are used for the DISPLAY program. The DISPLAY program
+is a companion program to ANSYS, used for recovering graphics displays
+produced within ANSYS.
+
+.. note::
+   Many of these commands will not be applicable when using PyMAPDL.
+
+.. toctree::
+   :maxdepth: 1
+
+   reduced/setup
+   reduced/preparation
+   reduced/generation
+   reduced/use_pass
