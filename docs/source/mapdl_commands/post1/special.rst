@@ -31,7 +31,6 @@ These POST1 commands are used for various special purposes.
    Mapdl.kcalc
    Mapdl.nforce
    Mapdl.nldpost
-   Mapdl.plas
    Mapdl.plcamp
    Mapdl.plcfreq
    Mapdl.plchist

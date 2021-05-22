@@ -14,7 +14,7 @@ These SESSION commands are for file operations, such as deleting, copying, and l
    Mapdl.anstoaqwa
    Mapdl.anstoasas
    Mapdl.assign
-   Mapdl.clog
+   Mapdl.slashclog
    Mapdl.copy
    Mapdl.delete
    Mapdl.fcomp

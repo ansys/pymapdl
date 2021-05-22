@@ -18,8 +18,6 @@ These SOLUTION commands are used to set general analysis options.
    Mapdl.ascres
    Mapdl.asol
    Mapdl.bcsoption
-   Mapdl.cecheck
-   Mapdl.check
    Mapdl.cint
    Mapdl.cmatrix
    Mapdl.cmsopt

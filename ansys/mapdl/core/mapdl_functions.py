@@ -5328,30 +5328,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "QUAD,%s,%s,%s,%s,%s,%s,%s" % (str(node1), str(nintr), str(node2), str(nfill), str(nstrt), str(ninc), str(pkfac))
         return self.run(command, **kwargs)
 
-    def slashclog(self, fname="", ext="", **kwargs):
-        """APDL Command: /CLOG
-
-        Copies the session log file to a named file.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path to which the log file is to be copied
-            (248 characters maximum, including directory). If you do not
-            specify a directory path, it will default to your working directory
-            and you can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        This command is valid in any processor, but only during an interactive
-        run.
-        """
-        command = "/CLOG,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
-
     def nlgeom(self, key="", **kwargs):
         """APDL Command: NLGEOM
 
@@ -65724,7 +65700,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"MPCHG,{mat},{elem}", **kwargs)
 
-    def icrotate(node="", omega="", x1="", y1="", z1="", x2="", y2="",
+    def icrotate(self, node="", omega="", x1="", y1="", z1="", x2="", y2="",
                  z2="", vx="", vy="", vz="", accel="", **kwargs):
         """Specifies initial velocity at nodes as a sum of rotation about an axis and translation.
 
@@ -65777,7 +65753,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
         return self.run(command, **kwargs)
 
-    def merge(name1="", name2="", val1="", val2="", **kwargs):
+    def merge(self, name1="", name2="", val1="", val2="", **kwargs):
         """Merges two dense matrices or vectors into one.
 
         APDL Command: *MERGE
@@ -65824,7 +65800,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"MERGE,{name1},{name2},{val1},{val2}", **kwargs)
 
-    def aport(portnum="", label="", kcn="", pres="", phase="", val1="",
+    def aport(self, portnum="", label="", kcn="", pres="", phase="", val1="",
               val2="", val3="", val4="", **kwargs):
         """Specifies input data for plane wave and acoustic duct ports.
 
@@ -65915,7 +65891,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
 
-    def scopt(tempdepkey="", **kwargs):
+    def scopt(self, tempdepkey="", **kwargs):
         """Specifies System Coupling options.
 
         APDL Command: SCOPT
@@ -65944,3 +65920,560 @@ class _MapdlCommands():  # pragma: no cover
         command ``scopt("NO")``.
         """
         return self.run(f"SCOPT,{tempdepkey}", **kwargs)
+
+    def moddir(self, key="", directory="", fname="", **kwargs):
+        """Activates the remote read-only modal files usage.
+
+        APDL Command: MODDIR
+
+        Parameters
+        ----------
+        key
+            Key to activate the remote modal files usage
+
+            * ``"1 (ON or YES)"`` : The program performs the analysis
+              using remote modal files. The files are read-only.
+
+            * ``"0 (OFF or NO)"`` : The program performs the analysis
+              using modal files located in the working directory
+              (default).
+
+        directory
+            Directory path (248 characters maximum). The directory
+            contains the modal analysis files.  The directory path
+            defaults to the current working directory.
+
+        fname
+            File name (no extension or directory path) for the modal
+            analysis files.  The file name defaults to the current
+            Jobname.
+
+        Notes
+        -----
+        Only applies to spectrum analyses (ANTYPE,SPECTR).
+
+        Using the default for both the directory path (Directory) and the
+        file name (Fname) is not valid. At least one of these values must
+        be specified.
+
+        The MODDIR command must be issued during the first solution and at
+        the beginning of the solution phase (before LVSCALE in
+        particular).
+
+        Remote modal files usage is not supported when mode file reuse is
+        activated (modeReuseKey = YES on SPOPT).
+        """
+        return self.run(f"MODDIR,{key},{directory},{fname}", **kwargs)
+
+    def lanboption(self, strmck="", **kwargs):
+        """Specifies Block Lanczos eigensolver options.
+
+        APDL Command: LANBOPTION
+
+        strmck
+            Controls whether the Block Lanczos eigensolver will perform a
+            Sturm sequence check:
+
+            * ``"OFF"`` : Do not perform the Sturm sequence check
+              (default).
+
+            * ``"ON"`` : Perform a Sturm sequence check. This requires
+              additional matrix factorization (which can be expensive),
+              but does help ensure that no modes are missed in the
+              specified range.
+
+        Notes
+        -----
+        LANBOPTION specifies options to be used with the Block Lanczos
+        eigensolver during an eigenvalue buckling analysis (BUCOPT,LANB)
+        or a modal analysis (MODOPT,LANB).
+
+        By default the sturm sequence check is off for the Block Lanczos
+        eigensolver when it is used in a modal analysis, and on when it is
+        used in a buckling analysis.
+
+        """
+        return self.run(f"LANBOPTION,{strmck}", **kwargs)
+
+    def exbopt(self, outinv2="", outtcms="", outsub="", outcms="", outcomp="",
+               outrm="", noinv="", outele="", **kwargs):
+        """Specifies .EXB file output options in a CMS generation pass.
+
+        APDL Command: EXBOPT
+
+        Parameters
+        ----------
+        outinv2
+            Output control for 2nd order invariant:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the second order invariant.
+
+        outtcms
+            Output control for .TCMS file:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the .TCMS file.
+
+        outsub
+            Output control for .SUB file:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the .SUB file.
+
+        OUTCMS
+            Output control for .CMS file:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the .CMS file.
+
+        outcomp
+            Output control for node and element component information:
+
+            * ``"0"`` : Do not output any component information.
+            * ``"1"`` : Output node component information only.
+            * ``"2"`` : Output element component information only.
+            * ``"3"`` : Output both node and element component information (default).
+
+        outrm
+            Output control for the recovery matrix:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the recovery matrix to file.EXB.
+            * ``"2"`` : Output the recovery matrix to a separate file, file_RECOVER.EXB.
+
+        noinv
+            Invariant calculation:
+
+            * ``"0"`` : Calculate all invariants (default).
+            * ``"1"`` : Suppress calculation of the 1st and 2nd order
+              invariants. NOINV = 1 suppresses OUTINV2 = 1.
+
+        OUTELE
+        Output control for the element data:
+
+            * ``"0"`` : Do not output (default).
+            * ``"1"`` : Output the element data.
+
+        Notes
+        -----
+        When the body property file (file.EXB) is requested in a CMS
+        generation pass (CMSOPT,,,,,,,EXB command), the .TCMS, .SUB, and
+        .CMS files are not output by default. Use the EXBOPT command to
+        request these files, as needed.
+
+        EXBOPT can also be used to manage some content in the .EXB file
+        for improving performance and storage (see the OUTINV2, OUTCOMP,
+        OUTRM, NOINV, and OUTELE arguments described above).
+
+        If both recovery matrix output (OUTRM = 1 or 2) and the .TCMS file
+        (OUTTCMS = 1) are requested, the .TCMS file writing is turned off
+        due to potentially large in-core memory use.
+
+        For more information on how to generate file.EXB, see ANSYS
+        Interface to AVL EXCITE in the Mechanical APDL Substructuring
+        Analysis Guide
+        """
+        command = f"EXBOPT,{outinv2},{outtcms},{outsub},{outcms},{outcomp},{outrm},{noinv},{outele}"
+        return self.run(command, **kwargs)
+
+    def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
+                trlevel="", cgap="", cpen="", ioff="", **kwargs):
+        """Provides and/or adjusts the initial status of contact pairs.
+
+        APDL Command: CNCHECK
+
+        Parameters
+        ----------
+        option
+            Option to be performed:
+
+            * ``"DETAIL"`` : List all contact pair properties (default).
+
+            * ``"SUMMARY"`` : List only the open/closed status for each
+              contact pair.
+
+            * ``"POST"`` : Execute a partial solution to write the initial
+              contact configuration to the Jobname.RCN file.
+
+            * ``"ADJUST"`` : Physically move contact nodes to the target
+              in order to close a gap or reduce penetration. The initial
+              adjustment is converted to structural displacement values
+              (UX, UY, UZ) and stored in the Jobname.RCN file.
+
+            * ``"MORPH"`` : Physically move contact nodes to the target in
+              order to close a gap or reduce penetration, and also morph
+              the underlying solid mesh. The initial adjustment of contact
+              nodes and repositioning of solid element nodes due to mesh
+              morphing are converted to structural displacement values
+              (UX, UY, UZ) and stored in the Jobname.RCN file.
+
+            * ``"RESET"`` : Reset target element and contact element key
+              options and real constants to their default values. This
+              option is not valid for general contact.
+
+            * ``"AUTO"`` : Automatically sets certain real constants and
+              key options to recommended values or settings in order to
+              achieve better convergence based on overall contact pair
+              behaviors. This option is not valid for general contact.
+
+            * ``"TRIM"`` : Trim contact pair (remove certain contact and
+              target elements).
+
+            * ``"UNSE"`` : Unselect certain contact and target elements.
+
+        rid1, rid2, rinc
+            For pair-based contact, the range of real constant pair IDs
+            for which Option will be performed. If RID2 is not specified,
+            it defaults to RID1. If no value is specified, all contact
+            pairs in the selected set of elements are considered.
+
+            For general contact (InterType = GCN), RID1 and RID2 are
+            section IDs associated with general contact surfaces instead
+            of real constant IDs. If RINC = 0, the Option is performed
+            between the two sections, RID1 and RID2. If RINC > 0, the
+            Option is performed among all specified sections (RID1 to RID2
+            with increment of RINC).
+
+        intertype
+            The type of contact interface (pair-based versus general
+            contact) to be considered; or the type of contact pair to be
+            trimmed/unselected/auto-set.
+
+            The following labels specify the type of contact interface:
+
+            * ``""`` : (blank) Include all contact definitions (pair-based
+              and general contact).
+
+            * ``"GCN"`` : Include general contact definitions only (not valid when Option = RESET or AUTO).
+
+            The following labels specify the type of contact pairs to be
+            trimmed/unselected/auto-set (used only when Option = TRIM,
+            UNSE, or AUTO, and only for pair-based contact definitions):
+
+            * ``"ANY"`` : All types (default).
+
+            * ``"MPC"`` : MPC-based contact pairs (KEYOPT(2) = 2).
+
+            * ``"BOND"`` : Bonded contact pairs (KEYOPT(12) = 3, 5, 6).
+
+            * ``"NOSP"`` : No separation contact pairs (KEYOPT(12) = 2, 4).
+
+            * ``"INAC"`` : Inactive contact pairs (symmetric contact pairs for MPC contact or KEYOPT(8) = 2).
+
+            * ``"TRlevel"`` : mming level (used only when Option = TRIM, UNSE, or MORPH):
+
+            * ``"(blank)"`` : Normal trimming (default): remove/unselect contact and target elements which are in far-field.
+
+            * ``"AGGRE"`` : Aggressive trimming: remove/unselect contact and target elements which are in far-field, and certain elements in near-field.
+
+        cgap
+            They are only valid when Option = ADJUST or MORPH.  Control
+            parameter for opening gap. Close the opening gap if the
+            absolute value of the gap is smaller than the CGAP value. CGAP
+            defaults to 0.25*PINB (where PINB is the pinball radius) for
+            bonded and no-separation contact; otherwise it defaults to the
+            value of real constant ICONT.
+
+        CPEN
+            They are only valid when Option = ADJUST or MORPH.  Control
+            parameter for initial penetration. Close the initial
+            penetration if the absolute value of the penetration is
+            smaller than the CPEN value. CPEN defaults to 0.25*PINB (where
+            PINB is the pinball radius) for any type of interface behavior
+            (either bonded or standard contact).
+
+        IOFF
+            They are only valid when Option = ADJUST or MORPH.  Control
+            parameter for initial adjustment. Input a positive value to
+            adjust the contact nodes towards the target surface with a
+            constant interference distance equal to IOFF. Input a negative
+            value to adjust the contact node towards the target surface
+            with a uniform gap distance equal to the absolute value of
+            IOFF.
+
+        Notes
+        -----
+        The CNCHECK command provides information for surface-to-surface,
+        node-to-surface, and line-to-line contact pairs (element types
+        TARGE169, TARGE170, CONTA171, CONTA172, CONTA173, CONTA174,
+        CONTA175, CONTA176, CONTA177). All contact and target elements of
+        interest, along with the solid elements and nodes attached to
+        them, must be selected for the command to function properly. For
+        performance reasons, the program uses a subset of nodes and
+        elements based on the specified contact regions (RID1, RID2, RINC)
+        when executing the CNCHECK command.
+
+        For additional details, see the notes section at:
+        https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_CNCHECK.html
+
+        """
+        command = f"CNCHECK,{option},{rid1},{rid2},{rinc},{intertype},{trlevel},{cgap},{cpen},{ioff}"
+        return self.run(command, **kwargs)
+
+    def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
+        """Deletes force loads on nodes.
+
+        APDL Command: FDELE
+
+        Parameters
+        ----------
+        node
+            Node for which force is to be deleted.  If ALL, NEND and NINC are
+            ignored and forces are deleted on all selected nodes [NSEL].  If
+            NODE = P, graphical picking is enabled and all remaining command
+            fields are ignored (valid only in the GUI).  A component name may
+            also be substituted for NODE.
+
+        lab
+            Valid force label.  If ALL, use all appropriate labels.  Structural
+            labels:  FX, FY, or FZ (forces); MX, MY, or MZ (moments).  Thermal
+            labels:  HEAT, HBOT, HE2, HE3, . . ., HTOP (heat flow).  Fluid
+            labels:  FLOW (fluid flow).  Electric labels:  AMPS (current flow),
+            CHRG (electric charge).  Magnetic labels:  FLUX (magnetic flux);
+            CSGX, CSGY, or CSGZ (magnetic current segments).  Diffusion labels:
+            RATE (diffusion flow rate).
+
+        nend, ninc
+            Delete forces from NODE to NEND (defaults to NODE) in steps of NINC
+            (defaults to 1).
+
+        lkey
+            Lock key:
+
+            (blank) - The DOF is not locked (default).
+
+            FIXED - Displacement on the specified degrees of freedom (Lab) is locked. The program
+                    prescribes the degree of freedom to the "current" relative
+                    displacement value in addition to deleting the force. If a
+                    displacement constraint (for example, D command) is applied
+                    in conjunction with this option, the actual applied
+                    displacement will be ramped during the next load step. The
+                    displacement is ramped from the current value to the newly
+                    defined value. This option is only valid for the following
+                    labels: FX, FY, FZ, MX, MY, MZ. This option is intended
+                    primarily for use in the ANSYS Workbench interface to apply
+                    an increment length adjustment (bolt pretension loading).
+
+        Notes
+        -----
+        The node and the degree of freedom label corresponding to the force
+        must be selected [NSEL, DOFSEL].
+
+        This command is also valid in PREP7.
+        """
+        command = "FDELE,%s,%s,%s,%s,%s" % (str(node), str(lab), str(nend), str(ninc), str(lkey))
+        return self.run(command, **kwargs)
+
+    def exoption(self, ldtype="", option="", value="", **kwargs):
+        """Specifies the EXPROFILE options for the Mechanical APDL to ANSYS CFX profile file transfer.
+
+        APDL Command: EXOPTION
+
+        Parameters
+        ----------
+        ldtype
+            Load type:
+
+            * ``"SURF"`` : Surface load
+
+            * ``"VOLU"`` : Volume load
+
+        option
+            Surface options:
+
+            * ``"Precision"`` : Number of significant digits for the
+              fractional part of real data
+
+            * ``"Connectivity"`` : Key to include face connectivity in the
+              exported profile file
+
+            * ``"Precision"`` : Number of significant digits after the
+              decimal for real data
+
+        value
+            Specify the value for either Precision or Connectivity.
+
+            For Precision, specify the number of significant digits. Can
+            be any value between 1 to 20, default 8. When 0 or an invalid
+            value is specified, the program will use the default value of
+            8 and issue a warning message.
+
+            For Connectivity, specify the key to include the element face
+            connectivity data for surface loads (does not support volume
+            loads):
+
+            * ``"OFF"`` : Do not include the connectivity data in the exported file (default)
+
+            * ``"ON"`` : Include the connectivity data in the exported file
+
+        Notes
+        -----
+        This command is not supported in Distributed ANSYS.
+        """
+        return self.run(f"EXOPTION,{ldtype},{option},{value}", **kwargs)
+
+    def shsd(self, rid="", action="", **kwargs):
+        """Creates or deletes a shell-solid interface to be used in shell-to-solid assemblies.
+
+        APDL Command: SHSD
+
+        Parameters
+        ----------
+        rid
+            The real constant set ID that identifies the contact pair on
+            which a shell-to-solid assembly is defined. If ALL, all
+            selected contact pairs will be considered for assembly.
+
+        Action
+            * ``"CREATE"`` : Builds new shell and contact elements to be
+              used in shell-to-solid assemblies (default). New elements
+              are stored as internally-created components.
+
+            * ``"DELETE"`` : Deletes the nodes and elements created during
+              a previous execution of SHSD,RID,CREATE for the real
+              constant set identified by RID.
+
+        Notes
+        -----
+        The SHSD command creates a shell-solid interface to be used in
+        shell-to-solid assemblies, or deletes a previously-created
+        shell-solid interface. “Virtual” shell elements and additional
+        CONTA175 elements are created at the contact pair identified by
+        RID when Action = CREATE. Set Action = DELETE to remove the
+        generated nodes and elements at the contact pair identified by
+        RID.
+
+        For further details, see:
+        https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_SHSD.html
+
+        """
+        return self.run(f"SHSD,{rid},{action}", **kwargs)
+
+    def remove(self, name="", val1="", val2="", val3="", **kwargs):
+        """Suppresses rows or columns of a dense matrix or a vector.
+
+        APDL Command: *REMOVE
+
+        Parameters
+        ----------
+        name
+            Name of the matrix or vector to be revised.
+
+        val1
+            First row or column number to suppress if ``name`` is a dense
+            matrix.  First value index to suppress if ``name`` is a
+            vector.
+
+        Val2
+            Last row or column number to suppress if ``name`` is a dense
+            matrix.  Last value index to suppress if ``name`` is a
+            vector.
+
+        Val3
+            Specifies what to remove if ``name`` is a dense matrix.
+
+            * ``"COL"`` : Remove columns of the matrix (default).
+
+            * ``"ROW"`` : Remove rows of the matrix.
+
+        Notes
+        -----
+        The values of the original matrix or vector specified by Name are
+        retained. The matrix or vector is resized to the new number of
+        rows and columns.
+        """
+        return self.run(f"REMOVE,{name},{val1},{val2},{val3}", **kwargs)
+
+    def scal(self, name="", val1="", val2="", **kwargs):
+        """Scales a vector or matrix by a constant.
+
+        APDL Command: *SCAL
+
+        Parameters
+        ----------
+        name
+            Name used to identify the vector or matrix to be scaled. Must
+            be specified.
+
+        val1
+            The real part of the constant to use (default = 1).
+
+        val2
+            The imaginary part of the constant to use (default = 0). This
+            value is used only if the vector or matrix specified by Name
+            is complex.
+
+        Notes
+        -----
+        This command can be applied to vectors and matrices created by the
+        *VEC, *DMAT and *SMAT commands.
+        """
+        return self.run(f"*SCAL,{name},{val1},{val2}", **kwargs)
+
+    def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
+        """Forms the common log of a variable
+
+        APDL Command: CLOG
+
+        Parameters
+        ----------
+        ir
+            Arbitrary reference number assigned to the resulting
+            variable (2 to NV [NUMVAR]).  If this number is the same
+            as for a previously defined variable, the previously
+            defined variable will be overwritten with this result.
+
+        ia
+            Reference number of the variable to be operated on.
+
+        name
+            Thirty-two character name for identifying the variable on
+            printouts and displays.  Embedded blanks are compressed
+            for output.
+
+        facta
+            Scaling factor applied to variable IA (defaults to 1.0).
+
+        factb
+            Scaling factor (positive or negative) applied to the operation
+            (defaults to 1.0).
+
+        Notes
+        -----
+        Forms the common log of a variable according to the operation:
+
+        IR = FACTB*LOG(FACTA x IA)
+        """
+        return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
+
+    def ecpchg(self, **kwargs):
+        """Optimizes degree-of-freedom usage in a coupled acoustic model.
+
+        APDL Command: ECPCHG
+
+        Notes
+        -----
+        The ECPCHG command converts uncoupled acoustic element types to
+        coupled acoustic element types that are attached to the
+        fluid-structure interaction interface. Or it converts coupled
+        acoustic element types to uncoupled acoustic element types that
+        are not attached to the fluid-structure interaction
+        interface. Issuing ECPCHG can dramatically reduce the size of the
+        Jobname.EMAT file, compared to the model fully meshed with the
+        coupled acoustic elements.
+
+        Performing the ECPCHG conversion on meshed volumes can create
+        circumstances in which more than one element type is defined for a
+        single volume.
+
+        If the acoustic elements are coupled with shell elements (SHELL181
+        or SHELL281), you must set the fluid-structure interaction (FSI)
+        flag by issuing the SF,,FSI command before the ECPCHG command.
+
+        ECPCHG may add new element types to your model, or it may change
+        the element type for existing acoustic elements. You should verify
+        the defined element types with ETLIST and the element attributes
+        with ELIST after using this command.
+        """
+        return self.run('ECPCHG', **kwargs)

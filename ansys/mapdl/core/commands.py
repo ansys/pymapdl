@@ -26,11 +26,10 @@ class Commands:
     anstoaqwa = session.files.anstoaqwa
     anstoasas = session.files.anstoasas
     assign = session.files.assign
-    clog = session.files.clog
+    slashclog = session.files.slashclog
     copy = session.files.copy
     delete = session.files.delete
     fcomp = session.files.fcomp
-    fdele = session.files.fdele
     lgwrite = session.files.lgwrite
     list = session.files.list
     rename = session.files.rename

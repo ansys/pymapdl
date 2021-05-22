@@ -279,41 +279,29 @@ def assign(self, ident="", fname="", ext="", lgkey="", **kwargs):
     return self.run(f"/ASSIGN,{ident},{fname},{ext},,{lgkey}", **kwargs)
 
 
-def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
-    """Forms the common log of a variable
+def slashclog(self, fname="", ext="", **kwargs):
+    """APDL Command: /CLOG
 
-    APDL Command: CLOG
+    Copies the session log file to a named file.
 
     Parameters
     ----------
-    ir
-        Arbitrary reference number assigned to the resulting
-        variable (2 to NV [NUMVAR]).  If this number is the same
-        as for a previously defined variable, the previously
-        defined variable will be overwritten with this result.
+    fname
+        File name and directory path to which the log file is to be copied
+        (248 characters maximum, including directory). If you do not
+        specify a directory path, it will default to your working directory
+        and you can use all 248 characters for the file name.
 
-    ia
-        Reference number of the variable to be operated on.
-
-    name
-        Thirty-two character name for identifying the variable on
-        printouts and displays.  Embedded blanks are compressed
-        for output.
-
-    facta
-        Scaling factor applied to variable IA (defaults to 1.0).
-
-    factb
-        Scaling factor (positive or negative) applied to the operation
-        (defaults to 1.0).
+    ext
+        Filename extension (eight-character maximum).
 
     Notes
     -----
-    Forms the common log of a variable according to the operation:
-
-    IR = FACTB*LOG(FACTA x IA)
+    This command is valid in any processor, but only during an interactive
+    run.
     """
-    return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
+    command = "/CLOG,%s,%s" % (str(fname), str(ext))
+    return self.run(command, **kwargs)
 
 
 def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
@@ -436,61 +424,6 @@ def fcomp(self, ident="", level="", **kwargs):
     See File Compression in the Basic Analysis Guide for more details.
     """
     return self.run(f'/FCOMP,{ident},{level}', **kwargs)
-
-
-def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
-    """Deletes force loads on nodes.
-
-    APDL Command: FDELE
-
-    Parameters
-    ----------
-    node
-        Node for which force is to be deleted.  If ALL, NEND and NINC are
-        ignored and forces are deleted on all selected nodes [NSEL].  If
-        NODE = P, graphical picking is enabled and all remaining command
-        fields are ignored (valid only in the GUI).  A component name may
-        also be substituted for NODE.
-
-    lab
-        Valid force label.  If ALL, use all appropriate labels.  Structural
-        labels:  FX, FY, or FZ (forces); MX, MY, or MZ (moments).  Thermal
-        labels:  HEAT, HBOT, HE2, HE3, . . ., HTOP (heat flow).  Fluid
-        labels:  FLOW (fluid flow).  Electric labels:  AMPS (current flow),
-        CHRG (electric charge).  Magnetic labels:  FLUX (magnetic flux);
-        CSGX, CSGY, or CSGZ (magnetic current segments).  Diffusion labels:
-        RATE (diffusion flow rate).
-
-    nend, ninc
-        Delete forces from NODE to NEND (defaults to NODE) in steps of NINC
-        (defaults to 1).
-
-    lkey
-        Lock key:
-
-        (blank) - The DOF is not locked (default).
-
-        FIXED - Displacement on the specified degrees of freedom (Lab) is locked. The program
-                prescribes the degree of freedom to the "current" relative
-                displacement value in addition to deleting the force. If a
-                displacement constraint (for example, D command) is applied
-                in conjunction with this option, the actual applied
-                displacement will be ramped during the next load step. The
-                displacement is ramped from the current value to the newly
-                defined value. This option is only valid for the following
-                labels: FX, FY, FZ, MX, MY, MZ. This option is intended
-                primarily for use in the ANSYS Workbench interface to apply
-                an increment length adjustment (bolt pretension loading).
-
-    Notes
-    -----
-    The node and the degree of freedom label corresponding to the force
-    must be selected [NSEL, DOFSEL].
-
-    This command is also valid in PREP7.
-    """
-    command = "FDELE,%s,%s,%s,%s,%s" % (str(node), str(lab), str(nend), str(ninc), str(lkey))
-    return self.run(command, **kwargs)
 
 
 def lgwrite(self, fname="", ext="", kedit="", **kwargs):
