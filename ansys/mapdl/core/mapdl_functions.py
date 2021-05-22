@@ -406,46 +406,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def keep(self, key="", **kwargs):
-        """APDL Command: KEEP
-
-        Stores POST26 definitions and data during active session.
-
-        Parameters
-        ----------
-        key
-            State or value
-
-            On or 1  - Allows you to exit and reenter /POST26 without losing your current time history
-                       variable information. Keeps a cache of the /POST26
-                       variable information including the active file name
-                       (FILE),  variable definitions (NSOL, ESOL, GAPF, RFORCE,
-                       SOLU, and EDREAD) and stored variable data in memory for
-                       the current ANSYS session.
-
-            Off or 0  - /POST26 variable information is deleted when you exit /POST26.
-
-        Notes
-        -----
-        Your variable information is saved in memory only for the current
-        active ANSYS session. It is deleted when you exit ANSYS. This
-        information is also deleted when you issue /CLEAR, RESUME, SOLVE, or
-        RESET.
-
-        When you reenter /POST26 all time history variable data is available
-        for use. When you issue STORE,NEW, variable definitions created by math
-        operations such as ADD or PROD will not be restored. However, variables
-        defined with NSOL, ESOL, GAPF, RFORCE, SOLU, and EDREAD will be
-        restored. Only the last active results file name is kept in memory
-        (FILE).
-
-        Commands such as LAYERP26, SHELL, and FORCE that specify the location
-        or a component of data to be stored will retain the setting at the time
-        of exiting /POST26 .
-        """
-        command = "KEEP,%s" % (str(key))
-        return self.run(command, **kwargs)
-
+    
     def czmesh(self, ecomps1="", ecomps2="", kcn="", kdir="", value="",
                cztol="", **kwargs):
         """APDL Command: CZMESH
@@ -1353,31 +1314,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "RSFIT,%s,%s,%s,%s,%s,%s,%s,%s" % (str(rslab), str(slab), str(name), str(rmod), str(ytrans), str(yval), str(xfilt), str(conf))
         return self.run(command, **kwargs)
 
-    def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
-              nvar7="", nvar8="", nvar9="", nvar10="", **kwargs):
-        """APDL Command: PLVAR
-
-        Displays up to ten variables in the form of a graph.
-
-        Parameters
-        ----------
-        nvar1, nvar2, nvar3, . . . , nvar10
-            Variables to be displayed, defined either by the reference number
-            or a unique thirty-two character name. If duplicate names are used
-            the command will plot the data for the lowest-numbered variable
-            with that name.
-
-        Notes
-        -----
-        Variables are displayed vs. variable N on the XVAR command. The string
-        value will be a predefined, unique name. For complex variables, the
-        amplitude is displayed by default [PLCPLX].  Each PLVAR command
-        produces a new frame.  See the /GRTYP command for displaying multiple
-        variables in a single frame with separate Y-axes.
-        """
-        command = "PLVAR,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nvar1), str(nvar2), str(nvar3), str(nvar4), str(nvar5), str(nvar6), str(nvar7), str(nvar8), str(nvar9), str(nvar10))
-        return self.run(command, **kwargs)
-
+    
     def dsurf(self, kcn="", xsurf="", ysurf="", zsurf="", **kwargs):
         """APDL Command: DSURF
 
@@ -3762,46 +3699,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"QRDOPT,{reusekey},,,{symmeth},{cmccoutkey}", **kwargs)
 
-    def abs(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: ABS
-
-        Forms the absolute value of a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on
-            the printout and displays.  Embedded blanks are compressed
-            upon output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable
-            IA (defaults to 1.0).
-
-        Notes
-        -----
-        The new variable is calculated as:
-
-        IR = | FACTA x IA |
-
-        For a complex number (a + ib), the absolute value is the
-        magnitude, where the IA values are obtained from:
-        ``sqrt(a**2 + b**2)``
-
-        See POST26 - Data Operations in the Mechanical APDL Theory
-        Reference for details.
-        """
-        return self.run(f"ABS,{ir},{ia},,,{name},,,{facta}", **kwargs)
-
+    
     def rigid(self, dof1="", dof2="", dof3="", dof4="", dof5="", dof6="",
               **kwargs):
         """APDL Command: RIGID
@@ -4615,26 +4513,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GTYPE,%s,%s,%s" % (str(wn), str(label), str(key))
         return self.run(command, **kwargs)
 
-    def nstore(self, tinc="", **kwargs):
-        """APDL Command: NSTORE
-
-        Defines which time points are to be stored.
-
-        Parameters
-        ----------
-        tinc
-            Store data associated with every TINC time (or frequency) point(s),
-            within the previously defined range of TMIN to TMAX [TIMERANGE].
-            (Defaults to 1)
-
-        Notes
-        -----
-        Defines which time (or frequency) points within the range are to be
-        stored.
-        """
-        command = "NSTORE,%s" % (str(tinc))
-        return self.run(command, **kwargs)
-
+    
     def cycfiles(self, fnamerst="", extrst="", fnamerfrq="", extrfrq="",
                  **kwargs):
         """APDL Command: CYCFILES
@@ -4772,59 +4651,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def pmgtran(self, fname="", freq="", fcnam1="", fcnam2="", pcnam1="",
-                pcnam2="", ecnam1="", ccnam1="", **kwargs):
-        """APDL Command: PMGTRAN
-
-        Summarizes electromagnetic results from a transient analysis.
-
-        Parameters
-        ----------
-        fname
-            File name (8 characters maximum) to which tabular data and plot
-            files will be written.  Must be enclosed in single quotes when the
-            command is manually typed in.  Defaults to MG_TRNS.  The data file
-            extension is .OUT and the plot file extension is .PLT.
-
-        freq
-            Frequency of solution output.  Defaults to 1.  Every FREQth
-            solution on the results file is output.
-
-        fcnam1, fcnam2
-            Names of element components for force calculation.  Must be
-            enclosed in single quotes when the command is manually typed in.
-
-        pcnam1, pcnam2
-            Names of element components for power loss calculation.  Must be
-            enclosed in single quotes when the command is manually typed in.
-
-        ecnam1, ccnam1
-            Names of element components for energy and total current
-            calculations, respectively.  Must be enclosed in single quotes when
-            the command is manually typed in.
-
-        Notes
-        -----
-        PMGTRAN invokes an ANSYS macro which calculates and summarizes
-        electromagnetic results from a transient analysis.  The results are
-        summarized by element components and listed on the screen as well as
-        written to a file (Fname.OUT).  Also, graph plots of results as a
-        function of time are created and written to a file (Fname.PLT) for use
-        in the DISPLAY program.
-
-        Two components may be selected for the summary of electromagnetic
-        forces (see FMAGSUM), two for power loss, and one each for stored
-        energy (see SENERGY) and total current (see CURR2D).  See the
-        referenced commands for other restrictions.
-
-        PMGTRAN is restricted to MKSA units.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "PMGTRAN,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(freq), str(fcnam1), str(fcnam2), str(pcnam1), str(pcnam2), str(ecnam1), str(ccnam1))
-        return self.run(command, **kwargs)
-
+    
     def sexp(self, labr="", lab1="", lab2="", exp1="", exp2="", **kwargs):
         """APDL Command: SEXP
 
@@ -5146,42 +4973,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MMF,"
         return self.run(command, **kwargs)
 
-    def add(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-            factc="", **kwargs):
-        """APDL Command: ADD
-
-        Adds (sums) variables.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia, ib, ic
-            Reference numbers of the three variables to be operated on.  If
-            only two variables, leave IC blank.  If only one, leave IB and IC
-            blank.
-
-        name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        facta, factb, factc
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (default to 1.0).
-
-        Notes
-        -----
-        Adds variables (up to three at once) according to the operation:
-
-        IR = (FACTA x IA) + (FACTB x IB) + (FACTC x IC)
-        """
-        command = f"ADD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
-        return self.run(command, **kwargs)
-
+    
     def gcolumn(self, curve="", string="", **kwargs):
         """APDL Command: /GCOLUMN
 
@@ -5207,49 +4999,6 @@ class _MapdlCommands():  # pragma: no cover
         original value.
         """
         command = "/GCOLUMN,%s,%s" % (str(curve), str(string))
-        return self.run(command, **kwargs)
-
-    def jsol(self, nvar="", elem="", item="", comp="", name="", **kwargs):
-        """APDL Command: JSOL
-
-        Specifies result items to be stored for the joint element.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number or name assigned to this variable.
-            Variable numbers can be 2 to NV (NUMVAR) while the name can be an
-            eight-byte character string. Overwrites any existing results for
-            this variable.
-
-        elem
-            Element number for which to store results.
-
-        item
-            Label identifying the item.  Valid item labels are shown in
-            Table 202: JSOL - Valid Item and Component Labels below.
-
-        comp
-            Component of the Item (if required).  Valid component labels are
-            shown in Table 202: JSOL - Valid Item and Component Labels below.
-
-        name
-            Thirty-two character name identifying the item on printouts and
-            displays.  Defaults to a label formed by concatenating the first
-            four characters of the Item and Comp labels.
-
-        Notes
-        -----
-        This command is valid for the MPC184 joint elements. The values stored
-        are for the free or unconstrained degrees of freedom of a joint
-        element. Relative reaction forces and moments are available only if
-        stiffness, damping, or friction is associated with the joint element.
-
-        Table: 202:: : JSOL - Valid Item and Component Labels
-
-
-        """
-        command = "JSOL,%s,%s,%s,%s,%s" % (str(nvar), str(elem), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
     
@@ -5525,41 +5274,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/FDELE,%s,%s" % (str(ident), str(stat))
         return self.run(command, **kwargs)
 
-    def solu(self, nvar="", item="", comp="", name="", **kwargs):
-        """APDL Command: SOLU
-
-        Specifies solution summary data per substep to be stored.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to NV
-            [NUMVAR]).
-
-        item
-            Label identifying the item.  Valid item labels are shown in the
-            table below.  Some items may also require a component label.
-
-        comp
-            Component of the item (if required).  Valid component labels are
-            shown in the table below.  None are currently required.
-
-        name
-            Thirty-two character name identifying the item on printouts and
-            displays.  Defaults to an eight character label formed by
-            concatenating the first four characters of the Item and Comp
-            labels.
-
-        Notes
-        -----
-        See also the PRITER command of POST1 to display some of these items
-        directly.  Valid for a static or full transient analysis. All other
-        analyses have zeros for the data. Valid item and component labels for
-        solution summary values are:
-        """
-        command = "SOLU,%s,%s,%s,%s" % (str(nvar), str(item), str(comp), str(name))
-        return self.run(command, **kwargs)
-
+    
     def emft(self, **kwargs):
         """APDL Command: EMFT
 
@@ -5843,46 +5558,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def int1(self, ir="", iy="", ix="", name="", facta="", factb="", const="",
-             **kwargs):
-        """APDL Command: INT1
-
-        Integrates a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-            Table values represent integrated sum of IY to current
-            table position of IX.
-
-        iy, ix
-            Integrate variable IY with respect to IX.
-
-        name
-            Thirty-two character name for identifying the variable on
-            the printout and displays.  Embedded blanks are compressed
-            upon output.
-
-        facta, factb
-            Scaling factors (positive or negative) applied to the
-            corresponding variables (default to 1.0).
-
-        const
-            Initial value.
-
-        Notes
-        -----
-        Integrates variables according to the operation:
-
-        IR = ∫ (FACTA x IY) d(FACTB x IX) + CONST
-        """
-        command = f"INT1,{ir},{iy},{ix},,{name},,,{facta},{factb},{const}"
-        return self.run(command, **kwargs)
-
+    
     def kscon(self, npt="", delr="", kctip="", nthet="", rrat="", **kwargs):
         """APDL Command: KSCON
 
@@ -6046,25 +5722,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GLINE,%s,%s" % (str(wn), str(style))
         return self.run(command, **kwargs)
 
-    def nprint(self, n="", **kwargs):
-        """APDL Command: NPRINT
-
-        Defines which time points stored are to be listed.
-
-        Parameters
-        ----------
-        n
-            List data associated with every N time (or frequency) point(s),
-            beginning with the first point stored (defaults to 1).
-
-        Notes
-        -----
-        Defines which time (or frequency) points within the range stored are to
-        be listed.
-        """
-        command = "NPRINT,%s" % (str(n))
-        return self.run(command, **kwargs)
-
+    
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """APDL Command: ADDAM
 
@@ -7007,54 +6665,6 @@ class _MapdlCommands():  # pragma: no cover
         This command is valid in any processor.
         """
         command = "/LIGHT,%s,%s,%s,%s,%s,%s,%s" % (str(wn), str(num), str(int_), str(xv), str(yv), str(zv), str(refl))
-        return self.run(command, **kwargs)
-
-    def gssol(self, nvar="", item="", comp="", name="", **kwargs):
-        """APDL Command: GSSOL
-
-        Specifies which results to store from the results file when using
-        generalized plane strain.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number or name assigned to this variable.
-            Variable numbers can be 2 to NV (NUMVAR) while the name can be an
-            eight byte character string. Overwrites any existing results for
-            this variable.
-
-        item
-            Label identifying item to be stored.
-
-            LENGTH - Change of fiber length at the ending point.
-
-            ROT - Rotation of the ending plane during deformation.
-
-            F - Reaction force at the ending point in the fiber direction.
-
-            M - Reaction moment applied on the ending plane.
-
-        comp
-            Component of the item, if Item = ROT or M.
-
-            X - The rotation angle or reaction moment of the ending plane about X.
-
-            Y - The rotation angle or reaction moment of the ending plane about Y.
-
-        name
-            Thirty-two character name identifying the item on the printout and
-            display. Defaults to the label formed by concatenating the first
-            four characters of the Item and Comp labels.
-
-        Notes
-        -----
-        This command stores the results (new position of the ending plane after
-        deformation) for generalized plane strain. All outputs are in the
-        global Cartesian coordinate system. For more information about the
-        generalized plane strain feature, see Generalized Plane Strain Option
-        of Current-Technology Solid Elements in the Element Reference.
-        """
-        command = "GSSOL,%s,%s,%s,%s" % (str(nvar), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
     
@@ -10923,86 +10533,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CPINTF,%s,%s" % (str(lab), str(toler))
         return self.run(command, **kwargs)
 
-    def atan(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: ATAN
-
-        Forms the arctangent of a complex variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia
-            Reference number of the complex variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable
-            IA (defaults to 1.0).  Usually FACTA should be set to 1.
-            FACTA may affect the position of the angle by a multiple
-            of π, resulting in a quadrant change.
-
-        Notes
-        -----
-        Forms the arctangent of a complex variable according to the
-        operation:
-
-        IR = ATAN(FACTA X b/a)
-
-        where a and b are the real and imaginary parts, respectively,
-        of the complex variable IA (which is of the form a + ib).  The
-        arctangent represents the phase angle (in radians), and is
-        valid only for a harmonic analysis (ANTYPE,HARMIC).
-
-        Since the scaling factor is applied uniformly to b/a, applying
-        any positive or negative scaling factor will not affect the
-        size of the phase angle, with the exception that a negative
-        scaling factor will change the results quadrant by : π.  The
-        magnitude of a complex number is still obtained through the
-        ABS command.  See POST26 - Data Operations in the Mechanical
-        APDL Theory Reference for details.
-        """
-        command = f"ATAN,{ir},{ia},,,{name},,,{facta}"
-        return self.run(command, **kwargs)
-
     
-    def prcplx(self, key="", **kwargs):
-        """APDL Command: PRCPLX
-
-        Defines the output form for complex variables.
-
-        Parameters
-        ----------
-        key
-            Output form key:
-
-            0 - Real and imaginary parts.
-
-            1 - Amplitude and phase angle.  Stored real and imaginary data are converted to
-                amplitude and phase angle upon output.  Data remain stored as
-                real and imaginary parts.
-
-        Notes
-        -----
-        Defines the output form for complex variables.  Used only with harmonic
-        analyses (ANTYPE,HARMIC).
-
-        All results data are stored in the form of real and imaginary
-        components and converted to amplitude and/or phase angle as specified
-        via the PRCPLX command. The conversion is not  valid for derived
-        results (such as principal stress/strain, equivalent stress/strain and
-        USUM).
-        """
-        command = "PRCPLX,%s" % (str(key))
-        return self.run(command, **kwargs)
-
     def demorph(self, elem="", dimn="", rmshky="", **kwargs):
         """APDL Command: DEMORPH
 
@@ -12406,45 +11937,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GRTYP,%s" % (str(kaxis))
         return self.run(command, **kwargs)
 
-    def large(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-              factc="", **kwargs):
-        """APDL Command: LARGE
-
-        Finds the largest (the envelope) of three variables.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia, ib, ic
-            Reference numbers of the three variables to be operated on.  If
-            only two, leave IC blank.  If only one, leave IB blank also.
-
-        name
-            Thirty-two character name for identifying the variable on the
-            printout and displays.  Embedded blanks are compressed upon output.
-
-        facta, factb, factc
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (default to 1.0).
-
-        Notes
-        -----
-        Creates a new variable by finding the largest of up to three variables
-        according to the operation:
-
-        IR = Largest of (FACTA x IA, FACTB x IB, FACTC x IC)
-
-        The comparison is done at each time location, so that the new variable
-        is the "envelope" of the three existing variables.
-        """
-        command = f"LARGE,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
-        return self.run(command, **kwargs)
-
+    
     def sscale(self, wn="", smult="", **kwargs):
         """APDL Command: /SSCALE
 
@@ -16559,58 +16052,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "VFSM,%s,%s,%s,%s,%s" % (str(action), str(encl), str(opt), str(maxiter), str(conv))
         return self.run(command, **kwargs)
 
-    def cvar(self, ir="", ia="", ib="", itype="", datum="", name="", **kwargs):
-        """APDL Command: CVAR
-
-        Computes covariance between two quantities.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previous
-            variable, the previous variable will be overwritten with this
-            result.
-
-        ia, ib
-            Reference numbers of the two variables to be operated on.  If only
-            one, leave IB blank.
-
-        itype
-            Defines the type of response PSD to be calculated:
-
-            0,1 - Displacement (default).
-
-            2 - Velocity.
-
-            3 - Acceleration.
-
-        datum
-            Defines the reference with respect to which covariance is to be
-            calculated:
-
-            1 - Absolute value.
-
-            2 - Relative to base (default).
-
-        name
-            Thirty-two character name for identifying the variable on listings
-            and displays.  Embedded blanks are compressed upon output.
-
-        Notes
-        -----
-        This command computes the covariance value for the variables referenced
-        by the reference numbers IA and IB.  If DATUM = 2, the variable
-        referenced by IR will contain the individual modal contributions (i.e.,
-        the dynamic or relative values).  If DATUM = 1, the variable referenced
-        by IR will contain the modal contributions followed by the
-        contributions of pseudo-static and covariance between dynamic and
-        pseudo-static responses. File.PSD must be available for the
-        calculations to occur.
-        """
-        command = "CVAR,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(itype), str(datum), str(name))
-        return self.run(command, **kwargs)
-
+    
     def ancyc(self, numframes="", kcycl="", delay="", **kwargs):
         """APDL Command: ANCYC
 
@@ -17115,40 +16557,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def deriv(self, ir="", iy="", ix="", name="", facta="", **kwargs):
-        """APDL Command: DERIV
-
-        Differentiates a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        iy, ix
-            Reference numbers of variables to be operated on.  IY is
-            differentiated with respect to IX.
-
-        name
-            Thirty-two character name for identifying the variable on
-            printouts and displays. Embedded blanks are compressed for
-            output.
-
-        facta
-            Scaling factor (positive or negative) applied as shown
-            below (defaults to 1.0).
-
-        Notes
-        -----
-        Differentiates variables according to the operation:
-
-        IR = FACTA x d(IY)/d(IX)
-        """
-        return self.run(f"DERIV,{ir},{iy},{ix},,{name},,,{facta}", **kwargs)
-
+    
     def edndtsd(self, vect1="", vect2="", datap="", fitpt="", vect3="",
                 vect4="", disp="", **kwargs):
         """APDL Command: EDNDTSD
@@ -18894,60 +18303,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ACCAT,%s,%s" % (str(na1), str(na2))
         return self.run(command, **kwargs)
 
-    def force(self, lab="", **kwargs):
-        """APDL Command: FORCE
-
-        Selects the element nodal force type for output.
-
-        Parameters
-        ----------
-        lab
-            Type of force to be associated with the force items:
-
-            TOTAL - Total forces (static, damping, and inertia).
-
-            STATIC - Static forces.
-
-            DAMP - Damping forces.
-
-            INERT - Inertia forces.
-
-        Notes
-        -----
-        FORCE selects the element nodal force type for output with the POST1
-        PRESOL, PLESOL, PRRFOR, NFORCE, FSUM, etc. commands, the POST26 ESOL
-        command, and reaction force plotting [/PBC].  For example, FORCE,STATIC
-        causes item F of the PRESOL command to be the static forces for the
-        elements processed. Element member forces (such as those available for
-        beams and shells and processed by Item and Sequence number) are not
-        affected by this command. The SMISC records extract the static force.
-
-        The PRRSOL command is not valid with FORCE.  Use the PRRFOR command,
-        which provides the same functionality as PRRSOL, instead.
-
-        Use the FORCE command prior to any load case operations (LCOPER) to
-        insure the correct element nodal force combinations.
-
-        In POST26, the ESOL data stored is based on the active FORCE
-        specification at the time the data is stored. To store data at various
-        specifications (for example, static and inertia forces), issue a STORE
-        command before each new specification.
-
-        The FORCE command cannot be used to extract static, damping, and
-        inertial forces for MPC184 joint elements.
-
-        To retrieve the different force types, use the *GET command with
-        Entity=ELEM and Item1=EFOR.
-
-        The FORCE command is not supported in a spectrum analysis. You can
-        specify the force type directly on the combination method commands
-        (ForceType on the PSDCOM, SRSS, CQC, etc. commands).
-
-        The FORCE command is not supported in a modal analysis.
-        """
-        command = "FORCE,%s" % (str(lab))
-        return self.run(command, **kwargs)
-
+    
     def torq2d(self, **kwargs):
         """APDL Command: TORQ2D
 
@@ -20958,49 +20314,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FCUM,%s,%s,%s" % (str(oper), str(rfact), str(ifact))
         return self.run(command, **kwargs)
 
-    def realvar(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: REALVAR
-
-        Forms a variable using only the real part of a complex variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable IA
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms a variable using only the real part of a variable.  Used only
-        with harmonic analyses (ANTYPE,HARMIC).
-
-        Complex variables are stored in two-column arrays with the
-        real component stored in the first column and the imaginary
-        component stored in the second column.  This command extracts
-        the value stored in the first column (i.e., real component).
-        However with harmonic analyses, all variables are stored in
-        two-column arrays as complex variables.  If the variable is
-        not complex, then the same value is stored in both columns.
-        This command will extract the variable in the first column of
-        the array, even if this variable is not the real component of
-        a complex variable.
-        """
-        command = f"REALVAR,{ir},{ia},,,{name},,,{facta}"
-        return self.run(command, **kwargs)
-
+    
     def cpngen(self, nset="", lab="", node1="", node2="", ninc="", **kwargs):
         """APDL Command: CPNGEN
 
@@ -21060,27 +20374,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FLIST,%s,%s,%s" % (str(node1), str(node2), str(ninc))
         return self.run(command, **kwargs)
 
-    def extrem(self, nvar1="", nvar2="", ninc="", **kwargs):
-        """APDL Command: EXTREM
-
-        Lists the extreme values for variables.
-
-        Parameters
-        ----------
-        nvar1, nvar2, ninc
-            List extremes for variables NVAR1 through NVAR2 in steps of NINC.
-            Variable range defaults to its maximum. NINC defaults to 1.
-
-        Notes
-        -----
-        Lists the extreme values (and the corresponding times) for stored and
-        calculated variables. Extremes for stored variables are automatically
-        listed as they are stored. Only the real part of a complex number is
-        used. Extreme values may also be assigned to parameters [*GET].
-        """
-        command = "EXTREM,%s,%s,%s" % (str(nvar1), str(nvar2), str(ninc))
-        return self.run(command, **kwargs)
-
+    
     def plst(self, fname="", ext="", parmplot="", mslvstep="", **kwargs):
         """APDL Command: PLST
 
@@ -21689,72 +20983,8 @@ class _MapdlCommands():  # pragma: no cover
         command = "RATE,%s" % (str(option))
         return self.run(command, **kwargs)
 
-    def print(self, **kwargs):
-        """APDL Command: PRINT
-
-        Specifies "Print settings" as the subsequent status topic.
-
-        Notes
-        -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
-
-        If entered directly into the program, the STAT command should
-        immediately follow this command.
-        """
-        command = "PRINT,"
-        return self.run(command, **kwargs)
-
-    def reset(self, **kwargs):
-        """APDL Command: RESET
-
-        Resets all POST1 or POST26 specifications to initial defaults.
-
-        Notes
-        -----
-        Has the same effect as entering the processor the first time within the
-        run.  In POST1, resets all specifications to initial defaults, erases
-        all element table items, path table data, fatigue table data, and load
-        case pointers.  In POST26, resets all specifications to initial
-        defaults, erases all variables defined, and zeroes the data storage
-        space.
-        """
-        command = "RESET,"
-        return self.run(command, **kwargs)
-
-    def conjug(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: CONJUG
-
-        Forms the complex conjugate of a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on printouts
-            and displays.  Embedded blanks are compressed for output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable (default
-            to 1.0).
-
-        Notes
-        -----
-        Used only with harmonic analyses (ANTYPE,HARMIC).
-        """        
-        return self.run(f"CONJUG,{ir},{ia},,,{name},,,{facta}", **kwargs)
-
+    
+    
     def modcont(self, mlskey="", enforcedkey="", **kwargs):
         """APDL Command: MODCONT
 
@@ -22114,25 +21344,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/AUTO,%s" % (str(wn))
         return self.run(command, **kwargs)
 
-    def plotting(self, **kwargs):
-        """APDL Command: PLOTTING
-
-        Specifies "Plotting settings" as the subsequent status topic.
-
-        Notes
-        -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
-
-        If entered directly into the program, the STAT command should
-        immediately follow this command.
-        """
-        command = "PLOTTING,"
-        return self.run(command, **kwargs)
-
+    
     def proein(self, name="", extension="", path="", proecomm="", **kwargs):
         """APDL Command: ~PROEIN
 
@@ -22287,30 +21499,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def pltime(self, tmin="", tmax="", **kwargs):
-        """APDL Command: PLTIME
-
-        Defines the time range for which data are to be displayed.
-
-        Parameters
-        ----------
-        tmin
-            Minimum time (defaults to the first point stored).
-
-        tmax
-            Maximum time (defaults to the last point stored).
-
-        Notes
-        -----
-        Defines the time (or frequency) range (within the range stored) for
-        which data are to be displayed.  Time is always displayed in the Z-axis
-        direction for 3-D graph displays.  If XVAR = 1, time is also displayed
-        in the X-axis direction and this control also sets the abscissa scale
-        range.
-        """
-        command = "PLTIME,%s,%s" % (str(tmin), str(tmax))
-        return self.run(command, **kwargs)
-
+    
     def gformat(self, ftype="", nwidth="", dsignf="", **kwargs):
         """APDL Command: /GFORMAT
 
@@ -23334,57 +22523,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CELIST,%s,%s,%s,%s" % (str(neqn1), str(neqn2), str(ninc), str(option))
         return self.run(command, **kwargs)
 
-    def layerp26(self, num="", **kwargs):
-        """APDL Command: LAYERP26
-
-        Specifies the element layer for which data are to be stored.
-
-        Parameters
-        ----------
-        num
-            Layer-processing mode:
-
-            N - The layer number to process. The default value is 1.
-
-        Notes
-        -----
-        Defines the element layer for which results data are to be stored for
-        postprocessing.  Applies to stress and strain data for layered elements
-        BEAM161, SHELL163, SHELL181, SOLID185, SOLID186, SOLSH190, SHELL208,
-        SHELL209, SHELL281, REINF265, and ELBOW290.
-
-        The SHELL command can be used (for shell elements) to specify a
-        location (TOP, MID, BOT) within the layer for selection on the ESOL
-        command. Transverse shear stresses for MID are linearly averaged from
-        TOP and BOT, and do not reflect a parabolic distribution. Setting
-        KEYOPT(8) = 2 for SHELL181, SHELL208, SHELL209, SHELL281, and ELBOW290
-        writes the mid-surface values directly to the results file and yields
-        more accurate values than linear averaging.
-
-        That this command cannot be used for energy output, as energy is a per-
-        element quantity.
-
-        When using the LAYERP26 command with SHELL181, SOLID185, SOLID186,
-        SOLSH190, SHELL208, or SHELL209, KEYOPT(8) must be set to 1 (or 2 for
-        SHELL181, SHELL208, SHELL209, SHELL281, and ELBOW290) in order to store
-        results for all layers.
-
-        For the ANSYS LS-DYNA product, this command works differently than
-        described above.  For SHELL163 and BEAM161, you must first use EDINT
-        during the solution phase to define the integration points for which
-        you want output data.  Be aware that the output location for SHELL163
-        data is always at the integration point, so "top" and "bottom" refer to
-        the top or bottom integration point, not necessarily the top or bottom
-        surface.  For more information, see the ANSYS LS-DYNA User's Guide.
-
-        In POST26, the ESOL data stored is based on the active LAYERP26
-        specification at the time the data is stored. To store data at various
-        specifications (for example, layers 2 and 5), issue a STORE command
-        before each new specification.
-        """
-        command = "LAYERP26,%s" % (str(num))
-        return self.run(command, **kwargs)
-
+    
     def layer(self, num="", **kwargs):
         """APDL Command: LAYER
 
@@ -24096,51 +23235,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CBTMP,%s" % (str(temp))
         return self.run(command, **kwargs)
 
-    def imagin(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: IMAGIN
-
-        Forms an imaginary variable from a complex variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on
-            the printout and displays.  Embedded blanks are compressed
-            upon output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable IA
-            (defaults to 1.0).
-
-        Notes
-        -----
-        This command forms a new variable from a complex variable by
-        storing the imaginary part as the real part.  The imaginary
-        part can then be used in other operations.  Used only with
-        harmonic analyses (ANTYPE,HARMIC).
-
-        Complex variables are stored in two-column arrays with the
-        real component stored in the first column and the imaginary
-        component stored in the second column.  This command extracts
-        the value stored in the second column (i.e., imaginary
-        component).  However, with harmonic analyses, all variables
-        are stored in two-column arrays as complex variables.  If the
-        variable is not complex, then the same value is stored in both
-        columns.  This command will extract the variable in the second
-        column of the array, even if this variable is not the
-        imaginary component of a complex variable.
-        """
-        return self.run(f"IMAGIN,{ir},{ia},,,{name},,,{facta}", **kwargs)
-
+    
     def ssmt(self, mt11="", mt22="", mt12="", t="", **kwargs):
         """APDL Command: SSMT
 
@@ -24732,42 +23827,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ANPRES,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(refframe))
         return self.run(command, **kwargs)
 
-    def nlog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
-        """APDL Command: NLOG
-
-        Forms the natural log of a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name identifying the variable on
-            printouts and displays.  Embedded blanks are compressed
-            for output.
-
-        facta
-            Scaling factor applied to variable IA (defaults to 1.0).
-
-        factb
-            Scaling factor (positive or negative) applied to the operation
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms the natural log of a variable according to the operation:
-
-        IR = FACTB*LN(FACTA x IA)
-        """
-        return self.run(f"NLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
-
+    
     def volumes(self, **kwargs):
         """APDL Command: VOLUMES
 
@@ -24856,50 +23916,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SEEXP,%s,%s,%s,%s" % (str(sename), str(usefil), str(imagky), str(expopt))
         return self.run(command, **kwargs)
 
-    def rforce(self, nvar="", node="", item="", comp="", name="", **kwargs):
-        """APDL Command: RFORCE
-
-        Specifies the total reaction force data to be stored.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to NV
-            [NUMVAR]). Overwrites any existing results for this variable.
-
-        node
-            Node for which data are to be stored.  If NODE = P, graphical
-            picking is enabled (valid only in the GUI).
-
-        item
-            Label identifying the item.  Valid item labels are shown in the
-            table below.  Some items also require a component label.
-
-        comp
-            Component of the item (if required).  Valid component labels are
-            shown in the table below.
-
-        name
-            Thirty-two character name identifying the item on printouts and
-            displays. Defaults to an eight character label formed by
-            concatenating the first four characters of the Item and Comp
-            labels.
-
-        Notes
-        -----
-        Defines the total reaction force data (static, damping, and inertial
-        components) to be stored from single pass (ANTYPE,STATIC or TRANS)
-        solutions or from the expansion pass of mode-superposition
-        (ANTYPE,HARMIC or TRANS) solutions.
-
-        Table: 228:: : RFORCE - Valid Item and Component Labels
-
-        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
-        labels HBOT, HE2, HE3, . . ., HTOP instead of HEAT.
-        """
-        command = "RFORCE,%s,%s,%s,%s,%s" % (str(nvar), str(node), str(item), str(comp), str(name))
-        return self.run(command, **kwargs)
-
+    
     def prorb(self, **kwargs):
         """APDL Command: PRORB
 
@@ -25218,37 +24235,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "XFENRICH,%s,%s,%s" % (str(enrichmentid), str(compname), str(matid))
         return self.run(command, **kwargs)
 
-    def plcplx(self, key="", **kwargs):
-        """APDL Command: PLCPLX
-
-        Specifies the part of a complex variable to display.
-
-        Parameters
-        ----------
-        key
-            Complex variable part:
-
-            0 - Amplitude.
-
-            1 - Phase angle.
-
-            2 - Real part.
-
-            3 - Imaginary part.
-
-        Notes
-        -----
-        Used only with harmonic analyses (ANTYPE,HARMIC).
-
-        All results data are stored in the form of real and imaginary
-        components and converted to amplitude and/or phase angle as specified
-        via the PLCPLX command. The conversion is not  valid for derived
-        results (such as principal stress/strain, equivalent stress/strain and
-        USUM).
-        """
-        command = "PLCPLX,%s" % (str(key))
-        return self.run(command, **kwargs)
-
+    
     def stabilize(self, key="", method="", value="", substpopt="",
                   forcelimit="", **kwargs):
         """APDL Command: STABILIZE
@@ -25875,38 +24862,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SPOINT,%s,%s,%s,%s" % (str(node), str(x), str(y), str(z))
         return self.run(command, **kwargs)
 
-    def quot(self, ir="", ia="", ib="", name="", facta="", factb="", **kwargs):
-        """APDL Command: QUOT
-
-        Divides two variables.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia, ib
-            Reference numbers of the two variables to be operated on.
-
-        name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        facta, factb
-            Scaling factors (positive or negative) applied to the corresponding
-            variables (default to 1.0).
-
-        Notes
-        -----
-        Divides two variables according to the operation:
-
-        IR = (FACTA x IA)/(FACTB x IB)
-        """
-        return self.run(f"QUOT,{ir},{ia},{ib},,{name},,,{facta},{factb}", **kwargs)
-
+    
     def edcgen(self, option="", cont="", targ="", fs="", fd="", dc="", vc="",
                vdc="", v1="", v2="", v3="", v4="", btime="", dtime="",
                boxid1="", boxid2="", **kwargs):
@@ -26466,58 +25422,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "WFRONT,%s,%s" % (str(kprnt), str(kcalc))
         return self.run(command, **kwargs)
 
-    def cfact(self, rfacta="", ifacta="", rfactb="", ifactb="", rfactc="",
-              ifactc="", **kwargs):
-        """APDL Command: CFACT
-
-        Defines complex scaling factors to be used with operations.
-
-        Parameters
-        ----------
-        rfacta
-            Real portion of the complex scale factor used in place of FACTA.
-
-        ifacta
-            Imaginary portion of the complex scale factor used in place of
-            FACTA.
-
-        rfactb
-            Real portion of the complex scale factor used in place of FACTB.
-
-        ifactb
-            Imaginary portion of the complex scale factor used in place of
-            FACTB.
-
-        rfactc
-            Real portion of the complex scale factor used in place of FACTC.
-
-        ifactc
-            Imaginary portion of the complex scale factor used in place of
-            FACTC.
-
-        Notes
-        -----
-        Defines complex scale factors to be used with the operations [ADD,
-        PROD, etc.].  If this command is supplied, these complex factors
-        override any real factors (FACTA, FACTB, FACTC) supplied on the
-        operation commands.  Factors are typically involved in scaling a
-        specified variable, such as in the term FACTA x IA of the ADD command
-        to scale variable IA before the ADD operation.
-
-        When the CFACT command is active, defaults are as follows: 1) if the
-        complex factor is not specified, but the variable upon which it acts
-        (such as IA) is specified, the factor defaults to 1.0+i0.0;  2) if the
-        variable upon which the factor operates is not specified, but the
-        factor is specified, the variable defaults to 1.0 so that the term in
-        the operation becomes the complex factor itself;  3) if neither the
-        factor nor the variable number is supplied, the term is omitted from
-        the operation.  Once the operation (such as the ADD command) has been
-        processed, the CFACT command becomes inactive and must be specified
-        again if it is to be used.
-        """
-        command = "CFACT,%s,%s,%s,%s,%s,%s" % (str(rfacta), str(ifacta), str(rfactb), str(ifactb), str(rfactc), str(ifactc))
-        return self.run(command, **kwargs)
-
+    
     def swdel(self, ecomp="", **kwargs):
         """APDL Command: SWDEL
 
@@ -27926,55 +26831,6 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def store(self, lab="", npts="", **kwargs):
-        """APDL Command: STORE
-
-        Stores data in the database for the defined variables.
-
-        Parameters
-        ----------
-        lab
-            Valid labels:
-
-            MERGE - Merge data from results file for the time points in memory with the existing
-                    data using current specifications (default).
-
-            NEW - Store a new set of data, replacing any previously stored data with current
-                  result file specifications and deleting any previously-
-                  calculated (OPER) variables. Variables defined using the
-                  ANSOL command are also deleted.
-
-            APPEN - Append data from results file to the existing data.
-
-            ALLOC - Allocate (and zero) space for NPTS data points.
-
-            PSD - Create a new set of frequency points for PSD calculations (replacing any
-                  previously stored data and erasing any previously calculated
-                  data).
-
-        npts
-            The number of time points (or frequency points) for storage (used
-            only with Lab = ALLOC or PSD).  The value may be input when using
-            POST26 with data supplied from other than a results file.  This
-            value is automatically determined from the results file data with
-            the NEW, APPEN, and MERGE options.  For the PSD option, NPTS
-            determines the resolution of the frequency vector (valid numbers
-            are between 1 and 10, defaults to 5).
-
-        Notes
-        -----
-        This command stores data from the results file in the database for the
-        defined variables [NSOL, ESOL, SOLU, JSOL] per specification [FORCE,
-        LAYERP26, SHELL].  See the Basic Analysis Guide for more information.
-
-        The STORE,PSD command will create a new frequency vector (variable 1)
-        for response PSD calculations [RPSD].  This command should first be
-        issued before defining variables [NSOL, ESOL, RFORCE] for which
-        response PSD's are to be calculated.
-        """
-        command = "STORE,%s,%s" % (str(lab), str(npts))
-        return self.run(command, **kwargs)
-
     
     def prcint(self, id_="", node="", dtype="", **kwargs):
         """APDL Command: PRCINT
@@ -29817,42 +28673,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CE,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(neqn), str(const), str(node1), str(lab1), str(c1), str(node2), str(lab2), str(c2), str(node3), str(lab3), str(c3))
         return self.run(command, **kwargs)
 
-    def filldata(self, ir="", lstrt="", lstop="", linc="", value="", dval="",
-                 **kwargs):
-        """APDL Command: FILLDATA
-
-        Fills a variable by a ramp function.
-
-        Parameters
-        ----------
-        ir
-            Define data table as variable IR (2 to NV [NUMVAR]).
-
-        lstrt
-            Start at location LSTRT (defaults to 1).
-
-        lstop
-            Stop at location LSTOP (defaults to maximum location as determined
-            from data previously stored.
-
-        linc
-            Fill every LINC location between LSTRT and LSTOP (defaults to 1).
-
-        value
-            Value assigned to location LSTRT.
-
-        dval
-            Increment value of previous filled location by DVAL and assign sum
-            to next location to be filled (may be positive or negative.)
-
-        Notes
-        -----
-        Locations may be filled continuously or at regular intervals (LINC).
-        Previously defined data at a location will be overwritten.
-        """
-        command = "FILLDATA,%s,%s,%s,%s,%s,%s" % (str(ir), str(lstrt), str(lstop), str(linc), str(value), str(dval))
-        return self.run(command, **kwargs)
-
+    
     def rbe3(self, master="", dof="", slaves="", wtfact="", **kwargs):
         """APDL Command: RBE3
 
@@ -30363,23 +29184,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "FKDELE,%s,%s" % (str(kpoi), str(lab))
         return self.run(command, **kwargs)
 
-    def varnam(self, ir="", name="", **kwargs):
-        """APDL Command: VARNAM
-
-        Names (or renames) a variable.
-
-        Parameters
-        ----------
-        ir
-            Reference number of the variable (2 to NV [NUMVAR]).
-
-        name
-            Thirty-two character name for identifying variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-        """
-        command = "VARNAM,%s,%s" % (str(ir), str(name))
-        return self.run(command, **kwargs)
-
+    
     def antype(self, antype="", status="", ldstep="", substep="", action="",
                **kwargs):
         """APDL Command: ANTYPE
@@ -31495,53 +30300,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "LCSEL,%s,%s,%s,%s" % (str(type_), str(lcmin), str(lcmax), str(lcinc))
         return self.run(command, **kwargs)
 
-    def shell(self, loc="", **kwargs):
-        """APDL Command: SHELL
-
-        Selects a shell element or shell layer location for results output.
-
-        Parameters
-        ----------
-        loc
-            Location within shell element (or layer) to obtain stress results:
-
-            TOP - Top of shell element (or layer) (default).
-
-            MID - Middle of shell element (or layer). The default method averages the TOP and BOT
-                  values to obtain a mid value. Setting KEYOPT(8) = 2 for
-                  SHELL181, SHELL208, SHELL209, and ELBOW290 uses MID results
-                  obtained directly from the results file.
-
-            BOT - Bottom of shell element (or layer).
-
-        Notes
-        -----
-        Selects the location within a shell element (or a shell layer) for
-        results output (nodal stresses, strains, etc.).  Applies to POST1
-        selects, sorts, and output [NSEL, NSORT, PRNSOL, PLNSOL, PRPATH,
-        PLPATH, etc.], and is used for storage with the POST26 ESOL command.
-        For example, SHELL,TOP causes item S of the POST1 PRNSOL command or the
-        POST26 ESOL command to be the stresses at the top of the shell
-        elements.  For layered shell elements, use the LAYER (POST1) or
-        LAYERP26 (POST26) command to select the layer. The SHELL command does
-        not apply to the layered thermal shell elements, SHELL131 and SHELL132.
-
-        For PowerGraphics [/GRAPHICS,POWER], the SHELL,MID command affects both
-        the printed output and the displayed results, while the SHELL (TOP or
-        BOT) command prints and displays both the top and bottom layers
-        simultaneously. Note that /CYCEXPAND,ON automatically turns on
-        PowerGraphics; however, for cyclic mode-superposition harmonic
-        postprocessing (CYCFILES), the SHELL command prints and displays only
-        the requested layer.
-
-        In POST26, the ESOL data stored is based on the active SHELL
-        specification at the time the data is stored. To store data at various
-        specifications (for example, stresses at the top and bottom locations),
-        issue a STORE command before each new specification.
-        """
-        command = "SHELL,%s" % (str(loc))
-        return self.run(command, **kwargs)
-
     
     def slashstatus(self, lab="", **kwargs):
         """APDL Command: /STATUS
@@ -32267,34 +31025,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDFPLOT,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def gapf(self, nvar="", num="", name="", **kwargs):
-        """APDL Command: GAPF
-
-        Defines the gap force data to be stored in a variable.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to NV
-            [NUMVAR]).  Overwrites any existing results for this variable.
-
-        num
-            Number identifying gap number for which the gap force is to be
-            stored.  Issue the GPLIST command to display gap numbers.
-
-        name
-            Thirty-two character name for identifying the item on the printout
-            and displays (defaults to the name GAPF).
-
-        Notes
-        -----
-        Defines the gap force data to be stored in a variable. Applicable only
-        to the expansion pass of the mode-superposition linear transient
-        dynamic (ANTYPE,TRANS) analysis. The data is usually on Fname.RDSP.
-        """
-        command = "GAPF,%s,%s,%s" % (str(nvar), str(num), str(name))
-        return self.run(command, **kwargs)
-
+    
     def mfwrite(self, fname="", ext="", **kwargs):
         """APDL Command: MFWRITE
 
@@ -32442,30 +31173,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "RSPRNT,%s,%s,%s" % (str(rslab), str(yname), str(xout))
         return self.run(command, **kwargs)
 
-    def file(self, fname="", ext="", **kwargs):
-        """APDL Command: FILE
-
-        Specifies the data file where results are to be found.
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Specifies the ANSYS data file where the results are to be found for
-        postprocessing.
-        """
-        command = "FILE,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def bfelist(self, elem="", lab="", **kwargs):
         """APDL Command: BFELIST
 
@@ -32606,54 +31314,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "REORDER,"
         return self.run(command, **kwargs)
 
-    def rgb(self, kywrd="", pred="", pgrn="", pblu="", n1="", n2="", ninc="",
-            ncntr="", **kwargs):
-        """APDL Command: /RGB
-
-        Specifies the RGB color values for indices and contours.
-
-        Parameters
-        ----------
-        kywrd
-            Determines how RGB modifications will be applied.
-
-            INDEX - Specifies that subsequent color values apply to ANSYS color indices (0-15).
-
-            CNTR - Specifies that subsequent color values apply to contours (1-128).  Applies to
-                   C-option devices only (i.e. X11C or Win32C).
-
-        pred
-            Intensity of the color red, expressed as a percentage.
-
-        pgrn
-            Intensity of the color green, expressed as a percentage.
-
-        pblu
-            Intensity of the color blue, expressed as a percentage.
-
-        n1
-            First index (0-15), or contour (1-128) to which the designated RGB
-            values apply.
-
-        n2
-            Final index (0-15), or contour (1-128) to which the designated RGB
-            values apply.
-
-        ninc
-            The step increment between the values N1 and N2 determining which
-            contours or indices will be controlled by the specified RGB values.
-
-        ncntr
-            The new maximum number of contours (1-128).
-
-        Notes
-        -----
-        Issuing the /CMAP command (with no filename) will restore the default
-        color settings.
-        """
-        command = "/RGB,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kywrd), str(pred), str(pgrn), str(pblu), str(n1), str(n2), str(ninc), str(ncntr))
-        return self.run(command, **kwargs)
-
+    
     def cmrotate(self, cm_name="", rotatx="", rotaty="", rotatz="", x1="",
                  y1="", z1="", x2="", y2="", z2="", **kwargs):
         """APDL Command: CMROTATE
@@ -33297,28 +31958,7 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run(f"PDPROB,{rlab},{name},{relation},{limit},,{conf}", **kwargs)
 
-    def numvar(self, nv="", **kwargs):
-        """APDL Command: NUMVAR
-
-        Specifies the number of variables allowed in POST26.
-
-        Parameters
-        ----------
-        nv
-            Allow storage for NV variables.  200 maximum are allowed.  Defaults
-            to 10 (except for an explicit dynamics analysis, which defaults to
-            30).  TIME (variable 1) should also be included in this number.
-
-        Notes
-        -----
-        Specifies the number of variables allowed for data read from the
-        results file and for data resulting from an operation (if any).  For
-        efficiency, NV should not be larger than necessary.  NV cannot be
-        changed after data storage begins.
-        """
-        command = "NUMVAR,%s" % (str(nv))
-        return self.run(command, **kwargs)
-
+    
     def pdsens(self, rlab="", name="", chart="", type_="", slevel="", **kwargs):
         """APDL Command: PDSENS
 
@@ -33897,61 +32537,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "KREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(np1), str(np2), str(ninc), str(level), str(depth), str(post), str(retain))
         return self.run(command, **kwargs)
 
-    def sqrt(self, ir="", ia="", name="", facta="", **kwargs):
-        """APDL Command: SQRT
-
-        Forms the square root of a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name identifying the variable on printouts and
-            displays.  Embedded blanks are compressed for output.
-
-        facta
-            Scaling factor (positive or negative) applied to variable IA
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms the square root of a variable according to the operation:
-        ``IR=sqrt(FACTA*IA)``
-        """
-        return self.run(f"SQRT,{ir},{ia},,,{name},,,{facta}", **kwargs)
-
-    def vardel(self, nvar="", **kwargs):
-        """APDL Command: VARDEL
-
-        Deletes a variable (GUI).
-
-        Parameters
-        ----------
-        nvar
-            The reference number of the variable to be deleted.  NVAR is as
-            defined by NSOL, ESOL, etc.
-
-        Notes
-        -----
-        Deletes a POST26 solution results variable.  This is a command
-        generated by the Graphical User Interface (GUI).  It will appear in the
-        log file (Jobname.LOG) if a POST26 variable is deleted from the
-        "Defined Time-History Variables" dialog box.  This command is not
-        intended to be typed in directly in an ANSYS session (although it can
-        be included in an input file for batch input or for use with the /INPUT
-        command).
-        """
-        command = "VARDEL,%s" % (str(nvar))
-        return self.run(command, **kwargs)
-
+    
     def rdec(self, option ="", reduc ="", nplace ="", **kwargs):
         """APDL Command: RDEC
 
@@ -35123,31 +33709,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "VADD,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nv1), str(nv2), str(nv3), str(nv4), str(nv5), str(nv6), str(nv7), str(nv8), str(nv9))
         return self.run(command, **kwargs)
 
-    def tvar(self, key="", **kwargs):
-        """APDL Command: TVAR
-
-        Changes time to the cumulative iteration number.
-
-        Parameters
-        ----------
-        key
-            Time key:
-
-            0 - Time is used for the variable TIME.
-
-            1 - NCUMIT is used for the variable TIME.
-
-        Notes
-        -----
-        Changes the meaning of the time variable to the cumulative iteration
-        number (NCUMIT) variable.  Data can be read from the file, printed, and
-        displayed as a function of NCUMIT rather than time.  All POST26
-        descriptions applying to TIME then apply to NCUMIT.
-        """
-        command = "TVAR,%s" % (str(key))
-        return self.run(command, **kwargs)
-
-    
     
     def sfdele(self, nlist="", lab="", **kwargs):
         """APDL Command: SFDELE
@@ -37396,33 +35957,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/GRID,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def timerange(self, tmin="", tmax="", **kwargs):
-        """APDL Command: TIMERANGE
-
-        Specifies the time range for which data are to be stored.
-
-        Parameters
-        ----------
-        tmin
-            Minimum time (defaults to first time (or frequency) point on the
-            file).
-
-        tmax
-            Maximum time (defaults to last time (or frequency) point on the
-            file).
-
-        Notes
-        -----
-        Defines the time (or frequency) range for which data are to be read
-        from the file and stored in memory.  Use the NSTORE command to define
-        the time increment.
-
-        Use PRTIME or PLTIME to specify the time (frequency) range for cyclic
-        mode-superposition harmonic analyses.
-        """
-        command = "TIMERANGE,%s,%s" % (str(tmin), str(tmax))
-        return self.run(command, **kwargs)
-
+    
     def seltol(self, toler="", **kwargs):
         """APDL Command: SELTOL
 
@@ -39471,27 +38006,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/LARC,%s,%s,%s,%s,%s" % (str(xcentr), str(ycentr), str(xlrad), str(angle1), str(angle2))
         return self.run(command, **kwargs)
 
-    def prtime(self, tmin="", tmax="", **kwargs):
-        """APDL Command: PRTIME
-
-        Defines the time range for which data are to be listed.
-
-        Parameters
-        ----------
-        tmin
-            Minimum time (defaults to the first point stored).
-
-        tmax
-            Maximum time (defaults to the last point stored).
-
-        Notes
-        -----
-        Defines the time (or frequency) range (within the range stored) for
-        which data are to be listed.
-        """
-        command = "PRTIME,%s,%s" % (str(tmin), str(tmax))
-        return self.run(command, **kwargs)
-
+    
     def frqscl(self, scaling ="", **kwargs):
         """APDL Command: FRQSCL
 
@@ -39662,29 +38177,6 @@ class _MapdlCommands():  # pragma: no cover
         commands are applied to avoid any "ungluing" of geometry.
         """
         command = "LGLUE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nl1), str(nl2), str(nl3), str(nl4), str(nl5), str(nl6), str(nl7), str(nl8), str(nl9))
-        return self.run(command, **kwargs)
-
-    def prvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
-              **kwargs):
-        """APDL Command: PRVAR
-
-        Lists variables vs. time (or frequency).
-
-        Parameters
-        ----------
-        nvar1, nvar2, nvar3, . . . , nvar6
-            Variables to be displayed, defined either by the reference number
-            or a unique thirty-two character name. If duplicate names are used
-            the command will print the data for the lowest-numbered variable
-            with that name.
-
-        Notes
-        -----
-        Lists variables vs. time (or frequency).  Up to six variables may be
-        listed across the line. Time column output format can be changed using
-        the /FORMAT command arguments Ftype, NWIDTH, and DSIGNF.
-        """
-        command = "PRVAR,%s,%s,%s,%s,%s,%s" % (str(nvar1), str(nvar2), str(nvar3), str(nvar4), str(nvar5), str(nvar6))
         return self.run(command, **kwargs)
 
     
@@ -39994,19 +38486,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MFEXTER,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fnumb1), str(fnumb2), str(fnumb3), str(fnumb4), str(fnumb5), str(fnumb6), str(fnumb7), str(fnumb8), str(fnumb9), str(fnumb10), str(fnumb11), str(fnumb12), str(fnumb13), str(fnumb14), str(fnumb15), str(fnumb16), str(fnumb17), str(fnumb18), str(fnumb19), str(fnumb20))
         return self.run(command, **kwargs)
 
-    def enersol(self, nvar="", item="", name="", **kwargs):
-        """APDL Command: ENERSOL
-
-        Specifies the total energies to be stored.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to NV).
-        """
-        command = "ENERSOL,%s,%s,%s" % (str(nvar), str(item), str(name))
-        return self.run(command, **kwargs)
-
+    
     def dvmorph(self, volu="", xarea="", rmshky="", **kwargs):
         """APDL Command: DVMORPH
 
@@ -40135,68 +38615,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DA,%s,%s,%s,%s" % (str(area), str(lab), str(value1), str(value2))
         return self.run(command, **kwargs)
 
-    def rpsd(self, ir="", ia="", ib="", itype="", datum="", name="", signif="",
-             **kwargs):
-        """APDL Command: RPSD
-
-        Calculates response power spectral density (PSD).
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previous
-            variable, the previous variable will be overwritten with this
-            result.
-
-        ia, ib
-            Reference numbers of the two variables to be operated on.  If only
-            one, leave IB blank.
-
-        itype
-            Defines the type of response PSD to be calculated:
-
-            0,1 - Displacement (default).
-
-            2 - Velocity.
-
-            3 - Acceleration.
-
-        datum
-            Defines the reference with respect to which response PSD is to be
-            calculated:
-
-            1 - Absolute value.
-
-            2 - Relative to base (default).
-
-        name
-            Thirty-two character name identifying variable on listings and
-            displays.  Embedded blanks are compressed for output.
-
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold. The significance level is defined as the modal
-            covariance matrix term divided by the maximum of all the modal
-            covariance matrix terms. Any term whose significance level is less
-            than SIGNIF is considered insignificant and does not contribute to
-            the response. All modes are taken into account by default (SIGNIF =
-            0.0).
-
-        Notes
-        -----
-        This command calculates response power spectral density (PSD) for the
-        variables referenced by the reference numbers IA and IB.  The variable
-        referred by IR will contain the response PSD.  You must issue the
-        STORE,PSD command first; File.PSD must be available for the
-        calculations to occur.
-
-        See POST26 - Response Power Spectral Density in the Mechanical APDL
-        Theory Reference for more information on these equations.
-        """
-        command = "RPSD,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(ia), str(ib), str(itype), str(datum), str(name), str(signif))
-        return self.run(command, **kwargs)
-
+    
     def starvplot(self, parx="", pary="", y2="", y3="", y4="", y5="", y6="",
                   y7="", y8="", **kwargs):
         """APDL Command: *VPLOT
@@ -41458,59 +39877,6 @@ class _MapdlCommands():  # pragma: no cover
         command = "DESOL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(elem), str(node), str(item), str(comp), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6))
         return self.run(command, **kwargs)
 
-    def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="",
-             **kwargs):
-        """APDL Command: DATA
-
-        Reads data records from a file into a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]).  If this number is the same as for a previously
-            defined variable, the previously defined variable will be
-            overwritten with this result.
-
-        lstrt
-            Start at location LSTRT (defaults to 1).
-
-        lstop
-            Stop at location LSTOP (defaults to LSTRT).  Maximum location
-            available is determined from data previously stored.
-
-        linc
-            Fill every LINC location between LSTRT and LSTOP (defaults to 1).
-
-        name
-            Eight character name for identifying the variable on the printout
-            and displays.  Embedded blanks are compressed upon output.
-
-        kcplx
-            Complex number key:
-
-            0 - Data stored as the real part of the complex number.
-
-            1 - Data stored as the imaginary part of the complex number.
-
-        Notes
-        -----
-        This command must be followed by a format statement (on the next line)
-        and the subsequent data records, and all must be on the same file (that
-        may then be read with the /INPUT command).  The format specifies the
-        number of fields to be read per record, the field width, and the
-        placement of the decimal point (if one is not included in the data
-        value).  The read operation follows the available FORTRAN FORMAT
-        conventions of the system.  See the system FORTRAN manual for details.
-        Any standard FORTRAN real format (such as (4F6.0), (F2.0,2X,F12.0),
-        etc.) may be used.  Integer (I), character (A), and list-directed (*)
-        descriptors may not be used.  The parentheses must be included in the
-        format.  Up to 80 columns per record may be read.  Locations may be
-        filled within a range.  Previous data in the range will be overwritten.
-        """
-        command = "DATA,%s,%s,%s,%s,%s,%s" % (str(ir), str(lstrt), str(lstop), str(linc), str(name), str(kcplx))
-        return self.run(command, **kwargs)
-
     
     def presol(self, item="", comp="", **kwargs):
         """APDL Command: PRESOL
@@ -41983,51 +40349,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "KPSCALE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(np1), str(np2), str(ninc), str(rx), str(ry), str(rz), str(kinc), str(noelem), str(imove))
         return self.run(command, **kwargs)
 
-    def rcyc(self, ir="", ia="", sector="", name="", **kwargs):
-        """APDL Command: RCYC
-
-        Calculates cyclic results for a mode-superposition harmonic solution.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting variable (2 to
-            NV [NUMVAR]). If this number is the same as for a previous
-            variable, the previous variable will be overwritten with this
-            result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        sector
-            Sector number to calculate the results for.
-
-        name
-            Thirty-two character name identifying the variable on listings and
-            displays. Embedded blanks are compressed for output.
-
-        Notes
-        -----
-        This command calculates the harmonic response in the sector specified
-        by SECTOR for the variable referenced by the reference number IA. Only
-        component values for IA are valid (no principles or sums). The variable
-        specified by IR will contain the harmonic solution. Jobname.RFRQ from
-        the cyclic mode-superposition harmonic solve and Jobname.RST or
-        Jobname.RSTP from the cyclic modal solve must be available for the
-        calculations to occur. The Jobname must be the same for the cyclic
-        modal solve and the cyclic mode-superposition harmonic solve.
-
-        For SECTOR > 1, the result is in the nodal coordinate system of the
-        base sector, and it is rotated to the expanded sector’s location. Refer
-        to Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide
-        for more information.
-
-        See also Mode-Superposition Harmonic Cyclic Symmetry Analysis in the
-        Cyclic Symmetry Analysis Guide.
-        """
-        command = "RCYC,%s,%s,%s,%s" % (str(ir), str(ia), str(sector), str(name))
-        return self.run(command, **kwargs)
-
+    
     def pcalc(self, oper="", labr="", lab1="", lab2="", fact1="", fact2="",
               const="", **kwargs):
         """APDL Command: PCALC
@@ -42292,44 +40614,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EXPAND,%s,%s,%s,%s,%s" % (str(nrepeat), str(hindex), str(icsys), str(sctang), str(phase))
         return self.run(command, **kwargs)
 
-    def prod(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-             factc="", **kwargs):
-        """APDL Command: PROD
-
-        Multiplies variables.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia, ib, ic
-            Reference numbers of the three variables to be operated
-            on.  If only two leave IC blank.  If only one, leave IB
-            blank also.
-
-        name
-            Thirty-two character name identifying the variable on
-            printouts and displays.  Embedded blanks are compressed
-            for output.
-
-        facta, factb, factc
-            Scaling factors (positive or negative) applied to the
-            corresponding variables (default to 1.0).
-
-        Notes
-        -----
-        Multiplies variables (up to three at once) according to the
-        operation:
-
-        ``IR = (FACTA x IA) x (FACTB x IB) x (FACTC x IC)``
-        """
-        return self.run(f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}",
-                        **kwargs)
-
+    
     def sectype(self, secid="", type_="", subtype="", name="", refinekey="",
                 **kwargs):
         """APDL Command: SECTYPE
@@ -45025,43 +43310,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "SLOAD,%s,%s,%s,%s,%s,%s,%s" % (str(secid), str(plnlab), str(kinit), str(kfd), str(fdvalue), str(lsload), str(lslock))
         return self.run(command, **kwargs)
 
-    def small(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-              factc="", **kwargs):
-        """APDL Command: SMALL
-
-        Finds the smallest of three variables.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia, ib, ic
-            Reference numbers of the three variables to be operated
-            on.  If only two, leave IC blank.  If only one, leave IB
-            blank also.
-
-        name
-            Thirty-two character name identifying the variable on
-            printouts and displays.  Embedded blanks are compressed
-            for output.
-
-        facta, factb, factc
-            Scaling factors (positive or negative) applied to the
-            corresponding variables (defaults to 1.0).
-
-        Notes
-        -----
-        Finds the smallest of three variables according to the operation:
-
-        ``IR = min(FACTA x IA, FACTB x IB, FACTC x IC)``
-        """
-        command = f"SMALL,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
-        return self.run(command, **kwargs)
-
+    
     def fp(self, stitm="", c1="", c2="", c3="", c4="", c5="", c6="", **kwargs):
         """APDL Command: FP
 
@@ -46497,62 +44746,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "VSBW,%s,%s,%s" % (str(nv), str(sepo), str(keep))
         return self.run(command, **kwargs)
 
-    def nsol(self, nvar="", node="", item="", comp="", name="", sector="",
-             **kwargs):
-        """APDL Command: NSOL
-
-        Specifies nodal data to be stored from the results file.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number or name assigned to this variable.
-            Variable numbers can be 2 to NV (NUMVAR) while the name can be an
-            eight byte character string. Overwrites any existing results for
-            this variable.
-
-        node
-            Node for which data are to be stored.
-
-        item
-            Label identifying the item.  Valid item labels are shown in the
-            table below.  Some items also require a component label.
-
-        comp
-            Component of the item (if required).  Valid component labels are
-            shown in the table below.
-
-        name
-            Thirty-two character name identifying the item on printouts and
-            displays.  Defaults to a label formed by concatenating the first
-            four characters of the Item and Comp labels.
-
-        sector
-            For a full harmonic cyclic symmetry solution, the sector number for
-            which the results from NODE are to be stored.
-
-        Notes
-        -----
-        Stores nodal degree of freedom and solution results in a variable. For
-        more information, see Data Interpreted in the Nodal Coordinate System
-        in the Modeling and Meshing Guide.
-
-        For SECTOR>1, the result is in the nodal coordinate system of the base
-        sector, and it is rotated to the expanded sector’s location. Refer to
-        Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide for
-        more information.
-
-        Table: 211:: : NSOL - Valid Item and Component Labels
-
-        Table: 212:: : NSOL - Valid Item and Component Labels for ANSYS LS-DYNA
-        Nodal Results
-
-         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
-        labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
-        """
-        command = "NSOL,%s,%s,%s,%s,%s,%s" % (str(nvar), str(node), str(item), str(comp), str(name), str(sector))
-        return self.run(command, **kwargs)
-
+    
     def spdamp(self, tblno="", curvno="", dampratio ="", **kwargs):
         """APDL Command: SPDAMP
 
@@ -46843,103 +45037,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MOVE,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(node), str(kc1), str(x1), str(y1), str(z1), str(kc2), str(x2), str(y2), str(z2))
         return self.run(command, **kwargs)
 
-    def ansol(self, nvar="", node="", item="", comp="", name="", mat="",
-              real="", ename="", **kwargs):
-        """APDL Command: ANSOL
-
-        Specifies averaged nodal data to be stored from the results file in the
-        solution coordinate system.
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to NV
-            [NUMVAR]). Overwrites any existing results for this variable.
-
-        node
-            Node number for which data are to be stored.
-
-        item
-            Label identifying the item. General item labels are shown in
-            Table 126: ANSOL - General Item and Component Labels below. Some
-            items also require a component label.
-
-        comp
-            Component of the item (if required). General component labels are
-            shown in Table 126: ANSOL - General Item and Component Labels
-            below.
-
-        name
-            Thirty-two character name for identifying the item on the printout
-            and displays. Defaults to an eight character label formed by
-            concatenating the first four characters of the Item and Comp
-            labels.
-
-        mat
-            The material number. Average will be computed based on the subset
-            of elements with the specified material number. DEFAULT: Use all
-            elements in the active set unless Real and/or Ename is specified.
-
-        real
-            The real number. Average will be computed based on the subset of
-            elements with the specified real number. DEFAULT: Use all elements
-            in the active set unless Mat and/or Ename is specified.
-
-        ename
-            The element type name. Average will be computed based on the subset
-            of elements with the specified element type name. DEFAULT: Use all
-            elements in the active set unless Mat and/or Real is specified.
-
-        Notes
-        -----
-        Valid item and component labels for averaged nodal results are listed
-        in Table: 126:: ANSOL - General Item and Component Labels, below.
-
-        All element nodal quantities are obtained in RSYS, Solu and then
-        averaged.
-
-        The ANSOL command defines averaged nodal results data to be stored from
-        a results file [FILE]. Not all items are valid for all nodes. See the
-        input and output summary tables of the Element Reference of each
-        element that is attached to the node for the available items.
-
-        COORDINATE SYSTEMS: All element nodal results used by ANSOL for
-        averaging are in the element coordinate system, except for layered
-        elements. Layered element results are in the layer coordinate system.
-        You can further specify the element nodal results, for some elements,
-        with the SHELL, LAYERP26, and FORCE commands.
-
-        ANSOL does not transform results from RSYS, SOLU to other coordinate
-        systems. Verify that all elements attached to the subject node have the
-        same coordinate system before using ANSOL.
-
-        SHELL ELEMENTS: The default shell element coordinate system is based on
-        node ordering. For shell elements the adjacent elements could have a
-        different RSYS,SOLU, making the resultant averaged data inconsistent. A
-        note to this effect is issued when ANSOL is used in models containing
-        shell elements. Ensure that consistent coordinate systems are active
-        for all associated elements used by the ANSOL command.
-
-        DERIVED QUANTITIES: Some of the result items supported by ANSOL (see
-        Table: 126:: ANSOL - General Item and Component Labels) are derived
-        from the component quantities. Use AVPRIN to specify the principal and
-        vector sum quantity averaging methods.
-
-        DEFAULT: If Mat, Real , and Ename are not specified, all of the
-        elements attached to the node will be considered. When a material ID,
-        real constant ID, or element type discontinuity is detected at a node,
-        a note is issued. For example, in a FSI analysis, a FLUID30 element at
-        the structure interface would be considered. But since it contains no
-        SX result, it will not be used during STORE operations.
-
-        Table: 126:: : ANSOL - General Item and Component Labels
-
-        For more information on the meaning of contact status and its possible
-        values, see Reviewing Results in POST1 in the Contact Technology Guide.
-        """
-        command = "ANSOL,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nvar), str(node), str(item), str(comp), str(name), str(mat), str(real), str(ename))
-        return self.run(command, **kwargs)
-
+    
     def paput(self, parray="", popt="", **kwargs):
         """APDL Command: PAPUT
 
@@ -47559,62 +45657,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "ANTIME,%s,%s,%s,%s,%s,%s,%s" % (str(nfram), str(delay), str(ncycl), str(autocntrky), str(rsltdat), str(min_), str(max_))
         return self.run(command, **kwargs)
 
-    def cisol(self, n="", id_="", node="", cont="", dtype="", **kwargs):
-        """APDL Command: CISOL
-
-        Stores fracture parameter information in a variable.
-
-        Parameters
-        ----------
-        n
-            Arbitrary reference number or name assigned to this variable.
-            Number must be >1 but </= NUMVAR.
-
-        id\_
-            Crack ID number.
-
-        node
-            Crack tip node number.
-
-        cont
-            Contour number.
-
-        dtype
-            Data type to output:
-
-            JINT - J-integral
-
-            IIN1 - Interaction integral 1
-
-            IIN2  - Interaction integral 2
-
-            IIN3 - Interaction integral 3
-
-            K1 - Mode 1 stress-intensity factor
-
-            K2 - Mode 2 stress-intensity factor
-
-            K3 - Mode 3 stress-intensity factor
-
-            G1 - Mode 1 energy release rate
-
-            G2  - Mode 2 energy release rate
-
-            G3  - Mode 3 energy release rate
-
-            GT - Total energy release rate
-
-            MFTX - Total material force X
-
-            MFTY - Total material force Y
-
-            MFTZ - Total material force Z
-
-            CEXT - Crack extension
-        """
-        command = "CISOL,%s,%s,%s,%s,%s" % (str(n), str(id_), str(node), str(cont), str(dtype))
-        return self.run(command, **kwargs)
-
+    
     def llist(self, nl1="", nl2="", ninc="", lab="", **kwargs):
         """APDL Command: LLIST
 
@@ -48479,32 +46522,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "NREFINE,%s,%s,%s,%s,%s,%s,%s" % (str(nn1), str(nn2), str(ninc), str(level), str(depth), str(post), str(retain))
         return self.run(command, **kwargs)
 
-    def xvar(self, n="", **kwargs):
-        """APDL Command: XVAR
-
-        Specifies the X variable to be displayed.
-
-        Parameters
-        ----------
-        n
-            X variable number:
-
-            0 or 1 - Display PLVAR values vs. time (or frequency).
-
-            n - Display PLVAR values vs. variable n (2 to NV [NUMVAR]).
-
-            1 - Interchange time and PLVAR variable numbers with time as the curve parameter.
-                PLVAR variable numbers are displayed uniformly spaced along
-                X-axis from position 1 to 10.
-
-        Notes
-        -----
-        Defines the X variable (displayed along the abscissa) against which the
-        Y variable(s) [PLVAR] are to be displayed.
-        """
-        command = "XVAR,%s" % (str(n))
-        return self.run(command, **kwargs)
-
+    
     def iclwid(self, factor="", **kwargs):
         """APDL Command: /ICLWID
 
@@ -48793,83 +46811,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"RIMPORT,{source},{type_},{loc},{lstep},{sbstep},{fname},{ext},,{spscale},{mscale}"
         return self.run(command, **kwargs)
 
-    def edread(self, nstart="", label="", num="", step1="", step2="",
-               **kwargs):
-        """APDL Command: EDREAD
-
-        Reads explicit dynamics output into variables for time-history
-        postprocessing.
-
-        Parameters
-        ----------
-        nstart
-            Starting reference number assigned to the first variable. Allowed
-            range is 2 (the default) to NV [NUMVAR].  (NV defaults to 30 for an
-            explicit dynamics analysis.)
-
-        label
-            Label identifying the output file to be read. No default.
-
-            GLSTAT - Read data from the GLSTAT file.
-
-            MATSUM - Read data from the MATSUM file.
-
-            SPCFORC - Read data from the SPCFORC file.
-
-            RCFORC - Read data from the RCFORC file.
-
-            SLEOUT - Read data from the SLEOUT file.
-
-            NODOUT - Read data from the NODOUT file.
-
-            RBDOUT - Read data from the RBDOUT file.
-
-        num
-            Number identifying the data set to be read in (defaults to 1). If
-            Label = GLSTAT, NUM is ignored. If Label = MATSUM or RBDOUT, NUM is
-            the PART number [EDPART] for which output is desired. If Label =
-            SPCFORC or NODOUT, NUM is the node number for which output is
-            desired. If Label  = SLEOUT or RCFORC, NUM is the number of the
-            contact entity for which output is desired.
-
-        step1, step2
-            Load step range of data to be read in. If STEP1 and STEP2 are
-            blank, all load steps are read in.
-
-        Notes
-        -----
-        EDREAD reads data from the specified ascii output file so that it may
-        be used during postprocessing. After EDREAD, you must issue the STORE
-        command to store the data in time history variables. Once stored, the
-        variables can be viewed as plots of output item versus time.
-
-        The number of variables stored depends on the file specified. The
-        following table shows the items in each file and the order in which
-        they are stored.  If data items were previously stored in variables
-        NSTART to NSTART+15, they will be overwritten. If more variables are
-        needed, change NV on the NUMVAR command. (Note that hourglass energy
-        will not be available if it was not specified for the model
-        [EDENERGY,1].)
-
-        The following items under MATSUM are listed in the MATSUM ASCII file
-        (in the Mat no. field) for each part number at time intervals specified
-        by the EDHTIME command. Use EDREAD,,MATSUM,NUM to specify the part
-        number that corresponds to the mat number in the MATSUM file.
-
-        Resultant contact forces and sliding interface energies are available
-        from the RCFORC and SLEOUT files, respectively. The RCFORC file is
-        written for surface based contact types that include target and contact
-        (master and slave) definitions.  You should ensure that this file
-        contains valid force results before issuing EDREAD,,RCFORC. Only the
-        resultant contact forces on the master surface are available for time-
-        history postprocessing.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "EDREAD,%s,%s,%s,%s,%s" % (str(nstart), str(label), str(num), str(step1), str(step2))
-        return self.run(command, **kwargs)
-
+    
     def nforce(self, item="", **kwargs):
         """APDL Command: NFORCE
 
@@ -49759,18 +47701,6 @@ class _MapdlCommands():  # pragma: no cover
         """
         return self.run("SELM,", **kwargs)
 
-    def spread(self, value="", **kwargs):
-        """APDL Command: SPREAD
-
-        Turns on a dashed tolerance curve for the subsequent curve plots.
-
-        Parameters
-        ----------
-        value
-            Amount of tolerance.  For example, 0.1 is ± 10%.
-        """
-        return self.run("SPREAD,%s" % (str(value)), **kwargs)
-
     
     def cgloc(self, xloc="", yloc="", zloc="", **kwargs):
         """APDL Command: CGLOC
@@ -50162,96 +48092,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MODMSH,%s" % (str(lab))
         return self.run(command, **kwargs)
 
-    def smooth(self, vect1="", vect2="", datap="", fitpt="", vect3="",
-               vect4="", disp="", **kwargs):
-        """APDL Command: SMOOTH
-
-        Allows smoothing of noisy data and provides a graphical representation
-        of the data.
-
-        Parameters
-        ----------
-        vect1
-            Name of the first vector that contains the noisy data set (i.e.,
-            independent variable). You must create and fill this vector before
-            issuing SMOOTH.
-
-        vect2
-            Name of the second vector that contains the dependent set of data.
-            Must be the same length as the first vector. You must create and
-            fill this vector before issuing SMOOTH.
-
-        datap
-            Number of data points to be fitted, starting from the beginning of
-            the vector. If left blank, the entire vector will be fitted. The
-            maximum number of data points is 100,000 (or greater, depending on
-            the memory of the computer).
-
-        fitpt
-            Order of the fitting curve that will be used as a smooth
-            representation of the data. This number should be less than or
-            equal to the number of the data points. Default (blank) is one-half
-            the number of data points. Maximum number of smoothed data fitting
-            order is the number of data points up to 50.  Depending on this
-            number, the smoothed curve will be one of the following:
-
-            1 - Curve is the absolute average of all of the data points.
-
-            2 - Curve is the least square average of all of the data points.
-
-            3 or more - Curve is a polynomial of the order (n-1), where n is the number of data fitting
-                        order points.
-
-        vect3
-            Name of the vector that contains the smoothed data of the
-            independent variable. This vector should have a length equal to or
-            greater than the number of smoothed data points. In batch (command)
-            mode, you must create this vector before issuing the SMOOTH
-            command. In interactive mode, the GUI automatically creates this
-            vector (if it does not exist). If you do not specify a vector name,
-            the GUI will name the vector smth_ind.
-
-        vect4
-            Name of the vector that contains the smoothed data of the dependent
-            variable.  This vector must be the same length as Vect3.  In batch
-            (command) mode, you must create this vector before issuing the
-            SMOOTH command. In interactive mode, the GUI automatically creates
-            this vector (if it does not exist). If you do not specify a vector
-            name, the GUI will name the vector smth_dep.
-
-        disp
-            Specifies how you want to display data. No default; you must
-            specify an option.
-
-            1 - Unsmoothed data only
-
-            2 - Smoothed data only
-
-            3 - Both smoothed and unsmoothed data
-
-        Notes
-        -----
-        You can control the attributes of the graph using standard ANSYS
-        controls (/GRID, /GTHK, /COLOR, etc.). If working interactively, these
-        controls appear in this dialog box for convenience, as well as in their
-        standard dialog boxes. You must always create Vect1 and Vect2 (using
-        *DIM) and fill these vectors before smoothing the data. If you're
-        working interactively, ANSYS automatically creates Vect3 and Vect4, but
-        if you're working in batch (command) mode, you must create Vect3 and
-        Vect4 (using *DIM) before issuing SMOOTH.  Vect3 and Vect4 are then
-        filled automatically by ANSYS.  In addition, ANSYS creates an
-        additional TABLE type array that contains the smoothed array and the
-        unsmoothed data to allow for plotting later with *VPLOT.  Column 1 in
-        this table corresponds to Vect1, column 2 to Vect2, and column 3 to
-        Vect4.  This array is named Vect3_SMOOTH, up to a limit of 32
-        characters. For example, if the array name is X1, the table name is
-        X1_SMOOTH.
-
-        This command is also valid in PREP7 and SOLUTION.
-        """
-        command = "SMOOTH,%s,%s,%s,%s,%s,%s,%s" % (str(vect1), str(vect2), str(datap), str(fitpt), str(vect3), str(vect4), str(disp))
-        return self.run(command, **kwargs)
-
+    
     def sfscale(self, lab="", fact="", fact2="", **kwargs):
         """APDL Command: SFSCALE
 
@@ -50564,23 +48405,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/PSF,%s,%s,%s,%s,%s" % (str(item), str(comp), str(key), str(kshell), str(color))
         return self.run(command, **kwargs)
 
-    def lines(self, n="", **kwargs):
-        """APDL Command: LINES
-
-        Specifies the length of a printed page.
-
-        Parameters
-        ----------
-        n
-            Number of lines per page (defaults to 20).  (Minimum allowed = 11).
-
-        Notes
-        -----
-        Specifies the length of a printed page (for use in reports, etc.).
-        """
-        command = "LINES,%s" % (str(n))
-        return self.run(command, **kwargs)
-
+    
     def amesh(self, na1="", na2="", ninc="", **kwargs):
         """APDL Command: AMESH
 
@@ -51129,25 +48954,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "COUPLE,"
         return self.run(command, **kwargs)
 
-    def operate(self, **kwargs):
-        """APDL Command: OPERATE
-
-        Specifies "Operation data" as the subsequent status topic.
-
-        Notes
-        -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
-
-        If entered directly into the program, the STAT command should
-        immediately follow this command.
-        """
-        command = "OPERATE,"
-        return self.run(command, **kwargs)
-
+    
     def upgeom(self, factor="", lstep="", sbstep="", fname="", ext="",
                **kwargs):
         """APDL Command: UPGEOM
@@ -52374,42 +50181,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MFINTER,%s" % (str(option))
         return self.run(command, **kwargs)
 
-    def exp(self, ir="", ia="", name="", facta="", factb="", **kwargs):
-        """APDL Command: EXP
-
-        Forms the exponential of a variable.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]). If this number is the same as
-            for a previously defined variable, the previously defined
-            variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on
-            the printout and displays. Embedded blanks are compressed
-            upon output.
-
-        facta
-            Scaling factor applied to variable IA (defaults to 1.0).
-
-        factb
-            Scaling factor (positive or negative) applied to the operation
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms the exponential of a variable according to the operation:
-
-        ``IR = FACTB*EXP(FACTA x IA)``
-        """
-        return self.run(f"EXP,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
-
+    
     def prerr(self, **kwargs):
         """APDL Command: PRERR
 
@@ -54452,98 +52224,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DATADEF,"
         return self.run(command, **kwargs)
 
-    def resp(self, ir="", lftab="", ldtab="", spectype="", dampratio="",
-             dtime="", tmin="", tmax="", inputtype="", **kwargs):
-        """APDL Command: RESP
-
-        Generates a response spectrum.
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the response spectrum
-            results (2 to NV [NUMVAR]).  If this number is the same as for a
-            previously defined variable, the previously defined variable will
-            be overwritten with these results.
-
-        lftab
-            Reference number of variable containing frequency table (created
-            with FILLDATA or DATA command).  The frequency table defines the
-            number and frequency of oscillating systems used to determine the
-            response spectrum. The frequency interval need not be constant over
-            the entire range. Frequencies must be input in ascending order.
-
-        ldtab
-            Reference number of variable containing the input time-history.
-
-        spectype
-            Defines the type of response spectrum to be calculated:
-
-            0 or 1 - Displacement (relative to base excitation)
-
-            2 - Velocity (relative to base excitation)
-
-            3 - Acceleration response spectrum (absolute)
-
-            4 - Pseudo-velocity
-
-            5 - Pseudo-acceleration
-
-        dampratio
-            Ratio of viscous damping to critical damping (input as a decimal
-            number).
-
-        dtime
-            Integration time step. This value should be equal to or greater
-            than the integration time step used in the initial transient
-            analysis performed to generate the input time-history (LDTAB).
-
-        tmin, tmax
-            Specifies a subset of the displacement-time history to be used in
-            the response spectrum calculation.  Defaults to the full time
-            range.
-
-        inputtype
-            Defines the type of the input time-history:
-
-            0 - Displacement (default)
-
-            1 - Acceleration
-
-        Notes
-        -----
-        This command generates a response spectrum from a displacement or
-        acceleration time-history and frequency data. The response spectrum is
-        defined as the maximum response of single degree of freedom systems of
-        varying frequency (or period) to a given input support excitation.
-
-        A response spectrum analysis (ANTYPE, SPECTR with SPOPT, SPRS or MPRS)
-        requires a response spectrum input. This input can be determined from
-        the response spectrum printout or display of this command.
-
-        If a response spectrum is to be calculated from a given displacement
-        (or acceleration) time-history, the displacement time-history may be
-        input to a single one-element reduced linear transient dynamic
-        (ANTYPE,TRANS) analysis, so that the calculated output (which should be
-        the same as the input) will be properly located on the file.
-
-        The integration time step (argument DTIME on the RESP command) and the
-        damping coefficient (argument dampRatio) are constant over the
-        frequency range. The number of calculations done per response spectrum
-        curve is the product of the number of input solution points (TMAX-
-        TMIN)/DTIME and the number of frequency points (frequencies located in
-        variable LFTAB).
-
-         Input solution points requested (using DTIME and the frequency range)
-        at a time not corresponding to an actual displacement solution time on
-        the file are linearly interpolated with respect to the existing points.
-
-        For the details of the response spectrum calculation, see POST26 -
-        Response Spectrum Generator (RESP).
-        """
-        command = "RESP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ir), str(lftab), str(ldtab), str(spectype), str(dampratio), str(dtime), str(tmin), str(tmax), str(inputtype))
-        return self.run(command, **kwargs)
-
+    
     def aplot(self, na1="", na2="", ninc="", degen="", scale="", **kwargs):
         """APDL Command: APLOT
 
@@ -54596,25 +52277,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MESHING,"
         return self.run(command, **kwargs)
 
-    def define(self, **kwargs):
-        """APDL Command: DEFINE
-
-        Specifies "Data definition settings" as the subsequent status topic.
-
-        Notes
-        -----
-        This is a status [STAT] topic command.  Status topic commands are
-        generated by the GUI and will appear in the log file (Jobname.LOG) if
-        status is requested for some items under Utility Menu> List> Status.
-        This command will be immediately followed by a STAT command, which will
-        report the status for the specified topic.
-
-        If entered directly into the program, the STAT command should
-        immediately follow this command.
-        """
-        command = "DEFINE,"
-        return self.run(command, **kwargs)
-
+    
     def dv3d(self, lab="", key="", **kwargs):
         """APDL Command: /DV3D
 
@@ -55414,105 +53077,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
         return self.run(command, **kwargs)
 
-    def esol(self, nvar: MapdlInt = "", elem: MapdlInt = "",
-             node: MapdlInt = "", item: str = "", comp: str = "",
-             name: str = "", **kwargs) -> Optional[str]:
-        """Specify element data to be stored from the results file.
-
-        /POST26 APDL Command: ESOL
-
-        Parameters
-        ----------
-        nvar
-            Arbitrary reference number assigned to this variable (2 to
-            NV [NUMVAR]). Overwrites any existing results for this
-            variable.
-
-        elem
-            Element for which data are to be stored.
-
-        node
-            Node number on this element for which data are to be
-            stored. If blank, store the average element value (except
-            for FMAG values, which are summed instead of averaged).
-
-        item
-            Label identifying the item. General item labels are shown
-            in Table 134: ESOL - General Item and Component Labels
-            below. Some items also require a component label.
-
-        comp
-            Component of the item (if required). General component
-            labels are shown in Table 134: ESOL - General Item and
-            Component Labels below.  If Comp is a sequence number (n),
-            the NODE field will be ignored.
-
-        name
-            Thirty-two character name for identifying the item on the
-            printout and displays.  Defaults to a label formed by
-            concatenating the first four characters of the Item and
-            Comp labels.
-
-        Examples
-        --------
-        Switch to the time-history postprocessor
-
-        >>> mapdl.post26()
-
-        Store the stress in the X direction for element 1 at node 1
-
-        >>> nvar = 2
-        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
-
-        Move the value to an array and access it via mapdl.parameters
-
-        >>> mapdl.dim('ARR', 'ARRAY', 1)
-        >>> mapdl.vget('ARR', nvar)
-        >>> mapdl.parameters['ARR']
-        array(-1991.40234375)
-
-        Notes
-        -----
-        See Table: 134:: ESOL - General Item and Component Labels for
-        a list of valid item and component labels for element (except
-        line element) results.
-
-        The ESOL command defines element results data to be stored
-        from a results file (FILE). Not all items are valid for all
-        elements. To see the available items for a given element,
-        refer to the input and output summary tables in the
-        documentation for that element.
-
-        Two methods of data access are available via the ESOL
-        command. You can access some simply by using a generic label
-        (component name method), while others require a label and
-        number (sequence number method).
-
-        Use the component name method to access general element data
-        (that is, element data generally available to most element
-        types or groups of element types).
-
-        The sequence number method is required for data that is not
-        averaged (such as pressures at nodes and temperatures at
-        integration points), or data that is not easily described in a
-        generic fashion (such as all derived data for structural line
-        elements and contact elements, all derived data for thermal
-        line elements, and layer data for layered elements).
-
-        Element results are in the element coordinate system, except
-        for layered elements where results are in the layer coordinate
-        system.  Element forces and moments are in the nodal
-        coordinate system. Results are obtainable for an element at a
-        specified node. Further location specifications can be made
-        for some elements via the SHELL, LAYERP26, and FORCE commands.
-
-        For more information on the meaning of contact status and its
-        possible values, see Reviewing Results in POST1 in the Contact
-        Technology Guide.
-        """
-        command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
-        return self.run(command, **kwargs)
-
+    
     def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "",
                **kwargs) -> Optional[str]:
         """Displays elements with shapes determined from the real constants or section definition.
@@ -60656,42 +58221,7 @@ class _MapdlCommands():  # pragma: no cover
 
     
     
-    def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
-        """Forms the common log of a variable
-
-        APDL Command: CLOG
-
-        Parameters
-        ----------
-        ir
-            Arbitrary reference number assigned to the resulting
-            variable (2 to NV [NUMVAR]).  If this number is the same
-            as for a previously defined variable, the previously
-            defined variable will be overwritten with this result.
-
-        ia
-            Reference number of the variable to be operated on.
-
-        name
-            Thirty-two character name for identifying the variable on
-            printouts and displays.  Embedded blanks are compressed
-            for output.
-
-        facta
-            Scaling factor applied to variable IA (defaults to 1.0).
-
-        factb
-            Scaling factor (positive or negative) applied to the operation
-            (defaults to 1.0).
-
-        Notes
-        -----
-        Forms the common log of a variable according to the operation:
-
-        IR = FACTB*LOG(FACTA x IA)
-        """
-        return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
-
+    
     def ecpchg(self, **kwargs):
         """Optimizes degree-of-freedom usage in a coupled acoustic model.
 

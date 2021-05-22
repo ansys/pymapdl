@@ -1,5 +1,5 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
-                        aux2_, aux3_, aux12_, reduced, apdl
+                        aux2_, aux3_, aux12_, reduced, apdl, post26_,
 )
 
 class Commands:
@@ -339,6 +339,74 @@ class Commands:
     starprint = apdl.matrix_op.starprint
     sort = apdl.matrix_op.sort
     vec = apdl.matrix_op.vec
+
+    # post26
+    cvar = post26_.special.cvar
+    pmgtran = post26_.special.pmgtran
+    rcyc = post26_.special.rcyc
+    resp = post26_.special.resp
+    rpsd = post26_.special.rpsd
+    smooth = post26_.special.smooth
+    ansol = post26_.setup.ansol
+    cisol = post26_.setup.cisol
+    data = post26_.setup.data
+    edread = post26_.setup.edread
+    enersol = post26_.setup.enersol
+    esol = post26_.setup.esol
+    file = post26_.setup.file
+    gapf = post26_.setup.gapf
+    gssol = post26_.setup.gssol
+    jsol = post26_.setup.jsol
+    nsol = post26_.setup.nsol
+    nstore = post26_.setup.nstore
+    numvar = post26_.setup.numvar
+    reset = post26_.setup.reset
+    rforce = post26_.setup.rforce
+    rgb = post26_.setup.rgb
+    solu = post26_.setup.solu
+    store = post26_.setup.store
+    timerange = post26_.setup.timerange
+    vardel = post26_.setup.vardel
+    varnam = post26_.setup.varnam
+    define = post26_.status.define
+    operate = post26_.status.operate
+    plotting = post26_.status.plotting
+    print = post26_.status.print
+    extrem = post26_.listing.extrem
+    lines = post26_.listing.lines
+    nprint = post26_.listing.nprint
+    prcplx = post26_.listing.prcplx
+    prtime = post26_.listing.prtime
+    prvar = post26_.listing.prvar
+    keep = post26_.display.keep
+    plcplx = post26_.display.plcplx
+    pltime = post26_.display.pltime
+    plvar = post26_.display.plvar
+    spread = post26_.display.spread
+    xvar = post26_.display.xvar
+    cfact = post26_.controls.cfact
+    force = post26_.controls.force
+    layerp26 = post26_.controls.layerp26
+    shell = post26_.controls.shell
+    tvar = post26_.controls.tvar
+    abs = post26_.operations.abs
+    add = post26_.operations.add
+    atan = post26_.operations.atan
+    clog = post26_.operations.clog
+    conjug = post26_.operations.conjug
+    deriv = post26_.operations.deriv
+    exp = post26_.operations.exp
+    filldata = post26_.operations.filldata
+    imagin = post26_.operations.imagin
+    int1 = post26_.operations.int1
+    large = post26_.operations.large
+    nlog = post26_.operations.nlog
+    prod = post26_.operations.prod
+    quot = post26_.operations.quot
+    realvar = post26_.operations.realvar
+    small = post26_.operations.small
+    sqrt = post26_.operations.sqrt
+
 
     # hidden
     _batch = hidden.batch

@@ -17,5 +17,3 @@ These POST26 commands are used for various special purposes.
    Mapdl.resp
    Mapdl.rpsd
    Mapdl.smooth
-   Mapdl.vget
-   Mapdl.vput
