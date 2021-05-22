@@ -1,8 +1,6 @@
 from ._commands import element  # TODO: move out of this module
 
-from ._commands import hidden
-from ._commands import session, database, preproc
-
+from ._commands import (hidden, session, database, preproc, map_cmd)
 
 class Commands:
     """Wrapped MAPDL commands"""
@@ -112,8 +110,19 @@ class Commands:
     title = database.setup.title
     units = database.setup.units
 
-    
+    # # mapping processor
+    # ftype = map_cmd.ftype
+    # map_ = map_cmd.map_
+    # plgeom = map_cmd.plgeom
+    # plmap = map_cmd.plmap
+    # read = map_cmd.read
+    # slashmap = map_cmd.slashmap
+    # target = map_cmd.target
+    # writemap = map_cmd.writemap
 
+    # # AUX15
+    # igesin = aux15.igesin
+    # ioptn = aux15.ioptn
 
     ################
     # PREP7 commands

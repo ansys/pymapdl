@@ -12,11 +12,11 @@ and map it onto a geometry.
 .. autosummary::
    :toctree: api/
 
-   mapdl.ftype
-   mapdl.map
-   mapdl.plgeom
-   mapdl.plmap
-   mapdl.read
-   mapdl.slashmap
-   mapdl.target
-   mapdl.writemap
+   Mapdl.ftype
+   Mapdl.map_
+   Mapdl.plgeom
+   Mapdl.plmap
+   Mapdl.read
+   Mapdl.slashmap
+   Mapdl.target
+   Mapdl.writemap

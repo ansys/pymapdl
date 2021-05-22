@@ -8,13 +8,13 @@ Results Files
 
 These commands are related to the /AUX3 command.
 
-..autosummary::
+.. autosummary::
    :toctree: api/
 
-   mapdl.aux3
-   mapdl.compress
-   mapdl.delete
-   mapdl.fileaux3
-   mapdl.list
-   mapdl.modify
-   mapdl.undelete
+   Mapdl.aux3
+   Mapdl.compress
+   Mapdl.delete
+   Mapdl.fileaux3
+   Mapdl.list
+   Mapdl.modify
+   Mapdl.undelete

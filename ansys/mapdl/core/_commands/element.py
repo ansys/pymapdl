@@ -56,14 +56,3 @@ import re
 from typing import Optional, Union
 
 from ..mapdl_types import MapdlInt, MapdlFloat
-from ..plotting import general_plotter
-
-
-def parse_e(msg: Optional[str]) -> Optional[int]:
-    """Parse create element message and return element number."""
-    if msg:
-        res = re.search(r"(ELEMENT\s*)([0-9]+)", msg)
-        if res is not None:
-            return int(res.group(2))
-
-
