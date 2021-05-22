@@ -8,3 +8,5 @@ wan
 levl
 mater
 aadd
+extrem
+imagin
