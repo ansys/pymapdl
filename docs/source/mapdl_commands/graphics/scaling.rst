@@ -12,11 +12,11 @@ display.
 .. autosummary::
    :toctree: api/
 
-   mapdl.dscale
-   mapdl.iclwid
-   mapdl.icscale
-   mapdl.ratio
-   mapdl.shrink
-   mapdl.sscale
-   mapdl.txtre
-   mapdl.vscale
+   Mapdl.dscale
+   Mapdl.iclwid
+   Mapdl.icscale
+   Mapdl.ratio
+   Mapdl.shrink
+   Mapdl.sscale
+   Mapdl.txtre
+   Mapdl.vscale

@@ -17,7 +17,6 @@ postprocessing.
    Mapdl.dnsol
    Mapdl.file
    Mapdl.hrcplx
-   Mapdl./post1
    Mapdl.rescombine
    Mapdl.reset
    Mapdl.set

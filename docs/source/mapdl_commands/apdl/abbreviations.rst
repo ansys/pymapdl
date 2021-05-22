@@ -17,6 +17,6 @@ These APDL commands can be used to define abbreviations for longer commands, and
    :toctree: api/
 
    Mapdl.abbr
-   Mapdl.bbres
-   Mapdl.bbsav
+   Mapdl.abbres
+   Mapdl.abbsav
    Mapdl.ucmd

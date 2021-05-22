@@ -18,7 +18,6 @@ These APDL commands are used to define parameters and their values.
    Mapdl.parres
    Mapdl.parsav
    Mapdl.set
-   Mapdl.starstatus
    Mapdl.taxis
    Mapdl.tread
    Mapdl.vfill

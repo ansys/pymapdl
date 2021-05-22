@@ -189,43 +189,5 @@ class Commands:
     tbpt = preproc.material_data_tables.tbpt
     tbtemp = preproc.material_data_tables.tbtemp
 
-    # Element commands
-    e = element.e
-    ealive = element.ealive
-    edele = element.edele
-    edtp = element.edtp
-    egen = element.egen
-    einfin = element.einfin
-    eintf = element.eintf
-    ekill = element.ekill
-    elem = element.elem
-    elist = element.elist
-    ematwrite = element.ematwrite
-    emodif = element.emodif
-    emore = element.emore
-    en = element.en
-    engen = element.engen
-    enorm = element.enorm
-    ensym = element.ensym
-    eorient = element.eorient
-    eplot = element.eplot
-    eread = element.eread
-    erefine = element.erefine
-    ereinf = element.ereinf
-    errang = element.errang
-    escheck = element.escheck
-    eshape = element.eshape
-    esol = element.esol
-    esort = element.esort
-    estif = element.estif
-    esurf = element.esurf
-    esym = element.esym
-    esys = element.esys
-    etable = element.etable
-    etype = element.etype
-    eusort = element.eusort
-    ewrite = element.ewrite
-    extopt = element.extopt
-
     # hidden
     _batch = hidden.batch

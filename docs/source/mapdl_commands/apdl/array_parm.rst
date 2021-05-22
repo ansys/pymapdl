@@ -22,7 +22,6 @@ vectors and matrices).
 .. autosummary::
    :toctree: api/
 
-   Mapdl.list_files
    Mapdl.mfouri
    Mapdl.mfun
    Mapdl.moper

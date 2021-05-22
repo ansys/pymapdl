@@ -1,15 +1,15 @@
 """Pythonic MAPDL Commands"""
 
-from .geometry_commands import _MapdlGeometryCommands
-from .io_commands import _MapdlIoCommands
-from .mesh_commands import _MapdlMeshingCommands
-from .misc_commands import _MapdlMiscCommands
+from typing import Optional, Union
+from ansys.mapdl.core.mapdl_types import *
+
+# from .geometry_commands import _MapdlGeometryCommands
+# from .io_commands import _MapdlIoCommands
+# from .mesh_commands import _MapdlMeshingCommands
+# from .misc_commands import _MapdlMiscCommands
 
 
-class _MapdlCommands(_MapdlGeometryCommands,
-                     _MapdlIoCommands,
-                     _MapdlMeshingCommands,
-                     _MapdlMiscCommands):  # pragma: no cover
+class _MapdlCommands():  # pragma: no cover
     """ANSYS class containing MAPDl functions."""
 
     def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
@@ -2017,12 +2017,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         to 2 for a 2-D analysis, the Gauss-Seidel iterative solver (SOLVER = 0)
         is used.
         """
-        command = "RADOPT,,%s,%s,%s,%s,%s,,,,,%s" % (str(fluxtol),
-                                                     str(solver),
-                                                     str(maxiter),
-                                                     str(toler),
-                                                     str(overrlex),
-                                                     str(maxfluxiter))
+        command = "RADOPT,,%s,%s,%s,%s,%s,,,,,%s" % (str(fluxtol), str(solver), str(maxiter), str(toler), str(overrlex), str(maxfluxiter))
         return self.run(command, **kwargs)
 
     def tiff(self, kywrd="", opt="", **kwargs):
@@ -2457,10 +2452,7 @@ class _MapdlCommands(_MapdlGeometryCommands,
         model boundary conditions assigned to the original entities will not be
         transferred to the new entities generated.
         """
-        command = "ASBL,%s,%s,%s,%s" % (str(na),
-                                        str(nl),
-                                        str(keepa),
-                                        str(keepl))
+        command = "ASBL,%s,%s,%s,%s" % (str(na), str(nl), str(keepa), str(keepl))
         return self.run(command, **kwargs)
 
     def neqit(self, neqit="", forcekey="", **kwargs):
@@ -9179,30 +9171,30 @@ class _MapdlCommands(_MapdlGeometryCommands,
         command = "BSAX,%s,%s,%s" % (str(val1), str(val2), str(t))
         return self.run(command, **kwargs)
 
-    # def plot(self, nstrt="", nend="", ninc="", **kwargs):
-    #     """APDL Command: PLOT
+    def plot(self, nstrt="", nend="", ninc="", **kwargs):
+        """APDL Command: PLOT
 
-    #     Forms a display.
+        Forms a display.
 
-    #     Parameters
-    #     ----------
-    #     nstrt, nend, ninc
-    #         Display plots sequentially from number NSTRT to NEND in steps of
-    #         NINC. NSTRT defaults to the next plot.  NEND defaults to NSTRT.
-    #         NINC defaults to 1.  If NSTRT = ALL, display all plots from the
-    #         beginning of the file.  If NEND = ALL, display to the end of the
-    #         file.
+        Parameters
+        ----------
+        nstrt, nend, ninc
+            Display plots sequentially from number NSTRT to NEND in steps of
+            NINC. NSTRT defaults to the next plot.  NEND defaults to NSTRT.
+            NINC defaults to 1.  If NSTRT = ALL, display all plots from the
+            beginning of the file.  If NEND = ALL, display to the end of the
+            file.
 
-    #     Notes
-    #     -----
-    #     Output will be to the terminal or to a file, depending on the driver
-    #     [/SHOWDISP].  The INTERLEAF and DUMP drivers produce an output file for
-    #     each plot named INTLnn and DUMPnn, with nn sequentially ranging from 00
-    #     to 99.  A blank line after the PLOT command causes the next plot to be
-    #     formed.
-    #     """
-    #     command = "PLOT,%s,%s,%s" % (str(nstrt), str(nend), str(ninc))
-    #     return self.run(command, **kwargs)
+        Notes
+        -----
+        Output will be to the terminal or to a file, depending on the driver
+        [/SHOWDISP].  The INTERLEAF and DUMP drivers produce an output file for
+        each plot named INTLnn and DUMPnn, with nn sequentially ranging from 00
+        to 99.  A blank line after the PLOT command causes the next plot to be
+        formed.
+        """
+        command = "PLOT,%s,%s,%s" % (str(nstrt), str(nend), str(ninc))
+        return self.run(command, **kwargs)
 
     def bfa(self, area="", lab="", val1="", val2="", val3="", val4="",
             **kwargs):
@@ -60487,3 +60479,5468 @@ class _MapdlCommands(_MapdlGeometryCommands,
         """
         command = "DALIST,%s" % (str(area))
         return self.run(command, **kwargs)
+
+    def ekill(self, elem: Union[str, int] = "",
+              **kwargs) -> Optional[str]:
+        """Deactivates an element (for the birth and death capability).
+
+        APDL Command: EKILL
+
+        Parameters
+        ----------
+        elem
+            Element to be deactivated. If ALL, deactivate all
+            selected elements [ESEL]. A component name may also be
+            substituted for ELEM.
+
+        Notes
+        -----
+        Deactivates the specified element when the birth and death
+        capability is being used. A deactivated element remains in
+        the model but contributes a near-zero stiffness (or
+        conductivity, etc.) value (ESTIF) to the overall matrix. Any
+        solution-dependent state variables (such as stress, plastic
+        strain, creep strain, etc.) are set to zero. Deactivated
+        elements contribute nothing to the overall mass (or
+        capacitance, etc.) matrix.
+
+        The element can be reactivated with the EALIVE command.
+
+        ANSYS, Inc. recommends using element deactivation/reactivation
+        (EKILL/EALIVE) for linear elastic materials only. For all other
+        materials, validate the results carefully before using them.
+
+        This command is also valid in PREP7.
+        """
+        command = f"EKILL,{elem}"
+        return self.run(command, **kwargs)
+
+
+    def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
+          l: MapdlInt = "", m: MapdlInt = "", n: MapdlInt = "", o:
+          MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[int]:
+        """Defines an element by node connectivity.
+
+        APDL Command: E
+
+        Parameters
+        ----------
+        i
+            Number of node assigned to first nodal position (node
+            ``i``).
+
+        j, k, l, m, n, o, p
+            Number assigned to second (node ``j``) through eighth
+            (node ``p``) nodal position, if any.
+
+        Examples
+        --------
+        Create a single SURF154 element.
+
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SURF154')
+        >>> mapdl.n(1, 0, 0, 0)
+        >>> mapdl.n(2, 1, 0, 0)
+        >>> mapdl.n(3, 1, 1, 0)
+        >>> mapdl.n(4, 0, 1, 0)
+        >>> mapdl.e(1, 2, 3, 4)
+        1
+
+        Create a single hexahedral SOLID185 element
+
+        >>> mapdl.et(2, 'SOLID185')
+        >>> mapdl.type(2)
+        >>> mapdl.n(5, 0, 0, 0)
+        >>> mapdl.n(6, 1, 0, 0)
+        >>> mapdl.n(7, 1, 1, 0)
+        >>> mapdl.n(8, 0, 1, 0)
+        >>> mapdl.n(9, 0, 0, 1)
+        >>> mapdl.n(10, 1, 0, 1)
+        >>> mapdl.n(11, 1, 1, 1)
+        >>> mapdl.n(12, 0, 1, 1)
+        >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
+        2
+
+        Notes
+        -----
+        Defines an element by its nodes and attribute values. Up to 8
+        nodes may be specified with the :meth:`e` command.  If more nodes
+        are needed for the element, use the :meth:`emore` command. The
+        number of nodes required and the order in which they should be
+        specified are described in Chapter 4 of the Element Reference for
+        each element type.  Elements are automatically assigned a number
+        [NUMSTR] as generated. The current (or default) MAT, TYPE, REAL,
+        SECNUM and ESYS attribute values are also assigned to the element.
+
+        When creating elements with more than 8 nodes using this command
+        and the EMORE command, it may be necessary to turn off shape
+        checking using the SHPP command before issuing this command. If a
+        valid element type can be created without using the additional
+        nodes on the :meth:`emore` command, this command will create that
+        element. The :meth:`emore` command will then modify the element to
+        include the additional nodes. If shape checking is active, it will
+        be performed before the :meth:`emore` command is issued.
+        Therefore, if the shape checking limits are exceeded, element
+        creation may fail before the :meth:`emore` command modifies the
+        element into an acceptable shape.
+
+        """
+        command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
+        return parse_e(self.run(command, **kwargs))
+
+    def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
+               format_: str = "", **kwargs) -> Optional[str]:
+        """Writes elements to a file.
+
+        APDL Command: EWRITE
+
+        Parameters
+        ----------
+        fname
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+        ext
+            Filename extension (eight-character maximum).
+
+        kappnd
+            Append key:
+
+            0 - Rewind file before the write operation.
+
+            1 - Append data to the end of the existing file.
+
+        format_
+            Format key:
+
+            SHORT - I6 format (the default).
+
+            LONG - I8 format.
+
+        Examples
+        --------
+        >>> mapdl.ewrite('etable.txt', format_='LONG')
+
+        Notes
+        -----
+        Writes the selected elements to a file. The write operation is not
+        necessary in a standard ANSYS run but is provided as convenience
+        to users wanting a coded element file. If issuing :meth:`ewrite`
+        from ANSYS to be used in ANSYS, you must also issue NWRITE to
+        store nodal information for later use. Only elements having all of
+        their nodes defined (and selected) are written. Data are written
+        in a coded format. The data description of each record is: I, J,
+        K, L, M, N, O, P, MAT, TYPE, REAL, SECNUM, ESYS, IEL, where MAT,
+        TYPE, REAL, and ESYS are attribute numbers, SECNUM is the beam
+        section number, and IEL is the element number.
+
+        The format is (14I6) if Format is set to SHORT and (14I8) if the
+        Format is set to LONG, with one element description per record for
+        elements having eight nodes of less. For elements having more than
+        eight nodes, nodes nine and above are written on a second record
+        with the same format.
+        """
+        return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
+
+    def etable(self, lab: str = "", item: str = "", comp: str = "",
+               option: str = "", **kwargs) -> Optional[str]:
+        """Fills a table of element values for further processing.
+
+        APDL Command: ETABLE
+
+        Parameters
+        ----------
+        lab
+            Any unique user defined label for use in subsequent
+            commands and output headings (maximum of eight characters
+            and not a General predefined Item label). Defaults to an
+            eight character label formed by concatenating the first
+            four characters of the Item and Comp labels. If the same
+            as a previous user label, this result item will be
+            included under the same label. Up to 200 different labels
+            may be defined. The following labels are predefined and
+            are not available for user-defined labels: ``'REFL''`,
+            ``'STAT'``, and ``'ERAS'``.  ``lab='REFL'`` refills all
+            tables previously defined with the :meth:`etable` commands
+            (not the CALC module commands) according to the latest
+            ETABLE specifications and is convenient for refilling
+            tables after the load step (SET) has been
+            changed. Remaining fields will be ignored if
+            ``Lab='REFL'``.  ``lab='STAT'`` displays stored table
+            values.  ``lab='ERAS'`` erases the entire table.
+
+        item
+            Label identifying the item. General item labels are shown
+            in the table below. Some items also require a component
+            label. Character parameters may be used. ``item='eras'``
+            erases a Lab column.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in the table below. Character parameters
+            may be used.
+
+        option
+            Option for storing element table data:
+
+            * ``'MIN'`` - Store minimum element nodal value of the specified
+              item component.
+            * ``'MAX'`` - Store maximum element nodal value of the specified
+              item component.
+            * ``'AVG'`` - Store averaged element centroid value of the
+              specified item component (default).
+
+        Examples
+        --------
+        Print the volume of individual elements.
+
+        >>> mapdl.clear()
+        >>> output = mapdl.input(examples.vmfiles['vm6'])
+        >>> mapdl.post1()
+        >>> label = 'MYVOLU'
+        >>> mapdl.etable(label, 'VOLU')
+        >>> print(mapdl.pretab(label))
+        PRINT ELEMENT TABLE ITEMS PER ELEMENT
+           *****ANSYS VERIFICATION RUN ONLY*****
+             DO NOT USE RESULTS FOR PRODUCTION
+          ***** POST1 ELEMENT TABLE LISTING *****
+            STAT     CURRENT
+            ELEM     XDISP
+               1  0.59135E-001
+               2  0.59135E-001
+               3  0.59135E-001
+        ...
+
+        Notes
+        -----
+        The ETABLE command defines a table of values per element (the
+        element table) for use in further processing. The element
+        table is organized similar to spreadsheet, with rows
+        representing all selected elements and columns consisting of
+        result items which have been moved into the table (Item,Comp)
+        via ETABLE. Each column of data is identified by a
+        user-defined label (Lab) for listings and displays.
+
+        After entering the data into the element table, you are not
+        limited to merely listing or displaying your data (PLESOL,
+        PRESOL, etc.). You may also perform many types of operations
+        on your data, such as adding or multiplying columns (SADD,
+        SMULT), defining allowable stresses for safety calculations
+        (SALLOW), or multiplying one column by another (SMULT).  See
+        Getting Started in the Basic Analysis Guide for more
+        information.
+
+        Various results data can be stored in the element table. For
+        example, many items for an element are inherently
+        single-valued (one value per element). The single-valued items
+        include: SERR, SDSG, TERR, TDSG, SENE, SEDN, TENE, KENE, AENE,
+        JHEAT, JS, VOLU, and CENT. All other items are multivalued
+        (varying over the element, such that there is a different
+        value at each node). Because only one value is stored in the
+        element table per element, an average value (based on the
+        number of contributing nodes) is calculated for multivalued
+        items. Exceptions to this averaging procedure are FMAG and all
+        element force items, which represent the sum only of the
+        contributing nodal values.
+
+        Two methods of data access can be used with the ETABLE
+        command. The method you select depends upon the type of data
+        that you want to store.  Some results can be accessed via a
+        generic label (Component Name method), while others require a
+        label and number (Sequence Number method).
+
+        The Component Name method is used to access the General
+        element data (that is, element data which is generally
+        available to most element types or groups of element
+        types). All of the single-valued items and some of the more
+        general multivalued items are accessible with the Component
+        Name method.  Various element results depend on the
+        calculation method and the selected results location (AVPRIN,
+        RSYS, LAYER, SHELL, and ESEL).
+
+        Although nodal data is readily available for listings and
+        displays (PRNSOL, PLNSOL) without using the element table, you
+        may also use the Component Name method to enter these results
+        into the element table for further "worksheet"
+        manipulation. (See Getting Started in theBasic Analysis Guide
+        for more information.) A listing of the General Item and Comp
+        labels for the Component Name method is shown below.
+
+        The Sequence Number method allows you to view results for data
+        that is not averaged (such as pressures at nodes, temperatures
+        at integration points, etc.), or data that is not easily
+        described in a generic fashion (such as all derived data for
+        structural line elements and contact elements, all derived
+        data for thermal line elements, layer data for layered
+        elements, etc.). A table illustrating the Items (such as LS,
+        LEPEL, LEPTH, SMISC, NMISC, SURF, etc.) and corresponding
+        sequence numbers for each element is shown in the Output Data
+        section of each element description found in the Element
+        Reference.
+
+        Some element table data are reported in the results coordinate
+        system.  These include all component results (for example, UX,
+        UY, etc.; SX, SY, etc.). The solution writes component results
+        in the database and on the results file in the solution
+        coordinate system. When you issue the ETABLE command, these
+        results are then transformed into the results coordinate
+        system (RSYS) before being stored in the element table. The
+        default results coordinate system is global Cartesian
+        (RSYS,0).  All other data are retrieved from the database and
+        stored in the element table with no coordinate transformation.
+
+        Use the PRETAB, PLETAB, or ETABLE,STAT commands to display the
+        stored table values. Issue ETABLE,ERAS to erase the entire
+        table. Issue ETABLE,Lab,ERAS to erase a Lab column.
+
+        The element table data option (Option) is not available for
+        all output items.
+
+        """
+        command = f"ETABLE,{lab},{item},{comp},{option}"
+        return self.run(command, **kwargs)
+
+    def eusort(self, **kwargs) -> Optional[str]:
+        """Restore original order of the element table.
+
+        APDL Command: EUSORT
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.eusort()
+        'ELEMENT SORT REMOVED'
+
+        Notes
+        -----
+        Changing the selected element set [ESEL] also restores the original
+        element order.
+        """
+        return self.run("EUSORT", **kwargs)
+
+    def edtp(self, option: MapdlInt = "", value1: MapdlInt = "",
+             value2: MapdlFloat = "", **kwargs) -> Optional[str]:  # pragma: no cover
+        """Plots explicit elements based on their time step size.
+
+        APDL Command: EDTP
+
+        Parameters
+        ----------
+        option
+             Plotting option (default = 1).
+
+            1 - Plots the elements with the smallest time step
+                sizes. The number of elements plotted and listed is
+                equal to VALUE1 (which defaults to 100).  Each element
+                is shaded red or yellow based on its time step value
+                (see "Notes" for details).
+
+            2 - Produces the same plot as for OPTION = 1, and also
+                produces a list of the plotted elements and their
+                corresponding time step values.
+
+            3 - Produces a plot similar to OPTION = 1, except that all
+                selected elements are plotted. Elements beyond the
+                first VALUE1 elements are blue and translucent. The
+                amount of translucency is specified by VALUE2.  This
+                option also produces a list of the first VALUE1
+                elements with their corresponding time step values.
+
+        value1
+            Number of elements to be plotted and listed (default =
+            100). For example, if VALUE1 = 10, only the elements with
+            the 10 smallest time step sizes are plotted and listed.
+
+        value2
+            Translucency level ranging from 0 to 1 (default =
+            0.9). VALUE2 is only used when OPTION = 3, and only for
+            the elements plotted in blue. To plot these elements as
+            non-translucent, set VALUE2 = 0.
+
+        Notes
+        -----
+        EDTP invokes an ANSYS macro that plots and lists explicit
+        elements based on their time step size. For OPTION = 1 or 2,
+        the number of elements plotted is equal to VALUE1 (default =
+        100). For OPTION = 3, all selected elements are plotted.
+
+        The elements are shaded red, yellow, or blue based on their
+        time step size. Red represents the smallest time step sizes,
+        yellow represents the intermediate time step sizes, and blue
+        represents the largest time step sizes. For example, if you
+        specify VALUE1 = 30, and if T1 is the smallest critical time
+        step of all elements and T30 is the time step of the 30th
+        smallest element, then the elements are shaded as follows:
+
+        Translucent blue elements only appear when OPTION = 3.
+
+        This command is also valid in PREP7.
+
+        Distributed ANSYS Restriction: This command is not supported in
+        Distributed ANSYS.
+        """
+        command = f"EDTP,{option},{value1},{value2}"
+        return self.run(command, **kwargs)
+
+    def estif(self, kmult: MapdlFloat = "", **kwargs) -> Optional[str]:
+        """Specifies the matrix multiplier for deactivated elements.
+
+        APDL Command: ESTIF
+
+        Parameters
+        ----------
+        kmult
+            Stiffness matrix multiplier for deactivated elements (defaults to
+            1.0E-6).
+
+        Examples
+        --------
+        >>> mapdl.prep7()
+        >>> mapdl.estif(1E-8)
+        'DEAD ELEMENT STIFFNESS MULTIPLIER= 0.10000E-07'
+
+        Notes
+        -----
+        Specifies the stiffness matrix multiplier for elements deactivated with
+        the EKILL command (birth and death).
+
+        This command is also valid in PREP7.
+        """
+        command = f"ESTIF,{kmult}"
+        return self.run(command, **kwargs)
+
+    def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "",
+               i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "",
+               i4: MapdlInt = "", i5: MapdlInt = "", i6: MapdlInt = "",
+               i7: MapdlInt = "", i8: MapdlInt = "",
+               **kwargs) -> Optional[str]:
+        """Modifies a previously defined element.
+
+        APDL Command: EMODIF
+
+        Parameters
+        ----------
+        iel
+            Modify nodes and/or attributes for element number IEL.  If
+            ALL, modify all selected elements [ESEL]. A component name
+            may also be substituted for IEL.
+
+        stloc
+            Starting location (n) of first node to be modified or the
+            attribute label.
+
+        i1, i2, i3, i4, i5, i6, i7, i8
+            Replace the previous node numbers assigned to this element
+            with these corresponding values. A (blank) retains the
+            previous value (except in the I1 field, which resets the
+            STLOC node number to zero).
+
+        Examples
+        --------
+        Modify all elements to have a material number of 2.
+
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mp_num = 2
+        >>> mapdl.mp('EX', mp_num, 210E9)
+        >>> mapdl.mp('DENS', mp_num, 7800)
+        >>> mapdl.mp('NUXY', mp_num, 0.3)
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.emodif('ALL', 'MAT', i1=mp_num)
+        'MODIFY ALL SELECTED ELEMENTS TO HAVE  MAT  =         2'
+
+        Notes
+        -----
+        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
+        values) of an existing element may be changed with this
+        command.
+        """
+        command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
+        return self.run(command, **kwargs)
+
+    def emore(self, q: MapdlInt = "", r: MapdlInt = "", s: MapdlInt = "",
+              t: MapdlInt = "", u: MapdlInt = "", v: MapdlInt = "",
+              w: MapdlInt = "", x: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Add more nodes to the just-defined element.
+
+        APDL Command: EMORE
+
+        Parameters
+        ----------
+        q, r, s, t, u, v, w, x
+            Numbers of nodes typically assigned to ninth (node Q)
+            through sixteenth (node X) nodal positions, if any.
+
+        Examples
+        --------
+        Generate a single quadratic element.
+
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.n(1, -1, -1, -1)
+        >>> mapdl.n(2,  1, -1, -1)
+        >>> mapdl.n(3,  1,  1, -1)
+        >>> mapdl.n(4, -1,  1, -1)
+        >>> mapdl.n(5, -1, -1,  1)
+        >>> mapdl.n(6,  1, -1,  1)
+        >>> mapdl.n(7,  1,  1,  1)
+        >>> mapdl.n(8, -1,  1,  1)
+        >>> mapdl.n(9,  0, -1, -1)
+        >>> mapdl.n(10,  1,  0, -1)
+        >>> mapdl.n(11,  0,  1, -1)
+        >>> mapdl.n(12, -1,  0, -1)
+        >>> mapdl.n(13,  0, -1,  1)
+        >>> mapdl.n(14,  1,  0,  1)
+        >>> mapdl.n(15,  0,  1,  1)
+        >>> mapdl.n(16, -1,  0,  1)
+        >>> mapdl.n(17, -1, -1,  0)
+        >>> mapdl.n(18,  1, -1,  0)
+        >>> mapdl.n(19,  1,  1,  0)
+        >>> mapdl.n(20, -1,  1,  0)
+        >>> mapdl.e(1, 2, 3, 4, 5, 6, 7, 8)
+        >>> mapdl.emore(9, 10, 11, 12, 13, 14, 15, 16)
+        >>> output = mapdl.emore(17, 18, 19, 20)
+        'ELEMENT 1  1  2  3  4  5  6  7  8
+                    9 10 11 12 13 14 15 16
+                   17 18 19 20
+
+        Notes
+        -----
+        Repeat EMORE command for up to 4 additional nodes (20
+        maximum). Nodes are added after the last nonzero node of the
+        element.  Node numbers defined with this command may be
+        zeroes.
+        """
+        command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
+        return self.run(command, **kwargs)
+
+    def esol(self, nvar: MapdlInt = "", elem: MapdlInt = "",
+             node: MapdlInt = "", item: str = "", comp: str = "",
+             name: str = "", **kwargs) -> Optional[str]:
+        """Specify element data to be stored from the results file.
+
+        /POST26 APDL Command: ESOL
+
+        Parameters
+        ----------
+        nvar
+            Arbitrary reference number assigned to this variable (2 to
+            NV [NUMVAR]). Overwrites any existing results for this
+            variable.
+
+        elem
+            Element for which data are to be stored.
+
+        node
+            Node number on this element for which data are to be
+            stored. If blank, store the average element value (except
+            for FMAG values, which are summed instead of averaged).
+
+        item
+            Label identifying the item. General item labels are shown
+            in Table 134: ESOL - General Item and Component Labels
+            below. Some items also require a component label.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in Table 134: ESOL - General Item and
+            Component Labels below.  If Comp is a sequence number (n),
+            the NODE field will be ignored.
+
+        name
+            Thirty-two character name for identifying the item on the
+            printout and displays.  Defaults to a label formed by
+            concatenating the first four characters of the Item and
+            Comp labels.
+
+        Examples
+        --------
+        Switch to the time-history postprocessor
+
+        >>> mapdl.post26()
+
+        Store the stress in the X direction for element 1 at node 1
+
+        >>> nvar = 2
+        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
+
+        Move the value to an array and access it via mapdl.parameters
+
+        >>> mapdl.dim('ARR', 'ARRAY', 1)
+        >>> mapdl.vget('ARR', nvar)
+        >>> mapdl.parameters['ARR']
+        array(-1991.40234375)
+
+        Notes
+        -----
+        See Table: 134:: ESOL - General Item and Component Labels for
+        a list of valid item and component labels for element (except
+        line element) results.
+
+        The ESOL command defines element results data to be stored
+        from a results file (FILE). Not all items are valid for all
+        elements. To see the available items for a given element,
+        refer to the input and output summary tables in the
+        documentation for that element.
+
+        Two methods of data access are available via the ESOL
+        command. You can access some simply by using a generic label
+        (component name method), while others require a label and
+        number (sequence number method).
+
+        Use the component name method to access general element data
+        (that is, element data generally available to most element
+        types or groups of element types).
+
+        The sequence number method is required for data that is not
+        averaged (such as pressures at nodes and temperatures at
+        integration points), or data that is not easily described in a
+        generic fashion (such as all derived data for structural line
+        elements and contact elements, all derived data for thermal
+        line elements, and layer data for layered elements).
+
+        Element results are in the element coordinate system, except
+        for layered elements where results are in the layer coordinate
+        system.  Element forces and moments are in the nodal
+        coordinate system. Results are obtainable for an element at a
+        specified node. Further location specifications can be made
+        for some elements via the SHELL, LAYERP26, and FORCE commands.
+
+        For more information on the meaning of contact status and its
+        possible values, see Reviewing Results in POST1 in the Contact
+        Technology Guide.
+        """
+        command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
+        return self.run(command, **kwargs)
+
+    def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "",
+               **kwargs) -> Optional[str]:
+        """Displays elements with shapes determined from the real constants or section definition.
+
+        APDL Command: /ESHAPE
+
+
+        Parameters
+        ----------
+        scale
+            Scaling factor:
+
+            * 0 - Use simple display of line and area elements. This
+              value is the default.
+
+            * 1 - Use real constants or section definition to form a
+                solid shape display of the applicable elements.
+
+            FAC - Multiply certain real constants, such as thickness,
+                  by FAC (where FAC > 0.01) and use them to form a
+                  solid shape display of elements.
+
+        key
+            Current shell thickness key:
+
+            * 0 - Use current thickness in the displaced solid shape
+                  display of shell elements (valid for SHELL181,
+                  SHELL208, SHELL209, and SHELL281). This value is the
+                  default.
+
+            * 1 - Use initial thickness in the displaced solid shape
+              display of shell elements.
+
+        Notes
+        -----
+        The /ESHAPE command allows beams, shells, current sources, and
+        certain special-purpose elements to be displayed as solids
+        with the shape determined from the real constants or section
+        types. Elements are displayed via the EPLOT command. No checks
+        for valid or complete input are made for the display.
+
+        Following are details about using this command with various
+        element types:
+
+        SOLID65 elements are displayed with internal lines that
+        represent rebar sizes and orientations (requires vector mode
+        [/DEVICE] with a basic type of display [/TYPE,,BASIC]). The
+        rebar with the largest volume ratio in each element plots as a
+        red line, the next largest as green, and the smallest as blue.
+
+        COMBIN14, COMBIN39, and MASS21 are displayed with a graphics
+        icon, with the offset determined by the real constants and
+        KEYOPT settings.
+
+        BEAM188, BEAM189, PIPE288, PIPE289 and ELBOW290 are displayed
+        as solids with the shape determined via the section-definition
+        commands (SECTYPE and SECDATA). The arbitrary section option
+        (Subtype = ASEC) has no definite shape and appears as a thin
+        rectangle to show orientation. The elements are displayed with
+        internal lines representing the cross- section mesh.
+
+        SOLID272 and SOLID273 are displayed as solids with the shape
+        determined via the section-definition commands (SECTYPE and
+        SECDATA).  The 2-D master plane is revolved around the
+        prescribed axis of symmetry.
+
+        Contour plots are available for these elements in
+        postprocessing for PowerGraphics only (/GRAPHICS,POWER). To
+        view 3-D deformed shapes for the elements, issue OUTRES,MISC
+        or OUTRES,ALL for static or transient analyses. To view 3-D
+        mode shapes for a modal or eigenvalue buckling analysis,
+        expand the modes with element results calculation ON (Elcalc =
+        YES for MXPAND).
+
+        SOURC36, CIRCU124, and TRANS126 elements always plot using
+        /ESHAPE when PowerGraphics is activated (/GRAPHICS,POWER).
+
+        In most cases, /ESHAPE renders a thickness representation of
+        your shell, plane and layered elements more readily in
+        PowerGraphics (/GRAPHICS,POWER). This type of representation
+        employs PowerGraphics to generate the enhanced representation,
+        and will often provide no enhancement in Full Graphics
+        (/GRAPHICS,FULL). This is especially true for POST1 results
+        displays, where /ESHAPE is not supported for most element
+        types with FULL graphics.
+
+        When PowerGraphics is active, /ESHAPE may degrade the image if
+        adjacent elements have overlapping material, such as shell
+        elements which are not co-planar. Additionally, if adjacent
+        elements have different thicknesses, the polygons depicting
+        the connectivity between the "thicker" and "thinner" elements
+        along the shared element edges may not always be displayed.
+
+        For POST1 results displays (such as PLNSOL), the following
+        limitations apply:
+
+        Rotational displacements for beam elements are used to create
+        a more realistic displacement display. When /ESHAPE is active,
+        displacement plots (via PLNSOL,U,X and PLDISP, for example)
+        may disagree with your PRNSOL listings. This discrepancy will
+        become more noticeable when the SCALE value is not equal to
+        one.
+
+        When shell elements are not co-planar, the resulting PLNSOL
+        display with /ESHAPE will actually be a PLESOL display as the
+        non-coincident pseudo-nodes are not averaged. Additionally,
+        /ESHAPE should not be used with coincident elements because
+        the plot may incorrectly average the displacements of the
+        coincident elements.
+
+        When nodes are initially coincident and PowerGraphics is
+        active, duplicate polygons are eliminated to conserve display
+        time and disk space. The command may degrade the image if
+        initially coincident nodes have different displacements. The
+        tolerance for determining coincidence is 1E-9 times the
+        model’s bounding box diagonal.
+
+        If you want to view solution results (PLNSOL, etc.) on layered
+        elements (such as SHELL181, SOLSH190, SOLID185 Layered Solid,
+        SOLID186 Layered Solid, SHELL208, SHELL209, SHELL281, and
+        ELBOW290), set KEYOPT(8) = 1 for the layer elements so that
+        the data for all layers is stored in the results file.
+
+        You can plot the through-thickness temperatures of elements
+        SHELL131 and SHELL132 regardless of the thermal DOFs in use by
+        issuing the PLNSOL,TEMP command (with PowerGraphics and
+        /ESHAPE active).
+
+        The /ESHAPE,1 and /ESHAPE,FAC commands are incompatible with
+        the /CYCEXPAND command used in cyclic symmetry analyses.
+
+        This command is valid in any processor.
+
+        """
+        warnings.warn('pymapdl does not support /ESHAPE when plotting in '
+                      'Python using ``mapdl.eplot()``.  '
+                      'Use ``mapdl.eplot(vtk=False)`` ')
+        command = f"/ESHAPE,{scale},{key}"
+        return self.run(command, **kwargs)
+
+    def etype(self, **kwargs) -> Optional[str]:
+        """Specify "Element types" as the subsequent status topic.
+
+        APDL Command: ETYPE
+
+        Examples
+        --------
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.etype()
+        >>> mapdl.stat()
+         ELEMENT TYPE        1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+          KEYOPT( 1- 6)=        0      0      0        0      0      0
+          KEYOPT( 7-12)=        0      0      0        0      0      0
+          KEYOPT(13-18)=        0      0      0        0      0      0
+
+        Notes
+        -----
+        This is a status [STAT] topic command.
+        The STAT command should immediately follow this command,
+        which should report the status for the specified topic.
+        """
+        return self.run("ETYPE", **kwargs)
+
+    def enorm(self, enum: Union[str, int] = "",
+              **kwargs) -> Optional[str]:
+        """Reorients shell element normals or line element node
+        connectivity.
+
+        APDL Command: ENORM
+
+        Parameters
+        ----------
+        enum
+            Element number having the normal direction that the
+            reoriented elements are to match.
+
+        Examples
+        --------
+        >>> mapdl.enorm(1)
+
+        Notes
+        -----
+        Reorients shell elements so that their outward normals are
+        consistent with that of a specified element. ENORM can also be
+        used to reorder nodal connectivity of line elements so that
+        their nodal ordering is consistent with that of a specified
+        element.
+
+        For shell elements, the operation reorients the element by
+        reversing and shifting the node connectivity pattern. For
+        example, for a 4-node shell element, the nodes in positions I,
+        J, K and L of the original element are placed in positions J,
+        I, L and K of the reoriented element. All 3-D shell elements
+        in the selected set are considered for reorientation, and no
+        element is reoriented more than once during the
+        operation. Only shell elements adjacent to the lateral (side)
+        faces are considered.
+
+        The command reorients the shell element normals on the same
+        panel as the specified shell element. A panel is the geometry
+        defined by a subset of shell elements bounded by free edges or
+        T-junctions (anywhere three or more shell edges share common
+        nodes).
+
+        Reorientation progresses within the selected set until either
+        of the following conditions is true:
+
+        - The edge of the model is reached.
+
+        - More than two elements (whether selected or unselected) are
+          adjacent to a lateral face.
+
+        In situations where unselected elements might undesirably
+        cause case b to control, consider using ENSYM,0,,0,ALL instead
+        of ENORM.  It is recommended that reoriented elements be
+        displayed and graphically reviewed.
+
+        You cannot use the ENORM command to change the normal
+        direction of any element that has a body or surface load. We
+        recommend that you apply all of your loads only after ensuring
+        that the element normal directions are acceptable.
+
+        Real constant values are not reoriented and may be invalidated
+        by an element reversal.
+        """
+        return self.run(f"ENORM,{enum}", **kwargs)
+
+
+    def edele(self, iel1: MapdlInt = "", iel2: MapdlInt = "",
+              inc: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Deletes selected elements from the model.
+
+        APDL Command: EDELE
+
+        Parameters
+        ----------
+        iel1, iel2, inc
+            Delete elements from ``iel1`` to ``iel2`` (defaults to
+            ``iel1``) in steps of ``inc`` (defaults to 1). If
+            ``iel1='ALL'``, ``iel2`` and ``inc`` are ignored and all
+            selected elements [ESEL] are deleted.  A component name
+            may also be substituted for ``iel1`` (``iel2`` and ``inc``
+            are ignored).
+
+        Examples
+        --------
+        Delete the elements 10 through 25
+
+        >>> mapdl.edele(10, 25)
+        'DELETE SELECTED ELEMENTS FROM         10 TO         25 BY          1'
+
+        Notes
+        -----
+        Deleted elements are replaced by null or "blank"
+        elements. Null elements are used only for retaining the
+        element numbers so that the element numbering sequence for the
+        rest of the model is not changed by deleting elements. Null
+        elements may be removed (although this is not necessary) with
+        the NUMCMP command. If related element data (pressures, etc.)
+        are also to be deleted, delete that data before deleting the
+        elements. EDELE is for unattached elements only. You can use
+        the xCLEAR family of commands to remove any attached elements
+        from the database.
+        """
+        return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
+
+    def extopt(self, lab: str = "", val1: Union[str, int] = "",
+               val2: Union[str, int] = "", val3: MapdlInt = "",
+               val4: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Controls options relating to the generation of volume elements from area elements.
+
+        APDL Command: EXTOPT
+
+        Parameters
+        ----------
+        lab
+            Label identifying the control option. The meanings of
+            Val1, Val2, and Val3 will vary depending on Lab.
+
+            ON - Sets carryover of the material attributes, real
+                 constant attributes, and element coordinate system
+                 attributes of the pattern area elements to the
+                 generated volume elements.  Sets the pattern
+                 area mesh to clear when volume generations are done.
+                 Val1, Val2, and Val3 are ignored.
+
+            OFF - Removes all settings associated with this command.
+                  Val1, Val2, and Val3 are ignored.
+
+            STAT - Shows all settings associated with this command.
+                   Val1, Val2, Val3, and Val4 are ignored.
+
+            ATTR - Sets carryover of particular pattern area attributes
+                   (materials, real constants, and element coordinate
+                   systems) of the pattern area elements to the
+                   generated volume elements. (See 2.) Val1 can be:
+
+                0 - Sets volume elements to use
+                    current MAT command settings.
+
+                1 - Sets volume elements to use material
+                    attributes of the pattern area elements.
+
+            Val2 can be:
+
+                0 - Sets volume elements to use current REAL
+                    command settings.
+
+                1 - Sets volume elements to use real constant attributes
+                    of the pattern area elements.
+
+            Val3 can be:
+
+                0 - Sets volume elements to use current ESYS command
+                    settings.
+
+                1 - Sets volume elements to use element coordinate
+                    system attributes of the pattern area elements.
+
+            Val4 can be:
+
+                0 - Sets volume elements to use current SECNUM command
+                    settings.
+
+                1 - Sets volume elements to use section attributes of
+                    the pattern area elements.
+
+            ESIZE - Val1 sets the number of element divisions in the
+                    direction of volume generation or volume sweep.
+                    For VDRAG and VSWEEP, Val1 is overridden by the
+                    LESIZE command NDIV setting. Val2 sets the spacing
+                    ratio (bias) in the direction of volume generation
+                    or volume sweep. If positive, Val2 is the nominal
+                    ratio of last division size to first division size
+                    (if > 1.0, sizes increase, if < 1.0, sizes
+                    decrease). If negative, Val2 is the nominal ratio of
+                    center division(s) size to end divisions size. Ratio
+                    defaults to 1.0 (uniform spacing).
+                    Val3 and Val4 are ignored.
+
+            ACLEAR - Sets clearing of pattern area mesh.
+                     (See 3.) Val1 can be:
+
+                0 - Sets pattern area to remain meshed when volume
+                    generation is done.
+
+                1 - Sets pattern area mesh to clear when volume
+                    generation is done. Val2, Val3, and Val4 are
+                    ignored.
+
+            VSWE - Indicates that volume sweeping options will be set
+                   using Val1 and Val2. Settings specified with EXTOPT,
+                   VSWE will be used the next time the VSWEEP command
+                   is invoked. If Lab = VSWE, Val1 becomes a label.
+                   Val1 can be:
+
+            AUTO - Indicates whether you will be prompted for the source
+                   and target used by VSWEEP or if VSWE should
+                   automatically determine the source and target.
+                   If Val1 = AUTO, Val2 is ON by default. VSWE will
+                   automatically determine the source and target for
+                   VSWEEP. You will be allowed to pick more than one
+                   volume for sweeping. When Val2 = OFF, the user will
+                   be prompted for the source and target for VSWEEP.
+                   You will only be allowed to pick one volume for
+                   sweeping.
+
+            TETS - Indicates whether VSWEEP will tet mesh non-sweepable
+                   volumes or leave them unmeshed. If Val1 = TETS,
+                   Val2 is OFF by default. Non-sweepable volumes will be
+                   left unmeshed. When Val2 = ON, the non-sweepable
+                   volumes will be tet meshed if the assigned element
+                   type supports tet shaped elements.
+
+        val1, val2, val3, val4
+            Additional input values as described under each option for
+            Lab.
+
+        Notes
+        -----
+        EXTOPT controls options relating to the generation of volume
+        elements from pattern area elements using the VEXT, VROTAT,
+        VOFFST, VDRAG, and VSWEEP commands.  (When using VSWEEP,
+        the pattern area is referred to as the source area.)
+
+        Enables carryover of the attributes  of the pattern area
+        elements to the generated volume elements when you are using
+        VEXT, VROTAT, VOFFST, or VDRAG. (When using VSWEEP, since the
+        volume already exists, use the VATT command to assign attributes
+        before sweeping.)
+
+        When you are using VEXT, VROTAT, VOFFST, or VDRAG, enables
+        clearing of the pattern area mesh when volume generations are
+        done. (When you are using VSWEEP, if selected, the area meshes
+        on the pattern (source), target, and/or side areas clear when
+        volume sweeping is done.)
+
+        Neither EXTOPT,VSWE,AUTO nor EXTOPT,VSWE,TETS will be affected
+        by EXTOPT,ON or EXTOPT, OFF.
+        """
+        command = f"EXTOPT,{lab},{val1},{val2},{val3},{val4}"
+        return self.run(command, **kwargs)
+
+    def ereinf(self, **kwargs) -> Optional[str]:
+        """Generates reinforcing elements from selected existing (base) elements.
+
+        APDL Command: EREINF
+
+        Notes
+        -----
+        The EREINF command generates reinforcing elements (REINF264 and
+        REINF265) directly from selected base elements (that is,
+        existing standard elements in your model). The command scans all
+        selected base elements and generates (if necessary) a compatible
+        reinforcing element type for each base element. (ANSYS
+        allows a combination of different base element types.)
+
+        Although predefining the reinforcing element type (ET) is not
+        required, you must define the reinforcing element section type
+        (SECTYPE); otherwise, ANSYS cannot generate the
+        reinforcing element.
+
+        The EREINF command does not create new nodes. The reinforcing
+        elements and the base elements share the common nodes.
+
+        Elements generated by this command are not associated with
+        the solid model.
+
+        After the EREINF command executes, you can issue ETLIST, ELIST,
+        and EPLOT commands to verify the newly created reinforcing
+        element types and elements.
+
+        Reinforcing elements do not account for any subsequent
+        modifications made to the base elements. ANSYS,
+        Inc. recommends issuing the EREINF command only after the
+        base elements are finalized. If you delete or modify base
+        elements (via EDELE, EMODIF, ETCHG, EMID, EORIENT, NUMMRG,
+        or NUMCMP commands, for example), remove all affected
+        reinforcing elements and reissue the EREINF command to avoid
+        inconsistencies.
+        """
+        command = "EREINF,"
+        return self.run(command, **kwargs)
+
+    def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "",
+             iel1: Union[str, int] = "", iel2: MapdlInt = "",
+             ieinc: MapdlInt = "", minc: MapdlInt = "",
+             tinc: MapdlInt = "", rinc: MapdlInt = "",
+             cinc: MapdlInt = "", sinc: MapdlInt = "",
+             dx: MapdlFloat = "", dy: MapdlFloat = "",
+             dz: MapdlFloat = "", **kwargs) -> Optional[str]:
+        """Generates elements from an existing pattern.
+
+        APDL Command: EGEN
+
+        Parameters
+        ----------
+        itime, ninc
+            Do this generation operation a total of ITIMEs,
+            incrementing all nodes in the given pattern by NINC each
+            time after the first. ITIME must be >1 if generation is
+            to occur. NINC may be positive, zero, or negative.
+            If DX, DY, and/or DZ is specified, NINC should be set
+            so any existing nodes (as on NGEN) are not overwritten.
+
+        iel1, iel2, ieinc
+            Generate elements from selected pattern beginning with
+            IEL1 to IEL2 (defaults to IEL1) in steps of IEINC (
+            defaults to 1). If IEL1 is negative, IEL2 and IEINC are
+            ignored and the last \|IEL1\| elements
+            (in sequence backward from the maximum element number)
+            are used as the pattern to be repeated.  If IEL1 = ALL,
+            IEL2 and IEINC are ignored and use all selected elements
+            [ESEL] as pattern to be repeated. A component name may
+            also be substituted for IEL1 (IEL2 and INC are
+            ignored).
+
+        minc
+            Increment material number of all elements in the given
+            pattern by
+            MINC each time after the first.
+
+        tinc
+            Increment type number by TINC.
+
+        rinc
+            Increment real constant table number by RINC.
+
+        cinc
+            Increment element coordinate system number by CINC.
+
+        sinc
+            Increment section ID number by SINC.
+
+        dx, dy, dz
+            Define nodes that do not already exist but are needed by
+            generated
+            elements (as though the NGEN,ITIME,INC,NODE1,,,DX,DY,
+            DZ were issued
+            before EGEN). Zero is a valid value. If blank, DX, DY,
+            and DZ are
+            ignored.
+
+        Notes
+        -----
+        A pattern may consist of any number of previously defined
+        elements. The MAT, TYPE, REAL, ESYS, and SECNUM numbers of
+        the new elements are based upon the elements in the pattern
+        and not upon the current specification settings.
+
+        You can use the EGEN command to generate interface elements (
+        INTER192, INTER193, INTER194, and INTER195) directly.
+        However, because interface elements require that the element
+        connectivity be started from the bottom surface, you must
+        make sure that you use the correct element node connectivity.
+        See the element descriptions for INTER192, INTER193,
+        INTER194, and INTER195 for the correct element node definition.
+        """
+        command = f"EGEN,{itime},{ninc},{iel1},{iel2},{ieinc},{minc}," \
+                  f"{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
+        return self.run(command, **kwargs)
+
+    def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
+        """Reactivates an element (for the birth and death capability).
+
+        APDL Command: EALIVE
+
+        Parameters
+        ----------
+        elem
+            Element to be reactivated:
+
+            ALL  - Reactivates all selected elements (ESEL).
+
+            Comp - Specifies a component name.
+
+        Notes
+        -----
+        Reactivates the specified element when the birth and death
+        capability is being used. An element can be reactivated only
+        after it has been deactivated (EKILL).
+
+        Reactivated elements have a zero strain (or thermal heat
+        storage, etc.)  state.
+
+        ANSYS, Inc. recommends using the element
+        deactivation/reactivation procedure for analyses involving
+        linear elastic materials only. Do not use element
+        deactivation/reactivation in analyses involving time-
+        dependent materials, such as viscoelasticity, viscoplasticity,
+        and creep analysis.
+
+        This command is also valid in PREP7.
+        """
+        command = f"EALIVE,{elem}"
+        return self.run(command, **kwargs)
+
+    def escheck(self, sele: str = "", levl: str = "",
+                defkey: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Perform element shape checking for a selected element set.
+
+        APDL Command: ESCHECK
+
+        Parameters
+        ----------
+        sele
+            Specifies whether to select elements for checking:
+
+            (blank) - List all warnings/errors from element shape
+            checking.
+
+            ESEL - Select the elements based on the .Levl criteria
+            specified below.
+
+        levl
+            WARN - Select elements producing warning and error messages.
+
+            ERR - Select only elements producing error messages (
+            default).
+
+        defkey
+            Specifies whether check should be performed on deformed
+            element
+            shapes. .
+
+            0 - Do not update node coordinates before performing
+            shape checks (default).
+
+            1 - Update node coordinates using the current set of
+            deformations in the database.
+
+        Notes
+        -----
+        Shape checking will occur according to the current SHPP
+        settings. Although ESCHECK is valid in all processors,
+        Defkey  uses the current results in the database. If no
+        results are available a warning will be issued.
+
+        This command is also valid in PREP7, SOLUTION and POST1.
+        """
+        command = f"ESCHECK,{sele},{levl},{defkey}"
+        return self.run(command, **kwargs)
+
+    def esys(self, kcn: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Sets the element coordinate system attribute pointer.
+
+        APDL Command: ESYS
+
+        Parameters
+        ----------
+        kcn
+            Coordinate system number:
+
+            0 - Use element coordinate system orientation as defined
+                (either by default or by KEYOPT setting) for the
+                element (default).
+
+            N - Use element coordinate system orientation based on
+                local coordinate system N (where N must be greater
+                than 10). For global system 0, 1, or 2, define a
+                local system N parallel to appropriate system with
+                the LOCAL or CS command (for example: LOCAL,11,1).
+
+        Notes
+        -----
+        Identifies the local coordinate system to be used to define
+        the element coordinate system of subsequently defined
+        elements. Used only with area and volume elements. For
+        non-layered volume elements, the local coordinate system N is
+        simply assigned to be the element coordinate system. For
+        shell and layered volume elements, the x and y axes of the
+        local coordinate system N are projected onto the shell or
+        layer plane to determine the element coordinate system. See
+        Understanding the Element Coordinate System for more details.
+        N refers to the coordinate system reference number (KCN)
+        defined using the LOCAL (or similar) command. Element
+        coordinate system numbers may be displayed [/PNUM].
+        """
+        command = f"ESYS,{kcn}"
+        return self.run(command, **kwargs)
+
+
+    def errang(self, emin: MapdlInt = "", emax: MapdlInt = "",
+               einc: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Specifies the element range to be read from a file.
+
+        APDL Command: ERRANG
+
+        Parameters
+        ----------
+        emin, emax, einc
+            Elements with numbers from EMIN (defaults to 1) to EMAX
+            (defaults to 99999999) in steps of EINC (defaults to 1)
+            will be read.
+
+        Notes
+        -----
+        Defines the element number range to be read [EREAD] from the
+        element file. If a range is also implied from the NRRANG
+        command, only those elements satisfying both ranges will be
+        read.
+        """
+        command = f"ERRANG,{emin},{emax},{einc}"
+        return self.run(command, **kwargs)
+
+    def erefine(self, ne1: Union[str, int] = "", ne2: MapdlInt = "",
+                ninc: MapdlInt = "", level: MapdlInt = "",
+                depth: MapdlInt = "", post: str = "", retain: str = "",
+                **kwargs) -> Optional[str]:
+        """Refines the mesh around specified elements.
+
+        APDL Command: EREFINE
+
+        Parameters
+        ----------
+        ne1, ne2, ninc
+            Elements (NE1 to NE2 in increments of NINC) around which
+            the mesh is to be refined. NE2 defaults to NE1, and NINC
+            defaults to 1. If NE1 = ALL, NE2 and NINC are ignored and
+            all selected elements are used for refinement. A component
+            name may also be substituted for NE1 (NE2 and NINC are
+            ignored).
+
+        level
+            Amount of refinement to be done. Specify the value of
+            LEVEL as an integer from 1 to 5, where a value of 1
+            provides minimal refinement, and a value of 5 provides
+            maximum refinement (defaults to 1).
+
+        depth
+            Depth of mesh refinement in terms of number of elements
+            outward from the indicated elements, NE1 to NE2
+            (defaults to 0).
+
+        post
+            Type of postprocessing to be done after element
+            splitting, in order to improve element quality:
+
+            OFF - No postprocessing will be done.
+
+            SMOOTH - Smoothing will be done. Node locations may change.
+
+            CLEAN - Smoothing and cleanup will be done. Existing
+                    elements may be deleted, and node
+                    locations may change (default).
+
+        retain
+            Flag indicating whether quadrilateral elements must be
+            retained in the refinement of an all-quadrilateral mesh.
+            (The ANSYS program ignores the RETAIN argument when you
+            are refining anything other than a quadrilateral mesh.)
+
+            ON - The final mesh will be composed entirely of
+                 quadrilateral elements, regardless
+                 of the element quality (default).
+
+            OFF - The final mesh may include some triangular elements
+                  in order to maintain
+                  element quality and provide transitioning.
+
+        Notes
+        -----
+        EREFINE performs local mesh refinement around the specified
+        elements. By default, the surrounding elements are split to
+        create new elements with 1/2 the edge length of the original
+        elements (LEVEL = 1).
+
+        EREFINE refines all area elements and tetrahedral volume
+        elements that are adjacent to the specified elements. Any
+        volume elements that are adjacent to the specified elements,
+        but are not tetrahedra (for example, hexahedra, wedges,
+        and pyramids), are not refined.
+
+        You cannot use mesh refinement on a solid model that contains
+        initial conditions at nodes [IC], coupled nodes
+        [CP family of commands], constraint equations [CE family of
+        commands], or boundary conditions or loads applied directly
+        to any of its nodes or elements. This applies to nodes and
+        elements anywhere in the model, not just in the
+        region where you want to request mesh refinement. If you have
+        detached the mesh from the solid model, you must disable
+        postprocessing cleanup or smoothing (POST = OFF) after the
+        refinement to preserve the element attributes.
+
+        For additional restrictions on mesh refinement, see Revising
+        Your Model in the Modeling and Meshing Guide.
+
+        This command is also valid for rezoning.
+        """
+        command = f"EREFINE,{ne1},{ne2},{ninc}," \
+                  f"{level},{depth},{post},{retain}"
+        return self.run(command, **kwargs)
+
+    def eintf(self, toler: MapdlFloat = "", k: MapdlInt = "",
+              tlab: str = "", kcn: str = "", dx: MapdlFloat = "",
+              dy: MapdlFloat = "", dz: MapdlFloat = "",
+              knonrot: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Defines two-node elements between coincident or offset nodes.
+
+        APDL Command: EINTF
+
+        Parameters
+        ----------
+        toler
+            Tolerance for coincidence (based on maximum Cartesian
+            coordinate difference for node locations and on angle
+            differences for node orientations). Defaults to 0.0001.
+            Only nodes within the tolerance are considered to be
+            coincident.
+
+        k
+            Only used when the type of the elements to be generated is
+            PRETS179. K is the pretension node that is common to the
+            pretension section that is being created. If K is not
+            specified, it will be created by ANSYS automatically and
+            will have an ANSYS-assigned node number. If K is
+            specified but does not already exist, it will be
+            created automatically but will have the user-specified
+            node number. K cannot be connected to any existing element.
+
+        tlab
+            Nodal number ordering. Allowable values are:
+
+            LOW - The 2-node elements are generated from the lowest
+                  numbered node to the highest numbered node.
+
+            HIGH - The 2-node elements are generated from the highest
+                   numbered node to the lowest numbered node.
+
+            REVE - Reverses the orientation of the selected 2-node
+                   element.
+
+        kcn
+            In coordinate system KCN, elements are created between
+            node 1 and node 2 (= node 1 + dx dy dz).
+
+        dx, dy, dz
+            Node location increments that define the node offset in
+            the active coordinate system (DR, Dθ, DZ for cylindrical
+            and DR, Dθ, DΦ for spherical or toroidal).
+
+        knonrot
+            When KNONROT = 0, the nodes coordinate system is not
+            rotated. When KNONROT = 1, the nodes belonging to the
+            elements created are rotated into coordinate system KCN
+            (see NROTAT command description).
+
+        Notes
+        -----
+        Defines 2-node elements (such as gap elements) between
+        coincident or offset nodes (within a tolerance). May be used,
+        for example, to "hook" together elements interfacing at a
+        seam, where the seam consists of a series of node pairs. One
+        element is generated for each set of two coincident nodes.
+        For more than two coincident or offset nodes in a cluster,
+        an element is generated from the lowest numbered
+        node to each of the other nodes in the cluster. If fewer than
+        all nodes are to be checked for coincidence, use the NSEL
+        command to select the nodes. Element numbers are incremented
+        by one from the highest previous element number. The element
+        type must be set [ET] to a 2-node element before issuing this
+        command. Use the CPINTF command to connect nodes by
+        coupling instead of by elements. Use the CEINTF command to
+        connect the nodes by constraint equations instead of by
+        elements.
+
+        For contact element CONTA178, the tolerance is based on the
+        maximum Cartesian coordinate difference for node locations
+        only. The angle differences for node orientations are not
+        checked.
+        """
+        command = f"EINTF,{toler},{k},{tlab}," \
+                  f"{kcn},{dx},{dy}," \
+                  f"{dz},{knonrot}"
+        return self.run(command, **kwargs)
+
+    def ensym(self, iinc: MapdlInt = "", ninc: MapdlInt = "",
+              iel1: MapdlInt = "", iel2: MapdlInt = "",
+              ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Generates elements by symmetry reflection.
+
+        APDL Command: ENSYM
+
+        Parameters
+        ----------
+        iinc
+            Increment to be added to element numbers in existing set.
+
+        ninc
+            Increment nodes in the given pattern by NINC.
+
+        iel1, iel2, ieinc
+            Reflect elements from pattern beginning with IEL1 to IEL2
+            (defaults to IEL1) in steps of IEINC (defaults to 1). If
+            IEL1 = ALL, IEL2 and IEINC are ignored and pattern is all
+            selected elements [ESEL]. A component name may also be
+            substituted for IEL1 (IEL2 and IEINC are ignored).
+
+        Notes
+        -----
+        This command is the same as the ESYM command except it allows
+        explicitly assigning element numbers to the generated set (in
+        terms of an increment IINC). Any existing elements already
+        having these numbers will be redefined.
+
+        The operation generates a new element by incrementing the
+        nodes on the original element, and reversing and shifting the
+        node connectivity pattern.  For example, for a 4-node 2-D
+        element, the nodes in positions I, J, K and L of the original
+        element are placed in positions J, I, L and K of the reflected
+        element.
+
+        Similar permutations occur for all other element types. For
+        line elements, the nodes in positions I and J of the original
+        element are placed in positions J and I of the reflected
+        element. In releases prior to ANSYS 5.5, no node pattern
+        reversing and shifting occurred for line elements generated by
+        ENSYM. To achieve the same results as you did in releases
+        prior to ANSYS 5.5, use the ENGEN command instead.
+
+        See the ESYM command for additional information about symmetry
+        elements.
+
+        The ENSYM command also provides a convenient way to reverse
+        shell element normals. If the IINC and NINC argument fields
+        are left blank, the effect of the reflection is to reverse the
+        direction of the outward normal of the specified elements. You
+        cannot use the ENSYM command to change the normal direction of
+        any element that has a body or surface load. We recommend that
+        you apply all of your loads only after ensuring that the
+        element normal directions are acceptable. Also note that real
+        constants (such as nonuniform shell thickness and tapered beam
+        constants) may be invalidated by an element reversal. See
+        Revising Your Model in the Modeling and Meshing Guide for more
+        information about controlling element normals.
+        """
+        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}",
+                        **kwargs)
+
+    def esym(self, ninc: MapdlInt = "", iel1: MapdlInt = "",
+             iel2: MapdlInt = "",
+             ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Generates elements from a pattern by a symmetry reflection.
+
+        APDL Command: ESYM
+
+        Parameters
+        ----------
+        ninc
+            Increment nodes in the given pattern by NINC.
+
+        iel1, iel2, ieinc
+            Reflect elements from pattern beginning with IEL1 to IEL2
+            (defaults to IEL1) in steps of IEINC (defaults to 1). If
+            IEL1 = ALL, IEL2 and IEINC are ignored and pattern is all
+            selected elements [ESEL]. A component name may
+            also be substituted for IEL1 (IEL2 and IEINC are ignored).
+
+        Notes
+        -----
+        Generates additional elements from a given pattern (similar
+        to EGEN) except with a "symmetry" reflection. The operation
+        generates a new element by incrementing the nodes on the
+        original element, and reversing and shifting  the node
+        connectivity pattern. For example, for a 4-node 2-D element,
+        the nodes in positions I, J, K, and L of the original element
+        are placed in positions J, I, L, and K of the reflected element.
+
+        Similar permutations occur for all other element types. For line
+        elements, the nodes in positions I and J of the original
+        element are placed in positions J and I of the reflected
+        element. In releases prior
+        to ANSYS 5.5, no node pattern reversing and shifting occurred
+        for line elements generated by ESYM. To achieve the same
+        results with ANSYS 5.5 as you did in prior releases, use the
+        EGEN command instead.
+
+        It is recommended that symmetry elements be displayed and
+        graphically reviewed.
+
+        If the nodes are also reflected (as with the NSYM command)
+        this pattern is such that the orientation of the symmetry
+        element remains similar to the original element (i.e.,
+        clockwise elements are generated from
+        clockwise elements).
+
+        For a non-reflected node pattern, the reversed orientation
+        has the effect of reversing the outward normal direction (
+        clockwise elements are generated from counterclockwise
+        elements).
+
+        Note:: : Since nodes may be defined anywhere in the model
+        independently of this command, any orientation of the
+        "symmetry" elements is possible. See also the ENSYM command
+        for modifying existing elements.
+        """
+        return self.run(f"ESYM,,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
+
+
+
+    def elist(self, iel1: Union[str, int] = "", iel2: MapdlInt = "",
+              inc: MapdlInt = "", nnkey: MapdlInt = "",
+              rkey: MapdlInt = "", ptkey: MapdlInt = "",
+              **kwargs) -> Optional[str]:
+        """APDL Command: ELIST
+
+        Lists the elements and their attributes.
+
+        Parameters
+        ----------
+        iel1, iel2, inc
+            Lists elements from IEL1 to IEL2 (defaults to IEL1) in
+            steps of INC (defaults to 1). If IEL1 = ALL (default),
+            IEL2 and INC are ignored and all selected elements [ESEL]
+            are listed. A component name may also be substituted
+            for IEL1 (IEL2 and INC are ignored).
+
+        nnkey
+            Node listing key:
+
+            0 - List attribute references and nodes.
+
+            1 - List attribute references but not nodes.
+
+        rkey
+            Real constant listing key:
+
+            0 - Do not show real constants for each element.
+
+            1 - Show real constants for each element. This includes
+                default values chosen for
+                the element.
+
+        ptkey
+            LS-DYNA part number listing key (applicable to ANSYS
+            LS-DYNA only):
+
+            0 - Do not show part ID number for each element.
+
+            1 - Show part ID number for each element.
+
+        Notes
+        -----
+        Lists the elements with their nodes and attributes (MAT,
+        TYPE, REAL, ESYS, SECNUM, PART). See also the LAYLIST command
+        for listing layered elements.
+
+        This command is valid in any processor.
+        """
+        command = f"ELIST,{iel1},{iel2},{inc},{nnkey},{rkey},{ptkey}"
+        return self.run(command, **kwargs)
+
+    def eorient(self, etype: str = "", dir_: Union[str, int] = "",
+                toler: MapdlFloat = "", **kwargs) -> Optional[str]:
+        """Reorients solid element normals.
+
+        APDL Command: EORIENT
+
+        Parameters
+        ----------
+        etype
+            Specifies which elements to orient.
+
+            LYSL - Specifies that certain solid elements (such as
+                   SOLID185 with KEYOPT(3) = 1,
+                   SOLID186 with KEYOPT(3) = 1, and SOLSH190) will be
+                   oriented. This value is the default.
+
+        dir_
+            The axis and direction for orientation, or an element
+            number. If Dir is set to a positive number (n),
+            then all eligible elements are oriented as similarly as
+            possible to element n.
+
+            NEGX - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   negative x-axis is designated (reoriented) as face 1.
+
+            POSX - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   positive x-axis is designated (reoriented) as face 1.
+
+            NEGY - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   negative y-axis is designated (reoriented) as face
+                   1. .
+
+            POSY - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   positive y-axis is designated (reoriented) as face 1.
+
+            NEGZ - (Default) The element face with the outward normal
+                   most nearly parallel to the element coordinate
+                   system’s negative z-axis is designated (reoriented)
+                   as face 1.
+
+            POSZ - The element face with the outward normal most
+                   nearly parallel to the element coordinate system’s
+                   positive z-axis is designated (reoriented) as face 1.
+
+        toler
+            The maximum angle (in degrees) between the outward normal
+            face and the target axis. Default is 90.0.
+            Lower toler values will reduce the number of faces that
+            are considered as the basis of element reorientation.
+
+        Notes
+        -----
+        EORIENT renumbers the element faces, designating the face  most
+        parallel to the XY plane of the element coordinate system (set
+        with ESYS) as face 1 (nodes I-J-K-L, parallel to the layers
+        in layered elements). It calculates the outward normal of
+        each face and changes the node designation  of the elements
+        so the face with a normal most nearly parallel with and in
+        the same general direction as the target axis becomes face 1.
+
+        The target axis, defined by Dir, is either the negative or
+        positive indicated axis or the outward normal of face 1 of
+        that element.
+
+        All SOLID185 Layered Structural Solid, SOLID186 Layered
+        Structural Solid, and SOLSH190 solid shell elements in the
+        selected set are considered for reorientation.
+
+        After reorienting elements, you should always display and
+        graphically review results using the /ESHAPE command. When
+        plotting models with many or symmetric layers, it may be
+        useful to temporarily reduce the number of layers to two,
+        with one layer being much thicker than the other.
+
+        You cannot use EORIENT to change the normal direction of any
+        element that has a body or surface load.  We recommend that
+        you apply all of your loads only after ensuring that the
+        element normal directions are acceptable.
+
+        Prisms and tetrahedrals are also supported, within the current
+        limitations of the SOLID185, SOLID186, and SOLSH190 elements.
+        (Layers parallel to the four-node face of the prism are not
+        supported.)
+        """
+        command = f"EORIENT,{etype},{dir_},{toler}"
+        return self.run(command, **kwargs)
+
+    def engen(self, iinc: MapdlInt = "", itime: MapdlInt = "",
+              ninc: MapdlInt = "", iel1: MapdlInt = "",
+              iel2: MapdlInt = "", ieinc: MapdlInt = "",
+              minc: MapdlInt = "", tinc: MapdlInt = "",
+              rinc: MapdlFloat = "", cinc: MapdlInt = "",
+              sinc: MapdlInt = "", dx: MapdlInt = "", dy: MapdlInt = "",
+              dz: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Generates elements from an existing pattern.
+
+        APDL Command: ENGEN
+
+        Parameters
+        ----------
+        iinc
+            Increment to be added to element numbers in pattern.
+
+        itime, ninc
+            Do this generation operation a total of ITIMEs,
+            incrementing all nodes in the given pattern by NINC each
+            time after the first. ITIME must be > 1 if generation is
+            to occur. NINC may be positive, zero, or negative.
+
+        iel1, iel2, ieinc
+            Generate elements from the pattern that begins with IEL1
+            to IEL2 (defaults to IEL1) in steps of IEINC (defaults to
+            1). If IEL1 is negative, IEL2 and IEINC are ignored and
+            use the last \|IEL1\| elements (in sequence backward from
+            the maximum element number) as the pattern to be
+            repeated.  If IEL1 = ALL, IEL2 and IEINC are ignored and
+            all selected elements [ESEL] are used as the
+            pattern to be repeated. A component name may also be
+            substituted for IEL1 (IEL2 and IEINC are ignored).
+
+        minc
+            Increment material number of all elements in the given
+            pattern by MINC each time after the first.
+
+        tinc
+            Increment type number by TINC.
+
+        rinc
+            Increment real constant table number by RINC.
+
+        cinc
+            Increment element coordinate system number by CINC.
+
+        sinc
+            Increment section ID number by SINC.
+
+        dx, dy, dz
+            Define nodes that do not already exist but are needed by
+            generated elements (NGEN,ITIME,INC,NODE1,,,DX,DY,
+            DZ). Zero is a valid value. If blank, DX, DY, and DZ are
+            ignored.
+
+        Notes
+        -----
+        Same as the EGEN command except it allows element numbers to be
+        explicitly incremented (IINC) from the generated set. Any
+        existing elements already having these numbers will be
+        redefined.
+        """
+        command = f"ENGEN,{iinc},{itime},{ninc},{iel1},{iel2}," \
+                  f"{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx}," \
+                  f"{dy},{dz}"
+        return self.run(command, **kwargs)
+
+
+    def ematwrite(self, key: str = "", **kwargs) -> Optional[str]:
+        """Forces the writing of all the element matrices to File.EMAT.
+
+        APDL Command: EMATWRITE
+
+        Parameters
+        ----------
+        key
+            Write key:
+
+            YES - Forces the writing of the element matrices to
+                  File.EMAT even if not normally
+                  done.
+
+            NO - Element matrices are written only if required. This
+                 value is the default.
+
+        Notes
+        -----
+        The EMATWRITE command forces ANSYS to write the File.EMAT
+        file. The file is necessary if you intend to follow the
+        initial load step with a subsequent inertia relief
+        calculation (IRLF). If used in the solution
+        processor (/SOLU), this command is only valid within the
+        first load step.
+
+        This command is also valid in PREP7.
+        """
+        command = f"EMATWRITE,{key}"
+        return self.run(command, **kwargs)
+
+    def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "",
+           k: MapdlInt = "", l: MapdlInt = "",
+           m: MapdlInt = "", n: MapdlInt = "", o: MapdlInt = "",
+           p: MapdlInt = "", **kwargs) -> Optional[str]:
+        """Defines an element by its number and node connectivity.
+
+        APDL Command: EN
+
+        Parameters
+        ----------
+        iel
+            Number assigned to element being defined.
+
+        i
+            Number of node assigned to first nodal position (node I).
+
+        j, k, l, m, n, o, p
+            Number assigned to second (node J) through eighth (node
+            P) nodal position, if any.
+
+        Notes
+        -----
+        Defines an element by its nodes and attribute values. Similar
+        to the E command except it allows the element number (IEL) to be defined
+        explicitly. Element numbers need not be consecutive. Any
+        existing element already having this number will be redefined.
+
+        Up to 8 nodes may be specified with the EN command. If more
+        nodes are needed for the element, use the
+        :meth:`emore` command. The number of nodes required and the
+        order in which they should be specified are described in the
+        Element Reference for each element type.  The current (or
+        default) MAT, TYPE, REAL, SECNUM, and ESYS attribute values
+        are also assigned to the element.
+
+        When creating elements with more than 8 nodes using this
+        command and the :meth:`emore` command, it may be necessary to
+        turn off shape checking using the SHPP command before
+        issuing this command. If a valid element type can be created
+        without using the additional nodes on the :meth:`emore`
+        command, this command will create that element. The
+        :meth:`emore` command will then modify the element to include
+        the additional nodes. If shape checking is active, it will be
+        performed before the :meth:`emore` command is issued.
+        Therefore, if the shape checking limits are exceeded, element
+        creation may fail before the :meth:`emore` command modifies
+        the element into an acceptable shape.
+        """
+        command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
+        return self.run(command, **kwargs)
+    def elem(self, **kwargs) -> Optional[str]:
+        """Specifies "Elements" as the subsequent status topic.
+
+        APDL Command: ELEM
+
+        Notes
+        -----
+
+        The STAT command should immediately follow this command,
+        which should report the status for the specified topic.
+        """
+        command = "ELEM,"
+        return self.run(command, **kwargs)
+
+    def einfin(self, compname: str = "", pnode: MapdlInt = "",
+               **kwargs) -> Optional[str]:
+        """Generates structural infinite elements from selected nodes.
+
+        APDL Command: EINFIN
+
+        Parameters
+        ----------
+        compname
+            Component name containing one node to be used as the pole
+            node for generating INFIN257 structural infinite
+            elements. The pole node is generally located at or near
+            the geometric center of the finite element domain.
+
+        pnode
+            Node number for the direct input of the pole node. A
+            parameter or parametric expression is also valid. Specify
+            this value when no CompName has been specified. If
+            CompName is specified, this value is ignored.
+
+        Notes
+        -----
+        The EINFIN command generates structural infinite elements
+        (INFIN257) directly from the selected face of valid base
+        elements (existing standard elements in your model). The
+        command scans all base elements for the selected nodes and
+        generates a compatible infinite element type for each base
+        element. A combination of different base element types is
+        allowed if the types are all compatible with the infinite
+        elements.
+
+        The infinite element type requires no predefinition (ET).
+
+        The faces of base elements are determined from the selected
+        node set (NSEL), and the geometry of the infinite element is
+        determined based on the shape of the face. Element
+        characteristics and options are determined according to the
+        base element. For the face to be used, all nodes on the face
+        of a base element must be selected
+
+        Use base elements to model the near-field domain that
+        interacts with the solid structures or applied loads. To
+        apply the truncated far-field effect, a single layer of
+        infinite elements must be attached to the near-field domain.
+        The outer surface of the near-field domain
+        must be convex.
+
+        After the EINFIN command executes, you can verify the newly
+        created infinite element types and elements (ETLIST, ELIST,
+        EPLOT).
+
+        Infinite elements do not account for any subsequent
+        modifications made to the base elements. It is good practice
+        to issue the EINFIN
+        command only after the base elements are finalized. If you
+        delete or modify base elements, remove all affected infinite
+        elements and reissue the EINFIN command; doing so prevents
+        inconsistencies.
+        """
+        command = f"EINFIN,{compname},{pnode}"
+        return self.run(command, **kwargs)
+
+    def eread(self, fname: str = "",
+              ext: str = "", **kwargs) -> Optional[str]:
+        """Reads elements from a file.
+
+        APDL Command: EREAD
+
+        Parameters
+        ----------
+        fname
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+        ext
+            Filename extension (eight-character maximum).
+
+        Notes
+        -----
+        This read operation is not necessary in a standard ANSYS run
+        but is provided as a convenience to users wanting to read a
+        coded element file, such as from another mesh generator or
+        from a CAD/CAM program.  Data should be formatted as produced
+        with the EWRITE command. If issuing EREAD to acquire element
+        information generated from ANSYS EWRITE, you must also issue
+        NREAD before the EREAD command. The element types [ET] must be
+        defined before the file is read so that the file may be read
+        properly. Only elements that are specified with the ERRANG
+        command are read from the file. Also, only elements that are
+        fully attached to the nodes specified on the NRRANG command
+        are read from the file. Elements are assigned numbers
+        consecutively as read from the file, beginning with the
+        current highest database element number plus one. The file is
+        rewound before and after reading. Reading continues until the
+        end of the file.
+        """
+        command = f"EREAD,{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "",
+              kabs: MapdlInt = "", numb: MapdlInt = "",
+              **kwargs) -> Optional[str]:
+        """Sorts the element table.
+
+        APDL Command: ESORT
+
+        Parameters
+        ----------
+        item
+            Label identifying the item:
+            ETAB - (currently the only Item available)
+
+        lab
+            element table label: Lab - Any user-defined label from
+            the ETABLE command (input in the Lab field of the ETABLE
+            command).
+
+        order
+            Order of sort operation:
+
+            0 - Sort into descending order.
+
+            1 - Sort into ascending order.
+
+        kabs
+            Absolute value key:
+
+            0 - Sort according to real value.
+
+            1 - Sort according to absolute value.
+
+        numb
+            Number of elements (element table rows) to be sorted in
+            ascending or descending order (ORDER) before sort is
+            stopped (remainder will be in unsorted sequence)
+            (defaults to all elements).
+
+        Notes
+        -----
+        The element table rows are sorted based on the column
+        containing the Lab values. Use EUSORT to restore the original
+        order. If ESORT is specified with PowerGraphics on
+        [/GRAPHICS,POWER], then the nodal solution results listing
+        [PRNSOL] will be the same as with the full graphics mode
+        [/GRAPHICS,FULL].
+        """
+        command = f"ESORT,{item},{lab},{order},{kabs},{numb}"
+        return self.run(command, **kwargs)
+
+    def esurf(self, xnode: MapdlInt = "", tlab: str = "",
+              shape: str = "", **kwargs) -> Optional[str]:
+        """Generates elements overlaid on the free faces of selected nodes.
+
+        APDL Command: ESURF
+
+        Parameters
+        ----------
+        xnode
+            Node number that is used only in the following two cases:
+
+        tlab
+            Generates target, contact, and hydrostatic fluid elements
+            with correct direction of normals.
+
+            TOP - Generates target and contact elements over beam and
+                  shell elements, or hydrostatic fluid elements over
+                  shell elements, with the normals the same as the
+                  underlying beam and shell elements (default).
+
+            BOTTOM - Generates target and contact elements over beam
+                     and shell elements, or hydrostatic fluid
+                     elements over shell elements, with the
+                     normals opposite to the underlying beam and shell
+                     elements.
+
+            If target or contact elements and hydrostatic fluid
+            elements are defined on the same underlying shell
+            elements, you only need to use this option once to orient
+            the normals opposite to the
+            underlying shell elements.
+
+            REVERSE - Reverses the direction of the normals on
+                      existing selected target elements, contact
+                      elements, and hydrostatic fluid elements. - If
+                      target or contact elements and hydrostatic
+                      fluid elements are defined on the same
+                      underlying shell elements, you only need to use
+                      this option once to reverse the normals for all
+                      selected elements.
+
+        shape
+            Used to specify the element shape for target element
+            TARGE170 (Shape = LINE or POINT) or TARGE169 elements
+            (Shape = POINT).
+
+            (blank) - The target element takes the same shape as the
+                      external surface of the underlying element
+                      (default).
+
+            LINE - Generates LINE or PARA (parabolic) segments on
+                   exterior of selected 3-D elements.
+
+            POINT - Generates POINT segments on selected nodes.
+
+        Notes
+        -----
+        The ESURF command generates elements of the currently active
+        element type overlaid on the free faces of existing elements.
+        For example, surface elements (such as SURF151, SURF152,
+        SURF153, SURF154, or SURF159) can be generated over solid
+        elements (such as PLANE55, SOLID70, PLANE182, SOLID185,
+        or SOLID272, respectively).
+
+        Element faces are determined from the selected node set
+        (NSEL) and the load faces for that element type. The
+        operation is similar to that used for generating element
+        loads from selected nodes via the SF,ALL command, except that
+        elements (instead of loads) are generated. All nodes on the
+        face must be selected for the face to be used. For shell
+        elements, only face one of the element is available. If nodes
+        are shared by adjacent selected element faces, the faces are not
+        free and no element is generated.
+
+        Elements created by ESURF are oriented such that their
+        surface load directions are consistent with those of the
+        underlying elements. Carefully check generated elements and
+        their orientations.
+
+        Generated elements use the existing nodes and the active MAT,
+        TYPE, REAL, and ESYS attributes. The exception is when Tlab =
+        REVERSE. The reversed target and contact elements have the
+        same attributes as the original elements. If the underlying
+        elements are solid elements, Tlab = TOP or BOTTOM has no effect.
+
+        When the command generates a target element, the shape is by
+        default the same as that of the underlying element. Issue
+        ESURF,,, LINE or ESURF,,,POINT to generate LINE, PARA,
+        and POINT segments.
+
+        The ESURF command can also generate the 2-D or 3-D
+        node-to-surface element CONTA175, based on the selected node
+        components of the underlying solid elements. When used to
+        generate CONTA175 elements, all ESURF arguments are ignored.
+        (If CONTA175 is the active element type, the path Main Menu>
+        Preprocessor> Modeling> Create> Elements> Node-to-Surf uses
+        ESURF to generate elements.)
+
+        To generate SURF151 or SURF152 elements that have two extra
+        nodes from FLUID116 elements, KEYOPT(5) for SURF151 or
+        SURF152 is first set to 0 and ESURF is issued. Then KEYOPT(5)
+        for SURF151 or SURF152 is set to 2 and MSTOLE is issued. For
+        more information, see Using the Surface Effect Elements in
+        the Thermal Analysis Guide.
+
+        For hydrostatic fluid elements HSFLD241 and HSFLD242,
+        the ESURF command generates triangular (2-D) or
+        pyramid-shaped (3-D) elements with bases that are overlaid on
+        the faces of selected 2-D or 3-D solid or shell elements.
+        The single vertex for all generated elements is at the
+        pressure node specified as XNODE. The generated elements fill
+        the volume enclosed by the solid or shell elements. The nodes
+        on the overlaid faces have translational degrees of freedom,
+        while the pressure node shared by all generated elements has
+        a single hydrostatic pressure degree of freedom, HDSP (see
+        HSFLD241 and HSFLD242 for more information about the pressure
+        node).
+        """
+        command = f"ESURF,{xnode},{tlab},{shape}"
+        return self.run(command, **kwargs)
+
+    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+        """Plots the currently selected elements.
+
+        APDL Command: EPLOT
+
+        Parameters
+        ----------
+        vtk : bool, optional
+            Plot the currently selected elements using ``pyvista``.
+            Defaults to current ``use_vtk`` setting.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs
+            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            keyword arguments related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.1)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.vgen(2, 'all')
+        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
+                        show_node_numbering=True)
+
+        Save a screenshot to disk without showing the plot
+
+        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                        window_size=[1920, 1080], savefig='screenshot.png',
+                        off_screen=True)
+
+        """
+        if vtk is None:
+            vtk = self._use_vtk
+
+        if vtk:
+            kwargs.setdefault('title', 'MAPDL Element Plot')
+            if not self._mesh.n_elem:
+                warnings.warn('There are no elements to plot.')
+                return general_plotter([], [], [], **kwargs)
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault('show_edges', True)
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{'points': esurf.points, 'labels': esurf['ansys_node_num']}]
+
+            return general_plotter([{'mesh': esurf}],
+                                   [],
+                                   labels,
+                                   **kwargs)
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
+        return super().eplot(**kwargs)
+
+    def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
+               zv1="", xv6="", yv6="", zv6="", **kwargs) -> int:
+        """Generate a single line from a spline fit to a series of keypoints.
+
+        APDL Command: BSPLIN
+
+        Parameters
+        ----------
+        p1, p2, p3, p4, p5, p6
+            Keypoints through which a spline is fit.  At least two
+            keypoints must be defined.
+
+        XV1, YV1, ZV1
+            Orientation point of an outward vector tangent to line at
+            P1. Vector coordinate system has its origin at the
+            keypoint. Coordinate interpretation corresponds to the
+            active coordinate system type, i.e., X is R for
+            cylindrical, etc. Defaults to zero curvature slope.
+
+        XV6, YV6, ZV6
+            Orientation point of an outward vector tangent to a line
+            at P6 (or the last keypoint specified if fewer than six
+            specified). Defaults to zero curvature slope.
+
+        Returns
+        -------
+        int
+            Line number of the spline generated from the spline fit.
+
+        Examples
+        --------
+        Generate a spline through ``(0, 0, 0)``, ``(0, 1, 0)`` and
+        ``(1, 2, 0)``
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 1, 0)
+        >>> k2 = mapdl.k("", 1, 2, 0)
+        >>> lnum = mapdl.bsplin(k0, k1, k2)
+
+        Notes
+        -----
+        One line is generated between keypoint P1 and the last
+        keypoint entered.  The line will pass through each entered
+        keypoint.  Solid modeling in a toroidal coordinate system is
+        not recommended.
+        """
+        command = "BSPLIN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(p3), str(p4), str(p5), str(p6), str(xv1), str(yv1), str(zv1), str(xv6), str(yv6), str(zv6))
+        return parse_line_no(self.run(command, **kwargs))
+
+    def k(self, npt="", x="", y="", z="", **kwargs) -> int:
+        """Define a keypoint.
+
+        APDL Command: K
+
+        Parameters
+        ----------
+        npt
+            Reference number for keypoint.  If zero, the lowest
+            available number is assigned [NUMSTR].
+
+        x, y, z
+            Keypoint location in the active coordinate system (may be
+            R, θ, Z or R, θ, Φ).
+
+        Returns
+        -------
+        int
+            The keypoint number of the generated keypoint.
+
+        Examples
+        --------
+        Create keypoint at ``(0, 1, 2)``
+
+        >>> knum = mapdl.k('', 0, 1, 2)
+        >>> knum
+        1
+
+        Create keypoint at ``(10, 11, 12)`` while specifying the
+        keypoint number.
+
+        >>> knum = mapdl.k(5, 10, 11, 12)
+        >>> knum
+        5
+
+        Notes
+        -----
+        Defines a keypoint in the active coordinate system [CSYS] for
+        line, area, and volume descriptions.  A previously defined
+        keypoint of the same number will be redefined.  Keypoints may
+        be redefined only if it is not yet attached to a line or is
+        not yet meshed.  Solid modeling in a toroidal system is not
+        recommended.
+        """
+        command = "K,%s,%s,%s,%s" % (str(npt), str(x), str(y), str(z))
+        msg = self.run(command, **kwargs)
+
+        if msg:
+            if not re.search(r"KEYPOINT NUMBER", msg):
+                res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
+            else:
+                res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
+
+            if res:
+                return int(res.group(2))
+
+    def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
+               **kwargs) -> list:
+        """Generate circular arc lines.
+
+        APDL Command: CIRCLE
+
+        Parameters
+        ----------
+        pcent
+            Keypoint defining the center of the circle (in the plane
+            of the circle).
+
+        rad
+            Radius of the circle.  If RAD is blank and PCENT = P, the
+            radius is the distance from PCENT to PZERO.
+
+        paxis
+            Keypoint defining axis of circle (along with PCENT).  If
+            PCENT = P and PAXIS is omitted, the axis is normal to the
+            working plane.
+
+        pzero
+            Keypoint defining the plane normal to circle (along with
+            PCENT and PAXIS) and the zero degree location.  Need not
+            be in the plane of the circle. This value is not required
+            if PAXIS is defined along the Y axis (that is, a circle in
+            the XZ plane).
+
+        arc
+            Arc length (in degrees).  Positive follows right-hand rule
+            about PCENT-PAXIS vector.  Defaults to 360 degrees.
+
+        nseg
+            Number of lines around circumference (defaults to minimum
+            required for 90 degrees-maximum arcs, i.e., 4 for 360 degrees).  Number
+            of keypoints generated is NSEG for 360 degrees or NSEG + 1 for
+            less than 360 degrees.
+
+        Returns
+        -------
+        list
+            List of lines of the circular arcs generated from this
+            command.
+
+        Examples
+        --------
+        Create a full circle containing four circular arcs.  Circle
+        centered at (0, 0, 0) and generated in the XY plane.  Return
+        the lines generated from the circle.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> carc0
+        [1, 2, 3, 4]
+
+        Notes
+        -----
+        Generates circular arc lines (and their corresponding
+        keypoints).  Keypoints are generated at regular angular
+        locations (based on a maximum spacing of 90 degrees).  Arc lines are
+        generated connecting the keypoints.  Keypoint and line numbers
+        are automatically assigned, beginning with the lowest
+        available values [NUMSTR].  Adjacent lines use a common
+        keypoint.  Line shapes are generated as arcs, regardless of
+        the active coordinate system.  Line shapes are invariant with
+        coordinate system after they are generated.
+        """
+        command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
+        return parse_line_nos(self.run(command, **kwargs))
+
+    def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
+          xv2="", yv2="", zv2="", **kwargs) -> int:
+        """Define a line between two keypoints.
+
+        APDL Command: L
+
+        Parameters
+        ----------
+        p1
+            Keypoint at the beginning of line.
+
+        p2
+            Keypoint at the end of line.
+
+        ndiv
+            Number of element divisions within this line.  Normally
+            this field is not used; specifying divisions with LESIZE,
+            etc. is recommended.
+
+        space
+            Spacing ratio.  Normally this field is not used, as
+            specifying spacing ratios with the LESIZE command is
+            recommended.  If positive, space is the nominal ratio of
+            the last division size (at P2) to the first division size
+            (at P1).  If the ratio is greater than 1, the division
+            sizes increase from P1 to P2, and if less than 1, they
+            decrease.  If space is negative, then ``space`` is the
+            nominal ratio of the center division size to those at the
+            ends.
+
+        Returns
+        -------
+        int
+            The line number of the generated line.
+
+        Examples
+        --------
+        Create a line between the two keypoints (0, 0, 0) and (1, 0, 0)
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> lnum = mapdl.l(k0, k1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Defines a line between two keypoints from P1 to P2.  The line
+        shape may be generated as "straight" (in the active coordinate
+        system) or curved.  The line shape is invariant with
+        coordinate system after it is generated.  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+        A curved line is limited to 180 degrees.  Lines may be redefined only
+        if not yet attached to an area.
+        """
+        command = "L,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(p1), str(p2), str(ndiv), str(space), str(xv1), str(yv1), str(zv1), str(xv2), str(yv2), str(zv2))
+        return parse_line_no(self.run(command, **kwargs))
+
+    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
+          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
+          p18="", **kwargs) -> int:
+        """Define an area by connecting keypoints.
+
+        APDL Command: A
+
+        Parameters
+        ----------
+        p1, p2, p3, . . . , p18
+            List of keypoints defining the area (18 maximum if using
+            keyboard entry).  At least 3 keypoints must be entered.
+
+        Returns
+        -------
+        int
+            The area number of the generated area.
+
+        Examples
+        --------
+        Create a simple triangle in the XY plane using three keypoints.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 0, 1, 0)
+        >>> a0 = mapdl.a(k0, k1, k2)
+        >>> a0
+        1
+
+        Notes
+        -----
+        Keypoints (P1 through P18) must be input in a clockwise or
+        counterclockwise order around the area.  This order also
+        determines the positive normal direction of the area according
+        to the right-hand rule.  Existing lines between adjacent
+        keypoints will be used; missing lines are generated "straight"
+        in the active coordinate system and assigned the lowest
+        available numbers [NUMSTR].  If more than one line exists
+        between two keypoints, the shorter one will be chosen.  If the
+        area is to be defined with more than four keypoints, the
+        required keypoints and lines must lie on a constant coordinate
+        value in the active coordinate system (such as a plane or a
+        cylinder).  Areas may be redefined only if not yet attached to
+        a volume.  Solid modeling in a toroidal coordinate system is
+        not recommended.
+        """
+        command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
+        return parse_a(self.run(command, **kwargs))
+
+    def v(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
+          **kwargs) -> int:
+        """Define a volume through keypoints.
+
+        APDL Command: V
+
+        Parameters
+        ----------
+        p1 : int, optional
+            Keypoint defining starting corner of volume.
+
+        p2 : int, optional
+            Keypoint defining second corner of volume.
+
+        p3 : int, optional
+            Keypoint defining third corner of volume.
+
+        p4 : int, optional
+            Keypoint defining fourth corner of volume.
+
+        p5 : int, optional
+            Keypoint defining fifth corner of volume.
+
+        p6 : int, optional
+            Keypoint defining sixth corner of volume.
+
+        p7 : int, optional
+            Keypoint defining seventh corner of volume.
+
+        p8 : int, optional
+            Keypoint defining eighth corner of volume.
+
+        Returns
+        -------
+        int
+            Volume number of the generated volume.
+
+        Examples
+        --------
+        Create a simple cube volume.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> k4 = mapdl.k("", 0, 0, 1)
+        >>> k5 = mapdl.k("", 1, 0, 1)
+        >>> k6 = mapdl.k("", 1, 1, 1)
+        >>> k7 = mapdl.k("", 0, 1, 1)
+        >>> v0 = mapdl.v(k0, k1, k2, k3, k4, k5, k6, k7)
+        >>> v0
+        1
+
+        Create a triangular prism
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> k4 = mapdl.k("", 0, 0, 1)
+        >>> k5 = mapdl.k("", 1, 0, 1)
+        >>> k6 = mapdl.k("", 1, 1, 1)
+        >>> k7 = mapdl.k("", 0, 1, 1)
+        >>> v1 = mapdl.v(k0, k1, k2, k2, k4, k5, k6, k6)
+        >>> v1
+        2
+
+        Create a tetrahedron
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 0, 1)
+        >>> v2 = mapdl.v(k0, k1, k2, k2, k3, k3, k3, k3)
+        >>> v2
+        3
+
+        Notes
+        -----
+        Defines a volume (and its corresponding lines and areas)
+        through eight (or fewer) existing keypoints.  Keypoints must
+        be input in a continuous order.  The order of the keypoints
+        should be around the bottom and then the top.  Missing lines
+        are generated "straight" in the active coordinate system and
+        assigned the lowest available numbers [NUMSTR].  Missing areas
+        are generated and assigned the lowest available numbers.
+
+        Solid modeling in a toroidal coordinate system is not recommended.
+
+        Certain faces may be condensed to a line or point by repeating
+        keypoints.   For example, use V,P1,P2,P3,P3,P5,P6,P7,P7   for a
+        triangular prism or V,P1,P2,P3,P3,P5,P5,P5,P5  for a tetrahedron.
+
+        Using keypoints to produce partial sections in CSYS = 2 can generate
+        anomalies; check the resulting volumes carefully.
+        """
+        command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
+        return parse_v(self.run(command, **kwargs))
+
+    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
+           l10="", **kwargs) -> int:
+        """Generate an area bounded by previously defined lines.
+
+        APDL Command: AL
+
+        Parameters
+        ----------
+        l1, l2, l3, . . . , l10
+            List of lines defining area.  The minimum number of lines
+            is 3.  The positive normal of the area is controlled by
+            the direction of L1 using the right-hand rule.  A negative
+            value of L1 reverses the normal direction.  If L1 = ALL,
+            use all selected lines with L2 defining the normal (L3 to
+            L10 are ignored and L2 defaults to the lowest numbered
+            selected line).  A component name may also be substituted
+            for L1.
+
+        Returns
+        -------
+        int
+            Area number of the generated area.
+
+        Examples
+        --------
+        Create an area from four lines
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> l1 = mapdl.l(k1, k2)
+        >>> l2 = mapdl.l(k2, k3)
+        >>> l3 = mapdl.l(k3, k0)
+        >>> anum = mapdl.al(l0, l1, l2, l3)
+        >>> anum
+        1
+
+        Notes
+        -----
+        Lines may be input (once each) in any order and must form a
+        simply connected closed curve.  If the area is defined with
+        more than four lines, the lines must also lie in the same
+        plane or on a constant coordinate value in the active
+        coordinate system (such as a plane or a cylinder).
+
+        Solid modeling in a toroidal coordinate system is not
+        recommended.  Areas may be redefined only if not yet attached
+        to a volume.
+
+        This command is valid in any processor.
+        """
+        command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
+        return parse_a(self.run(command, **kwargs))
+
+    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
+             **kwargs) -> int:
+        """APDL Command: BLC4
+
+        Creates a rectangular area or block volume by corner points.
+
+        Parameters
+        ----------
+        xcorner, ycorner
+            Working plane X and Y coordinates of one corner of the
+            rectangle or block face.
+
+        width
+            The distance from XCORNER on or parallel to the working
+            plane X-axis that, together with YCORNER, defines a second
+            corner of the rectangle or block face.
+
+        height
+            The distance from YCORNER on or parallel to the working
+            plane Y-axis that, together with XCORNER, defines a third
+            corner of the rectangle or block face.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the block.  If DEPTH = 0
+            (default), a rectangular area is created on the working
+            plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
+
+        Examples
+        --------
+        Create a block with dimensions 1 x 2 x 10 with one corner of
+        the block at (0, 0) of the current working plane.
+
+        >>> vnum = mapdl.blc4(1, 1, 1, 2, 10)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane.
+        A rectangle will be defined with four keypoints and four
+        lines.  A volume will be defined with eight keypoints, twelve
+        lines, and six areas, with the top and bottom faces parallel
+        to the working plane.  See the BLC5, RECTNG, and BLOCK
+        commands for alternate ways to create rectangles and blocks.
+        """
+        command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
+             theta2="", depth="", **kwargs) -> int:
+        """Creates a circular area or cylindrical volume anywhere on
+        the working plane.
+
+        APDL Command: CYL4
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            circle or cylinder.
+
+        rad1, rad2
+            Inner and outer radii (either order) of the circle or
+            cylinder.  A value of zero or blank for either RAD1 or
+            RAD2, or the same value for both RAD1 and RAD2, defines a
+            solid circle or cylinder.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the circle or
+            faces of the cylinder.  Used for creating a partial
+            annulus or partial cylinder.  The sector begins at the
+            algebraically smaller angle, extends in a positive angular
+            direction, and ends at the larger angle.  The starting
+            angle defaults to 0 degrees and the ending angle defaults to
+            360 degrees.  See the Modeling and Meshing Guide for an
+            illustration.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the cylinder.  If DEPTH =
+            0 (default), a circular area is created on the working
+            plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
+
+        Examples
+        --------
+        Create a half arc centered at the origin with an outer radius
+        of 2 and an inner radius of 1
+
+        >>> anum = mapdl.cyl4(xcenter=0, ycenter=0, rad1=1,
+                              theta1=0, rad2=2, theta2=180)
+        >>> anum
+
+        Create a solid cylinder with a depth of 10 at the center of
+        the working plane.
+
+        >>> vnum = mapdl.cyl4(0, 0, 1, depth=10)
+        >>> vnum
+        1
+
+        Create a cylinder with an inner radius of 1.9 and an outer of
+        2.0 with a height of 5 centered at the working plane.
+
+        >>> vnum = mapdl.cyl4(0, 0, rad1=1.9, rad2=2.0, depth=10)
+        2
+
+        Notes
+        -----
+        Defines a circular area anywhere on the working plane or a
+        cylindrical volume with one face anywhere on the working
+        plane.  For a solid cylinder of 360 degrees, the top and bottom faces
+        will be circular (each area defined with four lines) and they
+        will be connected with two surface areas (each spanning 180 degrees).
+        See the CYL5, PCIRC, and CYLIND commands for alternate ways to
+        create circles and cylinders.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you must provide a value for DEPTH or the
+        command will be ignored.
+        """
+        command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def asba(self, na1="", na2="", sepo="", keep1="", keep2="", **kwargs) -> int:
+        """Subtracts areas from areas.
+
+        APDL Command: ASBA
+
+        Parameters
+        ----------
+        na1
+            Area (or areas, if picking is used) to be subtracted from.
+            If ALL, use all selected areas.  Areas specified in this
+            argument are not available for use in the NA2 argument.  A
+            component name may also be substituted for NA1.
+
+        na2
+            Area (or areas, if picking is used) to subtract.  If ALL,
+            use all selected areas (except those included in the NA1
+            argument).  A component name may also be substituted for
+            NA2.
+
+        sepo
+            Behavior if the intersection of the NA1 areas and the NA2 areas is
+            a line or lines:
+
+            (blank) - The resulting areas will share line(s) where they touch.
+
+            SEPO - The resulting areas will have separate, but
+                   coincident line(s) where they touch.
+
+        keep1
+            Specifies whether NA1 areas are to be deleted:
+
+            (blank) - Use the setting of KEEP on the BOPTN command.
+
+            DELETE - Delete NA1 areas after ASBA operation (override
+            BOPTN command settings).
+
+            KEEP - Keep NA1 areas after ASBA operation (override BOPTN
+            command settings).
+
+        keep2
+            Specifies whether NA2 areas are to be deleted:
+
+            (blank) - Use the setting of KEEP on the BOPTN command.
+
+            DELETE - Delete NA2 areas after ASBA operation (override
+            BOPTN command settings).
+
+            KEEP - Keep NA2 areas after ASBA operation (override BOPTN
+            command settings).
+
+        Returns
+        -------
+        int
+            Area number of the new area (if applicable)
+
+        Examples
+        --------
+        Subtract a 0.5 x 0.5 rectangle from a 1 x 1 rectangle.
+
+        >>> anum0 = mapdl.blc4(0, 0, 1, 1)
+        >>> anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+        >>> aout = mapdl.asba(anum0, anum1)
+        >>> aout
+        3
+
+        Notes
+        -----
+        Generates new areas by subtracting the regions common to both
+        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
+        intersection can be an area(s) or line(s).  If the
+        intersection is a line and SEPO is blank, the NA1 area is
+        divided at the line and the resulting areas will be connected,
+        sharing a common line where they touch.  If SEPO is set to
+        SEPO, NA1 is divided into two unconnected areas with separate
+        lines where they touch.  See Solid Modeling in the Modeling
+        and Meshing Guide for an illustration.  See the BOPTN command
+        for an explanation of the options available to Boolean
+        operations.  Element attributes and solid model boundary
+        conditions assigned to the original entities will not be
+        transferred to the new entities generated.  ASBA,ALL,ALL will
+        have no effect since all the areas (in NA1) will be
+        unavailable as NA2 areas.
+        """
+        command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def kbetw(self, kp1="", kp2="", kpnew="", type_="", value="", **kwargs) -> int:
+        """Creates a keypoint between two existing keypoints.
+
+        APDL Command: KBETW
+
+        Parameters
+        ----------
+        kp1
+            First keypoint.
+
+        kp2
+            Second keypoint.
+
+        kpnew
+            Number assigned to the new keypoint.  Defaults to the
+            lowest available keypoint number.
+
+        type\_
+            Type of input for VALUE.
+
+            RATIO - Value is the ratio of the distances between keypoints as follows:
+                    ``(KP1-KPNEW)/(KP1-KP2)``.
+
+            DIST - Value is the absolute distance between KP1 and
+                   KPNEW (valid only if current coordinate system is
+                   Cartesian).
+
+        value
+            Location of new keypoint, as defined by Type (defaults to
+            0.5).  If VALUE is a ratio (Type = RATIO) and is less than
+            0 or greater than 1, the keypoint is created on the
+            extended line.  Similarly, if VALUE is a distance (Type =
+            DIST) and is less than 0 or greater than the distance
+            between KP1 and KP2, the keypoint is created on the
+            extended line.
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
+        Examples
+        --------
+        Create a keypoint exactly centered between two keypoints.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.kbetw(k0, k1)
+        >>> k2
+        3
+
+        Notes
+        -----
+        Placement of the new keypoint depends on the currently active
+        coordinate system [CSYS].  If the coordinate system is
+        Cartesian, the keypoint will lie on a straight line between
+        KP1 and KP2.  If the system is not Cartesian (e.g.,
+        cylindrical, spherical, etc.), the keypoint will be located as
+        if on a line (which may not be straight) created in the
+        current coordinate system between KP1 and KP2.  Note that
+        solid modeling in a toroidal coordinate system is not
+        recommended.
+        """
+        command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
+        return parse_kpoint(self.run(command, **kwargs))
+
+    def kcenter(self, type_="", val1="", val2="", val3="", val4="", kpnew="",
+                **kwargs) -> int:
+        """Creates a keypoint at the center of a circular arc defined
+        by three locations.
+
+        APDL Command: KCENTER
+
+        Parameters
+        ----------
+        type\_
+            Type of entity used to define the circular arc.  The
+            meaning of VAL1 through VAL4 will vary depending on Type.
+
+            KP - Arc is defined by keypoints.
+
+            LINE - Arc is defined by locations on a line.
+
+        val1, val2, val3, val4
+            Values used to specify three locations on the arc (see table
+            below).
+
+        kpnew
+            Number assigned to new keypoint.  Defaults to the lowest available
+            keypoint number.
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
+        Examples
+        --------
+        Create a keypoint at the center of a circle centered at (0, 0, 0)
+
+        >>> k0 = mapdl.k("", 0, 1, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 0, -1, 0)
+        >>> k3 = mapdl.kcenter('KP', k0, k1, k2)
+        >>> k3
+        4
+
+        Notes
+        -----
+        KCENTER should be used in the Cartesian coordinate system
+        (CSYS,0) only.  This command provides three methods to define
+        a keypoint at the center of three locations.
+
+        Three keypoints:
+
+                 , - ~ ~ ~ - ,
+             ,(x)(VAL2)        ' , <--- imaginary circluar arc
+           ,                       ,
+          ,                         ,
+         ,                           ,
+        (x)(VAL1)     (x)(KPNEW)    (x)(VAL3)
+
+        """
+        command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
+        return parse_kpoint(self.run(command, **kwargs))
+
+    def kdist(self, kp1="", kp2="", **kwargs) -> list:
+        """Calculates and lists the distance between two keypoints.
+
+        APDL Command: KDIST
+
+        Parameters
+        ----------
+        kp1
+            First keypoint in distance calculation.
+
+        kp2
+            Second keypoint in distance calculation.
+
+        Returns
+        -------
+        list
+            ``[X, Y, Z]`` distance between two keypoints.
+
+        Examples
+        --------
+        Compute the distance between two keypoints.
+
+        >>> kp0 = (0, 10, -3)
+        >>> kp1 = (1, 5, 10)
+        >>> knum0 = mapdl.k("", *kp0)
+        >>> knum1 = mapdl.k("", *kp1)
+        >>> dist = mapdl.kdist(knum0, knum1)
+        >>> dist
+        [1.0, -5.0, 13.0]
+
+        Notes
+        -----
+        KDIST lists the distance between keypoints KP1 and KP2, as
+        well as the current coordinate system offsets from KP1 to KP2,
+        where the X, Y, and Z locations of KP1 are subtracted from the
+        X, Y, and Z locations of KP2 (respectively) to determine the
+        offsets.  KDIST is valid in any coordinate system except
+        toroidal [CSYS,3].
+
+        This command is valid in any processor.
+        """
+        msg = self.run(f"KDIST,{kp1},{kp2}", **kwargs)
+        if msg:
+            finds = re.findall(NUM_PATTERN, msg)[-3:]
+            if len(finds) == 3:
+                return [float(val) for val in finds]
+
+    def kl(self, nl1="", ratio="", nk1="", **kwargs) -> int:
+        """Generates a keypoint at a specified location on an existing line.
+
+        APDL Command: KL
+
+        Parameters
+        ----------
+        nl1
+            Number of the line.  If negative, the direction of line
+            (as interpreted for RATIO) is reversed.
+
+        ratio
+            Ratio of line length to locate keypoint.  Must be between
+            0.0 and 1.0.  Defaults to 0.5 (divide the line in half).
+
+        nk1
+            Number to be assigned to keypoint generated at division
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
+        Examples
+        --------
+        Create a keypoint on a line from (0, 0, 0) and (10, 0, 0)
+
+        >>> kp0 = (0, 0, 0)
+        >>> kp1 = (10, 0, 0)
+        >>> knum0 = mapdl.k("", *kp0)
+        >>> knum1 = mapdl.k("", *kp1)
+        >>> lnum = mapdl.l(knum0, knum1)
+        >>> lnum
+        1
+
+        """
+        msg = self.run(f"KL,{nl1},{ratio},{nk1}", **kwargs)
+        if msg:
+            res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
+            if res is not None:
+                return int(res.group(1))
+
+    def knode(self, npt="", node="", **kwargs) -> int:
+        """Defines a keypoint at an existing node location.
+
+        APDL Command: KNODE
+
+        Parameters
+        ----------
+        npt
+            Arbitrary reference number for keypoint.  If zero, the
+            lowest available number is assigned [NUMSTR].
+
+        node
+            Node number defining global X, Y, Z keypoint location.  A
+            component name may also be substituted for NODE.
+
+        Returns
+        -------
+        int
+            Keypoint number of the generated keypoint.
+
+        Examples
+        --------
+        Create a keypoint at a node at (1, 2, 3)
+
+        >>> nnum = mapdl.n('', 1, 2, 3)
+        >>> knum1 = mapdl.knode('', nnum)
+        >>> knum1
+        1
+
+        """
+        msg = self.run(f"KNODE,{npt},{node}", **kwargs)
+        if msg:
+            res = re.search(r'KEYPOINT NUMBER =\s+(\d+)', msg)
+            if res is not None:
+                return int(res.group(1))
+
+    def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
+              **kwargs) -> int:
+        """Generates a line at an angle with two existing lines.
+
+        APDL Command: L2ANG
+
+        Parameters
+        ----------
+        nl1
+            Number of the first line to be hit (touched by the end of
+            the new line).  If negative, assume P1 (see below) is the
+            second keypoint of the line instead of the first.
+
+        nl2
+            Number of the second line to be hit.  If negative, assume
+            P3 is the second keypoint of the line instead of the
+            first.
+
+        ang1
+            Angle of intersection (usually zero or 180) of generated
+            line with tangent to first line.
+
+        ang2
+            Angle of intersection (usually zero or 180) of generated
+            line with tangent to second line.
+
+        phit1
+            Number to be assigned to keypoint generated at hit
+            location on first line (defaults to lowest available
+            keypoint number [NUMSTR]).
+
+        phit2
+            Number to be assigned to keypoint generated at hit
+            location on second line (defaults to lowest available
+            keypoint number [NUMSTR]).
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create two circles and join them with a line.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", 0, 0, 0.5)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> carc1 = mapdl.circle(k2, 1, k1)
+        >>> lnum = mapdl.l2ang(carc0[0], carc1[0], 90, 90)
+        >>> lnum
+        9
+
+        Notes
+        -----
+        Generates a straight line (PHIT1-PHIT2) at an angle (ANG1)
+        with an existing line NL1 (P1-P2) and which is also at an
+        angle (ANG2) with another existing line NL2 (P3-P4).  If the
+        angles are zero the generated line is tangent to the two
+        lines.  The PHIT1 and PHIT2 locations on the lines are
+        automatically calculated.  Line P1-P2 becomes P1-PHIT1, P3-P4
+        becomes P3-PHIT2, and new lines PHIT1-P2, PHIT2-P4, and
+        PHIT1-PHIT2 are generated.  Line divisions are set to zero
+        (use LESIZE, etc. to modify).
+        """
+        command = f"L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}"
+        msg = self.run(command, **kwargs)
+        if msg:
+            return parse_line_no(msg)
+
+    def l2tan(self, nl1="", nl2="", **kwargs) -> int:
+        """Generates a line tangent to two lines.
+
+        APDL Command: L2TAN
+
+        Parameters
+        ----------
+        nl1
+            Number of the first line generated line is tangent to.  If
+            negative, assume P1 (see below) is the second keypoint of
+            the line instead of the first.
+
+        nl2
+            Number of the second line generated line is tangent to.
+            If negative, assume P3 is the second keypoint of the line
+            instead of the first.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create two circular arcs and connect them with a spline.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", -1.5, 1.5, 0)
+        >>> k3 = mapdl.k("", -1.5, 1.5, 1)
+        >>> carc0 = mapdl.circle(k0, 1, k1, arc=90)
+        >>> carc1 = mapdl.circle(k2, 1, k3, arc=90)
+        >>> lnum = mapdl.l2tan(1, 2)
+        3
+
+        Plot these lines
+
+        >>> mapdl.lplot(cpos='xy')
+
+        Notes
+        -----
+        Generates a line (P2-P3) tangent at point P2 to line NL1
+        (P1-P2) and tangent at point P3 to line NL2 (P3-P4).
+        """
+        command = "L2TAN,%s,%s" % (str(nl1), str(nl2))
+        return parse_line_no(self.run(command, **kwargs))
+
+    def lang(self, nl1="", p3="", ang="", phit="", locat="", **kwargs) -> int:
+        """Generate a straight line at an angle with a line.
+
+        APDL Command: LANG
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be hit (touched by the end of the
+            new line).  If negative, assume P1 (see below) is the
+            second keypoint of the line instead of the first.
+
+        p3
+            Keypoint at which generated line must end.
+
+        ang
+            Angle of intersection of generated line PHIT-P3 with
+            tangent to line P1-P2 at PHIT.  If 0 (default), the
+            generated line is tangent to NL1 toward end P1; if 90, the
+            generated line is perpendicular to NL1.  If 180, the
+            generated line is tangent to NL1 toward end P2.  ANG can
+            be any value, but is adjusted to the corresponding acute
+            angle with respect to LOCAT. See "Notes" for a discussion
+            of accuracy.
+
+        phit
+            Number to be assigned to keypoint generated at hit
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).
+
+        locat
+            Approximate location of PHIT in terms of the ratio of the
+            distance along the line (NL1) to the length of the line.
+            LOCAT can range from 0 to 1.  If LOCAT is blank, the point
+            will be located with less speed and accuracy, and an
+            arbitrary location may result.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create a line from a line from (0, 0, 0) to (1, 0, 0) to a
+        keypoint at (1, 1, 1) at an angle of 60 degrees.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> lnum = mapdl.l(k0, k1)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> lnum = mapdl.lang(lnum, k2, 60)
+        >>> lnum
+        2
+
+        Notes
+        -----
+        Generates a straight line (PHIT-P3) at an angle (ANG) with a
+        line NL1 (P1-P2).  The location of PHIT on the line is
+        automatically calculated.  Line P1-P2 becomes P1-PHIT and new
+        lines PHIT-P2 and PHIT-P3 are generated.  Line divisions are
+        set to zero (use LESIZE, etc. to modify).
+
+        PHIT is positioned closest to LOCAT for the given angle, ANG.
+        To ensure better performance, it is recommended that LOCAT be
+        input, even if it is 0.
+
+        The program uses an iterative procedure to position PHIT.  The
+        procedure is not exact, with the result that the actual value
+        of ANG will sometimes differ slightly from the specified
+        value.
+        """
+        command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def larc(self, p1="", p2="", pc="", rad="", **kwargs) -> int:
+        """Define a circular arc.
+
+        APDL Command: LARC
+
+        Parameters
+        ----------
+        p1
+            Keypoint at one end of circular arc line.
+
+        p2
+            Keypoint at other end of circular arc line.
+
+        pc
+            Keypoint defining plane of arc and center of curvature
+            side (with positive radius).  Must not lie along the
+            straight line from P1 to P2.  PC need not be at the center
+            of curvature.
+
+        rad
+            Radius of curvature of the arc.  If negative, assume
+            center of curvature side is opposite to that defined by
+            PC.  If RAD is blank, RAD will be calculated from a curve
+            fit through P1, PC, and P2.
+
+        Returns
+        -------
+        int
+            Line number of the arc.
+
+        Examples
+        --------
+        Create a circular arc that travels between (0, 0, 0) and
+        (1, 1, 0) with a radius of curvature of 2.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 1, 0)
+        >>> k2 = mapdl.k("", 0, 1, 0)
+        >>> lnum = mapdl.larc(k0, k1, k2, 2)
+        1
+
+        Notes
+        -----
+        Defines a circular arc line from P1 to P2.  The line shape is
+        generated as circular, regardless of the active coordinate
+        system.  The line shape is invariant with coordinate system
+        after it is generated.
+
+        When dealing with a large radius arc (1e3), or if the location
+        of the arc you create is far away from the origin of your
+        coordinate system, anomalies may occur. You can prevent this
+        by creating the arc at a smaller scale, and then scaling the
+        model back to full size (LSSCALE).
+        """
+        command = f"LARC,{p1},{p2},{pc},{rad}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def larea(self, p1="", p2="", narea="", **kwargs) -> int:
+        """Generate the shortest line between two keypoints on an area.
+
+        APDL Command: LAREA
+
+        Parameters
+        ----------
+        p1
+            First keypoint of line to be generated.
+
+        p2
+            Second keypoint of line to be generated.
+
+        narea
+            Area containing P1 and P2, or area to which generated line
+            is to be parallel.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Generate a line on a square between its two corners.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 1, 1, 0)
+        >>> k3 = mapdl.k("", 0, 1, 0)
+        >>> a0 = mapdl.a(k0, k1, k2, k3)
+        >>> lnum = mapdl.larea(k0, k2, a0)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Generates the shortest line between two keypoints, P1 and P2,
+        both of which lie on an area.  The generated line will also
+        lie on the area.  P1 and P2 may also be equidistant (in global
+        Cartesian space) from the area (and on the same side of the
+        area), in which case a line parallel to the area is generated.
+        """
+        command = f"LAREA,{p1},{p2},{narea}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def lcomb(self, nl1="", nl2="", keep="", **kwargs) -> int:
+        """Combines adjacent lines into one line.
+
+        APDL Command: LCOMB
+
+        Parameters
+        ----------
+        nl1
+            Number of the first line to be combined.  If NL1 = ALL,
+            NL2 is ignored and all selected lines [LSEL] are combined.
+            A component name may also be substituted for NL1 (NL2 is
+            ignored).
+
+        nl2
+            Number of the second line to be combined.
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Delete lines NL1 and NL2 and their common keypoint.
+                Keypoints will not be deleted if they are meshed or if
+                they are attached to other lines.  Lines will not be
+                deleted if they are attached to different areas.
+
+            1 - Keep NL1, NL2, and their common keypoint.  (The common
+                keypoint will not be attached to the output line.)
+
+        Returns
+        -------
+        int
+            Line number of the combined line.
+
+        Examples
+        --------
+        Create two lines and combine them.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.k("", 2, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> l1 = mapdl.l(k0, k2)
+        >>> lout = mapdl.lcomb(l0, l1)
+        >>> lout
+        1
+
+        Notes
+        -----
+        Combines adjacent lines into one line (the output line).  This
+        operation will effectively "undo" the LDIV operation.  Line
+        divisions are set to zero (use LESIZE, etc. to modify).  Lines
+        attached to the same area(s) can also be combined.  See also
+        the LCCAT command for line concatenation capability.
+        """
+        command = f"LCOMB,{nl1},{nl2},{keep}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def ldiv(self, nl1="", ratio="", pdiv="", ndiv="", keep="", **kwargs) -> str:
+        """Divides a single line into two or more lines.
+
+        APDL Command: LDIV
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be divided.  If negative, assume P1
+            (see below) is the second keypoint of the line instead of
+            the first for RATIO.  If ALL, divide all selected lines
+            [LSEL].  A component name may also be substituted for NL1.
+
+        ratio
+            Ratio of line length P1-PDIV to line length P1-P2.  Must
+            be between 0.0 and 1.0. Input ignored if NDIV > 2.
+
+        pdiv
+            Number to be assigned to keypoint generated at division
+            location (defaults to lowest available keypoint number
+            [NUMSTR]).  Input ignored if NL1 = ALL or NDIV > 2.  If
+            PDIV already exists and lies on line NL1, divide line at
+            PDIV (RATIO must also be 0.0).  If PDIV already exists and
+            does not lie on line NL1, PDIV is projected and moved to
+            the nearest point on line NL1 (if possible). PDIV cannot
+            be attached to another line, area, or volume.
+
+        ndiv
+            The number of new lines to be generated from old line
+            (defaults to 2).
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Modify old line to use new keypoints and slopes.
+
+            1 - Do not modify old line.  New lines will overlay old
+                line and have unique keypoints.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Create a single line and divide it exactly half.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> output = mapdl.ldiv(l0, ratio=0.5)
+        >>> print(output)
+        DIVIDE LINE      1       RATIO=  0.50000       NEW KEYPOINT=     0
+          NUMBER OF LINES DIVIDED =      1
+
+
+        Create a single line and divide it into 5 pieces.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> mapdl.ldiv(l0, ndiv=5)
+
+        Notes
+        -----
+        Divides a single line NL1 (defined from keypoint P1 to
+        keypoint P2) into two or more lines.  Line NL1 becomes the new
+        line beginning with keypoint P1 and new lines are generated
+        ending at keypoint P2.  If the line is attached to an area,
+        the area will also be updated.  Line divisions are set to zero
+        (use LESIZE, etc. to modify).
+        """
+        command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
+        return self.run(command, **kwargs)
+
+    def lextnd(self, nl1="", nk1="", dist="", keep="", **kwargs) -> int:
+        """Extends a line at one end by using its slope.
+
+        APDL Command: LEXTND
+
+        Parameters
+        ----------
+        nl1
+            Number of the line to be extended.
+
+        nk1
+            Number of keypoint at the end of line NL1 to be extended.
+
+        dist
+            Distance that the line will be extended.
+
+        keep
+            Specifies whether to keep the input entities:
+
+            0 - Modify old line to use new keypoints and slopes.
+
+            1 - Do not modify old line.  New line will overlay old
+                line and have unique keypoints.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create a circular arc and extend it at one of its keypoints
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> carcs = mapdl.circle(k0, 1, k1, arc=90)
+        >>> lnum = mapdl.lextnd(carcs[0], 3, 1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Extends a line at one end by using its slope.  Lines may be
+        redefined only if not yet attached to an area.  Line divisions
+        are set to zero (use LESIZE, etc. to modify).  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+        """
+        command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def lfillt(self, nl1="", nl2="", rad="", pcent="", **kwargs) -> int:
+        """Generate a fillet line between two intersecting lines.
+
+        APDL Command: LFILLT
+
+        Parameters
+        ----------
+        nl1
+            Number of the first intersecting line.
+
+        nl2
+            Number of the second intersecting line.
+
+        rad
+            Radius of fillet to be generated.  Radius should be less than the
+            lengths of the two lines specified with NL1 and NL2.
+
+        pcent
+            Number to be assigned to generated keypoint at fillet arc center.
+            If zero (or blank), no keypoint is generated.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create two intersecting lines at a right angle and add a
+        fillet between them.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 1, 0)
+        >>> k2 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> l1 = mapdl.l(k0, k2)
+        >>> lnum = mapdl.lfillt(l0, l1, 0.25)
+        3
+
+        Notes
+        -----
+        Generates a fillet line between two intersecting lines NL1
+        (P1-PINT) and NL2 (P2-PINT).  Three keypoints may be
+        generated, two at the fillet tangent points (PTAN1 and PTAN2)
+        and one (optional) at the fillet arc center (PCENT).  Line
+        P1-PINT becomes P1-PTAN1, P2-PINT becomes P2-PTAN2, and new
+        arc line PTAN1-PTAN2 is generated.  Generated keypoint and
+        line numbers are automatically assigned (beginning with the
+        lowest available values [NUMSTR]).  Line divisions are set to
+        zero (use LESIZE, etc. to modify).
+        """
+        command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def lstr(self, p1="", p2="", **kwargs) -> int:
+        """Define a straight line irrespective of the active coordinate system.
+
+        APDL Command: LSTR
+
+        Parameters
+        ----------
+        p1
+            Keypoint at the beginning of line.
+
+        p2
+            Keypoint at the end of line.
+
+        Returns
+        -------
+        int
+            Line number of the generated line.
+
+        Examples
+        --------
+        Create a cartesian straight line regardless of the coordinate
+        system being in cylindrical.
+
+        >>> mapdl.csys(1)
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 1, 1)
+        >>> lnum = mapdl.lstr(k0, k1)
+        >>> lnum
+        1
+
+        Notes
+        -----
+        Defines a straight line from P1 to P2 using the global
+        Cartesian coordinate system.  The active coordinate system
+        will be ignored.  The line shape is invariant with the
+        coordinate system after it is generated.  Lines may be
+        redefined only if not yet attached to an area.
+        """
+        command = f"LSTR,{p1},{p2}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def ltan(self, nl1="", p3="", xv3="", yv3="", zv3="", **kwargs) -> int:
+        """Generate a line at the end of, and tangent to, an existing line.
+
+        APDL Command: LTAN
+
+        Parameters
+        ----------
+        nl1
+            Number of the line the generated line is tangent to.  If
+            negative, assume P1 (see below), instead of P2, is the
+            second keypoint of line NL1.
+
+        p3
+            Keypoint at which generated line must end.
+
+        Returns
+        -------
+        int
+            Line number of the line generated.
+
+        Examples
+        --------
+        Create a circular arc and generate a tangent spline at the end
+        of it directed to a new keypoint.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", -1, 1.5, 0)
+        >>> carc = mapdl.circle(k0, 1, k1, arc=90)
+        >>> lnum = mapdl.ltan(carc[0], k2)
+        >>> lnum
+        2
+
+        Notes
+        -----
+        Generates a line (P2-P3) tangent at end point (P2) of line NL1
+        (P1-P2).
+        """
+        command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
+        return parse_line_no(self.run(command, **kwargs))
+
+    def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
+               zv1="", xv6="", yv6="", zv6="", **kwargs) -> list:
+        """Generate a segmented spline through a series of keypoints.
+
+        APDL Command: SPLINE
+
+        Parameters
+        ----------
+        p1, p2, p3, . . . , p6
+            Keypoints through which the spline is fit.  At least two
+            must be defined.
+
+        Returns
+        -------
+        list
+            List of line numbers generated.
+
+        Examples
+        --------
+        Create a spline with 5 keypoints.
+
+        >>> k0 = mapdl.k('', 0, 0, 0)
+        >>> k1 = mapdl.k('', 0.2, 0.2, 0)
+        >>> k2 = mapdl.k('', 0.4, 0.3, 0)
+        >>> k3 = mapdl.k('', 0.6, 0.5, 0)
+        >>> k4 = mapdl.k('', 0.8, 0.3, 0)
+        >>> lines = mapdl.spline(k0, k1, k2, k3, k4)
+        >>> lines
+        [1, 2, 3, 4]
+
+        Notes
+        -----
+        The output from this command is a series of connected lines
+        (one line between each pair of keypoints) that together form a
+        spline.  Note that solid modeling in a toroidal coordinate
+        system is not recommended.
+        """
+        command = f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        return parse_line_nos(self.run(command, **kwargs))
+
+    def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
+              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
+        """Generate areas by dragging a line pattern along a path.
+
+        APDL Command: ADRAG
+
+        Parameters
+        ----------
+        nl1, nl2, nl3, . . . , nl6
+            List of lines in the pattern to be dragged (6 maximum if
+            using keyboard entry).  Lines should form a continuous
+            pattern (no more than two lines connected to any one
+            keypoint.  If NL1 = ALL, all selected lines (except those
+            that define the drag path) will be swept along the path.
+            A component name may also be substituted for NL1.
+
+        nlp1, nlp2, nlp3, . . . , nlp6
+            List of lines defining the path along which the pattern is
+            to be dragged (6 maximum if using keyboard entry).  Must
+            be a continuous set of lines.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Drag a circle between two keypoints to create an area
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> carc = mapdl.circle(k0, 1, k1, arc=90)
+        >>> l0 = mapdl.l(k0, k1)
+        >>> output = mapdl.adrag(carc[0], nlp1=l0)
+        >>> print(output)
+        DRAG LINES:
+             1,
+        ALONG LINES
+             2,
+
+        Notes
+        -----
+        Generates areas (and their corresponding keypoints and lines)
+        by sweeping a given line pattern along a characteristic drag
+        path.  If the drag path consists of multiple lines, the drag
+        direction is determined by the sequence in which the path
+        lines are input (NLP1, NLP2, etc.).  If the drag path is a
+        single line (NLP1), the drag direction is from the keypoint on
+        the drag line that is closest to the first keypoint of the
+        given line pattern to the other end of the drag line.
+
+        The magnitude of the vector between the keypoints of the given
+        pattern and the first path keypoint remains constant for all
+        generated keypoint patterns and the path keypoints.  The
+        direction of the vector relative to the path slope also
+        remains constant so that patterns may be swept around curves.
+
+        Keypoint, line, and area numbers are automatically assigned
+        (beginning with the lowest available values [NUMSTR]).
+        Adjacent lines use a common keypoint.  Adjacent areas use a
+        common line.  For best results, the entities to be dragged
+        should be orthogonal to the start of the drag path.  Drag
+        operations that produce an error message may create some of
+        the desired entities prior to terminating.
+        """
+        command = f"ADRAG,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
+        return self.run(command, **kwargs)
+
+    def vdrag(self, na1="", na2="", na3="", na4="", na5="", na6="", nlp1="",
+              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
+        """APDL Command: VDRAG
+
+        Generate volumes by dragging an area pattern along a path.
+
+        Parameters
+        ----------
+        na1, na2, na3, . . . , na6
+            List of areas in the pattern to be dragged (6 maximum if
+            using keyboard entry).  If NA1 = ALL, all selected areas
+            will be swept along the path.  A component name may also
+            be substituted for NA1.
+
+        nlp1, nlp2, nlp3, . . . , nlp6
+            List of lines defining the path along which the pattern is
+            to be dragged (6 maximum if using keyboard entry).  Must
+            be a continuous set of lines.  To be continuous, adjacent
+            lines must share the connecting keypoint (the end keypoint
+            of one line must also be first keypoint of the next line).
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Create a square with a hole in it and drag it along an arc.
+
+        >>> anum0 = mapdl.blc4(0, 0, 1, 1)
+        >>> anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
+        >>> aout = mapdl.asba(anum0, anum1)
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 1)
+        >>> k2 = mapdl.k("", 1, 0, 0)
+        >>> l0 = mapdl.larc(k0, k1, k2, 2)
+        >>> output = mapdl.vdrag(aout, nlp1=l0)
+        >>> print(output)
+        DRAG AREAS
+          3,
+        ALONG LINES
+          9
+
+
+        Notes
+        -----
+        Generates volumes (and their corresponding keypoints, lines,
+        and areas) by sweeping a given area pattern along a
+        characteristic drag path.  If the drag path consists of
+        multiple lines, the drag direction is determined by the
+        sequence in which the path lines are input (NLP1, NLP2, etc.).
+        If the drag path is a single line (NLP1), the drag direction
+        is from the keypoint on the drag line that is closest to the
+        first keypoint of the given area pattern to the other end of
+        the drag line.
+
+        The magnitude of the vector between the keypoints of the given
+        pattern and the first path keypoint remains constant for all
+        generated keypoint patterns and the path keypoints.  The
+        direction of the vector relative to the path slope also
+        remains constant so that patterns may be swept around curves.
+        Lines are generated with the same shapes as the given pattern
+        and the path lines.
+
+        Keypoint, line, area, and volume numbers are automatically
+        assigned (beginning with the lowest available values
+        [NUMSTR]).  Adjacent lines use a common keypoint, adjacent
+        areas use a common line, and adjacent volumes use a common
+        area.  For best results, the entities to be dragged should be
+        orthogonal to the start of the drag path.  Drag operations
+        that produce an error message may create some of the desired
+        entities prior to terminating.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the VDRAG
+        operation will also have those attributes (i.e., the element
+        attributes from the input area are copied to the opposite
+        area).  Note that only the area opposite the input area will
+        have the same attributes as the input area; the areas adjacent
+        to the input area will not.
+
+        If the input areas are meshed or belong to a meshed volume,
+        the area(s) can be extruded to a 3-D mesh.  Note that the NDIV
+        argument of the ESIZE command should be set before extruding
+        the meshed areas.  Alternatively, mesh divisions can be
+        specified directly on the drag line(s) (LESIZE).  See the
+        Modeling and Meshing Guide for more information.
+
+        You can use the VDRAG command to generate 3-D interface
+        element meshes for elements INTER194 and INTER195. When
+        generating interface element meshes using VDRAG, you must
+        specify the line divisions to generate one interface element
+        directly on the drag line using the LESIZE command.  The
+        source area to be extruded becomes the bottom surface of the
+        interface element. Interface elements must be extruded in what
+        will become the element's local x direction, that is, bottom
+        to top.
+        """
+        command = f"VDRAG,{na1},{na2},{na3},{na4},{na5},{na6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
+        return self.run(command, **kwargs)
+
+    def va(self, a1="", a2="", a3="", a4="", a5="", a6="", a7="", a8="", a9="",
+           a10="", **kwargs) -> int:
+        """APDL Command: VA
+
+        Generate a volume bounded by existing areas.
+
+        Parameters
+        ----------
+        a1, a2, a3, . . . , a10
+            List of areas defining volume.  The minimum number of
+            areas is 4.  If A1 = ALL, use all selected [ASEL] areas
+            and ignore A2 to A10.  A component name may also be
+            substituted for A1.
+
+        Returns
+        -------
+        int
+            Volume number of the volume.
+
+
+        Examples
+        --------
+        Create a simple tetrahedral bounded by 4 areas.
+
+        >>> k0 = mapdl.k('', -1, 0, 0)
+        >>> k1 = mapdl.k('', 1, 0,  0)
+        >>> k2 = mapdl.k('', 1, 1, 0)
+        >>> k3 = mapdl.k('', 1, 0.5, 1)
+        >>> a0 = mapdl.a(k0, k1, k2)
+        >>> a1 = mapdl.a(k0, k1, k3)
+        >>> a2 = mapdl.a(k1, k2, k3)
+        >>> a3 = mapdl.a(k0, k2, k3)
+        >>> vnum = mapdl.va(a0, a1, a2, a3)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        This command conveniently allows generating volumes from
+        regions having more than eight keypoints (which is not allowed
+        with the V command).  Areas may be input in any order.  The
+        exterior surface of a VA volume must be continuous, but holes
+        may pass completely through it.
+        """
+        command = f"VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}"
+        return parse_v(self.run(command, **kwargs))
+
+    def vext(self, na1="", na2="", ninc="", dx="", dy="", dz="", rx="", ry="",
+             rz="", **kwargs) -> str:
+        """APDL Command: VEXT
+
+        Generate additional volumes by extruding areas.
+
+        Parameters
+        ----------
+        na1, na2, ninc
+            Set of areas (NA1 to NA2 in steps of NINC) that defines
+            the pattern to be extruded.  NA2 defaults to NA1, NINC
+            defaults to 1.  If NA1 = ALL, NA2 and NINC are ignored and
+            the pattern is defined by all selected areas.  A component
+            name may also be substituted for NA1 (NA2 and NINC are
+            ignored).
+
+        dx, dy, dz
+            Increments to be applied to the X, Y, and Z keypoint
+            coordinates in the active coordinate system (DR, Dθ, DZ
+            for cylindrical; DR, Dθ, DΦ for spherical).
+
+        rx, ry, rz
+            Scale factors to be applied to the X, Y, and Z keypoint
+            coordinates in the active coordinate system (RR, Rθ, RZ
+            for cylindrical; RR, Rθ, RΦ for spherical).  Note that the
+            Rθ and RΦ scale factors are interpreted as angular
+            offsets.  For example, if CSYS = 1, RX, RY, RZ input of
+            (1.5,10,3) would scale the specified keypoints 1.5 times
+            in the radial and 3 times in the Z direction, while adding
+            an offset of 10 degrees to the keypoints.  Zero, blank, or
+            negative scale factor values are assumed to be 1.0.  Zero
+            or blank angular offsets have no effect.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Create a basic cylinder by extruding a circle.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 0, 0, 1)
+        >>> k2 = mapdl.k("", 0, 0, 0.5)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> a0 = mapdl.al(*carc0)
+        >>> mapdl.vext(a0, dz=4)
+
+        Create a tapered cylinder.
+
+        >>> mapdl.vdele('all')
+        >>> mapdl.vext(a0, dz=4, rx=0.3, ry=0.3, rz=1)
+
+        Notes
+        -----
+        Generates additional volumes (and their corresponding
+        keypoints, lines, and areas) by extruding and scaling a
+        pattern of areas in the active coordinate system.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the VEXT
+        operation will also have those attributes (i.e., the element
+        attributes from the input area are copied to the opposite
+        area).  Note that only the area opposite the input area will
+        have the same attributes as the input area; the areas adjacent
+        to the input area will not.
+
+        If the areas are meshed or belong to meshed volumes, a 3-D
+        mesh can be extruded with this command.  Note that the NDIV
+        argument on the ESIZE command should be set before extruding
+        the meshed areas.
+
+        Scaling of the input areas, if specified, is performed first,
+        followed by the extrusion.
+
+        In a non-Cartesian coordinate system, the VEXT command locates
+        the end face of the volume based on the active coordinate
+        system.  However, the extrusion is made along a straight line
+        between the end faces.  Note that solid modeling in a toroidal
+        coordinate system is not recommended.
+
+        Caution:: : Use of the VEXT command can produce unexpected
+        results when operating in a non-Cartesian coordinate system.
+        For a detailed description of the possible problems that may
+        occur, see Solid Modeling in the Modeling and Meshing Guide.
+        """
+        command = f"VEXT,{na1},{na2},{ninc},{dx},{dy},{dz},{rx},{ry},{rz}"
+        return self.run(command, **kwargs)
+
+    def vrotat(self, na1="", na2="", na3="", na4="", na5="",
+               na6="", pax1="", pax2="", arc="", nseg="",
+               **kwargs) -> str:
+        """APDL Command: VROTAT
+
+        Generate cylindrical volumes by rotating an area pattern about
+        an axis.
+
+        Parameters
+        ----------
+        na1, na2, na3, . . . , na6
+            List of areas in the pattern to be rotated (6 maximum if
+            using keyboard entry).  Areas must lie to one side of, and
+            in the plane of, the axis of rotation.  If NA1 = ALL,
+            all selected areas will define the pattern to be rotated.
+            A component name may also be substituted for NA1.
+
+        pax1, pax2
+            Keypoints defining the axis about which the area pattern
+            is to be rotated.
+
+        arc
+            Arc length (in degrees).  Positive follows right-hand rule
+            about PAX1-PAX2 vector.  Defaults to 360.
+
+        nseg
+            Number of volumes (8 maximum) around circumference.
+            Defaults to minimum required for 90 degrees (maximum) arcs, i.e.,
+            4 for 360 degrees, 3 for 270 degrees, etc.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Rotate a circle about the Z axis to create a hoop.
+
+        First, create a circle offset from origin on the XZ plane.
+
+        >>> hoop_radius = 10
+        >>> hoop_thickness = 0.5
+        >>> k0 = mapdl.k("", hoop_radius, 0, 0)
+        >>> k1 = mapdl.k("", hoop_radius, 1, 0)
+        >>> k2 = mapdl.k("", hoop_radius, 0, hoop_thickness)
+        >>> carc0 = mapdl.circle(k0, 1, k1)
+        >>> a0 = mapdl.al(*carc0)
+
+        Create a hoop by rotating it about an axis defined by two
+        keypoints.
+
+        >>> k_axis0 = mapdl.k("", 0, 0, 0)
+        >>> k_axis1 = mapdl.k("", 0, 0, 1)
+        mapdl.vrotat(a0, pax1=k_axis0, pax2=k_axis1)
+
+        Notes
+        -----
+        Generates cylindrical volumes (and their corresponding
+        keypoints, lines, and areas) by rotating an area pattern (and
+        its associated line and keypoint patterns) about an axis.
+        Keypoint patterns are generated at regular angular locations
+        (based on a maximum spacing of 90 degrees).  Line patterns are
+        generated at the keypoint patterns.  Arc lines are also
+        generated to connect the keypoints circumferentially.
+        Keypoint, line, area, and volume numbers are automatically
+        assigned (beginning with the lowest available values).
+        Adjacent lines use a common keypoint, adjacent areas use a
+        common line, and adjacent volumes use a common area.
+
+        To generate a single volume with an arc greater than 180 degrees,
+        NSEG must be greater than or equal to 2.
+
+        If element attributes have been associated with the input area
+        via the AATT command, the opposite area generated by the
+        VROTAT operation will also have those attributes (i.e., the
+        element attributes from the input area are copied to the
+        opposite area).  Note that only the area opposite the input
+        area will have the same attributes as the input area; the
+        areas adjacent to the input area will not.
+
+        If the given areas are meshed or belong to meshed volumes, the
+        2-D mesh can be rotated (extruded) to a 3-D mesh. See the
+        Modeling and Meshing Guide for more information.  Note that
+        the NDIV argument on the ESIZE command should be set before
+        extruding the meshed areas.
+        """
+        command = f"VROTAT,{na1},{na2},{na3},{na4},{na5},{na6},{pax1},{pax2},{arc},{nseg}"
+        return self.run(command, **kwargs)
+
+    def vsymm(self, ncomp="", nv1="", nv2="", ninc="", kinc="", noelem="",
+              imove="", **kwargs) -> str:
+        """APDL Command: VSYMM
+
+        Generate volumes from a volume pattern by symmetry reflection.
+
+        Parameters
+        ----------
+        ncomp
+            Symmetry key:
+
+            - ``'X'`` : X symmetry (default).
+            - ``'Y'`` : Y symmetry.
+            - ``'Z'`` : Z symmetry.
+
+        nv1, nv2, ninc
+            Reflect volumes from pattern beginning with NV1 to NV2
+            (defaults to NV1) in steps of NINC (defaults to 1).  If
+            NV1 = ALL, NV2 and NINC are ignored and the pattern is all
+            selected volumes [VSEL].  A component name may also be
+            substituted for NV1 (NV2 and NINC are ignored).
+
+        kinc
+            Keypoint increment between sets.  If zero, the lowest
+            available keypoint numbers are assigned [NUMSTR].
+
+        noelem
+            Specifies whether nodes and elements are also to be generated:
+
+            0 - Generate nodes and elements associated with the
+                original volumes, if they exist.
+
+            1 - Do not generate nodes and elements.
+
+        imove
+            Specifies whether volumes will be moved or newly defined:
+
+            0 - Generate additional volumes.
+
+            1 - Move original volumes to new position retaining the
+                same keypoint numbers (KINC and NOELEM are ignored).
+                Corresponding meshed items are also moved if not
+                needed at their original position.
+
+        Returns
+        -------
+        str
+            MAPDL command output.
+
+        Examples
+        --------
+        Create four blocks by reflecting a single block across the X
+        component and then the Y component.
+
+        >>> vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
+        >>> mapdl.vsymm('X', vnum)
+        >>> output = mapdl.vsymm('Y', 'ALL')
+        >>> print(output)
+        SYMMETRY TRANSFORMATION OF VOLUMES       USING COMPONENT  Y
+           SET IS ALL SELECTED VOLUMES
+
+        Notes
+        -----
+        Generates a reflected set of volumes (and their corresponding
+        keypoints, lines, areas and mesh) from a given volume pattern
+        by a symmetry reflection (see analogous node symmetry command,
+        NSYM).  The MAT, TYPE, REAL, and ESYS attributes are based
+        upon the volumes in the pattern and not upon the current
+        settings.  Reflection is done in the active coordinate system
+        by changing a particular coordinate sign.  The active
+        coordinate system must be a Cartesian system.  Volumes in the
+        pattern may have been generated in any coordinate system.
+        However, solid modeling in a toroidal coordinate system is not
+        recommended.  Volumes are generated as described in the VGEN
+        command.
+
+        See the ESYM command for additional information about symmetry
+        elements.
+        """
+        command = f"VSYMM,{ncomp},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
+        return self.run(command, **kwargs)
+
+    def blc5(self, xcenter="", ycenter="", width="", height="", depth="",
+             **kwargs) -> int:
+        """APDL Command: BLC5
+
+        Create a rectangular area or block volume by center and corner
+        points.
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            rectangle or block face.
+
+        width
+            The total distance on or parallel to the working plane
+            X-axis defining the width of the rectangle or block face.
+
+        height
+            The total distance on or parallel to the working plane
+            Y-axis defining the height of the rectangle or block face.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the block.  If ``depth=0``
+            (default), a rectangular area is created on the working
+            plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the block or rectangle.
+
+        Examples
+        --------
+        Create a square centered at ``(0, 0)`` with a width of 0.5 and
+        a height of 0.5
+
+        >>> anum = mapdl.blc5(width=0.5, height=0.5)
+        >>> anum
+        1
+
+        >>> vnum = mapdl.blc5(width=1, height=4, depth=9)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane
+        by specifying the center and corner points.  A rectangle will
+        be defined with four keypoints and four lines.  A volume will
+        be defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4``, ``RECTNG``, and ``BLOCK`` commands for
+        alternate ways to create rectangles and blocks.
+        """
+        command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def block(self, x1="", x2="", y1="", y2="", z1="", z2="", **kwargs):
+        """APDL Command: BLOCK
+
+        Create a block volume based on working plane coordinates.
+
+        Parameters
+        ----------
+        x1, x2
+            Working plane X coordinates of the block.
+
+        y1, y2
+            Working plane Y coordinates of the block.
+
+        z1, z2
+            Working plane Z coordinates of the block.
+
+        Returns
+        -------
+        int
+            Volume number of the block.
+
+        Examples
+        --------
+        Create a block volume based on working plane coordinates with
+        the size ``(1 x 2 x 3)``.
+
+        >>> vnum = mapdl.block(0, 1, 0, 2, 1, 4)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a hexahedral volume based on the working plane.  The
+        block must have a spatial volume greater than zero (i.e., this
+        volume primitive command cannot be used to create a degenerate
+        volume as a means of creating an area.)  The volume will be
+        defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4`` and ``BLC5`` commands for alternate ways to
+        create blocks.
+        """
+        command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="",
+             **kwargs) -> int:
+        """Create a conical volume anywhere on the working plane.
+
+        APDL Command: CON4
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center axis of
+            the cone.
+
+        rad1, rad2
+            Radii of the faces of the cone.  RAD1 defines the bottom
+            face and will be located on the working plane.  RAD2
+            defines the top face and is parallel to the working plane.
+            A value of zero or blank for either RAD1 or RAD2 defines a
+            degenerate face at the center axis (i.e., the vertex of
+            the cone).  The same value for both RAD1 and RAD2 defines
+            a cylinder instead of a cone.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the cone.  DEPTH cannot be
+            zero (see "Notes" below).
+
+        Returns
+        -------
+        int
+            Volume number of the cone.
+
+        Examples
+        --------
+        Create a cone with a bottom radius of 3 and a height of 10.
+
+        >>> vnum = mapdl.con4(rad1=3, rad2=0, depth=10)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid conical volume with either the vertex or a
+        face anywhere on the working plane.  The cone must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  The face or faces will be
+        circular (each area defined with four lines), and they will be
+        connected with two areas (each spanning 180 degrees).  See the CONE
+        command for an alternate way to create cones.
+        """
+        command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def cone(self, rbot="", rtop="", z1="", z2="", theta1="", theta2="",
+             **kwargs) -> int:
+        """Create a conical volume centered about the working plane origin.
+
+        APDL Command: CONE
+
+        Parameters
+        ----------
+        rbot, rtop
+            Radii of the bottom and top faces of the cone.  A value of
+            zero or blank for either RBOT or RTOP defines a degenerate
+            face at the center axis (i.e., the vertex of the cone).
+            The same value for both RBOT and RTOP defines a cylinder
+            instead of a cone.
+
+        z1, z2
+            Working plane Z coordinates of the cone.  The smaller
+            value is always associated with the bottom face.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the cone.
+            Used for creating a conical sector.  The sector begins at
+            the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0 degrees and the ending angle
+            defaults to 360 degrees.  See the Modeling and Meshing Guide for
+            an illustration.
+
+        Returns
+        -------
+        int
+            Volume number of the cone.
+
+        Examples
+        --------
+        Create a quarter cone with a bottom radius of 3, top radius of 1 and
+        a height of 10 centered at ``(0, 0)``.
+
+        >>> vnum = mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid conical volume centered about the working
+        plane origin.  The non-degenerate face (top or bottom) is
+        parallel to the working plane but not necessarily coplanar
+        with (i.e., "on") the working plane.  The cone must have a
+        spatial volume greater than zero. (i.e., this volume primitive
+        command cannot be used to create a degenerate volume as a
+        means of creating an area.)
+
+        For a cone of 360, top and bottom faces will be circular (each
+        area defined with four lines), and they will be connected with
+        two areas (each spanning 180 degrees).  See the ``CON4``
+        command for an alternate way to create cones.
+        """
+        command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def cyl5(self, xedge1="", yedge1="", xedge2="", yedge2="", depth="",
+             **kwargs) -> int:
+        """Create a circular area or cylindrical volume by end points.
+
+        APDL Command: CYL5
+
+        Parameters
+        ----------
+        xedge1, yedge1
+            Working plane X and Y coordinates of one end of the circle
+            or cylinder face.
+
+        xedge2, yedge2
+            Working plane X and Y coordinates of the other end of the
+            circle or cylinder face.
+
+        depth
+            The perpendicular distance (either positive or negative
+            based on the working plane Z direction) from the working
+            plane representing the depth of the cylinder.  If DEPTH =
+            0 (default), a circular area is created on the working
+            plane.
+
+        Returns
+        -------
+        int
+            Volume or area number of the circular area of cylindrical
+            volume.
+
+
+        Examples
+        --------
+        Create a circular with one point of the circle at ``(1, 1)``
+        and the other point at ``(2, 2)``
+
+        >>> anum = mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
+        >>> anum
+        1
+
+        Create a cylinder with one point of the circle at ``(X, Y) ==
+        (1, 1)`` and the other point at ``(X, Y) == (2, 2)`` with a
+        height of 3.
+
+        >>> vnum = mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2, depth=5)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a circular area anywhere on the working plane or a
+        cylindrical volume with one face anywhere on the working plane
+        by specifying diameter end points.  For a solid cylinder of
+        360°, the top and bottom faces will be circular (each area
+        defined with four lines) and they will be connected with two
+        surface areas (each spanning 180°).  See the CYL4, PCIRC, and
+        CYLIND commands for alternate ways to create circles and
+        cylinders.
+        """
+        command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def cylind(self, rad1="", rad2="", z1="", z2="", theta1="", theta2="",
+               **kwargs) -> int:
+        """Create a cylindrical volume centered about the working plane origin.
+
+        APDL Command: CYLIND
+
+        Parameters
+        ----------
+        rad1, rad2
+            Inner and outer radii (either order) of the cylinder.  A
+            value of zero or blank for either RAD1 or RAD2, or the
+            same value for both RAD1 and RAD2, defines a solid
+            cylinder.
+
+        z1, z2
+            Working plane Z coordinates of the cylinder.  If either Z1
+            or Z2 is zero, one of the faces of the cylinder will be
+            coplanar with the working plane.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the cylinder.
+            Used for creating a cylindrical sector.  The sector begins
+            at the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0.0° and the ending angle
+            defaults to 360.0°.  See the Modeling and Meshing Guide
+            for an illustration.
+
+        Returns
+        -------
+        int
+            Volume number of the cylinder.
+
+        Examples
+        --------
+        Create a hollow cylinder with an inner radius of 0.9 and an
+        outer radius of 1.0 with a height of 5
+
+        >>> vnum = mapdl.cylind(0.9, 1, z1=0, z2=5)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a cylindrical volume centered about the working plane
+        origin.  The top and bottom faces are parallel to the working
+        plane but neither face need be coplanar with (i.e., "on") the
+        working plane.  The cylinder must have a spatial volume
+        greater than zero. (i.e., this volume primitive command cannot
+        be used to create a degenerate volume as a means of creating
+        an area.)
+
+        For a solid cylinder of 360°, the top and bottom faces will be
+        circular (each area defined with four lines), and they will be
+        connected with two areas (each spanning 180°.)  See the CYL4
+        and CYL5 commands for alternate ways to create cylinders.
+        """
+        command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def pcirc(self, rad1="", rad2="", theta1="", theta2="", **kwargs) -> int:
+        """Create a circular area centered about the working plane origin.
+
+        APDL Command: PCIRC
+
+        Parameters
+        ----------
+        rad1, rad2
+            Inner and outer radii (either order) of the circle.  A
+            value of either zero or blank for either ``rad1`` or
+            ``rad2``, or the same value for both ``rad1`` and
+            ``rad2``, defines a solid circle.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the circular
+            area.  Used for creating a circular sector.  The sector
+            begins at the algebraically smaller angle, extends in a
+            positive angular direction, and ends at the larger angle.
+            The starting angle defaults to 0.0° and the ending angle
+            defaults to 360.0°.  See the Modeling and Meshing Guide
+            for an illustration.
+
+        Returns
+        -------
+        int
+            Area number of the new circular area.
+
+        Examples
+        --------
+        In this example a circular area with an inner radius of 0.95
+        and an outer radius of 1 is created.
+
+        >>> anum = mapdl.pcirc(0.95, 1)
+        >>> anum
+        1
+
+        Notes
+        -----
+        Defines a solid circular area or circular sector centered
+        about the working plane origin.  For a solid circle of 360°,
+        the area will be defined with four keypoints and four lines.
+        See the ``cyl4`` and ``cyl5`` commands for alternate ways to
+        create circles.
+        """
+        command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def rectng(self, x1="", x2="", y1="", y2="", **kwargs):
+        """Create a rectangular area anywhere on the working plane.
+
+        APDL Command: RECTNG
+
+        Parameters
+        ----------
+        x1, x2
+            Working plane X coordinates of the rectangle.
+
+        y1, y2
+            Working plane Y coordinates of the rectangle.
+
+        Notes
+        -----
+        The area will be defined with four keypoints and four lines.
+        See the ``blc4`` and ``blc5`` commands for alternate ways to
+        create rectangles.
+        """
+        command = f"RECTNG,{x1},{x2},{y1},{y2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sph4(self, xcenter="", ycenter="", rad1="", rad2="", **kwargs) -> int:
+        """Create a spherical volume anywhere on the working plane.
+
+        APDL Command: SPH4
+
+        Parameters
+        ----------
+        xcenter, ycenter
+            Working plane X and Y coordinates of the center of the
+            sphere.
+
+        rad1, rad2
+            Inner and outer radii (either order) of the sphere.  A
+            value of zero or blank for either ``rad1`` or ``rad2``
+            defines a solid sphere.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+
+        Examples
+        --------
+        This example creates a hollow sphere with an inner radius of
+        0.9 and an outer radius of 1.0 centered at ``(0, 0)``
+
+        >>> vnum = mapdl.sph4(0, 0, rad1=0.9, rad2=1.0)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines either a solid or hollow spherical volume anywhere on
+        the working plane.  The sphere must have a spatial volume
+        greater than zero.  (i.e., this volume primitive command
+        cannot be used to create a degenerate volume as a means of
+        creating an area.)  A sphere of 360° will be defined with two
+        areas, each consisting of a hemisphere.  See the ``sphere``
+        and ``sph5`` commands for other ways to create spheres.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you can create only solid spheres.  If you
+        enter a value for both ``rad1`` and ``rad2`` the command is
+        ignored.
+        """
+        command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sphere(self, rad1="", rad2="", theta1="", theta2="", **kwargs) -> int:
+        """Create a spherical volume centered about the working plane origin.
+
+        APDL Command: SPHERE
+
+        Parameters
+        ----------
+        rad1, rad2
+            Inner and outer radii (either order) of the sphere.  A
+            value of zero or blank for either ``rad1`` or ``rad2``
+            defines a solid sphere.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the sphere.
+            Used for creating a spherical sector.  The sector begins
+            at the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0.0° and the ending angle
+            defaults to 360.0°.  See the Modeling and Meshing Guide
+            for an illustration.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+        Examples
+        --------
+        >>> vnum = mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines either a solid or hollow sphere or spherical sector
+        centered about the working plane origin.  The sphere must have
+        a spatial volume greater than zero. (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  Inaccuracies can develop
+        when the size of the object you create is much smaller than
+        the relative coordinate system values (ratios near to or
+        greater than 1000). If you require an exceptionally small
+        sphere, create a larger object, and scale it down to the
+        appropriate size.
+
+        For a solid sphere of 360°, you define it with two areas, each
+        consisting of a hemisphere.  See the ``sph4`` and ``sph5``
+        commands for the other ways to create spheres.
+        """
+        command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def sph5(self, xedge1="", yedge1="", xedge2="", yedge2="", **kwargs) -> int:
+        """Create a spherical volume by diameter end points.
+
+        APDL Command: SPH5
+
+        Parameters
+        ----------
+        xedge1, yedge1
+            Working plane X and Y coordinates of one edge of the sphere.
+
+        xedge2, yedge2
+            Working plane X and Y coordinates of the other edge of the
+            sphere.
+
+        Returns
+        -------
+        int
+            Volume number of the sphere.
+
+        Examples
+        --------
+        This example creates a sphere with one point at ``(1, 1)`` and
+        one point at ``(2, 2)``
+
+        >>> vnum = mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a solid spherical volume anywhere on the working plane
+        by specifying diameter end points.  The sphere must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  A sphere of 360° will be
+        defined with two areas, each consisting of a hemisphere.  See
+        the ``sphere`` and ``sph4`` commands for other ways to create
+        spheres.
+        """
+        command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def torus(self, rad1="", rad2="", rad3="", theta1="", theta2="", **kwargs):
+        """Create a toroidal volume.
+
+        APDL Command: TORUS
+
+        Parameters
+        ----------
+        rad1, rad2, rad3
+            Three values that define the radii of the torus.  You can
+            specify the radii in any order.  The smallest of the
+            values is the inner minor radius, the intermediate value
+            is the outer minor radius, and the largest value is the
+            major radius.  (There is one exception regarding the order
+            of the radii values--if you want to create a solid torus,
+            specify zero or blank for the inner minor radius, in which
+            case the zero or blank must occupy either the ``rad1`` or
+            ``rad2`` position.)
+
+            At least two of the values that you specify must be
+            positive values; they will be used to define the outer
+            minor radius and the major radius.  See the diagram in the
+            Notes section for a view of a toroidal sector showing all
+            radii.
+
+        theta1, theta2
+            Starting and ending angles (either order) of the torus.
+            Used for creating a toroidal sector.  The sector begins at
+            the algebraically smaller angle, extends in a positive
+            angular direction, and ends at the larger angle.  The
+            starting angle defaults to 0° and the ending angle
+            defaults to 360°.
+
+        Returns
+        -------
+        int
+            Volume number of the torus.
+
+
+        Examples
+        --------
+        This example creates a torus with an inner minor radius of 1, an
+        intermediate radii of 2, and a major radius of 5.  The values
+        0 and 180 define the starting and ending angles of the torus.
+
+        >>> vnum = mapdl.torus(rad1=5, rad2=1, rad3=2, theta1=0, theta2=180)
+        >>> vnum
+        1
+
+        Notes
+        -----
+        Defines a toroidal volume centered about the working plane
+        origin.  A solid torus of 360° will be defined with four
+        areas, each area spanning 180° around the major and minor
+        circumference.
+        """
+        command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
+        return parse_output_volume_area(self.run(command, **kwargs))
+
+    def parres(self, lab="", fname="", ext="", **kwargs):
+        """APDL Command: PARRES
+
+        Reads parameters from a file.
+
+        Parameters
+        ----------
+        lab
+            Read operation.
+
+            NEW - Replace current parameter set with these parameters (default).
+
+            CHANGE - Extend current parameter set with these
+            parameters, replacing any that already exist.
+
+        fname
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
+
+            The file name defaults to Jobname.
+
+        ext
+            Filename extension (eight-character maximum).  The
+            extension defaults to PARM if Fname is blank.
+
+        Examples
+        --------
+        Read a local parameter file.
+
+        >>> mapdl.parres('parm.PARM')
+
+        Notes
+        -----
+        Reads parameters from a coded file.  The parameter file may
+        have been written with the PARSAV command.  The parameters
+        read may replace or change the current parameter set.
+
+        This command is valid in any processor.
+        """
+        if ext:
+            fname = fname + '.' + ext
+        elif not fname:
+            fname = '.' + 'PARM'
+
+        if 'Grpc' in self.__class__.__name__:  # grpc mode
+            if self._local:
+                if not os.path.isfile(fname):
+                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
+
+                if not os.path.dirname(fname):
+                    filename = os.path.join(os.getcwd(), fname)
+                else:
+                    filename = fname
+            else:
+                if not os.path.dirname(fname):
+                    # might be trying to run a local file.  Check if the
+                    # file exists remotely.
+                    if fname not in self.list_files():
+                        self.upload(fname, progress_bar=False)
+                else:
+                    self.upload(fname, progress_bar=False)
+                filename = os.path.basename(fname)
+        else:
+            filename = fname
+
+        return self.input(filename)
+
+    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
+          **kwargs) -> int:
+        """Define a node.
+
+        APDL Command: N
+
+        Parameters
+        ----------
+        node
+            Node number to be assigned.  A previously defined node of
+            the same number will be redefined.  Defaults to the
+            maximum node number used +1.
+
+        x, y, z
+            Node location in the active coordinate system (R, θ, Z for
+            cylindrical, R, θ, Φ for spherical or toroidal).
+
+        thxy
+            First rotation about nodal Z (positive X toward Y).
+
+        thyz
+            Second rotation about nodal X (positive Y toward Z).
+
+        thzx
+            Third rotation about nodal Y (positive Z toward X).
+
+        Returns
+        -------
+        int
+            Node number of the generated node.
+
+        Examples
+        --------
+        Create a node at ``(0, 1, 1)``
+
+        >>> nnum = mapdl.n("", 0, 1, 1)
+        >>> nnum
+        1
+
+        Create a node at ``(4, 5, 1)`` with a node ID of 10
+
+        >>> nnum = mapdl.n(10, 4, 5, 1)
+        >>> nnum
+        10
+
+        Notes
+        -----
+        Defines a node in the active coordinate system [CSYS].  The
+        nodal coordinate system is parallel to the global Cartesian
+        system unless rotated.  Rotation angles are in degrees and
+        redefine any previous rotation angles.  See the NMODIF, NANG,
+        NROTAT, and NORA commands for other rotation options.
+        """
+        command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
+        msg = self.run(command, **kwargs)
+        if msg:
+            res = re.search(r"(NODE\s*)([0-9]+)", msg)
+            if res is not None:
+                return int(res.group(2))
+
+    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
+        """APDL Command: LSSOLVE
+
+        Reads and solves multiple load steps.
+
+        Parameters
+        ----------
+        lsmin, lsmax, lsinc
+            Range of load step files to be read and solved, from
+            ``lsmin`` to ``lsmax`` in steps of ``lsinc``.  ``lsmax``
+            defaults to ``lsmin``, and ``lsinc`` defaults to 1. If
+            ``lsmin`` is blank, a brief command description is
+            displayed.  The load step files are assumed to be named
+            Jobname.Sn, where n is a number assigned by the
+            ``lswrite`` command (01--09, 10, 11, etc.).  On systems
+            with a 3-character limit on the extension, the "S" is
+            dropped for numbers > 99.
+
+        Examples
+        --------
+        Write the load and load step option data to a file and solve
+        it.  In this case, write the second load step.
+
+        >>> mapdl.lswrite(2)
+        >>> mapdl.lssolve(1, 2)
+
+        Notes
+        -----
+        ``lssolve`` invokes an ANSYS macro to read and solve multiple
+        load steps.  The macro loops through a series of load step
+        files written by the LSWRITE command.  The macro file called
+        by ``lssolve`` is called LSSOLVE.MAC.
+
+        ``lssolve`` cannot be used with the birth-death option.
+
+        ``lssolve`` is not supported for cyclic symmetry analyses.
+
+        ``lssolve`` does not support restarts.
+        """
+        with self.non_interactive:
+            self.run(f"LSSOLVE,{lsmin},{lsmax},{lsinc}", **kwargs)
+        return self.last_response
+
+    def mascale(self, massfact="", **kwargs):
+        """Activates scaling of the entire system matrix.
+
+        APDL Command: MASCALE
+
+        Parameters
+        ----------
+        massfact
+           Scaling factor (> 0) for the mass matrix. Default = 1.0.
+
+        Notes
+        -----
+        This command is supported in the first load step of the analysis only.
+        The following features are not affected by the scaling:
+
+        * Ocean loading
+        * Steady-state rolling SSTATE
+
+        The mass-related information (mass, center of mass, and mass
+        moments of inertia) printed in the mass summary is based on
+        unscaled mass properties.
+        """
+        return self.run(f"MASCALE,{massfact}", **kwargs)
+
+    def aerocoeff(self, aeromodetype="", aeromappedfilenames="",
+                  aerospecs="", aeroscalar="", nblades="",
+                  autofileread="", **kwargs):
+        """Computes the aero-damping and stiffness coefficients and
+        writes them to an APDL array.
+
+        APDL Command: AEROCOEFF
+
+        Parameters
+        ----------
+        aeromodetype
+            Mode type to be used.
+
+            * ``"blade"`` : Non-cyclic cantilevered blade mode (default)
+
+        aeromappedfiles
+            Name of string array containing file names of mapped pressures
+            from CFD. The file names should be ordered to correspond to
+            the AeroSpecs array.
+
+        aerospecs
+            Name of numerical array containing data organized to correspond to
+            the AeroMappedFiles array.
+
+        aeroscalar
+            Scaling value(s) to handle any modal scaling difference
+            between structural and CFD modes. The values can be entered as
+            a scalar or 1-dimensional array. (each scaling value defaults
+            to 1)
+
+        nblades
+            Number of blades.
+
+        autofileread
+            Key to automatically read and use values from CFD file header.
+
+            *  0 (OFF or NO) : Do not read scaling values or nodal diameter
+               from the CFD file header. (default)
+            * 1 (ON or YES) : Read scaling values (labeled Mode Multiplier
+              in CFD file) from CFD file header. The scaling values read
+              will be used in calculations and the AeroScalar input will
+              be ignored. The nodal diameter values will be used to cross
+              check the value of i (input through AeroSpecs array).
+
+        Notes
+        -----
+        The AEROCOEFF command is designed to generate an array of
+        aerodynamic coefficients that can be used in a cyclic
+        mode-superposition harmonic response analysis using the CYCFREQ
+        , AERO command to represent aerodynamic stiffness and
+        damping. These aerodynamic coefficients can also be used in a damped
+        modal analysis phase (CYCFREQ, MODAL) of a cyclic
+        mode-superposition harmonic solve. An APDL array called
+        JobnameAeroArray is generated using the AEROCOEFF command.  This array
+        is compatible with the array needed for the CYCFREQ, AERO command.
+        The format of the written array follows that of the CYCFREQ, AERO
+        command. The array is formatted as follows:
+        ``i, m, n, V_real, V_imag``
+
+        where
+        ``i`` = the i th interblade phase angle (IBPA)
+        ``m`` = the m th vibrating blade mode
+        ``n`` = the n th blade mode generating the pressure oscillations
+
+        ``Vreal`` and ``V_imag`` = the real and imaginary coefficients.
+
+        Prior to issuing the AEROCOEFF command, a non-cyclic cantilevered
+        blade modal analysis must be run, either stress-free or
+        prestressed using linear perturbation. For more information, see
+        Modal Analysis in the Structural Analysis Guide. The file
+        requirements for the AEROCOEFF command are the same as those
+        needed for modal restart as described in Modal Analysis Restart.
+        The AeroSpecs values are specified in a 3×r array *DIM,
+        where r is a positive integer equal to the number of interblade
+        phase angles and the pressure modes solved for in the CFD
+        analysis.
+
+        Each row has the structure: ``i, m, n``
+        where
+        ``i`` = the i th interblade phase angle (IBPA)
+        ``m`` = the m th vibrating blade mode
+        ``n`` = the n th blade mode generating the pressure oscillations
+
+        At least one aerodynamic damping coefficient must be specified for
+        each IBPA (equal to the number of blades) while keeping and
+        constant. If a value is not specified, the program writes an array
+        value of zero for both and . The values of and are relative to the
+        modes computed in the re- quired modal analysis.
+
+        The number of AeroScalar values must be equal to the number of
+        pressure modes ( from Aero- Specs). If the number of AeroScalar
+        values is greater than 1, the values must be entered by defining
+        an array *DIM and entering the array name in the AeroScalar
+        field. For a discussion of how AeroScalar values are computed, see
+        Scaling Aerodynamic Coupling Coefficients.
+
+        The value for nBlades should be equal to the number of sectors of
+        the system. If there are multiple blades per cyclic sector, then
+        the combination of blades on the single sector will have an aero
+        coefficient value. In this case, each blade will not have a
+        distinct aero coefficient.
+        """
+        command = f"AEROCOEFF,{aeromodetype},{aeromappedfilenames},{aerospecs},{aeroscalar},{nblades},{autofileread}"
+        return self.run(command, **kwargs)
+
+    def mrpm(self, val1="", **kwargs):
+        """Defines the revolutions per minute (RPM) for a machine rotation.
+
+        APDL Command: MRPM
+
+        Parameters
+        ----------
+        val1
+            The RPM value (no default).
+
+        Notes
+        -----
+        A different RPM value can be defined at each load step. The RPM
+        value is used to postprocess the equivalent radiated power from
+        the structural surface (the PRAS and PLAS commands) or the
+        radiated sound power level (the PRFAR and PLFAR commands).
+        """
+        return self.run(f"MRPM,{val1}", **kwargs)
+
+    def mpchg(self, mat="", elem="", **kwargs):
+        """Changes the material number attribute of an element.
+
+        APDL Command: MPCHG
+
+        Parameters
+        ----------
+        mat
+            Assign this material number to the element. Material numbers
+            are defined with the material property commands MP.
+
+        elem
+            Element for material change. If ALL, change materials for all
+            selected elements ESEL.
+
+        Notes
+        -----
+        Changes the material number of the specified element. Between load
+        steps in SOLUTION, material properties cannot be changed from
+        linear to nonlinear, or from one nonlinear option to another.
+
+        If you change from one CHABOCHE model to another CHABOCHE model,
+        the different models need to have the same number of data points.
+        """
+        return self.run(f"MPCHG,{mat},{elem}", **kwargs)
+
+    def icrotate(node="", omega="", x1="", y1="", z1="", x2="", y2="",
+                 z2="", vx="", vy="", vz="", accel="", **kwargs):
+        """Specifies initial velocity at nodes as a sum of rotation about an axis and translation.
+
+        APDL Command: ICROTATE
+
+        Parameters
+        ----------
+        NODE
+            Node at which the initial velocity is to be specified. If ALL,
+            apply to all selected nodes NSEL.  A component name may be
+            input for NODE.
+
+        OMEGA
+            Scalar rotational velocity about the rotational axis.
+
+        X1, Y1, Z1
+            Coordinates (in the global Cartesian coordinate system) of the
+            beginning point of the rotational axis vector.
+
+        X2, Y2, Z2
+            Coordinates (in the global Cartesian coordinate system) of the
+            end point of the rotational axis vector.
+
+        Vx
+            Initial translational velocity in direction x of the nodal
+            coordinate system.
+
+        Vy
+            Initial translational velocity in direction y of the nodal
+            coordinate system.
+
+        Vz
+            Initial translational velocity in direction z of the nodal
+            coordinate system.
+
+        accel
+            Key to initialize acceleration due to centrifugal effects:
+
+            * ``""`` : (blank) Do not initialize acceleration (default).
+            * ``"CENT"`` : Initialize acceleration due to centrifugal
+              effects along with the initial velocity.
+
+        Notes
+        -----
+        The ICROTATE command specifies initial velocity for all
+        translational degrees of freedom of the specified nodes. The
+        velocity value is a combination of velocity due to rotation about
+        an axis and translation.
+        """
+        command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
+        return self.run(command, **kwargs)
+
+    def merge(name1="", name2="", val1="", val2="", **kwargs):
+        """Merges two dense matrices or vectors into one.
+
+        APDL Command: *MERGE
+
+        Parameters
+        ----------
+        name1
+            Name of the matrix or vector to extend.
+
+        name2
+            Name of the matrix or vector to be merged into ``name1``.
+
+        val1
+            If ``name1`` refers to a dense matrix created by the *DMAT
+            command then the column or row number indicating where the new values
+            are to be inserted into the Name1 matrix.
+
+            If ``name` refers to a vector created by *VEC then this is the
+            row number indicating where the new values are to be inserted
+            into the ``name1`` vector.
+
+        val2
+            Specifies how the ``name2`` matrix or vector is copied into
+            the ``name1`` matrix.
+
+            * ``"COL"`` : Insert the new values at the column location
+              specified by ``val1`` (default).
+            * ``"row"`` : Insert the new values at the row location specified by ``val1``.
+
+        Notes
+        -----
+        ``merge`` can be used to add new columns or rows to a dense matrix
+        that was created by the *DMAT command. In this case, ``name1`` must
+        be the name of the dense matrix and ``name2`` must refer to a vector
+        or another dense matrix.
+
+        *MERGE can also be used to add new rows to a vector that was
+         created by the *VEC command. In this case, ``name1`` and
+         ``name2`` must both refer to vectors.
+
+        In all cases, the values of the original matrix or vector are
+        retained, and the matrix or vector is resized to accommodate the
+        additional rows or columns.
+        """
+        return self.run(f"MERGE,{name1},{name2},{val1},{val2}", **kwargs)
+
+    def aport(portnum="", label="", kcn="", pres="", phase="", val1="",
+              val2="", val3="", val4="", **kwargs):
+        """Specifies input data for plane wave and acoustic duct ports.
+
+        APDL Command: APORT
+
+        Parameters
+        ----------
+        portnum
+            Port number. This number is associated with an exterior port
+            or interior port previously specified by the SF and BF family
+            of commands, respectively. The number must be between 1 and
+            50.
+
+        Label
+
+            * ``"PLAN"`` : Incident plane wave.
+            * ``"RECT"`` : Rectangular duct.
+            * ``"CIRC"`` : Circular duct.
+            * ``"COAX"`` : Coaxial duct.
+            * ``"LIST"`` : List the port settings. If PortNum = ALL, list the port settings for all defined ports.
+            * ``"DELE"`` : Delete defined ports. If PortNum = ALL, delete all defined ports.
+
+        kcn
+            A previously-defined local (KCN >10) or global (KCN = 0)
+            Cartesian coordinate system number used to specify the
+            geometric properties of the duct. Defaults to the global
+            Cartesian coordinate system (0). The local Z-direction must be
+            the direction of wave propagation. The origin of the local
+            coordinate system must be centered about the face of the duct
+            port without considering symmetry.
+
+        pres
+            Zero-to-peak amplitude of the pressure. If blank, the port
+            will appear as a matching impedance.
+
+        phase
+            Phase angle of the applied pressure in degrees. Defaults to 0.
+
+        VAL1, VAL2, VAL3, VAL4
+            Additional input. The meaning of VAL1 through VAL4 varies
+            depending on the specified Label.  If ``label="PLAN"``:
+
+            * ``"VAL1"`` : angle from positive X-axis to positive Y-axis
+              in the local Cartesian coordinates (KCN).
+
+            * ``"VAL2"`` : angle away from positive Z-axis in the local
+              Cartesian coordinates (KCN).
+
+            if ``label="RECT"``:
+
+            * ``"VAL1"`` : Width of the rectangular duct.
+            * ``"VAL2"`` : Height of the rectangular duct.
+            * ``"VAL3"`` : Mode index for pressure variation along the
+              width (defaults to 0).
+            * ``"VAL4"`` : Mode index for pressure variation along the
+              height (defaults to 0).
+
+            if ``label="CIRC"``:
+
+            * ``"VAL1"`` : Radius of the circular duct.
+            * ``"VAL2"`` : Not used.
+            * ``"VAL3"`` : Mode index for pressure variation along the
+              azimuth (defaults to 0).
+            * ``"VAL4"`` : Mode index for pressure variation along the
+              radii (defaults to 0).
+
+            if ``label="COAX"``:
+
+            * ``"VAL1"`` : Inner radius of the coaxial duct.
+            * ``"VAL2"`` : Outer radius of the coaxial duct.
+            * ``"VAL3"`` : Mode index for pressure variation along the
+              azimuth (defaults to 0).
+            * ``"VAL4"`` : Mode index for pressure variation along the
+              radii (defaults to 0).
+
+        Notes
+        -----
+        Use the APORT command to launch a specified analytic acoustic mode
+        into a guided duct.
+
+        The low-order FLUID30 element does not support the higher modes in
+        the coaxial duct ``label="COAX"``.
+
+        For more information, see Specified Mode Excitation in an Acoustic
+        Duct in the Acoustic Analysis Guide, and Analytic Port Modes in a
+        Duct in the Mechanical APDL Theory Reference.
+        """
+        command = f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
+        return self.run(command, **kwargs)
+
+    def scopt(tempdepkey="", **kwargs):
+        """Specifies System Coupling options.
+
+        APDL Command: SCOPT
+
+        Parameters
+        ----------
+        tempdepkey
+            Temperature-dependent behavior key based on the convection
+            coefficient:
+
+            * ``"YES"`` : A negative convection coefficient, -N, is
+              assumed to be a function of temperature and is determined
+              from the HF property table for material N (MP command). This
+              is the default.
+
+            * ``"NO"`` : A negative convection coefficient, -N, is used as
+              is in the convection calculation.
+
+        Notes
+        -----
+        By default in the Mechanical APDL program, a negative convection
+        coefficient value triggers temperature-dependent behavior. In
+        System Coupling, and in some one-way CFD to Mechanical APDL
+        thermal simulations, it is desirable to allow convection
+        coefficients to be used as negative values. To do so, issue the
+        command ``scopt("NO")``.
+        """
+        return self.run(f"SCOPT,{tempdepkey}", **kwargs)

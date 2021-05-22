@@ -27,7 +27,7 @@ These PREP7 commands manage sections.
    Mapdl.seccontrol
    Mapdl.secdata
    Mapdl.secjoint
-   Mapdl./seclib
+   Mapdl.seclib
    Mapdl.seclock
    Mapdl.secnum
    Mapdl.secoffset

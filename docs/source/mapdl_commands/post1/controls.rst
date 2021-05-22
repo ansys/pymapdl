@@ -14,7 +14,7 @@ other commands.
 
    Mapdl.avprin
    Mapdl.avres
-   Mapdl./efacet
+   Mapdl.efacet
    Mapdl.ernorm
    Mapdl.force
    Mapdl.inres

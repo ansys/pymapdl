@@ -11,10 +11,10 @@ These DISPLAY commands are used to set up the DISPLAY program.
 .. autosummary::
    :toctree: api/
 
-   mapdl.cmap
-   mapdl.devdisp
-   mapdl.filedisp
-   mapdl.nocolor
-   mapdl.seg
-   mapdl.showdisp
-   mapdl.trans
+   Mapdl.cmap
+   Mapdl.devdisp
+   Mapdl.filedisp
+   Mapdl.nocolor
+   Mapdl.seg
+   Mapdl.showdisp
+   Mapdl.trans

@@ -24,10 +24,9 @@ These POST26 commands are used to store data for processing.
    Mapdl.nsol
    Mapdl.nstore
    Mapdl.numvar
-   Mapdl./post26
    Mapdl.reset
    Mapdl.rforce
-   Mapdl./rgb
+   Mapdl.rgb
    Mapdl.solu
    Mapdl.store
    Mapdl.timerange

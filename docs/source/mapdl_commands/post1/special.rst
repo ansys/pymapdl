@@ -15,7 +15,6 @@ These POST1 commands are used for various special purposes.
    Mapdl.cbdof
    Mapdl.cmsfile
    Mapdl.cyccalc
-   Mapdl./cycexpand
    Mapdl.cycfiles
    Mapdl.cycphase
    Mapdl.cycspec

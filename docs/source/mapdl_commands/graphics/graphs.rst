@@ -12,10 +12,10 @@ displayed.
 .. autosummary::
    :toctree: api/
 
-   mapdl.axlab
-   mapdl.grid
-   mapdl.gropt
-   mapdl.grtyp
-   mapdl.gthk
-   mapdl.xrange
-   mapdl.yrange
+   Mapdl.axlab
+   Mapdl.grid
+   Mapdl.gropt
+   Mapdl.grtyp
+   Mapdl.gthk
+   Mapdl.xrange
+   Mapdl.yrange

@@ -16,7 +16,7 @@ These SOLUTION commands are used to define options for nonlinear analyses.
    Mapdl.bucopt
    Mapdl.cnvtol
    Mapdl.crplim
-   Mapdl./gst
+   Mapdl.gst
    Mapdl.lnsrch
    Mapdl.mxpand
    Mapdl.ncnv

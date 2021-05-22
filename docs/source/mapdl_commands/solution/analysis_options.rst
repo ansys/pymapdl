@@ -61,7 +61,6 @@ These SOLUTION commands are used to set general analysis options.
    Mapdl.seexp
    Mapdl.seopt
    Mapdl.snoption
-   Mapdl./solu
    Mapdl.solve
    Mapdl.stabilize
    Mapdl.thexpand
