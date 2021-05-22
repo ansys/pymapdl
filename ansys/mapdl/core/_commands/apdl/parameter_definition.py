@@ -1,3 +1,5 @@
+import os
+
 def afun(self, lab="", **kwargs):
     """Specifies units for angular functions in parameter expressions.
 
