@@ -1452,55 +1452,6 @@ class _MapdlCore(Commands, _MapdlCommands):
         self.filname(new_jobname, mute=True)
         self._jobname = new_jobname
 
-    @supress_logging
-    def inquire(self, func):
-        """Returns system information.
-
-        Parameters
-        ----------
-        func : str
-           Specifies the type of system information returned.  See the
-           notes section for more information.
-
-        Returns
-        -------
-        value : str
-            Value of the inquired item.
-
-        Notes
-        -----
-        Allowable func entries
-        LOGIN - Returns the pathname of the login directory on Linux
-        systems or the pathname of the default directory (including
-        drive letter) on Windows systems.
-
-        - ``DOCU`` - Pathname of the ANSYS docu directory.
-        - ``APDL`` - Pathname of the ANSYS APDL directory.
-        - ``PROG`` - Pathname of the ANSYS executable directory.
-        - ``AUTH`` - Pathname of the directory in which the license file resides.
-        - ``USER`` - Name of the user currently logged-in.
-        - ``DIRECTORY`` - Pathname of the current directory.
-        - ``JOBNAME`` - Current Jobname.
-        - ``RSTDIR`` - Result file directory
-        - ``RSTFILE`` - Result file name
-        - ``RSTEXT`` - Result file extension
-        - ``OUTPUT`` - Current output file name
-
-        Examples
-        --------
-        Return the job name
-
-        >>> mapdl.inquire('JOBNAME')
-        file
-
-        Return the result file name
-
-        >>> mapdl.inquire('RSTFILE')
-        'file.rst'
-        """
-        response = self.run(f'/INQUIRE,,{func}', mute=False)
-        return response.split('=')[1].strip()
-
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
                        nrmkey='', modtype='', memory_option='', elcalc=False):
         """Run a modal with basic settings analysis

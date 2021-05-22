@@ -1,12 +1,89 @@
 """Pythonic MAPDL Commands"""
+import os
+import warnings
+import re
 
+from .plotting import general_plotter
 from typing import Optional, Union
 from ansys.mapdl.core.mapdl_types import *
+from ansys.mapdl.core.misc import supress_logging
 
-# from .geometry_commands import _MapdlGeometryCommands
-# from .io_commands import _MapdlIoCommands
-# from .mesh_commands import _MapdlMeshingCommands
-# from .misc_commands import _MapdlMiscCommands
+
+numeric_const_pattern = r"""
+[-+]? # optional sign
+(?:
+(?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
+|
+(?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
+)
+# followed by optional exponent part if desired
+(?: [Ee] [+-]? \d+ ) ?
+"""
+
+
+NUM_PATTERN = re.compile(numeric_const_pattern, re.VERBOSE)
+
+
+def parse_kpoint(msg):
+    if msg:
+        res = re.search(r'kpoint=\s+(\d+)\s+', msg)
+        if res is not None:
+            return int(res.group(1))
+
+
+def parse_output_areas(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_a(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_line_no(msg):
+    """Parse create area message and return area number"""
+    if msg:
+        res = re.search(r"LINE NO[.]=\s+(\d+)", msg)
+        if res is not None:
+            return int(res.group(1))
+
+
+def parse_line_nos(msg):
+    if msg:
+        matches = re.findall(r"LINE NO[.]=\s*(\d*)", msg)
+        if matches:
+            return [int(match) for match in matches]
+
+
+def parse_v(msg):
+    """Parse volume message and return volume number"""
+    if msg:
+        res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_output_volume_area(msg):
+    """Parse create area message and return area or volume number"""
+    if msg:
+        res = re.search(r"OUTPUT (AREA|VOLUME|AREAS) =\s*([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_e(msg: Optional[str]) -> Optional[int]:
+    """Parse create element message and return element number."""
+    if msg:
+        res = re.search(r"(ELEMENT\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
 
 
 class _MapdlCommands():  # pragma: no cover
@@ -7578,25 +7655,56 @@ class _MapdlCommands():  # pragma: no cover
         command = "GSSOL,%s,%s,%s,%s" % (str(nvar), str(item), str(comp), str(name))
         return self.run(command, **kwargs)
 
-    def inquire(self, strarray="", func="", **kwargs):
-        """APDL Command: /INQUIRE
-
-        Returns system information to a parameter.
+    @supress_logging
+    def inquire(self, func):
+        """Returns system information.
 
         Parameters
         ----------
-        strarray
-            Name of the "string array" parameter that will hold the returned
-            values.  String array parameters are similar to character arrays,
-            but each array element can be as long as 128 characters. If the
-            string parameter does not exist, it will be created.
+        func : str
+           Specifies the type of system information returned.  See the
+           notes section for more information.
+
+        Returns
+        -------
+        value : str
+            Value of the inquired item.
 
         Notes
         -----
-        The /INQUIRE command is valid in any processor.
+        Allowable func entries
+        LOGIN - Returns the pathname of the login directory on Linux
+        systems or the pathname of the default directory (including
+        drive letter) on Windows systems.
+
+        - ``DOCU`` - Pathname of the ANSYS docu directory.
+        - ``APDL`` - Pathname of the ANSYS APDL directory.
+        - ``PROG`` - Pathname of the ANSYS executable directory.
+        - ``AUTH`` - Pathname of the directory in which the license file resides.
+        - ``USER`` - Name of the user currently logged-in.
+        - ``DIRECTORY`` - Pathname of the current directory.
+        - ``JOBNAME`` - Current Jobname.
+        - ``RSTDIR`` - Result file directory
+        - ``RSTFILE`` - Result file name
+        - ``RSTEXT`` - Result file extension
+        - ``OUTPUT`` - Current output file name
+
+        Examples
+        --------
+        Return the job name
+
+        >>> mapdl.inquire('JOBNAME')
+        file
+
+        Return the result file name
+
+        >>> mapdl.inquire('RSTFILE')
+        'file.rst'
         """
-        command = "/INQUIRE,%s,%s" % (str(strarray), str(func))
-        return self.run(command, **kwargs)
+        response = self.run(f'/INQUIRE,,{func}', mute=False)
+        if '=' in response:
+            return response.split('=')[1].strip()
+        return ''
 
     def focus(self, wn="", xf="", yf="", zf="", ktrans="", **kwargs):
         """APDL Command: /FOCUS
@@ -60490,7 +60598,6 @@ class _MapdlCommands():  # pragma: no cover
         """
         command = f"EKILL,{elem}"
         return self.run(command, **kwargs)
-
 
     def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
           l: MapdlInt = "", m: MapdlInt = "", n: MapdlInt = "", o:
