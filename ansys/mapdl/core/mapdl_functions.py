@@ -679,19 +679,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDSP,%s,%s,%s,%s" % (str(option), str(min_), str(max_), str(inc))
         return self.run(command, **kwargs)
 
-    def rmclist(self, **kwargs):
-        """APDL Command: RMCLIST
-
-        Lists all lumped capacitance pairs defined.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMCLIST,"
-        return self.run(command, **kwargs)
-
+    
     def latt(self, mat="", real="", type_="", kb="", ke="", secnum="",
              **kwargs):
         """APDL Command: LATT
@@ -4024,72 +4012,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "MFRELAX,%s,%s,%s" % (str(lab), str(value), str(option))
         return self.run(command, **kwargs)
 
-    def dcvswp(self, option="", elem="", cnum="", vmax="", vinc1="", vinc2="",
-               gap="", **kwargs):
-        """APDL Command: DCVSWP
-
-        Performs a DC voltage sweep on a ROM element.
-
-        Parameters
-        ----------
-        option
-            Sweep option:
-
-            GV - Perform voltage sweep up to given voltage Vmax.
-
-        elem
-            Element number of the ROM element for the ROM use pass analysis.
-
-        cnum
-            Number of sweep conductor.
-
-        vmax
-            Maximum voltage. For the PI option, this voltage should be below
-            the pull-in voltage value.
-
-        vinc1
-            Voltage increment for Vmax (default = Vmax/20).
-
-        vinc2
-            Voltage increment for pull-in voltage (default = 1).
-
-        gap
-            Gap elements option:
-
-            0 - Create gap elements (COMBIN40) (default).
-
-        Notes
-        -----
-        Vinc1 is used to ramp the sweep conductor voltage from 0 to Vmax. Vinc2
-        is used to increase the sweep conductor voltage from Vmax to the pull-
-        in value if the PI sweep option is used.
-
-        Because ramping the voltage may lead to the unstable region of an
-        electromechanical system, DCVSWP might not converge when the sweep
-        conductor voltage approaches the pull-in value. To avoid non-converged
-        solutions, you should use the gap option to create a set of spring-gap
-        elements (COMBIN40). By default, DCVSWP creates two spring-gap elements
-        with opposite orientations for each active modal displacement DOF of
-        the ROM element. The gap size is set to the maximum absolute values of
-        the deflection range for the corresponding mode, as calculated by
-        RMMSELECT or modified  using the RMMRANGE command. The spring constants
-        are set to 1.E5 for all the COMBIN40 elements. Along with the spring-
-        gap elements, DCVSWP creates a set of constraint equations relating the
-        ROM element modal displacements DOF (EMF) and the displacement DOF (UX)
-        of the gap elements. Constraining the modal displacements using the
-        spring-gap elements allows DCVSWP to converge in the pull-in range. The
-        DCVSWP macro has a limit of 900 equilibrium iterations. If this limit
-        is not sufficient to reach convergence, try the advanced techniques
-        given in Overcoming Convergence Problems in the Structural Analysis
-        Guide. For more information on gap elements, see Using Gap Elements
-        with ROM144 in the Coupled-Field Analysis Guide.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "DCVSWP,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(elem), str(cnum), str(vmax), str(vinc1), str(vinc2), str(gap))
-        return self.run(command, **kwargs)
-
+    
     def qrdopt(self, reusekey="", symmeth="", cmccoutkey="", **kwargs):
         """APDL Command: QRDOPT
 
@@ -5860,27 +5783,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/PNUM,%s,%s" % (str(label), str(key))
         return self.run(command, **kwargs)
 
-    def rmsave(self, fname="", ext="", **kwargs):
-        """APDL Command: RMSAVE
-
-        Saves ROM data to file.
-
-        Parameters
-        ----------
-        fname
-            Name and directory path of the ROM database file. Default to
-            Jobname.
-
-        ext
-            Extension of the ROM database file. Default to .rom.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        return self.run(f"RMSAVE,{fname},{ext}", **kwargs)
-
+    
     def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="",
                **kwargs):
         """APDL Command: XFDATA
@@ -6466,19 +6369,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "KSCON,%s,%s,%s,%s,%s" % (str(npt), str(delr), str(kctip), str(nthet), str(rrat))
         return self.run(command, **kwargs)
 
-    def rmmlist(self, **kwargs):
-        """APDL Command: RMMLIST
-
-        Lists all mode specifications for the ROM method.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMMLIST,"
-        return self.run(command, **kwargs)
-
+    
     def pspec(self, pcolor="", kfill="", kbordr="", **kwargs):
         """APDL Command: /PSPEC
 
@@ -11808,25 +11699,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DEMORPH,%s,%s,%s" % (str(elem), str(dimn), str(rmshky))
         return self.run(command, **kwargs)
 
-    def rmxport(self, **kwargs):
-        """APDL Command: RMXPORT
-
-        Exports ROM model to external VHDL-AMS simulator.
-
-        Notes
-        -----
-        Use this command to generate all files necessary to run the ROM
-        analysis in an external VHDL-AMS Simulator.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-
-        VHDL files: Initial.vhd, S_ams_ijk.vhd, Cxxx_ams_ijk.vhd,
-        transducer.vhd.
-        """
-        command = "RMXPORT,"
-        return self.run(command, **kwargs)
-
+    
     def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="",
              **kwargs):
         """APDL Command: SADD
@@ -13391,30 +13264,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "GAP,"
         return self.run(command, **kwargs)
 
-    def rmuse(self, option="", usefil="", **kwargs):
-        """APDL Command: RMUSE
-
-        Activates ROM use pass for ROM elements.
-
-        Parameters
-        ----------
-        option
-            Type of data to be plotted. Valid types are:
-
-            1 or "ON" - Activates ROM use pass.
-
-        usefil
-            Name of the reduced displacement file (.rdsp) created by the ROM
-            Use Pass (required field only for the Expansion Pass).
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMUSE,%s,%s" % (str(option), str(usefil))
-        return self.run(command, **kwargs)
-
+    
     def fefor(self, **kwargs):
         """APDL Command: FEFOR
 
@@ -14089,34 +13939,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDIPART,%s,%s,%s,%s,%s,%s,%s,%s" % (str(part), str(option), str(cvect), str(tm), str(ircs), str(ivect), str(vvect), str(cid))
         return self.run(command, **kwargs)
 
-    def rmlvscale(self, nload="", fact1="", fact2="", fact3="", fact4="",
-                  fact5="", **kwargs):
-        """APDL Command: RMLVSCALE
-
-        Defines element load vector scaling for a ROM use pass.
-
-        Parameters
-        ----------
-        nload
-            Total number of load cases to be considered within a ROM use pass.
-            If Nload = "DELETE", all defined load vectors are deleted.
-
-        fact1, fact2, fact3, . . . , fact5
-            Scale factors applied to load vectors (maximum 5). Defaults to 0.
-
-        Notes
-        -----
-        Specifies the element load scale factor applied to a ROM analysis use
-        pass.  Element load vectors are extracted from a Static Analysis using
-        the RMNDISP command. Up to 5 element load vectors may be scaled and
-        applied to a ROM use pass.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMLVSCALE,%s,%s,%s,%s,%s,%s" % (str(nload), str(fact1), str(fact2), str(fact3), str(fact4), str(fact5))
-        return self.run(command, **kwargs)
-
+    
     def prenergy(self, energytype="", cname1="", cname2="", cname3="",
                  cname4="", cname5="", cname6="", **kwargs):
         """APDL Command: PRENERGY
@@ -17376,19 +17199,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "IC,%s,%s,%s,%s,%s,%s" % (str(node), str(lab), str(value), str(value2), str(nend), str(ninc))
         return self.run(command, **kwargs)
 
-    def rmalist(self, **kwargs):
-        """APDL Command: RMALIST
-
-        Lists all defined master nodes for a ROM method.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMALIST,"
-        return self.run(command, **kwargs)
-
+    
     def pdmeth(self, method="", samp="", **kwargs):
         """APDL Command: PDMETH
 
@@ -24879,37 +24690,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "/CLABEL,%s,%s" % (str(wn), str(key))
         return self.run(command, **kwargs)
 
-    def rmcap(self, refname="", c1="", c2="", **kwargs):
-        """APDL Command: RMCAP
-
-        Defines lumped capacitance pairs between conductors C1 and C2 for a ROM
-        method.
-
-        Parameters
-        ----------
-        refname
-            Reference name for capacitance pair definition.
-
-        c1
-            First conductor (between 1 and 5).
-
-        c2
-            Second conductor (between 1 and 5).
-
-        Notes
-        -----
-        For a capacitance definition between conductor C1 and C2, node
-        components COND%C1% and COND%C2% (see CM command) must be present
-        containing the conductor nodes. If C1 and C2 are blank, the capacitance
-        definition with RefName will be deleted.  (For example, if C1 = 1, and
-        C2 = 2, then node components COND1 and COND2 must be defined).
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMCAP,%s,%s,%s" % (str(refname), str(c1), str(c2))
-        return self.run(command, **kwargs)
-
+    
     def celist(self, neqn1="", neqn2="", ninc="", option="", **kwargs):
         """APDL Command: CELIST
 
@@ -25347,53 +25128,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "PLETAB,%s,%s" % (str(itlab), str(avglab))
         return self.run(command, **kwargs)
 
-    def rmmselect(self, nmode="", method="", dmin="", dmax="", **kwargs):
-        """APDL Command: RMMSELECT
-
-        Selects modes for the ROM method.
-
-        Parameters
-        ----------
-        nmode
-            Total number of modes to be selected
-
-        method
-            Method for mode selection. Valid methods are:
-
-            TMOD - Automated selection using a test load. TMOD must be enclosed in single quotes.
-
-        dmin
-            Lower bound for total deflection range.
-
-        dmax
-            Upper bound for total deflection range.
-
-        Notes
-        -----
-        Select pertinent modes for use in a ROM. Pertinent mode selection may
-        be enhanced by using the deflection state of the structure
-        representative of the operating nature of the device (Method = TMOD). A
-        static analysis with an applied Test Load may be used.  The test load
-        displacements must be extracted at the neutral plane of the device (if
-        the device is stress-stiffened), or at any plane of the device (non-
-        stress-stiffened). A node component "NEUN" must be defined for the
-        plane of nodes, and the displacements extracted using the RMNDISP
-        command prior to issuing this command. If Method = NMOD, use the first
-        Nmode eigenmodes to select the pertinent modes for the ROM tool. Only
-        those modes are selected that act in the operating direction of the
-        structure [RMANL].
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-
-        jobname.evx, jobname.evy, jobname.evz, jobname.evn, jobname.evl
-
-        Test load and element load neutral plane displacement files:
-        jobname.tld, jobname.eld
-        """
-        command = "RMMSELECT,%s,%s,%s,%s" % (str(nmode), str(method), str(dmin), str(dmax))
-        return self.run(command, **kwargs)
-
+    
     def cmacel(self, cm_name="", cmacel_x="", cmacel_y="", cmacel_z="",
                **kwargs):
         """APDL Command: CMACEL
@@ -27824,26 +27559,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDCGEN,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(cont), str(targ), str(fs), str(fd), str(dc), str(vc), str(vdc), str(v1), str(v2), str(v3), str(v4), str(btime), str(dtime), str(boxid1), str(boxid2))
         return self.run(command, **kwargs)
 
-    def rmrstatus(self, refname="", **kwargs):
-        """APDL Command: RMRSTATUS
-
-        Prints status of response surface for ROM function.
-
-        Parameters
-        ----------
-        refname
-            Reference name of ROM function. Valid reference names are "SENE"
-            for the strain energy of the mechanical domain and any capacitance
-            reference names [RMCAP], for the electrostatic domain.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMRSTATUS,%s" % (str(refname))
-        return self.run(command, **kwargs)
-
+    
     def kplot(self, np1="", np2="", ninc="", lab="", **kwargs):
         """APDL Command: KPLOT
 
@@ -28232,28 +27948,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "~PARAIN,%s,%s,%s,%s,%s,%s" % (str(name), str(extension), str(path), str(entity), str(fmt), str(scale))
         return self.run(command, **kwargs)
 
-    def rmresume(self, fname="", ext="", **kwargs):
-        """APDL Command: RMRESUME
-
-        Resumes ROM data from a file.
-
-        Parameters
-        ----------
-        fname
-            Name and directory path of the ROM database file (248 character
-            maximum). Default to Jobname.
-
-        ext
-            Extension of the ROM database file. Default to .rom.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMRESUME,%s,%s" % (str(fname), str(ext))
-        return self.run(command, **kwargs)
-
+    
     def wfront(self, kprnt="", kcalc="", **kwargs):
         """APDL Command: WFRONT
 
@@ -30205,56 +29900,7 @@ class _MapdlCommands():  # pragma: no cover
         command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
-    def rmsmple(self, nlgeom="", cap="", seqslv="", eeqslv="", **kwargs):
-        """APDL Command: RMSMPLE
-
-        Runs finite element solutions and obtains sample points for the ROM
-        method.
-
-        Parameters
-        ----------
-        nlgeom
-            Specify whether a large or small deflection analysis is to be
-            performed for the  mechanical domain:
-
-            OFF (or 0) - Perform small deflection analysis (default).
-
-        cap
-            Capacitance calculation method.
-
-            CHARGE - Compute capacitance based on the charge voltage relationship (default).
-
-        seqslv
-            Solver for structural analysis:
-
-            SPARSE - Sparse direct equation solver (default).
-
-        eeqslv
-            Solver for electrostatic analysis:
-
-            SPARSE - Sparse direct equation solver (default).
-
-        Notes
-        -----
-        This command prepares and runs multiple finite element solutions on the
-        Structural domain and the Electrostatic domain of a model to collect
-        sample points of data for ROM response curve fitting. The command
-        requires a model database [RMANL] and two Physics Files (Structural
-        domain, titled "STRU" and an Electrostatic domain, titled "ELEC"; see
-        PHYSICS command). Also required is a complete ROM database generated
-        from the ROM Tools.  The Cap = CHARGE method is preferred when
-        capacitance to "infinity" is not required. Capacitance conductor pairs
-        are defined by the RMCAP command.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-
-        Strain energy and capacitance data files  jobname_ijk.dec (mode i, j,
-        k).
-        """
-        command = "RMSMPLE,%s,%s,%s,%s" % (str(nlgeom), str(cap), str(seqslv), str(eeqslv))
-        return self.run(command, **kwargs)
-
+    
     def dmprat(self, ratio="", **kwargs):
         """APDL Command: DMPRAT
 
@@ -34165,32 +33811,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDSOLV,"
         return self.run(command, **kwargs)
 
-    def rmnevec(self, **kwargs):
-        """APDL Command: RMNEVEC
-
-        Extracts neutral plane eigenvectors from a modal analysis for the ROM
-        method.
-
-        Notes
-        -----
-        This command extracts the eigenvectors at a neutral plane of a model
-        from a modal analysis.  The modal analysis must have expanded modes
-        [MXPAND] in order to process the data. Only the first 9 modes are
-        considered.  The command requires a node component named "NEUN" to be
-        defined. These nodes represent the nodes at the neutral plane of a
-        structure (in the case of a stress-stiffened structure), or at any
-        plane in the structure (non stress-stiffened case).
-
-        This command is only valid in POST1.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-
-        jobname.evx, jobname.evy, jobname.evz, jobname.evn, jobname.evl
-        """
-        command = "RMNEVEC,"
-        return self.run(command, **kwargs)
-
+    
     def geometry(self, **kwargs):
         """APDL Command: GEOMETRY
 
@@ -37464,46 +37085,7 @@ class _MapdlCommands():  # pragma: no cover
         return self.run(command, **kwargs)
 
     
-    def rmanl(self, fname="", ext="", dimn="", oper="", **kwargs):
-        """APDL Command: RMANL
-
-        Assigns model database, dimensionality, and operating
-        direction for the ROM method.
-
-        Parameters
-        ----------
-        fname
-            Database file name and directory path  (248 characters maximum,
-            including directory). The file name defaults to Jobname.
-
-        ext
-            File extension (8 character maximum). The extension defaults to db.
-
-        dimn
-            Model dimensionality:
-
-            2 - 2-D models
-
-            3 - 3-D Models
-
-        oper
-            Primary operating direction:
-
-            X - direction
-
-            Y - direction
-
-            Z - direction
-
-        Notes
-        -----
-        Required Inputs:
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        return self.run(f"RMANL,{fname},{ext},,{dimn},{oper}", **kwargs)
-
+    
     def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
               con5="", con6="", con7="", con8="", con9="", con10="", **kwargs):
         """APDL Command: *VFILL
@@ -38055,53 +37637,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "TVAR,%s" % (str(key))
         return self.run(command, **kwargs)
 
-    def rmmrange(self, mode="", key="", min_="", max_="", nstep="", damp="",
-                 scale="", **kwargs):
-        """APDL Command: RMMRANGE
-
-        Defines and edits various modal parameters for the ROM method.
-
-        Parameters
-        ----------
-        mode
-            Mode number. Must be lower or equal to the number of modes
-            extracted via the RMNEVEC command.
-
-        key
-            Mode classification key. Valid keys are:
-
-            DOMINANT - Dominant mode
-
-        min\_
-            Lower bound for fit range of mode.
-
-        max\_
-            Upper bound for fit range of mode.
-
-        nstep
-            Number of equidistant steps in fit range of mode.
-
-        damp
-            Modal damping factor. Defaults to 0.0.
-
-        scale
-            Modal scaling factor.
-
-        Notes
-        -----
-        When selected manually (RMMSELECT), modes must be classified as
-        dominant, relevant, or unused. Dominant modes (Key = DOMINANT) are
-        basis functions with large amplitudes. Relevant modes (Key = RELEVANT)
-        are influenced by the dominant modes but do not cause interactions
-        among themselves due to the small amplitude. This assumption leads to
-        essential speed up of the sample point generator (see RMSMPLE).
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMMRANGE,%s,%s,%s,%s,%s,%s,%s" % (str(mode), str(key), str(min_), str(max_), str(nstep), str(damp), str(scale))
-        return self.run(command, **kwargs)
-
+    
     def hbmat(self, fname="", ext="", form="", matrx="", rhs="", mapping="",
               **kwargs):
         """APDL Command: HBMAT
@@ -41425,53 +40961,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*VFUN,%s,%s,%s,%s,%s,%s" % (str(parr), str(func), str(par1), str(con1), str(con2), str(con3))
         return self.run(command, **kwargs)
 
-    def rmndisp(self, loadt="", loc="", **kwargs):
-        """APDL Command: RMNDISP
-
-        Extracts neutral plane displacements from a test load or element load
-        solution for the ROM method.
-
-        Parameters
-        ----------
-        loadt
-            Load type. Load type must be an alphanumeric string enclosed in
-            single quotes. Valid load types are 'TLOAD' for the test load and
-            'ELOAD' for the element load.
-
-        loc
-            Determines whether file will be overwritten or appended. Valid
-            labels are 'WRITE' or 'APPEND'. Defaults to 'WRITE' for test load.
-
-        Notes
-        -----
-        This command extracts the displacements at a neutral plane of a model.
-        If  LoadT = 'TLOAD', extract displacements for a test load on a
-        structure that represents the expected deflection state.  A test load
-        is used to assist in the automatic mode selection for the ROM mode
-        characterization. If LoadT = 'ELOAD', extract the neutral plane
-        displacements for an element load that will be used in the use pass of
-        a ROM analysis.  Typical element loads are gravity, and pressure
-        loading. The element loads may be scaled [RMLVSCALE] during the use
-        pass.
-
-        The command requires a node component named "NEUN" to be defined. These
-        nodes represent the nodes at the neutral plane of a structure (in the
-        case of a stress-stiffened structure), or at any plane in the structure
-        (non stress-stiffened case).
-
-        For LoadT = 'TLOAD', node displacements are written to the file
-        jobname.tld.  For LoadT = 'ELOAD', node displacements are written to
-        the file jobname.eld. Up to 5 element load cases may be written to the
-        file jobname.eld.
-
-        This command is only valid in POST1.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMNDISP,%s,%s" % (str(loadt), str(loc))
-        return self.run(command, **kwargs)
-
+    
     def lmatrix(self, symfac="", coilname="", curname="", indname="",
                 **kwargs):
         """APDL Command: LMATRIX
@@ -44219,31 +43709,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EXPSOL,%s,%s,%s,%s" % (str(lstep), str(sbstep), str(timfrq), str(elcalc))
         return self.run(command, **kwargs)
 
-    def rmrgenerate(self, **kwargs):
-        """APDL Command: RMRGENERATE
-
-        Performs fitting procedure for all ROM functions to generate response
-        surfaces.
-
-        Notes
-        -----
-        The fitting procedure uses modal analysis data and function data
-        generated using the RMSMPLE command and specifications set forth in the
-        RMROPTIONS command. The files jobname_ijk.pcs (modes i, j, k) will be
-        generated containing the coefficients of the response surfaces. These
-        files are needed for the ROM Use Pass along with a ROM data base file
-        [RMSAVE].
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-
-        Strain energy and capacitance data file jobname_ijk.dec
-
-        Response surface coefficients jobname_ijk.pcs (modes i, j, k)
-        """
-        command = "RMRGENERATE,"
-        return self.run(command, **kwargs)
-
+    
     def campbell(self, action="", **kwargs):
         """APDL Command: CAMPBELL
 
@@ -45443,42 +44909,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "DATA,%s,%s,%s,%s,%s,%s" % (str(ir), str(lstrt), str(lstop), str(linc), str(name), str(kcplx))
         return self.run(command, **kwargs)
 
-    def rmroptions(self, refname="", type_="", invert="", **kwargs):
-        """APDL Command: RMROPTIONS
-
-        Defines options for ROM response surface fitting.
-
-        Parameters
-        ----------
-        refname
-            Reference name of ROM function to be fitted. Valid reference names
-            are "SENE" for the strain energy of the structural domain and any
-            capacitance reference name previously defined by means of RMCAP
-            command for the electrostatic domain.
-
-        type\_
-            Type of fitting function to be applied for regression analysis.
-            Valid types are:
-
-            LAGRANGE - Lagrange type (default)
-
-        invert
-            Flag to specify whether data should be inverted prior to fitting.
-
-            0 - Do not invert data (default for SENE)
-
-        Notes
-        -----
-        The objective of response surface fit is to compute an analytical
-        expression for the strain energy and the capacitance as functions of
-        modal amplitudes.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMROPTIONS,%s,%s,%s" % (str(refname), str(type_), str(invert))
-        return self.run(command, **kwargs)
-
+    
     def presol(self, item="", comp="", **kwargs):
         """APDL Command: PRESOL
 
@@ -54027,47 +53458,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "CNTR,%s,%s" % (str(option), str(key))
         return self.run(command, **kwargs)
 
-    def rmrplot(self, refname="", type_="", mode1="", mode2="", **kwargs):
-        """APDL Command: RMRPLOT
-
-        Plots response surface of ROM function or its derivatives with respect
-        to the dominant mode(s).
-
-        Parameters
-        ----------
-        refname
-            Reference name of ROM function. Valid reference names are "SENE"
-            for the strain energy of the mechanical domain and any capacitance
-            definition, previously defined by means of the RMCAP command, for
-            the electrostatic domain.
-
-        type\_
-            Type of data to be plotted. Valid types are:
-
-            FUNC - Response surface (default)
-
-        mode1
-            First mode number (used for Type = "FIRST" and Type = "SECOND"
-            only).
-
-        mode2
-            Second mode number (used for Type = "SECOND" only).
-
-        Notes
-        -----
-        The objective of response surface fit is to compute an analytical
-        expression for the strain energy and the capacitance as functions of
-        modal amplitudes. This command assumes that the coefficient files
-        jobnam_ijk.pcs are available [RMRGENERATE]. Visualization of the
-        response surface will help to evaluate the validity of the function
-        fit.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMRPLOT,%s,%s,%s,%s" % (str(refname), str(type_), str(mode1), str(mode2))
-        return self.run(command, **kwargs)
-
+    
     def fplist(self, **kwargs):
         """APDL Command: FPLIST
 
@@ -57785,34 +57176,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "*VMASK,%s" % (str(par))
         return self.run(command, **kwargs)
 
-    def rmaster(self, node="", lab="", **kwargs):
-        """APDL Command: RMASTER
-
-        Defines master nodes for the ROM method.
-
-        Parameters
-        ----------
-        node
-            Node number at which master degree of freedom is defined  If Node =
-            P, graphical picking is enabled and all remaining command fields
-            are ignored (valid only in the GUI).
-
-        lab
-            Valid labels are "ADD" (default) and "DEL".
-
-        Notes
-        -----
-        Defines master nodes for the ROM.  Master nodes are used to track the
-        total displacement of a structure in the operating direction [RMANL].
-        They may be used as attachment points for 1-D structural elements
-        during a ROM use pass via the UX degree of freedom.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMASTER,%s,%s" % (str(node), str(lab))
-        return self.run(command, **kwargs)
-
+    
     def lsclear(self, lab="", **kwargs):
         """APDL Command: LSCLEAR
 
@@ -58076,31 +57440,7 @@ class _MapdlCommands():  # pragma: no cover
         command = "EDSTART,%s,%s,%s,%s" % (str(restart), str(memory), str(fsize), str(dumpfile))
         return self.run(command, **kwargs)
 
-    def rmporder(self, ord1="", ord2="", ord3="", ord4="", ord5="", ord6="",
-                 ord7="", ord8="", ord9="", **kwargs):
-        """APDL Command: RMPORDER
-
-        Defines polynomial orders for ROM functions.
-
-        Parameters
-        ----------
-        ord1, ord2, ord3, . . . , ord9
-            Polynomial orders for modes. Ordi specifies the polynomial order
-            for modei. Modes are ordered as extracted from a modal analysis
-            using the RMNEVEC command.  Defaults to 0 if mode i is unused;
-            default to nstep(i) -1 for dominant or relevant modes, where
-            nstep(i) is the number of equidistant steps in fit range of mode i.
-            nstep(i) is automatically set by RMMSELECT or modified by the
-            RMMRANGE command.
-
-        Notes
-        -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
-        """
-        command = "RMPORDER,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(ord1), str(ord2), str(ord3), str(ord4), str(ord5), str(ord6), str(ord7), str(ord8), str(ord9))
-        return self.run(command, **kwargs)
-
+    
     def mstole(self, method="", namesurf="", namefluid="", **kwargs):
         """APDL Command: MSTOLE
 

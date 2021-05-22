@@ -1,5 +1,5 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
-                        aux3_
+                        aux3_, reduced,
 )
 
 class Commands:
@@ -129,6 +129,30 @@ class Commands:
     fileaux3 = aux3_.fileaux3
     modify = aux3_.modify
     undelete = aux3_.undelete
+
+    # reduced processor
+    rmndisp = reduced.preparation.rmndisp
+    rmnevec = reduced.preparation.rmnevec
+    rmresume = reduced.setup.rmresume
+    rmsave = reduced.setup.rmsave
+    dcvswp = reduced.use_pass.dcvswp
+    rmlvscale = reduced.use_pass.rmlvscale
+    rmuse = reduced.use_pass.rmuse
+    rmalist = reduced.generation.rmalist
+    rmanl = reduced.generation.rmanl
+    rmaster = reduced.generation.rmaster
+    rmcap = reduced.generation.rmcap
+    rmclist = reduced.generation.rmclist
+    rmmlist = reduced.generation.rmmlist
+    rmmrange = reduced.generation.rmmrange
+    rmmselect = reduced.generation.rmmselect
+    rmporder = reduced.generation.rmporder
+    rmrgenerate = reduced.generation.rmrgenerate
+    rmroptions = reduced.generation.rmroptions
+    rmrplot = reduced.generation.rmrplot
+    rmrstatus = reduced.generation.rmrstatus
+    rmsmple = reduced.generation.rmsmple
+    rmxport = reduced.generation.rmxport
 
     ################
     # PREP7 commands
