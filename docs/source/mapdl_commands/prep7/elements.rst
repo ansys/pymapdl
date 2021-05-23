@@ -15,6 +15,7 @@ These PREP7 commands are used to create, modify, list, etc., elements.
    Mapdl.e
    Mapdl.ecpchg
    Mapdl.edele
+   Mapdl.eextrude
    Mapdl.egen
    Mapdl.einfin
    Mapdl.eintf

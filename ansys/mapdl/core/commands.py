@@ -24,13 +24,14 @@ class Commands:
     anstoaqwa = session.files.anstoaqwa
     anstoasas = session.files.anstoasas
     assign = session.files.assign
-    slashclog = session.files.slashclog
     copy = session.files.copy
     delete = session.files.delete
     fcomp = session.files.fcomp
     lgwrite = session.files.lgwrite
     list = session.files.list
     rename = session.files.rename
+    slashclog = session.files.slashclog
+    slashfdele = session.files.slashfdele
 
     com = session.list_controls.com
     golist = session.list_controls.golist
@@ -618,6 +619,7 @@ class Commands:
     e = preproc.elements.e
     ecpchg = preproc.elements.ecpchg
     edele = preproc.elements.edele
+    eextrude = preproc.elements.eextrude
     egen = preproc.elements.egen
     einfin = preproc.elements.einfin
     eintf = preproc.elements.eintf
@@ -894,6 +896,7 @@ class Commands:
     reswrite = post1_.special.reswrite
     rmflvec = post1_.special.rmflvec
     rsplit = post1_.special.rsplit
+    rstmac = post1_.special.rstmac
     spoint = post1_.special.spoint
     spmwrite = post1_.special.spmwrite
     append = post1_.setup.append

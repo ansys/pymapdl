@@ -6,7 +6,8 @@ Files
 
 .. currentmodule:: ansys.mapdl.core
 
-These SESSION commands are for file operations, such as deleting, copying, and listing.
+These SESSION commands are for file operations, such as deleting,
+copying, and listing.
 
 .. autosummary::
    :toctree: api/
@@ -14,11 +15,11 @@ These SESSION commands are for file operations, such as deleting, copying, and l
    Mapdl.anstoaqwa
    Mapdl.anstoasas
    Mapdl.assign
-   Mapdl.slashclog
    Mapdl.copy
    Mapdl.delete
    Mapdl.fcomp
-   Mapdl.fdele
    Mapdl.lgwrite
    Mapdl.list
+   Mapdl.slashclog
+   Mapdl.slashfdele
    Mapdl.rename

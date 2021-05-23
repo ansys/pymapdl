@@ -44,5 +44,6 @@ These POST1 commands are used for various special purposes.
    Mapdl.reswrite
    Mapdl.rmflvec
    Mapdl.rsplit
+   Mapdl.rstmac
    Mapdl.spoint
    Mapdl.spmwrite

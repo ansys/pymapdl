@@ -427,6 +427,8 @@ def fcomp(self, ident="", level="", **kwargs):
     return self.run(f'/FCOMP,{ident},{level}', **kwargs)
 
 
+
+
 def lgwrite(self, fname="", ext="", kedit="", **kwargs):
     """Writes the database command log to a file.
 
@@ -551,3 +553,38 @@ def rename(self, fname1="", ext1="", fname2="", ext2="", distkey="",
     """
     return self.run(f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}",
                     **kwargs)
+
+
+def slashfdele(self, ident="", stat="", **kwargs):
+    """Deletes a binary file after it is used.
+
+    APDL Command: /FDELE
+
+    Parameters
+    ----------
+    ident
+        ANSYS file name identifier.  Valid identifiers are:  EMAT, ESAV,
+        FULL, SUB, MODE, DSUB, USUB, OSAV, and SELD.  See the Basic
+        Analysis Guide for file descriptions.
+
+    stat
+        Keep or delete key:
+
+        KEEP - Keep this file.
+
+        DELE - Delete (or do not write, if not necessary) this file.
+
+    Notes
+    -----
+    Deletes as soon as possible (or prevents writing) a binary file created
+    by the ANSYS program to save space.
+
+    .. warning::
+        Deleting files that are necessary for the next substep,
+        load step, or analysis will prevent continuation of the
+        run.
+
+    This command is valid only at the Begin Level.
+    """
+    command = f"/FDELE,{ident},{stat}"
+    return self.run(command, **kwargs)

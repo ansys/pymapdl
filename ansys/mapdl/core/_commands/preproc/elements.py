@@ -188,6 +188,134 @@ def edele(self, iel1: MapdlInt = "", iel2: MapdlInt = "",
     return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
 
 
+def eextrude(self, action="", nelem="", space="", dist="", theta="",
+             tfact="", bckey="", **kwargs):
+    """Extrudes 2-D plane elements into 3-D solids.
+
+    APDL Command: EEXTRUDE
+
+    Parameters
+    ----------
+    action
+        Specifies one of the following command behaviors:
+
+        AUTO - Extrudes plane elements (PLANE182 and PLANE183)
+               based on the KEYOPT(3) setting.  Complementary
+               elements are also extruded. (See Notes for more
+               information.) This behavior is the default.
+
+        PLANE - Extrudes elements in the global Z
+                direction. KEYOPT(3) of the parent elements is
+                ignored.
+
+        AXIS - Extrudes elements about the global Y
+               axis. KEYOPT(3) of the parent elements is ignored.
+
+        TANGENT - Similar to Action = AXIS, except that target
+                  elements are extruded in the global Z direction.
+
+    nelem
+        Number of elements to generate in the extruded direction. If you do
+        not specify a number, the program calculates a number automatically
+        based on the average element size and extrusion distance.
+
+    space
+        Spacing ratio. If positive, this value is the nominal ratio of the
+        last division size to the first division size (if > 1.0, sizes
+        increase, if < 1.0, sizes decrease). If negative, |SPACE| is the
+        nominal ratio of the center division size to the end division size.
+        The default value is 1.0 (uniform spacing).
+
+    dist
+        Distance to extrude in the global Z direction for the plane strain
+        case (Action = PLANE). The default is 1.
+
+    theta
+        Ending angle (in degrees) to extrude about the global Y axis for
+        the axisymmetric case (Action = AXIS). The beginning angle is
+        always 0 degrees. The ending angle defaults to 360 degrees.
+
+    tfact
+        Factor for increasing the rigid target size. The size of the
+        extruded rigid target elements is determined automatically based on
+        the size of the contact elements. The default value is 0.2.
+
+    bckey
+        Controls the nodal orientation in the third direction and
+        boundary-condition mapping (Action = AXIS or TIRE only)
+
+        * 0 : All nodes are rotated to a local Cartesian
+            coordinate system where X is the radial, Y axial and Z
+            circumferential direction. All loads and displacements
+            are mapped from the 2-D model to the 3-D model in the
+            local coordinate system.
+
+            If applying rotation ROTY in axisymmetric cases with
+            torsion on the 2-D model, this value sets UZ = 0 at
+            all corresponding 3-D nodes.  This value is the
+            default
+
+        * 1 : Only nodes with applied loads and/or displacements
+            are rotated to a local Cartesian co- ordinate system
+            where X is the radial, Y axial and Z circumferential
+            direction. All loads are mapped to the 3-D model and
+            all applied displacements are reset to zero.
+
+    Notes
+    -----
+    The EEXTRUDE command extrudes current-technology elements PLANE182 and
+    PLANE183. Complementary elements TARGE169, CONTA171, CONTA172, and
+    REINF263 will also extrude. Extrusion operates automatically on
+    elements in the selected element set.
+
+    For automatic PLANE182 and PLANE183 extrusion (Action = AUTO), based on
+    the element behavior of the plane elements, the command performs as
+    follows:
+
+    Plane stress; the element is ignored.
+
+    Axisymmetric; the element is extruded 360 degrees about the Y-axis.
+    THETA is ignored.
+
+    Plane strain (Z strain = 0.0); the element is extruded a unit distance
+    in the global Z direction.
+
+    Plane stress with thickness input; the element is extruded in the
+    Z-direction as specified by the thickness input via a real constant.
+
+    Generalized plane strain; the element is ignored.
+
+    For an axisymmetric extrusion (Action = AUTO with KEYOPT(3) = 1, Action
+    = AXIS, or Action = TANGENT), the command merges any nodes within the
+    specified tolerance (SELTOL,TOLER) of the axis into a single node, then
+    forms degenerate tetrahedrons, pyramids, or wedges. The default
+    tolerance value is 1.0E-6.
+
+    When issuing the EEXTRUDE command within the MAP2DTO3D environment
+    using KEYOPT(3) = 3, mapping results do not provide the correct 3-D
+    results state; therefore, KEYOPT(3) = 3 is suggested only as a tool for
+    extruding the mesh itself as a geometric feature.
+
+    For an axisymmetric extrusion, SHELL208 and SHELL209 will extrude.
+
+    You can control shape-checking options via the SHPP command.
+
+    The extrusion behavior of accompanying contact (CONTA171 and CONTA172)
+    is determined by the plane element settings. Rigid target (TARGE169)
+    elements are extruded in the global Z direction unless axisymmetric
+    extrusion (Action = AXIS) is in effect.
+
+    The following table shows each 2-D element capable of extrusion and its
+    corresponding post-extrusion 3-D element:
+
+    All element properties are also transferred consistently during
+    extrusion. For example, a  2-D element is extruded to a  3-D element,
+    and a mixed u-P 2-D element is extruded to a mixed u-P 3-D element.
+    """
+    command = f"EEXTRUDE,{action},{nelem},{space},{dist},{theta},{tfact},,{bckey}"
+    return self.run(command, **kwargs)
+
+
 def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "",
          iel1: Union[str, int] = "", iel2: MapdlInt = "",
          ieinc: MapdlInt = "", minc: MapdlInt = "",

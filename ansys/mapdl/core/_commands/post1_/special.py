@@ -2124,6 +2124,132 @@ def rsplit(self, option="", label="", name1="", name2="", name3="",
     return self.run(command, **kwargs)
 
 
+def rstmac(self, file1="", lstep1="", sbstep1="", file2="", lstep2="",
+           sbstep2="", maclim="", cname="", keyprint="", **kwargs):
+    """APDL Command: RSTMAC
+
+    Calculates modal assurance criterion (MAC) and matches nodal solutions
+    from two results files or from one results file and one universal
+    format file.
+
+    Parameters
+    ----------
+    file1
+        File name (32 characters maximum) corresponding to the first
+        results file (.rst or .rstp file). If the file name does not
+        contain the extension, it defaults to .rst.
+
+    lstep1
+        Load step number of the results to be read in File1.
+
+        N  - Reads load step N. Defaults to 1.
+
+    sbstep1
+        Substep number of the results to be read in File1.
+
+        N  - Reads substep N.
+
+        All  - Reads all substeps. This value is the default.
+
+    file2
+        File name (32 characters maximum) corresponding to the second file
+        (.rst, .rstp, or .unv file). If the file name does not contain the
+        extension, it defaults to .rst.
+
+    lstep2
+        Load step number of the results to be read in File2.
+
+        N  - Reads load step N. Defaults to 1.
+
+    sbstep2
+        Substep number of the results to be read in File2.
+
+        N  - Reads substep N.
+
+        All  - Reads all substeps. This value is the default.
+
+    maclim
+        Smallest acceptable MAC value. Must be  0 and  1. The default value
+        is 0.90.
+
+    cname
+        Name of the component from the first file (File1). The component
+        must be based on nodes. If unspecified, all nodes are matched and
+        used for MAC calculations. If a component name is specified, only
+        nodes included in the specified component are used. Not applicable
+        to node mapping (TolerN=-1).
+
+    keyprint
+        Printout options:
+
+        0  - Printout matched solutions table. This value is the default.
+
+        1  - Printout matched solutions table and full MAC table.
+
+        2  - Printout matched solutions table, full MAC table and matched nodes table.
+
+    Notes
+    -----
+    The RSTMAC command allows the comparison of the solutions from
+    either:
+
+    Two different results files
+
+    One result file and one universal format file
+
+    The modal assurance criterion (MAC) is used.
+
+    The meshes read on File1 and File2 may be different. If TolerN>0,
+    the nodes are matched. This is the default. If TolerN = -1, the
+    nodes are mapped and the solutions are interpolated from File1.
+
+    Units and coordinate systems must be the same for both
+    models. When a universal format file is used, the nodal
+    coordinates can be scaled using UNVscale.
+
+    The corresponding database file (.db) for File1 must be resumed
+    before running the command only if a component (Cname) is used or
+    if the nodes are mapped (TolerN = -1).
+
+    Results may be real or complex; however, if results from File1
+    have a different type from results in File2, only the real parts
+    of the solutions are taken into account in MAC calculations. The
+    analysis type can be arbitrary.
+
+    Only structural degrees of freedom are considered. Degrees of
+    freedom can vary between File1 and File2, but at least one common
+    degree of freedom must exist.
+
+    When node mapping and solution interpolation is performed
+    (TolerN=-1), File1 must correspond to a model meshed in solid
+    and/or shell elements.  Other types of elements can be present but
+    the node mapping is not performed for those
+    elements. Interpolation is performed on UX, UY, and UZ degrees of
+    freedom.
+
+    The solutions read on the results files are not all written to the
+    database, therefore, subsequent plotting or printing of solutions
+    is not possible.  A SET command must be issued after the RSTMAC
+    command to post-process each solution.
+
+    RSTMAC comparison on cyclic symmetry analysis works only if the
+    number of sectors on File1 and File2 are the same. Also comparison
+    cannot be made between cyclic symmetry results and full 360 degree
+    model results (File1 – cyclic solution, File2 – full 360 degree
+    model solution).  Comparing cyclic symmetry solutions written on
+    selected set of node (OUTRES) is not supported.
+
+    The modal assurance criterion values can be retrieved as
+    parameters using the *GET command (Entity = RSTMAC).
+
+    For more information and an example, see Comparing Nodal Solutions
+    From Two Models (RSTMAC) in the Basic Analysis Guide.
+    """
+    command = f"RSTMAC,{file1},{lstep1},{sbstep1},{file2},{lstep2},{sbstep2},,{maclim},{cname},{keyprint}"
+    return self.run(command, **kwargs)
+
+
+
 def spoint(self, node="", x="", y="", z="", **kwargs):
     """Defines a point for moment summations.
 
