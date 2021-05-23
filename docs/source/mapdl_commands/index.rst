@@ -266,9 +266,7 @@ produced within ANSYS.
 .. toctree::
    :maxdepth: 1
 
-   graphics/setup
-   graphics/driver
-   graphics/action
+   display/setup
 
 
 **********************

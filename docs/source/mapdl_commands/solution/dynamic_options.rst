@@ -27,6 +27,7 @@ These SOLUTION commands are used to define options for dynamic analyses.
    Mapdl.mdplot
    Mapdl.midtol
    Mapdl.modcont
+   Mapdl.modseloption
    Mapdl.modopt
    Mapdl.mxpand
    Mapdl.qrdopt

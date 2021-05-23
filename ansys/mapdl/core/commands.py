@@ -1,6 +1,6 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
                         aux2_, aux3_, aux12_, reduced, apdl, post26_, solution,
-                        post1_, graphics_)
+                        post1_, graphics_, display_)
 
 class Commands:
     """Wrapped MAPDL commands"""
@@ -213,7 +213,7 @@ class Commands:
     nummrg = preproc.database.nummrg
     numoff = preproc.database.numoff
     numstr = preproc.database.numstr
-    nsrv = preproc.element_type.nsvr
+    nsvr = preproc.element_type.nsvr
     dof = preproc.element_type.dof
     elbow = preproc.element_type.elbow
     et = preproc.element_type.et
@@ -668,6 +668,7 @@ class Commands:
     nlist = preproc.nodes.nlist
     nmodif = preproc.nodes.nmodif
     nora = preproc.nodes.nora
+    norl = preproc.nodes.norl
     nplot = preproc.nodes.nplot
     nread = preproc.nodes.nread
     nrotat = preproc.nodes.nrotat
@@ -1129,6 +1130,7 @@ class Commands:
     mdplot = solution.dynamic_options.mdplot
     midtol = solution.dynamic_options.midtol
     modcont = solution.dynamic_options.modcont
+    modseloption = solution.dynamic_options.modseloption
     modopt = solution.dynamic_options.modopt
     mxpand = solution.dynamic_options.mxpand
     qrdopt = solution.dynamic_options.qrdopt
@@ -1405,12 +1407,6 @@ class Commands:
     sscale = graphics_.scaling.sscale
     txtre = graphics_.scaling.txtre
     vscale = graphics_.scaling.vscale
-    cmap = graphics_.display.cmap
-    devdisp = graphics_.display.devdisp
-    filedisp = graphics_.display.filedisp
-    nocolor = graphics_.display.nocolor
-    showdisp = graphics_.display.showdisp
-    trans = graphics_.display.trans
     angle = graphics_.views.angle
     auto = graphics_.views.auto
     dist = graphics_.views.dist
@@ -1421,6 +1417,14 @@ class Commands:
     vup = graphics_.views.vup
     xfrm = graphics_.views.xfrm
     zoom = graphics_.views.zoom
+
+    cmap = display_.setup.cmap
+    devdisp = display_.setup.devdisp
+    filedisp = display_.setup.filedisp
+    nocolor = display_.setup.nocolor
+    showdisp = display_.setup.showdisp
+    trans = display_.setup.trans
+
 
     # hidden
     _batch = hidden.batch

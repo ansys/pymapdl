@@ -1,5 +1,4 @@
 from . import annotation
-from . import display
 from . import graphs
 from . import labeling
 from . import scaling

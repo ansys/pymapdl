@@ -732,6 +732,58 @@ def modcont(self, mlskey="", enforcedkey="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def modseloption(self, dir1="", dir2="", dir3="", dir4="", dir5="",
+                 dir6="", **kwargs):
+    """APDL Command: MODSELOPTION
+
+    Parameters
+    ----------
+    dir1, dir2, dir3, dir4, dir5, dir6
+        Selection of the direction to be expanded.
+
+        For ``modeselmethod=effm`` on the MXPAND command, the
+        directions correspond to the global Cartesian directions,
+        i.e. 1=X, 2=Y, 3=Z, 4=ROTX, 5=ROTY, and 6=ROTZ. If dir1 = YES,
+        then any mode in this direction is expanded if its modal
+        effective mass divided by the total mass (modal effective mass
+        ratio) is greater than SIGNIF on the MXPAND command. If
+        dir1=NO, then the specified direction is not considered as a
+        criterion for expansion. If dir1 is given a numerical decimal
+        value, modes in that direction are selected (starting from the
+        ones with the largest modal effective mass ratios to the
+        smallest) until the sum of their modal effective mass ratio
+        equals this requested threshold.
+
+        For ModeSelMethod = MODC on the MXPAND command, dir1
+        corresponds to the first input spectrum, dir2 to the second,
+        etc. (i.e. for multiple spectrum inputs; the actual directions
+        correspond to their respective SED directions). If dir1=YES,
+        then any mode in this spectrum is ex- panded if its mode
+        coefficient divided by the largest mode coefficient is greater
+        than SIGNIF on the MXPAND command. If dir1=NO, then the
+        specified direction is not considered as a criterion for
+        expansion.
+
+    Notes
+    -----
+    This command is only applicable when a mode selection method is defined
+    (ModeSelMethod on the MXPAND command). See Using Mode Selection in the
+    Mechanical APDL Structural Analysis Guide for more details.
+
+    If a numerical value is specified for a direction, the significance
+    threshold (SIGNIF on the MXPAND command) is ignored for the selection
+    of the modes in this direction.
+
+    If a mode is determined to be expanded in any of the 6 directions, it
+    will be expanded in the .MODE file. : Otherwise, the mode will not be
+    expanded.
+
+    The default behavior is to consider all directions for expansion.
+    """
+    command = f"MODSELOPTION,{dir1},{dir2},{dir3},{dir4},{dir5},{dir6}"
+    return self.run(command, **kwargs)
+
+
 def modopt(self, method="", nmode="", freqb="", freqe="", cpxmod="",
            nrmkey="", modtype="", blocksize="", freqmod="", **kwargs):
     """Specifies modal analysis options.
