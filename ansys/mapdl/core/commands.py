@@ -213,6 +213,7 @@ class Commands:
     nummrg = preproc.database.nummrg
     numoff = preproc.database.numoff
     numstr = preproc.database.numstr
+    nsrv = preproc.element_type.nsvr
     dof = preproc.element_type.dof
     elbow = preproc.element_type.elbow
     et = preproc.element_type.et
@@ -221,7 +222,6 @@ class Commands:
     etdele = preproc.element_type.etdele
     etlist = preproc.element_type.etlist
     keyopt = preproc.element_type.keyopt
-    nsrv = preproc.element_type.nsvr
     r = preproc.real_constants.r
     rdele = preproc.real_constants.rdele
     rlist = preproc.real_constants.rlist
