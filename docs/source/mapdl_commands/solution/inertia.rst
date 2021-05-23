@@ -23,5 +23,4 @@ These SOLUTION commands are used to define inertial loads on the model.
    Mapdl.domega
    Mapdl.irlf
    Mapdl.omega
-   Mapdl.spoint
    Mapdl.synchro

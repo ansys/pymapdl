@@ -22,7 +22,6 @@ These SOLUTION commands are for miscellaneous load definition and control.
    Mapdl.icdele
    Mapdl.iclist
    Mapdl.icrotate
-   Mapdl.inistate
    Mapdl.mpchg
    Mapdl.mrpm
    Mapdl.outpr
@@ -31,4 +30,3 @@ These SOLUTION commands are for miscellaneous load definition and control.
    Mapdl.sbclist
    Mapdl.sbctran
    Mapdl.wsprings
-   Mapdl.xflist

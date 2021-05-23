@@ -12,7 +12,6 @@ display.
 .. autosummary::
    :toctree: api/
 
-   Mapdl.dscale
    Mapdl.iclwid
    Mapdl.icscale
    Mapdl.ratio

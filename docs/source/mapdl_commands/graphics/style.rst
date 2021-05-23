@@ -24,4 +24,3 @@ displayed.
    Mapdl.normal
    Mapdl.shade
    Mapdl.trlcy
-   Mapdl.type

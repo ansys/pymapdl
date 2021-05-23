@@ -15,9 +15,6 @@ postprocessing.
    Mapdl.append
    Mapdl.desol
    Mapdl.dnsol
-   Mapdl.file
    Mapdl.hrcplx
    Mapdl.rescombine
-   Mapdl.reset
-   Mapdl.set
    Mapdl.subset

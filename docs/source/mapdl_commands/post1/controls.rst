@@ -16,8 +16,6 @@ other commands.
    Mapdl.avres
    Mapdl.efacet
    Mapdl.ernorm
-   Mapdl.force
    Mapdl.inres
    Mapdl.layer
    Mapdl.rsys
-   Mapdl.shell

@@ -13,15 +13,8 @@ solver method.
 .. autosummary::
    :toctree: api/
 
-   Mapdl.hemiopt
-   Mapdl.radopt
    Mapdl.rdec
    Mapdl.rsopt
    Mapdl.rsurf
    Mapdl.rsymm
-   Mapdl.spcnod
-   Mapdl.spctemp
-   Mapdl.stef
-   Mapdl.v2dopt
-   Mapdl.vfopt
    Mapdl.qsopt

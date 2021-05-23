@@ -20,7 +20,6 @@ These POST1 commands are used for various special purposes.
    Mapdl.cycspec
    Mapdl.exoption
    Mapdl.expand
-   Mapdl.expand
    Mapdl.exprofile
    Mapdl.exunit
    Mapdl.fssparm

@@ -13,10 +13,7 @@ These POST1 commands are for use with the STAT command.
 
    Mapdl.calc
    Mapdl.datadef
-   Mapdl.define
    Mapdl.display
    Mapdl.lccalc
    Mapdl.point
-   Mapdl.print
-   Mapdl.sort
    Mapdl.spec

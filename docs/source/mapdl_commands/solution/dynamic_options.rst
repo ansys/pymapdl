@@ -11,10 +11,8 @@ These SOLUTION commands are used to define options for dynamic analyses.
 .. autosummary::
    :toctree: api/
 
-   Mapdl.aerocoeff
    Mapdl.alphad
    Mapdl.betad
-   Mapdl.cycfreq
    Mapdl.dmprat
    Mapdl.dmpstr
    Mapdl.frqscl

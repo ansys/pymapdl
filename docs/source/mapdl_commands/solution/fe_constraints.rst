@@ -24,4 +24,3 @@ These SOLUTION commands are used to define constraints on the finite element mod
    Mapdl.dval
    Mapdl.gsbdata
    Mapdl.gslist
-   Mapdl.ldread

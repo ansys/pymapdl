@@ -15,6 +15,5 @@ These DISPLAY commands are used to set up the DISPLAY program.
    Mapdl.devdisp
    Mapdl.filedisp
    Mapdl.nocolor
-   Mapdl.seg
    Mapdl.showdisp
    Mapdl.trans

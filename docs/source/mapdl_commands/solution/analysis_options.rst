@@ -18,14 +18,12 @@ These SOLUTION commands are used to set general analysis options.
    Mapdl.ascres
    Mapdl.asol
    Mapdl.bcsoption
-   Mapdl.cint
    Mapdl.cmatrix
    Mapdl.cmsopt
    Mapdl.cncheck
    Mapdl.cnkmod
    Mapdl.cntr
    Mapdl.cutcontrol
-   Mapdl.cycopt
    Mapdl.ddoption
    Mapdl.dmpext
    Mapdl.dmpoption
@@ -63,4 +61,3 @@ These SOLUTION commands are used to set general analysis options.
    Mapdl.stabilize
    Mapdl.thexpand
    Mapdl.thopt
-   Mapdl.toffst

@@ -15,8 +15,6 @@ symbols.
    Mapdl.an3d
    Mapdl.annot
    Mapdl.anum
-   Mapdl.larc
-   Mapdl.line
    Mapdl.lspec
    Mapdl.lsymbol
    Mapdl.pcircle

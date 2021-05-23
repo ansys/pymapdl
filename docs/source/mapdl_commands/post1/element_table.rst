@@ -19,9 +19,7 @@ average stresses, heat fluxes, etc.
    Mapdl.eusort
    Mapdl.pletab
    Mapdl.plls
-   Mapdl.plvect
    Mapdl.pretab
-   Mapdl.prvect
    Mapdl.sabs
    Mapdl.sadd
    Mapdl.sallow
