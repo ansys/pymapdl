@@ -18,3 +18,4 @@ postprocessing.
    Mapdl.hrcplx
    Mapdl.rescombine
    Mapdl.subset
+   Mapdl.set

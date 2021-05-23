@@ -26,6 +26,7 @@ These APDL Math commands can be used to create, manipulate, and solve matrices.
    Mapdl.init
    Mapdl.itengine
    Mapdl.lsbac
+   Mapdl.lsdump
    Mapdl.lsengine
    Mapdl.lsfactor
    Mapdl.merge

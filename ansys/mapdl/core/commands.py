@@ -746,6 +746,7 @@ class Commands:
     init = apdl.matrix_op.init
     itengine = apdl.matrix_op.itengine
     lsbac = apdl.matrix_op.lsbac
+    lsdump = apdl.matrix_op.lsdump
     lsengine = apdl.matrix_op.lsengine
     lsfactor = apdl.matrix_op.lsfactor
     merge = apdl.matrix_op.merge
@@ -1379,6 +1380,7 @@ class Commands:
     pscr = graphics_.setup.pscr
     pstatus = graphics_.setup.pstatus
     replot = graphics_.setup.replot
+    slashreset = graphics_.setup.slashreset
     seg = graphics_.setup.seg
     show = graphics_.setup.show
     tiff = graphics_.setup.tiff

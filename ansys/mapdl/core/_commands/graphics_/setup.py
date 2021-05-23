@@ -968,6 +968,23 @@ def replot(self, label="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def slashreset(self, **kwargs):
+    """Resets display specifications to their initial defaults.
+
+    APDL Command: /RESET
+
+    Notes
+    -----
+    Resets slash display specifications (/WINDOW, /TYPE, /VIEW, etc.) back
+    to their initial default settings (for convenience).  Also resets the
+    focus location to the geometric center of the object.
+
+    This command is valid in any processor.
+    """
+    command = "/RESET,"
+    return self.run(command, **kwargs)
+
+
 def seg(self, label="", aviname="", delay="", **kwargs):
     """Allows graphics data to be stored in the local terminal memory.
 

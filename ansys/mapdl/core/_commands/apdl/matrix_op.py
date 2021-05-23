@@ -440,6 +440,33 @@ def lsbac(self, enginename="", rhsvector="", solvector="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def lsdump(self, enginename="", filename="", **kwargs):
+    """Dumps a linear solver engine to a binary File.
+
+    APDL Command: *LSDUMP
+
+    Parameters
+    ----------
+    enginename
+        Name used to identify this engine. Must have been previously
+        created using *LSENGINE and factorized using *LSFACTOR.
+
+    filename
+        Name of the file to create.
+
+    Notes
+    -----
+    Dumps a previously factorized linear solver system to a binary file.
+    Only LAPACK and BCS linear solvers can be used with this feature. The
+    Linear Solver can later be restored with the *LSRESTORE command.
+
+    A BCS Sparse Solver can be dumped only if uses the INCORE memory option
+    (see BCSOPTION).
+    """
+    command = f"*LSDUMP,{enginename},{filename}"
+    return self.run(command, **kwargs)
+
+
 def lsengine(self, type_="", enginename="", matrix="", option="", **kwargs):
     """Creates a linear solver engine.
 
@@ -447,12 +474,19 @@ def lsengine(self, type_="", enginename="", matrix="", option="", **kwargs):
 
     Parameters
     ----------
-    type\_
+    type_
         Specifies the algorithm to be used:
 
-        Boeing sparse solver (default if applied to sparse matrices). - MKL sparse linear solver (Intel Windows and Linux systems only).
+        * ``"BCS"`` - Boeing sparse solver (default if applied to
+                    sparse matrices).
 
-        LAPACK dense matrix linear solver (default if applied to dense matrices). - Distributed sparse solver.
+        * ``"DSS"`` : MKL sparse linear solver (Intel Windows and
+                    Linux systems only).
+
+        * ``"LAPACK"`` : LAPACK dense matrix linear solver (default if
+                       applied to dense matrices).
+
+        * ``"DSP"`` : Distributed sparse solver.
 
     enginename
         Name used to identify this engine. Must be specified.
@@ -461,10 +495,12 @@ def lsengine(self, type_="", enginename="", matrix="", option="", **kwargs):
         Name of the matrix to solve.
 
     option
-        Option to control the memory mode of the DSS solver (used only if
-        Type = DSS):
+        Option to control the memory mode of the DSS solver (used only
+        if ``type='dss'``):
 
-        In-core memory mode. - Out-of-core memory mode.
+        * ``"INCORE"`` : In-core memory mode
+
+        * ``"OUTOFCORE"`` : Out-of-core memory mode
 
     Notes
     -----

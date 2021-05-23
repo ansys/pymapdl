@@ -32,6 +32,7 @@ window setup, color settings, specifications saving, etc.
    Mapdl.pscr
    Mapdl.pstatus
    Mapdl.replot
+   Mapdl.slashreset
    Mapdl.seg
    Mapdl.show
    Mapdl.tiff
