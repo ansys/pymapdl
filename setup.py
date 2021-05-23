@@ -2,7 +2,7 @@
 import os
 from io import open as io_open
 
-from setuptools import setup
+from setuptools import setup, find_packages, find_namespace_packages
 
 
 # Get version from version info
@@ -36,11 +36,16 @@ if os.name == 'linux':
     install_requires.extend(['pexpect>=4.8.0'])
 
 
+# packages = find_packages(where='ansys/mapdl/core')
+packages = []
+for package in find_namespace_packages(include='ansys*'):
+    if package.startswith('ansys.mapdl.core'):
+        packages.append(package)
+
+
 setup(
     name='ansys-mapdl-core',
-    packages=['ansys.mapdl.core',
-              'ansys.mapdl.core._commands',
-              'ansys.mapdl.core.examples'],
+    packages=packages,
     version=__version__,
     description='Python interface to MAPDL Service',
     long_description=open('README.rst').read(),
@@ -58,11 +63,9 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     url='https://github.com/pyansys/pymapdl',
-
     python_requires='>=3.6.*',
     keywords='ANSYS MAPDL gRPC',
     package_data={'ansys.mapdl.core.examples': ['verif/*.dat',
                                                 'wing.dat']},
-
     install_requires=install_requires,
 )
