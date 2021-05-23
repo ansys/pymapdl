@@ -71,6 +71,7 @@ These commands make up the ANSYS Parametric Design Language
    apdl/array_parm
    apdl/matrix_op
 
+.. _ref_prep_commands:
 
 *************
 Preprocessing
@@ -140,7 +141,6 @@ These commands are used to load and solve the model.
    solution/fe_body_loads
    solution/ocean
    solution/solution_status
-   solution/explicit_dynamics
    solution/radiosity
    solution/multi_field_solver_definition_commands
    solution/multi_field_solver_global_controls
@@ -171,7 +171,6 @@ processor.
    post1/trace_points
    post1/special
    post1/status
-   post1/failure_criteria
 
 
 ******
@@ -267,9 +266,9 @@ produced within ANSYS.
 .. toctree::
    :maxdepth: 1
 
-   display/setup
-   display/driver
-   display/action
+   graphics/setup
+   graphics/driver
+   graphics/action
 
 
 **********************
