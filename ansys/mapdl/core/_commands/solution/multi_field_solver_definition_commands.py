@@ -34,8 +34,6 @@ def mfcmmand(self, fnumb="", fname="", ext="", **kwargs):
     command = f"MFCMMAND,{fnumb},{fname},{ext}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mfelem(self, fnumb="", itype1="", itype2="", itype3="", itype4="",
            itype5="", itype6="", itype7="", itype8="", itype9="",
@@ -71,10 +69,6 @@ def mfelem(self, fnumb="", itype1="", itype2="", itype3="", itype4="",
     """
     command = f"MFELEM,{fnumb},{itype1},{itype2},{itype3},{itype4},{itype5},{itype6},{itype7},{itype8},{itype9},{itype10}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def mfem(self, fnumb="", itype1="", itype2="", itype3="", itype4="",
@@ -147,10 +141,6 @@ def mfexter(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
     command = f"MFEXTER,{fnumb1},{fnumb2},{fnumb3},{fnumb4},{fnumb5},{fnumb6},{fnumb7},{fnumb8},{fnumb9},{fnumb10},{fnumb11},{fnumb12},{fnumb13},{fnumb14},{fnumb15},{fnumb16},{fnumb17},{fnumb18},{fnumb19},{fnumb20}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def mffname(self, fnumb="", fname="", **kwargs):
     """Specifies a file name for a field in an ANSYS Multi-field solver
@@ -182,6 +172,3 @@ def mffname(self, fnumb="", fname="", **kwargs):
     """
     command = f"MFFNAME,{fnumb},{fname}"
     return self.run(command, **kwargs)
-
-    
-    

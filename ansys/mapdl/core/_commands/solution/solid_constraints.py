@@ -63,8 +63,6 @@ def da(self, area="", lab="", value1="", value2="", **kwargs):
     command = f"DA,{area},{lab},{value1},{value2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dadele(self, area="", lab="", **kwargs):
     """Deletes degree-of-freedom constraints on an area.
@@ -136,8 +134,6 @@ def dadele(self, area="", lab="", **kwargs):
     command = f"DADELE,{area},{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dalist(self, area="", **kwargs):
     """Lists the DOF constraints on an area.
@@ -161,9 +157,6 @@ def dalist(self, area="", **kwargs):
     """
     command = f"DALIST,{area}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dk(self, kpoi="", lab="", value="", value2="", kexpnd="", lab2="",
@@ -239,9 +232,6 @@ def dk(self, kpoi="", lab="", value="", value2="", kexpnd="", lab2="",
     command = f"DK,{kpoi},{lab},{value},{value2},{kexpnd},{lab2},{lab3},{lab4},{lab5},{lab6}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def dkdele(self, kpoi="", lab="", **kwargs):
     """Deletes DOF constraints at a keypoint.
@@ -299,8 +289,6 @@ def dklist(self, kpoi="", **kwargs):
     """
     command = f"DKLIST,{kpoi}"
     return self.run(command, **kwargs)
-
-    
 
 
 def dl(self, line="", area="", lab="", value1="", value2="", **kwargs):
@@ -454,9 +442,6 @@ def dllist(self, line="", **kwargs):
     """
     command = f"DLLIST,{line}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dtran(self, **kwargs):

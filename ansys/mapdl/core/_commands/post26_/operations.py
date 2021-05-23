@@ -125,9 +125,6 @@ def atan(self, ir="", ia="", name="", facta="", **kwargs):
     command = f"ATAN,{ir},{ia},,,{name},,,{facta}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def clog(self, ir="", ia="", name="", facta="", factb="", **kwargs):
     """Forms the common log of a variable
@@ -193,7 +190,7 @@ def conjug(self, ir="", ia="", name="", facta="", **kwargs):
     Notes
     -----
     Used only with harmonic analyses (ANTYPE,HARMIC).
-    """        
+    """
     return self.run(f"CONJUG,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
 
@@ -654,5 +651,3 @@ def sqrt(self, ir="", ia="", name="", facta="", **kwargs):
     ``IR=sqrt(FACTA*IA)``
     """
     return self.run(f"SQRT,{ir},{ia},,,{name},,,{facta}", **kwargs)
-
-    

@@ -108,8 +108,6 @@ def header(self, header="", stitle="", idstmp="", notes="", colhed="",
     command = f"/HEADER,{header},{stitle},{idstmp},{notes},{colhed},{minmax}"
     return self.run(command, **kwargs)
 
-    
-
 
 def irlist(self, **kwargs):
     """Prints inertia relief summary table.
@@ -133,9 +131,6 @@ def irlist(self, **kwargs):
     """
     command = f"IRLIST,"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def page(self, iline="", ichar="", bline="", bchar="", comma="", **kwargs):
@@ -182,8 +177,6 @@ def page(self, iline="", ichar="", bline="", bchar="", comma="", **kwargs):
     """
     command = f"/PAGE,{iline},{ichar},{bline},{bchar},{comma}"
     return self.run(command, **kwargs)
-
-    
 
 
 def prerr(self, **kwargs):
@@ -277,6 +270,3 @@ def priter(self, **kwargs):
     """
     command = f"PRITER,"
     return self.run(command, **kwargs)
-
-    
-    

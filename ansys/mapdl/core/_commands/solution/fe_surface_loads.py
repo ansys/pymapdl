@@ -51,8 +51,6 @@ def sf(self, nlist="", lab="", value="", value2="", **kwargs):
     command = f"SF,{nlist},{lab},{value},{value2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sfbeam(self, elem="", lkey="", lab="", vali="", valj="", val2i="",
            val2j="", ioffst="", joffst="", lenrat="", **kwargs):
@@ -128,9 +126,6 @@ def sfbeam(self, elem="", lkey="", lab="", vali="", valj="", val2i="",
     """
     command = f"SFBEAM,{elem},{lkey},{lab},{vali},{valj},{val2i},{val2j},{ioffst},{joffst},{lenrat}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sfcum(self, lab="", oper="", fact="", fact2="", **kwargs):
@@ -310,9 +305,6 @@ def sfedele(self, elem="", lkey="", lab="", **kwargs):
     command = f"SFEDELE,{elem},{lkey},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def sfelist(self, elem="", lab="", **kwargs):
     """Lists the surface loads for elements.
@@ -359,9 +351,6 @@ def sfelist(self, elem="", lab="", **kwargs):
     """
     command = f"SFELIST,{elem},{lab}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sffun(self, lab="", par="", par2="", **kwargs):
@@ -414,8 +403,6 @@ def sffun(self, lab="", par="", par2="", **kwargs):
     """
     command = f"SFFUN,{lab},{par},{par2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def sfgrad(self, lab="", slkcn="", sldir="", slzer="", slope="", **kwargs):
@@ -523,9 +510,6 @@ def sflist(self, node="", lab="", **kwargs):
     """
     command = f"SFLIST,{node},{lab}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sfscale(self, lab="", fact="", fact2="", **kwargs):

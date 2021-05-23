@@ -45,8 +45,6 @@ def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
     command = f"FK,{kpoi},{lab},{value},{value2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def fkdele(self, kpoi="", lab="", **kwargs):
     """Deletes force loads at a keypoint.
@@ -74,11 +72,6 @@ def fkdele(self, kpoi="", lab="", **kwargs):
     """
     command = f"FKDELE,{kpoi},{lab}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def fklist(self, kpoi="", lab="", **kwargs):
@@ -108,8 +101,6 @@ def fklist(self, kpoi="", lab="", **kwargs):
     command = f"FKLIST,{kpoi},{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def ftran(self, **kwargs):
     """Transfers solid model forces to the finite element model.
@@ -127,8 +118,3 @@ def ftran(self, **kwargs):
     """
     command = f"FTRAN,"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    

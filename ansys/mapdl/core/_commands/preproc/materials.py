@@ -2,6 +2,7 @@
 These PREP7 commands are used to define the linear material properties.
 """
 
+
 def emunit(self, lab="", value="", **kwargs):
     """APDL Command: EMUNIT
 
@@ -186,7 +187,8 @@ def mp(self, lab="", mat="", c0="", c1="", c2="", c3="", c4="", **kwargs):
     a cubic curve is being used which is defined using 4 coefficients so
     that N = 4.
     """
-    command = "MP,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(c0), str(c1), str(c2), str(c3), str(c4))
+    command = "MP,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(
+        mat), str(c0), str(c1), str(c2), str(c3), str(c4))
     return self.run(command, **kwargs)
 
 
@@ -294,7 +296,7 @@ def mpcopy(self, matf="", matt="", **kwargs):
 
 
 def mpdata(self, lab="", mat="", sloc="", c1="", c2="", c3="", c4="",
-               c5="", c6="", **kwargs):
+           c5="", c6="", **kwargs):
     """APDL Command: MPDATA
 
     Defines property data to be associated with the temperature table.
@@ -406,7 +408,8 @@ def mpdata(self, lab="", mat="", sloc="", c1="", c2="", c3="", c4="",
     can use the LSST property. The SBK_ property is only available in ANSYS
     Multiphysics and ANSYS PrepPost.
     """
-    command = "MPDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(sloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
+    command = "MPDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(
+        sloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
     return self.run(command, **kwargs)
 
 
@@ -444,7 +447,8 @@ def mpdele(self, lab="", mat1="", mat2="", inc="", lchk="", **kwargs):
 
     The LCHK argument is valid only when Lab = ALL.
     """
-    command = "MPDELE,%s,%s,%s,%s,%s" % (str(lab), str(mat1), str(mat2), str(inc), str(lchk))
+    command = "MPDELE,%s,%s,%s,%s,%s" % (
+        str(lab), str(mat1), str(mat2), str(inc), str(lchk))
     return self.run(command, **kwargs)
 
 
@@ -479,7 +483,8 @@ def mpdres(self, labf="", matf="", labt="", matt="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
+    command = "MPDRES,%s,%s,%s,%s" % (
+        str(labf), str(matf), str(labt), str(matt))
     return self.run(command, **kwargs)
 
 
@@ -556,12 +561,13 @@ def mplist(self, mat1="", mat2="", inc="", lab="", tevl="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "MPLIST,%s,%s,%s,%s,%s" % (str(mat1), str(mat2), str(inc), str(lab), str(tevl))
+    command = "MPLIST,%s,%s,%s,%s,%s" % (
+        str(mat1), str(mat2), str(inc), str(lab), str(tevl))
     return self.run(command, **kwargs)
 
 
 def mpplot(self, lab="", mat="", tmin="", tmax="", pmin="", pmax="",
-               **kwargs):
+           **kwargs):
     """APDL Command: MPPLOT
 
     Plots linear material properties as a function of temperature.
@@ -593,7 +599,8 @@ def mpplot(self, lab="", mat="", tmin="", tmax="", pmin="", pmax="",
 
     This command is valid in any processor.
     """
-    command = "MPPLOT,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(tmin), str(tmax), str(pmin), str(pmax))
+    command = "MPPLOT,%s,%s,%s,%s,%s,%s" % (str(lab), str(
+        mat), str(tmin), str(tmax), str(pmin), str(pmax))
     return self.run(command, **kwargs)
 
 
@@ -651,7 +658,7 @@ def mpread(self, fname="", ext="", lib="", **kwargs):
 
 
 def mptemp(self, sloc="", t1="", t2="", t3="", t4="", t5="", t6="",
-               **kwargs):
+           **kwargs):
     """APDL Command: MPTEMP
 
     Defines a temperature table for material properties.
@@ -694,7 +701,8 @@ def mptemp(self, sloc="", t1="", t2="", t3="", t4="", t5="", t6="",
 
     This command is also valid in SOLUTION.
     """
-    command = "MPTEMP,%s,%s,%s,%s,%s,%s,%s" % (str(sloc), str(t1), str(t2), str(t3), str(t4), str(t5), str(t6))
+    command = "MPTEMP,%s,%s,%s,%s,%s,%s,%s" % (
+        str(sloc), str(t1), str(t2), str(t3), str(t4), str(t5), str(t6))
     return self.run(command, **kwargs)
 
 
@@ -726,7 +734,8 @@ def mptgen(self, stloc="", num="", tstrt="", tinc="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "MPTGEN,%s,%s,%s,%s" % (str(stloc), str(num), str(tstrt), str(tinc))
+    command = "MPTGEN,%s,%s,%s,%s" % (
+        str(stloc), str(num), str(tstrt), str(tinc))
     return self.run(command, **kwargs)
 
 
@@ -821,7 +830,7 @@ def mpwrite(self, fname="", ext="", lib="", mat="", **kwargs):
 
 
 def tbft(self, oper="", id_="", option1="", option2="", option3="",
-             option4="", option5="", option6="", option7="", **kwargs):
+         option4="", option5="", option6="", option7="", **kwargs):
     """APDL Command: TBFT
 
     Performs material curve-fitting operations.
@@ -884,12 +893,13 @@ def tbft(self, oper="", id_="", option1="", option2="", option3="",
         If Oper = SOLVE, specifies the allowed tolerance in coefficient
         change to stop an iteration. Valid entry is 0 to 1 (default = 0).
     """
-    command = "TBFT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(id_), str(option1), str(option2), str(option3), str(option4), str(option5), str(option6), str(option7))
+    command = "TBFT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(oper), str(id_), str(option1), str(
+        option2), str(option3), str(option4), str(option5), str(option6), str(option7))
     return self.run(command, **kwargs)
 
 
 def uimp(self, mat="", lab1="", lab2="", lab3="", val1="", val2="",
-             val3="", **kwargs):
+         val3="", **kwargs):
     """APDL Command: UIMP
 
     Defines constant material properties (GUI).
@@ -914,7 +924,6 @@ def uimp(self, mat="", lab1="", lab2="", lab3="", val1="", val2="",
     directly in an ANSYS session (although it can be included in an input
     file for batch input or for use with the /INPUT command).
     """
-    command = "UIMP,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(lab2), str(lab3), str(val1), str(val2), str(val3))
+    command = "UIMP,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(
+        lab1), str(lab2), str(lab3), str(val1), str(val2), str(val3))
     return self.run(command, **kwargs)
-
-

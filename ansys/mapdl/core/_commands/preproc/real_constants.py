@@ -48,7 +48,8 @@ def r(self, nset="", r1="", r2="", r3="", r4="", r5="", r6="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "R,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(r1), str(r2), str(r3), str(r4), str(r5), str(r6))
+    command = "R,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(
+        r1), str(r2), str(r3), str(r4), str(r5), str(r6))
     return self.run(command, **kwargs)
 
 
@@ -82,7 +83,8 @@ def rdele(self, nset1="", nset2="", ninc="", lchk="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "RDELE,%s,%s,%s,%s" % (str(nset1), str(nset2), str(ninc), str(lchk))
+    command = "RDELE,%s,%s,%s,%s" % (
+        str(nset1), str(nset2), str(ninc), str(lchk))
     return self.run(command, **kwargs)
 
 
@@ -111,7 +113,7 @@ def rlist(self, nset1="", nset2="", ninc="", **kwargs):
 
 
 def rmodif(self, nset="", stloc="", v1="", v2="", v3="", v4="", v5="",
-               v6="", **kwargs):
+           v6="", **kwargs):
     """APDL Command: RMODIF
 
     Modifies real constant sets.
@@ -148,7 +150,8 @@ def rmodif(self, nset="", stloc="", v1="", v2="", v3="", v4="", v5="",
     using this command within the solution phase, see What Are Nonstandard
     Uses? in the Advanced Analysis Guide.
     """
-    command = "RMODIF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(stloc), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6))
+    command = "RMODIF,%s,%s,%s,%s,%s,%s,%s,%s" % (str(nset), str(
+        stloc), str(v1), str(v2), str(v3), str(v4), str(v5), str(v6))
     return self.run(command, **kwargs)
 
 
@@ -179,12 +182,13 @@ def rmore(self, r7="", r8="", r9="", r10="", r11="", r12="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "RMORE,%s,%s,%s,%s,%s,%s" % (str(r7), str(r8), str(r9), str(r10), str(r11), str(r12))
+    command = "RMORE,%s,%s,%s,%s,%s,%s" % (
+        str(r7), str(r8), str(r9), str(r10), str(r11), str(r12))
     return self.run(command, **kwargs)
 
 
 def setfgap(self, gap="", ropt="", pamb="", acf1="", acf2="", pref="",
-                mfp="", **kwargs):
+            mfp="", **kwargs):
     """APDL Command: SETFGAP
 
     Updates or defines the real constant table for squeeze film elements.

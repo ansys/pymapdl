@@ -57,8 +57,6 @@ def lsdele(self, lsmin="", lsmax="", lsinc="", **kwargs):
     command = f"LSDELE,{lsmin},{lsmax},{lsinc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def lsread(self, lsnum="", **kwargs):
     """Reads load and load step option data into the database.
@@ -89,9 +87,6 @@ def lsread(self, lsnum="", **kwargs):
     """
     command = f"LSREAD,{lsnum}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):

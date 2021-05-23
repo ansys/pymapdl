@@ -23,8 +23,6 @@ def axlab(self, axis="", lab="", **kwargs):
     command = f"/AXLAB,{axis},{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def grid(self, key="", **kwargs):
     """Selects the type of grid on graph displays.
@@ -56,8 +54,6 @@ def grid(self, key="", **kwargs):
     """
     command = f"/GRID,{key}"
     return self.run(command, **kwargs)
-
-    
 
 
 def gropt(self, lab="", key="", **kwargs):
@@ -180,9 +176,6 @@ def gropt(self, lab="", key="", **kwargs):
     command = f"/GROPT,{lab},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def grtyp(self, kaxis="", **kwargs):
     """Selects single or multiple Y-axes graph displays.
@@ -217,8 +210,6 @@ def grtyp(self, kaxis="", **kwargs):
     """
     command = f"/GRTYP,{kaxis}"
     return self.run(command, **kwargs)
-
-    
 
 
 def gthk(self, label="", thick="", **kwargs):
@@ -260,8 +251,6 @@ def gthk(self, label="", thick="", **kwargs):
     command = f"/GTHK,{label},{thick}"
     return self.run(command, **kwargs)
 
-    
-
 
 def xrange(self, xmin="", xmax="", **kwargs):
     """Specifies a linear abscissa (X) scale range.
@@ -288,9 +277,6 @@ def xrange(self, xmin="", xmax="", **kwargs):
     """
     command = f"/XRANGE,{xmin},{xmax}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def yrange(self, ymin="", ymax="", num="", **kwargs):
@@ -325,9 +311,3 @@ def yrange(self, ymin="", ymax="", num="", **kwargs):
     """
     command = f"/YRANGE,{ymin},{ymax},{num}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
-    

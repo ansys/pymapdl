@@ -96,9 +96,6 @@ def esort(self, item: str = "", lab: str = "", order: MapdlInt = "",
     command = f"ESORT,{item},{lab},{order},{kabs},{numb}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def etable(self, lab: str = "", item: str = "", comp: str = "",
            option: str = "", **kwargs) -> Optional[str]:
@@ -277,8 +274,6 @@ def eusort(self, **kwargs) -> Optional[str]:
     """
     return self.run("EUSORT", **kwargs)
 
-    
-
 
 def pletab(self, itlab="", avglab="", **kwargs):
     """Displays element table items.
@@ -315,8 +310,6 @@ def pletab(self, itlab="", avglab="", **kwargs):
     """
     command = f"PLETAB,{itlab},{avglab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def plls(self, labi="", labj="", fact="", kund="", viewup="", **kwargs):
@@ -403,9 +396,6 @@ def pretab(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
     command = f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def sabs(self, key="", **kwargs):
     """Specifies absolute values for element table operations.
@@ -428,8 +418,6 @@ def sabs(self, key="", **kwargs):
     """
     command = f"SABS,{key}"
     return self.run(command, **kwargs)
-
-    
 
 
 def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="",
@@ -501,8 +489,6 @@ def sallow(self, strs1="", strs2="", strs3="", strs4="", strs5="",
     command = f"SALLOW,{strs1},{strs2},{strs3},{strs4},{strs5},{strs6}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sexp(self, labr="", lab1="", lab2="", exp1="", exp2="", **kwargs):
     """Forms an element table item by exponentiating and multiplying.
@@ -539,9 +525,6 @@ def sexp(self, labr="", lab1="", lab2="", exp1="", exp2="", **kwargs):
     """
     command = f"SEXP,{labr},{lab1},{lab2},{exp1},{exp2}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sfact(self, type_="", **kwargs):
@@ -582,8 +565,6 @@ def sfact(self, type_="", **kwargs):
     command = f"SFACT,{type_}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sfcalc(self, labr="", labs="", labt="", type_="", **kwargs):
     """Calculates the safety factor or margin of safety.
@@ -621,8 +602,6 @@ def sfcalc(self, labr="", labs="", labt="", type_="", **kwargs):
     """
     command = f"SFCALC,{labr},{labs},{labt},{type_}"
     return self.run(command, **kwargs)
-
-    
 
 
 def smax(self, labr="", lab1="", lab2="", fact1="", fact2="", **kwargs):
@@ -664,9 +643,6 @@ def smax(self, labr="", lab1="", lab2="", fact1="", fact2="", **kwargs):
     command = f"SMAX,{labr},{lab1},{lab2},{fact1},{fact2}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def smin(self, labr="", lab1="", lab2="", fact1="", fact2="", **kwargs):
     """Forms an element table item from the minimum of two other items.
@@ -706,8 +682,6 @@ def smin(self, labr="", lab1="", lab2="", fact1="", fact2="", **kwargs):
     """
     command = f"SMIN,{labr},{lab1},{lab2},{fact1},{fact2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def smult(self, labr="", lab1="", lab2="", fact1="", fact2="", **kwargs):

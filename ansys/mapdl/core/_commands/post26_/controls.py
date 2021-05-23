@@ -205,8 +205,6 @@ def shell(self, loc="", **kwargs):
     command = f"SHELL,{loc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def tvar(self, key="", **kwargs):
     """Changes time to the cumulative iteration number.
@@ -231,6 +229,3 @@ def tvar(self, key="", **kwargs):
     """
     command = f"TVAR,{key}"
     return self.run(command, **kwargs)
-
-    
-    

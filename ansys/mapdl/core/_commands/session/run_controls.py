@@ -100,6 +100,7 @@ def config(self, lab="", value="", **kwargs):
     command = "/CONFIG,%s,%s" % (str(lab), str(value))
     return self.run(command, **kwargs)
 
+
 def cwd(self, dirpath="", **kwargs):
     """Changes the current working directory.
 
@@ -230,7 +231,8 @@ def input(self, fname="", ext="", dir_="", line="", log="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "/INPUT,%s,%s,%s,%s,%s" % (str(fname), str(ext), str(dir_), str(line), str(log))
+    command = "/INPUT,%s,%s,%s,%s,%s" % (str(fname),
+                                         str(ext), str(dir_), str(line), str(log))
     return self.run(command, **kwargs)
 
 
@@ -414,8 +416,8 @@ def pause(self, **kwargs):
 
 
 def starstatus(self, par="", imin="", imax="", jmin="", jmax="", kmin="",
-                   kmax="", lmin="", lmax="", mmin="", mmax="", kpri="",
-                   **kwargs):
+               kmax="", lmin="", lmax="", mmin="", mmax="", kpri="",
+               **kwargs):
     """Lists the current parameters and abbreviations.
 
     APDL Command: *STATUS
@@ -464,12 +466,13 @@ def starstatus(self, par="", imin="", imax="", jmin="", jmax="", kmin="",
 
     This command is valid in any processor.
     """
-    command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(imin), str(imax), str(jmin), str(jmax), str(kmin), str(kmax), str(lmin), str(lmax), str(mmin), str(mmax), str(kpri))
+    command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(imin), str(imax), str(
+        jmin), str(jmax), str(kmin), str(kmax), str(lmin), str(lmax), str(mmin), str(mmax), str(kpri))
     return self.run(command, **kwargs)
 
 
 def syp(self, string="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", **kwargs):
+        arg6="", arg7="", arg8="", **kwargs):
     """Passes a command string and arguments to the operating system.
 
     APDL Command: /SYP
@@ -495,7 +498,8 @@ def syp(self, string="", arg1="", arg2="", arg3="", arg4="", arg5="",
 
     This command is valid in any processor.
     """
-    command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(string), str(arg1), str(arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8))
+    command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(string), str(arg1), str(
+        arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8))
     return self.run(command, **kwargs)
 
 

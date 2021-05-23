@@ -403,9 +403,6 @@ def itengine(self, type_="", enginename="", precondname="", matrix="",
     command = f"*ITENGINE,{type_},{enginename},{precondname},{matrix},{rhsvector},{solvector},{maxiter},{toler}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def lsbac(self, enginename="", rhsvector="", solvector="", **kwargs):
     """Performs the solve (forward/backward substitution) of a factorized
@@ -736,8 +733,6 @@ def smat(self, matrix="", type_="", method="", val1="", val2="", val3="", val4="
     """
     command = f"*SMAT,{matrix},{type_},{method},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
-
-    
 
 
 def starprint(self, matrix="", fname="", **kwargs):

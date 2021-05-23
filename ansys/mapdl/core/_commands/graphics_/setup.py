@@ -119,11 +119,6 @@ def color(self, lab="", clab="", n1="", n2="", ninc="", **kwargs):
     command = f"/COLOR,{lab},{clab},{n1},{n2},{ninc}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def device(self, label="", key="", **kwargs):
     """Controls graphics device options.
@@ -231,8 +226,6 @@ def device(self, label="", key="", **kwargs):
     command = f"/DEVICE,{label},{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dsys(self, kcn="", **kwargs):
     """Activates a display coordinate system for geometry listings and plots.
@@ -264,10 +257,6 @@ def dsys(self, kcn="", **kwargs):
     """
     command = f"DSYS,{kcn}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def dv3d(self, lab="", key="", **kwargs):
@@ -348,9 +337,6 @@ def dv3d(self, lab="", key="", **kwargs):
     command = f"/DV3D,{lab},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def gcmd(self, wn="", lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
          lab7="", lab8="", lab9="", lab10="", lab11="", lab12="",
@@ -384,11 +370,6 @@ def gcmd(self, wn="", lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
     command = f"/GCMD,{wn},{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9},{lab10},{lab11},{lab12}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def gcolumn(self, curve="", string="", **kwargs):
     """Allows the user to apply a label to a specified curve.
@@ -417,9 +398,6 @@ def gcolumn(self, curve="", string="", **kwargs):
     command = f"/GCOLUMN,{curve},{string}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def gfile(self, size="", **kwargs):
     """Specifies the pixel resolution on Z-buffered graphics files.
@@ -444,8 +422,6 @@ def gfile(self, size="", **kwargs):
     command = f"/GFILE,{size}"
     return self.run(command, **kwargs)
 
-    
-
 
 def gplot(self, **kwargs):
     """Controls general plotting.
@@ -463,9 +439,6 @@ def gplot(self, **kwargs):
     """
     command = f"GPLOT,"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def graphics(self, key="", **kwargs):
@@ -541,10 +514,6 @@ def graphics(self, key="", **kwargs):
     """
     command = f"/GRAPHICS,{key}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def gresume(self, fname="", ext="", **kwargs):
@@ -671,11 +640,6 @@ def gtype(self, wn="", label="", key="", **kwargs):
     command = f"/GTYPE,{wn},{label},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def image(self, label="", fname="", ext="", **kwargs):
     """Allows graphics data to be captured and saved.
@@ -706,9 +670,6 @@ def image(self, label="", fname="", ext="", **kwargs):
     """
     command = f"/IMAGE,{label},{fname},{ext}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def jpeg(self, kywrd="", opt="", **kwargs):
@@ -758,9 +719,6 @@ def jpeg(self, kywrd="", opt="", **kwargs):
     command = f"JPEG,{kywrd},{opt}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mrep(self, name="", arg1="", arg2="", arg3="", arg4="", arg5="",
          arg6="", arg7="", arg8="", arg9="", arg10="", arg11="", arg12="",
@@ -793,8 +751,6 @@ def mrep(self, name="", arg1="", arg2="", arg3="", arg4="", arg5="",
     command = f"/MREP,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pcopy(self, key="", **kwargs):
     """Automatically generates hard copies for HP UNIX work stations.
@@ -822,10 +778,6 @@ def pcopy(self, key="", **kwargs):
     """
     command = f"/PCOPY,{key}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def pngr(self, kywrd="", opt="", val="", **kwargs):
@@ -891,8 +843,6 @@ def pngr(self, kywrd="", opt="", val="", **kwargs):
     command = f"PNGR,{kywrd},{opt},{val}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pscr(self, kywrd="", key="", **kwargs):
     """Specifies various PostScript options.
@@ -931,9 +881,6 @@ def pscr(self, kywrd="", key="", **kwargs):
     command = f"PSCR,{kywrd},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def pstatus(self, wn="", **kwargs):
     """Displays the global or window display specifications.
@@ -956,8 +903,6 @@ def pstatus(self, wn="", **kwargs):
     """
     command = f"/PSTATUS,{wn}"
     return self.run(command, **kwargs)
-
-    
 
 
 def replot(self, label="", **kwargs):
@@ -1022,10 +967,6 @@ def replot(self, label="", **kwargs):
     command = f"/REPLOT,{label}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def seg(self, label="", aviname="", delay="", **kwargs):
     """Allows graphics data to be stored in the local terminal memory.
@@ -1077,11 +1018,6 @@ def seg(self, label="", aviname="", delay="", **kwargs):
     """
     command = f"/SEG,{label},{aviname},{delay}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def show(self, fname="", option="", vect="", ncpl="", **kwargs):
@@ -1229,8 +1165,6 @@ def show(self, fname="", option="", vect="", ncpl="", **kwargs):
     command = f"/SHOW,{fname},{option},{vect},{ncpl}"
     return self.run(command, **kwargs)
 
-    
-
 
 def tiff(self, kywrd="", opt="", **kwargs):
     """Provides TIFF file Export for ANSYS Displays.
@@ -1326,6 +1260,3 @@ def window(self, wn="", xmin="", xmax="", ymin="", ymax="", ncopy="",
     """
     command = f"/WINDOW,{wn},{xmin},{xmax},{ymin},{ymax},{ncopy}"
     return self.run(command, **kwargs)
-
-    
-    

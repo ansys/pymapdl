@@ -47,10 +47,6 @@ def anpres(self, nfram="", delay="", ncycl="", refframe="", **kwargs):
     command = f"ANPRES,{nfram},{delay},{ncycl},{refframe}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def aport(self, portnum="", label="", kcn="", pres="", phase="", val1="",
           val2="", val3="", val4="", **kwargs):
@@ -143,8 +139,6 @@ def aport(self, portnum="", label="", kcn="", pres="", phase="", val1="",
     command = f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
-    
-
 
 def asifile(self, opt="", fname="", ext="", oper="", kdim="", kout="",
             limit="", **kwargs):
@@ -229,8 +223,6 @@ def asifile(self, opt="", fname="", ext="", oper="", kdim="", kout="",
     """
     command = f"ASIFILE,{opt},{fname},{ext},{oper},{kdim},{kout},{limit}"
     return self.run(command, **kwargs)
-
-    
 
 
 def awave(self, wavenum="", wavetype="", opt1="", opt2="", val1="",
@@ -603,8 +595,6 @@ def ic(self, node="", lab="", value="", value2="", nend="", ninc="",
     command = f"IC,{node},{lab},{value},{value2},{nend},{ninc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def icdele(self, **kwargs):
     """Deletes initial conditions at nodes.
@@ -620,12 +610,6 @@ def icdele(self, **kwargs):
     """
     command = f"ICDELE,"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
-    
 
 
 def iclist(self, node1="", node2="", ninc="", lab="", **kwargs):
@@ -663,8 +647,6 @@ def iclist(self, node1="", node2="", ninc="", lab="", **kwargs):
     """
     command = f"ICLIST,{node1},{node2},{ninc},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def icrotate(self, node="", omega="", x1="", y1="", z1="", x2="", y2="",
@@ -720,9 +702,6 @@ def icrotate(self, node="", omega="", x1="", y1="", z1="", x2="", y2="",
     command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mpchg(self, mat="", elem="", **kwargs):
     """Changes the material number attribute of an element.
@@ -750,8 +729,6 @@ def mpchg(self, mat="", elem="", **kwargs):
     """
     return self.run(f"MPCHG,{mat},{elem}", **kwargs)
 
-    
-
 
 def mrpm(self, val1="", **kwargs):
     """Defines the revolutions per minute (RPM) for a machine rotation.
@@ -771,8 +748,6 @@ def mrpm(self, val1="", **kwargs):
     radiated sound power level (the PRFAR and PLFAR commands).
     """
     return self.run(f"MRPM,{val1}", **kwargs)
-
-    
 
 
 def outpr(self, item="", freq="", cname="", **kwargs):
@@ -863,8 +838,6 @@ def outpr(self, item="", freq="", cname="", **kwargs):
     """
     command = f"OUTPR,{item},{freq},{cname}"
     return self.run(command, **kwargs)
-
-    
 
 
 def outres(self, item="", freq="", cname="", nsvar="", dsubres="",
@@ -1095,8 +1068,6 @@ def rescontrol(self, action="", ldstep="", frequency="", maxfiles="",
     command = f"RESCONTROL,{action},{ldstep},{frequency},{maxfiles}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sbclist(self, **kwargs):
     """Lists solid model boundary conditions.
@@ -1113,8 +1084,6 @@ def sbclist(self, **kwargs):
     """
     command = f"SBCLIST,"
     return self.run(command, **kwargs)
-
-    
 
 
 def sbctran(self, **kwargs):

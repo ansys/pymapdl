@@ -350,9 +350,6 @@ def gline(self, wn="", style="", **kwargs):
     command = f"/GLINE,{wn},{style}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def gmarker(self, curve="", key="", incr="", **kwargs):
     """Specifies the curve marking style.
@@ -393,8 +390,6 @@ def gmarker(self, curve="", key="", incr="", **kwargs):
     command = f"/GMARKER,{curve},{key},{incr}"
     return self.run(command, **kwargs)
 
-    
-
 
 def gmface(self, lab="", n="", **kwargs):
     """Specifies the facet representation used to form solid models.
@@ -417,10 +412,6 @@ def gmface(self, lab="", n="", **kwargs):
     """
     command = f"GMFACE,{lab},{n}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def light(self, wn="", num="", int_="", xv="", yv="", zv="", refl="",
@@ -477,8 +468,6 @@ def light(self, wn="", num="", int_="", xv="", yv="", zv="", refl="",
     command = f"/LIGHT,{wn},{num},{int_},{xv},{yv},{zv},{refl}"
     return self.run(command, **kwargs)
 
-    
-
 
 def normal(self, wn="", key="", **kwargs):
     """Allows displaying area elements by top or bottom faces.
@@ -515,8 +504,6 @@ def normal(self, wn="", key="", **kwargs):
     command = f"/NORMAL,{wn},{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def shade(self, wn="", type_="", **kwargs):
     """Defines the type of surface shading used with Z-buffering.
@@ -550,8 +537,6 @@ def shade(self, wn="", type_="", **kwargs):
     """
     command = f"/SHADE,{wn},{type_}"
     return self.run(command, **kwargs)
-
-    
 
 
 def trlcy(self, lab="", tlevel="", n1="", n2="", ninc="", **kwargs):

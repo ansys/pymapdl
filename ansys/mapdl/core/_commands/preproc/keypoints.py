@@ -451,8 +451,6 @@ def klist(self, np1="", np2="", ninc="", lab="", **kwargs):
     command = f"KLIST,{np1},{np2},{ninc},{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def kmodif(self, npt="", x="", y="", z="", **kwargs):
     """Modifies an existing keypoint.

@@ -76,5 +76,3 @@ def print(self, **kwargs):
     """
     command = f"PRINT,"
     return self.run(command, **kwargs)
-
-    

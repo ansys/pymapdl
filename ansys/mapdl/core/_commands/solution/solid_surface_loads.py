@@ -47,9 +47,6 @@ def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
     command = f"SFA,{area},{lkey},{lab},{value},{value2}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def sfadele(self, area="", lkey="", lab="", **kwargs):
     """Deletes surface loads from areas.
@@ -106,9 +103,6 @@ def sfalist(self, area="", lab="", **kwargs):
     """
     command = f"SFALIST,{area},{lab}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="",
@@ -186,10 +180,6 @@ def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="",
     command = f"SFL,{line},{lab},{vali},{valj},{val2i},{val2j}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def sfldele(self, line="", lab="", **kwargs):
     """Deletes surface loads from lines.
@@ -218,11 +208,6 @@ def sfldele(self, line="", lab="", **kwargs):
     command = f"SFLDELE,{line},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def sfllist(self, line="", lab="", **kwargs):
     """Lists the surface loads for lines.
@@ -250,10 +235,6 @@ def sfllist(self, line="", lab="", **kwargs):
     command = f"SFLLIST,{line},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def sftran(self, **kwargs):
     """Transfer the solid model surface loads to the finite element model.
@@ -271,5 +252,3 @@ def sftran(self, **kwargs):
     """
     command = f"SFTRAN,"
     return self.run(command, **kwargs)
-
-    

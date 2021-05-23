@@ -53,9 +53,6 @@ def bfa(self, area="", lab="", val1="", val2="", val3="", val4="",
     command = f"BFA,{area},{lab},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def bfadele(self, area="", lab="", **kwargs):
     """Deletes body force loads on an area.
@@ -88,13 +85,6 @@ def bfadele(self, area="", lab="", **kwargs):
     command = f"BFADELE,{area},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-    
-    
-
 
 def bfalist(self, area="", lab="", **kwargs):
     """Lists the body force loads on an area.
@@ -124,8 +114,6 @@ def bfalist(self, area="", lab="", **kwargs):
     """
     command = f"BFALIST,{area},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="",
@@ -218,9 +206,6 @@ def bfkdele(self, kpoi="", lab="", **kwargs):
     command = f"BFKDELE,{kpoi},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def bfklist(self, kpoi="", lab="", **kwargs):
     """Lists the body force loads at keypoints.
@@ -251,8 +236,6 @@ def bfklist(self, kpoi="", lab="", **kwargs):
     """
     command = f"BFKLIST,{kpoi},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfl(self, line="", lab="", val1="", val2="", val3="", val4="",
@@ -304,8 +287,6 @@ def bfl(self, line="", lab="", val1="", val2="", val3="", val4="",
     command = f"BFL,{line},{lab},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfldele(self, line="", lab="", **kwargs):
     """Deletes body force loads on a line.
@@ -337,8 +318,6 @@ def bfldele(self, line="", lab="", **kwargs):
     """
     command = f"BFLDELE,{line},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfllist(self, line="", lab="", **kwargs):
@@ -445,8 +424,6 @@ def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
     command = f"BFV,{volu},{lab},{val1},{val2},{val3},{phase}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfvdele(self, volu="", lab="", **kwargs):
     """Deletes body force loads on a volume.
@@ -479,9 +456,6 @@ def bfvdele(self, volu="", lab="", **kwargs):
     command = f"BFVDELE,{volu},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def bfvlist(self, volu="", lab="", **kwargs):
     """Lists the body force loads on a volume.
@@ -511,7 +485,3 @@ def bfvlist(self, volu="", lab="", **kwargs):
     """
     command = f"BFVLIST,{volu},{lab}"
     return self.run(command, **kwargs)
-
-    
-    
-    

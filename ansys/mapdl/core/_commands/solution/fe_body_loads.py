@@ -68,8 +68,6 @@ def bf(self, node="", lab="", val1="", val2="", val3="", val4="", val5="",
     command = f"BF,{node},{lab},{val1},{val2},{val3},{val4},{val5},{val6}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfcum(self, lab="", oper="", fact="", tbase="", **kwargs):
     """Specifies that nodal body force loads are to be accumulated.
@@ -126,8 +124,6 @@ def bfcum(self, lab="", oper="", fact="", tbase="", **kwargs):
     """
     command = f"BFCUM,{lab},{oper},{fact},{tbase}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfdele(self, node="", lab="", **kwargs):
@@ -264,8 +260,6 @@ def bfe(self, elem="", lab="", stloc="", val1="", val2="", val3="",
     command = f"BFE,{elem},{lab},{stloc},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfecum(self, lab="", oper="", fact="", tbase="", **kwargs):
     """Specifies whether to ignore subsequent element body force loads.
@@ -315,8 +309,6 @@ def bfecum(self, lab="", oper="", fact="", tbase="", **kwargs):
     command = f"BFECUM,{lab},{oper},{fact},{tbase}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfedele(self, elem="", lab="", **kwargs):
     """Deletes element body force loads.
@@ -346,8 +338,6 @@ def bfedele(self, elem="", lab="", **kwargs):
     command = f"BFEDELE,{elem},{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def bfelist(self, elem="", lab="", **kwargs):
     """Lists the element body force loads.
@@ -376,8 +366,6 @@ def bfelist(self, elem="", lab="", **kwargs):
     """
     command = f"BFELIST,{elem},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfescal(self, lab="", fact="", tbase="", **kwargs):
@@ -451,8 +439,6 @@ def bflist(self, node="", lab="", **kwargs):
     """
     command = f"BFLIST,{node},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def bfscale(self, lab="", fact="", tbase="", **kwargs):
@@ -545,9 +531,6 @@ def bfunif(self, lab="", value="", **kwargs):
     """
     command = f"BFUNIF,{lab},{value}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def ldread(self, lab="", lstep="", sbstep="", time="", kimg="", fname="",
@@ -765,11 +748,6 @@ def rimport(self, source="", type_="", loc="", lstep="", sbstep="",
     command = f"RIMPORT,{source},{type_},{loc},{lstep},{sbstep},{fname},{ext},,{spscale},{mscale}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def tunif(self, temp="", **kwargs):
     """Assigns a uniform temperature to all nodes.
@@ -824,5 +802,3 @@ def tunif(self, temp="", **kwargs):
     """
     command = f"TUNIF,{temp}"
     return self.run(command, **kwargs)
-
-    

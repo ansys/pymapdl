@@ -98,8 +98,6 @@ def cecmod(self, neqn="", const="", **kwargs):
     command = f"CECMOD,{neqn},{const}"
     return self.run(command, **kwargs)
 
-    
-
 
 def deltim(self, dtime="", dtmin="", dtmax="", carry="", **kwargs):
     """Specifies the time step sizes to be used for the current load step.
@@ -192,9 +190,6 @@ def expsol(self, lstep="", sbstep="", timfrq="", elcalc="", **kwargs):
     """
     command = f"EXPSOL,{lstep},{sbstep},{timfrq},{elcalc}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def kbc(self, key="", **kwargs):
@@ -293,8 +288,6 @@ def kuse(self, key="", **kwargs):
     command = f"KUSE,{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def magopt(self, value="", **kwargs):
     """Specifies options for a 3-D magnetostatic field analysis.
@@ -331,10 +324,6 @@ def magopt(self, value="", **kwargs):
     """
     command = f"MAGOPT,{value}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def magsolv(self, opt="", nramp="", cnvcsg="", cnvflux="", neqit="",
@@ -433,8 +422,6 @@ def magsolv(self, opt="", nramp="", cnvcsg="", cnvflux="", neqit="",
     command = f"MAGSOLV,{opt},{nramp},{cnvcsg},{cnvflux},{neqit},{biot},{cnvtol}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mode(self, mode="", isym="", **kwargs):
     """Specifies the harmonic loading term for this load step.
@@ -466,9 +453,6 @@ def mode(self, mode="", isym="", **kwargs):
     """
     command = f"MODE,{mode},{isym}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def nsubst(self, nsbstp="", nsbmx="", nsbmn="", carry="", **kwargs):
@@ -621,10 +605,6 @@ def time(self, time="", **kwargs):
     command = f"TIME,{time}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def tref(self, tref="", **kwargs):
     """Defines the reference temperature for the thermal strain calculations.
@@ -667,8 +647,6 @@ def tref(self, tref="", **kwargs):
     command = f"TREF,{tref}"
     return self.run(command, **kwargs)
 
-    
-
 
 def tsres(self, array="", **kwargs):
     """Defines an array of key times at which the time-stepping strategy
@@ -709,11 +687,6 @@ def tsres(self, array="", **kwargs):
     """
     command = f"TSRES,{array}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def upcoord(self, factor="", key="", **kwargs):
@@ -772,9 +745,6 @@ def upcoord(self, factor="", key="", **kwargs):
     """
     command = f"UPCOORD,{factor},{key}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def usrcal(self, rnam1="", rnam2="", rnam3="", rnam4="", rnam5="",
@@ -869,10 +839,6 @@ def usrcal(self, rnam1="", rnam2="", rnam3="", rnam4="", rnam5="",
     command = f"USRCAL,{rnam1},{rnam2},{rnam3},{rnam4},{rnam5},{rnam6},{rnam7},{rnam8},{rnam9}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def wrfull(self, ldstep="", **kwargs):
     """Stops solution after assembling global matrices.
@@ -915,5 +881,3 @@ def wrfull(self, ldstep="", **kwargs):
     """
     command = f"WRFULL,{ldstep}"
     return self.run(command, **kwargs)
-
-    

@@ -44,9 +44,6 @@ def cformat(self, nfirst="", nlast="", **kwargs):
     command = f"/CFORMAT,{nfirst},{nlast}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def clabel(self, wn="", key="", **kwargs):
     """Specifies contour labeling.
@@ -79,12 +76,6 @@ def clabel(self, wn="", key="", **kwargs):
     """
     command = f"/CLABEL,{wn},{key}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
-    
 
 
 def contour(self, wn="", ncont="", vmin="", vinc="", vmax="", **kwargs):
@@ -153,8 +144,6 @@ def contour(self, wn="", ncont="", vmin="", vinc="", vmax="", **kwargs):
     command = f"/CONTOUR,{wn},{ncont},{vmin},{vinc},{vmax}"
     return self.run(command, **kwargs)
 
-    
-
 
 def cval(self, wn="", v1="", v2="", v3="", v4="", v5="", v6="", v7="",
          v8="", **kwargs):
@@ -186,10 +175,6 @@ def cval(self, wn="", v1="", v2="", v3="", v4="", v5="", v6="", v7="",
     """
     command = f"/CVAL,{wn},{v1},{v2},{v3},{v4},{v5},{v6},{v7},{v8}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def gformat(self, ftype="", nwidth="", dsignf="", **kwargs):
@@ -231,8 +216,6 @@ def gformat(self, ftype="", nwidth="", dsignf="", **kwargs):
     command = f"/GFORMAT,{ftype},{nwidth},{dsignf}"
     return self.run(command, **kwargs)
 
-    
-
 
 def hbc(self, wn="", key="", **kwargs):
     """Determines how boundary condition symbols are displayed in a display
@@ -256,10 +239,6 @@ def hbc(self, wn="", key="", **kwargs):
     """
     command = f"/HBC,{wn},{key}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def number(self, nkey="", **kwargs):
@@ -312,8 +291,6 @@ def number(self, nkey="", **kwargs):
     """
     command = f"/NUMBER,{nkey}"
     return self.run(command, **kwargs)
-
-    
 
 
 def pbc(self, item="", key="", min_="", max_="", abs_="", **kwargs):
@@ -447,9 +424,6 @@ def pbc(self, item="", key="", min_="", max_="", abs_="", **kwargs):
     command = f"/PBC,{item},,{key},{min_},{max_},{abs_}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def pbf(self, item="", key="", **kwargs):
     """Shows magnitude of body force loads on displays.
@@ -512,12 +486,6 @@ def pbf(self, item="", key="", **kwargs):
     This command is valid in any processor.
     """
     return self.run(f"/PBF,{item},,{key}", **kwargs)
-
-    
-    
-    
-    
-    
 
 
 def plopts(self, label="", key="", **kwargs):
@@ -610,9 +578,6 @@ def plopts(self, label="", key="", **kwargs):
     command = f"/PLOPTS,{label},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def pnum(self, label="", key="", **kwargs):
     """Controls entity numbering/coloring on plots.
@@ -698,10 +663,6 @@ def pnum(self, label="", key="", **kwargs):
     """
     command = f"/PNUM,{label},{key}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
@@ -801,11 +762,6 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
     """
     command = f"/PSF,{item},{comp},{key},{kshell},{color}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def psymb(self, label="", key="", **kwargs):
@@ -915,8 +871,6 @@ def psymb(self, label="", key="", **kwargs):
     """
     command = f"/PSYMB,{label},{key}"
     return self.run(command, **kwargs)
-
-    
 
 
 def triad(self, lab="", **kwargs):
@@ -1056,5 +1010,3 @@ def udoc(self, wind="", cl_ass="", key="", **kwargs):
     """
     command = f"/UDOC,{wind},{cl_ass},{key}"
     return self.run(command, **kwargs)
-
-    

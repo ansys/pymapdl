@@ -71,8 +71,6 @@ def avprin(self, key="", effnu="", **kwargs):
     command = f"AVPRIN,{key},{effnu}"
     return self.run(command, **kwargs)
 
-    
-
 
 def avres(self, key="", opt="", **kwargs):
     """Specifies how results data will be averaged when PowerGraphics is
@@ -231,8 +229,6 @@ def ernorm(self, key="", **kwargs):
     """
     return self.run("ERNORM,%s" % (str(key)), **kwargs)
 
-    
-
 
 def inres(self, item1="", item2="", item3="", item4="", item5="", item6="",
           item7="", item8="", **kwargs):
@@ -286,8 +282,6 @@ def inres(self, item1="", item2="", item3="", item4="", item5="", item6="",
     """
     command = f"INRES,{item1},{item2},{item3},{item4},{item5},{item6},{item7},{item8}"
     return self.run(command, **kwargs)
-
-    
 
 
 def layer(self, num="", **kwargs):
@@ -349,9 +343,6 @@ def layer(self, num="", **kwargs):
     """
     command = f"LAYER,{num}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def rsys(self, kcn="", **kwargs):
@@ -490,5 +481,3 @@ def rsys(self, kcn="", **kwargs):
     """
     command = f"RSYS,{kcn}"
     return self.run(command, **kwargs)
-
-    

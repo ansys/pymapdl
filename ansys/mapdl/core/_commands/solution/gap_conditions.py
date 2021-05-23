@@ -161,9 +161,6 @@ def gpdele(self, gap1="", gap2="", ginc="", **kwargs):
     command = f"GPDELE,{gap1},{gap2},{ginc}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def gplist(self, gap1="", gap2="", ginc="", **kwargs):
     """Lists the gap conditions.
@@ -183,5 +180,3 @@ def gplist(self, gap1="", gap2="", ginc="", **kwargs):
     """
     command = f"GPLIST,{gap1},{gap2},{ginc}"
     return self.run(command, **kwargs)
-
-    

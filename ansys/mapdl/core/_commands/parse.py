@@ -18,7 +18,6 @@ NUMERIC_CONST_PATTERN = r"""
 NUM_PATTERN = re.compile(NUMERIC_CONST_PATTERN, re.VERBOSE)
 
 
-
 def parse_kdist(msg):
     """Parse the keypoint value from a keypoint message"""
     finds = re.findall(NUM_PATTERN, msg)[-3:]

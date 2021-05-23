@@ -3,8 +3,9 @@ These PREP7 commands create and modify the material data tables (that
 is, to specify and define material models).
 """
 
+
 def tb(self, lab="", mat="", ntemp="", npts="", tbopt="", eosopt="",
-           funcname="", **kwargs):
+       funcname="", **kwargs):
     """APDL Command: TB
 
     Activates a data table for material properties or special element
@@ -102,7 +103,8 @@ def tb(self, lab="", mat="", ntemp="", npts="", tbopt="", eosopt="",
                 Polynomial Form, Response Function, Yeoh, and user-
                 defined).
     """
-    command = "TB,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(ntemp), str(npts), str(tbopt), str(eosopt), str(funcname))
+    command = "TB,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(
+        ntemp), str(npts), str(tbopt), str(eosopt), str(funcname))
     return self.run(command, **kwargs)
 
 
@@ -144,7 +146,7 @@ def tbcopy(self, lab="", matf="", matt="", **kwargs):
 
 
 def tbdata(self, stloc="", c1="", c2="", c3="", c4="", c5="", c6="",
-               **kwargs):
+           **kwargs):
     """APDL Command: TBDATA
 
     Defines data for the material data table.
@@ -176,7 +178,8 @@ def tbdata(self, stloc="", c1="", c2="", c3="", c4="", c5="", c6="",
 
     This command is also valid in SOLUTION.
     """
-    command = "TBDATA,%s,%s,%s,%s,%s,%s,%s" % (str(stloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
+    command = "TBDATA,%s,%s,%s,%s,%s,%s,%s" % (
+        str(stloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
     return self.run(command, **kwargs)
 
 
@@ -360,7 +363,8 @@ def tbin(self, oper="", par1="", par2="", par3="", par4="", **kwargs):
     For a list of the supported material data tables (TB), see Logarithmic
     Interpolation and Scaling in the Material Reference.
     """
-    command = "TBIN,%s,%s,%s,%s,%s" % (str(oper), str(par1), str(par2), str(par3), str(par4))
+    command = "TBIN,%s,%s,%s,%s,%s" % (
+        str(oper), str(par1), str(par2), str(par3), str(par4))
     return self.run(command, **kwargs)
 
 
@@ -475,7 +479,8 @@ def tbplot(self, lab="", mat="", tbopt="", temp="", segn="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "TBPLOT,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(tbopt), str(temp), str(segn))
+    command = "TBPLOT,%s,%s,%s,%s,%s" % (
+        str(lab), str(mat), str(tbopt), str(temp), str(segn))
     return self.run(command, **kwargs)
 
 
@@ -509,7 +514,8 @@ def tbpt(self, oper="", x1="", x2="", x3="", xn="", **kwargs):
 
     This command is also valid in SOLUTION.
     """
-    command = "TBPT,%s,%s,%s,%s,%s" % (str(oper), str(x1), str(x2), str(x3), str(xn))
+    command = "TBPT,%s,%s,%s,%s,%s" % (
+        str(oper), str(x1), str(x2), str(x3), str(xn))
     return self.run(command, **kwargs)
 
 

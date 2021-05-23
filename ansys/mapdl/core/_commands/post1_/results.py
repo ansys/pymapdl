@@ -151,8 +151,6 @@ def plcint(self, action="", id_="", node="", cont="", dtype="", **kwargs):
     command = f"PLCINT,{action},{id_},{node},{cont},{dtype}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pldisp(self, kund="", **kwargs):
     """Displays the displaced structure.
@@ -181,9 +179,6 @@ def pldisp(self, kund="", **kwargs):
     """
     command = f"PLDISP,{kund}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def plesol(self, item="", comp="", kund="", fact="", **kwargs):
@@ -245,12 +240,8 @@ def plesol(self, item="", comp="", kund="", fact="", **kwargs):
     command = f"PLESOL,{item},{comp},{kund},{fact}"
     return self.run(command, **kwargs)
 
-    
-    
-    
 
-
-def plnsol(self, item="", comp="", kund="", fact="", fileid ="", **kwargs):
+def plnsol(self, item="", comp="", kund="", fact="", fileid="", **kwargs):
     """Displays results as continuous contours.
 
     APDL Command: PLNSOL
@@ -308,9 +299,6 @@ def plnsol(self, item="", comp="", kund="", fact="", fileid ="", **kwargs):
     command = f"PLNSOL,{item},{comp},{kund},{fact},{fileid}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def plorb(self, **kwargs):
     """Displays the orbital motion of a rotating structure
@@ -343,10 +331,6 @@ def plorb(self, **kwargs):
     """
     command = f"PLORB,"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def prenergy(self, energytype="", cname1="", cname2="", cname3="",
@@ -385,8 +369,6 @@ def prenergy(self, energytype="", cname1="", cname2="", cname3="",
     """
     command = f"PRENERGY,{energytype},{cname1},{cname2},{cname3},{cname4},{cname5},{cname6}"
     return self.run(command, **kwargs)
-
-    
 
 
 def prorb(self, **kwargs):
@@ -605,8 +587,6 @@ def prcint(self, id_="", node="", dtype="", **kwargs):
     """
     command = f"PRCINT,{id_},{node},{dtype}"
     return self.run(command, **kwargs)
-
-    
 
 
 def presol(self, item="", comp="", **kwargs):
@@ -870,9 +850,6 @@ def prnsol(self, item="", comp="", **kwargs):
     command = f"PRNSOL,{item},{comp}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def prrfor(self, lab="", **kwargs):
     """Prints the constrained node reaction solution. Used with the FORCE
@@ -944,9 +921,6 @@ def prrsol(self, lab="", **kwargs):
     command = f"PRRSOL,{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def prvect(self, item="", lab2="", lab3="", labp="", **kwargs):
     """Prints results as vector magnitude and direction cosines.
@@ -999,8 +973,6 @@ def prvect(self, item="", lab2="", lab3="", labp="", **kwargs):
     command = f"PRVECT,{item},{lab2},{lab3},{labp}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sumtype(self, label="", **kwargs):
     """Sets the type of summation to be used in the following load case
@@ -1039,5 +1011,3 @@ def sumtype(self, label="", **kwargs):
     """
     command = f"SUMTYPE,{label}"
     return self.run(command, **kwargs)
-
-    

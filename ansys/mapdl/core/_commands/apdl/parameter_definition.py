@@ -1,5 +1,6 @@
 import os
 
+
 def afun(self, lab="", **kwargs):
     """Specifies units for angular functions in parameter expressions.
 
@@ -242,8 +243,6 @@ def get(self, par="", entity="", entnum="", item1="", it1num="", item2="",
     command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
     return self.run(command, **kwargs)
 
-    
-
 
 def inquire(self, func):
     """Returns system information.
@@ -346,7 +345,8 @@ def parres(self, lab="", fname="", ext="", **kwargs):
     if 'Grpc' in self.__class__.__name__:  # grpc mode
         if self._local:
             if not os.path.isfile(fname):
-                raise FileNotFoundError('Unable to locate filename "%s"' % fname)
+                raise FileNotFoundError(
+                    'Unable to locate filename "%s"' % fname)
 
             if not os.path.dirname(fname):
                 filename = os.path.join(os.getcwd(), fname)
@@ -678,7 +678,7 @@ def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
           0.005)
         - CON5 is an array parameter (size NFR) specifying the
           natural frequencies in Hz
-    
+
         The dimension of the resulting array parameter ParR is
         less than 2+NFR*(2*CON3+1) where NFR is the number of
         natural frequencies defined in CON5.

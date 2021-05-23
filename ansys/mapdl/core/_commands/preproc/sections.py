@@ -310,9 +310,6 @@ def cbmd(self, row="", c_r__r_="", c_r__r_plus_1_="", c_r__r_plus_2_="",
     command = f"CBMD,{row},{c_r__r_},{c_r__r_plus_1_},{c_r__r_plus_2_},{c_r__r_plus_3_},{c_r__r_plus_4_},{c_r__r_plus_5_}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def cbmx(self, row="", s_r__r_="", s_r__r_plus_1_="", s_r__r_plus_2_="",
          s_r__r_plus_3_="", s_r__r_plus_4_="", s_r__r_plus_5_="",
@@ -407,8 +404,6 @@ def cbtmp(self, temp="", **kwargs):
     """
     command = f"CBTMP,{temp}"
     return self.run(command, **kwargs)
-
-    
 
 
 def sdelete(self, sfirst="", slast="", sinc="", knoclean="", lchk="",
@@ -594,9 +589,6 @@ def secjoint(self, kywrd="", val1="", val2="", val3="", val4="", val5="",
     command = f"SECJOINT,{kywrd},{val1},{val2},{val3},{val4},{val5},{val6}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def seclib(self, option="", path="", **kwargs):
     """Sets the default section library path for the SECREAD command.
@@ -660,8 +652,6 @@ def seclock(self, dof1="", minvalue1="", maxvalue1="", dof2="",
     """
     command = f"SECLOCK,{dof1},{minvalue1},{maxvalue1},{dof2},{minvalue2},{maxvalue2},{dof3},{minvalue3},{maxvalue3}"
     return self.run(command, **kwargs)
-
-    
 
 
 def secnum(self, secid="", **kwargs):
@@ -1051,9 +1041,6 @@ def secwrite(self, fname="", ext="", elem_type="", **kwargs):
     """
     return self.run(f"SECWRITE,{fname},{ext},,{elem_type}", **kwargs)
 
-    
-    
-
 
 def sflex(self, ffax="", ffby="", ffbz="", ffto="", fftsy="", fftsz="",
           **kwargs):
@@ -1277,8 +1264,6 @@ def sload(self, secid="", plnlab="", kinit="", kfd="", fdvalue="",
     command = f"SLOAD,{secid},{plnlab},{kinit},{kfd},{fdvalue},{lsload},{lslock}"
     return self.run(command, **kwargs)
 
-    
-
 
 def ssbt(self, bt11="", bt22="", bt12="", t="", **kwargs):
     """Specifies preintegrated bending thermal effects for shell sections.
@@ -1398,8 +1383,6 @@ def sspa(self, a11="", a21="", a31="", a22="", a32="", a33="", t="",
     command = f"SSPA,{a11},{a21},{a31},{a22},{a32},{a33},{t}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sspb(self, b11="", b21="", b31="", b22="", b32="", b33="", t="",
          b12="", b13="", b23="", **kwargs):
@@ -1445,8 +1428,6 @@ def sspb(self, b11="", b21="", b31="", b22="", b32="", b33="", t="",
     """
     command = f"SSPB,{b11},{b21},{b31},{b22},{b32},{b33},{t},{b12},{b13},{b23}"
     return self.run(command, **kwargs)
-
-    
 
 
 def sspd(self, d11="", d21="", d31="", d22="", d32="", d33="", t="",

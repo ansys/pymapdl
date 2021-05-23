@@ -89,8 +89,6 @@ def ce(self, neqn="", const="", node1="", lab1="", c1="", node2="",
     command = f"CE,{neqn},{const},{node1},{lab1},{c1},{node2},{lab2},{c2},{node3},{lab3},{c3}"
     return self.run(command, **kwargs)
 
-    
-
 
 def cecyc(self, lowname="", highname="", nsector="", hindex="",
           tolerance="", kmove="", kpairs="", **kwargs):
@@ -169,9 +167,6 @@ def cedele(self, neqn1="", neqn2="", ninc="", nsel="", **kwargs):
     """
     command = f"CEDELE,{neqn1},{neqn2},{ninc},{nsel}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def ceintf(self, toler="", dof1="", dof2="", dof3="", dof4="", dof5="",
@@ -279,8 +274,6 @@ def celist(self, neqn1="", neqn2="", ninc="", option="", **kwargs):
     """
     command = f"CELIST,{neqn1},{neqn2},{ninc},{option}"
     return self.run(command, **kwargs)
-
-    
 
 
 def cerig(self, maste="", slave="", ldof="", ldof2="", ldof3="", ldof4="",
@@ -426,8 +419,6 @@ def cesgen(self, itime="", inc="", nset1="", nset2="", ninc="", **kwargs):
     """
     command = f"CESGEN,{itime},{inc},{nset1},{nset2},{ninc}"
     return self.run(command, **kwargs)
-
-    
 
 
 def rbe3(self, master="", dof="", slaves="", wtfact="", **kwargs):

@@ -73,8 +73,6 @@ def dmprat(self, ratio="", **kwargs):
     command = f"DMPRAT,{ratio}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dmpstr(self, coeff="", **kwargs):
     """Sets a constant structural damping coefficient.
@@ -108,7 +106,7 @@ def dmpstr(self, coeff="", **kwargs):
     return self.run(command, **kwargs)
 
 
-def frqscl(self, scaling ="", **kwargs):
+def frqscl(self, scaling="", **kwargs):
     """Turns on automatic scaling of the entire mass matrix and frequency
 
     APDL Command: FRQSCL
@@ -158,8 +156,6 @@ def frqscl(self, scaling ="", **kwargs):
     """
     command = f"FRQSCL,{scaling}"
     return self.run(command, **kwargs)
-
-    
 
 
 def harfrq(self, freqb="", freqe="", logopt="", freqarr="", toler="",
@@ -286,10 +282,6 @@ def hrexp(self, angle="", **kwargs):
     command = f"HREXP,{angle}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def hrocean(self, type_="", nphase="", **kwargs):
     """Perform the harmonic ocean wave procedure (HOWP).
@@ -358,9 +350,6 @@ def hrocean(self, type_="", nphase="", **kwargs):
     """
     command = f"HROCEAN,{type_},{nphase}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def hropt(self, method="", maxmode="", minmode="", mcout="", damp="",
@@ -556,9 +545,6 @@ def mascale(self, massfact="", **kwargs):
     """
     return self.run(f"MASCALE,{massfact}", **kwargs)
 
-    
-    
-
 
 def mdamp(self, stloc="", v1="", v2="", v3="", v4="", v5="", v6="",
           **kwargs):
@@ -698,8 +684,6 @@ def midtol(self, key="", tolerb="", resfq="", **kwargs):
     command = f"MIDTOL,{key},{tolerb},{resfq}"
     return self.run(command, **kwargs)
 
-    
-
 
 def modcont(self, mlskey="", enforcedkey="", **kwargs):
     """Specify additional modal analysis options.
@@ -746,9 +730,6 @@ def modcont(self, mlskey="", enforcedkey="", **kwargs):
     """
     command = f"MODCONT,{mlskey},{enforcedkey}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def modopt(self, method="", nmode="", freqb="", freqe="", cpxmod="",
@@ -896,10 +877,6 @@ def modopt(self, method="", nmode="", freqb="", freqe="", cpxmod="",
     command = f"MODOPT,{method},{nmode},{freqb},{freqe},{cpxmod},{nrmkey},{modtype},{blocksize},,,,{freqmod}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def mxpand(self, nmode="", freqb="", freqe="", elcalc="", signif="",
            msupkey="", modeselmethod="", **kwargs):
@@ -1018,8 +995,6 @@ def mxpand(self, nmode="", freqb="", freqe="", elcalc="", signif="",
     command = f"MXPAND,{nmode},{freqb},{freqe},{elcalc},{signif},{msupkey},{modeselmethod}"
     return self.run(command, **kwargs)
 
-    
-
 
 def qrdopt(self, reusekey="", symmeth="", cmccoutkey="", **kwargs):
     """Specifies additional QRDAMP modal analysis options.
@@ -1075,8 +1050,6 @@ def qrdopt(self, reusekey="", symmeth="", cmccoutkey="", **kwargs):
     used with shared-memory parallel processing runs.
     """
     return self.run(f"QRDOPT,{reusekey},,,{symmeth},{cmccoutkey}", **kwargs)
-
-    
 
 
 def rigid(self, dof1="", dof2="", dof3="", dof4="", dof5="", dof6="",
@@ -1151,8 +1124,6 @@ def subopt(self, option="", value1="", **kwargs):
     command = f"SUBOPT,{option},{value1}"
     return self.run(command, **kwargs)
 
-    
-
 
 def timint(self, key="", lab="", **kwargs):
     """Turns on transient effects.
@@ -1202,8 +1173,6 @@ def timint(self, key="", lab="", **kwargs):
     """
     command = f"TIMINT,{key},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def tintp(self, gamma="", alpha="", delta="", theta="", oslm="", tol="",
@@ -1284,9 +1253,6 @@ def tintp(self, gamma="", alpha="", delta="", theta="", oslm="", tol="",
     """
     command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},,,{avsmooth},{alphaf},{alpham}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
@@ -1401,6 +1367,3 @@ def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
     """
     command = f"TRNOPT,{method},{maxmode},,{minmode},{mcfwrite},{tintopt},{vaout},{dmpsfreq},{engcalc},{mckey}"
     return self.run(command, **kwargs)
-
-    
-    

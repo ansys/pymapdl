@@ -56,8 +56,6 @@ def accat(self, na1="", na2="", **kwargs):
     command = f"ACCAT,{na1},{na2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def aclear(self, na1="", na2="", ninc="", **kwargs):
     """Deletes nodes and area elements associated with selected areas.
@@ -90,9 +88,6 @@ def aclear(self, na1="", na2="", ninc="", **kwargs):
     """
     command = f"ACLEAR,{na1},{na2},{ninc}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def aesize(self, anum="", size="", **kwargs):
@@ -362,8 +357,6 @@ def cpcyc(self, lab="", toler="", kcn="", dx="", dy="", dz="", knonrot="",
     """
     command = f"CPCYC,{lab},{toler},{kcn},{dx},{dy},{dz},{knonrot}"
     return self.run(command, **kwargs)
-
-    
 
 
 def czdel(self, grp1="", grp2="", grp3="", **kwargs):
@@ -791,7 +784,6 @@ def esys(self, kcn: MapdlInt = "", **kwargs) -> Optional[str]:
     return self.run(command, **kwargs)
 
 
-
 def fvmesh(self, keep="", **kwargs):
     """Generates nodes and tetrahedral volume elements from detached exterior
 
@@ -1150,8 +1142,6 @@ def krefine(self, np1="", np2="", ninc="", level="", depth="", post="",
     command = f"KREFINE,{np1},{np2},{ninc},{level},{depth},{post},{retain}"
     return self.run(command, **kwargs)
 
-    
-
 
 def kscon(self, npt="", delr="", kctip="", nthet="", rrat="", **kwargs):
     """Specifies a keypoint about which an area mesh will be skewed.
@@ -1204,8 +1194,6 @@ def kscon(self, npt="", delr="", kctip="", nthet="", rrat="", **kwargs):
     """
     command = f"KSCON,{npt},{delr},{kctip},{nthet},{rrat}"
     return self.run(command, **kwargs)
-
-    
 
 
 def latt(self, mat="", real="", type_="", kb="", ke="", secnum="",
@@ -1328,8 +1316,6 @@ def lccat(self, nl1="", nl2="", **kwargs):
     """
     command = f"LCCAT,{nl1},{nl2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def lclear(self, nl1="", nl2="", ninc="", **kwargs):
@@ -1557,8 +1543,6 @@ def lrefine(self, nl1="", nl2="", ninc="", level="", depth="", post="",
     command = f"LREFINE,{nl1},{nl2},{ninc},{level},{depth},{post},{retain}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mat(self, mat="", **kwargs):
     """Sets the element material attribute pointer.
@@ -1683,8 +1667,6 @@ def modmsh(self, lab="", **kwargs):
     """
     command = f"MODMSH,{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def mopt(self, lab="", value="", **kwargs):
@@ -2034,8 +2016,6 @@ def nrefine(self, nn1="", nn2="", ninc="", level="", depth="", post="",
     command = f"NREFINE,{nn1},{nn2},{ninc},{level},{depth},{post},{retain}"
     return self.run(command, **kwargs)
 
-    
-
 
 def psmesh(self, secid="", name="", p0="", egroup="", num="", kcn="",
            kdir="", value="", ndplane="", pstol="", pstype="", ecomp="",
@@ -2375,8 +2355,6 @@ def shpp(self, lab="", value1="", value2="", **kwargs):
     """
     command = f"SHPP,{lab},{value1},{value2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def smrtsize(self, sizlvl="", fac="", expnd="", trans="", angl="", angh="",

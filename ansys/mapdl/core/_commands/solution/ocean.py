@@ -120,10 +120,6 @@ def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
     command = f"OCDATA,{val1},{val2},{val3},{val14}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def ocdelete(self, datatype="", zonename="", **kwargs):
     """Deletes a previously defined ocean load.
@@ -179,11 +175,6 @@ def oclist(self, datatype="", zonename="", **kwargs):
     command = f"OCLIST,{datatype},{zonename}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-
 
 def ocread(self, fname="", ext="", option="", **kwargs):
     """Reads externally defined ocean data.
@@ -237,9 +228,6 @@ def ocread(self, fname="", ext="", option="", **kwargs):
     """
     command = f"OCREAD,{fname},{ext},{option}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def octable(self, val1="", val2="", val3="", val4="", val5="", val6="",
@@ -355,9 +343,6 @@ def octype(self, datatype="", name="", **kwargs):
     command = f"OCTYPE,{datatype},{name}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
            **kwargs):
@@ -422,7 +407,3 @@ def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
     """
     command = f"OCZONE,{zonetype},{zonename},{compnameint},{compnameext}"
     return self.run(command, **kwargs)
-
-    
-    
-    

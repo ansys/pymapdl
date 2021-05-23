@@ -134,8 +134,6 @@ def spread(self, value="", **kwargs):
     """
     return self.run("SPREAD,%s" % (str(value)), **kwargs)
 
-    
-
 
 def xvar(self, n="", **kwargs):
     """Specifies the X variable to be displayed.

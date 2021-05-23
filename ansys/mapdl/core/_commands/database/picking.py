@@ -6,7 +6,6 @@ would be normally supported.
 """
 
 
-
 def fitem(self, nfield="", item="", itemy="", itemz="", **kwargs):
     """Identifies items chosen by a picking operation (GUI).
 
@@ -49,7 +48,8 @@ def fitem(self, nfield="", item="", itemy="", itemz="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "FITEM,%s,%s,%s,%s" % (str(nfield), str(item), str(itemy), str(itemz))
+    command = "FITEM,%s,%s,%s,%s" % (
+        str(nfield), str(item), str(itemy), str(itemz))
     return self.run(command, **kwargs)
 
 
@@ -119,5 +119,6 @@ def flst(self, nfield="", narg="", type_="", otype="", leng="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "FLST,%s,%s,%s,%s,%s" % (str(nfield), str(narg), str(type_), str(otype), str(leng))
+    command = "FLST,%s,%s,%s,%s,%s" % (
+        str(nfield), str(narg), str(type_), str(otype), str(leng))
     return self.run(command, **kwargs)

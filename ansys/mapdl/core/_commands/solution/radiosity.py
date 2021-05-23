@@ -1,4 +1,4 @@
-def rdec(self, option ="", reduc ="", nplace ="", **kwargs):
+def rdec(self, option="", reduc="", nplace="", **kwargs):
     """Defines the decimation parameters.
 
     APDL Command: RDEC
@@ -40,8 +40,6 @@ def rdec(self, option ="", reduc ="", nplace ="", **kwargs):
     always consist of at least one element.
     """
     return self.run(f"RDEC,{option},{reduc},,{nplace}", **kwargs)
-
-    
 
 
 def rsopt(self, opt="", filename="", ext="", dir_="", **kwargs):
@@ -154,8 +152,6 @@ def rsurf(self, options="", delopts="", etnum="", **kwargs):
     command = f"RSURF,{options},{delopts},{etnum}"
     return self.run(command, **kwargs)
 
-    
-
 
 def rsymm(self, option="", cs="", axis="", nsect="", condvalue="",
           **kwargs):
@@ -246,8 +242,6 @@ def rsymm(self, option="", cs="", axis="", nsect="", condvalue="",
     command = f"RSYMM,{option},{cs},{axis},{nsect},{condvalue}"
     return self.run(command, **kwargs)
 
-    
-
 
 def qsopt(self, opt="", **kwargs):
     """Specifies quasi static radiation options.
@@ -270,6 +264,3 @@ def qsopt(self, opt="", **kwargs):
     """
     command = f"QSOPT,{opt}"
     return self.run(command, **kwargs)
-
-    
-    

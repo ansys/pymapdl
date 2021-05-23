@@ -59,8 +59,6 @@ def sucalc(self, rsetname="", lab1="", oper="", lab2="", fact1="",
     command = f"SUCALC,{rsetname},{lab1},{oper},{lab2},{fact1},{fact2},{const}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sucr(self, surfname="", surftype="", nrefine="", radius="", tolout="",
          **kwargs):
@@ -139,9 +137,6 @@ def sucr(self, surfname="", surftype="", nrefine="", radius="", tolout="",
     """
     command = f"SUCR,{surfname},{surftype},{nrefine},{radius},{tolout}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sudel(self, surfname="", **kwargs):
@@ -232,8 +227,6 @@ def suget(self, surfname="", rsetname="", parm="", geom="", **kwargs):
     command = f"SUGET,{surfname},{rsetname},{parm},{geom}"
     return self.run(command, **kwargs)
 
-    
-
 
 def sumap(self, rsetname="", item="", comp="", **kwargs):
     """Map results onto selected surface(s).
@@ -263,9 +256,6 @@ def sumap(self, rsetname="", item="", comp="", **kwargs):
     """
     command = f"SUMAP,{rsetname},{item},{comp}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def supl(self, surfname="", rsetname="", kwire="", **kwargs):
@@ -325,8 +315,6 @@ def supr(self, surfname="", rsetname="", **kwargs):
     """
     command = f"SUPR,{surfname},{rsetname}"
     return self.run(command, **kwargs)
-
-    
 
 
 def suresu(self, fname="", fext="", fdir="", **kwargs):
@@ -481,5 +469,3 @@ def suvect(self, rsetname="", lab1="", oper="", lab2="", offset="",
     """
     command = f"SUVECT,{rsetname},{lab1},{oper},{lab2},{offset}"
     return self.run(command, **kwargs)
-
-    

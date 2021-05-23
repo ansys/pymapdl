@@ -60,8 +60,6 @@ def auto(self, wn="", **kwargs):
     command = f"/AUTO,{wn}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dist(self, wn="", dval="", kfact="", **kwargs):
     """Specifies the viewing distance for magnifications and perspective.
@@ -103,9 +101,6 @@ def dist(self, wn="", dval="", kfact="", **kwargs):
     """
     command = f"/DIST,{wn},{dval},{kfact}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def focus(self, wn="", xf="", yf="", zf="", ktrans="", **kwargs):
@@ -152,10 +147,6 @@ def focus(self, wn="", xf="", yf="", zf="", ktrans="", **kwargs):
     command = f"/FOCUS,{wn},{xf},{yf},{zf},{ktrans}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def user(self, wn="", **kwargs):
     """Conveniently resets /FOCUS and /DIST to USER.
@@ -180,10 +171,6 @@ def user(self, wn="", **kwargs):
     """
     command = f"/USER,{wn}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def vcone(self, wn="", phi="", **kwargs):
@@ -247,9 +234,6 @@ def vcone(self, wn="", phi="", **kwargs):
     command = f"/VCONE,{wn},{phi}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def view(self, wn="", xv="", yv="", zv="", **kwargs):
     """Defines the viewing direction for the display.
@@ -284,11 +268,6 @@ def view(self, wn="", xv="", yv="", zv="", **kwargs):
     """
     command = f"/VIEW,{wn},{xv},{yv},{zv}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def vup(self, wn="", label="", **kwargs):
@@ -331,12 +310,6 @@ def vup(self, wn="", label="", **kwargs):
     """
     command = f"/VUP,{wn},{label}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
-    
 
 
 def xfrm(self, lab="", x1="", y1="", z1="", x2="", y2="", z2="", **kwargs):
@@ -426,8 +399,6 @@ def xfrm(self, lab="", x1="", y1="", z1="", x2="", y2="", z2="", **kwargs):
     command = f"/XFRM,{lab},{x1},{y1},{z1},{x2},{y2},{z2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def zoom(self, wn="", lab="", x1="", y1="", x2="", y2="", **kwargs):
     """Zooms a region of a display window.
@@ -470,8 +441,3 @@ def zoom(self, wn="", lab="", x1="", y1="", x2="", y2="", **kwargs):
     """
     command = f"/ZOOM,{wn},{lab},{x1},{y1},{x2},{y2}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    

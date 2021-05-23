@@ -1,7 +1,6 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
                         aux2_, aux3_, aux12_, reduced, apdl, post26_, solution,
-                        post1_, graphics_
-)
+                        post1_, graphics_)
 
 class Commands:
     """Wrapped MAPDL commands"""

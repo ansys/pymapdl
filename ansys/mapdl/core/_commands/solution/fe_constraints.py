@@ -118,8 +118,6 @@ def d(self, node="", lab="", value="", value2="", nend="", ninc="",
     command = f"D,{node},{lab},{value},{value2},{nend},{ninc},{lab2},{lab3},{lab4},{lab5},{lab6}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dcum(self, oper="", rfact="", ifact="", tbase="", **kwargs):
     """Specifies that DOF constraint values are to be accumulated.
@@ -183,8 +181,6 @@ def dcum(self, oper="", rfact="", ifact="", tbase="", **kwargs):
     command = f"DCUM,{oper},{rfact},{ifact},{tbase}"
     return self.run(command, **kwargs)
 
-    
-
 
 def ddele(self, node="", lab="", nend="", ninc="", rkey="", **kwargs):
     """Deletes degree-of-freedom constraints.
@@ -243,9 +239,6 @@ def ddele(self, node="", lab="", nend="", ninc="", rkey="", **kwargs):
     command = f"DDELE,{node},{lab},{nend},{ninc},{rkey}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def dflx(self, node="", bx="", by="", bz="", bx2="", by2="", bz2="",
          **kwargs):
@@ -293,9 +286,6 @@ def dflx(self, node="", bx="", by="", bz="", bx2="", by2="", bz2="",
     """
     command = f"DFLX,{node},{bx},{by},{bz},{bx2},{by2},{bz2}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dj(self, elem="", label="", value="", **kwargs):
@@ -376,9 +366,6 @@ def dj(self, elem="", label="", value="", **kwargs):
     command = f"DJ,{elem},{label},{value}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def djdele(self, elem="", lab="", **kwargs):
     """Deletes boundary conditions on the components of relative motion of a
@@ -442,9 +429,6 @@ def djdele(self, elem="", lab="", **kwargs):
     command = f"DJDELE,{elem},{lab}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def djlist(self, elem="", **kwargs):
     """Lists boundary conditions applied to joint elements.
@@ -464,9 +448,6 @@ def djlist(self, elem="", **kwargs):
     """
     command = f"DJLIST,{elem}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dlist(self, node1="", node2="", ninc="", **kwargs):
@@ -494,9 +475,6 @@ def dlist(self, node1="", node2="", ninc="", **kwargs):
     """
     command = f"DLIST,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dscale(self, rfact="", ifact="", tbase="", **kwargs):
@@ -541,9 +519,6 @@ def dscale(self, rfact="", ifact="", tbase="", **kwargs):
     """
     command = f"DSCALE,{rfact},{ifact},{tbase}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def dsym(self, lab="", normal="", kcn="", **kwargs):
@@ -611,8 +586,6 @@ def dsym(self, lab="", normal="", kcn="", **kwargs):
     command = f"DSYM,{lab},{normal},{kcn}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dval(self, baseid="", lab="", value="", value2="", keycal="",
          **kwargs):
@@ -672,9 +645,6 @@ def dval(self, baseid="", lab="", value="", value2="", keycal="",
     command = f"DVAL,{baseid},{lab},{value},{value2},{keycal}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def gsbdata(self, labz="", valuez="", labx="", valuex="", laby="",
             valuey="", **kwargs):
@@ -727,8 +697,6 @@ def gsbdata(self, labz="", valuez="", labx="", valuex="", laby="",
     command = f"GSBDATA,{labz},{valuez},{labx},{valuex},{laby},{valuey}"
     return self.run(command, **kwargs)
 
-    
-
 
 def gslist(self, lab="", **kwargs):
     """When using generalized plane strain, lists the input data or solutions.
@@ -767,5 +735,3 @@ def gslist(self, lab="", **kwargs):
     """
     command = f"GSLIST,{lab}"
     return self.run(command, **kwargs)
-
-    

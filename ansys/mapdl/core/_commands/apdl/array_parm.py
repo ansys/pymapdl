@@ -112,7 +112,7 @@ def mfun(self, parr="", func="", par1="", **kwargs):
 
 
 def moper(self, parr="", par1="", oper="", val1="", val2="",
-        val3="", val4="", val5="", val6="", **kwargs):
+          val3="", val4="", val5="", val6="", **kwargs):
     """ Performs matrix operations on array parameter matrices.
 
     APDL Command: *MOPER
@@ -280,8 +280,6 @@ def moper(self, parr="", par1="", oper="", val1="", val2="",
     command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
            **kwargs):
@@ -358,8 +356,6 @@ def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
     """
     command = f"*MWRITE,{parr},{fname},{ext},,{label},{n1},{n2},{n3}"
     return self.run(command, **kwargs)
-
-    
 
 
 def sread(self, strarray="", fname="", ext="", nchar="", nskip="",
@@ -504,9 +500,6 @@ def vabs(self, kabsr="", kabs1="", kabs2="", kabs3="", **kwargs):
     """
     command = f"*VABS,{kabsr},{kabs1},{kabs2},{kabs3}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def vcol(self, ncol1="", ncol2="", **kwargs):
@@ -759,8 +752,6 @@ def vfun(self, parr="", func="", par1="", con1="", con2="", con3="",
     command = f"*VFUN,{parr},{func},{par1},{con1},{con2},{con3}"
     return self.run(command, **kwargs)
 
-    
-
 
 def vitrp(self, parr="", part="", pari="", parj="", park="", **kwargs):
     """Forms an array parameter by interpolation of a table.
@@ -904,8 +895,6 @@ def vmask(self, par="", **kwargs):
     """
     command = f"*VMASK,{par}"
     return self.run(command, **kwargs)
-
-    
 
 
 def voper(self, parr="", par1="", oper="", par2="", con1="", con2="",
@@ -1142,8 +1131,6 @@ def vstat(self, **kwargs):
     """
     command = f"*VSTAT,"
     return self.run(command, **kwargs)
-
-    
 
 
 def vwrite(self, par1="", par2="", par3="", par4="", par5="", par6="",

@@ -158,8 +158,6 @@ def mfsurface(self, inumb="", fnumb1="", label="", fnumb2="", **kwargs):
     command = f"MFSURFACE,{inumb},{fnumb1},{label},{fnumb2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mfvolume(self, inumb="", fnumb1="", label="", fnumb2="", **kwargs):
     """Defines a volume load transfer for an ANSYS Multi-field solver
@@ -204,5 +202,3 @@ def mfvolume(self, inumb="", fnumb1="", label="", fnumb2="", **kwargs):
     """
     command = f"MFVOLUME,{inumb},{fnumb1},{label},{fnumb2}"
     return self.run(command, **kwargs)
-
-    

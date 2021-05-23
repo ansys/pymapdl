@@ -154,8 +154,6 @@ def move(self, node="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="",
     command = f"MOVE,{node},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
       **kwargs) -> int:
@@ -283,8 +281,6 @@ def naxis(self, action="", val="", **kwargs):
     """
     command = f"NAXIS,{action},{val}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
@@ -649,8 +645,6 @@ def nread(self, fname="", ext="", **kwargs):
     command = f"NREAD,{fname},{ext}"
     return self.run(command, **kwargs)
 
-    
-
 
 def nrotat(self, node1="", node2="", ninc="", **kwargs):
     """Rotates nodal coordinate systems into the active system.
@@ -698,8 +692,6 @@ def nrotat(self, node1="", node2="", ninc="", **kwargs):
     command = f"NROTAT,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def nrrang(self, nmin="", nmax="", ninc="", **kwargs):
     """Specifies the range of nodes to be read from the node file.
@@ -720,8 +712,6 @@ def nrrang(self, nmin="", nmax="", ninc="", **kwargs):
     """
     command = f"NRRANG,{nmin},{nmax},{ninc}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nscale(self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="",
@@ -764,8 +754,6 @@ def nscale(self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="",
     command = f"NSCALE,{inc},{node1},{node2},{ninc},{rx},{ry},{rz}"
     return self.run(command, **kwargs)
 
-    
-
 
 def nsmooth(self, npass="", **kwargs):
     """Smooths selected nodes among selected elements.
@@ -788,8 +776,6 @@ def nsmooth(self, npass="", **kwargs):
     """
     command = f"NSMOOTH,{npass}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nsym(self, ncomp="", inc="", node1="", node2="", ninc="", **kwargs):
@@ -844,8 +830,6 @@ def nsym(self, ncomp="", inc="", node1="", node2="", ninc="", **kwargs):
     """
     command = f"NSYM,{ncomp},{inc},{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nwrite(self, fname="", ext="", kappnd="", **kwargs):
@@ -1013,5 +997,3 @@ def transfer(self, kcnto="", inc="", node1="", node2="", ninc="",
     """
     command = f"TRANSFER,{kcnto},{inc},{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
-
-    

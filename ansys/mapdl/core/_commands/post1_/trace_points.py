@@ -107,9 +107,6 @@ def pltrac(self, analopt="", item="", comp="", trpnum="", name="",
     command = f"PLTRAC,{analopt},{item},{comp},{trpnum},{name},{mxloop},{toler},{option},{escl},{mscl}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def trpdel(self, ntrp1="", ntrp2="", trpinc="", **kwargs):
     """Deletes particle flow or charged particle trace points.
@@ -206,5 +203,3 @@ def trpoin(self, x="", y="", z="", vx="", vy="", vz="", chrg="", mass="",
     """
     command = f"TRPOIN,{x},{y},{z},{vx},{vy},{vz},{chrg},{mass}"
     return self.run(command, **kwargs)
-
-    

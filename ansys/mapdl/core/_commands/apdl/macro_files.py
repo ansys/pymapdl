@@ -175,7 +175,7 @@ def mkdir(self, dir_="", **kwargs):
 
     Parameters
     ----------
-    dir\_
+    dir_
         The directory to create (248 characters maximum on Linux;
         233 on Windows). If no path is provided, it will be
         created in the current working directory. Must be a valid

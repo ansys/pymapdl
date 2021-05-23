@@ -40,8 +40,6 @@ def rezone(self, option="", ldstep="", sbstep="", **kwargs):
     command = f"REZONE,{option},{ldstep},{sbstep}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mapsolve(self, maxsbstep="", **kwargs):
     """Maps solved node and element solutions from an original mesh to a new
@@ -73,9 +71,6 @@ def mapsolve(self, maxsbstep="", **kwargs):
     """
     command = f"MAPSOLVE,{maxsbstep}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def mapvar(self, option="", matid="", istrtstress="", ntenstress="",
@@ -143,8 +138,6 @@ def mapvar(self, option="", matid="", istrtstress="", ntenstress="",
     """
     command = f"MAPVAR,{option},{matid},{istrtstress},{ntenstress},{istrtstrain},{ntenstrain},{istrtvect},{nvect}"
     return self.run(command, **kwargs)
-
-    
 
 
 def remesh(self, action="", filename="", ext="", opt1="", opt2="",
@@ -292,6 +285,3 @@ def aremesh(self, lcomb="", angle="", **kwargs):
     """
     command = f"AREMESH,{lcomb},{angle}"
     return self.run(command, **kwargs)
-
-    
-    

@@ -358,8 +358,6 @@ def cycfiles(self, fnamerst="", extrst="", fnamerfrq="", extrfrq="",
     command = f"CYCFILES,{fnamerst},{extrst},{fnamerfrq},{extrfrq}"
     return self.run(command, **kwargs)
 
-    
-
 
 def cycphase(self, type_="", option="", **kwargs):
     """Provides tools for determining minimum and maximum possible result
@@ -589,8 +587,6 @@ def exoption(self, ldtype="", option="", value="", **kwargs):
     """
     return self.run(f"EXOPTION,{ldtype},{option},{value}", **kwargs)
 
-    
-
 
 def expand(self, nrepeat="", hindex="", icsys="", sctang="", phase="",
            **kwargs):
@@ -669,9 +665,6 @@ def expand(self, nrepeat="", hindex="", icsys="", sctang="", phase="",
     """
     command = f"EXPAND,{nrepeat},{hindex},{icsys},{sctang},{phase}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def exprofile(self, ldtype="", load="", value="", pname="", fname="",
@@ -823,8 +816,6 @@ def exunit(self, ldtype="", load="", untype="", name="", **kwargs):
     command = f"EXUNIT,{ldtype},{load},{untype},{name}"
     return self.run(command, **kwargs)
 
-    
-
 
 def fssparm(self, port1="", port2="", **kwargs):
     """Calculates reflection and transmission properties of a frequency
@@ -920,8 +911,6 @@ def fsum(self, lab="", item="", **kwargs):
     command = f"FSUM,{lab},{item}"
     return self.run(command, **kwargs)
 
-    
-
 
 def hfang(self, lab="", phi1="", phi2="", theta1="", theta2="", **kwargs):
     """Defines or displays spatial angles of a spherical radiation surface for
@@ -954,10 +943,6 @@ def hfang(self, lab="", phi1="", phi2="", theta1="", theta2="", **kwargs):
     """
     command = f"HFANG,{lab},{phi1},{phi2},{theta1},{theta2}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def hfsym(self, kcn="", xkey="", ykey="", zkey="", **kwargs):
@@ -1016,9 +1001,6 @@ def hfsym(self, kcn="", xkey="", ykey="", zkey="", **kwargs):
     command = f"HFSYM,{kcn},{xkey},{ykey},{zkey}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def intsrf(self, lab="", **kwargs):
     """Integrates nodal results on an exterior surface.
@@ -1056,9 +1038,6 @@ def intsrf(self, lab="", **kwargs):
     """
     command = f"INTSRF,{lab}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def kcalc(self, kplan="", mat="", kcsym="", klocpr="", **kwargs):
@@ -1365,8 +1344,6 @@ def plcamp(self, option="", slope="", unit="", freqb="", cname="",
     command = f"PLCAMP,{option},{slope},{unit},{freqb},{cname},{stabval},{keyallfreq},{keynegfreq}"
     return self.run(command, **kwargs)
 
-    
-
 
 def plcfreq(self, spec="", sectbeg="", sectend="", **kwargs):
     """Plots the frequency response for the given CYCSPEC specification.
@@ -1395,8 +1372,6 @@ def plcfreq(self, spec="", sectbeg="", sectend="", **kwargs):
     """
     command = f"PLCFREQ,{spec},{sectbeg},{sectend}"
     return self.run(command, **kwargs)
-
-    
 
 
 def plchist(self, spec="", freqpt="", **kwargs):
@@ -1543,9 +1518,6 @@ def plmc(self, lstep="", sbstep="", timfrq="", kimg="", hibeg="", hiend="",
     """
     command = f"PLMC,{lstep},{sbstep},{timfrq},{kimg},{hibeg},{hiend}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def plnear(self, lab="", opt="", kcn="", val1="", val2="", val3="",
@@ -1715,8 +1687,6 @@ def pras(self, quantity="", loadstep="", substep="", **kwargs):
     """
     command = f"PRAS,{quantity},{loadstep},{substep}"
     return self.run(command, **kwargs)
-
-    
 
 
 def prcamp(self, option="", slope="", unit="", freqb="", cname="",
@@ -1921,8 +1891,6 @@ def prfar(self, lab="", option="", phi1="", phi2="", nph1="", theta1="",
     command = f"PRFAR,{lab},{option},{phi1},{phi2},{nph1},{theta1},{theta2},{ntheta},{val1},{val2},{val3}"
     return self.run(command, **kwargs)
 
-    
-
 
 def prnear(self, lab="", opt="", kcn="", val1="", val2="", val3="",
            val4="", val5="", val6="", val7="", val8="", val9="", **kwargs):
@@ -2054,7 +2022,7 @@ def reswrite(self, fname="", cflag="", **kwargs):
     results file will essentially contain the current set of
     results data for the entire (i.e., global) model.
     """
-    
+
     return self.run(f"RESWRITE,{fname},,,,{cflag}", **kwargs)
 
 
@@ -2182,10 +2150,6 @@ def spoint(self, node="", x="", y="", z="", **kwargs):
     command = f"SPOINT,{node},{x},{y},{z}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def spmwrite(self, method="", nmode="", inputs="", inputlabels="",
              outputs="", outputlabels="", nic="", velacckey="",
@@ -2287,6 +2251,3 @@ def spmwrite(self, method="", nmode="", inputs="", inputlabels="",
     """
     command = f"SPMWRITE,{method},{nmode},{inputs},{inputlabels},{outputs},{outputlabels},{nic},{velacckey},{fileformat}"
     return self.run(command, **kwargs)
-
-    
-    

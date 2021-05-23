@@ -31,8 +31,6 @@ def mfcalc(self, fnumb="", freq="", **kwargs):
     command = f"MFCALC,{fnumb},{freq}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mfdtime(self, dtime="", dtmin="", dtmax="", carry="", **kwargs):
     """Sets time step sizes for an ANSYS Multi-field solver analysis.
@@ -182,8 +180,6 @@ def mfrstart(self, time="", **kwargs):
     """
     command = f"MFRSTART,{time}"
     return self.run(command, **kwargs)
-
-    
 
 
 def mftime(self, time="", **kwargs):

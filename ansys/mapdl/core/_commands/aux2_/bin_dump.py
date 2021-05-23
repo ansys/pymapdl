@@ -70,8 +70,6 @@ def form(self, lab="", **kwargs):
     command = f"FORM,{lab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def ptr(self, loc="", base="", **kwargs):
     """Dumps the record of a binary file.

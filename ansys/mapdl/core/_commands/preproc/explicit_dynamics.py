@@ -2,6 +2,7 @@ from typing import Optional, Union
 
 from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
+
 def edasmp(self, option="", asmid="", part1="", part2="", part3="",
            part4="", part5="", part6="", part7="", part8="", part9="",
            part10="", part11="", part12="", part13="", part14="",
@@ -42,10 +43,6 @@ def edasmp(self, option="", asmid="", part1="", part2="", part3="",
     """
     command = f"EDASMP,{option},{asmid},{part1},{part2},{part3},{part4},{part5},{part6},{part7},{part8},{part9},{part10},{part11},{part12},{part13},{part14},{part15},{part16}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def edbound(self, option="", lab="", cname="", xc="", yc="", zc="",
@@ -118,8 +115,6 @@ def edbound(self, option="", lab="", cname="", xc="", yc="", zc="",
     """
     command = f"EDBOUND,{option},{lab},{cname},{xc},{yc},{zc},{cname2},{copt}"
     return self.run(command, **kwargs)
-
-    
 
 
 def edbx(self, option="", boxid="", xmin="", xmax="", ymin="", ymax="",
@@ -307,8 +302,6 @@ def edcgen(self, option="", cont="", targ="", fs="", fd="", dc="", vc="",
     """
     command = f"EDCGEN,{option},{cont},{targ},{fs},{fd},{dc},{vc},{vdc},{v1},{v2},{v3},{v4},{btime},{dtime},{boxid1},{boxid2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def edclist(self, num="", **kwargs):
@@ -756,9 +749,6 @@ def edcurve(self, option="", lcid="", par1="", par2="", **kwargs):
     command = f"EDCURVE,{option},{lcid},{par1},{par2}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def eddbl(self, key="", **kwargs):
     """ Selects a numerical precision type of the explicit dynamics analysis.
@@ -948,8 +938,6 @@ def edipart(self, part="", option="", cvect="", tm="", ircs="", ivect="",
     command = f"EDIPART,{part},{option},{cvect},{tm},{ircs},{ivect},{vvect},{cid}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edlcs(self, option="", cid="", x1="", y1="", z1="", x2="", y2="",
           z2="", x3="", y3="", z3="", **kwargs):
@@ -1017,9 +1005,6 @@ def edlcs(self, option="", cid="", x1="", y1="", z1="", x2="", y2="",
     """
     command = f"EDLCS,{option},{cid},{x1},{y1},{z1},{x2},{y2},{z2},{x3},{y3},{z3}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def edmp(self, lab="", mat="", val1="", val2="", val3="", val4="", val5="",
@@ -1492,9 +1477,6 @@ def edsp(self, option="", min_="", max_="", inc="", **kwargs):
     command = f"EDSP,{option},{min_},{max_},{inc}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def edweld(self, option="", nweld="", n1="", n2="", sn="", ss="", expn="",
            exps="", epsf="", tfail="", nsw="", cid="", **kwargs):
@@ -1687,8 +1669,6 @@ def edale(self, option="", afac="", bfac="", dfac="", efac="", start="",
     command = f"EDALE,{option},,{afac},{bfac},,{dfac},{efac},{start},{end}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edbvis(self, qvco="", lvco="", **kwargs):
     """Specifies global bulk viscosity coefficients for an explicit dynamics
@@ -1713,8 +1693,6 @@ def edbvis(self, qvco="", lvco="", **kwargs):
     """
     command = f"EDBVIS,{qvco},{lvco}"
     return self.run(command, **kwargs)
-
-    
 
 
 def edcadapt(self, freq="", tol="", opt="", maxlvl="", btime="", dtime="",
@@ -1871,8 +1849,6 @@ def edcsc(self, key="", **kwargs):
     """
     command = f"EDCSC,{key}"
     return self.run(command, **kwargs)
-
-    
 
 
 def edcts(self, dtms="", tssfac="", **kwargs):
@@ -2196,8 +2172,6 @@ def eddump(self, num="", dt="", **kwargs):
     command = f"EDDUMP,{num},{dt}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edenergy(self, hgen="", swen="", sien="", rlen="", **kwargs):
     """Specifies energy dissipation controls for an explicit dynamics
@@ -2283,8 +2257,6 @@ def edfplot(self, key="", **kwargs):
     command = f"EDFPLOT,{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edgcale(self, nadv="", meth="", **kwargs):
     """Defines global ALE controls for an explicit dynamic analysis.
@@ -2344,8 +2316,6 @@ def edhgls(self, hgco="", **kwargs):
     """
     command = f"EDHGLS,{hgco}"
     return self.run(command, **kwargs)
-
-    
 
 
 def edhist(self, comp="", **kwargs):
@@ -3060,8 +3030,6 @@ def edrd(self, option="", part="", mrb="", **kwargs):
     command = f"EDRD,{option},{part},{mrb}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edri(self, option="", part="", xc="", yc="", zc="", tm="", ixx="",
          iyy="", izz="", ixy="", iyz="", ixz="", **kwargs):
@@ -3155,9 +3123,6 @@ def edrst(self, nstep="", dt="", **kwargs):
     """
     command = f"EDRST,{nstep},{dt}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def edrun(self, option="", cons="", ncpu="", **kwargs):
@@ -3306,8 +3271,6 @@ def edsolv(self, **kwargs):
     command = f"EDSOLV,"
     return self.run(command, **kwargs)
 
-    
-
 
 def edstart(self, restart="", memory="", fsize="", dumpfile="", **kwargs):
     """Specifies status (new or restart) of an explicit dynamics analysis.
@@ -3409,9 +3372,6 @@ def edstart(self, restart="", memory="", fsize="", dumpfile="", **kwargs):
     """
     command = f"EDSTART,{restart},{memory},{fsize},{dumpfile}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def edterm(self, option="", lab="", num="", stop="", maxc="", minc="",
@@ -3775,8 +3735,6 @@ def edwrite(self, option="", fname="", ext="", **kwargs):
     command = f"EDWRITE,{option},{fname},{ext}"
     return self.run(command, **kwargs)
 
-    
-
 
 def rexport(self, target="", lstep="", sbstep="", fname="", ext="",
             **kwargs):
@@ -3825,6 +3783,3 @@ def rexport(self, target="", lstep="", sbstep="", fname="", ext="",
     """
     command = f"REXPORT,{target},,,{lstep},{sbstep},{fname},{ext}"
     return self.run(command, **kwargs)
-
-    
-    

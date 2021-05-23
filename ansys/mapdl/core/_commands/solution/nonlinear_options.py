@@ -70,8 +70,6 @@ def arclen(self, key="", maxarc="", minarc="", **kwargs):
     command = f"ARCLEN,{key},{maxarc},{minarc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def arctrm(self, lab="", val="", node="", dof="", **kwargs):
     """Controls termination of the solution when the arc-length method is
@@ -199,9 +197,6 @@ def bucopt(self, method="", nmode="", shift="", ldmulte="", rangekey="",
     command = f"BUCOPT,{method},{nmode},{shift},{ldmulte},{rangekey}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def cnvtol(self, lab="", value="", toler="", norm="", minref="", **kwargs):
     """Sets convergence values for nonlinear analyses.
@@ -273,10 +268,6 @@ def cnvtol(self, lab="", value="", toler="", norm="", minref="", **kwargs):
     command = f"CNVTOL,{lab},{value},{toler},{norm},{minref}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def crplim(self, crcr="", option="", **kwargs):
     """Specifies the creep criterion for automatic time stepping.
@@ -312,8 +303,6 @@ def crplim(self, crcr="", option="", **kwargs):
     """
     command = f"CRPLIM,{crcr},{option}"
     return self.run(command, **kwargs)
-
-    
 
 
 def gst(self, lab="", lab2="", **kwargs):
@@ -358,9 +347,6 @@ def gst(self, lab="", lab2="", **kwargs):
     """
     command = f"/GST,{lab},{lab2}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def lnsrch(self, key="", **kwargs):
@@ -456,9 +442,6 @@ def ncnv(self, kstop="", dlim="", itlim="", etlim="", cplim="", **kwargs):
     command = f"NCNV,{kstop},{dlim},{itlim},{etlim},{cplim}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def neqit(self, neqit="", forcekey="", **kwargs):
     """Specifies the maximum number of equilibrium iterations for nonlinear
@@ -482,9 +465,6 @@ def neqit(self, neqit="", forcekey="", **kwargs):
     """
     command = f"NEQIT,{neqit},{forcekey}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def nladaptive(self, component="", action="", criterion="", option="",
@@ -631,10 +611,6 @@ def nladaptive(self, component="", action="", criterion="", option="",
     """
     command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def nldiag(self, label="", key="", maxfile="", **kwargs):
@@ -819,9 +795,6 @@ def nldiag(self, label="", key="", maxfile="", **kwargs):
     command = f"NLDIAG,{label},{key},{maxfile}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def nlgeom(self, key="", **kwargs):
     """Includes large-deflection effects in a static or full transient
@@ -873,8 +846,6 @@ def nlgeom(self, key="", **kwargs):
     """
     command = f"NLGEOM,{key}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nlhist(self, key="", name="", item="", comp="", node="", elem="",
@@ -1016,8 +987,6 @@ def nlhist(self, key="", name="", item="", comp="", node="", elem="",
     command = f"NLHIST,{key},{name},{item},{comp},{node},{elem},{shell},{layer},{stop_value},{stop_cond}"
     return self.run(command, **kwargs)
 
-    
-
 
 def nlmesh(self, control="", val1="", val2="", val3="", val4="", **kwargs):
     """Controls remeshing in nonlinear adaptivity.
@@ -1151,8 +1120,6 @@ def nlmesh(self, control="", val1="", val2="", val3="", val4="", **kwargs):
     command = f"NLMESH,{control},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
-    
-
 
 def nropt(self, option1="", option2="", optval="", **kwargs):
     """Specifies the Newton-Raphson options in a static or full transient
@@ -1255,9 +1222,6 @@ def nropt(self, option1="", option2="", optval="", **kwargs):
     """
     command = f"NROPT,{option1},{option2},{optval}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def pred(self, sskey="", lskey="", **kwargs):
@@ -1364,6 +1328,3 @@ def pstres(self, key="", **kwargs):
     """
     command = f"PSTRES,{key}"
     return self.run(command, **kwargs)
-
-    
-    

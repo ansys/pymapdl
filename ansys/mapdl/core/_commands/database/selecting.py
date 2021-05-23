@@ -64,6 +64,7 @@ def allsel(self, labt="", entity="", **kwargs):
     command = "ALLSEL,%s,%s" % (str(labt), str(entity))
     return self.run(command, **kwargs)
 
+
 def asll(self, type_="", arkey="", **kwargs):
     """Selects those areas containing the selected lines.
 
@@ -98,7 +99,7 @@ def asll(self, type_="", arkey="", **kwargs):
 
 
 def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+         kswp="", **kwargs):
     """Selects a subset of areas.
 
     APDL Command: ASEL
@@ -159,7 +160,8 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 127:: : ASEL - Valid Item and Component Labels
     """
-    command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+    command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
     return self.run(command, **kwargs)
 
 
@@ -190,7 +192,7 @@ def aslv(self, type_="", **kwargs):
 
 
 def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", **kwargs):
+           dof6="", **kwargs):
     """Selects a DOF label set for reference by other commands.
 
     APDL Command: DOFSEL
@@ -245,7 +247,8 @@ def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
 
     This command is valid in any processor.
     """
-    command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
+    command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
     return self.run(command, **kwargs)
 
 
@@ -512,7 +515,7 @@ def eslv(self, type_: str = "", **kwargs) -> Optional[str]:
 
 
 def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+         kabs="", **kwargs):
     """Selects a subset of keypoints or hard points.
 
     APDL Command: KSEL
@@ -566,7 +569,8 @@ def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 203:: : KSEL - Valid Item and Component Labels
     """
-    command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+    command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
     return self.run(command, **kwargs)
 
 
@@ -627,7 +631,7 @@ def ksln(self, type_="", **kwargs):
 
 
 def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+         kswp="", **kwargs):
     """Selects a subset of lines.
 
     APDL Command: LSEL
@@ -689,7 +693,8 @@ def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 204:: : LSEL - Valid Item and Component Labels
     """
-    command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+    command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
     return self.run(command, **kwargs)
 
 
@@ -754,7 +759,7 @@ def lslk(self, type_="", lskey="", **kwargs):
 
 
 def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+         kabs="", **kwargs):
     """Selects a subset of nodes.
 
     APDL Command: NSEL
@@ -825,7 +830,8 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Table: 209:: : NSEL - Valid Item and Component Labels for Nodal DOF
     Result Values
     """
-    command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+    command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
     return self.run(command, **kwargs)
 
 
@@ -1086,12 +1092,13 @@ def partsel(self, type_="", pmin="", pmax="", pinc="", **kwargs):
     Distributed ANSYS Restriction: This command is not supported in
     Distributed ANSYS.
     """
-    command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
+    command = "PARTSEL,%s,%s,%s,%s" % (
+        str(type_), str(pmin), str(pmax), str(pinc))
     return self.run(command, **kwargs)
 
 
 def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+         kswp="", **kwargs):
     """Selects a subset of volumes.
 
     APDL Command: VSEL
@@ -1145,7 +1152,8 @@ def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 251:: : VSEL - Valid Item and Component Labels
     """
-    command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+    command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
+        item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
     return self.run(command, **kwargs)
 
 

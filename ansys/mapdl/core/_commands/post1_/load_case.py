@@ -295,8 +295,6 @@ def lcsel(self, type_="", lcmin="", lcmax="", lcinc="", **kwargs):
     command = f"LCSEL,{type_},{lcmin},{lcmax},{lcinc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def lcsum(self, lab="", **kwargs):
     """Specifies whether to process non-summable items in load case
@@ -361,8 +359,6 @@ def lcwrite(self, lcno="", fname="", ext="", **kwargs):
     """
     command = f"LCWRITE,{lcno},{fname},{ext}"
     return self.run(command, **kwargs)
-
-    
 
 
 def lczero(self, **kwargs):

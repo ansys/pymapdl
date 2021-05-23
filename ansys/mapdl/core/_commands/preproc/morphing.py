@@ -228,8 +228,6 @@ def demorph(self, elem="", dimn="", rmshky="", **kwargs):
     command = f"DEMORPH,{elem},{dimn},{rmshky}"
     return self.run(command, **kwargs)
 
-    
-
 
 def dvmorph(self, volu="", xarea="", rmshky="", **kwargs):
     """Move nodes in selected volumes to conform to structural displacements.

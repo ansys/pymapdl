@@ -210,8 +210,6 @@ def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="",
     command = f"DATA,{ir},{lstrt},{lstop},{linc},{name},{kcplx}"
     return self.run(command, **kwargs)
 
-    
-
 
 def edread(self, nstart="", label="", num="", step1="", step2="",
            **kwargs):
@@ -507,8 +505,6 @@ def gssol(self, nvar="", item="", comp="", name="", **kwargs):
     command = f"GSSOL,{nvar},{item},{comp},{name}"
     return self.run(command, **kwargs)
 
-    
-
 
 def jsol(self, nvar="", elem="", item="", comp="", name="", **kwargs):
     """Specifies result items to be stored for the joint element.
@@ -552,8 +548,6 @@ def jsol(self, nvar="", elem="", item="", comp="", name="", **kwargs):
     """
     command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
     return self.run(command, **kwargs)
-
-    
 
 
 def nsol(self, nvar="", node="", item="", comp="", name="", sector="",
@@ -853,8 +847,6 @@ def store(self, lab="", npts="", **kwargs):
     """
     command = f"STORE,{lab},{npts}"
     return self.run(command, **kwargs)
-
-    
 
 
 def timerange(self, tmin="", tmax="", **kwargs):

@@ -93,9 +93,6 @@ def mdele(self, node="", lab1="", nend="", ninc="", lab2="", lab3="",
     command = f"MDELE,{node},{lab1},{nend},{ninc},{lab2},{lab3},{lab4},{lab5},{lab6}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mgen(self, itime="", inc="", node1="", node2="", ninc="", **kwargs):
     """Generates additional MDOF from a previously defined set.
@@ -129,8 +126,6 @@ def mgen(self, itime="", inc="", node1="", node2="", ninc="", **kwargs):
     command = f"MGEN,{itime},{inc},{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mlist(self, node1="", node2="", ninc="", **kwargs):
     """Lists the MDOF of freedom.
@@ -154,5 +149,3 @@ def mlist(self, node1="", node2="", ninc="", **kwargs):
     """
     command = f"MLIST,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
-
-    

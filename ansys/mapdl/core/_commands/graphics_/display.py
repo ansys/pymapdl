@@ -53,13 +53,6 @@ def cmap(self, fname="", ext="", kywrd="", ncntr="", **kwargs):
     """
     return self.run(f"/CMAP,{fname},{ext},,{kywrd},{ncntr}", **kwargs)
 
-    
-    
-    
-    
-    
-    
-
 
 def devdisp(self, label="", key="", **kwargs):
     """Controls graphics device options.
@@ -151,10 +144,6 @@ def devdisp(self, label="", key="", **kwargs):
     command = f"/DEVDISP,{label},{key}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def filedisp(self, fname="", ext="", **kwargs):
     """Specifies the file containing the graphics data.
@@ -180,10 +169,6 @@ def filedisp(self, fname="", ext="", **kwargs):
     command = f"FILEDISP,{fname},{ext}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def nocolor(self, key="", **kwargs):
     """Removes color from graphics displays.
@@ -203,9 +188,6 @@ def nocolor(self, key="", **kwargs):
     """
     command = f"NOCOLOR,{key}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def showdisp(self, dname="", ncpl="", **kwargs):
@@ -238,9 +220,6 @@ def showdisp(self, dname="", ncpl="", **kwargs):
     """
     return self.run(f"/SHOWDISP,{dname},,,{ncpl}", **kwargs)
 
-    
-    
-
 
 def trans(self, fname="", ext="", **kwargs):
     """Reformats File.GRPH for improved performance with plotters.
@@ -266,6 +245,3 @@ def trans(self, fname="", ext="", **kwargs):
     """
     command = f"TRANS,{fname},{ext}"
     return self.run(command, **kwargs)
-
-    
-    

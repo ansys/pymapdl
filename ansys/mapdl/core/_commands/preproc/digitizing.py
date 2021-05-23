@@ -20,9 +20,6 @@ def dig(self, node1="", node2="", ninc="", **kwargs):
     command = f"DIG,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def dmove(self, node1="", node2="", ninc="", **kwargs):
     """Digitizes nodes on surfaces and along intersections.
@@ -48,8 +45,6 @@ def dmove(self, node1="", node2="", ninc="", **kwargs):
     """
     command = f"DMOVE,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
-
-    
 
 
 def dset(self, node1="", node2="", node3="", ddev="", **kwargs):

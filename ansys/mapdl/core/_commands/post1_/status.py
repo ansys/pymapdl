@@ -38,10 +38,6 @@ def datadef(self, **kwargs):
     command = f"DATADEF,"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def display(self, **kwargs):
     """Specifies "Display settings" as the subsequent status topic.
@@ -61,10 +57,6 @@ def display(self, **kwargs):
     """
     command = f"DISPLAY,"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def lccalc(self, **kwargs):

@@ -72,8 +72,6 @@ def mfiter(self, maxiter="", miniter="", target="", **kwargs):
     command = f"MFITER,{maxiter},{miniter},{target}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mfrelax(self, lab="", value="", option="", **kwargs):
     """Sets relaxation values for an ANSYS Multi-field solver analysis.
@@ -118,5 +116,3 @@ def mfrelax(self, lab="", value="", option="", **kwargs):
     """
     command = f"MFRELAX,{lab},{value},{option}"
     return self.run(command, **kwargs)
-
-    

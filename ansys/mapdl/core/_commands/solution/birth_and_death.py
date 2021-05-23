@@ -100,6 +100,3 @@ def estif(self, kmult: MapdlFloat = "", **kwargs) -> Optional[str]:
     """
     command = f"ESTIF,{kmult}"
     return self.run(command, **kwargs)
-
-    
-    

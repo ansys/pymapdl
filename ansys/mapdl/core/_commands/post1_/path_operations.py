@@ -220,8 +220,6 @@ def path(self, name="", npts="", nsets="", ndiv="", **kwargs):
     command = f"PATH,{name},{npts},{nsets},{ndiv}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pcalc(self, oper="", labr="", lab1="", lab2="", fact1="", fact2="",
           const="", **kwargs):
@@ -359,8 +357,6 @@ def pcalc(self, oper="", labr="", lab1="", lab2="", fact1="", fact2="",
     command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
            labz1="", labx2="", laby2="", labz2="", **kwargs):
@@ -400,8 +396,6 @@ def pcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
     """
     command = f"PCROSS,{labxr},{labyr},{labzr},{labx1},{laby1},{labz1},{labx2},{laby2},{labz2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def pdef(self, lab="", item="", comp="", avglab="", **kwargs):
@@ -474,8 +468,6 @@ def pdef(self, lab="", item="", comp="", avglab="", **kwargs):
     command = f"PDEF,{lab},{item},{comp},{avglab}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
          labz2="", **kwargs):
@@ -544,8 +536,6 @@ def plpagm(self, item="", gscale="", nopt="", **kwargs):
     command = f"PLPAGM,{item},{gscale},{nopt}"
     return self.run(command, **kwargs)
 
-    
-
 
 def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
            **kwargs):
@@ -571,8 +561,6 @@ def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
     """
     command = f"PLPATH,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6}"
     return self.run(command, **kwargs)
-
-    
 
 
 def plsect(self, item="", comp="", rho="", kbr="", **kwargs):
@@ -630,9 +618,6 @@ def plsect(self, item="", comp="", rho="", kbr="", **kwargs):
     command = f"PLSECT,{item},{comp},{rho},{kbr}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def pmap(self, form="", discon="", **kwargs):
     """Creates mapping of the path geometry by defining path interpolation
@@ -664,9 +649,6 @@ def pmap(self, form="", discon="", **kwargs):
     """
     command = f"PMAP,{form},{discon}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def ppath(self, point="", node="", x="", y="", z="", cs="", **kwargs):
@@ -741,8 +723,6 @@ def prange(self, linc="", vmin="", vmax="", xvar="", **kwargs):
     command = f"PRANGE,{linc},{vmin},{vmax},{xvar}"
     return self.run(command, **kwargs)
 
-    
-
 
 def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
            **kwargs):
@@ -767,9 +747,6 @@ def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
     """
     command = f"PRPATH,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def prsect(self, rho="", kbr="", **kwargs):
@@ -876,8 +853,6 @@ def prsect(self, rho="", kbr="", **kwargs):
     command = f"PRSECT,{rho},{kbr}"
     return self.run(command, **kwargs)
 
-    
-
 
 def psel(self, type_="", pname1="", pname2="", pname3="", pname4="",
          pname5="", pname6="", pname7="", pname8="", pname9="", pname10="",
@@ -967,6 +942,3 @@ def pvect(self, oper="", labxr="", labyr="", labzr="", **kwargs):
     """
     command = f"PVECT,{oper},{labxr},{labyr},{labzr}"
     return self.run(command, **kwargs)
-
-    
-    

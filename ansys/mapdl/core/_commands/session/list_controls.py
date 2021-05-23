@@ -100,5 +100,3 @@ def nopr(self, **kwargs):
     """
     command = "/NOPR,"
     return self.run(command, **kwargs)
-
-

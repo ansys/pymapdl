@@ -1,5 +1,6 @@
 from ansys.mapdl.core._commands import parse
 
+
 def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
       p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
       p18="", **kwargs) -> int:
@@ -253,9 +254,6 @@ def afillt(self, na1="", na2="", rad="", **kwargs):
     """
     command = f"AFILLT,{na1},{na2},{rad}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def agen(self, itime="", na1="", na2="", ninc="", dx="", dy="", dz="",

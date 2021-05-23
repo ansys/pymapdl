@@ -155,9 +155,6 @@ def desol(self, elem="", node="", item="", comp="", v1="", v2="", v3="",
     command = f"DESOL,{elem},{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def dnsol(self, node="", item="", comp="", v1="", v2="", v3="", v4="",
           v5="", v6="", **kwargs):
@@ -222,8 +219,6 @@ def dnsol(self, node="", item="", comp="", v1="", v2="", v3="", v4="",
     """
     command = f"DNSOL,{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
     return self.run(command, **kwargs)
-
-    
 
 
 def hrcplx(self, loadstep="", substep="", omegat="", firstlc_ase="",
@@ -304,8 +299,6 @@ def hrcplx(self, loadstep="", substep="", omegat="", firstlc_ase="",
     """
     command = f"HRCPLX,{loadstep},{substep},{omegat},{firstlc_ase},{secondlc_ase}"
     return self.run(command, **kwargs)
-
-    
 
 
 def rescombine(self, numfiles="", fname="", ext="", lstep="", sbstep="",

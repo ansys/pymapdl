@@ -71,9 +71,6 @@ def mfclear(self, option="", value="", **kwargs):
     command = f"MFCLEAR,{option},{value}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mffr(self, fname="", lab="", rfini="", rfmin="", rfmax="", **kwargs):
     """Setup Multi-Field relaxation factors for field solutions.
@@ -125,9 +122,6 @@ def mffr(self, fname="", lab="", rfini="", rfmin="", rfmax="", **kwargs):
     command = f"MFFR,{fname},{lab},{rfini},{rfmin},{rfmax}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mfinter(self, option="", **kwargs):
     """Specifies the interface load transfer interpolation option for an ANSYS
@@ -164,9 +158,6 @@ def mfinter(self, option="", **kwargs):
     """
     command = f"MFINTER,{option}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def mflist(self, option="", value="", **kwargs):
@@ -289,8 +280,6 @@ def mfpsimul(self, gname="", fname1="", fname2="", **kwargs):
     command = f"MFPSIMUL,{gname},{fname1},{fname2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mfsorder(self, gname1="", gname2="", **kwargs):
     """Sets up the solution sequence of simultaneous field solver groups for
@@ -315,8 +304,6 @@ def mfsorder(self, gname1="", gname2="", **kwargs):
     """
     command = f"MFSORDER,{gname1},{gname2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def mfwrite(self, fname="", ext="", **kwargs):
@@ -348,5 +335,3 @@ def mfwrite(self, fname="", ext="", **kwargs):
     """
     command = f"MFWRITE,{fname},{ext}"
     return self.run(command, **kwargs)
-
-    

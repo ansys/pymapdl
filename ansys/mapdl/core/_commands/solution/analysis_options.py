@@ -2477,7 +2477,7 @@ def ovcheck(self, method="", frequency="", set_="", **kwargs):
     return self.run(command, **kwargs)
 
 
-def pcgopt(self, lev_diff ="", reduceio="", strmck="", wrtfull="",
+def pcgopt(self, lev_diff="", reduceio="", strmck="", wrtfull="",
            memory="", lm_key="", **kwargs):
     """Controls PCG solver options.
 

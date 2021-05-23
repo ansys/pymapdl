@@ -17,9 +17,6 @@ def iclwid(self, factor="", **kwargs):
     command = f"/ICLWID,{factor}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def icscale(self, wn="", factor="", **kwargs):
     """Scales the icon size for elements supported in the circuit builder.
@@ -45,8 +42,6 @@ def icscale(self, wn="", factor="", **kwargs):
     """
     command = f"/ICSCALE,{wn},{factor}"
     return self.run(command, **kwargs)
-
-    
 
 
 def ratio(self, wn="", ratox="", ratoy="", **kwargs):
@@ -78,10 +73,6 @@ def ratio(self, wn="", ratox="", ratoy="", **kwargs):
     command = f"/RATIO,{wn},{ratox},{ratoy}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def shrink(self, ratio="", **kwargs):
     """Shrinks elements, lines, areas, and volumes for display clarity.
@@ -108,9 +99,6 @@ def shrink(self, ratio="", **kwargs):
     """
     command = f"/SHRINK,{ratio}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def sscale(self, wn="", smult="", **kwargs):
@@ -144,9 +132,6 @@ def sscale(self, wn="", smult="", **kwargs):
     """
     command = f"/SSCALE,{wn},{smult}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def txtre(self, lab="", num="", n1="", n2="", ninc="", **kwargs):
@@ -297,11 +282,6 @@ def txtre(self, lab="", num="", n1="", n2="", ninc="", **kwargs):
     """
     command = f"/TXTRE,{lab},{num},{n1},{n2},{ninc}"
     return self.run(command, **kwargs)
-
-    
-    
-    
-    
 
 
 def vscale(self, wn="", vratio="", key="", **kwargs):

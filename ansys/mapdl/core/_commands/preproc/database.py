@@ -5,6 +5,7 @@ database.
 
 """
 
+
 def aflist(self, **kwargs):
     """Lists the current data in the database.
 
@@ -425,7 +426,7 @@ def check(self, sele="", levl="", **kwargs):
 
 
 def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
-                trlevel="", cgap="", cpen="", ioff="", **kwargs):
+            trlevel="", cgap="", cpen="", ioff="", **kwargs):
     """Provides and/or adjusts the initial status of contact pairs.
 
     APDL Command: CNCHECK
@@ -526,12 +527,13 @@ def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
     Because Option = POST forces a solve operation, the PrepPost (PP)
     license does not work with CNCHECK,POST.
     """
-    command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(rid1), str(rid2), str(rinc), str(intertype), str(trlevel), str(cgap), str(cpen), str(ioff))
+    command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(rid1), str(
+        rid2), str(rinc), str(intertype), str(trlevel), str(cgap), str(cpen), str(ioff))
     return self.run(command, **kwargs)
 
 
 def fc(self, mat="", lab1="", lab2="", data1="", data2="", data3="",
-           data4="", data5="", data6="", **kwargs):
+       data4="", data5="", data6="", **kwargs):
     """Provides failure criteria information and activates a data
 
     APDL Command: FC
@@ -621,7 +623,8 @@ def fc(self, mat="", lab1="", lab2="", data1="", data2="", data3="",
     applied. See the appropriate plot or print command
     documentation for more information.
     """
-    command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(lab2), str(data1), str(data2), str(data3), str(data4), str(data5), str(data6))
+    command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(
+        lab2), str(data1), str(data2), str(data3), str(data4), str(data5), str(data6))
     return self.run(command, **kwargs)
 
 
@@ -797,7 +800,8 @@ def mfimport(self, fnumb="", option="", fname="", ext="", **kwargs):
     Distributed ANSYS Restriction: This command is not supported in
     Distributed ANSYS.
     """
-    command = "MFIMPORT,%s,%s,%s,%s" % (str(fnumb), str(option), str(fname), str(ext))
+    command = "MFIMPORT,%s,%s,%s,%s" % (
+        str(fnumb), str(option), str(fname), str(ext))
     return self.run(command, **kwargs)
 
 
@@ -915,7 +919,7 @@ def numcmp(self, label="", **kwargs):
 
 
 def nummrg(self, label="", toler="", gtoler="", action="", switch="",
-               **kwargs):
+           **kwargs):
     """Merges coincident or equivalently defined items.
 
     APDL Command: NUMMRG
@@ -1071,7 +1075,8 @@ def nummrg(self, label="", toler="", gtoler="", action="", switch="",
     correct for  keypoint merging, NUMMRG is more efficient and robust than
     AGLUE or VGLUE.
     """
-    command = "NUMMRG,%s,%s,%s,%s,%s" % (str(label), str(toler), str(gtoler), str(action), str(switch))
+    command = "NUMMRG,%s,%s,%s,%s,%s" % (str(label), str(
+        toler), str(gtoler), str(action), str(switch))
     return self.run(command, **kwargs)
 
 

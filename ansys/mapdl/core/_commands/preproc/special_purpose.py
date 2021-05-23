@@ -532,8 +532,6 @@ def emsym(self, nsect="", **kwargs):
     command = f"EMSYM,{nsect}"
     return self.run(command, **kwargs)
 
-    
-
 
 def mstole(self, method="", namesurf="", namefluid="", **kwargs):
     """Adds two extra nodes from FLUID116 elements to SURF151 or SURF152
@@ -579,8 +577,6 @@ def mstole(self, method="", namesurf="", namefluid="", **kwargs):
     """
     command = f"MSTOLE,{method},{namesurf},{namefluid}"
     return self.run(command, **kwargs)
-
-    
 
 
 def perbc2d(self, loc1="", loc2="", loctol="", r1="", r2="", tolr="",
@@ -756,8 +752,6 @@ def physics(self, option="", title="", fname="", ext="", **kwargs):
     command = f"PHYSICS,{option},{title},{fname},{ext}"
     return self.run(command, **kwargs)
 
-    
-
 
 def race(self, xc="", yc="", rad="", tcur="", dy="", dz="", cname="",
          **kwargs):
@@ -810,8 +804,6 @@ def race(self, xc="", yc="", rad="", tcur="", dy="", dz="", cname="",
     The diagram below shows you a racetrack current source.
     """
     return self.run(f"RACE,{xc},{yc},{rad},{tcur},{dy},{dz},,,{cname}", **kwargs)
-
-    
 
 
 def sstate(self, action="", cm_name="", val1="", val2="", val3="", val4="",
@@ -988,8 +980,6 @@ def xfenrich(self, enrichmentid="", compname="", matid="", **kwargs):
     """
     command = f"XFENRICH,{enrichmentid},{compname},{matid}"
     return self.run(command, **kwargs)
-
-    
 
 
 def xflist(self, enrichmentid="", **kwargs):

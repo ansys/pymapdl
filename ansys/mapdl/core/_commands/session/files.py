@@ -126,7 +126,7 @@ def anstoasas(self, fname="", key="", **kwargs):
 
 
 def anstoaqwa(self, fname="", vertaxis="", gc="", rho="", hwl="",
-                  diffkey="", symxkey="", symykey="", **kwargs):
+              diffkey="", symxkey="", symykey="", **kwargs):
     """Creates an AQWA-LINE input file from the current ANSYS model.
 
     APDL Command: ANSTOAQWA
@@ -220,7 +220,8 @@ def anstoaqwa(self, fname="", vertaxis="", gc="", rho="", hwl="",
 
     You must verify the completeness and accuracy of the data written.
     """
-    command = "ANSTOAQWA,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(vertaxis), str(gc), str(rho), str(hwl), str(diffkey), str(symxkey), str(symykey))
+    command = "ANSTOAQWA,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(vertaxis), str(
+        gc), str(rho), str(hwl), str(diffkey), str(symxkey), str(symykey))
     return self.run(command, **kwargs)
 
 
@@ -305,7 +306,7 @@ def slashclog(self, fname="", ext="", **kwargs):
 
 
 def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
-             **kwargs):
+         **kwargs):
     """Copies a file.
 
     APDL Command: /COPY

@@ -94,7 +94,7 @@ def cmdele(self, name="", **kwargs):
 
 
 def cmedit(self, aname="", oper="", cnam1="", cnam2="", cnam3="", cnam4="",
-               cnam5="", cnam6="", cnam7="", **kwargs):
+           cnam5="", cnam6="", cnam7="", **kwargs):
     """Edits an existing assembly.
 
     APDL Command: CMEDIT
@@ -120,12 +120,13 @@ def cmedit(self, aname="", oper="", cnam1="", cnam2="", cnam3="", cnam4="",
     -----
     This command is valid in any processor.
     """
-    command = "CMEDIT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(oper), str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7))
+    command = "CMEDIT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(oper), str(
+        cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7))
     return self.run(command, **kwargs)
 
 
 def cmgrp(self, aname="", cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
-              cnam6="", cnam7="", cnam8="", **kwargs):
+          cnam6="", cnam7="", cnam8="", **kwargs):
     """Groups components and assemblies into an assembly.
 
     APDL Command: CMGRP
@@ -163,7 +164,8 @@ def cmgrp(self, aname="", cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
 
     This command is valid in any processor.
     """
-    command = "CMGRP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8))
+    command = "CMGRP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(cnam1), str(
+        cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8))
     return self.run(command, **kwargs)
 
 
@@ -377,7 +379,7 @@ def cmsel(self, type_="", name="", entity="", **kwargs):
 
 
 def cmwrite(self, option="", fname="", ext="", fnamei="", exti="",
-                fmat="", **kwargs):
+            fmat="", **kwargs):
     """Writes node and element components and assemblies to a file.
 
     APDL Command: CMWRITE

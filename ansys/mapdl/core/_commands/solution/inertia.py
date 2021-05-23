@@ -57,10 +57,6 @@ def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
     command = f"ACEL,{acel_x},{acel_y},{acel_z}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def cgloc(self, xloc="", yloc="", zloc="", **kwargs):
     """Specifies the origin location of the acceleration coordinate system.
@@ -142,9 +138,6 @@ def cgomga(self, cgomx="", cgomy="", cgomz="", **kwargs):
     command = f"CGOMGA,{cgomx},{cgomy},{cgomz}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def cmacel(self, cm_name="", cmacel_x="", cmacel_y="", cmacel_z="",
            **kwargs):
@@ -212,9 +205,6 @@ def cmacel(self, cm_name="", cmacel_x="", cmacel_y="", cmacel_z="",
     """
     command = f"CMACEL,{cm_name},{cmacel_x},{cmacel_y},{cmacel_z}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def cmdomega(self, cm_name="", domegax="", domegay="", domegaz="", x1="",
@@ -288,8 +278,6 @@ def cmdomega(self, cm_name="", domegax="", domegay="", domegaz="", x1="",
     """
     command = f"CMDOMEGA,{cm_name},{domegax},{domegay},{domegaz},{x1},{y1},{z1},{x2},{y2},{z2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def cmomega(self, cm_name="", omegax="", omegay="", omegaz="", x1="",
@@ -376,8 +364,6 @@ def cmomega(self, cm_name="", omegax="", omegay="", omegaz="", x1="",
     command = f"CMOMEGA,{cm_name},{omegax},{omegay},{omegaz},{x1},{y1},{z1},{x2},{y2},{z2}"
     return self.run(command, **kwargs)
 
-    
-
 
 def cmrotate(self, cm_name="", rotatx="", rotaty="", rotatz="", x1="",
              y1="", z1="", x2="", y2="", z2="", **kwargs):
@@ -431,8 +417,6 @@ def cmrotate(self, cm_name="", rotatx="", rotaty="", rotatz="", x1="",
     """
     command = f"CMROTATE,{cm_name},{rotatx},{rotaty},{rotatz},{x1},{y1},{z1},{x2},{y2},{z2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def coriolis(self, option="", refframe="", rotdamp="", rotmass="", **kwargs):
@@ -599,9 +583,6 @@ def dcgomg(self, dcgox="", dcgoy="", dcgoz="", **kwargs):
     command = f"DCGOMG,{dcgox},{dcgoy},{dcgoz}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def domega(self, domgx="", domgy="", domgz="", **kwargs):
     """Specifies the rotational acceleration of the structure.
@@ -641,9 +622,6 @@ def domega(self, domgx="", domgy="", domgz="", **kwargs):
     """
     command = f"DOMEGA,{domgx},{domgy},{domgz}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def irlf(self, key="", **kwargs):
@@ -708,8 +686,6 @@ def irlf(self, key="", **kwargs):
     command = f"IRLF,{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def omega(self, omegx="", omegy="", omegz="", **kwargs):
     """Specifies the rotational velocity of the structure.
@@ -769,8 +745,6 @@ def omega(self, omegx="", omegy="", omegz="", **kwargs):
     command = f"OMEGA,{omegx},{omegy},{omegz}"
     return self.run(command, **kwargs)
 
-    
-
 
 def synchro(self, ratio="", cname="", **kwargs):
     """Specifies whether the excitation frequency is synchronous or
@@ -816,7 +790,3 @@ def synchro(self, ratio="", cname="", **kwargs):
     """
     command = f"SYNCHRO,{ratio},{cname}"
     return self.run(command, **kwargs)
-
-    
-    
-    

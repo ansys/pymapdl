@@ -768,7 +768,7 @@ def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "",
     the element into an acceptable shape.
     """
     command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
-    return self.run(command, **kwargs)    
+    return self.run(command, **kwargs)
 
 
 def endrelease(self, tolerance="", dof1="", dof2="", dof3="", dof4="",
@@ -1075,7 +1075,8 @@ def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
         # if show_node_numbering:
         labels = []
         if show_node_numbering:
-            labels = [{'points': esurf.points, 'labels': esurf['ansys_node_num']}]
+            labels = [{'points': esurf.points,
+                       'labels': esurf['ansys_node_num']}]
 
         return general_plotter([{'mesh': esurf}],
                                [],

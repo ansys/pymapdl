@@ -52,8 +52,6 @@ def an3d(self, kywrd="", key="", **kwargs):
     command = f"/AN3D,{kywrd},{key}"
     return self.run(command, **kwargs)
 
-    
-
 
 def annot(self, lab="", val1="", val2="", **kwargs):
     """Activates graphics for annotating displays (GUI).
@@ -124,8 +122,6 @@ def annot(self, lab="", val1="", val2="", **kwargs):
     """
     command = f"/ANNOT,{lab},{val1},{val2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def anum(self, num="", type_="", xhot="", yhot="", **kwargs):
@@ -258,8 +254,6 @@ def lspec(self, lcolor="", linstl="", xlnwid="", **kwargs):
     command = f"/LSPEC,{lcolor},{linstl},{xlnwid}"
     return self.run(command, **kwargs)
 
-    
-
 
 def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="",
             **kwargs):
@@ -328,8 +322,6 @@ def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="",
     command = f"/LSYMBOL,{x},{y},{symang},{symtyp},{symsiz},{keybmp}"
     return self.run(command, **kwargs)
 
-    
-
 
 def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
     """Creates an annotation circle (GUI).
@@ -364,8 +356,6 @@ def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
     """
     command = f"/PCIRCLE,{xcentr},{ycentr},{xlrad}"
     return self.run(command, **kwargs)
-
-    
 
 
 def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
@@ -469,9 +459,6 @@ def polygon(self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="",
     """
     command = f"/POLYGON,{nvert},{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def pspec(self, pcolor="", kfill="", kbordr="", **kwargs):
@@ -588,10 +575,6 @@ def pwedge(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="",
     command = f"/PWEDGE,{xcentr},{ycentr},{xlrad},{angle1},{angle2}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def tlabel(self, xloc="", yloc="", text="", **kwargs):
     """Creates annotation text (GUI).
@@ -628,9 +611,6 @@ def tlabel(self, xloc="", yloc="", text="", **kwargs):
     """
     command = f"/TLABEL,{xloc},{yloc},{text}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def tspec(self, tcolor="", tsize="", txthic="", pangle="", iangle="",

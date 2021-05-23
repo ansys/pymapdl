@@ -64,8 +64,6 @@ def sedlist(self, sename="", kopt="", **kwargs):
     command = f"SEDLIST,{sename},{kopt}"
     return self.run(command, **kwargs)
 
-    
-
 
 def selist(self, sename="", kopt="", kint="", **kwargs):
     """Lists the contents of a superelement matrix file.

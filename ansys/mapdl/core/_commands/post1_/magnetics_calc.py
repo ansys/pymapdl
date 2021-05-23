@@ -22,8 +22,6 @@ def curr2d(self, **kwargs):
     command = f"CURR2D,"
     return self.run(command, **kwargs)
 
-    
-
 
 def emagerr(self, **kwargs):
     """Calculates the relative error in an electrostatic or electromagnetic
@@ -90,9 +88,6 @@ def emf(self, **kwargs):
     command = f"EMF,"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def emft(self, **kwargs):
     """Summarizes electromagnetic forces and torques.
@@ -119,9 +114,6 @@ def emft(self, **kwargs):
     """
     command = f"EMFT,"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def fluxv(self, **kwargs):
@@ -173,8 +165,6 @@ def mmf(self, **kwargs):
     command = f"MMF,"
     return self.run(command, **kwargs)
 
-    
-
 
 def plf2d(self, ncont="", olay="", anum="", win="", **kwargs):
     """Generates a contour line plot of equipotentials.
@@ -217,10 +207,6 @@ def plf2d(self, ncont="", olay="", anum="", win="", **kwargs):
     command = f"PLF2D,{ncont},{olay},{anum},{win}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def powerh(self, **kwargs):
     """Calculates the rms power loss in a conductor or lossy dielectric.
@@ -242,8 +228,6 @@ def powerh(self, **kwargs):
     """
     command = f"POWERH,"
     return self.run(command, **kwargs)
-
-    
 
 
 def senergy(self, opt="", antype="", **kwargs):

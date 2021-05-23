@@ -133,5 +133,3 @@ def prvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
     """
     command = f"PRVAR,{nvar1},{nvar2},{nvar3},{nvar4},{nvar5},{nvar6}"
     return self.run(command, **kwargs)
-
-    

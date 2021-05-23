@@ -4,8 +4,6 @@ it to a file, or annotate it with titles and systems of units.
 """
 
 
-
-
 def resume(self, fname="", ext="", nopar="", knoplot="", **kwargs):
     """Resumes the database from the database file.
 
@@ -261,8 +259,8 @@ def title(self, title="", **kwargs):
 
 
 def units(self, label="", lenfact="", massfact="", timefact="",
-              tempfact="", toffset="", chargefact="", forcefact="",
-              heatfact="", **kwargs):
+          tempfact="", toffset="", chargefact="", forcefact="",
+          heatfact="", **kwargs):
     """Annotates the database with the system of units used.
 
     APDL Command: /UNITS
@@ -327,5 +325,6 @@ def units(self, label="", lenfact="", massfact="", timefact="",
 
     This command is valid in any processor.
     """
-    command = "/UNITS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(label), str(lenfact), str(massfact), str(timefact), str(tempfact), str(toffset), str(chargefact), str(forcefact), str(heatfact))
+    command = "/UNITS,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(label), str(lenfact), str(massfact), str(
+        timefact), str(tempfact), str(toffset), str(chargefact), str(forcefact), str(heatfact))
     return self.run(command, **kwargs)

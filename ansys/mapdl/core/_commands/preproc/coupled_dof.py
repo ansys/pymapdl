@@ -193,8 +193,6 @@ def cpintf(self, lab="", toler="", **kwargs):
     command = f"CPINTF,{lab},{toler}"
     return self.run(command, **kwargs)
 
-    
-
 
 def cplgen(self, nsetf="", lab1="", lab2="", lab3="", lab4="", lab5="",
            **kwargs):
@@ -221,8 +219,6 @@ def cplgen(self, nsetf="", lab1="", lab2="", lab3="", lab4="", lab5="",
     """
     command = f"CPLGEN,{nsetf},{lab1},{lab2},{lab3},{lab4},{lab5}"
     return self.run(command, **kwargs)
-
-    
 
 
 def cplist(self, nset1="", nset2="", ninc="", nsel="", **kwargs):
@@ -334,5 +330,3 @@ def cpsgen(self, itime="", inc="", nset1="", nset2="", ninc="", **kwargs):
     """
     command = f"CPSGEN,{itime},{inc},{nset1},{nset2},{ninc}"
     return self.run(command, **kwargs)
-
-    

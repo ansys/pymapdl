@@ -181,8 +181,6 @@ def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
     command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
     return parse.parse_line_no(self.run(command, **kwargs))
 
-    
-
 
 def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
           **kwargs) -> int:

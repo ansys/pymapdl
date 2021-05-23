@@ -122,9 +122,6 @@ def fcum(self, oper="", rfact="", ifact="", **kwargs):
     command = f"FCUM,{oper},{rfact},{ifact}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
     """Deletes force loads on nodes.
@@ -180,8 +177,6 @@ def fdele(self, node="", lab="", nend="", ninc="", lkey="", **kwargs):
     command = f"FDELE,{node},{lab},{nend},{ninc},{lkey}"
     return self.run(command, **kwargs)
 
-    
-
 
 def fj(self, elem="", label="", value="", **kwargs):
     """Specify forces or moments on the components of the relative motion of a
@@ -221,8 +216,6 @@ def fj(self, elem="", label="", value="", **kwargs):
     command = f"FJ,{elem},{label},{value}"
     return self.run(command, **kwargs)
 
-    
-
 
 def fjdele(self, elem="", lab="", **kwargs):
     """Deletes forces (or moments) on the components of the relative motion of
@@ -260,8 +253,6 @@ def fjdele(self, elem="", lab="", **kwargs):
     """
     command = f"FJDELE,{elem},{lab}"
     return self.run(command, **kwargs)
-
-    
 
 
 def fjlist(self, elem="", **kwargs):
@@ -313,8 +304,6 @@ def flist(self, node1="", node2="", ninc="", **kwargs):
     command = f"FLIST,{node1},{node2},{ninc}"
     return self.run(command, **kwargs)
 
-    
-
 
 def fscale(self, rfact="", ifact="", **kwargs):
     """Scales force load values in the database.
@@ -349,5 +338,3 @@ def fscale(self, rfact="", ifact="", **kwargs):
     """
     command = f"FSCALE,{rfact},{ifact}"
     return self.run(command, **kwargs)
-
-    

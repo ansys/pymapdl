@@ -77,8 +77,6 @@ def ancut(self, nfram="", delay="", ncycl="", qoff="", ktop="", topoff="",
     command = f"ANCUT,{nfram},{delay},{ncycl},{qoff},{ktop},{topoff},{node1},{node2},{node3}"
     return self.run(command, **kwargs)
 
-    
-
 
 def andata(self, delay="", ncycl="", rsltdat="", min_="", max_="", incr="",
            frclst="", autocont="", autocntr="", **kwargs):
@@ -181,9 +179,6 @@ def andscl(self, nfram="", delay="", ncycl="", **kwargs):
     command = f"ANDSCL,{nfram},{delay},{ncycl}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def ancyc(self, numframes="", kcycl="", delay="", **kwargs):
     """Applies a traveling wave animation to graphics data in a modal cyclic
@@ -282,8 +277,6 @@ def andyna(self, delay="", ncycl="", start="", end="", inc="",
     command = f"ANDYNA,{delay},{ncycl},{start},{end},{inc},{autocontourkey}"
     return self.run(command, **kwargs)
 
-    
-
 
 def anfile(self, lab="", fname="", ext="", **kwargs):
     """Saves or resumes an animation sequence to or from a file.
@@ -319,8 +312,6 @@ def anfile(self, lab="", fname="", ext="", **kwargs):
     """
     command = f"/ANFILE,{lab},{fname},{ext}"
     return self.run(command, **kwargs)
-
-    
 
 
 def anflow(self, nfram="", delay="", ncycl="", time="", spacing="",
@@ -505,8 +496,6 @@ def anim(self, ncycl="", kcycl="", delay="", **kwargs):
     command = f"ANIM,{ncycl},{kcycl},{delay}"
     return self.run(command, **kwargs)
 
-    
-
 
 def anisos(self, nfram="", delay="", ncycl="", **kwargs):
     """Produces an animated sequence of an isosurface.
@@ -575,9 +564,6 @@ def anmode(self, nfram="", delay="", ncycl="", kaccel="", **kwargs):
     """
     command = f"ANMODE,{nfram},{delay},{ncycl},{kaccel}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def anmres(self, delay="", min_="", max_="", inc="", autocntrky="", freq="",
@@ -703,9 +689,6 @@ def antime(self, nfram="", delay="", ncycl="", autocntrky="", rsltdat="",
     command = f"ANTIME,{nfram},{delay},{ncycl},{autocntrky},{rsltdat},{min_},{max_}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def trtime(self, time="", spacing="", offset="", size="", length="",
            **kwargs):
@@ -757,5 +740,3 @@ def trtime(self, time="", spacing="", offset="", size="", length="",
     """
     command = f"TRTIME,{time},{spacing},{offset},{size},{length}"
     return self.run(command, **kwargs)
-
-    

@@ -1,7 +1,8 @@
 """These DATABASE commands define and manipulate coordinate systems."""
 
+
 def clocal(self, kcn="", kcs="", xl="", yl="", zl="", thxy="", thyz="",
-               thzx="", par1="", par2="", **kwargs):
+           thzx="", par1="", par2="", **kwargs):
     """Defines a local coordinate system relative to the active coordinate
 
     APDL Command: CLOCAL
@@ -62,12 +63,13 @@ def clocal(self, kcn="", kcs="", xl="", yl="", zl="", thxy="", thyz="",
 
     This command is valid in any processor.
     """
-    command = "CLOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(xl), str(yl), str(zl), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
+    command = "CLOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(
+        xl), str(yl), str(zl), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
     return self.run(command, **kwargs)
 
 
 def cs(self, kcn="", kcs="", norig="", nxax="", nxypl="", par1="", par2="",
-           **kwargs):
+       **kwargs):
     """Defines a local coordinate system by three node locations.
 
     APDL Command: CS
@@ -124,7 +126,8 @@ def cs(self, kcn="", kcs="", norig="", nxax="", nxypl="", par1="", par2="",
 
     This command is valid in any processor.
     """
-    command = "CS,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(norig), str(nxax), str(nxypl), str(par1), str(par2))
+    command = "CS,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(
+        norig), str(nxax), str(nxypl), str(par1), str(par2))
     return self.run(command, **kwargs)
 
 
@@ -251,7 +254,8 @@ def cskp(self, kcn="", kcs="", porig="", pxaxs="", pxypl="", par1="",
 
     This command is valid in any processor.
     """
-    command = "CSKP,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(porig), str(pxaxs), str(pxypl), str(par1), str(par2))
+    command = "CSKP,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(
+        porig), str(pxaxs), str(pxypl), str(par1), str(par2))
     return self.run(command, **kwargs)
 
 
@@ -377,7 +381,7 @@ def csys(self, kcn="", **kwargs):
 
 
 def local(self, kcn="", kcs="", xc="", yc="", zc="", thxy="", thyz="",
-              thzx="", par1="", par2="", **kwargs):
+          thzx="", par1="", par2="", **kwargs):
     """Defines a local coordinate system by a location and orientation.
 
     APDL Command: LOCAL
@@ -435,6 +439,6 @@ def local(self, kcn="", kcs="", xc="", yc="", zc="", thxy="", thyz="",
 
     This command is valid in any processor.
     """
-    command = "LOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(xc), str(yc), str(zc), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
+    command = "LOCAL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(kcn), str(kcs), str(
+        xc), str(yc), str(zc), str(thxy), str(thyz), str(thzx), str(par1), str(par2))
     return self.run(command, **kwargs)
-

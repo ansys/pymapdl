@@ -38,9 +38,6 @@ def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
     command = f"ADDAM,{af},{aa},{ab},{ac},{ad},{amin}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def coval(self, tblno1="", tblno2="", sv1="", sv2="", sv3="", sv4="",
           sv5="", sv6="", sv7="", **kwargs):
@@ -77,8 +74,6 @@ def coval(self, tblno1="", tblno2="", sv1="", sv2="", sv3="", sv4="",
     """
     command = f"COVAL,{tblno1},{tblno2},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
     return self.run(command, **kwargs)
-
-    
 
 
 def cqc(self, signif="", label="", forcetype="", **kwargs):
@@ -126,8 +121,6 @@ def cqc(self, signif="", label="", forcetype="", **kwargs):
     """
     command = f"CQC,{signif},{label},{forcetype}"
     return self.run(command, **kwargs)
-
-    
 
 
 def dsum(self, signif="", label="", td="", forcetype="", **kwargs):
@@ -177,8 +170,6 @@ def dsum(self, signif="", label="", td="", forcetype="", **kwargs):
     """
     command = f"DSUM,{signif},{label},{td},{forcetype}"
     return self.run(command, **kwargs)
-
-    
 
 
 def freq(self, freq1="", freq2="", freq3="", freq4="", freq5="", freq6="",
@@ -263,10 +254,6 @@ def grp(self, signif="", label="", forcetype="", **kwargs):
     command = f"GRP,{signif},{label},{forcetype}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def mmass(self, option="", zpa="", **kwargs):
     """Specifies the missing mass response calculation.
@@ -321,9 +308,6 @@ def mmass(self, option="", zpa="", **kwargs):
     """
     command = f"MMASS,{option},{zpa}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def nrlsum(self, signif="", label="", labelcsm="", forcetype="", **kwargs):
@@ -434,8 +418,6 @@ def pfact(self, tblno="", excit="", parcor="", **kwargs):
     command = f"PFACT,{tblno},{excit},{parcor}"
     return self.run(command, **kwargs)
 
-    
-
 
 def psdcom(self, signif="", comode="", forcetype="", **kwargs):
     """Specifies the power spectral density mode combination method.
@@ -478,9 +460,6 @@ def psdcom(self, signif="", comode="", forcetype="", **kwargs):
     """
     command = f"PSDCOM,{signif},{comode},{forcetype}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def psdfrq(self, tblno1="", tblno2="", freq1="", freq2="", freq3="",
@@ -525,8 +504,6 @@ def psdfrq(self, tblno1="", tblno2="", freq1="", freq2="", freq3="",
     command = f"PSDFRQ,{tblno1},{tblno2},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
     return self.run(command, **kwargs)
 
-    
-
 
 def psdgraph(self, tblno1="", tblno2="", **kwargs):
     """Displays input PSD curves
@@ -560,8 +537,6 @@ def psdgraph(self, tblno1="", tblno2="", **kwargs):
     """
     command = f"PSDGRAPH,{tblno1},{tblno2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def psdres(self, lab="", relkey="", **kwargs):
@@ -609,9 +584,6 @@ def psdres(self, lab="", relkey="", **kwargs):
     command = f"PSDRES,{lab},{relkey}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def psdspl(self, tblno="", rmin="", rmax="", **kwargs):
     """Defines a partially correlated excitation in a PSD analysis.
@@ -648,8 +620,6 @@ def psdspl(self, tblno="", rmin="", rmax="", **kwargs):
     """
     command = f"PSDSPL,{tblno},{rmin},{rmax}"
     return self.run(command, **kwargs)
-
-    
 
 
 def psdunit(self, tblno="", type_="", gvalue="", **kwargs):
@@ -697,8 +667,6 @@ def psdunit(self, tblno="", type_="", gvalue="", **kwargs):
     command = f"PSDUNIT,{tblno},{type_},{gvalue}"
     return self.run(command, **kwargs)
 
-    
-
 
 def psdval(self, tblno="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
            sv7="", **kwargs):
@@ -728,8 +696,6 @@ def psdval(self, tblno="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
     """
     command = f"PSDVAL,{tblno},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
     return self.run(command, **kwargs)
-
-    
 
 
 def psdwav(self, tblno="", vx="", vy="", vz="", **kwargs):
@@ -802,10 +768,6 @@ def qdval(self, tblno1="", tblno2="", sv1="", sv2="", sv3="", sv4="",
     command = f"QDVAL,{tblno1},{tblno2},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def rock(self, cgx="", cgy="", cgz="", omx="", omy="", omz="", **kwargs):
     """Specifies a rocking response spectrum.
@@ -835,9 +797,6 @@ def rock(self, cgx="", cgy="", cgz="", omx="", omy="", omz="", **kwargs):
     """
     command = f"ROCK,{cgx},{cgy},{cgz},{omx},{omy},{omz}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def rose(self, signif="", label="", td="", forcetype="", **kwargs):
@@ -935,10 +894,6 @@ def rigresp(self, option="", method="", val1="", val2="", **kwargs):
     command = f"RIGRESP,{option},{method},{val1},{val2}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-
 
 def sed(self, sedx="", sedy="", sedz="", cname="", **kwargs):
     """Defines the excitation direction for response spectrum and PSD
@@ -983,7 +938,7 @@ def sed(self, sedx="", sedy="", sedz="", cname="", **kwargs):
     return self.run(command, **kwargs)
 
 
-def spdamp(self, tblno="", curvno="", dampratio ="", **kwargs):
+def spdamp(self, tblno="", curvno="", dampratio="", **kwargs):
     """Defines input spectrum damping in a multi-point response spectrum
 
     APDL Command: SPDAMP
@@ -1026,8 +981,6 @@ def spdamp(self, tblno="", curvno="", dampratio ="", **kwargs):
     command = f"SPDAMP,{tblno},{curvno},{dampratio}"
     return self.run(command, **kwargs)
 
-    
-
 
 def spfreq(self, tblno="", freq1="", freq2="", freq3="", freq4="",
            freq5="", freq6="", freq7="", **kwargs):
@@ -1068,10 +1021,8 @@ def spfreq(self, tblno="", freq1="", freq2="", freq3="", freq4="",
     command = f"SPFREQ,{tblno},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
     return self.run(command, **kwargs)
 
-    
 
-
-def spgraph(self, tblno="", curvno="", curvnobeg ="", **kwargs):
+def spgraph(self, tblno="", curvno="", curvnobeg="", **kwargs):
     """Displays input spectrum curves for MPRS analysis.
 
     APDL Command: SPGRAPH
@@ -1103,9 +1054,6 @@ def spgraph(self, tblno="", curvno="", curvnobeg ="", **kwargs):
     """
     command = f"SPGRAPH,{tblno},{curvno},{curvnobeg}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def spopt(self, sptype="", nmode="", elcalc="", modereusekey="", **kwargs):
@@ -1269,12 +1217,6 @@ def spval(self, tblno="", curvno="", sv1="", sv2="", sv3="", sv4="",
     command = f"SPVAL,{tblno},{curvno},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
     return self.run(command, **kwargs)
 
-    
-    
-    
-    
-    
-
 
 def srss(self, signif="", label="", abssumkey="", forcetype="", **kwargs):
     """Specifies the square root of sum of squares mode combination method.
@@ -1330,9 +1272,6 @@ def srss(self, signif="", label="", abssumkey="", forcetype="", **kwargs):
     command = f"SRSS,{signif},{label},{abssumkey},{forcetype}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def sv(self, damp="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
        sv7="", sv8="", sv9="", **kwargs):
@@ -1377,9 +1316,6 @@ def sv(self, damp="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
     """
     command = f"SV,{damp},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7},{sv8},{sv9}"
     return self.run(command, **kwargs)
-
-    
-    
 
 
 def svplot(self, optionscale="", damp1="", damp2="", damp3="", damp4="",
@@ -1510,6 +1446,3 @@ def vddam(self, vf="", va="", vb="", vc="", **kwargs):
     """
     command = f"VDDAM,{vf},{va},{vb},{vc}"
     return self.run(command, **kwargs)
-
-    
-    

@@ -39,9 +39,6 @@ def mfbucket(self, key="", value="", **kwargs):
     command = f"MFBUCKET,{key},{value}"
     return self.run(command, **kwargs)
 
-    
-    
-
 
 def mfci(self, val1="", val2="", **kwargs):
     """Sets the control parameters used by the conservative (CPP)
@@ -80,8 +77,6 @@ def mfci(self, val1="", val2="", **kwargs):
     """
     command = f"MFCI,{val1},{val2}"
     return self.run(command, **kwargs)
-
-    
 
 
 def mfmap(self, lab1="", lab2="", filename="", opt="", **kwargs):
@@ -147,10 +142,6 @@ def mfmap(self, lab1="", lab2="", filename="", opt="", **kwargs):
     """
     command = f"MFMAP,{lab1},{lab2},{filename},{opt}"
     return self.run(command, **kwargs)
-
-    
-    
-    
 
 
 def mftol(self, key="", value="", toler="", **kwargs):
