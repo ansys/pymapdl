@@ -453,6 +453,58 @@ def bcsoption(self, memory_option="", memory_size="", solve_info="",
     command = f"BCSOPTION,,{memory_option},{memory_size},,,{solve_info}"
     return self.run(command, **kwargs)
 
+def cgrow(self, action="", par1="", par2="", **kwargs):
+    """Defines crack-growth information
+
+    APDL Command: CGROW
+
+    Parameters
+    ----------
+    action
+        Specifies the action for defining or manipulating crack-growth
+        data:
+
+        NEW - Initiate a new set of crack-growth simulation data (default).
+
+        CID - Specify the crack-calculation (CINT) ID for energy-release rates to be used in
+              the fracture criterion calculation.
+
+        FCOPTION - Specify the fracture criterion for crack-growth/delamination.
+
+        CPATH - Specify the element component for crack growth.
+
+        DTIME - Specify the initial time step for crack growth.
+
+        DTMIN - Specify the minimum time step for crack growth.
+
+        DTMAX - Specify the maximum time step for crack growth.
+
+        FCRAT - Fracture criterion ratio (fc).
+
+        STOP - Stops the analysis when the specified maximum crack extension is reached.
+
+        METHOD - Define the method of crack propagation.
+
+    Notes
+    -----
+    When Action = NEW, the CGROW command initializes a crack-growth
+    simulation set. Subsequent CGROW commands define the parameters
+    necessary for the simulation.
+
+    For multiple cracks, issue multiple CGROW,NEW commands (and any
+    subsequent CGROW commands necessary to define the parameters) for each
+    crack.
+
+    If the analysis is restarted (ANTYPE,,RESTART), the CGROW command must
+    be re-issued.
+
+    For additional details on this command, see
+    https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_CGROW.html
+
+    """
+    command = f"CGROW,{action},{par1},{par2}"
+    return self.run(command, **kwargs)
+
 
 def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
             capname="", **kwargs):

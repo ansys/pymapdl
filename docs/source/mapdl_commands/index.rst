@@ -70,6 +70,7 @@ These commands make up the ANSYS Parametric Design Language
    apdl/abbreviations
    apdl/array_parm
    apdl/matrix_op
+   apdl/process_controls
 
 .. _ref_prep_commands:
 
@@ -283,3 +284,14 @@ produced within ANSYS.
    reduced/preparation
    reduced/generation
    reduced/use_pass
+
+*******************
+Connection Commands
+*******************
+
+These commands read in external CAD files into MAPDL.
+
+.. toctree::
+   :maxdepth: 1
+
+   conn

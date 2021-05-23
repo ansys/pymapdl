@@ -1,6 +1,6 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
                         aux2_, aux3_, aux12_, reduced, apdl, post26_, solution,
-                        post1_, graphics_, display_)
+                        post1_, graphics_, display_, conn)
 
 class Commands:
     """Wrapped MAPDL commands"""
@@ -16,6 +16,7 @@ class Commands:
     memm = session.run_controls.memm
     nerr = session.run_controls.nerr
     pause = session.run_controls.pause
+    slashstatus = session.run_controls.slashstatus
     starstatus = session.run_controls.starstatus
     syp = session.run_controls.syp
     sys = session.run_controls.sys
@@ -167,6 +168,7 @@ class Commands:
     spctemp = aux12_.radiosity_solver.spctemp
     v2dopt = aux12_.radiosity_solver.v2dopt
     vfopt = aux12_.radiosity_solver.vfopt
+    vfsm = aux12_.radiosity_solver.vfsm
     vfquery = aux12_.radiosity_solver.vfquery
 
     # reduced processor
@@ -723,7 +725,7 @@ class Commands:
     inquire = apdl.parameter_definition.inquire
     parres = apdl.parameter_definition.parres
     parsav = apdl.parameter_definition.parsav
-    set = apdl.parameter_definition.set
+    starset = apdl.parameter_definition.starset
     taxis = apdl.parameter_definition.taxis
     tread = apdl.parameter_definition.tread
     vfill = apdl.parameter_definition.vfill
@@ -755,6 +757,7 @@ class Commands:
     starprint = apdl.matrix_op.starprint
     sort = apdl.matrix_op.sort
     vec = apdl.matrix_op.vec
+    wait = apdl.process_controls.wait
 
     # post26
     cvar = post26_.special.cvar
@@ -904,6 +907,7 @@ class Commands:
     dnsol = post1_.setup.dnsol
     hrcplx = post1_.setup.hrcplx
     rescombine = post1_.setup.rescombine
+    set = post1_.setup.set
     subset = post1_.setup.subset
     pltrac = post1_.trace_points.pltrac
     trpdel = post1_.trace_points.trpdel
@@ -1008,6 +1012,7 @@ class Commands:
     fjlist = solution.fe_forces.fjlist
     flist = solution.fe_forces.flist
     fscale = solution.fe_forces.fscale
+    fssect = solution.fe_forces.fssect
     map2dto3d = solution.twod_to_3d_analysis.map2dto3d
     mfconv = solution.multi_field_solver_convergence_controls.mfconv
     mfiter = solution.multi_field_solver_convergence_controls.mfiter
@@ -1037,6 +1042,7 @@ class Commands:
     ascres = solution.analysis_options.ascres
     asol = solution.analysis_options.asol
     bcsoption = solution.analysis_options.bcsoption
+    cgrow = solution.analysis_options.cgrow
     cmatrix = solution.analysis_options.cmatrix
     cmsopt = solution.analysis_options.cmsopt
     cncheck = solution.analysis_options.cncheck
@@ -1161,6 +1167,7 @@ class Commands:
     mmass = solution.spectrum_options.mmass
     nrlsum = solution.spectrum_options.nrlsum
     pfact = solution.spectrum_options.pfact
+    pivcheck = solution.spectrum_options.pivcheck
     psdcom = solution.spectrum_options.psdcom
     psdfrq = solution.spectrum_options.psdfrq
     psdgraph = solution.spectrum_options.psdgraph
@@ -1428,6 +1435,14 @@ class Commands:
     showdisp = display_.setup.showdisp
     trans = display_.setup.trans
 
+    # connection
+    cat5in = conn.cat5in
+    catiain = conn.catiain
+    parain = conn.parain
+    proein = conn.proein
+    satin = conn.satin
+    ugin = conn.ugin
 
     # hidden
     _batch = hidden.batch
+    _output = hidden.output

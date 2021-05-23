@@ -17,7 +17,7 @@ These APDL commands are used to define parameters and their values.
    Mapdl.inquire
    Mapdl.parres
    Mapdl.parsav
-   Mapdl.set
+   Mapdl.starset
    Mapdl.taxis
    Mapdl.tread
    Mapdl.vfill

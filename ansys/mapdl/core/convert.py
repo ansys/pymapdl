@@ -2,6 +2,7 @@ import os
 
 from ansys.mapdl.core import __version__, mapdl_functions
 from ansys.mapdl.core.misc import is_float
+from ansys.mapdl.core.commands import Commands
 
 
 def convert_script(filename_in, filename_out, loglevel='WARNING', auto_exit=True,
@@ -82,7 +83,7 @@ class FileTranslator():
         self.write_header()
         self.initialize_mapdl_object(loglevel, exec_file)
 
-        self._valid_commands = dir(mapdl_functions._MapdlCommands)
+        self._valid_commands = dir(Commands)
         self._non_interactive_commands = ['*CRE', '*VWR']
 
     def write_header(self):

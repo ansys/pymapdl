@@ -19,3 +19,4 @@ These SOLUTION commands are used to define nodal loads on the finite element mod
    Mapdl.fjlist
    Mapdl.flist
    Mapdl.fscale
+   Mapdl.fssect

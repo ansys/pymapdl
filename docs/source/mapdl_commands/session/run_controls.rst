@@ -22,6 +22,7 @@ file switching.
    Mapdl.memm
    Mapdl.nerr
    Mapdl.pause
+   Mapdl.slashstatus
    Mapdl.starstatus
    Mapdl.syp
    Mapdl.sys

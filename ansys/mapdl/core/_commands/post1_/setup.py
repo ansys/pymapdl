@@ -451,6 +451,114 @@ def rescombine(self, numfiles="", fname="", ext="", lstep="", sbstep="",
     return self.run(command, **kwargs)
 
 
+def set(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
+        nset="", order="", **kwargs):
+    """Defines the data set to be read from the results file.
+
+    APDL Command: SET
+
+    Parameters
+    ----------
+    lstep
+        Load step number of the data set to be read (defaults to 1):
+
+        N - Read load step N.
+
+        FIRST - Read the first data set (Sbstep and TIME are ignored).
+
+        LAST - Read the last data set (Sbstep and TIME are ignored).
+
+        NEXT - Read the next data set (Sbstep and TIME are ignored).  If at the last data set,
+               the first data set will be read as the next.
+
+        PREVIOUS - Read the previous data set (Sbstep and TIME are ignored).  If at the first data
+                   set, the last data set will be read as the previous.
+
+        NEAR - Read the data set nearest to TIME (Sbstep is ignored).  If TIME is blank, read
+               the first data set.
+
+        LIST - Scan the results file and list a summary of each load step.  (KIMG, TIME,
+               ANGLE, and NSET are ignored.)
+
+    sbstep
+        Substep number (within Lstep). Defaults to the last substep of the
+        load step (except in a buckling or modal analysis). For a buckling
+        (ANTYPE,BUCKLE) or modal (ANTYPE,MODAL) analysis, Sbstep
+        corresponds to the mode number. Specify Sbstep = LAST to store the
+        last substep for the specified load step (that is, issue a
+        SET,Lstep,LAST command).
+
+    fact
+        Scale factor applied to data read from the file. If zero (or
+        blank), a value of 1.0 is used. This scale factor is only applied
+        to displacement and stress results. A nonzero factor excludes non-
+        summable items.
+
+    kimg
+        Used only with complex results (harmonic and complex modal
+        analyses).
+
+        0 or REAL - Store the real part of complex solution (default).
+
+        1, 2 or IMAG - Store the imaginary part of a complex solution.
+
+        3 or AMPL - Store the amplitude
+
+        4 or PHAS - Store the phase angle. The angle value, expressed in degrees, will be between
+                    -180°  and +180°.
+
+    time
+        Time-point identifying the data set to be read.  For a harmonic
+        analyses, time corresponds to the frequency.
+
+    angle
+        Circumferential location (0.0 to 360°).  Defines the
+        circumferential location for the harmonic calculations used when
+        reading from the results file.
+
+    nset
+        Data set number of the data set to be read.  If a positive value
+        for NSET is entered, Lstep, Sbstep, KIMG, and TIME are ignored.
+        Available set numbers can be determined by SET,LIST.
+
+    order
+        Key to sort the harmonic index results. This option applies to
+        cyclic symmetry buckling and modal analyses only, and is valid only
+        when Lstep = FIRST, LAST, NEXT, PREVIOUS, NEAR or LIST.
+
+        ORDER  - Sort the harmonic index results in ascending order of eigenfrequencies or
+                 buckling load multipliers.
+
+        (blank)  - No sorting takes place.
+
+    Notes
+    -----
+    Defines the data set to be read from the results file into the
+    database.  Various operations may also be performed during the read
+    operation.  The database must have the model geometry available (or use
+    the RESUME command before the SET command to restore the geometry from
+    Jobname.DB).  Values for applied constraints [D] and loads [F] in the
+    database will be replaced by their corresponding values on the results
+    file, if available. (See the description of the OUTRES command.)  In a
+    single load step analysis, these values are usually the same, except
+    for results from harmonic elements. (See the description of the ANGLE
+    value above.)
+
+    In an interactive run, the sorted list (ORDER option) is also available
+    for results-set reading via a GUI pick option.
+
+    You can postprocess results without issuing a SET command if the
+    solution results were saved to the database file (Jobname.DB).
+    Distributed ANSYS, however, can only postprocess using the results file
+    (for example, Jobname.RST) and cannot use the Jobname.DB file since no
+    solution results are written to the database. Therefore, you must issue
+    a SET command or a RESCOMBINE command before postprocessing in
+    Distributed ANSYS.
+    """
+    command = f"SET,{lstep},{sbstep},{fact},{kimg},{time},{angle},{nset},{order}"
+    return self.run(command, **kwargs)
+
+
 def subset(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
            nset="", **kwargs):
     """Reads results for the selected portions of the model.

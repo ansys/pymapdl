@@ -13,7 +13,6 @@ import pathlib
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.mapdl_functions import _MapdlCommands
 from ansys.mapdl.core.misc import (random_string, supress_logging,
                                    run_as_prep7, last_created)
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
@@ -106,7 +105,7 @@ def setup_logger(loglevel='INFO'):
     return log
 
 
-class _MapdlCore(Commands, _MapdlCommands):
+class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,

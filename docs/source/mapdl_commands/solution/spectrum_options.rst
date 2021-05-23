@@ -20,6 +20,7 @@ These SOLUTION commands are used to define options for spectrum analyses.
    Mapdl.mmass
    Mapdl.nrlsum
    Mapdl.pfact
+   Mapdl.pivcheck
    Mapdl.psdcom
    Mapdl.psdfrq
    Mapdl.psdgraph

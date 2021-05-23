@@ -18,5 +18,6 @@ method.
    Mapdl.spcnod
    Mapdl.spctemp
    Mapdl.v2dopt
+   Mapdl.vfsm
    Mapdl.vfopt
    Mapdl.vfquery

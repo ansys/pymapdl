@@ -409,111 +409,157 @@ def parsav(self, lab="", fname="", ext="", **kwargs):
     return self.run(command, **kwargs)
 
 
-def set(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
-        nset="", order="", **kwargs):
-    """Defines the data set to be read from the results file.
+def starset(self, par="", value="", val2="", val3="", val4="", val5="",
+            val6="", val7="", val8="", val9="", val10="", **kwargs):
+    """Assigns values to user-named parameters.
 
-    APDL Command: SET
+    APDL Command: *SET
 
     Parameters
     ----------
-    lstep
-        Load step number of the data set to be read (defaults to 1):
+    par
+        An alphanumeric name used to identify this parameter.  Par may be
+        up to 32 characters, beginning with a letter and containing only
+        letters, numbers, and underscores.  Examples:  ABC   A3X   TOP_END.
+        ANSYS command names, function names, label names, component and
+        assembly names, etc., should not be used.  Parameter names
+        beginning with an underscore (e.g.,  _LOOP) are reserved for use by
+        ANSYS and should be avoided.  Parameter names ending in an
+        underscore are not listed by the *STATUS command.  Array parameter
+        names must be followed by a subscript, and the entire expression
+        must be 32 characters or less.  Examples:  A(1,1)   NEW_VAL(3,2,5)
+        RESULT(1000).  There is no character parameter substitution for the
+        Par field. Table parameters that are used in command fields (where
+        constant values are normally given) are limited to 32 characters.
 
-        N - Read load step N.
+    value
+        Numerical value or alphanumeric character string (up to 32
+        characters enclosed in single quotes) to be assigned to this
+        parameter.  Examples:  A(1,3)=7.4 B='ABC3'.  May also be a
+        parameter or a parametric expression.  Examples:  C=A(1,3)
+        A(2,2)=(C+4)/2.  If blank, delete this parameter.  Example:  A=
+        deletes parameter A.
 
-        FIRST - Read the first data set (Sbstep and TIME are ignored).
-
-        LAST - Read the last data set (Sbstep and TIME are ignored).
-
-        NEXT - Read the next data set (Sbstep and TIME are ignored).  If at the last data set,
-               the first data set will be read as the next.
-
-        PREVIOUS - Read the previous data set (Sbstep and TIME are ignored).  If at the first data
-                   set, the last data set will be read as the previous.
-
-        NEAR - Read the data set nearest to TIME (Sbstep is ignored).  If TIME is blank, read
-               the first data set.
-
-        LIST - Scan the results file and list a summary of each load step.  (KIMG, TIME,
-               ANGLE, and NSET are ignored.)
-
-    sbstep
-        Substep number (within Lstep). Defaults to the last substep of the
-        load step (except in a buckling or modal analysis). For a buckling
-        (ANTYPE,BUCKLE) or modal (ANTYPE,MODAL) analysis, Sbstep
-        corresponds to the mode number. Specify Sbstep = LAST to store the
-        last substep for the specified load step (that is, issue a
-        SET,Lstep,LAST command).
-
-    fact
-        Scale factor applied to data read from the file. If zero (or
-        blank), a value of 1.0 is used. This scale factor is only applied
-        to displacement and stress results. A nonzero factor excludes non-
-        summable items.
-
-    kimg
-        Used only with complex results (harmonic and complex modal
-        analyses).
-
-        0 or REAL - Store the real part of complex solution (default).
-
-        1, 2 or IMAG - Store the imaginary part of a complex solution.
-
-        3 or AMPL - Store the amplitude
-
-        4 or PHAS - Store the phase angle. The angle value, expressed in degrees, will be between
-                    -180°  and +180°.
-
-    time
-        Time-point identifying the data set to be read.  For a harmonic
-        analyses, time corresponds to the frequency.
-
-    angle
-        Circumferential location (0.0 to 360°).  Defines the
-        circumferential location for the harmonic calculations used when
-        reading from the results file.
-
-    nset
-        Data set number of the data set to be read.  If a positive value
-        for NSET is entered, Lstep, Sbstep, KIMG, and TIME are ignored.
-        Available set numbers can be determined by SET,LIST.
-
-    order
-        Key to sort the harmonic index results. This option applies to
-        cyclic symmetry buckling and modal analyses only, and is valid only
-        when Lstep = FIRST, LAST, NEXT, PREVIOUS, NEAR or LIST.
-
-        ORDER  - Sort the harmonic index results in ascending order of eigenfrequencies or
-                 buckling load multipliers.
-
-        (blank)  - No sorting takes place.
+    val2, val3, val4, val5, val6, val7, val8, val9, val10
+        If Par is an array parameter, values VAL2 through VAL10 (up to the
+        last nonblank value) are sequentially assigned to the succeeding
+        array elements of the column.  Example:  *SET,A(1,4),10,11 assigns
+        A(1,4)=10, A(2,4)=11.  *SET,B(2,3),'file10','file11' assigns
+        B(2,3)='file10', B(3,3)='file11'.
 
     Notes
     -----
-    Defines the data set to be read from the results file into the
-    database.  Various operations may also be performed during the read
-    operation.  The database must have the model geometry available (or use
-    the RESUME command before the SET command to restore the geometry from
-    Jobname.DB).  Values for applied constraints [D] and loads [F] in the
-    database will be replaced by their corresponding values on the results
-    file, if available. (See the description of the OUTRES command.)  In a
-    single load step analysis, these values are usually the same, except
-    for results from harmonic elements. (See the description of the ANGLE
-    value above.)
+    Assigns values to user-named parameters that may be substituted later
+    in the run.  The equivalent (and recommended) format is
 
-    In an interactive run, the sorted list (ORDER option) is also available
-    for results-set reading via a GUI pick option.
+    Par = VALUE,VAL2,VAL3, . . . , VAL10
 
-    You can postprocess results without issuing a SET command if the
-    solution results were saved to the database file (Jobname.DB).
-    Distributed ANSYS, however, can only postprocess using the results file
-    (for example, Jobname.RST) and cannot use the Jobname.DB file since no
-    solution results are written to the database. Therefore, you must issue
-    a SET command or a RESCOMBINE command before postprocessing in
-    Distributed ANSYS.
+    which may be used in place of  *SET,Par, : ... for convenience.
+
+    This command is valid in any processor.
+
+    Parameters (numeric or character) may be scalars (single valued) or
+    arrays (multiple valued in one, two, or three dimensions). An unlimited
+    number of parameter names may be defined in any ANSYS run. For very
+    large numbers of parameters, it is most efficient to define them in
+    alphabetical order.
+
+    Parameter values may be redefined at any time.  Array parameters may
+    also be assigned values within a do-loop [*DO] for convenience.
+    Internally programmed do-loop commands are also available with the *VXX
+    commands (*VFILL).  Parameter values (except for parameters ending in
+    an underscore) may be listed with the  *STATUS command, displayed with
+    the *VPLOT   command (numeric parameters only), and modified with the
+    *VEDIT command (numeric parameters only).
+
+    Older ANSYS-supplied macro files may use parameter names that do not
+    begin with an underscore. Using these macros embedded in your own
+    macros may cause conflicts if the same parameter names are used.
+
+    Parameters can also be resolved in comments created by the /COM command
+    (see /COM for complete documentation). A parameter can be deleted by
+    redefining it with a blank  VALUE.  If the parameter is an array, the
+    entire array is deleted.  Parameters may also be defined by a response
+    to a query with the  *ASK command or from an "ANSYS-supplied" value
+    with the *GET command.
+
+    Array parameters must be dimensioned  [*DIM] before being assigned
+    values unless they are the result of an array operation or defined
+    using the implied loop convention. Scalar parameters that are not
+    defined are initialized to a "near" zero value.  Numeric array
+    parameters are initialized to zero when dimensioned, and character
+    array parameters are initialized to blank.  An existing array parameter
+    must be deleted before it can be redimensioned.  Array parameter names
+    must be followed by a subscript list (enclosed in parentheses)
+    identifying the element of the array.  The subscript list may have one,
+    two, or three values (separated by commas).  Typical array parameter
+    elements are  A(1,1), NEW_VAL(3,2,5), RESULT(1000).  Subscripts for
+    defining an array element must be integers (or parameter expressions
+    that evaluate to integers).  Non-integer values are rounded to the
+    nearest integer value.  All array parameters are stored as 3-D arrays
+    with the unspecified dimensions set to 1.  For example, the 4th array
+    element of a 1-dimensional array, A(4), is stored as array element
+    A(4,1,1).  Arrays are patterned after standard FORTRAN conventions.
+
+    If the parameter name Par is input in a numeric argument of a command,
+    the numeric value of the parameter (as assigned with *SET, *GET, =,
+    etc.) is substituted into the command at that point.  Substitution
+    occurs only if the parameter name is used between blanks, commas,
+    parentheses, or arithmetic operators (or any combination) in a numeric
+    argument.  Substitution can be prevented by enclosing the parameter
+    name Par within single quotes ( ' ), if the parameter is alone in the
+    argument; if the parameter is part of an arithmetic expression, the
+    entire expression must be enclosed within single quotes to prevent
+    substitution.  In either case the character string will be used instead
+    of the numeric value (and the string will be taken as 0.0 if it is in a
+    numeric argument).
+
+    A forced substitution is available in the text fields of the /TITLE,
+    /STITLE,  /TLABEL, /AN3D, /SYP (ARG1--ARG8), and *ABBR  commands by
+    enclosing the parameter within percent (%) signs.  Also, parameter
+    substitution may be forced within the file name or extension fields of
+    commands having these fields by enclosing the parameter within percent
+    (%) signs.  Array parameters  [*DIM] must include a subscript (within
+    parentheses) to identify the array element whose value is to be
+    substituted, such as A(1,3).  Out-of-range subscripts result in an
+    error message.  Non-integer subscripts are allowed when identifying a
+    TABLE array element for substitution.  A proportional linear
+    interpolation of values among the nearest array elements is performed
+    before substitution.  Interpolation is done in all three dimensions.
+
+    Note:: : Interpolation is based upon the assigned index numbers which
+    must be defined when the table is filled [*DIM].
+
+    Most alphanumeric arguments permit the use of character parameter
+    substitution.  When the parameter name Par input, the alphanumeric
+    value of the parameter is substituted into the command at that point.
+    Substitution can be suppressed by enclosing the parameter name within
+    single quotes ( ' ).  Forced substitution is available in some fields
+    by enclosing the parameter name within percent (%) signs.  Valid forced
+    substitution fields include command name fields, Fname (filename) or
+    Ext (extension) arguments, *ABBR command (Abbr arguments), /TITLE and
+    /STITLE commands (Title argument) and /TLABEL command (Text argument).
+    Character parameter substitution is also available in the  *ASK, /AN3D,
+    *CFWRITE,  *IF,  *ELSEIF,   *MSG,  *SET,  *USE,  *VREAD, and  *VWRITE
+    commands.   Character array parameters must include a subscript (within
+    parentheses) to identify the array element whose value is to be
+    substituted.
+
+    If a parameter operation expression is input in a numeric argument, the
+    numeric value of the expression is substituted into the command at that
+    point.  Allowable operation expressions are of the form
+
+    E1oE2oE3: ...oE10
+
+    where E1, E2, etc. are expressions connected by operators (o).  The
+    allowable operations (o) are
+
+    ``+ - * / ** < >``
+
+    For example, ``A+B**C/D*E`` is a valid operation expression.  The ``*``
+    represents multiplication and the ``**`` represents exponentiation.
     """
-    command = f"SET,{lstep},{sbstep},{fact},{kimg},{time},{angle},{nset},{order}"
+    command = f"*SET,{par},{value},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10}"
     return self.run(command, **kwargs)
 
 

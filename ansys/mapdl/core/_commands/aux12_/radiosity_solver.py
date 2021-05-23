@@ -223,6 +223,76 @@ def v2dopt(self, geom="", ndiv="", hidopt="", nzone="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def vfsm(self, action="", encl="", opt="", maxiter="", conv="", **kwargs):
+        """Adjusts view factor matrix to satisfy reciprocity and/or
+        row sum properties.
+
+        APDL Command: VFSM
+
+        Parameters
+        ----------
+        action
+            Action to be performed:
+
+            Define - Define a view factor summation (default)
+
+            Clear - Resets the scaling method to 0 for all
+                    enclosures. All subsequent arguments are ignored.
+
+            Status - Outputs the OPT value for each enclosure in the model.
+
+        encl
+            Previously defined enclosure number for the view factor adjustment.
+
+        opt
+            Option key:
+
+            0 - The view factor matrix values are not adjusted (default).
+
+            1 - The view factor matrix values are adjusted so that the
+                row sum equals 1.0.
+
+            2 - The view factor matrix values are adjusted so that the
+                row sum equals 1.0 and the reciprocity relationship is
+                satisfied.
+
+            3 - The view factor matrix values are adjusted so that the
+                original row sum is maintained.
+
+            4 - The view factor matrix values are adjusted so that the
+                original row sum is maintained and the reciprocity
+                relationship is satisfied.
+
+        maxiter
+            Maximum number of iterations to achieve convergence. Valid only
+            when OPT = 2 or 4. Default is 100.
+
+        conv
+            Convergence value for row sum. Iterations will continue (up to
+            MAXITER) until the maximum residual over all the rows is less than
+            this value. Valid only when OPT = 2 or 4. Default is 1E-3.
+
+        Notes
+        -----
+        To have a good energy balance, it is important to satisfy both the row
+        sum and reciprocity relationships. For more information, see View
+        Factors in the Mechanical APDL Theory Reference.
+
+        OPT = 1 and 2 are suitable for perfect enclosures. OPT = 1 is less
+        expensive than OPT = 2 because no iterations are involved. However,
+        with OPT = 1, the reciprocity relationship is not satisfied.
+
+        OPT = 3 and 4 are suitable for leaky enclosures. OPT = 3 is less
+        expensive than OPT = 4 because no iterations are involved. However,
+        with OPT = 3, the reciprocity relationship is not satisfied.
+
+        The VFSM command must be used before VFOPT is issued, or Solve is
+        initiated.
+        """
+        command = f"VFSM,{action},{encl},{opt},{maxiter},{conv}"
+        return self.run(command, **kwargs)
+
+
 def vfopt(self, opt="", filename="", ext="", dir_="", filetype="",
           fileformat="", **kwargs):
     """Specifies options for the view factor file and calculates view factors.

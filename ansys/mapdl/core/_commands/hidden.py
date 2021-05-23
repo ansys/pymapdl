@@ -41,3 +41,45 @@ def batch(self, lab="", **kwargs):
     """
     command = "/BATCH,%s" % (str(lab))
     return self.run(command, **kwargs)
+
+
+def output(self, fname="", ext="", loc="", **kwargs):
+    """Redirects text output to a file or to the screen.
+
+    APDL Command: /OUTPUT
+
+    Parameters
+    ----------
+    fname
+        Filename and directory path (248 character maximum, including
+        directory) to which text output will be redirected (defaults to
+        Jobname if Ext is specified).  For interactive runs, Fname = TERM
+        (or blank) redirects output to the screen.  For batch runs, Fname =
+        blank (with all remaining command arguments blank) redirects output
+        to the  default system output file.
+
+    ext
+        Filename extension (eight-character maximum).
+
+    loc
+        Location within a file to which output will be written:
+
+        (blank) - Output is written starting at the top of the file (default).
+
+        APPEND - Output is appended to the existing file.
+
+    Notes
+    -----
+    Text output includes responses to every command and GUI
+    function, notes, warnings, errors, and other informational
+    messages.  Upon execution of /OUTPUT,Fname, Ext, ..., all
+    subsequent text output is redirected to the file Fname.Ext.
+    To redirect output back to the default location, issue /OUTPUT
+    (no arguments).
+
+    This command is valid in any processor.
+    """
+    if loc:
+        return self.run(f"/OUTPUT,{fname},{ext},,{loc}", **kwargs)
+    else:
+        return self.run(f"/OUTPUT,{fname},{ext}", **kwargs)
