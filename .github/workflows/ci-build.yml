@@ -52,7 +52,7 @@ jobs:
         run: |
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
-          make -C docs html -j auto
+          make -C docs html
   
       - name: Upload Documentation
         uses: actions/upload-artifact@v2.2.1
