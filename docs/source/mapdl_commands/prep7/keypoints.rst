@@ -11,7 +11,6 @@ These PREP7 commands are used to create, modify, list, etc., keypoints.
 .. autosummary::
    :toctree: api/
 
-   Mapdl.gsum
    Mapdl.k
    Mapdl.kbetw
    Mapdl.kcenter

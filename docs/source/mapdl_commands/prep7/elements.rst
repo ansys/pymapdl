@@ -28,14 +28,12 @@ These PREP7 commands are used to create, modify, list, etc., elements.
    Mapdl.engen
    Mapdl.enorm
    Mapdl.ensym
-   Mapdl.eorient
    Mapdl.eplot
    Mapdl.eread
    Mapdl.ereinf
    Mapdl.errang
    Mapdl.esurf
    Mapdl.esym
-   Mapdl.esys
    Mapdl.ewrite
    Mapdl.gcdef
    Mapdl.gcgen
@@ -43,16 +41,13 @@ These PREP7 commands are used to create, modify, list, etc., elements.
    Mapdl.laylist
    Mapdl.layplot
    Mapdl.lfsurf
-   Mapdl.mat
    Mapdl.ndsurf
-   Mapdl.real
    Mapdl.shsd
    Mapdl.swadd
    Mapdl.swdel
    Mapdl.swgen
    Mapdl.swlist
    Mapdl.tshap
-   Mapdl.type
    Mapdl.upgeom
    Mapdl.usrdof
    Mapdl.usrelem

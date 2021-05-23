@@ -1,20 +1,10 @@
 """
 These PREP7 commands define the type of elements to be used in the model.
 """
-import re
 from typing import Optional, Union
 
+from ansys.mapdl.core._commands.parse import parse_e, parse_et
 from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
-
-
-def parse_et(msg: Optional[str]) -> Optional[int]:
-    """Parse local element type number definition message
-    and return element type number.
-    """
-    if msg:
-        res = re.search(r"(ELEMENT TYPE\s*)([0-9]+)", msg)
-        if res is not None:
-            return int(res.group(2))
 
 
 def dof(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",

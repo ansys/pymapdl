@@ -1,6 +1,7 @@
 from typing import Optional, Union
 from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
+
 def ansol(self, nvar="", node="", item="", comp="", name="", mat="",
           real="", ename="", **kwargs):
     """Specifies averaged nodal data to be stored from the results file in the

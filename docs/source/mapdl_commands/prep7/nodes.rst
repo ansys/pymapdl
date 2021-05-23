@@ -33,5 +33,4 @@ These PREP7 commands are used to create, modify, list, etc., nodes.
    Mapdl.nsym
    Mapdl.nwrite
    Mapdl.quad
-   Mapdl.source
    Mapdl.transfer

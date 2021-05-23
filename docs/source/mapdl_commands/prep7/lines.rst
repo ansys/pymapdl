@@ -13,7 +13,6 @@ These PREP7 commands are used to create, modify, list, etc., lines.
 
    Mapdl.bsplin
    Mapdl.circle
-   Mapdl.gsum
    Mapdl.l
    Mapdl.l2ang
    Mapdl.l2tan
