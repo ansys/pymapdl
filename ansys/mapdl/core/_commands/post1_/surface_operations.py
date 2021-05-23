@@ -182,7 +182,7 @@ def sueval(self, parm="", lab1="", oper="", **kwargs):
     The result of this operation is a scalar APDL parameter value. If
     multiple surfaces are selected when this command is issued, then the
     operation is carried out on each surface individually and the parameter
-    reperesents the culmulative value of the operation on all selected
+    represents the cumulative value of the operation on all selected
     surfaces.
     """
     command = f"SUEVAL,{parm},{lab1},{oper}"
@@ -208,9 +208,11 @@ def suget(self, surfname="", rsetname="", parm="", geom="", **kwargs):
     geom
         Switch controlling how data is written.
 
-        ON (or 1 or YES) - Writes geometry data and interpolated results information to the parameter.
+        ON (or 1 or YES) - Writes geometry data and interpolated
+        results information to the parameter.
 
-        OFF (or 0 or NO) - Writes only interpolated results information to the parameter. (Default)
+        OFF (or 0 or NO) - Writes only interpolated results
+        information to the parameter. (Default)
 
     Notes
     -----

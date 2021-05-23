@@ -63,7 +63,7 @@ def cfwrite(self, command="", **kwargs):
     -----
     Writes an ANSYS command (or similar string) to the file opened with
     *CFOPEN.  The Command string is not executed (except that numeric and
-    character parameter substitution and operations (with imbedded *, /, >,
+    character parameter substitution and operations (with embedded *, /, >,$
     etc. characters) are performed before writing).  When used with *GET
     results and parameter substitution, an ANSYS command can be created
     from results and then read back into the ANSYS program (or used

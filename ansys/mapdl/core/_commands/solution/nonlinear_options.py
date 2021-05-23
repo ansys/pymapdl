@@ -1199,7 +1199,7 @@ def nropt(self, option1="", option2="", optval="", **kwargs):
     mathematical definition, and you switch from unsymmetric to symmetric.
 
     You change analysis types and also switch from symmetric to unsymmetric
-    (or vise versa) at the same time. This situation could result in
+    (or vice versa) at the same time. This situation could result in
     failures such as data corruption or a core dump and should therefore be
     avoided.
 

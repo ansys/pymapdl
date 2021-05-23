@@ -4,9 +4,10 @@
 MAPDL Commands
 ==============
 This section gives an overview of the classic MAPDL commands that have
-been wrapped pythonically via PyMapdl.  Not all commands have been
-wrapped, most notably there are a variety of commands that are not
-supported natively or only have partial support within PyMAPDL.  
+been wrapped pythonically via PyMapdl.  Most commands have been
+wrapped, but there are a few commands that are not supported natively
+or only have partial support within PyMAPDL.  See
+:ref:`ref_unsupported_commands` for more details.
 
 *******
 Session
@@ -277,9 +278,6 @@ REDUCED Order Modeling
 These commands are used for the DISPLAY program. The DISPLAY program
 is a companion program to ANSYS, used for recovering graphics displays
 produced within ANSYS.
-
-.. note::
-   Many of these commands will not be applicable when using PyMAPDL.
 
 .. toctree::
    :maxdepth: 1

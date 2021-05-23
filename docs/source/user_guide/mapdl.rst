@@ -680,6 +680,7 @@ Ignored commands:
 * ``UNDO``
 * ``*VEDIT``
 
+.. _ref_unsupported_commands:
 
 Unsupported "Interactive" Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

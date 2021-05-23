@@ -607,7 +607,7 @@ def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
     normtype
         Mathematical norm to use:
 
-        L2 (Euclidian or SRSS) norm (default). - L1 (absolute sum) norm (vectors only).
+        L2 (Euclidean or SRSS) norm (default). - L1 (absolute sum) norm (vectors only).
 
     parr
         Parameter name that contains the result.
@@ -619,7 +619,7 @@ def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
 
     Notes
     -----
-    The NRM2 option corresponds to the Euclidian or L2 norm and is
+    The NRM2 option corresponds to the Euclidean or L2 norm and is
     applicable to either vectors or matrices. The NRM1 option corresponds
     to the L1 norm and is applicable to vectors only. The NRMINF option is
     the maximum norm and is applicable to either vectors or matrices.

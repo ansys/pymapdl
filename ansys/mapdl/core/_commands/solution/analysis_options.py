@@ -469,7 +469,7 @@ def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
         Defaults to 1.
 
     condname
-        Alpha-numeric prefix identifier used in defining named conductor
+        Alphanumeric prefix identifier used in defining named conductor
         components.
 
     numcond
@@ -798,7 +798,7 @@ def cnkmod(self, itype="", knum="", value="", **kwargs):
 
     If an open gap exists at the end of the previous load step and the
     contact status is adjusted as sliding or sticking due to a "bonded" or
-    "no seperation" contact behavior definition, then the program will
+    "no separation" contact behavior definition, then the program will
     treat it as near-field contact when executing CNKMOD in the subsequent
     load steps.
 

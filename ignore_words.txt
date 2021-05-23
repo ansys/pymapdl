@@ -1,3 +1,5 @@
+delet
+appen
 parm
 pres
 WAN
@@ -10,3 +12,9 @@ mater
 aadd
 extrem
 imagin
+ist
+nin
+sord
+struc
+emiss
+vise
