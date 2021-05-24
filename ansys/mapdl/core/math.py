@@ -596,7 +596,7 @@ class MapdlMath():
         Parameters
         ----------
         obj : ansys.mapdl.math.AnsMat or ansys.mapdl.math.AnsVec
-        ord_ : Order of the norm. nrm2(default), nrminf, nrm1
+        ord\_ : Order of the norm. nrm2(default), nrminf, nrm1
 
         Examples
         --------

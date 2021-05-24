@@ -13,14 +13,13 @@ import pathlib
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.mapdl_functions import _MapdlCommands
 from ansys.mapdl.core.misc import (random_string, supress_logging,
                                    run_as_prep7, last_created)
-from ansys.mapdl.core.element_commands import element_commands
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-
+from ansys.mapdl.core import commands
+from .commands import Commands
 
 _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
@@ -42,10 +41,12 @@ with self.non_interactive:
 """
 
 INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
-                  '*CFO': 'Run CFOPEN as non_interactive',
+                  '*CFO': 'Run CFOPEN as ``non_interactive``',
                   '*CRE': 'Create a function within python or run as non_interactive',
                   '*END': 'Create a function within python or run as non_interactive',
-                  '*IF': 'Use a python if or run as non_interactive'}
+                  '/EOF': 'Unsupported command.  Use ``exit`` to stop the server.',
+                  '*ASK': 'Unsupported command.  Use python ``input`` instead.',
+                  '*IF': 'Use a python ``if`` or run as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
@@ -66,7 +67,7 @@ def parse_to_short_cmd(command):
     try:
         short_cmd = command.split(',')[0]
         return short_cmd[:4].upper()
-    except:  # pragma: no cover
+    except Exception:  # pragma: no cover
         return
 
 
@@ -104,7 +105,7 @@ def setup_logger(loglevel='INFO'):
     return log
 
 
-class _MapdlCore(_MapdlCommands):
+class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
@@ -340,7 +341,7 @@ class _MapdlCore(_MapdlCommands):
             if self._exited:
                 return 'MAPDL exited'
             stats = self.slashstatus('PROD')
-        except:  # pragma: no cover
+        except Exception:  # pragma: no cover
             return 'MAPDL exited'
 
         st = stats.find('*** Products ***')
@@ -937,70 +938,6 @@ class _MapdlCore(_MapdlCommands):
         else:
             raise Exception('Cannot run:\n{command}\n\nFile does not exist')
 
-    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
-        """Plots the currently selected elements.
-
-        APDL Command: EPLOT
-
-        Parameters
-        ----------
-        vtk : bool, optional
-            Plot the currently selected elements using ``pyvista``.
-            Defaults to current ``use_vtk`` setting.
-
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        **kwargs
-            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
-            keyword arguments related to visualizing using ``vtk``.
-
-        Examples
-        --------
-        >>> mapdl.clear()
-        >>> mapdl.prep7()
-        >>> mapdl.block(0, 1, 0, 1, 0, 1)
-        >>> mapdl.et(1, 186)
-        >>> mapdl.esize(0.1)
-        >>> mapdl.vmesh('ALL')
-        >>> mapdl.vgen(2, 'all')
-        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
-                        show_node_numbering=True)
-
-        Save a screenshot to disk without showing the plot
-
-        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                        window_size=[1920, 1080], savefig='screenshot.png',
-                        off_screen=True)
-
-        """
-        if vtk is None:
-            vtk = self._use_vtk
-
-        if vtk:
-            kwargs.setdefault('title', 'MAPDL Element Plot')
-            if not self._mesh.n_elem:
-                warnings.warn('There are no elements to plot.')
-                return general_plotter([], [], [], **kwargs)
-
-            # TODO: Consider caching the surface
-            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
-            kwargs.setdefault('show_edges', True)
-
-            # if show_node_numbering:
-            labels = []
-            if show_node_numbering:
-                labels = [{'points': esurf.points, 'labels': esurf['ansys_node_num']}]
-
-            return general_plotter([{'mesh': esurf}],
-                                   [],
-                                   labels,
-                                   **kwargs)
-
-        # otherwise, use MAPDL plotter
-        self._enable_interactive_plotting()
-        return super().eplot(**kwargs)
-
     def lplot(self, nl1="", nl2="", ninc="", vtk=None,
               show_line_numbering=True,
               show_keypoint_numbering=False, color_lines=False,
@@ -1204,12 +1141,12 @@ class _MapdlCore(_MapdlCommands):
             filename = self.inquire('RSTFILE')
             if not filename:
                 filename = self.jobname
-        except:
+        except Exception:
             filename = self.jobname
 
         try:
             ext = self.inquire('RSTEXT')
-        except:  # check if rth file exists
+        except Exception:  # check if rth file exists
             ext = ''
 
         if ext == '':
@@ -1234,7 +1171,7 @@ class _MapdlCore(_MapdlCommands):
             filename = self.inquire('RSTFILE')
             if not filename:
                 filename = self.jobname
-        except:
+        except Exception:
             filename = self.jobname
 
         # ansys decided that a jobname ended in a number needs a bonus "_"
@@ -1492,7 +1429,7 @@ class _MapdlCore(_MapdlCommands):
         value = response.split('=')[-1].strip()
         try:  # always either a float or string
             return float(value)
-        except:
+        except ValueError:
             return value
 
     @property
@@ -1503,7 +1440,7 @@ class _MapdlCore(_MapdlCommands):
         """
         try:
             self._jobname = self.inquire('JOBNAME')
-        except:
+        except Exception:
             pass
         return self._jobname
 
@@ -1513,55 +1450,6 @@ class _MapdlCore(_MapdlCommands):
         self.finish(mute=True)
         self.filname(new_jobname, mute=True)
         self._jobname = new_jobname
-
-    @supress_logging
-    def inquire(self, func):
-        """Returns system information.
-
-        Parameters
-        ----------
-        func : str
-           Specifies the type of system information returned.  See the
-           notes section for more information.
-
-        Returns
-        -------
-        value : str
-            Value of the inquired item.
-
-        Notes
-        -----
-        Allowable func entries
-        LOGIN - Returns the pathname of the login directory on Linux
-        systems or the pathname of the default directory (including
-        drive letter) on Windows systems.
-
-        - ``DOCU`` - Pathname of the ANSYS docu directory.
-        - ``APDL`` - Pathname of the ANSYS APDL directory.
-        - ``PROG`` - Pathname of the ANSYS executable directory.
-        - ``AUTH`` - Pathname of the directory in which the license file resides.
-        - ``USER`` - Name of the user currently logged-in.
-        - ``DIRECTORY`` - Pathname of the current directory.
-        - ``JOBNAME`` - Current Jobname.
-        - ``RSTDIR`` - Result file directory
-        - ``RSTFILE`` - Result file name
-        - ``RSTEXT`` - Result file extension
-        - ``OUTPUT`` - Current output file name
-
-        Examples
-        --------
-        Return the job name
-
-        >>> mapdl.inquire('JOBNAME')
-        file
-
-        Return the result file name
-
-        >>> mapdl.inquire('RSTFILE')
-        'file.rst'
-        """
-        response = self.run(f'/INQUIRE,,{func}', mute=False)
-        return response.split('=')[1].strip()
 
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
                        nrmkey='', modtype='', memory_option='', elcalc=False):
@@ -1895,9 +1783,6 @@ class _MapdlCore(_MapdlCommands):
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
 
-        # command parsing
-        if short_cmd in element_commands:
-            return element_commands[short_cmd](self._response)
         if short_cmd in PLOT_COMMANDS:
             return self._display_plot(self._response)
 
@@ -2029,7 +1914,7 @@ class _MapdlCore(_MapdlCommands):
         # always attempt to cache the path
         try:
             self._path = self.inquire('DIRECTORY')
-        except:
+        except Exception:
             pass
 
         # os independent path format
@@ -2059,7 +1944,7 @@ class _MapdlCore(_MapdlCommands):
                 try:  # logger might be closed
                     if self._log is not None:
                         self._log.error('exit: %s', str(e))
-                except:
+                except Exception:
                     pass
 
     @supress_logging

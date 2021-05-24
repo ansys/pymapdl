@@ -643,3 +643,83 @@ You can upload a local file a the remote mapdl instance with:
 .. note::
 
    This is a gRPC feature only available in 2021R1 or newer.
+
+
+Unsupported MAPDL Commands and Other Considerations
+---------------------------------------------------
+Most MAPDl commands have been mapped pythonically into their
+equivalent methods.  Some commands, however, are not supported either
+because they are not applicable to an interactive session, or require
+additional commands that are incompatible with the way inputs are
+handled in the MAPDL server.
+
+Unapplicable Commands
+~~~~~~~~~~~~~~~~~~~~~
+
+Some commands are quietly ignored by MAPDL and you are still free to
+use them.  For example ``/BATCH``, implemented as ``mapdl.batch()`` returns:
+
+.. code::
+
+    *** WARNING ***                         CP =       0.519   TIME= 12:04:16
+    The /BATCH command must be the first line of input.  The /BATCH command
+    is ignored.
+
+Note, that running these commands with ``mapdl.run('<command>')`` will
+not cause MAPDL to die, and will generally simply be ignored by MAPDL.
+
+Ignored commands:
+
+* ``/BATCH``
+* ``*DEL``
+* ``/ERASE``
+* ``ERASE``
+* ``HELP``
+* ``HELPDISP``
+* ``NOERASE``
+* ``UNDO``
+* ``*VEDIT``
+
+.. _ref_unsupported_commands:
+
+Unsupported "Interactive" Commands
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following commands will immediately kill the server if run and are
+not permitted.
+
+Some commands, such as ``/EOF``, .  These commands are not wrapped or
+directly exposed to the user with a Python method such as
+``mapdl.eof()``.  If you wish to exit the server, use
+``mapdl.exit()``.  Other commands, such as ``*ASK``, request user and
+are not supported within an interactive context.  Some of commands may
+be run in ``non_interactive`` mode if applicable.  Others simply are
+not supported.
+
+* ``*ASK``
+* ``*CREATE``
+* ``CFOPEN``
+* ``*CYCLE``
+* ``*DO``
+* ``*DOWHILE``
+* ``*ELSE``
+* ``*ELSEIF``
+* ``*ENDDO``
+* ``/EOF``
+* ``*GO``
+* ``*IF``
+* ``*REPEAT``
+* ``*RETURN``
+* ``*VWRITE``
+
+Note, many of these commands do not make sense in a Python context.
+For example the ``*ASK`` can be replaced with a Python ``input``,
+``*IF`` with a Python ``if`` statement, and instead of ``*CREATE`` and
+``*USE`` can simply call another Python function or module.
+
+
+GUI Commands
+~~~~~~~~~~~~
+These commands have no direct mapping to MAPDL as they are not
+applicable to a "headless" interactive session.
+
+* ``*DEL``

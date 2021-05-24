@@ -226,9 +226,11 @@ def mapdl(request, tmpdir_factory):
 
 @pytest.fixture(scope='function')
 def cleared(mapdl):
-    mapdl.finish()
-    mapdl.clear('NOSTART')  # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl.prep7()
+    mapdl.finish(mute=True)
+    # *MUST* be NOSTART.  With START fails after 20 calls...
+    # this has been fixed in later pymapdl and MAPDL releases
+    mapdl.clear('NOSTART', mute=True)
+    mapdl.prep7(mute=True)
     yield
 
 

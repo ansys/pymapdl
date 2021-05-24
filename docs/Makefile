@@ -23,6 +23,7 @@ help:
 clean:
 	rm -rf build
 	rm -rf source/examples
+	find . -type d -name 'api' -exec rm -rf {} +
 
 # build and upload html to the doc host
 upload: html
