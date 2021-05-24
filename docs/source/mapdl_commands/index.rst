@@ -172,7 +172,8 @@ processor.
    post1/trace_points
    post1/special
    post1/status
-
+   post1/failb
+   post1/failure_criteria
 
 ******
 POST26
@@ -214,7 +215,7 @@ files by deleting sets or by changing values.
 .. toctree::
    :maxdepth: 1
 
-   aux3.rst
+   aux3
 
 
 *****
@@ -239,7 +240,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
 .. toctree::
    :maxdepth: 1
 
-   aux15.rst
+   aux15
 
 
 *****************

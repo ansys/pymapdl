@@ -396,3 +396,88 @@ def smooth(self, vect1="", vect2="", datap="", fitpt="", vect3="",
     """
     command = f"SMOOTH,{vect1},{vect2},{datap},{fitpt},{vect3},{vect4},{disp}"
     return self.run(command, **kwargs)
+
+
+def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
+    """Moves a variable into an array parameter vector.
+
+    APDL Command: VGET
+
+    Parameters
+    ----------
+    par
+        Array parameter vector in the operation.
+
+    ir
+        Reference number of the variable (1 to NV [NUMVAR]).
+
+    tstrt
+        Time (or frequency) corresponding to start of IR data.  If between
+        values, the nearer value is used.
+
+    kcplx
+        Complex number key:
+
+        * ``0`` - Use the real part of the IR data.
+
+        * ``1`` - Use the imaginary part of the IR data.
+
+    Notes
+    -----
+    Moves a variable into an array parameter vector.  The starting array
+    element number must be defined.  For example, VGET,A(1),2 moves
+    variable 2 (starting at time 0.0) to array parameter A.  Looping
+    continues from array element A(1) with the index number incremented by
+    one until the variable is filled.  The number of loops may be
+    controlled with the *VLEN command (except that loop skipping (NINC) is
+    not allowed).  For multi-dimensioned array parameters, only the first
+    (row) subscript is incremented.
+    """
+    command = f"VGET,{par},{ir},{tstrt},{kcplx}"
+    return self.run(command, **kwargs)
+
+
+def vput(self, par="", ir="", tstrt="", kcplx="", name="", **kwargs):
+    """Moves an array parameter vector into a variable.
+
+    APDL Command: VPUT
+
+    Parameters
+    ----------
+    par
+        Array parameter vector in the operation.
+
+    ir
+        Arbitrary reference number assigned to this variable (1 to NV
+        [NUMVAR]).  Overwrites any existing results for this variable.
+
+    tstrt
+        Time (or frequency) corresponding to start of IR data.  If between
+        values, the nearer value is used.
+
+    kcplx
+        Complex number key:
+
+        0 - Use the real part of the IR data.
+
+        1 - Use the imaginary part of the IR data.
+
+    name
+        Thirty-two character name identifying the item on printouts and
+        displays. Defaults to the label formed by concatenating VPUT with
+        the reference number IR.
+
+    Notes
+    -----
+    At least one variable should be defined (NSOL, ESOL, RFORCE, etc.)
+    before using this command.  The starting array element number must be
+    defined.  For example, VPUT,A(1),2 moves array parameter A to variable
+    2 starting at time 0.0.  Looping continues from array element A(1) with
+    the index number incremented by one until the variable is filled.
+    Unfilled variable locations are assigned a zero value.  The number of
+    loops may be controlled with the *VLEN command (except that loop
+    skipping (NINC) is not allowed).  For multi-dimensioned array
+    parameters, only the first (row) subscript is incremented.
+    """
+    command = f"VPUT,{par},{ir},{tstrt},{kcplx},{name}"
+    return self.run(command, **kwargs)

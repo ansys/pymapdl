@@ -358,6 +358,88 @@ def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
     return self.run(command, **kwargs)
 
 
+def starvput(self, parr="", entity="", entnum="", item1="", it1num="",
+             item2="", it2num="", kloop="", **kwargs):
+    """Restores array parameter values into the ANSYS database.
+
+    APDL Command: *VPUT
+
+    Parameters
+    ----------
+    parr
+        The name of the input vector array parameter.  See *SET for name
+        restrictions.  The parameter must exist as a dimensioned array
+        [*DIM] with data input.
+
+    entity
+        Entity keyword.  Valid keywords are shown for Entity = in the table
+        below.
+
+    entnum
+        The number of the entity (as shown for ENTNUM= in the table below).
+
+    item1
+        The name of a particular item for the given entity.  Valid items
+        are as shown in the Item1 columns of the table below.
+
+    it1num
+        The number (or label) for the specified Item1 (if any).  Valid
+        IT1NUM values are as shown in the IT1NUM columns of the table
+        below.  Some Item1 labels do not require an IT1NUM value.
+
+    item2, it2num
+        A second set of item labels and numbers to further qualify the item
+        for which data is to be stored.  Most items do not require this
+        level of information.
+
+    kloop
+        Field to be looped on:
+
+        Loop on the ENTNUM field (default). - Loop on the Item1 field.
+
+        Loop on the IT1NUM field.  Successive items are as shown with IT1NUM. - Loop on the Item2 field.
+
+    Notes
+    -----
+    The *VPUT command is not supported for PowerGraphics displays.
+    Inconsistent results may be obtained if this command is not used in
+    /GRAPHICS, FULL.
+
+    Plot and print operations entered via the GUI (Utility Menu> Pltcrtls,
+    Utility Menu> Plot) incorporate the AVPRIN command. This means that the
+    principal and equivalent values are recalculated. If you use *VPUT to
+    put data back into the database, issue the plot commands from the
+    command line to preserve your data.
+
+    This operation is basically the inverse of the *VGET operation.  Vector
+    items are put directly (without any coordinate system transformation)
+    into the ANSYS database.  Items can only replace existing items of the
+    database and not create new items.  Degree of freedom results that are
+    replaced in the database are available for all subsequent
+    postprocessing operations.  Other results are changed temporarily and
+    are available mainly for the immediately following print and display
+    operations.  The vector specification *VCUM does not apply to this
+    command.  The valid labels for the location fields (Entity, ENTNUM,
+    Item1, and IT1NUM) are listed below.  Item2 and IT2NUM are not
+    currently used.  Not all items from the *VGET list are allowed on *VPUT
+    since putting values into some locations could cause the database to be
+    inconsistent.
+
+    This command is valid in any processor.
+
+    Table: 250:: : *VPUT - POST1 Items
+
+    X, Y, or Z fluid velocity. X, Y, or Z nodal velocity in a transient
+    structural analysis (LS-DYNA analysis or analysis with ANTYPE,TRANS).
+
+    X, Y, or Z magnetic vector potential. X, Y, or Z nodal acceleration in
+    a transient structural analysis (LS-DYNA analysis or analysis with
+    ANTYPE,TRANS).
+    """
+    command = f"*VPUT,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+    return self.run(command, **kwargs)
+
+
 def sread(self, strarray="", fname="", ext="", nchar="", nskip="",
           nread="", **kwargs):
     """Reads a file into a string array parameter.
@@ -1017,50 +1099,6 @@ def voper(self, parr="", par1="", oper="", par2="", con1="", con2="",
     return self.run(command, **kwargs)
 
 
-def vput(self, par="", ir="", tstrt="", kcplx="", name="", **kwargs):
-    """Moves an array parameter vector into a variable.
-
-    APDL Command: VPUT
-
-    Parameters
-    ----------
-    par
-        Array parameter vector in the operation.
-
-    ir
-        Arbitrary reference number assigned to this variable (1 to NV
-        [NUMVAR]).  Overwrites any existing results for this variable.
-
-    tstrt
-        Time (or frequency) corresponding to start of IR data.  If between
-        values, the nearer value is used.
-
-    kcplx
-        Complex number key:
-
-        0 - Use the real part of the IR data.
-
-        1 - Use the imaginary part of the IR data.
-
-    name
-        Thirty-two character name identifying the item on printouts and
-        displays. Defaults to the label formed by concatenating VPUT with
-        the reference number IR.
-
-    Notes
-    -----
-    At least one variable should be defined (NSOL, ESOL, RFORCE, etc.)
-    before using this command.  The starting array element number must be
-    defined.  For example, VPUT,A(1),2 moves array parameter A to variable
-    2 starting at time 0.0.  Looping continues from array element A(1) with
-    the index number incremented by one until the variable is filled.
-    Unfilled variable locations are assigned a zero value.  The number of
-    loops may be controlled with the *VLEN command (except that loop
-    skipping (NINC) is not allowed).  For multi-dimensioned array
-    parameters, only the first (row) subscript is incremented.
-    """
-    command = f"VPUT,{par},{ir},{tstrt},{kcplx},{name}"
-    return self.run(command, **kwargs)
 
 
 def vscfun(self, parr="", func="", par1="", **kwargs):

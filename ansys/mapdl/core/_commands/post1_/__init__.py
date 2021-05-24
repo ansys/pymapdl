@@ -1,6 +1,7 @@
 from . import animation
 from . import controls
 from . import element_table
+from . import failure_criteria
 from . import listing
 from . import load_case
 from . import magnetics_calc

@@ -20,10 +20,6 @@ database.
    Mapdl.cecheck
    Mapdl.check
    Mapdl.cncheck
-   Mapdl.fc
-   Mapdl.fccheck
-   Mapdl.fcdele
-   Mapdl.fclist
    Mapdl.igesout
    Mapdl.mfimport
    Mapdl.nooffset

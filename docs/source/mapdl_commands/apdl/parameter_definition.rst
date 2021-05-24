@@ -21,5 +21,5 @@ These APDL commands are used to define parameters and their values.
    Mapdl.taxis
    Mapdl.tread
    Mapdl.vfill
-   Mapdl.vget
+   Mapdl.starvget
    Mapdl.vread

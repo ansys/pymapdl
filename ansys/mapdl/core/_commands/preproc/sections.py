@@ -454,6 +454,89 @@ def sdelete(self, sfirst="", slast="", sinc="", knoclean="", lchk="",
     return self.run(command, **kwargs)
 
 
+def secmodif(self, secid="", kywrd="", **kwargs):
+    """Modifies a pretension section
+
+    APDL Command: SECMODIF
+
+    Parameters
+    ----------
+    secid
+        Unique section number. This number must already be assigned to a
+        section.
+
+    norm
+        Keyword specifying that the command will modify the pretension
+        section normal direction.
+
+    nx, ny, nz
+        Specifies the individual normal components to modify.
+
+    kcn
+        Coordinate system number. This can be either 0 (Global Cartesian),
+        1 (Global Cylindrical) 2 (Global Spherical), 4 (Working Plane), 5
+        (Global Y Axis Cylindrical) or an arbitrary reference number
+        assigned to a coordinate system.
+
+    Notes
+    -----
+    The SECMODIF command either modifies the normal for a specified
+    pretension section, or changes the name of the specified pretension
+    surface.
+    """
+    command = f"SECMODIF,{secid},{kywrd}"
+    return self.run(command, **kwargs)
+
+
+def secfunction(self, table="", kcn="", **kwargs):
+    """Specifies shell section thickness as a tabular function.
+
+    APDL Command: SECFUNCTION
+
+    Parameters
+    ----------
+    table
+        Table name or array parameter reference for specifying thickness.
+
+    kcn
+        Local coordinate system reference number or array interpretation
+        pattern for this tabular function evaluation.
+
+    Notes
+    -----
+    The SECFUNCTION command is associated with the section most recently
+    defined via the SECTYPE command.
+
+    A table (TABLE) can define tabular thickness as a function of
+    coordinates. Alternatively, you can use an array parameter (indexed by
+    node number) that expresses the function to be mapped. (For example,
+    func (17) should be the desired shell thickness at node 17.)  To
+    specify a table, enclose the table or array name in percent signs (%)
+    (SECFUNCTION,%tablename%). Use the *DIM command to define a table.
+
+    The table or array defines the total shell thickness at any point in
+    space. In multilayered sections, the total thickness and each layer
+    thickness are scaled accordingly.
+
+    The Function Tool is a convenient way to define your thickness tables.
+    For more information, see Using the Function Tool in the Basic Analysis
+    Guide.
+
+    If you do not specify a local coordinate system (KCN), the program
+    interprets TABLE in global XYZ coordinates. (For information about
+    local coordinate systems, see the LOCAL command documentation.)
+
+    When KCN = NODE, the program interprets TABLE as an array parameter
+    (indexed by node number) that expresses the function to be mapped.
+
+    When KCN = NOD2, the program interprets TABLE as a 2-D array parameter
+    (where columns contain node numbers and rows contain the corresponding
+    thicknesses) that expresses the function to be mapped.
+    """
+    command = f"SECFUNCTION,{table},{kcn}"
+    return self.run(command, **kwargs)
+
+
 def seccontrol(self, val1="", val2="", val3="", val4="", val5="", val6="",
                val7="", val8="", val9="", val10="", val11="", val12="",
                val13="", **kwargs):

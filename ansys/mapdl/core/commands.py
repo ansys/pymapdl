@@ -26,10 +26,10 @@ class Commands:
     anstoasas = session.files.anstoasas
     assign = session.files.assign
     copy = session.files.copy
-    delete = session.files.delete
+    slashdelete = session.files.slashdelete
     fcomp = session.files.fcomp
     lgwrite = session.files.lgwrite
-    list = session.files.list
+    starlist = session.files.starlist
     rename = session.files.rename
     slashclog = session.files.slashclog
     slashfdele = session.files.slashfdele
@@ -149,7 +149,9 @@ class Commands:
 
     # AUX3
     compress = aux3_.compress
+    delete = aux3_.delete
     fileaux3 = aux3_.fileaux3
+    list = aux3_.list
     modify = aux3_.modify
     undelete = aux3_.undelete
 
@@ -205,10 +207,6 @@ class Commands:
     cecheck = preproc.database.cecheck
     check = preproc.database.check
     cncheck = preproc.database.cncheck
-    fc = preproc.database.fc
-    fccheck = preproc.database.fccheck
-    fcdele = preproc.database.fcdele
-    fclist = preproc.database.fclist
     igesout = preproc.database.igesout
     mfimport = preproc.database.mfimport
     nooffset = preproc.database.nooffset
@@ -497,6 +495,8 @@ class Commands:
     cbte = preproc.sections.cbte
     cbtmp = preproc.sections.cbtmp
     sdelete = preproc.sections.sdelete
+    secmodif = preproc.sections.secmodif
+    secfunction = preproc.sections.secfunction
     seccontrol = preproc.sections.seccontrol
     secdata = preproc.sections.secdata
     secjoint = preproc.sections.secjoint
@@ -715,7 +715,7 @@ class Commands:
     vlen = apdl.array_parm.vlen
     vmask = apdl.array_parm.vmask
     voper = apdl.array_parm.voper
-    vput = apdl.array_parm.vput
+    starvput = apdl.array_parm.starvput
     vscfun = apdl.array_parm.vscfun
     vstat = apdl.array_parm.vstat
     vwrite = apdl.array_parm.vwrite
@@ -729,7 +729,7 @@ class Commands:
     taxis = apdl.parameter_definition.taxis
     tread = apdl.parameter_definition.tread
     vfill = apdl.parameter_definition.vfill
-    vget = apdl.parameter_definition.vget
+    starvget = apdl.parameter_definition.starvget
     vread = apdl.parameter_definition.vread
     abbr = apdl.abbreviations.abbr
     abbres = apdl.abbreviations.abbres
@@ -749,6 +749,7 @@ class Commands:
     lsdump = apdl.matrix_op.lsdump
     lsengine = apdl.matrix_op.lsengine
     lsfactor = apdl.matrix_op.lsfactor
+    lsrestore = apdl.matrix_op.lsrestore
     merge = apdl.matrix_op.merge
     mult = apdl.matrix_op.mult
     nrm = apdl.matrix_op.nrm
@@ -758,6 +759,7 @@ class Commands:
     starprint = apdl.matrix_op.starprint
     sort = apdl.matrix_op.sort
     vec = apdl.matrix_op.vec
+    wrk = apdl.matrix_op.wrk
     wait = apdl.process_controls.wait
 
     # post26
@@ -767,6 +769,8 @@ class Commands:
     resp = post26_.special.resp
     rpsd = post26_.special.rpsd
     smooth = post26_.special.smooth
+    vput = post26_.special.vput
+    vget = post26_.special.vget
     ansol = post26_.setup.ansol
     cisol = post26_.setup.cisol
     data = post26_.setup.data
@@ -1000,6 +1004,11 @@ class Commands:
     inres = post1_.controls.inres
     layer = post1_.controls.layer
     rsys = post1_.controls.rsys
+    fc = post1_.failure_criteria.fc
+    fccheck = post1_.failure_criteria.fccheck
+    fcdele = post1_.failure_criteria.fcdele
+    fclist = post1_.failure_criteria.fclist
+    fctyp = post1_.failure_criteria.fctyp
 
     # solution
     gp = solution.gap_conditions.gp
@@ -1162,6 +1171,7 @@ class Commands:
     addam = solution.spectrum_options.addam
     coval = solution.spectrum_options.coval
     cqc = solution.spectrum_options.cqc
+    ddaspec = solution.spectrum_options.ddaspec
     dsum = solution.spectrum_options.dsum
     freq = solution.spectrum_options.freq
     grp = solution.spectrum_options.grp

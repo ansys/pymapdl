@@ -538,6 +538,29 @@ def lsfactor(self, enginename="", option="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def lsrestore(self, enginename="", filename="", **kwargs):
+    """Restores a linear solver engine from a binary file.
+
+    APDL Command: *LSRESTORE
+
+    Parameters
+    ----------
+    enginename
+        Name used to identify this engine.
+
+    filename
+        Name of the file to read from.
+
+    Notes
+    -----
+    Restores a previously dumped Linear Solver (see the *LSDUMP command).
+    This Linear Solver can be used to solve a linear system using the
+    *LSBAC command.
+    """
+    command = "*LSRESTORE,%s,%s" % (str(enginename), str(filename))
+    return self.run(command, **kwargs)
+
+
 def merge(self, name1="", name2="", val1="", val2="", **kwargs):
     """Merges two dense matrices or vectors into one.
 
@@ -824,24 +847,40 @@ def vec(self, vector="", type_="", method="", val1="", val2="", val3="",
     vector
         Name used to identify the vector. Must be specified.
 
-    type\_
+    type_
         Vector type:
 
-        Double precision real values (default). - Complex double precision values.
+        * ``"D"`` : Double precision real values (default).
+
+        * ``"Z"`` : Complex double precision values.
+
+        * ``"I"`` : Integer values.
 
     method
         Method used to create the vector:
 
-        Allocate space for a vector (default). - Resize an existing vector to a new length. Values are kept from the original
-                          vector. If the length specified by Val1 is
-                          greater than the original vector length, the
-                          additional rows are assigned a value of zero.
+        * ``"ALLOC"`` : Allocate space for a vector (default).
+
+        * ``"RESIZE"`` : Resize an existing vector to a new
+          length. Values are kept from the original vector. If the
+          length specified by Val1 is greater than the original vector
+          length, the additional rows are assigned a value of zero.
+
+        * ``"COPY"`` : Copy an existing vector.
+
+        * ``"IMPORT"`` : Import the vector from a file.
+
+        * ``"LINK"`` : Link to a column of an existing dense *DMAT
+          matrix and use it in subsequent vector calculations. Any
+          changes to the vector are also made to the corresponding
+          matrix column (memory is shared).
 
         Copy an existing vector. - Import the vector from a file.
 
     val1, val2, val3, val4, val5
-        Additional input. The meaning of Val1 through Val5 will vary
-        depending on the specified Method. See details below.
+        Additional input. The meaning of ``val1`` through ``val5`` will vary
+        depending on the specified Method.  See:
+        https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VEC.html
 
     Notes
     -----
@@ -852,4 +891,30 @@ def vec(self, vector="", type_="", method="", val1="", val2="", val3="",
     Guide.
     """
     command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4}"
+    return self.run(command, **kwargs)
+
+
+def wrk(self, num="", **kwargs):
+    """APDL Command: *WRK
+
+    Sets the active workspace number.
+
+    Parameters
+    ----------
+    num
+        Number of the active memory workspace for APDLMath vector and
+        matrices. All the following APDLMath vectors and matrices will
+        belong to this memory workspace, until the next call to the *WRK
+        command. By default, all the APDLMath objects belong to workspace
+        number 1.
+
+    Notes
+    -----
+    This feature enables you to associate a set of vector and matrices in a
+    given memory workspace, so that you can easily manage the free step:
+
+    This feature can be useful to free all the temporary APDLMath variables
+    inside a MACRO in one call.
+    """
+    command = "*WRK,%s" % (str(num))
     return self.run(command, **kwargs)

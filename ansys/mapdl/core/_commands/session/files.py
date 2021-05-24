@@ -369,36 +369,6 @@ def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
     return self.run(command, **kwargs)
 
 
-def delete(self, set_="", nstart="", nend="", **kwargs):
-    """Specifies sets in the results file to be deleted before postprocessing.
-
-    APDL Command: DELETE
-
-    Parameters
-    ----------
-    set\_
-        Specifies that sets in the results file are to be deleted.
-
-    nstart
-        The first set in a results file to be deleted.
-
-    nend
-        The final set in a results file to be deleted. This field is used
-        only if deleting more than one sequential sets.
-
-    Notes
-    -----
-    DELETE is a specification command that flags sets in the results file
-    for deletion. It should be followed by a COMPRESS command, the
-    corresponding action command that deletes the specified sets.
-
-    The DELETE command is valid only in the results file editing processor
-    (ANSYS auxiliary processor AUX3).
-    """
-    command = "DELETE,%s,%s,%s" % (str(set_), str(nstart), str(nend))
-    return self.run(command, **kwargs)
-
-
 def fcomp(self, ident="", level="", **kwargs):
     """Specifies file compression level.
 
@@ -476,17 +446,32 @@ def lgwrite(self, fname="", ext="", kedit="", **kwargs):
     return self.run(f"LGWRITE,{fname},{ext},,{kedit}", **kwargs)
 
 
-def list(self, level="", **kwargs):
-    """Lists out the sets in the results file.
+def starlist(self, fname="", ext="", **kwargs):
+    """Displays the contents of an external, coded file.
 
-    APDL Command: LIST
+    APDL Command: *LIST
+
+    Parameters
+    ----------
+    fname
+        File name and directory path (248 characters maximum,
+        including the characters needed for the directory path).  An
+        unspecified directory path defaults to the working directory;
+        in this case, you can use all 248 characters for the file
+        name.
+
+    ext
+        Filename extension (eight-character maximum).
 
     Notes
     -----
-    This command lists the results set number, the load step, substep, and
-    time step for each set. It also shows all sets marked for deletion.
+    Displays the contents of an external, coded file.  The file to be
+    listed cannot be in use (open) at the time (except for the error
+    file, File.ERR, which may be displayed with *LIST,ERR).
+
+    This command is valid in any processor.
     """
-    command = "LIST,%s" % (str(level))
+    command = f"*LIST,{fname},{ext}"
     return self.run(command, **kwargs)
 
 
@@ -588,3 +573,45 @@ def slashfdele(self, ident="", stat="", **kwargs):
     """
     command = f"/FDELE,{ident},{stat}"
     return self.run(command, **kwargs)
+
+
+def slashdelete(self, fname="", ext="", distkey="", **kwargs):
+    """Deletes a file.
+
+    APDL Command: /DELETE
+
+    Parameters
+    ----------
+    fname
+        File name and directory path (248 characters maximum,
+        including the characters needed for the directory path).
+        An unspecified directory path defaults to the working
+        directory; in this case, you can use all 248 characters
+        for the file name.
+
+    ext
+        Filename extension (eight-character maximum).
+
+    distkey
+        Key that specifies whether the file deletion is performed
+        on all processes in distributed parallel mode (Distributed
+        ANSYS):
+
+        1 (ON or YES) - The program performs the file deletion
+        locally on each process.
+
+        0 (OFF or NO) - The program performs the file deletion
+        only on the master process (default).
+
+    Notes
+    -----
+    In distributed parallel mode (Distributed ANSYS), only the
+    master process will delete Fname.Ext by default. However, when
+    DistKey is set to 1 (or ON or YES), the command is executed by
+    all processes. In this case, Fname will automatically have the
+    process rank appended to it.  This means FnameN.Ext will be
+    deleted by all processes, where N is the Distributed ANSYS
+    process rank. For more information see Differences in General
+    Behavior in the Parallel Processing Guide.
+    """
+    return self.run(f"/DELETE,{fname},{ext},,{distkey}", **kwargs)

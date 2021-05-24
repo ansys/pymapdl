@@ -16,10 +16,10 @@ copying, and listing.
    Mapdl.anstoasas
    Mapdl.assign
    Mapdl.copy
-   Mapdl.delete
+   Mapdl.slashdelete
    Mapdl.fcomp
    Mapdl.lgwrite
-   Mapdl.list
+   Mapdl.starlist
    Mapdl.slashclog
    Mapdl.slashfdele
    Mapdl.rename

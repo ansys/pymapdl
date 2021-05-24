@@ -1,6 +1,6 @@
 import os
 
-from ansys.mapdl.core import __version__, mapdl_functions
+from ansys.mapdl.core import __version__
 from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.commands import Commands
 

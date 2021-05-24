@@ -12,6 +12,20 @@ def compress(self, **kwargs):
     return self.run(command, **kwargs)
 
 
+def list(self, level="", **kwargs):
+    """Lists out the sets in the results file.
+
+    APDL Command: LIST
+
+    Notes
+    -----
+    This command lists the results set number, the load step, substep, and
+    time step for each set. It also shows all sets marked for deletion.
+    """
+    command = "LIST,%s" % (str(level))
+    return self.run(command, **kwargs)
+
+
 def fileaux3(self, fname="", ext="", **kwargs):
     """Specifies the results file to be edited.
 
@@ -113,4 +127,34 @@ def undelete(self, option="", nstart="", nend="", **kwargs):
     it.
     """
     command = f"UNDELETE,{option},{nstart},{nend}"
+    return self.run(command, **kwargs)
+
+
+def delete(self, set_="", nstart="", nend="", **kwargs):
+    """Specifies sets in the results file to be deleted before postprocessing.
+
+    APDL Command: DELETE
+
+    Parameters
+    ----------
+    set_
+        Specifies that sets in the results file are to be deleted.
+
+    nstart
+        The first set in a results file to be deleted.
+
+    nend
+        The final set in a results file to be deleted. This field is used
+        only if deleting more than one sequential sets.
+
+    Notes
+    -----
+    DELETE is a specification command that flags sets in the results
+    file for deletion. It should be followed by a COMPRESS command,
+    the corresponding action command that deletes the specified sets.
+
+    The DELETE command is valid only in the results file editing processor
+    (ANSYS auxiliary processor AUX3).
+    """
+    command = f"DELETE,{set_},{nstart},{nend}"
     return self.run(command, **kwargs)

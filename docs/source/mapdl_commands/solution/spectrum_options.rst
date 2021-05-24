@@ -14,6 +14,7 @@ These SOLUTION commands are used to define options for spectrum analyses.
    Mapdl.addam
    Mapdl.coval
    Mapdl.cqc
+   Mapdl.ddaspec
    Mapdl.dsum
    Mapdl.freq
    Mapdl.grp

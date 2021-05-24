@@ -29,6 +29,7 @@ These APDL Math commands can be used to create, manipulate, and solve matrices.
    Mapdl.lsdump
    Mapdl.lsengine
    Mapdl.lsfactor
+   Mapdl.lsrestore
    Mapdl.merge
    Mapdl.mult
    Mapdl.nrm
@@ -38,3 +39,4 @@ These APDL Math commands can be used to create, manipulate, and solve matrices.
    Mapdl.starprint
    Mapdl.sort
    Mapdl.vec
+   Mapdl.wrk

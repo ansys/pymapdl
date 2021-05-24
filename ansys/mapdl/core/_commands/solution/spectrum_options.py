@@ -123,6 +123,69 @@ def cqc(self, signif="", label="", forcetype="", **kwargs):
     return self.run(command, **kwargs)
 
 
+def ddaspec(self, keyref="", shptyp="", mountloc="", deftyp="", amin="",
+            **kwargs):
+    """APDL Command: DDASPEC
+
+    Specifies the shock spectrum computation constants for DDAM analysis.
+
+    Parameters
+    ----------
+    keyref
+        Key for reference catalog:
+
+        1 - The spectrum computation constants are based on NRL-1396 (default). For more
+            information, see Dynamic Design Analysis Method in the
+            Mechanical APDL Theory Reference
+
+    shptyp
+        Select the ship type:
+
+        SUBM - Submarine
+
+        SURF - Surface ship
+
+    mountloc
+        Select the mounting location:
+
+        HULL - Hull mounting location. These structures are mounted directly to basic hull
+               structures like frames, structural bulkheads below the water
+               line, and shell plating above the water line.
+
+        DECK - Deck mounting location. These structures are mounted directly to decks, non-
+               structural bulkheads, or to structural bulkheads above the
+               water line.
+
+        SHEL - Shell plating mounting location. These structures are mounted directly to shell
+               plating below the water line without intervening
+               foundations.
+
+    deftyp
+        Select the deformation type:
+
+        ELAS - Elastic deformation (default)
+
+        PLAS - Elastic-plastic deformation
+
+    amin
+        Minimum acceleration value in inch/sec2. It defaults to 2316
+        inch/sec2 which equals 6g, where g is the acceleration due to
+        gravity (g = 386 in/sec2).
+
+    Notes
+    -----
+    The excitation direction is required to calculate the spectrum
+    coefficients. Issue the SED command before issuing DDASPEC.
+
+    ADDAM and VDDAM may alternatively be used to calculate spectrum
+    coefficients.
+
+    This command is also valid in PREP7.
+    """
+    command = f"DDASPEC,{keyref},{shptyp},{mountloc},{deftyp},{amin}"
+    return self.run(command, **kwargs)
+
+
 def dsum(self, signif="", label="", td="", forcetype="", **kwargs):
     """Specifies the double sum mode combination method.
 

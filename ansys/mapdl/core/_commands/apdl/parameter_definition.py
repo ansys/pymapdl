@@ -563,6 +563,94 @@ def starset(self, par="", value="", val2="", val3="", val4="", val5="",
     return self.run(command, **kwargs)
 
 
+def starvget(self, parr="", entity="", entnum="", item1="", it1num="",
+             item2="", it2num="", kloop="", **kwargs):
+    """Retrieves values and stores them into an array parameter.
+
+    APDL Command: *VGET
+
+    Parameters
+    ----------
+    parr
+        The name of the resulting vector array parameter.  See *SET for
+        name restrictions.
+
+    entity
+        Entity keyword.  Valid keywords are NODE, ELEM, KP, LINE, AREA,
+        VOLU, etc. as shown for Entity = in the tables below.
+
+    entnum
+        The number of the entity (as shown for ENTNUM = in the tables
+        below).
+
+    item1
+        The name of a particular item for the given entity.  Valid items
+        are as shown in the Item1 columns of the tables below.
+
+    it1num
+        The number (or label) for the specified Item1 (if any).  Valid
+        IT1NUM values are as shown in the IT1NUM columns of the tables
+        below.  Some Item1 labels do not require an IT1NUM value.
+
+    item2, it2num
+        A second set of item labels and numbers to further qualify the item
+        for which data is to be retrieved.  Most items do not require this
+        level of information.
+
+    kloop
+        Field to be looped on:
+
+        ``0`` or ``2`` : Loop on the ENTNUM field (default).
+
+        ``3`` : Loop on the Item1 field.
+
+        ``4`` : Loop on the IT1NUM field. Successive items are as shown with IT1NUM.
+
+        ``5`` : Loop on the Item2 field.
+
+        ``6`` : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
+
+    Notes
+    -----
+    Retrieves values for specified items and stores the values in an output
+    vector of a user-named array parameter according to:
+
+    ``ParR = f(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)``
+
+    where (f) is the *GET function; Entity, Item1, and Item2 are keywords;
+    and ENTNUM, IT1NUM, and IT2NUM are numbers or labels corresponding to
+    the keywords. Looping continues over successive entity numbers (ENTNUM)
+    for the KLOOP default.  For example, *VGET,A(1),ELEM,5,CENT,X returns
+    the centroid x-location of element 5 and stores the result in the first
+    location of A.  Retrieving continues with element 6, 7, 8, etc.,
+    regardless of whether the element exists or is selected, until
+    successive array locations are filled.  Use *VLEN or *VMASK to skip
+    locations. Absolute values and scale factors may be applied to the
+    result parameter [*VABS, *VFACT].  Results may be cumulative [*VCUM].
+    See the *VOPER command for general details.  Results can be put back
+    into an analysis by writing a file of the desired input commands with
+    the *VWRITE command.  See also the *VPUT command.
+
+    Both *GET and *VGET retrieve information from the active data stored in
+    memory. The database is often the source, and sometimes the information
+    is retrieved from common memory blocks that ANSYS uses to manipulate
+    information. Although POST1 and POST26 operations use a *.rst file, GET
+    data is accessed from the database or from the common blocks. Get
+    operations do not access the *.rst file directly.
+
+    The *VGET command retrieves both the unprocessed real and the imaginary
+    parts (original and duplicate sector nodes and elements) of a cyclic
+    symmetry solution.
+
+    For each  of the sections for accessing *VGET parameters see:
+    https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html
+
+    This command is valid in any processor.
+    """
+    command = f"*VGET,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+    return self.run(command, **kwargs)
+
+
 def taxis(self, parmloc="", naxis="", val1="", val2="", val3="", val4="",
           val5="", val6="", val7="", val8="", val9="", val10="", **kwargs):
     """Defines table index numbers.
@@ -750,45 +838,6 @@ def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
     This command is valid in any processor.
     """
     command = f"*VFILL,{parr},{func},{con1},{con2},{con3},{con4},{con5},{con6},{con7},{con8},{con9},{con10}"
-    return self.run(command, **kwargs)
-
-
-def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
-    """Moves a variable into an array parameter vector.
-
-    APDL Command: VGET
-
-    Parameters
-    ----------
-    par
-        Array parameter vector in the operation.
-
-    ir
-        Reference number of the variable (1 to NV [NUMVAR]).
-
-    tstrt
-        Time (or frequency) corresponding to start of IR data.  If between
-        values, the nearer value is used.
-
-    kcplx
-        Complex number key:
-
-        0 - Use the real part of the IR data.
-
-        1 - Use the imaginary part of the IR data.
-
-    Notes
-    -----
-    Moves a variable into an array parameter vector.  The starting array
-    element number must be defined.  For example, VGET,A(1),2 moves
-    variable 2 (starting at time 0.0) to array parameter A.  Looping
-    continues from array element A(1) with the index number incremented by
-    one until the variable is filled.  The number of loops may be
-    controlled with the *VLEN command (except that loop skipping (NINC) is
-    not allowed).  For multi-dimensioned array parameters, only the first
-    (row) subscript is incremented.
-    """
-    command = f"VGET,{par},{ir},{tstrt},{kcplx}"
     return self.run(command, **kwargs)
 
 

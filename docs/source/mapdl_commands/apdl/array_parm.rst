@@ -37,7 +37,7 @@ vectors and matrices).
    Mapdl.vlen
    Mapdl.vmask
    Mapdl.voper
-   Mapdl.vput
+   Mapdl.starvput
    Mapdl.vscfun
    Mapdl.vstat
    Mapdl.vwrite
