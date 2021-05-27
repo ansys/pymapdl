@@ -1363,16 +1363,9 @@ class MapdlGrpc(_MapdlCore):
         en = stats.find('*** PrePro')
         product = '\n'.join(stats[st:en].splitlines()[1:]).strip()
 
-        # get product version
-        stats = self.slashstatus('TITLE')
-        st = stats.find('RELEASE')
-        en = stats.find('INITIAL', st)
-        mapdl_version = stats[st:en].split('CUSTOMER')[0].strip()
-
-        info =  'Product:             %s\n' % product
-        info += 'MAPDL Version:       %s\n' % mapdl_version
-        info += 'ansys.mapdl Version: %s\n' % __version__
-
+        info = f'Product:             {product}\n'
+        info += f'MAPDL Version:       {self.version}\n'
+        info += f'ansys.mapdl Version: {__version__}\n'
         return info
 
     @supress_logging
