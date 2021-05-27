@@ -102,8 +102,13 @@ def test_multiline_fail(mapdl, cleared):
 
 
 def test_str(mapdl):
-    assert 'ANSYS Mechanical' in str(mapdl)
-
+    mapdl_str = str(mapdl)
+    assert 'Product:' in mapdl_str
+    assert 'MAPDL Version' in mapdl_str
+    try:
+        assert str(mapdl.version) in mapdl_str
+    except:
+        breakpoint()
 
 def test_version(mapdl):
     assert isinstance(mapdl.version, float)
@@ -152,6 +157,7 @@ def test_error(mapdl):
 
 
 def test_ignore_error(mapdl):
+    mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
     assert mapdl.ignore_errors is True
