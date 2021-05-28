@@ -1,6 +1,6 @@
 FROM centos:7
 
-LABEL description="Trimmed MAPDL RC2 v211"
+LABEL description="Trimmed MAPDL RC2 v212"
 MAINTAINER Alex Kaszynski "alexander.kaszynski@ansys.com"
 
 RUN yum install \
@@ -15,7 +15,7 @@ RUN yum install \
     rm -rf /var/cache/yum
 
 RUN mkdir -p /ansys_inc
-COPY v211 /ansys_inc/v211
+COPY v212 /ansys_inc/v212
 
 EXPOSE 50052
-ENTRYPOINT ["/ansys_inc/v211/ansys/bin/mapdl", "-grpc"]
+ENTRYPOINT ["/ansys_inc/v212/ansys/bin/mapdl", "-grpc"]
