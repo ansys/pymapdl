@@ -252,7 +252,7 @@ Access and plot the results within python using PyMAPDL:
             (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
             (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
 
-    result.plot_nodal_displacement(0, cpos=cpos, screenshot='cylinder_disp.png')
+    result.plot_nodal_displacement(0, cpos=cpos, savefig='cylinder_disp.png')
 
 .. figure:: ../images/cylinder_disp.png
     :width: 300pt

@@ -60,8 +60,8 @@ View the current mesh status with:
 
 Geometry Commands
 ~~~~~~~~~~~~~~~~~
-.. autoclass:: ansys.mapdl.core.geometry_commands._MapdlGeometryCommands
-    :members:
+See the :ref:`ref_prep_commands` commands for additional MAPDL
+commands for creating geometries.
 
 
 API Reference

@@ -124,7 +124,93 @@ Run a command and stream its output while it is being run.
     >>> mapdl.solve(verbose=True)
 
 .. note::
-    This feature is only available when running MAPDL in gRPC mode.
+    The ``verbose`` and ``mute`` features are only available when
+    running MAPDL in gRPC mode.
+
+
+Running Several Commands or an Input File
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You can run several MAPDL commands as a unified block.  This is useful
+when using PyMAPDL with older MAPDL commands.  For example:
+
+    >>> cmd = '''/prep7
+    ! Mat
+    MP,EX,1,200000
+    MP,NUXY,1,0.3
+    MP,DENS,1,7.85e-09
+    ! Elements
+    et,1,186
+    et,2,154
+    ! Geometry
+    BLC4,0,0,1000,100,10
+    ! Mesh
+    esize,5
+    vmesh,all
+    nsel,s,loc,x,0
+    d,all,all
+    nsel,s,loc,x,999,1001
+    type,2
+    esurf
+    esel,s,type,,2
+    nsle
+    sfe,all,3,pres,,-10
+    allsel
+    /solu
+    antype,0
+    solve
+    /post1
+    set,last
+    plnsol,u,sum
+    '''
+    >>> resp = mapdl.run_multiline(cmd)
+    >>> resp
+
+     You have already entered the general preprocessor (PREP7).
+
+     MATERIAL          1     EX   =   200000.0
+
+     MATERIAL          1     NUXY =  0.3000000
+
+     MATERIAL          1     DENS =  0.7850000E-08
+
+     ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+      KEYOPT( 1- 6)=        0      0      0        0      0      0
+      KEYOPT( 7-12)=        0      0      0        0      0      0
+      KEYOPT(13-18)=        0      0      0        0      0      0
+
+     CURRENT NODAL DOF SET IS  UX    UY    UZ
+      THREE-DIMENSIONAL MODEL
+
+     ELEMENT TYPE          2 IS SURF154      3-D STRUCTURAL SURFACE
+      KEYOPT( 1- 6)=        0      0      0        0      0      0
+      KEYOPT( 7-12)=        0      0      0        0      0      0
+      KEYOPT(13-18)=        0      0      0        0      0      0
+
+     CURRENT NODAL DOF SET IS  UX    UY    UZ
+      THREE-DIMENSIONAL MODEL
+
+     CREATE A HEXAHEDRAL VOLUME WITH
+     X-DISTANCES FROM      0.000000000     TO      1000.000000
+     Y-DISTANCES FROM      0.000000000     TO      100.0000000
+     Z-DISTANCES FROM      0.000000000     TO      10.00000000
+
+          OUTPUT VOLUME =     1
+
+     DEFAULT ELEMENT DIVISIONS PER LINE BASED ON ELEMENT SIZE =   5.00
+
+     GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED VOLUMES
+    
+     NUMBER OF VOLUMES MESHED   =         1
+     MAXIMUM NODE NUMBER        =     45765
+     MAXIMUM ELEMENT NUMBER     =      8000
+
+Alternatively, you can simply write the commands to a file and then
+run it.  For example, if you have a ``"ds.dat"`` generated from Ansys
+Workbench, you can run that with:
+
+.. code:: python
+
+    >>> resp = mapdl.input("ds.dat")
 
 
 Conditional Statements and Loops
@@ -494,10 +580,10 @@ each command individually.
 Sending Arrays to MAPDL
 -----------------------
 You can send ``numpy`` arrays or Python lists directly to MAPDL using
-``load_array``.  This is far more efficient than individually sending
-parameters to MAPDL through python or MAPDL.  It uses ``*VREAD``
-behind the scenes and will be replaced with a faster interface in the
-future.
+``parameters['MY_ARRAY_NAME']``.  This is far more efficient than
+individually sending parameters to MAPDL through Python with ``run``.
+It uses ``*VREAD`` behind the scenes and will be replaced with a
+faster interface in the future.
 
 .. code:: python
 
@@ -505,20 +591,20 @@ future.
     import numpy as np
     mapdl = launch_mapdl()
     arr = np.random.random((5, 3))
-    mapdl.load_array(arr, 'MYARR')
+    mapdl.parameters['MYARR'] = arr
 
-Verify the data has been properly loaded to MAPDL by accessing the
-first element.  Note that MAPDL uses fortran (1) based indexing.
+Verify the data has been properly loaded to MAPDL by indexing
+``mapdl.parameters`` as if it was a Python dictionary:
 
 .. code:: python
 
-   >>> mapdl.read_float_parameter('MYARR(1, 1)')
-   2020-07-03 21:49:54,387 [INFO] mapdl: MYARR(1, 1) = MYARR(1, 1)
-
-   PARAMETER MYARR(1,1) =    0.7960742456
-
-   >>> arr[0]
-   0.7960742456194109
+   >>> array_from_mapdl = mapdl.parameters['MYARR']
+   >>> array_from_mapdl
+   array([[0.65516567, 0.96977939, 0.3224993 ],
+          [0.58634927, 0.84392263, 0.18152529],
+          [0.76719759, 0.45748876, 0.56432361],
+          [0.78548338, 0.01042177, 0.57420062],
+          [0.33189362, 0.9681039 , 0.47525875]])
 
 
 Downloading a Remote MAPDL File
@@ -557,3 +643,83 @@ You can upload a local file a the remote mapdl instance with:
 .. note::
 
    This is a gRPC feature only available in 2021R1 or newer.
+
+
+Unsupported MAPDL Commands and Other Considerations
+---------------------------------------------------
+Most MAPDl commands have been mapped pythonically into their
+equivalent methods.  Some commands, however, are not supported either
+because they are not applicable to an interactive session, or require
+additional commands that are incompatible with the way inputs are
+handled in the MAPDL server.
+
+Unapplicable Commands
+~~~~~~~~~~~~~~~~~~~~~
+
+Some commands are quietly ignored by MAPDL and you are still free to
+use them.  For example ``/BATCH``, implemented as ``mapdl.batch()`` returns:
+
+.. code::
+
+    *** WARNING ***                         CP =       0.519   TIME= 12:04:16
+    The /BATCH command must be the first line of input.  The /BATCH command
+    is ignored.
+
+Note, that running these commands with ``mapdl.run('<command>')`` will
+not cause MAPDL to die, and will generally simply be ignored by MAPDL.
+
+Ignored commands:
+
+* ``/BATCH``
+* ``*DEL``
+* ``/ERASE``
+* ``ERASE``
+* ``HELP``
+* ``HELPDISP``
+* ``NOERASE``
+* ``UNDO``
+* ``*VEDIT``
+
+.. _ref_unsupported_commands:
+
+Unsupported "Interactive" Commands
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following commands will immediately kill the server if run and are
+not permitted.
+
+Some commands, such as ``/EOF``, .  These commands are not wrapped or
+directly exposed to the user with a Python method such as
+``mapdl.eof()``.  If you wish to exit the server, use
+``mapdl.exit()``.  Other commands, such as ``*ASK``, request user and
+are not supported within an interactive context.  Some of commands may
+be run in ``non_interactive`` mode if applicable.  Others simply are
+not supported.
+
+* ``*ASK``
+* ``*CREATE``
+* ``CFOPEN``
+* ``*CYCLE``
+* ``*DO``
+* ``*DOWHILE``
+* ``*ELSE``
+* ``*ELSEIF``
+* ``*ENDDO``
+* ``/EOF``
+* ``*GO``
+* ``*IF``
+* ``*REPEAT``
+* ``*RETURN``
+* ``*VWRITE``
+
+Note, many of these commands do not make sense in a Python context.
+For example the ``*ASK`` can be replaced with a Python ``input``,
+``*IF`` with a Python ``if`` statement, and instead of ``*CREATE`` and
+``*USE`` can simply call another Python function or module.
+
+
+GUI Commands
+~~~~~~~~~~~~
+These commands have no direct mapping to MAPDL as they are not
+applicable to a "headless" interactive session.
+
+* ``*DEL``

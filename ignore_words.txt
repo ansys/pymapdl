@@ -1,3 +1,5 @@
+delet
+appen
 parm
 pres
 WAN
@@ -5,3 +7,14 @@ filname
 ans
 tread
 wan
+levl
+mater
+aadd
+extrem
+imagin
+ist
+nin
+sord
+struc
+emiss
+vise

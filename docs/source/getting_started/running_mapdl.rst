@@ -62,9 +62,9 @@ This starts up MAPDL in gRPC mode, and MAPDL should output:
      Server Executable   : MapdlGrpc Server
      Server listening on : 0.0.0.0:50052
 
-You can configure the IP address and the port MAPDL starts on with the
-and ``-port``.  For example, you can startup the server to listen for
-connections at port 50005 with:
+You can configure the port MAPDL starts on with the ``-port`` argument.  For
+example, you can startup the server to listen for connections at 
+port 50005 with:
 
 .. code::
 
@@ -93,6 +93,25 @@ Please note that you must have started MAPDL for both of these code
 blocks to work.  If you have MAPDL installed on your local host, you
 can use ``launch_mapdl`` to both start and connect to MAPDL.
 
+If you need to specify the network adapter to open up the gRPC interface 
+on, you need to provide a file named ``"mylocal.ip"`` in the same 
+directory that runs MAPDL.  For example, if one of your network 
+adapters has an IP address of ``192.168.0.16``, then create a file 
+named ``"mylocal.ip"`` containing:
+
+.. code::
+
+    192.168.0.16
+
+
+Then start the instance with:
+
+.. code::
+
+    /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
+
+
+
 
 Debugging Launching MAPDL
 -------------------------
@@ -109,6 +128,7 @@ this will be:
 
 .. code:: python
 
+    >>> from ansys.mapdl.core import launch_mapdl
     >>> exec_loc = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe'
     >>> mapdl = launch_mapdl(exec_loc)
 
@@ -116,6 +136,7 @@ For Linux:
 
 .. code:: python
 
+    >>> from ansys.mapdl.core import launch_mapdl
     >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
     >>> mapdl = launch_mapdl(exec_loc)
 
@@ -136,6 +157,10 @@ dependent) command:
 .. code::
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
+
+.. note::
+   Powershell users can run the above without quotes.
+
 
 For Linux:
 
@@ -170,7 +195,8 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
 
 .. code::
 
-   >>> mapdl = launch_mapdl(additional_switches='-smp')
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl(additional_switches='-smp')
 
 While this approach has the disadvantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
 

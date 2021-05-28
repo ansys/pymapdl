@@ -119,7 +119,8 @@ class PostProcessing():
         >>> mapdl.post_processing.filename
         'file'
         """
-        return self._mapdl.run('/INQUIRE, param, RSTFILE').split('=')[-1].strip()
+        response = self._mapdl.run('/INQUIRE, param, RSTFILE', mute=False)
+        return response.split('=')[-1].strip()
 
     @property
     def nsets(self) -> int:
@@ -307,14 +308,15 @@ class PostProcessing():
         scalars = scalars[mask][ridx]
 
         meshes = [{'mesh': surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                   'stitle': kwargs.pop('stitle', ''),
+                   'scalar_bar_args': {'title': kwargs.pop('stitle', '')},
                    'scalars': scalars}]
 
         labels = []
         if show_node_numbering:
             labels = [{'points': surf.points, 'labels': surf['ansys_node_num']}]
 
-        return general_plotter('MAPDL Displacement', meshes, [], labels, **kwargs)
+        kwargs.setdefault('title', 'MAPDL Displacement')
+        return general_plotter(meshes, [], labels, **kwargs)
 
     @property
     @supress_logging
@@ -486,7 +488,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_temperature(off_screen=True,
-                                                         screenshot='temp_1_2.png')
+                                                         savefig='temp_1_2.png')
 
         Subselect a single result type and plot those stress results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -542,7 +544,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_pressure(off_screen=True,
-                                                   screenshot='temp_1_2.png')
+                                                   savefig='temp_1_2.png')
 
         Subselect a single result type and plot those stress results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -598,7 +600,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_voltage(off_screen=True,
-                                                   screenshot='temp_1_2.png')
+                                                   savefig='temp_1_2.png')
 
         Subselect a single result type and plot those stress results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -797,7 +799,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_stress_intensity(off_screen=True,
-                                                              screenshot='seqv_00.png')
+                                                              savefig='seqv_00.png')
 
         Subselect a single result type and plot those stress results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -865,7 +867,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_eqv_stress(off_screen=True,
-                                                        screenshot='seqv_00.png')
+                                                        savefig='seqv_00.png')
 
         Subselect a single result type and plot those stress results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1075,7 +1077,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_total_strain_intensity(off_screen=True,
-                                                                    screenshot='seqv_00.png')
+                                                                    savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1144,7 +1146,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(off_screen=True,
-                                                              screenshot='seqv_00.png')
+                                                              savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1348,7 +1350,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity(off_screen=True,
-                                                                    screenshot='seqv_00.png')
+                                                                    savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1417,7 +1419,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(off_screen=True,
-                                                              screenshot='seqv_00.png')
+                                                              savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1623,7 +1625,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity(off_screen=True,
-                                                                    screenshot='seqv_00.png')
+                                                                    savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1692,7 +1694,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(off_screen=True,
-                                                              screenshot='seqv_00.png')
+                                                              savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1898,7 +1900,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity(off_screen=True,
-                                                                    screenshot='seqv_00.png')
+                                                                    savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)
@@ -1967,7 +1969,7 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(off_screen=True,
-                                                              screenshot='seqv_00.png')
+                                                              savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results
         >>> mapdl.esel('S', 'TYPE', vmin=1)

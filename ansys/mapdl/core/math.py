@@ -15,6 +15,7 @@ from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc
 from .common_grpc import (parse_chunks, ANSYS_VALUE_TYPE,
                           DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE)
+from .check_version import version_requires
 
 
 MYCTYPE = {np.int32: 'I',
@@ -59,8 +60,12 @@ def get_nparray_chunks(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
                                          chunk=chunk)
         i += chunk_size
 
-def get_nparray_chunks2(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
-    """Serializes a 2D numpy array into chunks"""
+def get_nparray_chunks_mat(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
+    """Serializes a 2D numpy array into chunks
+
+    Uses the ``SetMatDataRequest``
+
+    """
     stype = NP_VALUE_TYPE[array.dtype.type]
     sh1 = array.shape[0]
     sh2 = array.shape[1]
@@ -69,9 +74,10 @@ def get_nparray_chunks2(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
     while i < len(byte_array):
         piece = byte_array[i: i + chunk_size]
         chunk = anskernel.Chunk(payload=piece, size=len(piece))
-        yield pb_types.SetMatDataRequest( mname=name, stype=stype, nrow=sh1,
-                                          ncol=sh2, chunk=chunk)
+        yield pb_types.SetMatDataRequest(mname=name, stype=stype, nrow=sh1,
+                                         ncol=sh2, chunk=chunk)
         i += chunk_size
+
 
 class MapdlMath():
     """Abstract mapdl math class.  Created from a ``Mapdl`` instance.
@@ -115,7 +121,7 @@ class MapdlMath():
 
     def free(self):
         """Delete all vectors"""
-        self._mapdl.run("*FREE,ALL")
+        self._mapdl.run("*FREE,ALL", mute=True)
 
     def __repr__(self):
         return self._status
@@ -127,7 +133,7 @@ class MapdlMath():
     @property
     def _status(self):
         """Print out the status of all APDLMath Objects"""
-        return self._mapdl.run("*STATUS,MATH")
+        return self._mapdl.run("*STATUS,MATH", mute=False)
 
     def vec(self, size=0, dtype=np.double, init=None, name=None):
         """Create a vector
@@ -153,7 +159,7 @@ class MapdlMath():
 
         if not name:
             name = id_generator()
-            self._mapdl.run("*VEC," + name + "," + MYCTYPE[dtype] + ",ALLOC," + str(size))
+            self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
             return AnsVec(name, self._mapdl, dtype, init)
         else:
             return AnsVec(name, self._mapdl)
@@ -186,7 +192,8 @@ class MapdlMath():
 
         if not name:
             name = id_generator()
-            self._mapdl.run(f'*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{nrow},{ncol}')
+            self._mapdl.run(f'*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{nrow},{ncol}',
+                            mute=True)
             mat = AnsDenseMat(name, self._mapdl)
 
             if (init == "rand"):
@@ -361,17 +368,18 @@ class MapdlMath():
         
         from scipy import sparse
         self._set_mat(name, matrix, triu)
-        if ( sparse.issparse(matrix)) :
+        if sparse.issparse(matrix):
             return AnsSparseMat(name, self._mapdl)
         else:
             return AnsDenseMat(name, self._mapdl)
 
-    def load_matrix_from_file(self, type=np.double, fname="file.full", matId="STIFF"):
+    def load_matrix_from_file(self, type_=np.double, fname="file.full", matId="STIFF"):
         """Load a matrix from a file"""
         name = id_generator()
-        self._mapdl._log.info(f"Calling MAPDL to extract the %s matrix from %s",
+        self._mapdl._log.info("Calling MAPDL to extract the %s matrix from %s",
                               matId, fname)
-        self._mapdl.run(f"*SMAT,{name},{MYCTYPE[type]},IMPORT,FULL,{fname},{matId}")
+        self._mapdl.run(f"*SMAT,{name},{MYCTYPE[type_]},IMPORT,FULL,{fname},{matId}",
+                        mute=True)
         return AnsSparseMat(name, self._mapdl)
 
     def stiff(self, dtype=np.double, fname="file.full"):
@@ -418,7 +426,8 @@ class MapdlMath():
         name = id_generator()
         self._mapdl._log.info("Call MAPDL to extract the %s vector from the file %s",
                               matId, fname)
-        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{matId}")
+        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{matId}",
+                        mute=True)
         return AnsVec(name, self._mapdl)
 
     def set_vec(self, vname, data):
@@ -449,8 +458,8 @@ class MapdlMath():
         self._set_vec(vname, data)
         return AnsVec(vname, self._mapdl)
 
-    def rhs(self, type=np.double, fname="file.full"):
-        return self.getVec(type, fname, "RHS")
+    def rhs(self, type_=np.double, fname="file.full"):
+        return self.getVec(type_, fname, "RHS")
 
     def svd(self, mat, thresh='', sig='', v='', **kwargs):
         """Apply an SVD Algorithm on a matrix.
@@ -583,14 +592,13 @@ class MapdlMath():
             cid = c.id
             algo = "DAMP"
 
-        self._mapdl.run("/SOLU")
-        self._mapdl.run("antype,modal")
-        self._mapdl.run("modopt," + algo + "," + str(nev) + "," + str(fmin) + "," + str(fmax))
+        self._mapdl.run("/SOLU", mute=True)
+        self._mapdl.run("antype,modal", mute=True)
+        self._mapdl.run(f"modopt,{algo},{nev},{fmin},{fmax}", mute=True)
         ev = self.vec()
 
         phistr = '' if not phi else phi.id
-        self._mapdl.run("*EIG," + k.id + "," + m.id + "," + cid + "," + ev.id + "," + phistr)
-
+        self._mapdl.run(f'*EIG,{k.id},{m.id},{cid},{ev.id},{phistr}', mute=True)
         return ev
 
     def dot(self, vec_a, vec_b):
@@ -689,13 +697,13 @@ class MapdlMath():
         solver.factorize(mat)
         return solver
 
-    def norm(self, obj, ord="nrm2"):
+    def norm(self, obj, ord_="nrm2"):
         """ Matrix or vector norm
 
         Parameters
         ----------
         obj : ansys.mapdl.math.AnsMat or ansys.mapdl.math.AnsVec
-        ord : Order of the norm. nrm2(default), nrminf, nrm1
+        ord\_ : Order of the norm. nrm2(default), nrminf, nrm1
 
         Examples
         --------
@@ -838,10 +846,10 @@ class MapdlMath():
             
 
 class ApdlMathObj:
-    def __init__(self, id, mapdl, type=ObjType.GEN):
-        self.id = id
+    def __init__(self, id_, mapdl, type_=ObjType.GEN):
+        self.id = id_
         self._mapdl = mapdl
-        self.type = type
+        self.type = type_
 
     #def __del__(self):
     #    self._mapdl._log.debug("Deleting the MAPDL Vector Object")
@@ -851,7 +859,7 @@ class ApdlMathObj:
         return "APDLMath Object %s" % str(self.id)
 
     def __str__(self):
-        return self._mapdl.run("*PRINT," + self.id)
+        return self._mapdl.run("*PRINT," + self.id, mute=False)
 
     def copy(self):
         """Returns the name of the copy of this object"""
@@ -866,12 +874,11 @@ class ApdlMathObj:
             raise TypeError("Unknown obj type: operation aborted")
 
         # APDLMath cmd to COPY vin to vout
-        self._mapdl.run(acmd + "," + name + ",D,COPY," + self.id)
+        self._mapdl.run(acmd + "," + name + ",D,COPY," + self.id, mute=True)
         return name
 
     def _init(self, method):
-        cmd = "*INIT," + self.id + "," + method
-        self._mapdl.run(cmd)
+        self._mapdl.run(f"*INIT,{self.id},{method}", mute=True)
 
     def zeros(self):
         """Set all values of the vector to zero"""
@@ -887,7 +894,7 @@ class ApdlMathObj:
 
     def const(self, value):
         """Set all values of the vector to a constant"""
-        return self._init("CONST," + str(value))
+        return self._init(f"CONST,{value}")
 
     def norm(self, nrmtype="nrm2"):
         """Matrix or vector norm.
@@ -914,26 +921,26 @@ class ApdlMathObj:
         >>> nrm = mm.norm( m2)
         """
         val_name = 'py_val'
-        self._mapdl.run("*NRM," + self.id + "," + nrmtype + ",%s" % val_name)
+        self._mapdl.run(f"*NRM,{self.id},{nrmtype},{val_name}", mute=True)
         return self._mapdl.scalar_param(val_name)
 
     def axpy(self, op, val1, val2):
         """Perform the matrix operation: ``M2= v*M1 + w*M2``"""
         cmd = "*AXPY," + str(val1) + ",0," + op.id + "," + str(val2) + ",0," + self.id
-        self._mapdl._log.info(f">> Call Mapdl to perform AXPY operation")
-        self._mapdl.run(cmd)
+        self._mapdl._log.info(">> Call Mapdl to perform AXPY operation")
+        self._mapdl.run(cmd, mute=True)
         return self
 
     def __add__(self, op2):
         opout = self.copy()
         self._mapdl._log.info(">> Call Mapdl to perform AXPY operation")
-        self._mapdl.run(f"*AXPY,1,0,{op2.id},1,0,{opout.id}")
+        self._mapdl.run(f"*AXPY,1,0,{op2.id},1,0,{opout.id}", mute=True)
         return opout
 
     def __sub__(self, op2):
         opout = self.copy()
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
-        self._mapdl.run(f"*AXPY,-1,0,{op2.id},1,0,{opout.id}")
+        self._mapdl.run(f"*AXPY,-1,0,{op2.id},1,0,{opout.id}", mute=True)
         return opout
 
     def __iadd__(self, op):
@@ -944,14 +951,14 @@ class ApdlMathObj:
 
     def __imul__(self, val):
         self._mapdl._log.info("Call Mapdl to scale the object")
-        self._mapdl.run(f"*SCAL,{self.id},{val}")
+        self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
         return self
 
     def __itruediv__(self, val):
         if val == 0:
             raise ZeroDivisionError('division by zero')
         self._mapdl._log.info("Call Mapdl to 1/scale the object")
-        self._mapdl.run(f"*SCAL,{self.id},{1/val}")
+        self._mapdl.run(f"*SCAL,{self.id},{1/val}", mute=True)
         return self
 
     @property
@@ -964,8 +971,8 @@ class ApdlMathObj:
 
 class AnsVec(ApdlMathObj):
     """APDLMath Vector Object"""
-    def __init__(self, id, mapdl, dtype=np.double, init=None):
-        ApdlMathObj.__init__(self, id, mapdl, ObjType.VEC)
+    def __init__(self, id_, mapdl, dtype=np.double, init=None):
+        ApdlMathObj.__init__(self, id_, mapdl, ObjType.VEC)
 
         if init not in ['ones', 'zeros', 'rand', None]:
             raise ValueError('Invalid init option.  Should be "ones", "zeros", "rand", or None')
@@ -987,13 +994,15 @@ class AnsVec(ApdlMathObj):
     def __getitem__(self, num):
         if num < 0:
             raise ValueError('Negative indices not permitted')
-        cmd = "pyval=" + self.id + "(" + str(num+1) + ")"
-        self._mapdl.run(cmd)
+        self._mapdl.run(f"pyval={self.id}({num+1})", mute=True)
         return self._mapdl.scalar_param("pyval")
 
+    @version_requires((0, 4, 0))
     def __mul__(self, vec):
-        """Element-Wise product with another ansys vector object
-           ( also knowm as Hadamard product )
+        """Element-Wise product with another Ansys vector object.
+
+        Also known as Hadamard product.
+
         Parameters
         ----------
         vec : ansys.mapdl.math.AnsVec
@@ -1005,10 +1014,6 @@ class AnsVec(ApdlMathObj):
             Hadamard product between this vector and the other vector.
         """
 
-        if self._mapdl._grpc_api_ver < 0.4:        
-            raise AttributeError('Array multiplication is not yet available.  '
-                                 'For dot product, please use `dot()`')
-
         if not isinstance(vec, AnsVec):
             raise TypeError('Must be an Ansys vector object')
             
@@ -1017,14 +1022,14 @@ class AnsVec(ApdlMathObj):
         dtype = ANSYS_VALUE_TYPE[info.stype]
 
         # check size consistency
-        if self.size != vec.size :
+        if self.size != vec.size:
             raise TypeError('Ansys vectors have inconsistent sizes')
 
         self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}")
         objout = AnsVec(name, self._mapdl)
 
-        cmd = "*HPROD," + self.id + "," + vec.id + "," + name
-        self._mapdl.run(cmd)
+        # perform the Hadamard product
+        self._mapdl.run(f"*HPROD,{self.id},{vec.id},{name}")
         return objout
         
     def copy(self):
@@ -1047,8 +1052,7 @@ class AnsVec(ApdlMathObj):
         if not isinstance(vec, AnsVec):
             raise TypeError('Must be an Ansys vector object')
 
-        cmd = "*DOT," + self.id + "," + vec.id + ",py_val"
-        self._mapdl.run(cmd)
+        self._mapdl.run(f"*DOT,{self.id},{vec.id},py_val")
         return self._mapdl.scalar_param("py_val")
 
     def asarray(self):
@@ -1072,8 +1076,8 @@ class AnsVec(ApdlMathObj):
 class AnsMat(ApdlMathObj):
     """APDLMath Matrix Object"""
 
-    def __init__(self, id, mapdl, type=ObjType.DMAT):
-        ApdlMathObj.__init__(self, id, mapdl, type)
+    def __init__(self, id_, mapdl, type_=ObjType.DMAT):
+        ApdlMathObj.__init__(self, id_, mapdl, type_)
 
     @property
     def nrow(self):
@@ -1112,7 +1116,7 @@ class AnsMat(ApdlMathObj):
         return self._mapdl._mat_data(self.id)
 
     def __repr__(self):
-        return "APDLMath Matrix %d x %d" % (self.nrow, self.ncol)
+        return f"APDLMath Matrix {self.nrow} x {self.ncol}"
 
     def __mul__(self, vec):
         raise AttributeError('Array multiplication is not yet available.  '
@@ -1145,21 +1149,20 @@ class AnsMat(ApdlMathObj):
         info = self._mapdl._data_info(self.id)
         dtype = ANSYS_VALUE_TYPE[info.stype]
         if obj.type == ObjType.VEC:
-            self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}")
+            self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}",
+                            mute=True)
             objout = AnsVec(name, self._mapdl)
         else:
-            self._mapdl.run(f"*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{info.size1},{info.size2}")
+            self._mapdl.run(f"*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{info.size1},{info.size2}", mute=True)
             objout = AnsDenseMat(name, self._mapdl)
             
-        cmd = f"*MULT,{self.id},,{obj.id},,{name}"
         self._mapdl._log.info("Call Mapdl to perform MV Product")
-        self._mapdl.run(cmd)
+        self._mapdl.run(f"*MULT,{self.id},,{obj.id},,{name}", mute=True)
         return objout
 
     def __getitem__(self, num):
         name = id_generator()
-        cmd = "*VEC," + name + ",D,LINK," + self.id + "," + str(num+1)
-        self._mapdl.run(cmd)
+        self._mapdl.run(f"*VEC,{name},D,LINK,{self.id},{num+1}", mute=True)
         return AnsVec(name, self._mapdl)
 
     @property
@@ -1184,7 +1187,8 @@ class AnsMat(ApdlMathObj):
         dtype = ANSYS_VALUE_TYPE[info.stype]
         name = id_generator()
         self._mapdl._log.info("Call MAPDL to transpose")
-        self._mapdl.run(f"{objtype},{name},{MYCTYPE[dtype]},COPY,{self.id},TRANS")
+        self._mapdl.run(f"{objtype},{name},{MYCTYPE[dtype]},COPY,{self.id},TRANS",
+                        mute=True)
         if info.objtype == 2:
             mat = AnsDenseMat(name, self._mapdl)
         else:
@@ -1254,15 +1258,15 @@ class AnsSolver(ApdlMathObj):
                 Algo = "LAPACK"
             elif (M.type == ObjType.SMAT):
                 Algo = "DSP"
-        self._mapdl.run(f"*LSENGINE,{Algo},{self.id},{M.id}")
-        self._mapdl._log.info("Factorizing using the %s package", Algo)
-        self._mapdl.run("*LSFACTOR," + self.id)
+        self._mapdl.run(f"*LSENGINE,{Algo},{self.id},{M.id}", mute=True)
+        self._mapdl._log.info(f"Factorizing using the {Algo} package")
+        self._mapdl.run(f"*LSFACTOR,{self.id}", mute=True)
 
     def solve(self, B, X=None):
         if not X:
             X = B.copy()
         self._mapdl._log.info("Solving")
-        self._mapdl.run("*LSBAC," + self.id + "," + B.id + "," + X.id)
+        self._mapdl.run(f"*LSBAC,{self.id},{B.id},{X.id}", mute=True)
         return X
 
 
@@ -1274,7 +1278,7 @@ def rand(obj):
     obj : ansys.math.MapdlMath object
         MapdlMath object
     """
-    obj._mapdl.cmd("*INIT," + obj.id + ",RAND")
+    obj._mapdl.run(f"*INIT,{obj.id},RAND", mute=True)
 
 
 def solve(Mat, B, X=None, Algo=None):
@@ -1305,10 +1309,10 @@ def dot(vec1, vec2):
 
     """
     if (vec1.type != ObjType.VEC or vec2.type != ObjType.VEC):
-        raise Exception("Both objects must be ANSYS vectors")
+        raise TypeError("Both objects must be ANSYS vectors")
 
     mapdl = vec1._mapdl
-    mapdl.run("*DOT," + vec1.id + "," + vec2.id + ",py_val")
+    mapdl.run(f"*DOT,{vec1.id},{vec2.id},py_val", mute=True)
     return mapdl.scalar_param("py_val")
 
 

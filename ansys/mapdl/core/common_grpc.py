@@ -141,7 +141,6 @@ def parse_chunks(chunks, dtype=None):
         chunk = chunks.next()
     except:
         return np.empty(0)
-        # raise GrpcError('Failed to read first chunk')
 
     if not chunk.value_type and dtype is None:
         raise ValueError('Must specify a data type for this record')

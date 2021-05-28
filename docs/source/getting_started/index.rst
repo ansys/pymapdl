@@ -2,7 +2,7 @@
 Getting Started
 ===============
 To use PyMAPDL, you need to have a local installation of Ansys.  The
-version of ANSYS installed will dictate the interface and features
+version of Ansys installed will dictate the interface and features
 available to you.
 
 Visit `Ansys <https://www.ansys.com/>`_ for more information on
@@ -32,7 +32,7 @@ Install the latest release from `PyPi
 
 .. code::
 
-   pip install ansys.mapdl-core
+   pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
 <https://github.com/pyansys/pymapdl/issues>`_ via:
@@ -115,7 +115,7 @@ Check that you can start MAPDL from Python by running:
 
     Product:             ANSYS Mechanical Enterprise
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
-    PyMAPDL Version:     Version: 0.57.0
+    PyMAPDL Version:     Version: 0.58.0
 
 If you see a response from the server, congratulations!  You're ready
 to get started using MAPDL as a service.  For details regarding the

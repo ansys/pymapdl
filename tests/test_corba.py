@@ -73,20 +73,9 @@ def test_comment(cleared, mapdl_corba):
     assert comment in resp
 
 
-# @skip_grpc
-# def test_output(cleared, mapdl):
-#     tmp_file = 'tmp_redirect.txt'
-#     resp = mapdl_corba.output(tmp_file)
-#     comment = 'Testing...'
-#     resp = mapdl_corba.com(comment)
-#     mapdl_corba.output()
-#     output = open(os.path.join(mapdl_corba.path, tmp_file)).read()
-#     assert comment in output
-
-
 def test_basic_command(cleared, mapdl_corba):
-    resp = mapdl_corba.block(0, 1, 0, 1, 0, 1)
-    assert 'CREATE A HEXAHEDRAL VOLUME' in resp
+    resp = mapdl_corba.finish()
+    assert 'ROUTINE COMPLETED' in resp
 
 
 def test_allow_ignore(mapdl_corba):
@@ -224,7 +213,7 @@ def test_kplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl_corba.kplot(screenshot=filename)
+    cpos = mapdl_corba.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -503,7 +492,7 @@ def test_eplot(mapdl_corba, make_block):
 def test_eplot_screenshot(mapdl_corba, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl_corba.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], screenshot=filename)
+                window_size=[1920, 1080], savefig=filename)
     assert os.path.isfile(filename)
 
 

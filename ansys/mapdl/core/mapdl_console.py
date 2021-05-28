@@ -87,7 +87,7 @@ class MapdlConsole(_MapdlCore):
         """Connect to MAPDL process using pexpect"""
         self._process = launch_pexpect(**start_parm)
 
-    def _run(self, command):
+    def _run(self, command, **kwargs):
         """Sends command and returns ANSYS's response"""
         self._reset_cache()
 
