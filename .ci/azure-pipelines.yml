@@ -18,7 +18,7 @@ trigger:
 jobs:
 - job: Linux
   variables:
-    python.version: '3.7'  # due to VTK 8.1.2 requirement for docbuild
+    python.version: '3.8'  # limited to < Python 3.8 due to VTK req
     DISPLAY: ':99.0'
     MAPDL.IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl'
     PYMAPDL_PORT: 32771  # default of 50052 does not work on azure devops
@@ -58,7 +58,6 @@ jobs:
     - script: |
         set -ex
         echo $(GH_PAT) | docker login -u $(GH_USERNAME) --password-stdin docker.pkg.github.com
-        docker pull $(MAPDL_IMAGE)
         touch log.txt
         docker run -e ANSYSLMD_LICENSE_FILE=1055@$(LICENSE_SERVER) --restart always --name mapdl -p $(PYMAPDL_PORT):50052 $(MAPDL.IMAGE):$(MAPDL.VERSION) -smp > log.txt &
         grep -q 'Server listening on' <(timeout 60 tail --retry -f log.txt)
