@@ -8,6 +8,13 @@ The decorator allows arguments within the decorator itself.
 
 """
 
+# Map version tuple to MAPDL release version
+VERSION_MAP = {(0, 0, 0): '2020R2',
+               (0, 3, 0): '2021R1',
+               (0, 4, 0): '2021R2',
+               (0, 4, 1): '2021R2'}
+
+
 def meets_version(version, meets):
     """Check if a version string meets a minimum version.
     This is a simplified way to compare version strings. For a more robust
@@ -132,11 +139,17 @@ def version_requires(min_version):
             if not hasattr(self, '_server_version'):
                 raise AttributeError('decorated class must have `_server_version` '
                                      'attribute')
-            server_version = self._server_version
 
-            if not meets_version(server_version, min_version):
-                ver_str = '.'.join(map(str, min_version))
-                raise VersionError(f'``{func.__name__}`` requires server version >= {ver_str}')
+            if not meets_version(self._server_version, min_version):
+
+                # try to give the user a helpful warning indicating
+                # the minimum version of MAPDL
+                if min_version in VERSION_MAP:
+                    raise VersionError(f'``{func.__name__}`` requires MAPDL version '
+                                       '>= {VERSION_MAP[min_version]}')
+                else:
+                    raise VersionError(f'``{func.__name__}`` requires gRPC server '
+                                       'version >= {min_version}')
 
             return func(self, *args, **kwargs)
 

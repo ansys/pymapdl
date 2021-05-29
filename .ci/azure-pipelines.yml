@@ -20,7 +20,7 @@ jobs:
   variables:
     python.version: '3.7'  # due to VTK 8.1.2 requirement for docbuild
     DISPLAY: ':99.0'
-    MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.1.0'
+    MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.0'
     PYMAPDL_PORT: 32771  # default of 50052 does not work on azure devops
     PYMAPDL_START_INSTANCE: FALSE
     PYANSYS_OFF_SCREEN: True

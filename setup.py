@@ -22,7 +22,7 @@ install_requires = [
     'scipy>=1.3.0',  # for sparse (consider optional?)
     'google-api-python-client',
     'grpcio>=1.30.0',  # tested up to grpcio==1.35
-    'ansys-grpc-mapdl==0.2.0',
+    'ansys-grpc-mapdl==0.4.0',  # supports at least 2020R2 - 2021R2
     'ansys-mapdl-reader>=0.50.0',
     'ansys-corba',  # pending depreciation to ansys-mapdl-corba
     'protobuf>=3.1.4',  # had an issue with gRPC health checking with this version
