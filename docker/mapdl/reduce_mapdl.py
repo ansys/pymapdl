@@ -33,7 +33,9 @@ import os
 
 import numpy as np
 
-source_directory = '/ansys_inc/v211/'
+ver = '212'
+source_directory = f'/mnt/old/usr/ansys_inc/v{ver}/'  # mounted with strictatime
+
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -44,8 +46,10 @@ def convert_size(size_bytes):
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
 
+# time.time()  # manually run
+cutoff = 1622174341.787562
 
-cutoff = 1607646816.3588207
+# next, run mapdl and pymapdl unit testing in both DPM and SMP modes
 
 total_size = 0
 times = []
@@ -54,7 +58,6 @@ for root, dirs, files in os.walk(source_directory, topdown=False):
     for name in files:
         if os.path.isfile(os.path.join(root, name)):
             stats = os.stat(os.path.join(root, name))
-            # accesstime = time.ctime(stats[stat.ST_ATIME])
             accesstime = stats[stat.ST_ATIME]
             times.append(accesstime)
             if accesstime > cutoff:
@@ -73,10 +76,21 @@ for i in np.argsort(masked_times):
     accesstime = masked_times[i]
     print(recent_files[i][0])
     # print('%40s    %s' % (recent_files[i][1], time.ctime(accesstime)))
-    dest = recent_files[i][0].replace('/v211/', '/v211_docker/')
+    dest = recent_files[i][0].replace(f'/v{ver}/', f'/v{ver}_docker/')
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     shutil.copy(recent_files[i][0], dest)
 
+
+# these may not be captured if not using a newer xeon cpu
+extra_files = [
+    f'/usr/ansys_inc/v{ver}/tp/IntelMKL/2020.0.166/linx64/lib/intel64/libmkl_avx512.so',
+    f'/usr/ansys_inc/v{ver}/tp/IntelMKL/2020.0.166/linx64/lib/intel64/libmkl_def.so',
+]
+
+for filename in extra_files:
+    dest = filename.replace(f'/v{ver}/', f'/v{ver}_docker/')
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.copy(filename, dest)
 
 print(np.sum(times > cutoff), 'out of', len(times))
 print(convert_size(total_size))

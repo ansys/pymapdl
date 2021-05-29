@@ -1,3 +1,3 @@
-VERSION=v21.1.0
-REPO=docker.pkg.github.com/pyansys/mapdl
+VERSION=v21.2.0
+REPO=docker.pkg.github.com/pyansys/pymapdl
 IMAGE=$REPO/mapdl:$VERSION
