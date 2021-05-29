@@ -52,7 +52,7 @@ ky
 #
 # Printout the norm of this vector.
 #
-b = mm.getVec(fname='PRSMEMB.full', matId="RHS")
+b = mm.rhs(fname='PRSMEMB.full')
 b.norm()
 
 ###############################################################################

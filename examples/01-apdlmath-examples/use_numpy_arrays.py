@@ -59,8 +59,8 @@ print(apdl_vec.norm(), np.linalg.norm(apdl_vec))
 # Copy a NumPy Array to an APDLMath vector
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # You can push back any numpy vector or 2D array to MAPDL.  This
-# creates a new APDLMath, which in this case is named ``'NewVec'``
-mm.set_vec('NewVec', pv)
+# creates a new APDLMath, which in this case is named ``'NewVec'``.
+mm.set_vec(pv, 'NewVec')
 
 # verify this vector exists
 print(mm)

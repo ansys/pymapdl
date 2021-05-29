@@ -1293,10 +1293,15 @@ class MapdlGrpc(_MapdlCore):
 
     @protect_grpc
     def scalar_param(self, pname):
-        """Return a scalar parameter as a float"""
+        """Return a scalar parameter as a float.
+
+        If parameter does not exist, returns ``None``.
+
+        """
         request = pb_types.ParameterRequest(name=pname, array=False)
         presponse = self._stub.GetParameter(request)
-        return float(presponse.val[0])
+        if presponse.val:
+            return float(presponse.val[0])
 
     @protect_grpc
     def _upload_raw(self, raw, save_as):  # consider private
