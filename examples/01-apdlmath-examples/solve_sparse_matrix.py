@@ -20,8 +20,8 @@ mm = mapdl.math
 # First, run a MAPDL solve to create a .full file
 # We use a model from the official verification manual.
 #
-# After a solve command, the full contains the assemblied (stiffness,
-# mass, ...) matrix, and the load vector.
+# After a solve command, the full contains the assemblied stiffness
+# matrix, mass matrix, and the load vector.
 #
 out = mapdl.input(vmfiles['vm153'])
 

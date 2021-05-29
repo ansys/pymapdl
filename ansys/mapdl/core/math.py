@@ -165,7 +165,7 @@ class MapdlMath():
         Returns
         -------
         vector : ansys.mapdl.math.AnsVec
-            ANSYS Vector
+            Ansys Vector
         """
         if dtype not in MYCTYPE:
             raise ANSYSDataTypeError
@@ -434,12 +434,42 @@ class MapdlMath():
         """Load the damping matrix from the full file"""
         return self.load_matrix_from_file(dtype, fname, "DAMP")
 
-    def getVec(self, dtype=np.double, fname="file.full", matId="RHS"):
-        """Load a vector from a file"""
+    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS"):
+        """Load a vector from a file.
+
+        Parameters
+        ----------
+        dtype : numpy.dtype, optional
+            Numpy data type to store the vector as.  Defaults to ``np.double``
+
+        fname : str, optional
+            Filename to read the vector from.
+
+        mat_id : str, optional
+            Vector ID to load.  If loading from a ``"*.full"`` file,
+            can be one of the following:
+
+            * ``"RHS"`` - Load vector
+            * ``"GVEC"`` - Constraint equation constant terms
+            * ``"BACK"`` - nodal mapping vector (internal to user)
+            * ``"FORWARD"`` - nodal mapping vector (user to internal)
+
+        Returns
+        --------
+        ansys.mapdl.math.AnsVec
+            APDL vector instance generated from the file.
+
+        Examples
+        --------
+        >>> b = mm.get_vec(fname='PRSMEMB.full', mat_id="RHS")
+        >>> b
+        APDLMath Vector Size 126
+
+        """
         name = id_generator()
         self._mapdl._log.info("Call MAPDL to extract the %s vector from the file %s",
-                              matId, fname)
-        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{matId}",
+                              mat_id, fname)
+        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
                         mute=True)
         return AnsVec(name, self._mapdl)
 
@@ -472,7 +502,7 @@ class MapdlMath():
         return AnsVec(vname, self._mapdl)
 
     def rhs(self, type_=np.double, fname="file.full"):
-        return self.getVec(type_, fname, "RHS")
+        return self.get_vec(type_, fname, "RHS")
 
     def svd(self, mat, thresh='', sig='', v='', **kwargs):
         """Apply an SVD Algorithm on a matrix.
@@ -1236,11 +1266,47 @@ class AnsSparseMat(AnsMat):
         return f'Sparse APDLMath Matrix ({self.nrow}, {self.ncol})'
 
     def copy(self):
-        """Return a copy of this matrix"""
+        """Return a copy of this matrix.
+
+        Matrix remains in MAPDL.
+
+        Examples
+        --------
+        >>> k
+        Sparse APDLMath Matrix (126, 126)
+
+        >>> kcopy = k.copy()
+        >>> kcopy
+        Sparse APDLMath Matrix (126, 126)
+
+        """
         return AnsSparseMat(ApdlMathObj.copy(self), self._mapdl)
 
     def todense(self):
-        """Return this array as a dense np.ndarray"""
+        """Return this array as a dense np.ndarray
+
+        Examples
+        --------
+        >>> k
+        Sparse APDLMath Matrix (126, 126)
+
+        >>> mat = k.todense()
+        >>> mat
+        matrix([[ 2.02925393e-01,  3.78142616e-03,  0.00000000e+00, ...,
+                  0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+                [ 0.00000000e+00,  2.00906608e-01,  0.00000000e+00, ...,
+                  0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+                [ 0.00000000e+00,  0.00000000e+00,  2.29396542e+03, ...,
+                  0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+                ...,
+                [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, ...,
+                  2.26431549e+03, -9.11391851e-08,  0.00000000e+00],
+                [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, ...,
+                  0.00000000e+00,  3.32179197e+03,  0.00000000e+00],
+                [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, ...,
+                  0.00000000e+00,  0.00000000e+00,  2.48282229e-01]])
+
+        """
         return self.asarray().todense()
 
     def __array__(self):
@@ -1274,12 +1340,37 @@ class AnsSolver(ApdlMathObj):
         self._mapdl._log.info(f"Factorizing using the {Algo} package")
         self._mapdl.run(f"*LSFACTOR,{self.id}", mute=True)
 
-    def solve(self, B, X=None):
-        if not X:
-            X = B.copy()
+    def solve(self, b, x=None):
+        """Solve a linear system
+
+        Parameters
+        ----------
+        b : ansys.mapdl.math.AnsVec
+            APDLmath vector.
+
+        x : ansys.mapdl.math.AnsVec, optional
+            APDLmath vector to place the solution.
+
+        Returns
+        -------
+        ansys.mapdl.math.AnsVec
+            Solution vector.  Identical to ``x`` if supplied.
+
+        Examples
+        --------
+        >>> k = mm.stiff(fname='PRSMEMB.full')
+        >>> s = mm.factorize(k)
+        >>> b = mm.get_vec(fname='PRSMEMB.full', matId="RHS")
+        >>> x = s.solve(b)
+        >>> x
+        APDLMath Vector Size 20000
+
+        """
+        if not x:
+            x = b.copy()
         self._mapdl._log.info("Solving")
-        self._mapdl.run(f"*LSBAC,{self.id},{B.id},{X.id}", mute=True)
-        return X
+        self._mapdl.run(f"*LSBAC,{self.id},{b.id},{x.id}", mute=True)
+        return x
 
 
 def rand(obj):

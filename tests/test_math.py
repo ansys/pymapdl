@@ -266,6 +266,7 @@ def test_transpose(mm):
     assert np.allclose(apdl_mat.asarray().todense().T, apdl_mat_t.asarray().todense())
 
 
+@pytest.mark.needs_v212
 def test_dense(mm):
     # test if a APDLMath object can treated as an array
     array = np.random.random((5, 5))

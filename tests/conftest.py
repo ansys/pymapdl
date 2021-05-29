@@ -94,11 +94,16 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        # --corba given in cli: run CORBA interface tests
         skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
+
+    if not int(rver) >= 212:
+        needs_v212 = pytest.mark.skip(reason="requires at least v212 to run")
+        for item in items:
+            if "needs_v212" in item.keywords:
+                item.add_marker(needs_v212)
 
 
 @pytest.fixture(scope="session")

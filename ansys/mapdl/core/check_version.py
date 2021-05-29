@@ -146,10 +146,11 @@ def version_requires(min_version):
                 # the minimum version of MAPDL
                 if min_version in VERSION_MAP:
                     raise VersionError(f'``{func.__name__}`` requires MAPDL version '
-                                       '>= {VERSION_MAP[min_version]}')
-                else:
-                    raise VersionError(f'``{func.__name__}`` requires gRPC server '
-                                       'version >= {min_version}')
+                                       f'>= {VERSION_MAP[min_version]}')
+
+                # otherwise, use the less helpful "gRPC server" version
+                raise VersionError(f'``{func.__name__}`` requires gRPC server '
+                                   f'version >= {min_version}')
 
             return func(self, *args, **kwargs)
 
