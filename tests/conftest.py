@@ -18,7 +18,7 @@ pyvista.OFF_SCREEN = True
 
 # check for a valid MAPDL install with gRPC
 # NOTE: checks in this order
-valid_rver = ['211', '202', '201', '195', '194', '193', '192', '191']
+valid_rver = ['212', '211', '202', '201', '195', '194', '193', '192', '191']
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
@@ -94,7 +94,6 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        # --corba given in cli: run CORBA interface tests
         skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
         for item in items:
             if "skip_grpc" in item.keywords:

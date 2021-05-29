@@ -56,6 +56,21 @@ def test_jobname(mapdl, cleared):
 
 
 @pytest.mark.skip_grpc
+def test_server_version(mapdl):
+    if mapdl.version == 20.2:
+        assert mapdl._server_version == (0, 0, 0)
+    elif mapdl.version == 21.1:
+        assert mapdl._server_version == (0, 3, 0)
+    elif mapdl.version == 21.2:
+        assert mapdl._server_version in [(0, 4, 0), (0, 4, 1)]
+    else:
+        # untested future version
+        assert isinstance(mapdl._server_version, tuple)
+        assert mapdl._server_version[1] >= 4
+        assert mapdl._server_version[0] >= 0
+
+
+@pytest.mark.skip_grpc
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True

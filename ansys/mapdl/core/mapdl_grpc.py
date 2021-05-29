@@ -31,10 +31,12 @@ from ansys.mapdl.core.common_grpc import (parse_chunks,
                                           DEFAULT_CHUNKSIZE,
                                           DEFAULT_FILE_CHUNK_SIZE)
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
+from ansys.mapdl.core import check_version
 
 logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
+
 
 
 def chunk_raw(raw, save_as):
@@ -332,19 +334,53 @@ class MapdlGrpc(_MapdlCore):
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
-        # TODO: version check
-
         # enable health check
         if enable_health_check:
             self._enable_health_check()
 
-        # housekeeping otherwise, many failures in a row will cause
-        # MAPDL to exit without returning anything useful.  Also
-        # avoids abort in batch mode if set.
+        self.__server_version = None
+
+        # HOUSEKEEPING:
+        # Set to not abort after encountering errors.  Otherwise, many
+        # failures in a row will cause MAPDL to exit without returning
+        # anything useful.  Also avoids abort in batch mode if set.
         if set_no_abort:
             self._set_no_abort()
 
         return True
+
+    @property
+    def _server_version(self):
+        """Return the server version.
+
+        Examples
+        --------
+        >>> mapdl._server_version
+        (0, 3, 0)
+
+        Uses cached ``__server_version`` to avoid unnecessary communication.
+        """
+        # check cache
+        if self.__server_version is None:
+            self.__server_version = self._get_server_version()
+        return self.__server_version
+
+    def _get_server_version(self):
+        """Request version from gRPC server.
+
+        Generally tied to the release version unless on a development release.
+
+        2020R2 --> 0.0.0 (or any unknown version)
+        2021R1 --> 0.3.0
+        2021R2 --> 0.4.0
+        2022R1 --> 0.X.X
+
+        """
+        sver = (0, 0, 0)
+        verstr = self._ctrl('VERSION')
+        if verstr:
+            sver = check_version.version_tuple(verstr)
+        return sver
 
     def _enable_health_check(self):
         """Places the status of the health check in _health_response_queue"""
@@ -845,6 +881,15 @@ class MapdlGrpc(_MapdlCore):
         - 'set_verb'
             Enables verbose mode on the server.
 
+        - 'VERSION'
+            Returns version string in of the server in the form
+            "MAJOR.MINOR.PATCH".  E.g. "0.3.0".  Known versions
+            include:
+
+            2020R2 - "0.3.0"
+            2021R1 - "0.3.0"
+            2021R2 - "0.4.0"
+
         Unavailable/Flaky:
 
         - 'time_stats'
@@ -867,8 +912,9 @@ class MapdlGrpc(_MapdlCore):
                 pass
             return
 
-        # otherwise, simply send command
-        self._stub.Ctrl(request)
+        resp = self._stub.Ctrl(request)
+        if hasattr(resp, 'response'):
+            return resp.response
 
     @wraps(_MapdlCore.cdread)
     def cdread(self, *args, **kwargs):
@@ -1247,10 +1293,15 @@ class MapdlGrpc(_MapdlCore):
 
     @protect_grpc
     def scalar_param(self, pname):
-        """Return a scalar parameter as a float"""
+        """Return a scalar parameter as a float.
+
+        If parameter does not exist, returns ``None``.
+
+        """
         request = pb_types.ParameterRequest(name=pname, array=False)
         presponse = self._stub.GetParameter(request)
-        return float(presponse.val[0])
+        if presponse.val:
+            return float(presponse.val[0])
 
     @protect_grpc
     def _upload_raw(self, raw, save_as):  # consider private
@@ -1330,7 +1381,7 @@ class MapdlGrpc(_MapdlCore):
             chunks = self._stub.GetMatData(request)
             values = parse_chunks(chunks, stype)
             return np.transpose(np.reshape(values, shape[::-1]))
-        elif mtype == 3:
+        elif mtype == 3:  # sparse
             indptr = self._vec_data(pname + "::ROWS")
             indices = self._vec_data(pname + "::COLS")
             vals = self._vec_data(pname + "::VALS")

@@ -310,15 +310,52 @@ class ansXpl():
 
         if (response.stype == anskernel.INTEGER):
             dtype = np.int32
-        elif (response.stype == anskernel.DOUBLE):
-            dtype = np.double
         elif (response.stype == anskernel.HYPER):
             dtype = np.int64
+        elif (response.stype == anskernel.FLOAT):
+            dtype = np.single
+        elif (response.stype == anskernel.DOUBLE):
+            dtype = np.double
+        elif (response.stype == anskernel.FCPLX):
+            dtype = np.complex64
+        elif (response.stype == anskernel.DCPLX):
+            dtype = np.complex128
         else:
             raise TypeError('Unhandled ANSYS type %s' % response.stype)
 
         mm = self._mapdl.math
         return mm.vec(dtype=dtype, name="TmpXplData")
+
+    def write(self, recordname, vecname):
+        """Write a given record back to an MAPDL File
+        Use the write function at your own risk, you may corrupt 
+        an existing file by changing the size of a record in the 
+        file. 
+        This function must be used only on a non-compressed file
+
+        Parameters
+        ----------
+        recordname : str
+            Name of the record you want to overwrite. Your position
+            in the file must be set accordingly to this record location
+            ( same as if you want to read it)
+
+        vecname : str
+            Name of the APDLMath vector you want to write in the MAPDL
+            file. Its size must be consistent with the existing record
+
+        Returns
+        -------
+        mapdl_response : str
+            Response from MAPDL.
+
+        Examples
+        --------
+        >>> xpl.write('MASS', vecname)
+        """
+        response = self._mapdl.run(f"*XPL,WRITE,{recordname},{vecname}")        
+        self._check_ignored(response)
+        return response
 
     def __repr__(self):
         txt = 'MAPDL File Explorer\n'
