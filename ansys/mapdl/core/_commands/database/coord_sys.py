@@ -385,8 +385,8 @@ def csys(self, kcn="", **kwargs):
 
     Examples
     --------
-    Suppose we want to create a cylindrical surface in cylindrical y (5)
-    with a radius of 6 and spanning `30 < θ < -90` and `0 < z < 4`
+    Create a cylindrical surface in cylindrical y (CSYS=5) with
+    a radius of 6 and spanning `30 < θ < -90` and `0 < z < 4`.
 
     >>> mapdl.csys(5)
     >>> mapdl.k(1, 6, 30)
