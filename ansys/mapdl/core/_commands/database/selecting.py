@@ -63,9 +63,7 @@ def allsel(self, labt="", entity="", **kwargs):
 
     Examples
     --------
-
     >>> mapdl.allsel()
-
     """
     command = "ALLSEL,%s,%s" % (str(labt), str(entity))
     return self.run(command, **kwargs)
