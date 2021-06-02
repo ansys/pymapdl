@@ -60,6 +60,12 @@ def allsel(self, labt="", entity="", **kwargs):
     The $ character should not be used after the  ALLSEL  command.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+
+    >>> mapdl.allsel()
+
     """
     command = "ALLSEL,%s,%s" % (str(labt), str(entity))
     return self.run(command, **kwargs)
@@ -128,9 +134,16 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Notes
     -----
     Selects a subset of areas. For example, to select those areas with area
-    numbers 1 through 7, use ASEL,S,AREA,,1,7.  The selected subset is then
-    used when the ALL label is entered (or implied) on other commands, such
-    as ALIST,ALL.  Only data identified by area number are selected.  Data
+    numbers 1 through 7, use
+
+    >>> mapdl.asel('S','AREA',,1,7)
+
+    The selected subset is then used when the ALL label is entered
+    (or implied) on other commands, such as
+
+    >>> mapdl.alist('ALL')
+
+    Only data identified by area number are selected.  Data
     are flagged as selected and unselected; no data are actually deleted
     from the database.
 
@@ -159,6 +172,13 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     explicitly.
 
     Table: 127:: : ASEL - Valid Item and Component Labels
+
+    Examples
+    --------
+
+    >>> mapdl.asel('S', 'LOC', 'X', 0)  # Select area(s) at location x=0
+
+    >>> mapdl.asel('S', 'LOC', 'Y', t/2)  # where t is some local float
     """
     command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
         item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
@@ -324,9 +344,16 @@ def esel(self, type_: str = "", item: str = "", comp: str = "",
     Selects elements based on values of a labeled item and
     component. For example, to select a new set of elements
     based on element numbers 1
-    through 7, use ESEL,S,ELEM,,1,7.  The subset is used when the
-    ALL label is entered (or implied) on other commands, such as
-    ELIST, ALL. Only data identified by element number are
+    through 7, use
+
+    >>> mapdl.esel('S', 'ELEM', '', 1, 7)
+
+    The subset is used when the ALL label is entered (or implied)
+    on other commands, such as
+
+    >>> mapdl.elist('ALL')
+
+    Only data identified by element number are
     selected. Selected data are internally flagged; no actual
     removal of data from the database occurs. Different element
     subsets cannot be used for different load steps [SOLVE] in a
@@ -361,6 +388,14 @@ def esel(self, type_: str = "", item: str = "", comp: str = "",
     Toler explicitly.
 
     Table: 133:: : ESEL - Valid Item and Component Labels
+
+    Examples
+    --------
+
+    >>> mapdl.esel('S', 'MAT', '', 2, 6, 2)  # elect elements using material numbers 2, 4 and 6
+    >>> mapdl.esel('R', 'ENAME', '', 185)  # Of these, reselect SOLID185 element types
+
+    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
     """
     command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc}," \
               f"{kabs}"
@@ -788,9 +823,16 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Notes
     -----
     Selects a subset of nodes.  For example, to select a new set of nodes
-    based on node numbers 1 through 7, use NSEL,S,NODE,,1,7.  The subset is
-    used when the ALL label is entered (or implied) on other commands, such
-    as NLIST,ALL.  Only data identified by node number are selected.  Data
+    based on node numbers 1 through 7, do
+
+    >>> mapdl.nsel('S','NODE','',1,7)
+
+    The subset is used when the `'ALL'` label is entered (or implied)
+    on other commands, such as
+
+    >>> mapdl.nlist('ALL')
+
+    Only data identified by node number are selected.  Data
     are flagged as selected and unselected; no data are actually deleted
     from the database.
 
@@ -829,6 +871,29 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 209:: : NSEL - Valid Item and Component Labels for Nodal DOF
     Result Values
+
+    Examples
+    --------
+
+    >>> mapdl.nsel('S', 'LOC', 'X', 0)  # select nodes at x=0
+    >>> mapdl.nsel('R', 'LOC', 'Y', 1, 10)  # Of these, reselect nodes between 1<Y<10
+    >>> mapdl.nsel('U', 'LOC', 'Y', 5, 6)  # unselect nodes between 5<Y<6
+
+    for other coordinate systems activate the coord system first
+
+    >>> mapdl.csys(1)  # Change to cylindrical coordinate system
+    >>> mapdl.nsel('S', 'LOC', 'X', 5)  # Select nodes at radius = 5
+    >>> mapdl.nsel('R', 'LOC', 'Y', 0, 90)  # Reselect nodes from 0 to 90 degrees
+
+    The labels X, Y, and Z are always used, regardless of which coordinate
+    system is activated. They take on different meanings in different systems
+    Additionally, angles are always in degrees and NOT radians.
+
+    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
+    >>> mapdl.nsle()  # Select the nodes these elements use
+    >>> mapdl.nsel('R', 'EXT')  # Reselect nodes on the element external surfaces
+    >>> mapdl.csys(1)  # Change to cylindrical coordinates
+    >>> mapdl.nsel('R', 'LOC', 'X', 5)  # Reselect nodes with radius=5
     """
     command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
         item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
@@ -867,6 +932,12 @@ def nsla(self, type_="", nkey="", **kwargs):
     [AMESH, VMESH] on a solid model that contains the selected areas.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+
+    >>> mapdl.asel('S', 'LOC', 'X', 0)  # Select area(s) at location x=0
+    >>> mapdl.nsla('S', 1)  # Select nodes residing on the areas at x=0
     """
     command = "NSLA,%s,%s" % (str(type_), str(nkey))
     return self.run(command, **kwargs)
@@ -922,6 +993,12 @@ def nsle(self, type_="", nodetype="", num="", **kwargs):
     appear as both corner and midside nodes.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+
+    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
+    >>> mapdl.nsle()  # Select the nodes these elements use
     """
     command = "NSLE,%s,%s,%s" % (str(type_), str(nodetype), str(num))
     return self.run(command, **kwargs)
