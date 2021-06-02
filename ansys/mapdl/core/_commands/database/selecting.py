@@ -16,11 +16,11 @@ def allsel(self, labt="", entity="", **kwargs):
     labt
         Type of selection to be made:
 
-        ALL - Selects all items of the specified entity type and all items of lower entity
-              types (default).
+        ALL - Selects all items of the specified entity type and all
+              items of lower entity types (default).
 
-        BELOW - Selects all items directly associated with and below the selected items of the
-                specified entity type.
+        BELOW - Selects all items directly associated with and below
+                the selected items of the specified entity type.
 
     entity
         Entity type on which selection is based:
@@ -1023,9 +1023,10 @@ def nsle(self, type_="", nodetype="", num="", **kwargs):
     elements. Only nodes on elements in the currently-selected element set
     can be selected.
 
-    Note:: : When using degenerate hexahedral elements, NSLE, U,CORNER and
-    NSLE,S,MID will not select the same set of nodes because some nodes
-    appear as both corner and midside nodes.
+    .. note::
+        When using degenerate hexahedral elements, NSLE, U,CORNER and
+        NSLE,S,MID will not select the same set of nodes because some
+        nodes appear as both corner and midside nodes.
 
     This command is valid in any processor.
 
@@ -1259,7 +1260,7 @@ def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     If VMIN = VMAX = 0.0, Toler = 1.0E-6.
 
-     If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
+    If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
 
     Use the SELTOL command to override this default and specify Toler
     explicitly.
