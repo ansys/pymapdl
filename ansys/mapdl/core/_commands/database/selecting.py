@@ -134,7 +134,7 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Selects a subset of areas. For example, to select those areas with area
     numbers 1 through 7, use
 
-    >>> mapdl.asel('S','AREA',,1,7)
+    >>> mapdl.asel('S','AREA', '', 1, 7)
 
     The selected subset is then used when the ALL label is entered
     (or implied) on other commands, such as
@@ -164,7 +164,7 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     If VMIN = VMAX = 0.0, Toler = 1.0E-6.
 
-     If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
+    If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
 
     Use the SELTOL command to override this default and specify Toler
     explicitly.
@@ -173,13 +173,17 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Examples
     --------
+    Select area(s) at location x == 0.  Note that value of seltol is
+    used since ``vmin == vmax``.
 
-    >>> mapdl.asel('S', 'LOC', 'X', 0)  # Select area(s) at location x=0
+    >>> mapdl.asel('S', 'LOC', 'X', 0)
 
-    >>> mapdl.asel('S', 'LOC', 'Y', t/2)  # where t is some local float
+    Select areas between ``y == 2`` and ``y == 4``
+
+    >>> mapdl.asel('S', 'LOC', 'Y', 2, 4)
+
     """
-    command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-        item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+    command = f"ASEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
     return self.run(command, **kwargs)
 
 
@@ -205,8 +209,7 @@ def aslv(self, type_="", **kwargs):
     -----
     This command is valid in any processor.
     """
-    command = "ASLV,%s" % (str(type_))
-    return self.run(command, **kwargs)
+    return self.run(f"ASLV,{type_}", **kwargs)
 
 
 def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
@@ -389,14 +392,24 @@ def esel(self, type_: str = "", item: str = "", comp: str = "",
 
     Examples
     --------
+    Select elements using material numbers 2, 4 and 6.
 
-    >>> mapdl.esel('S', 'MAT', '', 2, 6, 2)  # elect elements using material numbers 2, 4 and 6
-    >>> mapdl.esel('R', 'ENAME', '', 185)  # Of these, reselect SOLID185 element types
+    >>> mapdl.esel('S', 'MAT', '', 2, 6, 2)
 
-    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
+    Of these, reselect SOLID185 element types
+
+    >>> mapdl.esel('R', 'ENAME', '', 185)
+
+    Select elements assigned to material property 2
+
+    >>> mapdl.esel('S', 'MAT', '', 2)
+
+    Note, this command is equivalent to:
+
+    >>> mapdl.esel('S', 'MAT', vmin=2)
+
     """
-    command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc}," \
-              f"{kabs}"
+    command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
     return self.run(command, **kwargs)
 
 
@@ -872,26 +885,45 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Examples
     --------
+    Select nodes at `x == 0`, Of these, reselect nodes between ``1 < Y
+    < 10``, then finally unselect nodes between ``5 < Y < 6``.
 
-    >>> mapdl.nsel('S', 'LOC', 'X', 0)  # select nodes at x=0
-    >>> mapdl.nsel('R', 'LOC', 'Y', 1, 10)  # Of these, reselect nodes between 1<Y<10
-    >>> mapdl.nsel('U', 'LOC', 'Y', 5, 6)  # unselect nodes between 5<Y<6
+    >>> mapdl.nsel('S', 'LOC', 'X', 0)
+    >>> mapdl.nsel('R', 'LOC', 'Y', 1, 10)
+    >>> mapdl.nsel('U', 'LOC', 'Y', 5, 6)
 
-    for other coordinate systems activate the coord system first
+    For other coordinate systems activate the coord system first.
+    First, change to cylindrical coordinate system, select nodes at
+    ``radius == 5``.  Reselect nodes from 0 to 90 degrees.
 
-    >>> mapdl.csys(1)  # Change to cylindrical coordinate system
-    >>> mapdl.nsel('S', 'LOC', 'X', 5)  # Select nodes at radius = 5
-    >>> mapdl.nsel('R', 'LOC', 'Y', 0, 90)  # Reselect nodes from 0 to 90 degrees
+    >>> mapdl.csys(1)
+    >>> mapdl.nsel('S', 'LOC', 'X', 5)
+    >>> mapdl.nsel('R', 'LOC', 'Y', 0, 90)
 
-    The labels X, Y, and Z are always used, regardless of which coordinate
-    system is activated. They take on different meanings in different systems
-    Additionally, angles are always in degrees and NOT radians.
+    Note that the labels X, Y, and Z are always used, regardless of which
+    coordinate system is activated. They take on different meanings in
+    different systems Additionally, angles are always in degrees and
+    NOT radians.
 
-    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
-    >>> mapdl.nsle()  # Select the nodes these elements use
-    >>> mapdl.nsel('R', 'EXT')  # Reselect nodes on the element external surfaces
-    >>> mapdl.csys(1)  # Change to cylindrical coordinates
-    >>> mapdl.nsel('R', 'LOC', 'X', 5)  # Reselect nodes with radius=5
+    Select elements assigned to material property 2
+
+    >>> mapdl.esel('S', 'MAT', '', 2)
+
+    Select the nodes these elements use
+
+    >>> mapdl.nsle()
+
+    Reselect nodes on the element external surfaces
+
+    >>> mapdl.nsel('R', 'EXT')
+
+    Change to cylindrical coordinates
+
+    >>> mapdl.csys(1)
+
+    Reselect nodes with radius=5
+
+    >>> mapdl.nsel('R', 'LOC', 'X', 5)
     """
     command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
         item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
@@ -933,9 +965,14 @@ def nsla(self, type_="", nkey="", **kwargs):
 
     Examples
     --------
+    Select area(s) at location x=0.  Note that the selection tolerance
+    above and below 0 will depend on the value of ``mapdl.seltol``
 
-    >>> mapdl.asel('S', 'LOC', 'X', 0)  # Select area(s) at location x=0
-    >>> mapdl.nsla('S', 1)  # Select nodes residing on the areas at x=0
+    >>> mapdl.asel('S', 'LOC', 'X', 0)
+
+    Select nodes residing on those areas.
+
+    >>> mapdl.nsla('S', 1)
     """
     command = "NSLA,%s,%s" % (str(type_), str(nkey))
     return self.run(command, **kwargs)
@@ -994,9 +1031,11 @@ def nsle(self, type_="", nodetype="", num="", **kwargs):
 
     Examples
     --------
+    Select elements assigned to material property 2 and then select
+    the nodes these elements use.
 
-    >>> mapdl.esel('S', 'MAT', '', 2)  # Select elements assigned to material property 2
-    >>> mapdl.nsle()  # Select the nodes these elements use
+    >>> mapdl.esel('S', 'MAT', '', 2)
+    >>> mapdl.nsle()
     """
     command = "NSLE,%s,%s,%s" % (str(type_), str(nodetype), str(num))
     return self.run(command, **kwargs)
@@ -1264,3 +1303,47 @@ def vsla(self, type_="", vlkey="", **kwargs):
     """
     command = "VSLA,%s,%s" % (str(type_), str(vlkey))
     return self.run(command, **kwargs)
+
+
+def seltol(self, toler="", **kwargs):
+    """Select those volumes containing the selected areas.
+
+    APDL Command: SELTOL
+
+    Parameters
+    ----------
+    toler
+        Tolerance value. If blank, restores the default tolerance
+        logic.
+
+    Notes
+    -----
+    For selects based on non-integer numbers (e.g. coordinates,
+    results, etc.), items within the range VMIN - Toler and VMAX +
+    Toler are selected, where VMIN and VMAX are the range values input
+    on the xSEL commands (ASEL, ESEL, KSEL, LSEL, NSEL, and VSEL).
+
+    The default tolerance logic is based on the relative values of
+    VMIN and VMAX as follows:
+
+    If ``vmin == vmax``, ``toler = 0.005*vmin``
+
+    If ``vmin == vmax == 0.0``, ``toler = 1.0E-6``.
+
+    If ``vmax != vmin``, ``toler = 1.0E-8 x (vmax - vmin)``.
+
+    This command is typically used when ``vmax - vmin`` is very large so
+    that the computed default tolerance is therefore large and the
+    xSEL commands selects more than what is desired.
+
+    Toler remains active until respecified by a subsequent seltol
+    command. ``seltol()`` resets back to the default toler value.
+
+    Examples
+    --------
+    Set selection tolarance to 1E-5
+
+    >>> seltol(1E-5)
+
+    """
+    return self.run(f"SELTOL{toler}", **kwargs)
