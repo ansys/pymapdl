@@ -67,8 +67,11 @@ def cm(self, cname="", entity="", **kwargs):
     Examples
     --------
 
-    >>> mapdl.asel('S', 'LOC', 'Y', t/2)  # where t is some local float
-    >>> mapdl.cm('PRES_A', 'AREA')  # This names the selected areas 'PRES_A'
+    Create a component selection named ``"PRES_A"`` after
+    selecting the areas located in the Y plane at `loc`.
+
+    >>> mapdl.asel('S', 'LOC', 'Y', loc)
+    >>> mapdl.cm('PRES_A', 'AREA')
     """
     command = "CM,%s,%s" % (str(cname), str(entity))
     return self.run(command, **kwargs)
