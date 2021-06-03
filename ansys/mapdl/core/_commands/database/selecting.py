@@ -16,11 +16,11 @@ def allsel(self, labt="", entity="", **kwargs):
     labt
         Type of selection to be made:
 
-        ALL - Selects all items of the specified entity type and all items of lower entity
-              types (default).
+        ALL - Selects all items of the specified entity type and all
+              items of lower entity types (default).
 
-        BELOW - Selects all items directly associated with and below the selected items of the
-                specified entity type.
+        BELOW - Selects all items directly associated with and below
+                the selected items of the specified entity type.
 
     entity
         Entity type on which selection is based:
@@ -60,6 +60,10 @@ def allsel(self, labt="", entity="", **kwargs):
     The $ character should not be used after the  ALLSEL  command.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+    >>> mapdl.allsel()
     """
     command = "ALLSEL,%s,%s" % (str(labt), str(entity))
     return self.run(command, **kwargs)
@@ -128,9 +132,16 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Notes
     -----
     Selects a subset of areas. For example, to select those areas with area
-    numbers 1 through 7, use ASEL,S,AREA,,1,7.  The selected subset is then
-    used when the ALL label is entered (or implied) on other commands, such
-    as ALIST,ALL.  Only data identified by area number are selected.  Data
+    numbers 1 through 7, use
+
+    >>> mapdl.asel('S','AREA', '', 1, 7)
+
+    The selected subset is then used when the ALL label is entered
+    (or implied) on other commands, such as
+
+    >>> mapdl.alist('ALL')
+
+    Only data identified by area number are selected.  Data
     are flagged as selected and unselected; no data are actually deleted
     from the database.
 
@@ -153,15 +164,26 @@ def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     If VMIN = VMAX = 0.0, Toler = 1.0E-6.
 
-     If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
+    If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
 
     Use the SELTOL command to override this default and specify Toler
     explicitly.
 
     Table: 127:: : ASEL - Valid Item and Component Labels
+
+    Examples
+    --------
+    Select area(s) at location x == 0.  Note that value of seltol is
+    used since ``vmin == vmax``.
+
+    >>> mapdl.asel('S', 'LOC', 'X', 0)
+
+    Select areas between ``y == 2`` and ``y == 4``
+
+    >>> mapdl.asel('S', 'LOC', 'Y', 2, 4)
+
     """
-    command = "ASEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-        item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+    command = f"ASEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
     return self.run(command, **kwargs)
 
 
@@ -187,8 +209,7 @@ def aslv(self, type_="", **kwargs):
     -----
     This command is valid in any processor.
     """
-    command = "ASLV,%s" % (str(type_))
-    return self.run(command, **kwargs)
+    return self.run(f"ASLV,{type_}", **kwargs)
 
 
 def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
@@ -324,9 +345,16 @@ def esel(self, type_: str = "", item: str = "", comp: str = "",
     Selects elements based on values of a labeled item and
     component. For example, to select a new set of elements
     based on element numbers 1
-    through 7, use ESEL,S,ELEM,,1,7.  The subset is used when the
-    ALL label is entered (or implied) on other commands, such as
-    ELIST, ALL. Only data identified by element number are
+    through 7, use
+
+    >>> mapdl.esel('S', 'ELEM', '', 1, 7)
+
+    The subset is used when the ALL label is entered (or implied)
+    on other commands, such as
+
+    >>> mapdl.elist('ALL')
+
+    Only data identified by element number are
     selected. Selected data are internally flagged; no actual
     removal of data from the database occurs. Different element
     subsets cannot be used for different load steps [SOLVE] in a
@@ -361,9 +389,27 @@ def esel(self, type_: str = "", item: str = "", comp: str = "",
     Toler explicitly.
 
     Table: 133:: : ESEL - Valid Item and Component Labels
+
+    Examples
+    --------
+    Select elements using material numbers 2, 4 and 6.
+
+    >>> mapdl.esel('S', 'MAT', '', 2, 6, 2)
+
+    Of these, reselect SOLID185 element types
+
+    >>> mapdl.esel('R', 'ENAME', '', 185)
+
+    Select elements assigned to material property 2
+
+    >>> mapdl.esel('S', 'MAT', '', 2)
+
+    Note, this command is equivalent to:
+
+    >>> mapdl.esel('S', 'MAT', vmin=2)
+
     """
-    command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc}," \
-              f"{kabs}"
+    command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
     return self.run(command, **kwargs)
 
 
@@ -788,9 +834,16 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     Notes
     -----
     Selects a subset of nodes.  For example, to select a new set of nodes
-    based on node numbers 1 through 7, use NSEL,S,NODE,,1,7.  The subset is
-    used when the ALL label is entered (or implied) on other commands, such
-    as NLIST,ALL.  Only data identified by node number are selected.  Data
+    based on node numbers 1 through 7, do
+
+    >>> mapdl.nsel('S','NODE','',1,7)
+
+    The subset is used when the `'ALL'` label is entered (or implied)
+    on other commands, such as
+
+    >>> mapdl.nlist('ALL')
+
+    Only data identified by node number are selected.  Data
     are flagged as selected and unselected; no data are actually deleted
     from the database.
 
@@ -829,6 +882,48 @@ def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Table: 209:: : NSEL - Valid Item and Component Labels for Nodal DOF
     Result Values
+
+    Examples
+    --------
+    Select nodes at `x == 0`, Of these, reselect nodes between ``1 < Y
+    < 10``, then finally unselect nodes between ``5 < Y < 6``.
+
+    >>> mapdl.nsel('S', 'LOC', 'X', 0)
+    >>> mapdl.nsel('R', 'LOC', 'Y', 1, 10)
+    >>> mapdl.nsel('U', 'LOC', 'Y', 5, 6)
+
+    For other coordinate systems activate the coord system first.
+    First, change to cylindrical coordinate system, select nodes at
+    ``radius == 5``.  Reselect nodes from 0 to 90 degrees.
+
+    >>> mapdl.csys(1)
+    >>> mapdl.nsel('S', 'LOC', 'X', 5)
+    >>> mapdl.nsel('R', 'LOC', 'Y', 0, 90)
+
+    Note that the labels X, Y, and Z are always used, regardless of which
+    coordinate system is activated. They take on different meanings in
+    different systems Additionally, angles are always in degrees and
+    NOT radians.
+
+    Select elements assigned to material property 2
+
+    >>> mapdl.esel('S', 'MAT', '', 2)
+
+    Select the nodes these elements use
+
+    >>> mapdl.nsle()
+
+    Reselect nodes on the element external surfaces
+
+    >>> mapdl.nsel('R', 'EXT')
+
+    Change to cylindrical coordinates
+
+    >>> mapdl.csys(1)
+
+    Reselect nodes with radius=5
+
+    >>> mapdl.nsel('R', 'LOC', 'X', 5)
     """
     command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
         item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
@@ -867,6 +962,17 @@ def nsla(self, type_="", nkey="", **kwargs):
     [AMESH, VMESH] on a solid model that contains the selected areas.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+    Select area(s) at location x=0.  Note that the selection tolerance
+    above and below 0 will depend on the value of ``mapdl.seltol``
+
+    >>> mapdl.asel('S', 'LOC', 'X', 0)
+
+    Select nodes residing on those areas.
+
+    >>> mapdl.nsla('S', 1)
     """
     command = "NSLA,%s,%s" % (str(type_), str(nkey))
     return self.run(command, **kwargs)
@@ -917,11 +1023,20 @@ def nsle(self, type_="", nodetype="", num="", **kwargs):
     elements. Only nodes on elements in the currently-selected element set
     can be selected.
 
-    Note:: : When using degenerate hexahedral elements, NSLE, U,CORNER and
-    NSLE,S,MID will not select the same set of nodes because some nodes
-    appear as both corner and midside nodes.
+    .. note::
+        When using degenerate hexahedral elements, NSLE, U,CORNER and
+        NSLE,S,MID will not select the same set of nodes because some
+        nodes appear as both corner and midside nodes.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+    Select elements assigned to material property 2 and then select
+    the nodes these elements use.
+
+    >>> mapdl.esel('S', 'MAT', '', 2)
+    >>> mapdl.nsle()
     """
     command = "NSLE,%s,%s,%s" % (str(type_), str(nodetype), str(num))
     return self.run(command, **kwargs)
@@ -1145,7 +1260,7 @@ def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     If VMIN = VMAX = 0.0, Toler = 1.0E-6.
 
-     If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
+    If VMAX ≠ VMIN, Toler = 1.0E-8 x (VMAX-VMIN).
 
     Use the SELTOL command to override this default and specify Toler
     explicitly.
@@ -1189,3 +1304,47 @@ def vsla(self, type_="", vlkey="", **kwargs):
     """
     command = "VSLA,%s,%s" % (str(type_), str(vlkey))
     return self.run(command, **kwargs)
+
+
+def seltol(self, toler="", **kwargs):
+    """Select those volumes containing the selected areas.
+
+    APDL Command: SELTOL
+
+    Parameters
+    ----------
+    toler
+        Tolerance value. If blank, restores the default tolerance
+        logic.
+
+    Notes
+    -----
+    For selects based on non-integer numbers (e.g. coordinates,
+    results, etc.), items within the range VMIN - Toler and VMAX +
+    Toler are selected, where VMIN and VMAX are the range values input
+    on the xSEL commands (ASEL, ESEL, KSEL, LSEL, NSEL, and VSEL).
+
+    The default tolerance logic is based on the relative values of
+    VMIN and VMAX as follows:
+
+    If ``vmin == vmax``, ``toler = 0.005*vmin``
+
+    If ``vmin == vmax == 0.0``, ``toler = 1.0E-6``.
+
+    If ``vmax != vmin``, ``toler = 1.0E-8 x (vmax - vmin)``.
+
+    This command is typically used when ``vmax - vmin`` is very large so
+    that the computed default tolerance is therefore large and the
+    xSEL commands selects more than what is desired.
+
+    Toler remains active until respecified by a subsequent seltol
+    command. ``seltol()`` resets back to the default toler value.
+
+    Examples
+    --------
+    Set selection tolarance to 1E-5
+
+    >>> seltol(1E-5)
+
+    """
+    return self.run(f"SELTOL{toler}", **kwargs)

@@ -103,6 +103,7 @@ class Commands:
     partsel = database.selecting.partsel
     vsel = database.selecting.vsel
     vsla = database.selecting.vsla
+    seltol = database.selecting.seltol
 
     resume = database.setup.resume
     save = database.setup.save
