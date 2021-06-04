@@ -242,6 +242,16 @@ Documentation for PyMAPDL is generated from three sources:
 General usage and API descriptions should be placed within `docs/source` and
 the docstrings.  Full examples should be placed in `examples`.
 
+How to add a new example
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To add a new example, all you need to do is create a new example file and add it to the repo.
+In order to make this process as easy as possible, a self-demonstrating example is included
+in the examples section, which explains how examples can be created & added. It can also
+be used as a template for future usage.
+
+:ref:`ref_how_to_add_an_example_reference_key`
+
 
 Documentation Style and Organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
