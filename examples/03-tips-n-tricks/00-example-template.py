@@ -23,7 +23,9 @@ New examples should be added as python scripts to:
 
 Avoid creating new folders unless absolutely necessary. If in doubt put the example
 in the folder closest to what it is doing and its precise location can be advised
-on in the pull request!
+on in the pull request! If you *must* create a new folder, make sure to add a
+``README.txt`` containing a reference, a title and a single sentence description of the folder.
+Otherwise the new folder will be ignored by Sphinx!
 
 Example file names should be in the format:
 
