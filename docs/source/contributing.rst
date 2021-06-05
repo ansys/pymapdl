@@ -242,13 +242,14 @@ Documentation for PyMAPDL is generated from three sources:
 General usage and API descriptions should be placed within `docs/source` and
 the docstrings.  Full examples should be placed in `examples`.
 
-How to add a new example
-~~~~~~~~~~~~~~~~~~~~~~~~
+Adding a New Example
+~~~~~~~~~~~~~~~~~~~~
 
-To add a new example, all you need to do is create a new example file and add it to the repo.
-In order to make this process as easy as possible, a self-demonstrating example is included
-in the examples section, which explains how examples can be created & added. It can also
-be used as a template for future usage.
+PyMAPDL examples come in two formats.  Basic code snippets demonstrating some functionality, or a full gallery examples.  Small code samples and snippets are contained in the `docs/source` directory, while the full gallery examples, meant to be run as individual downloadable scripts, are contained in the `examples` directory at the root of this repository.
+
+To add a fully fledged, standalone example, add your example to the `examples` directory within one of the applicable subfolders.  Should none of the existing directories match the category of your example, create a new directory with a `README.txt` describing the new category.  Additionally, as these examples are built using the sphinx gallery extension, follow coding guidelines as established by [Sphinx-Gallery](https://sphinx-gallery.github.io/stable/index.html)
+
+A self-demonstrating example is can be found at :ref:`ref_how_to_add_an_example_reference_key`.
 
 :ref:`ref_how_to_add_an_example_reference_key`
 

@@ -1,8 +1,8 @@
 """
 .. _ref_how_to_add_an_example_reference_key:
 
-How to add a new example
-------------------------
+Adding a New Gallery Example
+----------------------------
 This example demonstrates how to add new examples as well as being a template that can
 be used in their creation.
 
@@ -21,20 +21,21 @@ New examples should be added as python scripts to:
 
 ``PyMAPDL/examples/XY-example-folder-name/``
 
-Avoid creating new folders unless absolutely necessary. If in doubt put the example
-in the folder closest to what it is doing and its precise location can be advised
-on in the pull request! If you *must* create a new folder, make sure to add a
-``README.txt`` containing a reference, a title and a single sentence description of the folder.
-Otherwise the new folder will be ignored by Sphinx!
+.. note::
+   Avoid creating new folders unless absolutely necessary. If in doubt put the example
+   in the folder closest to what it is doing and its precise location can be advised
+   on in the pull request. If you *must* create a new folder, make sure to add a
+   ``README.txt`` containing a reference, a title and a single sentence description of the folder.
+   Otherwise the new folder will be ignored by Sphinx.
 
 Example file names should be in the format:
 
 ``XY-example-name.py``
 
 Where ``XY`` is the number of the example. If there are already three examples numbered
-``00``, ``01``, and ``02``, then yours must subsequently use the prefix 03.
+``00``, ``01``, and ``02``, then your example must subsequently use the prefix ``03``.
 
-After this pre-amble is complete, the first code block begins.
+After this preamble is complete, the first code block begins.
 """
 
 # Your code goes here...
@@ -56,7 +57,7 @@ mapdl
 #
 # As in jupyter notebooks, if code is left unassigned at the end of a code block
 # (as with ``mapdl`` in the previous block) the output will be generated and
-# printed to the screen. Otherwise, ``print()`` will also do the same.
+# printed to the screen according to its ``__repr__``.  Otherwise, you can use ``print()`` to output the ``__str__``.
 
 # more code...
 mapdl.clear()
@@ -75,8 +76,8 @@ mapdl.vplot()
 
 ###############################################################################
 # Further Plots and images
-# ========================
-# Matplotlib plots also work!
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# Matplotlib plots will also be rendered in the html.
 
 import matplotlib.pyplot as plt
 
@@ -89,17 +90,17 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 
 ###############################################################################
-# Further Further Plots and images
-# ================================
-# You can even do animations! See :ref:`ref_pyvista_mesh` for an example.
-# Incidentally that is also how you link to another example via their ref key!
+# Animations
+# ~~~~~~~~~~
+# You can even create animations.  See :ref:`ref_pyvista_mesh` for an example.
+# Incidentally that is also how you link to another example (via `ref_pyvista_mesh`).
 #
 #
 # Making a Pull Request
-# ---------------------
-# Once your example is complete, and ready to go you can make a pull request (PR)
+# ~~~~~~~~~~~~~~~~~~~~~
+# Once your example is complete and you've verified builds locally, you can make a pull request (PR).
 # Branches containing examples should be prefixed with `doc/` as per the branch
 # naming conventions found here: :ref:`contributing`.
 #
-# Finally, you only need to create the python file to add an example! The jupyter
-# notebook, the example html and the demo script are all auto-generated.
+# Note that you only need to create the python source example (*.py).  The jupyter
+# notebook, the example html and the demo script will all be auto-generated via ``sphinx-gallery``.
