@@ -742,7 +742,7 @@ class PostProcessing():
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.plot_nodal_component_stress('1')
+        >>> mapdl.post_processing.plot_nodal_principal_stress('1')
         """
         disp = self.nodal_principal_stress(component)
         kwargs.setdefault('stitle', '%s Nodal\nPrincipal Stress' % component)
@@ -922,15 +922,15 @@ class PostProcessing():
 
     def plot_nodal_total_component_strain(self, component, show_node_numbering=False,
                                           **kwargs):
-        """Plot nodal principal stress.
+        """Plot nodal total component starin.
 
         Includes elastic, plastic, and creep strain.
 
         Parameters
         ----------
-        component : str
-            Nodal component stress component to plot.  Must be
-            ``'1'``, ``'2'``, or ``'3'``
+        component : str, optional
+            Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
+            ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Returns
         --------
@@ -941,11 +941,11 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the nodal principal stress "1" for the second result set
+        Plot Total component strain in the X direction for the first result
 
         >>> mapdl.post1()
-        >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.plot_nodal_component_stress('1')
+        >>> mapdl.set(1, 1)
+        >>> mapdl.post_processing.plot_nodal_total_component_strain('X')
         """
         disp = self.nodal_total_component_strain(component)
         kwargs.setdefault('stitle', '%s Total Nodal\nComponent Strain' % component)
@@ -1014,11 +1014,11 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the nodal principal stress "1" for the second result set
+        Plot the principal nodal strain in the S1 direction for the first result
 
         >>> mapdl.post1()
-        >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.plot_nodal_component_stress('1')
+        >>> mapdl.set(1, 1)
+        >>> mapdl.post_processing.nodal_total_principal_strain('1')
         """
         disp = self.nodal_total_principal_strain(component)
         kwargs.setdefault('stitle', '%s Nodal\nPrincipal Strain' % component)
