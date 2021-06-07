@@ -591,7 +591,10 @@ def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     -----
     Selects a subset of keypoints or hard points.  For example, to select a
     new set of keypoints based on keypoint numbers 1 through 7, use
-    KSEL,S,KP,,1,7.  The selected subset is used when the ALL label is
+
+    >>> mapdl.ksel('S', 'KP', '', 1, 7)
+
+    The selected subset is used when the ALL label is
     entered (or implied) on other commands, such as KLIST,ALL.  Only data
     identified by keypoint number are selected.  Data are flagged as
     selected and unselected; no data are actually deleted from the
@@ -614,6 +617,12 @@ def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
     explicitly.
 
     Table: 203:: : KSEL - Valid Item and Component Labels
+
+    Examples
+    --------
+
+    To select a single keypoint (keypoint 1)
+    >>> mapdl.ksel('S', 'KP', '', 1)
     """
     command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
         item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
