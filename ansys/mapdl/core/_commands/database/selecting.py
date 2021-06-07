@@ -620,8 +620,8 @@ def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
 
     Examples
     --------
-
     To select a single keypoint (keypoint 1)
+
     >>> mapdl.ksel('S', 'KP', '', 1)
     """
     command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(

@@ -2644,6 +2644,7 @@ def type(self, itype="", **kwargs):
     --------
 
     Set the type pointer to 2
+
     >>> mapdl.type(2)
     """
     command = f"TYPE,{itype}"
@@ -2809,8 +2810,9 @@ def vmesh(self, nv1="", nv2="", ninc="", **kwargs):
     Examples
     --------
 
-    Set the material ID and type pointers to 2, then mesh volume #1
+    Set the material ID and type pointers to 2, then mesh volume 1
     using mat 2 and type 2.
+
     >>> mapdl.mat(2)
     >>> mapdl.type(2)
     >>> mapdl.vmesh(1)
