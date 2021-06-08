@@ -7,9 +7,7 @@ def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
     ----------
     area
         Area to which surface load applies.  If ALL, apply load to all
-        selected areas [ASEL].  If Area = P, graphical picking is enabled
-        and all remaining command fields are ignored (valid only in the
-        GUI).  A component may be substituted for Area.
+        selected areas [ASEL].  A component may be substituted for Area.
 
     lkey
         Load key associated with surface load (defaults to 1).  Load keys
@@ -43,6 +41,16 @@ def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
     ambient temperature). Use the *DIM command to define a table.
 
     This command is also valid in PREP7.
+
+    Examples
+    --------
+    Select areas with coordinates in the range 0.4 < Y < 1.0
+
+    >>> mapdl.asel('S', 'LOC', 'Y', 0.4, 1.0)
+
+    Set Pressure to 250e3 on all areas.
+
+    >>> mapdl.sfa('ALL', '', 'PRES', 250e3)
     """
     command = f"SFA,{area},{lkey},{lab},{value},{value2}"
     return self.run(command, **kwargs)
@@ -57,9 +65,7 @@ def sfadele(self, area="", lkey="", lab="", **kwargs):
     ----------
     area
         Area to which surface load deletion applies.  If ALL, delete load
-        from all selected areas [ASEL].  If AREA = P, graphical picking is
-        enabled and all remaining command fields are ignored (valid only in
-        the GUI).  A component name may be substituted for AREA.
+        from all selected areas [ASEL].  A component name may be substituted for AREA.
 
     lkey
         Load key associated with surface load (defaults to 1).  See the SFA
@@ -75,6 +81,13 @@ def sfadele(self, area="", lkey="", lab="", **kwargs):
     selected areas.
 
     This command is also valid in PREP7.
+
+    Examples
+    --------
+    Delete all convections applied to all areas where -1 < X < -0.5
+
+    >>> mapdl.asel('S', 'LOC', 'X', -1, -0.5)
+    >>> mapdl.sfadele('ALL', 'CONV')
     """
     command = f"SFADELE,{area},{lkey},{lab}"
     return self.run(command, **kwargs)
