@@ -42,7 +42,7 @@ I've heard APDL has been "deprecated" by Ansys, what does that mean for PyMAPDL?
 
 APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's generating an input file
 (look for "ds.dat") that's fed into MAPDL. However, what's changed over the past several years is where the geometry,
-meshing, and post-processing is occuring. Geometry generation can take place within SpaceClaim or Design Modeler,
+meshing, and post-processing is occurring. Geometry generation can take place within SpaceClaim or Design Modeler,
 and meshing is done using a variety of new and powerful meshers within Workbench. I can attest that these tools are
 far superior to the ones in MAPDL, but the biggest limitation to them is that they're difficult to script
 (especially externally) and as a result there are still users who choose to generate geometry and mesh within MAPDL.
