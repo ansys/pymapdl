@@ -37,8 +37,8 @@ The main advantages that PyAnsys has over Ansys ACT are:
 The best approach will depend on your workflow needs and how you'd like to develop software.
 
 
-APDL has been "deprecated" by Ansys, what does that mean for PyMAPDL?
----------------------------------------------------------------------
+I've heard APDL has been "deprecated" by Ansys, what does that mean for PyMAPDL?
+--------------------------------------------------------------------------------
 
 APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's generating an input file
 (look for "ds.dat") that's fed into MAPDL. However, what's changed over the past several years is where the geometry,
@@ -57,3 +57,4 @@ easy to run analyses. However, it's limited by its IronPython scripting and you'
 either a granular or high level or use packages such as ``numpy``, ``scipy``, ``pytorch``, ``tensorflow``, etc.
 PyMAPDL ties this in with MAPDL, that allows you to have a fully parametric workflow that leverages these machine
 learning tools or allows for advanced plotting with ``pyvista`` or ``matplotlib``.
+
