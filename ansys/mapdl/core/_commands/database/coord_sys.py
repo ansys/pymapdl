@@ -359,22 +359,43 @@ def csys(self, kcn="", **kwargs):
     command.
 
     The active coordinate system for files created via the CDWRITE command
-    is Cartesian (CSYS,0).
+    is Cartesian
+
+    >>> mapdl.csys(0)
 
     This command is valid in any processor.
 
-    CSYS,4 (or CSYS,WP) activates working plane tracking, which updates the
-    coordinate system to follow working plane changes. To deactivate
-    working plane tracking, activate any other coordinate system (for
-    example, CSYS,0 or CSYS,11).
+    >>> mapdl.csys(4)
+    >>> # or
+    >>> mapdl.csys('WP')
 
-    CSYS,5 is a cylindrical coordinate system with global Cartesian Y as
+    activates working plane tracking, which updates the
+    coordinate system to follow working plane changes. To deactivate
+    working plane tracking, activate any other coordinate system.
+
+    >>> mapdl.csys(5)
+
+    is a cylindrical coordinate system with global Cartesian Y as
     the axis. The local x, y and z axes are radial, θ, and axial
     (respectively). The R-Theta plane is the global X-Z plane, as it is for
-    an axisymmetric model. Thus, at θ = 0.0, CSYS,5 has a specific
+    an axisymmetric model. Thus, at `θ = 0.0`, `mapdl.csys(5)` has a specific
     orientation: the local x is in the global +X direction, local y is in
     the global -Z direction, and local z (the cylindrical axis) is in the
     global +Y direction.
+
+    Examples
+    --------
+    Create a cylindrical surface in cylindrical y (CSYS=5) with
+    a radius of 6 and spanning `30 < θ < -90` and `0 < z < 4`.
+
+    >>> mapdl.csys(5)
+    >>> mapdl.k(1, 6, 30)
+    >>> mapdl.k(2, 6, -90)
+    >>> mapdl.k(3, 6, -90, 4)
+    >>> mapdl.k(4, 6, 30, 4)
+    >>> mapdl.a(1, 2, 3, 4)
+    >>> mapdl.aplot()
+
     """
     command = "CSYS,%s" % (str(kcn))
     return self.run(command, **kwargs)

@@ -1561,6 +1561,12 @@ def mat(self, mat="", **kwargs):
     elements.  This number refers to the material number (MAT) defined with
     the material properties [MP].  Material numbers may be displayed
     [/PNUM].
+
+    Examples
+    --------
+    Set the material ID pointer to 2
+
+    >>> mapdl.mat(2)
     """
     command = f"MAT,{mat}"
     return self.run(command, **kwargs)
@@ -2633,6 +2639,13 @@ def type(self, itype="", **kwargs):
     logical element type has been assigned via TYPE or XATT,,,TYPE.  For
     more information, see the discussion on setting element attributes in
     Meshing Your Solid Model in the Modeling and Meshing Guide.
+
+    Examples
+    --------
+
+    Set the type pointer to 2
+
+    >>> mapdl.type(2)
     """
     command = f"TYPE,{itype}"
     return self.run(command, **kwargs)
@@ -2793,6 +2806,16 @@ def vmesh(self, nv1="", nv2="", ninc="", **kwargs):
 
     Tetrahedral mesh expansion [MOPT,TETEXPND,Value] is supported for both
     the VMESH and FVMESH commands.
+
+    Examples
+    --------
+
+    Set the material ID and type pointers to 2, then mesh volume 1
+    using mat 2 and type 2.
+
+    >>> mapdl.mat(2)
+    >>> mapdl.type(2)
+    >>> mapdl.vmesh(1)
     """
     command = f"VMESH,{nv1},{nv2},{ninc}"
     return self.run(command, **kwargs)

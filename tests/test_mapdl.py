@@ -56,6 +56,21 @@ def test_jobname(mapdl, cleared):
 
 
 @pytest.mark.skip_grpc
+def test_server_version(mapdl):
+    if mapdl.version == 20.2:
+        assert mapdl._server_version == (0, 0, 0)
+    elif mapdl.version == 21.1:
+        assert mapdl._server_version == (0, 3, 0)
+    elif mapdl.version == 21.2:
+        assert mapdl._server_version in [(0, 4, 0), (0, 4, 1)]
+    else:
+        # untested future version
+        assert isinstance(mapdl._server_version, tuple)
+        assert mapdl._server_version[1] >= 4
+        assert mapdl._server_version[0] >= 0
+
+
+@pytest.mark.skip_grpc
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
@@ -102,8 +117,13 @@ def test_multiline_fail(mapdl, cleared):
 
 
 def test_str(mapdl):
-    assert 'ANSYS Mechanical' in str(mapdl)
-
+    mapdl_str = str(mapdl)
+    assert 'Product:' in mapdl_str
+    assert 'MAPDL Version' in mapdl_str
+    try:
+        assert str(mapdl.version) in mapdl_str
+    except:
+        breakpoint()
 
 def test_version(mapdl):
     assert isinstance(mapdl.version, float)
@@ -152,6 +172,7 @@ def test_error(mapdl):
 
 
 def test_ignore_error(mapdl):
+    mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
     assert mapdl.ignore_errors is True

@@ -63,6 +63,15 @@ def cm(self, cname="", entity="", **kwargs):
     components and subassemblies are deleted.
 
     This command is valid in any processor.
+
+    Examples
+    --------
+
+    Create a component selection named ``"PRES_A"`` after
+    selecting the areas located in the Y plane at `loc`.
+
+    >>> mapdl.asel('S', 'LOC', 'Y', loc)
+    >>> mapdl.cm('PRES_A', 'AREA')
     """
     command = "CM,%s,%s" % (str(cname), str(entity))
     return self.run(command, **kwargs)

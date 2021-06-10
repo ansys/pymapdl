@@ -1,9 +1,11 @@
 """
 Manipulate APDLMath vectors or dense matrices as NumPy Arrays
 -------------------------------------------------------------
-
 This example demonstrates how to exchange data between MAPDL and
-python via numpy arrays.
+Python via numpy arrays.
+
+.. note::
+    This example requires Ansys 2021R2.
 
 """
 import numpy as np
@@ -57,8 +59,8 @@ print(apdl_vec.norm(), np.linalg.norm(apdl_vec))
 # Copy a NumPy Array to an APDLMath vector
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # You can push back any numpy vector or 2D array to MAPDL.  This
-# creates a new APDLMath, which in this case is named ``'NewVec'``
-mm.set_vec('NewVec', pv)
+# creates a new APDLMath, which in this case is named ``'NewVec'``.
+mm.set_vec(pv, 'NewVec')
 
 # verify this vector exists
 print(mm)
@@ -96,5 +98,5 @@ print(ans_mat.id)
 
 ###############################################################################
 # Load this matrix from APDL and verify it is identical
-from_ans = ans_mat.todense()
+from_ans = ans_mat.asarray()
 print(np.allclose(from_ans, np_rand))

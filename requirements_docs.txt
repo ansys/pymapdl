@@ -13,4 +13,4 @@ sphinx-gallery>=0.8.1
 sphinx-autodoc-typehints
 pydata-sphinx-theme==0.5.0
 pypandoc
-Jinja2==2.11.2  # due to An error happened in rendering the page genindex. with v3
+Jinja2==2.11.3  # due to An error happened in rendering the page genindex. with v3

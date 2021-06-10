@@ -690,6 +690,13 @@ def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "",
     >>> mapdl.emodif('ALL', 'MAT', i1=mp_num)
     'MODIFY ALL SELECTED ELEMENTS TO HAVE  MAT  =         2'
 
+    Use `emodif` to modify all of volume 2's elements
+    after meshing.
+
+    >>> mapdl.vmesh('S', 'VOLU', '', 2)
+    >>> mapdl.allsel('BELOW', 'VOLU')
+    >>> mapdl.emodif('ALL', 'MAT', 2)
+
     Notes
     -----
     The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
