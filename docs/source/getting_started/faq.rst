@@ -35,3 +35,26 @@ The main advantages that PyAnsys has over Ansys ACT are:
  * It is compatible with modern Python (3), whereas ACT is only compatible with IronPython (Python 2)
 
 The best approach will depend on your workflow needs and how you'd like to develop software.
+
+
+I've heard APDL has been "deprecated" by Ansys, what does that mean for PyMAPDL?
+--------------------------------------------------------------------------------
+
+APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's generating an input file
+(look for "ds.dat") that's fed into MAPDL. However, what's changed over the past several years is where the geometry,
+meshing, and post-processing is occurring. Geometry generation can take place within SpaceClaim or Design Modeler,
+and meshing is done using a variety of new and powerful meshers within Workbench. I can attest that these tools are
+far superior to the ones in MAPDL, but the biggest limitation to them is that they're difficult to script
+(especially externally) and as a result there are still users who choose to generate geometry and mesh within MAPDL.
+
+
+What are the main reasons to use this over other Ansys products like Workbench?
+-------------------------------------------------------------------------------
+
+There will always be tasks where it's better to use one or the other. Workbench is great tool to rapidly prototype,
+mesh, set boundary conditions, and solve. It's where a ton of development has gone there are many features that make it
+easy to run analyses. However, it's limited by its IronPython scripting and you're unable call multiple products at
+either a granular or high level or use packages such as ``numpy``, ``scipy``, ``pytorch``, ``tensorflow``, etc.
+PyMAPDL ties this in with MAPDL, that allows you to have a fully parametric workflow that leverages these machine
+learning tools or allows for advanced plotting with ``pyvista`` or ``matplotlib``.
+
