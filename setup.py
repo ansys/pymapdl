@@ -14,6 +14,7 @@ with io_open(version_file, mode='r') as fd:
     exec(fd.read())
 
 install_requires = [
+    'matplotlib>=3.0.0'  # for colormaps for pyvista
     'numpy>=1.14.0',
     'pyvista>=0.30.1',
     'appdirs>=1.4.0',
