@@ -12,6 +12,7 @@ class Commands:
     config = session.run_controls.config
     cwd = session.run_controls.cwd
     filname = session.run_controls.filname
+    input = session.run_controls.input
     keyw = session.run_controls.keyw
     memm = session.run_controls.memm
     nerr = session.run_controls.nerr
