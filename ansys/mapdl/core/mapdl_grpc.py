@@ -1601,19 +1601,20 @@ class MapdlGrpc(_MapdlCore):
 
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
-        """Wrap the IGESIN command while handling the remote case.
-
-
-        """
+        """Wrap the IGESIN command to handle the remote case."""
         if self._local:
-            super().igesin(fname, ext, **kwargs)
+            out = super().igesin(fname, ext, **kwargs)
+        elif not fname:
+            out = super().igesin(**kwargs)
         elif fname in self.list_files():
             # check if this file is already remote
-            super().igesin(fname, ext, **kwargs)
+            out = super().igesin(fname, ext, **kwargs)
         else:
             if not os.path.isfile(fname):
                 raise FileNotFoundError(f'Unable to find {fname}.  You may need to'
                                         'input the full path to the file.')
 
             basename = self.upload(fname, progress_bar=False)
-            super().igesin(basename, **kwargs)
+            out = super().igesin(basename, **kwargs)
+
+        return out
