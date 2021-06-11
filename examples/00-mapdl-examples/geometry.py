@@ -55,6 +55,7 @@ mapdl.lplot(show_line_numbering=False,
             color='w',
             show_axes=False,
             show_bounds=True,
+            title='',
             cpos='xz')
 
 

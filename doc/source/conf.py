@@ -3,6 +3,7 @@ import warnings
 
 import pyvista
 import numpy as np
+from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl.core import __version__
 
@@ -13,11 +14,8 @@ pyvista.set_error_output_file('errors.txt')
 # Ensure that offscreen rendering is used for docs generation
 pyvista.OFF_SCREEN = True
 
-# Preferred plotting style for documentation
-# pyvista.set_plot_theme('document')
-
 # must be less than or equal to the XVFB window size
-pyvista.rcParams['window_size'] = np.array([1024, 768])  # * 2
+pyvista.rcParams['window_size'] = np.array([1024, 768])
 
 # Save figures in specified directory
 pyvista.FIGURE_PATH = os.path.join(os.path.abspath('./images/'), 'auto-generated/')
@@ -38,22 +36,14 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = 'ansys.mapdl.core'
-copyright = '2021, ANSYS'
-author = 'ANSYS Open Source Developers'
+copyright = 'Copyright (c) 2021 ANSYS, Inc. All rights reserved.'
+author = 'ANSYS Inc.'
 
 # The short X.Y version
 release = version = __version__
 
 
 # -- General configuration ---------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -100,8 +90,6 @@ copybutton_prompt_text = ">>> "
 
 
 # -- Sphinx Gallery Options ---------------------------------------------------
-from sphinx_gallery.sorting import FileNameSortKey
-
 sphinx_gallery_conf = {
     # convert rst to md for ipynb
     'pypandoc': True,
@@ -122,31 +110,17 @@ sphinx_gallery_conf = {
     "image_scrapers": ('pyvista', 'matplotlib'),
     'ignore_pattern': 'flycheck*',
     "thumbnail_size": (350, 350),
-    # 'first_notebook_cell': ("%matplotlib inline\n"
-    #                         "from pyvista import set_plot_theme\n"
-    #                         "set_plot_theme('document')"),
 }
 
 
 # -- Options for HTML output -------------------------------------------------
-
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'pydata_sphinx_theme'
-html_logo = '_static/pyansys-logo-black-cropped.png'
+html_theme = 'pyansys_sphinx_theme'
+html_logo = 'https://docs.pyansys.com/_static/pyansys-logo-black-cropped.png'
 html_theme_options = {
-    "github_url": "https://github.com/pyansys/pymapdl",
-    # "show_toc_level": 1,
-    # "show_prev_next": False
+    "github_url": "https://github.com/pyansys/PyMAPDL",
 }
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['css/ansys.css']
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -155,24 +129,7 @@ htmlhelp_basename = 'pymapdldoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
+latex_elements = {}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
