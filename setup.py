@@ -16,7 +16,7 @@ with io_open(version_file, mode='r') as fd:
 install_requires = [
     'matplotlib>=3.0.0'  # for colormaps for pyvista
     'numpy>=1.14.0',
-    'pyvista>=0.30.1',
+    'pyvista>=0.31.0',  # first release with theme support
     'appdirs>=1.4.0',
     'tqdm>=4.45.0',
     'pyiges>=0.1.4',
@@ -37,7 +37,6 @@ if os.name == 'linux':
     install_requires.extend(['pexpect>=4.8.0'])
 
 
-# packages = find_packages(where='ansys/mapdl/core')
 packages = []
 for package in find_namespace_packages(include='ansys*'):
     if package.startswith('ansys.mapdl.core'):

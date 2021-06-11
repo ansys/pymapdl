@@ -11,3 +11,6 @@ wing_model = os.path.join(dir_path, 'wing.dat')
 # This way, files can be loaded with:
 # from ansys.mapdl.core import examples
 # examples.wing_model
+
+# downloadable files
+from .downloads import download_bracket
