@@ -432,3 +432,7 @@ class MeshGrpc(Mesh):
             self._update_cache()
             self._grid_cache = self._parse_vtk(force_linear=True)
         return self._grid_cache
+
+    @_grid.setter
+    def _grid(self, value):
+        self._grid_cache = value
