@@ -3,7 +3,7 @@ import pyvista as pv
 import numpy as np
 
 from ansys.mapdl.core.misc import unique_rows
-
+from .theme import MapdlTheme
 
 def general_plotter(meshes, points, labels,
                     title='',
@@ -22,10 +22,12 @@ def general_plotter(meshes, points, labels,
                     render_points_as_spheres=False, render_lines_as_tubes=False,
                     scalar_bar_args={},
                     smooth_shading=None,
+                    show_scalar_bar=None,
                     # labels kwargs
                     font_size=None,
                     font_family=None,
-                    text_color=None):
+                    text_color=None,
+                    theme=None):
     """General pyansys plotter for APDL geometry and meshes.
 
     Parameters
@@ -125,11 +127,15 @@ def general_plotter(meshes, points, labels,
     smooth_shading : bool, optional
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
+
+    theme : pyvista.DefaultTheme, optional
+        PyVista theme.  Defaults to PyMAPDL theme.
+
     """
     if notebook:
         off_screen = True
 
-    pl = pv.Plotter(off_screen=off_screen, notebook=notebook)
+    pl = pv.Plotter(off_screen=off_screen, notebook=notebook, theme=theme)
 
     if background:
         pl.set_background(background)
@@ -154,6 +160,7 @@ def general_plotter(meshes, points, labels,
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
                     point_size=point_size, line_width=line_width,
+                    show_scalar_bar=show_scalar_bar,
                     opacity=opacity, flip_scalars=flip_scalars,
                     lighting=lighting, n_colors=n_colors,
                     interpolate_before_map=interpolate_before_map,

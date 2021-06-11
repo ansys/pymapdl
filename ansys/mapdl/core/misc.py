@@ -102,16 +102,6 @@ def random_string(stringLength=10, letters=string.ascii_lowercase):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 
-def _configure_pyvista():
-    """Configure PyVista's ``rcParams`` for pyansys"""
-    import pyvista as pv
-    pv.rcParams['interactive'] = True
-    pv.rcParams["cmap"] = "jet"
-    pv.rcParams["font"]["family"] = "courier"
-    pv.rcParams["title"] = "pyansys"
-    return
-
-
 def _check_has_ansys():
     """Safely wraps check_valid_ansys
 

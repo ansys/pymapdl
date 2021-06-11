@@ -723,7 +723,7 @@ class _MapdlCore(Commands):
 
         Examples
         --------
-        Plot while displaying area numbers
+        Plot while displaying area numbers.
 
         >>> mapdl.vplot(show_area_numbering=True)
         """
@@ -731,9 +731,10 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
+            kwargs.setdefault('title', 'MAPDL Volume Plot')
             cm_name = '__tmp_area2__'
-            self.cm(cm_name, 'AREA')
-            self.aslv('S')  # select areas attached to active volumes
+            self.cm(cm_name, 'AREA', mute=True)
+            self.aslv('S', mute=True)  # select areas attached to active volumes
             self.aplot(vtk=vtk, color_areas=color_areas, quality=quality,
                        show_area_numbering=show_area_numbering,
                        show_line_numbering=show_line_numbering,
@@ -741,7 +742,8 @@ class _MapdlCore(Commands):
             self.cmsel('S', cm_name, 'AREA')
         else:
             self._enable_interactive_plotting()
-            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc, **kwargs)
+            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc,
+                                 degen=degen, scale=scale, **kwargs)
 
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,
@@ -812,6 +814,7 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
+            kwargs.setdefault('show_scalar_bar', False)
             kwargs.setdefault('title', 'MAPDL Area Plot')
             kwargs.setdefault('scalar_bar_args', {'title': 'Scalar Bar Title'})
             if quality > 10:
@@ -860,9 +863,9 @@ class _MapdlCore(Commands):
             return general_plotter(meshes, [],
                                    labels, **kwargs)
 
-        else:
-            self._enable_interactive_plotting()
-            return super().aplot(na1=na1, na2=na2, ninc=ninc, **kwargs)
+        self._enable_interactive_plotting()
+        return super().aplot(na1=na1, na2=na2, ninc=ninc,
+                             degen=degen, scale=scale, **kwargs)
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
