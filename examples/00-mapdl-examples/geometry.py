@@ -119,7 +119,7 @@ grid.point_arrays['ansys_node_num']
 
 
 ###############################################################################
-# Save arbitary data to the grid
+# Save arbitrary data to the grid
 
 # must be sized to the number of points
 grid.point_arrays['my_data'] = np.arange(grid.n_points)
