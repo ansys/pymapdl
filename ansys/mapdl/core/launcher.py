@@ -710,6 +710,12 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         ``True``, giving you a fresh environment when connecting to
         MAPDL.
 
+    log_apdl : str, optional
+        Enables logging every APDL command to the local disk.  This
+        can be used to "record" all the commands that are sent to
+        MAPDL via PyMAPDL so a script can be run within MAPDL without
+        PyMAPDL.
+
     remove_temp_files : bool, optional
         Removes temporary files on exit.  Default ``False``.
 
@@ -885,23 +891,19 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
             os.environ['I_MPI_SHM_LMT'] = 'shm'
 
     # cache start parameters
+    start_parm = {'exec_file': exec_file,
+                  'run_location': run_location,
+                  'additional_switches': additional_switches,
+                  'jobname': jobname,
+                  'nproc': nproc}
+
     if mode in ['console', 'corba']:
-        start_parm = {'exec_file': exec_file,
-                      'run_location': run_location,
-                      'jobname': jobname,
-                      'nproc': nproc,
-                      'additional_switches': additional_switches,
-                      'start_timeout': start_timeout}
+        start_parm['start_timeout'] = start_timeout
     else:
-        start_parm = {'exec_file': exec_file,
-                      'jobname': jobname,
-                      'nproc': nproc,
-                      'ram': ram,
-                      'run_location': run_location,
-                      'additional_switches': additional_switches,
-                      'custom_bin': custom_bin,
-                      'override': override,
-                      'timeout': start_timeout}
+        start_parm['ram'] = ram
+        start_parm['custom_bin'] = custom_bin
+        start_parm['override'] = override
+        start_parm['timeout'] = start_timeout
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
@@ -913,8 +915,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
             from ansys.mapdl.core.mapdl_corba import MapdlCorba
         except ImportError:
             raise ImportError('To use this feature, install the MAPDL CORBA package'
-                              ' with:\n\n'
-                              '    pip install ansys_corba')
+                              ' with:\n\npip install ansys_corba') from None
 
         broadcast = kwargs.get('log_broadcast', False)
         mapdl = MapdlCorba(loglevel=loglevel, log_apdl=log_apdl,
@@ -927,7 +928,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                           cleanup_on_exit=cleanup_on_exit,
                           loglevel=loglevel, set_no_abort=set_no_abort,
                           remove_temp_files=kwargs.pop('remove_temp_files', False),
-                          **start_parm)
+                          log_apdl=log_apdl, **start_parm)
         if run_location is None:
             mapdl._path = actual_run_location
     else:

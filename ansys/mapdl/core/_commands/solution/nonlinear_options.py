@@ -468,148 +468,165 @@ def neqit(self, neqit="", forcekey="", **kwargs):
 
 
 def nladaptive(self, component="", action="", criterion="", option="",
-               val1="", val2="", val3="", **kwargs):
-    """Defines the criteria under which the mesh is refined or modified during
+               val1="", val2="", val3="", val4="", **kwargs):
+    """Defines the criteria under which the mesh is refined or modified during a nonlinear solution.
 
     APDL Command: NLADAPTIVE
-    a nonlinear solution.
 
     Parameters
     ----------
-    component
-        Specifies the element component upon which this command should act:
+    component : str
+        Specifies the element component upon which this command should
+        act.  One of the following:
 
-        ALL  - All selected components, or all selected elements if no component is selected
-               (default).
+        - ``"ALL"`` : All selected components, or all selected
+               elements if no component is selected (default).
+        - ``"Name"`` : Component name.
 
-        Name - Component name.
+    action : str
+        The action to perform on the selected component(s).  One of
+        the following:
 
-    action
-        The action to perform on the selected component(s):
-
-        ADD  - Add a criterion to the database.
-
-        LIST  - List the criteria defined for the specified component(s).
-
-        DELETE  - Delete the criteria defined for the specified component(s).
-
-        ON - Enable the defined criteria for the specified component(s) and specify how
-             frequently and when to check them (via ON,,,VAL1,VAL2,VAL3):
-
-        VAL1 -- Checking frequency. If > 0, check criteria at every VAL1 substeps. If < 0, check criteria at each of the VAL1 points (approximately equally spaced) between VAL2 and VAL3. (Default = -1.) - VAL2 -- Checking start time, where VAL2 < VAL3. (Default is the start time of
-                          the load step.)
-
-        VAL3 -- Checking end time, where VAL3 > VAL2. (Default is the end time of the load step.)  - OFF
+        - ``"ADD"`` : Add a criterion to the database.
+        - ``"LIST"`` : List the criteria defined for the specified
+          component(s).
+        - ``"DELETE"`` : Delete the criteria defined for the specified
+          component(s).
+        - ``"ON"`` : Enable the defined criteria for the specified
+          component(s) and specify how frequently and when to check
+          them (via ON,,,VAL1,VAL2,VAL3):
+            - ``"VAL1"`` : Checking frequency. If > 0, check criteria
+              at every VAL1 substeps. If < 0, check criteria at each
+              of the VAL1 points (approximately equally spaced)
+              between VAL2 and VAL3. (Default = -1.)
+            - ``"VAL2"`` : Checking start time, where VAL2 <
+              VAL3. (Default is the start time of the load step.)
+            - ``"VAL3"`` : Checking end time, where VAL3 >
+              VAL2. (Default is the end time of the load step.)
+            - ``"VAL4"`` : SOLID187 element type ID (defined prior to
+              issuing this command). Valid only for SOLID185 or
+              SOLID186 components in a NLAD-ETCHG analysis.
+        - ``"OFF"`` : Disable the defined criteria for the specified
+          component(s).
 
     criterion
         The type of criterion to apply to the selected component(s):
 
-        CONTACT  - Contact-based. (Valid only for Action = ADD, Action = LIST, or Action =
-                   DELETE.)
+        - ``"CONTACT"`` : Contact-based. (Valid only for Action = ADD,
+          Action = LIST, or Action = DELETE.)
 
-        ENERGY  - Energy-based. (Valid only for Action = ADD, Action = LIST, or Action = DELETE.)
+        - ``"ENERGY"`` : Energy-based. (Valid only for Action = ADD,
+          Action = LIST, or Action = DELETE.)
 
-        BOX  - A position-based criterion, defined by a box. (Valid only for Action = ADD,
-               Action = LIST, or Action = DELETE.)
+        - ``"BOX"`` : A position-based criterion, defined by a
+          box. (Valid only for Action = ADD, Action = LIST, or Action
+          = DELETE.)
 
-        MESH  - A mesh-quality-based criterion. (Valid only for Action = LIST, or Action =
-                DELETE.)
+        - ``"MESH"`` : A mesh-quality-based criterion. (Valid only for
+          Action = LIST, or Action = DELETE.)
 
-        ALL  - All criteria and options. (Valid only for Action = LIST or Action = DELETE.
-               Option and all subsequent arguments are ignored.)
+        - ``"ALL"`` : All criteria and options. (Valid only for Action
+          = LIST or Action = DELETE. Option and all subsequent
+          arguments are ignored.)
 
-    option
+    option : str
         Criterion option to apply to the selected component(s):
 
-        NUMELEM  - For target elements only, define the minimum number of contact elements to
-                   contact with each target element. If this criterion is
-                   not satisfied, the program refines the contact elements
-                   and the associated solid elements. For this option, VAL1
-                   must be a positive integer. (Valid only for Action =
-                   ADD, Action = LIST, or Action = DELETE. )
+        - ``"NUMELEM"`` : For target elements only, define the minimum
+          number of contact elements to contact with each target
+          element. If this criterion is not satisfied, the program
+          refines the contact elements and the associated solid
+          elements. For this option, VAL1 must be a positive
+          integer. (Valid only for Action = ADD, Action = LIST, or
+          Action = DELETE. )
 
-        MEAN  - Check the strain energy of any element that is part of the defined component
-                for the condition Ee ≥ c1 * Etotal / NUME (where c1 = VAL1,
-                Etotal is the total strain energy of the component, and
-                NUME is the number of elements of the component). If this
-                criterion is satisfied at an element, the program refines
-                the element. For this option, VAL1 must be non-negative and
-                defaults to 1. (Valid only for Action = ADD, Action = LIST,
-                or Action = DELETE.)
+        - ``"MEAN"`` : Check the strain energy of any element that is
+          part of the defined component for the condition Ee ≥ c1 *
+          Etotal / NUME (where c1 = VAL1, Etotal is the total strain
+          energy of the component, and NUME is the number of elements
+          of the component). If this criterion is satisfied at an
+          element, the program refines the element. For this option,
+          VAL1 must be non-negative and defaults to 1. (Valid only for
+          Action = ADD, Action = LIST, or Action = DELETE.)
 
-        XYZRANGE  - Define the location box in which all elements within are to be split or
-                    refined. Up to six values following the Option argument
-                    (representing the x1, x2, y1, y2, z1, and z2
-                    coordinates) are allowed. An unspecified coordinate is
-                    not checked. (Valid only for Action = ADD, Action =
-                    LIST, or Action = DELETE.)
+        - ``"XYZRANGE"`` : Define the location box in which all
+          elements within are to be split or refined. Up to six values
+          following the Option argument (representing the x1, x2, y1,
+          y2, z1, and z2 coordinates) are allowed. An unspecified
+          coordinate is not checked. (Valid only for Action = ADD,
+          Action = LIST, or Action = DELETE.)
 
-        SKEWNESS - Mesh-quality control threshold for element SOLID285. Valid values (VAL1) are
-                   0.0 through 1.0. Default = 0.9. (Valid only for Action =
-                   ADD, Action = LIST, or Action = DELETE.)
+        - ``"SKEWNESS"`` : Mesh-quality control threshold for element
+          SOLID285. Valid values (VAL1) are 0.0 through 1.0. Default =
+          0.9. (Valid only for Action = ADD, Action = LIST, or Action
+          = DELETE.)
 
-        WEAR - This option is valid only for contact elements having surface wear specified
-               (TB,WEAR). Define VAL1 as a critical ratio of magnitude of
-               wear to the average depth of the solid element underlying
-               the contact element. Once this critical ratio is reached for
-               any element, the program morphs the mesh to improve the
-               quality of the elements. VAL1 must be a positive integer.
-               (Valid only for Action = ADD, Action = LIST, or Action =
-               DELETE.) The WEAR criterion cannot be combined with any
-               other criterion.
+        - ``"WEAR"`` : This option is valid only for contact elements
+          having surface wear specified (TB,WEAR). Define VAL1 as a
+          critical ratio of magnitude of wear to the average depth of
+          the solid element underlying the contact element. Once this
+          critical ratio is reached for any element, the program
+          morphs the mesh to improve the quality of the elements. VAL1
+          must be a positive integer.  (Valid only for Action = ADD,
+          Action = LIST, or Action = DELETE.) The WEAR criterion
+          cannot be combined with any other criterion.
 
-        ALL  - All options. (Valid only for Action = LIST or Action = DELETE. All subsequent
-               arguments are ignored.)
+        - ``"ALL"`` : All options. (Valid only for Action = LIST or
+          Action = DELETE. All subsequent arguments are ignored.)
 
     Notes
     -----
     If a specified component (Component) is an assembly, the defined
-    criterion applies to all element components included in the assembly.
+    criterion applies to all element components included in the
+    assembly.
 
     All components must be defined and selected before the first solve
-    (SOLVE), although their nonlinear adaptivity criteria can be modified
-    from load step to load step, and upon restart. For nonlinear adaptivity
-    to work properly, ensure that all components are selected before each
-    solve.
+    (SOLVE), although their nonlinear adaptivity criteria can be
+    modified from load step to load step, and upon restart. For
+    nonlinear adaptivity to work properly, ensure that all components
+    are selected before each solve.
 
-    After using this command to define a new criterion, the new criterion
-    becomes active and is checked one time during each load step, roughly
-    in mid-loading (unless this behavior is changed via Action = ON).
+    After using this command to define a new criterion, the new
+    criterion becomes active and is checked one time during each load
+    step, roughly in mid-loading (unless this behavior is changed via
+    Action = ON).
 
     When a criterion is defined, it overwrites a previously defined
-    criterion (if one exists) through the same component, or through the
-    component assembly that includes the specified component.
+    criterion (if one exists) through the same component, or through
+    the component assembly that includes the specified component.
 
     During solution, the same criteria defined for an element through
-    different components are combined, and the tightest criteria and action
-    control (Action,ON,,,VAL1) are used. If an ON action is defined by a
-    positive VAL1 value through one component and a negative VAL1 value
-    through another, the program uses the positive value.
+    different components are combined, and the tightest criteria and
+    action control (Action,ON,,,VAL1) are used. If an ON action is
+    defined by a positive VAL1 value through one component and a
+    negative VAL1 value through another, the program uses the positive
+    value.
 
-    For Action = ON, if VAL2 (start time) and/or VAL3 (end time) are
-    unspecified or invalid, the program uses the start and/or end time
-    (respectively) of the load step. If VAL1 < 0, the program checks VAL1
-    points between VAL2 and VAL3. The time interval between each check
-    points is determined by (VAL3 - VAL2) / (VAL1 + 1), with the first
-    check point as close to VAL2 + (VAL3 - VAL2) / (VAL1 + 1) as possible.
-    Fewer check points can be used if the number of substeps during
-    solution is insufficient (as the program can only check at the end of a
-    substep).
+    For ``action="ON"``, if VAL2 (start time) and/or VAL3 (end time)
+    are unspecified or invalid, the program uses the start and/or end
+    time (respectively) of the load step. If VAL1 < 0, the program
+    checks VAL1 points between VAL2 and VAL3. The time interval
+    between each check points is determined by (VAL3 - VAL2) / (VAL1 +
+    1), with the first check point as close to VAL2 + (VAL3 - VAL2) /
+    (VAL1 + 1) as possible.  Fewer check points can be used if the
+    number of substeps during solution is insufficient (as the program
+    can only check at the end of a substep).
 
-    Option = SKEWNESS applies to linear tetrahedral element SOLID285 only.
-    When the skewness of a SOLID285 element is >= the defined value, the
-    element is used as the core (seed) element of the remeshed region(s).
-    If this criterion is used together with any other criteria for the same
-    component, the other criteria defined for the component are ignored.
-    The most desirable skewness value is 0, applicable when the element is
-    a standard tetrahedral element; the highest value is 1, applicable when
-    the element becomes flat with zero volume. For more information about
-    skewness and remeshing, see Mesh Nonlinear Adaptivity in the Advanced
+    Option = SKEWNESS applies to linear tetrahedral element SOLID285
+    only.  When the skewness of a SOLID285 element is >= the defined
+    value, the element is used as the core (seed) element of the
+    remeshed region(s).  If this criterion is used together with any
+    other criteria for the same component, the other criteria defined
+    for the component are ignored.  The most desirable skewness value
+    is 0, applicable when the element is a standard tetrahedral
+    element; the highest value is 1, applicable when the element
+    becomes flat with zero volume. For more information about skewness
+    and remeshing, see Mesh Nonlinear Adaptivity in the Advanced
     Analysis Guide.
 
     For more granular control of the source mesh geometry, see NLMESH.
     """
-    command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3}"
+    command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3},{val4}"
     return self.run(command, **kwargs)
 
 
