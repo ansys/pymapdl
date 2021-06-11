@@ -424,6 +424,7 @@ class MeshGrpc(Mesh):
         >>> pyvista.read('grid.vtk')
 
         """
+        return self._grid
 
     @property
     def _grid(self):
@@ -431,8 +432,3 @@ class MeshGrpc(Mesh):
             self._update_cache()
             self._grid_cache = self._parse_vtk(force_linear=True)
         return self._grid_cache
-
-    # TODO: grid probably does not need a setter...
-    @_grid.setter
-    def _grid(self, value):
-        self._grid_cache = value
