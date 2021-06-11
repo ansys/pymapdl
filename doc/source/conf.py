@@ -120,8 +120,6 @@ html_theme_options = {
     "github_url": "https://github.com/pyansys/PyMAPDL",
 }
 
-html_static_path = ['_static']
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
