@@ -12,7 +12,6 @@ def test_load_verif():
 def test_bracket(mapdl, cleared):
     # note that this method just returns a file path
     bracket_file = examples.download_bracket()
-
     assert os.path.isfile(bracket_file)
 
     # load the bracket and then print out the geometry
