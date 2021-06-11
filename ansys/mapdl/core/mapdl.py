@@ -743,7 +743,7 @@ class _MapdlCore(Commands):
         else:
             self._enable_interactive_plotting()
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc,
-                                 degen="", scale="", **kwargs)
+                                 degen=degen, scale=scale, **kwargs)
 
     def aplot(self, na1="", na2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,
@@ -865,7 +865,7 @@ class _MapdlCore(Commands):
 
         self._enable_interactive_plotting()
         return super().aplot(na1=na1, na2=na2, ninc=ninc,
-                             degen="", scale="", **kwargs)
+                             degen=degen, scale=scale, **kwargs)
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
