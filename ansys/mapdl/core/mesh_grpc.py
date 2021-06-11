@@ -1,4 +1,4 @@
-"""Module to manage downloading and parsing the FEM from the MAPDL grpc server"""
+"""Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 import time
 import weakref
 import os
@@ -388,6 +388,8 @@ class MeshGrpc(Mesh):
 
         Examples
         --------
+        Store the finite element mesh as a VTK UnstructuredGrid.
+
         >>> grid = mapdl.mesh.grid
         UnstructuredGrid (0x7f99b4135760)
           N Cells:	32198
@@ -397,7 +399,7 @@ class MeshGrpc(Mesh):
           Z Bounds:	-2.394e+00, 2.509e+00
           N Arrays:	10
 
-        Plot this grid
+        Plot this grid.
 
         >>> grid.plot()
 
