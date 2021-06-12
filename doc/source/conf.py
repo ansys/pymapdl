@@ -36,7 +36,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = 'ansys.mapdl.core'
-copyright = 'Copyright (c) 2021 ANSYS, Inc. All rights reserved.'
+copyright = '(c) 2021 ANSYS, Inc. All rights reserved'
 author = 'ANSYS Inc.'
 
 # The short X.Y version
