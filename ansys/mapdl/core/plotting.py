@@ -230,13 +230,21 @@ def general_plotter(meshes, points, labels,
     if title:
         pl.add_title(title)
 
-    if return_plotter:
-        return pl
-
+    # permit user to save the figure as a screenshot
     if savefig:
         pl.show(title=title, auto_close=False, window_size=window_size,
                 screenshot=True)
         pl.screenshot(savefig)
+
+        # return unclosed plotter
+        if return_plotter:
+            return pl
+
+        # if not returning plotter, close right away
+        pl.close()
+
+    elif return_plotter:
+        return pl
     else:
         pl.show()
 
