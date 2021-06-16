@@ -140,7 +140,7 @@ def port_in_use(port, host=LOCALHOST):
 
 def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                 run_location=None, port=MAPDL_DEFAULT_PORT,
-                additional_switches='', custom_bin=None,
+                additional_switches='',
                 override=True, timeout=20, verbose=False) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -169,14 +169,14 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         port available after (or including) this port.
 
     additional_switches : str, optional
-        Additional switches for MAPDL, for example aa_r, and academic
-        research license, would be added with:
+        Additional switches for MAPDL, for example ``"-aa_r"``, and
+        academic research license, would be added with:
 
         - ``additional_switches="-aa_r"``
 
-        Avoid adding switches like -i -o or -b as these are already
-        included to start up the MAPDL server.  See the notes
-        section for additional details.
+        Avoid adding switches like ``"-i"`` ``"-o"`` or ``"-b"`` as
+        these are already included to start up the MAPDL server.  See
+        the notes section for additional details.
 
     custom_bin : str, optional
         Path to the MAPDL custom executable.
