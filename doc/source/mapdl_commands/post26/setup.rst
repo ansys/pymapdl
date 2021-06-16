@@ -9,7 +9,7 @@ Setup
 These POST26 commands are used to store data for processing.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.ansol
    Mapdl.cisol

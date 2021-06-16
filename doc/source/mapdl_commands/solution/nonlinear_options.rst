@@ -9,7 +9,7 @@ Nonlinear Options
 These SOLUTION commands are used to define options for nonlinear analyses.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.arclen
    Mapdl.arctrm

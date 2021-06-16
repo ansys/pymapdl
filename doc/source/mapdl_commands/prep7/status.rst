@@ -9,7 +9,7 @@ Status
 These PREP7 commands are for use with the STAT command.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.areas
    Mapdl.bool

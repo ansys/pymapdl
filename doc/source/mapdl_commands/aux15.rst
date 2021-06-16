@@ -9,7 +9,7 @@ IGES
 These AUX15 commands read an IGES format file into PREP7 data.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.igesin
    Mapdl.ioptn

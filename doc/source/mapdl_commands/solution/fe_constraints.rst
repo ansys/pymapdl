@@ -9,7 +9,7 @@ FE Constraints
 These SOLUTION commands are used to define constraints on the finite element model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.d
    Mapdl.dcum

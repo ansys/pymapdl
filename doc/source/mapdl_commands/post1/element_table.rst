@@ -11,7 +11,7 @@ in turn is used to process results stored for each element, such as
 average stresses, heat fluxes, etc.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.detab
    Mapdl.esort

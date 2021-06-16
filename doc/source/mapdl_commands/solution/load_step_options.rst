@@ -9,7 +9,7 @@ Load Step Options
 These SOLUTION commands are used to define options for individual load steps.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.autots
    Mapdl.campbell

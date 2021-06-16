@@ -10,7 +10,7 @@ These GRAPHICS commands are used for general graphics control, such as
 window setup, color settings, specifications saving, etc.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.color
    Mapdl.device

@@ -9,7 +9,7 @@ Setup
 These commands are used to save or resume the ROM database.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.rmresume
    Mapdl.rmsave

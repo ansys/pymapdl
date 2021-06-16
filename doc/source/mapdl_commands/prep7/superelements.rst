@@ -9,7 +9,7 @@ Superelements
 These PREP7 commands are used to create and modify superelements.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.se
    Mapdl.sedlist

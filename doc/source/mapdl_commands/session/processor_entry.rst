@@ -9,7 +9,7 @@ Processor Entry
 These SESSION commands are used to enter and exit the various processors in the program.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.aux2
    Mapdl.aux3

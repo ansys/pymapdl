@@ -9,7 +9,7 @@ Failure Criteria
 These POST1 commands are for use with the failure criteria.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.fc
    Mapdl.fccheck

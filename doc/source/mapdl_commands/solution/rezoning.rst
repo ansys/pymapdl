@@ -9,7 +9,7 @@ Rezoning
 These SOLUTION commands apply to analyses that use rezoning.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.rezone
    Mapdl.mapsolve

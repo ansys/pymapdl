@@ -10,7 +10,7 @@ These PREP7 commands are used to define, modify, list, etc., coupled
 degrees of freedom.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cp
    Mapdl.cpdele

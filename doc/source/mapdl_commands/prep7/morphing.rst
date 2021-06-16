@@ -9,7 +9,7 @@ Morphing
 These PREP7 commands are used to adjust the finite element mesh in the non-structural regions to coincide with the deflections of the structural regions.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.morph
    Mapdl.damorph

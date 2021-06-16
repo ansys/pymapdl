@@ -9,7 +9,7 @@ Real Constants
 These PREP7 commands define the model real constants.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.r
    Mapdl.rdele

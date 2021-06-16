@@ -10,7 +10,7 @@ These POST1 commands are used for combining results from different
 load steps.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.lcabs
    Mapdl.lcase

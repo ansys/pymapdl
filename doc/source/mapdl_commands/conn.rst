@@ -9,7 +9,7 @@ Connection Commands
 These commands read in external CAD files into MAPDL.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cat5in
    Mapdl.catiain

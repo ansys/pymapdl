@@ -10,7 +10,7 @@ These POST1 commands are used to define an arbitrary surface and to
 develop results information for that surface.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.sucalc
    Mapdl.sucr

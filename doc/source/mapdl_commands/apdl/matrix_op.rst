@@ -13,7 +13,7 @@ These APDL Math commands can be used to create, manipulate, and solve matrices.
    interacting with APDLMath.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.axpy
    Mapdl.comp

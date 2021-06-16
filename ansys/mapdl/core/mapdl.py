@@ -18,8 +18,8 @@ from ansys.mapdl.core.misc import (random_string, supress_logging,
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core import commands
-from .commands import Commands
+from ansys.mapdl.core.commands import Commands
+
 
 _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
@@ -185,7 +185,28 @@ class _MapdlCore(Commands):
 
     @property
     def chain_commands(self):
-        """Chain several mapdl commands."""
+        """Chain several mapdl commands.
+
+        Commands can be separated with ``"$"`` in MAPDL rather than
+        with a line break, so you could send multiple commands to
+        MAPDL with:
+
+        ``mapdl.run("/PREP7$K,1,1,2,3")``
+
+        This method is merely a convenience context manager to allow
+        for easy chaining of PyMAPDL commands to speed up sending
+        commands to MAPDL.
+
+        .. note::
+            Commmands must be limited to 640 characters.
+
+        Examples
+        --------
+        >>> with mapdl.chain_commands:
+            mapdl.prep7()
+            mapdl.k(1, 1, 2, 3)
+
+        """
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -988,9 +1009,9 @@ class _MapdlCore(Commands):
               show_line_numbering=True,
               show_keypoint_numbering=False, color_lines=False,
               **kwargs):
-        """APDL Command: LPLOT
+        """Display the selected lines.
 
-        Displays the selected lines.
+        APDL Command: LPLOT
 
         Parameters
         ----------
@@ -1006,11 +1027,12 @@ class _MapdlCore(Commands):
             Display line and keypoint numbers when ``vtk=True``.
 
         show_keypoint_numbering : bool, optional
-            Number keypoints.  Only valid when show_keypoints is True
+            Number keypoints.  Only valid when ``show_keypoints=True``
 
         **kwargs
-            See ``help(pyvista.plot)`` for more keyword arguments
-            related to visualizing using ``vtk``.
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicatle when visualizing with
+            ``vtk=True``.
 
         Examples
         --------
@@ -1018,8 +1040,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
-        Mesh divisions on plotted lines are controlled by the LDIV
-        option of the /PSYMB command.
+        Mesh divisions on plotted lines are controlled by the ``ldiv``
+        option of the ``psymb`` command when ``vtk=False``.
+        Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
         """
@@ -1058,7 +1081,7 @@ class _MapdlCore(Commands):
 
     def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
               show_keypoint_numbering=True, **kwargs):
-        """Displays the selected keypoints.
+        """Display the selected keypoints.
 
         APDL Command: KPLOT
 
@@ -1082,6 +1105,8 @@ class _MapdlCore(Commands):
 
         show_keypoint_numbering : bool, optional
             Display keypoint numbers when ``vtk=True``.
+
+
 
         Notes
         -----
@@ -1325,7 +1350,7 @@ class _MapdlCore(Commands):
 
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the \*GET command and returns a Python value.
+        """Runs the *GET command and returns a Python value.
 
         See ``help(mapdl.starget)`` for more details.
 

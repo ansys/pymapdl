@@ -9,7 +9,7 @@ List Controls
 These SESSION commands are used to control listings and printed program output.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.com
    Mapdl.golist

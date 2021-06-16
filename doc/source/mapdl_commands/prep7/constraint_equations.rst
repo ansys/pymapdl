@@ -9,7 +9,7 @@ Constraint Equations
 These PREP7 commands are used to define, modify, list, etc., constraint equations.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.ce
    Mapdl.cecyc

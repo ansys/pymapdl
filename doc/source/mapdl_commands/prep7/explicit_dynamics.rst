@@ -9,7 +9,7 @@ Explicit Dynamics
 These PREP7 commands are used for an explicit dynamic analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.edasmp
    Mapdl.edbound
@@ -40,7 +40,7 @@ These PREP7 commands are used for an explicit dynamic analysis.
 These SOLUTION commands are used for an explicit dynamic analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.edadapt
    Mapdl.edale

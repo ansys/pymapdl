@@ -10,7 +10,7 @@ These SESSION commands are for file operations, such as deleting,
 copying, and listing.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.anstoaqwa
    Mapdl.anstoasas

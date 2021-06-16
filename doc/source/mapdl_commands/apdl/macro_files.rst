@@ -17,7 +17,7 @@ These APDL commands are used to build and execute command macros.
    Many of the commands here must be run in ``mapdl.non_interactive``
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cfclos
    Mapdl.cfopen

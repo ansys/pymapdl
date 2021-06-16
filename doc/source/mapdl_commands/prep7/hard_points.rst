@@ -9,7 +9,7 @@ Hard Points
 These PREP7 commands are used to create, modify, list, etc., hard points.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.hptcreate
    Mapdl.hptdelete

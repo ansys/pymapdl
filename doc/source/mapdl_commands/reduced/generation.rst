@@ -9,7 +9,7 @@ Generation Pass
 These commands are used to create a reduced order model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.rmalist
    Mapdl.rmanl

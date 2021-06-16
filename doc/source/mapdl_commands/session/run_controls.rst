@@ -11,7 +11,7 @@ session, including the jobname, Graphical User Interface behavior, and
 file switching.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.config
    Mapdl.cwd

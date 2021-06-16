@@ -29,6 +29,6 @@ commands are processed.
 
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.wait

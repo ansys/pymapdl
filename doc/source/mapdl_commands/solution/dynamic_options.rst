@@ -9,7 +9,7 @@ Dynamic Options
 These SOLUTION commands are used to define options for dynamic analyses.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.alphad
    Mapdl.betad

@@ -9,7 +9,7 @@ Material Data Tables
 These PREP7 commands create and modify the material data tables (that is, to specify and define material models).
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.tb
    Mapdl.tbcopy

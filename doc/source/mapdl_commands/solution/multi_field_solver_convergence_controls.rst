@@ -10,7 +10,7 @@ These SOLUTION commands are used to define convergence controls for an
 ANSYS Multi-field solver analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.mfconv
    Mapdl.mfiter

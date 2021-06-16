@@ -9,7 +9,7 @@ Setup
 These DISPLAY commands are used to set up the DISPLAY program.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cmap
    Mapdl.devdisp

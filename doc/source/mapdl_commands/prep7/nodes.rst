@@ -9,7 +9,7 @@ Nodes
 These PREP7 commands are used to create, modify, list, etc., nodes.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.center
    Mapdl.fill

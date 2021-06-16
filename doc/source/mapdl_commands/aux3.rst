@@ -9,7 +9,7 @@ Results Files
 These commands are related to the /AUX3 command.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.compress
    Mapdl.fileaux3

@@ -9,7 +9,7 @@ Master Degrees of Freedom
 These SOLUTION commands are used to define master degrees of freedom.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.m
    Mapdl.mdele

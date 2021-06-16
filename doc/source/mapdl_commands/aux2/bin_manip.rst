@@ -10,7 +10,7 @@ These AUX2 commands are used to manipulate the contents of binary
 files.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.combine
    Mapdl.hbmat

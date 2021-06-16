@@ -9,7 +9,7 @@ Primitives
 These PREP7 commands are used to create primitive shapes for modeling.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.blc4
    Mapdl.blc5

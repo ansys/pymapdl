@@ -9,7 +9,7 @@ Areas
 These PREP7 commands are used to create, modify, list, etc., areas.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.a
    Mapdl.aatt

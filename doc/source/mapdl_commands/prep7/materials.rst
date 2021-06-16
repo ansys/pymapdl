@@ -9,7 +9,7 @@ Materials
 These PREP7 commands are used to define the linear material properties.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.emunit
    Mapdl.mp

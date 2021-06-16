@@ -9,7 +9,7 @@ Solid Forces
 These SOLUTION commands are used to define forces on the solid model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.fk
    Mapdl.fkdele

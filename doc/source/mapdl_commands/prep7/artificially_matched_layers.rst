@@ -9,7 +9,7 @@ Artificially Matched Layers
 These PREP7 commands are used to create artificially matched layers (PMLs or AMLs) designed to absorb high frequency waves.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.pmlopt
    Mapdl.pmlsize

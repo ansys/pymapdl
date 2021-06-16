@@ -9,7 +9,7 @@ Binary File Dump
 These AUX2 commands are used to dump the contents of binary files.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.dump
    Mapdl.fileaux2

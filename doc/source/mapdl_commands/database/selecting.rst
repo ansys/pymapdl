@@ -10,7 +10,7 @@ These DATABASE commands are used to select subsets of database
 entities for further operations.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.allsel
    Mapdl.asll

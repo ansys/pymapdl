@@ -9,7 +9,7 @@ Status
 These POST26 commands are for use with the STAT command.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.define
    Mapdl.operate

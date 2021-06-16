@@ -9,7 +9,7 @@ Lines
 These PREP7 commands are used to create, modify, list, etc., lines.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.bsplin
    Mapdl.circle

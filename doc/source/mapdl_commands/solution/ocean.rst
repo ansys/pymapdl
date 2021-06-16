@@ -9,7 +9,7 @@ Ocean
 These SOLUTION commands define ocean load data.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.ocdata
    Mapdl.ocdelete

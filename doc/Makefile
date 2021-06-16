@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
@@ -24,9 +24,5 @@ clean:
 	rm -rf build
 	rm -rf source/examples
 	find . -type d -name 'api' -exec rm -rf {} +
-
-# build and upload html to the doc host
-upload: html
-	tar -C build/ -czf docs.tar.gz html
-	scp docs.tar.gz web-redirect:/tmp/
-	rm docs.tar.gz
+	find . -type f -name "_autosummary" -delete
+	find . -type f -name "api-autogen" -delete
