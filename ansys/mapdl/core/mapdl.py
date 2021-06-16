@@ -197,8 +197,6 @@ class _MapdlCore(Commands):
         for easy chaining of PyMAPDL commands to speed up sending
         commands to MAPDL.
 
-        .. note::
-            Commands must be limited to 640 characters.
 
         Examples
         --------
