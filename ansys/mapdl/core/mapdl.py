@@ -198,7 +198,7 @@ class _MapdlCore(Commands):
         commands to MAPDL.
 
         .. note::
-            Commmands must be limited to 640 characters.
+            Commands must be limited to 640 characters.
 
         Examples
         --------
@@ -669,6 +669,10 @@ class _MapdlCore(Commands):
 
         Displays nodes.
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         knum : bool, int, optional
@@ -745,6 +749,10 @@ class _MapdlCore(Commands):
 
         APDL Command: VPLOT
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         nv1, nv2, ninc
@@ -782,6 +790,7 @@ class _MapdlCore(Commands):
         Plot while displaying area numbers.
 
         >>> mapdl.vplot(show_area_numbering=True)
+
         """
         if vtk is None:
             vtk = self._use_vtk
@@ -810,6 +819,10 @@ class _MapdlCore(Commands):
 
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -1013,6 +1026,10 @@ class _MapdlCore(Commands):
 
         APDL Command: LPLOT
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         nl1, nl2, ninc
@@ -1084,6 +1101,10 @@ class _MapdlCore(Commands):
         """Display the selected keypoints.
 
         APDL Command: KPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
 
         Parameters
         ----------
