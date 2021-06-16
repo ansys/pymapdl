@@ -12,7 +12,7 @@ parameters to a command.  For example, more points to a spline than
 would be normally supported.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.fitem
    Mapdl.flst

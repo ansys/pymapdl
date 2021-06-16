@@ -9,7 +9,7 @@ Display
 These POST26 commands are used to display the results.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.keep
    Mapdl.plcplx

@@ -9,7 +9,7 @@ Solid Surface Loads
 These SOLUTION commands are used to define surface loads on the solid model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.sfa
    Mapdl.sfadele

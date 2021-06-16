@@ -172,7 +172,6 @@ processor.
    post1/trace_points
    post1/special
    post1/status
-   post1/failb
    post1/failure_criteria
 
 ******

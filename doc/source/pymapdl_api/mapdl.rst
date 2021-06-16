@@ -1,8 +1,8 @@
 .. _ref_mapdl_api:
 
-************
-MAPDL Object
-************
+***********
+Mapdl Class
+***********
 .. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
     :members:
 

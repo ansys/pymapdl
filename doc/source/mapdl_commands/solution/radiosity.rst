@@ -11,7 +11,7 @@ factors and to specify the solution parameters for the Radiosity
 solver method.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.rdec
    Mapdl.rsopt

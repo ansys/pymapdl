@@ -9,7 +9,7 @@ Special Purpose
 These PREP7 commands are used for special-purpose operations.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.aerocoeff
    Mapdl.cint

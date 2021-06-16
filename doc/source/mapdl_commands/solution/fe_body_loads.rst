@@ -9,7 +9,7 @@ FE Body Loads
 These SOLUTION commands are used to define body loads on the finite element model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.bf
    Mapdl.bfcum

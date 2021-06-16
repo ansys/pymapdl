@@ -9,7 +9,7 @@ Spectrum Options
 These SOLUTION commands are used to define options for spectrum analyses.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.addam
    Mapdl.coval

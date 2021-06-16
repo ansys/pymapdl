@@ -9,7 +9,7 @@ Solid Body Loads
 These SOLUTION commands are used to define body loads on the solid model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.bfa
    Mapdl.bfadele

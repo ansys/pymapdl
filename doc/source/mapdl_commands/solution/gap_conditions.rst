@@ -9,7 +9,7 @@ Gap Conditions
 These SOLUTION commands are used to define gaps for transient dynamic analyses.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.gp
    Mapdl.gpdele

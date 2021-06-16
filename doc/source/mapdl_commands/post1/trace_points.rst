@@ -10,7 +10,7 @@ These POST1 commands are used to trace particle motions in a flow
 stream.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.pltrac
    Mapdl.trpdel

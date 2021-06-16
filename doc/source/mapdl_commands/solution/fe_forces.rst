@@ -9,7 +9,7 @@ FE Forces
 These SOLUTION commands are used to define nodal loads on the finite element model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.f
    Mapdl.fcum

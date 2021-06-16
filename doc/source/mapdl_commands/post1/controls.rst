@@ -10,7 +10,7 @@ These POST1 commands are used to control the calculations done for
 other commands.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.avprin
    Mapdl.avres

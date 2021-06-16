@@ -11,7 +11,7 @@ degree-of-freedom results, nodal stresses, and element summable and
 nonsummable miscellaneous data.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.nsort
    Mapdl.nusort

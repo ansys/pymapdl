@@ -9,7 +9,7 @@ Sections
 These PREP7 commands manage sections.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.bsax
    Mapdl.bsm1

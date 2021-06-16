@@ -9,7 +9,7 @@ Solution Status
 These SOLUTION commands are for use with the STAT command.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.atype
    Mapdl.bioopt

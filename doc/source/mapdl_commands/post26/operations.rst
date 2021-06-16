@@ -10,7 +10,7 @@ These POST26 commands are used to perform operations on the stored
 variables.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.abs
    Mapdl.add

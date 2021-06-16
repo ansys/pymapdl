@@ -9,7 +9,7 @@ Use Pass
 These commands use the reduced order model in an analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.dcvswp
    Mapdl.rmlvscale

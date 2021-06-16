@@ -10,7 +10,7 @@ These POST1 commands are used to put data into the database for
 postprocessing.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.append
    Mapdl.desol

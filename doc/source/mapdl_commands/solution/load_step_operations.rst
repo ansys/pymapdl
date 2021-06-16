@@ -9,7 +9,7 @@ Load Step Operations
 These SOLUTION commands are used to write and solve multiple load steps.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.lsclear
    Mapdl.lsdele

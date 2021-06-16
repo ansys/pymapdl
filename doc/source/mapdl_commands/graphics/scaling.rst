@@ -10,7 +10,7 @@ These GRAPHICS commands are used to scale various parts of the
 display.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.iclwid
    Mapdl.icscale

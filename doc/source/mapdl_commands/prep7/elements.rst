@@ -9,7 +9,7 @@ Elements
 These PREP7 commands are used to create, modify, list, etc., elements.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.afsurf
    Mapdl.e

@@ -10,7 +10,7 @@ These POST1 commands are used for special purpose magnetics
 postprocessing.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.curr2d
    Mapdl.emagerr

@@ -18,8 +18,8 @@ from ansys.mapdl.core.misc import (random_string, supress_logging,
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core import commands
-from .commands import Commands
+from ansys.mapdl.core.commands import Commands
+
 
 _PERMITTED_ERRORS = [
     r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
@@ -185,7 +185,26 @@ class _MapdlCore(Commands):
 
     @property
     def chain_commands(self):
-        """Chain several mapdl commands."""
+        """Chain several mapdl commands.
+
+        Commands can be separated with ``"$"`` in MAPDL rather than
+        with a line break, so you could send multiple commands to
+        MAPDL with:
+
+        ``mapdl.run("/PREP7$K,1,1,2,3")``
+
+        This method is merely a convenience context manager to allow
+        for easy chaining of PyMAPDL commands to speed up sending
+        commands to MAPDL.
+
+
+        Examples
+        --------
+        >>> with mapdl.chain_commands:
+            mapdl.prep7()
+            mapdl.k(1, 1, 2, 3)
+
+        """
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -354,14 +373,49 @@ class _MapdlCore(Commands):
         en = stats.find('INITIAL', st)
         mapdl_version = stats[st:en].split('CUSTOMER')[0].strip()
 
-        info =  'Product:         %s\n' % product
-        info += 'MAPDL Version:   %s\n' % mapdl_version
-        info += 'PyMAPDL Version: %s\n' % pymapdl.__version__
-        return info
+        info = [f'Product:         {product}']
+        info.append(f'MAPDL Version:   {mapdl_version}')
+        info.append(f'PyMAPDL Version: {pymapdl.__version__}\n')
+        return '\n'.join(info)
 
     @property
     def geometry(self):
-        """Geometry (CAD) information."""
+        """Geometry (CAD) information.
+
+        Examples
+        --------
+        Print the current status of the geometry.
+
+        >>> print(mapdl.geometry)
+        MAPDL Selected Geometry
+        Keypoints:  8
+        Lines:      12
+        Areas:      6
+        Volumes:    1
+
+        Return the number of lines.
+
+        >>> mapdl.geometry.n_line
+        12
+
+        Return the number of areas.
+
+        >>> mapdl.geometry.n_area
+        6
+
+        Select a list of keypoints.
+
+        >>> mapdl.geometry.keypoint_select([1, 5, 10])
+
+        Append to an existing selection of lines.
+
+        >>> mapdl.geometry.line_select([1, 2, 3], sel_type='A')
+
+        Reselect from the existing selection of lines.
+
+        >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
+
+        """
         return self._geometry
 
     @property
@@ -613,6 +667,10 @@ class _MapdlCore(Commands):
 
         Displays nodes.
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         knum : bool, int, optional
@@ -689,6 +747,10 @@ class _MapdlCore(Commands):
 
         APDL Command: VPLOT
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         nv1, nv2, ninc
@@ -726,6 +788,7 @@ class _MapdlCore(Commands):
         Plot while displaying area numbers.
 
         >>> mapdl.vplot(show_area_numbering=True)
+
         """
         if vtk is None:
             vtk = self._use_vtk
@@ -735,11 +798,12 @@ class _MapdlCore(Commands):
             cm_name = '__tmp_area2__'
             self.cm(cm_name, 'AREA', mute=True)
             self.aslv('S', mute=True)  # select areas attached to active volumes
-            self.aplot(vtk=vtk, color_areas=color_areas, quality=quality,
-                       show_area_numbering=show_area_numbering,
-                       show_line_numbering=show_line_numbering,
-                       show_lines=show_lines, **kwargs)
-            self.cmsel('S', cm_name, 'AREA')
+            out = self.aplot(vtk=vtk, color_areas=color_areas, quality=quality,
+                             show_area_numbering=show_area_numbering,
+                             show_line_numbering=show_line_numbering,
+                             show_lines=show_lines, **kwargs)
+            self.cmsel('S', cm_name, 'AREA', mute=True)
+            return out
         else:
             self._enable_interactive_plotting()
             return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc,
@@ -754,13 +818,17 @@ class _MapdlCore(Commands):
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
 
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
         Parameters
         ----------
         na1 : int, optional
             Minimum area to display.
 
         na2 : int, optional
-            Maximum area to display
+            Maximum area to display.
 
         ninc : int, optional
             Increment between minimum and maximum area.
@@ -808,6 +876,14 @@ class _MapdlCore(Commands):
 
         >>> mapdl.aplot(show_area_numbering=True, color_areas=True)
 
+        Return the plotting instance and modify it.
+
+        >>> mapdl.aplot()
+        >>> pl = mapdl.aplot(return_plotter=True)
+        >>> pl.show_bounds()
+        >>> pl.set_background('black')
+        >>> pl.add_text('my text')
+        >>> pl.show()
 
         """
         if vtk is None:
@@ -847,11 +923,11 @@ class _MapdlCore(Commands):
             if show_lines or show_line_numbering:
                 kwargs.setdefault('line_width', 2)
                 # subselect lines belonging to the current areas
-                self.cm('__area__', 'AREA')
-                self.lsla('S')
+                self.cm('__area__', 'AREA', mute=True)
+                self.lsla('S', mute=True)
 
                 lines = self.geometry.lines
-                self.cmsel('S', '__area__', 'AREA')
+                self.cmsel('S', '__area__', 'AREA', mute=True)
 
                 if show_lines:
                     meshes.append({'mesh': lines,
@@ -860,8 +936,7 @@ class _MapdlCore(Commands):
                     labels.append({'points': lines.points[50::101],
                                    'labels': lines['entity_num']})
 
-            return general_plotter(meshes, [],
-                                   labels, **kwargs)
+            return general_plotter(meshes, [], labels, **kwargs)
 
         self._enable_interactive_plotting()
         return super().aplot(na1=na1, na2=na2, ninc=ninc,
@@ -945,9 +1020,13 @@ class _MapdlCore(Commands):
               show_line_numbering=True,
               show_keypoint_numbering=False, color_lines=False,
               **kwargs):
-        """APDL Command: LPLOT
+        """Display the selected lines.
 
-        Displays the selected lines.
+        APDL Command: LPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -963,11 +1042,12 @@ class _MapdlCore(Commands):
             Display line and keypoint numbers when ``vtk=True``.
 
         show_keypoint_numbering : bool, optional
-            Number keypoints.  Only valid when show_keypoints is True
+            Number keypoints.  Only valid when ``show_keypoints=True``
 
         **kwargs
-            See ``help(pyvista.plot)`` for more keyword arguments
-            related to visualizing using ``vtk``.
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicatle when visualizing with
+            ``vtk=True``.
 
         Examples
         --------
@@ -975,8 +1055,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
-        Mesh divisions on plotted lines are controlled by the LDIV
-        option of the /PSYMB command.
+        Mesh divisions on plotted lines are controlled by the ``ldiv``
+        option of the ``psymb`` command when ``vtk=False``.
+        Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
         """
@@ -984,6 +1065,7 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
+            kwargs.setdefault('show_scalar_bar', False)
             kwargs.setdefault('title', 'MAPDL Line Plot')
             if not self.geometry.n_line:
                 warnings.warn('Either no lines have been selected or there '
@@ -1014,9 +1096,13 @@ class _MapdlCore(Commands):
 
     def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
               show_keypoint_numbering=True, **kwargs):
-        """Displays the selected keypoints.
+        """Display the selected keypoints.
 
         APDL Command: KPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -1038,6 +1124,8 @@ class _MapdlCore(Commands):
 
         show_keypoint_numbering : bool, optional
             Display keypoint numbers when ``vtk=True``.
+
+
 
         Notes
         -----
@@ -1281,7 +1369,7 @@ class _MapdlCore(Commands):
 
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the \*GET command and returns a Python value.
+        """Runs the *GET command and returns a Python value.
 
         See ``help(mapdl.starget)`` for more details.
 

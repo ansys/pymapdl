@@ -10,7 +10,7 @@ These SOLUTION commands are used to define mapping details for an
 ANSYS Multi-field solver analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.mfbucket
    Mapdl.mfci

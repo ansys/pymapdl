@@ -10,7 +10,7 @@ These GRAPHICS commands are used to change the way a model is
 displayed.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cplane
    Mapdl.ctype

@@ -9,7 +9,7 @@ Volumes
 These PREP7 commands are used to create, modify, list, etc., volumes.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.extopt
    Mapdl.v

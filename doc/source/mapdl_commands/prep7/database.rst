@@ -11,7 +11,7 @@ list out the database, and control the numbering of entities in the
 database.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.aflist
    Mapdl.cdread

@@ -14,7 +14,7 @@ These APDL commands can be used to define abbreviations for longer commands, and
 
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.abbr
    Mapdl.abbres

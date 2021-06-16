@@ -9,7 +9,7 @@ Inertia
 These SOLUTION commands are used to define inertial loads on the model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.acel
    Mapdl.cgloc

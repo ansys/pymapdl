@@ -9,7 +9,7 @@ Miscellaneous Loads
 These SOLUTION commands are for miscellaneous load definition and control.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.anpres
    Mapdl.aport

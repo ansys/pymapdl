@@ -10,7 +10,7 @@ These SOLUTION commands set global controls for an ANSYS Multi-field
 solver analysis.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.mfanalysis
    Mapdl.mfclear

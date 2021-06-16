@@ -20,7 +20,7 @@ vectors and matrices).
 
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.mfouri
    Mapdl.mfun

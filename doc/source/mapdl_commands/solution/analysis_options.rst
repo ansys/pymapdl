@@ -9,7 +9,7 @@ Analysis Options
 These SOLUTION commands are used to set general analysis options.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.abextract
    Mapdl.accoption

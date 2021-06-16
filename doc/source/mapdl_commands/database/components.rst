@@ -10,7 +10,7 @@ These DATABASE commands allow selected subsets of entities to be named
 as components for easy selection later on.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cm
    Mapdl.cmdele

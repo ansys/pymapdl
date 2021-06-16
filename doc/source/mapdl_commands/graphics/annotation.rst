@@ -10,7 +10,7 @@ These GRAPHICS commands are used to annotate a display with notes and
 symbols.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.an3d
    Mapdl.annot

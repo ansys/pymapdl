@@ -9,7 +9,7 @@ Booleans
 These PREP7 commands are used to perform Boolean operations on solid model entities.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.aadd
    Mapdl.aglue

@@ -9,7 +9,7 @@ Parameter Definition
 These APDL commands are used to define parameters and their values.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.afun
    Mapdl.dim

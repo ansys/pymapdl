@@ -9,6 +9,6 @@
 These SOLUTION commands apply to 2-D to 3-D analyses.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.map2dto3d

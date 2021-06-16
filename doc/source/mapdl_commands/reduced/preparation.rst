@@ -10,7 +10,7 @@ These commands are used to create the input files for the ROM
 Generation Pass.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.rmndisp
    Mapdl.rmnevec

@@ -9,7 +9,7 @@ Element Type
 These PREP7 commands define the type of elements to be used in the model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.dof
    Mapdl.elbow

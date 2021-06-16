@@ -10,7 +10,7 @@ These POST26 commands are used to control the calculations of other
 commands.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cfact
    Mapdl.force

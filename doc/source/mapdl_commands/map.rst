@@ -10,7 +10,7 @@ These commands are used to read pressure data from an external file
 and map it onto a geometry.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.ftype
    Mapdl.map_

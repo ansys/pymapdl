@@ -10,7 +10,7 @@ These DATABASE commands turn on, move, rotate, and modify the working
 plane, which is used for picking operations.
 
 ..autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.kwpave
    Mapdl.kwplan

@@ -9,7 +9,7 @@ Solid Constraints
 These SOLUTION commands are used to define constraints on the solid model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.da
    Mapdl.dadele

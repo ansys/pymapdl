@@ -9,7 +9,7 @@ Birth and Death
 These SOLUTION commands are used for the birth and death option for elements.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.ealive
    Mapdl.ekill

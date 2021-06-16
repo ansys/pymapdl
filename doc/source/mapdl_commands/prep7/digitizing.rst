@@ -9,7 +9,7 @@ Digitizing
 These PREP7 commands are used to define nodes by tablet digitizing.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.dig
    Mapdl.dmove

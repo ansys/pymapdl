@@ -9,7 +9,7 @@ Path Operations
 These POST1 commands are used for path operations.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.padele
    Mapdl.paget

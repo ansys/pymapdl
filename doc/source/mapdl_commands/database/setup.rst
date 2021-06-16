@@ -10,7 +10,7 @@ These DATABASE commands can be used to initialize the database, save
 it to a file, or annotate it with titles and systems of units.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.clear
    Mapdl.resume

@@ -9,7 +9,7 @@ General Radiation
 These AUX12 commands are used to specify general radiation parameters.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.stef
    Mapdl.toffst

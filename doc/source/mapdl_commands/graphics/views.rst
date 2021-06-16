@@ -9,7 +9,7 @@ Views
 These GRAPHICS commands are used to control the view of the model.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.angle
    Mapdl.auto

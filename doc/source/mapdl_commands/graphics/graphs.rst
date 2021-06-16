@@ -10,7 +10,7 @@ These GRAPHICS commands are used to control the way line graphs are
 displayed.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.axlab
    Mapdl.grid

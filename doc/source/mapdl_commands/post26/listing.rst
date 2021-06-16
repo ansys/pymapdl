@@ -10,7 +10,7 @@ These POST26 commands are used to produce tabular listings of the
 results.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.extrem
    Mapdl.lines

@@ -10,7 +10,7 @@ These GRAPHICS commands are used to add helpful labels and symbols to
 displays.
 
 .. autosummary::
-   :toctree: api/
+   :toctree: _autosummary/
 
    Mapdl.cformat
    Mapdl.clabel
