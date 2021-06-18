@@ -22,7 +22,7 @@ if not os.path.isdir(SETTINGS_DIR):
         os.makedirs(SETTINGS_DIR)
     except:
         warnings.warn('Unable to create settings directory.\n' +
-                      'Will be unable to cache ANSYS executable location')
+                      'Will be unable to cache MAPDL executable location')
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, 'config.txt')
 ALLOWABLE_MODES = ['corba', 'console', 'grpc']
@@ -611,7 +611,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                  nproc=2, ram=None, mode=None, override=False,
                  loglevel='ERROR', additional_switches='',
                  start_timeout=120, port=None,
-                 custom_bin=None, cleanup_on_exit=True,
+                 cleanup_on_exit=True,
                  start_instance=True, ip=LOCALHOST,
                  clear_on_connect=True, log_apdl=False,
                  verbose_mapdl=False, **kwargs):
@@ -856,12 +856,12 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         # Load cached path
         exec_file = get_ansys_path()
         if exec_file is None:
-            raise FileNotFoundError('Invalid or path or cannot load cached '
+            raise FileNotFoundError('Invalid exec_file path or cannot load cached '
                                     'ansys path.  Enter one manually using '
                                     'launch_mapdl(exec_file=)')
     else:  # verify ansys exists at this location
         if not os.path.isfile(exec_file):
-            raise FileNotFoundError('Invalid ANSYS executable at "%s"\n'
+            raise FileNotFoundError('Invalid MAPDL executable at "{exec_file%s"\n'
                                     % exec_file + 'Enter one manually using '
                                     'launch_mapdl(exec_file=)')
 
@@ -901,7 +901,6 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         start_parm['start_timeout'] = start_timeout
     else:
         start_parm['ram'] = ram
-        start_parm['custom_bin'] = custom_bin
         start_parm['override'] = override
         start_parm['timeout'] = start_timeout
 

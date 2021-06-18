@@ -10,7 +10,10 @@ from tqdm import tqdm
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import threaded
 from ansys.mapdl.core.misc import create_temp_dir, threaded_daemon
-from ansys.mapdl.core.launcher import port_in_use, MAPDL_DEFAULT_PORT
+from ansys.mapdl.core.launcher import (port_in_use,
+                                       MAPDL_DEFAULT_PORT,
+                                       _version_from_path)
+from ansys.mapdl.core.errors import VersionError
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel('DEBUG')
@@ -79,6 +82,7 @@ class LocalMapdlPool:
 
     >>> from ansys.mapdl import LocalMapdlPool
     >>> pool = mapdl.LocalMapdlPool(10)
+    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
     directory within their own isolated directories.
@@ -87,6 +91,19 @@ class LocalMapdlPool:
     >>> my_path = os.getcmd()
     >>> pool = mapdl.LocalMapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+
+    Create a pool while specifying the MAPDL executable in Windows.
+
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/win64/ANSYS212.exe'
+    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+
+    Create a pool while specifying the MAPDL executable in Linux.
+
+    >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
+    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+
     """
 
     def __init__(self, n_instances, wait=True, run_location=None,
@@ -98,6 +115,19 @@ class LocalMapdlPool:
         kwargs['remove_temp_files'] = remove_temp_files
         kwargs['mode'] = 'grpc'
         self._spawn_kwargs = kwargs
+
+        # verify that mapdl is 2021R1 or newer
+        if 'exec_file' in kwargs:
+            exec_file = kwargs['exec_file']
+        else:  # get default executable
+            exec_file = get_ansys_path()
+            if exec_file is None:
+                raise FileNotFoundError('Invalid exec_file path or cannot load cached '
+                                        'ansys path.  Enter one manually using '
+                                        'exec_file=<path to executable>')
+
+        if _version_from_path(exec_file) < 211:
+            raise VersionError('LocalMapdlPool requires MAPDL 2021R1 or later.')
 
         # grab available ports
         ports = available_ports(n_instances, port)
