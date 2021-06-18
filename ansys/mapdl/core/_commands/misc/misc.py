@@ -15,7 +15,7 @@ def verify(self, case='', level='', **kwargs):
         ``'OFF'`` to disable the verification run mode.
 
     level : int, optional
-        Verification level ranging from 1 to 6.
+        Verification level ranging from 1 to 6 defaulting to 4.
 
     Returns
     --------

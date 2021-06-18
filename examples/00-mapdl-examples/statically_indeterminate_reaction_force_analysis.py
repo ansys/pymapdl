@@ -3,18 +3,45 @@
 
 Statically Indeterminate Reaction Force Analysis
 ------------------------------------------------
-taken from "the strength of materials" - Timoshenko, part 1, 3rd
-edition, page 26, problem 10
+Problem Descrption:
+ - A prismatical bar with built-in ends is loaded axially at two
+   intermediate cross sections.  Determine the reactions :math:`R_1`
+   and :math:`R_2`.
 
-Find the reaction forces at opposite, fixed, ends of a linking element
-10 units long, with forces applied in the dimension of the element of
-500 and 1000 at 4 and 7 units along the element.
+Reference:
+ - S. Timoshenko, Strength of Materials, Part I, Elementary Theory and
+   Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
+   pg. 26, problem 10.
 
-.. image:: vm1_setup.png
-  :width: 400
-  :alt: Alternative text
+Analysis Type(s):
+ - Static Analysis ``ANTYPE=0``
+
+Element Type(s):
+ - 3-D Spar (or Truss) Elements (LINK180)
+
+.. image:: ../../_static/vm1_setup.png
+   :width: 400
+   :alt: VM1 Problem Sketch
+
+Material Properties
+ - :math:`E = 30 \cdot 10^6 psi`
+
+Geometric Properties:
+ - :math:`a = b = 0.3`
+ - :math:`l = 10 in`
+
+Loading:
+ - :math:`F_1 = 2*F_2 = 1000 lb`
+
+Analytical Equations:
+ - :math:`P = R_1 + R_2` where :math:`P` is load.
+ - :math:`\frac{R_2}{R_1} = \frac{a}{b}`
+   Where :math:`a` and :math:`b` are the ratios of distances between
+   the load and the wall.
 
 """
+# sphinx_gallery_thumbnail_path = '_static/vm1_setup.png'
+
 from ansys.mapdl.core import launch_mapdl
 
 # start mapdl and clear it
@@ -40,9 +67,10 @@ mapdl.mp('EX', 1, 30e6)
 ###############################################################################
 # Define Geometry
 # ~~~~~~~~~~~~~~~
-# Set up the nodes and elements.
+# Set up the nodes and elements.  This creates a mesh just like in the
+# problem setup.
 
-mapdl.n(1)  # note: default args are 0
+mapdl.n(1, 0, 0)
 mapdl.n(2, 0, 4)
 mapdl.n(3, 0, 7)
 mapdl.n(4, 0, 10)
@@ -53,9 +81,12 @@ mapdl.egen(3, 1, 1)
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Set nodes 1 and 4 to have no degrees of freedom, by incrementing from node 1
-# to node 4 in steps of 3. Apply y-direction forces to nodes 2 and 3, with
-# values of -500 and -1000 respectively. Then exit prep7.
+# Full constrain nodes 1 and 4, by incrementing from node 1 to node 4
+# in steps of 3. Apply y-direction forces to nodes 2 and 3, with
+# values of -500 lb and -1000 lb respectively. Then exit prep7.
+#
+# Effectiely, this sets:
+# - :math:`F_1 = 2*F_2 = 1000 lb`
 
 mapdl.d(1, 'ALL', '', '', 4, 3)
 mapdl.f(2, 'FY', -500)
@@ -75,9 +106,9 @@ mapdl.finish()
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
-# Enter post-processing. Select the nodes at y=10 & y=0, and sum the forces
-# there. Then store the y-components in two variables: ``reaction_1`` and
-# ``reaction_2``.
+# Enter post-processing. Select the nodes at ``y=10`` and ``y=0``, and
+# sum the forces there. Then store the y-components in two variables:
+# ``reaction_1`` and ``reaction_2``.
 
 mapdl.post1()
 mapdl.nsel('S', 'LOC', 'Y', 10)
@@ -91,9 +122,15 @@ reaction_2 = mapdl.get('REAC_2', 'FSUM', '', 'ITEM', 'FY')
 ###############################################################################
 # Check Results
 # ~~~~~~~~~~~~~
-# Now we have the reaction forces we can compare them to the expected values of
-# 900 and 600 for reaction 1 and 2 respectively.
-
+# Now that we have the reaction forces we can compare them to the
+# expected values of 900 lbs and 600 lbs for reactions 1 and 2 respectively.
+#
+# Analytical results obtained from:
+# - :math:`P = R_1 + R_2` where :math:`P` is load of 1500 lbs
+# - :math:`\frac{R_2}{R_1} = \frac{a}{b}`
+# 
+# Hint: Solve for each reaction force independently.
+# 
 results = \
     f"""
     ---------------------  RESULTS COMPARISON  ---------------------
