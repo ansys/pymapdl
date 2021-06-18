@@ -33,8 +33,10 @@ def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
     return ports
 
 
-class LocalMapdlPool():
+class LocalMapdlPool:
     """Create a pool of MAPDL instances.
+
+    Requires MAPDL 2020 R2 or later.
 
     Parameters
     ----------
