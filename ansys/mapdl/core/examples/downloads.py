@@ -1,4 +1,4 @@
-"""Functions to download sample datasets from the pymapdl data repository
+"""Functions to download sample datasets from the pyansys data repository.
 """
 import shutil
 import os
@@ -27,8 +27,10 @@ def _decompress(filename):
     return zip_ref.close()
 
 
-def _get_file_url(filename):
-    return f'https://github.com/akaszynski/pyansys-data/raw/master/data/{filename}'
+def _get_file_url(filename, directory=None):
+    if directory:
+        return f'https://github.com/pyansys/example-data/raw/master/{directory}/{filename}'
+    return f'https://github.com/pyansys/example-data/raw/master/{filename}'
 
 
 def _retrieve_file(url, filename):
@@ -50,24 +52,20 @@ def _retrieve_file(url, filename):
     return local_path, resp
 
 
-def download_file(filename):
-    return _download_file(filename)
-
-
-def _download_file(filename):
-    url = _get_file_url(filename)
+def _download_file(filename, directory=None):
+    url = _get_file_url(filename, directory)
     return _retrieve_file(url, filename)
 
 
-def _download_and_read(filename):
-    saved_file, _ = _download_file(filename)
-    if saved_file[-3:] == 'cdb':
-        return pymapdl.Archive(saved_file)
-    else:
-        return pymapdl.read_binary(saved_file)
+def download_bracket():
+    """Download an IGS bracket.
 
+    Examples
+    --------
+    >>> from ansys.mapdl.core import examples
+    >>> filename = examples.download_bracket()
+    >>> filename
+    '/home/user/.local/share/ansys_mapdl_core/examples/bracket.iges'
 
-###############################################################################
-# def download_verification_result(index):
-#     """Download a verification manual result file"""
-#     return _download_and_read('vm%d.rst' % index)
+    """
+    return _download_file('bracket.iges', 'geometry')[0]

@@ -240,7 +240,7 @@ def title(self, title="", **kwargs):
 
     Parameters
     ----------
-    title
+    title str
         Input up to 72 alphanumeric characters.  Parameter substitution may
         be forced within the title by enclosing the parameter name or
         parametric expression within percent (%) signs.
@@ -254,8 +254,7 @@ def title(self, title="", **kwargs):
 
     This command is valid in any processor.
     """
-    command = "/TITLE,%s" % (str(title))
-    return self.run(command, **kwargs)
+    return self.run(f"/TITLE,{title}", **kwargs)
 
 
 def units(self, label="", lenfact="", massfact="", timefact="",

@@ -1,4 +1,4 @@
-"""Module to manage downloading and parsing the FEM from the MAPDL grpc server"""
+"""Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 import time
 import weakref
 import os
@@ -383,13 +383,58 @@ class MeshGrpc(Mesh):
         return np.split(data, split_ind)[1:]
 
     @property
+    def grid(self):
+        """VTK representation of the underlying finite element mesh.
+
+        Examples
+        --------
+        Store the finite element mesh as a VTK UnstructuredGrid.
+
+        >>> grid = mapdl.mesh.grid
+        UnstructuredGrid (0x7f99b4135760)
+          N Cells:	32198
+          N Points:	50686
+          X Bounds:	-1.181e+00, 1.181e+00
+          Y Bounds:	-2.362e-01, 0.000e+00
+          Z Bounds:	-2.394e+00, 2.509e+00
+          N Arrays:	10
+
+        Plot this grid.
+
+        >>> grid.plot()
+
+        Access the node numbers of grid.
+
+        >>> grid.point_arrays
+        Contains keys:
+            ansys_node_num
+            vtkOriginalPointIds
+            origid
+            VTKorigID
+
+        >>> grid.point_arrays['ansys_node_num']
+        pyvista_ndarray([    1,     2,     3, ..., 50684, 50685, 50686],
+                        dtype=int32)
+
+        Save this grid to disk
+
+        >>> grid.save('grid.vtk')
+
+        Load this grid externally with ParaView or with pyvista
+
+        >>> import pyvista
+        >>> pyvista.read('grid.vtk')
+
+        """
+        return self._grid
+
+    @property
     def _grid(self):
         if self._grid_cache is None:
             self._update_cache()
             self._grid_cache = self._parse_vtk(force_linear=True)
         return self._grid_cache
 
-    # TODO: grid probably does not need a setter...
     @_grid.setter
     def _grid(self, value):
         self._grid_cache = value

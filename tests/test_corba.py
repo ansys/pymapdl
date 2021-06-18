@@ -204,9 +204,6 @@ def test_invalid_area(mapdl_corba):
 
 @skip_no_xserver
 def test_kplot(cleared, mapdl_corba, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl_corba.kplot(vtk=True)
-
     mapdl_corba.k("", 0, 0, 0)
     mapdl_corba.k("", 1, 0, 0)
     mapdl_corba.k("", 1, 1, 0)
@@ -288,8 +285,7 @@ def test_lines(cleared, mapdl_corba):
 
 @skip_no_xserver
 def test_lplot(cleared, mapdl_corba, tmpdir):
-    with pytest.raises(MapdlRuntimeError):
-        mapdl_corba.lplot(vtk=True)
+    mapdl_corba.lplot(vtk=True)
 
     k0 = mapdl_corba.k("", 0, 0, 0)
     k1 = mapdl_corba.k("", 1, 0, 0)
@@ -301,7 +297,7 @@ def test_lplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    cpos = mapdl_corba.lplot(show_keypoint_numbering=True, screenshot=filename)
+    cpos = mapdl_corba.lplot(show_keypoint_numbering=True, savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
@@ -366,8 +362,7 @@ def test_enum(mapdl_corba, make_block):
 @pytest.mark.parametrize('knum', [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl_corba, knum):
-    with pytest.raises(RuntimeError):
-        mapdl_corba.nplot()
+    mapdl_corba.nplot()
 
     mapdl_corba.n(1, 0, 0, 0)
     mapdl_corba.n(11, 10, 0, 0)
@@ -473,12 +468,6 @@ def test_builtin_parameters(mapdl_corba, cleared):
     assert mapdl_corba.parameters.real == 1
 
 
-def test_eplot_fail(mapdl_corba):
-    # must fail with empty mesh
-    with pytest.raises(RuntimeError):
-        mapdl_corba.eplot()
-
-
 @skip_no_xserver
 def test_eplot(mapdl_corba, make_block):
     init_elem = mapdl_corba.mesh.n_elem
@@ -492,7 +481,7 @@ def test_eplot(mapdl_corba, make_block):
 def test_eplot_screenshot(mapdl_corba, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
     mapdl_corba.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], savefig=filename)
+                      window_size=[1920, 1080], savefig=filename)
     assert os.path.isfile(filename)
 
 

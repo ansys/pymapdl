@@ -544,6 +544,8 @@ class Geometry():
 
         Returns
         -------
+        list
+            List of keypoint numbers if ``return_selected=True``.
 
         Examples
         --------
