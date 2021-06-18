@@ -3,4 +3,3 @@ pytest
 matplotlib
 pytest
 pytest-cov
-pytest-azurepipelines

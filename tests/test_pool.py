@@ -8,6 +8,7 @@ import pytest
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.errors import VersionError
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -16,6 +17,10 @@ IGNORE_POOL = os.environ.get('IGNORE_POOL', '').upper() == 'TRUE'
 
 skip_launch_mapdl = pytest.mark.skipif(get_start_instance() is False or IGNORE_POOL,
                                        reason="Must be able to launch MAPDL locally")
+
+MAPDL194PATH = '/usr/ansys_inc/v194/ansys/bin/mapdl'
+skip_requires_194 = pytest.mark.skipif(not os.path.isfile(MAPDL194PATH),
+                                       reason="Requires MAPDL 194")
 
 TWAIT = 90
 
@@ -50,6 +55,12 @@ def pool():
         pth = mapdl_pool[0].directory
         if mapdl_pool._spawn_kwargs['remove_temp_files']:
             assert not list(Path(pth).rglob("*.page*"))
+
+
+@skip_requires_194
+def test_invalid_exec():
+    with pytest.raises(VersionError):
+        mapdl_pool = LocalMapdlPool(4, exec_file='/usr/ansys_inc/v194/ansys/bin/mapdl')
 
 
 @skip_launch_mapdl
