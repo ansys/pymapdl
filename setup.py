@@ -1,4 +1,5 @@
 """Installation file for ansys-mapdl-core"""
+import sys
 import struct
 import os
 from io import open as io_open
