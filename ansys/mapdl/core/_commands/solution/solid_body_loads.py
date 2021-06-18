@@ -423,7 +423,7 @@ def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
 
     Examples
     --------
-    Set heat generation = 1e4 on all selected volumes
+    Set heat generation 1e4 on all selected volumes.
 
     >>> mapdl.bfv('ALL', 'HGEN', 1e4)
     """

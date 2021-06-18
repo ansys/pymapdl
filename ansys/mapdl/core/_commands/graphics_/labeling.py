@@ -793,11 +793,11 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
 
     Examples
     --------
-    On subsesuent plots display the surface loads of pressire as arrows.
+    On subsequent plots display the surface loads of pressure as arrows.
 
     >>> mapd.psf('PRES', '', 2)
 
-    Activate display of convection on surfaces (element outline option)
+    Activate display of convection on surfaces using the element outline option.
 
     >>> mapdl.psf('CONV', '', 1)
     """

@@ -44,11 +44,11 @@ def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
 
     Examples
     --------
-    Select areas with coordinates in the range 0.4 < Y < 1.0
+    Select areas with coordinates in the range ``0.4 < Y < 1.0``
 
     >>> mapdl.asel('S', 'LOC', 'Y', 0.4, 1.0)
 
-    Set Pressure to 250e3 on all areas.
+    Set pressure to 250e3 on all areas.
 
     >>> mapdl.sfa('ALL', '', 'PRES', 250e3)
     """
@@ -84,7 +84,7 @@ def sfadele(self, area="", lkey="", lab="", **kwargs):
 
     Examples
     --------
-    Delete all convections applied to all areas where -1 < X < -0.5
+    Delete all convections applied to all areas where ``-1 < X < -0.5``
 
     >>> mapdl.asel('S', 'LOC', 'X', -1, -0.5)
     >>> mapdl.sfadele('ALL', 'CONV')
