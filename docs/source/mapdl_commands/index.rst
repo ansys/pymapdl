@@ -296,3 +296,14 @@ These commands read in external CAD files into MAPDL.
    :maxdepth: 1
 
    conn
+
+**********************
+Miscellaneous Commands
+**********************
+
+Undocumented miscellaneous commands.
+
+.. toctree::
+   :maxdepth: 1
+
+   misc

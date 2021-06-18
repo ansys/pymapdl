@@ -3,19 +3,26 @@
 
 Statically Indeterminate Reaction Force Analysis
 ------------------------------------------------
-Taken from "The Strength of Materials" - Timoshenko, Part 1, 3rd Edition, Page 26, Problem 10
+taken from "the strength of materials" - Timoshenko, part 1, 3rd
+edition, page 26, problem 10
 
-Find the reaction forces at opposite, fixed, ends of a linking element 10 units long, with
-forces applied in the dimension of the element of 500 and 1000 at 4 and 7 units along the
-element.
+Find the reaction forces at opposite, fixed, ends of a linking element
+10 units long, with forces applied in the dimension of the element of
+500 and 1000 at 4 and 7 units along the element.
+
+.. image:: vm1_setup.png
+  :width: 400
+  :alt: Alternative text
+
 """
 from ansys.mapdl.core import launch_mapdl
 
-# start MAPDL and enter the pre-processing routine
+# start mapdl and clear it
 mapdl = launch_mapdl()
-mapdl.clear()
-#
-mapdl.run("/VERIFY,VM1")
+mapdl.clear()  # optional as MAPDL just started
+
+# enter verification example mode and the pre-processing routine
+mapdl.verify()
 mapdl.prep7()
 
 ###############################################################################
@@ -35,12 +42,13 @@ mapdl.mp('EX', 1, 30e6)
 # ~~~~~~~~~~~~~~~
 # Set up the nodes and elements.
 
-mapdl.n(1)
-mapdl.n(2, '', 4)
-mapdl.n(3, '', 7)
-mapdl.n(4, '', 10)
+mapdl.n(1)  # note: default args are 0
+mapdl.n(2, 0, 4)
+mapdl.n(3, 0, 7)
+mapdl.n(4, 0, 10)
 mapdl.e(1, 2)
 mapdl.egen(3, 1, 1)
+
 
 ###############################################################################
 # Define Boundary Conditions
@@ -61,7 +69,7 @@ mapdl.finish()
 # Enter solution mode and solve the system.
 
 mapdl.run('/SOLU')
-mapdl.solve()
+out = mapdl.solve()
 mapdl.finish()
 
 ###############################################################################
