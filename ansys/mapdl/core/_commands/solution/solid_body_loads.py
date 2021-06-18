@@ -420,6 +420,12 @@ def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
     Graphical picking is available only via the listed menu paths.
 
     This command is also valid in PREP7.
+
+    Examples
+    --------
+    Set heat generation 1e4 on all selected volumes.
+
+    >>> mapdl.bfv('ALL', 'HGEN', 1e4)
     """
     command = f"BFV,{volu},{lab},{val1},{val2},{val3},{phase}"
     return self.run(command, **kwargs)

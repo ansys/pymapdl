@@ -1,6 +1,6 @@
 from ._commands import (hidden, session, database, preproc, aux15_, map_cmd,
                         aux2_, aux3_, aux12_, reduced, apdl, post26_, solution,
-                        post1_, graphics_, display_, conn)
+                        post1_, graphics_, display_, conn, misc)
 
 class Commands:
     """Wrapped MAPDL commands"""
@@ -1456,6 +1456,9 @@ class Commands:
     proein = conn.proein
     satin = conn.satin
     ugin = conn.ugin
+
+    # miscellaneous
+    verify = misc.verify
 
     # hidden
     _batch = hidden.batch

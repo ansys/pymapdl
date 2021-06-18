@@ -53,6 +53,12 @@ def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
     information.
 
     This command is also valid in /PREP7.
+
+    Examples
+    --------
+    Set global y-acceleration to 9.81
+
+    >>> mapdl.acel(acel_y=9.81)
     """
     command = f"ACEL,{acel_x},{acel_y},{acel_z}"
     return self.run(command, **kwargs)

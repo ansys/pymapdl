@@ -7,16 +7,44 @@ def da(self, area="", lab="", value1="", value2="", **kwargs):
     ----------
     area
         Area on which constraints are to be specified.  If ALL, apply to
-        all selected areas [ASEL].  If AREA = P, graphical picking is
-        enabled and all remaining command fields are ignored (valid only in
-        the GUI).  A component name may also be substituted for AREA.
+        all selected areas [ASEL].  A component name may also be substituted for AREA.
 
     lab
-        Symmetry label (see 2 below):
+        Symmetry label (see below):
 
         SYMM - Generate symmetry constraints. Requires no Value1 or Value2.
 
         ASYM - Generate antisymmetry constraints. Requires no Value1 or Value2.
+
+        ANSYS DOF labels:
+
+        UX - Displacement in X direction.
+
+        UY - Displacement in Y direction.
+
+        UZ - Displacement in Z direction.
+
+        ROTX - Rotation about X axis.
+
+        ROTY - Rotation about Y axis.
+
+        ROTZ - Rotation about Z axis.
+
+        HDSP - Hydrostatic pressure.
+
+        PRES - Pressure.
+
+        TEMP, TBOT, TE2, TE3, . . ., TTOP - Temperature.
+
+        MAG - Magnetic scalar potential (see 2 below).
+
+        VOLT - Electric scalar potential (see 3 below).
+
+        AZ - Magnetic vector potential in Z direction (see 4 below).
+
+        CONC - Concentration.
+
+        ALL - Applies all appropriate DOF labels except HDSP.
 
     value1
         Value of DOF or table name reference on the area.  Valid for all
@@ -59,6 +87,22 @@ def da(self, area="", lab="", value1="", value2="", **kwargs):
     Specifications in the Basic Analysis Guide for details.
 
     The DA command is also valid in PREP7.
+
+    Examples
+    --------
+    Select all areas with a z-coordinate of 0, then set value for all
+    degrees of freedom to be 0 on the selected areas.
+
+    >>> mapdl.asel('S', 'LOC', 'Z', 0)
+    >>> mapdl.da('ALL', 'ALL')
+
+    Apply symmetric boundary conditions on area 2.
+
+    >>> mapdl.da(2, 'SYMM')
+
+    Allow x-displacement on area 2.
+
+    >>> mapdl.da(2, 'UX', 1)
     """
     command = f"DA,{area},{lab},{value1},{value2}"
     return self.run(command, **kwargs)
