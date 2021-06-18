@@ -857,13 +857,12 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         exec_file = get_ansys_path()
         if exec_file is None:
             raise FileNotFoundError('Invalid exec_file path or cannot load cached '
-                                    'ansys path.  Enter one manually using '
-                                    'launch_mapdl(exec_file=)')
+                                    'mapdl path.  Enter one manually by specifying '
+                                    'exec_file=')
     else:  # verify ansys exists at this location
         if not os.path.isfile(exec_file):
-            raise FileNotFoundError('Invalid MAPDL executable at "{exec_file%s"\n'
-                                    % exec_file + 'Enter one manually using '
-                                    'launch_mapdl(exec_file=)')
+            raise FileNotFoundError(f'Invalid MAPDL executable at "{exec_file}"\n'
+                                    'Enter one manually using exec_file=')
 
     # verify run location
     if run_location is None:
