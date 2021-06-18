@@ -1,34 +1,57 @@
 def igesin(self, fname="", ext="", **kwargs):
-    """Transfers IGES data from a file into ANSYS.
+    """Transfers IGES data from a file into MAPDL.
 
     APDL Command: IGESIN
 
     Parameters
     ----------
-    fname
-        File name and directory path (248 characters maximum, including the
-        characters needed for the directory path).  An unspecified
-        directory path defaults to the working directory; in this case, you
-        can use all 248 characters for the file name.
+    fname : str
+        File name and directory path (248 characters maximum,
+        including the characters needed for the directory path).  An
+        unspecified directory path defaults to the working directory;
+        in this case, you can use all 248 characters for the file
+        name.  The file name defaults to JOBNAME
 
-    ext
-        Filename extension (eight-character maximum).
+    ext : str
+        Filename extension (eight-character maximum).  This is
+        optional and the extension can be included in the ``fname``
+        parameter.  The extension defaults to CAD if ``fname`` is
+        blank.
 
     Notes
     -----
     Reads a file containing IGES data and transfers it into the ANSYS
-    database.  The file transferred is the IGES Version 5.1, ASCII format
-    file.  IGES (Initial Graphics Exchange Specification) is a neutral
-    format developed by the U.S. Dept. of Commerce, National Institute of
-    Standards and Technology.  There is no output transfer file written
-    since the transferred data is read directly into the ANSYS database.
+    database.  The file transferred is the IGES Version 5.1, ASCII
+    format file.  IGES (Initial Graphics Exchange Specification) is a
+    neutral format developed by the U.S. Dept. of Commerce, National
+    Institute of Standards and Technology.  There is no output
+    transfer file written since the transferred data is read directly
+    into the MAPDL database.
 
-    You can import multiple files into a single database, but you must use
-    the same import option (set with the IOPTN command) for each file.
+    You can import multiple files into a single database, but you must
+    use the same import option (set with the IOPTN command) for each
+    file.
 
-    The IOPTN command sets the parameters for reading the file.  Files read
-    via the SMOOTH method (the only available method) use the standard
-    database.
+    The IOPTN command sets the parameters for reading the file.  Files
+    read via the SMOOTH method (the only available method) use the
+    standard database.
+
+    Examples
+    --------
+    Read in an IGES file in the current MAPDL directory.
+
+    >>> mapdl.igesin('bracket.iges')
+
+    Read in an example IGES file
+
+    >>> from ansys.mapdl.core import examples
+    >>> bracket_file = examples.download_bracket()
+    >>> mapdl.igesin(bracket_file)
+
+    Read in a igesfile from a full path
+
+    >>> mapdl.igesin('C:\\Users\\user\\bracket.iges)
+
     """
     return self.run(f"IGESIN,{fname},{ext}", **kwargs)
 

@@ -434,7 +434,7 @@ class PostProcessing():
                                  'single component (e.g. "X")')
 
         disp = self.nodal_rotation(component)
-        kwargs.setdefault('stitle', '%s Rotation' % component)
+        kwargs.setdefault('stitle', f'{component} Rotation')
         return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
                                         **kwargs)
 
@@ -676,7 +676,7 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_component_stress('X')
         """
         disp = self.nodal_component_stress(component)
-        kwargs.setdefault('stitle', '%s Nodal\nStress' % component)
+        kwargs.setdefault('stitle', f'{component} Nodal\nStress')
         return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
                                         **kwargs)
 
@@ -745,7 +745,7 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_principal_stress('1')
         """
         disp = self.nodal_principal_stress(component)
-        kwargs.setdefault('stitle', '%s Nodal\nPrincipal Stress' % component)
+        kwargs.setdefault('stitle', f'{component} Nodal\nPrincipal Stress')
         return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
                                         **kwargs)
 
@@ -932,6 +932,8 @@ class PostProcessing():
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
+        
+
         Returns
         --------
         cpos : list
@@ -941,14 +943,14 @@ class PostProcessing():
 
         Examples
         --------
-        Plot Total component strain in the X direction for the first result
+        Plot total component strain in the X direction for the first result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 1)
         >>> mapdl.post_processing.plot_nodal_total_component_strain('X')
         """
         disp = self.nodal_total_component_strain(component)
-        kwargs.setdefault('stitle', '%s Total Nodal\nComponent Strain' % component)
+        kwargs.setdefault('stitle', f'{component} Total Nodal\nComponent Strain')
         return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
                                         **kwargs)
 

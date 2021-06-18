@@ -71,7 +71,7 @@ circ_anum = mapdl.cyl4(length/2, width/2, radius)
 plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 
 # finally, plot the lines of the plate
-_ = mapdl.lplot(vtk=True, cpos='xy', line_width=10, font_size=26,
+_ = mapdl.lplot(cpos='xy', line_width=3, font_size=26,
                 color_lines=True, background='w')
 
 ###############################################################################

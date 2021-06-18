@@ -3,6 +3,7 @@ import pyvista as pv
 import numpy as np
 
 from ansys.mapdl.core.misc import unique_rows
+from .theme import MapdlTheme
 
 
 def general_plotter(meshes, points, labels,
@@ -22,11 +23,14 @@ def general_plotter(meshes, points, labels,
                     render_points_as_spheres=False, render_lines_as_tubes=False,
                     scalar_bar_args={},
                     smooth_shading=None,
+                    show_scalar_bar=None,
                     # labels kwargs
                     font_size=None,
                     font_family=None,
-                    text_color=None):
-    """General pyansys plotter for APDL geometry and meshes.
+                    text_color=None,
+                    theme=None,
+                    return_plotter=False):
+    """General pymapdl plotter for APDL geometry and meshes.
 
     Parameters
     ----------
@@ -105,11 +109,12 @@ def general_plotter(meshes, points, labels,
         The scalar bar will also have this many colors.
 
     cmap : str, list, optional
-       Name of the Matplotlib colormap to us when mapping the ``scalars``.
-       See available Matplotlib colormaps.  Only applicable for when
-       displaying ``scalars``. Requires Matplotlib to be installed.
-       ``colormap`` is also an accepted alias for this. If ``colorcet`` or
-       ``cmocean`` are installed, their colormaps can be specified by name.
+       Name of the Matplotlib colormap to us when mapping the
+       ``scalars``.  See available Matplotlib colormaps.  Only
+       applicable for when displaying ``scalars``. Requires Matplotlib
+       to be installed.  ``colormap`` is also an accepted alias for
+       this. If ``colorcet`` or ``cmocean`` are installed, their
+       colormaps can be specified by name.
 
         You can also specify a list of colors to override an
         existing colormap with a custom one.  For example, to
@@ -125,11 +130,52 @@ def general_plotter(meshes, points, labels,
     smooth_shading : bool, optional
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
+
+    theme : pyvista.DefaultTheme, optional
+        PyVista theme.  Defaults to PyMAPDL theme.
+
+    return_plotter : bool, optional
+        Return the plotting object rather than showing the plot and
+        returning the camera position.  Default ``False``.
+
+    Returns
+    -------
+    cpos or pyvista.Plotter
+        Camera position or instance of ``pyvista.Plotter`` depending
+        on ``return_plotter``.
+
+    Examples
+    --------
+    Plot areas and modify the background color to ``'black'``
+
+    >>> cpos = mapdl.aplot(background='black')
+
+    Enable smooth_shading on an element plot.
+
+    >>> cpos = mapdl.eplot(smooth_shading=True)
+
+    Return the plotting instance, modify it, and display the plot.
+
+    >>> pl = mapdl.aplot(return_plotter=True)
+    >>> pl.show_bounds()
+    >>> pl.set_background('black')
+    >>> pl.add_text('my text')
+    >>> pl.show()
+
+    Save a screenshot to disk without showing the plot.
+
+    >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                    window_size=[1920, 1080], savefig='screenshot.png',
+                    off_screen=True)
+
     """
     if notebook:
         off_screen = True
 
-    pl = pv.Plotter(off_screen=off_screen, notebook=notebook)
+    if theme is None:
+        theme = MapdlTheme()
+
+    pl = pv.Plotter(off_screen=off_screen, notebook=notebook, theme=theme)
 
     if background:
         pl.set_background(background)
@@ -154,6 +200,7 @@ def general_plotter(meshes, points, labels,
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
                     point_size=point_size, line_width=line_width,
+                    show_scalar_bar=show_scalar_bar,
                     opacity=opacity, flip_scalars=flip_scalars,
                     lighting=lighting, n_colors=n_colors,
                     interpolate_before_map=interpolate_before_map,
@@ -172,9 +219,6 @@ def general_plotter(meshes, points, labels,
                             font_family=font_family,
                             text_color=text_color)
 
-    # if stitle is not None:
-    #     pl.add_scalar_bar(title=stitle)
-
     if cpos:
         pl.camera_position = cpos
 
@@ -186,10 +230,21 @@ def general_plotter(meshes, points, labels,
     if title:
         pl.add_title(title)
 
+    # permit user to save the figure as a screenshot
     if savefig:
         pl.show(title=title, auto_close=False, window_size=window_size,
                 screenshot=True)
         pl.screenshot(savefig)
+
+        # return unclosed plotter
+        if return_plotter:
+            return pl
+
+        # if not returning plotter, close right away
+        pl.close()
+
+    elif return_plotter:
+        return pl
     else:
         pl.show()
 

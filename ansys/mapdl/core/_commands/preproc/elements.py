@@ -1162,6 +1162,10 @@ def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
 
     APDL Command: EPLOT
 
+    .. note::
+        PyMAPDL plotting commands with ``vtk=True`` ignore any
+        values set with the ``PNUM`` command.
+
     Parameters
     ----------
     vtk : bool, optional
@@ -1220,7 +1224,7 @@ def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
 
     # otherwise, use MAPDL plotter
     self._enable_interactive_plotting()
-    return super().eplot(**kwargs)
+    return self.run('EPLOT')
 
 
 def eread(self, fname: str = "",
