@@ -22,7 +22,7 @@ mapdl.prep7()
 # Define Material
 # ~~~~~~~~~~~~~~~
 # Set up the material and its type (a single material, with a linking-type
-# section and an enthalpy of 30e6).
+# section and a Young's modulus of 30e6).
 
 mapdl.antype('STATIC')
 mapdl.et(1, 'LINK180')
@@ -96,4 +96,3 @@ results = \
     ----------------------------------------------------------------
     """
 print(results)
-
