@@ -37,6 +37,26 @@ if os.name == 'linux':
     install_requires.extend(['pexpect>=4.8.0'])
 
 
+# perform python version checking
+# this is necessary to avoid the new pip package checking as vtk does
+# not support Python 3.9 or any 32-bit as of 17 June 2021.
+is64 = struct.calcsize("P")*8 == 64
+if not is64:
+    raise RuntimeError('\n\n``ansys-mapdl-reader`` requires 64-bit Python\n'
+                       'Please check the version of Python installed at\n'
+                       '%s' % sys.executable)
+
+if sys.version_info.minor > 8:
+    try:
+        import vtk
+    except:
+        raise RuntimeError('\n\n``ansys-mapdl-reader`` supports Python 3.6 - 3.8\n'
+                           'Python 3.9 support depends on vtk wheels, which should\n'
+                           'be released by August 2021.\n\n'
+                           'Installed Python:\n'
+                           '%s' % str(sys.version.splitlines()[0]))
+
+
 packages = []
 for package in find_namespace_packages(include='ansys*'):
     if package.startswith('ansys.mapdl.core'):
