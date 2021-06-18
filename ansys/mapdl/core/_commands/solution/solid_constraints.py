@@ -91,16 +91,16 @@ def da(self, area="", lab="", value1="", value2="", **kwargs):
     Examples
     --------
     Select all areas with a z-coordinate of 0, then set value for all
-    Degrees of Freedom to be 0 on the selected areas.
+    degrees of freedom to be 0 on the selected areas.
 
     >>> mapdl.asel('S', 'LOC', 'Z', 0)
     >>> mapdl.da('ALL', 'ALL')
 
-    Apply symmetric Boundary Conditions on area 2
+    Apply symmetric boundary conditions on area 2.
 
     >>> mapdl.da(2, 'SYMM')
 
-    Allow x-displacement on area 2
+    Allow x-displacement on area 2.
 
     >>> mapdl.da(2, 'UX', 1)
     """

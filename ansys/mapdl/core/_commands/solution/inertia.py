@@ -56,9 +56,9 @@ def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
 
     Examples
     --------
-    Set global y-acceleration to be 9.81
+    Set global y-acceleration to 9.81
 
-    >>> mapdl.acel('', 9.81)
+    >>> mapdl.acel(acel_y=9.81)
     """
     command = f"ACEL,{acel_x},{acel_y},{acel_z}"
     return self.run(command, **kwargs)
