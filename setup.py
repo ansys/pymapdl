@@ -85,7 +85,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     url='https://github.com/pyansys/pymapdl',
-    python_requires='>=3.6.*',
+    python_requires='>=3.6.*, <3.9',
     keywords='ANSYS MAPDL gRPC',
     package_data={'ansys.mapdl.core.examples': ['verif/*.dat',
                                                 'wing.dat']},
