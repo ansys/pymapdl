@@ -70,57 +70,60 @@ def mp(self, lab="", mat="", c0="", c1="", c2="", c3="", c4="", **kwargs):
 
         BETD - Stiffness matrix multiplier for damping.
 
-        Note:If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain. - BETX
+        Note: If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high
+        frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain.
 
-        Coefficient of diffusion expansion (also BETY, BETZ) - BVIS
+        BETX - Coefficient of diffusion expansion (also BETY, BETZ)
 
-        Bulk viscosity - C
+        BVIS - Bulk viscosity
 
-        Specific heat - CREF
+        C - Specific heat
 
-        Reference concentration (may not be temperature dependent) - CSAT
+        CREF - Reference concentration (may not be temperature dependent)
 
-        Saturated concentration - CTEX
+        CSAT - Saturated concentration
 
-        Instantaneous coefficients of thermal expansion (also CTEY, CTEZ) - CVH
+        CTEX - Instantaneous coefficients of thermal expansion (also CTEY, CTEZ)
 
-        Heat coefficient at constant volume per unit of mass - DENS
+        CVH - Heat coefficient at constant volume per unit of mass
 
-        Mass density. - DMPR
+        DENS - Mass density.
 
-        Constant structural damping coefficient in full harmonic analysis or damping ratio in mode-superposition analysis. - DXX
+        DMPR - Constant structural damping coefficient in full harmonic analysis or damping ratio in mode-superposition
+               analysis.
 
-        Diffusivity coefficients (also DYY, DZZ) - EMIS
+        DXX - Diffusivity coefficients (also DYY, DZZ)
 
-        Emissivity. - ENTH
+        EMIS - Emissivity.
 
-        Enthalpy. - EX
+        ENTH - Enthalpy.
 
-        Elastic moduli (also EY, EZ) - GXY
+        EX - Elastic moduli (also EY, EZ)
 
-        Shear moduli (also GYZ, GXZ) - HF
+        GXY - Shear moduli (also GYZ, GXZ)
 
-        Convection or film coefficient - KXX
+        HF - Convection or film coefficient
 
-        Thermal conductivities (also KYY, KZZ) - LSST
+        KXX - Thermal conductivities (also KYY, KZZ)
 
-        Electric loss tangent - LSSM
+        LSST - Electric loss tangent
 
-        Magnetic loss tangent - MGXX
+        LSSM - Magnetic loss tangent
 
-        Magnetic coercive forces (also MGYY, MGZZ) - MURX
+        MGXX - Magnetic coercive forces (also MGYY, MGZZ)
 
-        Magnetic relative permeabilities (also MURY, MURZ) - MU
+        MURX - Magnetic relative permeabilities (also MURY, MURZ)
 
-        Coefficient of friction - NUXY
+        MU - Coefficient of friction
 
-        Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = νyx, as described in Stress-Strain Relationships in the Mechanical APDL Theory Reference) - PERX
+        NUXY - Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = νyx, as described in Stress-Strain Relationships in the
+               Mechanical APDL Theory Reference)
 
-        Electric relative permittivities (also PERY, PERZ) - Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or
-                          SOLID98, the program interprets the values as
-                          absolute permittivity. Values input for PLANE223,
-                          SOLID226, or SOLID227 are always interpreted as
-                          relative permittivity.
+        PERX - Electric relative permittivities (also PERY, PERZ)
+
+        Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or SOLID98, the program interprets
+        the values as absolute permittivity. Values input for PLANE223, SOLID226, or SOLID227 are always interpreted as
+        relative permittivity.
 
         PRXY - Major Poisson's ratios (also PRYZ, PRXZ) (PRXY = νxy, as described in Stress-
                Strain Relationships in the Mechanical APDL Theory
