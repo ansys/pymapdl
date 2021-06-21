@@ -137,11 +137,52 @@ following the steps in the `Creating a New Pull Request
 section <#creating-a-new-pull-request>`__.
 
 
+Making Issues
+~~~~~~~~~~~~~
+Should you come across a bug in pyansys or otherwise encounter some
+unexpected behaviour you should create an "issue" regarding it.
+Issues are used when developing to keep track of what is being
+worked on at any one time, and by who. We have two issue templates
+that we recommend you use:
+
+* Bug report template
+* Feature request template
+
+If your issue does not fit into these two categories you are free
+to create your own issue as well.
+
+Issues should contain sufficient context for others to reproduce your
+problem, such as the application versions you are using as well as
+reproduction steps. Use issue labels like "Documentation" to further
+highlight your issue's category.
+
+Developers will respond to your issue and hopefully resolve it! Users
+are encouraged to close their own issues once they are completed.
+Otherwise, issues will be closed after a period of inactivity at the
+discretion of the maintainers.
+
+Should it turn out the fix did not work, or your issue was closed
+erroneously, please re-open your issue with a comment addressing why.
+
+
+Discussions
+~~~~~~~~~~~
+General questions about pyansys should go in the discussions tab on
+the repo rather than as issues themselves. Issues can be spun out of
+discussions depending on what is decided, but general Q&A content
+should start as discussions where possible.
+
+.. note::
+
+    The discussions feature is still in beta on GitHub, so this may
+    change in the future.
+
+
 Creating a New Pull Request
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Once you have tested your branch locally, create a pull request on
 `PyMAPDL <https://github.com/pyansys/pymapdl>`_ and target your
-merge to `master`.  This will automatically run continuous
+merge to `main`.  This will automatically run continuous
 integration (CI) testing and verify your changes will work across all
 supported platforms.
 
@@ -325,7 +366,7 @@ features without sacrificing stability, and closely follows the
 
 The main features of our branching model are:
 
-- The `master` branch is the main development branch.  All features,
+- The `main` branch is the main development branch.  All features,
   patches, and other branches should be merged here.  While all PRs
   should pass all applicable CI checks, this branch may be
   functionally unstable as changes might have introduced unintended
@@ -333,7 +374,7 @@ The main features of our branching model are:
 - There will be one or many `release/` branches based on minor
   releases (for example `release/0.2`) which contain a stable version
   of the code base that is also reflected on PyPi/.  Hotfixes from
-  `fix/` branches should be merged both to master and to these
+  `fix/` branches should be merged both to main and to these
   branches.  When necessary to create a new patch release these
   release branches will have their `__version__.py` updated and be
   tagged with a patched semantic version (e.g. `0.2.1`).  This
@@ -341,11 +382,11 @@ The main features of our branching model are:
   for past versions of ``ansys.mapdl.core`` without having to worry about
   untested features.
 - When a minor release candidate is ready, a new `release` branch will
-  be created from `master` with the next incremented minor version
+  be created from `main` with the next incremented minor version
   (e.g. `release/0.2`), which will be thoroughly tested.  When deemed
   stable, the release branch will be tagged with the version (`0.2.0`
-  in this case), and if necessary merged with master if any changes
-  were pushed to it.  Feature development then continues on `master`
+  in this case), and if necessary merged with main if any changes
+  were pushed to it.  Feature development then continues on `main`
   and any hotfixes will now be merged with this release.  Older
   release branches should not be deleted so they can be patched as
   needed.
@@ -357,7 +398,7 @@ Minor releases are feature and bug releases that improve the
 functionality and stability of ``PyMAPDL``.  Before a minor release is
 created the following will occur:
 
-1.  Create a new branch from the ``master`` branch with name
+1.  Create a new branch from the ``main`` branch with name
     ``release/MAJOR.MINOR`` (e.g. `release/0.2`).
 
 2. Locally run all tests as outlined in the `Testing Section <#testing>`__
@@ -378,7 +419,7 @@ cached.
 
 5. Update the version numbers in ``ansys/mapdl/reader/_version.py`` and commit it.
    Push the branch to GitHub and create a new PR for this release that
-   merges it to master.  Development to master should be limited at
+   merges it to main.  Development to main should be limited at
    this point while effort is focused on the release.
 
 6. It is now the responsibility of the PyMAPDL community and
@@ -388,7 +429,7 @@ cached.
    branch.
 
 7. When the branch is deemed as stable for public release, the PR will
-   be merged to master and the `master` branch will be tagged with a
+   be merged to main and the `main` branch will be tagged with a
    `MAJOR.MINOR.0` release.  The release branch will not be deleted.
    Tag the release with:
 
@@ -401,7 +442,7 @@ cached.
 8. Create a list of all changes for the release. It is often helpful
    to leverage `GitHub's compare feature
    <https://github.com/pyansys/pymapdl/compare>`_ to see the
-   differences from the last tag and the `master` branch.  Be sure to
+   differences from the last tag and the `main` branch.  Be sure to
    acknowledge new contributors by their GitHub username and place
    mentions where appropriate if a specific contributor is to thank
    for a new feature.
@@ -425,9 +466,12 @@ should not wait until a minor release.  The steps for a patch release
    a chance to validate and approve the bugfix release.  Any
    additional hotfixes should be outside of this PR.
 
-3. When approved, merge with the release branch, but not `master` as
-   there is no reason to increment the version of the `master` branch.
+3. When approved, merge with the release branch, but not `main` as
+   there is no reason to increment the version of the `main` branch.
    Then create a tag from the release branch with the applicable
    version number (see above for the correct steps).
 
 4. If deemed necessary a release notes page.
+
+
+
