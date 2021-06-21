@@ -164,6 +164,11 @@ discretion of the maintainers.
 Should it turn out the fix did not work, or your issue was closed
 erroneously, please re-open your issue with a comment addressing why.
 
+Open ended questions should go in the discussion tab and should an
+issue generate additional discussion, further issues should be spun out
+into their own separate issues. This helps developers keep track of
+what is being done and what needs to be done.
+
 
 Discussions
 ~~~~~~~~~~~
