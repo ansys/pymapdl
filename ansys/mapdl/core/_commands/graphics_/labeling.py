@@ -391,7 +391,7 @@ def pbc(self, item="", key="", min_="", max_="", abs_="", **kwargs):
 
     Notes
     -----
-    The /PBC command adds degree of freedom constraint, force load, and
+    The ``mapdl.pbc`` command adds degree of freedom constraint, force load, and
     other symbols to displays.
 
     Symbols are applied to the selected nodes only.  All arrow and
@@ -403,23 +403,40 @@ def pbc(self, item="", key="", min_="", max_="", abs_="", **kwargs):
     (e.g., positive or negative x) represents a positive or negative scalar
     value, respectively.
 
-    The effects of the /PBC command are not cumulative (that is, the
+    The effects of the ``mapdl.pbc`` command are not cumulative (that is, the
     command does not modify an existing setting from a previously issued
-    /PBC command).  If you issue multiple /PBC commands during an analysis,
-    only the setting specified by the most recent /PBC command applies.
+    ``mapdl.pbc`` command).  If you issue multiple ``mapdl.pbc`` commands
+    during an analysis, only the setting specified by the most recent
+    ``mapdl.pbc`` command applies.
 
-    Use /PSTATUS or /PBC,STAT to display settings.  Use /PBC,DEFA to reset
-    all specifications back to default.  See the /PSF and /PBF commands for
-    other display symbols.
+    Use ``mapdl.pstatus()`` or ``mapdl.pbc('STAT')`` to display settings.
+    Use ``mapdl.pbc('DEFA')`` to reset all specifications back to default.
+    See the ``mapdl.psf`` and ``mapdl.pbf`` commands for other display symbols.
 
-    In a cyclic symmetry analysis, the /PBC command is deactivated when
+    In a cyclic symmetry analysis, the ``mapdl.pbc`` command is deactivated when
     cyclic expansion is active (/CYCEXPAND,,ON). To view boundary
     conditions on the basic sector, deactivate cyclic expansion
-    (/CYCEXPAND,,OFF) and issue this command:: : /PBC,ALL,,1
+    (/CYCEXPAND,,OFF) and issue this command: ``mapdl.pbc('ALL', 1)``
 
-    Issuing the command /PBC,PATH, ,1 displays all defined paths.
+    Issuing the command ``mapdl.pbc('PATH', 1)`` displays all defined paths.
 
-    The /PBC command is valid in any processor.
+    The ``mapdl.pbc`` command is valid in any processor.
+
+    .. note:
+        In APDL the /PBC command has an unused 3rd argument. This has been
+        removed in PyMAPDL because of its redundancy, and should be
+        kept in mind when translating between the two.
+
+    Examples
+    --------
+    On all subsequent plots (after this command). Activate display of
+    translational boundary condition symbols.
+
+    >>> mapdl.pbc('U', 1)
+
+    Display enforced nodal temperatures
+
+    >>> mapdl.pbc('TEMP', 1)
     """
     command = f"/PBC,{item},,{key},{min_},{max_},{abs_}"
     return self.run(command, **kwargs)
@@ -471,19 +488,33 @@ def pbf(self, item="", key="", **kwargs):
     Shows body force loads as contours on displays for the selected
     elements.
 
-    The effects of the /PBF command are not cumulative (that is, the
+    The effects of the ``mapdl.pbf`` command are not cumulative (that is, the
     command does not modify an existing setting from a previously issued
-    /PBF command).  If you issue multiple /PBF commands during an analysis,
-    only the setting specified by the most recent /PBF command applies.
+    ``mapdl.pbf`` command).  If you issue multiple ``mapdl.pbf`` commands
+    during an analysis, only the setting specified by the most recent
+    ``mapdl.pbf`` command applies.
 
-    Use /PSTATUS or /PBF,STAT to display settings.  Use /PBF,DEFA to reset
-    all specifications back to default.  See also the /PSF and /PBC command
+    Use ``mapdl.pstatus()`` or ``mapdl.pbf('STAT')`` to display settings.
+    Use ``mapdl.pbf('DEFA')`` to reset all specifications back to default.
+    See also the ``mapdl.psf`` and ``mapdl.pbc`` command
     for other display contours.
 
     Portions of this command are not supported by PowerGraphics
-    [/GRAPHICS,POWER].
+    [``mapdl.graphics('POWER')``].
 
     This command is valid in any processor.
+
+    .. note:
+        In APDL the /PBF command has an unused 2nd argument. This has been
+        removed in PyMAPDL because of its redundancy, and should be
+        kept in mind when translating between the two.
+
+    Examples
+    --------
+    Activate display of body loads of structural temperature on subsequent plots
+    by showing body force and contours.
+
+    >>> mapdl.pbf('TEMP', 1)
     """
     return self.run(f"/PBF,{item},,{key}", **kwargs)
 
@@ -708,7 +739,7 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
 
     Notes
     -----
-    The /PSF command determines whether and how to show surface loads on
+    The ``mapdl.psf`` command determines whether and how to show surface loads on
     subsequent model displays.
 
     If surface loads are applied to solid model entities, only solid model
@@ -719,13 +750,13 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
     models, the surface load symbols are shown only if the load face is
     visible from the current viewing direction.
 
-    The effects of the /PSF command are not cumulative (that is, the
+    The effects of the ``mapdl.psf`` command are not cumulative (that is, the
     command does not modify an existing setting from a previously issued
-    /PSF command).  Only the setting specified via the most recent /PSF
-    command applies.
+    ``mapdl.psf`` command).  Only the setting specified via the most recent
+    ``mapdl.psf`` command applies.
 
-    If you issue a postprocessing (POST1) plot command that produces result
-    contours (such as PLNSOL), the /PSF command has no effect. This
+    If you issue a postprocessing (``mapdl.post1``) plot command that produces result
+    contours (such as PLNSOL), the ``mapdl.psf`` command has no effect. This
     behavior prevents conflicting contours in the graphics window.
 
     When using the radiosity method (Item = RDSF and Comp = ENCL) with Key
@@ -733,12 +764,12 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
     using SURF154 with KEYOPT(2) = 1, set the Item to PRES and leave the
     Component Label blank.
 
-    /PSF,STAT displays current /PSF settings, and /PSF,DEFA resets them
-    back to default.
+    ``mapdl.psf('STAT')`` displays current ``mapdl.psf`` settings, and
+    ``mapdl.psf('DEFA')`` resets them back to default.
 
-    Other useful commands are /PNUM,SVAL,1 to show the values of the
-    surface loads, /VSCALE to change arrow lengths, and /PBC and /PBF to
-    activate other load symbols.
+    Other useful commands are ``mapdl.pnum('SVAL', 1)`` to show the values of the
+    surface loads, ``mapdl.vscale()`` to change arrow lengths, and
+    ``mapdl.pbc`` and ``mapdl.pbf`` to activate other load symbols.
 
     For beam elements, only the colors representing shear (GREEN) and
     normal (RED) pressures are displayed for the arrows. The color of these
@@ -748,9 +779,9 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
 
     For elements SURF159, SOLID272, SOLID273, PIPE288 and PIPE289, the /PSF
     command is not available when displaying elements with shapes
-    determined from the real constants or section definition (/ESHAPE). For
-    PIPE288 and PIPE289, only external loads applied via the SFBEAM command
-    are displayed.
+    determined from the real constants or section definition (``mapdl.eshape``).
+    For PIPE288 and PIPE289, only external loads applied via the
+    ``mapdl.sfbeam`` command are displayed.
 
     This command is valid in any processor.
 
@@ -759,6 +790,16 @@ def psf(self, item="", comp="", key="", kshell="", color="", **kwargs):
     Pressure loads apply to the element coordinate system (KEYOPT(2) = 0).
     Adjust appropriately for a local coordinate system (KEYOPT(2) = 1). See
     Figure: 153.2:: Pressures in the Element Reference.
+
+    Examples
+    --------
+    On subsequent plots display the surface loads of pressure as arrows.
+
+    >>> mapd.psf('PRES', '', 2)
+
+    Activate display of convection on surfaces using the element outline option.
+
+    >>> mapdl.psf('CONV', '', 1)
     """
     command = f"/PSF,{item},{comp},{key},{kshell},{color}"
     return self.run(command, **kwargs)
