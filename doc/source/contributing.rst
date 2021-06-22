@@ -105,8 +105,8 @@ Consider the following general coding paradigms when contributing:
 2. **Document it**. Include a docstring for any function, method, or
    class added.  Follow the `numpydocs docstring
    <https://numpydoc.readthedocs.io/en/latest/format.html>`_
-   guidelines, and always provide a for simple use cases for the new
-   features.
+   guidelines, and always provide an example of simple use cases for
+   the new features.
 
 3. **Test it**. Since Python is an interperted language, if it's not
    tested, it's probably broken.  At the minimum, include unit tests
