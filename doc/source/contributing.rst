@@ -165,7 +165,7 @@ discretion of the maintainers.
 Should it turn out the fix did not work, or your issue was closed
 erroneously, please re-open your issue with a comment addressing why.
 
-Open ended questions should go in the `discussions tab <https://github.com/pyansys/pymapdl/discussions>`_
+Open ended questions should be opened in `Discussions <https://github.com/pyansys/pymapdl/discussions>`_,
 and should an issue generate additional discussion, further issues
 should be spun out into their own separate issues. This helps developers
 keep track of what is being done and what needs to be done.
@@ -174,9 +174,9 @@ keep track of what is being done and what needs to be done.
 Discussions
 ~~~~~~~~~~~
 
-General questions about PyMAPDL should go in the
-`discussions tab <https://github.com/pyansys/pymapdl/discussions>`_ on
-the repo rather than as issues themselves. Issues can be spun out of
+General questions about PyMAPDL should be raised in
+`Discussions <https://github.com/pyansys/pymapdl/discussions>`_ in
+this repository rather than as issues themselves. Issues can be spun out of
 discussions depending on what is decided, but general Q&A content
 should start as discussions where possible.
 
