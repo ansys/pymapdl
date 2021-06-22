@@ -140,7 +140,8 @@ section <#creating-a-new-pull-request>`__.
 Making Issues
 ~~~~~~~~~~~~~
 Should you come across a bug in ``pymapdl`` or otherwise encounter some
-unexpected behaviour you should create an "issue" regarding it.
+unexpected behaviour you should create an "issue" regarding it. Issues are
+created and submitted `here <https://github.com/pyansys/pymapdl/issues>`_.
 Issues are used when developing to keep track of what is being
 worked on at any one time, and by who. We have two issue templates
 that we recommend you use:
@@ -164,15 +165,17 @@ discretion of the maintainers.
 Should it turn out the fix did not work, or your issue was closed
 erroneously, please re-open your issue with a comment addressing why.
 
-Open ended questions should go in the discussion tab and should an
-issue generate additional discussion, further issues should be spun out
-into their own separate issues. This helps developers keep track of
-what is being done and what needs to be done.
+Open ended questions should go in the `discussions tab <https://github.com/pyansys/pymapdl/discussions>`_
+and should an issue generate additional discussion, further issues
+should be spun out into their own separate issues. This helps developers
+keep track of what is being done and what needs to be done.
 
 
 Discussions
 ~~~~~~~~~~~
-General questions about pyansys should go in the discussions tab on
+
+General questions about pyansys should go in the
+`discussions tab <https://github.com/pyansys/pymapdl/discussions>`_ on
 the repo rather than as issues themselves. Issues can be spun out of
 discussions depending on what is decided, but general Q&A content
 should start as discussions where possible.
