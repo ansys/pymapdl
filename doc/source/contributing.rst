@@ -139,7 +139,7 @@ section <#creating-a-new-pull-request>`__.
 
 Making Issues
 ~~~~~~~~~~~~~
-Should you come across a bug in ``PyMAPDLl`` or otherwise encounter some
+Should you come across a bug in ``PyMAPDL`` or otherwise encounter some
 unexpected behaviour you should create an "issue" regarding it. Issues are
 created and submitted `here <https://github.com/pyansys/pymapdl/issues>`_.
 Issues are used when developing to keep track of what is being
@@ -479,4 +479,3 @@ should not wait until a minor release.  The steps for a patch release
    version number (see above for the correct steps).
 
 4. If deemed necessary a release notes page.
-
