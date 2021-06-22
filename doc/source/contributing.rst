@@ -137,8 +137,8 @@ following the steps in the `Creating a New Pull Request
 section <#creating-a-new-pull-request>`__.
 
 
-Making Issues
-~~~~~~~~~~~~~
+Opening Issues
+~~~~~~~~~~~~~~
 Should you come across a bug in ``PyMAPDL`` or otherwise encounter some
 unexpected behaviour you should create an "issue" regarding it. Issues are
 created and submitted `here <https://github.com/pyansys/pymapdl/issues>`_.
