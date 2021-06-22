@@ -228,7 +228,7 @@ ignored to ``ignore_words.txt``
 
 .. code::
 
-    codespell ./ "*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./docs/build/*,./docs/images/*,./dist/*,*~,.hypothesis*,./docs/source/examples/*,*cover,*.dat,*.mac,\#*,build,./docker/mapdl/v211,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO" -I "ignore_words.txt"
+    codespell ./ "*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,\#*,build,./docker/mapdl/v211,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO" -I "ignore_words.txt"
 
 
 Documentation
@@ -236,16 +236,16 @@ Documentation
 Documentation for PyMAPDL is generated from three sources:
 
 - Docstrings from the classes, functions, and modules of ``ansys.mapdl.core`` using `sphinx.ext.autodoc <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_.
-- Restructured test from `docs/`
+- Restructured test from `doc/`
 - Examples from `examples/`
 
-General usage and API descriptions should be placed within `docs/source` and
+General usage and API descriptions should be placed within `doc/source` and
 the docstrings.  Full examples should be placed in `examples`.
 
 Adding a New Example
 ~~~~~~~~~~~~~~~~~~~~
 
-PyMAPDL examples come in two formats.  Basic code snippets demonstrating some functionality, or a full gallery examples.  Small code samples and snippets are contained in the `docs/source` directory, while the full gallery examples, meant to be run as individual downloadable scripts, are contained in the `examples` directory at the root of this repository.
+PyMAPDL examples come in two formats.  Basic code snippets demonstrating some functionality, or a full gallery examples.  Small code samples and snippets are contained in the `doc/source` directory, while the full gallery examples, meant to be run as individual downloadable scripts, are contained in the `examples` directory at the root of this repository.
 
 To add a fully fledged, standalone example, add your example to the `examples` directory within one of the applicable subfolders.  Should none of the existing directories match the category of your example, create a new directory with a `README.txt` describing the new category.  Additionally, as these examples are built using the sphinx gallery extension, follow coding guidelines as established by [Sphinx-Gallery](https://sphinx-gallery.github.io/stable/index.html)
 
@@ -258,7 +258,7 @@ Documentation Style and Organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Docstrings should follow the `numpydocs docstring
 <https://numpydoc.readthedocs.io/en/latest/format.html>`_ guidelines.
-Documentation from `docs` use reStructuredText format.  Examples
+Documentation from `doc` use reStructuredText format.  Examples
 within the `examples/` directory should be PEP8 compliant and will be
 compiled dynamically during the build process; ensure they run
 properly locally as they will be verified through the continuous
@@ -267,7 +267,7 @@ integration performed on GitHub Actions.
 
 Building the Documentation Locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Documentation for PyMAPDL is hosted at docs.pyansys.com and is
+Documentation for PyMAPDL is hosted at mapdldocs.pyansys.com and is
 automatically built and deployed using the GitHub Actions.  You can
 build and verify the html documentation locally by install ``sphinx``
 and the other documentation build dependencies by running the
@@ -290,17 +290,17 @@ Next, if running Linux/Mac OS, build the documentation with:
 
 .. code::
 
-    make -C docs html
+    make -C doc html
 
 Otherwise, if running Windows, build the documentation by running:
 
 .. code::
 
-   cd docs
+   cd doc
    make.bat html
 
 Upon the successful build of the documentation, you can open the local
-build by opening ``index.html`` at ``docs/build/html/`` with
+build by opening ``index.html`` at ``doc/build/html/`` with
 your browser.
 
 
@@ -369,7 +369,7 @@ cached.
 
     .. code::
 
-        cd docs
+        cd doc
         make clean  # deletes the sphinx-gallery cache
         make html -b linkcheck
 
