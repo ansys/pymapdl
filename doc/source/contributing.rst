@@ -178,7 +178,6 @@ discussions depending on what is decided, but general Q&A content
 should start as discussions where possible.
 
 .. note::
-
     The discussions feature is still in beta on GitHub, so this may
     change in the future.
 
@@ -477,5 +476,4 @@ should not wait until a minor release.  The steps for a patch release
    version number (see above for the correct steps).
 
 4. If deemed necessary a release notes page.
-
 
