@@ -139,7 +139,7 @@ section <#creating-a-new-pull-request>`__.
 
 Making Issues
 ~~~~~~~~~~~~~
-Should you come across a bug in pyansys or otherwise encounter some
+Should you come across a bug in ``pymapdl`` or otherwise encounter some
 unexpected behaviour you should create an "issue" regarding it.
 Issues are used when developing to keep track of what is being
 worked on at any one time, and by who. We have two issue templates
@@ -477,6 +477,5 @@ should not wait until a minor release.  The steps for a patch release
    version number (see above for the correct steps).
 
 4. If deemed necessary a release notes page.
-
 
 
