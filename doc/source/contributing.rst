@@ -139,7 +139,7 @@ section <#creating-a-new-pull-request>`__.
 
 Making Issues
 ~~~~~~~~~~~~~
-Should you come across a bug in ``pymapdl`` or otherwise encounter some
+Should you come across a bug in ``PyMAPDLl`` or otherwise encounter some
 unexpected behaviour you should create an "issue" regarding it. Issues are
 created and submitted `here <https://github.com/pyansys/pymapdl/issues>`_.
 Issues are used when developing to keep track of what is being
@@ -174,7 +174,7 @@ keep track of what is being done and what needs to be done.
 Discussions
 ~~~~~~~~~~~
 
-General questions about pyansys should go in the
+General questions about PyMAPDL should go in the
 `discussions tab <https://github.com/pyansys/pymapdl/discussions>`_ on
 the repo rather than as issues themselves. Issues can be spun out of
 discussions depending on what is decided, but general Q&A content
@@ -193,7 +193,7 @@ merge to `main`.  This will automatically run continuous
 integration (CI) testing and verify your changes will work across all
 supported platforms.
 
-For code verification, someone from the pyansys developers team will
+For code verification, someone from the PyMAPDL developers team will
 review your code to verify your code meets our our standards.  Once
 approved, if you have write permission you may merge the branch.  If
 you don't have write permission, the reviewer or someone else with
