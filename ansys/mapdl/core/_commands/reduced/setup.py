@@ -1,43 +1,44 @@
-def rmresume(self, fname="", ext="", **kwargs):
-    """Resumes ROM data from a file.
+class Setup:
 
-    APDL Command: RMRESUME
+    def rmresume(self, fname="", ext="", **kwargs):
+        """Resumes ROM data from a file.
 
-    Parameters
-    ----------
-    fname
-        Name and directory path of the ROM database file (248 character
-        maximum). Default to Jobname.
+        APDL Command: RMRESUME
 
-    ext
-        Extension of the ROM database file. Default to .rom.
+        Parameters
+        ----------
+        fname
+            Name and directory path of the ROM database file (248 character
+            maximum). Default to Jobname.
 
-    Notes
-    -----
-    Distributed ANSYS Restriction: This command is not supported in
-    Distributed ANSYS.
-    """
-    command = f"RMRESUME,{fname},{ext}"
-    return self.run(command, **kwargs)
+        ext
+            Extension of the ROM database file. Default to .rom.
 
+        Notes
+        -----
+        Distributed ANSYS Restriction: This command is not supported in
+        Distributed ANSYS.
+        """
+        command = f"RMRESUME,{fname},{ext}"
+        return self.run(command, **kwargs)
 
-def rmsave(self, fname="", ext="", **kwargs):
-    """Saves ROM data to file.
+    def rmsave(self, fname="", ext="", **kwargs):
+        """Saves ROM data to file.
 
-    APDL Command: RMSAVE
+        APDL Command: RMSAVE
 
-    Parameters
-    ----------
-    fname
-        Name and directory path of the ROM database file. Default to
-        Jobname.
+        Parameters
+        ----------
+        fname
+            Name and directory path of the ROM database file. Default to
+            Jobname.
 
-    ext
-        Extension of the ROM database file. Default to .rom.
+        ext
+            Extension of the ROM database file. Default to .rom.
 
-    Notes
-    -----
-    Distributed ANSYS Restriction: This command is not supported in
-    Distributed ANSYS.
-    """
-    return self.run(f"RMSAVE,{fname},{ext}", **kwargs)
+        Notes
+        -----
+        Distributed ANSYS Restriction: This command is not supported in
+        Distributed ANSYS.
+        """
+        return self.run(f"RMSAVE,{fname},{ext}", **kwargs)

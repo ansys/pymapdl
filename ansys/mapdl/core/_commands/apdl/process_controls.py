@@ -1,24 +1,26 @@
-def wait(self, dtime="", **kwargs):
-    """APDL Command: /WAIT
+class ProcessControls:
 
-    Causes a delay before the reading of the next command.
+    def wait(self, dtime="", **kwargs):
+        """APDL Command: /WAIT
 
-    Parameters
-    ----------
-    dtime
-        Time delay (in seconds). Maximum time delay is 59 seconds.
+        Causes a delay before the reading of the next command.
 
-    Notes
-    -----
-    You should consider using ``time.sleep(dtime)``
+        Parameters
+        ----------
+        dtime
+            Time delay (in seconds). Maximum time delay is 59 seconds.
 
-    The command following the /WAIT will not be processed until the
-    specified wait time increment has elapsed.  Useful when reading from a
-    prepared input file to cause a pause, for example, after a display
-    command so that the display can be reviewed for a period of time.
-    Another "wait" feature is available via the *ASK command.
+        Notes
+        -----
+        You should consider using ``time.sleep(dtime)``
 
-    This command is valid in any processor.
-    """
-    command = f"/WAIT,{dtime}"
-    return self.run(command, **kwargs)
+        The command following the /WAIT will not be processed until the
+        specified wait time increment has elapsed.  Useful when reading from a
+        prepared input file to cause a pause, for example, after a display
+        command so that the display can be reviewed for a period of time.
+        Another "wait" feature is available via the *ASK command.
+
+        This command is valid in any processor.
+        """
+        command = f"/WAIT,{dtime}"
+        return self.run(command, **kwargs)

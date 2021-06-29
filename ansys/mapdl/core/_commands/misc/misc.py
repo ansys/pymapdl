@@ -1,32 +1,34 @@
 """Miscellaneous methods not covered in the documentation."""
 
 
-def verify(self, case='', level='', **kwargs):
-    """Enter the verification run mode.
+class Misc:
 
-    .. note::
-       This command is only valid at the ``/BEGIN`` level, obtained
-       with ``mapdl.finish()``.
+    def verify(self, case='', level='', **kwargs):
+        """Enter the verification run mode.
 
-    Parameters
-    ----------
-    case : str, optional
-        Optional title of the verification manual file.  Also accepts
-        ``'OFF'`` to disable the verification run mode.
+        .. note::
+           This command is only valid at the ``/BEGIN`` level, obtained
+           with ``mapdl.finish()``.
 
-    level : int, optional
-        Verification level ranging from 1 to 6 defaulting to 4.
+        Parameters
+        ----------
+        case : str, optional
+            Optional title of the verification manual file.  Also accepts
+            ``'OFF'`` to disable the verification run mode.
 
-    Returns
-    --------
+        level : int, optional
+            Verification level ranging from 1 to 6 defaulting to 4.
 
-    Examples
-    --------
-    Enter the verification routine with the default option.
+        Returns
+        --------
 
-    >>> mapdl.finish()
-    >>> mapdl.verify('VM1')
-    '*** VERIFICATION RUN - CASE VM1                              ***  OPTION=  4'
+        Examples
+        --------
+        Enter the verification routine with the default option.
 
-    """
-    return self.run(f'/VERIFY,{case},{level}', **kwargs)
+        >>> mapdl.finish()
+        >>> mapdl.verify('VM1')
+        '*** VERIFICATION RUN - CASE VM1                              ***  OPTION=  4'
+
+        """
+        return self.run(f'/VERIFY,{case},{level}', **kwargs)

@@ -1,692 +1,683 @@
-def an3d(self, kywrd="", key="", **kwargs):
-    """Specifies 3-D annotation functions
+class Annotation:
 
-    APDL Command: /AN3D
+    def an3d(self, kywrd="", key="", **kwargs):
+        """Specifies 3-D annotation functions
 
-    Parameters
-    ----------
-    num
-        Unique number assigned as each annotation is applied to a model.
-        These numbers are applied sequentially, although when an annotation
-        entity is deleted, its number is reassigned.
+        APDL Command: /AN3D
 
-    type
-        Annotation internal type number (101 = text, 102 = line, 103 =
-        point, 104 = area, 105 = arrow, 106 = symbol, 108 = bitmap).
+        Parameters
+        ----------
+        num
+            Unique number assigned as each annotation is applied to a model.
+            These numbers are applied sequentially, although when an annotation
+            entity is deleted, its number is reassigned.
 
-    xhot, yhot, zhot
-        X, Y, Z coordinates for hot spot location.
+        type
+            Annotation internal type number (101 = text, 102 = line, 103 =
+            point, 104 = area, 105 = arrow, 106 = symbol, 108 = bitmap).
 
-    Notes
-    -----
-    Because 3-D annotation is applied in relation to the XYZ coordinates of
-    the anchor, you can transform your model, and the annotation will
-    maintain the spatial relationship with the model. This works within
-    reason, and there are instances where changing the perspective or the
-    size of the model will change the apparent relationship between the
-    annotation and the model.
+        xhot, yhot, zhot
+            X, Y, Z coordinates for hot spot location.
 
-     The overall 3-D dimensions of your model are defined by a bounding
-    box.  If portions of your model's bounding box lie outside of the
-    visible area of your graphics window (if you are zoomed in on a
-    specific area of your model), it can affect the placement of your 3-D
-    annotations.  Zooming out will usually overcome this problem.
+        Notes
+        -----
+        Because 3-D annotation is applied in relation to the XYZ coordinates of
+        the anchor, you can transform your model, and the annotation will
+        maintain the spatial relationship with the model. This works within
+        reason, and there are instances where changing the perspective or the
+        size of the model will change the apparent relationship between the
+        annotation and the model.
 
-    3-D annotation is valid for the Cartesian (CSYS,0) coordinate system
-    only. If you want to annotate a model you created in another coordinate
-    system, use 2-D annotation (note that 2-D annotations do not remain
-    anchored for dynamic rotations or transformations).
+         The overall 3-D dimensions of your model are defined by a bounding
+        box.  If portions of your model's bounding box lie outside of the
+        visible area of your graphics window (if you are zoomed in on a
+        specific area of your model), it can affect the placement of your 3-D
+        annotations.  Zooming out will usually overcome this problem.
 
-    When you apply user defined bitmaps, the size of the annotation can
-    vary. Use the options menu of the 3-D annotation widget to adjust the
-    size and placement of your bitmaps.
+        3-D annotation is valid for the Cartesian (CSYS,0) coordinate system
+        only. If you want to annotate a model you created in another coordinate
+        system, use 2-D annotation (note that 2-D annotations do not remain
+        anchored for dynamic rotations or transformations).
 
-    You cannot use the "!" and "$" characters in ANSYS text annotation.
+        When you apply user defined bitmaps, the size of the annotation can
+        vary. Use the options menu of the 3-D annotation widget to adjust the
+        size and placement of your bitmaps.
 
-    The GUI generates this command during 3-D annotation operations and
-    inserts the command into the log file (Jobname.LOG). You should NOT
-    type this command directly during an ANSYS session (although the
-    command can be included in an input file for batch input or for use
-    with the /INPUT command).
-    """
-    command = f"/AN3D,{kywrd},{key}"
-    return self.run(command, **kwargs)
+        You cannot use the "!" and "$" characters in ANSYS text annotation.
 
+        The GUI generates this command during 3-D annotation operations and
+        inserts the command into the log file (Jobname.LOG). You should NOT
+        type this command directly during an ANSYS session (although the
+        command can be included in an input file for batch input or for use
+        with the /INPUT command).
+        """
+        command = f"/AN3D,{kywrd},{key}"
+        return self.run(command, **kwargs)
 
-def annot(self, lab="", val1="", val2="", **kwargs):
-    """Activates graphics for annotating displays (GUI).
+    def annot(self, lab="", val1="", val2="", **kwargs):
+        """Activates graphics for annotating displays (GUI).
 
-    APDL Command: /ANNOT
+        APDL Command: /ANNOT
 
-    Parameters
-    ----------
-    lab
-        Annotation control key:
+        Parameters
+        ----------
+        lab
+            Annotation control key:
 
-        OFF - Turns off annotation for each subsequent display (default).
+            OFF - Turns off annotation for each subsequent display (default).
 
-        ON - Turns on annotation for each subsequent display.
+            ON - Turns on annotation for each subsequent display.
 
-        DELE - Deletes all annotation.
+            DELE - Deletes all annotation.
 
-        SAVE - Saves annotation on a file.  Use VAL1 for file name (defaults to Jobname) and
-               VAL2 for the extension (defaults to ANO).
+            SAVE - Saves annotation on a file.  Use VAL1 for file name (defaults to Jobname) and
+                   VAL2 for the extension (defaults to ANO).
 
-        SCALE - Sets annotation scale factor (direct input only).  Use VAL1 for value (0.1 to
-                10.0) (defaults to 1.0).
+            SCALE - Sets annotation scale factor (direct input only).  Use VAL1 for value (0.1 to
+                    10.0) (defaults to 1.0).
 
-        XORIG - Sets the annotation x origin (direct input only).  Use VAL1 for value (-3.0 to
-                3.0).
+            XORIG - Sets the annotation x origin (direct input only).  Use VAL1 for value (-3.0 to
+                    3.0).
 
-        YORIG - Sets annotation y origin (direct input only).  Use VAL1 for value (-3.0 to
-                3.0).
+            YORIG - Sets annotation y origin (direct input only).  Use VAL1 for value (-3.0 to
+                    3.0).
 
-        SNAP - Sets annotation snap (menu button input only).  Use VAL1 for value (0.002 to
-               0.2) (defaults to 0.002).
+            SNAP - Sets annotation snap (menu button input only).  Use VAL1 for value (0.002 to
+                   0.2) (defaults to 0.002).
 
-        STAT - Displays current annotation status.
+            STAT - Displays current annotation status.
 
-        DEFA - Sets annotation specifications to the default values.
+            DEFA - Sets annotation specifications to the default values.
 
-        REFR - Redisplays annotation graphics.
+            REFR - Redisplays annotation graphics.
 
-        TMOD - Sets the annotation text mode. If VAL1 = 1, annotation text will be drawn in
-               scalable bitmap fonts (default). If VAL1 = 0, annotation
-               text will be drawn with stroke text.
+            TMOD - Sets the annotation text mode. If VAL1 = 1, annotation text will be drawn in
+                   scalable bitmap fonts (default). If VAL1 = 0, annotation
+                   text will be drawn with stroke text.
 
-    val1
-        Value (or file name) as noted with label above.
+        val1
+            Value (or file name) as noted with label above.
 
-    val2
-        Value (or file name extension) as noted with label above.
+        val2
+            Value (or file name extension) as noted with label above.
 
-    Notes
-    -----
-    This is a command generated by the GUI and will appear in the log file
-    (Jobname.LOG) if annotation is used.  This command is not intended to
-    be typed in directly in an ANSYS session (although it can be included
-    in an input file for batch input or for use with the /INPUT command).
+        Notes
+        -----
+        This is a command generated by the GUI and will appear in the log file
+        (Jobname.LOG) if annotation is used.  This command is not intended to
+        be typed in directly in an ANSYS session (although it can be included
+        in an input file for batch input or for use with the /INPUT command).
 
-    You cannot use the "!" and "$" characters in ANSYS text annotation.
+        You cannot use the "!" and "$" characters in ANSYS text annotation.
 
-    /ANNOT activates annotation graphics for adding annotation to displays.
-    Commands representing the annotation instructions are automatically
-    created by the annotation functions in the GUI and written to
-    Jobname.LOG.  The annotation commands are /ANNOT, /ANUM, /TLABEL,
-    /LINE, /LARC, /LSYMBOL, /POLYGON, /PMORE, /PCIRCLE, /PWEDGE, /TSPEC,
-    /LSPEC, and /PSPEC.  Annotation graphics are relative to the full
-    Graphics Window and are not affected by ANSYS window-specific commands
-    (/WINDOW, /VIEW, etc.).
+        /ANNOT activates annotation graphics for adding annotation to displays.
+        Commands representing the annotation instructions are automatically
+        created by the annotation functions in the GUI and written to
+        Jobname.LOG.  The annotation commands are /ANNOT, /ANUM, /TLABEL,
+        /LINE, /LARC, /LSYMBOL, /POLYGON, /PMORE, /PCIRCLE, /PWEDGE, /TSPEC,
+        /LSPEC, and /PSPEC.  Annotation graphics are relative to the full
+        Graphics Window and are not affected by ANSYS window-specific commands
+        (/WINDOW, /VIEW, etc.).
 
-    This command is valid in any processor.
-    """
-    command = f"/ANNOT,{lab},{val1},{val2}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/ANNOT,{lab},{val1},{val2}"
+        return self.run(command, **kwargs)
 
+    def anum(self, num="", type_="", xhot="", yhot="", **kwargs):
+        """Specifies the annotation number, type, and hot spot (GUI).
 
-def anum(self, num="", type_="", xhot="", yhot="", **kwargs):
-    """Specifies the annotation number, type, and hot spot (GUI).
+        APDL Command: /ANUM
 
-    APDL Command: /ANUM
+        Parameters
+        ----------
+        num
+            Annotation number.  ANSYS automatically assigns the lowest
+            available number.  You cannot assign a higher number if a lower
+            number is available; ANSYS will substitute the lowest available
+            number in place of any user-specified higher number.
 
-    Parameters
-    ----------
-    num
-        Annotation number.  ANSYS automatically assigns the lowest
-        available number.  You cannot assign a higher number if a lower
-        number is available; ANSYS will substitute the lowest available
-        number in place of any user-specified higher number.
+        type\_
+            Annotation internal type number.  If TYPE = DELE, delete annotation
+            NUM.
 
-    type\_
-        Annotation internal type number.  If TYPE = DELE, delete annotation
-        NUM.
+            1 - Text
 
-        1 - Text
+            2 - Block text (not available in GUI)
 
-        2 - Block text (not available in GUI)
+            3 - Dimensions
 
-        3 - Dimensions
+            4 - Lines
 
-        4 - Lines
+            5 - Rectangles
 
-        5 - Rectangles
+            6 - Circles
 
-        6 - Circles
+            7 - Polygons
 
-        7 - Polygons
+            8 - Arcs
 
-        8 - Arcs
+            9 - Wedges, pies
 
-        9 - Wedges, pies
+            11 - Symbols
 
-        11 - Symbols
+            12 - Arrows
 
-        12 - Arrows
+            13 - Bitmap
 
-        13 - Bitmap
+        xhot
+            X hot spot (-1.0 < X < 2.0).  Used for menu button item delete.
 
-    xhot
-        X hot spot (-1.0 < X < 2.0).  Used for menu button item delete.
+        yhot
+            Y hot spot (-1.0 < Y < 1.0).  Used for menu button item delete.
 
-    yhot
-        Y hot spot (-1.0 < Y < 1.0).  Used for menu button item delete.
+        Notes
+        -----
+        This is a command generated by the GUI and will appear in the log file
+        (Jobname.LOG) if annotation is used.  This command is not intended to
+        be typed in directly in an ANSYS session (although it can be included
+        in an input file for batch input or for use with the /INPUT command).
 
-    Notes
-    -----
-    This is a command generated by the GUI and will appear in the log file
-    (Jobname.LOG) if annotation is used.  This command is not intended to
-    be typed in directly in an ANSYS session (although it can be included
-    in an input file for batch input or for use with the /INPUT command).
+        Type 13 (bitmap) annotation applies user defined bitmaps defined using
+        the FILE option of the /TXTRE command.
 
-    Type 13 (bitmap) annotation applies user defined bitmaps defined using
-    the FILE option of the /TXTRE command.
+        This command is valid in any processor.
+        """
+        command = f"/ANUM,{num},{type_},{xhot},{yhot}"
+        return self.run(command, **kwargs)
 
-    This command is valid in any processor.
-    """
-    command = f"/ANUM,{num},{type_},{xhot},{yhot}"
-    return self.run(command, **kwargs)
+    def lspec(self, lcolor="", linstl="", xlnwid="", **kwargs):
+        """Specifies annotation line attributes (GUI).
 
+        APDL Command: /LSPEC
 
-def lspec(self, lcolor="", linstl="", xlnwid="", **kwargs):
-    """Specifies annotation line attributes (GUI).
+        Parameters
+        ----------
+        lcolor
+            Line color:
 
-    APDL Command: /LSPEC
+            0 - Black
 
-    Parameters
-    ----------
-    lcolor
-        Line color:
+            1 - Red-Magenta
 
-        0 - Black
+            2 - Magenta
 
-        1 - Red-Magenta
+            3 - Blue-Magenta
 
-        2 - Magenta
+            4 - Blue
 
-        3 - Blue-Magenta
+            5 - Cyan-Blue
 
-        4 - Blue
+            6 - Cyan
 
-        5 - Cyan-Blue
+            7 - Green-Cyan
 
-        6 - Cyan
+            8 - Green
 
-        7 - Green-Cyan
+            9 - Yellow-Green
 
-        8 - Green
+            10 - Yellow
 
-        9 - Yellow-Green
+            11 - Orange
 
-        10 - Yellow
+            12 - Red
 
-        11 - Orange
+            13 - Dark Gray
 
-        12 - Red
+            14 - Light Gray
 
-        13 - Dark Gray
+            15 - White
 
-        14 - Light Gray
+        linstl
+            Line style:
 
-        15 - White
+            0 - Solid line.
 
-    linstl
-        Line style:
+            1 - Dashed line.
 
-        0 - Solid line.
+        xlnwid
+            Line width multiplier (1.0 to 20.0).  Defaults to 1.0.
 
-        1 - Dashed line.
+        Notes
+        -----
+        Specifies annotation line attributes to control certain characteristics
+        of the lines created via the /LINE, /LARC, /LSYMBOL, /POLYGON, /PMORE,
+        /PCIRCLE, and /PWEDGE commands.  This is a command generated by the
+        Graphical User Interface (GUI) and will appear in the log file
+        (Jobname.LOG) if annotation is used.  This command is not intended to
+        be typed in directly in an ANSYS session (although it can be included
+        in an input file for batch input or for use with the /INPUT command).
 
-    xlnwid
-        Line width multiplier (1.0 to 20.0).  Defaults to 1.0.
+        This command is valid in any processor.
+        """
+        command = f"/LSPEC,{lcolor},{linstl},{xlnwid}"
+        return self.run(command, **kwargs)
 
-    Notes
-    -----
-    Specifies annotation line attributes to control certain characteristics
-    of the lines created via the /LINE, /LARC, /LSYMBOL, /POLYGON, /PMORE,
-    /PCIRCLE, and /PWEDGE commands.  This is a command generated by the
-    Graphical User Interface (GUI) and will appear in the log file
-    (Jobname.LOG) if annotation is used.  This command is not intended to
-    be typed in directly in an ANSYS session (although it can be included
-    in an input file for batch input or for use with the /INPUT command).
+    def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="",
+                **kwargs):
+        """Creates annotation symbols (GUI).
 
-    This command is valid in any processor.
-    """
-    command = f"/LSPEC,{lcolor},{linstl},{xlnwid}"
-    return self.run(command, **kwargs)
+        APDL Command: /LSYMBOL
 
+        Parameters
+        ----------
+        x
+            X location for symbol (-1.0 < X < 2.0).
 
-def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="",
-            **kwargs):
-    """Creates annotation symbols (GUI).
+        y
+            Y location for symbol (-1.0 < Y < 1.0).
 
-    APDL Command: /LSYMBOL
+        symang
+            Symbol orientation angle.
 
-    Parameters
-    ----------
-    x
-        X location for symbol (-1.0 < X < 2.0).
+        symtyp
+            Symbol type:
 
-    y
-        Y location for symbol (-1.0 < Y < 1.0).
+            1 - Arrow.
 
-    symang
-        Symbol orientation angle.
+            2 - Tee.
 
-    symtyp
-        Symbol type:
+            3 - Circle.
 
-        1 - Arrow.
+            4 - Triangle.
 
-        2 - Tee.
+            5 - Star.
 
-        3 - Circle.
+        symsiz
+            Symbol size multiplier (0.1 to 20.0).  Defaults to 1.0.
 
-        4 - Triangle.
+        keybmp
+            If KEYBMP = 1, the annotation is a bitmap. SYMTYP will then be a
+            number from 1-99, indicating the bitmap type (see notes), and X and
+            Y will define the lower left corner of the bitmap. The SYMANG,
+            SYMSIZarguments are ignored. If KEYBMP = 0, or blank, then the
+            argument definitions above apply.
 
-        5 - Star.
+        Notes
+        -----
+        Defines annotation symbols to be written directly onto the display at a
+        specified location.  This is a command generated by the GUI and will
+        appear in the log file (Jobname.LOG) if annotation is used.  This
+        command is not intended to be typed in directly in an ANSYS session
+        (although it can be included in an input file for batch input or for
+        use with the /INPUT command).
 
-    symsiz
-        Symbol size multiplier (0.1 to 20.0).  Defaults to 1.0.
+        All symbols are shown on subsequent displays unless the annotation is
+        turned off or deleted.  Use the /LSPEC command to set the attributes of
+        the symbol.
 
-    keybmp
-        If KEYBMP = 1, the annotation is a bitmap. SYMTYP will then be a
-        number from 1-99, indicating the bitmap type (see notes), and X and
-        Y will define the lower left corner of the bitmap. The SYMANG,
-        SYMSIZarguments are ignored. If KEYBMP = 0, or blank, then the
-        argument definitions above apply.
+        The KEYBMP argument reads the symtype argument to determine which
+        bitmap to insert. This bitmap is defined by an integer between 1 and
+        99. Numbers 1 through 40 correspond to the standard texture values
+        found in the /TXTRE  command, while numbers 51 through 99 correspond to
+        user supplied bitmaps, as defined using the Filename option of the
+        /TXTRE command. Numbers 51 through 57 are predefined (the logos, clamps
+        and arrows available from the GUI) but can be overridden. Numbers 41
+        through 50 are reserved.
 
-    Notes
-    -----
-    Defines annotation symbols to be written directly onto the display at a
-    specified location.  This is a command generated by the GUI and will
-    appear in the log file (Jobname.LOG) if annotation is used.  This
-    command is not intended to be typed in directly in an ANSYS session
-    (although it can be included in an input file for batch input or for
-    use with the /INPUT command).
+        This command is valid in any processor.
+        """
+        command = f"/LSYMBOL,{x},{y},{symang},{symtyp},{symsiz},{keybmp}"
+        return self.run(command, **kwargs)
 
-    All symbols are shown on subsequent displays unless the annotation is
-    turned off or deleted.  Use the /LSPEC command to set the attributes of
-    the symbol.
+    def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
+        """Creates an annotation circle (GUI).
 
-    The KEYBMP argument reads the symtype argument to determine which
-    bitmap to insert. This bitmap is defined by an integer between 1 and
-    99. Numbers 1 through 40 correspond to the standard texture values
-    found in the /TXTRE  command, while numbers 51 through 99 correspond to
-    user supplied bitmaps, as defined using the Filename option of the
-    /TXTRE command. Numbers 51 through 57 are predefined (the logos, clamps
-    and arrows available from the GUI) but can be overridden. Numbers 41
-    through 50 are reserved.
+        APDL Command: /PCIRCLE
 
-    This command is valid in any processor.
-    """
-    command = f"/LSYMBOL,{x},{y},{symang},{symtyp},{symsiz},{keybmp}"
-    return self.run(command, **kwargs)
+        Parameters
+        ----------
+        xcentr
+            Circle X center location (-1.0 < X < 2.0).
 
+        ycentr
+            Circle Y center location (-1.0 < Y < 1.0).
 
-def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
-    """Creates an annotation circle (GUI).
+        xlrad
+            Circle radius length.
 
-    APDL Command: /PCIRCLE
+        Notes
+        -----
+        Creates an annotation circle to be written directly onto the display at
+        a specified location.  This is a command generated by the Graphical
+        User Interface (GUI) and will appear in the log file (Jobname.LOG) if
+        annotation is used.  This command is not intended to be typed in
+        directly in an ANSYS session (although it can be included in an input
+        file for batch input or for use with the /INPUT command).
 
-    Parameters
-    ----------
-    xcentr
-        Circle X center location (-1.0 < X < 2.0).
+        All circles are shown on subsequent displays unless the annotation is
+        turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
+        the attributes of the circle.
 
-    ycentr
-        Circle Y center location (-1.0 < Y < 1.0).
+        This command is valid in any processor.
+        """
+        command = f"/PCIRCLE,{xcentr},{ycentr},{xlrad}"
+        return self.run(command, **kwargs)
 
-    xlrad
-        Circle radius length.
+    def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
+              **kwargs):
+        """Creates an annotation polygon (GUI).
 
-    Notes
-    -----
-    Creates an annotation circle to be written directly onto the display at
-    a specified location.  This is a command generated by the Graphical
-    User Interface (GUI) and will appear in the log file (Jobname.LOG) if
-    annotation is used.  This command is not intended to be typed in
-    directly in an ANSYS session (although it can be included in an input
-    file for batch input or for use with the /INPUT command).
+        APDL Command: /PMORE
 
-    All circles are shown on subsequent displays unless the annotation is
-    turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
-    the attributes of the circle.
+        Parameters
+        ----------
+        x5
+            X location for vertex 5 of polygon (-1.0 < X < 2.0).
 
-    This command is valid in any processor.
-    """
-    command = f"/PCIRCLE,{xcentr},{ycentr},{xlrad}"
-    return self.run(command, **kwargs)
+        y5
+            Y location for vertex 5 of polygon (-1.0 < Y < 1.0).
 
+        x6
+            X location for vertex 6 of polygon (-1.0 < X < 2.0).
 
-def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
-          **kwargs):
-    """Creates an annotation polygon (GUI).
+        y6
+            Y location for vertex 6 of polygon (-1.0 < Y < 1.0).
 
-    APDL Command: /PMORE
+        x7
+            X location for vertex 7 of polygon (-1.0 < X < 2.0).
 
-    Parameters
-    ----------
-    x5
-        X location for vertex 5 of polygon (-1.0 < X < 2.0).
+        y7
+            Y location for vertex 7 of polygon (-1.0 < Y < 1.0).
 
-    y5
-        Y location for vertex 5 of polygon (-1.0 < Y < 1.0).
+        x8
+            X location for vertex 8 of polygon (-1.0 < X < 2.0).
 
-    x6
-        X location for vertex 6 of polygon (-1.0 < X < 2.0).
+        y8
+            Y location for vertex 8 of polygon (-1.0 < Y < 1.0).
 
-    y6
-        Y location for vertex 6 of polygon (-1.0 < Y < 1.0).
+        Notes
+        -----
+        Defines the 5th through 8th vertices of an annotation polygon
+        [/POLYGON].  This is a command generated by the Graphical User
+        Interface (GUI) and will appear in the log file (Jobname.LOG) if
+        annotation is used.  This command is not intended to be typed in
+        directly in an ANSYS session (although it can be included in an input
+        file for batch input or for use with the /INPUT command).
 
-    x7
-        X location for vertex 7 of polygon (-1.0 < X < 2.0).
+        This command is valid in any processor.
+        """
+        command = f"/PMORE,,{x5},{y5},{x6},{y6},{x7},{y7},{x8},{y8}"
+        return self.run(command, **kwargs)
 
-    y7
-        Y location for vertex 7 of polygon (-1.0 < Y < 1.0).
+    def polygon(self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="",
+                x4="", y4="", **kwargs):
+        """Creates annotation polygons (GUI).
 
-    x8
-        X location for vertex 8 of polygon (-1.0 < X < 2.0).
+        APDL Command: /POLYGON
 
-    y8
-        Y location for vertex 8 of polygon (-1.0 < Y < 1.0).
+        Parameters
+        ----------
+        nvert
+            Number of vertices of polygon (3  NVERT   8).  Use /PMORE for
+            polygons with more than 4 vertices.
 
-    Notes
-    -----
-    Defines the 5th through 8th vertices of an annotation polygon
-    [/POLYGON].  This is a command generated by the Graphical User
-    Interface (GUI) and will appear in the log file (Jobname.LOG) if
-    annotation is used.  This command is not intended to be typed in
-    directly in an ANSYS session (although it can be included in an input
-    file for batch input or for use with the /INPUT command).
+        x1
+            X location for vertex 1 of polygon (-1.0 < X < 2.0).
 
-    This command is valid in any processor.
-    """
-    command = f"/PMORE,,{x5},{y5},{x6},{y6},{x7},{y7},{x8},{y8}"
-    return self.run(command, **kwargs)
+        y1
+            Y location for vertex 1 of polygon (-1.0 < Y < 1.0).
 
+        x2
+            X location for vertex 2 of polygon (-1.0 < X < 2.0).
 
-def polygon(self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="",
-            x4="", y4="", **kwargs):
-    """Creates annotation polygons (GUI).
+        y2
+            Y location for vertex 2 of polygon (-1.0 < Y < 1.0).
 
-    APDL Command: /POLYGON
+        x3
+            X location for vertex 3 of polygon (-1.0 < X < 2.0).
 
-    Parameters
-    ----------
-    nvert
-        Number of vertices of polygon (3  NVERT   8).  Use /PMORE for
-        polygons with more than 4 vertices.
+        y3
+            Y location for vertex 3 of polygon (-1.0 < Y < 1.0).
 
-    x1
-        X location for vertex 1 of polygon (-1.0 < X < 2.0).
+        x4
+            X location for vertex 4 of polygon (-1.0 < X < 2.0).
 
-    y1
-        Y location for vertex 1 of polygon (-1.0 < Y < 1.0).
+        y4
+            Y location for vertex 4 of polygon (-1.0 < Y < 1.0).
 
-    x2
-        X location for vertex 2 of polygon (-1.0 < X < 2.0).
+        Notes
+        -----
+        Creates annotation polygons to be written directly onto the display at
+        a specified location.  This is a command generated by the Graphical
+        User Interface (GUI) and will appear in the log file (Jobname.LOG) if
+        annotation is used.  This command is not intended to be typed in
+        directly in an ANSYS session (although it can be included in an input
+        file for batch input or for use with the /INPUT command).
 
-    y2
-        Y location for vertex 2 of polygon (-1.0 < Y < 1.0).
+        All polygons are shown on subsequent displays unless the annotation is
+        turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
+        the attributes of the polygon.  Use the /PMORE command to define the
+        5th through 8th vertices of the polygon.
 
-    x3
-        X location for vertex 3 of polygon (-1.0 < X < 2.0).
+        This command is valid in any processor.
+        """
+        command = f"/POLYGON,{nvert},{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
+        return self.run(command, **kwargs)
 
-    y3
-        Y location for vertex 3 of polygon (-1.0 < Y < 1.0).
+    def pspec(self, pcolor="", kfill="", kbordr="", **kwargs):
+        """Creates annotation polygon attributes (GUI).
 
-    x4
-        X location for vertex 4 of polygon (-1.0 < X < 2.0).
+        APDL Command: /PSPEC
 
-    y4
-        Y location for vertex 4 of polygon (-1.0 < Y < 1.0).
+        Parameters
+        ----------
+        pcolor
+            Polygon color (0  PCOLOR   15):
 
-    Notes
-    -----
-    Creates annotation polygons to be written directly onto the display at
-    a specified location.  This is a command generated by the Graphical
-    User Interface (GUI) and will appear in the log file (Jobname.LOG) if
-    annotation is used.  This command is not intended to be typed in
-    directly in an ANSYS session (although it can be included in an input
-    file for batch input or for use with the /INPUT command).
+            0 - Black.
 
-    All polygons are shown on subsequent displays unless the annotation is
-    turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
-    the attributes of the polygon.  Use the /PMORE command to define the
-    5th through 8th vertices of the polygon.
+            1 - Red-Magenta.
 
-    This command is valid in any processor.
-    """
-    command = f"/POLYGON,{nvert},{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
-    return self.run(command, **kwargs)
+            2 - Magenta.
 
+            3 - Blue-Magenta.
 
-def pspec(self, pcolor="", kfill="", kbordr="", **kwargs):
-    """Creates annotation polygon attributes (GUI).
+            4 - Blue.
 
-    APDL Command: /PSPEC
+            5 - Cyan-Blue.
 
-    Parameters
-    ----------
-    pcolor
-        Polygon color (0  PCOLOR   15):
+            6 - Cyan.
 
-        0 - Black.
+            7 - Green-Cyan.
 
-        1 - Red-Magenta.
+            8 - Green.
 
-        2 - Magenta.
+            9 - Yellow-Green.
 
-        3 - Blue-Magenta.
+            10 - Yellow.
 
-        4 - Blue.
+            11 - Orange.
 
-        5 - Cyan-Blue.
+            12 - Red.
 
-        6 - Cyan.
+            13 - Dark Gray.
 
-        7 - Green-Cyan.
+            14 - Light Gray.
 
-        8 - Green.
+            15 - White.
 
-        9 - Yellow-Green.
+        kfill
+            Polygon fill key:
 
-        10 - Yellow.
+            0 - Hollow polygon.
 
-        11 - Orange.
+            1 - Filled polygon.
 
-        12 - Red.
+        kbordr
+            Polygon border key:
 
-        13 - Dark Gray.
+            0 - No border.
 
-        14 - Light Gray.
+            1 - Border.
 
-        15 - White.
+        Notes
+        -----
+        Creates annotation polygon attributes to control certain
+        characteristics of the polygons created via the /POLYGON, /PMORE,
+        /PCIRCLE and /PWEDGE commands.  This is a command generated by the
+        Graphical User Interface (GUI) and will appear in the log file
+        (Jobname.LOG) if annotation is used.  This command is not intended to
+        be typed in directly in an ANSYS session (although it can be included
+        in an input file for batch input or for use with the /INPUT command).
 
-    kfill
-        Polygon fill key:
+        This command is valid in any processor.
+        """
+        command = f"/PSPEC,{pcolor},{kfill},{kbordr}"
+        return self.run(command, **kwargs)
 
-        0 - Hollow polygon.
+    def pwedge(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="",
+               **kwargs):
+        """Creates an annotation wedge (GUI).
 
-        1 - Filled polygon.
+        APDL Command: /PWEDGE
 
-    kbordr
-        Polygon border key:
+        Parameters
+        ----------
+        xcentr
+            Wedge X center location (-1.0 < X < 2.0).
 
-        0 - No border.
+        ycentr
+            Wedge Y center location (-1.0 < Y < 1.0).
 
-        1 - Border.
+        xlrad
+            Wedge radius length.
 
-    Notes
-    -----
-    Creates annotation polygon attributes to control certain
-    characteristics of the polygons created via the /POLYGON, /PMORE,
-    /PCIRCLE and /PWEDGE commands.  This is a command generated by the
-    Graphical User Interface (GUI) and will appear in the log file
-    (Jobname.LOG) if annotation is used.  This command is not intended to
-    be typed in directly in an ANSYS session (although it can be included
-    in an input file for batch input or for use with the /INPUT command).
+        angle1
+            Starting angle of wedge.
 
-    This command is valid in any processor.
-    """
-    command = f"/PSPEC,{pcolor},{kfill},{kbordr}"
-    return self.run(command, **kwargs)
+        angle2
+            Ending angle of wedge.  The wedge is drawn counterclockwise from
+            the starting angle, ANGLE1, to the ending angle, ANGLE2.
 
+        Notes
+        -----
+        Creates an annotation wedge to be written directly onto the display at
+        a specified location.  This is a command generated by the Graphical
+        User Interface (GUI) and will appear in the log file (Jobname.LOG) if
+        annotation is used.  This command is not intended to be typed in
+        directly in an ANSYS session (although it can be included in an input
+        file for batch input or for use with the /INPUT command).
 
-def pwedge(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="",
-           **kwargs):
-    """Creates an annotation wedge (GUI).
+        All wedges are shown on subsequent displays unless the annotation is
+        turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
+        the attributes of the wedge.
 
-    APDL Command: /PWEDGE
+        This command is valid in any processor.
+        """
+        command = f"/PWEDGE,{xcentr},{ycentr},{xlrad},{angle1},{angle2}"
+        return self.run(command, **kwargs)
 
-    Parameters
-    ----------
-    xcentr
-        Wedge X center location (-1.0 < X < 2.0).
+    def tlabel(self, xloc="", yloc="", text="", **kwargs):
+        """Creates annotation text (GUI).
 
-    ycentr
-        Wedge Y center location (-1.0 < Y < 1.0).
+        APDL Command: /TLABEL
 
-    xlrad
-        Wedge radius length.
+        Parameters
+        ----------
+        xloc
+            Text X starting location (-1.0 < X < 1.6).
 
-    angle1
-        Starting angle of wedge.
+        yloc
+            Text Y starting location (-1.0 < Y < 1.0).
 
-    angle2
-        Ending angle of wedge.  The wedge is drawn counterclockwise from
-        the starting angle, ANGLE1, to the ending angle, ANGLE2.
+        text
+            Text string (60 characters maximum).  Parameter substitution may be
+            forced within the text by enclosing the parameter name or
+            parametric expression within percent (%) signs.
 
-    Notes
-    -----
-    Creates an annotation wedge to be written directly onto the display at
-    a specified location.  This is a command generated by the Graphical
-    User Interface (GUI) and will appear in the log file (Jobname.LOG) if
-    annotation is used.  This command is not intended to be typed in
-    directly in an ANSYS session (although it can be included in an input
-    file for batch input or for use with the /INPUT command).
+        Notes
+        -----
+        Defines annotation text to be written directly onto the display at a
+        specified location.  This is a command generated by the Graphical User
+        Interface (GUI) and will appear in the log file (Jobname.LOG) if
+        annotation is used.  This command is not intended to be typed in
+        directly in an ANSYS session (although it can be included in an input
+        file for batch input or for use with the /INPUT command).
 
-    All wedges are shown on subsequent displays unless the annotation is
-    turned off or deleted.  Use the /LSPEC and the /PSPEC command to set
-    the attributes of the wedge.
+        All text is shown on subsequent displays unless the annotation is
+        turned off or deleted.  Use the /TSPEC command to set the attributes of
+        the text.
 
-    This command is valid in any processor.
-    """
-    command = f"/PWEDGE,{xcentr},{ycentr},{xlrad},{angle1},{angle2}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/TLABEL,{xloc},{yloc},{text}"
+        return self.run(command, **kwargs)
 
+    def tspec(self, tcolor="", tsize="", txthic="", pangle="", iangle="",
+              **kwargs):
+        """Creates annotation text attributes (GUI).
 
-def tlabel(self, xloc="", yloc="", text="", **kwargs):
-    """Creates annotation text (GUI).
+        APDL Command: /TSPEC
 
-    APDL Command: /TLABEL
+        Parameters
+        ----------
+        tcolor
+            Text color (0  TCOLOR   15):
 
-    Parameters
-    ----------
-    xloc
-        Text X starting location (-1.0 < X < 1.6).
+            0 - Black.
 
-    yloc
-        Text Y starting location (-1.0 < Y < 1.0).
+            1 - Red-Magenta.
 
-    text
-        Text string (60 characters maximum).  Parameter substitution may be
-        forced within the text by enclosing the parameter name or
-        parametric expression within percent (%) signs.
+            2 - Magenta.
 
-    Notes
-    -----
-    Defines annotation text to be written directly onto the display at a
-    specified location.  This is a command generated by the Graphical User
-    Interface (GUI) and will appear in the log file (Jobname.LOG) if
-    annotation is used.  This command is not intended to be typed in
-    directly in an ANSYS session (although it can be included in an input
-    file for batch input or for use with the /INPUT command).
+            3 - Blue-Magenta.
 
-    All text is shown on subsequent displays unless the annotation is
-    turned off or deleted.  Use the /TSPEC command to set the attributes of
-    the text.
+            4 - Blue.
 
-    This command is valid in any processor.
-    """
-    command = f"/TLABEL,{xloc},{yloc},{text}"
-    return self.run(command, **kwargs)
+            5 - Cyan-Blue.
 
+            6 - Cyan.
 
-def tspec(self, tcolor="", tsize="", txthic="", pangle="", iangle="",
-          **kwargs):
-    """Creates annotation text attributes (GUI).
+            7 - Green-Cyan.
 
-    APDL Command: /TSPEC
+            8 - Green.
 
-    Parameters
-    ----------
-    tcolor
-        Text color (0  TCOLOR   15):
+            9 - Yellow-Green.
 
-        0 - Black.
+            10 - Yellow.
 
-        1 - Red-Magenta.
+            11 - Orange.
 
-        2 - Magenta.
+            12 - Red.
 
-        3 - Blue-Magenta.
+            13 - Dark Gray.
 
-        4 - Blue.
+            14 - Light Gray.
 
-        5 - Cyan-Blue.
+            15 - White.
 
-        6 - Cyan.
+        tsize
+            Text size factor.
 
-        7 - Green-Cyan.
+        txthic
+            Text thickness key:
 
-        8 - Green.
+            1 - normal.
 
-        9 - Yellow-Green.
+            2 - twice as thick.
 
-        10 - Yellow.
+            3 - three times as thick.
 
-        11 - Orange.
+            4 - four times as thick.
 
-        12 - Red.
+        pangle
+            Text path angle (0.0 < angle < 360.0).
 
-        13 - Dark Gray.
+        iangle
+            Text italic angle (0.0 < angle < 45.0).
 
-        14 - Light Gray.
+        Notes
+        -----
+        Defines annotation text attributes to control certain characteristics
+        of the text created via the /TLABEL command.  This is a command
+        generated by the Graphical User Interface (GUI) and will appear in the
+        log file (Jobname.LOG) if annotation is used.  This command is not
+        intended to be typed in directly in an ANSYS session (although it can
+        be included in an input file for batch input or for use with the /INPUT
+        command).
 
-        15 - White.
-
-    tsize
-        Text size factor.
-
-    txthic
-        Text thickness key:
-
-        1 - normal.
-
-        2 - twice as thick.
-
-        3 - three times as thick.
-
-        4 - four times as thick.
-
-    pangle
-        Text path angle (0.0 < angle < 360.0).
-
-    iangle
-        Text italic angle (0.0 < angle < 45.0).
-
-    Notes
-    -----
-    Defines annotation text attributes to control certain characteristics
-    of the text created via the /TLABEL command.  This is a command
-    generated by the Graphical User Interface (GUI) and will appear in the
-    log file (Jobname.LOG) if annotation is used.  This command is not
-    intended to be typed in directly in an ANSYS session (although it can
-    be included in an input file for batch input or for use with the /INPUT
-    command).
-
-    This command is valid in any processor.
-    """
-    command = f"/TSPEC,{tcolor},{tsize},{txthic},{pangle},{iangle}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/TSPEC,{tcolor},{tsize},{txthic},{pangle},{iangle}"
+        return self.run(command, **kwargs)

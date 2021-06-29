@@ -1,409 +1,405 @@
-def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
-    """Defines an ocean load using non-table data.
+class Ocean:
 
-    APDL Command: OCDATA
+    def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
+        """Defines an ocean load using non-table data.
 
-    Parameters
-    ----------
-    val1, val2, val3, . . . , val14
-        Values describing the basic ocean load or a wave condition.
+        APDL Command: OCDATA
 
-    Notes
-    -----
-    The OCDATA command specifies non-table data that defines the ocean
-    load, such as the depth of the ocean to the mud line, the ratio of
-    added mass over added mass for a circular cross section, or the wave
-    type to apply. The terms VAL1, VAL2, etc. are specialized according to
-    the input set required for the given ocean load.
+        Parameters
+        ----------
+        val1, val2, val3, . . . , val14
+            Values describing the basic ocean load or a wave condition.
 
-    The program interprets the data input via the OCDATA command within the
-    context of the most recently issued OCTYPE command.
+        Notes
+        -----
+        The OCDATA command specifies non-table data that defines the ocean
+        load, such as the depth of the ocean to the mud line, the ratio of
+        added mass over added mass for a circular cross section, or the wave
+        type to apply. The terms VAL1, VAL2, etc. are specialized according to
+        the input set required for the given ocean load.
 
-    Input values in the order indicated.
+        The program interprets the data input via the OCDATA command within the
+        context of the most recently issued OCTYPE command.
 
-    This command is also valid in PREP7.
+        Input values in the order indicated.
 
-    You can define the following ocean data types:
+        This command is also valid in PREP7.
 
-    For a better understanding of how to set up a basic ocean type, see
-    Figure: 5:: Basic Ocean Data Type Components .
+        You can define the following ocean data types:
 
-    DEPTH -- The depth of the ocean (that is, the distance between the mean
-    sea level and the mud line). The water surface is assumed to be level
-    in the XY plane, with Z being positive upwards. This value is required
-    and must be positive.
+        For a better understanding of how to set up a basic ocean type, see
+        Figure: 5:: Basic Ocean Data Type Components .
 
-    MATOC -- The material number of the ocean. This value is required and
-    is used to input the required density. It is also used to input the
-    viscosity if the Reynolds number is used (OCTABLE).
+        DEPTH -- The depth of the ocean (that is, the distance between the mean
+        sea level and the mud line). The water surface is assumed to be level
+        in the XY plane, with Z being positive upwards. This value is required
+        and must be positive.
 
-    KFLOOD -- The inside-outside fluid-interaction key:
+        MATOC -- The material number of the ocean. This value is required and
+        is used to input the required density. It is also used to input the
+        viscosity if the Reynolds number is used (OCTABLE).
 
-    For beam subtype CTUBE and HREC used with BEAM188 or BEAM189 and ocean
-    loading, KFLOOD is always set to 1.
+        KFLOOD -- The inside-outside fluid-interaction key:
 
-    Cay -- The ratio of added mass of the external fluid over the mass of
-    the fluid displaced by the element cross section in the y direction
-    (normal). The added mass represents the mass of the external fluid
-    (ocean water) that moves with the pipe, beam, or link element when the
-    element moves in the element y direction during a dynamic analysis.
+        For beam subtype CTUBE and HREC used with BEAM188 or BEAM189 and ocean
+        loading, KFLOOD is always set to 1.
 
-    If no value is specified, and the coefficient of inertia CMy is not
-    specified (OCTABLE), both values default to 0.0.
+        Cay -- The ratio of added mass of the external fluid over the mass of
+        the fluid displaced by the element cross section in the y direction
+        (normal). The added mass represents the mass of the external fluid
+        (ocean water) that moves with the pipe, beam, or link element when the
+        element moves in the element y direction during a dynamic analysis.
 
-    If no value is specified, but CMy is specified, this value defaults to
-    Cay = CMy - 1.0.
+        If no value is specified, and the coefficient of inertia CMy is not
+        specified (OCTABLE), both values default to 0.0.
 
-    If this value should be 0.0, enter 0.0.
+        If no value is specified, but CMy is specified, this value defaults to
+        Cay = CMy - 1.0.
 
-    Caz -- The ratio of added mass of the external fluid over the mass of a
-    cross section in the element z direction (normal). The added mass
-    represents the mass of the external fluid (ocean water) that moves with
-    the pipe, beam, or link element when the element moves in the element z
-    direction during a dynamic analysis.
+        If this value should be 0.0, enter 0.0.
 
-    If no value is specified, and Cay is specified, this value defaults to
-    Cay.
+        Caz -- The ratio of added mass of the external fluid over the mass of a
+        cross section in the element z direction (normal). The added mass
+        represents the mass of the external fluid (ocean water) that moves with
+        the pipe, beam, or link element when the element moves in the element z
+        direction during a dynamic analysis.
 
-    If no value is specified, and the coefficient of inertia CMz is not
-    specified (OCTABLE), both values default to 0.0.
+        If no value is specified, and Cay is specified, this value defaults to
+        Cay.
 
-    If no value is specified, but CMz is specified, this value defaults to
-    Cay = CMz - 1.0.
+        If no value is specified, and the coefficient of inertia CMz is not
+        specified (OCTABLE), both values default to 0.0.
 
-    If this value should be 0.0, enter 0.0.
+        If no value is specified, but CMz is specified, this value defaults to
+        Cay = CMz - 1.0.
 
-    Cb -- The ratio of buoyancy force used over buoyancy force based on the
-    outside diameter and water density. Accept the default value in most
-    cases. Adjust this option only when you must account for additional
-    hardware (such as a control valve) attached to the pipe exterior. A
-    non-default value may lead to small non-physical inconsistencies;
-    testing is therefore recommended for non-default values.
+        If this value should be 0.0, enter 0.0.
 
-    If no value is specified, this value defaults to 1.0.
+        Cb -- The ratio of buoyancy force used over buoyancy force based on the
+        outside diameter and water density. Accept the default value in most
+        cases. Adjust this option only when you must account for additional
+        hardware (such as a control valve) attached to the pipe exterior. A
+        non-default value may lead to small non-physical inconsistencies;
+        testing is therefore recommended for non-default values.
 
-    If this value should be 0.0 (useful when troubleshooting your input),
-    enter 0.0.
+        If no value is specified, this value defaults to 1.0.
 
-    Zmsl -- A vertical offset from the global origin to the mean sea level.
-    The default value is zero (meaning that the origin is located at the
-    mean sea level).
+        If this value should be 0.0 (useful when troubleshooting your input),
+        enter 0.0.
 
-    Two example cases for Zmsl are:
+        Zmsl -- A vertical offset from the global origin to the mean sea level.
+        The default value is zero (meaning that the origin is located at the
+        mean sea level).
 
-    A structure with its origin on the sea floor (Zmsl = DEPTH).
+        Two example cases for Zmsl are:
 
-    A tidal change (tc) above the mean sea level (Zmsl = tc, and DEPTH
-    becomes DEPTH + tc)
+        A structure with its origin on the sea floor (Zmsl = DEPTH).
 
-    Ktable -- The dependency of VAL1 on the OCTABLE command:
+        A tidal change (tc) above the mean sea level (Zmsl = tc, and DEPTH
+        becomes DEPTH + tc)
 
-    Figure: 5:: : Basic Ocean Data Type Components
+        Ktable -- The dependency of VAL1 on the OCTABLE command:
 
-     KWAVE -- The incident wave type:
+        Figure: 5:: : Basic Ocean Data Type Components
 
-    THETA -- Angle of the wave direction θ from the global Cartesian X axis
-    toward the global Cartesian Y axis (in degrees).
+         KWAVE -- The incident wave type:
 
-    WAVELOC (valid when KWAVE = 0 through 3, and 101+) -- The wave location
-    type:
+        THETA -- Angle of the wave direction θ from the global Cartesian X axis
+        toward the global Cartesian Y axis (in degrees).
 
-    SPECTRUM (valid when KWAVE = 5 through 7) -- The wave spectrum type:
+        WAVELOC (valid when KWAVE = 0 through 3, and 101+) -- The wave location
+        type:
 
-    KCRC -- The wave-current interaction key.
+        SPECTRUM (valid when KWAVE = 5 through 7) -- The wave spectrum type:
 
-    Adjustments to the current profile are available via the KCRC constant
-    of the water motion table. Typically, these options are used only when
-    the wave amplitude is large relative to the water depth, such that
-    significant wave-current interaction exists.
-    """
-    command = f"OCDATA,{val1},{val2},{val3},{val14}"
-    return self.run(command, **kwargs)
+        KCRC -- The wave-current interaction key.
 
+        Adjustments to the current profile are available via the KCRC constant
+        of the water motion table. Typically, these options are used only when
+        the wave amplitude is large relative to the water depth, such that
+        significant wave-current interaction exists.
+        """
+        command = f"OCDATA,{val1},{val2},{val3},{val14}"
+        return self.run(command, **kwargs)
 
-def ocdelete(self, datatype="", zonename="", **kwargs):
-    """Deletes a previously defined ocean load.
+    def ocdelete(self, datatype="", zonename="", **kwargs):
+        """Deletes a previously defined ocean load.
 
-    APDL Command: OCDELETE
+        APDL Command: OCDELETE
 
-    Parameters
-    ----------
-    datatype
-        Ocean data type to delete. Valid values are BASIC, CURRENT, WAVE,
-        ZONE, and ALL.
+        Parameters
+        ----------
+        datatype
+            Ocean data type to delete. Valid values are BASIC, CURRENT, WAVE,
+            ZONE, and ALL.
 
-    zonename
-        The name of the ocean zone to delete. If no name is specified, all
-        defined ocean zones are deleted. Valid only when DataType = ZONE.
+        zonename
+            The name of the ocean zone to delete. If no name is specified, all
+            defined ocean zones are deleted. Valid only when DataType = ZONE.
 
-    Notes
-    -----
-    The OCDELETE command deletes previously specified ocean data from the
-    database.
+        Notes
+        -----
+        The OCDELETE command deletes previously specified ocean data from the
+        database.
 
-    This command is also valid in PREP7.
-    """
-    command = f"OCDELETE,{datatype},{zonename}"
-    return self.run(command, **kwargs)
+        This command is also valid in PREP7.
+        """
+        command = f"OCDELETE,{datatype},{zonename}"
+        return self.run(command, **kwargs)
 
+    def oclist(self, datatype="", zonename="", **kwargs):
+        """Summarizes all currently defined ocean loads.
 
-def oclist(self, datatype="", zonename="", **kwargs):
-    """Summarizes all currently defined ocean loads.
+        APDL Command: OCLIST
 
-    APDL Command: OCLIST
+        Parameters
+        ----------
+        datatype
+            Ocean data type to list. Valid values are BASIC, CURRENT, WAVE,
+            ZONE, and ALL.
 
-    Parameters
-    ----------
-    datatype
-        Ocean data type to list. Valid values are BASIC, CURRENT, WAVE,
-        ZONE, and ALL.
+        zonename
+            The name of an ocean zone to list. If no name is specified, all
+            defined ocean zones are listed. Valid only when DataType = ZONE.
 
-    zonename
-        The name of an ocean zone to list. If no name is specified, all
-        defined ocean zones are listed. Valid only when DataType = ZONE.
+        Notes
+        -----
+        The OCLIST command summarizes the ocean properties for all defined
+        ocean loads in the current session.
 
-    Notes
-    -----
-    The OCLIST command summarizes the ocean properties for all defined
-    ocean loads in the current session.
+        When this command follows the SOLVE command, certain waves types also
+        list the calculated wave length.
 
-    When this command follows the SOLVE command, certain waves types also
-    list the calculated wave length.
+        This command is also valid in PREP7.
+        """
+        command = f"OCLIST,{datatype},{zonename}"
+        return self.run(command, **kwargs)
 
-    This command is also valid in PREP7.
-    """
-    command = f"OCLIST,{datatype},{zonename}"
-    return self.run(command, **kwargs)
+    def ocread(self, fname="", ext="", option="", **kwargs):
+        """Reads externally defined ocean data.
 
+        APDL Command: OCREAD
 
-def ocread(self, fname="", ext="", option="", **kwargs):
-    """Reads externally defined ocean data.
+        Parameters
+        ----------
+        fname
+            External ocean data file name (excluding the filename extension)
+            and directory path containing the file. For more information, see
+            the Notes section.
 
-    APDL Command: OCREAD
+        ext
+            Filename extension (limited to eight characters).
 
-    Parameters
-    ----------
-    fname
-        External ocean data file name (excluding the filename extension)
-        and directory path containing the file. For more information, see
-        the Notes section.
+        --
+            Reserved field.
 
-    ext
-        Filename extension (limited to eight characters).
+        option
+            Integer value passed to the userOceanRead subroutine (as iOption)
+            for user-defined waves. This value does not apply to the diffracted
+            wave type.
 
-    --
-        Reserved field.
+        Notes
+        -----
+        The OCREAD command imports ocean data that has been defined externally
+        (for example, via the Hydrodynamic Diffraction System (AQWA)).
 
-    option
-        Integer value passed to the userOceanRead subroutine (as iOption)
-        for user-defined waves. This value does not apply to the diffracted
-        wave type.
+        The command operates on the ocean load ID specified via the most
+        recently issued OCTYPE command. Issue a separate OCREAD command for
+        each ocean load that you want to read into the program.
 
-    Notes
-    -----
-    The OCREAD command imports ocean data that has been defined externally
-    (for example, via the Hydrodynamic Diffraction System (AQWA)).
+        Fname is limited to 248 characters, including the directory path. If
+        Fname does not include a directory path, the program searches for the
+        specified file in the current working directory. An unspecified Fname
+        defaults to Jobname.
 
-    The command operates on the ocean load ID specified via the most
-    recently issued OCTYPE command. Issue a separate OCREAD command for
-    each ocean load that you want to read into the program.
+        For the diffracted wave type (KWAVE = 8 on the OCDATA command), you
+        must issue an OCREAD command for the ocean wave ID in order to import
+        the hydrodynamic data from the hydrodynamic analysis.
 
-    Fname is limited to 248 characters, including the directory path. If
-    Fname does not include a directory path, the program searches for the
-    specified file in the current working directory. An unspecified Fname
-    defaults to Jobname.
+        For more information, see Applying Ocean Loading from a Hydrodynamic
+        Analysis in the Advanced Analysis Guide.
 
-    For the diffracted wave type (KWAVE = 8 on the OCDATA command), you
-    must issue an OCREAD command for the ocean wave ID in order to import
-    the hydrodynamic data from the hydrodynamic analysis.
+        To learn more about creating user-defined waves, see Subroutine
+        userPanelHydFor (Calculating Panel Loads Caused by Ocean Loading) in
+        the Programmer's Reference.
 
-    For more information, see Applying Ocean Loading from a Hydrodynamic
-    Analysis in the Advanced Analysis Guide.
+        This command is also valid in PREP7.
+        """
+        command = f"OCREAD,{fname},{ext},{option}"
+        return self.run(command, **kwargs)
 
-    To learn more about creating user-defined waves, see Subroutine
-    userPanelHydFor (Calculating Panel Loads Caused by Ocean Loading) in
-    the Programmer's Reference.
+    def octable(self, val1="", val2="", val3="", val4="", val5="", val6="",
+                val7="", **kwargs):
+        """Defines an ocean load using table data.
 
-    This command is also valid in PREP7.
-    """
-    command = f"OCREAD,{fname},{ext},{option}"
-    return self.run(command, **kwargs)
+        APDL Command: OCTABLE
 
+        Parameters
+        ----------
+        val1, val2, val3, . . . , val6
+            Values describing the basic ocean load, a current condition, or a
+            wave condition.
 
-def octable(self, val1="", val2="", val3="", val4="", val5="", val6="",
-            val7="", **kwargs):
-    """Defines an ocean load using table data.
+        Notes
+        -----
+        The OCTABLE specifies table data that defines the ocean load. The terms
+        VAL1, VAL2, etc. are specialized according to the input set required
+        for the given ocean load.
 
-    APDL Command: OCTABLE
+        The program interprets the data input via the OCTABLE command within
+        the context of the most recently issued OCTYPE command.
 
-    Parameters
-    ----------
-    val1, val2, val3, . . . , val6
-        Values describing the basic ocean load, a current condition, or a
-        wave condition.
+        There is no limit to the number of data input.
 
-    Notes
-    -----
-    The OCTABLE specifies table data that defines the ocean load. The terms
-    VAL1, VAL2, etc. are specialized according to the input set required
-    for the given ocean load.
+        Input values in the order indicated.
 
-    The program interprets the data input via the OCTABLE command within
-    the context of the most recently issued OCTYPE command.
+        This command is also valid in PREP7.
 
-    There is no limit to the number of data input.
+        You can define the following ocean data types:
 
-    Input values in the order indicated.
+        If the current is constant, only one OCTABLE command is necessary and
+        Dep  is not required.
 
-    This command is also valid in PREP7.
+        For waves, the current profile is stretched or compressed linearly up
+        to 10 percent.
 
-    You can define the following ocean data types:
+        The first Dep value (representing the mean sea level) must be zero. The
+        last Dep value (representing the mud line) must be equal to the DEPTH
+        value input on the OCDATA command.
 
-    If the current is constant, only one OCTABLE command is necessary and
-    Dep  is not required.
+        The Cartesian Z values used to locate nodes, etc. decrease as one moves
+        from the ocean surface to the sea floor, but the Dep values increase.
+        See Figure: 5:: Basic Ocean Data Type Components .
 
-    For waves, the current profile is stretched or compressed linearly up
-    to 10 percent.
+        Dep is not affected by changes to Zmsl on the OCDATA command, as that
+        value simply relocates the origin.
 
-    The first Dep value (representing the mean sea level) must be zero. The
-    last Dep value (representing the mud line) must be equal to the DEPTH
-    value input on the OCDATA command.
+        When specifying an ocean wave type, issue the OCTABLE command to input
+        either wave location data or wave spectrum data.
 
-    The Cartesian Z values used to locate nodes, etc. decrease as one moves
-    from the ocean surface to the sea floor, but the Dep values increase.
-    See Figure: 5:: Basic Ocean Data Type Components .
+        Hints for Wave Location Input:
 
-    Dep is not affected by changes to Zmsl on the OCDATA command, as that
-    value simply relocates the origin.
+        The TIME command is not used, except perhaps to identify the load case.
 
-    When specifying an ocean wave type, issue the OCTABLE command to input
-    either wave location data or wave spectrum data.
+                The phase shift (Ps) determines the wave position (that is, the
+        point at which the load is to be applied).
 
-    Hints for Wave Location Input:
+        When using the Stokes fifth-order (KWAVE = 2) or stream function (KWAVE
+        = 3) wave type, issue only one OCTABLE command.
 
-    The TIME command is not used, except perhaps to identify the load case.
+        The valid range of the order of the stream function (NORDER) is 3
+        through 50. If no value is specified, the program determines a value
+        automatically.
 
-            The phase shift (Ps) determines the wave position (that is, the
-    point at which the load is to be applied).
+        When using the diffracted wave type (KWAVE = 8), an OCREAD command is
+        also required to read in the hydrodynamic data from the hydrodynamic
+        analysis.
+        """
+        command = f"OCTABLE,{val1},{val2},{val3},{val4},{val5},{val6},{val7}"
+        return self.run(command, **kwargs)
 
-    When using the Stokes fifth-order (KWAVE = 2) or stream function (KWAVE
-    = 3) wave type, issue only one OCTABLE command.
+    def octype(self, datatype="", name="", **kwargs):
+        """Specifies the type of ocean load data to follow.
 
-    The valid range of the order of the stream function (NORDER) is 3
-    through 50. If no value is specified, the program determines a value
-    automatically.
+        APDL Command: OCTYPE
 
-    When using the diffracted wave type (KWAVE = 8), an OCREAD command is
-    also required to read in the hydrodynamic data from the hydrodynamic
-    analysis.
-    """
-    command = f"OCTABLE,{val1},{val2},{val3},{val4},{val5},{val6},{val7}"
-    return self.run(command, **kwargs)
+        Parameters
+        ----------
+        datatype
+            The type of ocean data to be input following this command:
 
+            BASIC - The basic ocean load, required for any ocean loading.
 
-def octype(self, datatype="", name="", **kwargs):
-    """Specifies the type of ocean load data to follow.
+            CURR - An optional drift current.
 
-    APDL Command: OCTYPE
+            WAVE - An optional ocean wave state.
 
-    Parameters
-    ----------
-    datatype
-        The type of ocean data to be input following this command:
+        name
+            An eight-character name for the ocean load. An ocean name can
+            consist of letters and numbers, but cannot contain punctuation,
+            special characters, or spaces.
 
-        BASIC - The basic ocean load, required for any ocean loading.
+        Notes
+        -----
+        The OCTYPE command specifies the type of ocean load data to follow
+        (basic, current, or wave). Issue this command before defining your
+        ocean load data (OCDATA and OCTABLE).
 
-        CURR - An optional drift current.
+        Ocean loading applies only to current-technology pipe (PIPE288 and
+        PIPE289), surface (SURF154), link (LINK180) and beam (BEAM188 and
+        BEAM189) elements.
 
-        WAVE - An optional ocean wave state.
+        An ocean current or wave is accessible repeatedly. For example, it is
+        not necessary to input an identical current table again just because
+        the drag coefficients of the basic input table have changed.
 
-    name
-        An eight-character name for the ocean load. An ocean name can
-        consist of letters and numbers, but cannot contain punctuation,
-        special characters, or spaces.
+        The following example shows how you can use the basic (DataType =
+        BASIC), current (DataType = CURR), and wave (DataType = WAVE) ocean
+        data types within the context of a simple input file fragment:
+        """
+        command = f"OCTYPE,{datatype},{name}"
+        return self.run(command, **kwargs)
 
-    Notes
-    -----
-    The OCTYPE command specifies the type of ocean load data to follow
-    (basic, current, or wave). Issue this command before defining your
-    ocean load data (OCDATA and OCTABLE).
+    def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
+               **kwargs):
+        """Specifies the type of ocean zone data to follow.
 
-    Ocean loading applies only to current-technology pipe (PIPE288 and
-    PIPE289), surface (SURF154), link (LINK180) and beam (BEAM188 and
-    BEAM189) elements.
+        APDL Command: OCZONE
 
-    An ocean current or wave is accessible repeatedly. For example, it is
-    not necessary to input an identical current table again just because
-    the drag coefficients of the basic input table have changed.
+        Parameters
+        ----------
+        zonetype
+            The type of ocean zone data to be input following this command:
 
-    The following example shows how you can use the basic (DataType =
-    BASIC), current (DataType = CURR), and wave (DataType = WAVE) ocean
-    data types within the context of a simple input file fragment:
-    """
-    command = f"OCTYPE,{datatype},{name}"
-    return self.run(command, **kwargs)
+            COMP - Define by a component.
 
+            ZLOC - Define by Z levels.
 
-def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
-           **kwargs):
-    """Specifies the type of ocean zone data to follow.
+            PIP - Associate an internal pipe or pipes with an external pipe.
 
-    APDL Command: OCZONE
+        zonename
+            The ocean zone name. If no name is specified, the program assigns
+            one.
 
-    Parameters
-    ----------
-    zonetype
-        The type of ocean zone data to be input following this command:
+        compnameint
+            For Zonetype = COMP, the required name of a component.
 
-        COMP - Define by a component.
+        compnameext
+            For Zonetype = PIP, the required name of an external pipe
+            component.
 
-        ZLOC - Define by Z levels.
+        Notes
+        -----
+        The OCZONE command specifies the type of ocean zone data to follow
+        (component, Z-level, or internal pipes associated with an external
+        pipe). An ocean zone is a local space where you can override global
+        ocean-loading parameters.
 
-        PIP - Associate an internal pipe or pipes with an external pipe.
+        Names specified for ZoneName, CompNameInt, and CompNameExt can consist
+        of up to 32 alphanumeric characters. The name cannot contain
+        punctuation, special characters, or spaces.
 
-    zonename
-        The ocean zone name. If no name is specified, the program assigns
-        one.
+        For Zonetype = COMP, the zone is defined by a component. Only the
+        elements in the component are affected by the local parameters. A
+        partial component can be defined as the zone via the Z input on the
+        OCTABLE command.
 
-    compnameint
-        For Zonetype = COMP, the required name of a component.
+        For Zonetype = ZLOC, the zone is defined by Z levels. Structural
+        elements (such as BEAM188, BEAM189, PIPE288, PIPE289, and LINK180) in
+        the Z levels are included in the zone.
 
-    compnameext
-        For Zonetype = PIP, the required name of an external pipe
-        component.
+        For Zonetype = PIP, the zone is prepared for a special configuration of
+        pipes. It associates an internal pipe or pipes with an external pipe to
+        remove the hydrodynamic effect on the internal pipe. Only hydrostatic
+        pressure is applied on the internal pipe.
 
-    Notes
-    -----
-    The OCZONE command specifies the type of ocean zone data to follow
-    (component, Z-level, or internal pipes associated with an external
-    pipe). An ocean zone is a local space where you can override global
-    ocean-loading parameters.
+        This command is also valid in PREP7.
 
-    Names specified for ZoneName, CompNameInt, and CompNameExt can consist
-    of up to 32 alphanumeric characters. The name cannot contain
-    punctuation, special characters, or spaces.
+        Figure: 6:: : Ocean Zone Types (Specified via ZoneType)
 
-    For Zonetype = COMP, the zone is defined by a component. Only the
-    elements in the component are affected by the local parameters. A
-    partial component can be defined as the zone via the Z input on the
-    OCTABLE command.
-
-    For Zonetype = ZLOC, the zone is defined by Z levels. Structural
-    elements (such as BEAM188, BEAM189, PIPE288, PIPE289, and LINK180) in
-    the Z levels are included in the zone.
-
-    For Zonetype = PIP, the zone is prepared for a special configuration of
-    pipes. It associates an internal pipe or pipes with an external pipe to
-    remove the hydrodynamic effect on the internal pipe. Only hydrostatic
-    pressure is applied on the internal pipe.
-
-    This command is also valid in PREP7.
-
-    Figure: 6:: : Ocean Zone Types (Specified via ZoneType)
-
-    Issue this command before defining your ocean load data (OCDATA or
-    OCTABLE). Define components before defining a component-type or a pipe-
-    type zone (OCZONE,COMP or OCZONE,PIP, respectively).
-    """
-    command = f"OCZONE,{zonetype},{zonename},{compnameint},{compnameext}"
-    return self.run(command, **kwargs)
+        Issue this command before defining your ocean load data (OCDATA or
+        OCTABLE). Define components before defining a component-type or a pipe-
+        type zone (OCZONE,COMP or OCZONE,PIP, respectively).
+        """
+        command = f"OCZONE,{zonetype},{zonename},{compnameint},{compnameext}"
+        return self.run(command, **kwargs)

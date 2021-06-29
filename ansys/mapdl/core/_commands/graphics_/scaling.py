@@ -1,319 +1,315 @@
-def iclwid(self, factor="", **kwargs):
-    """Scales the line width of circuit builder icons.
+class Scaling:
+
+    def iclwid(self, factor="", **kwargs):
+        """Scales the line width of circuit builder icons.
+
+        APDL Command: /ICLWID
+
+        Parameters
+        ----------
+        factor
+            Multiplication factor applied to the default line width (defaults
+            to 1). The minimum is 1 and the maximum is 6.
+
+        Notes
+        -----
+        Distributed ANSYS Restriction: This command is not supported in
+        Distributed ANSYS.
+        """
+        command = f"/ICLWID,{factor}"
+        return self.run(command, **kwargs)
+
+    def icscale(self, wn="", factor="", **kwargs):
+        """Scales the icon size for elements supported in the circuit builder.
+
+        APDL Command: /ICSCALE
+
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        factor
+            Factor applied to the default icon size (defaults to 1).
+
+        Notes
+        -----
+        Scaling the icon size can provide better visualization of the circuit
+        components when using the Circuit Builder (an interactive builder
+        available in the ANSYS GUI).
+
+        Distributed ANSYS Restriction: This command is not supported in
+        Distributed ANSYS.
+        """
+        command = f"/ICSCALE,{wn},{factor}"
+        return self.run(command, **kwargs)
+
+    def ratio(self, wn="", ratox="", ratoy="", **kwargs):
+        """Distorts the object geometry.
+
+        APDL Command: /RATIO
+
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
 
-    APDL Command: /ICLWID
+        ratox
+            Distort object in the window X direction by this factor (defaults
+            to 1.0).
 
-    Parameters
-    ----------
-    factor
-        Multiplication factor applied to the default line width (defaults
-        to 1). The minimum is 1 and the maximum is 6.
+        ratoy
+            Distort object in the window Y direction by this factor (defaults
+            to 1.0).
+
+        Notes
+        -----
+        Distorts the object geometry in a particular direction.  An example of
+        this command's use would be to allow long narrow sections to be
+        distorted to a more square area for better display visualization.
+
+        This command is valid in any processor.
+        """
+        command = f"/RATIO,{wn},{ratox},{ratoy}"
+        return self.run(command, **kwargs)
+
+    def shrink(self, ratio="", **kwargs):
+        """Shrinks elements, lines, areas, and volumes for display clarity.
+
+        APDL Command: /SHRINK
+
+        Parameters
+        ----------
+        ratio
+            Shrinkage ratio (input as a decimal (0.0 to 0.5)).  Defaults to 0.0
+            (no shrinkage).  Values greater than 0.5 default to 0.1 (10%
+            shrinkage).
+
+        Notes
+        -----
+        Shrinks the elements, lines, areas, and volumes so that adjacent
+        entities are separated for clarity.  Portions of this command are not
+        supported by PowerGraphics [/GRAPHICS,POWER].
 
-    Notes
-    -----
-    Distributed ANSYS Restriction: This command is not supported in
-    Distributed ANSYS.
-    """
-    command = f"/ICLWID,{factor}"
-    return self.run(command, **kwargs)
+        If only the common lines of non-coplanar faces are drawn (as per the
+        /EDGE command), then this command is ignored.
 
+        This command is valid in any processor.
+        """
+        command = f"/SHRINK,{ratio}"
+        return self.run(command, **kwargs)
 
-def icscale(self, wn="", factor="", **kwargs):
-    """Scales the icon size for elements supported in the circuit builder.
+    def sscale(self, wn="", smult="", **kwargs):
+        """Sets the contour multiplier for topographic displays.
 
-    APDL Command: /ICSCALE
+        APDL Command: /SSCALE
 
-    Parameters
-    ----------
-    wn
-        Window number (or ALL) to which command applies (defaults to 1).
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
 
-    factor
-        Factor applied to the default icon size (defaults to 1).
+        smult
+            Contour multiplier that factors in results based on the product of
+            the multiplier and the result being plotted. Defaults to 0.0 (no
+            topographic effects).
 
-    Notes
-    -----
-    Scaling the icon size can provide better visualization of the circuit
-    components when using the Circuit Builder (an interactive builder
-    available in the ANSYS GUI).
+        Notes
+        -----
+        Use this command to scale values to the geometry when the contours are
+        shown elevated.  For section displays [/TYPE], the elevation is
+        performed perpendicular to the section face.
 
-    Distributed ANSYS Restriction: This command is not supported in
-    Distributed ANSYS.
-    """
-    command = f"/ICSCALE,{wn},{factor}"
-    return self.run(command, **kwargs)
+        Nonzero contour multipliers factoring in large results (stresses or
+        displacements) can produce very large distortion, causing images to
+        disappear.  To bring a distorted image back into view, reduce the
+        contour multiplier value.
 
+        Portions of this command are not supported by PowerGraphics
+        [/GRAPHICS,POWER].
+        """
+        command = f"/SSCALE,{wn},{smult}"
+        return self.run(command, **kwargs)
 
-def ratio(self, wn="", ratox="", ratoy="", **kwargs):
-    """Distorts the object geometry.
+    def txtre(self, lab="", num="", n1="", n2="", ninc="", **kwargs):
+        """Controls application of texture to selected items.
 
-    APDL Command: /RATIO
+        APDL Command: /TXTRE
 
-    Parameters
-    ----------
-    wn
-        Window number (or ALL) to which command applies (defaults to 1).
+        Parameters
+        ----------
+        lab
+            You can apply texture according to the following labels:
 
-    ratox
-        Distort object in the window X direction by this factor (defaults
-        to 1.0).
+            ELEM - Apply texture to elements N1 through N2 in steps of NINC.
 
-    ratoy
-        Distort object in the window Y direction by this factor (defaults
-        to 1.0).
+            AREA - Apply texture to areas N1 through N2 in steps of NINC.
 
-    Notes
-    -----
-    Distorts the object geometry in a particular direction.  An example of
-    this command's use would be to allow long narrow sections to be
-    distorted to a more square area for better display visualization.
+            VOLU - Apply texture to volumes N1 through N2 in steps of NINC.
 
-    This command is valid in any processor.
-    """
-    command = f"/RATIO,{wn},{ratox},{ratoy}"
-    return self.run(command, **kwargs)
+            CM - Apply texture to the component named in N1. N2 and
+            NINC are ignored.
 
+            ON, OFF - Sets the specified texture display on or
+            off. All other fields are ignored.
 
-def shrink(self, ratio="", **kwargs):
-    """Shrinks elements, lines, areas, and volumes for display clarity.
+            File - If Lab = File, the command format is /TXTRE, File,
+                   Key_Index, Fname, Fext, --, Format (This variant of
+                   the command is applicable to 2-D drivers).
 
-    APDL Command: /SHRINK
+            Key_Index - The texture index associated with the file. If
+                        the number fifty-one (51) is used, the
+                        imported bitmap will be used as the window's
+                        logo.
 
-    Parameters
-    ----------
-    ratio
-        Shrinkage ratio (input as a decimal (0.0 to 0.5)).  Defaults to 0.0
-        (no shrinkage).  Values greater than 0.5 default to 0.1 (10%
-        shrinkage).
+            Fname - File name and directory path (248 characters
+                    maximum, including the characters needed for the
+                    directory path).  An unspecified directory path
+                    defaults to the working directory; in this case,
+                    you can use all 248 characters for the file name.
 
-    Notes
-    -----
-    Shrinks the elements, lines, areas, and volumes so that adjacent
-    entities are separated for clarity.  Portions of this command are not
-    supported by PowerGraphics [/GRAPHICS,POWER].
+            Fext - Filename extension (eight-character maximum).
 
-    If only the common lines of non-coplanar faces are drawn (as per the
-    /EDGE command), then this command is ignored.
+            Format - The file format. If Format = 0, the file is a
+                     pixmap (Linux) or Bitmap (PC).  The file cannot
+                     contain a compressed image, and the PC file must
+                     be 8 or 24 bit BI_RGB format. If Format = 1 or
+                     JPEG, then the file is in JPEG (Joint
+                     Photographic Experts Group) format. If Format = 2
+                     or PNG, then the file is in PNG (Portable Network
+                     Graphics) format.
 
-    This command is valid in any processor.
-    """
-    command = f"/SHRINK,{ratio}"
-    return self.run(command, **kwargs)
+        num
+            Select the texture index number from the following list:
 
+            0 - No Texturing
 
-def sscale(self, wn="", smult="", **kwargs):
-    """Sets the contour multiplier for topographic displays.
+            1 - Aluminum
 
-    APDL Command: /SSCALE
+            2 -  Aluminum, Brushed
 
-    Parameters
-    ----------
-    wn
-        Window number (or ALL) to which command applies (defaults to 1).
+            3 - Steel With Bumps
 
-    smult
-        Contour multiplier that factors in results based on the product of
-        the multiplier and the result being plotted. Defaults to 0.0 (no
-        topographic effects).
+            4 - Steel, Embossed
 
-    Notes
-    -----
-    Use this command to scale values to the geometry when the contours are
-    shown elevated.  For section displays [/TYPE], the elevation is
-    performed perpendicular to the section face.
+            5 - Iron
 
-    Nonzero contour multipliers factoring in large results (stresses or
-    displacements) can produce very large distortion, causing images to
-    disappear.  To bring a distorted image back into view, reduce the
-    contour multiplier value.
+            6 - Steel, Pattern
 
-    Portions of this command are not supported by PowerGraphics
-    [/GRAPHICS,POWER].
-    """
-    command = f"/SSCALE,{wn},{smult}"
-    return self.run(command, **kwargs)
+            7 - Steel, Riveted
 
+            8 - Steel, Scratched
 
-def txtre(self, lab="", num="", n1="", n2="", ninc="", **kwargs):
-    """Controls application of texture to selected items.
+            9 - Tin
 
-    APDL Command: /TXTRE
+            10 - Metal
 
-    Parameters
-    ----------
-    lab
-        You can apply texture according to the following labels:
+            11 - Steel, Etched
 
-        ELEM - Apply texture to elements N1 through N2 in steps of NINC.
+            12 - Metal, Hot
 
-        AREA - Apply texture to areas N1 through N2 in steps of NINC.
+            13 - Iron, Grainy
 
-        VOLU - Apply texture to volumes N1 through N2 in steps of NINC.
+            14 - Metal, Rusty
 
-        CM - Apply texture to the component named in N1. N2 and
-        NINC are ignored.
+            15 - Brick
 
-        ON, OFF - Sets the specified texture display on or
-        off. All other fields are ignored.
+            16 - Block
 
-        File - If Lab = File, the command format is /TXTRE, File,
-               Key_Index, Fname, Fext, --, Format (This variant of
-               the command is applicable to 2-D drivers).
+            17 - Wood
 
-        Key_Index - The texture index associated with the file. If
-                    the number fifty-one (51) is used, the
-                    imported bitmap will be used as the window's
-                    logo.
+            18 - Wood, Light
 
-        Fname - File name and directory path (248 characters
-                maximum, including the characters needed for the
-                directory path).  An unspecified directory path
-                defaults to the working directory; in this case,
-                you can use all 248 characters for the file name.
+            19 - Wood, Walnut
 
-        Fext - Filename extension (eight-character maximum).
+            20 - Plastic, Hard Blue
 
-        Format - The file format. If Format = 0, the file is a
-                 pixmap (Linux) or Bitmap (PC).  The file cannot
-                 contain a compressed image, and the PC file must
-                 be 8 or 24 bit BI_RGB format. If Format = 1 or
-                 JPEG, then the file is in JPEG (Joint
-                 Photographic Experts Group) format. If Format = 2
-                 or PNG, then the file is in PNG (Portable Network
-                 Graphics) format.
+            21 - Plastic, Light Blue
 
-    num
-        Select the texture index number from the following list:
+            22 - Plastic, Hard Red
 
-        0 - No Texturing
+            31 - Gold
 
-        1 - Aluminum
+            32 - Brass
 
-        2 -  Aluminum, Brushed
+            33 - Silver
 
-        3 - Steel With Bumps
+            34 -  Plastic, Black
 
-        4 - Steel, Embossed
+            35 - Plastic, Ivory
 
-        5 - Iron
+            36 - Plastic, Blue
 
-        6 - Steel, Pattern
+            37 - Plastic, Red
 
-        7 - Steel, Riveted
+            38 - Plastic, Yellow
 
-        8 - Steel, Scratched
+            39 - Plastic, Green
 
-        9 - Tin
+            40 - Plastic, Brown
 
-        10 - Metal
+        n1, n2, ninc
+            Apply texture to Lab items numbered N1 through N2 in steps of NINC
+            (defaults to 1). If Lab = CM, then N1 is used to for the component
+            name and N2 and NINC are ignored. If Lab = ELEM, AREA, or VOLU and
+            N1 = blank or ALL, then the specified texture will be applied to
+            all entities of type Lab. If N1 = P, then graphical picking is
+            enabled.
 
-        11 - Steel, Etched
+        Notes
+        -----
+         This command is available for 3-D Open GL devices. 2-D devices are
+        supported only for the Lab = File variation of the command, allowing
+        imported bitmaps to be used for texturing and annotation. Textures can
+        affect the speed of many of your display operations. You can increase
+        the speed by temporarily turning the textures off (Utility Menu>
+        PlotCtrls> Style> Texturing(3D)> Display Texturing). This menu
+        selection toggles your textures on and off. When textures are toggled
+        off, all of the texture information is retained and reapplied when
+        texturing is toggled back on.
 
-        12 - Metal, Hot
+        For some displays, the texture will appear distorted because of a
+        technique used to enhance 3-D displays (/DV3D,TRIS,1). Disabling this
+        function (/DV3D,TRIS,0) will improve the quality of some texture
+        displays. Disabling the TRIS option of the /DV3D command will slow down
+        3-D displays significantly. Be sure to reapply the TRIS option after
+        you obtain a satisfactory output.
 
-        13 - Iron, Grainy
+        Specifying /TXTRE,DEFA removes all texturing.
+        """
+        command = f"/TXTRE,{lab},{num},{n1},{n2},{ninc}"
+        return self.run(command, **kwargs)
 
-        14 - Metal, Rusty
+    def vscale(self, wn="", vratio="", key="", **kwargs):
+        """Scales the length of displayed vectors.
 
-        15 - Brick
+        APDL Command: /VSCALE
 
-        16 - Block
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
 
-        17 - Wood
+        vratio
+            Ratio value applied to the automatically calculated scale factor
+            (defaults to 1.0, i.e., use scale factor as automatically
+            calculated).
 
-        18 - Wood, Light
+        key
+            Relative scaling key:
 
-        19 - Wood, Walnut
+            0 - Use relative length scaling among vectors based on magnitudes.
 
-        20 - Plastic, Hard Blue
+            1 - Use uniform length scaling for all vector lengths.
 
-        21 - Plastic, Light Blue
+        Notes
+        -----
+        Allows scaling of the vector length displayed with the PLVECT command
+        of POST1 and the /PBC and /PSF commands.  Also allows the scaling of
+        the  element (i.e., /PSYMB,ESYS) and the nodal (i.e., /PSYMB,NDIR)
+        coordinate system symbols.
 
-        22 - Plastic, Hard Red
-
-        31 - Gold
-
-        32 - Brass
-
-        33 - Silver
-
-        34 -  Plastic, Black
-
-        35 - Plastic, Ivory
-
-        36 - Plastic, Blue
-
-        37 - Plastic, Red
-
-        38 - Plastic, Yellow
-
-        39 - Plastic, Green
-
-        40 - Plastic, Brown
-
-    n1, n2, ninc
-        Apply texture to Lab items numbered N1 through N2 in steps of NINC
-        (defaults to 1). If Lab = CM, then N1 is used to for the component
-        name and N2 and NINC are ignored. If Lab = ELEM, AREA, or VOLU and
-        N1 = blank or ALL, then the specified texture will be applied to
-        all entities of type Lab. If N1 = P, then graphical picking is
-        enabled.
-
-    Notes
-    -----
-     This command is available for 3-D Open GL devices. 2-D devices are
-    supported only for the Lab = File variation of the command, allowing
-    imported bitmaps to be used for texturing and annotation. Textures can
-    affect the speed of many of your display operations. You can increase
-    the speed by temporarily turning the textures off (Utility Menu>
-    PlotCtrls> Style> Texturing(3D)> Display Texturing). This menu
-    selection toggles your textures on and off. When textures are toggled
-    off, all of the texture information is retained and reapplied when
-    texturing is toggled back on.
-
-    For some displays, the texture will appear distorted because of a
-    technique used to enhance 3-D displays (/DV3D,TRIS,1). Disabling this
-    function (/DV3D,TRIS,0) will improve the quality of some texture
-    displays. Disabling the TRIS option of the /DV3D command will slow down
-    3-D displays significantly. Be sure to reapply the TRIS option after
-    you obtain a satisfactory output.
-
-    Specifying /TXTRE,DEFA removes all texturing.
-    """
-    command = f"/TXTRE,{lab},{num},{n1},{n2},{ninc}"
-    return self.run(command, **kwargs)
-
-
-def vscale(self, wn="", vratio="", key="", **kwargs):
-    """Scales the length of displayed vectors.
-
-    APDL Command: /VSCALE
-
-    Parameters
-    ----------
-    wn
-        Window number (or ALL) to which command applies (defaults to 1).
-
-    vratio
-        Ratio value applied to the automatically calculated scale factor
-        (defaults to 1.0, i.e., use scale factor as automatically
-        calculated).
-
-    key
-        Relative scaling key:
-
-        0 - Use relative length scaling among vectors based on magnitudes.
-
-        1 - Use uniform length scaling for all vector lengths.
-
-    Notes
-    -----
-    Allows scaling of the vector length displayed with the PLVECT command
-    of POST1 and the /PBC and /PSF commands.  Also allows the scaling of
-    the  element (i.e., /PSYMB,ESYS) and the nodal (i.e., /PSYMB,NDIR)
-    coordinate system symbols.
-
-    This command is valid in any processor.
-    """
-    command = f"/VSCALE,{wn},{vratio},{key}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/VSCALE,{wn},{vratio},{key}"
+        return self.run(command, **kwargs)
