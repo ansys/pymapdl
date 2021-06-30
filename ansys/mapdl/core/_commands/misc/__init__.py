@@ -1,1 +1,1 @@
-from .misc import verify
+from . import misc

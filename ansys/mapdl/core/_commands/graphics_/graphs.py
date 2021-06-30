@@ -1,313 +1,309 @@
-def axlab(self, axis="", lab="", **kwargs):
-    """Labels the X and Y axes on graph displays.
+class Graphs:
 
-    APDL Command: /AXLAB
+    def axlab(self, axis="", lab="", **kwargs):
+        """Labels the X and Y axes on graph displays.
 
-    Parameters
-    ----------
-    axis
-        Axis specifier:
+        APDL Command: /AXLAB
 
-        X - Apply label to X axis.
+        Parameters
+        ----------
+        axis
+            Axis specifier:
 
-        Y - Apply label to Y axis.
+            X - Apply label to X axis.
 
-    lab
-        Axis label (user defined text up to 30 characters long).  Leave
-        blank to reestablish the default for Axis axis.
+            Y - Apply label to Y axis.
 
-    Notes
-    -----
-    This command is valid in any processor.
-    """
-    command = f"/AXLAB,{axis},{lab}"
-    return self.run(command, **kwargs)
+        lab
+            Axis label (user defined text up to 30 characters long).  Leave
+            blank to reestablish the default for Axis axis.
 
+        Notes
+        -----
+        This command is valid in any processor.
+        """
+        command = f"/AXLAB,{axis},{lab}"
+        return self.run(command, **kwargs)
 
-def grid(self, key="", **kwargs):
-    """Selects the type of grid on graph displays.
+    def grid(self, key="", **kwargs):
+        """Selects the type of grid on graph displays.
 
-    APDL Command: /GRID
+        APDL Command: /GRID
 
-    Parameters
-    ----------
-    key
-        Grid key:
+        Parameters
+        ----------
+        key
+            Grid key:
 
-        0 (OFF) - No grid.
+            0 (OFF) - No grid.
 
-        1 (ON) - Full grid (X and Y grid lines).
+            1 (ON) - Full grid (X and Y grid lines).
 
-        2 (X) - Partial grid (X grid lines only).
+            2 (X) - Partial grid (X grid lines only).
 
-        3 (Y) - Partial grid (Y grid lines only)
+            3 (Y) - Partial grid (Y grid lines only)
 
-    Notes
-    -----
-    Selects the type of grid on graph displays.  Graphs with multiple
-    Y-axes can have multiple grids [/GRTYP].  The grid of the first curve
-    is also used as the background grid (above and behind the curve).
-    Grids for other curves are limited to be under the curves.  See also
-    /GTHK and /GROPT for other grid options.
+        Notes
+        -----
+        Selects the type of grid on graph displays.  Graphs with multiple
+        Y-axes can have multiple grids [/GRTYP].  The grid of the first curve
+        is also used as the background grid (above and behind the curve).
+        Grids for other curves are limited to be under the curves.  See also
+        /GTHK and /GROPT for other grid options.
 
-    This command is valid in any processor.
-    """
-    command = f"/GRID,{key}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/GRID,{key}"
+        return self.run(command, **kwargs)
 
+    def gropt(self, lab="", key="", **kwargs):
+        """Sets various line graph display options.
 
-def gropt(self, lab="", key="", **kwargs):
-    """Sets various line graph display options.
+        APDL Command: /GROPT
 
-    APDL Command: /GROPT
+        Parameters
+        ----------
+        lab
+            Apply display style as selected from the following labels:
 
-    Parameters
-    ----------
-    lab
-        Apply display style as selected from the following labels:
+            AXDV - Axis division (tick) marks (defaults to KEY = ON).
 
-        AXDV - Axis division (tick) marks (defaults to KEY = ON).
+            AXNM - Axis scale numbers (defaults to KEY = ON, which puts numbers at the back plane
+                   of the graph).  If KEY = FRONT, numbers are on the front
+                   plane of the graph.
 
-        AXNM - Axis scale numbers (defaults to KEY = ON, which puts numbers at the back plane
-               of the graph).  If KEY = FRONT, numbers are on the front
-               plane of the graph.
+            AXNSC - Axis number size scale factor.  Input the scale value for KEY (defaults to
+                    1.0).
 
-        AXNSC - Axis number size scale factor.  Input the scale value for KEY (defaults to
-                1.0).
+            ASCAL - Automatic scaling of additional Y-axes for multi-curve [/GRTYP, 2 or 3] graphs
+                    (defaults to KEY = ON).  If KEY = OFF, use base Y-axis
+                    scaling (see the /YRANGE command).
 
-        ASCAL - Automatic scaling of additional Y-axes for multi-curve [/GRTYP, 2 or 3] graphs
-                (defaults to KEY = ON).  If KEY = OFF, use base Y-axis
-                scaling (see the /YRANGE command).
+            LOGX - Log X scale (defaults to KEY = OFF (linear)).
 
-        LOGX - Log X scale (defaults to KEY = OFF (linear)).
+            LOGY - Log Y scale (applies only to the base Y axis) (defaults to KEY = OFF (linear)).
 
-        LOGY - Log Y scale (applies only to the base Y axis) (defaults to KEY = OFF (linear)).
+            FILL - Color fill areas under curves (defaults to KEY = OFF).
 
-        FILL - Color fill areas under curves (defaults to KEY = OFF).
+            CGRID - Superimpose background grid [/GRID] over areas under filled curves (defaults to
+                    KEY = OFF).
 
-        CGRID - Superimpose background grid [/GRID] over areas under filled curves (defaults to
-                KEY = OFF).
+            DIG1 - Number of significant digits before decimal point for axis values.  Input the
+                   value for KEY (defaults to 4).
 
-        DIG1 - Number of significant digits before decimal point for axis values.  Input the
-               value for KEY (defaults to 4).
+            DIG2 - Number of significant digits after decimal point for axis values.  Input the
+                   value for KEY (defaults to 3).
 
-        DIG2 - Number of significant digits after decimal point for axis values.  Input the
-               value for KEY (defaults to 3).
+            VIEW - View key for graph displays (defaults to KEY = OFF, in which case the view is
+                   (0,0,1) for 2-D graph displays or (1,2,3) for 3-D graph
+                   displays).  If KEY = ON, the view settings for graph
+                   displays are the same as the view settings for the model.
 
-        VIEW - View key for graph displays (defaults to KEY = OFF, in which case the view is
-               (0,0,1) for 2-D graph displays or (1,2,3) for 3-D graph
-               displays).  If KEY = ON, the view settings for graph
-               displays are the same as the view settings for the model.
+            REVX - Plots the values on the X-axis in reverse order.
 
-        REVX - Plots the values on the X-axis in reverse order.
+            REVY - Plots the values on the Y-axis in reverse order.
 
-        REVY - Plots the values on the Y-axis in reverse order.
+            DIVX - Determines the number of divisions (grid markers) that will be plotted on the X
+                   axis.
 
-        DIVX - Determines the number of divisions (grid markers) that will be plotted on the X
-               axis.
+            DIVY - Determines the number of divisions (grid markers) that will be plotted on the Y
+                   axis.
+
+            LTYP - Determines whether ANSYS generated (KEY = 1) or system derived (KEY = 0) fonts
+                   will be used for the axis labels.
+
+            CURL - Determines the position of the curve labels. If (KEY = 1), the curve label will
+                   be plotted in the legend column, and the label will be
+                   displayed in the same color as the curve. If (KEY = 0) the
+                   curve labels will be plotted near the curve. (default).
 
-        DIVY - Determines the number of divisions (grid markers) that will be plotted on the Y
-               axis.
+            XAXO - When you use this label, the subsequent KEY value will determine an offset
+                   amount from the default (along the bottom) location for the
+                   X axis. If KEY = 1.0, a full offset occurs (the X axis is
+                   moved to the top of the graph). If KEY = 0.5, the axis is
+                   offset to the midpoint of the graph, and if KEY = 0 the axis
+                   remains in the original position, along the bottom of the
+                   graph. For any offset, a grey copy of the original axis
+                   (containing the axis numbering) remains at the original
+                   location.
 
-        LTYP - Determines whether ANSYS generated (KEY = 1) or system derived (KEY = 0) fonts
-               will be used for the axis labels.
+            YAXO - When you use this label, the subsequent KEY value will determine an offset
+                   amount from the default (along the left side of the graph)
+                   location for the Y axis. If KEY = 1.0, a full offset occurs
+                   (the Y axis is moved to the right side of the graph). If KEY
+                   = 0.5, the axis is offset to the midpoint of the graph, and
+                   if KEY = 0 the axis remains in the original position, along
+                   the left side of the graph. For any offset, a gray copy of
+                   the original axis (containing the axis numbering) remains at
+                   the original location.
 
-        CURL - Determines the position of the curve labels. If (KEY = 1), the curve label will
-               be plotted in the legend column, and the label will be
-               displayed in the same color as the curve. If (KEY = 0) the
-               curve labels will be plotted near the curve. (default).
+        key
+            Option values:
 
-        XAXO - When you use this label, the subsequent KEY value will determine an offset
-               amount from the default (along the bottom) location for the
-               X axis. If KEY = 1.0, a full offset occurs (the X axis is
-               moved to the top of the graph). If KEY = 0.5, the axis is
-               offset to the midpoint of the graph, and if KEY = 0 the axis
-               remains in the original position, along the bottom of the
-               graph. For any offset, a grey copy of the original axis
-               (containing the axis numbering) remains at the original
-               location.
+            OFF (0) - Do not apply selected style.
 
-        YAXO - When you use this label, the subsequent KEY value will determine an offset
-               amount from the default (along the left side of the graph)
-               location for the Y axis. If KEY = 1.0, a full offset occurs
-               (the Y axis is moved to the right side of the graph). If KEY
-               = 0.5, the axis is offset to the midpoint of the graph, and
-               if KEY = 0 the axis remains in the original position, along
-               the left side of the graph. For any offset, a gray copy of
-               the original axis (containing the axis numbering) remains at
-               the original location.
+            ON (1) - Apply selected style.
 
-    key
-        Option values:
+            nnnn - If Lab is DIG1 or DIG2, input the number of digits.
 
-        OFF (0) - Do not apply selected style.
+            nn - If Lab is AXNSC, input the scale factor.
 
-        ON (1) - Apply selected style.
+            FRONT - If Lab is AXNM, FRONT may also be input.
 
-        nnnn - If Lab is DIG1 or DIG2, input the number of digits.
+            Ndiv - If Lab is DIVX or DIVY, determines the number of divisions (1-99) that will be
+                   applied to the axis.
 
-        nn - If Lab is AXNSC, input the scale factor.
+            Kfont - If Lab is LTYP, Kfont is ON (1) or OFF(0).  ON will use ANSYS generated fonts
+                    for the axis labels, while OFF will use SYSTEM (Windows,
+                    X-system, etc.) fonts. The default value is ON (ANSYS
+                    fonts).
 
-        FRONT - If Lab is AXNM, FRONT may also be input.
+        Notes
+        -----
+        Sets various line graph display options.  Issue /GROPT,STAT to display
+        the current settings.  Issue /GROPT,DEFA to reset the default
+        specifications.  ANSYS informs you that graph view manipulation is
+        inactive unless you have issued the /GROPT,VIEW,ON command.  See the
+        /AXLAB, /GRTYP, /GRID, and /GTHK commands for other graph control
+        options.
 
-        Ndiv - If Lab is DIVX or DIVY, determines the number of divisions (1-99) that will be
-               applied to the axis.
+        Automatic scaling using the /XRANGE and /YRANGE commands will often
+        yield inappropriate range values for logarithmic scales (/GROPT, LOGX
+        or /GROPT, LOGY).
 
-        Kfont - If Lab is LTYP, Kfont is ON (1) or OFF(0).  ON will use ANSYS generated fonts
-                for the axis labels, while OFF will use SYSTEM (Windows,
-                X-system, etc.) fonts. The default value is ON (ANSYS
-                fonts).
+        This command is valid in any processor.
+        """
+        command = f"/GROPT,{lab},{key}"
+        return self.run(command, **kwargs)
 
-    Notes
-    -----
-    Sets various line graph display options.  Issue /GROPT,STAT to display
-    the current settings.  Issue /GROPT,DEFA to reset the default
-    specifications.  ANSYS informs you that graph view manipulation is
-    inactive unless you have issued the /GROPT,VIEW,ON command.  See the
-    /AXLAB, /GRTYP, /GRID, and /GTHK commands for other graph control
-    options.
+    def grtyp(self, kaxis="", **kwargs):
+        """Selects single or multiple Y-axes graph displays.
 
-    Automatic scaling using the /XRANGE and /YRANGE commands will often
-    yield inappropriate range values for logarithmic scales (/GROPT, LOGX
-    or /GROPT, LOGY).
+        APDL Command: /GRTYP
 
-    This command is valid in any processor.
-    """
-    command = f"/GROPT,{lab},{key}"
-    return self.run(command, **kwargs)
+        Parameters
+        ----------
+        kaxis
+            Axis selection key:
 
+            0 or 1 - Single Y-axis.  Up to 10 curves scaled to a single Y-axis.
 
-def grtyp(self, kaxis="", **kwargs):
-    """Selects single or multiple Y-axes graph displays.
+            2 - Additional Y-axes (one for each curve) (3 curves maximum).  Allows better
+                scaling of curves with widely differing numbering ranges.
 
-    APDL Command: /GRTYP
+            3 - Same as 2 but with additional Y-axis and curves projected out of the plane (6
+                curves maximum).  Allows clearer display with an isometric
+                view.  The default view when KAXIS = 3 is View,1,1,2,3.
 
-    Parameters
-    ----------
-    kaxis
-        Axis selection key:
+        Notes
+        -----
+        The basic line graph has one or more curves plotted against the same Y
+        and X axes.  Multiple curve graphs can also be plotted with individual
+        Y axes and the same X axis.  The Y axis of the first curve is referred
+        to as the base Y-axis and the Y axes of the other curves as additional
+        Y axes.  Curves are numbered sequentially from 1 (the base curve) in
+        the order in which they are displayed.  See the /AXLAB, /GROPT, /GRID,
+        and /GTHK commands for other display options.
 
-        0 or 1 - Single Y-axis.  Up to 10 curves scaled to a single Y-axis.
+        This command is valid in any processor.
+        """
+        command = f"/GRTYP,{kaxis}"
+        return self.run(command, **kwargs)
 
-        2 - Additional Y-axes (one for each curve) (3 curves maximum).  Allows better
-            scaling of curves with widely differing numbering ranges.
+    def gthk(self, label="", thick="", **kwargs):
+        """Sets line thicknesses for graph lines.
 
-        3 - Same as 2 but with additional Y-axis and curves projected out of the plane (6
-            curves maximum).  Allows clearer display with an isometric
-            view.  The default view when KAXIS = 3 is View,1,1,2,3.
+        APDL Command: /GTHK
 
-    Notes
-    -----
-    The basic line graph has one or more curves plotted against the same Y
-    and X axes.  Multiple curve graphs can also be plotted with individual
-    Y axes and the same X axis.  The Y axis of the first curve is referred
-    to as the base Y-axis and the Y axes of the other curves as additional
-    Y axes.  Curves are numbered sequentially from 1 (the base curve) in
-    the order in which they are displayed.  See the /AXLAB, /GROPT, /GRID,
-    and /GTHK commands for other display options.
+        Parameters
+        ----------
+        label
+            Apply thicknesses as selected from the following labels:
 
-    This command is valid in any processor.
-    """
-    command = f"/GRTYP,{kaxis}"
-    return self.run(command, **kwargs)
+            AXIS - Modify thickness of ordinate and abscissa axes on graph displays.
 
+            GRID - Modify thickness of grid lines on graph displays.
 
-def gthk(self, label="", thick="", **kwargs):
-    """Sets line thicknesses for graph lines.
+            CURVE - Modify thickness of curve lines (when no area fill [/GROPT]).
 
-    APDL Command: /GTHK
+        thick
+            Thickness ratio (whole numbers only, from -1 to 10):
 
-    Parameters
-    ----------
-    label
-        Apply thicknesses as selected from the following labels:
+            -1 - Do not draw the curve, but show only the markers specified by /GMARKER.
 
-        AXIS - Modify thickness of ordinate and abscissa axes on graph displays.
+            0 or 1 - Thin lines.
 
-        GRID - Modify thickness of grid lines on graph displays.
+            2 - The default thickness.
 
-        CURVE - Modify thickness of curve lines (when no area fill [/GROPT]).
+            3 - 1.5 times the default thickness.
 
-    thick
-        Thickness ratio (whole numbers only, from -1 to 10):
+            etc. - (up to 10)
 
-        -1 - Do not draw the curve, but show only the markers specified by /GMARKER.
+        Notes
+        -----
+        Sets line thicknesses for graph lines (in raster mode only).  Use
+        /GTHK,STAT to show settings.
 
-        0 or 1 - Thin lines.
+        This command is valid in any processor.
+        """
+        command = f"/GTHK,{label},{thick}"
+        return self.run(command, **kwargs)
 
-        2 - The default thickness.
+    def xrange(self, xmin="", xmax="", **kwargs):
+        """Specifies a linear abscissa (X) scale range.
 
-        3 - 1.5 times the default thickness.
+        APDL Command: /XRANGE
 
-        etc. - (up to 10)
+        Parameters
+        ----------
+        xmin
+            Minimum abscissa scale value.
 
-    Notes
-    -----
-    Sets line thicknesses for graph lines (in raster mode only).  Use
-    /GTHK,STAT to show settings.
+        xmax
+            Maximum abscissa scale value.
 
-    This command is valid in any processor.
-    """
-    command = f"/GTHK,{label},{thick}"
-    return self.run(command, **kwargs)
+        Notes
+        -----
+        Specifies a linear abscissa (X) scale range for the line graph display.
+        Use /XRANGE,DEFAULT to return to automatic scaling.
 
+        Automatic scaling will often yield inappropriate range values for
+        logarithmic scales (/GROPT, LOGX).
 
-def xrange(self, xmin="", xmax="", **kwargs):
-    """Specifies a linear abscissa (X) scale range.
+        This command is valid in any processor.
+        """
+        command = f"/XRANGE,{xmin},{xmax}"
+        return self.run(command, **kwargs)
 
-    APDL Command: /XRANGE
+    def yrange(self, ymin="", ymax="", num="", **kwargs):
+        """Specifies a linear ordinate (Y) scale range.
 
-    Parameters
-    ----------
-    xmin
-        Minimum abscissa scale value.
+        APDL Command: /YRANGE
 
-    xmax
-        Maximum abscissa scale value.
+        Parameters
+        ----------
+        ymin
+            Minimum ordinate scale value.
 
-    Notes
-    -----
-    Specifies a linear abscissa (X) scale range for the line graph display.
-    Use /XRANGE,DEFAULT to return to automatic scaling.
+        ymax
+            Maximum ordinate scale value.
 
-    Automatic scaling will often yield inappropriate range values for
-    logarithmic scales (/GROPT, LOGX).
+        num
+            Y-axis number to which range applies (defaults to 1).  Valid
+            numbers are 1 to 3 for /GRTYP,2 and 1 to 6 for /GRTYP,3.  If ALL,
+            apply to all Y-axes.
 
-    This command is valid in any processor.
-    """
-    command = f"/XRANGE,{xmin},{xmax}"
-    return self.run(command, **kwargs)
+        Notes
+        -----
+        Specifies a linear ordinate (Y) scale range for the line graph display.
+        Use /YRANGE,DEFAULT to return to automatic scaling.  For multiple
+        Y-axes graphs [/GRTYP], see /GROPT, ASCAL to automatically scale the
+        additional Y-axes.
 
+        Automatic scaling will often yield inappropriate range values for
+        logarithmic scales (/GROPT, LOGY).
 
-def yrange(self, ymin="", ymax="", num="", **kwargs):
-    """Specifies a linear ordinate (Y) scale range.
-
-    APDL Command: /YRANGE
-
-    Parameters
-    ----------
-    ymin
-        Minimum ordinate scale value.
-
-    ymax
-        Maximum ordinate scale value.
-
-    num
-        Y-axis number to which range applies (defaults to 1).  Valid
-        numbers are 1 to 3 for /GRTYP,2 and 1 to 6 for /GRTYP,3.  If ALL,
-        apply to all Y-axes.
-
-    Notes
-    -----
-    Specifies a linear ordinate (Y) scale range for the line graph display.
-    Use /YRANGE,DEFAULT to return to automatic scaling.  For multiple
-    Y-axes graphs [/GRTYP], see /GROPT, ASCAL to automatically scale the
-    additional Y-axes.
-
-    Automatic scaling will often yield inappropriate range values for
-    logarithmic scales (/GROPT, LOGY).
-
-    This command is valid in any processor.
-    """
-    command = f"/YRANGE,{ymin},{ymax},{num}"
-    return self.run(command, **kwargs)
+        This command is valid in any processor.
+        """
+        command = f"/YRANGE,{ymin},{ymax},{num}"
+        return self.run(command, **kwargs)
