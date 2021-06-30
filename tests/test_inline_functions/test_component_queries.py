@@ -1,0 +1,52 @@
+
+
+class TestCentroidGetter:
+    def test_x(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        x = q.centrx(1)
+        assert x is not None
+
+    def test_y(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        y = q.centry(1)
+        assert y is not None
+
+    def test_z(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        z = q.centrz(1)
+        assert z is not None
+
+
+class TestComponentQueries:
+    def test_nx(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        x = q.nx(1)
+        assert x == nodes[1].x
+
+    def test_ny(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        y = q.ny(1)
+        assert y == nodes[1].y
+
+    def test_nz(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        z = q.nz(1)
+        assert z == nodes[1].z
+
+    def test_kx(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        # first kp at (0, 0, 0)
+        x = q.kx(kps[0])
+        assert x == 0.
+
+    def test_ky(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        y = q.ky(kps[0])
+        assert y == 0.
+
+    def test_kz(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        z = q.kz(kps[0])
+        assert z == 0.
+
+
