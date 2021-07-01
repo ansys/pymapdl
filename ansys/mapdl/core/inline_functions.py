@@ -17,7 +17,8 @@ class _ComponentQueries(_ParameterParsing):
     _mapdl = None
 
     def centrx(self, e: int) -> float:
-        """
+        """Return the x coordinate of the element centroid.
+
         Fetches centroid X-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
