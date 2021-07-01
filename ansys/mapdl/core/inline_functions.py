@@ -1,12 +1,11 @@
-from typing import Optional
 
 
 class _ParameterParsing:
-    def _parse_parameter_integer_response(self, response) -> Optional[int]:
+    def _parse_parameter_integer_response(self, response) -> int:
         return int(self._parse_parameter_float_response(response))
 
     @staticmethod
-    def _parse_parameter_float_response(response) -> Optional[int]:
+    def _parse_parameter_float_response(response) -> float:
         parts = response.split('=')
         if len(parts) != 2:
             raise TypeError('Expression not provided; parameter response not recognised.')
@@ -14,7 +13,9 @@ class _ParameterParsing:
         return float(number)
 
 
-class ComponentQueries(_ParameterParsing):
+class _ComponentQueries(_ParameterParsing):
+    _mapdl = None
+
     def centrx(self, e: int) -> float:
         """
         Fetches centroid X-coordinate of element ``e`` in global
@@ -295,7 +296,7 @@ class ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
 
-class Query(ComponentQueries):
+class Query(_ComponentQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
