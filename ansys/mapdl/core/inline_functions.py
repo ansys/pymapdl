@@ -34,6 +34,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a line between the coordinates (0, 0, 0) and
+        (1, 2, 3) then find the centroid x-coordinate of this element.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -43,7 +46,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
         >>> q = Query(mapdl)
-        >>> print(q.centrx(e0))
+        >>> q.centrx(e0)
         0.5
         """
         response = self._mapdl.run(f'_=CENTRX({e})')
@@ -67,6 +70,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a line between the coordinates (0, 0, 0) and
+        (1, 2, 3) then find the centroid y-coordinate of this element.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -76,7 +82,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
         >>> q = Query(mapdl)
-        >>> print(q.centry(e0))
+        >>> q.centry(e0)
         1.0
         """
         response = self._mapdl.run(f'_=CENTRY({e})')
@@ -100,6 +106,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a line between the coordinates (0, 0, 0) and
+        (1, 2, 3) then find the centroid z-coordinate of this element.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -109,7 +118,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
         >>> q = Query(mapdl)
-        >>> print(q.centrz(e0))
+        >>> q.centrz(e0)
         1.5
         """
         response = self._mapdl.run(f'_=CENTRZ({e})')
@@ -132,6 +141,10 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a simple box and mesh it with elements. Then
+        we use the ``Query`` class, and the ``nx`` method to find the
+        x-coordinate of the 10th node.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -164,6 +177,10 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a simple box and mesh it with elements. Then
+        we use the ``Query`` class, and the ``ny`` method to find the
+        y-coordinate of the 10th node.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -196,6 +213,10 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we construct a simple box and mesh it with elements. Then
+        we use the ``Query`` class, and the ``nz`` method to find the
+        z-coordinate of the 10th node.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -227,6 +248,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we add a single keypoint, then use ``kx`` to extract the
+        x-coordinate of it.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -255,6 +279,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we add a single keypoint, then use ``ky`` to extract the
+        y-coordinate of it.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -283,6 +310,9 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        Here we add a single keypoint, then use ``kz`` to extract the
+        z-coordinate of it.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
@@ -317,6 +347,10 @@ class Query(_ComponentQueries):
 
     Examples
     --------
+    In this example we construct a solid box and mesh it. Then we use
+    the ``Query`` methods ``nx``, ``ny``, and ``nz`` to find the
+    cartesian coordinates of the first node.
+
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core.inline_functions import Query
     >>> mapdl = launch_mapdl()
