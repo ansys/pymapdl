@@ -34,8 +34,8 @@ class _ComponentQueries(_ParameterParsing):
 
         Examples
         --------
-        Here we construct a line between the coordinates (0, 0, 0) and
-        (1, 2, 3) then find the centroid x-coordinate of this element.
+        Here we construct a line between the coordinates ``(0, 0, 0)`` and
+        ``(1, 2, 3)`` then find the centroid x-coordinate of this element.
 
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
