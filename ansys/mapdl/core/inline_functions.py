@@ -352,7 +352,25 @@ class _InverseGetComponentQueries(_ParameterParsing):
 
         Examples
         --------
+        In this example we construct a solid cube and mesh it. Then we
+        use ``Query.node`` to find the node closest to the centre of the
+        cube. Using this we can extract the coordinates of this node and
+        see how close to the centre the node is.
 
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 10, 0, 10)
+        >>> mapdl.esize(3)
+        >>> mapdl.vmesh('ALL')
+        >>> q = Query(mapdl)
+        >>> node_number = q.node(5., 5., 5.)
+        >>> node_number
+        112
+        >>> q.nx(node_number), q.ny(node_number), q.nz(node_number)
+        5.0, 5.0, 5.0
         """
         response = self._mapdl.run(f'_=NODE({x},{y},{z})')
         return self._parse_parameter_integer_response(response)
@@ -377,6 +395,22 @@ class _InverseGetComponentQueries(_ParameterParsing):
         -------
         number : int
             Keypoint number
+
+        Examples
+        --------
+        In this example we construct a simple triangle of keypoints in
+        3D and then find the keypoint closest to the point (1, 1, 1).
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.k(1, 0, 1, 2)
+        >>> mapdl.k(2, 1, 2, 0)
+        >>> mapdl.k(3, 2, 0, 1)
+        >>> q = Query(mapdl)
+        >>> q.kp(1., 1., 1.)
+        1
         """
         response = self._mapdl.run(f'_=KP({x},{y},{z})')
         return self._parse_parameter_integer_response(response)
