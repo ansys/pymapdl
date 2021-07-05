@@ -73,3 +73,23 @@ class TestInverseGetFunctions:
         q, kps, areas, nodes = box_geometry
         kp = q.kp(*coords)
         assert kp in kps
+
+
+class TestDisplacementComponentQueries:
+    def test_ux(self, solved_box):
+        q, nodes = solved_box
+        displaced_nodes = [node for node in nodes
+                           if abs(q.ux(node)) > 0]
+        assert len(displaced_nodes) > 0
+
+    def test_uy(self, solved_box):
+        q, nodes = solved_box
+        displaced_nodes = [node for node in nodes
+                           if abs(q.uy(node)) > 0]
+        assert len(displaced_nodes) > 0
+
+    def test_uz(self, solved_box):
+        q, nodes = solved_box
+        displaced_nodes = [node for node in nodes
+                           if abs(q.uz(node)) > 0]
+        assert len(displaced_nodes) > 0
