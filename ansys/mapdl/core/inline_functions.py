@@ -1,3 +1,4 @@
+import warnings
 
 
 class _ParameterParsing:
@@ -6,9 +7,13 @@ class _ParameterParsing:
 
     @staticmethod
     def _parse_parameter_float_response(response) -> float:
-        parts = response.split('=')
-        if len(parts) != 2:
-            raise TypeError('Expression not provided; parameter response not recognised.')
+        if 'PARAMETER' not in response:
+            raise TypeError(f'Parameter response not recognised: '
+                            f'"{response}"')
+        parts = response.rsplit('=', 1)
+        if 'WARNING' in parts[0]:
+            warnings.warn(parts[0])
+
         number = parts[1].strip()
         return float(number)
 
@@ -416,7 +421,205 @@ class _InverseGetComponentQueries(_ParameterParsing):
         return self._parse_parameter_integer_response(response)
 
 
-class Query(_ComponentQueries, _InverseGetComponentQueries):
+class _DisplacementComponentQueries(_ParameterParsing):
+    _mapdl = None
+
+    def rotx(self, n: int) -> float:
+        """
+        X-component of structural displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        number : float
+            Displacement of node
+
+        Examples
+        --------
+        In this example we create a simple block of 6 cubic elements,
+        fix one end in place, and then bend the other perpindicular to
+        it. We can then examine the displacement of one of the nodes
+        in the x-direction at the deformed end (node number 7).
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 20, 0, 30)
+        >>> mapdl.esize(10)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.mp('EX', 1, 210E9)
+        >>> mapdl.nsel('S', 'LOC', 'Z', 0)
+        >>> mapdl.d('ALL', 'UX')
+        >>> mapdl.d('ALL', 'UY')
+        >>> mapdl.d('ALL', 'UZ')
+        >>> mapdl.nsel('S', 'LOC', 'Z', 30)
+        >>> mapdl.f('ALL', 'FY', 1000)
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.solve()
+        >>> mapdl.finish()
+        >>> q = Query(mapdl)
+        >>> q.rotx(7)
+        1.549155634e-07
+
+        """
+        response = self._mapdl.run(f'_=ROTX({n})')
+        return self._parse_parameter_float_response(response)
+
+    def ux(self, n: int) -> float:
+        """
+        X-component of structural displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        number : float
+            Displacement of node
+
+        Examples
+        --------
+        In this example we create a simple block of 6 cubic elements,
+        fix one end in place, and then bend the other perpindicular to
+        it. We can then examine the displacement of one of the nodes
+        in the x-direction at the deformed end (node number 7).
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 20, 0, 30)
+        >>> mapdl.esize(10)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.mp('EX', 1, 210E9)
+        >>> mapdl.nsel('S', 'LOC', 'Z', 0)
+        >>> mapdl.d('ALL', 'UX')
+        >>> mapdl.d('ALL', 'UY')
+        >>> mapdl.d('ALL', 'UZ')
+        >>> mapdl.nsel('S', 'LOC', 'Z', 30)
+        >>> mapdl.f('ALL', 'FY', 1000)
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.solve()
+        >>> mapdl.finish()
+        >>> q = Query(mapdl)
+        >>> q.ux(7)
+        1.549155634e-07
+
+        """
+        response = self._mapdl.run(f'_=UX({n})')
+        return self._parse_parameter_float_response(response)
+
+    def uy(self, n: int) -> float:
+        """
+        Y-component of structural displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        number : float
+            Displacement of node
+
+        Examples
+        --------
+        In this example we create a simple block of 6 cubic elements,
+        fix one end in place, and then bend the other perpindicular to
+        it. We can then examine the displacement of one of the nodes
+        in the y-direction at the deformed end (node number 7).
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 20, 0, 30)
+        >>> mapdl.esize(10)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.mp('EX', 1, 210E9)
+        >>> mapdl.nsel('S', 'LOC', 'Z', 0)
+        >>> mapdl.d('ALL', 'UX')
+        >>> mapdl.d('ALL', 'UY')
+        >>> mapdl.d('ALL', 'UZ')
+        >>> mapdl.nsel('S', 'LOC', 'Z', 30)
+        >>> mapdl.f('ALL', 'FY', 1000)
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.solve()
+        >>> mapdl.finish()
+        >>> q = Query(mapdl)
+        >>> q.uy(7)
+        5.803680779e-10
+
+        """
+        response = self._mapdl.run(f'_=UY({n})')
+        return self._parse_parameter_float_response(response)
+
+    def uz(self, n: int) -> float:
+        """
+        Z-component of structural displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        number : float
+            Displacement of node
+
+        Examples
+        --------
+        In this example we create a simple block of 6 cubic elements,
+        fix one end in place, and then bend the other perpindicular to
+        it. We can then examine the displacement of one of the nodes
+        in the z-direction at the deformed end (node number 7).
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 20, 0, 30)
+        >>> mapdl.esize(10)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.mp('EX', 1, 210E9)
+        >>> mapdl.nsel('S', 'LOC', 'Z', 0)
+        >>> mapdl.d('ALL', 'UX')
+        >>> mapdl.d('ALL', 'UY')
+        >>> mapdl.d('ALL', 'UZ')
+        >>> mapdl.nsel('S', 'LOC', 'Z', 30)
+        >>> mapdl.f('ALL', 'FY', 1000)
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.solve()
+        >>> mapdl.finish()
+        >>> q = Query(mapdl)
+        >>> q.uz(7)
+        3.74530389e-08
+
+        """
+        response = self._mapdl.run(f'_=UZ({n})')
+        return self._parse_parameter_float_response(response)
+
+
+class Query(_ComponentQueries,
+            _InverseGetComponentQueries,
+            _DisplacementComponentQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
