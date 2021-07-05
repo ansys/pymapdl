@@ -11,6 +11,9 @@ from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.launcher import (get_start_instance,
                                        MAPDL_DEFAULT_PORT,
                                        _get_available_base_ansys)
+from ansys.mapdl.core.inline_functions import Query
+from common import get_details_of_nodes
+
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -165,7 +168,6 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
-
 @pytest.fixture(scope="session", params=local)
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
@@ -248,3 +250,62 @@ def cube_solve(cleared, mapdl):
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
+
+
+@pytest.fixture
+def box_geometry(mapdl, cleared):
+    areas, keypoints = create_geometry(mapdl)
+    q = Query(mapdl)
+    return q, keypoints, areas, get_details_of_nodes(mapdl)
+
+
+@pytest.fixture
+def solved_box(mapdl, cleared):
+    areas, keypoints = create_geometry(mapdl)
+    apply_forces(mapdl)
+    solve_simulation(mapdl)
+    q = Query(mapdl)
+    return q, keypoints, areas, get_details_of_nodes(mapdl)
+
+
+def create_geometry(mapdl):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 0, 5, 0)
+    k2 = mapdl.k(3, 5, 5, 0)
+    k3 = mapdl.k(4, 5, 0, 0)
+    k4 = mapdl.k(5, 0, 0, 5)
+    k5 = mapdl.k(6, 0, 5, 5)
+    k6 = mapdl.k(7, 5, 5, 5)
+    k7 = mapdl.k(8, 5, 0, 5)
+    a0 = mapdl.a(1, 2, 3, 4)
+    a1 = mapdl.a(5, 6, 7, 8)
+    a2 = mapdl.a(3, 4, 8, 7)
+    a3 = mapdl.a(1, 2, 6, 5)
+    keypoints = [k0, k1, k2, k3, k4, k5, k6, k7]
+    areas = [a0, a1, a2, a3]
+    mapdl.esize(5)
+    mapdl.mshape(1, '2D')
+    mapdl.et(1, "SHELL181")
+    mapdl.amesh('ALL')
+    return areas, keypoints
+
+
+def apply_forces(mapdl):
+    for const in ['UX', 'UY', 'UZ', 'ROTX', 'ROTY', 'ROTZ']:
+        mapdl.d('all', const)
+
+    mapdl.f(1, 'FX', 1000)
+    mapdl.f(2, 'FY', 1000)
+    mapdl.f(3, 'FZ', 1000)
+    mapdl.f(4, 'MX', 1000)
+    mapdl.f(5, 'MY', 1000)
+    mapdl.f(6, 'MZ', 1000)
+    mapdl.d(7, 'UZ')
+    mapdl.d(8, 'UZ')
+
+
+def solve_simulation(mapdl):
+    mapdl.run('/solu')
+    mapdl.antype('static')
+    mapdl.solve()
