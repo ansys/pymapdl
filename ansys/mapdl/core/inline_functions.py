@@ -30,7 +30,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
@@ -54,7 +54,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def centry(self, e: int) -> float:
-        """
+        """Return the y coordinate of the element centroid.
+
         Fetches centroid Y-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
@@ -66,7 +67,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
@@ -90,7 +91,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def centrz(self, e: int) -> float:
-        """
+        """Return the z coordinate of the element centroid.
+
         Fetches centroid Z-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
@@ -102,7 +104,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
@@ -126,7 +128,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def nx(self, n: int) -> float:
-        """
+        """Return the x coordinate of a node.
+
         Fetches X-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -137,7 +140,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -162,7 +165,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def ny(self, n: int) -> float:
-        """
+        """Return the y coordinate of a node.
+
         Fetches Y-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -173,7 +177,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -198,7 +202,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def nz(self, n: int) -> float:
-        """
+        """Return the z coordinate of a node.
+
         Fetches Z-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -209,7 +214,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -234,7 +239,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def kx(self, k: int) -> float:
-        """
+        """Return the x coordinate of a keypont.
+
         X-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -244,7 +250,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
@@ -265,7 +271,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def ky(self, k: int) -> float:
-        """
+        """Return the y coordinate of a keypont.
+
         Y-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -275,7 +282,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
@@ -296,7 +303,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def kz(self, k: int) -> float:
-        """
+        """Return the z coordinate of a keypont.
+
         Z-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -306,7 +314,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
