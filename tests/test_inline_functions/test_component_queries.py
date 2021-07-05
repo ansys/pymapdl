@@ -1,3 +1,4 @@
+import pytest
 
 
 class TestCentroidGetter:
@@ -50,3 +51,25 @@ class TestComponentQueries:
         assert z == 0.
 
 
+class TestInverseGetFunctions:
+    @pytest.mark.parametrize('coords', [(0, 0, 0),
+                                        (.5, .5, .5),
+                                        (100, 100, 100)])
+    def test_get_node_at_coordinates(self, box_geometry, coords):
+        q, kps, areas, nodes = box_geometry
+        node = q.node(*coords)
+        assert node in nodes
+
+    def test_get_node_matches_known_node(self, box_geometry):
+        q, kps, areas, nodes = box_geometry
+        for number, node in nodes.items():
+            calculated_node = q.node(node.x, node.y, node.z)
+            assert number == calculated_node
+
+    @pytest.mark.parametrize('coords', [(0, 0, 0),
+                                        (.5, .5, .5),
+                                        (100, 100, 100)])
+    def test_get_keypoints_at_coordinates(self, box_geometry, coords):
+        q, kps, areas, nodes = box_geometry
+        kp = q.kp(*coords)
+        assert kp in kps

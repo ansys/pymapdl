@@ -12,6 +12,9 @@ given its number (``Query.nx``).
 .. autosummary::
    :toctree: _autosummary/
 
+   Query.node
+   Query.kp
+
    Query.centrx
    Query.centry
    Query.centrz
