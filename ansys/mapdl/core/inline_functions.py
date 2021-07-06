@@ -454,7 +454,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Examples
         --------
         In this example we create a simple block of 6 cubic elements,
-        fix one end in place, and then bend the other perpindicular to
+        fix one end in place, and then bend the other perpendicular to
         it. We can then examine the displacement of one of the nodes
         in the x-direction at the deformed end (node number 7).
 
@@ -503,7 +503,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Examples
         --------
         In this example we create a simple block of 6 cubic elements,
-        fix one end in place, and then bend the other perpindicular to
+        fix one end in place, and then bend the other perpendicular to
         it. We can then examine the displacement of one of the nodes
         in the y-direction at the deformed end (node number 7).
 
@@ -552,7 +552,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Examples
         --------
         In this example we create a simple block of 6 cubic elements,
-        fix one end in place, and then bend the other perpindicular to
+        fix one end in place, and then bend the other perpendicular to
         it. We can then examine the displacement of one of the nodes
         in the z-direction at the deformed end (node number 7).
 
