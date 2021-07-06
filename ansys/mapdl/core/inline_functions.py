@@ -1,6 +1,7 @@
 import warnings
 
 
+
 class _ParameterParsing:
     def _parse_parameter_integer_response(self, response) -> int:
         return int(self._parse_parameter_float_response(response))
@@ -22,7 +23,8 @@ class _ComponentQueries(_ParameterParsing):
     _mapdl = None
 
     def centrx(self, e: int) -> float:
-        """
+        """Return the x coordinate of the element centroid.
+
         Fetches centroid X-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
@@ -34,13 +36,14 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
         --------
-        Here we construct a line between the coordinates (0, 0, 0) and
-        (1, 2, 3) then find the centroid x-coordinate of this element.
+        Here we construct a line between the coordinates ``(0, 0, 0)``
+        and ``(1, 2, 3)`` then find the centroid x-coordinate of this
+        element.
 
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
@@ -58,7 +61,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def centry(self, e: int) -> float:
-        """
+        """Return the y coordinate of the element centroid.
+
         Fetches centroid Y-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
@@ -70,7 +74,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
@@ -94,7 +98,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def centrz(self, e: int) -> float:
-        """
+        """Return the z coordinate of the element centroid.
+
         Fetches centroid Z-coordinate of element ``e`` in global
         Cartesian coordinate system. Centroid is determined from the
         selected nodes on the element.
@@ -106,7 +111,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             The centroid coordinate.
 
         Examples
@@ -130,7 +135,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def nx(self, n: int) -> float:
-        """
+        """Return the x coordinate of a node.
+
         Fetches X-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -141,7 +147,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -166,7 +172,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def ny(self, n: int) -> float:
-        """
+        """Return the y coordinate of a node.
+
         Fetches Y-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -177,7 +184,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -202,7 +209,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def nz(self, n: int) -> float:
-        """
+        """Return the z coordinate of a node.
+
         Fetches Z-coordinate of node ``n`` in the active coordinate
         system.
 
@@ -213,7 +221,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number: float
+        float
              Coordinate of node
 
         Examples
@@ -238,7 +246,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def kx(self, k: int) -> float:
-        """
+        """Return the x coordinate of a keypont.
+
         X-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -248,7 +257,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
@@ -269,7 +278,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def ky(self, k: int) -> float:
-        """
+        """Return the y coordinate of a keypont.
+
         Y-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -279,7 +289,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
@@ -300,7 +310,8 @@ class _ComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def kz(self, k: int) -> float:
-        """
+        """Return the z coordinate of a keypont.
+
         Z-coordinate of keypoint ``k`` in the active coordinate system.
 
         Parameters
@@ -310,7 +321,7 @@ class _ComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Coordinate of the keypoint.
 
         Examples
@@ -335,8 +346,9 @@ class _InverseGetComponentQueries(_ParameterParsing):
     _mapdl = None
 
     def node(self, x: float, y: float, z: float) -> int:
-        """Number of the selected node nearest the `x`, `y`, `z` point.
+        """Return node closest to coordinate ``(x, y, z)``.
 
+        Number of the selected node nearest the `x`, `y`, `z` point.
         (In the active coordinate system, lowest number for coincident
         nodes.) A number higher than the highest node number indicates
         that the node is internal (generated by program).
@@ -352,7 +364,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : int
+        int
             Node number
 
         Examples
@@ -381,7 +393,8 @@ class _InverseGetComponentQueries(_ParameterParsing):
         return self._parse_parameter_integer_response(response)
 
     def kp(self, x: float, y: float, z: float) -> int:
-        """
+        """Return keypoint closest to coordinate ``(x, y, z)``.
+
         Number of the selected keypoint nearest the `x`, `y`, `z` point.
 
         In the active coordinate system, lowest number for coincident
@@ -398,7 +411,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : int
+        int
             Keypoint number
 
         Examples
