@@ -1,14 +1,13 @@
 import warnings
 
 
-
 class _ParameterParsing:
     def _parse_parameter_integer_response(self, response) -> int:
         return int(self._parse_parameter_float_response(response))
 
     @staticmethod
     def _parse_parameter_float_response(response) -> float:
-        if 'PARAMETER' not in response:
+        if 'PARAMETER' not in response or '=' not in response:
             raise TypeError(f'Parameter response not recognised: '
                             f'"{response}"')
         parts = response.rsplit('=', 1)
@@ -437,56 +436,9 @@ class _InverseGetComponentQueries(_ParameterParsing):
 class _DisplacementComponentQueries(_ParameterParsing):
     _mapdl = None
 
-    def rotx(self, n: int) -> float:
-        """
-        X-component of structural displacement at node ``n``.
-
-        Parameters
-        ----------
-        n : int
-            Node number
-
-        Returns
-        -------
-        number : float
-            Displacement of node
-
-        Examples
-        --------
-        In this example we create a simple block of 6 cubic elements,
-        fix one end in place, and then bend the other perpindicular to
-        it. We can then examine the displacement of one of the nodes
-        in the x-direction at the deformed end (node number 7).
-
-        >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
-        >>> mapdl = launch_mapdl()
-        >>> mapdl.prep7()
-        >>> mapdl.et(1, 'SOLID5')
-        >>> mapdl.block(0, 10, 0, 20, 0, 30)
-        >>> mapdl.esize(10)
-        >>> mapdl.vmesh('ALL')
-        >>> mapdl.mp('EX', 1, 210E9)
-        >>> mapdl.nsel('S', 'LOC', 'Z', 0)
-        >>> mapdl.d('ALL', 'UX')
-        >>> mapdl.d('ALL', 'UY')
-        >>> mapdl.d('ALL', 'UZ')
-        >>> mapdl.nsel('S', 'LOC', 'Z', 30)
-        >>> mapdl.f('ALL', 'FY', 1000)
-        >>> mapdl.run('/SOLU')
-        >>> mapdl.antype('STATIC')
-        >>> mapdl.solve()
-        >>> mapdl.finish()
-        >>> q = Query(mapdl)
-        >>> q.rotx(7)
-        1.549155634e-07
-
-        """
-        response = self._mapdl.run(f'_=ROTX({n})')
-        return self._parse_parameter_float_response(response)
-
     def ux(self, n: int) -> float:
-        """
+        """Returns x-component of structural displacement at a node.
+
         X-component of structural displacement at node ``n``.
 
         Parameters
@@ -496,7 +448,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Displacement of node
 
         Examples
@@ -534,7 +486,8 @@ class _DisplacementComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def uy(self, n: int) -> float:
-        """
+        """Returns y-component of structural displacement at a node.
+
         Y-component of structural displacement at node ``n``.
 
         Parameters
@@ -544,7 +497,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Displacement of node
 
         Examples
@@ -582,7 +535,8 @@ class _DisplacementComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
     def uz(self, n: int) -> float:
-        """
+        """Returns z-component of structural displacement at a node.
+
         Z-component of structural displacement at node ``n``.
 
         Parameters
@@ -592,7 +546,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
 
         Returns
         -------
-        number : float
+        float
             Displacement of node
 
         Examples
@@ -650,6 +604,9 @@ class Query(_ComponentQueries,
     - `kx(k)` - get the x-coordinate of keypoint `k`
     - `ky(k)` - get the y-coordinate of keypoint `k`
     - `kz(k)` - get the z-coordinate of keypoint `k`
+    - `ux(n)` - get the structural displacement at node `n` in x
+    - `uy(n)` - get the structural displacement at node `n` in y
+    - `uz(n)` - get the structural displacement at node `n` in z
     - `node(x, y, z)` - get the node closest to coordinate (x, y, z)
     - `kp(x, y, z)` - get the keypoint closest to coordinate (x, y, z)
 

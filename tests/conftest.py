@@ -260,6 +260,11 @@ def box_geometry(mapdl, cleared):
 
 
 @pytest.fixture
+def query():
+    return Query(mapdl)
+
+
+@pytest.fixture
 def solved_box(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, 'SOLID5')
