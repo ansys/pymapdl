@@ -260,12 +260,36 @@ def box_geometry(mapdl, cleared):
 
 
 @pytest.fixture
+def query():
+    return Query(mapdl)
+
+
+@pytest.fixture
 def solved_box(mapdl, cleared):
-    areas, keypoints = create_geometry(mapdl)
-    apply_forces(mapdl)
-    solve_simulation(mapdl)
+    mapdl.prep7()
+    mapdl.et(1, 'SOLID5')
+    mapdl.block(0, 10, 0, 20, 0, 30)
+    mapdl.esize(10)
+    mapdl.vmesh('ALL')
+    mapdl.units('SI')  # SI - International system (m, kg, s, K).
+    # Define a material (nominal steel in SI)
+    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
+    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    # Fix the left-hand side.
+    mapdl.nsel('S', 'LOC', 'Z', 0)
+    mapdl.d('ALL', 'UX')
+    mapdl.d('ALL', 'UY')
+    mapdl.d('ALL', 'UZ')
+
+    mapdl.nsel('S', 'LOC', 'Z', 30)
+    mapdl.f('ALL', 'FX', 1000)
+    mapdl.run('/SOLU')
+    mapdl.antype('STATIC')
+    mapdl.solve()
+    mapdl.finish()
     q = Query(mapdl)
-    return q, keypoints, areas, get_details_of_nodes(mapdl)
+    return q, get_details_of_nodes(mapdl)
 
 
 def create_geometry(mapdl):
