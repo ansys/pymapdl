@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: doc/build
-          key: ${{ PYMAPDL_VERSION }}
+          key: ${{ env.PYMAPDL_VERSION }}
 
 
       - name: Pull, launch, and validate MAPDL service
