@@ -9,7 +9,8 @@ on the ``mapdl.inline_functions.Query`` object. In this example we set
 up a simple simulation and use ``Query`` to demonstrate some of its
 functionality.
 
-We create a ``Query`` instance as below, using the ``mapdl`` instance
+We create an instance of :class:`ansys.mapdl.core.inline_functions.Query` below, using
+the ``mapdl`` instance.
 as a required argument.
 """
 
@@ -110,6 +111,5 @@ for node in [node1, node2]:
     
     """
     print(message)
-
 
 
