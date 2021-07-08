@@ -42,7 +42,6 @@ mapdl.eplot()
 # - Assign an Elastic modulus in the x-direction to material 1 of 21e9
 # - Select all nodes at the ``z = 30`` end of the block
 # - Remove all degrees of freedom for all nodes in the selection
-#   - I.e. fix them in place
 # - Select all nodes at the ``z = 0`` end
 # - Apply a x-direction force of 10000 to all of these
 # - Finish preprocessing
@@ -111,5 +110,4 @@ for node in [node1, node2]:
     
     """
     print(message)
-
 
