@@ -36,18 +36,6 @@ jobs:
           pip install dist/ansys*.whl
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-      - name: Cache pymapdl version
-      - run: |
-          export PYMAPDL_VERSION=$(python -c "from ansys.mapdl import core; print(core.__version__)")
-          echo "::set-env name=PYMAPDL_VERSION::$PYMAPDL_VERSION"
-
-      - name: Cache Documentation
-        id: cache-documentation
-        uses: actions/cache@v2
-        with:
-          path: doc/build
-          key: ${{ PYMAPDL_VERSION }}
-
       - name: Pull, launch, and validate MAPDL service
         run: |
           echo $GH_PAT | docker login -u $GH_USERNAME --password-stdin docker.pkg.github.com
