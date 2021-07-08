@@ -449,11 +449,41 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Displacement of node
+            Rotational displacement of node
 
         Examples
         --------
+        This example has been adapted from the example script
+        :ref:`ref_rotational_displacement_example`. We create a square
+        of shell material, apply a displacement perpendicular to the
+        plane of the material, and then solve.
 
+        Then we can use ``Query.rotx`` to get the x-component rotational
+        displacement at the middle node on the deformed edge.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SHELL181')
+        >>> mapdl.mp("EX", 1, 2e5)
+        >>> mapdl.rectng(0, 1, 0, 1)
+        >>> mapdl.sectype(1, "SHELL")
+        >>> mapdl.secdata(0.1)
+        >>> mapdl.esize(0.2)
+        >>> mapdl.amesh("all")
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.nsel("s", "loc", "x", 0)
+        >>> mapdl.d("all", "all")
+        >>> mapdl.nsel("s", "loc", "x", 1)
+        >>> mapdl.d("all", "uz", -0.1)
+        >>> mapdl.allsel("all")
+        >>> mapdl.solve()
+        >>> q = Query(mapdl)
+        >>> node = q.node(1, 0.5, 0)
+        >>> q.rotx(node)
+        -0.0002149851187
         """
         response = self._mapdl.run(f'_=ROTX({n})')
         return self._parse_parameter_float_response(response)
@@ -471,11 +501,41 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Displacement of node
+            Rotational displacement of node
 
         Examples
         --------
+        This example has been adapted from the example script
+        :ref:`ref_rotational_displacement_example`. We create a square
+        of shell material, apply a displacement perpendicular to the
+        plane of the material, and then solve.
 
+        Then we can use ``Query.roty`` to get the y-component rotational
+        displacement at the middle node on the deformed edge.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SHELL181')
+        >>> mapdl.mp("EX", 1, 2e5)
+        >>> mapdl.rectng(0, 1, 0, 1)
+        >>> mapdl.sectype(1, "SHELL")
+        >>> mapdl.secdata(0.1)
+        >>> mapdl.esize(0.2)
+        >>> mapdl.amesh("all")
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.nsel("s", "loc", "x", 0)
+        >>> mapdl.d("all", "all")
+        >>> mapdl.nsel("s", "loc", "x", 1)
+        >>> mapdl.d("all", "uz", -0.1)
+        >>> mapdl.allsel("all")
+        >>> mapdl.solve()
+        >>> q = Query(mapdl)
+        >>> node = q.node(1, 0.5, 0)
+        >>> q.roty(node)
+        0.1489593933
         """
         response = self._mapdl.run(f'_=ROTY({n})')
         return self._parse_parameter_float_response(response)
@@ -493,11 +553,41 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Displacement of node
+            Rotational displacement of node
 
         Examples
         --------
+        This example has been adapted from the example script
+        :ref:`ref_rotational_displacement_example`. We create a square
+        of shell material, apply a displacement perpendicular to the
+        plane of the material, and then solve.
 
+        Then we can use ``Query.rotz`` to get the z-component rotational
+        displacement at the middle node on the deformed edge.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SHELL181')
+        >>> mapdl.mp("EX", 1, 2e5)
+        >>> mapdl.rectng(0, 1, 0, 1)
+        >>> mapdl.sectype(1, "SHELL")
+        >>> mapdl.secdata(0.1)
+        >>> mapdl.esize(0.2)
+        >>> mapdl.amesh("all")
+        >>> mapdl.run('/SOLU')
+        >>> mapdl.antype('STATIC')
+        >>> mapdl.nsel("s", "loc", "x", 0)
+        >>> mapdl.d("all", "all")
+        >>> mapdl.nsel("s", "loc", "x", 1)
+        >>> mapdl.d("all", "uz", -0.1)
+        >>> mapdl.allsel("all")
+        >>> mapdl.solve()
+        >>> q = Query(mapdl)
+        >>> node = q.node(1, 0.5, 0)
+        >>> q.rotz(node)
+        0.0
         """
         response = self._mapdl.run(f'_=ROTZ({n})')
         return self._parse_parameter_float_response(response)
