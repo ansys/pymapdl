@@ -3,8 +3,14 @@ from enum import IntEnum
 
 
 class SelectionStatus(IntEnum):
-    """
-    Enumeration for Status Information to use with Inline.
+    """Enumeration class for selection status information.
+
+    This class is used with methods on the ``Query`` class and has the
+    following options.
+
+    UNSELECTED = -1
+    UNDEFINED = 0
+    SELECTED = 1
     """
     UNSELECTED = -1
     UNDEFINED = 0
