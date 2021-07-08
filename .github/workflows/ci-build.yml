@@ -40,6 +40,8 @@ jobs:
         run: |
           export PYMAPDL_VERSION=$(python -c "from ansys.mapdl import core; print(core.__version__)")
           echo "::set-env name=PYMAPDL_VERSION::$PYMAPDL_VERSION"
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
       - name: Cache Documentation
         id: cache-documentation
