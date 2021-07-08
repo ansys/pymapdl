@@ -50,7 +50,6 @@ jobs:
           path: doc/build
           key: ${{ env.PYMAPDL_VERSION }}
 
-
       - name: Pull, launch, and validate MAPDL service
         run: |
           echo $GH_PAT | docker login -u $GH_USERNAME --password-stdin docker.pkg.github.com
