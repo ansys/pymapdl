@@ -1,23 +1,26 @@
 """
 .. _ref_how_to_use_query:
 
-Using inline functions (Query)
------------------------------
+Using Inline Functions (Query)
+------------------------------
 
 Inline functions like ``UX`` have been implemented in PyMAPDL as methods
 on the ``mapdl.inline_functions.Query`` object. In this example we set
 up a simple simulation and use ``Query`` to demonstrate some of its
 functionality.
 
-We create an instance of :class:`ansys.mapdl.core.inline_functions.Query` below, using
-the ``mapdl`` instance.
-as a required argument.
+First, create an instance of
+:class:`ansys.mapdl.core.inline_functions.Query` below, using the
+``mapdl`` instance as a required argument.
 """
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.inline_functions import Query
 
 mapdl = launch_mapdl()
+
+# clear at the start and enter the preprocessing routine
+mapdl.clear()
 mapdl.prep7()
 q = Query(mapdl)
 
@@ -103,7 +106,6 @@ for node in [node1, node2]:
     ************************
     Displacement at Node {node}:
     ************************
-    _____
     X | {x_displacement}
     Y | {y_displacement}
     Z | {z_displacement}
