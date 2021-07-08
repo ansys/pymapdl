@@ -1,5 +1,5 @@
 """
-.. _ref_how_to_use_Query:
+.. _ref_how_to_use_query:
 
 Using inline functions (Query)
 -----------------------------
@@ -110,7 +110,6 @@ for node in [node1, node2]:
     
     """
     print(message)
-
 
 
 
