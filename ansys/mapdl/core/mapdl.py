@@ -1542,6 +1542,8 @@ class _MapdlCore(Commands):
         self.filname(new_jobname, mute=True)
         self._jobname = new_jobname
 
+    # TODO: add static_analysis
+
     def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
                        nrmkey='', modtype='', memory_option='', elcalc=False):
         """Run a modal with basic settings analysis
