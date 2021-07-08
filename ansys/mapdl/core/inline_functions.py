@@ -436,6 +436,72 @@ class _InverseGetComponentQueries(_ParameterParsing):
 class _DisplacementComponentQueries(_ParameterParsing):
     _mapdl = None
 
+    def rotx(self, n: int) -> float:
+        """Returns x-component of rotational displacement at a node.
+
+        X-component of rotational displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        float
+            Displacement of node
+
+        Examples
+        --------
+
+        """
+        response = self._mapdl.run(f'_=ROTX({n})')
+        return self._parse_parameter_float_response(response)
+
+    def roty(self, n: int) -> float:
+        """Returns y-component of rotational displacement at a node.
+
+        Y-component of rotational displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        float
+            Displacement of node
+
+        Examples
+        --------
+
+        """
+        response = self._mapdl.run(f'_=ROTY({n})')
+        return self._parse_parameter_float_response(response)
+
+    def rotz(self, n: int) -> float:
+        """Returns z-component of rotational displacement at a node.
+
+        Z-component of rotational displacement at node ``n``.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        float
+            Displacement of node
+
+        Examples
+        --------
+
+        """
+        response = self._mapdl.run(f'_=ROTZ({n})')
+        return self._parse_parameter_float_response(response)
+
     def ux(self, n: int) -> float:
         """Returns x-component of structural displacement at a node.
 
