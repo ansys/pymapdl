@@ -77,3 +77,25 @@ class TestLSEL:
         q = selection_test_geometry
         select = q.lsel(999)
         assert select == 0
+
+
+class TestASEL:
+    def test_selected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.asel('all')
+        # there are 4 areas numbered 1-4
+        for area in range(1, 5, 1):
+            select = q.asel(area)
+            assert select == 1
+
+    def test_unselected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.asel('NONE')
+        for area in range(1, 5, 1):
+            select = q.asel(area)
+            assert select == -1
+
+    def test_undefined(self, selection_test_geometry):
+        q = selection_test_geometry
+        select = q.asel(999)
+        assert select == 0
