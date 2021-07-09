@@ -892,6 +892,61 @@ class _SelectionStatusQueries(_ParameterParsing):
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
+    def vsel(self, v: int) -> SelectionStatus:
+        """Returns selection status of a volume.
+
+        Returns a ``SelectionStatus`` object with values:
+
+        1  - SELECTED
+        0  - UNDEFINED
+        -1 - UNSELECTED
+
+        Parameters
+        ----------
+        v : int
+            Volume number
+
+        Returns
+        -------
+        mapdl.ansys.core.inline_functions.SelectionStatus
+            Status of element
+
+        Examples
+        --------
+        Here we create a single volume and interrogate its selection
+        status.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SHELL181')
+        >>> k1 = mapdl.k(1, 0, 0, 0)
+        >>> k2 = mapdl.k(2, 1, 0, 0)
+        >>> k3 = mapdl.k(3, 0, 1, 0)
+        >>> k4 = mapdl.k(4, 0, 0, 1)
+        >>> v1 = mapdl.v(k1, k2, k3, k4)
+        >>> v1
+        1
+
+        We can use ``Query.vsel`` to interrogate the selection status
+        of the element. The response is an ``enum.IntEnum`` object. If
+        you query a volume that does not exist, it will return a
+        status ``SelectionStatus.UNDEFINED``.
+
+        >>> q = Query(mapdl)
+        >>> q.vsel(v1)
+        <SelectionStatus.SELECTED: 1>
+        >>> mapdl.vsel('NONE')
+        >>> q.vsel(v1)
+        <SelectionStatus.UNSELECTED: -1>
+        >>> q.vsel(0)
+        <SelectionStatus.UNDEFINED: 0>
+        """
+        response = self._mapdl.run(f'_=VSEL({v})')
+        integer = self._parse_parameter_integer_response(response)
+        return SelectionStatus(integer)
+
 
 class Query(_ComponentQueries,
             _InverseGetComponentQueries,
