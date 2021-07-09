@@ -660,10 +660,12 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> n1 = mapdl.n(1, 0, 0, 0)
         >>> n1
         1
+
         We can use ``Query.nsel`` to interrogate the selection status
         of the node. The response is an ``enum.IntEnum`` object. If
         you query a node that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
+
         >>> q = Query(mapdl)
         >>> q.nsel(n1)
         <SelectionStatus.SELECTED: 1>
