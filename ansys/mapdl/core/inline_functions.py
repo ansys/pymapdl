@@ -1,4 +1,50 @@
 import warnings
+from enum import IntEnum
+
+
+class SelectionStatus(IntEnum):
+    """Enumeration class for selection status information.
+
+    This class is used with methods on the ``Query`` class and has the
+    following options.
+
+    UNSELECTED = -1
+    UNDEFINED = 0
+    SELECTED = 1
+
+    Examples
+    --------
+    The following example is taken from ``Query.nsel`` and demonstrates
+    how `SelectionSatus` appears in PyMAPDL.
+
+    Here we create a single node and interrogate its selection
+    status.
+    
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core.inline_functions import Query
+    >>> mapdl = launch_mapdl()
+    >>> mapdl.prep7()
+    >>> n1 = mapdl.n(1, 0, 0, 0)
+    >>> n1
+    1
+
+    We can use ``Query.nsel`` to interrogate the selection status
+    of the node. The response is an ``enum.IntEnum`` object. If
+    you query a node that does not exist, it will return a status
+    ``SelectionStatus.UNDEFINED``.
+
+    >>> q = Query(mapdl)
+    >>> q.nsel(n1)
+    <SelectionStatus.SELECTED: 1>
+    >>> mapdl.nsel('NONE')
+    >>> q.nsel(n1)
+    <SelectionStatus.UNSELECTED: -1>
+    >>> q.nsel(0)
+    <SelectionStatus.UNDEFINED: 0>
+    """
+    UNSELECTED = -1
+    UNDEFINED = 0
+    SELECTED = 1
 
 
 class _ParameterParsing:
@@ -584,9 +630,114 @@ class _DisplacementComponentQueries(_ParameterParsing):
         return self._parse_parameter_float_response(response)
 
 
+class _SelectionStatusQueries(_ParameterParsing):
+    _mapdl = None
+
+    def nsel(self, n: int) -> float:
+        """Returns selection status of a node.
+
+        Returns a ``SelectionStatus`` object with values:
+
+        1  - SELECTED
+        0  - UNDEFINED
+        -1 - UNSELECTED
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        mapdl.ansys.core.inline_functions.SelectionStatus
+            Status of node
+
+        Examples
+        --------
+        Here we create a single node and interrogate its selection
+        status.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> n1 = mapdl.n(1, 0, 0, 0)
+        >>> n1
+        1
+
+        We can use ``Query.nsel`` to interrogate the selection status
+        of the node. The response is an ``enum.IntEnum`` object. If
+        you query a node that does not exist, it will return a status
+        ``SelectionStatus.UNDEFINED``.
+
+        >>> q = Query(mapdl)
+        >>> q.nsel(n1)
+        <SelectionStatus.SELECTED: 1>
+        >>> mapdl.nsel('NONE')
+        >>> q.nsel(n1)
+        <SelectionStatus.UNSELECTED: -1>
+        >>> q.nsel(0)
+        <SelectionStatus.UNDEFINED: 0>
+        """
+        response = self._mapdl.run(f'_=NSEL({n})')
+        integer = self._parse_parameter_integer_response(response)
+        return SelectionStatus(integer)
+
+    def ksel(self, k: int) -> float:
+        """Returns selection status of a keypoint.
+
+        Returns a ``SelectionStatus`` object with values:
+
+        1  - SELECTED
+        0  - UNDEFINED
+        -1 - UNSELECTED
+
+        Parameters
+        ----------
+        k : int
+            Keypoint number
+
+        Returns
+        -------
+        mapdl.ansys.core.inline_functions.SelectionStatus
+            Status of keypoint
+
+        Examples
+        --------
+        Here we create a single keypoint and interrogate its selection
+        status.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> k1 = mapdl.k(1, 0, 0, 0)
+        >>> k1
+        1
+
+        We can use ``Query.ksel`` to interrogate the selection status
+        of the node. The response is an ``enum.IntEnum`` object. If
+        you query a node that does not exist, it will return a status
+        ``SelectionStatus.UNDEFINED``.
+
+        >>> q = Query(mapdl)
+        >>> q.ksel(k1)
+        <SelectionStatus.SELECTED: 1>
+        >>> mapdl.ksel('NONE')
+        >>> q.ksel(k1)
+        <SelectionStatus.UNSELECTED: -1>
+        >>> q.ksel(0)
+        <SelectionStatus.UNDEFINED: 0>
+        """
+        response = self._mapdl.run(f'_=KSEL({k})')
+        integer = self._parse_parameter_integer_response(response)
+        return SelectionStatus(integer)
+
+
 class Query(_ComponentQueries,
             _InverseGetComponentQueries,
-            _DisplacementComponentQueries):
+            _DisplacementComponentQueries,
+            _SelectionStatusQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
