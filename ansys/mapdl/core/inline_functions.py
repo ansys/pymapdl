@@ -633,7 +633,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
 class _SelectionStatusQueries(_ParameterParsing):
     _mapdl = None
 
-    def nsel(self, n: int) -> float:
+    def nsel(self, n: int) -> SelectionStatus:
         """Returns selection status of a node.
 
         Returns a ``SelectionStatus`` object with values:
@@ -683,7 +683,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
-    def ksel(self, k: int) -> float:
+    def ksel(self, k: int) -> SelectionStatus:
         """Returns selection status of a keypoint.
 
         Returns a ``SelectionStatus`` object with values:
