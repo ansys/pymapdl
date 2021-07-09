@@ -43,6 +43,7 @@ mapdl.eplot()
 # Setup Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 # - Assign an Elastic modulus in the x-direction to material 1 of 21e9
+# - And a poisson's ratio of 0.3
 # - Select all nodes at the ``z = 30`` end of the block
 # - Remove all degrees of freedom for all nodes in the selection
 # - Select all nodes at the ``z = 0`` end
@@ -50,6 +51,7 @@ mapdl.eplot()
 # - Finish preprocessing
 
 mapdl.mp('EX', 1, 210E9)
+mapdl.mp('PRXY', 1, 0.3)
 mapdl.nsel('S', 'LOC', 'Z', 30)
 mapdl.d('ALL', 'UX')
 mapdl.d('ALL', 'UY')
