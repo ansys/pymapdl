@@ -702,6 +702,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         --------
         Here we create a single keypoint and interrogate its selection
         status.
+
         >>> from ansys.mapdl.core import launch_mapdl
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
