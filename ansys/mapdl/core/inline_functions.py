@@ -449,7 +449,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Rotational displacement of node
+            Rotational displacement of the node.
 
         Examples
         --------
@@ -501,7 +501,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Rotational displacement of node
+            Rotational displacement of the node.
 
         Examples
         --------
@@ -553,7 +553,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         Returns
         -------
         float
-            Rotational displacement of node
+            Rotational displacement of the node.
 
         Examples
         --------
