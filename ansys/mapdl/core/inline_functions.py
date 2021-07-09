@@ -710,10 +710,12 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> k1 = mapdl.k(1, 0, 0, 0)
         >>> k1
         1
+
         We can use ``Query.ksel`` to interrogate the selection status
         of the node. The response is an ``enum.IntEnum`` object. If
         you query a node that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
+
         >>> q = Query(mapdl)
         >>> q.ksel(k1)
         <SelectionStatus.SELECTED: 1>
