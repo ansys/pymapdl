@@ -767,7 +767,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> L1
         1
 
-        We can use ``Query.nsel`` to interrogate the selection status
+        We can use ``Query.lsel`` to interrogate the selection status
         of the line. The response is an ``enum.IntEnum`` object. If
         you query a line that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
