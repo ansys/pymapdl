@@ -121,3 +121,22 @@ class TestESEL:
         q = selection_test_geometry
         select = q.esel(999)
         assert select == 0
+
+
+class TestVSEL:
+    def test_selected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.vsel('all')
+        select = q.vsel(1)
+        assert select == 1
+
+    def test_unselected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.vsel('NONE')
+        select = q.vsel(1)
+        assert select == -1
+
+    def test_undefined(self, selection_test_geometry):
+        q = selection_test_geometry
+        select = q.vsel(999)
+        assert select == 0
