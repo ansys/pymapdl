@@ -733,6 +733,58 @@ class _SelectionStatusQueries(_ParameterParsing):
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
+    def lsel(self, n: int) -> SelectionStatus:
+        """Returns selection status of a line.
+
+        Returns a ``SelectionStatus`` object with values:
+
+        1  - SELECTED
+        0  - UNDEFINED
+        -1 - UNSELECTED
+
+        Parameters
+        ----------
+        n : int
+            Line number
+
+        Returns
+        -------
+        mapdl.ansys.core.inline_functions.SelectionStatus
+            Status of line
+
+        Examples
+        --------
+        Here we create a single line and interrogate its selection
+        status.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> k1 = mapdl.k(1, 0, 0, 0)
+        >>> k2 = mapdl.k(2, 1, 1, 1)
+        >>> L1 = mapdl.l(k1, k2)
+        >>> L1
+        1
+
+        We can use ``Query.lsel`` to interrogate the selection status
+        of the line. The response is an ``enum.IntEnum`` object. If
+        you query a line that does not exist, it will return a status
+        ``SelectionStatus.UNDEFINED``.
+
+        >>> q = Query(mapdl)
+        >>> q.lsel(L1)
+        <SelectionStatus.SELECTED: 1>
+        >>> mapdl.lsel('NONE')
+        >>> q.lsel(L1)
+        <SelectionStatus.UNSELECTED: -1>
+        >>> q.lsel(0)
+        <SelectionStatus.UNDEFINED: 0>
+        """
+        response = self._mapdl.run(f'_=LSEL({n})')
+        integer = self._parse_parameter_integer_response(response)
+        return SelectionStatus(integer)
+
 
 class Query(_ComponentQueries,
             _InverseGetComponentQueries,
