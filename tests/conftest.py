@@ -306,7 +306,8 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.vmesh('ALL')
     return Query(mapdl)
 
-  
+
+@pytest.fixture
 def twisted_sheet(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, 'SHELL181')
