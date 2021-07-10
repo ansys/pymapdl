@@ -306,6 +306,31 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.vmesh('ALL')
     return Query(mapdl)
 
+  
+def twisted_sheet(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.et(1, 'SHELL181')
+    mapdl.mp("EX", 1, 2e5)
+    mapdl.rectng(0, 1, 0, 1)
+    mapdl.sectype(1, "SHELL")
+    mapdl.secdata(0.1)
+    mapdl.esize(0.5)
+    mapdl.amesh("all")
+    mapdl.run('/SOLU')
+    mapdl.antype('STATIC')
+    mapdl.nsel("s", "loc", "x", 0)
+    mapdl.d("all", "all")
+    mapdl.nsel("s", "loc", "x", 1)
+    mapdl.d("all", "ux", -0.1)
+    mapdl.d("all", "uy", -0.1)
+    mapdl.d("all", "uz", -0.1)
+    mapdl.allsel("all")
+    mapdl.solve()
+    mapdl.finish()
+    q = Query(mapdl)
+    return q, get_details_of_nodes(mapdl)
+
+
 
 def create_geometry(mapdl):
     mapdl.prep7()
