@@ -293,6 +293,21 @@ def solved_box(mapdl, cleared):
 
 
 @pytest.fixture
+def selection_test_geometry(mapdl, cleared):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 0, 0, 1)
+    k2 = mapdl.k(3, 0, 1, 0)
+    k3 = mapdl.k(4, 1, 0, 0)
+    v0 = mapdl.v(k0, k1, k2, k3)
+    mapdl.mshape(1, '3D')
+    mapdl.et(1, "SOLID98")
+    mapdl.esize(0.5)
+    mapdl.vmesh('ALL')
+    return Query(mapdl)
+
+
+@pytest.fixture
 def twisted_sheet(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, 'SHELL181')
@@ -315,6 +330,7 @@ def twisted_sheet(mapdl, cleared):
     mapdl.finish()
     q = Query(mapdl)
     return q, get_details_of_nodes(mapdl)
+
 
 
 def create_geometry(mapdl):
