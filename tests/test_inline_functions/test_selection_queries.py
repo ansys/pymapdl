@@ -79,6 +79,7 @@ class TestLSEL:
         assert select == 0
 
 
+
 class TestASEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry

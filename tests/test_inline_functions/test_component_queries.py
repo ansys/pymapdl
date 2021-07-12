@@ -93,3 +93,21 @@ class TestDisplacementComponentQueries:
         displaced_nodes = [node for node in nodes
                            if abs(q.uz(node)) > 0]
         assert len(displaced_nodes) > 0
+
+    def test_rotx(self, twisted_sheet):
+        q, nodes = twisted_sheet
+        displaced_nodes = [node for node in nodes
+                           if abs(q.rotx(node)) > 0]
+        assert len(displaced_nodes) > 0
+
+    def test_roty(self, twisted_sheet):
+        q, nodes = twisted_sheet
+        displaced_nodes = [node for node in nodes
+                           if abs(q.roty(node)) > 0]
+        assert len(displaced_nodes) > 0
+
+    def test_rotz(self, twisted_sheet):
+        q, nodes = twisted_sheet
+        displaced_nodes = [node for node in nodes
+                           if abs(q.rotz(node)) > 0]
+        assert len(displaced_nodes) > 0
