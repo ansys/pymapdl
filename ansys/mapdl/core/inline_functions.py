@@ -941,6 +941,59 @@ class _SelectionStatusQueries(_ParameterParsing):
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
+    def asel(self, a: int) -> SelectionStatus:
+        """Returns selection status of an area.
+
+        Returns a ``SelectionStatus`` object with values:
+
+        1  - SELECTED
+        0  - UNDEFINED
+        -1 - UNSELECTED
+
+        Parameters
+        ----------
+        a : int
+            Area number
+
+        Returns
+        -------
+        mapdl.ansys.core.inline_functions.SelectionStatus
+            Selection status of the area.
+
+        Examples
+        --------
+        Here we create a single area and interrogate its selection
+        status.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> k1 = mapdl.k(1, 0, 0, 0)
+        >>> k2 = mapdl.k(2, 1, 0, 0)
+        >>> k3 = mapdl.k(3, 1, 1, 1)
+        >>> a1 = mapdl.a(k1, k2, k3)
+        >>> a1
+        1
+
+        We can use ``Query.asel`` to interrogate the selection status
+        of the line. The response is an ``enum.IntEnum`` object. If
+        you query a line that does not exist, it will return a status
+        ``SelectionStatus.UNDEFINED``.
+
+        >>> q = Query(mapdl)
+        >>> q.asel(a1)
+        <SelectionStatus.SELECTED: 1>
+        >>> mapdl.asel('NONE')
+        >>> q.asel(a1)
+        <SelectionStatus.UNSELECTED: -1>
+        >>> q.asel(0)
+        <SelectionStatus.UNDEFINED: 0>
+        """
+        response = self._mapdl.run(f'_=ASEL({a})')
+        integer = self._parse_parameter_integer_response(response)
+        return SelectionStatus(integer)
+
 
 class Query(_ComponentQueries,
             _InverseGetComponentQueries,

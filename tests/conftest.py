@@ -332,7 +332,6 @@ def twisted_sheet(mapdl, cleared):
     return q, get_details_of_nodes(mapdl)
 
 
-
 def create_geometry(mapdl):
     mapdl.prep7()
     k0 = mapdl.k(1, 0, 0, 0)
