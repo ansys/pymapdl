@@ -1130,7 +1130,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
-        and ``(1, 2, 3)`` then find the X-coordinate half the way along.
+        and ``(1, 2, 3)`` then find the X-coordinate halfway along the line.
 
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
@@ -1169,7 +1169,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
-        and ``(1, 2, 3)`` then find the Y-coordinate half the way along.
+        and ``(1, 2, 3)`` then find the Y-coordinate halfway along the line.
 
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
@@ -1208,7 +1208,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
-        and ``(1, 2, 3)`` then find the Z-coordinate half the way along.
+        and ``(1, 2, 3)`` then find the Z-coordinate halfway along the line.
 
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
