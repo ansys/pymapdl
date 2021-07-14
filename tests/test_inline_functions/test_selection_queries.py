@@ -99,3 +99,25 @@ class TestASEL:
         q = selection_test_geometry
         select = q.asel(999)
         assert select == 0
+
+
+class TestESEL:
+    def test_selected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.esel('all')
+        # there are at least 4 elements numbered 1-4
+        for element in range(1, 5, 1):
+            select = q.esel(element)
+            assert select == 1
+
+    def test_unselected(self, selection_test_geometry):
+        q = selection_test_geometry
+        q._mapdl.esel('NONE')
+        for element in range(1, 5, 1):
+            select = q.esel(element)
+            assert select == -1
+
+    def test_undefined(self, selection_test_geometry):
+        q = selection_test_geometry
+        select = q.esel(999)
+        assert select == 0
