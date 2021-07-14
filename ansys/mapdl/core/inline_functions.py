@@ -958,7 +958,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         Returns
         -------
         mapdl.ansys.core.inline_functions.SelectionStatus
-            Status of area
+            Selection status of the area.
 
         Examples
         --------
