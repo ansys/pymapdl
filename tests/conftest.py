@@ -260,6 +260,16 @@ def box_geometry(mapdl, cleared):
 
 
 @pytest.fixture
+def line_geometry(mapdl, cleared):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 1, 1, 1)
+    l0 = mapdl.l(k0, k1)
+    q = Query(mapdl)
+    return q, [k0, k1], l0
+
+
+@pytest.fixture
 def query():
     return Query(mapdl)
 
@@ -286,6 +296,46 @@ def solved_box(mapdl, cleared):
     mapdl.f('ALL', 'FX', 1000)
     mapdl.run('/SOLU')
     mapdl.antype('STATIC')
+    mapdl.solve()
+    mapdl.finish()
+    q = Query(mapdl)
+    return q, get_details_of_nodes(mapdl)
+
+
+@pytest.fixture
+def selection_test_geometry(mapdl, cleared):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 0, 0, 1)
+    k2 = mapdl.k(3, 0, 1, 0)
+    k3 = mapdl.k(4, 1, 0, 0)
+    v0 = mapdl.v(k0, k1, k2, k3)
+    mapdl.mshape(1, '3D')
+    mapdl.et(1, "SOLID98")
+    mapdl.esize(0.5)
+    mapdl.vmesh('ALL')
+    return Query(mapdl)
+
+
+@pytest.fixture
+def twisted_sheet(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.et(1, 'SHELL181')
+    mapdl.mp("EX", 1, 2e5)
+    mapdl.rectng(0, 1, 0, 1)
+    mapdl.sectype(1, "SHELL")
+    mapdl.secdata(0.1)
+    mapdl.esize(0.5)
+    mapdl.amesh("all")
+    mapdl.run('/SOLU')
+    mapdl.antype('STATIC')
+    mapdl.nsel("s", "loc", "x", 0)
+    mapdl.d("all", "all")
+    mapdl.nsel("s", "loc", "x", 1)
+    mapdl.d("all", "ux", -0.1)
+    mapdl.d("all", "uy", -0.1)
+    mapdl.d("all", "uz", -0.1)
+    mapdl.allsel("all")
     mapdl.solve()
     mapdl.finish()
     q = Query(mapdl)
