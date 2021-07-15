@@ -263,7 +263,7 @@ def box_geometry(mapdl, cleared):
 def line_geometry(mapdl, cleared):
     mapdl.prep7()
     k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 1, 1, 2)
+    k1 = mapdl.k(2, 1, 2, 2)
     l0 = mapdl.l(k0, k1)
     q = Query(mapdl)
     return q, [k0, k1], l0
