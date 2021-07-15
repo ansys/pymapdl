@@ -260,6 +260,16 @@ def box_geometry(mapdl, cleared):
 
 
 @pytest.fixture
+def line_geometry(mapdl, cleared):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 1, 1, 1)
+    l0 = mapdl.l(k0, k1)
+    q = Query(mapdl)
+    return q, [k0, k1], l0
+
+
+@pytest.fixture
 def query():
     return Query(mapdl)
 
