@@ -101,8 +101,6 @@ nodes = [node1, node2, node3, node4]
 rotations = [(q.rotx(n), q.roty(n), q.rotz(n)) for n in nodes]
 
 message = f"""
-
-
 (0,1) B _________ C (1,1)
        |         |
        |         |
@@ -112,15 +110,11 @@ message = f"""
 
 N | (x_rot_disp, y_rot_disp, z_rot_disp)
 --|------------------------------------
-A | {rotations[0]}
-B | {rotations[1]}
-C | {rotations[2]}
-D | {rotations[3]}
+A | {rotations[0][0]:11.6f},{rotations[0][1]:11.6f},{rotations[0][2]:11.6f}
+B | {rotations[1][0]:11.6f},{rotations[1][1]:11.6f},{rotations[1][2]:11.6f}
+C | {rotations[2][0]:11.6f},{rotations[2][1]:11.6f},{rotations[2][2]:11.6f}
+D | {rotations[3][0]:11.6f},{rotations[3][1]:11.6f},{rotations[3][2]:11.6f}
  
 """
 
 print(message)
-
-
-
-
