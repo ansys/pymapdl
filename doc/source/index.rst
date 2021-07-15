@@ -7,7 +7,7 @@ PyMAPDL Documentation
 
    getting_started/index
    user_guide/index
-   api
+   api/index
    mapdl_commands/index
    examples/index
    contributing

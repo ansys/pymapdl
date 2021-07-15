@@ -23,6 +23,4 @@ help:
 clean:
 	rm -rf build
 	rm -rf source/examples
-	find . -type d -name 'api' -exec rm -rf {} +
 	find . -type f -name "_autosummary" -delete
-	find . -type f -name "api-autogen" -delete
