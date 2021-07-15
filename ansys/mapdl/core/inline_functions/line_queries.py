@@ -150,6 +150,7 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the X-slope halfway along the line.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -189,6 +190,7 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the Y-slope halfway along the line.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -223,11 +225,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         -------
         float
             The Z-slope.
-            
+
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the Z-slope halfway along the line.
+
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
