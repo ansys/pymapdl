@@ -127,10 +127,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
 
     def lsx(self, n: int, lfrac: float) -> float:
         """X-slope of line ``n`` at length fraction ``lfrac``.
+
         Fetches X-slope of line ``n`` at ``lfrac`` times the line
         length along the line. ``0. <= lfrac <= 1.``.
         This is equivalent to the rate of change of the x-coordinate
         with respect to the change of line length.
+
         Parameters
         ----------
         n : int
@@ -138,10 +140,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         lfrac: float
             The fraction of the length of the line along which to
             enquire. ``0. <= lfrac <= 1.``
+
         Returns
         -------
         float
             The X-slope.
+
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
@@ -162,10 +166,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
 
     def lsy(self, n: int, lfrac: float) -> float:
         """Y-slope of line ``n`` at length fraction ``lfrac``.
+
         Fetches Y-slope of line ``n`` at ``lfrac`` times the line
         length along the line. ``0. <= lfrac <= 1.``.
         This is equivalent to the rate of change of the y-coordinate
         with respect to the change of line length.
+
         Parameters
         ----------
         n : int
@@ -173,10 +179,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         lfrac: float
             The fraction of the length of the line along which to
             enquire. ``0. <= lfrac <= 1.``
+
         Returns
         -------
         float
             The Y-slope.
+
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
@@ -197,10 +205,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
 
     def lsz(self, n: int, lfrac: float) -> float:
         """Z-slope of line ``n`` at length fraction ``lfrac``.
+
         Fetches Z-slope of line ``n`` at ``lfrac`` times the line
         length along the line. ``0. <= lfrac <= 1.``.
         This is equivalent to the rate of change of the z-coordinate
         with respect to the change of line length.
+
         Parameters
         ----------
         n : int
@@ -208,10 +218,12 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         lfrac: float
             The fraction of the length of the line along which to
             enquire. ``0. <= lfrac <= 1.``
+
         Returns
         -------
         float
             The Z-slope.
+            
         Examples
         --------
         Here we construct a line between the coordinates ``(0, 0, 0)``
