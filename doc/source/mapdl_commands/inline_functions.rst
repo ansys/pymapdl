@@ -27,3 +27,25 @@ given its number (``Query.nx``).
    Query.ny
    Query.nz
 
+   Query.ux
+   Query.uy
+   Query.uz
+
+   Query.rotx
+   Query.roty
+   Query.rotz
+
+   Query.lx
+   Query.ly
+   Query.lz
+
+   Query.lsx
+   Query.lsy
+   Query.lsz
+
+   Query.nsel
+   Query.ksel
+   Query.lsel
+   Query.asel
+   Query.esel
+   Query.vsel
