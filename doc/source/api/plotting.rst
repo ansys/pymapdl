@@ -4,6 +4,8 @@ Plotting
 ========
 Various PyMAPDL specific plotting commands.
 
+.. currentmodule:: ansys.mapdl.core
+
 .. autosummary::
    :toctree: _autosummary
 
