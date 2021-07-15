@@ -1,14 +1,16 @@
 from .component_queries import _DisplacementComponentQueries, \
     _InverseGetComponentQueries, _ComponentQueries
 from .selection_queries import _SelectionStatusQueries
-from .line_queries import _LineFractionCoordinateQueries
+from .line_queries import _LineFractionCoordinateQueries, \
+    _LineFractionSlopeQueries
 
 
 class Query(_ComponentQueries,
             _InverseGetComponentQueries,
             _DisplacementComponentQueries,
             _SelectionStatusQueries,
-            _LineFractionCoordinateQueries):
+            _LineFractionCoordinateQueries,
+            _LineFractionSlopeQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
@@ -29,6 +31,9 @@ class Query(_ComponentQueries,
     - `lx(n, lfrac)` - X-coordinate of line ``n`` at length fraction ``lfrac``
     - `ly(n, lfrac)` - Y-coordinate of line ``n`` at length fraction ``lfrac``
     - `lz(n, lfrac)` - Z-coordinate of line ``n`` at length fraction ``lfrac``
+    - `lsx(n, lfrac)` - X-slope of line ``n`` at length fraction ``lfrac``
+    - `lsy(n, lfrac)` - Y-slope of line ``n`` at length fraction ``lfrac``
+    - `lsz(n, lfrac)` - Z-slope of line ``n`` at length fraction ``lfrac``
     - `ux(n)` - get the structural displacement at node `n` in x
     - `uy(n)` - get the structural displacement at node `n` in y
     - `uz(n)` - get the structural displacement at node `n` in z
