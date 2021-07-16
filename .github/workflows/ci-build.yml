@@ -55,6 +55,13 @@ jobs:
           make -C doc html
         env:
           PYMAPDL_CI_NO_AUTODOC: True
+
+      - name: Full Documentation Build
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sudo apt install pandoc -qy
+          pip install -r requirements_docs.txt
+          make -C doc html
   
       - name: Upload Documentation
         uses: actions/upload-artifact@v2.2.1
