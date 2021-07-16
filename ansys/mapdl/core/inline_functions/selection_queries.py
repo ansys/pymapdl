@@ -424,7 +424,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         Examples
         --------
         Here we create 9 elements from 10 nodes and find the next
-        selected elememt for each. For the last element there are no
+        selected element for each. For the last element there are no
         other elements with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
@@ -440,5 +440,47 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
         response = self._mapdl.run(f'_=ELNEXT({e})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def lsnext(self, n: int) -> int:
+        """Returns next selected line with a number greater than `n`.
+
+        Returns the next highest line number after the supplied
+        line number `n`, from the current selection.
+
+        If no 'next selected' line exists (or if the supplied
+        line number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        n : int
+            Line number
+
+        Returns
+        -------
+        int
+            Line number
+
+        Examples
+        --------
+        Here we create 9 lines from 10 nodes and find the next
+        selected line for each. For the last line there are no
+        other lines with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'LINK11')
+        >>> q = Query(mapdl)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> lines = [mapdl.l(i, i+1) for i in kps[:-1]]
+        >>> next_selected_lines = [q.lsnext(j) for j in lines]
+        >>> print(next_selected_lines)
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=LSNEXT({n})')
         integer = self._parse_parameter_integer_response(response)
         return integer
