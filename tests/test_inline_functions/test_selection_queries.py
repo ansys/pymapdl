@@ -168,13 +168,39 @@ class TestNDNEXT:
         assert next_ == 0
 
 
+class TestELNEXT:
+    def test_existing_elements(self, selection_test_geometry,
+                               common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        elements = get_details_of_elements(q._mapdl)
+        next_ = q.elnext(1)
+        assert next_ in elements
+
+    def test_unselected_elements(self, selection_test_geometry,
+                                 common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        elements = get_details_of_elements(q._mapdl)
+        last_element = len(elements)
+        next_ = q.elnext(last_element)
+        assert next_ == 0
+
+    def test_non_existing_elements(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.elnext(999)
+        assert next_ == 0
+
+
 class TestKPNEXT:
-    def test_existing_nodes(self, selection_test_geometry):
+    def test_existing_kps(self, selection_test_geometry):
         q = selection_test_geometry
         next_ = q.kpnext(1)
         assert next_ == 2
 
-    def test_unselected_nodes(self, selection_test_geometry):
+    def test_unselected_kps(self, selection_test_geometry):
         q = selection_test_geometry
         next_ = q.kpnext(4)
         assert next_ == 0

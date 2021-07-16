@@ -400,3 +400,43 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=KPNEXT({k})')
         integer = self._parse_parameter_integer_response(response)
         return integer
+
+    def elnext(self, e: int) -> int:
+        """Returns next selected keypoint having with a number greater than `k`.
+
+        Returns the next highest keypoint number after the supplied
+        keypoint number `k`, from the current selection.
+
+        If no 'next selected' keypoint exists (or if the supplied
+        keypoint number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        e : int
+            Element number
+
+        Returns
+        -------
+        int
+            Keypoint number
+
+        Examples
+        --------
+        Here we create some elements and find the next selected elememts
+        for each. For the last element there are no other keypoints with
+        a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> next_selected_kps = [q.kpnext(j) for j in kps]
+        >>> next_selected_kps
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
+        """
+        response = self._mapdl.run(f'_=ELNEXT({e})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer

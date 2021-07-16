@@ -44,14 +44,17 @@ def get_details_of_nodes(mapdl_) -> Dict[int, Node]:
 
 def get_details_of_elements(mapdl_) -> Dict[int, Node]:
     string = mapdl_.elist('ALL')
-    string = string.split(' ELEM ')[1]
-    string = string.split('\n', 1)[1]
+    # string = string.split(' ELEM ')[1]
+    # string = string.split('\n', 1)[1]
     rows = string.split('\n')
     elements = {}
     for row in rows:
-        if bool(row.strip()):
+        if is_just_floats(row):
             row_values = [v for v in row.split(' ') if v != '']
             args = [int(rv) for rv in row_values[:6]]
-            nodes = [int(rv) for rv in row_values[6:]]
-            elements[args[0]] = Element(*args, node_numbers=nodes)
+            # todo: Node numbers can go over multiple lines, which makes
+            #  parsing them properly a real pain. So for now I'll leave
+            #  this as is and work on a better version in the future
+            if len(args) == 6:
+                elements[args[0]] = Element(*args, node_numbers=None)
     return elements
