@@ -149,8 +149,8 @@ class TestNDNEXT:
             common_functions_and_classes
         q = selection_test_geometry
         nodes = get_details_of_nodes(q._mapdl)
-        next_node = q.ndnext(1)
-        assert next_node in nodes
+        next_ = q.ndnext(1)
+        assert next_ in nodes
 
     def test_unselected_nodes(self, selection_test_geometry,
                               common_functions_and_classes):
@@ -159,10 +159,27 @@ class TestNDNEXT:
         q = selection_test_geometry
         nodes = get_details_of_nodes(q._mapdl)
         last_node = len(nodes)
-        next_node = q.ndnext(last_node)
-        assert next_node == 0
+        next_ = q.ndnext(last_node)
+        assert next_ == 0
 
     def test_non_existing_nodes(self, selection_test_geometry):
         q = selection_test_geometry
-        next_node = q.ndnext(999)
-        assert next_node == 0
+        next_ = q.ndnext(999)
+        assert next_e == 0
+
+
+class TestKPNEXT:
+    def test_existing_nodes(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(1)
+        assert next_ == 2
+
+    def test_unselected_nodes(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(4)
+        assert next_ == 0
+
+    def test_non_existing_kps(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(999)
+        assert next_ == 0
