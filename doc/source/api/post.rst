@@ -1,6 +1,8 @@
+.. _ref_post_processing_api:
+
+
 Post-Processing
 ===============
-.. _post_api:
 
 This class contains an API to post-process directly from MAPDL.
 Should you wish to post-process MAPDL result files outside of PyMAPDL,

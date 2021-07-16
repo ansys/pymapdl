@@ -4,7 +4,7 @@
 User Guide
 ==========
 This guide provides a general overview of the basics and usage of the
-PyMAPDL module ``ansys-mapdl-core``.
+PyMAPDL library.
 
 
 ..
@@ -31,7 +31,7 @@ PyMAPDL module ``ansys-mapdl-core``.
 PyMAPDL Basic Overview
 ======================
 The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
-within the ``ansys-mapdl-core`` module creates an instance of of
+within the ``ansys-mapdl-core`` library creates an instance of of
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in the background and sends
 commands to that service.  Errors and warnings are processed
 Pythonically letting the user develop a script real-time without

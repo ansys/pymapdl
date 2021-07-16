@@ -1,10 +1,12 @@
 Post-Processing
 ===============
 You can post process using an active MAPDL session using the
-``post_processing`` property of a ``ansys.mapdl.core.Mapdl`` instance.
-One advantage of this approach is it integrates well with existing
-MAPDL scripting or automation, but can also be carried out on result
-files generated from other programs, including ANSYS Mechanical.
+:attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
+attrbute of an instance of :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>`.  One advantage of this approach
+is it integrates well with existing MAPDL scripting or automation, but
+can also be carried out on result files generated from other programs,
+including ANSYS Mechanical.
 
 Perhaps on of the biggest advantages of gRPC based post-processing is
 it can be done remotely without any file exchange.  Multi gigabyte
@@ -17,7 +19,7 @@ streamed back to the client for review or visualization.
    modules at `DPF-Core <https://github.com/pyansys/DPF-Core>`_ and
    `DPF-Post <https://github.com/pyansys/DPF-Post>`_ as they provide a
    modern interface to ANSYS result files using a client/server
-   interface using the same software used within ANSYS Workbench, but
+   interface using the same software used within Ansys Workbench, but
    via a Python client.
 
 
@@ -53,7 +55,8 @@ Classically, one would request nodal results from MAPDL using the
      MORE (YES,NO OR CONTINUOUS)=
 
 
-However, using an instance of ``Mapdl``, you can instead request the
+However, using an instance of :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>`, you can instead request the
 nodal displacement with:
 
 .. code:: python
@@ -76,11 +79,14 @@ You could also plot the nodal displacement with:
 
 Selected Nodes
 ~~~~~~~~~~~~~~
-The ANSYS database processes some results independently of if nodes or
+The MAPDL database processes some results independently of if nodes or
 elements are selected.  If you have subselected a certain component
 and wish to also limit the result of a certain output
-(i.e. ``nodal_displacement``), use the ``selected_nodes`` property to
-get a mask of the currently selected nodes.
+(i.e. :func:`nodal_displacement()
+<ansys.mapdl.core.post.PostProcessing.nodal_displacement`), use the
+:attr:`selected_nodes
+<ansys.mapdl.core.post.PostProcessing.selected_nodes` attribute to get
+a mask of the currently selected nodes.
 
 .. code::
 

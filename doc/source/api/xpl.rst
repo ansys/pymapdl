@@ -1,4 +1,4 @@
-.. _xpl_api:
+.. _ref_xpl_api:
 
 Database Explorer
 =================

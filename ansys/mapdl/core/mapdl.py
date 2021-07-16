@@ -1417,7 +1417,7 @@ class _MapdlCore(Commands):
 
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the \*GET command and returns a Python value.
+        """Runs the GET command and returns a Python value.
 
         This method uses :func:`_MapdlCore.get`.
 

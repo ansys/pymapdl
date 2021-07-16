@@ -96,7 +96,8 @@ todo_include_todos = False
 
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
-copybutton_prompt_text = ">>> "
+copybutton_prompt_text = r'>>> ?|\.\.\. '
+copybutton_prompt_is_regexp = True
 
 
 # -- Sphinx Gallery Options ---------------------------------------------------

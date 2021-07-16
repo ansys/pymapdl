@@ -1,4 +1,4 @@
-.. _pool_api:
+.. _ref_pool_api:
 
 Local MAPDL Pool
 ================

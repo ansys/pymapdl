@@ -6,7 +6,7 @@ non-standard installs will need to provide the location of MAPDL.
 When running for the first time, ``ansys-mapdl-core`` will request the
 location of the MAPDL executable if it cannot automatically find it.
 You can test your installation of PyMAPDL and set it up by running
-the :func:`launch_mapdl <ansys.mapdl.core.launch_mapdl>`:
+the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`:
 
 .. code:: python
 
@@ -36,10 +36,10 @@ the path again.  If you need to change the default ansys path
     new_path = 'C:\\Program Files\\ANSYS Inc\\v212\\ANSYS\\bin\\winx64\\ansys212.exe'
     pymapdl.change_default_ansys_path(new_path)
 
-Also see :func:`change_default_ansys_path <ansys.mapdl.core.change_default_ansys_path>` and :func:`find_ansys <ansys.mapdl.core.launcher.find_ansys>`.
+Also see :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` and :func:`find_ansys() <ansys.mapdl.core.launcher.find_ansys>`.
 
 
 API Reference
 ~~~~~~~~~~~~~
 For more details for controlling how MAPDL launches locally, see the
-function description of :func:`launch_mapdl <ansys.mapdl.core.launch_mapdl>`.
+function description of :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
