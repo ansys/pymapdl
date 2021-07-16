@@ -277,7 +277,7 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.prep7()
         ''
 
-        Temporarly override the instance setting this with
+        Temporarily override the instance setting this with
         ``mute=False``.  This is useful for methods that parse the
         MAPDL output like ``k``.
 

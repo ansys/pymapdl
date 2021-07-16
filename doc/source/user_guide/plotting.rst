@@ -84,7 +84,7 @@ mesh.
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Elemenet Plot from MAPDL using PyMAPDL and `pyvista <https://docs.pyvista.org/>`__
+    Element Plot from MAPDL using PyMAPDL and `pyvista <https://docs.pyvista.org/>`__
 
 
 Plotting Non-Interactively using MAPDL
