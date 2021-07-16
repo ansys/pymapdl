@@ -246,3 +246,31 @@ class TestARNEXT:
         next_ = q.arnext(999)
         assert next_ == 0
 
+
+class TestVLNEXT:
+    @staticmethod
+    def make_volumes(mapdl):
+        mapdl.prep7()
+        point1 = mapdl.k(999, 0, 10, 0)
+        point2 = mapdl.k(99, 0, 0, 10)
+        kps = [mapdl.k(i + 1, i, 0, 0) for i in range(10)]
+        vols = [mapdl.v(i, i + 1, point1, point2) for i in kps[:-1]]
+        return vols
+
+    def test_existing_volumes(self, query):
+        q = query
+        _ = self.make_volumes(q._mapdl)
+        next_ = q.vlnext(1)
+        assert next_ == 2
+
+    def test_unselected_volumes(self, query):
+        q = query
+        vols = self.make_volumes(q._mapdl)
+        next_ = q.vlnext(len(vols))
+        assert next_ == 0
+
+    def test_non_existing_volumes(self, query):
+        next_ = query.vlnext(999)
+        assert next_ == 0
+
+

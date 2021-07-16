@@ -271,7 +271,7 @@ def line_geometry(mapdl, cleared):
 
 
 @pytest.fixture
-def query():
+def query(mapdl, cleared):
     return Query(mapdl)
 
 

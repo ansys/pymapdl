@@ -478,7 +478,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
         >>> lines = [mapdl.l(i, i+1) for i in kps[:-1]]
         >>> next_selected_lines = [q.lsnext(j) for j in lines]
-        >>> print(next_selected_lines)
+        >>> next_selected_lines
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
         response = self._mapdl.run(f'_=LSNEXT({n})')
@@ -486,10 +486,10 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         return integer
 
     def arnext(self, a: int) -> int:
-        """Returns next selected area with a number greater than `n`.
+        """Returns next selected area with a number greater than `a`.
 
         Returns the next highest area number after the supplied
-        area number `n`, from the current selection.
+        area number `a`, from the current selection.
 
         If no 'next selected' area exists (or if the supplied
         area number does not exist in the selection) `0` is
@@ -515,15 +515,57 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
-        >>> mapdl.et(1, 'LINK11')
         >>> q = Query(mapdl)
-        >>> farpoint = mapdl.k(999, 10, 0)
+        >>> farpoint = mapdl.k(999, 0, 10, 0)
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
         >>> areas = [mapdl.a(i, i+1, farpoint) for i in kps[:-1]]
         >>> next_selected_areas = [q.arnext(j) for j in areas]
-        >>> print(next_selected_areas)
+        >>> next_selected_areas
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
         response = self._mapdl.run(f'_=ARNEXT({a})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def vlnext(self, v: int) -> int:
+        """Returns next selected volume with a number greater than `v`.
+
+        Returns the next highest volume number after the supplied
+        volume number `v`, from the current selection.
+
+        If no 'next selected' volume exists (or if the supplied
+        volume number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        v : int
+            Volume number
+
+        Returns
+        -------
+        int
+            Volume number
+
+        Examples
+        --------
+        Here we create 9 volumes from 12 nodes and find the next
+        selected volume for each. For the last volume there are no
+        other volumes with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> point1 = mapdl.k(999, 0, 10, 0)
+        >>> point2 = mapdl.k(99, 0, 0, 10)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> vols = [mapdl.v(i, i+1, point1, point2) for i in kps[:-1]]
+        >>> next_selected_vols = [q.vlnext(j) for j in vols]
+        >>> next_selected_vols
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=VLNEXT({v})')
         integer = self._parse_parameter_integer_response(response)
         return integer
