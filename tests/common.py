@@ -9,16 +9,36 @@ Element = namedtuple('Element', ['number', 'material', 'type',
                                  'section', 'node_numbers'])
 
 
+def is_float(s: str) -> bool:
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_just_floats(s: str, delimiter=None):
+    if delimiter is None:
+        entries = s.split()
+    else:
+        entries = s.split(delimiter)
+    if not entries:
+        return False
+    for entry in entries:
+        if not is_float(entry.strip()):
+            return False
+    return True
+
+
 def get_details_of_nodes(mapdl_) -> Dict[int, Node]:
     string = mapdl_.nlist('ALL')
-    string = string.split(' NODE ')[1]
-    string = string.split('\n', 1)[1]
     rows = string.split('\n')
     nodes = {}
     for row in rows:
-        row_values = [v for v in row.split(' ') if v != '']
-        node = int(row_values[0])
-        nodes[node] = Node(node, *[float(rv) for rv in row_values[1:]])
+        if is_just_floats(row):
+            row_values = [v for v in row.split(' ') if v != '']
+            node = int(row_values[0])
+            nodes[node] = Node(node, *[float(rv) for rv in row_values[1:]])
     return nodes
 
 

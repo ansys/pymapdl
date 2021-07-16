@@ -317,3 +317,46 @@ class _SelectionStatusQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=VSEL({v})')
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
+
+
+class _NextSelectedEntityQueries(_ParameterParsing):
+    _mapdl = None
+
+    def ndnext(self, n: int) -> int:
+        """Returns next selected node having with a number greater than `n`.
+
+        Returns the next highest node number after the supplied node
+        number `n`, from the current selection.
+
+        If no 'next selected' node exists (or if the supplied node
+        number does not exist in the selection) `0` is returned.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        int
+            Node number
+
+        Examples
+        --------
+        Here we create 10 nodes, select them all, and find the next
+        selected node for each. For the last node there are no other
+        nodes with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> nodes = [mapdl.n(i+1, i, 0, 0) for i in range(10)]
+        >>> next_selected_nodes = [q.ndnext(j) for j in nodes]
+        >>> next_selected_nodes
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
+        """
+        response = self._mapdl.run(f'_=NDNEXT({n})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer

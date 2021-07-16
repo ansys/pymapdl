@@ -1,6 +1,7 @@
 from .component_queries import _DisplacementComponentQueries, \
     _InverseGetComponentQueries, _ComponentQueries
-from .selection_queries import _SelectionStatusQueries
+from .selection_queries import _SelectionStatusQueries, \
+    _NextSelectedEntityQueries
 from .line_queries import _LineFractionCoordinateQueries, \
     _LineFractionSlopeQueries
 
@@ -10,7 +11,8 @@ class Query(_ComponentQueries,
             _DisplacementComponentQueries,
             _SelectionStatusQueries,
             _LineFractionCoordinateQueries,
-            _LineFractionSlopeQueries):
+            _LineFractionSlopeQueries,
+            _NextSelectedEntityQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific

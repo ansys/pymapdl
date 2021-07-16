@@ -140,3 +140,29 @@ class TestVSEL:
         q = selection_test_geometry
         select = q.vsel(999)
         assert select == 0
+
+
+class TestNDNEXT:
+    def test_existing_nodes(self, selection_test_geometry,
+                            common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        nodes = get_details_of_nodes(q._mapdl)
+        next_node = q.ndnext(1)
+        assert next_node in nodes
+
+    def test_unselected_nodes(self, selection_test_geometry,
+                              common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        nodes = get_details_of_nodes(q._mapdl)
+        last_node = len(nodes)
+        next_node = q.ndnext(last_node)
+        assert next_node == 0
+
+    def test_non_existing_nodes(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_node = q.ndnext(999)
+        assert next_node == 0
