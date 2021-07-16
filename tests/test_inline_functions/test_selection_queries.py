@@ -165,7 +165,7 @@ class TestNDNEXT:
     def test_non_existing_nodes(self, selection_test_geometry):
         q = selection_test_geometry
         next_ = q.ndnext(999)
-        assert next_e == 0
+        assert next_ == 0
 
 
 class TestKPNEXT:
