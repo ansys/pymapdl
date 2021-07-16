@@ -484,3 +484,46 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=LSNEXT({n})')
         integer = self._parse_parameter_integer_response(response)
         return integer
+
+    def arnext(self, a: int) -> int:
+        """Returns next selected area with a number greater than `n`.
+
+        Returns the next highest area number after the supplied
+        area number `n`, from the current selection.
+
+        If no 'next selected' area exists (or if the supplied
+        area number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        a : int
+            Area number
+
+        Returns
+        -------
+        int
+            Area number
+
+        Examples
+        --------
+        Here we create 9 areas from 11 nodes and find the next
+        selected area for each. For the last area there are no
+        other areas with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'LINK11')
+        >>> q = Query(mapdl)
+        >>> farpoint = mapdl.k(999, 10, 0)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> areas = [mapdl.a(i, i+1, farpoint) for i in kps[:-1]]
+        >>> next_selected_areas = [q.arnext(j) for j in areas]
+        >>> print(next_selected_areas)
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=ARNEXT({a})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer

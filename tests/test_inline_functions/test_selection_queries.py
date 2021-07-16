@@ -227,3 +227,22 @@ class TestLSNEXT:
         q = selection_test_geometry
         next_ = q.lsnext(999)
         assert next_ == 0
+
+
+class TestARNEXT:
+    def test_existing_areas(self, selection_test_geometry):
+        # there are 4 areas in in the selection_test_geometry fixture
+        q = selection_test_geometry
+        next_ = q.arnext(1)
+        assert next_ == 2
+
+    def test_unselected_areas(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.arnext(4)
+        assert next_ == 0
+
+    def test_non_existing_areas(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.arnext(999)
+        assert next_ == 0
+
