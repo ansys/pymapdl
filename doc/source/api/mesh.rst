@@ -1,4 +1,4 @@
-.. _mesh_api:
+.. _ref_mesh_api:
 
 Mesh
 ====

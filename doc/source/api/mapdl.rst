@@ -1,3 +1,5 @@
+.. _ref_mapdl_api:
+
 Mapdl
 =====
 
@@ -26,6 +28,7 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.load_table
    Mapdl.mesh
    Mapdl.modal_analysis
+   Mapdl.non_interactive
    Mapdl.open_apdl_log
    Mapdl.open_gui
    Mapdl.parameters
@@ -35,14 +38,16 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.set_log_level
    Mapdl.version
 
+Latest 2021R1 and newer features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: ansys.mapdl.core.mapdl_grpc.MapdlGrpc
+
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
-   xpl.ansXpl
-   mapdl_geometry.Geometry
-   parameters.Parameters
-   pool.LocalMapdlPool
-   post.PostProcessing
-   solution.Solution
-
+   mapdl_grpc.MapdlGrpc.download
+   mapdl_grpc.MapdlGrpc.list_error_file
+   mapdl_grpc.MapdlGrpc.list_files
+   mapdl_grpc.MapdlGrpc.math
+   mapdl_grpc.MapdlGrpc.upload

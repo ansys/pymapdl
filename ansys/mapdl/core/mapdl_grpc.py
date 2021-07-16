@@ -1327,6 +1327,10 @@ class MapdlGrpc(_MapdlCore):
     def math(self):
         """APDL math interface
 
+        Returns
+        -------
+        :class:`MapdlMath <ansys.mapdl.core.math.MapdlMath>`
+
         Examples
         --------
         Get the stiffness matrix from MAPDL

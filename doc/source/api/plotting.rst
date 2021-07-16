@@ -1,4 +1,4 @@
-.. _plotting_api:
+.. _ref_plotting_api:
 
 Plotting
 ========

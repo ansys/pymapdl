@@ -23,4 +23,9 @@ help:
 clean:
 	rm -rf build
 	rm -rf source/examples
-	find . -type f -name "_autosummary" -delete
+	find . -type d -name "_autosummary" -exec rm -rf {} +
+
+# customized clean due to examples gallery
+clean-api:
+	rm -rf build
+	find . -type d -name "_autosummary" -exec rm -rf {} +

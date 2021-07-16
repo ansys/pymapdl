@@ -1,8 +1,10 @@
-.. _math_api:
+.. _ref_math_api:
 
 MapdlMath
 =========
 These classes are specific to the ``MapdlMath`` module:
+
+.. currentmodule:: ansys.mapdl.core
 
 .. autosummary::
    :toctree: _autosummary
@@ -13,5 +15,3 @@ These classes are specific to the ``MapdlMath`` module:
    math.AnsVec
    math.AnsMat
    math.AnsSolver
-
-

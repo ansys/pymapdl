@@ -1232,6 +1232,12 @@ class ArrayParam:
         etc.).
 
         This command is valid in any processor.
+
+        Warnings
+        --------
+        This command cannot be run interactively.  See
+        :func:`ansys.mapdl.core.Mapdl.non_interactive`.
+
         """
         # cannot be in interactive mode
         if not self._store_commands:

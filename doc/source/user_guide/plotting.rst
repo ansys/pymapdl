@@ -8,7 +8,7 @@ volumes), and ``PyMAPDL`` supports plotting basic CAD using VTK.  The
 ``KPLOT``, ``LPLOT``, ``APLOT``) and transfers the geometry to Python
 to visualize it.  Combined with the MAPDL geometry commands, you can
 generate and visualize geometry from scratch without opening the GUI
-using ``open_gui``.
+using :func:`ansys.mapdl.core.Mapdl.open_gui`.
 
 
 Line Plotting
@@ -41,8 +41,9 @@ Plot lines within Python using ``lplot``.
 Area and Volume Plotting
 ~~~~~~~~~~~~~~~~~~~~~~~~
 More complex geometry can be obtained using boolean operations and can
-be visualized using ``mapdl.vplot``.  In this example, we cut the
-initial area with the 8 circles and then extrude it.
+be visualized using :func:`ansys.mapdl.core.Mapdl.vplot`.  In this
+example, we cut the initial area with the 8 circles and then extrude
+it.
 
 .. code:: python
 
@@ -82,8 +83,9 @@ Plotting Non-Interactively using MAPDL
 --------------------------------------
 You can also plot using MAPDL's native plotting tools.  To use the
 native tools, set ``vtk=False`` when running plotting commands such as
-``aplot``, ``eplot``, etc..  Plots will be generated within MAPDL and
-then shown using ``matploblib``.
+:func:`ansys.mapdl.core.Mapdl.aplot`,
+:func:`ansys.mapdl.core.Mapdl.eplot`, etc..  Plots will be generated
+within MAPDL and then shown using ``matploblib``.
 
 .. code:: python
 
@@ -144,5 +146,6 @@ XY plane with ``cpos='xy'``.
 
     >>> mapdl.eplot(cpos='xy')
 
-For all general plotting options, see :ref:`ref_general_plotter`.
+For all general plotting options, see
+:func:`ansys.mapdl.core.plotting.general_plotter`.
 

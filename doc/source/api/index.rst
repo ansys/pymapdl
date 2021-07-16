@@ -14,6 +14,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
    mapdl
    math
@@ -22,7 +23,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    mesh
    xpl
    parameters
-   plotting
+   geometry
    pool
    post
    solution
