@@ -7,8 +7,6 @@ Mapdl Class Specific Classes or Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. currentmodule:: ansys.mapdl.core
 
-..
-   not using template here as we don't need to capture all the methods
 .. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
 
 .. autosummary::
@@ -50,4 +48,5 @@ Latest 2021R1 and newer features
    mapdl_grpc.MapdlGrpc.list_error_file
    mapdl_grpc.MapdlGrpc.list_files
    mapdl_grpc.MapdlGrpc.math
+   mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.upload

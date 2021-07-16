@@ -446,6 +446,10 @@ class _MapdlCore(Commands):
     def mesh(self):
         """Mesh information.
 
+        Returns
+        -------
+        :class:`Mapdl.Mesh <ansys.mapdl.core.mesh_grpc.Mesh>`
+
         Examples
         --------
         Return an array of the active nodes
@@ -1411,16 +1415,13 @@ class _MapdlCore(Commands):
         else:
             self._log.info(self._response)
 
-    def get_float(self, *args, **kwargs):
-        raise NotImplementedError('Please use ``get_value`` instead')
-
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
         """Runs the \*GET command and returns a Python value.
 
         This method uses :func:`_MapdlCore.get`.
 
-        See the full MADPL command at `*GET
+        See the full MADPL command documentation at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
         Parameters

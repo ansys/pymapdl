@@ -1,4 +1,4 @@
-.. _ref_geometry_rst:
+.. _ref_geometry_api:
 
 .. currentmodule:: ansys.mapdl.core
 
