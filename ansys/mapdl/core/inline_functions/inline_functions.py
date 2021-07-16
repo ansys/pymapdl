@@ -48,6 +48,12 @@ class Query(_ComponentQueries,
     - `asel(a)` - get the selection status of area `a`
     - `esel(n)` - get the selection status of element `e`
     - `vsel(v)` - get the selection status of volume `v`
+    - `ndnext(n)` - get the next selected node with a number greater than `n`.
+    - `kpnext(k)` - get the next selected keypoint with a number greater than `k`.
+    - `lsnext(n)` - get the next selected line with a number greater than `n`.
+    - `arnext(a)` - get the next selected area with a number greater than `a`.
+    - `elnext(e)` - get the next selected element with a number greater than `e`.
+    - `vlnext(v)` - get the next selected volume with a number greater than `v`.
     - `node(x, y, z)` - get the node closest to coordinate (x, y, z)
     - `kp(x, y, z)` - get the keypoint closest to coordinate (x, y, z)
 
