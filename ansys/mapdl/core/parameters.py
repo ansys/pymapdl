@@ -32,7 +32,7 @@ UNITS_MAP = {-1: 'NONE',
 
 
 class Parameters():
-    """Collection of MAPDL parameters obtainable from the \*GET command
+    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
 
     Examples
     --------

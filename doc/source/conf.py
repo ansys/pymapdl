@@ -57,11 +57,18 @@ extensions = [
     'sphinx.ext.coverage',
 ]
 
+# return type inline with the description.
+napoleon_use_rtype = False
+
 # static path
 html_static_path = ['_static']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+# disable class autodoc summary when this is set
+if 'PYMAPDL_CI_NO_AUTODOC' in os.environ:
+    templates_path.clear()
 
 # The suffix(es) of source filenames.
 source_suffix = '.rst'
@@ -89,7 +96,8 @@ todo_include_todos = False
 
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
-copybutton_prompt_text = ">>> "
+copybutton_prompt_text = r'>>> ?|\.\.\. '
+copybutton_prompt_is_regexp = True
 
 
 # -- Sphinx Gallery Options ---------------------------------------------------
@@ -121,6 +129,7 @@ html_theme = 'pyansys_sphinx_theme'
 html_logo = 'https://docs.pyansys.com/_static/pyansys-logo-black-cropped.png'
 html_theme_options = {
     "github_url": "https://github.com/pyansys/PyMAPDL",
+    "show_prev_next": False
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------

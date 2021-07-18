@@ -296,18 +296,6 @@ These commands read in external CAD files into MAPDL.
 
    conn
 
-**************
-APDL Functions
-**************
-
-These are wrapped versions of inline APDL functions that perform operations like finding the x-coordinate of a node
-given its number (``Query.nx``).
-
-.. toctree::
-   :maxdepth: 1
-
-   inline_functions
-
 
 **********************
 Miscellaneous Commands

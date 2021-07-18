@@ -1,13 +1,14 @@
-.. _ref_function_commands_api:
+.. _inline_functions_api:
 
-**************
-APDL Functions
-**************
+Inline Functions
+================
 
 .. currentmodule:: ansys.mapdl.core.inline_functions
 
 These are wrapped versions of inline APDL functions that perform operations like finding the x-coordinate of a node
 given its number (``Query.nx``).
+
+.. autoclass:: ansys.mapdl.core.inline_functions.Query
 
 .. autosummary::
    :toctree: _autosummary/

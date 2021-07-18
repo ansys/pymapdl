@@ -8,7 +8,9 @@ from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
 
 from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.convert import convert_script
-from ansys.mapdl.core.launcher import (launch_mapdl, change_default_ansys_path,
+from ansys.mapdl.core.launcher import (launch_mapdl,
+                                       change_default_ansys_path,
+                                       find_ansys,
                                        close_all_local_instances)
 from ansys.mapdl.core.misc import Report, _check_has_ansys
 from ansys.mapdl.core.launcher import get_ansys_path

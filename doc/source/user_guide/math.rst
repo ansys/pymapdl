@@ -5,11 +5,12 @@ APDL Math Overview
 APDL Math provides the ability to access and manipulate the large
 sparse matrices and solve a variety of eigenproblems.  PyMAPDL classes
 and bindings present APDL Math in a similar manner to the popular
-``numpy`` and ``scipy`` libraries.  The APDL Math command set is based
-on tools for manipulating large mathematical matrices and vectors that
-provide access to standard linear algebra operations, access to the
-powerful sparse linear solvers of ANSYS Mechanical APDL (MAPDL), and
-the ability to solve eigenproblems.
+`numpy <https://numpy.org/doc/stable/>`_ and `scipy
+<https://docs.scipy.org/doc/scipy/reference/>`_ libraries.  The APDL
+Math command set is based on tools for manipulating large mathematical
+matrices and vectors that provide access to standard linear algebra
+operations, access to the powerful sparse linear solvers of ANSYS
+Mechanical APDL (MAPDL), and the ability to solve eigenproblems.
 
 Python and MATLAB's eigensolver is based on the publicly available
 LAPACK libraries and provides reasonable solve time for relatively
@@ -45,10 +46,10 @@ MAPDL Matrix Example
 ~~~~~~~~~~~~~~~~~~~~
 This example demonstrates how to send an MAPDL Math matrix from MAPDL
 to Python and then send it back to be solved.  While this example runs
-``MapdlMath.eigs`` on mass and stiffness matrices generated from
-MAPDL, you could instead use mass and stiffness matrices generated
-from an external FEM tool, or even modify the mass and stiffness
-matrices within Python.
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` on mass
+and stiffness matrices generated from MAPDL, you could instead use
+mass and stiffness matrices generated from an external FEM tool, or
+even modify the mass and stiffness matrices within Python.
 
 First, solve the first 10 modes of a 1 x 1 x 1 steel meter cube
 in MAPDL.
@@ -88,8 +89,8 @@ We now have solved for the first 10 modes of the cube:
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
 Next, load the mass and stiffness matrices that are stored by default
-at ``<jobname>.full``.  First, create an instance of ``MapdlMath`` as
-``mm``:
+at ``<jobname>.full``.  First, create an instance of :class:`MapdlMath
+<ansys.mapdl.core.math.MapdlMath>` as ``mm``:
 
 .. code:: python
 
@@ -106,7 +107,7 @@ at ``<jobname>.full``.  First, create an instance of ``MapdlMath`` as
     print(k_py)
 
 These matrices are now solely stored within Python now that we've
-cleared ``mapdl``.
+run :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>`.
 
 .. code:: 
 
@@ -134,8 +135,10 @@ transferred them to a different MAPDL session to be solved.
     eigval = mapdl_vec.asarray()
     print(eigval)
 
-As expected, the natural frequencies obtained from ``eigs`` is
-identical to the result from ``SOLVE`` within MAPDL.
+As expected, the natural frequencies obtained from
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` is
+identical to the result from :func:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
+within MAPDL.
 
 .. code::
 
@@ -143,7 +146,8 @@ identical to the result from ``SOLVE`` within MAPDL.
      2024.78684466 2024.78684561 2024.7868466  2242.21532585 2274.82997741]
 
 If you wish to obtain the eigenvectors as well as the eigenvalues,
-initialize a matrix ``eigvec`` and send that to the ``eigs`` method:
+initialize a matrix ``eigvec`` and send that to
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>`:
 
 .. code::
 

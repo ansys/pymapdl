@@ -1,10 +1,11 @@
-# Build documentation
-name: Documentation Build
+name: Nightly Documentation Build
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  schedule:  # UTC at 0400
+    - cron:  '0 4 * * *'
 
 jobs:
-  docs_build:
+  nightly_docs_build:
     runs-on: ubuntu-20.04
 
     env:
@@ -15,7 +16,6 @@ jobs:
       PYANSYS_OFF_SCREEN: True
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Setup Python
@@ -53,28 +53,13 @@ jobs:
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
           make -C doc html
-        env:
-          PYMAPDL_CI_NO_AUTODOC: True
-
-      - name: Full Documentation Build
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          sudo apt install pandoc -qy
-          pip install -r requirements_docs.txt
-          make -C doc html
-  
-      - name: Upload Documentation
-        uses: actions/upload-artifact@v2.2.1
-        with:
-          name: Documentation
-          path: doc/build/html
-          retention-days: 7
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          repository-name: pyansys/pymapdl-dev-docs
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true
