@@ -1,9 +1,11 @@
 Create a Pool of MAPDL Instances
---------------------------------
-The ``ansys.mapdl.core`` module contains the ``MapdlLocalPool`` class
-to simplify creating multiple local instances of ``Mapdl`` for batch
-processing.  This can be used for the batch processing of a set of
-input files, convergence analysis, or other batch related processes.
+================================
+The PyMAPDL library contains the :class:`MapdlLocalPool
+<ansys.mapdl.core.MapdlLocalPool>` class to simplify creating multiple
+local instances of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+for batch processing.  This can be used for the batch processing of a
+set of input files, convergence analysis, or other batch related
+processes.
 
 To create the pool:
 
@@ -40,8 +42,8 @@ creating the pool.
 Run a Set of Input Files
 ~~~~~~~~~~~~~~~~~~~~~~~~
 You can use the pool to run a set of pre-generated input files using
-``run_batch``.  For example, you can run the first set of 20
-verification files with:
+:func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>`.  For
+example, you can run the first set of 20 verification files with:
 
 .. code:: python
 
@@ -56,7 +58,8 @@ Run a User Function
 ~~~~~~~~~~~~~~~~~~~
 You can also use the pool to run a custom user function to run on each
 instance of MAPDL over a set of inputs.  This example again uses set
-of verification files as in the ``run_batch`` example, but implements
+of verification files as in the :func:`run_batch
+<ansys.mapdl.core.MapdlLocalPool.run_batch>` example, but implements
 it as a function and outputs the final routine instead of the text
 output from MAPDL.
 

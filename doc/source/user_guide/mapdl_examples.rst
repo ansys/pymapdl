@@ -1,8 +1,11 @@
 ANSYS APDL Interactive Control Examples
 =======================================
 These examples are used to demonstrate how to convert an existing
-ANSYS APDL script to a python ``pyansys`` script.  You could also
-simply use the built-in ``convert_script`` function within ``ansys-mapdl-core`` to convert an existing input file:
+ANSYS APDL script to a python PyMAPDL script.  You could also simply
+use the built-in :func:`convert_script()
+<ansys.mapdl.core.convert_script>` within `ansys-mapdl-core
+<https://pypi.org/project/ansys-mapdl-core/>`_ to convert an existing
+input file:
 
 .. code:: python
 
@@ -37,8 +40,8 @@ Beginning of MAPDL script:
     FORCE = 100/RADIUS
     PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
 
-Corresponding ``ansys-mapdl-core`` script including the initialization
-of an instance of ``Mapdl``:
+Corresponding PyMAPDL script including the initialization of an
+instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`:
 
 .. code:: python
 
@@ -257,7 +260,7 @@ Access and plot the results within python using PyMAPDL:
 .. figure:: ../images/cylinder_disp.png
     :width: 300pt
 
-    Non-interactive Screenshot of Displacement from ``ansys-mapdl-core``
+    Non-interactive Screenshot of Displacement from PyMAPDL
 
 .. code:: python
 
@@ -267,7 +270,7 @@ Access and plot the results within python using PyMAPDL:
 .. figure:: ../images/cylinder_sx.png
     :width: 300pt
 
-    Non-interactive Screenshot of X Stress from ``ansys-mapdl-core``
+    Non-interactive Screenshot of X Stress from PyMAPDL
 
 .. code:: python
 
@@ -277,11 +280,11 @@ Access and plot the results within python using PyMAPDL:
 .. figure:: ../images/cylinder_vonmises.png
     :width: 300pt
 
-    Non-interactive Screenshot of von Mises Stress from ``ansys-mapdl-core``
+    Non-interactive Screenshot of von Mises Stress from PyMAPDL
 
 
 Alternatively, you can access the same results directly from MAPDL
-using the ``post_processing`` attribute:
+using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`:
 
 .. code:: python
 
@@ -435,22 +438,24 @@ the PyMAPDL interface.
 
 .. code:: python
 
-    from ansys.mapdl.core import launch_mapdl
-    mapdl = launch_mapdl()
-    mapdl.input('spot_weld.inp')
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> mapdl.input('spot_weld.inp')
 
 
-Here is the Python script using ``ansys-mapdl-reader`` to access the
-results after running the MAPDL analysis.
+Here is the Python script using `ansys-mapdl-reader
+<https://pypi.org/project/ansys-mapdl-reader/>`_ to access the results
+after running the MAPDL analysis.
 
 .. code:: python
     
-    from ansys.mapdl import reader as pymapdl_reader
+    >>> from ansys.mapdl import reader as pymapdl_reader
     
-    # Open the result file and plot the displacement of time step 3
-    resultfile = os.path.join(mapdl.directory, 'file.rst')
-    result = pymapdl_reader.read_binary(resultfile)
-    result.plot_nodal_solution(2)
+    Open the result file and plot the displacement of time step 3
+
+    >>> resultfile = os.path.join(mapdl.directory, 'file.rst')
+    >>> result = pymapdl_reader.read_binary(resultfile)
+    >>> result.plot_nodal_solution(2)
 
 .. figure:: ../images/spot_disp.png
     :width: 300pt
@@ -462,12 +467,13 @@ stress in the Z direction.
 
 .. code:: python
 
-    nodenum, stress = result.nodal_stress(0)
-    element_stress, elemnum, enode = result.element_stress(0)
+    >>> nodenum, stress = result.nodal_stress(0)
+    >>> element_stress, elemnum, enode = result.element_stress(0)
     
-    # Plot the Z direction stress:
-    # The stress at the contact element simulating the spot weld
-    result.plot_nodal_stress(0, 'Sz')
+    Plot the Z direction stress:
+    The stress at the contact element simulating the spot weld
+
+    >>> result.plot_nodal_stress(0, 'Sz')
 
 .. figure:: ../images/spot_sz.png
     :width: 300pt
@@ -476,9 +482,10 @@ stress in the Z direction.
 
 .. code:: python
 
-    # Get the principal nodal stress and plot the von Mises Stress
-    nnum, pstress = result.principal_nodal_stress(0)
-    result.plot_principal_nodal_stress(0, 'SEQV')
+    Get the principal nodal stress and plot the von Mises Stress
+
+    >>> nnum, pstress = result.principal_nodal_stress(0)
+    >>> result.plot_principal_nodal_stress(0, 'SEQV')
 
 .. figure:: ../images/spot_seqv.png
     :width: 300pt

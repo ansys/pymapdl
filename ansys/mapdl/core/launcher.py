@@ -94,6 +94,14 @@ def close_all_local_instances(port_range=None):
     port_range : list, optional
         Defaults to ``range(50000, 50200)``.  Expand this range if
         there are many potential instances of MAPDL in gRPC mode.
+
+    Examples
+    --------
+    Close all instances on in the range of 50000 and 50199.
+
+    >>> import ansys.mapdl.core as pymapdl
+    >>> pymapdl.close_all_local_instances()
+
     """
     if port_range is None:
         port_range = range(50000, 50200)
@@ -473,7 +481,7 @@ def find_ansys():
     --------
     Within Windows
 
-    >>> from ansys.mapdl.core.misc import find_ansys
+    >>> from ansys.mapdl.core.launcher import find_ansys
     >>> find_ansys()
     'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
 

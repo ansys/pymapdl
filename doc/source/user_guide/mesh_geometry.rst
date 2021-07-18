@@ -1,13 +1,14 @@
 Mesh and Geometry
 =================
-The ``ansys.mapdl.core.Mapdl`` class allows you to access the mesh and
-geometry without writing to an intermediate file or interpreting the
-text output from various MAPDL commands.  For example, to access the
-nodes and elements of a model, normally one would list the nodes
-within MAPDL ``NLIST``, but this generates a string and array access
-either requires cumbersome MAPDL GET commands, or requires the nodes
-be written to a archive file and then read in within other software.
-For example:
+The :class:`Mapdl <ansys.mapdl.core.Mapdl>` class allows you to access
+the mesh and geometry without writing to an intermediate file or
+interpreting the text output from various MAPDL commands.  For
+example, to access the nodes and elements of a model, normally one
+would list the nodes within MAPDL :func:`Mapdl.nlist()
+<ansys.mapdl.core.Mapdl.nlist`, but this generates a string and array
+access either requires cumbersome MAPDL GET commands, or requires the
+nodes be written to a archive file and then read in within other
+software.  For example:
 
 .. code::
 
@@ -21,8 +22,9 @@ For example:
         3   0.2500        0.0000        0.0000          0.00     0.00     0.00
 
 
-However, with ``ansys-mapdl-core``, it's possible to interface with a
-current instance of ``Mapdl`` and access the current nodes coordinates
+However, with :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>`
+possible to interface with a current instance of :class:`Mapdl
+<ansys.mapdl.core.Mapdl>` and access the current nodes coordinates
 with:
 
 .. code:: python
@@ -37,8 +39,9 @@ with:
     [0.75 0.5  4.5 ]]
 
 
-Both the ``geometry`` and ``mesh`` attributes support additional,
-lower level access to MAPDL data.  Access them with:
+Both the :attr:`Mapdl.geometry <ansys.mapdl.core.Mapdl.geometry` and
+:attr:`Mapdl.mesh <ansys.mapdl.core.Mapdl.mesh` attributes support
+additional, lower level access to MAPDL data.  Access them with:
 
 .. code:: python
 

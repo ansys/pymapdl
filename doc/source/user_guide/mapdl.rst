@@ -4,19 +4,21 @@
 PyMAPDL Language and Usage
 **************************
 This section gives you an overview of the PyMAPDL API for the
-``Mapdl`` class.  For additional reference, see :ref:`ref_plotting_api`.
+``Mapdl`` class.  For additional reference, see :ref:`ref_mapdl_api`.
 
 Overview
 --------
 When calling MAPDL commands as functions, each command has been
 translated from its original MAPDL all CAPS format to a PEP8
-compatible format.  For example, ``ESEL`` is now ``esel``.
-Additionally, MAPDL commands containing a ``/`` or ``*`` have had
-those characters removed, unless this causes a conflict with an
-existing name.  Most notable is ``/SOLU`` which would conflict with
-``SOLU``.  Therefore, the ``/SOLU`` has been renamed to ``slashsolu``
-to differentiate it from ``solu``.  Out of the 1500 MAPDL commands,
-about 15 start with ``slash`` and 8 with ``star``.  
+compatible format.  For example, ``ESEL`` is now :func:`Mapdl.esel()
+<ansys.mapdl.core.Mapdl.esel>`.  Additionally, MAPDL commands
+containing a ``/`` or ``*`` have had those characters removed, unless
+this causes a conflict with an existing name.  Most notable is
+``/SOLU`` which would conflict with ``SOLU``.  Therefore, the
+``/SOLU`` has been renamed to :func:`Mapdl.slashsolu()
+<ansys.mapdl.core.Mapdl.slashsolu>` to differentiate it from ``solu``.
+Out of the 1500 MAPDL commands, about 15 start with ``slash`` and 8
+with ``star``.
 
 MAPDL commands that normally have an empty space, such as ``ESEL, S,
 TYPE, , 1`` should include an empty string when called by Python:
@@ -31,8 +33,9 @@ or these commands can be called using keyword arguments:
 
     mapdl.esel('s', 'type', vmin=1)
 
-None of these restrictions apply to commands run with ``run``, and it
-may be easier to run some of these commands (e.g. "/SOLU"):
+None of these restrictions apply to commands run with :func:`Mapdl.run()
+<ansys.mapdl.core.Mapdl.run>`, and it may be easier to run some of
+these commands (e.g. ``"/SOLU"``):
 
 .. code:: python
 
@@ -43,8 +46,9 @@ Some commands can only be run non-interactively from within in a
 script.  PyMAPDL gets around this restriction by writing the commands
 to a temporary input file and then reading the input file.  To run a
 group of commands that must be run non-interactively, set the
-``MAPDL`` object to run a series of commands as an input file by using
-``non_interactive`` as in this example:
+``mapdl`` to run a series of commands as an input file by using
+:func:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
+as in this example:
 
 .. code:: python
 
@@ -84,15 +88,15 @@ Should be written as:
         mapdl.nsel("ALL")
         mapdl.run("/OUT,SCRATCH")
         mapdl.solve()
-    
+
     
     DISP(-.032)
     DISP(-.05)
     DISP(-.1)
 
 If you have an existing input file with a macro, it can be converted
-using the ``convert_script`` function and setting
-``macros_as_functions=True``:
+using :func:`convert_script() <ansys.mapdl.core.Mapdl.convert_script>`
+setting ``macros_as_functions=True``:
 
 .. code:: python
 
@@ -107,7 +111,7 @@ Commands can be run in ``mute`` or ``verbose`` mode, which allows you
 to suppress or print the output in as it is being run for any MAPDL
 command.  This can be especially helpful for long-running commands
 like ``SOLVE``.  This works for the pythonic wrapping of all commands
-and when using ``run``.
+and when using :func:`Mapdl.run() <ansys.mapdl.core.Mapdl.run>`.
 
 Run a command and suppress its output:
 
@@ -130,8 +134,10 @@ Run a command and stream its output while it is being run.
 
 Running Several Commands or an Input File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-You can run several MAPDL commands as a unified block.  This is useful
-when using PyMAPDL with older MAPDL commands.  For example:
+You can run several MAPDL commands as a unified block using
+:func:`Mapdl.run_multiline() <ansys.mapdl.core.Mapdl.run_multiline>`.
+This is useful when using PyMAPDL with older MAPDL scripts.  For
+example:
 
     >>> cmd = '''/prep7
     ! Mat
@@ -205,8 +211,9 @@ when using PyMAPDL with older MAPDL commands.  For example:
      MAXIMUM ELEMENT NUMBER     =      8000
 
 Alternatively, you can simply write the commands to a file and then
-run it.  For example, if you have a ``"ds.dat"`` generated from Ansys
-Workbench, you can run that with:
+run it using :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`.  For
+example, if you have a ``"ds.dat"`` generated from Ansys Mechanical,
+you can run that with:
 
 .. code:: python
 
@@ -216,9 +223,9 @@ Workbench, you can run that with:
 Conditional Statements and Loops
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 APDL conditional statements such as ``*IF`` must be either implemented
-pythonically or using ``with mapdl.non_interactive:``.   For example:
+pythonically or using :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.  For example:
 
-.. code:: 
+.. code::
 
     *IF,ARG1,EQ,0,THEN
       *GET,ARG4,NX,ARG2     ! RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
@@ -309,19 +316,23 @@ running a command in the wrong session raises an error:
      K is not a recognized BEGIN command, abbreviation, or macro.  This      
      command will be ignored.
 
-You can change this behavior so ignored commands can be logged as warnings not raised as an exception by setting:
+You can change this behavior so ignored commands can be logged as
+warnings not raised as an exception by setting
+:func:`Mapdl.allow_ignore() <ansys.mapdl.core.Mapdl.allow_ignore>`.  For
+example:
 
 .. code:: python
 
-   mapdl.allow_ignore = True
-   mapdl.k()  # error ignored
+   >>> mapdl.allow_ignore = True
+   >>> mapdl.k()  # warning silently ignored
 
 
 Prompts
 ~~~~~~~
 Prompts from MAPDL automatically continued as if MAPDL is in batch
-mode.  Commands requiring user input, such as ``*VWRITE`` will fail
-and must be entered in non-interactively.
+mode.  Commands requiring user input, such as :func:`Mapdl.vwrite()
+<ansys.mapdl.core.Mapdl.vwrite>` will fail and must be entered in
+non-interactively.
 
 
 APDL Command Logging
@@ -330,10 +341,10 @@ While ``ansys-mapdl-core`` is designed to make it easier to control an
 APDL session by calling it using Python, it may be necessary to call
 MAPDL again using an input file generated from a PyMAPDL script.  This
 is automatically enabled with the ``log_apdl='apdl.log'`` parameter.
-Enabling this parameter will cause ``ansys-mapdl-core`` to write each
-command run from a ``Mapdl`` object into a log file named
-``"apdl.log"`` in the MAPDL working directory of the active ``mapdl``
-object.  For example:
+Enabling this parameter will cause :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>` to write each command run into a
+log file named ``"apdl.log"`` in the active :attr:`Mapdl.directory
+<ansys.mapdl.core.Mapdl.directory>`.  For example:
 
 .. code:: python
 
@@ -363,34 +374,35 @@ except for conditional statements, loops, or functions.
 Interactive Breakpoint
 ----------------------
 In most circumstances it is necessary or preferable to open up the
-MAPDL GUI.  The ``ansys-mapdl-core`` module has an ``open_gui`` method
-that allows you to seamlessly open up the GUI without losing work or
-having to restart your session.  For example:
+MAPDL GUI.  The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` module has :func:`Mapdl.open_gui() <ansys.mapdl.core.Mapdl.open_gui>` that allows you to seamlessly open up the GUI without losing work or having to restart your session.  For example:
 
 .. code:: python
 
-    from ansys.mapdl.core import launch_mapdl
-    mapdl = launch_mapdl()
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
 
-    # create a square area using keypoints
-    mapdl.prep7()
-    mapdl.k(1, 0, 0, 0)
-    mapdl.k(2, 1, 0, 0)
-    mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)    
-    mapdl.l(1, 2)
-    mapdl.l(2, 3)
-    mapdl.l(3, 4)
-    mapdl.l(4, 1)
-    mapdl.al(1, 2, 3, 4)
+    Create a square area using keypoints
 
-    # open up the gui
-    mapdl.open_gui()
+    >>> mapdl.prep7()
+    >>> mapdl.k(1, 0, 0, 0)
+    >>> mapdl.k(2, 1, 0, 0)
+    >>> mapdl.k(3, 1, 1, 0)
+    >>> mapdl.k(4, 0, 1, 0)    
+    >>> mapdl.l(1, 2)
+    >>> mapdl.l(2, 3)
+    >>> mapdl.l(3, 4)
+    >>> mapdl.l(4, 1)
+    >>> mapdl.al(1, 2, 3, 4)
 
-    # it resumes where you left off...
-    mapdl.et(1, 'MESH200', 6)
-    mapdl.amesh('all')
-    mapdl.eplot()    
+    Open up the gui
+
+    >>> mapdl.open_gui()
+
+    Resume where you left off
+
+    >>> mapdl.et(1, 'MESH200', 6)
+    >>> mapdl.amesh('all')
+    >>> mapdl.eplot()    
 
 This approach avoids the hassle of having to switch back and forth
 between an interactive session and a scripting session.  Instead, you
@@ -563,8 +575,10 @@ would run:
 
 However, since each command executes individually and returns a
 response, it is much faster to send the commands to be executed by
-MAPDL in groups and have ``ansys-mapdl-core`` handle grouping the
-commands by running ``with mapdl.chain_commands``:
+MAPDL in groups and have :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>` handle grouping the commands by
+using :attr:`Mapdl.chain_commands
+<ansys.mapdl.core.Mapdl.chain_commands>`.
 
 .. code:: python
 
@@ -574,16 +588,20 @@ commands by running ``with mapdl.chain_commands``:
             mapdl.k(x=x)
 
 The execution time on this generally 4 to 10 times faster than running
-each command individually.
+each command individually.  You can then view the final response of
+the chained commands with :attr:`Mapdl.last_response
+<ansys.mapdl.core.Mapdl.last_response>`.
 
 
 Sending Arrays to MAPDL
 -----------------------
 You can send ``numpy`` arrays or Python lists directly to MAPDL using
-``parameters['MY_ARRAY_NAME']``.  This is far more efficient than
-individually sending parameters to MAPDL through Python with ``run``.
-It uses ``*VREAD`` behind the scenes and will be replaced with a
-faster interface in the future.
+:class:`Mapdl.parameters <ansys.mapdl.core.parameters.Parameters`.
+This is far more efficient than individually sending parameters to
+MAPDL through Python with :func:`Mapdl.run()
+<ansys.mapdl.core.Mapdl.run>`.  It uses :func:`Mapdl.vread()
+<ansys.mapdl.core._commands.ParameterDefinition>` behind the scenes
+and will be replaced with a faster interface in the future.
 
 .. code:: python
 
@@ -609,8 +627,10 @@ Verify the data has been properly loaded to MAPDL by indexing
 
 Downloading a Remote MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Remote files can be listed and downloaded using ``ansys-mapdl-core``.
-For example, to list the remote files and download one of them:
+When running MAPDL in gRPC mode, remote files can be listed and
+downloaded using :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+with :func:`Mapdl.download() <ansys.mapdl.core.Mapdl.download>` For
+example, to list the remote files and download one of them:
 
 .. code:: python
 
@@ -624,12 +644,13 @@ For example, to list the remote files and download one of them:
 
 .. note::
 
-   This is a gRPC feature only available in 2021R1 or newer.
+   This feature is only available for MAPDL 2021R1 or newer.
 
 
 Uploading a Local MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-You can upload a local file a the remote mapdl instance with:
+You can upload a local file a the remote mapdl instance with
+:func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` For example:
 
 .. code:: python
 
@@ -642,7 +663,7 @@ You can upload a local file a the remote mapdl instance with:
 
 .. note::
 
-   This is a gRPC feature only available in 2021R1 or newer.
+   This feature is only available for MAPDL 2021R1 or newer.
 
 
 Unsupported MAPDL Commands and Other Considerations
@@ -653,11 +674,11 @@ because they are not applicable to an interactive session, or require
 additional commands that are incompatible with the way inputs are
 handled in the MAPDL server.
 
-Unapplicable Commands
-~~~~~~~~~~~~~~~~~~~~~
 
+Non-Applicable Commands
+~~~~~~~~~~~~~~~~~~~~~~~
 Some commands are quietly ignored by MAPDL and you are still free to
-use them.  For example ``/BATCH``, implemented as ``mapdl.batch()`` returns:
+use them.  For example ``/BATCH``, implemented as ``Mapdl.batch()`` returns:
 
 .. code::
 
@@ -666,7 +687,7 @@ use them.  For example ``/BATCH``, implemented as ``mapdl.batch()`` returns:
     is ignored.
 
 Note, that running these commands with ``mapdl.run('<command>')`` will
-not cause MAPDL to die, and will generally simply be ignored by MAPDL.
+not cause MAPDL to exit, and will generally simply be ignored by MAPDL.
 
 Ignored commands:
 
@@ -690,10 +711,12 @@ not permitted.
 Some commands, such as ``/EOF``, .  These commands are not wrapped or
 directly exposed to the user with a Python method such as
 ``mapdl.eof()``.  If you wish to exit the server, use
-``mapdl.exit()``.  Other commands, such as ``*ASK``, request user and
-are not supported within an interactive context.  Some of commands may
-be run in ``non_interactive`` mode if applicable.  Others simply are
-not supported.
+:func:`Mapdl.exit() <ansys.mapdl.core.Mapdl.exit>`.  Other commands,
+such as ``*ASK``, request user and are not supported within an
+interactive context.  Some of commands may be run in
+:attr:`Mapdl.non_interactive
+<ansys.mapdl.core.Mapdl.non_interactive>`.  Others simply are not
+supported.
 
 * ``*ASK``
 * ``*CREATE``
