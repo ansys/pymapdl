@@ -1,6 +1,7 @@
 from .component_queries import _DisplacementComponentQueries, \
     _InverseGetComponentQueries, _ComponentQueries
-from .selection_queries import _SelectionStatusQueries
+from .selection_queries import _SelectionStatusQueries, \
+    _NextSelectedEntityQueries
 from .line_queries import _LineFractionCoordinateQueries, \
     _LineFractionSlopeQueries
 
@@ -10,7 +11,8 @@ class Query(_ComponentQueries,
             _DisplacementComponentQueries,
             _SelectionStatusQueries,
             _LineFractionCoordinateQueries,
-            _LineFractionSlopeQueries):
+            _LineFractionSlopeQueries,
+            _NextSelectedEntityQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
@@ -45,6 +47,12 @@ class Query(_ComponentQueries,
     - ``asel(a)`` - get the selection status of area `a`
     - ``esel(n)`` - get the selection status of element `e`
     - ``vsel(v)`` - get the selection status of volume `v`
+    - ``ndnext(n)`` - get the next selected node with a number greater than `n`.
+    - ``kpnext(k)`` - get the next selected keypoint with a number greater than `k`.
+    - ``lsnext(n)`` - get the next selected line with a number greater than `n`.
+    - ``arnext(a)`` - get the next selected area with a number greater than `a`.
+    - ``elnext(e)`` - get the next selected element with a number greater than `e`.
+    - ``vlnext(v)`` - get the next selected volume with a number greater than `v`.
     - ``node(x, y, z)`` - get the node closest to coordinate (x, y, z)
     - ``kp(x, y, z)`` - get the keypoint closest to coordinate (x, y, z)
 
@@ -66,5 +74,6 @@ class Query(_ComponentQueries,
     >>> q.nx(1), q.ny(1), q.nz(1)
     0.0 20.0 0.0
     """
+
     def __init__(self, mapdl):
         self._mapdl = mapdl

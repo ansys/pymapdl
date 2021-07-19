@@ -140,3 +140,137 @@ class TestVSEL:
         q = selection_test_geometry
         select = q.vsel(999)
         assert select == 0
+
+
+class TestNDNEXT:
+    def test_existing_nodes(self, selection_test_geometry,
+                            common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        nodes = get_details_of_nodes(q._mapdl)
+        next_ = q.ndnext(1)
+        assert next_ in nodes
+
+    def test_unselected_nodes(self, selection_test_geometry,
+                              common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        nodes = get_details_of_nodes(q._mapdl)
+        last_node = len(nodes)
+        next_ = q.ndnext(last_node)
+        assert next_ == 0
+
+    def test_non_existing_nodes(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.ndnext(999)
+        assert next_ == 0
+
+
+class TestELNEXT:
+    def test_existing_elements(self, selection_test_geometry,
+                               common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        elements = get_details_of_elements(q._mapdl)
+        next_ = q.elnext(1)
+        assert next_ in elements
+
+    def test_unselected_elements(self, selection_test_geometry,
+                                 common_functions_and_classes):
+        get_details_of_nodes, get_details_of_elements, _, _ = \
+            common_functions_and_classes
+        q = selection_test_geometry
+        elements = get_details_of_elements(q._mapdl)
+        last_element = len(elements)
+        next_ = q.elnext(last_element)
+        assert next_ == 0
+
+    def test_non_existing_elements(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.elnext(999)
+        assert next_ == 0
+
+
+class TestKPNEXT:
+    def test_existing_kps(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(1)
+        assert next_ == 2
+
+    def test_unselected_kps(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(4)
+        assert next_ == 0
+
+    def test_non_existing_kps(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.kpnext(999)
+        assert next_ == 0
+
+
+class TestLSNEXT:
+    def test_existing_lines(self, selection_test_geometry):
+        # there are 6 lines in in the selection_test_geometry fixture
+        q = selection_test_geometry
+        next_ = q.lsnext(1)
+        assert next_ == 2
+
+    def test_unselected_lines(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.lsnext(6)
+        assert next_ == 0
+
+    def test_non_existing_lines(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.lsnext(999)
+        assert next_ == 0
+
+
+class TestARNEXT:
+    def test_existing_areas(self, selection_test_geometry):
+        # there are 4 areas in in the selection_test_geometry fixture
+        q = selection_test_geometry
+        next_ = q.arnext(1)
+        assert next_ == 2
+
+    def test_unselected_areas(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.arnext(4)
+        assert next_ == 0
+
+    def test_non_existing_areas(self, selection_test_geometry):
+        q = selection_test_geometry
+        next_ = q.arnext(999)
+        assert next_ == 0
+
+
+class TestVLNEXT:
+    @staticmethod
+    def make_volumes(mapdl):
+        mapdl.prep7()
+        point1 = mapdl.k(999, 0, 10, 0)
+        point2 = mapdl.k(99, 0, 0, 10)
+        kps = [mapdl.k(i + 1, i, 0, 0) for i in range(10)]
+        vols = [mapdl.v(i, i + 1, point1, point2) for i in kps[:-1]]
+        return vols
+
+    def test_existing_volumes(self, query):
+        q = query
+        _ = self.make_volumes(q._mapdl)
+        next_ = q.vlnext(1)
+        assert next_ == 2
+
+    def test_unselected_volumes(self, query):
+        q = query
+        vols = self.make_volumes(q._mapdl)
+        next_ = q.vlnext(len(vols))
+        assert next_ == 0
+
+    def test_non_existing_volumes(self, query):
+        next_ = query.vlnext(999)
+        assert next_ == 0
+
+

@@ -317,3 +317,255 @@ class _SelectionStatusQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=VSEL({v})')
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
+
+
+class _NextSelectedEntityQueries(_ParameterParsing):
+    _mapdl = None
+
+    def ndnext(self, n: int) -> int:
+        """Returns next selected node with a number greater than `n`.
+
+        Returns the next highest node number after the supplied node
+        number `n`, from the current selection.
+
+        If no 'next selected' node exists (or if the supplied node
+        number does not exist in the selection) `0` is returned.
+
+        Parameters
+        ----------
+        n : int
+            Node number
+
+        Returns
+        -------
+        int
+            Node number
+
+        Examples
+        --------
+        Here we create 10 nodes, select them all, and find the next
+        selected node for each. For the last node there are no other
+        nodes with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> nodes = [mapdl.n(i+1, i, 0, 0) for i in range(10)]
+        >>> next_selected_nodes = [q.ndnext(j) for j in nodes]
+        >>> next_selected_nodes
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
+        """
+        response = self._mapdl.run(f'_=NDNEXT({n})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def kpnext(self, k: int) -> int:
+        """Returns next selected keypoint with a number greater than `k`.
+
+        Returns the next highest keypoint number after the supplied
+        keypoint number `k`, from the current selection.
+
+        If no 'next selected' keypoint exists (or if the supplied
+        keypoint number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        k : int
+            Keypoint number
+
+        Returns
+        -------
+        int
+            Keypoint number
+
+        Examples
+        --------
+        Here we create 10 keypoints and find the next selected keypoint
+        for each. For the last node there are no other keypoints with a
+        higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> next_selected_kps = [q.kpnext(j) for j in kps]
+        >>> next_selected_kps
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
+        """
+        response = self._mapdl.run(f'_=KPNEXT({k})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def elnext(self, e: int) -> int:
+        """Returns next selected element with a number greater than `e`.
+
+        Returns the next highest element number after the supplied
+        element number `e`, from the current selection.
+
+        If no 'next selected' element exists (or if the supplied
+        element number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        e : int
+            Element number
+
+        Returns
+        -------
+        int
+            Element number
+
+        Examples
+        --------
+        Here we create 9 elements from 10 nodes and find the next
+        selected element for each. For the last element there are no
+        other elements with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'LINK11')
+        >>> q = Query(mapdl)
+        >>> nodes = [mapdl.n(i+1, i, 0, 0) for i in range(10)]
+        >>> els = [mapdl.e(i, i+1) for i in nodes[:-1]]
+        >>> next_selected_els = [q.elnext(j) for j in els]
+        >>> next_selected_els
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=ELNEXT({e})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def lsnext(self, n: int) -> int:
+        """Returns next selected line with a number greater than `n`.
+
+        Returns the next highest line number after the supplied
+        line number `n`, from the current selection.
+
+        If no 'next selected' line exists (or if the supplied
+        line number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        n : int
+            Line number
+
+        Returns
+        -------
+        int
+            Line number
+
+        Examples
+        --------
+        Here we create 9 lines from 10 nodes and find the next
+        selected line for each. For the last line there are no
+        other lines with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'LINK11')
+        >>> q = Query(mapdl)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> lines = [mapdl.l(i, i+1) for i in kps[:-1]]
+        >>> next_selected_lines = [q.lsnext(j) for j in lines]
+        >>> next_selected_lines
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=LSNEXT({n})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def arnext(self, a: int) -> int:
+        """Returns next selected area with a number greater than `a`.
+
+        Returns the next highest area number after the supplied
+        area number `a`, from the current selection.
+
+        If no 'next selected' area exists (or if the supplied
+        area number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        a : int
+            Area number
+
+        Returns
+        -------
+        int
+            Area number
+
+        Examples
+        --------
+        Here we create 9 areas from 11 nodes and find the next
+        selected area for each. For the last area there are no
+        other areas with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> farpoint = mapdl.k(999, 0, 10, 0)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> areas = [mapdl.a(i, i+1, farpoint) for i in kps[:-1]]
+        >>> next_selected_areas = [q.arnext(j) for j in areas]
+        >>> next_selected_areas
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=ARNEXT({a})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer
+
+    def vlnext(self, v: int) -> int:
+        """Returns next selected volume with a number greater than `v`.
+
+        Returns the next highest volume number after the supplied
+        volume number `v`, from the current selection.
+
+        If no 'next selected' volume exists (or if the supplied
+        volume number does not exist in the selection) `0` is
+        returned.
+
+        Parameters
+        ----------
+        v : int
+            Volume number
+
+        Returns
+        -------
+        int
+            Volume number
+
+        Examples
+        --------
+        Here we create 9 volumes from 12 nodes and find the next
+        selected volume for each. For the last volume there are no
+        other volumes with a higher number, so 0 is returned.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from ansys.mapdl.core.inline_functions import Query
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> q = Query(mapdl)
+        >>> point1 = mapdl.k(999, 0, 10, 0)
+        >>> point2 = mapdl.k(99, 0, 0, 10)
+        >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
+        >>> vols = [mapdl.v(i, i+1, point1, point2) for i in kps[:-1]]
+        >>> next_selected_vols = [q.vlnext(j) for j in vols]
+        >>> next_selected_vols
+        [2, 3, 4, 5, 6, 7, 8, 9, 0]
+        """
+        response = self._mapdl.run(f'_=VLNEXT({v})')
+        integer = self._parse_parameter_integer_response(response)
+        return integer

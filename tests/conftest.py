@@ -12,7 +12,8 @@ from ansys.mapdl.core.launcher import (get_start_instance,
                                        MAPDL_DEFAULT_PORT,
                                        _get_available_base_ansys)
 from ansys.mapdl.core.inline_functions import Query
-from common import get_details_of_nodes
+from common import get_details_of_nodes, get_details_of_elements, \
+    Node, Element
 
 
 # Necessary for CI plotting
@@ -270,7 +271,7 @@ def line_geometry(mapdl, cleared):
 
 
 @pytest.fixture
-def query():
+def query(mapdl, cleared):
     return Query(mapdl)
 
 
@@ -300,6 +301,11 @@ def solved_box(mapdl, cleared):
     mapdl.finish()
     q = Query(mapdl)
     return q, get_details_of_nodes(mapdl)
+
+
+@pytest.fixture
+def common_functions_and_classes():
+    return get_details_of_nodes, get_details_of_elements, Node, Element
 
 
 @pytest.fixture
