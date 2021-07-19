@@ -68,6 +68,7 @@ templates_path = ['_templates']
 
 # disable class autodoc summary when this is set
 if 'PYMAPDL_CI_NO_AUTODOC' in os.environ:
+    extensions.remove('sphinx.ext.autosummary')
     templates_path.clear()
 
 # The suffix(es) of source filenames.
