@@ -264,16 +264,22 @@ class MapdlGrpc(_MapdlCore):
     @property
     def mute(self):
         """Silence the response from all MAPDL functions unless
-        explicitly set to ``True``
+        explicitly set to ``True``.
+
+        Returns
+        -------
+        bool
+            Current state of the mute.
 
         Examples
         --------
         >>> mapdl.mute = True
-        >>> mapdl.prep()
+        >>> mapdl.prep7()
         ''
 
-        Override this with ``mute=False``.  This is useful for methods
-        that parse the MAPDL output like ``k``.
+        Temporarily override the instance setting this with
+        ``mute=False``.  This is useful for methods that parse the
+        MAPDL output like ``k``.
 
         >>> mapdl.k('', 1, 1, 1, mute=False)
         1
@@ -283,7 +289,6 @@ class MapdlGrpc(_MapdlCore):
 
     @mute.setter
     def mute(self, value):
-        """Set mute."""
         self._mute = value
 
     def __repr__(self):
@@ -1326,6 +1331,10 @@ class MapdlGrpc(_MapdlCore):
     @property
     def math(self):
         """APDL math interface
+
+        Returns
+        -------
+        :class:`MapdlMath <ansys.mapdl.core.math.MapdlMath>`
 
         Examples
         --------

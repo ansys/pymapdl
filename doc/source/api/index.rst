@@ -8,20 +8,23 @@ classes, functions, and attributes.
 
 These methods may include some MAPDL commands but are generally
 specific to pymapdl specific methods and classes (i.e. methods that
-extend existing MAPDL methods in a pythonic manner).
+extend existing MAPDL methods in a pythonic manner).  For classic
+MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
+
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :hidden:
 
-   ansXpl
-   convert
-   geometry
-   launcher
-   math
    mapdl
-   mesh
-   parameters
+   math
    plotting
+   helper
+   mesh
+   xpl
+   parameters
+   geometry
    pool
    post
    solution
+   inline

@@ -13,7 +13,6 @@ These APDL commands are used to define parameters and their values.
 
    Mapdl.afun
    Mapdl.dim
-   Mapdl.get
    Mapdl.inquire
    Mapdl.parres
    Mapdl.parsav

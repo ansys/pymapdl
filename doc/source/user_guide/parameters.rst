@@ -1,10 +1,11 @@
 *********************************
 Setting and Retrieving Parameters
 *********************************
-APDL parameters can be retrieved using ``ansys-mapdl-core`` using the
-``Parameters`` class accessible from a ``mapdl`` instance.  For
-example, if you wish to use the MAPDL ``GET`` command to populate a
-parameter, you can then access the parameter with:
+APDL parameters can be retrieved from and instance of :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>` using the :attr:`Mapdl.parameters
+<ansys.mapdl.core.Mapdl.parameters>`.  For example, if you wish to use
+the MAPDL's :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` to
+populate a parameter, you can then access the parameter with:
 
 .. code:: python
 
@@ -14,7 +15,8 @@ parameter, you can then access the parameter with:
    >>> mapdl.parameters['DEF_Y']
 
 You can also set both scalar and array parameters from python objects
-using ``parameters`` with:
+using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`
+with:
 
 .. code:: python
 
@@ -27,9 +29,10 @@ using ``parameters`` with:
    >>> mapdl.parameters['MY_STRING']
    "helloworld"
 
-You an also access some built-in parameters normally accessed through
-the ``\*GET`` command.  For example, instead of getting the current
-routine with ``\*GET, ACTIVE, 0, ROUT``, you can access it with:
+You can also access some built-in parameters normally accessed through
+the :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>`.  For example,
+instead of getting the current routine with ``\*GET, ACTIVE, 0,
+ROUT``, you can access it with:
 
 .. code:: python
 
@@ -37,4 +40,5 @@ routine with ``\*GET, ACTIVE, 0, ROUT``, you can access it with:
   'Begin level'
 
 
-For a full listing of the methods and attributes available to the ``Parameters`` class, please reference the :ref:`ref_parameters_api`.
+For a full listing of the methods and attributes available to the
+``Parameters`` class, please reference the :ref:`ref_parameters_api`.

@@ -1,4 +1,4 @@
-"""
+r"""
 .. _ref_how_to_add_an_example_reference_key:
 
 Statically Indeterminate Reaction Force Analysis

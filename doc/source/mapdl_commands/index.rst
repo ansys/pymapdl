@@ -296,6 +296,7 @@ These commands read in external CAD files into MAPDL.
 
    conn
 
+
 **********************
 Miscellaneous Commands
 **********************

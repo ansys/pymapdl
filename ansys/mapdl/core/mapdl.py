@@ -131,7 +131,6 @@ class _MapdlCore(Commands):
 
         self._log = setup_logger(loglevel.upper())
         self._log.debug('Logging set to %s', loglevel)
-        self.non_interactive = self._non_interactive(self)
 
         from ansys.mapdl.core.parameters import Parameters
         self._parameters = Parameters(self)
@@ -146,8 +145,32 @@ class _MapdlCore(Commands):
         self._post = PostProcessing(self)
 
     @property
+    def non_interactive(self):
+        """Non-interactive context manager.
+
+        Use this when using commands that require user
+        interaction within MAPDL (e.g. :func:`Mapdl.vwrite`).
+
+        Examples
+        --------
+        Use the non-interactive context manager for the VWRITE
+        command.  View the last response with :attr:`Mapdl.last_response`.
+
+        >>> with mapdl.non_interactive:
+        ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>> mapdl.last_response
+
+        """
+        return self._non_interactive(self)
+
+    @property
     def solution(self):
         """Solution parameters of MAPDL.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.core.solution.Solution`
 
         Examples
         --------
@@ -197,6 +220,7 @@ class _MapdlCore(Commands):
         for easy chaining of PyMAPDL commands to speed up sending
         commands to MAPDL.
 
+        View the response from MAPDL with :attr:`Mapdl.last_response`.
 
         Examples
         --------
@@ -234,8 +258,11 @@ class _MapdlCore(Commands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the ``*GET``
-        command or ``GET`` command.
+        """Collection of MAPDL parameters obtainable from the ``*GET`` command or ``GET`` command.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.core.parameters.Parameters`
 
         Examples
         --------
@@ -273,18 +300,7 @@ class _MapdlCore(Commands):
         return self._parameters
 
     class _non_interactive:
-        """Allows user to enter commands that need to run
-        non-interactively.
-
-        Examples
-        --------
-        To use an non-interactive command like *VWRITE, use:
-
-        >>> with ansys.non_interactive:
-                ansys.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-                ansys.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
-
-        """
+        """Allows user to enter commands that need to run non-interactively."""
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
 
@@ -380,7 +396,9 @@ class _MapdlCore(Commands):
 
     @property
     def geometry(self):
-        """Geometry (CAD) information.
+        """Geometry information.
+
+        See :class:`ansys.mapdl.core.mapdl_geometry.Geometry`
 
         Examples
         --------
@@ -427,6 +445,10 @@ class _MapdlCore(Commands):
     @property
     def mesh(self):
         """Mesh information.
+
+        Returns
+        -------
+        :class:`Mapdl.Mesh <ansys.mapdl.core.mesh_grpc.Mesh>`
 
         Examples
         --------
@@ -588,7 +610,31 @@ class _MapdlCore(Commands):
 
         Examples
         --------
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+
+        Create a square area using keypoints
+
+        >>> mapdl.prep7()
+        >>> mapdl.k(1, 0, 0, 0)
+        >>> mapdl.k(2, 1, 0, 0)
+        >>> mapdl.k(3, 1, 1, 0)
+        >>> mapdl.k(4, 0, 1, 0)    
+        >>> mapdl.l(1, 2)
+        >>> mapdl.l(2, 3)
+        >>> mapdl.l(3, 4)
+        >>> mapdl.l(4, 1)
+        >>> mapdl.al(1, 2, 3, 4)
+
+        Open up the gui
+
         >>> mapdl.open_gui()
+
+        Resume where you left off
+
+        >>> mapdl.et(1, 'MESH200', 6)
+        >>> mapdl.amesh('all')
+        >>> mapdl.eplot()    
         """
         # lazy load here to avoid circular import
         from ansys.mapdl.core.launcher import get_ansys_path
@@ -1159,7 +1205,12 @@ class _MapdlCore(Commands):
 
     @property
     def result(self):
-        """Binary interface to the result file using ``ansys.mapdl.reader.Result``
+        """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.reader.rst.Result`.
+            Result reader class.  See `Legacy PyMAPDL Reader <https://readerdocs.pyansys.com/>`.
 
         Examples
         --------
@@ -1174,7 +1225,7 @@ class _MapdlCore(Commands):
         Result Sets : 1
         Nodes       : 3083
         Elements    : 977
-
+        ...
         Available Results:
         EMS : Miscellaneous summable items (normally includes face pressures)
         ENF : Nodal forces
@@ -1364,20 +1415,20 @@ class _MapdlCore(Commands):
         else:
             self._log.info(self._response)
 
-    def get_float(self, *args, **kwargs):
-        raise NotImplementedError('Please use ``get_value`` instead')
-
     def get_value(self, entity="", entnum="", item1="", it1num="",
                   item2="", it2num="", **kwargs):
-        """Runs the *GET command and returns a Python value.
+        """Runs the GET command and returns a Python value.
 
-        See ``help(mapdl.starget)`` for more details.
+        This method uses :func:`_MapdlCore.get`.
+
+        See the full MADPL command documentation at `*GET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
         Parameters
         ----------
         entity
             Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc., as shown for Entity = in the tables below.
+            VOLU, PDS, etc.
 
         entnum
             The number or label for the entity (as shown for ENTNUM = in the
@@ -1422,10 +1473,12 @@ class _MapdlCore(Commands):
 
     def get(self, par="__floatparameter__", entity="", entnum="",
             item1="", it1num="", item2="", it2num="", **kwargs):
-        """APDL Command: \*GET
+        """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
-        Retrieves a value and stores it as a scalar parameter or part
-        of an array parameter.
+        APDL Command: \*GET
+
+        See the full MADPL command at `*GET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
         Parameters
         ----------
@@ -2044,6 +2097,10 @@ class _MapdlCore(Commands):
         """Uses the VGET command to Return an array from ANSYS as a
         Python array.
 
+        See `*VGET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
+        for more details.
+
         Parameters
         ----------
         entity
@@ -2051,8 +2108,7 @@ class _MapdlCore(Commands):
             AREA, VOLU, etc
 
         entnum
-            The number of the entity (as shown for ENTNUM = in the tables
-            below).
+            The number of the entity.
 
         item1
             The name of a particular item for the given entity.  Valid
@@ -2139,12 +2195,6 @@ class _MapdlCore(Commands):
             return array.astype(dtype)
         else:
             return array
-
-    def load_parameters(self):  # pragma: no cover
-        """Depreciated in favor of ``mapdl.parameters``"""
-        raise NotImplementedError('``load_parameters`` is  Depreciated.  '
-                                  '\n\nInstead, please use:\n'
-                                  '``mapdl.parameters``')
 
     def _display_plot(self, text):
         """Display the last generated plot (*.png) from MAPDL"""

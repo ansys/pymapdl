@@ -105,8 +105,8 @@ Consider the following general coding paradigms when contributing:
 2. **Document it**. Include a docstring for any function, method, or
    class added.  Follow the `numpydocs docstring
    <https://numpydoc.readthedocs.io/en/latest/format.html>`_
-   guidelines, and always provide a for simple use cases for the new
-   features.
+   guidelines, and always provide an example of simple use cases for
+   the new features.
 
 3. **Test it**. Since Python is an interperted language, if it's not
    tested, it's probably broken.  At the minimum, include unit tests
@@ -137,15 +137,63 @@ following the steps in the `Creating a New Pull Request
 section <#creating-a-new-pull-request>`__.
 
 
+Opening Issues
+~~~~~~~~~~~~~~
+Should you come across a bug in ``PyMAPDL`` or otherwise encounter some
+unexpected behaviour you should create an "issue" regarding it. Issues are
+created and submitted `here <https://github.com/pyansys/pymapdl/issues>`_.
+Issues are used when developing to keep track of what is being
+worked on at any one time, and by who. We have two issue templates
+that we recommend you use:
+
+* Bug report template
+* Feature request template
+
+If your issue does not fit into these two categories you are free
+to create your own issue as well.
+
+Issues should contain sufficient context for others to reproduce your
+problem, such as the application versions you are using as well as
+reproduction steps. Use issue labels like "Documentation" to further
+highlight your issue's category.
+
+Developers will respond to your issue and hopefully resolve it! Users
+are encouraged to close their own issues once they are completed.
+Otherwise, issues will be closed after a period of inactivity at the
+discretion of the maintainers.
+
+Should it turn out the fix did not work, or your issue was closed
+erroneously, please re-open your issue with a comment addressing why.
+
+Open ended questions should be opened in `Discussions <https://github.com/pyansys/pymapdl/discussions>`_,
+and should an issue generate additional discussion, further issues
+should be spun out into their own separate issues. This helps developers
+keep track of what is being done and what needs to be done.
+
+
+Discussions
+~~~~~~~~~~~
+
+General questions about PyMAPDL should be raised in
+`Discussions <https://github.com/pyansys/pymapdl/discussions>`_ in
+this repository rather than as issues themselves. Issues can be spun out of
+discussions depending on what is decided, but general Q&A content
+should start as discussions where possible.
+
+.. note::
+    The discussions feature is still in beta on GitHub, so this may
+    change in the future.
+
+
 Creating a New Pull Request
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Once you have tested your branch locally, create a pull request on
 `PyMAPDL <https://github.com/pyansys/pymapdl>`_ and target your
-merge to `master`.  This will automatically run continuous
+merge to `main`.  This will automatically run continuous
 integration (CI) testing and verify your changes will work across all
 supported platforms.
 
-For code verification, someone from the pyansys developers team will
+For code verification, someone from the PyMAPDL developers team will
 review your code to verify your code meets our our standards.  Once
 approved, if you have write permission you may merge the branch.  If
 you don't have write permission, the reviewer or someone else with
@@ -228,7 +276,7 @@ ignored to ``ignore_words.txt``
 
 .. code::
 
-    codespell ./ "*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./docs/build/*,./docs/images/*,./dist/*,*~,.hypothesis*,./docs/source/examples/*,*cover,*.dat,*.mac,\#*,build,./docker/mapdl/v211,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO" -I "ignore_words.txt"
+    codespell ./ "*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,\#*,build,./docker/mapdl/v211,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO" -I "ignore_words.txt"
 
 
 Documentation
@@ -236,16 +284,16 @@ Documentation
 Documentation for PyMAPDL is generated from three sources:
 
 - Docstrings from the classes, functions, and modules of ``ansys.mapdl.core`` using `sphinx.ext.autodoc <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_.
-- Restructured test from `docs/`
+- Restructured test from `doc/`
 - Examples from `examples/`
 
-General usage and API descriptions should be placed within `docs/source` and
+General usage and API descriptions should be placed within `doc/source` and
 the docstrings.  Full examples should be placed in `examples`.
 
 Adding a New Example
 ~~~~~~~~~~~~~~~~~~~~
 
-PyMAPDL examples come in two formats.  Basic code snippets demonstrating some functionality, or a full gallery examples.  Small code samples and snippets are contained in the `docs/source` directory, while the full gallery examples, meant to be run as individual downloadable scripts, are contained in the `examples` directory at the root of this repository.
+PyMAPDL examples come in two formats.  Basic code snippets demonstrating some functionality, or a full gallery examples.  Small code samples and snippets are contained in the `doc/source` directory, while the full gallery examples, meant to be run as individual downloadable scripts, are contained in the `examples` directory at the root of this repository.
 
 To add a fully fledged, standalone example, add your example to the `examples` directory within one of the applicable subfolders.  Should none of the existing directories match the category of your example, create a new directory with a `README.txt` describing the new category.  Additionally, as these examples are built using the sphinx gallery extension, follow coding guidelines as established by [Sphinx-Gallery](https://sphinx-gallery.github.io/stable/index.html)
 
@@ -258,7 +306,7 @@ Documentation Style and Organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Docstrings should follow the `numpydocs docstring
 <https://numpydoc.readthedocs.io/en/latest/format.html>`_ guidelines.
-Documentation from `docs` use reStructuredText format.  Examples
+Documentation from `doc` use reStructuredText format.  Examples
 within the `examples/` directory should be PEP8 compliant and will be
 compiled dynamically during the build process; ensure they run
 properly locally as they will be verified through the continuous
@@ -267,7 +315,7 @@ integration performed on GitHub Actions.
 
 Building the Documentation Locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Documentation for PyMAPDL is hosted at docs.pyansys.com and is
+Documentation for PyMAPDL is hosted at mapdldocs.pyansys.com and is
 automatically built and deployed using the GitHub Actions.  You can
 build and verify the html documentation locally by install ``sphinx``
 and the other documentation build dependencies by running the
@@ -290,17 +338,17 @@ Next, if running Linux/Mac OS, build the documentation with:
 
 .. code::
 
-    make -C docs html
+    make -C doc html
 
 Otherwise, if running Windows, build the documentation by running:
 
 .. code::
 
-   cd docs
+   cd doc
    make.bat html
 
 Upon the successful build of the documentation, you can open the local
-build by opening ``index.html`` at ``docs/build/html/`` with
+build by opening ``index.html`` at ``doc/build/html/`` with
 your browser.
 
 
@@ -325,7 +373,7 @@ features without sacrificing stability, and closely follows the
 
 The main features of our branching model are:
 
-- The `master` branch is the main development branch.  All features,
+- The `main` branch is the main development branch.  All features,
   patches, and other branches should be merged here.  While all PRs
   should pass all applicable CI checks, this branch may be
   functionally unstable as changes might have introduced unintended
@@ -333,7 +381,7 @@ The main features of our branching model are:
 - There will be one or many `release/` branches based on minor
   releases (for example `release/0.2`) which contain a stable version
   of the code base that is also reflected on PyPi/.  Hotfixes from
-  `fix/` branches should be merged both to master and to these
+  `fix/` branches should be merged both to main and to these
   branches.  When necessary to create a new patch release these
   release branches will have their `__version__.py` updated and be
   tagged with a patched semantic version (e.g. `0.2.1`).  This
@@ -341,11 +389,11 @@ The main features of our branching model are:
   for past versions of ``ansys.mapdl.core`` without having to worry about
   untested features.
 - When a minor release candidate is ready, a new `release` branch will
-  be created from `master` with the next incremented minor version
+  be created from `main` with the next incremented minor version
   (e.g. `release/0.2`), which will be thoroughly tested.  When deemed
   stable, the release branch will be tagged with the version (`0.2.0`
-  in this case), and if necessary merged with master if any changes
-  were pushed to it.  Feature development then continues on `master`
+  in this case), and if necessary merged with main if any changes
+  were pushed to it.  Feature development then continues on `main`
   and any hotfixes will now be merged with this release.  Older
   release branches should not be deleted so they can be patched as
   needed.
@@ -357,7 +405,7 @@ Minor releases are feature and bug releases that improve the
 functionality and stability of ``PyMAPDL``.  Before a minor release is
 created the following will occur:
 
-1.  Create a new branch from the ``master`` branch with name
+1.  Create a new branch from the ``main`` branch with name
     ``release/MAJOR.MINOR`` (e.g. `release/0.2`).
 
 2. Locally run all tests as outlined in the `Testing Section <#testing>`__
@@ -369,7 +417,7 @@ cached.
 
     .. code::
 
-        cd docs
+        cd doc
         make clean  # deletes the sphinx-gallery cache
         make html -b linkcheck
 
@@ -378,7 +426,7 @@ cached.
 
 5. Update the version numbers in ``ansys/mapdl/reader/_version.py`` and commit it.
    Push the branch to GitHub and create a new PR for this release that
-   merges it to master.  Development to master should be limited at
+   merges it to main.  Development to main should be limited at
    this point while effort is focused on the release.
 
 6. It is now the responsibility of the PyMAPDL community and
@@ -388,7 +436,7 @@ cached.
    branch.
 
 7. When the branch is deemed as stable for public release, the PR will
-   be merged to master and the `master` branch will be tagged with a
+   be merged to main and the `main` branch will be tagged with a
    `MAJOR.MINOR.0` release.  The release branch will not be deleted.
    Tag the release with:
 
@@ -401,7 +449,7 @@ cached.
 8. Create a list of all changes for the release. It is often helpful
    to leverage `GitHub's compare feature
    <https://github.com/pyansys/pymapdl/compare>`_ to see the
-   differences from the last tag and the `master` branch.  Be sure to
+   differences from the last tag and the `main` branch.  Be sure to
    acknowledge new contributors by their GitHub username and place
    mentions where appropriate if a specific contributor is to thank
    for a new feature.
@@ -425,8 +473,8 @@ should not wait until a minor release.  The steps for a patch release
    a chance to validate and approve the bugfix release.  Any
    additional hotfixes should be outside of this PR.
 
-3. When approved, merge with the release branch, but not `master` as
-   there is no reason to increment the version of the `master` branch.
+3. When approved, merge with the release branch, but not `main` as
+   there is no reason to increment the version of the `main` branch.
    Then create a tag from the release branch with the applicable
    version number (see above for the correct steps).
 
