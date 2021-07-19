@@ -192,7 +192,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        ansys.mapdl.core.inline_functions.Query
+        :class:`ansys.mapdl.core.inline_functions.Query`
             Instance of the Query class
 
         Examples
