@@ -208,7 +208,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     --------
     Launch MAPDL using the default configuration.
 
-    >>> from ansys.mapdl import launch_mapdl
+    >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of
