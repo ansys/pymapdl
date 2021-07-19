@@ -19,6 +19,7 @@ from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.commands import Commands
+from ansys.mapdl.core.inline_functions import Query
 
 
 _PERMITTED_ERRORS = [
@@ -112,6 +113,7 @@ class _MapdlCore(Commands):
                  local=True, **start_parm):
         """Initialize connection with MAPDL. """
         self._show_matplotlib_figures = True  # for testing
+        self._query = None
         self._exited = False
         self._allow_ignore = False
         self._apdl_log = None
@@ -143,6 +145,78 @@ class _MapdlCore(Commands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
+
+    def query(self):
+        """Get instance of Query class containing inline functions of APDL.
+
+        Most of the results of these methods are shortcuts for specific
+        combinations of arguments supplied to :func:`ansys.mapdl.core.Mapdl.get`.
+
+        Currently implemented functions:
+
+        - ``centrx(e)`` - get the centroid x-coordinate of element `e`
+        - ``centry(e)`` - get the centroid y-coordinate of element `e`
+        - ``centrz(e)`` - get the centroid z-coordinate of element `e`
+        - ``nx(n)`` - get the x-coordinate of node `n`
+        - ``ny(n)`` - get the y-coordinate of node `n`
+        - ``nz(n)`` - get the z-coordinate of node `n`
+        - ``kx(k)`` - get the x-coordinate of keypoint `k`
+        - ``ky(k)`` - get the y-coordinate of keypoint `k`
+        - ``kz(k)`` - get the z-coordinate of keypoint `k`
+        - ``lx(n, lfrac)`` - X-coordinate of line ``n`` at length fraction ``lfrac``
+        - ``ly(n, lfrac)`` - Y-coordinate of line ``n`` at length fraction ``lfrac``
+        - ``lz(n, lfrac)`` - Z-coordinate of line ``n`` at length fraction ``lfrac``
+        - ``lsx(n, lfrac)`` - X-slope of line ``n`` at length fraction ``lfrac``
+        - ``lsy(n, lfrac)`` - Y-slope of line ``n`` at length fraction ``lfrac``
+        - ``lsz(n, lfrac)`` - Z-slope of line ``n`` at length fraction ``lfrac``
+        - ``ux(n)`` - get the structural displacement at node `n` in x
+        - ``uy(n)`` - get the structural displacement at node `n` in y
+        - ``uz(n)`` - get the structural displacement at node `n` in z
+        - ``rotx(n)`` - get the rotational displacement at node `n` in x
+        - ``roty(n)`` - get the rotational displacement at node `n` in y
+        - ``rotz(n)`` - get the rotational displacement at node `n` in z
+        - ``nsel(n)`` - get the selection status of node `n`
+        - ``ksel(k)`` - get the selection status of keypoint `k`
+        - ``lsel(n)`` - get the selection status of line `n`
+        - ``asel(a)`` - get the selection status of area `a`
+        - ``esel(n)`` - get the selection status of element `e`
+        - ``vsel(v)`` - get the selection status of volume `v`
+        - ``ndnext(n)`` - get the next selected node with a number greater than `n`.
+        - ``kpnext(k)`` - get the next selected keypoint with a number greater than `k`.
+        - ``lsnext(n)`` - get the next selected line with a number greater than `n`.
+        - ``arnext(a)`` - get the next selected area with a number greater than `a`.
+        - ``elnext(e)`` - get the next selected element with a number greater than `e`.
+        - ``vlnext(v)`` - get the next selected volume with a number greater than `v`.
+        - ``node(x, y, z)`` - get the node closest to coordinate (x, y, z)
+        - ``kp(x, y, z)`` - get the keypoint closest to coordinate (x, y, z)
+
+        Returns
+        -------
+        ansys.mapdl.core.inline_functions.Query
+            Instance of the Query class
+
+        Examples
+        --------
+        In this example we construct a solid box and mesh it. Then we use
+        the ``Query`` methods ``nx``, ``ny``, and ``nz`` to find the
+        cartesian coordinates of the first node.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> mapdl.et(1, 'SOLID5')
+        >>> mapdl.block(0, 10, 0, 20, 0, 30)
+        >>> mapdl.esize(2)
+        >>> mapdl.vmesh('ALL')
+        >>> q = mapdl.query()
+        >>> q.nx(1), q.ny(1), q.nz(1)
+        0.0 20.0 0.0
+
+
+        """
+        if self._query is None:
+            self._query = Query(self)
+        return self._query
 
     @property
     def non_interactive(self):
