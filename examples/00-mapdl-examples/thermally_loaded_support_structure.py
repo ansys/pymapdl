@@ -30,8 +30,7 @@ Material Properties
  - :math:`\alpha_{steel} = 92 \cdot 10^{-7} /K
 
 Geometric Properties:
- - :math:`a = b = 0.3`
- - :math:`l = 10 in`
+ - ?
 
 Loading:
  - ?
