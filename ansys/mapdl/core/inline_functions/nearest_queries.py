@@ -3,7 +3,7 @@ class _EntityNearestEntityQueries:
     _mapdl = None
 
     def nnear(self, n: int) -> int:
-        """Retruns the selected node nearest node `n`.
+        """Returns the selected node nearest node `n`.
 
         Parameters
         ----------
@@ -40,7 +40,7 @@ class _EntityNearestEntityQueries:
         return integer
 
     def knear(self, k: int) -> int:
-        """Retruns the selected keypoint nearest keypoint `k`.
+        """Returns the selected keypoint nearest keypoint `k`.
 
         Parameters
         ----------
@@ -74,7 +74,7 @@ class _EntityNearestEntityQueries:
         return integer
 
     def enearn(self, n: int) -> int:
-        """Retruns the selected element nearest node `n`.
+        """Returns the selected element nearest node `n`.
 
         The element position is calculated from the selected nodes.
 

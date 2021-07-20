@@ -58,6 +58,9 @@ class Query(_ComponentQueries,
     - ``arnext(a)`` - get the next selected area with a number greater than `a`.
     - ``elnext(e)`` - get the next selected element with a number greater than `e`.
     - ``vlnext(v)`` - get the next selected volume with a number greater than `v`.
+    - ``nnear(n)`` - get the selected node nearest node `n`.
+    - ``knear(k)`` - get the selected keypoint nearest keypoint `k`.
+    - ``enearn(n)`` - get  the selected element nearest node `n`.
     - ``node(x, y, z)`` - get the node closest to coordinate (x, y, z)
     - ``kp(x, y, z)`` - get the keypoint closest to coordinate (x, y, z)
 
