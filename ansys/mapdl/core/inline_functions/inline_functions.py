@@ -5,6 +5,7 @@ from .selection_queries import _SelectionStatusQueries, \
 from .line_queries import _LineFractionCoordinateQueries, \
     _LineFractionSlopeQueries
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
+from .nearest_queries import _EntityNearestEntityQueries
 
 
 class Query(_ComponentQueries,
@@ -15,7 +16,8 @@ class Query(_ComponentQueries,
             _LineFractionSlopeQueries,
             _NextSelectedEntityQueries,
             _NodeNormalQueries,
-            _KeypointNormalQueries):
+            _KeypointNormalQueries,
+            _EntityNearestEntityQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
