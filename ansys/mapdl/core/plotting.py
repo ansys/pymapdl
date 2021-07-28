@@ -15,6 +15,7 @@ def general_plotter(meshes, points, labels,
                     window_size=None,
                     notebook=None,
                     # add_mesh kwargs:
+                    style=None,
                     color='w',
                     show_edges=None, edge_color=None, point_size=5.0,
                     line_width=None, opacity=1.0, flip_scalars=False,
@@ -70,7 +71,13 @@ def general_plotter(meshes, points, labels,
     savefig : str, optional
         Saves screenshot to a file path.
 
-    color : string or 3 item list, optional, defaults to white
+    style : string, optional
+        Visualization style of the mesh.  One of the following:
+        ``style='surface'``, ``style='wireframe'``,
+        ``style='points'``.  Defaults to ``'surface'``. Note that
+        ``'wireframe'`` only shows a wireframe of the outer geometry.
+
+    color : string or 3 item list, optional
         Use to make the entire mesh have a single solid color.  Either
         a string, RGB list, or hex color string.  For example:
         ``color='white'``, ``color='w'``, ``color=[1, 1, 1]``, or
@@ -197,6 +204,7 @@ def general_plotter(meshes, points, labels,
                     scalars=mesh.get('scalars'),
                     scalar_bar_args=scalar_bar_args,
                     color=mesh.get('color', color),
+                    style=mesh.get('style', style),
                     show_edges=show_edges, edge_color=edge_color,
                     smooth_shading=smooth_shading,
                     point_size=point_size, line_width=line_width,
