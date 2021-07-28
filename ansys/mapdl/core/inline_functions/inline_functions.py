@@ -5,6 +5,7 @@ from .selection_queries import _SelectionStatusQueries, \
 from .line_queries import _LineFractionCoordinateQueries, \
     _LineFractionSlopeQueries
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
+from .nearest_queries import _EntityNearestEntityQueries
 
 
 class Query(_ComponentQueries,
@@ -15,7 +16,8 @@ class Query(_ComponentQueries,
             _LineFractionSlopeQueries,
             _NextSelectedEntityQueries,
             _NodeNormalQueries,
-            _KeypointNormalQueries):
+            _KeypointNormalQueries,
+            _EntityNearestEntityQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
@@ -56,6 +58,9 @@ class Query(_ComponentQueries,
     - ``arnext(a)`` - get the next selected area with a number greater than `a`.
     - ``elnext(e)`` - get the next selected element with a number greater than `e`.
     - ``vlnext(v)`` - get the next selected volume with a number greater than `v`.
+    - ``nnear(n)`` - get the selected node nearest node `n`.
+    - ``knear(k)`` - get the selected keypoint nearest keypoint `k`.
+    - ``enearn(n)`` - get  the selected element nearest node `n`.
     - ``node(x, y, z)`` - get the node closest to coordinate (x, y, z)
     - ``kp(x, y, z)`` - get the keypoint closest to coordinate (x, y, z)
 
