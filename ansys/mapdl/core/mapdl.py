@@ -838,7 +838,7 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if 'knum' in kwargs:
-            raise ValueError('`knum` keyword depricated.  Please use `nnum` instead.')
+            raise ValueError('`knum` keyword deprecated.  Please use `nnum` instead.')
 
         if vtk:
             kwargs.setdefault('title', 'MAPDL Node Plot')
