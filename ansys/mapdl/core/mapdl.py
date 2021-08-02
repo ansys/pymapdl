@@ -847,7 +847,7 @@ class _MapdlCore(Commands):
                 return general_plotter([], [], [], **kwargs)
 
             labels = []
-            if knum:
+            if nnum:
                 # must eliminate duplicate points or labeling fails miserably.
                 pcloud = pv.PolyData(self.mesh.nodes)
                 pcloud['labels'] = self.mesh.nnum
@@ -858,11 +858,11 @@ class _MapdlCore(Commands):
             return general_plotter([], points, labels, **kwargs)
 
         # otherwise, use the built-in nplot
-        if isinstance(knum, bool):
-            knum = int(knum)
+        if isinstance(nnum, bool):
+            nnum = int(nnum)
 
         self._enable_interactive_plotting()
-        return super().nplot(knum, **kwargs)
+        return super().nplot(nnum, **kwargs)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,
