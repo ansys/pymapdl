@@ -782,7 +782,7 @@ class _MapdlCore(Commands):
             self._apdl_log.close()
         self._apdl_log = None
 
-    def nplot(self, nnum="", vtk=None, show_node_numbering=False, **kwargs):
+    def nplot(self, nnum="", vtk=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
