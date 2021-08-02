@@ -782,7 +782,7 @@ class _MapdlCore(Commands):
             self._apdl_log.close()
         self._apdl_log = None
 
-    def nplot(self, knum="", vtk=None, **kwargs):
+    def nplot(self, nnum="", vtk=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
@@ -793,11 +793,14 @@ class _MapdlCore(Commands):
 
         Parameters
         ----------
-        knum : bool, int, optional
+        nnum : bool, int, optional
             Node number key:
 
             - ``False`` : No node numbers on display (default).
             - ``True`` : Include node numbers on display.
+
+            .. note::
+               This parameter is only valid when ``vtk==True``
 
         vtk : bool, optional
             Plot the currently selected nodes using ``pyvista``.
@@ -812,7 +815,7 @@ class _MapdlCore(Commands):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(knum=True, vtk=True, background='w', color='k',
+        >>> mapdl.nplot(nnum=True, vtk=True, background='w', color='k',
                         show_bounds=True)
 
         Plot without using VTK
@@ -834,6 +837,9 @@ class _MapdlCore(Commands):
         if vtk is None:
             vtk = self._use_vtk
 
+        if 'knum' in kwargs:
+            raise ValueError('`knum` keyword deprecated.  Please use `nnum` instead.')
+
         if vtk:
             kwargs.setdefault('title', 'MAPDL Node Plot')
             if not self.mesh.n_node:
@@ -841,7 +847,7 @@ class _MapdlCore(Commands):
                 return general_plotter([], [], [], **kwargs)
 
             labels = []
-            if knum:
+            if nnum:
                 # must eliminate duplicate points or labeling fails miserably.
                 pcloud = pv.PolyData(self.mesh.nodes)
                 pcloud['labels'] = self.mesh.nnum
@@ -852,11 +858,11 @@ class _MapdlCore(Commands):
             return general_plotter([], points, labels, **kwargs)
 
         # otherwise, use the built-in nplot
-        if isinstance(knum, bool):
-            knum = int(knum)
+        if isinstance(nnum, bool):
+            nnum = int(nnum)
 
         self._enable_interactive_plotting()
-        return super().nplot(knum, **kwargs)
+        return super().nplot(nnum, **kwargs)
 
     def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
               vtk=None, quality=4, show_area_numbering=False,

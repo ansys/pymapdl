@@ -360,13 +360,13 @@ def test_enum(mapdl, make_block):
     assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
-@pytest.mark.parametrize('knum', [True, False])
+@pytest.mark.parametrize('nnum', [True, False])
 @skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, knum):
+def test_nplot_vtk(cleared, mapdl, nnum):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=True, knum=knum, background='w', color='k')
+    mapdl.nplot(vtk=True, nnum=nnum, background='w', color='k')
 
 
 @skip_no_xserver
