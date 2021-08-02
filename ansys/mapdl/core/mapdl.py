@@ -782,7 +782,7 @@ class _MapdlCore(Commands):
             self._apdl_log.close()
         self._apdl_log = None
 
-    def nplot(self, knum="", vtk=None, **kwargs):
+    def nplot(self, nnum="", vtk=None, show_node_numbering=False, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
@@ -793,11 +793,14 @@ class _MapdlCore(Commands):
 
         Parameters
         ----------
-        knum : bool, int, optional
+        nnum : bool, int, optional
             Node number key:
 
             - ``False`` : No node numbers on display (default).
             - ``True`` : Include node numbers on display.
+
+            .. note::
+               This parameter is only valid when ``vtk==True``
 
         vtk : bool, optional
             Plot the currently selected nodes using ``pyvista``.
@@ -812,7 +815,7 @@ class _MapdlCore(Commands):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(knum=True, vtk=True, background='w', color='k',
+        >>> mapdl.nplot(nnum=True, vtk=True, background='w', color='k',
                         show_bounds=True)
 
         Plot without using VTK
@@ -833,6 +836,9 @@ class _MapdlCore(Commands):
 
         if vtk is None:
             vtk = self._use_vtk
+
+        if 'knum' in kwargs:
+            raise ValueError('`knum` keyword depricated.  Please use `nnum` instead.')
 
         if vtk:
             kwargs.setdefault('title', 'MAPDL Node Plot')
