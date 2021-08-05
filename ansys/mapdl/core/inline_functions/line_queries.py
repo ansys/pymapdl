@@ -156,12 +156,13 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
-        >>> k1 = mapdl.k(2, 1, 2, 2)
+        >>> k1 = mapdl.k(2, 1, 2, 3)
         >>> l0 = mapdl.l(k0, k1)
         >>> q = Query(mapdl)
         >>> q.lsx(l0, 0.5)
-        0.3333333333
+        0.2672612419
         """
+        print('This is the developer code!')
         response = self._mapdl.run(f'_=LSX({n},{lfrac})')
         return self._parse_parameter_float_response(response)
 
