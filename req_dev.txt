@@ -1,0 +1,8 @@
+# temp requirements for CI debug
+
+ansys-mapdl-reader==0.51.3
+charset-normalizer==2.0.3
+scipy==1.7.0
+tqdm==4.61.2
+importlib-metadata==4.6.1
+wslink==0.2.0

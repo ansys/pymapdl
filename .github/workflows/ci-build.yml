@@ -52,6 +52,8 @@ jobs:
         run: |
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
+          pip install -r req_dev.txt
+          pip uninstall aiohttp async-timeout chardet importlib-metadata
           pip list
           make -C doc html
         env:
