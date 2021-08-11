@@ -21,7 +21,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2.1.4
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Install, start, and test the virtual framebuffer
         run: |
@@ -52,6 +52,7 @@ jobs:
         run: |
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
+          pip list
           make -C doc html
         env:
           PYMAPDL_CI_NO_AUTODOC: True
