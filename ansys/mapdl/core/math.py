@@ -59,6 +59,7 @@ def get_nparray_chunks(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
                                          chunk=chunk)
         i += chunk_size
 
+
 def get_nparray_chunks_mat(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
     """Serializes a 2D numpy array into chunks
 
@@ -86,21 +87,16 @@ def list_allowed_dtypes():
     return '\n'.join([f'{dtype}' for dtype in dtypes])
 
 
-class MapdlMath():
+class MapdlMath:
     """Abstract mapdl math class.  Created from a ``Mapdl`` instance.
 
     Examples
     --------
-    Create an instance from an existing mapdl instance
+    Create an instance.
 
-    >>> import ansys
-    >>> mapdl = ansys.Mapdl()
-    >>> mm = mapdl.math()
-
-    Alternatively:
-
-    >>> from ansys.mapdl.math import MapdlMath
-    >>> mm = MapdlMath(mapdl)  # from mapdl above
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> mm = mapdl.math
 
     Vector addition
 
@@ -108,7 +104,7 @@ class MapdlMath():
     >>> v2 = mm.ones(10)
     >>> v3 = v1 + v2
 
-    Matrix multiplcation
+    Matrix multiplcation (not yet available)
 
     >>> v1 = mm.ones(10)
     >>> m1 = mm.rand(10, 10)
@@ -703,7 +699,7 @@ class MapdlMath():
             value is 1E-16.
         """
         kwargs.setdefault('mute', True)
-        self._mapdl.run(f"*COMP,{M.id},SPARSE,{thresh}", **kwargs)
+        self._mapdl.run(f"*COMP,{mat.id},SPARSE,{thresh}", **kwargs)
 
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
              fmin=None, fmax=None):
@@ -1243,8 +1239,9 @@ class AnsVec(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
@@ -1290,8 +1287,9 @@ class AnsMat(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
@@ -1351,8 +1349,9 @@ class AnsMat(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> mat = mm.rand(2, 3)
         >>> mat_t = mat.T
 
