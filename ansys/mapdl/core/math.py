@@ -1293,6 +1293,7 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+        
         """
         return self._mapdl._mat_data(self.id)
 
