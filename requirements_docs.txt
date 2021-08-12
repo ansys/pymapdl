@@ -12,5 +12,5 @@ sphinx-copybutton
 sphinx-gallery>=0.8.1
 sphinx-autodoc-typehints
 pyansys_sphinx_theme
-pypandoc
 Jinja2==2.11.3  # due to An error happened in rendering the page genindex. with v3
+ansys-mapdl-reader<=0.51.3  # 0.51.4-0.51.5 breaks doc build
