@@ -463,7 +463,7 @@ class MapdlMath:
             Filename to read the matrix from.
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than a Ansys matrix.
 
         Examples
         --------
