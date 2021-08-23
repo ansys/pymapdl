@@ -445,11 +445,11 @@ class MapdlMath:
                               mat_id, fname)
         self._mapdl.run(f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
                         mute=True)
-        A = AnsSparseMat(name, self._mapdl)
+        ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
-            return self._mapdl._mat_data(A.id)
+            return self._mapdl._mat_data(ans_sparse_mat.id)
         else:
-            return A
+            return ans_sparse_mat
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
