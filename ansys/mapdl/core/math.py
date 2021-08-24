@@ -437,7 +437,7 @@ class MapdlMath:
             * ``"K"``_IM - Imaginary part of the stiffness matrix
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than an APDLMath matrix.
 
         """
         name = id_generator()
@@ -463,7 +463,7 @@ class MapdlMath:
             Filename to read the matrix from.
 
         asarray : bool, optional
-            Return a `scipy` array rather than a Ansys matrix.
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -491,7 +491,7 @@ class MapdlMath:
             Filename to read the matrix from.
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -520,7 +520,7 @@ class MapdlMath:
             Filename to read the matrix from.
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -559,7 +559,7 @@ class MapdlMath:
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         --------
@@ -578,11 +578,11 @@ class MapdlMath:
                               mat_id, fname)
         self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
                         mute=True)
-        V = AnsVec(name, self._mapdl)
+        ans_vec = AnsVec(name, self._mapdl)
         if asarray:
-            return self._mapdl._vec_data(V.id)
+            return self._mapdl._vec_data(ans_vec.id)
         else:
-            return V
+            return ans_vec
 
     def set_vec(self, data, name=None):
         """Push a numpy array or Python list to the MAPDL Memory
@@ -627,7 +627,7 @@ class MapdlMath:
             Filename to read the vector from.  Defaults to ``"file.full"``.
 
         asarray : bool, optional
-            Create directly a Python SciPy representation
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -1018,9 +1018,9 @@ class MapdlMath:
 
         # data vector
         dataname = f'{mname}_DATA'
-        VValues = self.set_vec(arr.data, dataname)
+        ans_vec = self.set_vec(arr.data, dataname)
         if dtype is None:
-            info = self._mapdl._data_info(VValues.id)
+            info = self._mapdl._data_info(ans_vec.id)
             dtype = ANSYS_VALUE_TYPE[info.stype]
 
         # indptr vector
