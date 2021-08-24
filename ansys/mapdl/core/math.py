@@ -448,8 +448,7 @@ class MapdlMath:
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
             return self._mapdl._mat_data(ans_sparse_mat.id)
-        else:
-            return ans_sparse_mat
+        return ans_sparse_mat
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
@@ -581,8 +580,7 @@ class MapdlMath:
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
             return self._mapdl._vec_data(ans_vec.id)
-        else:
-            return ans_vec
+        return ans_vec
 
     def set_vec(self, data, name=None):
         """Push a numpy array or Python list to the MAPDL Memory
