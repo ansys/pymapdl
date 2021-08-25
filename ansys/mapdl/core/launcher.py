@@ -177,10 +177,10 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         port available after (or including) this port.
 
     additional_switches : str, optional
-        Additional switches for MAPDL, for example ``"-aa_r"``, and
+        Additional switches for MAPDL, for example ``"-p aa_r"``, the
         academic research license, would be added with:
 
-        - ``additional_switches="-aa_r"``
+        - ``additional_switches="-p aa_r"``
 
         Avoid adding switches like ``"-i"`` ``"-o"`` or ``"-b"`` as
         these are already included to start up the MAPDL server.  See
@@ -208,7 +208,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     --------
     Launch MAPDL using the default configuration.
 
-    >>> from ansys.mapdl import launch_mapdl
+    >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of

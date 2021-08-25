@@ -44,7 +44,7 @@ print(mapdl.mesh.nodes)
 print(mapdl.mesh.nnum)
 
 # plot the nodes using VTK
-mapdl.nplot(vtk=True, knum=True, cpos='xy', show_bounds=True, point_size=10)
+mapdl.nplot(vtk=True, nnum=True, cpos='xy', show_bounds=True, point_size=10)
 
 ###############################################################################
 # create elements between the nodes

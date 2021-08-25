@@ -56,7 +56,6 @@ jobs:
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           repository-name: pyansys/pymapdl-dev-docs
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}

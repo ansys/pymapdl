@@ -19,7 +19,7 @@ from .check_version import version_requires, meets_version, VersionError
 
 MYCTYPE = {np.int32: 'I',
            np.int64: 'L',
-           np.single: 'S',
+           np.single: 'F',
            np.double: 'D',
            np.complex64: 'C',
            np.complex128: 'Z'}
@@ -59,6 +59,7 @@ def get_nparray_chunks(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
                                          chunk=chunk)
         i += chunk_size
 
+
 def get_nparray_chunks_mat(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
     """Serializes a 2D numpy array into chunks
 
@@ -86,21 +87,16 @@ def list_allowed_dtypes():
     return '\n'.join([f'{dtype}' for dtype in dtypes])
 
 
-class MapdlMath():
+class MapdlMath:
     """Abstract mapdl math class.  Created from a ``Mapdl`` instance.
 
     Examples
     --------
-    Create an instance from an existing mapdl instance
+    Create an instance.
 
-    >>> import ansys
-    >>> mapdl = ansys.Mapdl()
-    >>> mm = mapdl.math()
-
-    Alternatively:
-
-    >>> from ansys.mapdl.math import MapdlMath
-    >>> mm = MapdlMath(mapdl)  # from mapdl above
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> mm = mapdl.math
 
     Vector addition
 
@@ -108,7 +104,7 @@ class MapdlMath():
     >>> v2 = mm.ones(10)
     >>> v3 = v1 + v2
 
-    Matrix multiplcation
+    Matrix multiplcation (not yet available)
 
     >>> v1 = mm.ones(10)
     >>> m1 = mm.rand(10, 10)
@@ -414,7 +410,7 @@ class MapdlMath():
             return AnsDenseMat(name, self._mapdl)
 
     def load_matrix_from_file(self, dtype=np.double, fname="file.full",
-                              mat_id="STIFF"):
+                              mat_id="STIFF", asarray=False):
         """Import a matrix from an existing FULL file.
 
         Parameters
@@ -440,6 +436,8 @@ class MapdlMath():
             * ``"K"``_RE - Real part of the stiffness matrix
             * ``"K"``_IM - Imaginary part of the stiffness matrix
 
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         """
         name = id_generator()
@@ -447,9 +445,12 @@ class MapdlMath():
                               mat_id, fname)
         self._mapdl.run(f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
                         mute=True)
-        return AnsSparseMat(name, self._mapdl)
+        ans_sparse_mat = AnsSparseMat(name, self._mapdl)
+        if asarray:
+            return self._mapdl._mat_data(ans_sparse_mat.id)
+        return ans_sparse_mat
 
-    def stiff(self, dtype=np.double, fname="file.full"):
+    def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
 
         Parameters
@@ -459,6 +460,9 @@ class MapdlMath():
 
         fname : str, optional
             Filename to read the matrix from.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -472,9 +476,9 @@ class MapdlMath():
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
-        return self.load_matrix_from_file(dtype, fname, "STIFF")
+        return self.load_matrix_from_file(dtype, fname, "STIFF", asarray)
 
-    def mass(self, dtype=np.double, fname="file.full"):
+    def mass(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the mass matrix from a full file.
 
         Parameters
@@ -484,6 +488,9 @@ class MapdlMath():
 
         fname : str, optional
             Filename to read the matrix from.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -498,9 +505,9 @@ class MapdlMath():
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
-        return self.load_matrix_from_file(dtype, fname, "MASS")
+        return self.load_matrix_from_file(dtype, fname, "MASS", asarray)
 
-    def damp(self, dtype=np.double, fname="file.full"):
+    def damp(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the damping matrix from the full file
 
         Parameters
@@ -510,6 +517,9 @@ class MapdlMath():
 
         fname : str, optional
             Filename to read the matrix from.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Examples
         --------
@@ -525,9 +535,9 @@ class MapdlMath():
             with 1734 stored elements in Compressed Sparse Row format>
 
         """
-        return self.load_matrix_from_file(dtype, fname, "DAMP")
+        return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS"):
+    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
@@ -547,6 +557,9 @@ class MapdlMath():
             * ``"BACK"`` - nodal mapping vector (internal to user)
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
 
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
+
         Returns
         --------
         ansys.mapdl.math.AnsVec
@@ -564,7 +577,10 @@ class MapdlMath():
                               mat_id, fname)
         self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
                         mute=True)
-        return AnsVec(name, self._mapdl)
+        ans_vec = AnsVec(name, self._mapdl)
+        if asarray:
+            return self._mapdl._vec_data(ans_vec.id)
+        return ans_vec
 
     def set_vec(self, data, name=None):
         """Push a numpy array or Python list to the MAPDL Memory
@@ -597,7 +613,7 @@ class MapdlMath():
         self._set_vec(name, data)
         return AnsVec(name, self._mapdl)
 
-    def rhs(self, dtype=np.double, fname="file.full"):
+    def rhs(self, dtype=np.double, fname="file.full", asarray=False):
         """Return the load vector from a full file.
 
         Parameters
@@ -607,6 +623,9 @@ class MapdlMath():
 
         fname : str, optional
             Filename to read the vector from.  Defaults to ``"file.full"``.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -619,7 +638,7 @@ class MapdlMath():
         APDLMath Vector Size 126
 
         """
-        return self.get_vec(dtype, fname, "RHS")
+        return self.get_vec(dtype, fname, "RHS", asarray)
 
     def svd(self, mat, thresh='', sig='', v='', **kwargs):
         """Apply an SVD Algorithm on a matrix.
@@ -703,7 +722,7 @@ class MapdlMath():
             value is 1E-16.
         """
         kwargs.setdefault('mute', True)
-        self._mapdl.run(f"*COMP,{M.id},SPARSE,{thresh}", **kwargs)
+        self._mapdl.run(f"*COMP,{mat.id},SPARSE,{thresh}", **kwargs)
 
     def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
              fmin=None, fmax=None):
@@ -997,7 +1016,10 @@ class MapdlMath():
 
         # data vector
         dataname = f'{mname}_DATA'
-        self.set_vec(arr.data, dataname)
+        ans_vec = self.set_vec(arr.data, dataname)
+        if dtype is None:
+            info = self._mapdl._data_info(ans_vec.id)
+            dtype = ANSYS_VALUE_TYPE[info.stype]
 
         # indptr vector
         indptrname = f'{mname}_IND'
@@ -1010,9 +1032,8 @@ class MapdlMath():
         self.set_vec(idx, indxname)
 
         flagsym = 'TRUE' if sym else 'FALSE'
-        self._mapdl.run(f'*SMAT,{mname},D,ALLOC,CSR,{indptrname},{indxname},'
+        self._mapdl.run(f'*SMAT,{mname},{MYCTYPE[dtype]},ALLOC,CSR,{indptrname},{indxname},'
                         f'{dataname},{flagsym}')
-
 
 class ApdlMathObj:
     """Common class for MAPDL Math objects"""
@@ -1243,8 +1264,9 @@ class AnsVec(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
@@ -1290,11 +1312,13 @@ class AnsMat(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+        
         """
         return self._mapdl._mat_data(self.id)
 
@@ -1351,8 +1375,9 @@ class AnsMat(ApdlMathObj):
 
         Examples
         --------
-        >>> from ansys.mapdl import Mapdl
-        >>> mm = mapdl.math()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mm = mapdl.math
         >>> mat = mm.rand(2, 3)
         >>> mat_t = mat.T
 

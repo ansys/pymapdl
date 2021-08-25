@@ -1201,7 +1201,8 @@ class Elements:
                 labels = [{'points': esurf.points,
                            'labels': esurf['ansys_node_num']}]
 
-            return general_plotter([{'mesh': esurf}],
+            return general_plotter([{'mesh': esurf,
+                                     'style': kwargs.pop('style', 'surface')}],
                                    [],
                                    labels,
                                    **kwargs)
