@@ -2,7 +2,7 @@ pypandoc>=1.5.0
 matplotlib
 imageio>=2.5.0
 imageio-ffmpeg
-Sphinx>=4.0.0
+Sphinx==4.0.3
 sphinx-autobuild
 sphinxcontrib-napoleon
 sphinxcontrib-websupport

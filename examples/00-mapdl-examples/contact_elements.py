@@ -1,6 +1,9 @@
 """
 .. _ref_contact_example:
 
+Contact Element Example
+~~~~~~~~~~~~~~~~~~~~~~~
+
 This example demonstrates how to create contact elements for general
 contact.
 
