@@ -3,6 +3,7 @@ name: Nightly Documentation Build
 on:
   schedule:  # UTC at 0400
     - cron:  '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   nightly_docs_build:
