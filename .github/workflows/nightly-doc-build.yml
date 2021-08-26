@@ -58,7 +58,7 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
-          repositoryName: pyansys/pymapdl-dev-docs
+          repository-name: pyansys/pymapdl-dev-docs
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           BRANCH: gh-pages
           FOLDER: doc/build/html
