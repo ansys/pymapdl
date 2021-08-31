@@ -246,5 +246,5 @@ then installs it via ``dpkg``.
     sudo tar xzf control.tar.gz
     sudo sed '/Pre-Depends/d' control -i
     sudo bash -c "tar c postinst postrm md5sums control | gzip -c > control.tar.gz"
-    ar rcs libxp6_1.0.2-2_amd64_mod.deb debian-binary control.tar.gz data.tar.xz
+    sudo ar rcs libxp6_1.0.2-2_amd64_mod.deb debian-binary control.tar.gz data.tar.xz
     sudo dpkg -i ./libxp6_1.0.2-2_amd64_mod.deb
