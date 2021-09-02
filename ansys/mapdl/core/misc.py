@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+import sys
 import tempfile
 import inspect
 import platform
@@ -59,13 +60,27 @@ class Report(scooby.Report):
 
         """
         # Mandatory packages
-        core = ['pyvista', 'vtk', 'numpy', 'scipy', 'appdirs',
-                'ansys.mapdl.core', 'ansys.mapdl.reader']
+        core = [
+            'matplotlib',
+            'numpy',
+            'pyvista',
+            'appdirs',
+            'tqdm',
+            'pyiges',
+            'scipy',
+            'grpc',  # grpcio
+            'ansys.grpc.mapdl',  # ansys-grpc-mapdl
+            'ansys.mapdl.reader',  # ansys-mapdl-reader
+            'google.protobuf',  # protobuf library
+        ]
+
         if os.name == 'linux':
             core.extend(['pexpect'])
 
         # Optional packages
-        optional = ['matplotlib', 'ansys_corba']
+        optional = ['matplotlib']
+        if sys.version_info[1] < 9:
+            optional.append('ansys_corba')
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
@@ -83,9 +98,42 @@ class Report(scooby.Report):
                                text_width=text_width, sort=sort,
                                extra_meta=extra_meta)
 
+    def mapdl_info(self):
+        """Return information regarding the ansys environment and installation."""
+        # this is here to avoid circular imports
+        from ansys.mapdl.core.launcher import _get_available_base_ansys
+
+        # List installed Ansys
+        lines = ['', 'Ansys Environment Report', '-'*79]
+        lines = ['\n', 'Ansys Installation', '******************']
+        mapdl_install = _get_available_base_ansys()
+        if not mapdl_install:
+            lines.append('Unable to locate any Ansys installations')
+        else:
+            lines.append('Version   Location')
+            lines.append('------------------')
+            for key in sorted(mapdl_install.keys()):
+                lines.append(f'{key}       {mapdl_install[key]}')
+        install_info = '\n'.join(lines)
+
+        env_info_lines = ['\n\n\nAnsys Environment Variables',
+                          '***************************']
+        n_var = 0
+        for key, value in os.environ.items():
+            if 'AWP' in key or 'CADOE' in key or 'ANSYS' in key:
+                env_info_lines.append(f'{key:<30} {value}')
+                n_var += 1
+        if not n_var:
+            env_info_lines.append('None')
+        env_info = '\n'.join(env_info_lines)
+
+        return install_info + env_info
+
     def __repr__(self):
         add_text = '-'*79 + '\nPyMAPDL Software and Environment Report'
-        return add_text + super().__repr__()
+
+        report = add_text + super().__repr__() + self.mapdl_info()
+        return report.replace('-'*80, '-'*79)  # hotfix for scooby
 
 
 def is_float(input_string):
