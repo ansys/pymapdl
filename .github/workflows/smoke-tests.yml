@@ -26,4 +26,6 @@ jobs:
         pip install dist/ansys*
 
     - name: Test import
+      run: |
+      working-directory: ./tests
         python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
