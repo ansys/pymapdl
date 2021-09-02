@@ -100,7 +100,7 @@ class Report(scooby.Report):
                                extra_meta=extra_meta)
 
     def mapdl_info(self):
-        """Return information regarding the ansys envionment and installation."""
+        """Return information regarding the ansys environment and installation."""
         # this is here to avoid circular imports
         from ansys.mapdl.core.launcher import _get_available_base_ansys
 
