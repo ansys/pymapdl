@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+import sys
 import tempfile
 import inspect
 import platform
@@ -59,13 +60,28 @@ class Report(scooby.Report):
 
         """
         # Mandatory packages
-        core = ['pyvista', 'vtk', 'numpy', 'scipy', 'appdirs',
-                'ansys.mapdl.core', 'ansys.mapdl.reader']
+        core = [
+            'matplotlib',
+            'numpy',
+            'pyvista',
+            'appdirs',
+            'tqdm',
+            'pyiges',
+            'scipy',
+            'google.api.python_client',
+            'grpc',  # grpcio
+            'ansys.grpc.mapdl',  # ansys-grpc-mapdl
+            'ansys.mapdl.reader',  # ansys-mapdl-reader
+            'google.protobuf',  # protobuf library
+        ]
+
         if os.name == 'linux':
             core.extend(['pexpect'])
 
         # Optional packages
-        optional = ['matplotlib', 'ansys_corba']
+        optional = ['matplotlib']
+        if sys.version_info[1] < 9:
+            optional.append('ansys_corba')
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.

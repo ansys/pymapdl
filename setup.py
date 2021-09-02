@@ -27,10 +27,14 @@ install_requires = [
     'grpcio>=1.30.0',  # tested up to grpcio==1.35
     'ansys-grpc-mapdl==0.4.0',  # supports at least 2020R2 - 2021R2
     'ansys-mapdl-reader>=0.50.15',
-    'ansys-corba',  # pending depreciation to ansys-mapdl-corba
-    'protobuf>=3.1.4',  # had an issue with gRPC health checking with this version
+    'protobuf>=3.12.2',  # minimum required based on latest ansys-grpc-mapdl
 ]
 # 'grpcio-health-checking>=1.30.0',
+
+# for CORBA
+# pending depreciation to ansys-mapdl-corba
+if sys.version_info[1] < 9:
+    install_requires.append('ansys-corba')
 
 
 # these are only used when launching a MAPDL via a console.  This
