@@ -1355,6 +1355,31 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.math import MapdlMath
         return MapdlMath(self)
 
+    @property
+    def db(self):
+        """APDL DB interface
+
+        Returns
+        -------
+        :class:`MapdlDb <ansys.mapdl.core.math.MapdlDb>`
+
+        Examples
+        --------
+        Get the number of nodes in the MAPDL DB
+
+        >>> db = mapdl.db
+        >>> print(db.n_nodes())
+        >>> 101
+
+        Push a new node into MAPDL
+
+        >>> nod = mapdl.math.stiff()
+        >>> db.set_node(nod)
+        """
+        
+        from ansys.mapdl.core.mapdl_db import MapdlDb
+        return MapdlDb(self)
+    
     @protect_grpc
     def _data_info(self, pname):
         """Returns the data type of a parameter
