@@ -12,6 +12,8 @@ jobs:
         python-version: ['3.6', '3.7', '3.8', '3.9']
 
     steps:
+    - uses: actions/checkout@v2
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -22,4 +24,6 @@ jobs:
         pip install -r requirements_build.txt
         python setup.py sdist
         pip install dist/ansys*
+
+    - name: Test import
         python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
