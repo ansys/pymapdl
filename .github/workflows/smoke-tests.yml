@@ -26,4 +26,4 @@ jobs:
       - name: Test import
         working-directory: tests
         run: |
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
