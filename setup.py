@@ -23,7 +23,6 @@ install_requires = [
     'tqdm>=4.45.0',
     'pyiges>=0.1.4',
     'scipy>=1.3.0',  # for sparse (consider optional?)
-    'google-api-python-client',
     'grpcio>=1.30.0',  # tested up to grpcio==1.35
     'ansys-grpc-mapdl==0.4.0',  # supports at least 2020R2 - 2021R2
     'ansys-mapdl-reader>=0.50.15',
