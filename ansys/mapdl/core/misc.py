@@ -68,7 +68,6 @@ class Report(scooby.Report):
             'tqdm',
             'pyiges',
             'scipy',
-            'google.api.python_client',
             'grpc',  # grpcio
             'ansys.grpc.mapdl',  # ansys-grpc-mapdl
             'ansys.mapdl.reader',  # ansys-mapdl-reader

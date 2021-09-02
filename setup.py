@@ -4,7 +4,7 @@ import struct
 import os
 from io import open as io_open
 
-from setuptools import setup, find_packages, find_namespace_packages
+from setuptools import setup, find_namespace_packages
 
 
 # Get version from version info
