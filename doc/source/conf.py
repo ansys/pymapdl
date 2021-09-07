@@ -46,7 +46,6 @@ release = version = __version__
 # -- General configuration ---------------------------------------------------
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx_autodoc_typehints',
     'sphinx.ext.autosummary',
@@ -55,6 +54,7 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
+    'numpydoc',
 ]
 
 # return type inline with the description.
