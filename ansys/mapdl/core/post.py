@@ -315,7 +315,7 @@ class PostProcessing():
         if show_node_numbering:
             labels = [{'points': surf.points, 'labels': surf['ansys_node_num']}]
 
-        kwargs.setdefault('title', 'MAPDL Displacement')
+        # kwargs.setdefault('title', '') #no default title
         return general_plotter(meshes, [], labels, **kwargs)
 
     @property
