@@ -420,16 +420,16 @@ class LocalMapdlPool:
         """Wait until an instance of mapdl is available and return that instance.
 
         Parameters
-        --------
+        ----------
         return_index : bool, optional
             Return the index along with the instance.  Default ``False``.
 
         Returns
-        --------
-        mapdl : MapdlGrpc
+        -------
+        pyansys.MapdlGrpc
             Instance of MAPDL.
 
-        index : int
+        int
             Index within the pool of the instance of MAPDL.  By
             default this is not returned.
 

@@ -423,7 +423,7 @@ class MapdlMath:
             Filename to read the matrix from.  Defaults to ``"file.full"``.
 
         mat_id : str, optional
-            Matrix type.  Defaults to ``"STIFF"``
+            Matrix type.  Defaults to ``"STIFF"``.
 
             * ``"STIFF"`` - Stiffness matrix
             * ``"MASS"`` - Mass matrix
@@ -437,7 +437,7 @@ class MapdlMath:
             * ``"K"``_IM - Imaginary part of the stiffness matrix
 
         asarray : bool, optional
-            Return a `scipy` array rather than an APDLMath matrix.
+            Return a ``scipy`` array rather than an APDLMath matrix.
 
         """
         name = id_generator()

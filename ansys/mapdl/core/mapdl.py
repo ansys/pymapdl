@@ -2177,7 +2177,7 @@ class _MapdlCore(Commands):
         """Uses the VGET command to Return an array from ANSYS as a
         Python array.
 
-        See `*VGET
+        See `VGET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 

@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Python
-        uses: actions/setup-python@v2.1.4
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Install, start, and test the virtual framebuffer
         run: |
@@ -53,18 +53,9 @@ jobs:
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
           make -C doc html
-        env:
-          PYMAPDL_CI_NO_AUTODOC: True
-
-      - name: Full Documentation Build
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          sudo apt install pandoc -qy
-          pip install -r requirements_docs.txt
-          make -C doc html
   
       - name: Upload Documentation
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2
         with:
           name: Documentation
           path: doc/build/html

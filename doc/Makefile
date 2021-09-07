@@ -21,11 +21,12 @@ help:
 
 # customized clean due to examples gallery
 clean:
-	rm -rf build
+	rm -rf $(BUILDDIR)/*
 	rm -rf source/examples
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
 # customized clean due to examples gallery
-clean-api:
-	rm -rf build
+clean-except-examples:
+	rm -rf $(BUILDDIR)/*
+	rm -rf images/auto-generated
 	find . -type d -name "_autosummary" -exec rm -rf {} +

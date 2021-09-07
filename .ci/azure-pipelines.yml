@@ -18,7 +18,7 @@ trigger:
 jobs:
 - job: Linux
   variables:
-    python.version: '3.8'  # limited to < Python 3.8 due to VTK req
+    python.version: '3.8'
     DISPLAY: ':99.0'
     MAPDL.IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl'
     PYMAPDL_PORT: 32771  # default of 50052 does not work on azure devops
