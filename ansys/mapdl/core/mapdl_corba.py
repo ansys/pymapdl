@@ -1,4 +1,5 @@
-"""CORBA implementation of the MAPDL interface"""
+"""CORBA implementation of the MAPDL interface."""
+import sys
 import atexit
 import subprocess
 import time
@@ -9,6 +10,10 @@ import weakref
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import threaded, random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlExitedError
+
+if sys.version_info[1] > 8:
+    raise ImportError('The CORBA interface is only supported for Python 3.8'
+                      ' and earlier')
 
 from ansys_corba import CORBA
 

@@ -12,20 +12,18 @@ jobs:
         python-version: ['3.6', '3.7', '3.8', '3.9']
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install PyMAPDL
-      run: |
-        pip install -r requirements_build.txt
-        python setup.py sdist
-        pip install dist/ansys*
+      - name: Install PyMAPDL
+        run: |
+          pip install .
 
-    - name: Test import
-      run: |
-      working-directory: ./tests
-        python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      - name: Test import
+        working-directory: tests
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
