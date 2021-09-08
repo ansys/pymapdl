@@ -148,21 +148,19 @@ def port_in_use(port, host=LOCALHOST):
 def delete_ip_file(path):
     """Delete the created 'mylocal.ip'."""
     # path=''
-    file_name = os.path.join(path,'mylocal.ip') 
+    file_name = os.path.join(path, 'mylocal.ip') 
     if os.path.exists(file_name):
         # os.remove(file_name)
         pass 
 
 def create_ip_file(ip, path):
     """Create 'mylocal.ip' file required for ansys to change the IP of the gRPC server."""
-    delete_ip_file(path) # Delete if exist
 
-    file_name = os.path.join(path,'mylocal.ip')
+    file_name = os.path.join(path, 'mylocal.ip')
 
-    file = open(file_name, "x")  # The name is fixed and cannot be changed. 
-    file.write(f"{ip}")
-    file.close()
-
+    with open(file_name, 'w') as f:
+        f.write(f"{ip}")
+        
     
 def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                 run_location=None, 
@@ -349,9 +347,9 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
     pymapdl._LOCAL_PORTS.append(port)
 
     # setting ip for the grpc server
-    _using_custom_grpc_ip = False 
+    using_custom_grpc_ip = False 
     if ip != LOCALHOST: # Default local ip is 127.0.0.1
-        _using_custom_grpc_ip = True
+        using_custom_grpc_ip = True
         create_ip_file(ip, run_location)        
 
     cpu_sw = '-np %d' % nproc
@@ -424,7 +422,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
             break
         time.sleep(sleep_time)
 
-    if _using_custom_grpc_ip:
+    if using_custom_grpc_ip:
         delete_ip_file(run_location) 
 
     return port, run_location
