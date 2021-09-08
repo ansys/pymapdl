@@ -70,6 +70,18 @@ port 50005 with:
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
+You can configure the IP too. However because of ANSYS limitation to receive
+strings from command line, the IP needs to be read from an external file 
+called ``mylocal.ip``. This file is read automatically.
+
+You can then setup the IP (in linux or Windows-Powershell) with:
+
+.. code::
+    
+    echo "127.0.0.1" > mylocal.ip
+    /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
+
+
 This server can be connected to either from the same host, or from an
 external host.  For example, you can connect to a MAPDL service
 running locally with:
