@@ -348,7 +348,7 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
         port += 1
     pymapdl._LOCAL_PORTS.append(port)
 
-    # setting ip fo the grpc server
+    # setting ip for the grpc server
     _using_custom_grpc_ip = False 
     if ip != LOCALHOST: # Default local ip is 127.0.0.1
         _using_custom_grpc_ip = True
