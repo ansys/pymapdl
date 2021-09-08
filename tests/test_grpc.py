@@ -4,11 +4,15 @@ import os
 import pytest
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.launcher import get_start_instance
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = pytest.mark.skip_grpc
+
+skip_launch_mapdl = pytest.mark.skipif(get_start_instance(),
+                                       reason="Must be able to launch MAPDL locally")
 
 
 def test_clear_nostart(mapdl):
@@ -93,6 +97,7 @@ def test_download_missing_file(mapdl, tmpdir):
         mapdl.download('__notafile__', target)
 
 
+@skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
     from ansys.mapdl.core import launch_mapdl
     
