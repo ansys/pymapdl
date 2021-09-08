@@ -740,6 +740,11 @@ For example the ``*ASK`` can be replaced with a Python ``input``,
 ``*IF`` with a Python ``if`` statement, and instead of ``*CREATE`` and
 ``*USE`` can simply call another Python function or module.
 
+The command ``CMATRIX`` does not kill the server, however when it is
+run on interactive mode does not make any effect. This command needs to
+be run in non_interactive mode (:attr:`Mapdl.non_interactive
+<ansys.mapdl.core.Mapdl.non_interactive>`). 
+
 
 GUI Commands
 ~~~~~~~~~~~~
