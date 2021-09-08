@@ -32,10 +32,9 @@ for rver in valid_rver:
 # Cache if gRPC MAPDL is installed.
 #
 # minimum version on linux.  Windows is v202, but using v211 for consistency
-# override this if running on Azure
-HAS_GRPC = int(rver) >= 211
-if 'PYMAPDL_PORT' in os.environ:
-    HAS_GRPC = True
+# Override this if running on CI/CD and PYMAPDL_PORT has been specified
+ON_CI = 'PYMAPDL_START_INSTANCE' in os.environ and 'PYMAPDL_PORT' in os.environ
+HAS_GRPC = int(rver) >= 211 or ON_CI
 
 
 # determine if we can launch an instance of MAPDL locally
