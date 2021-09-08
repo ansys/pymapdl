@@ -45,7 +45,7 @@ connect to it.  First, launch MAPDL with:
 
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
-Or on Linux with (assuming a ``/usr/ansys_inc`` install:
+Or on Linux with (assuming a ``/usr/ansys_inc`` install):
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
 
@@ -74,7 +74,15 @@ You can configure the IP too. However because of ANSYS limitation to receive
 strings from command line, the IP needs to be read from an external file 
 called ``mylocal.ip``. This file is read automatically.
 
-You can then setup the IP (in linux or Windows-Powershell) with:
+You can then setup the IP in Windows (Powershell and CMD) with:
+
+.. code::
+    
+    echo "127.0.0.1" > mylocal.ip
+    C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
+
+
+or in Linux with:
 
 .. code::
     
