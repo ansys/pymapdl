@@ -152,7 +152,7 @@ def test_allow_ignore(mapdl):
     mapdl.allow_ignore = True
     assert mapdl.allow_ignore is True
     mapdl.k()
-    assert mapdl.geometry.n_keypoint is 0
+    assert mapdl.geometry.n_keypoint == 0
     mapdl.allow_ignore = False
 
 
