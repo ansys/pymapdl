@@ -7,7 +7,7 @@ from ansys.mapdl.core import examples
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-# skip entire module unless HAS_GRPC
+# skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = pytest.mark.skip_grpc
 
 
