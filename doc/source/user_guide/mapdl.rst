@@ -733,6 +733,7 @@ supported.
 * ``*REPEAT``
 * ``*RETURN``
 * ``*VWRITE``
+* ``CMATRIX``
 
 Note, many of these commands do not make sense in a Python context.
 For example the ``*ASK`` can be replaced with a Python ``input``,
