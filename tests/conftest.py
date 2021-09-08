@@ -12,25 +12,30 @@ from ansys.mapdl.core.launcher import (get_start_instance,
                                        MAPDL_DEFAULT_PORT,
                                        _get_available_base_ansys)
 from ansys.mapdl.core.inline_functions import Query
-from common import get_details_of_nodes, get_details_of_elements, \
-    Node, Element
+from common import (get_details_of_nodes, get_details_of_elements,
+                    Node, Element)
 
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 
 
-# check for a valid MAPDL install with gRPC
-# NOTE: checks in this order
-valid_rver = ['212', '211', '202', '201', '195', '194', '193', '192', '191']
+# Check if MAPDL is installed
+# NOTE: checks in this order to get the newest installed version
+valid_rver = ['221', '212', '211', '202', '201', '195', '194', '193', '192', '191']
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
         break
 
+# Cache if gRPC MAPDL is installed.
+#
 # minimum version on linux.  Windows is v202, but using v211 for consistency
-HAS_GRPC = int(rver) >= 211
+# Override this if running on CI/CD and PYMAPDL_PORT has been specified
+ON_CI = 'PYMAPDL_START_INSTANCE' in os.environ and 'PYMAPDL_PORT' in os.environ
+HAS_GRPC = int(rver) >= 211 or ON_CI
+
 
 # determine if we can launch an instance of MAPDL locally
 local = [False]

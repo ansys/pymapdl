@@ -9,7 +9,7 @@ Working Plane
 These DATABASE commands turn on, move, rotate, and modify the working
 plane, which is used for picking operations.
 
-..autosummary::
+.. autosummary::
    :toctree: _autosummary/
 
    Mapdl.kwpave
