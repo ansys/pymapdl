@@ -950,8 +950,9 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                            **start_parm)
     elif mode == 'grpc':
         port, actual_run_location = launch_grpc(port=port, verbose=verbose_mapdl,
+                                                ip=ip,
                                                 **start_parm)
-        mapdl = MapdlGrpc(ip=LOCALHOST, port=port,
+        mapdl = MapdlGrpc(ip=ip, port=port,
                           cleanup_on_exit=cleanup_on_exit,
                           loglevel=loglevel, set_no_abort=set_no_abort,
                           remove_temp_files=kwargs.pop('remove_temp_files', False),
