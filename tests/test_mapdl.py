@@ -7,12 +7,13 @@ import numpy as np
 import pyvista
 from pyvista.plotting.renderer import CameraPosition
 from pyvista.plotting import system_supports_plotting
-
 from ansys.mapdl.reader import examples
 
 from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl import core as pymapdl
+
+from conftest import ON_CI
 
 skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
                                      reason="Requires active X Server")
@@ -537,6 +538,7 @@ def test_load_table(mapdl):
     assert np.allclose(mapdl.parameters['my_conv'], my_conv[:, -1])
 
 
+@pytest.mark.xfail(ON_CI, reason="Bug in docker 2021R1 release candidate image")
 @pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
