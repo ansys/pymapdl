@@ -145,6 +145,7 @@ def port_in_use(port, host=LOCALHOST):
         except:
             return True
 
+
 def delete_ip_file(path):
     """Delete the created 'mylocal.ip'."""
     # path=''
@@ -153,11 +154,11 @@ def delete_ip_file(path):
         # os.remove(file_name)
         pass 
 
+
 def create_ip_file(ip, path):
     """Create 'mylocal.ip' file required for ansys to change the IP of the gRPC server."""
 
     file_name = os.path.join(path, 'mylocal.ip')
-
     with open(file_name, 'w') as f:
         f.write(f"{ip}")
         
