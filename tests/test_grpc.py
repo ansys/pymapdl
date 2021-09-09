@@ -100,28 +100,19 @@ def test_download_missing_file(mapdl, tmpdir):
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
     from ansys.mapdl.core import launch_mapdl
+    import re
     
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
 
-    # Check the ip
-    # print(mapdl._ip)
-
-    # Check it also in the output file.
-    # print(mapdl.directory)
-
     output_file = mapdl._download_as_raw('.__tmp__.out')
     output = output_file.decode().splitlines()
 
-    # Catching the line where the IP of the gRPC server is specified.
-    for each_line in output:
-        if 'Server listening on' in each_line: 
-            line = each_line
-            print(each_line)
-
+    ip_in_output = re.findall('Server listening on : (.*):', output)
+    
     mapdl.exit()
 
-    assert ip in line
+    assert ip == ip_in_output
 
 
 # these tests take some time to run, and we might consider moving
