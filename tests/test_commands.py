@@ -74,9 +74,9 @@ def test_cmatrix():
         mapdl.run("cmatrix,1, 'cond', 3, 0, 'aa'")
 
     # Next line is going to be included in the `CMATRIX` wrapper in `mapdl_grpc`.
-    # See PR #571.
-    # So please comment/delete when that PR is merged.
-    # mapdl._response  = mapdl._download_as_raw('cmatrix.out').decode() #TODO: To delete/comment when PR #571 is merged.
+    # See PR #584 and issue #571.
+    # So please un-comment if you want test before #584 merge.
+    # mapdl._response  = mapdl._download_as_raw('cmatrix.out').decode()
     assert 'Capacitance matricies are stored in file' in mapdl.last_response
     
     mapdl.finish()
