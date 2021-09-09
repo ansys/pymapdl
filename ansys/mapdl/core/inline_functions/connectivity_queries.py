@@ -82,23 +82,3 @@ class _ConnectivityQueries(_ParameterParsing):
         """
         response = self._mapdl.run(f'_=ENEXTN({n},{loc})')
         return self._parse_parameter_integer_response(response)
-
-    def nodedof(self, n) -> int:
-        """Returns the bit pattern for the active DOFs at the specified node.
-
-        Parameters
-        ----------
-        n : int
-            Node number.
-
-        Returns
-        -------
-        int
-            The bit pattern
-
-        Examples
-        --------
-
-        """
-        response = self._mapdl.run(f'_=NODEDOF({n})')
-        return self._parse_parameter_integer_response(response)
