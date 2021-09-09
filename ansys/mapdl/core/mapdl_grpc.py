@@ -620,6 +620,7 @@ class MapdlGrpc(_MapdlCore):
         self._kill()  # sets self._exited = True
         self._close_process()
         self._remove_lock_file()
+        self._remove_mylocalip_file()
 
         if self._remove_tmp and self._local:
             self._log.debug('Removing local temporary files')
@@ -671,6 +672,20 @@ class MapdlGrpc(_MapdlCore):
                         os.remove(lock_file)
                     except OSError:
                         pass
+    
+    def _remove_mylocalip_file(self):
+        """
+        Delete the file 'mylocal.ip' (if exists) which is used to run
+        the gRPC in a custom ip.
+        """
+        mapdl_path = self.directory
+        if mapdl_path:
+            mylocalip_file = os.path.join(mapdl_path, 'mylocal.ip')
+            if os.path.isfile(mylocalip_file):
+                try:
+                    os.remove(mylocalip_file)
+                except OSError:
+                    pass
 
     def _run_cleanup_script(self):  # pragma: no cover
         """Run the APDL cleanup script.
