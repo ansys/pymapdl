@@ -81,5 +81,3 @@ def test_cmatrix():
     
     mapdl.finish()
     mapdl.exit()
-    
-    
