@@ -44,7 +44,7 @@ class _ConnectivityQueries(_ParameterParsing):
         return self._parse_parameter_integer_response(response)
 
     def enextn(self, n, loc) -> int:
-        """Returns the element connected to node `n`.
+        """Returns the `loc` element connected to node `n`.
 
         Returns the element connected to node `n`. `loc` is the position
         in the resulting list when many elements share the node.
