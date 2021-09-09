@@ -101,7 +101,7 @@ def test_download_missing_file(mapdl, tmpdir):
 def test_grpc_custom_ip():
     from ansys.mapdl.core import launch_mapdl
     
-    ip='127.0.0.2'
+    ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
 
     # Check the ip

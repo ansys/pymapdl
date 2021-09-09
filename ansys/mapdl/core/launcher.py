@@ -160,7 +160,7 @@ def create_ip_file(ip, path):
 
     file_name = os.path.join(path, 'mylocal.ip')
     with open(file_name, 'w') as f:
-        f.write(f"{ip}")
+        f.write(ip)
         
     
 def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
