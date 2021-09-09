@@ -1633,11 +1633,9 @@ class MapdlGrpc(_MapdlCore):
                 capname="", **kwargs):
         """Wrap the CMATRIX command to update correctly the `last_response` command. """ 
 
-        """The CMATRIX command needs to run in non-interactive mode"""
-        empty_output = super().cmatrix(self, symfac, condname, numcond, grndkey, capname, **kwargs)
+        # The CMATRIX command needs to run in non-interactive mode
+        super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
        
         # Reading output
-        output = self._download_as_raw('cmatrix.out').decode()
-        self._response = output 
-
-        return output 
+        self._response = self._download_as_raw('cmatrix.out').decode()
+        return self._response 
