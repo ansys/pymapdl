@@ -558,7 +558,7 @@ class AnalysisOptions:
 
         This command does not support multiframe restarts.
         """
-        command = f"CMATRIX,{symfac},{condname},{numcond},{grndkey},{capname}"
+        command = f"CMATRIX,{symfac},'{condname}',{numcond},{grndkey},'{capname}'"
         return self.run(command, **kwargs)
 
     def cmsopt(self, cmsmeth="", nmode="", freqb="", freqe="", fbddef="",
