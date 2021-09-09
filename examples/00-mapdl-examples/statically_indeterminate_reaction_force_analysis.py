@@ -3,7 +3,7 @@ r"""
 
 Statically Indeterminate Reaction Force Analysis
 ------------------------------------------------
-Problem Descrption:
+Problem Description:
  - A prismatical bar with built-in ends is loaded axially at two
    intermediate cross sections.  Determine the reactions :math:`R_1`
    and :math:`R_2`.

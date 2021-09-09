@@ -3,6 +3,7 @@ name: Nightly Documentation Build
 on:
   schedule:  # UTC at 0400
     - cron:  '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   nightly_docs_build:
@@ -55,7 +56,7 @@ jobs:
           make -C doc html
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           repository-name: pyansys/pymapdl-dev-docs
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}

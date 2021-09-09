@@ -89,7 +89,7 @@ def test_allow_ignore(mapdl_corba):
     mapdl_corba.allow_ignore = True
     assert mapdl_corba.allow_ignore is True
     mapdl_corba.k()
-    assert mapdl_corba.geometry.n_keypoint is 0
+    assert mapdl_corba.geometry.n_keypoint == 0
 
 
 def test_chaining(mapdl_corba, cleared):
