@@ -48,7 +48,7 @@ INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
                   '/EOF': 'Unsupported command.  Use ``exit`` to stop the server.',
                   '*ASK': 'Unsupported command.  Use python ``input`` instead.',
                   '*IF': 'Use a python ``if`` or run as non_interactive',
-                  'CMATRIX': ' Use as non_interactive'}
+                  'CMATRIX': 'Use as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
