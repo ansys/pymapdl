@@ -1627,3 +1627,19 @@ class MapdlGrpc(_MapdlCore):
             out = super().igesin(basename, **kwargs)
 
         return out
+
+    @wraps(_MapdlCore.cmatrix)
+    def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
+                capname="", **kwargs):
+        """Run CMATRIX in non-interactive mode and return the response from file. """
+
+        # The CMATRIX command needs to run in non-interactive mode
+        if not self._store_commands:
+            with self.non_interactive:
+                super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
+            self._response = self._download_as_raw('cmatrix.out').decode()
+            return self._response
+
+        # otherwise, simply run cmatrix as we're already in
+        # non-interactive and there's no output to return
+        super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)

@@ -538,7 +538,6 @@ def test_load_table(mapdl):
     assert np.allclose(mapdl.parameters['my_conv'], my_conv[:, -1])
 
 
-@pytest.mark.xfail(ON_CI, reason="Bug in docker 2021R1 release candidate image")
 @pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
