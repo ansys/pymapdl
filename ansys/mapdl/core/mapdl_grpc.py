@@ -620,7 +620,6 @@ class MapdlGrpc(_MapdlCore):
         self._kill()  # sets self._exited = True
         self._close_process()
         self._remove_lock_file()
-        self._remove_mylocalip_file()
 
         if self._remove_tmp and self._local:
             self._log.debug('Removing local temporary files')
