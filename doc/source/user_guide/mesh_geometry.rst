@@ -69,5 +69,5 @@ commands for creating geometries.
 
 API Reference
 ~~~~~~~~~~~~~
-For a full descrption of the ``Mesh`` and ``Geometry`` classes, please
+For a full description of the ``Mesh`` and ``Geometry`` classes, please
 see :ref:`ref_mesh_api` and :ref:`ref_geometry_api`.

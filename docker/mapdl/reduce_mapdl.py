@@ -34,8 +34,8 @@ import os
 import numpy as np
 
 ver = '212'
-source_directory = f'/mnt/old/usr/ansys_inc/v{ver}/'  # mounted with strictatime
-
+# source_directory = f'/mnt/old/usr/ansys_inc/v{ver}/'  # mounted with strictatime
+source_directory = f'/mnt/thumb/ansys_inc/v{ver}/'  # mounted with strictatime
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -46,10 +46,13 @@ def convert_size(size_bytes):
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
 
-# time.time()  # manually run
-cutoff = 1622174341.787562
+
+# update this...
+cutoff = 0 # <from time.time()>
+
 
 # next, run mapdl and pymapdl unit testing in both DPM and SMP modes
+
 
 total_size = 0
 times = []
@@ -77,8 +80,8 @@ for i in np.argsort(masked_times):
     print(recent_files[i][0])
     # print('%40s    %s' % (recent_files[i][1], time.ctime(accesstime)))
     dest = recent_files[i][0].replace(f'/v{ver}/', f'/v{ver}_docker/')
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    shutil.copy(recent_files[i][0], dest)
+    # os.makedirs(os.path.dirname(dest), exist_ok=True)
+    # shutil.copy(recent_files[i][0], dest)
 
 
 # these may not be captured if not using a newer xeon cpu
@@ -87,10 +90,12 @@ extra_files = [
     f'/usr/ansys_inc/v{ver}/tp/IntelMKL/2020.0.166/linx64/lib/intel64/libmkl_def.so',
 ]
 
+# TODO: Move over all MAC files in /usr/ansys_inc/<ver>/ansys/apdl/* as well
+
 for filename in extra_files:
     dest = filename.replace(f'/v{ver}/', f'/v{ver}_docker/')
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    shutil.copy(filename, dest)
+    # os.makedirs(os.path.dirname(dest), exist_ok=True)
+    # shutil.copy(filename, dest)
 
 print(np.sum(times > cutoff), 'out of', len(times))
 print(convert_size(total_size))

@@ -733,11 +733,17 @@ supported.
 * ``*REPEAT``
 * ``*RETURN``
 * ``*VWRITE``
+* ``CMATRIX``
 
 Note, many of these commands do not make sense in a Python context.
 For example the ``*ASK`` can be replaced with a Python ``input``,
 ``*IF`` with a Python ``if`` statement, and instead of ``*CREATE`` and
 ``*USE`` can simply call another Python function or module.
+
+The command ``CMATRIX`` does not kill the server, however when it is
+run on interactive mode does not make any effect. This command needs to
+be run in non_interactive mode (:attr:`Mapdl.non_interactive
+<ansys.mapdl.core.Mapdl.non_interactive>`). 
 
 
 GUI Commands
@@ -746,3 +752,30 @@ These commands have no direct mapping to MAPDL as they are not
 applicable to a "headless" interactive session.
 
 * ``*DEL``
+
+
+Environment Variables
+~~~~~~~~~~~~~~~~~~~~~
+There are several PyMAPDL specific environment variables that can be
+used to control the behavior or launching of PyMAPDL and MAPDL.  These
+include:
+
++----------------------------+-------------------------------------------------+
+| ANSYSLMD_LICENSE_FILE      | License file or IP address (e.g. 192.168.0.16). |
+|                            | This is helpful for supplying licencing for     |
+|                            | docker.                                         |
++----------------------------+-------------------------------------------------+
+| PYMAPDL_MAX_MESSAGE_LENGTH | Maximum gRPC message length.  If your           |
+|                            | connection terminates when running              |
+|                            | PRNSOL or NLIST, raise this.  In bytes,         |
+|                            | defaults to 256 MB                              |
++----------------------------+-------------------------------------------------+
+| PYMAPDL_PORT               | Default port to look for when connecting        |
+|                            | PyMAPDL.  Normally used for unit testing.       |
++----------------------------+-------------------------------------------------+
+| PYMAPDL_START_INSTANCE     | Override the behavior of                        |
+|                            | :func:`ansys.mapdl.core.launch_mapdl` to only   |
+|                            | attempt to connect to existing                  |
+|                            | instances of PyMAPDL.  Generally used           |
+|                            | in combination with ``PYMAPDL_PORT``            |
++----------------------------+-------------------------------------------------+
