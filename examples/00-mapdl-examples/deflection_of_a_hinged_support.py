@@ -4,7 +4,12 @@ r"""
 Deflection of a Hinged Support
 ------------------------------
 Problem Description:
- - ?
+ - A structure consisting of two equal steel bars, each of length :math:l:
+   and cross-sectional area :math:`A`, with hinged ends is subjected to
+   the action of a load :math:`F`. Determine the stress, :math:`\sigma`,
+   in the bars and the deflection, :math:`\delta`, of point 2. Neglect
+   the weight of the bars as a small quantity in comparison with the load
+   :math:`F`.
 
 Reference:
  - S. Timoshenko, Strength of Materials, Part I, Elementary Theory and
@@ -12,7 +17,7 @@ Reference:
    pg. 10, problem 2.
 
 Analysis Type(s):
- - None?
+ - Static Analysis ``ANTYPE=0``
 
 Element Type(s):
  - 3-D Spar (or Truss) Elements (LINK180)
@@ -25,13 +30,27 @@ Material Properties
  - :math:`E = 30 \cdot 10^6 psi`
 
 Geometric Properties:
- - ?
+ - :math:`l = 15 ft`
+ - :math:`A = 0.5 in^2`
+ - :math:`\Theta = 30 ^\circ`
 
 Loading:
- - ?
+ - :math:`F = 5000 lb`
 
 Analytical Equations:
- - ?
+ - The tensile force in the bars is :math:`S`
+   - :math:`S = \frac{P}{2 sin \Theta}`
+ - The necessary cross-sectional area :math:`A` is
+   - :math:`A = \frac{S}{\sigma}`
+ - The elongation of the bar :math:`AB` is
+   - :math:`B_1 D = \frac{\sigma l}{E}`
+ - The deflection :math:`BB_1` is
+   - :math:`BB_1 = \frac{B_1 D}{sin \Theta}`
+
+Notes:
+ - Consistent length units are used. The dimensions :math:`a` and :math:`b` are
+   calculated parametrically in the input as follows: :math:`a = 2 l cos \Theta`,
+   :math:`b = l sin \Theta`.
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm4_setup.png'
