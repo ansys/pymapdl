@@ -537,7 +537,6 @@ def test_load_table(mapdl):
     assert np.allclose(mapdl.parameters['my_conv'], my_conv[:, -1])
 
 
-@pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
 
