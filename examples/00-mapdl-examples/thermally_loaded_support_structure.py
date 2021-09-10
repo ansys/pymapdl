@@ -4,9 +4,10 @@ r"""
 Thermally Loaded Support Structure
 ----------------------------------
 Problem Descrption:
- - A prismatical bar with built-in ends is loaded axially at two
-   intermediate cross sections.  Determine the reactions :math:`R_1`
-   and :math:`R_2`.
+ - Find the stresses in the copper and steel wire structure shown below.
+   The wires have a cross-sectional area of math:`A`. The structure is
+   subjected to a load math:`Q` and a temperature rise of math:`\Delta T` after
+   assembly.
 
 Reference:
  - S. Timoshenko, Strength of Materials, Part I, Elementary Theory and
@@ -21,22 +22,29 @@ Element Type(s):
 
 .. image:: ../../_static/vm3_setup.png
    :width: 400
-   :alt: VM1 Problem Sketch
+   :alt: VM3 Problem Sketch
 
 Material Properties
- - :math:`E_{copper} = 16 \cdot 10^6 psi`
- - :math:`E_{steel} = 30 \cdot 10^6 psi`
- - :math:`\alpha_{copper} = 70 \cdot 10^{-7} /K
- - :math:`\alpha_{steel} = 92 \cdot 10^{-7} /K
+ - :math:`E_c = 16 \cdot 10^6 psi`
+ - :math:`E_s = 30 \cdot 10^6 psi`
+ - :math:`\alpha_c = 70 \cdot 10^{-7} in/in-^\circ F`
+ - :math:`\alpha_s = 92 \cdot 10^{-7} in/in-^\circ F`
 
 Geometric Properties:
- - ?
+ - :math:`A = 0.1 in^2`
 
 Loading:
- - ?
+ - :math:`Q = 4000 lb`
+ - :math:`\Delta T = 10 ^\circ F`
 
 Analytical Equations:
- - ?
+ - The compressive force :math:`X` is given by the following equation
+ - :math:`X = \frac{\Delta T (\alpha_c - \alpha_s) (A_s - E_s) }{1 + \frac{1 E_s A_s}{2 E_c A_c}} + \frac{Q}{1 + \frac{2 E_c A_c}{E_s A_s}}`
+
+ Notes:
+ - Length of wires (20 in.), spacing between wires (10 in.), and the reference
+   temperature (70°F) are arbitrarily selected. The rigid lower beam is modeled
+   by nodal coupling.
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm3_setup.png'
