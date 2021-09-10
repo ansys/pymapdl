@@ -5,10 +5,10 @@ class _ConnectivityQueries(_ParameterParsing):
     _mapdl = None
 
     def nelem(self, e, npos) -> int:
-        """Return the number of the node at position `npos` in element `e`.
+        """Return the number of the node at position ``npos`` in element ``e``.
 
-        Returns the node number in position `npos` for element number `e`.
-        `npos` can be 1, 2, 3, ..., 20.
+        Returns the node number in position `npos` for element number ``e``.
+        ``npos`` can be 1, 2, 3, ..., 20.
 
         Parameters
         ----------
@@ -44,9 +44,9 @@ class _ConnectivityQueries(_ParameterParsing):
         return self._parse_parameter_integer_response(response)
 
     def enextn(self, n, loc) -> int:
-        """Returns the `loc` element connected to node `n`.
+        """Returns the ``loc`` element connected to node ``n``.
 
-        Returns the element connected to node `n`. `loc` is the position
+        Returns the element connected to node ``n``. ``loc`` is the position
         in the resulting list when many elements share the node.
         A zero is returned at the end of the list.
 
