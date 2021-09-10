@@ -91,7 +91,7 @@ mapdl.fill()
 mapdl.n(4, -10, -20)
 mapdl.n(6, 10, -20)
 mapdl.fill()
-mapdl.nplot(knum=True)
+mapdl.nplot(nnum=True)
 
 ###############################################################################
 # Define Geometry: Elements
