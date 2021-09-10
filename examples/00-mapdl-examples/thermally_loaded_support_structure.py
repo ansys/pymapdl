@@ -3,7 +3,7 @@ r"""
 
 Thermally Loaded Support Structure
 ----------------------------------
-Problem Descrption:
+Problem Description:
  - Find the stresses in the copper and steel wire structure shown below.
    The wires have a cross-sectional area of math:`A`. The structure is
    subjected to a load math:`Q` and a temperature rise of math:`\Delta T` after
