@@ -36,7 +36,10 @@ from ansys.mapdl.core import check_version
 logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
-MAX_MESSAGE_LENGTH = 256*1024**2  # 256 MB
+
+# Default 256 MB message length
+MAX_MESSAGE_LENGTH = int(os.environ.get('PYMAPDL_MAX_MESSAGE_LENGTH', 256*1024**2))
+
 
 def chunk_raw(raw, save_as):
     with io.BytesIO(raw) as f:
