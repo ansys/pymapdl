@@ -1,3 +1,4 @@
+"""Shared testing module"""
 from typing import Dict, Tuple
 from collections import namedtuple
 
