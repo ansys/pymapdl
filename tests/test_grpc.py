@@ -87,6 +87,16 @@ def test_input_empty(mapdl):
     assert 'does not exist' in resp
 
 
+def test_large_output(mapdl, cleared):
+    """Verify we can receive messages over the default 4MB limit."""
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.et(1, 187)
+    mapdl.esize(0.05)
+    mapdl.vmesh('all')
+    msg = mapdl.nlist()
+    assert len(msg) > 4*1024**2
+
+
 def test_download_missing_file(mapdl, tmpdir):
     target = tmpdir.join('tmp')
     with pytest.raises(FileNotFoundError):
