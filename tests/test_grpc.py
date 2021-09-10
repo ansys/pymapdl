@@ -106,9 +106,9 @@ def test_grpc_custom_ip():
     mapdl = launch_mapdl(ip=ip)
 
     output_file = mapdl._download_as_raw('.__tmp__.out')
-    output = output_file.decode().splitlines()
+    output = output_file.decode()
 
-    ip_in_output = re.findall('Server listening on : (.*):', output)
+    ip_in_output = re.findall('Server listening on : (.*):', output)[0]
     
     mapdl.exit()
 
