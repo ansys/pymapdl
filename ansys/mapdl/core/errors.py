@@ -21,6 +21,11 @@ Disable this check by passing ``override=True``
 """
 
 
+LICENSE_CONNECTION_ERROR = """
+Error connecting to the license server specified in {port}:{ip}.
+"""
+
+
 TYPE_MSG = 'Invalid datatype.  Must be one of the following:\n' +\
     'np.int32, np.int64, or np.double'
 
@@ -67,6 +72,13 @@ class MapdlExitedError(RuntimeError):
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
     def __init__(self, msg=LOCKFILE_MSG):
+        RuntimeError.__init__(self, msg)
+
+
+class LicenseServerConnectionError(RuntimeError):
+    """Error message when the license server is not available."""
+    def __init__(self, LICENSE_CONNECTION_ERROR, ip, port):
+        msg = LICENSE_CONNECTION_ERROR.replace('{port}',str(port)).replace('{ip}', ip)        
         RuntimeError.__init__(self, msg)
 
 
