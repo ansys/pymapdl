@@ -12,7 +12,7 @@ import subprocess
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
-from ansys.mapdl.core.errors import LockFileException, VersionError
+from ansys.mapdl.core.errors import LockFileException, VersionError, LicenseServerConnectionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, check_valid_ip
 
 # settings directory
@@ -913,8 +913,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
     # Here we will check the license server
     if not check_license_server(ip, port):
-        # raise Exception
-        pass
+        raise LicenseServerConnectionError(ip=ip, port=port)
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
