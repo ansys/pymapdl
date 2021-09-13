@@ -1077,7 +1077,7 @@ def get_license_server_details_locally_for_windows():
     with open(ansyslmdini_file) as f:
         ansyslmdini = f.readlines()
     
-    server_conf = ansyslmdini[0].strip().split('=')[1] # Geting first line only. 
+    server_conf = ansyslmdini[0].strip().split('=')[1] # Getting first line only. 
     port = server_conf.split('@')[0]
     host = server_conf.split('@')[1]
     return host, port 
