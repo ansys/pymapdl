@@ -13,7 +13,7 @@ import subprocess
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
 from ansys.mapdl.core.errors import LockFileException, VersionError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, check_valid_ip
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('ansys_mapdl_core')
@@ -993,3 +993,93 @@ def check_mode(mode, version):
         warnings.warn('MAPDL as a service has not been tested on MAPDL < v13')
 
     return mode
+
+
+def lmutils_is_installed():
+    return False 
+
+
+def run_lmutils():
+    return True 
+
+
+def ping_license_server_python(ip=LOCALHOST, port=1055, timeout=2):
+    """
+    Ping an IP with a port using python.
+    """
+    
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+
+    msg = "lmutils lmstat"
+    
+    try:
+        s.connect((ip, port))
+        s.send(msg.encode('utf-8'))
+
+    except socket.timeout: #if timeout error, the port is closed.
+        return False 
+    else:
+        # when there is no exceptions
+        return True 
+
+
+def ping_license_server(ip, port):
+    """
+    Ping the license server at the specified port and IP. 
+    """
+    check_valid_ip()
+    
+    if lmutils_is_installed():  # Not implemented.
+        # Run lmutils
+        return run_lmutils()
+
+    else: #Using python
+        return ping_license_server_python(ip, port)
+        
+
+
+
+def check_license_server(ip=None, port=None):
+    """
+    Check if there is a valid license server running in the specified ip and port.
+    If not supplied we will guess the location of the server from the installation.
+    
+    """
+
+    if ip is not None and port is not None:
+
+        return ping_license_server(ip, port)
+
+    if os.getenv('ANSYSLMD_LICENSE_FILE') is not None:
+        # Running from a docker!
+        # We assume that docker containers always have `ANSYSLMD_LICENSE_FILE` environment variable.
+        ansyslmd_env = os.getenv('ANSYSLMD_LICENSE_FILE')
+        port = ansyslmd_env.split('@')[0]
+        host = ansyslmd_env.split('@')[1]
+
+        return ping_license_server(host, port)
+        
+    else: 
+        # We are running with a full installation
+
+        if os.name == 'posix': # Linux
+
+
+            pass 
+
+        elif os.name == 'nt':  # Windows
+
+            ansyslic_dir = os.getenv('ANSYSLIC_DIR')
+            ansyslmdini_file = os.path.join(ansyslic_dir, 'ansyslmd.ini')
+
+            with open(ansyslmdini_file) as f:
+                ansyslmdini = f.readlines()
+            
+            server_conf = ansyslmdini[0].split('=')[1] # Geting first line only. 
+            port = server_conf.split('@')[0]
+            host = server_conf.split('@')[1]
+
+            return ping_license_server(host, port)
+
+ 
