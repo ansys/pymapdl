@@ -22,7 +22,7 @@ Disable this check by passing ``override=True``
 
 
 LICENSE_CONNECTION_ERROR = """
-Error connecting to the license server specified in {port}:{ip}.
+Error connecting to the license server in {port}:{ip}.
 """
 
 
@@ -77,7 +77,7 @@ class LockFileException(RuntimeError):
 
 class LicenseServerConnectionError(RuntimeError):
     """Error message when the license server is not available."""
-    def __init__(self, LICENSE_CONNECTION_ERROR, ip, port):
+    def __init__(self, ip, port, msg = LICENSE_CONNECTION_ERROR):
         msg = LICENSE_CONNECTION_ERROR.replace('{port}',str(port)).replace('{ip}', ip)        
         RuntimeError.__init__(self, msg)
 
