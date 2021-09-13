@@ -90,6 +90,7 @@ mapdl.n(14, 75, -9)
 mapdl.fill()
 mapdl.e(2, 1, 8, 9)
 mapdl.egen(6, 1, 1)
+mapdl.eplot(cpos='xy')
 
 
 ###############################################################################
@@ -134,19 +135,22 @@ def fetch_mid_and_end_stress(m):
 
 
 fixed_end_stress_182, mid_stress_182 = fetch_mid_and_end_stress(mapdl)
-
-
-# mport matplotlib.pyplot as plt
-
-# fig = plt.figure()
-# ax = fig.add_subplot(121)
 result = mapdl.result
-result.plot_principal_nodal_stress(-1,
+
+###############################################################################
+# Plotting
+# ~~~~~~~~
+# View the equivalent stress, and displacement, of the cantilever with a
+# ``displacement_factor`` of  26 to scale up the deformation to a visible
+# amount.
+
+result.plot_principal_nodal_stress(0,
                                    'SEQV',
                                    show_edges=True,
-                                   cmap='plasma', cpos='xy',
-                                   show_displacement=True)
-# plt.show()
+                                   show_displacement=True,
+                                   displacement_factor=26.,
+                                   cmap='Oranges',
+                                   cpos='xy')
 
 ###############################################################################
 # Redo with Plane 183
@@ -172,6 +176,14 @@ mapdl.post1()
 fixed_end_stress_183, mid_stress_183 = fetch_mid_and_end_stress(mapdl)
 mapdl.finish()
 
+result = mapdl.result
+result.plot_principal_nodal_stress(0,
+                                   'SEQV',
+                                   show_edges=True,
+                                   show_displacement=True,
+                                   displacement_factor=26.,
+                                   cmap='Blues',
+                                   cpos='xy')
 
 ###############################################################################
 # Check Results
