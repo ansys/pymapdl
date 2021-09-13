@@ -622,7 +622,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
                  cleanup_on_exit=True,
                  start_instance=True, ip=LOCALHOST,
                  clear_on_connect=True, log_apdl=False,
-                 verbose_mapdl=False, **kwargs):
+                 verbose_mapdl=False,
+                 license_server_check=True, **kwargs):
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -912,9 +913,10 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         start_parm['timeout'] = start_timeout
 
     # Here we will check the license server
-    license_host, license_port = get_license_server_details()
-    if not ping_license_server(license_host, license_port):
-        raise LicenseServerConnectionError(ip=license_host, port=license_port)
+    if license_server_check:
+        license_host, license_port = get_license_server_details()
+        if not ping_license_server(license_host, license_port):
+            raise LicenseServerConnectionError(ip=license_host, port=license_port)
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
