@@ -911,6 +911,11 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         start_parm['override'] = override
         start_parm['timeout'] = start_timeout
 
+    # Here we will check the license server
+    if not check_license_server(ip, port):
+        # raise Exception
+        pass
+
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
         mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl,
@@ -1038,8 +1043,6 @@ def ping_license_server(ip, port):
         return ping_license_server_python(ip, port)
         
 
-
-
 def check_license_server(ip=None, port=None):
     """
     Check if there is a valid license server running in the specified ip and port.
@@ -1058,13 +1061,12 @@ def check_license_server(ip=None, port=None):
         port = ansyslmd_env.split('@')[0]
         host = ansyslmd_env.split('@')[1]
 
-        return ping_license_server(host, port)
+        return ping_license_server(host, int(port))
         
     else: 
         # We are running with a full installation
 
         if os.name == 'posix': # Linux
-
 
             pass 
 
@@ -1080,6 +1082,6 @@ def check_license_server(ip=None, port=None):
             port = server_conf.split('@')[0]
             host = server_conf.split('@')[1]
 
-            return ping_license_server(host, port)
+            return ping_license_server(host, int(port))
 
  
