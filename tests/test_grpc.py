@@ -1,5 +1,6 @@
 """gRPC service specific tests"""
 import os
+import re
 
 import pytest
 
@@ -14,6 +15,51 @@ pytestmark = pytest.mark.skip_grpc
 skip_launch_mapdl = pytest.mark.skipif(not get_start_instance() and check_valid_ansys(),
                                        reason="Must be able to launch MAPDL locally")
 
+
+@pytest.fixture(scope='function')
+def setup_for_cmatrix(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.title("Capacitance of two long cylinders above a ground plane")
+    mapdl.run("a=100")  # Cylinder inside radius (μm)
+    mapdl.run("d=400")  # Outer radius of air region
+    mapdl.run("ro=800")  # Outer radius of infinite elements
+    mapdl.et(1, 121)  # 8-node 2-D electrostatic element
+    mapdl.et(2, 110, 1, 1)  # 8-node 2-D Infinite element
+    mapdl.emunit("epzro", 8.854e-6)  # Set free-space permittivity for μMKSV units
+    mapdl.mp("perx", 1, 1)
+    mapdl.cyl4("d/2", "d/2", "a", 0)  # Create mode in first quadrant
+    mapdl.cyl4(0, 0, "ro", 0, "", 90)
+    mapdl.cyl4(0, 0, "2*ro", 0, "", 90)
+    mapdl.aovlap("all")
+    mapdl.numcmp("area")
+    mapdl.run("smrtsiz,4")
+    mapdl.mshape(1)  # Mesh air region
+    mapdl.amesh(3)
+    mapdl.lsel("s", "loc", "x", "1.5*ro")
+    mapdl.lsel("a", "loc", "y", "1.5*ro")
+    mapdl.lesize("all", "", "", 1)
+    mapdl.type(2)
+    mapdl.mshape(0)
+    mapdl.mshkey(1)
+    mapdl.amesh(2)  # Mesh infinite region
+    mapdl.run("arsymm,x,all")  # Reflect model about y axis
+    mapdl.nummrg("node")
+    mapdl.nummrg("kpoi")
+    mapdl.csys(1)
+    mapdl.nsel("s", "loc", "x", "2*ro")
+    mapdl.sf("all", 'inf')  # Set infinite flag in Infinite elements
+    mapdl.local(11, 1, "d/2", "d/2")
+    mapdl.nsel("s", "loc", "x", "a")
+    mapdl.cm("cond1", "node")  # Assign node component to 1st conductor
+    mapdl.local(12, 1, "-d/2", "d/2")
+    mapdl.nsel("s", "loc", "x", "a")
+    mapdl.cm("cond2", "node")  # Assign node component to 2nd conductor
+    mapdl.csys(0)
+    mapdl.nsel("s", "loc", "y", 0)
+    mapdl.cm("cond3", "node")  # Assign node component to ground conductor
+    mapdl.allsel("all")
+    mapdl.finish()
+    mapdl.run("/solu")
 
 def test_clear_nostart(mapdl):
     resp = mapdl._send_command('FINISH')
@@ -91,6 +137,16 @@ def test_input_empty(mapdl):
     assert 'does not exist' in resp
 
 
+def test_large_output(mapdl, cleared):
+    """Verify we can receive messages over the default 4MB limit."""
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.et(1, 187)
+    mapdl.esize(0.05)
+    mapdl.vmesh('all')
+    msg = mapdl.nlist()
+    assert len(msg) > 4*1024**2
+
+
 def test_download_missing_file(mapdl, tmpdir):
     target = tmpdir.join('tmp')
     with pytest.raises(FileNotFoundError):
@@ -100,7 +156,6 @@ def test_download_missing_file(mapdl, tmpdir):
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
     from ansys.mapdl.core import launch_mapdl
-    import re
     
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
@@ -113,6 +168,25 @@ def test_grpc_custom_ip():
     mapdl.exit()
 
     assert ip == ip_in_output
+
+
+def test_cmatrix(mapdl, setup_for_cmatrix):
+    cap_name = 'aaaaa'
+    output = mapdl.cmatrix(1, 'cond', 3, 0, cap_name)
+    assert 'Capacitance matricies are stored in file' in output
+    assert cap_name in output
+
+    # also test if it works while we're already in non-interactive:
+    # no asserts needed here since we're not concerned about the last response
+    cap_name = 'bbbbb'
+    with mapdl.non_interactive:
+        mapdl.cmatrix(1, 'cond', 3, 0, cap_name)
+
+    # we have to manually get the response here.  This is ok because
+    # user is not expected to do this.
+    output = mapdl._download_as_raw('cmatrix.out').decode()
+    assert 'Capacitance matricies are stored in file' in output
+    assert cap_name in output
 
 
 # these tests take some time to run, and we might consider moving
