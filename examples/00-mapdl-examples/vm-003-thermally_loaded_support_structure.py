@@ -41,7 +41,7 @@ Analytical Equations:
  - The compressive force :math:`X` is given by the following equation
  - :math:`X = \frac{\Delta T (\alpha_c - \alpha_s) (A_s - E_s) }{1 + \frac{1 E_s A_s}{2 E_c A_c}} + \frac{Q}{1 + \frac{2 E_c A_c}{E_s A_s}}`
 
- Notes:
+Notes:
  - Length of wires (20 in.), spacing between wires (10 in.), and the reference
    temperature (70°F) are arbitrarily selected. The rigid lower beam is modeled
    by nodal coupling.
@@ -91,7 +91,7 @@ mapdl.fill()
 mapdl.n(4, -10, -20)
 mapdl.n(6, 10, -20)
 mapdl.fill()
-mapdl.nplot(nnum=True)
+mapdl.nplot(nnum=True, cpos='xy')
 
 ###############################################################################
 # Define Geometry: Elements
@@ -104,7 +104,7 @@ mapdl.e(1, 4)
 mapdl.e(3, 6)
 mapdl.mat(2)
 mapdl.e(2, 5)
-mapdl.eplot()
+mapdl.eplot(show_node_numbering=True, cpos='xy')
 
 ###############################################################################
 # Define Boundary Conditions
@@ -168,10 +168,10 @@ copper_ratio = stress_copper/copper_target
 message = f"""
 ------------------- VM3 RESULTS COMPARISON ---------------------
 
-                 |   TARGET   |   Mechanical APDL   |   RATIO
+             |   TARGET   |   Mechanical APDL   |   RATIO
 ----------------------------------------------------------------
-    Steel            {steel_target}        {stress_steel}           {steel_ratio}
-    Copper           {copper_target}        {stress_copper}           {copper_ratio}
+    Steel        {steel_target}        {stress_steel}            {steel_ratio:.6f}
+    Copper       {copper_target}        {stress_copper}            {copper_ratio:.6f}
 
 ----------------------------------------------------------------
 
