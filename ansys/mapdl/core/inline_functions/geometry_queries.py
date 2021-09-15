@@ -32,7 +32,6 @@ class _AngleQueries(_ParameterParsing):
         the fact.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from math import pi
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -40,8 +39,7 @@ class _AngleQueries(_ParameterParsing):
         >>> n1 = mapdl.n(1, 0, 0, 0)
         >>> n2 = mapdl.n(2, 1, 0, 0)
         >>> n3 = mapdl.n(3, 0, 1, 0)
-        >>> q = Query(mapdl)
-        >>> angle = q.anglen(n1, n2, n3)
+        >>> angle = mapdl.queries.anglen(n1, n2, n3)
         >>> angle*180./pi
         90.00000001175157
         """
@@ -76,7 +74,6 @@ class _AngleQueries(_ParameterParsing):
         to degrees after the fact.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from math import pi
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -84,8 +81,7 @@ class _AngleQueries(_ParameterParsing):
         >>> k1 = mapdl.k(1, 0, 0, 0)
         >>> k2 = mapdl.k(2, 1, 0, 0)
         >>> k3 = mapdl.k(3, 1, 1, 0)
-        >>> q = Query(mapdl)
-        >>> angle = q.anglek(k1, k2, k3)
+        >>> angle = mapdl.queries.anglek(k1, k2, k3)
         >>> angle*180./pi
         45.00000000014621
         """
@@ -118,14 +114,12 @@ class _AreaQueries(_ParameterParsing):
         Here we consrtruct a simple right-angled triangle and query the area.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> n1 = mapdl.n(1, 0, 0, 0)
         >>> n2 = mapdl.n(2, 1, 0, 0)
         >>> n3 = mapdl.n(3, 0, 1, 0)
-        >>> q = Query(mapdl)
-        >>> area = q.areand(n1, n2, n3)
+        >>> area = mapdl.queries.areand(n1, n2, n3)
         0.5
         """
         response = self._mapdl.run(f'_=AREAND({n1},{n2},{n3})')
