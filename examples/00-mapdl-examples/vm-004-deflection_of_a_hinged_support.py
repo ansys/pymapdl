@@ -180,7 +180,7 @@ for i, nnum in enumerate(mapdl.mesh.nnum):
 # - Get the stress on this element
 # - Compare
 
-q = mapdl.query()
+q = mapdl.queries
 mid_node = q.node(node3_x * 0.5, -node2_y, 0)
 displacement = mapdl.get_value('NODE', mid_node, 'U', 'Y')
 left_element = q.enearn(mid_node)
