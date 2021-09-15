@@ -202,6 +202,46 @@ def get_license_server_details():
     return host, int(port)
 
 
+## New approach
+import os
+import time 
+import re 
+
+# from ansys.mapdl.core.launcher import _version_from_path
+
+def get_licdebug_path():
+    if os.name == 'nt': 
+        folder = os.getenv('TEMP')
+    elif os.name == 'posix':
+        folder = os.getenv('HOME')
+    else:
+        raise OSError
+    
+    return os.path.join(folder, '.ansys')
 
 
- 
+def get_licdebug_name():
+    return 'licdebug.FEAT_ANSYS.212.out'  #TODO: Make this more flexible and for more ansys versions.
+
+
+def get_licdebug_msg():
+    licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
+    f = open(licdebug_file)
+    f.seek(0,2)  # Going to the end of the file. 
+
+    buffer = []
+    while True:
+        line = f.readline()
+        if line:
+            if buffer == []: # not empty
+                buffer.append(line)
+
+            else:
+                if line.startswith('\t\t'):
+                    buffer.append(line)
+                else:
+                    msg = ''.join(buffer)
+                    buffer = [line]  # Flushing buffer
+                    yield  msg 
+        else:
+            time.sleep(0.01)
