@@ -1002,11 +1002,69 @@ def check_mode(mode, version):
     return mode
 
 
+def get_lmutil_path_windows():
+    ansyslic_dir = os.getenv('ANSYSLIC_DIR')
+    return os.path.join(ansyslic_dir, 'winx64')
+
+
+def get_lmutil_path_linux():
+    ansyslic_dir = os.getenv('ANSYSLIC_DIR')
+    return os.path.join(ansyslic_dir, 'winx64') #TODO: Check if this folder is right.
+
+
+def get_lmutil_path():
+    if os.name == 'nt': # Windows
+        lmutil_path = get_lmutil_path_windows()
+
+    elif os.name == 'posix':  # Linux
+        lmutil_path = get_lmutil_path_linux() 
+    
+    return os.path.join(lmutil_path,'lmutil.exe')
+
 def lmutils_is_installed():
-    return False 
+    if os.path.exists(get_lmutil_path()):
+        return True
+    else: 
+        return False 
 
 
-def run_lmutils():
+def run_lmutil(ip, port):
+    lmutil_path = get_lmutil_path()
+    command = f"{lmutil_path} lmstat -a -i -c {port}@{ip}"
+    # subprocess.check_output(command, shell=os.name != 'nt')
+    process =  subprocess.Popen(command,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+    return process.stdout.read().decode()
+
+
+def check_license_server_lmutil(ip, port):
+    """
+    Check the license server status by running 'lmutil'. 
+
+    However this method is:
+    - Not recommended because of the load generated in the server side.
+    - Not reliable because the difficulty to catch the port in the license server
+    """
+
+    warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
+    
+    output = run_lmutil(ip, port)
+    selected_lines = re.findall('(?<=: license server )(.*)(?=\n)', output)
+    servers_up = ['UP' in each for each in selected_lines]
+    down_error_msg = 'Error getting status: License server machine is down or not responding.'
+    
+    if len(servers_up)==0 or down_error_msg in output:
+        print("License check failed.")
+        return False 
+    elif all(servers_up):
+        print("All servers are UP")
+    elif any(servers_up):
+        print("Some servers are down")
+    else:
+        print("All servers are down")
+        return False 
+    
     return True 
 
 
@@ -1042,7 +1100,7 @@ def ping_license_server(ip, port):
     
     if lmutils_is_installed():  # Not implemented.
         # Run lmutils
-        return run_lmutils()
+        return check_license_server_lmutil(ip, port)
 
     else: #Using python
         return ping_license_server_python(ip, port)
@@ -1060,12 +1118,34 @@ def check_license_server(ip=None, port=None):
 
     return ping_license_server(host, port)
 
-def get_license_server_details_for_docker():
-    ansyslmd_env = os.getenv('ANSYSLMD_LICENSE_FILE')
+
+def get_license_server_details_for_docker_as_IP(ansyslmd_env):
     port = ansyslmd_env.split('@')[0]
     host = ansyslmd_env.split('@')[1]
-    return host, port 
+    return host, port  
 
+
+def get_license_server_details_for_docker_as_file(ansyslmd_env):
+    pass
+
+
+def check_valid_hostname():
+    pass 
+
+
+def check_is_license_file():
+    pass 
+
+
+
+def get_license_server_details_for_docker():
+    ansyslmd_env = os.getenv('ANSYSLMD_LICENSE_FILE')
+
+    if check_valid_ip(ansyslmd_env) or check_valid_hostname(ansyslmd_env):
+        return get_license_server_details_for_docker_as_IP(ansyslmd_env)
+    elif check_is_license_file(ansyslmd_env):
+        return 
+    
 
 def get_license_server_details_locally_for_linux():
     #trying windows approach?
