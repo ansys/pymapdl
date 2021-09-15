@@ -1,5 +1,7 @@
+from .core import _ParameterParsing
 
-class _EntityNearestEntityQueries:
+
+class _EntityNearestEntityQueries(_ParameterParsing):
     _mapdl = None
 
     def nnear(self, n: int) -> int:
@@ -29,7 +31,7 @@ class _EntityNearestEntityQueries:
         >>> mapdl.block(0, 10, 0, 10, 0, 10)
         >>> mapdl.esize(3)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> node_number = q.node(5., 5., 5.)
         >>> nearest_node = q.nnear(node_number)
         >>> node_number, nearest_node
@@ -62,7 +64,7 @@ class _EntityNearestEntityQueries:
         >>> mapdl.prep7()
         >>> k1 = mapdl.k(1, 0, 0, 0)
         >>> k2 = mapdl.k(2, 1, 1, 1)
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> q.knear(k1)
         1
 
@@ -102,7 +104,7 @@ class _EntityNearestEntityQueries:
         >>> mapdl.block(0, 10, 0, 10, 0, 10)
         >>> mapdl.esize(3)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> node_number = q.node(5., 5., 5.)
         >>> nearest_element = q.enearn(node_number)
         >>> node_number, nearest_element

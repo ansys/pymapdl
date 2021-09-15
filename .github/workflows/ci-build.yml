@@ -9,7 +9,7 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
-      MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.0'
+      MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.1'
       PYMAPDL_PORT: 32771  # default won't work on azure
       PYMAPDL_START_INSTANCE: FALSE
       PYANSYS_OFF_SCREEN: True

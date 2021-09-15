@@ -29,9 +29,9 @@ jobs:
   strategy:
     matrix:
       MAPDL2021R1:
-        MAPDL.VERSION: 'v21.1.0'
+        MAPDL.VERSION: 'v21.1.1'
       MAPDL2021R2:
-        MAPDL.VERSION: 'v21.2.0'
+        MAPDL.VERSION: 'v21.2.1'
   steps:
     - task: UsePythonVersion@0
       inputs:

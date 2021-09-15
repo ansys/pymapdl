@@ -11,26 +11,30 @@ from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.launcher import (get_start_instance,
                                        MAPDL_DEFAULT_PORT,
                                        _get_available_base_ansys)
-from ansys.mapdl.core.inline_functions import Query
-from common import get_details_of_nodes, get_details_of_elements, \
-    Node, Element
+from common import (get_details_of_nodes, get_details_of_elements,
+                    Node, Element)
 
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 
 
-# check for a valid MAPDL install with gRPC
-# NOTE: checks in this order
-valid_rver = ['212', '211', '202', '201', '195', '194', '193', '192', '191']
+# Check if MAPDL is installed
+# NOTE: checks in this order to get the newest installed version
+valid_rver = ['221', '212', '211', '202', '201', '195', '194', '193', '192', '191']
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
         break
 
+# Cache if gRPC MAPDL is installed.
+#
 # minimum version on linux.  Windows is v202, but using v211 for consistency
-HAS_GRPC = int(rver) >= 211
+# Override this if running on CI/CD and PYMAPDL_PORT has been specified
+ON_CI = 'PYMAPDL_START_INSTANCE' in os.environ and 'PYMAPDL_PORT' in os.environ
+HAS_GRPC = int(rver) >= 211 or ON_CI
+
 
 # determine if we can launch an instance of MAPDL locally
 local = [False]
@@ -256,7 +260,7 @@ def cube_solve(cleared, mapdl):
 @pytest.fixture
 def box_geometry(mapdl, cleared):
     areas, keypoints = create_geometry(mapdl)
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, keypoints, areas, get_details_of_nodes(mapdl)
 
 
@@ -266,13 +270,13 @@ def line_geometry(mapdl, cleared):
     k0 = mapdl.k(1, 0, 0, 0)
     k1 = mapdl.k(2, 1, 2, 2)
     l0 = mapdl.l(k0, k1)
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, [k0, k1], l0
 
 
 @pytest.fixture
 def query(mapdl, cleared):
-    return Query(mapdl)
+    return mapdl.queries
 
 
 @pytest.fixture
@@ -299,7 +303,7 @@ def solved_box(mapdl, cleared):
     mapdl.antype('STATIC')
     mapdl.solve()
     mapdl.finish()
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, get_details_of_nodes(mapdl)
 
 
@@ -320,7 +324,7 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.et(1, "SOLID98")
     mapdl.esize(0.5)
     mapdl.vmesh('ALL')
-    return Query(mapdl)
+    return mapdl.queries
 
 
 @pytest.fixture
@@ -344,7 +348,7 @@ def twisted_sheet(mapdl, cleared):
     mapdl.allsel("all")
     mapdl.solve()
     mapdl.finish()
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, get_details_of_nodes(mapdl)
 
 

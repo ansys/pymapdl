@@ -47,7 +47,8 @@ INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
                   '*END': 'Create a function within python or run as non_interactive',
                   '/EOF': 'Unsupported command.  Use ``exit`` to stop the server.',
                   '*ASK': 'Unsupported command.  Use python ``input`` instead.',
-                  '*IF': 'Use a python ``if`` or run as non_interactive'}
+                  '*IF': 'Use a python ``if`` or run as non_interactive',
+                  'CMATRIX': 'Use as non_interactive'}
 
 PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
@@ -146,7 +147,8 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
-    def query(self):
+    @property
+    def queries(self):
         """Get instance of Query class containing inline functions of APDL.
 
         Most of the results of these methods are shortcuts for specific
@@ -208,7 +210,7 @@ class _MapdlCore(Commands):
         >>> mapdl.block(0, 10, 0, 20, 0, 30)
         >>> mapdl.esize(2)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> q.nx(1), q.ny(1), q.nz(1)
         0.0 20.0 0.0
 

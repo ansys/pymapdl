@@ -37,6 +37,8 @@ logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
 
+# Default 256 MB message length
+MAX_MESSAGE_LENGTH = int(os.environ.get('PYMAPDL_MAX_MESSAGE_LENGTH', 256*1024**2))
 
 
 def chunk_raw(raw, save_as):
@@ -304,10 +306,17 @@ class MapdlGrpc(_MapdlCore):
             Time in seconds to wait until the connection has been established
         """
         self._server = {'ip': self._ip, 'port': port}
+
+        # open the channel
         self._channel_str = '%s:%d' % (self._ip, port)
         self._log.debug('Opening insecure channel at %s', self._channel_str)
+        self._channel = grpc.insecure_channel(
+            self._channel_str,
+            options=[
+                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+            ]
+        )
 
-        self._channel = grpc.insecure_channel(self._channel_str)
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
 
@@ -1627,3 +1636,19 @@ class MapdlGrpc(_MapdlCore):
             out = super().igesin(basename, **kwargs)
 
         return out
+
+    @wraps(_MapdlCore.cmatrix)
+    def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
+                capname="", **kwargs):
+        """Run CMATRIX in non-interactive mode and return the response from file. """
+
+        # The CMATRIX command needs to run in non-interactive mode
+        if not self._store_commands:
+            with self.non_interactive:
+                super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
+            self._response = self._download_as_raw('cmatrix.out').decode()
+            return self._response
+
+        # otherwise, simply run cmatrix as we're already in
+        # non-interactive and there's no output to return
+        super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)

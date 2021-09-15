@@ -73,6 +73,7 @@ examples/.local
 # docker
 docker/mapdl/v211
 docker/mapdl/v212
+docker/mapdl/_old
 
 # temp testing
 tmp.out

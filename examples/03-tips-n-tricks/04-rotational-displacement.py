@@ -84,12 +84,13 @@ result.plot_principal_nodal_stress(0,
 ###############################################################################
 # Extracting Rotational Displacements
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# - Create a :class:`ansys.mapdl.core.inline_functions.Query` instance
+# - Get a :class:`ansys.mapdl.core.inline_functions.Query` instance from the
+#   ``queries`` property
 # - Locate the nodes at the four corners of the square
 # - Extract all 3 rotational displacement components for each one
 # - Print them all
 
-q = Query(mapdl)
+q = mapdl.queries
 
 node1 = q.node(0, 0, 0)
 node2 = q.node(0, 1, 0)

@@ -100,7 +100,7 @@ def test_allow_ignore(mapdl_console):
     mapdl_console.allow_ignore = True
     assert mapdl_console.allow_ignore is True
     mapdl_console.k()
-    assert mapdl_console.geometry.n_keypoint is 0
+    assert mapdl_console.geometry.n_keypoint == 0
 
 
 def test_chaining(mapdl_console, cleared):
