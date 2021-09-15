@@ -1,10 +1,11 @@
 import pytest
 from collections import namedtuple
-from math import pi, isclose
+from math import pi, isclose, sqrt
 from itertools import combinations
 
 PointTrioAngle = namedtuple('PointTrioAngle', ['point1', 'point2', 'vertex', 'angle'])
 Triangle = namedtuple('Triangle', ['point1', 'point2', 'point3', 'area'])
+Line = namedtuple('Line', ['point1', 'point2', 'distance'])
 
 angles = [PointTrioAngle((1, 0, 0), (0, 1, 0), (0, 0, 0), pi*.5),
           PointTrioAngle((1, 0, 0), (0, 0, 1), (0, 0, 0), pi*.5),
@@ -23,6 +24,11 @@ triangles = [Triangle((1, 0, 0), (0, 0, 0), (0, 1, 0), 0.5),
              Triangle((1, 0, 0), (-1, 0, 0), (0, 1, 0), 1.0),
              Triangle((1, 0, 0), (0, 0, 0), (0, 1, 0), 0.5),
              Triangle((1, 0, 0), (0, 1, 0), (0, 0, 1), 0.8660254038)]
+
+lines = [Line((0, 0, 0), (1, 0, 0), 1.),
+         Line((0, 0, 0), (1, 1, 0), sqrt(2.)),
+         Line((0, 0, -2), (0, 0, 0), 2.),
+         Line((0, 0, 0.), (0, 0, 0), 0.)]
 
 
 class TestAngleQueries:
@@ -76,3 +82,32 @@ class TestTriangleAreaQueries:
         k3 = mapdl.k(3, *triangle.point3)
         area = mapdl.queries.areakp(k1, k2, k3)
         assert isclose(area, triangle.area)
+
+
+class TestDistanceQueries:
+
+    def test_distkp_order_invariance(self, mapdl, cleared):
+        line = Line((0, 0, 0), (1, 0, 0), 1.)
+        k1 = mapdl.k(1, *line.point1)
+        k2 = mapdl.k(2, *line.point2)
+        assert mapdl.queries.distkp(k1, k2) == mapdl.queries.distkp(k2, k1)
+
+    def test_distnd_order_invariance(self, mapdl, cleared):
+        line = Line((0, 0, 0), (1, 0, 0), 1.)
+        n1 = mapdl.n(1, *line.point1)
+        n2 = mapdl.n(2, *line.point2)
+        assert mapdl.queries.distnd(n1, n2) == mapdl.queries.distnd(n2, n1)
+
+    @pytest.mark.parametrize('line', lines)
+    def test_distnd(self, mapdl, cleared, line: Line):
+        n1 = mapdl.n(1, *line.point1)
+        n2 = mapdl.n(2, *line.point2)
+        distance = mapdl.queries.distnd(n1, n2)
+        assert isclose(distance, line.distance)
+
+    @pytest.mark.parametrize('line', lines)
+    def test_distkp(self, mapdl, cleared, line: Line):
+        k1 = mapdl.k(1, *line.point1)
+        k2 = mapdl.k(2, *line.point2)
+        distance = mapdl.queries.distkp(k1, k2)
+        assert isclose(distance, line.distance)

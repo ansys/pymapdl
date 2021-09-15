@@ -157,3 +157,71 @@ class _AreaQueries(_ParameterParsing):
         """
         response = self._mapdl.run(f'_=AREAKP({k1},{k2},{k3})')
         return self._parse_parameter_float_response(response)
+
+
+class _DistanceQueries(_ParameterParsing):
+    _mapdl = None
+
+    def distnd(self, n1, n2) -> float:
+        """Distance between nodes ``n1`` and ``n2``.
+
+        Parameters
+        ----------
+        n1 : int
+            First node
+        n2 : int
+            Second node
+
+        Returns
+        -------
+        float
+            Distance between the nodes
+
+        Examples
+        --------
+        Here we consrtruct two nodes and query their distance apart.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> n1 = mapdl.n(1, 1, 0, 0)
+        >>> n2 = mapdl.n(2, 0, 0, 0)
+        >>> mapdl.queries.distnd(n1, n2)
+        1.0
+        """
+        response = self._mapdl.run(f'_=DISTND({n1},{n2})')
+        return self._parse_parameter_float_response(response)
+
+    def distkp(self, k1, k2) -> float:
+        """Distance between keypoints ``k1`` and ``k2``.
+
+        Parameters
+        ----------
+        k1 : int
+            First keypoint
+        k2 : int
+            Second keypoint
+
+        Returns
+        -------
+        float
+            Distance between the keypoints
+
+        Examples
+        --------
+        Here we consrtruct two keypoints and query their distance apart.
+        It should be equal to the squareroot of 2.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> from math import sqrt
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.prep7()
+        >>> n1 = mapdl.n(1, 1, 0, 0)
+        >>> n2 = mapdl.n(2, 0, 1, 0)
+        >>> mapdl.queries.distnd(n1, n2)
+        1.414213562
+        >>> sqrt(2)
+        1.4142135623730951
+        """
+        response = self._mapdl.run(f'_=DISTKP({k1},{k2})')
+        return self._parse_parameter_float_response(response)

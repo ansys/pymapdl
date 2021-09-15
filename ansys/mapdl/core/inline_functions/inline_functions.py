@@ -7,7 +7,7 @@ from .line_queries import _LineFractionCoordinateQueries, \
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
 from .nearest_queries import _EntityNearestEntityQueries
 from .connectivity_queries import _ConnectivityQueries
-from .geometry_queries import _AngleQueries, _AreaQueries
+from .geometry_queries import _AngleQueries, _AreaQueries, _DistanceQueries
 
 
 class Query(_ComponentQueries,
@@ -22,7 +22,8 @@ class Query(_ComponentQueries,
             _EntityNearestEntityQueries,
             _ConnectivityQueries,
             _AngleQueries,
-            _AreaQueries):
+            _AreaQueries,
+            _DistanceQueries):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
