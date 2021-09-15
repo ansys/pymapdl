@@ -136,13 +136,13 @@ mapdl.solve()
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
-# - Get a query instance
+# - Access the queries functions
 # - Find a steel node and a copper node
 # - Then use these to get the steel and copper elements
 # - Finally we extract the stress experienced by each element
 
 mapdl.post1()
-q = mapdl.query()
+q = mapdl.queries
 steel_n = q.node(0, 0, 0)
 copper_n = q.node(10, 0, 0)
 steel_e = q.enearn(steel_n)

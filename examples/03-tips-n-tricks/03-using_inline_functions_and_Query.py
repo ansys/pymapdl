@@ -9,9 +9,10 @@ on the ``mapdl.inline_functions.Query`` object. In this example we set
 up a simple simulation and use ``Query`` to demonstrate some of its
 functionality.
 
-First, create an instance of
+First, get an instance of
 :class:`ansys.mapdl.core.inline_functions.Query` below, using the
-``mapdl`` instance as a required argument.
+``mapdl`` property ``queries``.
+
 """
 
 from ansys.mapdl.core import launch_mapdl
@@ -22,7 +23,7 @@ mapdl = launch_mapdl()
 # clear at the start and enter the preprocessing routine
 mapdl.clear()
 mapdl.prep7()
-q = Query(mapdl)
+q = mapdl.queries
 
 ###############################################################################
 # Setup Mesh

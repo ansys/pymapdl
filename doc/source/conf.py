@@ -5,6 +5,8 @@ import pyvista
 import numpy as np
 from sphinx_gallery.sorting import FileNameSortKey
 
+import sys
+sys.path.append('../..')
 from ansys.mapdl.core import __version__
 
 
