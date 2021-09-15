@@ -255,8 +255,15 @@ class PostProcessing():
             ``'X'``, ``'Y'``, ``'Z'``, or ``'NORM'``.  Defaults to
             ``'NORM'``.
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -264,18 +271,18 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the normalized nodal displacement for the second result
+        Plot the normalized nodal displacement for the second result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
         >>> mapdl.post_processing.plot_nodal_displacement('NORM',
-                                                          smooth_shading=True)
+        ...                                               smooth_shading=True)
 
         Plot the x displacement without smooth shading with individual
-        node numbering
+        node numbering.
 
         >>> mapdl.post_processing.plot_nodal_displacement('X',
-                                                          show_node_numbering=True)
+        ...                                               show_node_numbering=True)
         """
         if isinstance(component, str):
             if component.upper() == 'ALL':
@@ -355,15 +362,16 @@ class PostProcessing():
         """Nodal X, Y, or Z structural rotation
 
         Equilvanent MAPDL commands:
-        ``PRNSOL, ROT, X``
-        ``PRNSOL, ROT, Y``
-        ``PRNSOL, ROT, Z``
+
+        * ``PRNSOL, ROT, X``
+        * ``PRNSOL, ROT, Y``
+        * ``PRNSOL, ROT, Z``
 
         Parameters
         ----------
         component : str, optional
             Structural rotational component to retrieve.  Must be
-            ``'X'``, ``'Y'``, ``'Z'``, ``'ALL'``.  Defaults to ``'ALL'``
+            ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to ``'ALL'``.
 
         Examples
         --------
@@ -411,8 +419,15 @@ class PostProcessing():
             Structural rotation component to retrieve.  Must be
             ``'X'``, ``'Y'``, or ``'Z'``.
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -421,7 +436,7 @@ class PostProcessing():
         Examples
         --------
         Plot the x rotation without smooth shading with individual
-        node numbering
+        node numbering.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
@@ -449,11 +464,6 @@ class PostProcessing():
         Equilvanent MAPDL command:
         ``PRNSOL, TEMP``
 
-        Examples
-        --------
-        >>> mapdl.post_processing.temperature
-        array([0., 0., 0., ..., 0., 0., 0.])
-
         Notes
         -----
         The nodal results are averaged across all selected elements.
@@ -463,14 +473,29 @@ class PostProcessing():
         Elements that are not selected will not contribute to the
         averaged nodal values, and if a node's attached elements are
         all unselected, the element will report a zero value.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.temperature
+        array([0., 0., 0., ..., 0., 0., 0.])
+
         """
         return self._ndof_rst('TEMP')
 
     def plot_nodal_temperature(self, show_node_numbering=False, **kwargs):
         """Plot nodal temperature of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -487,9 +512,10 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_temperature(off_screen=True,
-                                                         savefig='temp_1_2.png')
+        ...                                              savefig='temp_1_2.png')
 
-        Subselect a single result type and plot those stress results
+        Subselect a single result type and plot those stress results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
         """
@@ -505,11 +531,6 @@ class PostProcessing():
         Equilvanent MAPDL command:
         ``PRNSOL, PRES``
 
-        Examples
-        --------
-        >>> mapdl.post_processing.pressure
-        array([0., 0., 0., ..., 0., 0., 0.])
-
         Notes
         -----
         The nodal results are averaged across all selected elements.
@@ -519,14 +540,29 @@ class PostProcessing():
         Elements that are not selected will not contribute to the
         averaged nodal values, and if a node's attached elements are
         all unselected, the element will report a zero value.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.pressure
+        array([0., 0., 0., ..., 0., 0., 0.])
+
         """
         return self._ndof_rst('PRES')
 
     def plot_nodal_pressure(self, show_node_numbering=False, **kwargs):
         """Plot nodal pressure of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -534,7 +570,7 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the nodal pressure for the second result
+        Plot the nodal pressure for the second result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
@@ -543,9 +579,10 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_pressure(off_screen=True,
-                                                   savefig='temp_1_2.png')
+        ...                                           savefig='temp_1_2.png')
 
-        Subselect a single result type and plot those stress results
+        Subselect a single result type and plot those stress results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_pressure(smooth_shading=True)
         """
@@ -559,12 +596,8 @@ class PostProcessing():
         """The nodal voltage of the current result.
 
         Equilvanent MAPDL command:
-        ``PRNSOL, PRES``
 
-        Examples
-        --------
-        >>> mapdl.post_processing.voltage
-        array([0., 0., 0., ..., 0., 0., 0.])
+        * ``PRNSOL, PRES``
 
         Notes
         -----
@@ -575,14 +608,28 @@ class PostProcessing():
         Elements that are not selected will not contribute to the
         averaged nodal values, and if a node's attached elements are
         all unselected, the element will report a zero value.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.voltage
+        array([0., 0., 0., ..., 0., 0., 0.])
         """
         return self._ndof_rst('VOLT')
 
     def plot_nodal_voltage(self, show_node_numbering=False, **kwargs):
         """Plot nodal voltage of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -590,18 +637,19 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the nodal voltage for the second result
+        Plot the nodal voltage for the second result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
         >>> mapdl.post_processing.plot_nodal_voltage()
 
-        Plot off_screen and save a screenshot
+        Plot off screen and save a screenshot.
 
         >>> mapdl.post_processing.plot_nodal_voltage(off_screen=True,
-                                                   savefig='temp_1_2.png')
+        ...                                          savefig='temp_1_2.png')
 
-        Subselect a single result type and plot those stress results
+        Subselect a single result type and plot those stress results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_voltage(smooth_shading=True)
         """
@@ -611,11 +659,12 @@ class PostProcessing():
                                         **kwargs)
 
     def nodal_component_stress(self, component) -> np.ndarray:
-        """Nodal component stress.
+        r"""Nodal component stress.
 
         Equilvanent MAPDL commands:
-        \*VGET, PARM, NODE, , S, X
-        PRNSOL, S, COMP
+
+        * ``VGET, PARM, NODE, , S, X``
+        * ``PRNSOL, S, COMP``
 
         Parameters
         ----------
@@ -623,6 +672,12 @@ class PostProcessing():
             Nodal component stress component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or
             ``'XZ'``.
+
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the ``selected_nodes``
+        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -639,11 +694,6 @@ class PostProcessing():
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self._ndof_rst('S', component)
@@ -659,8 +709,15 @@ class PostProcessing():
             ``'X'``, ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or
             ``'XZ'``.
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -683,8 +740,9 @@ class PostProcessing():
         """Nodal principal stress.
 
         Equilvanent MAPDL commands:
-        \*VGET, PARM, NODE, , S, 1
-        PRNSOL, S, PRIN
+
+        * ``*VGET, PARM, NODE, , S, 1``
+        * ``PRNSOL, S, PRIN``
 
         Parameters
         ----------
@@ -692,9 +750,15 @@ class PostProcessing():
             Nodal component stress component to retrieve.  Must be
             ``'1'``, ``'2'``, or ``'3'``
 
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the ``selected_nodes``
+        mask to get the currently selected nodes.
+
         Examples
         --------
-        Nodal stress in the S1 direction for the first result
+        Nodal stress in the S1 direction for the first result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 1)
@@ -702,16 +766,11 @@ class PostProcessing():
             array([0.60024621, 0.61625265, 0.65081825, ...,
                    0.        , 0.        , 0.        ])
 
-        Corresponding nodes
+        Corresponding nodes.
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
         """
         if isinstance(component, int):
             component = str(component)
@@ -728,8 +787,15 @@ class PostProcessing():
             Nodal component stress component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -780,8 +846,17 @@ class PostProcessing():
     def plot_nodal_stress_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the nodal stress intensity of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -800,7 +875,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_stress_intensity(off_screen=True,
                                                               savefig='seqv_00.png')
 
-        Subselect a single result type and plot those stress results
+        Subselect a single result type and plot those stress results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_stress_intensity(smooth_shading=True)
 
@@ -848,8 +924,17 @@ class PostProcessing():
     def plot_nodal_eqv_stress(self, show_node_numbering=False, **kwargs):
         """Plot nodal equivalent stress of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -868,7 +953,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_eqv_stress(off_screen=True,
                                                         savefig='seqv_00.png')
 
-        Subselect a single result type and plot those stress results
+        Subselect a single result type and plot those stress results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True)
 
@@ -931,10 +1017,15 @@ class PostProcessing():
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
-        
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1006,8 +1097,15 @@ class PostProcessing():
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1015,7 +1113,7 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the principal nodal strain in the S1 direction for the first result
+        Plot the principal nodal strain in the S1 direction for the first result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 1)
@@ -1061,11 +1159,18 @@ class PostProcessing():
         """Plot the total nodal strain intensity of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
 
         Examples
         --------
@@ -1077,10 +1182,13 @@ class PostProcessing():
 
         Plot off_screen and save a screenshot
 
-        >>> mapdl.post_processing.plot_nodal_total_strain_intensity(off_screen=True,
-                                                                    savefig='seqv_00.png')
+        >>> mapdl.post_processing.plot_nodal_total_strain_intensity(
+        ...     off_screen=True,
+        ...     savefig='seqv_00.png'
+        ...     )
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_total_strain_intensity()
 
@@ -1129,8 +1237,17 @@ class PostProcessing():
     def plot_nodal_total_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal equivalent strain of the current result.
 
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1149,7 +1266,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(off_screen=True,
                                                               savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
 
@@ -1159,8 +1277,6 @@ class PostProcessing():
         return self._plot_point_scalars(scalars,
                                         show_node_numbering=show_node_numbering,
                                         **kwargs)
-###############################################################################
-
 
     def nodal_elastic_component_strain(self, component) -> np.ndarray:
         """Elastic nodal component strain
@@ -1206,12 +1322,17 @@ class PostProcessing():
 
         Parameters
         ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
         component : str
             Nodal elastic component to plot.  Must be ``'X'``,
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1219,7 +1340,7 @@ class PostProcessing():
 
         Examples
         --------
-        Plot the nodal elastic principal strain "1" for the second result set
+        Plot the nodal elastic principal strain "1" for the second result set.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
@@ -1234,13 +1355,25 @@ class PostProcessing():
         """Nodal elastic principal elastic strain.
 
         Equivalent MAPDL commands:
-        \*VGET, PARM, NODE, , EPEL, 1
+
+        - ``*VGET, PARM, NODE, , EPEL, 1``
 
         Parameters
         ----------
         component : str, optional
             Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array of nodal elastic principal elastic strain.
+
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the ``selected_nodes``
+        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -1257,11 +1390,6 @@ class PostProcessing():
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
         """
         if isinstance(component, int):
             component = str(component)
@@ -1278,9 +1406,14 @@ class PostProcessing():
         component : str
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1304,11 +1437,17 @@ class PostProcessing():
         """The elastic nodal strain intensity of the current result.
 
         Equivalent MAPDL command:
-        ``PRNSOL, EPEL, PRIN``
+
+        * ``PRNSOL, EPEL, PRIN``
+
+        Returns
+        -------
+        numpy.ndarray
+            The elastic nodal strain intensity of the current result.
 
         Examples
         --------
-        Elastic strain intensity for result 2
+        Return the elastic strain intensity for result 2.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
@@ -1334,7 +1473,7 @@ class PostProcessing():
         """Plot the elastic nodal strain intensity of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1353,7 +1492,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity(off_screen=True,
                                                                     savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity()
 
@@ -1403,7 +1543,7 @@ class PostProcessing():
         """Plot the elastic nodal equivalent strain of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1422,7 +1562,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(off_screen=True,
                                                               savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
 
@@ -1486,7 +1627,7 @@ class PostProcessing():
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1555,7 +1696,7 @@ class PostProcessing():
             ``'1'``, ``'2'``, or ``'3'``
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1609,7 +1750,7 @@ class PostProcessing():
         """Plot the plastic nodal strain intensity of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1628,7 +1769,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity(off_screen=True,
                                                                     savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity()
 
@@ -1678,7 +1820,7 @@ class PostProcessing():
         """Plot the plastic nodal equivalent strain of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1697,7 +1839,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(off_screen=True,
                                                               savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
 
@@ -1761,7 +1904,7 @@ class PostProcessing():
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1830,7 +1973,7 @@ class PostProcessing():
             ``'1'``, ``'2'``, or ``'3'``
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1884,7 +2027,7 @@ class PostProcessing():
         """Plot the thermal nodal strain intensity of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1903,7 +2046,8 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity(off_screen=True,
                                                                     savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity()
 
@@ -1953,7 +2097,7 @@ class PostProcessing():
         """Plot the thermal nodal equivalent strain of the current result.
 
         Returns
-        --------
+        -------
         cpos : list
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
@@ -1970,9 +2114,10 @@ class PostProcessing():
         Plot off_screen and save a screenshot
 
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(off_screen=True,
-                                                              savefig='seqv_00.png')
+        ...                                                     savefig='seqv_00.png')
 
-        Subselect a single result type and plot those strain results
+        Subselect a single result type and plot those strain results.
+
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
 
