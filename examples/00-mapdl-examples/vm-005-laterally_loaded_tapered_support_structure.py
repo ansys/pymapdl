@@ -4,16 +4,16 @@ r"""
 Statically Indeterminate Reaction Force Analysis
 ------------------------------------------------
 Problem Description:
- - A cantilever beam of thickness t and length :math:`l`
+ - A cantilever beam of thickness :math:`t` and length :math:`l`
    has a depth which tapers uniformly from :math:`d` at the tip
    to :math:`3d` at the wall. It is loaded by a force :math:`F`
    at the tip, as shown. Find the maximum bending stress at the
    mid-length (:math:`X = l`) and the fixed end of the beam.
 
 Reference:
- - 	S. H. Crandall, N. C. Dahl, An Introduction to the Mechanics
-    of Solids, McGraw-Hill Book Co., Inc., New York, NY, 1959,
-    pg. 342, problem 7.18.
+ - S. H. Crandall, N. C. Dahl, An Introduction to the Mechanics
+   of Solids, McGraw-Hill Book Co., Inc., New York, NY, 1959,
+   pg. 342, problem 7.18.
 
 Analysis Type(s):
  - Static Analysis ``ANTYPE=0``
@@ -40,9 +40,6 @@ Geometric Properties:
 Loading:
  - :math:`F = 4000 lb`
 
-Analytical Equations:
- - ?
-
 Notes:
  - Two different solutions are obtained. The first solution uses
    lower order PLANE182 elements and the second solution uses higher
@@ -52,6 +49,10 @@ Notes:
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm5_setup.png'
+
+###############################################################################
+# Start MAPDL
+# ~~~~~~~~~~~
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -66,11 +67,12 @@ mapdl.prep7()
 ###############################################################################
 # Define Material
 # ~~~~~~~~~~~~~~~
-# Set up the material using PLANE182 for its type a Young's modulus of 30e6,
-# a thickness of 2 and a poisson's ratio of 0.0 to agree with beam theory.
+# Set up the material using PLANE182 with a thickness of 2 (using real
+# constants), and create a material with a Young's modulus of 30e6,
+# and a poisson's ratio of 0.0 to agree with beam theory.
 
 mapdl.antype('STATIC')
-mapdl.et(1, 'PLANE182', 2, '', 3)
+mapdl.et(1, 'PLANE182', kop1=2, kop3=3)
 mapdl.r(1, 2)
 mapdl.mp('EX', 1, 30e6)
 mapdl.mp('NUXY', 1, 0.)
@@ -90,7 +92,7 @@ mapdl.n(14, 75, -9)
 mapdl.fill()
 mapdl.e(2, 1, 8, 9)
 mapdl.egen(6, 1, 1)
-mapdl.eplot(cpos='xy')
+mapdl.eplot(show_node_numbering=True, cpos='xy')
 
 
 ###############################################################################
@@ -128,22 +130,22 @@ def fetch_mid_and_end_stress(m):
     q = m.query()
     m.post1()
     end = q.node(75., 0., 0.)
-    fixed_end_stress = m.get('_', 'NODE', end, 'S', 'X')
+    fixed_end_stress = m.get_value('NODE', end, 'S', 'X')
     mid = q.node(50., 0., 0.)
-    mid_stress = m.get('_', 'NODE', mid, 'S', 'EQV')
+    mid_stress = m.get_value('NODE', mid, 'S', 'EQV')
     return fixed_end_stress, mid_stress
 
 
 fixed_end_stress_182, mid_stress_182 = fetch_mid_and_end_stress(mapdl)
-result = mapdl.result
 
 ###############################################################################
 # Plotting
 # ~~~~~~~~
 # View the equivalent stress, and displacement, of the cantilever with a
-# ``displacement_factor`` of  26 to scale up the deformation to a visible
+# ``displacement_factor`` of 26 to scale up the deformation to a visible
 # amount.
 
+result = mapdl.result
 result.plot_principal_nodal_stress(0,
                                    'SEQV',
                                    show_edges=True,
@@ -159,7 +161,7 @@ result.plot_principal_nodal_stress(0,
 # element type. We additionally remove midside nodes with ``emid``.
 
 mapdl.prep7()
-mapdl.et(1, 'PLANE183', '', '', 3)
+mapdl.et(1, 'PLANE183', kop3=3)
 mapdl.emid()
 mapdl.nsel('R', 'LOC', 'X', 75)
 mapdl.nsel('R', 'LOC', 'Y', -4.5)
@@ -172,7 +174,7 @@ mapdl.solve()
 mapdl.finish()
 
 mapdl.post1()
-# reuse our code from earlier
+# reuse our function from earlier
 fixed_end_stress_183, mid_stress_183 = fetch_mid_and_end_stress(mapdl)
 mapdl.finish()
 
@@ -193,22 +195,20 @@ result.plot_principal_nodal_stress(0,
 # simulations.
 
 
-results_182 = \
-    f"""
-    -----------------  PLANE 182 RESULTS COMPARISON  ----------------
-    |    LABEL    |   TARGET   |   Mechanical APDL   |   RATIO
-       mid stress      8333        {mid_stress_182}           {mid_stress_182 / 8333}
-       end stress      7407        {fixed_end_stress_182}            {fixed_end_stress_182 / 7407}
-    ----------------------------------------------------------------
-    """
+results_182 = f"""
+-----------------  PLANE 182 RESULTS COMPARISON  ----------------
+|    LABEL    |   TARGET   |   Mechanical APDL   |   RATIO
+   mid stress      8333        {mid_stress_182:.2f}               {mid_stress_182 / 8333:.2f}
+   end stress      7407        {fixed_end_stress_182:.2f}               {fixed_end_stress_182 / 7407:.2f}
+----------------------------------------------------------------
+"""
 
-results_183 = \
-    f"""
-    -----------------  PLANE 183 RESULTS COMPARISON  ----------------
-    |    LABEL    |   TARGET   |   Mechanical APDL   |   RATIO
-       mid stress      8333        {mid_stress_183}           {mid_stress_183 / 8333}
-       end stress      7407        {fixed_end_stress_183}           {fixed_end_stress_183 / 7407}
-    ----------------------------------------------------------------
-    """
+results_183 = f"""
+-----------------  PLANE 183 RESULTS COMPARISON  ----------------
+|    LABEL    |   TARGET   |   Mechanical APDL   |   RATIO
+   mid stress      8333        {mid_stress_183:.2f}               {mid_stress_183 / 8333:.2f}
+   end stress      7407        {fixed_end_stress_183:.2f}               {fixed_end_stress_183 / 7407:.2f}
+----------------------------------------------------------------
+"""
 print(results_182)
 print(results_183)
