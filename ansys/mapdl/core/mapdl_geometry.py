@@ -12,14 +12,15 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 - 'U' : Unselect a set from the current set.
 """
 
-FLST_LOOKUP = {'NODE': 1,  # node numbers
-               'ELEM': 2,  # element numbers
-               'KP': 3,  # keypoint numbers
-               'LINE': 4,  # line numbers
-               'AREA': 5,  # area numbers
-               'VOLU': 6,  # volume numbers
-               'TRACE': 7,  # trace points
-               'COORD': 8,  # coordinate locations
+FLST_LOOKUP = {
+	'NODE': 1,  # node numbers
+	'ELEM': 2,  # element numbers
+	'KP': 3,  # keypoint numbers
+	'LINE': 4,  # line numbers
+	'AREA': 5,  # area numbers
+	'VOLU': 6,  # volume numbers
+	'TRACE': 7,  # trace points
+	'COORD': 8,  # coordinate locations
 }
 
 def merge_polydata(items):

@@ -142,7 +142,7 @@ mapdl.post_processing.plot_nodal_displacement(
     cmap='magma',
     line_width=5,
     cpos='xy',
-    scalar_bar_args={'title':'Displacement', 'vertical': False},
+    scalar_bar_args={'title': 'Displacement', 'vertical': False},
 )
 
 ###############################################################################

@@ -262,8 +262,6 @@ print('Stress Concentration: %.2f' % stress_con)
 # # stress concentration for a variety of hole diameters.  For each
 # # batch, MAPDL is reset and the geometry is generated from scratch.
 
-
-
 # ###############################################################################
 # # Run the batch and record the stress concentration
 # k_t_exp = []

@@ -272,5 +272,3 @@ class TestVLNEXT:
     def test_non_existing_volumes(self, query):
         next_ = query.vlnext(999)
         assert next_ == 0
-
-
