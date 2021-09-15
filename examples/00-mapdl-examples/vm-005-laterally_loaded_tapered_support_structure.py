@@ -127,7 +127,7 @@ mapdl.finish()
 
 
 def fetch_mid_and_end_stress(m):
-    q = m.query()
+    q = m.queries
     m.post1()
     end = q.node(75., 0., 0.)
     fixed_end_stress = m.get_value('NODE', end, 'S', 'X')

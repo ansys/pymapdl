@@ -11,7 +11,6 @@ from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.launcher import (get_start_instance,
                                        MAPDL_DEFAULT_PORT,
                                        _get_available_base_ansys)
-from ansys.mapdl.core.inline_functions import Query
 from common import (get_details_of_nodes, get_details_of_elements,
                     Node, Element)
 
@@ -261,7 +260,7 @@ def cube_solve(cleared, mapdl):
 @pytest.fixture
 def box_geometry(mapdl, cleared):
     areas, keypoints = create_geometry(mapdl)
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, keypoints, areas, get_details_of_nodes(mapdl)
 
 
@@ -271,13 +270,13 @@ def line_geometry(mapdl, cleared):
     k0 = mapdl.k(1, 0, 0, 0)
     k1 = mapdl.k(2, 1, 2, 2)
     l0 = mapdl.l(k0, k1)
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, [k0, k1], l0
 
 
 @pytest.fixture
 def query(mapdl, cleared):
-    return Query(mapdl)
+    return mapdl.queries
 
 
 @pytest.fixture
@@ -304,7 +303,7 @@ def solved_box(mapdl, cleared):
     mapdl.antype('STATIC')
     mapdl.solve()
     mapdl.finish()
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, get_details_of_nodes(mapdl)
 
 
@@ -325,7 +324,7 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.et(1, "SOLID98")
     mapdl.esize(0.5)
     mapdl.vmesh('ALL')
-    return Query(mapdl)
+    return mapdl.queries
 
 
 @pytest.fixture
@@ -349,7 +348,7 @@ def twisted_sheet(mapdl, cleared):
     mapdl.allsel("all")
     mapdl.solve()
     mapdl.finish()
-    q = Query(mapdl)
+    q = mapdl.queries
     return q, get_details_of_nodes(mapdl)
 
 
