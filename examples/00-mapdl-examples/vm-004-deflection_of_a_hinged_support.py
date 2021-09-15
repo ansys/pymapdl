@@ -4,7 +4,7 @@ r"""
 Deflection of a Hinged Support
 ------------------------------
 Problem Description:
- - A structure consisting of two equal steel bars, each of length :math:l:
+ - A structure consisting of two equal steel bars, each of length :math:`l`
    and cross-sectional area :math:`A`, with hinged ends is subjected to
    the action of a load :math:`F`. Determine the stress, :math:`\sigma`,
    in the bars and the deflection, :math:`\delta`, of point 2. Neglect
@@ -49,14 +49,19 @@ Analytical Equations:
 
 Notes:
  - Consistent length units are used. The dimensions :math:`a` and :math:`b` are
-   calculated parametrically in the input as follows: :math:`a = 2 l cos \Theta`,
-   :math:`b = l sin \Theta`.
+   calculated parametrically in the input as follows:
+   - :math:`a = 2 l cos \Theta`,
+   - :math:`b = l sin \Theta`.
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm4_setup.png'
 
-from ansys.mapdl.core import launch_mapdl
+###############################################################################
+# Start MAPDL
+# ~~~~~~~~~~~
+
 from math import sin, cos, pi
+from ansys.mapdl.core import launch_mapdl
 
 # start mapdl and clear it
 mapdl = launch_mapdl()
@@ -69,7 +74,7 @@ mapdl.prep7()
 ###############################################################################
 # Define Material
 # ~~~~~~~~~~~~~~~
-# This example demonstrates a simple hinge geometry.
+# Create a simple hinge geometry.
 # We use the `LINK180` element type to model this and an elastic modulus
 # of 30e6.
 # We store the x-coordinate of node 3 and the y-coordinate of node 2 for
@@ -83,7 +88,7 @@ node2_y = length_bar * sin(theta_rad)
 
 mapdl.et(1, 'LINK180')
 mapdl.sectype(1, 'LINK')
-mapdl.secdata(.5)
+mapdl.secdata(0.5)
 mapdl.mp('EX', 1, 30e6)
 
 ###############################################################################
@@ -93,12 +98,12 @@ mapdl.mp('EX', 1, 30e6)
 # along the equal sides, forming a hinge.
 
 n1 = mapdl.n(1, 0, 0, 0)
-n2 = mapdl.n(2, node3_x * .5, -node2_y, 0)
+n2 = mapdl.n(2, node3_x * 0.5, -node2_y, 0)
 n3 = mapdl.n(3, node3_x, 0, 0)
 
 mapdl.e(n1, n2)
 mapdl.e(n2, n3)
-mapdl.eplot(line_width=5)
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos='xy')
 
 ###############################################################################
 # Define Boundary Conditions
@@ -127,21 +132,39 @@ mapdl.finish()
 # Enter post-processing, get the results and view the nodal displacement
 # as well as the equivalent stress on the nodes.
 #
-# We make the line width larger for ease of visualisation as well as
+# We make the line width larger for ease of visualization as well as
 # using two perceptually linear colormaps to enhance display of the
 # data.
 
 mapdl.post1()
-result = mapdl.result
-result.plot_nodal_displacement(0,
-                               cmap='magma',
-                               line_width=5)
+mapdl.post_processing.plot_nodal_displacement(
+    'Y',
+    cmap='magma',
+    line_width=5,
+    cpos='xy',
+    scalar_bar_args={'title':'Displacement', 'vertical': False},
+)
 
-result.plot_principal_nodal_stress(0,
-                                   'SEQV',
-                                   cmap='viridis',
-                                   line_width=5)
+###############################################################################
+# Principal nodal stress
+# ~~~~~~~~~~~~~~~~~~~~~~
+# Use the ``post_processing`` attribute to get the principal nodal
+# stress as an array.
+# 
+# .. note::
+#    This returns the same data as :func:`prnsol
+#    <ansys.mapdl.core.Mapdl.prnsol>`, except instead of returning
+#    text, it returns a numpy array.
 
+
+seqv = mapdl.post_processing.nodal_eqv_stress
+
+# print out the nodes
+for i, nnum in enumerate(mapdl.mesh.nnum):
+    print(f'Node {nnum} : {seqv[i]} psi')
+
+# Which is identical to:
+# print(mapdl.prnsol('S', 'PRIN'))
 
 ###############################################################################
 # Check Results
@@ -150,29 +173,27 @@ result.plot_principal_nodal_stress(0,
 # stress experienced by node 2 to the known quantities 10000 psi and
 # -0.12 inches. To do this we:
 #
-# - Find the mid-node from the coordinates using the `Query` class.
+# - Find the mid-node from the coordinates using the :class:`Query
+#   <ansys.mapdl.core.inline_functions.Query>` class
 # - Get the y-displacement from node 2
 # - Get the element nearest to node 2
 # - Get the stress on this element
-# - Compare.
+# - Compare
 
 q = mapdl.query()
-mid_node = q.node(node3_x * .5, -node2_y, 0)
-# *GET requires we assign to a variable in APDL, however, we just assign
-# the result to a Python variable. So here we use a dummy variable '_'
-# instead.
-displacement = mapdl.get('_', 'NODE', mid_node, 'U', 'Y')
+mid_node = q.node(node3_x * 0.5, -node2_y, 0)
+displacement = mapdl.get_value('NODE', mid_node, 'U', 'Y')
 left_element = q.enearn(mid_node)
 mapdl.etable('STRS', 'LS', 1)
-stress = mapdl.get('_', 'ELEM', left_element, 'ETAB', 'STRS')
+stress = mapdl.get_value('ELEM', left_element, 'ETAB', 'STRS')
 
-results = \
-    f"""
-    ---------------------  RESULTS COMPARISON  -----------------------
-    |   TARGET         |  TARGET     |   Mechanical APDL   |   RATIO
-    ------------------------------------------------------------------
-    Stress [psi]          10000            {stress}              {stress/10000}
-    Displacement [in]     -0.12            {displacement}                {abs(displacement) / 0.12}
-    ------------------------------------------------------------------
-    """
+results = f"""
+---------------------  RESULTS COMPARISON  -----------------------
+|   TARGET         |  TARGET     |   Mechanical APDL   |   RATIO
+------------------------------------------------------------------
+Stress [psi]          10000          {stress}               {stress/10000:.2f}
+Displacement [in]     -0.12          {displacement:.2f}                 {abs(displacement) / 0.12:.2f}
+------------------------------------------------------------------
+"""
+
 print(results)
