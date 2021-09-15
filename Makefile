@@ -31,3 +31,7 @@ coverage-xml:
 coverage-html:
 	@echo "Reporting HTML coverage"
 	@pytest -v --cov ansys.mapdl --cov-report html
+
+flake8:
+	@echo "Running flake8"
+	@flake8 .
