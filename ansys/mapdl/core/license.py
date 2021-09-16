@@ -207,6 +207,8 @@ import os
 import time 
 import re 
 
+from ansys.mapdl.core.errors import LicenseServerConnectionError
+
 # from ansys.mapdl.core.launcher import _version_from_path
 
 def get_licdebug_path():
@@ -224,8 +226,7 @@ def get_licdebug_name():
     return 'licdebug.FEAT_ANSYS.212.out'  #TODO: Make this more flexible and for more ansys versions.
 
 
-def get_licdebug_msg():
-    licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
+def get_licdebug_msg(licdebug_file):
     f = open(licdebug_file)
     f.seek(0,2)  # Going to the end of the file. 
 
@@ -245,3 +246,134 @@ def get_licdebug_msg():
                     yield  msg 
         else:
             time.sleep(0.01)
+
+
+def is_denied_msg(msg):
+    if 'DENIED' in msg:
+        return True 
+    else:
+        return False 
+
+
+def license_file_checker():
+    licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
+
+    time_to_be_checking = 5 #seconds
+    tstart = time.time()
+    file_iterator = get_licdebug_msg(licdebug_file)
+
+    while (time.time() - tstart) < time_to_be_checking:
+        msg = next(file_iterator)
+
+        if is_denied_msg(msg):
+            license_path = re.findall( "(?<=License path:)(.*)(?=;\n)", msg)[0]
+            license_port = license_path.split('@')[0]
+            license_hostname = license_path.split('@')[1]
+            raise LicenseServerConnectionError(ip=license_hostname, port=license_port)
+
+
+def check_license_server_with_python():
+    # We are running with a full installation
+    if os.name == 'posix':  # Linux
+        host, port = get_license_server_details_locally_for_linux()
+    elif os.name == 'nt':  # Windows
+        host, port = get_license_server_details_locally_for_windows()
+
+    if not ping_license_server_python(host, port):
+        raise LicenseServerConnectionError(ip=host, port=port)
+
+
+def check_license_server_with_lmutil():
+    
+    if os.name == 'posix':  # Linux
+        ip, port = get_license_server_details_locally_for_linux()
+    elif os.name == 'nt':  # Windows
+        ip, port = get_license_server_details_locally_for_windows()
+
+    """
+    Check the license server status by running 'lmutil'. 
+
+    However this method is:
+    - Not recommended because of the load generated in the server side.
+    - Not reliable because the difficulty to catch the port in the license server
+    """
+
+    warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
+    
+    output = run_lmutil(ip, port)
+    selected_lines = re.findall('(?<=: license server )(.*)(?=\n)', output)
+    servers_up = ['UP' in each for each in selected_lines]
+    down_error_msg = 'Error getting status: License server machine is down or not responding.'
+    
+    if len(servers_up)==0 or down_error_msg in output:
+        print("License check failed.")
+        return False 
+    elif all(servers_up):
+        print("All servers are UP")
+    elif any(servers_up):
+        warnings.warn("Some license servers are down.")
+    else:
+        print("All servers are down")
+        raise LicenseServerConnectionError
+
+
+def try_license_file():
+    
+    try:
+        license_file_checker()
+    except LicenseServerConnectionError:
+        # expected error, so let it raise
+        raise LicenseServerConnectionError 
+    except:
+        # Rest of the cases, let's run secondary methods.
+        print("Error found trying to ready license file.")
+        return False
+    else:
+        return True 
+        
+
+def try_ping_server_python():
+    try:
+        check_license_server_with_python()
+    except LicenseServerConnectionError:
+        # Reraising error 
+        raise LicenseServerConnectionError 
+    except:
+        return False 
+    else:
+        return True 
+        
+
+def try_lmutil():
+    try:
+        check_license_server_with_lmutil()
+    except LicenseServerConnectionError:
+        # Reraising error 
+        raise LicenseServerConnectionError  
+    except:
+        # Unkw
+        return False 
+    else:
+        return True 
+
+
+        """
+        
+if license_server_check:
+
+    if os.getenv('ANSYSLMD_LICENSE_FILE') is not None:
+        # We are in a dockerized environment. 
+        # We skip processing for the moment.
+        pass 
+
+    else:
+        # running locally 
+        success_ = try_license_file()
+
+        if not success_:
+            success_ = try_ping_server_python
+        
+        if not success_:
+            success_ = try_lmutil()
+            
+            """
