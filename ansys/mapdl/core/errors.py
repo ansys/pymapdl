@@ -85,7 +85,7 @@ class LicenseServerConnectionError(RuntimeError):
 
         if error_message != '':
             head_msg = ''
-            tail_msg = f'\nError obtained: {licdebug_name}\n***\n' + error_message + '\n***\n'
+            tail_msg = f'\nExtended message/Error obtained: {licdebug_name}\n***\n' + error_message + '\n***\n'
         else:
             head_msg = ''
             tail_msg = ''
