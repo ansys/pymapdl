@@ -9,12 +9,13 @@ import tempfile
 import socket
 import time
 import subprocess
+import threading
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
 from ansys.mapdl.core.errors import LockFileException, VersionError, LicenseServerConnectionError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, check_valid_ip
-from ansys.mapdl.core.license import get_license_server_details, ping_license_server
+from ansys.mapdl.core.license import try_license_server
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir('ansys_mapdl_core')
@@ -915,9 +916,18 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
     # Here we will check the license server
     if license_server_check:
-        license_host, license_port = get_license_server_details()
-        if not ping_license_server(license_host, license_port):
-            raise LicenseServerConnectionError(ip=license_host, port=license_port)
+
+        if os.getenv('ANSYSLMD_LICENSE_FILE') is not None:
+            # We are in a dockerized environment. 
+            # We skip processing for the moment.
+            pass 
+
+        else:
+            # Running locally 
+            license_thread = threading.Thread(target=try_license_server)
+            license_thread.start()
+            # try_license_server()
+
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole

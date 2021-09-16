@@ -77,8 +77,8 @@ class LockFileException(RuntimeError):
 
 class LicenseServerConnectionError(RuntimeError):
     """Error message when the license server is not available."""
-    def __init__(self, ip, port, msg = LICENSE_CONNECTION_ERROR):
-        msg = LICENSE_CONNECTION_ERROR.replace('{port}',str(port)).replace('{ip}', ip)        
+    def __init__(self, ip=None, port=None, msg=LICENSE_CONNECTION_ERROR):
+        msg = LICENSE_CONNECTION_ERROR.replace('{port}',str(port).strip()).replace('{ip}', str(ip).strip())        
         RuntimeError.__init__(self, msg)
 
 
