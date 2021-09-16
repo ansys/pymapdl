@@ -306,7 +306,7 @@ def compute_stress_con(ratio):
     mapdl.antype('STATIC')
     mapdl.solve()
 
-	# Post-Processing
+    # Post-Processing
     # ~~~~~~~~~~~~~~~
     # grab the stress from the result
     result = mapdl.result
