@@ -69,7 +69,7 @@ def get_licdebug_name():
     from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
     ansys_bin = get_ansys_path(allow_input=False)
     version = _version_from_path(ansys_bin)    
-    return f'licdebug.FEAT_ANSYS.{version}.out'  #TODO: Make this more flexible and for more ansys versions.
+    return f'licdebug.FEAT_ANSYS.{version}.out'  
 
 
 def get_licdebug_msg(licdebug_file):
@@ -133,7 +133,7 @@ def get_license_server_details():
 
 def get_license_server_details_locally_for_linux():
     #trying windows approach?
-    return get_license_server_details_locally_for_windows
+    return get_license_server_details_locally_for_windows  #TODO: to fix this because it is not the same path as for windows.
 
 
 def get_license_server_details_locally_for_windows():
@@ -144,7 +144,7 @@ def get_license_server_details_locally_for_windows():
         ansyslmdini = f.readlines()
     
     server_conf = ansyslmdini[0].strip().split('=')[1] # Getting first line only. 
-    port = server_conf.split('@')[0]
+    port = int(server_conf.split('@')[0])
     host = server_conf.split('@')[1]
     return host, port 
 
@@ -200,22 +200,25 @@ def check_license_server_with_lmutil():
 
     ip, port = get_license_server_details()
 
-    warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
+    # warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
     
     output = run_lmutil(ip, port)
     selected_lines = re.findall('(?<=: license server )(.*)(?=\n)', output)
     servers_up = ['UP' in each for each in selected_lines]
     down_error_msg = 'Error getting status: License server machine is down or not responding.'
     
-    if len(servers_up)==0 or down_error_msg in output:
-        print("License check failed.")
-        return False 
+    if len(servers_up)==0:
+        msg = "'lmutil' failed to get a list of servers."
+        raise LicenseServerConnectionError(error_message=msg)
+    
+    elif down_error_msg in output:
+        raise LicenseServerConnectionError(error_message=down_error_msg) 
+    
     elif all(servers_up):
-        print("All servers are UP")
+        pass 
     elif any(servers_up):
         warnings.warn("Some license servers are down.")
     else:
-        print("All servers are down")
         raise LicenseServerConnectionError
 
 
@@ -246,7 +249,70 @@ def get_lmutil_path_windows():
 
 def get_lmutil_path_linux():
     ansyslic_dir = os.getenv('ANSYSLIC_DIR')
-    return os.path.join(ansyslic_dir, 'winx64') #TODO: Check if this folder is right.
+    return os.path.join(ansyslic_dir, 'linx64') #TODO: Check if this folder is right.
+
+
+## ansysli_util
+
+def try_ansysli_util():
+    try:
+        check_license_server_with_ansysli_util()
+    except LicenseServerConnectionError:
+        # Reraising error 
+        raise 
+    except:
+        # Unkw
+        return False 
+    else:
+        return True 
+
+
+def check_license_server_with_ansysli_util():
+    """
+    Check the license server status by running 'ansysli_util'. 
+
+    However this method is:
+    - Not recommended because of the load generated in the server side.
+    - Not reliable because the difficulty to catch the port in the license server
+    """
+    warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
+    
+    output = run_ansysli_util()
+    if 'No such feature exists' in output or 'The server is down or is not responsive.' in output:
+        raise LicenseServerConnectionError(ip='N/A (ansysli_util resolves these)', port='N/A')
+
+
+def run_ansysli_util():
+    ansysli_util_path = get_ansysli_util_path()
+    license = 'meba'  # mechanical enterprise license. 
+    command = f"{ansysli_util_path}  -checkout {license} "
+
+    # subprocess.check_output(command, shell=os.name != 'nt')
+    process =  subprocess.Popen(command,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+    return process.stdout.read().decode()
+
+
+def get_ansysli_util_path():
+    if os.name == 'nt': # Windows
+        ansysli_util_path = get_ansysli_util_path_windows()
+
+    elif os.name == 'posix':  # Linux
+        ansysli_util_path = get_ansysli_util_path_linux() 
+    
+    return os.path.join(ansysli_util_path,'ansysli_util.exe')
+
+
+def get_ansysli_util_path_windows():
+    ansyslic_dir = os.getenv('ANSYSLIC_DIR')
+    return os.path.join(ansyslic_dir, 'winx64')
+
+
+def get_ansysli_util_path_linux():
+    ansyslic_dir = os.getenv('ANSYSLIC_DIR')
+    return os.path.join(ansyslic_dir, 'linx64') #TODO: Check if this folder is right.
+
 
 
 ## Main 
@@ -258,7 +324,10 @@ def try_license_server():
     success_ = try_license_file()
 
     if not success_:
-        success_ = try_ping_server_python
+        success_ = try_ping_server_python()
+    
+    if not success_:
+        success_ = try_ansysli_util()
     
     if not success_:
         success_ = try_lmutil()
