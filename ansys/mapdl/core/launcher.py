@@ -924,10 +924,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
 
         else:
             # Running locally 
-            version = _version_from_path(get_ansys_path())
-            license_thread = threading.Thread(target=try_license_server, args=[version])
+            license_thread = threading.Thread(target=try_license_server)
             license_thread.start()
-            # try_license_server()
 
     if mode == 'console':
         from ansys.mapdl.core.mapdl_console import MapdlConsole
