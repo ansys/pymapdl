@@ -343,6 +343,20 @@ class Areas:
         int
             Area number of the generated area.
 
+        Notes
+        -----
+        Lines may be input (once each) in any order and must form a
+        simply connected closed curve.  If the area is defined with
+        more than four lines, the lines must also lie in the same
+        plane or on a constant coordinate value in the active
+        coordinate system (such as a plane or a cylinder).
+
+        Solid modeling in a toroidal coordinate system is not
+        recommended.  Areas may be redefined only if not yet attached
+        to a volume.
+
+        This command is valid in any processor.
+
         Examples
         --------
         Create an area from four lines
@@ -359,19 +373,6 @@ class Areas:
         >>> anum
         1
 
-        Notes
-        -----
-        Lines may be input (once each) in any order and must form a
-        simply connected closed curve.  If the area is defined with
-        more than four lines, the lines must also lie in the same
-        plane or on a constant coordinate value in the active
-        coordinate system (such as a plane or a cylinder).
-
-        Solid modeling in a toroidal coordinate system is not
-        recommended.  Areas may be redefined only if not yet attached
-        to a volume.
-
-        This command is valid in any processor.
         """
         command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
         return parse.parse_a(self.run(command, **kwargs))

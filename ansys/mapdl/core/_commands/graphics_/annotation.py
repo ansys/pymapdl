@@ -320,7 +320,7 @@ class Annotation:
         command = f"/LSYMBOL,{x},{y},{symang},{symtyp},{symsiz},{keybmp}"
         return self.run(command, **kwargs)
 
-    def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
+    def slash_pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
         """Creates an annotation circle (GUI).
 
         APDL Command: /PCIRCLE

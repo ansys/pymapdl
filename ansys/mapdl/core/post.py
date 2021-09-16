@@ -432,9 +432,21 @@ class PostProcessing():
             Structural rotational component to retrieve.  Must be
             ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to ``'ALL'``.
 
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array with nodal X, Y, Z, or all structural rotations.
+
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the
+        :attr:`selected_nodes <PostProcessing.selected_nodes>` mask to
+        get the currently selected nodes.
+
         Examples
         --------
-        Nodal rotation in all dimensions for current result
+        Nodal rotation in all dimensions for current result.
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 1)
@@ -452,11 +464,6 @@ class PostProcessing():
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
         """
         component = check_comp(component, ROT_TYPE)
 
@@ -964,8 +971,23 @@ class PostProcessing():
     def nodal_eqv_stress(self) -> np.ndarray:
         """The nodal equivalent stress of the current result.
 
-        Equilvanent MAPDL command:
-        ``PRNSOL, S, PRIN``
+        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the nodal equivalent stress of the
+            current result.
+
+        Notes
+        -----
+        The nodal results are averaged across all selected elements.
+        Not all nodes will contain valid results (e.g. midside nodes),
+        and those nodes will report a zero stress.
+
+        Elements that are not selected will not contribute to the
+        averaged nodal values, and if a node's attached elements are
+        all unselected, the element will report a zero stress value.
 
         Examples
         --------
@@ -980,16 +1002,6 @@ class PostProcessing():
         >>> mapdl.post_processing.nodal_eqv_stress
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
-        Notes
-        -----
-        The nodal results are averaged across all selected elements.
-        Not all nodes will contain valid results (e.g. midside nodes),
-        and those nodes will report a zero stress.
-
-        Elements that are not selected will not contribute to the
-        averaged nodal values, and if a node's attached elements are
-        all unselected, the element will report a zero stress value.
 
         """
         return self._ndof_rst('S', 'EQV')
@@ -1044,13 +1056,25 @@ class PostProcessing():
         Includes elastic, plastic, and creep strain.
 
         Equilvanent MAPDL commands:
-        \*VGET, PARM, NODE, , EPTO, X
+
+        * ``*VGET, PARM, NODE, , EPTO, X``
 
         Parameters
         ----------
         component : str, optional
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array containing the total nodal component strain.
+
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the ``selected_nodes``
+        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -1067,11 +1091,6 @@ class PostProcessing():
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
         """
         if isinstance(component, int):
             component = str(component)

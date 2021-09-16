@@ -260,16 +260,17 @@ class ElementTable:
 
         APDL Command: EUSORT
 
+        Notes
+        -----
+        Changing the selected element set [ESEL] also restores the original
+        element order.
+
         Examples
         --------
         >>> mapdl.post1()
         >>> mapdl.eusort()
         'ELEMENT SORT REMOVED'
 
-        Notes
-        -----
-        Changing the selected element set [ESEL] also restores the original
-        element order.
         """
         return self.run("EUSORT", **kwargs)
 

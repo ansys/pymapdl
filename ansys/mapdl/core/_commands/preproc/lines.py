@@ -32,6 +32,13 @@ class Lines:
         int
             Line number of the spline generated from the spline fit.
 
+        Notes
+        -----
+        One line is generated between keypoint P1 and the last
+        keypoint entered.  The line will pass through each entered
+        keypoint.  Solid modeling in a toroidal coordinate system is
+        not recommended.
+
         Examples
         --------
         Generate a spline through ``(0, 0, 0)``, ``(0, 1, 0)`` and
@@ -42,12 +49,6 @@ class Lines:
         >>> k2 = mapdl.k("", 1, 2, 0)
         >>> lnum = mapdl.bsplin(k0, k1, k2)
 
-        Notes
-        -----
-        One line is generated between keypoint P1 and the last
-        keypoint entered.  The line will pass through each entered
-        keypoint.  Solid modeling in a toroidal coordinate system is
-        not recommended.
         """
         command = f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -129,6 +130,14 @@ class Lines:
 
         APDL Command: L
 
+        Defines a line between two keypoints from P1 to P2.  The line
+        shape may be generated as "straight" (in the active coordinate
+        system) or curved.  The line shape is invariant with
+        coordinate system after it is generated.  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+        A curved line is limited to 180 degrees.  Lines may be redefined only
+        if not yet attached to an area.
+
         Parameters
         ----------
         p1
@@ -168,15 +177,6 @@ class Lines:
         >>> lnum
         1
 
-        Notes
-        -----
-        Defines a line between two keypoints from P1 to P2.  The line
-        shape may be generated as "straight" (in the active coordinate
-        system) or curved.  The line shape is invariant with
-        coordinate system after it is generated.  Note that solid
-        modeling in a toroidal coordinate system is not recommended.
-        A curved line is limited to 180 degrees.  Lines may be redefined only
-        if not yet attached to an area.
         """
         command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -482,6 +482,12 @@ class Lines:
 
         APDL Command: LCOMB
 
+        Combines adjacent lines into one line (the output line).  This
+        operation will effectively "undo" the LDIV operation.  Line
+        divisions are set to zero (use LESIZE, etc. to modify).  Lines
+        attached to the same area(s) can also be combined.  See also
+        the LCCAT command for line concatenation capability.
+
         Parameters
         ----------
         nl1
@@ -522,13 +528,6 @@ class Lines:
         >>> lout
         1
 
-        Notes
-        -----
-        Combines adjacent lines into one line (the output line).  This
-        operation will effectively "undo" the LDIV operation.  Line
-        divisions are set to zero (use LESIZE, etc. to modify).  Lines
-        attached to the same area(s) can also be combined.  See also
-        the LCCAT command for line concatenation capability.
         """
         command = f"LCOMB,{nl1},{nl2},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -568,6 +567,13 @@ class Lines:
         """Divides a single line into two or more lines.
 
         APDL Command: LDIV
+
+        Divides a single line NL1 (defined from keypoint P1 to
+        keypoint P2) into two or more lines.  Line NL1 becomes the new
+        line beginning with keypoint P1 and new lines are generated
+        ending at keypoint P2.  If the line is attached to an area,
+        the area will also be updated.  Line divisions are set to zero
+        (use LESIZE, etc. to modify).
 
         Parameters
         ----------
@@ -628,14 +634,6 @@ class Lines:
         >>> l0 = mapdl.l(k0, k1)
         >>> mapdl.ldiv(l0, ndiv=5)
 
-        Notes
-        -----
-        Divides a single line NL1 (defined from keypoint P1 to
-        keypoint P2) into two or more lines.  Line NL1 becomes the new
-        line beginning with keypoint P1 and new lines are generated
-        ending at keypoint P2.  If the line is attached to an area,
-        the area will also be updated.  Line divisions are set to zero
-        (use LESIZE, etc. to modify).
         """
         command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
         return self.run(command, **kwargs)
@@ -689,6 +687,11 @@ class Lines:
 
         APDL Command: LEXTND
 
+        Extends a line at one end by using its slope.  Lines may be
+        redefined only if not yet attached to an area.  Line divisions
+        are set to zero (use LESIZE, etc. to modify).  Note that solid
+        modeling in a toroidal coordinate system is not recommended.
+
         Parameters
         ----------
         nl1
@@ -724,12 +727,6 @@ class Lines:
         >>> lnum
         1
 
-        Notes
-        -----
-        Extends a line at one end by using its slope.  Lines may be
-        redefined only if not yet attached to an area.  Line divisions
-        are set to zero (use LESIZE, etc. to modify).  Note that solid
-        modeling in a toroidal coordinate system is not recommended.
         """
         command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -738,6 +735,16 @@ class Lines:
         """Generate a fillet line between two intersecting lines.
 
         APDL Command: LFILLT
+
+        Generates a fillet line between two intersecting lines NL1
+        (P1-PINT) and NL2 (P2-PINT).  Three keypoints may be
+        generated, two at the fillet tangent points (PTAN1 and PTAN2)
+        and one (optional) at the fillet arc center (PCENT).  Line
+        P1-PINT becomes P1-PTAN1, P2-PINT becomes P2-PTAN2, and new
+        arc line PTAN1-PTAN2 is generated.  Generated keypoint and
+        line numbers are automatically assigned (beginning with the
+        lowest available values [NUMSTR]).  Line divisions are set to
+        zero (use LESIZE, etc. to modify).
 
         Parameters
         ----------
@@ -773,17 +780,6 @@ class Lines:
         >>> lnum = mapdl.lfillt(l0, l1, 0.25)
         3
 
-        Notes
-        -----
-        Generates a fillet line between two intersecting lines NL1
-        (P1-PINT) and NL2 (P2-PINT).  Three keypoints may be
-        generated, two at the fillet tangent points (PTAN1 and PTAN2)
-        and one (optional) at the fillet arc center (PCENT).  Line
-        P1-PINT becomes P1-PTAN1, P2-PINT becomes P2-PTAN2, and new
-        arc line PTAN1-PTAN2 is generated.  Generated keypoint and
-        line numbers are automatically assigned (beginning with the
-        lowest available values [NUMSTR]).  Line divisions are set to
-        zero (use LESIZE, etc. to modify).
         """
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1211,6 +1207,9 @@ class Lines:
 
         APDL Command: LTAN
 
+        Generates a line (P2-P3) tangent at end point (P2) of line NL1
+        (P1-P2).
+
         Parameters
         ----------
         nl1
@@ -1239,10 +1238,6 @@ class Lines:
         >>> lnum
         2
 
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at end point (P2) of line NL1
-        (P1-P2).
         """
         command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1313,6 +1308,11 @@ class Lines:
 
         APDL Command: SPLINE
 
+        The output from this command is a series of connected lines
+        (one line between each pair of keypoints) that together form a
+        spline.  Note that solid modeling in a toroidal coordinate
+        system is not recommended.
+
         Parameters
         ----------
         p1, p2, p3, . . . , p6
@@ -1337,12 +1337,6 @@ class Lines:
         >>> lines
         [1, 2, 3, 4]
 
-        Notes
-        -----
-        The output from this command is a series of connected lines
-        (one line between each pair of keypoints) that together form a
-        spline.  Note that solid modeling in a toroidal coordinate
-        system is not recommended.
         """
         command = f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
         return parse.parse_line_nos(self.run(command, **kwargs))

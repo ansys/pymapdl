@@ -339,24 +339,6 @@ class Setup:
             concatenating the first four characters of the Item and
             Comp labels.
 
-        Examples
-        --------
-        Switch to the time-history postprocessor
-
-        >>> mapdl.post26()
-
-        Store the stress in the X direction for element 1 at node 1
-
-        >>> nvar = 2
-        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
-
-        Move the value to an array and access it via mapdl.parameters
-
-        >>> mapdl.dim('ARR', 'ARRAY', 1)
-        >>> mapdl.vget('ARR', nvar)
-        >>> mapdl.parameters['ARR']
-        array(-1991.40234375)
-
         Notes
         -----
         See Table: 134:: ESOL - General Item and Component Labels for
@@ -395,6 +377,25 @@ class Setup:
         For more information on the meaning of contact status and its
         possible values, see Reviewing Results in POST1 in the Contact
         Technology Guide.
+
+        Examples
+        --------
+        Switch to the time-history postprocessor
+
+        >>> mapdl.post26()
+
+        Store the stress in the X direction for element 1 at node 1
+
+        >>> nvar = 2
+        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
+
+        Move the value to an array and access it via mapdl.parameters
+
+        >>> mapdl.dim('ARR', 'ARRAY', 1)
+        >>> mapdl.vget('ARR', nvar)
+        >>> mapdl.parameters['ARR']
+        array(-1991.40234375)
+
         """
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)

@@ -790,8 +790,8 @@ class _MapdlCore(Commands):
         Displays nodes.
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
-            values set with the ``PNUM`` command.
+           PyMAPDL plotting commands with ``vtk=True`` ignore any
+           values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -828,10 +828,6 @@ class _MapdlCore(Commands):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
 
-        Notes
-        -----
-        Only selected nodes [NSEL] are displayed.  Elements need not
-        be defined.
         """
         # lazy import here to avoid top level import
         import pyvista as pv
@@ -1794,12 +1790,6 @@ class _MapdlCore(Commands):
         response : str
             Output from MAPDL SOLVE command.
 
-        Examples
-        --------
-        Modal analysis using default parameters for the first 6 modes
-
-        >>> mapdl.modal_analysis(nmode=6)
-
         Notes
         -----
         For models that involve a non-symmetric element stiffness
@@ -1817,6 +1807,12 @@ class _MapdlCore(Commands):
         The DAMP and QRDAMP options cannot be followed by a subsequent
         spectrum analysis. The UNSYM method supports spectrum analysis
         when eigensolutions are real.
+
+        Examples
+        --------
+        Modal analysis using default parameters for the first 6 modes
+
+        >>> mapdl.modal_analysis(nmode=6)
 
         """
         if nrmkey:
@@ -1923,14 +1919,6 @@ class _MapdlCore(Commands):
         command_output : str
             Command output from MAPDL.
 
-        Examples
-        --------
-        >>> mapdl.run('/PREP7')
-
-        Equivalent Pythonic method:
-
-        >>> mapdl.prep7()
-
         Notes
         -----
         When two or more commands need to be run non-interactively
@@ -1943,6 +1931,15 @@ class _MapdlCore(Commands):
         Alternatively, you can simply run a block of commands with:
 
         >>> mapdl.run_multiline(cmd)
+
+        Examples
+        --------
+        >>> mapdl.run('/PREP7')
+
+        Equivalent Pythonic method:
+
+        >>> mapdl.prep7()
+
         """
         command = command.strip()
         # check if multiline
@@ -2217,6 +2214,11 @@ class _MapdlCore(Commands):
             - 5 : Loop on the Item2 field.
             - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
 
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
         Examples
         --------
         List the current selected node numbers
@@ -2235,10 +2237,6 @@ class _MapdlCore(Commands):
                ...
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
-        Notes
-        -----
-        Please reference your Ansys help manual ``*VGET`` command tables
-        for all the available ``*VGET`` values.
         """
         arr = self._get_array(entity, entnum, item1, it1num, item2,
                               it2num, kloop)

@@ -13,6 +13,7 @@ from ansys.mapdl.core.common_grpc import parse_chunks, DEFAULT_CHUNKSIZE
 
 
 class MeshGrpc(Mesh):
+    """Provides an interface to the gRPC mesh from MAPDL."""
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""

@@ -74,28 +74,28 @@ intersphinx_mapping = {
 numpydoc_use_plots = True
 numpydoc_show_class_members = False
 numpydoc_xref_param_type = True
-# numpydoc_validate = True
-# numpydoc_validation_checks = {
-#     "GL06", # Found unknown section
-#     "GL07", # Sections are in the wrong order.
-#     "GL08", # The object does not have a docstring
-#     "GL09", # Deprecation warning should precede extended summary
-#     "GL10", # reST directives {directives} must be followed by two colons
+numpydoc_validate = True
+numpydoc_validation_checks = {
+    "GL06", # Found unknown section
+    "GL07", # Sections are in the wrong order.
+    "GL08", # The object does not have a docstring
+    "GL09", # Deprecation warning should precede extended summary
+    "GL10", # reST directives {directives} must be followed by two colons
 
-#     "SS01", # No summary found
-#     "SS02", # Summary does not start with a capital letter
+    "SS01", # No summary found
+    "SS02", # Summary does not start with a capital letter
 #     "SS03", # Summary does not end with a period
-#     "SS04", # Summary contains heading whitespaces
+    "SS04", # Summary contains heading whitespaces
 #     "SS05", # Summary must start with infinitive verb, not third person
 
 #     "RT02", # The first line of the Returns section should contain only the
 #             # type, unless multiple values are being returned"
 
-# }
+}
 
-# coverage_ignore_modules = [
-#     r'\.plot_directive$',  # Issue with class parameter documentation
-# ]
+coverage_ignore_modules = [
+    r'\.plot_directive$',  # Ignoring commands as we /might/ autogenerate this
+]
 
 
 

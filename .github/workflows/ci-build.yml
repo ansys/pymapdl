@@ -52,8 +52,13 @@ jobs:
         run: |
           sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
-          make -C doc html
-  
+          make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
+
+      # Verify that sphinx generates no warnings
+      - name: Check for warnings
+        run: |
+          python doc/print_errors.py
+
       - name: Upload Documentation
         uses: actions/upload-artifact@v2
         with:

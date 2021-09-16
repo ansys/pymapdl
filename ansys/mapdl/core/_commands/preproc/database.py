@@ -194,38 +194,6 @@ class Database:
         str
             Mapdl command output.
 
-        Examples
-        --------
-        Create a basic block and save it to disk.
-
-        >>> mapdl.prep7()
-        >>> mapdl.block(0, 1, 0, 1, 0, 1)
-        >>> mapdl.et(1, 186)
-        >>> mapdl.esize(0.25)
-        >>> mapdl.vmesh('ALL')
-        >>> mapdl.cdwrite('DB', '/tmp/mesh.cdb')
-         TITLE =
-         NUMBER OF ELEMENT TYPES =      1
-                64 ELEMENTS CURRENTLY SELECTED.  MAX ELEMENT NUMBER =   64
-               425 NODES CURRENTLY SELECTED.     MAX NODE NUMBER =     425
-                 8 KEYPOINTS CURRENTLY SELECTED. MAX KEYPOINT NUMBER =   8
-                12 LINES CURRENTLY SELECTED.     MAX LINE NUMBER =      12
-                 6 AREAS CURRENTLY SELECTED.     MAX AREA NUMBER =       6
-                 1 VOLUMES CURRENTLY SELECTED.   MAX VOL. NUMBER =       1
-         WRITE ANSYS DATABASE AS AN ANSYS INPUT FILE: /tmp/mesh.cdb
-
-        Optionally load the mesh into Python using the archive reader.
-
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> mesh = pymapdl_reader.Archive('/tmp/mesh.cdb')
-        >>> mesh
-        ANSYS Archive File mesh.cdb
-         Number of Nodes:              425
-         Number of Elements:           64
-         Number of Element Types:      1
-         Number of Node Components:    0
-         Number of Element Components: 0
-
         Notes
         -----
         Load data includes the current load step only. Loads applied
@@ -303,6 +271,39 @@ class Database:
 
         Before writing solid model entities, select all corresponding
         lower level entities (ALLSEL,BELOW,ALL).
+
+        Examples
+        --------
+        Create a basic block and save it to disk.
+
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.25)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.cdwrite('DB', '/tmp/mesh.cdb')
+         TITLE =
+         NUMBER OF ELEMENT TYPES =      1
+                64 ELEMENTS CURRENTLY SELECTED.  MAX ELEMENT NUMBER =   64
+               425 NODES CURRENTLY SELECTED.     MAX NODE NUMBER =     425
+                 8 KEYPOINTS CURRENTLY SELECTED. MAX KEYPOINT NUMBER =   8
+                12 LINES CURRENTLY SELECTED.     MAX LINE NUMBER =      12
+                 6 AREAS CURRENTLY SELECTED.     MAX AREA NUMBER =       6
+                 1 VOLUMES CURRENTLY SELECTED.   MAX VOL. NUMBER =       1
+         WRITE ANSYS DATABASE AS AN ANSYS INPUT FILE: /tmp/mesh.cdb
+
+        Optionally load the mesh into Python using the archive reader.
+
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> mesh = pymapdl_reader.Archive('/tmp/mesh.cdb')
+        >>> mesh
+        ANSYS Archive File mesh.cdb
+         Number of Nodes:              425
+         Number of Elements:           64
+         Number of Element Types:      1
+         Number of Node Components:    0
+         Number of Element Components: 0
+
         """
         command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)

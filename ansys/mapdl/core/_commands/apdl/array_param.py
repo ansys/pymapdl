@@ -1150,6 +1150,10 @@ class ArrayParam:
 
         APDL Command: ``*VWRITE``
 
+        .. warning::
+           This command cannot be run interactively.  See
+           :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
+
         Parameters
         ----------
         par1, par2, par3, . . . , par19
@@ -1223,11 +1227,6 @@ class ArrayParam:
         prepared file and read into ANSYS (i.e., ``*USE``, /INPUT, etc.).
 
         This command is valid in any processor.
-
-        Warnings
-        --------
-        This command cannot be run interactively.  See
-        :func:`ansys.mapdl.core.Mapdl.non_interactive`.
 
         """
         # cannot be in interactive mode

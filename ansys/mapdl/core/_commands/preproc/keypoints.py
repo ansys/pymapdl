@@ -102,16 +102,6 @@ class KeyPoints:
         int
             Keypoint number of the generated keypoint.
 
-        Examples
-        --------
-        Create a keypoint exactly centered between two keypoints.
-
-        >>> k0 = mapdl.k("", 0, 0, 0)
-        >>> k1 = mapdl.k("", 1, 0, 0)
-        >>> k2 = mapdl.kbetw(k0, k1)
-        >>> k2
-        3
-
         Notes
         -----
         Placement of the new keypoint depends on the currently active
@@ -123,6 +113,17 @@ class KeyPoints:
         current coordinate system between KP1 and KP2.  Note that
         solid modeling in a toroidal coordinate system is not
         recommended.
+
+        Examples
+        --------
+        Create a keypoint exactly centered between two keypoints.
+
+        >>> k0 = mapdl.k("", 0, 0, 0)
+        >>> k1 = mapdl.k("", 1, 0, 0)
+        >>> k2 = mapdl.kbetw(k0, k1)
+        >>> k2
+        3
+
         """
         command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
         return parse.parse_kpoint(self.run(command, **kwargs))
