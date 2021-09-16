@@ -158,6 +158,10 @@ class MapdlGrpc(_MapdlCore):
         Removes temporary files on exit if MAPDL is local.  Default
         ``False``.
 
+    log_file : bool, optional
+        Copy the log to a file called `logs.log` located where the
+        python script is executed. Default ``True``. 
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
