@@ -644,7 +644,7 @@ class MapdlGrpc(_MapdlCore):
 
     def _close_process(self):
        """Close all MAPDL processes"""
-		if self._local:
+        if self._local:
             for pid in self._pids:
                 try:
                     os.kill(pid, 9)
