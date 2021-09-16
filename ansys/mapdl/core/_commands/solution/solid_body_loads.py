@@ -26,7 +26,7 @@ class SolidBodyLoads:
             is the voltage drop and VAL2 is the phase angle. If Lab = IMPD,
             VAL1 is the resistance and VAL2 is the reactance in ohms/square.
             When specifying a table name, you must enclose the table name in
-            percent signs (%), e.g., BFA,Area,Lab,%tabname%. Use the *DIM
+            percent signs (%), e.g., BFA,Area,Lab,%tabname%. Use the ``*DIM``
             command to define a table.
 
         val4
@@ -140,7 +140,7 @@ class SolidBodyLoads:
             for mass source in a harmonic analysis or mass source rate in a
             transient analysis, and ignoreVAL2 and VAL3. When specifying a
             table name, you must enclose the table name in percent signs (%),
-            e.g., BFK,Kpoi,Lab,%tabname%.  Use the *DIM command to define a
+            e.g., BFK,Kpoi,Lab,%tabname%.  Use the ``*DIM`` command to define a
             table.
 
         phase
@@ -257,7 +257,7 @@ class SolidBodyLoads:
             a harmonic analysis or mass source rate in a transient analysis,
             and ignoreVAL2 and VAL3. When specifying a table name, you must
             enclose the table name in percent signs (%), e.g.,
-            BFL,Line,Lab,%tabname%.  Use the *DIM command to define a table.
+            BFL,Line,Lab,%tabname%.  Use the ``*DIM`` command to define a table.
 
         val4
             If Lab = JS, VAL4 is the phase angle in degrees.
@@ -387,7 +387,7 @@ class SolidBodyLoads:
             transient analysis, and ignoreVAL2 and VAL3. For Lab = VLTG, VAL1
             is the voltage drop and VAL2 is the phase angle.  When specifying a
             table name, you must enclose the table name in percent signs (%),
-            e.g., BFV,Volu,Lab,%tabname%.  Use the *DIM command to define a
+            e.g., BFV,Volu,Lab,%tabname%.  Use the ``*DIM`` command to define a
             table.
 
         phase

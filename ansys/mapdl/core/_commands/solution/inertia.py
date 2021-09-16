@@ -45,7 +45,7 @@ class Inertia:
 
         The ACEL command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for ACEL_X, ACEL_Y, and ACEL_Z input
-        values (*DIM) as a function of both time and frequency for full
+        values (``*DIM``) as a function of both time and frequency for full
         transient and harmonic analyses.
 
         Related commands for rotational effects are CMACEL, CGLOC, CGOMGA,
@@ -137,7 +137,7 @@ class Inertia:
 
         The CGOMGA command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for CGOMGA_X, CGOMGA_Y, and CGOMGA_Z
-        input values (*DIM) for full transient and harmonic analyses.
+        input values (``*DIM``) for full transient and harmonic analyses.
 
         This command is also valid in PREP7.
         """
@@ -197,7 +197,7 @@ class Inertia:
 
         The CMACEL command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for CMACEL_X, CMACEL_Y, and CMACEL_Z
-        input values (*DIM) as a function of both time and frequency for full
+        input values (``*DIM``) as a function of both time and frequency for full
         transient and harmonic analyses.
 
         Related commands for inertia loads are ACEL, CGLOC, CGOMGA, DCGOMG,
@@ -251,7 +251,7 @@ class Inertia:
 
         The CMDOMEGA command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for CMDOMEGA_X, CMDOMEGA_Y, and
-        CMDOMEGA_Z input values (*DIM) for full transient and harmonic
+        CMDOMEGA_Z input values (``*DIM``) for full transient and harmonic
         analyses.
 
         Related commands are ACEL, CGLOC, CGLOC, OMEGA, CMOMEGA, DCGOMG,
@@ -357,7 +357,7 @@ class Inertia:
 
         The CMOMEGA command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for CMOMEGA_X, CMOMEGA_Y, and CMOMEGA_Z
-        input values (*DIM) for full transient and harmonic analyses.
+        input values (``*DIM``) for full transient and harmonic analyses.
 
         In a mode-superposition harmonic or transient analysis, you must apply
         the load in the modal portion of the analysis. Mechanical APDL
@@ -571,7 +571,7 @@ class Inertia:
 
         The DCGOMG command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for DCGOMG_X, DCGOMG_Y, and DCGOMG_Z
-        input values (*DIM) for full transient and harmonic analyses.
+        input values (``*DIM``) for full transient and harmonic analyses.
 
          Related commands are ACEL, CGLOC, CGOMGA, DOMEGA, and OMEGA.
 
@@ -605,7 +605,7 @@ class Inertia:
 
         The DOMEGA command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for DOMEGA_X, DOMEGA_Y, and DOMEGA_Z
-        input values (*DIM) for full transient and harmonic analyses.
+        input values (``*DIM``) for full transient and harmonic analyses.
 
         Related commands are ACEL, CGLOC, CGOMGA, DCGOMG, and OMEGA.
 
@@ -713,7 +713,7 @@ class Inertia:
 
         The OMEGA command supports tabular boundary conditions (%TABNAME_X%,
         %TABNAME_Y%, and %TABNAME_Z%) for OMEGA_X, OMEGA_Y, and OMEGA_Z input
-        values (*DIM) for full transient and harmonic analyses.
+        values (``*DIM``) for full transient and harmonic analyses.
 
         Rotational velocities are combined with the element mass matrices to
         form a body force load vector term.  Units are radians/time.  Related

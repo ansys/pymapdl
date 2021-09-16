@@ -441,7 +441,7 @@ class Files:
     def starlist(self, fname="", ext="", **kwargs):
         """Displays the contents of an external, coded file.
 
-        APDL Command: *LIST
+        APDL Command: ``*LIST``
 
         Parameters
         ----------
@@ -459,7 +459,7 @@ class Files:
         -----
         Displays the contents of an external, coded file.  The file to be
         listed cannot be in use (open) at the time (except for the error
-        file, File.ERR, which may be displayed with *LIST,ERR).
+        file, File.ERR, which may be displayed with ``*LIST,ERR``).
 
         This command is valid in any processor.
         """

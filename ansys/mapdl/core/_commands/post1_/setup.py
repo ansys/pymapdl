@@ -633,7 +633,7 @@ class Setup:
         nset
             Data set number of the data set to be read.  If a positive value
             for NSET is entered, Lstep, SBSTEP, KIMG, and TIME are ignored.
-            Available set numbers can be determined by *SET,LIST.
+            Available set numbers can be determined by ``*SET,LIST``.
 
         Notes
         -----

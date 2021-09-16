@@ -33,7 +33,7 @@ class GapConditions:
             condition.  For a rotational gap, GAP should be in radians.
 
         damp
-            Damping coefficient (Force*Time/Length) of closed gap using pseudo
+            Damping coefficient (``Force*Time/Length``) of closed gap using pseudo
             velocity (Newmark finite difference expansion scheme).
 
         Notes

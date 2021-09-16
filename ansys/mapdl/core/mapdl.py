@@ -2176,7 +2176,7 @@ class _MapdlCore(Commands):
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                   it2num='', kloop='', **kwargs):
-        """Uses the VGET command to Return an array from ANSYS as a
+        """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
         See `VGET
@@ -2237,8 +2237,8 @@ class _MapdlCore(Commands):
 
         Notes
         -----
-        Please reference your ANSYS help manual *VGET command tables
-        for all the available *VGET values
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
         """
         arr = self._get_array(entity, entnum, item1, it1num, item2,
                               it2num, kloop)

@@ -888,7 +888,7 @@ class Volumes:
         Geometry items are reported in the global Cartesian coordinate system.
         A unit density is assumed unless the volumes have a material
         association via the VATT command.  Items calculated by VSUM and later
-        retrieved by a *GET or *VGET command are valid only if the model is not
+        retrieved by a ``*GET`` or ``*VGET`` command are valid only if the model is not
         modified after the VSUM command is issued.
 
         Setting a finer degree of tessellation will provide area calculations

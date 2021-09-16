@@ -19,7 +19,6 @@ database.
    Mapdl.cdopt
    Mapdl.cecheck
    Mapdl.check
-   Mapdl.cncheck
    Mapdl.igesout
    Mapdl.mfimport
    Mapdl.nooffset

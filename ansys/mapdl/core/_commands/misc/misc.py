@@ -20,7 +20,9 @@ class Misc:
             Verification level ranging from 1 to 6 defaulting to 4.
 
         Returns
-        --------
+        -------
+        str
+            Command output.
 
         Examples
         --------

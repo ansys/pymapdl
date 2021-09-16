@@ -511,7 +511,7 @@ class ElementTable:
         elements by exponentiating and multiplying two existing labeled result
         items according to the operation:
 
-        LabR = (|Lab1|EXP1) x (|Lab2|EXP2)
+        ``LabR = (|Lab1|EXP1) x (|Lab2|EXP2)``
 
         Roots, reciprocals, and divides may also be done with this command.
         """
@@ -539,16 +539,16 @@ class ElementTable:
         Allows safety factor (SF) or margin of safety (MS) calculations to be
         made for the average nodal stresses according to:
 
-        SF = SALLOW/|Stress|
+        ``SF = SALLOW/|Stress|``
 
-        MS = (SALLOW/|Stress|) -- 1.0
+        ``MS = (SALLOW/|Stress|) -- 1.0``
 
         Calculations are done during the display, select, or sort operation (in
         the active coordinate system [RSYS]) with results stored in place of
         the nodal stresses.  Use the PRNSOL or PLNSOL command to display the
         results.
 
-        Note:: : The results are meaningful only for the stress (SIG1, SIGE,
+        The results are meaningful only for the stress (SIG1, SIGE,
         etc.) upon which SALLOW is based.  Nodal temperatures used are those
         automatically stored for the node.  Related commands are SFCALC,
         SALLOW, TALLOW.

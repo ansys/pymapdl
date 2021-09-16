@@ -72,7 +72,7 @@ class SpecialPurpose:
         Modal Analysis in the Structural Analysis Guide. The file
         requirements for the AEROCOEFF command are the same as those
         needed for modal restart as described in Modal Analysis Restart.
-        The AeroSpecs values are specified in a 3×r array *DIM,
+        The AeroSpecs values are specified in a 3×r array ``*DIM``,
         where r is a positive integer equal to the number of interblade
         phase angles and the pressure modes solved for in the CFD
         analysis.
@@ -92,7 +92,7 @@ class SpecialPurpose:
         The number of AeroScalar values must be equal to the number of
         pressure modes ( from Aero- Specs). If the number of AeroScalar
         values is greater than 1, the values must be entered by defining
-        an array *DIM and entering the array name in the AeroScalar
+        an array ``*DIM`` and entering the array name in the AeroScalar
         field. For a discussion of how AeroScalar values are computed, see
         Scaling Aerodynamic Coupling Coefficients.
 
@@ -237,7 +237,7 @@ class SpecialPurpose:
         command during preprocessing) at the harmonic indices specified via the
         CYCOPT command.
 
-        The aerodynamic coefficients are specified in a 5×(N×r) array (*DIM),
+        The aerodynamic coefficients are specified in a 5×(N×r) array (``*DIM``),
         where N is the number of blades and r can be any positive integer. Each
         column has the structure:
 
@@ -247,7 +247,7 @@ class SpecialPurpose:
         (equal to the number of blades) while keeping m and n constant.
 
         For constant (frequency-independent) mistuning, the stiffness
-        parameters are specified in an N×1 array (*DIM) where N is the number
+        parameters are specified in an N×1 array (``*DIM``) where N is the number
         of blades.
 
         For stiffness mistuning, each row entry represents the deviation of

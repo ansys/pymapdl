@@ -425,8 +425,8 @@ class MapdlMath:
             * ``"USR2BCS"`` - Mapping vector relating the full set of
               external nodal DOFs to the subset that the solver uses
             * ``"GMAT"`` - Constraint equation matrix
-            * ``"K"``_RE - Real part of the stiffness matrix
-            * ``"K"``_IM - Imaginary part of the stiffness matrix
+            * ``"K_RE"`` - Real part of the stiffness matrix
+            * ``"K_IM"`` - Imaginary part of the stiffness matrix
 
         asarray : bool, optional
             Return a ``scipy`` array rather than an APDLMath matrix.
@@ -1235,7 +1235,7 @@ class AnsVec(ApdlMathObj):
         self._mapdl.run(f"*HPROD,{self.id},{vec.id},{name}")
         return objout
         
-    def copy(self) -> AnsVec:
+    def copy(self):
         """Return a copy of this vector"""
         return AnsVec(ApdlMathObj.copy(self), self._mapdl)
 
@@ -1258,7 +1258,7 @@ class AnsVec(ApdlMathObj):
         self._mapdl.run(f"*DOT,{self.id},{vec.id},py_val")
         return self._mapdl.scalar_param("py_val")
 
-    def asarray(self) -> numpy.ndarray:
+    def asarray(self) -> np.ndarray:
         """Returns vector as a numpy array
 
         Examples
@@ -1294,7 +1294,7 @@ class AnsMat(ApdlMathObj):
         return int(self._mapdl.scalar_param(self.id + "_COLDIM"))
 
     @property
-    def size(self) > int:
+    def size(self) -> int:
         """Number of items in this matrix."""
         return self.nrow*self.ncol
 
@@ -1309,7 +1309,7 @@ class AnsMat(ApdlMathObj):
     def sym(self):  # BUG this is not always true
         return True
 
-    def asarray(self) -> numpy.ndarray:
+    def asarray(self) -> np.ndarray:
         """Returns vector as a numpy array.
 
         Examples
@@ -1372,7 +1372,7 @@ class AnsMat(ApdlMathObj):
         return AnsVec(name, self._mapdl)
 
     @property
-    def T(self) -> AnsMat:
+    def T(self):
         """Returns the transpose of a MAPDL matrix.
 
         Examples
@@ -1416,7 +1416,7 @@ class AnsDenseMat(AnsMat):
     def __repr__(self):
         return f'Dense APDLMath Matrix ({self.nrow}, {self.ncol})'
 
-    def copy(self) -> AnsDenseMat:
+    def copy(self):
         """Return a copy of this matrix"""
         return AnsDenseMat(ApdlMathObj.copy(self), self._mapdl)
 
@@ -1430,7 +1430,7 @@ class AnsSparseMat(AnsMat):
     def __repr__(self):
         return f'Sparse APDLMath Matrix ({self.nrow}, {self.ncol})'
 
-    def copy(self) -> AnsSparseMat:
+    def copy(self):
         """Return a copy of this matrix.
 
         Matrix remains in MAPDL.
@@ -1447,7 +1447,7 @@ class AnsSparseMat(AnsMat):
         """
         return AnsSparseMat(ApdlMathObj.copy(self), self._mapdl)
 
-    def todense(self) -> numpy.ndarray:
+    def todense(self) -> np.ndarray:
         """Return this array as a dense np.ndarray
 
         Examples

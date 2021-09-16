@@ -587,12 +587,7 @@ class Setup:
         Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide for
         more information.
 
-        Table: 211:: : NSOL - Valid Item and Component Labels
-
-        Table: 212:: : NSOL - Valid Item and Component Labels for ANSYS LS-DYNA
-        Nodal Results
-
-         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
         """
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"

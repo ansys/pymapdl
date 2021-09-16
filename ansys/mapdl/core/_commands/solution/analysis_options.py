@@ -747,7 +747,7 @@ class AnalysisOptions:
             They are only valid when Option = ADJUST or MORPH.  Control
             parameter for opening gap. Close the opening gap if the
             absolute value of the gap is smaller than the CGAP value. CGAP
-            defaults to 0.25*PINB (where PINB is the pinball radius) for
+            defaults to ``0.25*PINB`` (where PINB is the pinball radius) for
             bonded and no-separation contact; otherwise it defaults to the
             value of real constant ICONT.
 
@@ -755,7 +755,7 @@ class AnalysisOptions:
             They are only valid when Option = ADJUST or MORPH.  Control
             parameter for initial penetration. Close the initial
             penetration if the absolute value of the penetration is
-            smaller than the CPEN value. CPEN defaults to 0.25*PINB (where
+            smaller than the CPEN value. CPEN defaults to ``0.25*PINB`` (where
             PINB is the pinball radius) for any type of interface behavior
             (either bonded or standard contact).
 
@@ -2674,24 +2674,28 @@ class AnalysisOptions:
             BONDED). The tables in the Notes section show how the contact
             status is adjusted by CNKMOD and/or the ContKey setting.
 
-            CURRENT - Use the current contact status from the restart snapshot (default). If the
-                      previous run is nonlinear, then the nonlinear contact
-                      status at the point of restart is frozen and used
+            CURRENT - Use the current contact status from the restart
+                      snapshot (default). If the previous run is
+                      nonlinear, then the nonlinear contact status at
+                      the point of restart is frozen and used
                       throughout the linear perturbation analysis.
 
-            STICKING - For frictional contact pairs (MU > 0), use sticking contact (e.g., MU*KN for
-                       tangential contact stiffness)  everywhere the contact
-                       state is closed (i.e., status is sticking or sliding).
-                       This option only applies to contact pairs that are in
-                       contact and have a frictional coefficient MU greater
-                       than zero. Contact pairs without friction (MU = 0) and
-                       in a sliding state remain free to slide in the linear
+            STICKING - For frictional contact pairs (MU > 0), use
+                       sticking contact (e.g., ``MU*KN`` for tangential
+                       contact stiffness) everywhere the contact state
+                       is closed (i.e., status is sticking or
+                       sliding).  This option only applies to contact
+                       pairs that are in contact and have a frictional
+                       coefficient MU greater than zero. Contact pairs
+                       without friction (MU = 0) and in a sliding
+                       state remain free to slide in the linear
                        perturbation analysis.
 
-            BONDED - Any contact pairs that are in the closed (sticking or sliding) state are moved
-                     to bonded (for example, KN for both normal and tangential
-                     contact stiffness). Contact pairs that have a status of
-                     far-field or near-field remain open.
+            BONDED - Any contact pairs that are in the closed
+                     (sticking or sliding) state are moved to bonded
+                     (for example, KN for both normal and tangential
+                     contact stiffness). Contact pairs that have a
+                     status of far-field or near-field remain open.
 
         loadcontrol
             Key that controls how the load vector of {Fperturbed} is
@@ -3140,7 +3144,7 @@ class AnalysisOptions:
             Factor used to control the range of eigenvalues computed for each
             supernode. The value of RangeFact must be a number between 1.0 and
             5.0. By default the RangeFact value is set to 2.0, which means that
-            all eigenvalues between 0 and 2*FREQE are computed for each
+            all eigenvalues between 0 and ``2*FREQE`` are computed for each
             supernode (where FREQE is the upper end of the frequency range of
             interest as specified on the MODOPT command). As the RangeFact
             value increases, the eigensolution for the SNODE solver becomes

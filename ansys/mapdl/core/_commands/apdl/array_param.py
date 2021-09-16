@@ -4,19 +4,21 @@ class ArrayParam:
                **kwargs):
         """Calculates the coefficients for, or evaluates, a Fourier series.
 
-        APDL Command: *MFOURI
+        APDL Command: ``*MFOURI``
 
         Parameters
         ----------
         oper
             Type of Fourier operation:
 
-            Calculate Fourier coefficients COEFF from MODE, ISYM, THETA, and CURVE. - Evaluate the Fourier curve CURVE from COEFF, MODE, ISYM andTHETA
+            Calculate Fourier coefficients COEFF from MODE, ISYM,
+            THETA, and CURVE. - Evaluate the Fourier curve CURVE from
+            COEFF, MODE, ISYM and THETA.
 
         coeff
             Name of the array parameter vector containing the Fourier
             coefficients (calculated if Oper = FIT, required as input if Oper =
-            EVAL).  See *SET for name restrictions.
+            EVAL).  See ``*SET`` for name restrictions.
 
         mode
             Name of the array parameter vector containing the mode numbers of
@@ -38,21 +40,24 @@ class ArrayParam:
 
         Notes
         -----
-        Calculates the coefficients of a Fourier series for a given curve, or
-        evaluates the Fourier curve from the given (or previously calculated)
-        coefficients.  The lengths of the COEFF, MODE, and ISYM vectors must be
-        the same--typically two times the number of modes desired, since two
-        terms (sine and cosine) are generally required for each mode.  The
-        lengths of the CURVE and THETA vectors should be the same or the
-        smaller of the two will be used.  There should be a sufficient number
-        of points to adequately define the curve--at least two times the number
-        of coefficients.  A starting array element number (1) must be defined
-        for each array parameter vector.  The vector specifications *VLEN,
-        *VCOL, *VABS, *VFACT, and *VCUM do not apply to this command.  Array
-        elements should not be skipped with the *VMASK and the NINC value of
-        the *VLEN specifications.  The vector being calculated (COEFF if Oper
-        is FIT, or CURVE if Oper is EVAL) must exist as a dimensioned array
-        [*DIM].
+        Calculates the coefficients of a Fourier series for a given
+        curve, or evaluates the Fourier curve from the given (or
+        previously calculated) coefficients.  The lengths of the
+        COEFF, MODE, and ISYM vectors must be the same--typically two
+        times the number of modes desired, since two terms (sine and
+        cosine) are generally required for each mode.  The lengths of
+        the CURVE and THETA vectors should be the same or the smaller
+        of the two will be used.  There should be a sufficient number
+        of points to adequately define the curve--at least two times
+        the number of coefficients.  A starting array element number
+        (1) must be defined for each array parameter vector.
+
+        The vector specifications ``*VLEN``, ``*VCOL``, ``*VABS``,
+        ``*VFACT``, and ``*VCUM`` do not apply to this command.  Array
+        elements should not be skipped with the ``*VMASK`` and the
+        NINC value of the ``*VLEN`` specifications.  The vector being
+        calculated (COEFF if Oper is FIT, or CURVE if Oper is EVAL)
+        must exist as a dimensioned array [``*DIM``].
 
         This command is valid in any processor.
         """
@@ -62,20 +67,20 @@ class ArrayParam:
     def mfun(self, parr="", func="", par1="", **kwargs):
         """Copies or transposes an array parameter matrix.
 
-        APDL Command: *MFUN
+        APDL Command: ``*MFUN``
 
         Parameters
         ----------
         parr
-            The name of the resulting array parameter matrix.  See *SET for
+            The name of the resulting array parameter matrix.  See ``*SET`` for
             name restrictions.
 
         func
             Copy or transpose function:
 
-            Par1 is copied to ParR - Par1 is transposed to ParR.  Rows (m) and columns (n) of Par1 matrix are
-                              transposed to resulting ParR matrix of shape
-                              (n,m).
+            Par1 is copied to ParR - Par1 is transposed to ParR.  Rows
+            (m) and columns (n) of Par1 matrix are transposed to
+            resulting ParR matrix of shape (n,m).
 
         par1
             Array parameter matrix input to the operation.
@@ -90,21 +95,26 @@ class ArrayParam:
         where the function (f) is either a copy or transpose, as described
         above.
 
-        Functions are based on the standard FORTRAN definitions where possible.
-        ParR may be the same as Par1.  Starting array element numbers must be
-        defined for each array parameter matrix if it does not start at the
-        first location. For example, *MFUN,A(1,5),COPY,B(2,3) copies matrix B
-        (starting at element (2,3)) to matrix A (starting at element (1,5)).
-        The diagonal corner elements for each submatrix must be defined: the
-        upper left corner by the array starting element (on this command), the
-        lower right corner by the current values from the *VCOL and *VLEN
-        commands.  The default values are the (1,1) element and the last
-        element in the matrix.  No operations progress across matrix planes (in
-        the 3rd dimension).  Absolute values and scale factors may be applied
-        to all parameters [*VABS, *VFACT].  Results may be cumulative [*VCUM].
-        Array elements should not be skipped with the *VMASK and the NINC value
-        of the *VLEN specifications.  The number of rows [*VLEN] applies to the
-        Par1 array.  See the *VOPER command for details.
+        Functions are based on the standard FORTRAN definitions where
+        possible.  ParR may be the same as Par1.  Starting array
+        element numbers must be defined for each array parameter
+        matrix if it does not start at the first location. For
+        example, ``*MFUN,A(1,5),COPY,B(2,3)`` copies matrix B
+        (starting at element (2,3)) to matrix A (starting at element
+        (1,5)).  The diagonal corner elements for each submatrix must
+        be defined: the upper left corner by the array starting
+        element (on this command), the lower right corner by the
+        current values from the ``*VCOL`` and ``*VLEN`` commands.  The
+        default values are the (1,1) element and the last element in
+        the matrix.  No operations progress across matrix planes (in
+        the 3rd dimension).  Absolute values and scale factors may be
+        applied to all parameters [``*VABS``, ``*VFACT``].  Results
+        may be cumulative [``*VCUM``].
+
+        Array elements should not be skipped with the ``*VMASK`` and the
+        NINC value of the ``*VLEN`` specifications.  The number of
+        rows [``*VLEN``] applies to the Par1 array.  See the
+        ``*VOPER`` command for details.
 
         This command is valid in any processor.
         """
@@ -113,14 +123,14 @@ class ArrayParam:
 
     def moper(self, parr="", par1="", oper="", val1="", val2="",
               val3="", val4="", val5="", val6="", **kwargs):
-        """ Performs matrix operations on array parameter matrices.
+        """Performs matrix operations on array parameter matrices.
 
-        APDL Command: *MOPER
+        APDL Command: ``*MOPER``
 
         Parameters
         ----------
         parr
-            The name of the resulting array parameter matrix.  See *SET for
+            The name of the resulting array parameter matrix.  See ``*SET`` for
             name restrictions.
 
         par1
@@ -132,16 +142,16 @@ class ArrayParam:
         oper
             Matrix operations:
 
-            INVERT - (*MOPER, ParR, Par1, INVERT)
+            INVERT - ``(*MOPER, ParR, Par1, INVERT)``
             Square matrix invert: Inverts the n x n matrix in Par1
             into ParR. The matrix must be well conditioned.
 
             Warning: Non-independent or ill-conditioned equations can
             cause erroneous results. - For large matrices, use the
-            APDL Math operation *LSFACTOR for efficiency (see APDL
+            APDL Math operation ``*LSFACTOR`` for efficiency (see APDL
             Math).
 
-            MULT - (*MOPER, ParR, Par1, MULT, Par2)
+            MULT - ``(*MOPER, ParR, Par1, MULT, Par2)``
             Matrix multiply: Multiplies Par1 by Par2.  The number of
             rows of Par2 must equal the number of columns of Par1 for
             the operation. If Par2 is input with a number of rows
@@ -150,7 +160,7 @@ class ArrayParam:
             number of rows of Par2 equal to the number of columns of
             Par1.
 
-            COVAR - (*MOPER, ParR, Par1, COVAR, Par2)
+            COVAR - ``(*MOPER, ParR, Par1, COVAR, Par2)``
             Covariance: The measure of association between two columns
             of the input matrix (Par1).  Par1, of size m runs (rows)
             by n data (columns) is first processed to produce a row
@@ -160,7 +170,7 @@ class ArrayParam:
             n matrix (ParR) of covariances (with the variances as the
             diagonal terms).
 
-            CORR - (*MOPER, ParR, Par1, CORR, Par2)
+            CORR - ``(*MOPER, ParR, Par1, CORR, Par2)``
             Correlation: The correlation coefficient between two
             variables.  The input matrix (Par1), of size m runs (rows)
             by n data (columns), is first processed to produce a row
@@ -170,7 +180,7 @@ class ArrayParam:
             n matrix (ParR) of correlation coefficients (with a value
             of 1.0 for the diagonal terms).
 
-            SOLV - (*MOPER, ParR, Par1, SOLV, Par2)
+            SOLV - ``(*MOPER, ParR, Par1, SOLV, Par2)``
             Solution of simultaneous equations: Solves the set of n
             equations of n terms of the form an1x1 + an2x2 + ... +
             annxn = bn where Par1 contains the matrix of
@@ -181,10 +191,10 @@ class ArrayParam:
 
             Warning: Non-independent or ill-conditioned equations can
             cause erroneous results. - For large matrices, use the
-            APDL Math operation *LSFACTOR for efficiency (see APDL
+            APDL Math operation ``*LSFACTOR`` for efficiency (see APDL
             Math).
 
-            SORT - (*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)
+            SORT - ``(*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)``
             Matrix sort: Sorts matrix Par1 according to sort vector
             Par2 and places the result back in Par1. Rows of Par1 are
             moved to the corresponding positions indicated by the
@@ -196,15 +206,15 @@ class ArrayParam:
             row positions (the permutation vector).  Sorting Par1
             according to ParR should reproduce the initial ordering.
 
-            NNEAR - (*MOPER, ParR, Par1, NNEAR, Toler)
+            NNEAR - ``(*MOPER, ParR, Par1, NNEAR, Toler)``
             Nearest Node: Quickly determine all the nodes within a
             specified tolerance of a given array.  ParR is a vector of
             the nearest selected nodes, or 0 if no nodes are nearer
             than Toler. Par1 is the n x 3 array of coordinate
             locations. Toler defaults to 1 and is limited to the
-            maximum model size. - (*MOPER, ParR, Par1, ENEAR, Toler)
+            maximum model size.
 
-            ENEAR - (*MOPER, ParR, Par1, ENEAR, Toler)
+            ENEAR - ``(*MOPER, ParR, Par1, ENEAR, Toler)``
             Nearest Element: Quickly determine the elements with
             centroids that are within a specified tolerance of the
             points in a given array. - ParR is a vector of the nearest
@@ -212,7 +222,7 @@ class ArrayParam:
             than Toler. Par1 is the n x 3 array of coordinate
             locations.
 
-            MAP - (*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)
+            MAP - ``(*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)``
 
             Maps the results from one set of points to another. For
             example, you can map pressures from a CFD analysis onto
@@ -256,20 +266,20 @@ class ArrayParam:
             bounds. Results mapping is available from the command line
             only.
 
-            INTP - (*MOPER, ParR, Par1, INTP, Par2)
+            INTP - ``(*MOPER, ParR, Par1, INTP, Par2)``
             Finds the elements that contain each point in the array of
             n x 3 points in Par1. Par2 will contain the set of element
             ID numbers and ParR will contain their n x 3 set of
             natural element coordinates (values between -1 and
             1). Par1 must be in global Cartesian coordinates.
 
-            SGET - (*MOPER, ParR, Par1, SGET, Par2, Label, Comp)
+            SGET - ``(*MOPER, ParR, Par1, SGET, Par2, Label, Comp)``
             Gets the nodal solution item corresponding to Label and
             Comp (see the PLNSOL command) and interpolates it to the
             given element locations. Par1 contains the n x 3 array of
             natural element coordinates (values between -1 and 1) of
             the n element ID numbers in Par2. Par1 and Par2 are
-            usually the output of the *MOPER,,,INTP operation. ParR
+            usually the output of the ``*MOPER,,,INTP`` operation. ParR
             contains the n interpolated results.
 
             Val1, Val2, ..., Val6
@@ -284,12 +294,12 @@ class ArrayParam:
                **kwargs):
         """Writes a matrix to a file in a formatted sequence.
 
-        APDL Command: *MWRITE
+        APDL Command: ``*MWRITE``
 
         Parameters
         ----------
         parr
-            The name of the array parameter. See *SET for name restrictions.
+            The name of the array parameter. See ``*SET`` for name restrictions.
 
         fname
             File name and directory path (248 characters maximum, including the
@@ -311,13 +321,13 @@ class ArrayParam:
         Notes
         -----
         Writes a matrix or vector to a specified file in a formatted sequence.
-        You can also use the *VWRITE command to write data to a specified file.
+        You can also use the ``*VWRITE`` command to write data to a specified file.
         Both commands contain format descriptors on the line immediately
         following the command. The format descriptors can be in either Fortran
         or C format.
 
         Fortran format descriptors are enclosed in parentheses. They must
-        immediately follow the *MWRITE command on a separate line of the same
+        immediately follow the ``*MWRITE`` command on a separate line of the same
         input file. The word FORMAT should not be included. The format must
         specify the number of fields to be written per line, the field width,
         the placement of the decimal point, etc. There should be one field
@@ -325,7 +335,7 @@ class ArrayParam:
         available system FORTRAN FORMAT conventions (see your system FORTRAN
         manual). Any standard FORTRAN real format (such as (4F6.0),
         (E10.3,2X,D8.2), etc.) and character format (A) may be used.  Integer
-        (I) and list-directed (*) descriptors may not be used. Text may be
+        (I) and list-directed (``*``) descriptors may not be used. Text may be
         included in the format as a quoted string. The FORTRAN descriptor must
         be enclosed in parentheses and the format must not exceed 80 characters
         (including parentheses).
@@ -338,18 +348,18 @@ class ArrayParam:
         are %I for integer data, %G for double precision data, %C for
         alphanumeric character data, and %/ for a line break. There must be one
         data descriptor for each specified value in the order of the specified
-        values. The enhanced formats described in *MSG may also be used.
+        values. The enhanced formats described in ``*MSG`` may also be used.
 
         The starting array element number must be defined. Looping continues in
         the directions indicated by the Label argument. The number of loops and
-        loop skipping may also be controlled with the *VLEN and *VMASK
+        loop skipping may also be controlled with the ``*VLEN`` and ``*VMASK``
         commands, which work in the n2 direction (by row on the output file),
-        and by  the *VCOL command, which works in the n1 direction (by column
-        in the output file).  The vector specifications *VABS and *VFACT apply
-        to this command, while *VCUM does not apply to this command. See the
-        *VOPER command for details. If you are in the GUI, the *MWRITE command
+        and by  the ``*VCOL`` command, which works in the n1 direction (by column
+        in the output file).  The vector specifications ``*VABS`` and ``*VFACT`` apply
+        to this command, while ``*VCUM`` does not apply to this command. See the
+        ``*VOPER`` command for details. If you are in the GUI, the ``*MWRITE`` command
         must be contained in an externally prepared file and read into ANSYS
-        (i.e., *USE, /INPUT, etc.).
+        (i.e., ``*USE``, /INPUT, etc.).
 
         This command is valid in any processor.
         """
@@ -360,14 +370,14 @@ class ArrayParam:
                  item2="", it2num="", kloop="", **kwargs):
         """Restores array parameter values into the ANSYS database.
 
-        APDL Command: *VPUT
+        APDL Command: ``*VPUT``
 
         Parameters
         ----------
         parr
-            The name of the input vector array parameter.  See *SET for name
+            The name of the input vector array parameter.  See ``*SET`` for name
             restrictions.  The parameter must exist as a dimensioned array
-            [*DIM] with data input.
+            [``*DIM``] with data input.
 
         entity
             Entity keyword.  Valid keywords are shown for Entity = in the table
@@ -399,40 +409,35 @@ class ArrayParam:
 
         Notes
         -----
-        The *VPUT command is not supported for PowerGraphics displays.
-        Inconsistent results may be obtained if this command is not used in
-        /GRAPHICS, FULL.
+        The ``*VPUT`` command is not supported for PowerGraphics
+        displays.  Inconsistent results may be obtained if this
+        command is not used in /GRAPHICS, FULL.
 
-        Plot and print operations entered via the GUI (Utility Menu> Pltcrtls,
-        Utility Menu> Plot) incorporate the AVPRIN command. This means that the
-        principal and equivalent values are recalculated. If you use *VPUT to
-        put data back into the database, issue the plot commands from the
-        command line to preserve your data.
+        Plot and print operations entered via the GUI (Utility Menu>
+        Pltcrtls, Utility Menu> Plot) incorporate the AVPRIN
+        command. This means that the principal and equivalent values
+        are recalculated. If you use ``*VPUT`` to put data back into
+        the database, issue the plot commands from the command line to
+        preserve your data.
 
-        This operation is basically the inverse of the *VGET operation.  Vector
-        items are put directly (without any coordinate system transformation)
-        into the ANSYS database.  Items can only replace existing items of the
-        database and not create new items.  Degree of freedom results that are
-        replaced in the database are available for all subsequent
-        postprocessing operations.  Other results are changed temporarily and
-        are available mainly for the immediately following print and display
-        operations.  The vector specification *VCUM does not apply to this
-        command.  The valid labels for the location fields (Entity, ENTNUM,
-        Item1, and IT1NUM) are listed below.  Item2 and IT2NUM are not
-        currently used.  Not all items from the *VGET list are allowed on *VPUT
-        since putting values into some locations could cause the database to be
-        inconsistent.
+        This operation is basically the inverse of the ``*VGET``
+        operation.  Vector items are put directly (without any
+        coordinate system transformation) into the ANSYS database.
+        Items can only replace existing items of the database and not
+        create new items.  Degree of freedom results that are replaced
+        in the database are available for all subsequent
+        postprocessing operations.  Other results are changed
+        temporarily and are available mainly for the immediately
+        following print and display operations.  The vector
+        specification ``*VCUM`` does not apply to this command.  The
+        valid labels for the location fields (Entity, ENTNUM, Item1,
+        and IT1NUM) are listed below.  Item2 and IT2NUM are not
+        currently used.  Not all items from the ``*VGET`` list are
+        allowed on ``*VPUT`` since putting values into some locations
+        could cause the database to be inconsistent.
 
         This command is valid in any processor.
 
-        Table: 250:: : *VPUT - POST1 Items
-
-        X, Y, or Z fluid velocity. X, Y, or Z nodal velocity in a transient
-        structural analysis (LS-DYNA analysis or analysis with ANTYPE,TRANS).
-
-        X, Y, or Z magnetic vector potential. X, Y, or Z nodal acceleration in
-        a transient structural analysis (LS-DYNA analysis or analysis with
-        ANTYPE,TRANS).
         """
         command = f"*VPUT,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
         return self.run(command, **kwargs)
@@ -441,7 +446,7 @@ class ArrayParam:
               nread="", **kwargs):
         """Reads a file into a string array parameter.
 
-        APDL Command: *SREAD
+        APDL Command: ``*SREAD``
 
         Parameters
         ----------
@@ -450,7 +455,7 @@ class ArrayParam:
             String array parameters are similar to character arrays, but each
             array element can be as long as 128 characters. If the string
             parameter does not exist, it will be created. The array will be
-            created as: *DIM,StrArray,STRING,nChar,nRead
+            created as: ``*DIM,StrArray,STRING,nChar,nRead```
 
         fname
             File name and directory path (248 characters maximum, including the
@@ -473,7 +478,7 @@ class ArrayParam:
 
         Notes
         -----
-        The *SREAD command reads from a file into a string array
+        The ``*SREAD`` command reads from a file into a string array
         parameter. The file must be an ASCII text file.
         """
         command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
@@ -483,7 +488,7 @@ class ArrayParam:
               con1="", **kwargs):
         """Operates on table parameters.
 
-        APDL Command: *TOPER
+        APDL Command: ``*TOPER``
 
         Parameters
         ----------
@@ -496,8 +501,8 @@ class ArrayParam:
             Name of the first table parameter.
 
         oper
-            The operation to be performed: ADD.  The operation is:  ParR(i,j,k)
-            =   FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1
+            The operation to be performed: ADD.  The operation is:
+            ``ParR(i,j,k) = FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1``
 
         par2
             Name of the second table parameter.
@@ -513,15 +518,15 @@ class ArrayParam:
 
         Notes
         -----
-        *TOPER operates on table parameters according to: ParR(i,j,k) =
-        FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1
+        ``*TOPER`` operates on table parameters according to:
+        ``ParR(i,j,k) = FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1``
 
         Par1 and Par2 must have the same dimensions and the same variable names
         corresponding to those dimensions. Par1 and Par2 must also have
         identical index values for rows, columns, etc.
 
         If you want a local coordinate system for the resulting array, you must
-        dimension it as such using the *DIM command before issuing *TOPER.
+        dimension it as such using the ``*DIM`` command before issuing ``*TOPER``.
 
         This command is valid in any processor.
         """
@@ -531,7 +536,7 @@ class ArrayParam:
     def vabs(self, kabsr="", kabs1="", kabs2="", kabs3="", **kwargs):
         """Applies the absolute value function to array parameters.
 
-        APDL Command: *VABS
+        APDL Command: ``*VABS``
 
         Parameters
         ----------
@@ -557,21 +562,21 @@ class ArrayParam:
 
         Notes
         -----
-        Applies an absolute value to parameters used in certain  *VXX and  *MXX
+        Applies an absolute value to parameters used in certain  ``*VXX`` and ``*MXX``
         operations.  Typical absolute value applications are of the form:
 
-        ParR = |f(|Par1|)|
+        ``ParR = |f(|Par1|)|``
 
         or
 
-        ParR = |(|Par1| o |Par2|)|
+        ``ParR = |(|Par1| o |Par2|)|``
 
         The absolute values are applied to each input parameter value before
         the operation and to the result value after the operation.  Absolute
         values are applied before the scale factors so that negative scale
         factors may be used.  The absolute value settings are reset to the
-        default (no absolute value) after each *VXX or *MXX operation.  Use
-        *VSTAT to list settings.
+        default (no absolute value) after each ``*VXX`` or ``*MXX`` operation.  Use
+        ``*VSTAT`` to list settings.
 
         This command is valid in any processor.
         """
@@ -581,16 +586,16 @@ class ArrayParam:
     def vcol(self, ncol1="", ncol2="", **kwargs):
         """Specifies the number of columns in matrix operations.
 
-        APDL Command: *VCOL
+        APDL Command: ``*VCOL``
 
         Parameters
         ----------
         ncol1
-            Number of columns to be used for Par1 with *MXX operations.
+            Number of columns to be used for Par1 with ``*MXX`` operations.
             Defaults to whatever is needed to fill the result array.
 
         ncol2
-            Number of columns to be used for Par2 with *MXX operations.
+            Number of columns to be used for Par2 with ``*MXX`` operations.
             Defaults to whatever is needed to fill the result array.
 
         Notes
@@ -599,19 +604,19 @@ class ArrayParam:
         operations.  The size of the submatrix used is determined from the
         upper left starting array element (defined on the operation command) to
         the lower right array element (defined by the number of columns on this
-        command and the number of rows on the *VLEN command).
+        command and the number of rows on the ``*VLEN`` command).
 
         The default NCOL is calculated from the maximum number of columns of
-        the result array (the *DIM column dimension) minus the starting
-        location + 1.  For example, *DIM,R,,1,10 and a starting location of
+        the result array (the ``*DIM`` column dimension) minus the starting
+        location + 1.  For example, ``*DIM,R,,1,10`` and a starting location of
         R(1,7) gives a default of 4 columns ( starting with R(1,7), R(1,8),
         R(1,9), and R(1,10)).  Repeat operations automatically terminate at the
         last column of the result array.  Existing values in the rows and
         columns of the results matrix remain unchanged where not overwritten by
         the requested input or operation values.
 
-        The column control settings are reset to the defaults after each *MXX
-        operation.  Use *VSTAT to list settings.
+        The column control settings are reset to the defaults after each ``*MXX``
+        operation.  Use ``*VSTAT`` to list settings.
 
         This command is valid in any processor.
         """
@@ -621,7 +626,7 @@ class ArrayParam:
     def vcum(self, key="", **kwargs):
         """Allows array parameter results to add to existing results.
 
-        APDL Command: *VCUM
+        APDL Command: ``*VCUM``
 
         Parameters
         ----------
@@ -632,13 +637,13 @@ class ArrayParam:
 
         Notes
         -----
-        Allows results from certain *VXX and *MXX operations to overwrite or
+        Allows results from certain ``*VXX`` and ``*MXX`` operations to overwrite or
         add to existing results.  The cumulative operation is of the form:
 
-        ParR = ParR + ParR(Previous)
+        ``ParR = ParR + ParR(Previous)``
 
         The cumulative setting is reset to the default (overwrite) after each
-        *VXX or *MXX operation.  Use *VSTAT to list settings.
+        ``*VXX`` or ``*MXX`` operation.  Use ``*VSTAT`` to list settings.
 
         This command is valid in any processor.
         """
@@ -648,7 +653,7 @@ class ArrayParam:
     def vfact(self, factr="", fact1="", fact2="", fact3="", **kwargs):
         """Applies a scale factor to array parameters.
 
-        APDL Command: *VFACT
+        APDL Command: ``*VFACT``
 
         Parameters
         ----------
@@ -669,19 +674,19 @@ class ArrayParam:
 
         Notes
         -----
-        Applies a scale factor to parameters used in certain *VXX and *MXX
+        Applies a scale factor to parameters used in certain ``*VXX`` and ``*MXX``
         operations.   Typical scale factor applications are of the form:
 
-        ParR = FACTR*f(FACT1*Par1)
+        ``ParR = FACTR*f(FACT1*Par1)``
 
         or
 
-        ParR = FACTR*((FACT1*Par1) o (FACT2*Par2))
+        ``ParR = FACTR*((FACT1*Par1) o (FACT2*Par2))``
 
         The factors are applied to each input parameter value before the
         operation and to the result value after the operation.  The scale
-        factor settings are reset to the default (1.0) after each *VXX or *MXX
-        operation.  Use *VSTAT to list settings.
+        factor settings are reset to the default (1.0) after each ``*VXX`` or ``*MXX``
+        operation.  Use ``*VSTAT`` to list settings.
 
         This command is valid in any processor.
         """
@@ -692,12 +697,12 @@ class ArrayParam:
              **kwargs):
         """Performs a function on a single array parameter.
 
-        APDL Command: *VFUN
+        APDL Command: ``*VFUN``
 
         Parameters
         ----------
         parr
-            The name of the resulting numeric array parameter vector.  See *SET
+            The name of the resulting numeric array parameter vector.  See ``*SET``
             for name restrictions.
 
         func
@@ -705,67 +710,52 @@ class ArrayParam:
 
             Arccosine: ACOS(Par1). - Arcsine: ASIN(Par1).
 
-            Par1 is sorted in ascending order.  *VCOL, *VMASK, *VCUM, and *VLEN,,NINC do not apply.  *VLEN,NROW does apply. - Arctangent: ATAN(Par1).
+            Par1 is sorted in ascending order.  ``*VCOL``, ``*VMASK``,
+            ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
+            ``*VLEN,NROW`` does apply.
 
-            Compress:  Selectively compresses data set.  "True" (*VMASK) values of Par1 (or row positions to be considered according to the NINC value on the *VLEN command) are written in  compressed form to ParR, starting at the specified position. - Copy: Par1 copied to ParR.
+            Compress: Selectively compresses data set.  "True"
+            (``*VMASK``) values of Par1 (or row positions to be considered
+            according to the NINC value on the ``*VLEN`` command) are
+            written in compressed form to ParR, starting at the
+            specified position. - Copy: Par1 copied to ParR.
 
             Cosine: COS(Par1). - Hyperbolic cosine: COSH(Par1).
 
-            Direction cosines of the principal stresses (nX9).  Par1 contains the nX6 component stresses for the n locations of the calculations. - Par1 is sorted in descending order.  *VCOL, *VMASK, *VCUM, and *VLEN,,NINC do
-                              not apply.  *VLEN,NROW does apply.
+            Direction cosines of the principal stresses (nX9).  Par1
+            contains the nX6 component stresses for the n locations of
+            the calculations. - Par1 is sorted in descending order.
+            ``*VCOL``, ``*VMASK``, ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
+            ``*VLEN,NROW`` does apply.
 
-            Euler angles of the principal stresses (nX3).  Par1 contains the nX6 component stresses for the n locations of the calculations. - Exponential: EXP(Par1).
+            Euler angles of the principal stresses (nX3).  Par1
+            contains the nX6 component stresses for the n locations of
+            the calculations. - Exponential: EXP(Par1).
 
-            Expand:  Reverse of the COMP function.  All elements of Par1 (starting at the position specified) are written in expanded form to corresponding "true" (*VMASK) positions (or row positions to be considered according to the NINC value on the *VLEN command) of ParR. - Natural logarithm: LOG(Par1).
+            Expand: Reverse of the COMP function.  All elements of
+            Par1 (starting at the position specified) are written in
+            expanded form to corresponding "true" (``*VMASK``) positions
+            (or row positions to be considered according to the NINC
+            value on the ``*VLEN`` command) of ParR. - Natural logarithm:
+            LOG(Par1).
 
-            Common logarithm: LOG10(Par1). - Nearest integer: 2.783 becomes 3.0, -1.75 becomes -2.0.
+            Common logarithm: LOG10(Par1). - Nearest integer: 2.783
+            becomes 3.0, -1.75 becomes -2.0.
 
-            Logical complement: values   0.0 (false) become 1.0 (true).  Values > 0.0 (true) become 0.0 (false). - Principal stresses (nX5). Par1 contains the nX6 component stresses for the n
-                              locations of the calculations.
+            Logical complement: values 0.0 (false) become 1.0 (true).
+            Values > 0.0 (true) become 0.0 (false). - Principal
+            stresses (nX5). Par1 contains the nX6 component stresses
+            for the n locations of the calculations.
 
-            Power function: Par1**CON1. Exponentiation of any negative number in the vector Par1 to a non-integer power is performed by exponentiating the positive number and prepending the minus sign. For example, -4**2.3 is -(4**2.3). - Sine: SIN(Par1).
+            Power function: ``Par1**CON1``. Exponentiation of any negative
+            number in the vector Par1 to a non-integer power is
+            performed by exponentiating the positive number and
+            prepending the minus sign. For example, ``-4**2.3`` is
+            ``-(4**2.3)``.
 
             Hyperbolic sine: SINH(Par1). - Square root: SQRT(Par1).
 
             Tangent: TAN(Par1). - Hyperbolic tangent: TANH(Par1).
-
-            Tangent to a path at a point:  the slope at a point is determined by linear interpolation half way between the previous and next points.  Points are assumed to be in the global Cartesian coordinate system.  Path points are specified in array Par1 (having 3 consecutive columns of data, with the columns containing the x, y, and z coordinate locations, respectively, of the points).  Only the starting row index and the column index for the x coordinates are specified, such as A(1,1).  The y and z coordinates of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3).  The tangent result, ParR, must also have 3 consecutive columns of data and will contain the tangent direction vector (normalized to 1.0); such as 1,0,0 for an x-direction vector. - Normal to a path and an input vector at a point: determined from the cross-
-                              product of the calculated tangent vector (see
-                              TANG) and the input direction vector (with the i,
-                              j, and k components input as CON1, CON2, and
-                              CON3).  Points are assumed to be in the global
-                              Cartesian coordinate system.  Path points are
-                              specified in array Par1 (having 3 consecutive
-                              columns of data, with the columns containing the
-                              x, y, and z coordinate locations, respectively,
-                              of the points).  Only the starting row index and
-                              the column index for the x coordinates are
-                              specified, such as A(1,1).  The y and z
-                              coordinates of the vector are assumed to begin in
-                              the corresponding next columns, such as A(1,2)
-                              and A(1,3).  The normal result, ParR, must also
-                              have 3 consecutive columns of data and will
-                              contain the normal direction vector (normalized
-                              to 1.0); such as 1,0,0 for an x-direction vector.
-
-            Transforms global Cartesian coordinates of a point to the coordinates of a specified system: points to be transformed are specified in array Par1 (having 3 consecutive columns of data, with the columns containing the x, y, and z global Cartesian coordinate locations, respectively, of the points).  Only the starting row index and the column index for the x coordinates are specified, such as A(1,1).  The y and z coordinates of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3).  Results are transformed to coordinate system CON1 (which may be any valid coordinate system number, such as 1,2,11,12, etc.).  The transformed result, ParR, must also have 3 consecutive columns of data and will contain the corresponding transformed coordinate locations. - Transforms specified coordinates of a point to global Cartesian coordinates:
-                              points to be transformed are specified in array
-                              Par1 (having 3 consecutive columns of data, with
-                              the columns containing the local coordinate
-                              locations (x, y, z or r, θ, z or etc.) of the
-                              points).  Only the starting row index and the
-                              column index for the x coordinates are specified,
-                              such as A(1,1).  The y and z coordinates (or θ
-                              and z, or etc.) of the vector are assumed to
-                              begin in the corresponding next columns, such as
-                              A(1,2) and A(1,3).  Local coordinate locations
-                              are assumed to be in coordinate system CON1
-                              (which may be any valid coordinate system number,
-                              such as 1,2,11,12, etc.).  The transformed
-                              result, ParR, must also have 3 consecutive
-                              columns of data, with the columns containing the
-                              global Cartesian x, y, and z coordinate
-                              locations, respectively.
 
         par1
             Array parameter vector in the operation.
@@ -779,48 +769,8 @@ class ArrayParam:
         Operates on one input array parameter vector and produces one output
         array parameter vector according to:
 
-        ParR = f(Par1)
+        ``ParR = f(Par1)``
 
-        where the functions (f) are described below.  Functions are based on
-        the standard FORTRAN definitions where possible.  Out-of-range function
-        results (or results with exponents whose magnitudes are approximately
-        greater than 32 or less than -32) produce a zero value.  Input and
-        output for angular functions may be radians (default) or degrees
-        [*AFUN].  ParR may be the same as Par1.  Starting array element numbers
-        must be defined for each array parameter vector if it does not start at
-        the first location. For example, *VFUN,A,SQRT,B(5) takes the square
-        root of the fifth element of B and stores the result in the first
-        element of A.  Operations continue on successive array elements [*VLEN,
-        *VMASK] with the default being all successive elements.  Absolute
-        values and scale factors may be applied to all parameters [*VABS,
-        *VFACT].  Results may be cumulative [*VCUM].  Skipping array elements
-        via *VMASK or *VLEN for the TANG and NORM functions skips only the
-        writing of the results (skipped array element data are used in all
-        calculations).  See the *VOPER command for detail   s   .   /   p   >
-        p   >   T   h   i   s       c   o   m   m   a   n   d       i   s
-        v   a   l   i   d       i   n       a   n   y       p   r   o   c   e
-        s   s   o   r   .   /   p   >   /   d   i   v   >   d   i   v       c
-        l   a   s   s   =   "   r   e   f   s   e   c   t   1   "       t   i
-        t   l   e   =   "   M   e   n   u       P   a   t   h   s   "   >   a
-        n   a   m   e   =   "   d   0   e   2   9   2   8   5   8   "   >   /
-        a   >   h   2   >   M   e   n   u       P   a   t   h   s   /   h   2
-        >   t   a   b   l   e       b   o   r   d   e   r   =   "   0   "
-        s   u   m   m   a   r   y   =   "   S   i   m   p   l   e       l   i
-        s   t   "       c   l   a   s   s   =   "   s   i   m   p   l   e   l
-        i   s   t   "   >   t   r   >   t   d   >   s   p   a   n       c   l
-        a   s   s   =   "   g   u   i   m   e   n   u   "   >   s   t   r   o
-        n   g   >   U   t   i   l   i   t   y       M   e   n   u   &g   t   ;
-        P   a   r   a   m   e   t   e   r   s   &g   t   ;   A   r   r   a   y
-        O   p   e   r   a   t   i   o   n   s   &g   t   ;   V   e   c   t   o
-        r       F   u   n   c   t   i   o   n   s   /   s   t   r   o   n   g
-        >   /   s   p   a   n   >   /   t   d   >   /   t   r   >   /   t   a
-        b   l   e   >   /   d   i   v   >   /   d   i   v   >   h   r   >   p
-        c   l   a   s   s   =   "   l   e   g   a   l   f   o   o   t   e   r
-        "   >   s   m   a   l   l   >   i   >   R   e   l   e   a   s   e
-        1   6   .   2       -       &c   o   p   y   ;       S   A   S       I
-        P   ,       I   n   c   .       A   l   l       r   i   g   h   t   s
-        r   e   s   e   r   v   e   d   .   /   i   >   /   s   m   a   l   l
-        >   /   p   >   /   b   o   d   y   >   /   h   t   m   l   >
         """
         command = f"*VFUN,{parr},{func},{par1},{con1},{con2},{con3}"
         return self.run(command, **kwargs)
@@ -828,17 +778,17 @@ class ArrayParam:
     def vitrp(self, parr="", part="", pari="", parj="", park="", **kwargs):
         """Forms an array parameter by interpolation of a table.
 
-        APDL Command: *VITRP
+        APDL Command: ``*VITRP``
 
         Parameters
         ----------
         parr
-            The name of the resulting array parameter.  See *SET for name
+            The name of the resulting array parameter.  See ``*SET`` for name
             restrictions.
 
         part
             The name of the TABLE array parameter.  The parameter must exist as
-            a dimensioned array of type TABLE [*DIM].
+            a dimensioned array of type TABLE [``*DIM``].
 
         pari
             Array parameter vector of I (row) index values for interpolation in
@@ -862,18 +812,18 @@ class ArrayParam:
 
         where ParT is the type TABLE array parameter, and ParI, ParJ, ParK are
         the type ARRAY array parameter vectors of index values for
-        interpolation in ParT.  See the *DIM command for TABLE and ARRAY
+        interpolation in ParT.  See the ``*DIM`` command for TABLE and ARRAY
         declaration types.  Linear interpolation is used.  The starting array
         element number for the TABLE array (ParT) is not used (but a value must
         be input).  Starting array element numbers must be defined for each
         array parameter vector if it does not start at the first location. For
-        example, *VITRP,R(5),TAB(1,1),X(2),Y(4) uses the second element of X
+        example, ``*VITRP,R(5),TAB(1,1),X(2),Y(4)`` uses the second element of X
         and the fourth element of Y as index values (row and column) for a 2-D
         interpolation in TAB and stores the result in the fifth element of R.
-        Operations continue on successive array elements [*VLEN, *VMASK] with
+        Operations continue on successive array elements ``[*VLEN, *VMASK]`` with
         the default being all successive elements.  Absolute values and scale
-        factors may be applied to the result parameter [*VABS, *VFACT].
-        Results may be cumulative [*VCUM].  See the *VOPER command for details.
+        factors may be applied to the result parameter ``[*VABS, *VFACT]``.
+        Results may be cumulative ``[*VCUM]``.  See the ``*VOPER`` command for details.
 
         This command is valid in any processor.
         """
@@ -883,12 +833,12 @@ class ArrayParam:
     def vlen(self, nrow="", ninc="", **kwargs):
         """Specifies the number of rows to be used in array parameter operations.
 
-        APDL Command: *VLEN
+        APDL Command: ``*VLEN``
 
         Parameters
         ----------
         nrow
-            Number of rows to be used with the *VXX or *MXX operations.
+            Number of rows to be used with the ``*VXX`` or ``*MXX`` operations.
             Defaults to the number of rows needed to fill the result array.
 
         ninc
@@ -900,14 +850,14 @@ class ArrayParam:
         The size of the submatrix used is determined from the upper left
         starting array element (defined on the operation command) to the lower
         right array element (defined by the number of rows on this command and
-        the number of columns on the *VCOL command).  NINC allows skipping row
+        the number of columns on the ``*VCOL`` command).  NINC allows skipping row
         operations for some operation commands.  Skipped rows are included in
         the row count.  The starting row number must be defined on the
         operation command for each parameter read and for the result written.
 
         The default NROW is calculated from the maximum number of rows of the
-        result array (the *DIM row dimension) minus the starting location + 1.
-        For example, *DIM,R,,10 and a starting location of R(7) gives a default
+        result array (the ``*DIM`` row dimension) minus the starting location + 1.
+        For example, ``*DIM,R,,10`` and a starting location of R(7) gives a default
         of 4 loops (filling R(7), R(8), R(9), and R(10)).  Repeat operations
         automatically terminate at the last row of the result array.  Existing
         values in the rows and columns of the results matrix remain unchanged
@@ -915,12 +865,12 @@ class ArrayParam:
 
         The stride (NINC) allows operations to be performed at regular
         intervals.  It has no effect on the total number of row operations.
-        Skipped operations retain the previous result.  For example, *DIM,R,,6,
+        Skipped operations retain the previous result.  For example, ``*DIM,R,,6,``
         with a starting location of R(1), NROW = 10, and NINC = 2 calculates
         values for locations R(1), R(3), and R(5) and retains values for
         locations R(2), R(4), and R(6).  A more general skip control may be
-        done by masking [*VMASK].  The row control settings are reset to the
-        defaults after each *VXX or *MXX operation.  Use *VSTAT to list
+        done by masking ``[*VMASK]``.  The row control settings are reset to the
+        defaults after each ``*VXX`` or ``*MXX`` operation.  Use ``*VSTAT`` to list
         settings.
 
         This command is valid in any processor.
@@ -931,7 +881,7 @@ class ArrayParam:
     def vmask(self, par="", **kwargs):
         """Specifies an array parameter as a masking vector.
 
-        APDL Command: *VMASK
+        APDL Command: ``*VMASK``
 
         Parameters
         ----------
@@ -947,19 +897,19 @@ class ArrayParam:
         corresponding mask vector value is checked.  A true value allows the
         operation to be done.  A false value skips the operation (and retains
         the previous results).  A mask vector can be created from direct input,
-        such as M(1) = 1,0,0,1,1,0,1; or from the DATA function of the *VFILL
-        command.  The NOT function of the *VFUN command can be used to reverse
+        such as M(1) = 1,0,0,1,1,0,1; or from the DATA function of the ``*VFILL``
+        command.  The NOT function of the ``*VFUN`` command can be used to reverse
         the logical sense of the mask vector.  The logical compare operations
-        (LT, LE, EQ, NE, GE, and GT) of the *VOPER command also produce a mask
+        (LT, LE, EQ, NE, GE, and GT) of the ``*VOPER`` command also produce a mask
         vector by operating on two other vectors.  Any numeric vector can be
         used as a mask vector since the actual interpretation assumes values
         less than 0.0 are 0.0 (false) and values greater than 0.0 are 1.0
         (true).  If the mask vector is not specified (or has fewer values than
         the result vector), true (1.0) values are assumed for the unspecified
-        values.  Another skip control may be input with NINC on the *VLEN
+        values.  Another skip control may be input with NINC on the ``*VLEN``
         command.  If both are present, operations occur only when both are
         true.  The mask setting is reset to the default (no mask) after each
-        *VXX or *MXX operation.  Use *VSTAT to list settings.
+        ``*VXX`` or ``*MXX`` operation.  Use ``*VSTAT`` to list settings.
 
         This command is valid in any processor.
         """
@@ -970,12 +920,12 @@ class ArrayParam:
               **kwargs):
         """Operates on two array parameters.
 
-        APDL Command: *VOPER
+        APDL Command: ``*VOPER``
 
         Parameters
         ----------
         parr
-            The name of the resulting array parameter vector.  See *SET  for
+            The name of the resulting array parameter vector.  See ``*SET``  for
             name restrictions.
 
         par1
@@ -987,46 +937,73 @@ class ArrayParam:
 
             Addition: Par1+Par2. - Subtraction: Par1-Par2.
 
-            Multiplication: Par1*Par2. - Division: Par1/Par2  (a divide by zero results in a value of zero).
+            Multiplication: ``Par1*Par2``.
+
+            Division: Par1/Par2  (a divide by zero results in a value of zero).
 
             Minimum: minimum of Par1 and Par2. - Maximum: maximum of Par1 and Par2.
 
-            Less than comparison: Par1<Par2 gives 1.0 if true, 0.0 if false. - Less than or equal comparison: Par1 Par2 gives 1.0 if true, 0.0 if false.
+            Less than comparison: Par1<Par2 gives 1.0 if true, 0.0 if
+            false. - Less than or equal comparison: Par1 Par2 gives
+            1.0 if true, 0.0 if false.
 
-            Equal comparison: Par1 = Par2 gives 1.0 if true, 0.0 if false. - Not equal comparison: Par1 ≠ Par2 gives 1.0 if true, 0.0 if false.
+            Equal comparison: Par1 = Par2 gives 1.0 if true, 0.0 if
+            false. - Not equal comparison: Par1 ≠ Par2 gives 1.0 if
+            true, 0.0 if false.
 
-            Greater than or equal comparison: Par1 Par2 gives 1.0 if true, 0.0 if false. - Greater than comparison: Par1>Par2 gives 1.0 if true, 0.0 if false.
+            Greater than or equal comparison: Par1 Par2 gives 1.0 if
+            true, 0.0 if false. - Greater than comparison: Par1>Par2
+            gives 1.0 if true, 0.0 if false.
 
-            First derivative: d(Par1)/d(Par2).  The derivative at a point is determined  over points half way between the previous and next points (by linear  interpolation). Par1 must be a function (a unique Par1 value for each Par2 value) and Par2 must be in ascending order. - Second derivative: d2(Par1)/d(Par2)2.  See also DER1.
+            First derivative: d(Par1)/d(Par2).  The derivative at a
+            point is determined over points half way between the
+            previous and next points (by linear interpolation). Par1
+            must be a function (a unique Par1 value for each Par2
+            value) and Par2 must be in ascending order. - Second
+            derivative: d2(Par1)/d(Par2)2.  See also DER1.
 
-            Single integral:    Par1 d(Par2), where CON1 is the integration constant.  The integral at a point is determined by using the single integration procedure described in the Mechanical APDL Theory Reference. - Double integral:       Par1 d(Par2), where CON1 is the integration constant of
-                              the first integral and CON2 is the integration
-                              constant of the second integral.  If Par1
-                              contains acceleration data, CON1 is the initial
-                              velocity and CON2 is the initial displacement.
-                              See also INT1.
+            Single integral: Par1 d(Par2), where CON1 is the
+            integration constant.  The integral at a point is
+            determined by using the single integration procedure
+            described in the Mechanical APDL Theory Reference. -
+            Double integral: Par1 d(Par2), where CON1 is the
+            integration constant of the first integral and CON2 is the
+            integration constant of the second integral.  If Par1
+            contains acceleration data, CON1 is the initial velocity
+            and CON2 is the initial displacement.  See also INT1.
 
-            Dot product: Par1  . Par2.  Par1 and Par2 must each have three consecutive columns of data, with the columns containing the i, j, and k vector components, respectively.  Only the starting row index and the column index for the i components are specified for Par1 and Par2, such as A(1,1).  The j and k components of the vector are assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3). - Cross product: Par1 x Par2.  Par1, Par2, and ParR must each have 3 components,
-                              respectively.  Only the starting row index and
-                              the column index for the i components are
-                              specified for Par1, Par2, and ParR, such as
-                              A(1,1).  The j and k components of the vector are
-                              assumed to begin in the corresponding next
-                              columns, such as A(1,2) and A(1,3).
+            Dot product: Par1 . Par2.  Par1 and Par2 must each have
+            three consecutive columns of data, with the columns
+            containing the i, j, and k vector components,
+            respectively.  Only the starting row index and the column
+            index for the i components are specified for Par1 and
+            Par2, such as A(1,1).  The j and k components of the
+            vector are assumed to begin in the corresponding next
+            columns, such as A(1,2) and A(1,3). - Cross product: Par1
+            x Par2.  Par1, Par2, and ParR must each have 3 components,
+            respectively.  Only the starting row index and the column
+            index for the i components are specified for Par1, Par2,
+            and ParR, such as A(1,1).  The j and k components of the
+            vector are assumed to begin in the corresponding next
+            columns, such as A(1,2) and A(1,3).
 
-            Gather:  For a vector of position numbers, Par2, copy the value of Par1 at each position number to ParR.  Example:  for Par1 = 10,20,30,40 and Par2 = 2,4,1;  ParR = 20,40,10. - Scatter:  Opposite of GATH operation.  For a vector of position numbers, Par2,
-                              copy the value of Par1 to that position number in
-                              ParR.  Example: for Par1 = 10,20,30,40,50 and
-                              Par2 = 2,1,0,5,3; ParR = 20,10,50,0,40.
+            Gather: For a vector of position numbers, Par2, copy the
+            value of Par1 at each position number to ParR.  Example:
+            for Par1 = 10,20,30,40 and Par2 = 2,4,1; ParR =
+            20,40,10. - Scatter: Opposite of GATH operation.  For a
+            vector of position numbers, Par2, copy the value of Par1
+            to that position number in ParR.  Example: for Par1 =
+            10,20,30,40,50 and Par2 = 2,1,0,5,3; ParR = 20,10,50,0,40.
 
-            Arctangent: arctangent of Par1/Par2 with the sign of each component considered. - Transform the data in Par1 from the global Cartesian coordinate system to the
-                              local coordinate system given in CON1. Par1 must
-                              be an N x 3 (i.e., vector) or an N x 6 (i.e.,
-                              stress or strain tensor) array. If the local
-                              coordinate system is a cylindrical, spherical, or
-                              toroidal system, then you must provide the global
-                              Cartesian coordinates in Par2 as an N x 3 array.
-                              Set CON2 = 1 if the data is strain data.
+            Arctangent: arctangent of Par1/Par2 with the sign of each
+            component considered. - Transform the data in Par1 from
+            the global Cartesian coordinate system to the local
+            coordinate system given in CON1. Par1 must be an N x 3
+            (i.e., vector) or an N x 6 (i.e., stress or strain tensor)
+            array. If the local coordinate system is a cylindrical,
+            spherical, or toroidal system, then you must provide the
+            global Cartesian coordinates in Par2 as an N x 3 array.
+            Set CON2 = 1 if the data is strain data.
 
         par2
             Second array parameter vector in the operation.  May also be a
@@ -1047,23 +1024,23 @@ class ArrayParam:
 
         where the operations (o) are described below.  ParR may be the same as
         Par1 or Par2.  Absolute values and scale factors may be applied to all
-        parameters [*VABS, *VFACT].  Results may be cumulative [*VCUM].
+        parameters [``*VABS``, ``*VFACT``].  Results may be cumulative [``*VCUM``].
         Starting array element numbers must be defined for each array parameter
         vector if it does not start at the first location, such as
-        *VOPER,A,B(5),ADD,C(3) which adds the third element of C to the fifth
+        ``*VOPER,A,B(5),ADD,C(3)`` which adds the third element of C to the fifth
         element of B and stores the result in the first element of A.
-        Operations continue on successive array elements [*VLEN, *VMASK] with
+        Operations continue on successive array elements ``[*VLEN, *VMASK]`` with
         the default being all successive elements.  Skipping array elements via
-        *VMASK or *VLEN for the DER_ and INT_ functions skips only the writing
+        ``*VMASK`` or ``*VLEN`` for the DER and INT functions skips only the writing
         of the results (skipped array element data are used in all
         calculations).
 
         Parameter functions and operations are available to operate on a scalar
         parameter or a single element of an array parameter, such as SQRT(B) or
-        SQRT(A(4)).  See the *SET command for details.  Operations on a
+        SQRT(A(4)).  See the ``*SET`` command for details.  Operations on a
         sequence of array elements can be done by repeating the desired
-        function or operation in a do-loop [*DO].  The vector operations within
-        the ANSYS program (*VXX commands) are internally programmed do-loops
+        function or operation in a do-loop ``[*DO]``.  The vector operations within
+        the ANSYS program (``*VXX`` commands) are internally programmed do-loops
         that conveniently perform the indicated operation over a sequence of
         array elements.  If the array is multidimensional, only the first
         subscript is incremented in the do-loop, that is, the operation repeats
@@ -1072,9 +1049,9 @@ class ArrayParam:
         defined for each parameter read and for the result written.
 
         The default number of loops is from the starting result location to the
-        last result location and can be altered with the *VLEN command.  A
+        last result location and can be altered with the ``*VLEN`` command.  A
         logical mask vector may be defined to control at which locations the
-        operations are to be skipped [*VMASK].  The default is to skip no
+        operations are to be skipped [``*VMASK``].  The default is to skip no
         locations.  Repeat operations automatically terminate at the last array
         element of the result array column if the number of loops is undefined
         or if it exceeds the last result array element.  Zeroes are used in
@@ -1088,31 +1065,43 @@ class ArrayParam:
     def vscfun(self, parr="", func="", par1="", **kwargs):
         """Determines properties of an array parameter.
 
-        APDL Command: *VSCFUN
+        APDL Command: ``*VSCFUN``
 
         Parameters
         ----------
         parr
-            The name of the resulting scalar parameter.  See *SET for name
+            The name of the resulting scalar parameter.  See ``*SET`` for name
             restrictions.
 
         func
             Functions:
 
-            Maximum: the maximum Par1 array element value. - Minimum: the minimum Par1 array element value.
+            Maximum: the maximum Par1 array element value. - Minimum:
+            the minimum Par1 array element value.
 
-            Index location of the maximum Par1 array element value.  Array Par1 is searched starting from its specified index. - Index location of the minimum Par1 array element value.  Array Par1 is searched
-                              starting from its specified index.
+            Index location of the maximum Par1 array element value.
+            Array Par1 is searched starting from its specified
+            index. - Index location of the minimum Par1 array element
+            value.  Array Par1 is searched starting from its specified
+            index.
 
-            Index location of the first nonzero value in array Par1.  Array Par1 is searched starting from its specified index. - Index location of the last nonzero value in array Par1.  Array Par1 is searched
-                              starting from its specified index.
+            Index location of the first nonzero value in array Par1.
+            Array Par1 is searched starting from its specified
+            index. - Index location of the last nonzero value in array
+            Par1.  Array Par1 is searched starting from its specified
+            index.
 
-            Sum:  Par1 (the summation of the Par1 array element values). - Median: value of Par1 at which there are an equal number of values above and
-                              below.
+            Sum: Par1 (the summation of the Par1 array element
+            values). - Median: value of Par1 at which there are an
+            equal number of values above and below.
 
-            Mean: (σ Par1)/NUM, where NUM is the number of summed values. - Variance: (σ ((Par1-MEAN)**2))/NUM.
+            Mean: (σ Par1)/NUM, where NUM is the number of summed
+            values. 
 
-            Standard deviation: square root of VARI. - Root-mean-square: square root of (σ (Par1**2))/NUM.
+            Variance: ``(σ ((Par1-MEAN)**2))/NUM``.
+
+            Standard deviation: square root of VARI. -
+            Root-mean-square: square root of ``(σ (Par1**2))/NUM``.
 
         par1
             Array parameter vector in the operation.
@@ -1126,12 +1115,12 @@ class ArrayParam:
 
         where the functions (f) are described below. The starting array element
         number must be defined for the array parameter vector.  For example,
-        *VSCFUN,MU,MEAN,A(1) finds the mean of the A vector values, starting
+        ``*VSCFUN,MU,MEAN,A(1)`` finds the mean of the A vector values, starting
         from the first value and stores the result as parameter MU.  Operations
-        use successive array elements [*VLEN, *VMASK] with the default being
+        use successive array elements ``[*VLEN, *VMASK]`` with the default being
         all successive array elements.  Absolute values and scale factors may
-        be applied to all parameters [*VABS, *VFACT].  Results may be
-        cumulative [*VCUM].  See the *VOPER command for details.
+        be applied to all parameters ``[*VABS, *VFACT]``.  Results may be
+        cumulative ``[*VCUM]``.  See the ``*VOPER`` command for details.
 
         This command is valid in any processor.
         """
@@ -1141,12 +1130,12 @@ class ArrayParam:
     def vstat(self, **kwargs):
         """Lists the current specifications for the array parameters.
 
-        APDL Command: *VSTAT
+        APDL Command: ``*VSTAT``
 
         Notes
         -----
-        Lists the current specifications for the *VABS, *VCOL, *VCUM, *VFACT,
-        *VLEN, and *VMASK commands.
+        Lists the current specifications for the ``*VABS``, ``*VCOL``,
+        ``*VCUM``, ``*VFACT``, ``*VLEN``, and ``*VMASK`` commands.
 
         This command is valid in any processor.
         """
@@ -1159,7 +1148,7 @@ class ArrayParam:
                par19="", **kwargs):
         """Writes data to a file in a formatted sequence.
 
-        APDL Command: *VWRITE
+        APDL Command: ``*VWRITE``
 
         Parameters
         ----------
@@ -1172,22 +1161,22 @@ class ArrayParam:
 
         Notes
         -----
-        You use *VWRITE to write data to a file in a formatted sequence. Data
+        You use ``*VWRITE`` to write data to a file in a formatted sequence. Data
         items (Par1, Par2, etc.) may be array parameters, scalar parameters,
         character parameters (scalar or array), or constants.  You must
         evaluate expressions and functions in the data item fields before using
-        the *VWRITE command, since initially they will be evaluated to a
+        the ``*VWRITE`` command, since initially they will be evaluated to a
         constant and remain constant throughout the operation.  Unless a file
-        is defined with the *CFOPEN  command, data is written to the standard
+        is defined with the ``*CFOPEN``  command, data is written to the standard
         output file. Data written to the standard output file may be diverted
         to a different file by first switching the current output file with the
-        /OUTPUT command. You can also use the *MWRITE command to write data to
+        /OUTPUT command. You can also use the ``*MWRITE`` command to write data to
         a specified file. Both commands contain format descriptors on the line
         immediately following the command. The format descriptors can be in
         either Fortran or C format.
 
         You must enclose Fortran format descriptors in parentheses. They must
-        immediately follow the *VWRITE command on a separate line of the same
+        immediately follow the ``*VWRITE`` command on a separate line of the same
         input file.  Do not include the word FORMAT. The format must specify
         the number of fields to be written per line, the field width, the
         placement of the decimal point, etc.  You should use one field
@@ -1211,25 +1200,27 @@ class ArrayParam:
         are %I for integer data, %G for double precision data, %C for
         alphanumeric character data, and %/ for a line break. There must be one
         data descriptor for each specified value (8 maximum) in the order of
-        the specified values. The enhanced formats described in *MSG may also
+        the specified values. The enhanced formats described in ``*MSG`` may also
         be used.
 
-        For array parameter items, you must define the starting array element
-        number. Looping continues (incrementing the vector index number of each
-        array parameter by one) each time you output a line, until the maximum
-        array vector element is written.  For example, *VWRITE,A(1) followed by
-        (F6.0) will write one value per output line, i.e., A(1), A(2), A(3),
-        A(4), etc.  You write constants and scalar parameters with the same
-        values for each loop.  You can also control the number of loops and
-        loop skipping with the *VLEN and *VMASK commands.  The vector
-        specifications *VABS,  *VFACT, and *VCUM  do not apply to this command.
-        If looping continues beyond the supplied data array's length, zeros
-        will be output for numeric array parameters and blanks for character
-        array parameters.  For multi-dimensioned array parameters, only the
-        first (row) subscript is incremented.  See the *VOPER command for
-        details.  If you are in the GUI, the *VWRITE command must be contained
-        in an externally prepared file and read into ANSYS (i.e., *USE, /INPUT,
-        etc.).
+        For array parameter items, you must define the starting array
+        element number. Looping continues (incrementing the vector
+        index number of each array parameter by one) each time you
+        output a line, until the maximum array vector element is
+        written.  For example, ``*VWRITE,A(1)`` followed by (F6.0)
+        will write one value per output line, i.e., A(1), A(2), A(3),
+        A(4), etc.  You write constants and scalar parameters with the
+        same values for each loop.  You can also control the number of
+        loops and loop skipping with the ``*VLEN`` and ``*VMASK``
+        commands.  The vector specifications ``*VABS``, ``*VFACT``,
+        and ``*VCUM`` do not apply to this command.  If looping
+        continues beyond the supplied data array's length, zeros will
+        be output for numeric array parameters and blanks for
+        character array parameters.  For multi-dimensioned array
+        parameters, only the first (row) subscript is incremented.
+        See the ``*VOPER`` command for details.  If you are in the GUI,
+        the ``*VWRITE`` command must be contained in an externally
+        prepared file and read into ANSYS (i.e., ``*USE``, /INPUT, etc.).
 
         This command is valid in any processor.
 

@@ -9,7 +9,7 @@ class MultiFieldSolverLoadTransfer:
         Parameters
         ----------
         type\_
-             Set to SURF for a surface load transfer. Only surface load
+            Set to SURF for a surface load transfer. Only surface load
             transfers are available for MFX.
 
         fname1

@@ -657,39 +657,25 @@ class Database:
         label
             Specifies items not to be offset.
 
-            NODE - Node numbers
-
-            ELEM - Element numbers
-
-            KP - Keypoint numbers
-
-            LINE - Line numbers
-
-            AREA - Area numbers
-
-            VOLU - Volume numbers
-
-            MAT - Material numbers
-
-            TYPE - Element type numbers
-
-            REAL - Real constant numbers
-
-            CSYS - Coordinate system numbers
-
-            SECN - Section numbers
-
-            CP - Coupled set numbers
-
-            CE - Constraint equation numbers
-
-            CLEAR - All items will be offset
-
-            STATUS - Shows which items are specified notto be offset.
+            - ``"NODE"`` : Node numbers
+            - ``"ELEM"`` : Element numbers
+            - ``"KP"`` : Keypoint numbers
+            - ``"LINE"`` : Line numbers
+            - ``"AREA"`` : Area numbers
+            - ``"VOLU"`` : Volume numbers
+            - ``"MAT"`` : Material numbers
+            - ``"TYPE"`` : Element type numbers
+            - ``"REAL"`` : Real constant numbers
+            - ``"CSYS"`` : Coordinate system numbers
+            - ``"SECN"`` : Section numbers
+            - ``"CP"`` : Coupled set numbers
+            - ``"CE"`` : Constraint equation numbers
+            - ``"CLEAR"`` : All items will be offset
+            - ``"STATUS"`` : Shows which items are specified not to be offset.
 
         Notes
         -----
-         The NOOFFSET command specifies data items not to be offset by a set of
+        The NOOFFSET command specifies data items not to be offset by a set of
         data read from a CDREAD command.
         """
         command = "NOOFFSET,%s" % (str(label))

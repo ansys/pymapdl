@@ -114,7 +114,7 @@ class RadiationMat:
         nzone
             Number of sampling zones for the hidden procedure (100 maximum for
             3-D, 1000 maximum for 2-D).  Defaults to 20 for 3-D, 200 for 2-D.
-            Number of points is 2*NZONE for 2-D and 2*NZONE*(NZONE+1) for 3-D.
+            Number of points is ``2*NZONE`` for 2-D and ``2*NZONE*(NZONE+1)`` for 3-D.
         """
         command = f"VTYPE,{nohid},{nzone}"
         return self.run(command, **kwargs)

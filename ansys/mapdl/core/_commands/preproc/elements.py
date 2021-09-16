@@ -218,11 +218,12 @@ class Elements:
             based on the average element size and extrusion distance.
 
         space
-            Spacing ratio. If positive, this value is the nominal ratio of the
-            last division size to the first division size (if > 1.0, sizes
-            increase, if < 1.0, sizes decrease). If negative, |SPACE| is the
-            nominal ratio of the center division size to the end division size.
-            The default value is 1.0 (uniform spacing).
+            Spacing ratio. If positive, this value is the nominal
+            ratio of the last division size to the first division size
+            (if > 1.0, sizes increase, if < 1.0, sizes decrease). If
+            negative, ``|SPACE|`` is the nominal ratio of the center
+            division size to the end division size.  The default value
+            is 1.0 (uniform spacing).
 
         dist
             Distance to extrude in the global Z direction for the plane strain
@@ -763,12 +764,12 @@ class Elements:
         Parameters
         ----------
         ncomp
-             Component name of the surface nodes of a structure which attach to
+            Component name of the surface nodes of a structure which attach to
             the TRANS126 elements. You must enclose name-strings in single
             quotes in the EMTGEN command line.
 
         ecomp
-             Component name of the TRANS126 elements generated. You must
+            Component name of the TRANS126 elements generated. You must
             enclose name-strings in single quotes in the EMTGEN command line.
             Defaults to EMTELM.
 
@@ -813,10 +814,10 @@ class Elements:
         the gap distance between the device and the plane is small compared to
         the overall surface area dimensions of the device. This assumption
         allows for a point-wise closed-form solution of capacitance between the
-        surface nodes and the plane; i.e. CAP = EPZERO*AREA/GAP, where EPZERO
+        surface nodes and the plane; i.e. CAP = ``EPZERO*AREA/GAP``, where EPZERO
         if the free-space permittivity, AREA is the area associated with the
         node, and GAP is the gap between the node and the plane. The area for
-        each node is computed using the ARNODE function in ANSYS. See the *GET
+        each node is computed using the ARNODE function in ANSYS. See the ``*GET``
         command description for more information on the ARNODE function.
 
         With a distributed set of TRANS126 elements attached directly to the

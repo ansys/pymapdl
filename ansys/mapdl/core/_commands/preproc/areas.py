@@ -861,7 +861,7 @@ class Areas:
         The thickness and density are associated to the areas via the AATT
         command.
 
-        Items calculated via ASUM and later retrieved via a *GET or *VGET
+        Items calculated via ASUM and later retrieved via a ``*GET`` or ``*VGET``
         command are valid only if the model is not modified after issuing the
         ASUM command.
 
@@ -954,7 +954,7 @@ class Areas:
         the areas have a material (and real constant) association via the AATT
         command.  For lines and keypoints, a unit density is assumed,
         irrespective of any material associations [LATT, KATT, MAT].  Items
-        calculated by GSUM and later retrieved by a *GET or *VGET commands are
+        calculated by GSUM and later retrieved by a ``*GET`` or ``*VGET`` commands are
         valid only if the model is not modified after the GSUM command is
         issued.  This command combines the functions of the KSUM, LSUM, ASUM,
         and VSUM commands.

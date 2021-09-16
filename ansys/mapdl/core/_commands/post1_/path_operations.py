@@ -308,20 +308,20 @@ class PathOperations:
         This operation exponentiates and adds existing path items according to
         the operation:
 
-        LabR = (|Lab1|FACT1) + (|Lab2|FACT2|)
+        ``LabR = (|Lab1|FACT1) + (|Lab2|FACT2|)``
 
         If Oper = DERI, the command format is:
 
-        PCALC,DERI,LabR,Lab1,Lab2,FACT1
+        ``PCALC,DERI,LabR,Lab1,Lab2,FACT1``
 
         Lab2 must not be blank.  This operation finds a derivative according to
         the operation:
 
-        LabR = FACT1 x d(Lab1)/d(Lab2)
+        ``LabR = FACT1 x d(Lab1)/d(Lab2)``
 
         If Oper = INTG, the command format is:
 
-        PCALC,INTG,LabR,Lab1,Lab2,FACT1
+        ``PCALC,INTG,LabR,Lab1,Lab2,FACT1``
 
         Lab2 must not be blank.  This operation finds an integral according to
         the operation:
@@ -332,7 +332,7 @@ class PathOperations:
 
         If Oper = SIN, COS, ASIN, ACOS, or LOG, the command format is:
 
-        PCALC,Oper,LabR,Lab1,,FACT1,CONST
+        ``PCALC,Oper,LabR,Lab1,,FACT1,CONST``
 
         where the function (SIN, COS, ASIN, ACOS or LOG) is substituted for
         Oper and Lab2 is blank.
@@ -340,15 +340,15 @@ class PathOperations:
         The operation finds the resulting path item according to one of the
         following formulas:
 
-        LabR = FACT2 x sin(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x sin(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x cos(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x cos(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x sin-1(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x sin-1(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x cos-1(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x cos-1(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x log(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x log(FACT1 x Lab1) + CONST``
         """
         command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
@@ -451,9 +451,7 @@ class PathOperations:
         PDEF,STAT to list the path item labels.  Use PDEF,CLEAR to erase all
         labeled path items, except the path geometry items (XG, YG, ZG, S).
 
-        Table: 216:: : PDEF - valid Item and Component Labels
-
-         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, ..., TTOP instead of TEMP.
 
         For more information on the meaning of contact status and its possible

@@ -181,11 +181,13 @@ class Setup:
 
             Pixel size (e.g., 14). Note that this value does no affect the annotation fonts (KEY = 3). Use the /TSPEC command for annotation font size.  - Val5
 
-            Val1 - Family name (e.g., Courier*New) Substitute an asterisk (*) for any blank
-                   character that appears in a family name. If Val1 = MENU, all
-                   other values are ignored and a font selection menu appears
-                   (GUI must be active). When this value is blank ANSYS uses
-                   the first available resource it finds.
+            Val1 - Family name (e.g., ``Courier*New``) Substitute an
+                   asterisk (``*``) for any blank character that
+                   appears in a family name. If Val1 = MENU, all other
+                   values are ignored and a font selection menu
+                   appears (GUI must be active). When this value is
+                   blank ANSYS uses the first available resource it
+                   finds.
 
             Val2 - Weight (0 - 1000)
 
@@ -240,13 +242,13 @@ class Setup:
 
         Notes
         -----
-          Boundary condition symbols, vector arrows, and element coordinate
+        Boundary condition symbols, vector arrows, and element coordinate
         system triads are not transformed to the display coordinate system. The
         display system orientation (for the default view) is X horizontal to
         the right, Y vertical upward, and Z out of the screen (normal).
 
         Line directions and area directions (/PSYMB,LDIR and /PSYMB,ADIR) are
-        not plotted for DSYS >0.
+        not plotted for DSYS > 0.
 
         When you create ANSYS 3-D annotation, the coordinates are stored to the
         database in the DSYS that was active at the time of creation. Changing
@@ -386,7 +388,7 @@ class Setup:
         Notes
         -----
         This command is used for an array parameter plot (a plot created by the
-        *VPLOT command).  Normally the label for curve 1 is "COL 1", the label
+        ``*VPLOT`` command).  Normally the label for curve 1 is "COL 1", the label
         for curve 2 is "COL 2" and so on; the column number is the field
         containing the dependent variables for that particular curve. Issuing
         /GCOLUMN,CURVE, with no string value specified resets the label to the
@@ -502,7 +504,7 @@ class Setup:
         Commands that are not supported by PowerGraphics are listed below.
         These commands are executed using the Key = FULL option, regardless of
         whether PowerGraphics is activated.  Only certain options for /CTYPE,
-        /EDGE, /ESHAPE, *GET, /PNUM, /PSYMB, SHELL, and *VGET are not supported
+        /edge, /ESHAPE, ``*GET``, /PNUM, /PSYMB, SHELL, and ``*VGET`` are not supported
         by PowerGraphics.  (See the descriptions of these commands for more
         information.)
         """

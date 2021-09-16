@@ -26,7 +26,7 @@ class ExplicitDynamics:
                    assembly.
 
         asmid
-             User defined part assembly ID number. The part assembly number
+            User defined part assembly ID number. The part assembly number
             cannot be the same as any currently defined part ID number.
 
         part1, part2, part3, . . . , part16
@@ -878,7 +878,7 @@ class ExplicitDynamics:
         cvect
             The vector containing the global Cartesian coordinates of the
             center of mass for the part. This vector must have been previously
-            defined with a dimension of three (*DIM command) and filled in as
+            defined with a dimension of three (``*DIM`` command) and filled in as
             shown below. If Cvect is blank, the global Cartesian origin (0,0,0)
             is used as the center of mass.
 
@@ -896,7 +896,7 @@ class ExplicitDynamics:
 
         ivect
             The name of a vector containing the components of the inertia
-            tensor. This vector must have been previously defined (*DIM
+            tensor. This vector must have been previously defined (``*DIM``
             command) with a dimension of six and filled in as shown below.
             Vector entries 2, 3, and 5 are ignored if IRCS = 1. There is no
             default for this vector; it must be specified.
@@ -904,7 +904,7 @@ class ExplicitDynamics:
         vvect
             The name of a vector containing the initial velocity (relative to
             the global Cartesian coordinate system) of the rigid part. This
-            vector must have been previously defined (*DIM command) with a
+            vector must have been previously defined (``*DIM`` command) with a
             dimension of six and filled in as shown below. If Vvect is blank,
             the initial velocity defaults to zero.
 
@@ -1082,7 +1082,7 @@ class ExplicitDynamics:
         Parameters
         ----------
         option
-             Label identifying the nonreflecting boundary option to be
+            Label identifying the nonreflecting boundary option to be
             performed.
 
             ADD - Define a nonreflecting boundary (default).
@@ -1207,13 +1207,13 @@ class ExplicitDynamics:
         controls (/GRID, /GTHK, /COLOR, etc.). If working interactively, these
         controls appear in this dialog box for convenience, as well as in their
         standard dialog boxes. You must always create Vect1 and Vect2 (using
-        *DIM) and fill these vectors before smoothing the data. If you're
+        ``*DIM``) and fill these vectors before smoothing the data. If you're
         working interactively, ANSYS automatically creates Vect3 and Vect4, but
         if you're working in batch (command) mode, you must create Vect3 and
-        Vect4 (using *DIM) before issuing EDNDTSD.  Vect3 and Vect4 are then
+        Vect4 (using ``*DIM``) before issuing EDNDTSD.  Vect3 and Vect4 are then
         filled automatically by ANSYS.  In addition, ANSYS creates an
         additional TABLE type array that contains the smoothed array and the
-        unsmoothed data to allow for plotting later with *VPLOT.  Column 1 in
+        unsmoothed data to allow for plotting later with ``*VPLOT``.  Column 1 in
         this table corresponds to Vect1, column 2 to Vect2, and column 3 to
         Vect4.  This array is named Vect3_SMOOTH, up to a limit of 32
         characters. For example, if the array name is X1, the table name is
@@ -1376,7 +1376,7 @@ class ExplicitDynamics:
         Parameters
         ----------
         min\_
-             Minimum contact entity number to be selected and plotted (default
+            Minimum contact entity number to be selected and plotted (default
             = 1).
 
         max\_
@@ -3721,7 +3721,7 @@ class ExplicitDynamics:
         This command exports the displacements, rotations, and temperatures
         calculated in an ANSYS implicit analysis into the `drelax' file, which
         is subsequently read in by ANSYS LS-DYNA when a dynamic relaxation or
-        stress initialization is conducted [EDDRELAX].
+        stress initialization is conducted ``EDDRELAX``.
 
         This command is not written to the Jobname.CDB file when the CDWRITE
         command is issued.

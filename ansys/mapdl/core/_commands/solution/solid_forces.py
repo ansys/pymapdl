@@ -24,7 +24,7 @@ class SolidForces:
         value
             Force value or table name reference for specifying tabular boundary
             conditions.  To specify a table, enclose the table name in percent
-            signs (%), e.g., FK, KPOI, HEAT,%tabname%).  Use the *DIM command
+            signs (%), e.g., FK, KPOI, HEAT,%tabname%).  Use the ``*DIM`` command
             to define a table.
 
         value2

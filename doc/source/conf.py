@@ -93,6 +93,11 @@ numpydoc_xref_param_type = True
 
 # }
 
+# coverage_ignore_modules = [
+#     r'\.plot_directive$',  # Issue with class parameter documentation
+# ]
+
+
 
 # static path
 html_static_path = ['_static']

@@ -1133,7 +1133,7 @@ class Lines:
         inertia, etc.) associated with the selected lines.  Geometry items are
         reported in the global Cartesian coordinate system.  A unit density is
         assumed, irrespective of any material associations [LATT, MAT].  Items
-        calculated by LSUM and later retrieved by a *GET or *VGET command are
+        calculated by LSUM and later retrieved by a ``*GET`` or ``*VGET`` command are
         valid only if the model is not modified after the LSUM command is
         issued.
         """

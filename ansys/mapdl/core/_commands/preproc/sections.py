@@ -500,7 +500,7 @@ class Sections:
         node number) that expresses the function to be mapped. (For example,
         func (17) should be the desired shell thickness at node 17.)  To
         specify a table, enclose the table or array name in percent signs (%)
-        (SECFUNCTION,%tablename%). Use the *DIM command to define a table.
+        (SECFUNCTION,%tablename%). Use the ``*DIM`` command to define a table.
 
         The table or array defines the total shell thickness at any point in
         space. In multilayered sections, the total thickness and each layer

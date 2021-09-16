@@ -171,18 +171,7 @@ class KeyPoints:
         Notes
         -----
         KCENTER should be used in the Cartesian coordinate system
-        (CSYS,0) only.  This command provides three methods to define
-        a keypoint at the center of three locations.
-
-        Three keypoints:
-
-                 , - ~ ~ ~ - ,
-             ,(x)(VAL2)        ' , <--- imaginary circluar arc
-           ,                       ,
-          ,                         ,
-         ,                           ,
-        (x)(VAL1)     (x)(KPNEW)    (x)(VAL3)
-
+        (CSYS,0) only.
         """
         command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
         return parse.parse_kpoint(self.run(command, **kwargs))
@@ -268,7 +257,7 @@ class KeyPoints:
             remaining command fields are ignored (valid only in the GUI).
 
         nfill
-            Fill NFILL keypoints between NP1 and NP2 (defaults to |NP2-NP1|-1).
+            Fill NFILL keypoints between NP1 and NP2 (defaults to ``|NP2-NP1|-1``).
             NFILL must be positive.
 
         nstrt
@@ -278,7 +267,7 @@ class KeyPoints:
         ninc
             Add this increment to each of the remaining filled-in keypoint
             numbers (may be positive or negative).  Defaults to
-            (NP2-NP1)/(NFILL + 1), i.e., linear interpolation.
+            ``(NP2-NP1)/(NFILL + 1)``, i.e., linear interpolation.
 
         space
             Spacing ratio.  Ratio of last division size to first division size.
@@ -311,15 +300,15 @@ class KeyPoints:
             occur.
 
         np1, np2, ninc
-            Generate keypoints from the pattern of keypoints beginning with NP1
-            to NP2 (defaults to NP1) in steps of NINC (defaults to 1).  If NP1
-            = ALL, NP2 and NINC are ignored and the pattern is all selected
-            keypoints [KSEL].  If NP1 is negative, NP2 and NINC are ignored and
-            the last |NP1| keypoints (in sequence from the highest keypoint
-            number) are used as the pattern to be repeated.  If NP1 = P,
-            graphical picking is enabled and all remaining command fields are
-            ignored (valid only in the GUI).  A component name may also be
-            substituted for NP1 (NP2 and NINC are ignored).
+            Generate keypoints from the pattern of keypoints beginning
+            with NP1 to NP2 (defaults to NP1) in steps of NINC
+            (defaults to 1).  If NP1 = ALL, NP2 and NINC are ignored
+            and the pattern is all selected keypoints [KSEL].  If NP1
+            is negative, NP2 and NINC are ignored and the last
+            ``|NP1|`` keypoints (in sequence from the highest keypoint
+            number) are used as the pattern to be repeated.  A
+            component name may also be substituted for NP1 (NP2 and
+            NINC are ignored).
 
         dx, dy, dz
             Keypoint location increments in the active coordinate system (DR,
@@ -529,7 +518,7 @@ class KeyPoints:
         and intersection details.  The three (of six) constants easiest to
         define should be used.  The program will calculate the remaining three
         coordinate constants.  All arguments, except KC1, must be input.  Use
-        the repeat command [*REPEAT] after the KMOVE command to move a series
+        the repeat command [``*REPEAT``] after the KMOVE command to move a series
         of keypoints, if desired.
         """
         command = f"KMOVE,{npt},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
@@ -709,7 +698,7 @@ class KeyPoints:
         of inertia, etc.) associated with the selected keypoints.  Geometry
         items are reported in the global Cartesian coordinate system.  A unit
         density is assumed, irrespective of any material associations [KATT,
-        MAT].  Items calculated by KSUM and later retrieved by a *GET or *VGET
+        MAT].  Items calculated by KSUM and later retrieved by a ``*GET`` or ``*VGET``
         command are valid only if the model is not modified after the KSUM
         command is issued.
         """

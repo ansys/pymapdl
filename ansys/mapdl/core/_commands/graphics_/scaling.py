@@ -258,7 +258,7 @@ class Scaling:
 
         Notes
         -----
-         This command is available for 3-D Open GL devices. 2-D devices are
+        This command is available for 3-D Open GL devices. 2-D devices are
         supported only for the Lab = File variation of the command, allowing
         imported bitmaps to be used for texturing and annotation. Textures can
         affect the speed of many of your display operations. You can increase

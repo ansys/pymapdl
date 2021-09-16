@@ -247,14 +247,16 @@ class Labelling:
         nkey
             Numbering style:
 
-             0  - Color (terminal dependent) the numbered items and show numbers.
+            * ``0`` : Color (terminal dependent) the numbered items
+              and show numbers.
 
-             1  - Color the numbered items.  Do not show the numbers.
+            * ``1`` : Color the numbered items.  Do not show the
+              numbers.
 
-             2  - Show the numbers.  Do not color the items.
+            * ``2`` : Show the numbers.  Do not color the items.
 
-            -1  - Do not color the items or show the numbers. For contour plots, the resulting
-                  display will vary (see below).
+            * ``-1`` : Do not color the items or show the numbers. For
+              contour plots, the resulting display will vary (see below).
 
         Notes
         -----
@@ -262,7 +264,7 @@ class Labelling:
         displays [/PNUM] of nodes, elements, keypoints, lines, areas, and
         volumes.
 
-          Shading is also available for terminals configured with more than 4
+        Shading is also available for terminals configured with more than 4
         color planes [/SHOW].  Color automatically appears for certain items
         and may be manually controlled (off or on) for other items.
 
@@ -836,39 +838,45 @@ class Labelling:
             DEFA - Resets the symbol keys so that ANSYS displays none of the symbols controlled by
                    the /PSYMB command.  The value of the KEY field is ignored.
 
-            STAT - Prints the status of the settings of the symbol keys controlled by the /PSYMB
-                   command.  The KEY field is ignored.
+            STAT - Prints the status of the settings of the symbol
+                   keys controlled by the /PSYMB command.  The KEY
+                   field is ignored.
 
         key
             Symbol key:
 
-            -1  - Effective only if Label = LAYR and solid shape element display (/ESHAPE) is
-                  active. Orientation of all layers appears with the solid
-                  shape element display.
+            ``-1`` - Effective only if Label = LAYR and solid shape
+                  element display (/ESHAPE) is active. Orientation of
+                  all layers appears with the solid shape element
+                  display.
 
-            0  - No symbol (default). If Label = LDIV, then KEY= 0 indicates that the displayed
-                 element divisions will correspond to the existing mesh (the
-                 word MESHED or EXISTING can also be substituted). Also, for
-                 Label = LDIV, if you execute any meshing command (such as
-                 AMESH or VMESH), KEY is set to 0 (MESHED) automatically. If
-                 Label = FBCS, then KEY= 0 indicates that boundary condition
-                 scaling will not be common. The applied and derived
-                 forces/moments will be scaled to their respective maximum
-                 values.
+            0 - No symbol (default). If Label = LDIV, then KEY= 0
+                 indicates that the displayed element divisions will
+                 correspond to the existing mesh (the word MESHED or
+                 EXISTING can also be substituted). Also, for Label =
+                 LDIV, if you execute any meshing command (such as
+                 AMESH or VMESH), KEY is set to 0 (MESHED)
+                 automatically. If Label = FBCS, then KEY= 0 indicates
+                 that boundary condition scaling will not be
+                 common. The applied and derived forces/moments will
+                 be scaled to their respective maximum values.
 
-            1  - Include symbol. If Label = LDIV, then KEY = 1 indicates that the displayed line
-                 divisions will correspond to the value assigned by LESIZE (the
-                 word LESIZE can also be substituted). Also, for Label = LDIV,
-                 if you execute the LESIZE command, KEY is set to 1 (LESIZE)
-                 automatically. If Label = FBCS, then KEY= 1 indicates that
-                 boundary condition scaling will be common. The applied and
-                 derived forces/moments will be scaled to the same maximum
-                 value.
+            1 - Include symbol. If Label = LDIV, then KEY = 1
+                 indicates that the displayed line divisions will
+                 correspond to the value assigned by LESIZE (the word
+                 LESIZE can also be substituted). Also, for Label =
+                 LDIV, if you execute the LESIZE command, KEY is set
+                 to 1 (LESIZE) automatically. If Label = FBCS, then
+                 KEY= 1 indicates that boundary condition scaling will
+                 be common. The applied and derived forces/moments
+                 will be scaled to the same maximum value.
 
-            N  - If Label = LAYR, then N is equal to the layer number. If Label = DOT, then N
-                 can be equal to 0,1,.....15, indicating the dot size. If Label
-                 = LDIV, then KEY = -1, indicates that no element divisions
-                 will be displayed (the word OFF can also be substituted).
+            N - If Label = LAYR, then N is equal to the layer
+                 number. If Label = DOT, then N can be equal to
+                 0,1,.....15, indicating the dot size. If Label =
+                 LDIV, then KEY = -1, indicates that no element
+                 divisions will be displayed (the word OFF can also be
+                 substituted).
 
         Notes
         -----
@@ -899,6 +907,7 @@ class Labelling:
         graphics option (/DEVICE,VECTOR,1).
 
         This command is valid in any processor.
+
         """
         command = f"/PSYMB,{label},{key}"
         return self.run(command, **kwargs)
