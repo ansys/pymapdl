@@ -12,17 +12,16 @@ import subprocess
 import datetime
 
 
-from ansys.mapdl.core.errors import LicenseServerConnectionError 
-from ansys.mapdl.core.launcher import *
-# from ansys.mapdl.core.launcher import  _version_from_path , get_ansys_path
+from ansys.mapdl.core.errors import LicenseServerConnectionError  
+
 
 LOCALHOST = '127.0.0.1'
 
 
-def try_license_file():
+def try_license_file(version):
     
     try:
-        license_file_checker()
+        license_file_checker(version)
     except LicenseServerConnectionError:
         # expected error, so let it raise
         raise 
@@ -34,8 +33,8 @@ def try_license_file():
         return True 
 
 
-def license_file_checker():
-    licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
+def license_file_checker(version):
+    licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name(version))
     file_iterator = get_licdebug_msg(licdebug_file)
 
     time_to_be_checking = 10 #seconds
@@ -48,7 +47,9 @@ def license_file_checker():
             license_path = re.findall( "(?<=License path:)(.*)(?=;\n)", msg)[0]
             license_port = license_path.split('@')[0]
             license_hostname = license_path.split('@')[1]
-            raise LicenseServerConnectionError(ip=license_hostname, port=license_port)
+            raise LicenseServerConnectionError(ip=license_hostname, port=license_port, 
+                                                error_message=msg, 
+                                                licdebug_name=get_licdebug_name(version))
         
     else:
         print("Time is out for license checking.")
@@ -64,11 +65,13 @@ def get_licdebug_path():
     return os.path.join(folder, '.ansys')
 
 
-def get_licdebug_name():
+def get_licdebug_name(version):
     # ansys_bin = get_ansys_path(allow_input=False) 
     # version = _version_from_path(ansys_bin)
 
-    return 'licdebug.FEAT_ANSYS.212.out'  #TODO: Make this more flexible and for more ansys versions.
+    # print(ansys_bin)
+
+    return f'licdebug.FEAT_ANSYS.{version}.out'  #TODO: Make this more flexible and for more ansys versions.
 
 
 def get_licdebug_msg(licdebug_file):
@@ -250,11 +253,11 @@ def get_lmutil_path_linux():
 
 ## Main 
 
-def try_license_server():
+def try_license_server(version):
     """
     Trying the three possible methods to check the license server status.
     """
-    success_ = try_license_file()
+    success_ = try_license_file(version)
 
     if not success_:
         success_ = try_ping_server_python
