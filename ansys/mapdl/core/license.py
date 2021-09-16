@@ -66,11 +66,6 @@ def get_licdebug_path():
 
 
 def get_licdebug_name(version):
-    # ansys_bin = get_ansys_path(allow_input=False) 
-    # version = _version_from_path(ansys_bin)
-
-    # print(ansys_bin)
-
     return f'licdebug.FEAT_ANSYS.{version}.out'  #TODO: Make this more flexible and for more ansys versions.
 
 
