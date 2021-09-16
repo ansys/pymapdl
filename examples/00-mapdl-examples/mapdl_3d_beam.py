@@ -65,4 +65,3 @@ result.plot_nodal_displacement(0, show_edges=True)
 # Animate a modal result
 # result.animate_nodal_solution(0, show_edges=True, loop=False, displacement_factor=10,
                               # movie_filename='demo.gif')
-

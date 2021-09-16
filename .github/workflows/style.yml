@@ -20,3 +20,7 @@ jobs:
         run: |
           pip install -r requirements_style.txt --disable-pip-version-check
           make
+
+      - name: flake8
+        run: |
+          make flake8

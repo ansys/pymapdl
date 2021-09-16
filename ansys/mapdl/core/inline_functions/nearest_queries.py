@@ -113,4 +113,3 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=ENEARN({n})')
         integer = self._parse_parameter_integer_response(response)
         return integer
-

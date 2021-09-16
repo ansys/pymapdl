@@ -115,4 +115,3 @@ for node in [node1, node2]:
     
     """
     print(message)
-

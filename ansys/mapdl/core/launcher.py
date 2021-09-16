@@ -385,7 +385,6 @@ def launch_grpc(exec_file='', jobname='file', nproc=2, ram=None,
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL)
 
-
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
