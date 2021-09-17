@@ -268,4 +268,3 @@ class _KeypointNormalQueries(_ParameterParsing):
         response = self._mapdl.run(f'_=NORMKZ({k1}, {k2}, {k3})')
         float_ = self._parse_parameter_float_response(response)
         return float_
-

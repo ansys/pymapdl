@@ -78,3 +78,9 @@ docker/mapdl/_old
 
 # temp testing
 tmp.out
+
+# virtual environment
+venv/
+
+# Visual studio code local settings
+.vscode/

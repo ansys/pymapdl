@@ -1694,7 +1694,6 @@ class PostProcessing():
                                         show_node_numbering=show_node_numbering,
                                         **kwargs)
 
-
     def nodal_plastic_component_strain(self, component) -> np.ndarray:
         """Plastic nodal component strain.
 
@@ -2018,8 +2017,7 @@ class PostProcessing():
         return self._plot_point_scalars(scalars,
                                         show_node_numbering=show_node_numbering,
                                         **kwargs)
-
-
+    
     def nodal_thermal_component_strain(self, component) -> np.ndarray:
         """Thermal nodal component strain
 
@@ -2347,4 +2345,3 @@ class PostProcessing():
         return self._plot_point_scalars(scalars,
                                         show_node_numbering=show_node_numbering,
                                         **kwargs)
-

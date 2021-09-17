@@ -34,8 +34,6 @@ esize,5
 vmesh,all
 """
 
-
-
 @pytest.fixture(scope='function')
 def make_block(mapdl, cleared):
     mapdl.block(0, 1, 0, 1, 0, 1)

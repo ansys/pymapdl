@@ -63,8 +63,6 @@ print(mapdl.elist())
 for elem in mapdl.mesh.elem:
     print(elem)
 
-
-
 ###############################################################################
 # Define the boundary conditions
 

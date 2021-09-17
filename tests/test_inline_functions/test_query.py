@@ -49,5 +49,3 @@ class TestParseParameter:
         input_ = value
         with pytest.raises(TypeError):
             query._parse_parameter_integer_response(input_)
-
-
