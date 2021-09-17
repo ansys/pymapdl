@@ -276,15 +276,16 @@ def check_license_server_with_ansysli_util():
     - Not reliable because the difficulty to catch the port in the license server
     """
     warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
-    
-    output = run_ansysli_util()
-    if 'No such feature exists' in output or 'The server is down or is not responsive.' in output:
-        raise LicenseServerConnectionError(ip='N/A (ansysli_util resolves these)', port='N/A')
+    licenses = ['meba']  # mechanical enterprise license. 
+
+    for each_license in licenses:
+        output = run_ansysli_util(each_license)
+        if 'No such feature exists' in output or 'The server is down or is not responsive.' in output:
+            raise LicenseServerConnectionError(ip='N/A (ansysli_util resolves these)', port='N/A')
 
 
-def run_ansysli_util():
+def run_ansysli_util(license):
     ansysli_util_path = get_ansysli_util_path()
-    license = 'meba'  # mechanical enterprise license. 
     command = f"{ansysli_util_path}  -checkout {license} "
 
     # subprocess.check_output(command, shell=os.name != 'nt')
