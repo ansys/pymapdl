@@ -718,7 +718,7 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        files : list
+        list
             List of files in the working directory of MAPDL.
 
         Examples
@@ -761,7 +761,16 @@ class MapdlGrpc(_MapdlCore):
     @supress_logging
     def sys(self, cmd):
         """Pass a command string to the operating system.
+
         APDL Command: /SYS
+
+        Passes a command string to the operating system for execution
+        (see the Operations Guide).  Typical strings are system
+        commands such as list, copy, rename, etc.  Control returns to
+        the ANSYS program after the system procedure is completed.
+        ANSYS may not be aware of your specific user environment. For
+        example, on Linux this command may not recognize aliases,
+        depending on the hardware platform and user environment.
 
         Parameters
         ----------
@@ -773,22 +782,13 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        output : str
+        str
             Output from the command.
 
         Examples
         --------
         >>> mapdl.sys('ls')
 
-        Notes
-        -----
-        Passes a command string to the operating system for execution
-        (see the Operations Guide).  Typical strings are system
-        commands such as list, copy, rename, etc.  Control returns to
-        the ANSYS program after the system procedure is completed.
-        ANSYS may not be aware of your specific user environment. For
-        example, on Linux this command may not recognize aliases,
-        depending on the hardware platform and user environment.
         """
         # always redirect system output to a temporary file
         tmp_file = '__tmp_sys_out__'
@@ -973,7 +973,7 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -1190,7 +1190,7 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        basename : str
+        str
             Base name of the file uploaded.  File can be accessed
             relative to the mapdl instance with this file name.
 
@@ -1640,7 +1640,9 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
                 capname="", **kwargs):
-        """Run CMATRIX in non-interactive mode and return the response from file. """
+        """Run CMATRIX in non-interactive mode and return the response
+        from file.
+        """
 
         # The CMATRIX command needs to run in non-interactive mode
         if not self._store_commands:

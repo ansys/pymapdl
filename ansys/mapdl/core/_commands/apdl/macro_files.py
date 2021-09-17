@@ -3,7 +3,7 @@ class MacroFiles:
     def cfclos(self, **kwargs):
         """Closes the "command" file.
 
-        APDL Command: *CFCLOS
+        APDL Command: ``*CFCLOS``
 
         Notes
         -----
@@ -15,10 +15,11 @@ class MacroFiles:
     def cfopen(self, fname="", ext="", loc="", **kwargs):
         """Opens a "command" file.
 
-        APDL Command: *CFOPEN
+        APDL Command: ``*CFOPEN``
 
         .. warning::
-           This command must be run using ``mapdl.non_interactive``
+           This command must be run using :func:`non_interactive
+           <ansys.mapdl.core.Mapdl.non_interactive>`
 
         Parameters
         ----------
@@ -40,8 +41,8 @@ class MacroFiles:
 
         Notes
         -----
-        Data processed with the *VWRITE command will also be written to this
-        file if the file is open when the *VWRITE command is issued.
+        Data processed with the ``*VWRITE`` command will also be written to this
+        file if the file is open when the ``*VWRITE`` command is issued.
 
         This command is valid in any processor.
         """
@@ -50,29 +51,31 @@ class MacroFiles:
     def cfwrite(self, command="", **kwargs):
         """Writes an ANSYS command (or similar string) to a "command" file.
 
-        APDL Command: *CFWRITE
+        APDL Command: ``*CFWRITE``
 
         Parameters
         ----------
         command
             Command or string to be written.  The standard command form of a
             label followed by arguments separated by commas is assumed.
-            Command may be a parameter assignment (e.g.,  *CFWRITE, A = 5).
+            Command may be a parameter assignment (e.g.,  ``*CFWRITE, A = 5``).
 
         Notes
         -----
-        Writes an ANSYS command (or similar string) to the file opened with
-        *CFOPEN.  The Command string is not executed (except that numeric and
-        character parameter substitution and operations (with embedded *, /, >,$
-        etc. characters) are performed before writing).  When used with *GET
-        results and parameter substitution, an ANSYS command can be created
-        from results and then read back into the ANSYS program (or used
-        elsewhere).  For example, if the command *CFWRITE,BF,NNUM,TEMP,TVAL is
-        used in a do-loop, where TVAL is a parameter value returned from the
-        *GET operation and NNUM is a specified or returned parameter value, a
-        series of BF  commands, with numerical values substituted for the two
-        parameters, will be written.  To create a file without parameter
-        substitution, use *CREATE.
+        Writes an ANSYS command (or similar string) to the file opened
+        with ``*CFOPEN``.  The Command string is not executed (except
+        that numeric and character parameter substitution and
+        operations (with embedded ``*``, /, >,$ etc. characters) are
+        performed before writing).  When used with ``*GET`` results
+        and parameter substitution, an ANSYS command can be created
+        from results and then read back into the ANSYS program (or
+        used elsewhere).  For example, if the command
+        ``*CFWRITE,BF,NNUM,TEMP,TVAL`` is used in a do-loop, where
+        TVAL is a parameter value returned from the ``*GET`` operation
+        and NNUM is a specified or returned parameter value, a series
+        of BF commands, with numerical values substituted for the two
+        parameters, will be written.  To create a file without
+        parameter substitution, use ``*CREATE``.
 
         This command is valid in any processor.
         """
@@ -82,10 +85,11 @@ class MacroFiles:
     def create(self, fname="", ext="", **kwargs):
         """Opens (creates) a macro file.
 
-        APDL Command: *CREATE
+        APDL Command: ``*CREATE``
 
         .. warning::
-           This command must be run using ``mapdl.non_interactive``
+           This command must be run using :func:`non_interactive
+           <ansys.mapdl.core.Mapdl.non_interactive>`
 
         Parameters
         ----------
@@ -100,17 +104,18 @@ class MacroFiles:
 
         Notes
         -----
-        See the *USE command for a discussion of macros.  All commands
-        following the *CREATE command, up to the *END command, are written to
-        the specified file without being executed.  An existing file of the
-        same name, if any, will be overwritten.  Parameter values are not
-        substituted for parameter names in the commands when the commands are
-        written to the file.  Use *CFWRITE to create a file if this is desired.
-        The resulting macro may be executed with a *USE command (which also
-        allows parameters to be passed into the macro) or a /INPUT command
-        (which does not allow parameters to be passed in).  Several macros may
-        be stacked into a library file [*ULIB]. You cannot use *CREATE within a
-        DO loop.
+        See the ``*USE`` command for a discussion of macros.  All
+        commands following the ``*CREATE`` command, up to the ``*END``
+        command, are written to the specified file without being
+        executed.  An existing file of the same name, if any, will be
+        overwritten.  Parameter values are not substituted for
+        parameter names in the commands when the commands are written
+        to the file.  Use ``*CFWRITE`` to create a file if this is
+        desired.  The resulting macro may be executed with a ``*USE``
+        command (which also allows parameters to be passed into the
+        macro) or a /INPUT command (which does not allow parameters to
+        be passed in).  Several macros may be stacked into a library
+        file ``[*ULIB]``. You cannot use ``*CREATE`` within a DO loop.
 
         This command is valid in any processor.
         """
@@ -149,14 +154,14 @@ class MacroFiles:
     def end(self, **kwargs):
         """Closes a macro file.
 
-        APDL Command: *END
+        APDL Command: ``*END``
 
         Notes
         -----
-        Closes a file opened with *CREATE. The *END command is an 8-character
-        command (to differentiate it from *ENDIF).   If you add commented text
-        on that same line but do not allow enough spaces between *END and the
-        "!" that indicates the comment text, the *END will attempt to interpret
+        Closes a file opened with ``*CREATE``. The ``*END`` command is an 8-character
+        command (to differentiate it from ``*ENDIF``).   If you add commented text
+        on that same line but do not allow enough spaces between ``*END`` and the
+        "!" that indicates the comment text, the ``*END`` will attempt to interpret
         the "!" as the 8th character and will fail.
 
         This command is valid in any processor.
@@ -190,21 +195,27 @@ class MacroFiles:
             val7="", val8="", **kwargs):
         """Writes an output message via the ANSYS message subroutine.
 
-        APDL Command: *MSG
+        APDL Command: ``*MSG``
 
         Parameters
         ----------
         lab
             Label for output and termination control:
 
-            Writes the message with no heading (default). - Writes the message with a "NOTE" heading.
+            Writes the message with no heading (default). - Writes the
+            message with a "NOTE" heading.
 
-            Writes the message with a "WARNING" heading.  Also writes the message to the errors file, Jobname.ERR. - Writes the message with a "ERROR" heading and causes run termination (if batch)
-                              at earliest "clean exit" point.  Also writes the
-                              message to the errors file, Jobname.ERR.
+            Writes the message with a "WARNING" heading.  Also writes
+            the message to the errors file, Jobname.ERR. - Writes the
+            message with a "ERROR" heading and causes run termination
+            (if batch) at earliest "clean exit" point.  Also writes
+            the message to the errors file, Jobname.ERR.
 
-            Writes the message with a "FATAL ERROR" heading and causes run termination immediately.  Also writes the message to the errors file, Jobname.ERR. - Writes the message with a "NOTE" heading and displays it in the message dialog
-                              box.  This option is most useful in GUI mode.
+            Writes the message with a "FATAL ERROR" heading and causes
+            run termination immediately.  Also writes the message to
+            the errors file, Jobname.ERR. - Writes the message with a
+            "NOTE" heading and displays it in the message dialog box.
+            This option is most useful in GUI mode.
 
         val1, val2, val3, . . . , val8
             Numeric or alphanumeric character values to be included in message.
@@ -218,7 +229,7 @@ class MacroFiles:
         Allows writing an output message via the ANSYS message subroutine.
         Also allows run termination control.  This command is used only when
         contained in a prepared file read into the ANSYS program (i.e.,
-        *USE,/INPUT, etc.).  A message format must immediately follow the *MSG
+        ``*USE,/INPUT``, etc.).  A message format must immediately follow the ``*MSG``
         command (on a separate line, without parentheses, as described below).
 
         The message format may be up to 80 characters long, consisting of text
@@ -233,16 +244,17 @@ class MacroFiles:
 
         Enhanced descriptions may also be used:
 
-        Do not begin *MSG format lines with *IF, *ELSE , *ELSEIF , or *ENDIF .
-        If the last nonblank character of the message format is an ampersand
-        (&), a second line will also be read as a continuation of the format.
-        Up to nine continuations (ten total lines) may be read.  If normal
-        descriptions are used, then consecutive blanks are condensed into one
-        blank upon output, and a period is appended.  Up to ten lines of output
-        of 72 characters each may be produced (using the %/ descriptor).  Two
-        examples follow.
+        Do not begin ``*MSG`` format lines with ``*IF``, ``*ELSE`` ,
+        ``*ELSEIF``, or ``*ENDIF`` .  If the last nonblank character
+        of the message format is an ampersand (&), a second line will
+        also be read as a continuation of the format.  Up to nine
+        continuations (ten total lines) may be read.  If normal
+        descriptions are used, then consecutive blanks are condensed
+        into one blank upon output, and a period is appended.  Up to
+        ten lines of output of 72 characters each may be produced
+        (using the %/ descriptor).  Two examples follow.
 
-        Here is an example of the *MSG command and a format to print a message
+        Here is an example of the ``*MSG`` command and a format to print a message
         with two integer values and one real value:
 
         The output line is:
@@ -252,11 +264,12 @@ class MacroFiles:
 
         Note:: : The /UIS,MSGPOP command controls which messages are displayed
         in the message dialog box when the GUI is active.  All messages
-        produced by the *MSG command are subject to the /UIS specification,
+        produced by the ``*MSG`` command are subject to the /UIS specification,
         with one exception,  If Lab = UI, the message will be displayed in the
         dialog box regardless of the /UIS specification.
 
         This command is valid in any processor.
+
         """
         command = f"*MSG,{lab},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8}"
         return self.run(command, **kwargs)
@@ -372,7 +385,7 @@ class MacroFiles:
     def ulib(self, fname="", ext="", **kwargs):
         """Identifies a macro library file.
 
-        APDL Command: *ULIB
+        APDL Command: ``*ULIB``
 
         Parameters
         ----------
@@ -387,7 +400,7 @@ class MacroFiles:
 
         Notes
         -----
-        Identifies a macro library file for the *USE command.  A
+        Identifies a macro library file for the ``*USE`` command.  A
         library of macros allows blocks of often used ANSYS commands
         to be stacked and executed from a single file.  The macro
         blocks must be enclosed within block identifier and terminator
@@ -400,17 +413,17 @@ class MacroFiles:
         block.
 
         The name of the macro library file is identified for reading
-        on the *ULIB command.  The name of the macro block is
-        identified on the *USE command.  The commands within the macro
+        on the ``*ULIB`` command.  The name of the macro block is
+        identified on the ``*USE`` command.  The commands within the macro
         block are copied to a temporary file (of the macro block name)
-        during the *USE operation and executed as if a macro file of
+        during the ``*USE`` operation and executed as if a macro file of
         that name had been created by the user.  The temporary file is
         deleted after it has been used.  Macro block names should be
         acceptable filenames (system dependent) and should not match
         user created macro file names, since the user macro file will
         be used first (if it exists) before the library file is
         searched.  Macro blocks may be stacked in any order.
-        Branching [*GO or *IF] external to the macro block is not
+        Branching [``*GO`` or ``*IF``] external to the macro block is not
         allowed.
 
         This command is valid in any processor.
@@ -423,7 +436,7 @@ class MacroFiles:
             ar13="", ar14="", ag15="", ar16="", ar17="", ar18="", **kwargs):
         """Executes a macro file.
 
-        APDL Command: *USE
+        APDL Command: ``*USE``
 
         Parameters
         ----------
@@ -441,24 +454,24 @@ class MacroFiles:
         Notes
         -----
         Causes execution of a macro file called Name, or, if not found, a macro
-        block "Name" on the macro library file [*ULIB].  Argument values
+        block "Name" on the macro library file [``*ULIB``].  Argument values
         (numeric or character) are passed into the file or block and
         substituted for local parameters ARG1, ARG2, ..., AR18.  The file Name
-        may also be executed as an "unknown command" (i.e., without the *USE
+        may also be executed as an "unknown command" (i.e., without the ``*USE``
         command name) as described below.
 
         A macro is a sequence of ANSYS commands (as many as needed) recorded in
-        a file or in a macro block in a library file (specified with the *ULIB
-        command).  The file or block is typically executed with the *USE
+        a file or in a macro block in a library file (specified with the ``*ULIB``
+        command).  The file or block is typically executed with the ``*USE``
         command.  In addition to command, numerical and alphanumeric data, the
         macro may include parameters which will be assigned numerical or
         alphanumerical character values when the macro is used.  Use of the
         macro may be repeated (within a do-loop, for example) with the
         parameters incremented.  A macro is defined within a run by "enclosing"
-        a sequence of data input commands between a *CREATE and a *END
+        a sequence of data input commands between a ``*CREATE`` and a ``*END``
         command.  The data input commands are passive (not executed) while
-        being written to the macro file.  The macro file (without *CREATE and
-        *END ) can also be created external to ANSYS.
+        being written to the macro file.  The macro file (without ``*CREATE`` and
+        ``*END`` ) can also be created external to ANSYS.
 
         Up to 99 specially named scalar parameters called ARG1 to AR99 are
         locally available to each macro.  Note that the prefix for the first 9
@@ -469,7 +482,7 @@ class MacroFiles:
         parameters outside the macro is if values are passed out of, or into,
         the macro by an argument list.  Parameters ARG1 through AR18 can have
         their values (numeric or character) passed via the argument list on the
-        *USE command (ARG1 through AR19 can be passed as arguments on the
+        ``*USE`` command (ARG1 through AR19 can be passed as arguments on the
         "unknown command" macro).  Parameters AR19 through AR99 (AR20 through
         AR99 in the "unknown command" macro) are available solely for use
         within the macro; they cannot be passed via an argument list.  Local
@@ -479,24 +492,24 @@ class MacroFiles:
         "non-macro" space.
 
         A macro is exited after its last line is executed.  Macros may be
-        nested (such as a *USE or an "unknown command" within a macro).  Each
+        nested (such as a ``*USE`` or an "unknown command" within a macro).  Each
         nested macro has its own set of 99 local parameters.  Only one set of
         local parameters can be active at a time and that is the set
         corresponding to the macro currently being executed or to the set
         external to all macros (if any).  When a nested macro completes
         execution, the previous set of local parameters once again becomes
-        available.  Use *STATUS,ARGX to view current macro parameter values.
+        available.  Use ``*STATUS,ARGX`` to view current macro parameter values.
 
         An alternate way of executing a macro file is via the "unknown command"
         route.  If a command unknown to the ANSYS program is entered, a search
         for a file of that name (plus a .MAC suffix) is made.  If the file
         exists, it is executed, if not, the "unknown command" message is
         output.  Thus, users can write their own commands in terms of other
-        ANSYS commands.  The procedure is similar to issuing the *USE command
+        ANSYS commands.  The procedure is similar to issuing the ``*USE`` command
         with the unknown command in the Name field.  For example, the command
-        CMD,10,20,30 is internally similar to *USE,CMD,10,20,30.  The macro
+        CMD,10,20,30 is internally similar to ``*USE,CMD,10,20,30``.  The macro
         file named CMD.MAC will be executed with the three parameters.  The
-        *USE macro description also applies to the "unknown command" macro,
+        ``*USE`` macro description also applies to the "unknown command" macro,
         except that various directories are searched and a suffix (.MAC) is
         assumed.  Also, a macro library file is not searched.
 
@@ -513,7 +526,7 @@ class MacroFiles:
         file with the matching upper case name will be used. All macro files
         placed in the apdl directory must be upper case.
 
-         Note, since undocumented commands exist in the ANSYS program, the user
+        Note, since undocumented commands exist in the ANSYS program, the user
         should issue the command intended for the macro file name to be sure
         the "unknown command" message is output in the processor where it's to
         be used.  If the macro is to be used in other processors, the other

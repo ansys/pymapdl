@@ -15,18 +15,21 @@ class Materials:
         lab
             Label specifying the type of units:
 
-            MKS - Rationalized MKS system of units (meters, amperes, henries, webers, etc.).
-                  Free-space permeability is set to 4 πe-7 henries/meter. Free-
-                  space permittivity is set to 8.85 e-12 F/m.
+            MKS - Rationalized MKS system of units (meters, amperes,
+                  henries, webers, etc.).  Free-space permeability is
+                  set to 4 πe-7 henries/meter. Free- space
+                  permittivity is set to 8.85 e-12 F/m.
 
-            MUZRO - User defined system of units. Free-space permeability is set to the value input
-                    for VALUE. Other units must correspond to the permeability
-                    units. Relative permeability may be altered to absolute
-                    values.
+            MUZRO - User defined system of units. Free-space
+                    permeability is set to the value input for
+                    VALUE. Other units must correspond to the
+                    permeability units. Relative permeability may be
+                    altered to absolute values.
 
-            EPZRO - User defined system of units. Free-space permittivity is set to the value input
-                    for VALUE. Other units must correspond to the permittivity
-                    units.
+            EPZRO - User defined system of units. Free-space
+                    permittivity is set to the value input for
+                    VALUE. Other units must correspond to the
+                    permittivity units.
 
         value
             User value of free-space permeability (defaults to 1) if Lab =
@@ -401,12 +404,13 @@ class Materials:
 
         This command is also valid in SOLUTION.
 
-        Without Emag enabled, the MUR_ and MG__ properties are not allowed.  In
-        ANSYS Professional, all structural and thermal properties are allowed
-        except ALPD, BETD, and MU.  In ANSYS Emag, only the RSV_, PER_, MUR_,
-        and MG__ properties are allowed. Only products that include ANSYS Emag
-        can use the LSST property. The SBK_ property is only available in ANSYS
-        Multiphysics and ANSYS PrepPost.
+        Without Emag enabled, the ``MURx`` and ``MGxx`` properties are
+        not allowed.  In ANSYS Professional, all structural and
+        thermal properties are allowed except ALPD, BETD, and MU.  In
+        ANSYS Emag, only the ``RSVx``, ``PERx``, ``MURx``, and ``MGxx``
+        properties are allowed. Only products that include ANSYS Emag
+        can use the LSST property. The ``SBKx`` property is only available
+        in ANSYS Multiphysics and ANSYS PrepPost.
         """
         command = "MPDATA,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(
             sloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))

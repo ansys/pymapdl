@@ -209,7 +209,7 @@ class LocalMapdlPool:
 
         Returns
         -------
-        output : list
+        list
             A list containing the return values for ``func``.  Failed
             runs will not return an output.  Since the returns are not
             necessarily in the same order as ``iterable``, you may
@@ -386,7 +386,7 @@ class LocalMapdlPool:
 
         Returns
         -------
-        outputs : list
+        list
             List of text outputs from MAPDL for each batch run.  Not
             necessarily in the order of the inputs. Failed runs will
             not return an output.  Since the returns are not
@@ -420,16 +420,16 @@ class LocalMapdlPool:
         """Wait until an instance of mapdl is available and return that instance.
 
         Parameters
-        --------
+        ----------
         return_index : bool, optional
             Return the index along with the instance.  Default ``False``.
 
         Returns
-        --------
-        mapdl : MapdlGrpc
+        -------
+        pyansys.MapdlGrpc
             Instance of MAPDL.
 
-        index : int
+        int
             Index within the pool of the instance of MAPDL.  By
             default this is not returned.
 

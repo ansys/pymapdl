@@ -223,6 +223,22 @@ class Booleans:
 
         APDL Command: ASBA
 
+        Generates new areas by subtracting the regions common to both
+        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
+        intersection can be an area(s) or line(s).  If the
+        intersection is a line and SEPO is blank, the NA1 area is
+        divided at the line and the resulting areas will be connected,
+        sharing a common line where they touch.  If SEPO is set to
+        SEPO, NA1 is divided into two unconnected areas with separate
+        lines where they touch.  See Solid Modeling in the Modeling
+        and Meshing Guide for an illustration.  See the BOPTN command
+        for an explanation of the options available to Boolean
+        operations.  Element attributes and solid model boundary
+        conditions assigned to the original entities will not be
+        transferred to the new entities generated.  ASBA,ALL,ALL will
+        have no effect since all the areas (in NA1) will be
+        unavailable as NA2 areas.
+
         Parameters
         ----------
         na1
@@ -283,23 +299,6 @@ class Booleans:
         >>> aout
         3
 
-        Notes
-        -----
-        Generates new areas by subtracting the regions common to both
-        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
-        intersection can be an area(s) or line(s).  If the
-        intersection is a line and SEPO is blank, the NA1 area is
-        divided at the line and the resulting areas will be connected,
-        sharing a common line where they touch.  If SEPO is set to
-        SEPO, NA1 is divided into two unconnected areas with separate
-        lines where they touch.  See Solid Modeling in the Modeling
-        and Meshing Guide for an illustration.  See the BOPTN command
-        for an explanation of the options available to Boolean
-        operations.  Element attributes and solid model boundary
-        conditions assigned to the original entities will not be
-        transferred to the new entities generated.  ASBA,ALL,ALL will
-        have no effect since all the areas (in NA1) will be
-        unavailable as NA2 areas.
         """
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -1325,10 +1324,9 @@ class Booleans:
         return self.run(command, **kwargs)
 
     def vsbw(self, nv="", sepo="", keep="", **kwargs):
-        """Subtracts intersection of the working plane from volumes (divides
+        """Subtracts intersection of the working plane from volumes.
 
         APDL Command: VSBW
-        volumes).
 
         Parameters
         ----------

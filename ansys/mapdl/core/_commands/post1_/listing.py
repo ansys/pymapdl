@@ -211,7 +211,7 @@ class Listing:
         for the thermal energy error).  These energy errors, along with the
         appropriate energy, are then used to calculate the percent error in
         energy norm (SEPC for structural and TEPC for thermal). These
-        percentages can be listed by the PRERR command, retrieved by the *GET
+        percentages can be listed by the PRERR command, retrieved by the ``*GET``
         command (with labels SEPC and TEPC) for further calculations, and shown
         on the displacement display (PLDISP), as applicable.
 

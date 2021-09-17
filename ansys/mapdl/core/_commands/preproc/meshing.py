@@ -305,10 +305,10 @@ class Meshing:
 
     def cpcyc(self, lab="", toler="", kcn="", dx="", dy="", dz="", knonrot="",
               **kwargs):
-        """Couples the two side faces of a cyclically symmetric model for loadings
+        """Couples the two side faces of a cyclically symmetric model
+        for loading that are the same on every segment.
 
         APDL Command: CPCYC
-        that are the same on every segment.
 
         Parameters
         ----------
@@ -325,7 +325,7 @@ class Meshing:
             within the tolerance are considered to be coincident for coupling.
 
         kcn
-             In coordinate system KCN, node 1 of CP + dx dy dz = node 2 of CP.
+            In coordinate system KCN, node 1 of CP + dx dy dz = node 2 of CP.
 
         dx, dy, dz
             Node location increments in the active coordinate system (DR, Dθ,
@@ -339,7 +339,7 @@ class Meshing:
 
         Notes
         -----
-         Cyclic coupling requires identical node and element patterns on the
+        Cyclic coupling requires identical node and element patterns on the
         low and high sector boundaries. The MSHCOPY operation allows convenient
         generation of identical node and element patterns. See Using CPCYC and
         MSHCOPY Commands in the Modeling and Meshing Guide for more
@@ -1356,7 +1356,7 @@ class Meshing:
         space
             Spacing ratio.  If positive, nominal ratio of last division size to
             first division size (if > 1.0, sizes increase, if < 1.0, sizes
-            decrease).  If negative, |SPACE| is nominal ratio of center
+            decrease).  If negative, ``|SPACE|`` is nominal ratio of center
             division(s) size to end divisions size.  Ratio defaults to 1.0
             (uniform spacing). For layer-meshing, a value of 1.0 normally is
             used. If SPACE = FREE, ratio is determined by other considerations
@@ -1369,14 +1369,15 @@ class Meshing:
 
             1 - Modify all selected lines.
 
-            2 - Modify only selected lines having fewer divisions (including zero) than
+            2 - Modify only selected lines having fewer divisions
+                (including zero) than specified with this command.
+
+            3 - Modify only selected lines having more divisions than
                 specified with this command.
 
-            3 - Modify only selected lines having more divisions than specified with this
-                command.
-
-            4 - Modify only nonzero settings for SIZE, ANGSIZ, NDIV,  SPACE, LAYER1, and
-                LAYER2.  If KFORC = 4, blank or 0 settings remain unchanged.
+            4 - Modify only nonzero settings for SIZE, ANGSIZ, NDIV,
+                SPACE, LAYER1, and LAYER2.  If KFORC = 4, blank or 0
+                settings remain unchanged.
 
         layer1
             Layer-meshing control parameter.  Distance which defines the
@@ -1556,15 +1557,15 @@ class Meshing:
 
         Notes
         -----
-         Wherever two area or volume elements share a common face, MCHECK
+        Wherever two area or volume elements share a common face, MCHECK
         verifies that the way the elements are connected to the face is
         consistent with their relative normals or integrated volumes. (This may
         detect folds or otherwise overlapping elements.)
 
-         MCHECK verifies that the element exterior faces form simply-connected
+        MCHECK verifies that the element exterior faces form simply-connected
         closed surfaces. (This may detect unintended cracks in a mesh.)
 
-         MCHECK warns if the number of element facets in a 2-D loop or 3-D
+        MCHECK warns if the number of element facets in a 2-D loop or 3-D
         shell is not greater than a computed limit. This limit is the smaller
         of either three times the number of faces on one element, or one-tenth
         the total number of element faces in the model. (This may detect holes
@@ -2140,7 +2141,7 @@ class Meshing:
         Parameters
         ----------
         par
-             Array parameter (indexed by node number) that expresses the
+            Array parameter (indexed by node number) that expresses the
             function to be mapped.  For example, func (17) should be the
             desired shell thickness at node 17.
 

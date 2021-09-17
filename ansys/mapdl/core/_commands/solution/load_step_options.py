@@ -258,17 +258,17 @@ class LoadStepOptions:
         key
             Reuse key:
 
-            0  - Program decides whether or not to reuse the previous factorized stiffness
-                 matrix.
-
-            1  - Force the previous factorized stiffness matrix to be reused.  Used mainly in a
-                 restart.  Forcing reuse of the matrix is a nonstandard use of
-                 the program, and should be done with caution.  For instance,
-                 using this option and changing the number of elements, or the
-                 number or type of degrees of freedom, may cause an abort.
-
-            -1  - All element matrices are reformed and are used to reform a new factorized
-                  stiffness matrix.
+            - 0 : Program decides whether or not to reuse the previous
+              factorized stiffness matrix.
+            - 1 : Force the previous factorized stiffness matrix to be
+              reused.  Used mainly in a restart.  Forcing reuse of the
+              matrix is a nonstandard use of the program, and
+              should be done with caution.  For instance, using
+              this option and changing the number of elements, or
+              the number or type of degrees of freedom, may cause
+              an abort.
+            - -1 : All element matrices are reformed and are used to
+              reform a new factorized stiffness matrix.
 
         Notes
         -----
@@ -384,7 +384,7 @@ class LoadStepOptions:
         reduced scalar potential (RSP), difference scalar potential (DSP),
         general scalar potential (GSP), or combined MVP-RSP formulation
         options.  Results are only stored for the final converged solution.
-        (In POST1, issue *SET,LIST to identify the load step of solution
+        (In POST1, issue ``*SET,LIST`` to identify the load step of solution
         results.)  The macro internally determines if a nonlinear analysis is
         required based on magnetic material properties.
 
@@ -609,7 +609,7 @@ class LoadStepOptions:
         -----
         Defines the reference temperature for the thermal strain calculations
         in structural analyses and explicit dynamic analyses.  Thermal strains
-        are given by : α *(T-TREF), where α is the coefficient of thermal
+        are given by : ``α * (T-TREF)``, where α is the coefficient of thermal
         expansion (for more on this see the Mechanical APDL Theory Reference).
         Input the strain via ALPX, ALPY, ALPZ (the secant or mean coefficient
         value), or CTEX, CTEY, CTEZ (the instantaneous coefficient value), or
@@ -649,7 +649,7 @@ class LoadStepOptions:
             which the heat transfer time-stepping strategy changes (the time
             step is reset to the initial time step based on DELTIM or NSUBST
             settings).  The array name must be enclosed by % signs (e.g.,
-            %array%).  See *DIM for more information on array parameters.
+            %array%).  See ``*DIM`` for more information on array parameters.
 
         Notes
         -----

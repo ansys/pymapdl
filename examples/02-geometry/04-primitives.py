@@ -1,5 +1,5 @@
 """
-.. _ref_basic-geometry-volumes:
+.. _ref_basic-geometry-primitives:
 
 Primitives
 ----------

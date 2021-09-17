@@ -66,6 +66,7 @@ mapdl.prep7()
 # steel here.
 # - `EX` - X-direction elastic modulus
 # - `ALPX` - Secant x - coefficient of thermal expansion
+#
 
 mapdl.antype('STATIC')
 mapdl.et(1, 'LINK180')
@@ -110,10 +111,11 @@ mapdl.eplot(show_node_numbering=True, cpos='xy')
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # - Couple the degrees of freedom in y-displacement across nodes 5, 4,
-# and 6.
+#   and 6.
 # - Fix nodes 1, 2, and 3 in place.
 # - Apply a force of -4000 in the y-direction to node 5
 # - Apply a uniform temperature of 80 to the whole body
+# - Finally, exit the post-processor.
 
 mapdl.cp(1, 'UY', 5, 4, 6)
 mapdl.d(1, 'ALL', '', '', 3)
@@ -126,8 +128,9 @@ mapdl.finish()
 # Solve
 # ~~~~~
 # - Enter solution mode
-# - Specify 1 timestep to be used for this load step
+# - Specify a timestep of 1 to be used for this load step
 # - Solve the system.
+# 
 
 mapdl.run('/SOLU')
 mapdl.nsubst(1)
@@ -139,7 +142,8 @@ mapdl.solve()
 # - Access the queries functions
 # - Find a steel node and a copper node
 # - Then use these to get the steel and copper elements
-# - Finally we extract the stress experienced by each element
+# - Finally extract the stress experienced by each element
+# 
 
 mapdl.post1()
 q = mapdl.queries

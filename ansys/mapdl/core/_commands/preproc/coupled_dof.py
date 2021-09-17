@@ -315,7 +315,7 @@ class CoupledDOF:
         nset1, nset2, ninc
             Generate sets from sets beginning with NSET1 to NSET2 (defaults to
             NSET1) in steps of NINC (defaults to 1).  If NSET1 is negative,
-            NSET2 and NINC are ignored and the last |NSET1| sets (in sequence
+            NSET2 and NINC are ignored and the last ``|NSET1|`` sets (in sequence
             from the maximum set number) are used as the sets to be repeated.
 
         Notes

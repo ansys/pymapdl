@@ -205,7 +205,7 @@ class DynamicOptions:
             calculated based on the specifications from FREQB, FREQE, and
             LogOpt, as well NSBSTP on the NSUBST command and Clust on the HROUT
             command. Enclose the array name in percent (%) signs (for example,
-            HARFRQ,,,,,%arrname%). Use *DIM to define the array.
+            HARFRQ,,,,,%arrname%). Use ``*DIM`` to define the array.
 
         toler
             Tolerance to determine if a user input frequency value in FREQARR
@@ -252,17 +252,7 @@ class DynamicOptions:
         harmonic mode-superposition expansion pass.
 
         For a specific angle, the following real solution is stored in the
-        results (*.rst) file:
-
-        Where:
-
-        i is the degree of freedom number.
-
-         is the amplitude of the i th degree of freedom solution
-
-        Φi is the phase shift angle of the i th degree of freedom solution
-
-        ϕ is the supplied phase shift angle (ANGLE)
+        results (``*.rst``) file:
 
         If ANGLE is ALL, both the real and imaginary parts of the solution are
         stored in the results file.
@@ -932,7 +922,7 @@ class DynamicOptions:
             otherwise, where the array index corresponds to the mode number. To
             specify an array containing the individual modes to expand, enclose
             the array name in percent (%) signs (for example,
-            MXPAND,%arrname%). Use the *DIM command to define the array.
+            MXPAND,%arrname%). Use the ``*DIM`` command to define the array.
 
         freqb
             Beginning, or lower end, of frequency range of interest. If FREQB
@@ -988,7 +978,7 @@ class DynamicOptions:
         step.
 
         There is no limit on the number of expanded modes (NMODE). However,
-        there is a limit on the maximum number of modes used via the *GET,,MODE
+        there is a limit on the maximum number of modes used via the ``*GET,,MODE``
         command, mode combinations, and the MDAMP command.
 
         With MSUPkey = YES, the computed element results (Elcalc = YES) are

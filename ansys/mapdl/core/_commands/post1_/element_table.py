@@ -103,71 +103,6 @@ class ElementTable:
 
         APDL Command: ETABLE
 
-        Parameters
-        ----------
-        lab
-            Any unique user defined label for use in subsequent
-            commands and output headings (maximum of eight characters
-            and not a General predefined Item label). Defaults to an
-            eight character label formed by concatenating the first
-            four characters of the Item and Comp labels. If the same
-            as a previous user label, this result item will be
-            included under the same label. Up to 200 different labels
-            may be defined. The following labels are predefined and
-            are not available for user-defined labels: ``'REFL''`,
-            ``'STAT'``, and ``'ERAS'``.  ``lab='REFL'`` refills all
-            tables previously defined with the :meth:`etable` commands
-            (not the CALC module commands) according to the latest
-            ETABLE specifications and is convenient for refilling
-            tables after the load step (SET) has been
-            changed. Remaining fields will be ignored if
-            ``Lab='REFL'``.  ``lab='STAT'`` displays stored table
-            values.  ``lab='ERAS'`` erases the entire table.
-
-        item
-            Label identifying the item. General item labels are shown
-            in the table below. Some items also require a component
-            label. Character parameters may be used. ``item='eras'``
-            erases a Lab column.
-
-        comp
-            Component of the item (if required). General component
-            labels are shown in the table below. Character parameters
-            may be used.
-
-        option
-            Option for storing element table data:
-
-            * ``'MIN'`` - Store minimum element nodal value of the specified
-              item component.
-            * ``'MAX'`` - Store maximum element nodal value of the specified
-              item component.
-            * ``'AVG'`` - Store averaged element centroid value of the
-              specified item component (default).
-
-        Examples
-        --------
-        Print the volume of individual elements.
-
-        >>> mapdl.clear()
-        >>> output = mapdl.input(examples.vmfiles['vm6'])
-        >>> mapdl.post1()
-        >>> label = 'MYVOLU'
-        >>> mapdl.etable(label, 'VOLU')
-        >>> print(mapdl.pretab(label))
-        PRINT ELEMENT TABLE ITEMS PER ELEMENT
-           *****ANSYS VERIFICATION RUN ONLY*****
-             DO NOT USE RESULTS FOR PRODUCTION
-          ***** POST1 ELEMENT TABLE LISTING *****
-            STAT     CURRENT
-            ELEM     XDISP
-               1  0.59135E-001
-               2  0.59135E-001
-               3  0.59135E-001
-        ...
-
-        Notes
-        -----
         The ETABLE command defines a table of values per element (the
         element table) for use in further processing. The element
         table is organized similar to spreadsheet, with rows
@@ -251,6 +186,69 @@ class ElementTable:
         The element table data option (Option) is not available for
         all output items.
 
+        Parameters
+        ----------
+        lab
+            Any unique user defined label for use in subsequent
+            commands and output headings (maximum of eight characters
+            and not a General predefined Item label). Defaults to an
+            eight character label formed by concatenating the first
+            four characters of the Item and Comp labels. If the same
+            as a previous user label, this result item will be
+            included under the same label. Up to 200 different labels
+            may be defined. The following labels are predefined and
+            are not available for user-defined labels: ``'REFL''`,
+            ``'STAT'``, and ``'ERAS'``.  ``lab='REFL'`` refills all
+            tables previously defined with the :meth:`etable` commands
+            (not the CALC module commands) according to the latest
+            ETABLE specifications and is convenient for refilling
+            tables after the load step (SET) has been
+            changed. Remaining fields will be ignored if
+            ``Lab='REFL'``.  ``lab='STAT'`` displays stored table
+            values.  ``lab='ERAS'`` erases the entire table.
+
+        item
+            Label identifying the item. General item labels are shown
+            in the table below. Some items also require a component
+            label. Character parameters may be used. ``item='eras'``
+            erases a Lab column.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in the table below. Character parameters
+            may be used.
+
+        option
+            Option for storing element table data:
+
+            * ``'MIN'`` - Store minimum element nodal value of the specified
+              item component.
+            * ``'MAX'`` - Store maximum element nodal value of the specified
+              item component.
+            * ``'AVG'`` - Store averaged element centroid value of the
+              specified item component (default).
+
+        Examples
+        --------
+        Print the volume of individual elements.
+
+        >>> mapdl.clear()
+        >>> output = mapdl.input(examples.vmfiles['vm6'])
+        >>> mapdl.post1()
+        >>> label = 'MYVOLU'
+        >>> mapdl.etable(label, 'VOLU')
+        >>> print(mapdl.pretab(label))
+        PRINT ELEMENT TABLE ITEMS PER ELEMENT
+           *****ANSYS VERIFICATION RUN ONLY*****
+             DO NOT USE RESULTS FOR PRODUCTION
+          ***** POST1 ELEMENT TABLE LISTING *****
+            STAT     CURRENT
+            ELEM     XDISP
+               1  0.59135E-001
+               2  0.59135E-001
+               3  0.59135E-001
+        ...
+
         """
         command = f"ETABLE,{lab},{item},{comp},{option}"
         return self.run(command, **kwargs)
@@ -260,16 +258,17 @@ class ElementTable:
 
         APDL Command: EUSORT
 
+        Notes
+        -----
+        Changing the selected element set [ESEL] also restores the original
+        element order.
+
         Examples
         --------
         >>> mapdl.post1()
         >>> mapdl.eusort()
         'ELEMENT SORT REMOVED'
 
-        Notes
-        -----
-        Changing the selected element set [ESEL] also restores the original
-        element order.
         """
         return self.run("EUSORT", **kwargs)
 
@@ -511,7 +510,7 @@ class ElementTable:
         elements by exponentiating and multiplying two existing labeled result
         items according to the operation:
 
-        LabR = (|Lab1|EXP1) x (|Lab2|EXP2)
+        ``LabR = (|Lab1|EXP1) x (|Lab2|EXP2)``
 
         Roots, reciprocals, and divides may also be done with this command.
         """
@@ -539,16 +538,16 @@ class ElementTable:
         Allows safety factor (SF) or margin of safety (MS) calculations to be
         made for the average nodal stresses according to:
 
-        SF = SALLOW/|Stress|
+        ``SF = SALLOW/|Stress|``
 
-        MS = (SALLOW/|Stress|) -- 1.0
+        ``MS = (SALLOW/|Stress|) -- 1.0``
 
         Calculations are done during the display, select, or sort operation (in
         the active coordinate system [RSYS]) with results stored in place of
         the nodal stresses.  Use the PRNSOL or PLNSOL command to display the
         results.
 
-        Note:: : The results are meaningful only for the stress (SIG1, SIGE,
+        The results are meaningful only for the stress (SIG1, SIGE,
         etc.) upon which SALLOW is based.  Nodal temperatures used are those
         automatically stored for the node.  Related commands are SFCALC,
         SALLOW, TALLOW.

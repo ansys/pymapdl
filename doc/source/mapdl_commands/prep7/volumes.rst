@@ -22,7 +22,6 @@ These PREP7 commands are used to create, modify, list, etc., volumes.
    Mapdl.vlist
    Mapdl.vlscale
    Mapdl.voffst
-   Mapdl.vplot
    Mapdl.vrotat
    Mapdl.vsum
    Mapdl.vsymm

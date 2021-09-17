@@ -311,10 +311,9 @@ class Animation:
 
     def anflow(self, nfram="", delay="", ncycl="", time="", spacing="",
                size="", length="", **kwargs):
-        """Produces an animated sequence of particle flow in a flowing fluid or a
+        """Produces an animated sequence of particle flow in a flowing fluid or a charged particle traveling in an electric or magnetic field.
 
         APDL Command: ANFLOW
-        charged particle traveling in an electric or magnetic field.
 
         Parameters
         ----------

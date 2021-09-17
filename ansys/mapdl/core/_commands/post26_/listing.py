@@ -16,7 +16,7 @@ class Listing:
         Lists the extreme values (and the corresponding times) for stored and
         calculated variables. Extremes for stored variables are automatically
         listed as they are stored. Only the real part of a complex number is
-        used. Extreme values may also be assigned to parameters [*GET].
+        used. Extreme values may also be assigned to parameters [``*GET``].
         """
         command = f"EXTREM,{nvar1},{nvar2},{ninc}"
         return self.run(command, **kwargs)

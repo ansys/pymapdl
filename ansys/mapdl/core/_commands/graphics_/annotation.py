@@ -28,7 +28,7 @@ class Annotation:
         size of the model will change the apparent relationship between the
         annotation and the model.
 
-         The overall 3-D dimensions of your model are defined by a bounding
+        The overall 3-D dimensions of your model are defined by a bounding
         box.  If portions of your model's bounding box lie outside of the
         visible area of your graphics window (if you are zoomed in on a
         specific area of your model), it can affect the placement of your 3-D
@@ -320,7 +320,7 @@ class Annotation:
         command = f"/LSYMBOL,{x},{y},{symang},{symtyp},{symsiz},{keybmp}"
         return self.run(command, **kwargs)
 
-    def pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
+    def slash_pcircle(self, xcentr="", ycentr="", xlrad="", **kwargs):
         """Creates an annotation circle (GUI).
 
         APDL Command: /PCIRCLE

@@ -174,7 +174,7 @@ class SurfaceOperations:
 
             INTG - Integral of lab1 over surface.
 
-            AVG - Area-weighted average of a result item [Σ(lab1*DA) / Σ(DA)]
+            AVG - Area-weighted average of a result item ``[Σ(lab1*DA) / Σ(DA)]``
 
         Notes
         -----

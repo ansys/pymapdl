@@ -100,9 +100,7 @@ class Ocean:
 
         Ktable -- The dependency of VAL1 on the OCTABLE command:
 
-        Figure: 5:: : Basic Ocean Data Type Components
-
-         KWAVE -- The incident wave type:
+        KWAVE -- The incident wave type:
 
         THETA -- Angle of the wave direction θ from the global Cartesian X axis
         toward the global Cartesian Y axis (in degrees).
@@ -281,7 +279,7 @@ class Ocean:
 
         The TIME command is not used, except perhaps to identify the load case.
 
-                The phase shift (Ps) determines the wave position (that is, the
+        The phase shift (Ps) determines the wave position (that is, the
         point at which the load is to be applied).
 
         When using the Stokes fifth-order (KWAVE = 2) or stream function (KWAVE

@@ -419,12 +419,6 @@ class _MapdlCore(Commands):
 
         APDL Command: ``/CLEAR``
 
-        Examples
-        --------
-        >>> mapdl.clear()
-
-        Notes
-        -----
         Resets the ANSYS database to the conditions at the beginning
         of the problem.  Sets the import and Boolean options back to
         the ANSYS default. All items are deleted from the database and
@@ -441,7 +435,11 @@ class _MapdlCore(Commands):
         its original value, or to the most recent value specified on
         ``/FILNAME`` with KEY = 1.
 
-        this command is valid only at the Begin level.
+        This command is valid only at the Begin level.
+
+        Examples
+        --------
+        >>> mapdl.clear()
 
         """
         self.run('/CLE,NOSTART', mute=True)
@@ -790,8 +788,8 @@ class _MapdlCore(Commands):
         Displays nodes.
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
-            values set with the ``PNUM`` command.
+           PyMAPDL plotting commands with ``vtk=True`` ignore any
+           values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -828,10 +826,6 @@ class _MapdlCore(Commands):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
 
-        Notes
-        -----
-        Only selected nodes [NSEL] are displayed.  Elements need not
-        be defined.
         """
         # lazy import here to avoid top level import
         import pyvista as pv
@@ -1177,10 +1171,6 @@ class _MapdlCore(Commands):
             more keyword arguments applicatle when visualizing with
             ``vtk=True``.
 
-        Examples
-        --------
-        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
-
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
@@ -1188,6 +1178,10 @@ class _MapdlCore(Commands):
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
+
+        Examples
+        --------
+        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
         """
         if vtk is None:
             vtk = self._use_vtk
@@ -1533,7 +1527,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        par : float
+        float
             Floating point value of the parameter.
 
         Examples
@@ -1557,10 +1551,44 @@ class _MapdlCore(Commands):
             item1="", it1num="", item2="", it2num="", **kwargs):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
-        APDL Command: \*GET
+        APDL Command: ``*GET``
 
         See the full MADPL command at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
+
+        GET retrieves a value for a specified item and stores the
+        value as a scalar parameter, or as a value in a user-named
+        array parameter. An item is identified by various keyword,
+        label, and number combinations.  Usage is similar to the SET
+        command except that the parameter values are retrieved from
+        previously input or calculated results. For example,
+        ``GET,A,ELEM,5,CENT,X`` returns the centroid x-location of element
+        5 and stores the result as parameter A. GET command
+        operations, along with the associated Get functions return
+        values in the active coordinate system unless stated
+        otherwise. A Get function is an alternative in- line function
+        that can be used to retrieve a value instead of the GET
+        command (see Using In-line Get Functions for more
+        information).
+
+        Both GET and VGET retrieve information from the active data
+        stored in memory. The database is often the source, and
+        sometimes the information is retrieved from common memory
+        blocks that the program uses to manipulate
+        information. Although POST1 and POST26 operations use a .rst
+        file, GET data is accessed from the database or from the
+        common blocks. Get operations do not access the .rst file
+        directly. For repeated gets of sequential items, such as from
+        a series of elements, see the VGET command.
+
+        Most items are stored in the database after they are
+        calculated and are available anytime thereafter. Items are
+        grouped according to where they are usually first defined or
+        calculated. Preprocessing data will often not reflect the
+        calculated values generated from section data. Do not use GET
+        to obtain data from elements that use calculated section data,
+        such as beams or shells. Most of the general items listed
+        below are available from all modules.
 
         Parameters
         ----------
@@ -1594,7 +1622,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        par : float
+        float
             Floating point value of the parameter.
 
         Examples
@@ -1611,42 +1639,6 @@ class _MapdlCore(Commands):
         >>> value = mapdl.get(entity='node', item1='count')
         >>> value
         3003
-
-        Notes
-        -----
-        GET retrieves a value for a specified item and stores the
-        value as a scalar parameter, or as a value in a user-named
-        array parameter. An item is identified by various keyword,
-        label, and number combinations.  Usage is similar to the SET
-        command except that the parameter values are retrieved from
-        previously input or calculated results. For example,
-        GET,A,ELEM,5,CENT,X returns the centroid x-location of element
-        5 and stores the result as parameter A. GET command
-        operations, along with the associated Get functions return
-        values in the active coordinate system unless stated
-        otherwise. A Get function is an alternative in- line function
-        that can be used to retrieve a value instead of the GET
-        command (see Using In-line Get Functions for more
-        information).
-
-        Both GET and VGET retrieve information from the active data
-        stored in memory. The database is often the source, and
-        sometimes the information is retrieved from common memory
-        blocks that the program uses to manipulate
-        information. Although POST1 and POST26 operations use a .rst
-        file, GET data is accessed from the database or from the
-        common blocks. Get operations do not access the .rst file
-        directly. For repeated gets of sequential items, such as from
-        a series of elements, see the VGET command.
-
-        Most items are stored in the database after they are
-        calculated and are available anytime thereafter. Items are
-        grouped according to where they are usually first defined or
-        calculated. Preprocessing data will often not reflect the
-        calculated values generated from section data. Do not use GET
-        to obtain data from elements that use calculated section data,
-        such as beams or shells. Most of the general items listed
-        below are available from all modules.
 
         """
         command = f'*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}'
@@ -1791,14 +1783,8 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        response : str
+        str
             Output from MAPDL SOLVE command.
-
-        Examples
-        --------
-        Modal analysis using default parameters for the first 6 modes
-
-        >>> mapdl.modal_analysis(nmode=6)
 
         Notes
         -----
@@ -1817,6 +1803,12 @@ class _MapdlCore(Commands):
         The DAMP and QRDAMP options cannot be followed by a subsequent
         spectrum analysis. The UNSYM method supports spectrum analysis
         when eigensolutions are real.
+
+        Examples
+        --------
+        Modal analysis using default parameters for the first 6 modes
+
+        >>> mapdl.modal_analysis(nmode=6)
 
         """
         if nrmkey:
@@ -1920,16 +1912,8 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        command_output : str
+        str
             Command output from MAPDL.
-
-        Examples
-        --------
-        >>> mapdl.run('/PREP7')
-
-        Equivalent Pythonic method:
-
-        >>> mapdl.prep7()
 
         Notes
         -----
@@ -1943,6 +1927,15 @@ class _MapdlCore(Commands):
         Alternatively, you can simply run a block of commands with:
 
         >>> mapdl.run_multiline(cmd)
+
+        Examples
+        --------
+        >>> mapdl.run('/PREP7')
+
+        Equivalent Pythonic method:
+
+        >>> mapdl.prep7()
+
         """
         command = command.strip()
         # check if multiline
@@ -2176,10 +2169,10 @@ class _MapdlCore(Commands):
     @supress_logging
     def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
                   it2num='', kloop='', **kwargs):
-        """Uses the VGET command to Return an array from ANSYS as a
+        """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
-        See `*VGET
+        See `VGET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 
@@ -2217,6 +2210,11 @@ class _MapdlCore(Commands):
             - 5 : Loop on the Item2 field.
             - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
 
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
         Examples
         --------
         List the current selected node numbers
@@ -2235,10 +2233,6 @@ class _MapdlCore(Commands):
                ...
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
-        Notes
-        -----
-        Please reference your ANSYS help manual *VGET command tables
-        for all the available *VGET values
         """
         arr = self._get_array(entity, entnum, item1, it1num, item2,
                               it2num, kloop)

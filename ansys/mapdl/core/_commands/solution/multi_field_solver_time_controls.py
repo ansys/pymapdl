@@ -120,12 +120,16 @@ class MultiFieldSolverTimeControls:
                       equal to the ending time values for the load
                       step.
 
-            For restart runs (see MFRSTART command), either change the parameter values to fall between the beginning and ending time values of the load step, or erase the current settings and reissue the command with a new array parameter.  - For more information about defining array parameters, see the *DIM command
-                              documentation.
+            For restart runs (see MFRSTART command), either change the
+            parameter values to fall between the beginning and ending
+            time values of the load step, or erase the current
+            settings and reissue the command with a new array
+            parameter.  - For more information about defining array
+            parameters, see the ``*DIM`` command documentation.
 
         Notes
         -----
-         A MFOUTPUT setting overrides any other output frequency setting
+        A MFOUTPUT setting overrides any other output frequency setting
         (OUTRES). To select the solution items, use the OUTRES command.
 
         For the case of Freq = -n and Freq = %array%, the results at the time

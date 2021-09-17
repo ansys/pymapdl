@@ -151,23 +151,7 @@ class ElementType:
         inopr
             If 1, suppress all element solution printout for this
             element type.
-    
-        Examples
-        --------
-        Define an element type.  Allow MAPDL to pick your the element
-        type.
-    
-        >>> etype_num = mapdl.et('', 'SURF154')
-        >>> etype_num
-        1
-    
-        Define an element type while specifying the element type
-        number.
-    
-        >>> etype_num = mapdl.et(2, 'SOLID186')
-        >>> etype_num
-        2
-    
+
         Notes
         -----
         The ET command selects an element type from the element
@@ -201,6 +185,23 @@ class ElementType:
         analysis capability, use the ET command
         to choose an element that works only with LS-DYNA (such as
         SHELL163).
+
+        Examples
+        --------
+        Define an element type.  Allow MAPDL to pick your the element
+        type.
+    
+        >>> etype_num = mapdl.et('', 'SURF154')
+        >>> etype_num
+        1
+    
+        Define an element type while specifying the element type
+        number.
+    
+        >>> etype_num = mapdl.et(2, 'SOLID186')
+        >>> etype_num
+        2
+    
         """
         command = f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4}," \
                   f"{kop5},{kop6},{inopr}"
@@ -294,16 +295,6 @@ class ElementType:
               technologies (e.g., enhanced strain, B-bar, uniform
               reduced integration) are still used.
 
-        Examples
-        --------
-        Enable element tech control and degenerated shape control.
-
-        >>> mapdl.et(1, 'SOLID186')
-        >>> output = mapdl.etcontrol(eltech='SET', eldegene='ON')
-        >>> print(output)
-        ELEMENT TECHNOLOGY CONTROL PARAMETER FOR APPLICABLE ELEMENTS = SET.
-         DEGENERATED ELEMENT SHAPE CONTROL PARAMETER FOR APPLICABLE ELEMENTS = ON.
-
         Notes
         -----
         The command default is ``mapdl.etcontrol('SUGGESTION', 'ON')``
@@ -316,6 +307,17 @@ class ElementType:
 
         For more information, see Automatic Selection of Element
         Technologies and Formulations in the Element Reference.
+
+        Examples
+        --------
+        Enable element tech control and degenerated shape control.
+
+        >>> mapdl.et(1, 'SOLID186')
+        >>> output = mapdl.etcontrol(eltech='SET', eldegene='ON')
+        >>> print(output)
+        ELEMENT TECHNOLOGY CONTROL PARAMETER FOR APPLICABLE ELEMENTS = SET.
+         DEGENERATED ELEMENT SHAPE CONTROL PARAMETER FOR APPLICABLE ELEMENTS = ON.
+
         """
         return self.run(f"ETCONTROL,{eltech},{eldegene}", **kwargs)
 
@@ -325,13 +327,6 @@ class ElementType:
 
         Deletes element types.
 
-        Examples
-        --------
-        Create and delete an element type.
-
-        >>> mapdl.et(1, 'SOLID186')
-        >>> mapdl.etdele(1)
-
         Parameters
         ----------
         ityp1, ityp2, inc
@@ -340,6 +335,14 @@ class ElementType:
             1). If ``ityp1='ALL'``, ``ityp2`` and ``inc`` are ignored
             and all element types are deleted.  Element types are
             defined with the ``et`` command.
+
+        Examples
+        --------
+        Create and delete an element type.
+
+        >>> mapdl.et(1, 'SOLID186')
+        >>> mapdl.etdele(1)
+
         """
         command = f"ETDELE,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)

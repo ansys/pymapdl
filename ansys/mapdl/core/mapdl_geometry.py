@@ -158,7 +158,7 @@ class Geometry():
 
         Returns
         -------
-        areas : list, pyvista.UnstructuredGrid
+        list of pyvista.UnstructuredGrid
             List of ``pyvista.UnstructuredGrid`` meshes representing
             the active surface areas selected by ``ASEL``.  If
             ``merge=True``, areas are returned as a single merged
@@ -622,6 +622,8 @@ class Geometry():
 
         Returns
         -------
+        list
+            List of the selected lines if ``return_selected=True``.
 
         Examples
         --------
@@ -697,6 +699,8 @@ class Geometry():
 
         Returns
         -------
+        list
+            List of the selected areas if ``return_selected=True``.
 
         Examples
         --------
@@ -772,6 +776,8 @@ class Geometry():
 
         Returns
         -------
+        list
+            List of the selected volumes if ``return_selected=True``.
 
         Examples
         --------

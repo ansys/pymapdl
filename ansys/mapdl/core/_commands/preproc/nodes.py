@@ -49,16 +49,16 @@ class Nodes:
 
         nfill
             Fill NFILL nodes between NODE1 and NODE2 (defaults to
-            |NODE2-NODE1|-1).  NFILL must be positive.
+            ``|NODE2-NODE1|-1``).  NFILL must be positive.
 
         nstrt
-            Node number assigned to first filled-in node (defaults to NODE1 +
-            NINC).
+            Node number assigned to first filled-in node (defaults to ``NODE1 +
+            NINC``).
 
         ninc
             Add this increment to each of the remaining filled-in node numbers
             (may be positive or negative).  Defaults to the integer result of
-            (NODE2-NODE1)/(NFILL + 1), i.e., linear interpolation.  If the
+            ``(NODE2-NODE1)/(NFILL + 1)``, i.e., linear interpolation.  If the
             default evaluates to zero, or if zero is input, NINC is set to 1.
 
         itime, inc
@@ -124,7 +124,7 @@ class Nodes:
         different coordinate systems).  The three (of six) constants easiest to
         define should be used.  The program will calculate the remaining three
         coordinate constants.  All arguments, except KC1, must be input.  Use
-        the repeat command [*REPEAT] after the MOVE command to define a line of
+        the repeat command [``*REPEAT``] after the MOVE command to define a line of
         intersection by repeating the move operation on all nodes of the line.
 
         Surfaces of constant value are implied by some commands by specifying a
@@ -159,6 +159,12 @@ class Nodes:
         """Define a node.
 
         APDL Command: N
+
+        Defines a node in the active coordinate system [CSYS].  The
+        nodal coordinate system is parallel to the global Cartesian
+        system unless rotated.  Rotation angles are in degrees and
+        redefine any previous rotation angles.  See the NMODIF, NANG,
+        NROTAT, and NORA commands for other rotation options.
 
         Parameters
         ----------
@@ -199,13 +205,6 @@ class Nodes:
         >>> nnum
         10
 
-        Notes
-        -----
-        Defines a node in the active coordinate system [CSYS].  The
-        nodal coordinate system is parallel to the global Cartesian
-        system unless rotated.  Rotation angles are in degrees and
-        redefine any previous rotation angles.  See the NMODIF, NANG,
-        NROTAT, and NORA commands for other rotation options.
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         msg = self.run(command, **kwargs)
@@ -916,7 +915,7 @@ class Nodes:
 
         nfill
             Fill-in NFILL nodes between NODE1 and NODE2 (defaults to
-            |NODE2-NODE1|-1).  NFILL must be positive.
+            ``|NODE2-NODE1|-1``).  NFILL must be positive.
 
         nstrt
             Node number assigned to first filled-in node (defaults to NODE1 +
@@ -924,8 +923,8 @@ class Nodes:
 
         ninc
             Add this increment to each of the remaining filled-in node numbers
-            (may be positive or negative).  Defaults to (NODE2-NODE1)/(NFILL +
-            1), i.e., linear interpolation.
+            (may be positive or negative).  Defaults to ``(NODE2-NODE1)/(NFILL +
+            1)``, i.e., linear interpolation.
 
         pkfac
             Peak location factor.  If PKFAC=0.5, the peak of the quadratic
@@ -959,7 +958,7 @@ class Nodes:
         approaches the line through NODE1 and NINTR at an infinite distance
         from NODE1.  The QUAD command generates quadratic lines of nodes, which
         in turn may be used as a base line for generating irregular surfaces of
-        nodes (by repeating [*REPEAT], generating [NGEN, NSCALE], etc.).
+        nodes (by repeating [``*REPEAT``], generating [NGEN, NSCALE], etc.).
         Irregular surfaces may also be generated with the meshing commands.
         """
         command = f"QUAD,{node1},{nintr},{node2},{nfill},{nstrt},{ninc},{pkfac}"

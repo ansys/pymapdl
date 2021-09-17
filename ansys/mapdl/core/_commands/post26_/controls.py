@@ -94,7 +94,7 @@ class Controls:
         The FORCE command cannot be used to extract static, damping, and
         inertial forces for MPC184 joint elements.
 
-        To retrieve the different force types, use the *GET command with
+        To retrieve the different force types, use the ``*GET`` command with
         Entity=ELEM and Item1=EFOR.
 
         The FORCE command is not supported in a spectrum analysis. You can

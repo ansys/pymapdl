@@ -157,7 +157,7 @@ class Operations:
         -----
         Forms the common log of a variable according to the operation:
 
-        IR = FACTB*LOG(FACTA x IA)
+        ``IR = FACTB*LOG(FACTA x IA)``
         """
         return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
@@ -453,7 +453,7 @@ class Operations:
         -----
         Forms the natural log of a variable according to the operation:
 
-        IR = FACTB*LN(FACTA x IA)
+        ``IR = FACTB*LN(FACTA x IA)``
         """
         return self.run(f"NLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 

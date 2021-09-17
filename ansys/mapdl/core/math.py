@@ -119,12 +119,12 @@ class MapdlMath:
 
     @property
     def _mapdl(self):
-        """Return the weakly referenced instance of mapdl"""
+        """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
     @property
     def _server_version(self):
-        """Return the version of MAPDL"""
+        """Return the version of MAPDL."""
         return self._mapdl._server_version
 
     def free(self):
@@ -152,7 +152,6 @@ class MapdlMath:
         WWYLBR       SMAT   0.011           [126:126]               1
         FIOMZR       VEC    0.001           126                     1
 
-
         """
         print(self._status)
 
@@ -174,15 +173,17 @@ class MapdlMath:
             ``np.int64``, or ``np.double``.
 
         init : str, optional
-            Initialization options.  Can be ``"ones"``, ``"zeros"``, or ``"rand"``.
+            Initialization options.  Can be ``"ones"``, ``"zeros"``,
+            or ``"rand"``.
 
         name : str, optional
-            Give the vector a name.  Otherwise one will be automatically generated.
+            Give the vector a name.  Otherwise one will be
+            automatically generated.
 
         Returns
         -------
-        vector : ansys.mapdl.math.AnsVec
-            Ansys Vector
+        ansys.mapdl.math.AnsVec
+            APDLMath Vector.
         """
         if dtype not in MYCTYPE:
             raise ANSYSDataTypeError
@@ -195,24 +196,20 @@ class MapdlMath:
             return AnsVec(name, self._mapdl)
     
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
-        """Create matrix
+        """Create an APDLMath matrix.
 
         Parameters
         ----------
         nrow : int
             Number of rows.
-
         ncol : int
             Number of columns.
-
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
-
         init : str, optional
             Initialization options.  Can be ``"ones"``, ``"zeros"``,
             or ``"rand"``.
-
         name : str, optional
             Matrix name.  If given, assigns a MAPDL matrix based on
             the existing named matrix.  Otherwise one will be
@@ -220,11 +217,11 @@ class MapdlMath:
 
         Returns
         -------
-        matrix : ansys.math.AnsMat
-            ANSYS matrix.
+        AnsMat
+            APDLMath matrix.
         """
         if dtype not in MYCTYPE:
-            raise ValueError('Invalid datatype.  Must be one of the following:\n' +
+            raise ValueError('Invalid datatype.  Must be one of the following:\n'
                              'np.int32, np.int64, or np.double')
 
         if not name:
@@ -254,67 +251,67 @@ class MapdlMath:
     def zeros(self, nrow, ncol=None, dtype=np.double):
         """Create a vector or matrix containing all zeros.
 
+        Parameters
+        ----------
         nrow : int
             Number of rows.
-
         ncol : int, optional
             Number of columns.  If specified, returns a matrix.
-
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
 
         Returns
         -------
-        ans_vec_mat : ansys.AnsVec or ansys.AnsMat
-            ANSYS vector or matrix depending on if ``ncol`` is specified
+        AnsVec or AnsMat
+            APDLMath vector or matrix depending on if ``ncol`` is specified.
 
         Examples
         --------
-        Create a zero vector
+        Create a zero vector.
 
-        >>> import ansys
-        >>> mapdl = ansys.Mapdl()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
         >>> mm = mapdl.math()
         >>> vec = mm.zeros(10)
 
-        Create a zero matrix
+        Create a zero matrix.
 
         >>> mat = mm.zeros(10, 10)
         """
         if not ncol:
             return self.vec(nrow, dtype, init="zeros")
-        else:
-            return self.mat(nrow, ncol, dtype, init="zeros")
+        return self.mat(nrow, ncol, dtype, init="zeros")
 
     def ones(self, nrow, ncol=None, dtype=np.double):
         """Create a vector or matrix containing all ones
 
+        Parameters
+        ----------
         nrow : int
             Number of rows.
-
         ncol : int, optional
             Number of columns.  If specified, returns a matrix.
-
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
 
         Returns
         -------
-        ans_vec_mat : ansys.AnsVec or ansys.AnsMat
-            ANSYS vector or matrix depending on if "ncol" is specified
+        AnsVec or AnsMat
+            APDLMath vector or matrix depending on if "ncol" is
+            specified.
 
         Examples
         --------
-        Create a ones vector
+        Create a ones vector.
 
-        >>> import ansys
-        >>> mapdl = ansys.Mapdl()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
         >>> mm = mapdl.math()
         >>> vec = mm.ones(10)
 
-        Create a ones matrix
+        Create a ones matrix.
 
         >>> mat = mm.ones(10, 10)
         """
@@ -326,38 +323,38 @@ class MapdlMath:
     def rand(self, nrow, ncol=None, dtype=np.double):
         """Create a vector or matrix containing all random values
 
+        Parameters
+        ----------
         nrow : int
             Number of rows.
-
         ncol : int, optional
             Number of columns.  If specified, returns a matrix.
-
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
 
         Returns
         -------
-        ans_vec_mat : ansys.AnsVec or ansys.AnsMat
-            ANSYS vector or matrix depending on if "ncol" is specified
+        AnsVec or AnsMat
+            APDLMath vector or matrix depending on if "ncol" is
+            specified.
 
         Examples
         --------
-        Create a random vector
+        Create a random vector.
 
-        >>> import ansys
-        >>> mapdl = ansys.Mapdl()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
         >>> mm = mapdl.math()
         >>> vec = mm.rand(10)
 
-        Create a random matrix
+        Create a random matrix.
 
         >>> mat = mm.rand(10, 10)
         """
         if not ncol:
             return self.vec(nrow, dtype, init="rand")
-        else:
-            return self.mat(nrow, ncol, dtype, init="rand")
+        return self.mat(nrow, ncol, dtype, init="rand")
 
     def matrix(self, matrix, name=None, triu=False):
         """Send a scipy matrix or numpy array to MAPDL.
@@ -366,22 +363,20 @@ class MapdlMath:
         ----------
         matrix : np.ndarray
             Numpy array to send as a matrix to MAPDL.
-
         name : str, optional
             APDLMath matrix name.  Optional and defaults to a random name.
-
-        triu: bool, optional
+        triu : bool, optional
             ``True`` when the matrix is upper triangular, ``False``
             when unsymmetric.
 
         Returns
         -------
-        ans_mat : MapdlMath.AnsMat
+        AnsMat
             MapdlMath matrix.
 
         Examples
         --------
-        Generate a random sparse matrix
+        Generate a random sparse matrix.
 
         >>> from scipy import sparse
         >>> sz = 5000
@@ -390,7 +385,7 @@ class MapdlMath:
         >>> ans_mat
         APDLMath Matrix 5000 x 5000
 
-        Read the matrix back to Python
+        Transfer the matrix back to Python.
 
         >>> ans_mat.asarray()
         <500x5000 sparse matrix of type '<class 'numpy.float64'>'
@@ -406,8 +401,7 @@ class MapdlMath:
         self._set_mat(name, matrix, triu)
         if sparse.issparse(matrix):
             return AnsSparseMat(name, self._mapdl)
-        else:
-            return AnsDenseMat(name, self._mapdl)
+        return AnsDenseMat(name, self._mapdl)
 
     def load_matrix_from_file(self, dtype=np.double, fname="file.full",
                               mat_id="STIFF", asarray=False):
@@ -418,12 +412,10 @@ class MapdlMath:
         dtype : numpy.dtype, optional
             Numpy data type to store the vector as.  Defaults to
             ``np.double``.
-
         fname : str, optional
             Filename to read the matrix from.  Defaults to ``"file.full"``.
-
         mat_id : str, optional
-            Matrix type.  Defaults to ``"STIFF"``
+            Matrix type.  Defaults to ``"STIFF"``.
 
             * ``"STIFF"`` - Stiffness matrix
             * ``"MASS"`` - Mass matrix
@@ -433,11 +425,17 @@ class MapdlMath:
             * ``"USR2BCS"`` - Mapping vector relating the full set of
               external nodal DOFs to the subset that the solver uses
             * ``"GMAT"`` - Constraint equation matrix
-            * ``"K"``_RE - Real part of the stiffness matrix
-            * ``"K"``_IM - Imaginary part of the stiffness matrix
+            * ``"K_RE"`` - Real part of the stiffness matrix
+            * ``"K_IM"`` - Imaginary part of the stiffness matrix
 
         asarray : bool, optional
-            Return a `scipy` array rather than an APDLMath matrix.
+            Return a ``scipy`` array rather than an APDLMath matrix.
+
+        Returns
+        -------
+        scipy.sparse.csr.csr_matrix or AnsMat
+            Scipy sparse matrix or APDLMath matrix depending on
+            ``asarray``.
 
         """
         name = id_generator()
@@ -457,12 +455,16 @@ class MapdlMath:
         ----------
         dtype : numpy.dtype, optional
             Numpy data type to store the vector as.  Defaults to ``np.double``
-
         fname : str, optional
             Filename to read the matrix from.
-
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
+
+        Returns
+        -------
+        scipy.sparse.csr.csr_matrix or AnsMat
+            Scipy sparse matrix or APDLMath matrix depending on
+            ``asarray``.
 
         Examples
         --------
@@ -484,23 +486,28 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to ``np.double``
-
+            Numpy data type to store the vector as.  Defaults to
+            ``np.double``.
         fname : str, optional
             Filename to read the matrix from.
-
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
+        Returns
+        -------
+        scipy.sparse.csr.csr_matrix or AnsMat
+            Scipy sparse matrix or APDLMath matrix depending on
+            ``asarray``.
+
         Examples
         --------
-        >>> m = mapdl.math.mass()
-        >>> m
+        >>> mass = mapdl.math.mass()
+        >>> mass
         APDLMATH Matrix 60 x 60
 
         Convert to a scipy array
 
-        >>> mat = m.asarray()
+        >>> mat = mass.asarray()
         >>> mat
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
@@ -508,28 +515,33 @@ class MapdlMath:
         return self.load_matrix_from_file(dtype, fname, "MASS", asarray)
 
     def damp(self, dtype=np.double, fname="file.full", asarray=False):
-        """Load the damping matrix from the full file
+        """Load the damping matrix from the full file.
 
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to ``np.double``
-
+            Numpy data type to store the vector as.  Defaults to
+            ``np.double``.
         fname : str, optional
             Filename to read the matrix from.
-
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
+        Returns
+        -------
+        scipy.sparse.csr.csr_matrix or AnsMat
+            Scipy sparse matrix or APDLMath matrix depending on
+            ``asarray``.
+
         Examples
         --------
-        >>> m = mapdl.math.damp()
-        >>> m
+        >>> ans_mat = mapdl.math.damp()
+        >>> ans_mat
         APDLMATH Matrix 60 x 60
 
         Convert to a scipy array
 
-        >>> mat = m.asarray()
+        >>> mat = ans_mat.asarray()
         >>> mat
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
@@ -537,17 +549,17 @@ class MapdlMath:
         """
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(self, dtype=np.double, fname="file.full",
+                mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to ``np.double``
-
+            Numpy data type to store the vector as.  Defaults to
+            ``np.double``.
         fname : str, optional
             Filename to read the vector from.
-
         mat_id : str, optional
             Vector ID to load.  If loading from a ``"*.full"`` file,
             can be one of the following:
@@ -556,19 +568,18 @@ class MapdlMath:
             * ``"GVEC"`` - Constraint equation constant terms
             * ``"BACK"`` - nodal mapping vector (internal to user)
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
-
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
-        --------
-        ansys.mapdl.math.AnsVec
-            APDL vector instance generated from the file.
+        -------
+        numpy.ndarray or AnsVec
+            Numpy array or APDLMath vector depending on ``asarray``.
 
         Examples
         --------
-        >>> b = mm.get_vec(fname='PRSMEMB.full', mat_id="RHS")
-        >>> b
+        >>> vec = mm.get_vec(fname='PRSMEMB.full', mat_id="RHS")
+        >>> vec
         APDLMath Vector Size 126
 
         """
@@ -583,26 +594,26 @@ class MapdlMath:
         return ans_vec
 
     def set_vec(self, data, name=None):
-        """Push a numpy array or Python list to the MAPDL Memory
-        Workspace.
+        """Push a numpy array or Python list to the MAPDL memory workspace.
 
         Parameters
         ----------
         data : np.ndarray, list
             Numpy array or Python list to push to MAPDL.  Must be 1
             dimensional.
-
         vname : str, optional
             APDLMath vector name.  If unset, one will be automatically
             generated.
 
         Returns
         -------
-        vec : ansys.mapdl.math.AnsVec
+        ansys.mapdl.math.AnsVec
             MAPDL vector instance generated from the pushed vector.
 
         Examples
         --------
+        Push a random vector from numpy to MAPDL.
+
         >>> data = np.random.random(10)
         >>> vec = mm.set_vec(data)
         >>> np.isclose(vec.asarray(), data)
@@ -620,17 +631,15 @@ class MapdlMath:
         ----------
         dtype : numpy.dtype, optional
             Data type to store the vector as.  Defaults to ``np.double``.
-
         fname : str, optional
             Filename to read the vector from.  Defaults to ``"file.full"``.
-
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
-            APDL vector instance generated from the file.
+        numpy.ndarray or ansys.mapdl.math.AnsVec
+            Numpy or APDL vector instance generated from the file.
 
         Examples
         --------
@@ -653,21 +662,18 @@ class MapdlMath:
 
         ``M = U*SIGMA*V.T``
 
-        For more details, see:
-        https://en.wikipedia.org/wiki/Singular_value_decomposition
+        For more details, see `Singular Value Decomposition
+        <https://en.wikipedia.org/wiki/Singular_value_decomposition>`_.
 
         Parameters
         ----------
         mat : ansys.AnsMat
             The array to compress.
-
         thresh : float, optional
             Numerical threshold value used to manage the compression.
             Default is 1E-7.
-
         sig : str, optional
             Name of the vector used to store the ``SIGMA`` values.
-
         v : str, optional
             Name of the vector used to store the values from ``v``.
             See the equation above.
@@ -695,7 +701,6 @@ class MapdlMath:
         ----------
         mat : ansys.mapdl.core.math.AnsMat
             The array to apply Modified Gram-Schmidt algorithm to.
-
         thresh : float, optional
             Numerical threshold value used to manage the compression.
             The default value is 1E-14 for MGS.
@@ -732,12 +737,10 @@ class MapdlMath:
         ----------
         nev : int
             Number of eigenvalues to compute.
-
-        K : ansys.AnsMat
+        k : ansys.AnsMat
             An array representing the operation ``A * x`` where A is a
             square matrix.
-
-        M : ansys.AnsMat, optional
+        m : ansys.AnsMat, optional
             An array representing the operation ``M * x`` for the
             generalized eigenvalue problem:
 
@@ -760,7 +763,6 @@ class MapdlMath:
             fmax = ''
 
         cid = ''
-
         if not c:
             if (k.sym() and m.sym()):
                 if not algo:
@@ -793,7 +795,7 @@ class MapdlMath:
 
         Returns
         -------
-        dot_product : float
+        float
             Dot product between the two vectors.
 
         Examples
@@ -811,18 +813,19 @@ class MapdlMath:
         ----------
         obj1 : ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
             Ansys object.
-
         obj2 : ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
             Ansys object.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
+        AnsVec or AnsMat
             Sum of the two input objects.  Type of the output matches
             type of the input.  Sum of the two vectors/matrices.
 
         Examples
         --------
+        Comupute the sum between two vectors.
+
         >>> v = mm.ones(10)
         >>> w = mm.ones(10)
         >>> x = mm.add(v, w)
@@ -836,34 +839,37 @@ class MapdlMath:
         ----------
         obj1 : ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
             Ansys object.
-
         obj2 : ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
             Ansys object.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
-            Difference of the two input vectors or matrices.  Type of the output
-            matches the type of the input.
+        AnsVec or AnsMat
+            Difference of the two input vectors or matrices.  Type of
+            the output matches the type of the input.
 
         Examples
         --------
+        Subtract two APDLMath vectors.
+
         >>> v = mm.ones(10)
         >>> w = mm.ones(10)
-        >>> x = mm.add( v, w)
+        >>> x = mm.subtract(v, w)
         """
         return obj1 - obj2
 
     def factorize(self, mat):
-        """Factorize a matrix
+        """Factorize a matrix.
 
         Parameters
         ----------
         mat : ansys.mapdl.math.AnsMat
-            An ansys.mapdl.math matrix.
+            An APDLMath matrix
 
         Examples
         --------
+        Factorize a random matrix.
+
         >>> mm = mapdl.math
         >>> dim = 1000
         >>> m2 = mm.rand(dim, dim)
@@ -882,19 +888,18 @@ class MapdlMath:
         ----------
         obj : ansys.mapdl.math.AnsMat or ansys.mapdl.math.AnsVec
             ApdlMath object to compute the norm from.
-
         order : str
             Mathematical norm to use.  One of:
 
             * ``'NRM2'``: L2 (Euclidean or SRSS) norm (default).
             * ``'NRM1'``: L1 (absolute sum) norm (vectors only).
             * ``'NRMINF'`` Maximum norm.
-
         nrm : float
             Norm of the matrix or vector(s).
 
         Examples
         --------
+        Compute the norm of a APDLMath vector.
         v = mm.ones(10)
         3.1622776601683795
         """
@@ -908,13 +913,10 @@ class MapdlMath:
         ----------
         vname : str
             Vector parameter name.  Character ":" is not allowed.
-
         arr : np.ndarray
             Numpy array to upload
-
         dtype : np.dtype, optional
             Type to upload array as.  Defaults to the current array type.
-
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB.
 
@@ -945,16 +947,12 @@ class MapdlMath:
         ----------
         mname : str
             Matrix parameter name.  Character ":" is not allowed.
-
         arr : np.ndarray or scipy.sparse matrix
             Matrix to upload
-
         sym : bool
             ``True`` when matrix is symmetric. Unused if Matrix is dense.
-
         dtype : np.dtype, optional
             Type to upload array as.  Defaults to the current array type.
-
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB.
 
@@ -1035,6 +1033,7 @@ class MapdlMath:
         self._mapdl.run(f'*SMAT,{mname},{MYCTYPE[dtype]},ALLOC,CSR,{indptrname},{indxname},'
                         f'{dataname},{flagsym}')
 
+
 class ApdlMathObj:
     """Common class for MAPDL Math objects"""
 
@@ -1094,11 +1093,11 @@ class ApdlMathObj:
 
             - ``'NRM2'``: L2 (Euclidean or SRSS) norm (default).
             - ``'NRM1'``: L1 (absolute sum) norm (vectors only).
-            - ``'NRMINF'`` Maximum norm.
+            - ``'NRMINF'`` : Maximum norm.
 
         Returns
         -------
-        nrm : float
+        float
             Norm of the matrix or vector(s).
 
         Examples
@@ -1183,6 +1182,7 @@ class AnsVec(ApdlMathObj):
 
     @property
     def size(self):
+        """Number of items in this vector."""
         sz = self._mapdl.scalar_param(f"{self.id}_DIM")
         if sz is None:
             raise RuntimeError('This vector has been deleted within MAPDL.')
@@ -1212,7 +1212,7 @@ class AnsVec(ApdlMathObj):
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
+        AnsVec
             Hadamard product between this vector and the other vector.
         """
         if not meets_version(self._mapdl._server_version, (0, 4, 0)):
@@ -1240,8 +1240,8 @@ class AnsVec(ApdlMathObj):
         """Return a copy of this vector"""
         return AnsVec(ApdlMathObj.copy(self), self._mapdl)
 
-    def dot(self, vec):
-        """Dot product with another ansys vector object
+    def dot(self, vec) -> float:
+        """Dot product with another APDLMath vector.
 
         Parameters
         ----------
@@ -1250,7 +1250,7 @@ class AnsVec(ApdlMathObj):
 
         Returns
         -------
-        dot_product : float
+        float
             Dot product between this vector and the other vector.
         """
         if not isinstance(vec, AnsVec):
@@ -1259,7 +1259,7 @@ class AnsVec(ApdlMathObj):
         self._mapdl.run(f"*DOT,{self.id},{vec.id},py_val")
         return self._mapdl.scalar_param("py_val")
 
-    def asarray(self):
+    def asarray(self) -> np.ndarray:
         """Returns vector as a numpy array
 
         Examples
@@ -1285,30 +1285,34 @@ class AnsMat(ApdlMathObj):
         ApdlMathObj.__init__(self, id_, mapdl, type_)
 
     @property
-    def nrow(self):
+    def nrow(self) -> int:
+        """Number of columns in this matrix."""
         return int(self._mapdl.scalar_param(self.id + "_ROWDIM"))
 
     @property
-    def ncol(self):
+    def ncol(self) -> int:
+        """Number of rows in this matrix."""
         return int(self._mapdl.scalar_param(self.id + "_COLDIM"))
 
     @property
-    def size(self):
+    def size(self) -> int:
+        """Number of items in this matrix."""
         return self.nrow*self.ncol
 
     @property
-    def shape(self):
+    def shape(self) -> tuple:
         """Returns a numpy-like shape.
 
-        Tuple of (rows and columns)
+        Tuple of (rows and columns).
         """
         return (self.nrow, self.ncol)
 
     def sym(self):  # BUG this is not always true
+        """Return if matrix is symmetric."""
         return True
 
-    def asarray(self):
-        """Returns vector as a numpy array
+    def asarray(self) -> np.ndarray:
+        """Returns vector as a numpy array.
 
         Examples
         --------
@@ -1336,12 +1340,12 @@ class AnsMat(ApdlMathObj):
 
         Returns
         -------
-        dot_product : ansys.mapdl.math.AnsVec or ansys.mapdl.math.AnsMat
+        AnsVec or AnsMat
             Matrix multiplication result.
 
         Examples
         --------
-        Multiplication of a matrix and vector
+        Multiplication of a matrix and vector.
 
         >>> m1 = mm.rand(10, 10)
         >>> v1 = mm.rand(10)
@@ -1445,7 +1449,7 @@ class AnsSparseMat(AnsMat):
         """
         return AnsSparseMat(ApdlMathObj.copy(self), self._mapdl)
 
-    def todense(self):
+    def todense(self) -> np.ndarray:
         """Return this array as a dense np.ndarray
 
         Examples
@@ -1492,7 +1496,6 @@ class AnsSolver(ApdlMathObj):
         ----------
         mat : ansys.mapdl.math.AnsMat
             An ansys.mapdl.math matrix.
-
         algo : str, optional
             Factorization algorithm.  Either ``"LAPACK"`` or
             ``"DSP"``.
@@ -1514,13 +1517,12 @@ class AnsSolver(ApdlMathObj):
         ----------
         b : ansys.mapdl.math.AnsVec
             APDLmath vector.
-
         x : ansys.mapdl.math.AnsVec, optional
             APDLmath vector to place the solution.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
+        AnsVec
             Solution vector.  Identical to ``x`` if supplied.
 
         Examples
@@ -1567,19 +1569,20 @@ def solve(mat, b, x=None, algo=None):
     return x
 
 
-def dot(vec1, vec2):
-    """Dot product between two ANSYS vector objects
+def dot(vec1, vec2) -> float:
+    """Dot product between two APDLMath vectors.
 
     Parameters
+    ----------
     vec1 : ansys.mapdl.math.AnsVec
-        Ansys vector object.
+        APDLMath vector.
 
     vec1 : ansys.mapdl.math.AnsVec
-        Ansys vector object.
+        APDLMath vector.
 
     Returns
     -------
-    dot_product : float
+    float
         Dot product between the two vectors
 
     """

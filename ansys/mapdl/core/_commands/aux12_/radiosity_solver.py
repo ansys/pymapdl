@@ -202,7 +202,7 @@ class RadiositySolver:
             1 - Axisymmetric
 
         ndiv
-             Number of divisions for axisymmetric geometry (that is, the number
+            Number of divisions for axisymmetric geometry (that is, the number
             of circumferential segments). Default is 20. Maximum is 90.
 
         hidopt
@@ -391,7 +391,7 @@ class RadiositySolver:
         View factors for each target element will be printed.
 
         An average view factor for all target elements will be computed.  (Use
-        *GET  to retrieve the average value).
+        ``*GET``  to retrieve the average value).
 
         When resuming a database, issue the command VFOPT,READ before issuing
         the VFQUERY command.

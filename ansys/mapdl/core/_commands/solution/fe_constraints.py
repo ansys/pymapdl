@@ -22,7 +22,7 @@ class FeConstraints:
             Degree-of-freedom value or table name reference for tabular
             boundary conditions.  To specify a table, enclose the table name in
             percent (%) signs (for example, D,Node,TEMP,%tabname%). Use the
-            *DIM command to define a table.
+            ``*DIM`` command to define a table.
 
         value2
             Second degree-of-freedom value (if any).  If the analysis type and
@@ -87,7 +87,7 @@ class FeConstraints:
         ANSYS will prescribe the degree of freedom to the "current" relative
         displacement value. This option is only valid for the following labels:
         UX, UY, UZ, ROTX, ROTY, ROTZ. Alternatively, functions UX(), UY(), etc.
-        may be used (see *GET for a complete list of available functions). In
+        may be used (see ``*GET`` for a complete list of available functions). In
         most cases, %_FIX% usage is efficient and recommended for all
         structural degrees of freedom.
 
@@ -601,7 +601,7 @@ class FeConstraints:
         value
             The value or table name reference for tabular boundary conditions.
             To specify a table, enclose the table name in percent (%) signs
-            (DVAL,BaseID,U,%tablename%). Use the *DIM command to define a
+            (DVAL,BaseID,U,%tablename%). Use the ``*DIM`` command to define a
             table.
 
         value2

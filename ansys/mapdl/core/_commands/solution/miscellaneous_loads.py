@@ -1,3 +1,4 @@
+
 class MiscellaneousLoads:
 
     def anpres(self, nfram="", delay="", ncycl="", refframe="", **kwargs):
@@ -693,32 +694,6 @@ class MiscellaneousLoads:
         """
         command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
         return self.run(command, **kwargs)
-
-    def mpchg(self, mat="", elem="", **kwargs):
-        """Changes the material number attribute of an element.
-
-        APDL Command: MPCHG
-
-        Parameters
-        ----------
-        mat
-            Assign this material number to the element. Material numbers
-            are defined with the material property commands MP.
-
-        elem
-            Element for material change. If ALL, change materials for all
-            selected elements ESEL.
-
-        Notes
-        -----
-        Changes the material number of the specified element. Between load
-        steps in SOLUTION, material properties cannot be changed from
-        linear to nonlinear, or from one nonlinear option to another.
-
-        If you change from one CHABOCHE model to another CHABOCHE model,
-        the different models need to have the same number of data points.
-        """
-        return self.run(f"MPCHG,{mat},{elem}", **kwargs)
 
     def mrpm(self, val1="", **kwargs):
         """Defines the revolutions per minute (RPM) for a machine rotation.

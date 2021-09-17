@@ -175,7 +175,7 @@ class Morphing:
         Parameters
         ----------
         elem
-             Non-structural elements to which mesh movement (morph) applies.
+            Non-structural elements to which mesh movement (morph) applies.
             If ALL, apply morphing to all selected elements [ESEL]. If ELEM =
             P, graphical picking is enabled.  A component may be substituted
             for ELEM.

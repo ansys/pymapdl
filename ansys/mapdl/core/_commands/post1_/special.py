@@ -134,7 +134,7 @@ class Special:
             this block of D commands on Fname2.  his label is appended
             to the colon (:).  Defaults to CBn, where n is the
             cumulative iteration number for the data set currently in
-            the database.  For imaginary data (see KIMG on the *SET
+            the database.  For imaginary data (see KIMG on the ``*SET``
             command), Clab defaults to CIn.
 
         kshs
@@ -1020,7 +1020,7 @@ class Special:
         Integration results are in the active coordinate system (see the RSYS
         command). The type of results coordinate system must match the type
         used in the analysis. However, you may translate and rotate forces and
-        moments as needed. Use the *GET command (Utility Menu> Parameters> Get
+        moments as needed. Use the ``*GET`` command (Utility Menu> Parameters> Get
         Scalar Data) to retrieve the results.
         """
         command = f"INTSRF,{lab}"
@@ -1953,8 +1953,8 @@ class Special:
             varies as follows:
 
             - .RST for structural, fluid, or coupled-field analyses
-             - .RTH for thermal or electrical analyses
-             - .RMG for magnetic analyses
+            - .RTH for thermal or electrical analyses
+            - .RMG for magnetic analyses
 
         cflag
             0 - The complex results flag is set to 0 in the results
@@ -2209,7 +2209,7 @@ class Special:
         selected set of node (OUTRES) is not supported.
 
         The modal assurance criterion values can be retrieved as
-        parameters using the *GET command (Entity = RSTMAC).
+        parameters using the ``*GET`` command (Entity = RSTMAC).
 
         For more information and an example, see Comparing Nodal Solutions
         From Two Models (RSTMAC) in the Basic Analysis Guide.

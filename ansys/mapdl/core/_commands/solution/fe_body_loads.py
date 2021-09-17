@@ -21,7 +21,7 @@ class FeBodyLoads:
             Value associated with the Lab item or table name reference for
             tabular boundary conditions. To specify a table, enclose the table
             name in percent signs (%) (e.g., BF,Node,TEMP,%tabname%). Use the
-            *DIM command to define a table. Use only VAL1 for TEMP, FLUE, HGEN,
+            ``*DIM`` command to define a table. Use only VAL1 for TEMP, FLUE, HGEN,
             DGEN, MVDI, CHRGD. If Lab = CHRGD for acoustics, VAL1 is the static
             pressure for a non-uniform acoustic medium calculation.
 
@@ -223,7 +223,7 @@ class FeBodyLoads:
 
         BFE,Elem, Lab,STLOC,%tabname%
 
-        Use the *DIM command to define a table.
+        Use the ``*DIM`` command to define a table.
 
         For Lab = TEMP, each table defines NTEMP temperatures, as follows:
 

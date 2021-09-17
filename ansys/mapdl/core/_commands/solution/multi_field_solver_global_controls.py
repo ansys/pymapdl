@@ -80,7 +80,7 @@ class MultiFieldSolverGlobalControls:
         Parameters
         ----------
         fname
-             Field name (MFX) or number (MFS). Must be the ANSYS field (cannot
+            Field name (MFX) or number (MFS). Must be the ANSYS field (cannot
             be a CFX field).
 
         lab
