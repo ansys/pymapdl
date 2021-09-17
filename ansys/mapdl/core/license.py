@@ -70,12 +70,13 @@ def get_licdebug_name():
     # Licdebug name convention:
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
-    
+
     from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path 
     
     name = 'licdebug'
     hostname = socket.gethostname()
-    appname = 'FEAT_ANSYS'
+    appname = 'FEAT_ANSYS'  #TODO: We need to make sure this is the type of feature we need to checkout.
+    # This is the type of license my client requests (Windows 10, 2021R2)
     version = _version_from_path(get_ansys_path(allow_input=False))
     ending = 'out'
 
