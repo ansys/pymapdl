@@ -3,7 +3,8 @@ entities for further operations.
 """
 
 from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class Selecting:

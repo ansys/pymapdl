@@ -1,5 +1,6 @@
-from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from typing import Optional
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class ElementTable:

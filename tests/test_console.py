@@ -3,20 +3,17 @@
 This has been copied from test_mapdl.py
 
 """
-import time
 import os
+import time
 
-import pytest
 import numpy as np
+import pytest
 import pyvista
-from pyvista.plotting.renderer import CameraPosition
-from pyvista.plotting import system_supports_plotting
-
-from ansys.mapdl.reader import examples
-
-from ansys.mapdl.core.misc import random_string
-from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.reader import examples
+from pyvista.plotting import system_supports_plotting
+from pyvista.plotting.renderer import CameraPosition
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"

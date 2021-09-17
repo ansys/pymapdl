@@ -25,11 +25,9 @@ This misses some files that will be needed by different architectures, like:
 /ansys_inc/v211/tp/IntelMKL/2020.0.166/linx64/lib/intel64/libmkl_def.so
 
 """
-import shutil
 import math
-import stat
-import time
 import os
+import stat
 
 import numpy as np
 

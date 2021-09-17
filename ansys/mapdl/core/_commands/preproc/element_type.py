@@ -3,8 +3,8 @@ These PREP7 commands define the type of elements to be used in the model.
 """
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands.parse import parse_e, parse_et
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from ansys.mapdl.core._commands.parse import parse_et
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class ElementType:

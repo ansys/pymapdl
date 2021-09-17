@@ -17,7 +17,6 @@ of our square.
 
 # start MAPDL and enter the pre-processing routine
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.inline_functions import Query
 
 mapdl = launch_mapdl()
 mapdl.prep7()
@@ -114,7 +113,7 @@ A | {rotations[0][0]:11.6f},{rotations[0][1]:11.6f},{rotations[0][2]:11.6f}
 B | {rotations[1][0]:11.6f},{rotations[1][1]:11.6f},{rotations[1][2]:11.6f}
 C | {rotations[2][0]:11.6f},{rotations[2][1]:11.6f},{rotations[2][2]:11.6f}
 D | {rotations[3][0]:11.6f},{rotations[3][1]:11.6f},{rotations[3][2]:11.6f}
- 
+
 """
 
 print(message)

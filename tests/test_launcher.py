@@ -1,14 +1,14 @@
 """Test the mapdl launcher"""
-import weakref
 import os
-import pytest
+import weakref
 
+import pytest
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.launcher import _version_from_path, get_start_instance
 from ansys.mapdl.core.misc import get_ansys_bin
-from ansys.mapdl.core.launcher import get_start_instance, _version_from_path
 
 try:
-    import ansys_corba
+    import ansys_corba  # noqa: F401
 
     HAS_CORBA = True
 except:

@@ -16,7 +16,6 @@ First, get an instance of
 """
 
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.inline_functions import Query
 
 mapdl = launch_mapdl()
 
@@ -109,6 +108,6 @@ for node in [node1, node2]:
     X | {x_displacement}
     Y | {y_displacement}
     Z | {z_displacement}
-    
+
     """
     print(message)

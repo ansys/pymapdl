@@ -1,14 +1,11 @@
+import os
 import tempfile
 import weakref
 
-import os
 import numpy as np
-
-from ansys.mapdl.reader._reader import write_array
-
-from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
+from ansys.mapdl.reader._reader import write_array
 
 ROUTINE_MAP = {
     0: "Begin level",
