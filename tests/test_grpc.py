@@ -159,15 +159,7 @@ def test_grpc_custom_ip():
     
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
-
-    output_file = mapdl._download_as_raw('.__tmp__.out')
-    output = output_file.decode()
-
-    ip_in_output = re.findall('Server listening on : (.*):', output)[0]
-    
-    mapdl.exit()
-
-    assert ip == ip_in_output
+    assert mapdl.ip == ip
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
