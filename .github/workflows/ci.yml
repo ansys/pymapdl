@@ -39,7 +39,7 @@ jobs:
           make flake8
 
   testimport:
-  name: Smoke Tests
+    name: Smoke Tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
