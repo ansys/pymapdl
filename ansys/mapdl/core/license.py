@@ -67,10 +67,24 @@ def get_licdebug_path():
 
 
 def get_licdebug_name():
-    from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
-    ansys_bin = get_ansys_path(allow_input=False)
-    version = _version_from_path(ansys_bin)    
-    return f'licdebug.FEAT_ANSYS.{version}.out'  
+    # Licdebug name convention:
+    # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
+    # - For version 21.2 and below: `licdebug.$appname.$version.out`
+    
+    from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path 
+    
+    name = 'licdebug'
+    hostname = socket.gethostname()
+    appname = 'FEAT_ANSYS'
+    version = _version_from_path(get_ansys_path(allow_input=False))
+    ending = 'out'
+
+    if version < 221:
+        parts = (name, appname, version, ending)
+    else:
+        parts = (name, hostname, appname, version, ending)
+    
+    return '.'.join(parts)
 
 
 def get_licdebug_msg(licdebug_file):
@@ -271,10 +285,6 @@ def try_ansysli_util():
 def check_license_server_with_ansysli_util():
     """
     Check the license server status by running 'ansysli_util'. 
-
-    However this method is:
-    - Not recommended because of the load generated in the server side.
-    - Not reliable because the difficulty to catch the port in the license server
     """
     warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
     licenses = ['meba']  # mechanical enterprise license. 
