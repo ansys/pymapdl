@@ -1,7 +1,14 @@
 # check spelling, codestyle
 name: Style Check
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
 
 jobs:
   build:
@@ -20,3 +27,7 @@ jobs:
         run: |
           pip install -r requirements_style.txt --disable-pip-version-check
           make
+
+      - name: flake8
+        run: |
+          make flake8

@@ -1,5 +1,4 @@
 class DynamicOptions:
-
     def alphad(self, value="", **kwargs):
         """Defines the mass matrix multiplier for damping.
 
@@ -155,8 +154,7 @@ class DynamicOptions:
         command = f"FRQSCL,{scaling}"
         return self.run(command, **kwargs)
 
-    def harfrq(self, freqb="", freqe="", logopt="", freqarr="", toler="",
-               **kwargs):
+    def harfrq(self, freqb="", freqe="", logopt="", freqarr="", toler="", **kwargs):
         """Defines the frequency range in a harmonic analysis.
 
         APDL Command: HARFRQ
@@ -205,7 +203,7 @@ class DynamicOptions:
             calculated based on the specifications from FREQB, FREQE, and
             LogOpt, as well NSBSTP on the NSUBST command and Clust on the HROUT
             command. Enclose the array name in percent (%) signs (for example,
-            HARFRQ,,,,,%arrname%). Use *DIM to define the array.
+            HARFRQ,,,,,%arrname%). Use ``*DIM`` to define the array.
 
         toler
             Tolerance to determine if a user input frequency value in FREQARR
@@ -252,17 +250,7 @@ class DynamicOptions:
         harmonic mode-superposition expansion pass.
 
         For a specific angle, the following real solution is stored in the
-        results (*.rst) file:
-
-        Where:
-
-        i is the degree of freedom number.
-
-         is the amplitude of the i th degree of freedom solution
-
-        Φi is the phase shift angle of the i th degree of freedom solution
-
-        ϕ is the supplied phase shift angle (ANGLE)
+        results (``*.rst``) file:
 
         If ANGLE is ALL, both the real and imaginary parts of the solution are
         stored in the results file.
@@ -346,8 +334,7 @@ class DynamicOptions:
         command = f"HROCEAN,{type_},{nphase}"
         return self.run(command, **kwargs)
 
-    def hropt(self, method="", maxmode="", minmode="", mcout="", damp="",
-              **kwargs):
+    def hropt(self, method="", maxmode="", minmode="", mcout="", damp="", **kwargs):
         """Specifies harmonic analysis options.
 
         APDL Command: HROPT
@@ -536,8 +523,7 @@ class DynamicOptions:
         """
         return self.run(f"MASCALE,{massfact}", **kwargs)
 
-    def mdamp(self, stloc="", v1="", v2="", v3="", v4="", v5="", v6="",
-              **kwargs):
+    def mdamp(self, stloc="", v1="", v2="", v3="", v4="", v5="", v6="", **kwargs):
         """Defines the damping ratios as a function of mode.
 
         APDL Command: MDAMP
@@ -718,8 +704,9 @@ class DynamicOptions:
         command = f"MODCONT,{mlskey},{enforcedkey}"
         return self.run(command, **kwargs)
 
-    def modseloption(self, dir1="", dir2="", dir3="", dir4="", dir5="",
-                     dir6="", **kwargs):
+    def modseloption(
+        self, dir1="", dir2="", dir3="", dir4="", dir5="", dir6="", **kwargs
+    ):
         """APDL Command: MODSELOPTION
 
         Parameters
@@ -769,8 +756,19 @@ class DynamicOptions:
         command = f"MODSELOPTION,{dir1},{dir2},{dir3},{dir4},{dir5},{dir6}"
         return self.run(command, **kwargs)
 
-    def modopt(self, method="", nmode="", freqb="", freqe="", cpxmod="",
-               nrmkey="", modtype="", blocksize="", freqmod="", **kwargs):
+    def modopt(
+        self,
+        method="",
+        nmode="",
+        freqb="",
+        freqe="",
+        cpxmod="",
+        nrmkey="",
+        modtype="",
+        blocksize="",
+        freqmod="",
+        **kwargs,
+    ):
         """Specifies modal analysis options.
 
         APDL Command: MODOPT
@@ -914,8 +912,17 @@ class DynamicOptions:
         command = f"MODOPT,{method},{nmode},{freqb},{freqe},{cpxmod},{nrmkey},{modtype},{blocksize},,,,{freqmod}"
         return self.run(command, **kwargs)
 
-    def mxpand(self, nmode="", freqb="", freqe="", elcalc="", signif="",
-               msupkey="", modeselmethod="", **kwargs):
+    def mxpand(
+        self,
+        nmode="",
+        freqb="",
+        freqe="",
+        elcalc="",
+        signif="",
+        msupkey="",
+        modeselmethod="",
+        **kwargs,
+    ):
         """Specifies the number of modes to expand and write for a modal or
 
         APDL Command: MXPAND
@@ -932,7 +939,7 @@ class DynamicOptions:
             otherwise, where the array index corresponds to the mode number. To
             specify an array containing the individual modes to expand, enclose
             the array name in percent (%) signs (for example,
-            MXPAND,%arrname%). Use the *DIM command to define the array.
+            MXPAND,%arrname%). Use the ``*DIM`` command to define the array.
 
         freqb
             Beginning, or lower end, of frequency range of interest. If FREQB
@@ -988,7 +995,7 @@ class DynamicOptions:
         step.
 
         There is no limit on the number of expanded modes (NMODE). However,
-        there is a limit on the maximum number of modes used via the *GET,,MODE
+        there is a limit on the maximum number of modes used via the ``*GET,,MODE``
         command, mode combinations, and the MDAMP command.
 
         With MSUPkey = YES, the computed element results (Elcalc = YES) are
@@ -1086,8 +1093,7 @@ class DynamicOptions:
         """
         return self.run(f"QRDOPT,{reusekey},,,{symmeth},{cmccoutkey}", **kwargs)
 
-    def rigid(self, dof1="", dof2="", dof3="", dof4="", dof5="", dof6="",
-              **kwargs):
+    def rigid(self, dof1="", dof2="", dof3="", dof4="", dof5="", dof6="", **kwargs):
         """Specifies known rigid body modes (if any) of the model.
 
         APDL Command: RIGID
@@ -1206,8 +1212,19 @@ class DynamicOptions:
         command = f"TIMINT,{key},{lab}"
         return self.run(command, **kwargs)
 
-    def tintp(self, gamma="", alpha="", delta="", theta="", oslm="", tol="",
-              avsmooth="", alphaf="", alpham="", **kwargs):
+    def tintp(
+        self,
+        gamma="",
+        alpha="",
+        delta="",
+        theta="",
+        oslm="",
+        tol="",
+        avsmooth="",
+        alphaf="",
+        alpham="",
+        **kwargs,
+    ):
         """Defines transient integration parameters.
 
         APDL Command: TINTP
@@ -1285,8 +1302,19 @@ class DynamicOptions:
         command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},,,{avsmooth},{alphaf},{alpham}"
         return self.run(command, **kwargs)
 
-    def trnopt(self, method="", maxmode="", minmode="", mcfwrite="",
-               tintopt="", vaout="", dmpsfreq="", engcalc="", mckey="", **kwargs):
+    def trnopt(
+        self,
+        method="",
+        maxmode="",
+        minmode="",
+        mcfwrite="",
+        tintopt="",
+        vaout="",
+        dmpsfreq="",
+        engcalc="",
+        mckey="",
+        **kwargs,
+    ):
         """Specifies transient analysis options.
 
         APDL Command: TRNOPT

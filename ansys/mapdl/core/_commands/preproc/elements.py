@@ -7,23 +7,13 @@ from ansys.mapdl.core.plotting import general_plotter
 
 
 class Elements:
-
     def afsurf(self, sarea="", tline="", **kwargs):
-        """Generates surface elements overlaid on the surface of existing solid
+        """Generates surface elements overlaid on the surface of existing solid elements.
 
         APDL Command: AFSURF
-        elements and assigns the extra node as the closest fluid element node.
 
-        Parameters
-        ----------
-        sarea
-            Component name for the surface areas of the meshed solid volumes.
+        This assigns extra nodes to the closest fluid element node.
 
-        tline
-            Component name for the target lines meshed with fluid elements.
-
-        Notes
-        -----
         This command macro is used to generate surface effect elements overlaid
         on the surface of existing  solid elements and, based on proximity, to
         determine and assign the extra node for each surface element.  The
@@ -41,31 +31,70 @@ class Elements:
         through the picking dialog boxes associated with this command.
 
         The macro is applicable for the SURF152 and FLUID116 element types.
+
+        Parameters
+        ----------
+        sarea
+            Component name for the surface areas of the meshed solid volumes.
+
+        tline
+            Component name for the target lines meshed with fluid elements.
+
         """
         command = f"AFSURF,{sarea},{tline}"
         return self.run(command, **kwargs)
 
-    def e(self, i: MapdlInt = "", j: MapdlInt = "", k: MapdlInt = "",
-          l: MapdlInt = "", m: MapdlInt = "", n: MapdlInt = "", o:
-            MapdlInt = "", p: MapdlInt = "", **kwargs) -> Optional[int]:
+    def e(
+        self,
+        i: MapdlInt = "",
+        j: MapdlInt = "",
+        k: MapdlInt = "",
+        l: MapdlInt = "",
+        m: MapdlInt = "",
+        n: MapdlInt = "",
+        o: MapdlInt = "",
+        p: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[int]:
         """Defines an element by node connectivity.
-    
+
         APDL Command: E
-    
+
+        Defines an element by its nodes and attribute values. Up to 8
+        nodes may be specified with the :meth:`e` command.  If more nodes
+        are needed for the element, use the :meth:`emore` command. The
+        number of nodes required and the order in which they should be
+        specified are described in Chapter 4 of the Element Reference for
+        each element type.  Elements are automatically assigned a number
+        [NUMSTR] as generated. The current (or default) MAT, TYPE, REAL,
+        SECNUM and ESYS attribute values are also assigned to the element.
+
+        When creating elements with more than 8 nodes using this command
+        and the EMORE command, it may be necessary to turn off shape
+        checking using the SHPP command before issuing this command. If a
+        valid element type can be created without using the additional
+        nodes on the :meth:`emore` command, this command will create that
+        element. The :meth:`emore` command will then modify the element to
+        include the additional nodes. If shape checking is active, it will
+        be performed before the :meth:`emore` command is issued.
+        Therefore, if the shape checking limits are exceeded, element
+        creation may fail before the :meth:`emore` command modifies the
+        element into an acceptable shape.
+
         Parameters
         ----------
         i
             Number of node assigned to first nodal position (node
             ``i``).
-    
+
         j, k, l, m, n, o, p
             Number assigned to second (node ``j``) through eighth
             (node ``p``) nodal position, if any.
-    
+
         Examples
         --------
         Create a single SURF154 element.
-    
+
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SURF154')
         >>> mapdl.n(1, 0, 0, 0)
@@ -74,9 +103,9 @@ class Elements:
         >>> mapdl.n(4, 0, 1, 0)
         >>> mapdl.e(1, 2, 3, 4)
         1
-    
+
         Create a single hexahedral SOLID185 element
-    
+
         >>> mapdl.et(2, 'SOLID185')
         >>> mapdl.type(2)
         >>> mapdl.n(5, 0, 0, 0)
@@ -89,30 +118,7 @@ class Elements:
         >>> mapdl.n(12, 0, 1, 1)
         >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
         2
-    
-        Notes
-        -----
-        Defines an element by its nodes and attribute values. Up to 8
-        nodes may be specified with the :meth:`e` command.  If more nodes
-        are needed for the element, use the :meth:`emore` command. The
-        number of nodes required and the order in which they should be
-        specified are described in Chapter 4 of the Element Reference for
-        each element type.  Elements are automatically assigned a number
-        [NUMSTR] as generated. The current (or default) MAT, TYPE, REAL,
-        SECNUM and ESYS attribute values are also assigned to the element.
-    
-        When creating elements with more than 8 nodes using this command
-        and the EMORE command, it may be necessary to turn off shape
-        checking using the SHPP command before issuing this command. If a
-        valid element type can be created without using the additional
-        nodes on the :meth:`emore` command, this command will create that
-        element. The :meth:`emore` command will then modify the element to
-        include the additional nodes. If shape checking is active, it will
-        be performed before the :meth:`emore` command is issued.
-        Therefore, if the shape checking limits are exceeded, element
-        creation may fail before the :meth:`emore` command modifies the
-        element into an acceptable shape.
-    
+
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
         return parse_e(self.run(command, **kwargs))
@@ -122,8 +128,6 @@ class Elements:
 
         APDL Command: ECPCHG
 
-        Notes
-        -----
         The ECPCHG command converts uncoupled acoustic element types to
         coupled acoustic element types that are attached to the
         fluid-structure interaction interface. Or it converts coupled
@@ -146,13 +150,25 @@ class Elements:
         the defined element types with ETLIST and the element attributes
         with ELIST after using this command.
         """
-        return self.run('ECPCHG', **kwargs)
+        return self.run("ECPCHG", **kwargs)
 
-    def edele(self, iel1: MapdlInt = "", iel2: MapdlInt = "",
-              inc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def edele(
+        self, iel1: MapdlInt = "", iel2: MapdlInt = "", inc: MapdlInt = "", **kwargs
+    ) -> Optional[str]:
         """Deletes selected elements from the model.
 
         APDL Command: EDELE
+
+        Deleted elements are replaced by null or "blank"
+        elements. Null elements are used only for retaining the
+        element numbers so that the element numbering sequence for the
+        rest of the model is not changed by deleting elements. Null
+        elements may be removed (although this is not necessary) with
+        the NUMCMP command. If related element data (pressures, etc.)
+        are also to be deleted, delete that data before deleting the
+        elements. EDELE is for unattached elements only. You can use
+        the xCLEAR family of commands to remove any attached elements
+        from the database.
 
         Parameters
         ----------
@@ -171,23 +187,20 @@ class Elements:
         >>> mapdl.edele(10, 25)
         'DELETE SELECTED ELEMENTS FROM         10 TO         25 BY          1'
 
-        Notes
-        -----
-        Deleted elements are replaced by null or "blank"
-        elements. Null elements are used only for retaining the
-        element numbers so that the element numbering sequence for the
-        rest of the model is not changed by deleting elements. Null
-        elements may be removed (although this is not necessary) with
-        the NUMCMP command. If related element data (pressures, etc.)
-        are also to be deleted, delete that data before deleting the
-        elements. EDELE is for unattached elements only. You can use
-        the xCLEAR family of commands to remove any attached elements
-        from the database.
         """
         return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
 
-    def eextrude(self, action="", nelem="", space="", dist="", theta="",
-                 tfact="", bckey="", **kwargs):
+    def eextrude(
+        self,
+        action="",
+        nelem="",
+        space="",
+        dist="",
+        theta="",
+        tfact="",
+        bckey="",
+        **kwargs,
+    ):
         """Extrudes 2-D plane elements into 3-D solids.
 
         APDL Command: EEXTRUDE
@@ -218,11 +231,12 @@ class Elements:
             based on the average element size and extrusion distance.
 
         space
-            Spacing ratio. If positive, this value is the nominal ratio of the
-            last division size to the first division size (if > 1.0, sizes
-            increase, if < 1.0, sizes decrease). If negative, |SPACE| is the
-            nominal ratio of the center division size to the end division size.
-            The default value is 1.0 (uniform spacing).
+            Spacing ratio. If positive, this value is the nominal
+            ratio of the last division size to the first division size
+            (if > 1.0, sizes increase, if < 1.0, sizes decrease). If
+            negative, ``|SPACE|`` is the nominal ratio of the center
+            division size to the end division size.  The default value
+            is 1.0 (uniform spacing).
 
         dist
             Distance to extrude in the global Z direction for the plane strain
@@ -313,13 +327,23 @@ class Elements:
         command = f"EEXTRUDE,{action},{nelem},{space},{dist},{theta},{tfact},,{bckey}"
         return self.run(command, **kwargs)
 
-    def egen(self, itime: MapdlInt = "", ninc: MapdlInt = "",
-             iel1: Union[str, int] = "", iel2: MapdlInt = "",
-             ieinc: MapdlInt = "", minc: MapdlInt = "",
-             tinc: MapdlInt = "", rinc: MapdlInt = "",
-             cinc: MapdlInt = "", sinc: MapdlInt = "",
-             dx: MapdlFloat = "", dy: MapdlFloat = "",
-             dz: MapdlFloat = "", **kwargs) -> Optional[str]:
+    def egen(
+        self,
+        itime: MapdlInt = "",
+        ninc: MapdlInt = "",
+        iel1: Union[str, int] = "",
+        iel2: MapdlInt = "",
+        ieinc: MapdlInt = "",
+        minc: MapdlInt = "",
+        tinc: MapdlInt = "",
+        rinc: MapdlInt = "",
+        cinc: MapdlInt = "",
+        sinc: MapdlInt = "",
+        dx: MapdlFloat = "",
+        dy: MapdlFloat = "",
+        dz: MapdlFloat = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Generates elements from an existing pattern.
 
         APDL Command: EGEN
@@ -387,12 +411,15 @@ class Elements:
         See the element descriptions for INTER192, INTER193,
         INTER194, and INTER195 for the correct element node definition.
         """
-        command = f"EGEN,{itime},{ninc},{iel1},{iel2},{ieinc},{minc}," \
-                  f"{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
+        command = (
+            f"EGEN,{itime},{ninc},{iel1},{iel2},{ieinc},{minc},"
+            f"{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
+        )
         return self.run(command, **kwargs)
 
-    def einfin(self, compname: str = "", pnode: MapdlInt = "",
-               **kwargs) -> Optional[str]:
+    def einfin(
+        self, compname: str = "", pnode: MapdlInt = "", **kwargs
+    ) -> Optional[str]:
         """Generates structural infinite elements from selected nodes.
 
         APDL Command: EINFIN
@@ -453,10 +480,18 @@ class Elements:
         command = f"EINFIN,{compname},{pnode}"
         return self.run(command, **kwargs)
 
-    def eintf(self, toler: MapdlFloat = "", k: MapdlInt = "",
-              tlab: str = "", kcn: str = "", dx: MapdlFloat = "",
-              dy: MapdlFloat = "", dz: MapdlFloat = "",
-              knonrot: MapdlInt = "", **kwargs) -> Optional[str]:
+    def eintf(
+        self,
+        toler: MapdlFloat = "",
+        k: MapdlInt = "",
+        tlab: str = "",
+        kcn: str = "",
+        dx: MapdlFloat = "",
+        dy: MapdlFloat = "",
+        dz: MapdlFloat = "",
+        knonrot: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Defines two-node elements between coincident or offset nodes.
 
         APDL Command: EINTF
@@ -531,15 +566,19 @@ class Elements:
         only. The angle differences for node orientations are not
         checked.
         """
-        command = f"EINTF,{toler},{k},{tlab}," \
-                  f"{kcn},{dx},{dy}," \
-                  f"{dz},{knonrot}"
+        command = f"EINTF,{toler},{k},{tlab}," f"{kcn},{dx},{dy}," f"{dz},{knonrot}"
         return self.run(command, **kwargs)
 
-    def elist(self, iel1: Union[str, int] = "", iel2: MapdlInt = "",
-              inc: MapdlInt = "", nnkey: MapdlInt = "",
-              rkey: MapdlInt = "", ptkey: MapdlInt = "",
-              **kwargs) -> Optional[str]:
+    def elist(
+        self,
+        iel1: Union[str, int] = "",
+        iel2: MapdlInt = "",
+        inc: MapdlInt = "",
+        nnkey: MapdlInt = "",
+        rkey: MapdlInt = "",
+        ptkey: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Lists the elements and their attributes.
 
         APDL Command: ELIST
@@ -640,11 +679,20 @@ class Elements:
         command = f"EMID,{key},{edges}"
         return self.run(command, **kwargs)
 
-    def emodif(self, iel: Union[str, int] = "", stloc: Union[str, int] = "",
-               i1: MapdlInt = "", i2: MapdlInt = "", i3: MapdlInt = "",
-               i4: MapdlInt = "", i5: MapdlInt = "", i6: MapdlInt = "",
-               i7: MapdlInt = "", i8: MapdlInt = "",
-               **kwargs) -> Optional[str]:
+    def emodif(
+        self,
+        iel: Union[str, int] = "",
+        stloc: Union[str, int] = "",
+        i1: MapdlInt = "",
+        i2: MapdlInt = "",
+        i3: MapdlInt = "",
+        i4: MapdlInt = "",
+        i5: MapdlInt = "",
+        i6: MapdlInt = "",
+        i7: MapdlInt = "",
+        i8: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Modifies a previously defined element.
 
         APDL Command: EMODIF
@@ -665,6 +713,12 @@ class Elements:
             with these corresponding values. A (blank) retains the
             previous value (except in the I1 field, which resets the
             STLOC node number to zero).
+
+        Notes
+        -----
+        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
+        values) of an existing element may be changed with this
+        command.
 
         Examples
         --------
@@ -689,21 +743,30 @@ class Elements:
         >>> mapdl.allsel('BELOW', 'VOLU')
         >>> mapdl.emodif('ALL', 'MAT', 2)
 
-        Notes
-        -----
-        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
-        values) of an existing element may be changed with this
-        command.
         """
         command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
         return self.run(command, **kwargs)
 
-    def emore(self, q: MapdlInt = "", r: MapdlInt = "", s: MapdlInt = "",
-              t: MapdlInt = "", u: MapdlInt = "", v: MapdlInt = "",
-              w: MapdlInt = "", x: MapdlInt = "", **kwargs) -> Optional[str]:
+    def emore(
+        self,
+        q: MapdlInt = "",
+        r: MapdlInt = "",
+        s: MapdlInt = "",
+        t: MapdlInt = "",
+        u: MapdlInt = "",
+        v: MapdlInt = "",
+        w: MapdlInt = "",
+        x: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Add more nodes to the just-defined element.
 
         APDL Command: EMORE
+
+        Repeat this method for up to 4 additional nodes (20
+        maximum). Nodes are added after the last nonzero node of the
+        element.  Node numbers defined with this command may be
+        zeroes.
 
         Parameters
         ----------
@@ -744,18 +807,22 @@ class Elements:
                     9 10 11 12 13 14 15 16
                    17 18 19 20
 
-        Notes
-        -----
-        Repeat EMORE command for up to 4 additional nodes (20
-        maximum). Nodes are added after the last nonzero node of the
-        element.  Node numbers defined with this command may be
-        zeroes.
         """
         command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
         return self.run(command, **kwargs)
 
-    def emtgen(self, ncomp="", ecomp="", pncomp="", dof="", gap="", gapmin="",
-               fkn="", epzero="", **kwargs):
+    def emtgen(
+        self,
+        ncomp="",
+        ecomp="",
+        pncomp="",
+        dof="",
+        gap="",
+        gapmin="",
+        fkn="",
+        epzero="",
+        **kwargs,
+    ):
         """Generates a set of TRANS126 elements.
 
         APDL Command: EMTGEN
@@ -763,12 +830,12 @@ class Elements:
         Parameters
         ----------
         ncomp
-             Component name of the surface nodes of a structure which attach to
+            Component name of the surface nodes of a structure which attach to
             the TRANS126 elements. You must enclose name-strings in single
             quotes in the EMTGEN command line.
 
         ecomp
-             Component name of the TRANS126 elements generated. You must
+            Component name of the TRANS126 elements generated. You must
             enclose name-strings in single quotes in the EMTGEN command line.
             Defaults to EMTELM.
 
@@ -813,10 +880,10 @@ class Elements:
         the gap distance between the device and the plane is small compared to
         the overall surface area dimensions of the device. This assumption
         allows for a point-wise closed-form solution of capacitance between the
-        surface nodes and the plane; i.e. CAP = EPZERO*AREA/GAP, where EPZERO
+        surface nodes and the plane; i.e. CAP = ``EPZERO*AREA/GAP``, where EPZERO
         if the free-space permittivity, AREA is the area associated with the
         node, and GAP is the gap between the node and the plane. The area for
-        each node is computed using the ARNODE function in ANSYS. See the *GET
+        each node is computed using the ARNODE function in ANSYS. See the ``*GET``
         command description for more information on the ARNODE function.
 
         With a distributed set of TRANS126 elements attached directly to the
@@ -843,10 +910,19 @@ class Elements:
         command = f"EMTGEN,{ncomp},{ecomp},{pncomp},{dof},{gap},{gapmin},{fkn},{epzero}"
         return self.run(command, **kwargs)
 
-    def en(self, iel: MapdlInt = "", i: MapdlInt = "", j: MapdlInt = "",
-           k: MapdlInt = "", l: MapdlInt = "",
-           m: MapdlInt = "", n: MapdlInt = "", o: MapdlInt = "",
-           p: MapdlInt = "", **kwargs) -> Optional[str]:
+    def en(
+        self,
+        iel: MapdlInt = "",
+        i: MapdlInt = "",
+        j: MapdlInt = "",
+        k: MapdlInt = "",
+        l: MapdlInt = "",
+        m: MapdlInt = "",
+        n: MapdlInt = "",
+        o: MapdlInt = "",
+        p: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Defines an element by its number and node connectivity.
 
         APDL Command: EN
@@ -894,8 +970,7 @@ class Elements:
         command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
         return self.run(command, **kwargs)
 
-    def endrelease(self, tolerance="", dof1="", dof2="", dof3="", dof4="",
-                   **kwargs):
+    def endrelease(self, tolerance="", dof1="", dof2="", dof3="", dof4="", **kwargs):
         """Specifies degrees of freedom to be decoupled for end release.
 
         APDL Command: ENDRELEASE
@@ -947,13 +1022,24 @@ class Elements:
         command = f"ENDRELEASE,,{tolerance},{dof1},{dof2},{dof3},{dof4}"
         return self.run(command, **kwargs)
 
-    def engen(self, iinc: MapdlInt = "", itime: MapdlInt = "",
-              ninc: MapdlInt = "", iel1: MapdlInt = "",
-              iel2: MapdlInt = "", ieinc: MapdlInt = "",
-              minc: MapdlInt = "", tinc: MapdlInt = "",
-              rinc: MapdlFloat = "", cinc: MapdlInt = "",
-              sinc: MapdlInt = "", dx: MapdlInt = "", dy: MapdlInt = "",
-              dz: MapdlInt = "", **kwargs) -> Optional[str]:
+    def engen(
+        self,
+        iinc: MapdlInt = "",
+        itime: MapdlInt = "",
+        ninc: MapdlInt = "",
+        iel1: MapdlInt = "",
+        iel2: MapdlInt = "",
+        ieinc: MapdlInt = "",
+        minc: MapdlInt = "",
+        tinc: MapdlInt = "",
+        rinc: MapdlFloat = "",
+        cinc: MapdlInt = "",
+        sinc: MapdlInt = "",
+        dx: MapdlInt = "",
+        dy: MapdlInt = "",
+        dz: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Generates elements from an existing pattern.
 
         APDL Command: ENGEN
@@ -1009,15 +1095,15 @@ class Elements:
         existing elements already having these numbers will be
         redefined.
         """
-        command = f"ENGEN,{iinc},{itime},{ninc},{iel1},{iel2}," \
-                  f"{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx}," \
-                  f"{dy},{dz}"
+        command = (
+            f"ENGEN,{iinc},{itime},{ninc},{iel1},{iel2},"
+            f"{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx},"
+            f"{dy},{dz}"
+        )
         return self.run(command, **kwargs)
 
-    def enorm(self, enum: Union[str, int] = "",
-              **kwargs) -> Optional[str]:
-        """Reorients shell element normals or line element node
-        connectivity.
+    def enorm(self, enum: Union[str, int] = "", **kwargs) -> Optional[str]:
+        """Reorients shell element normals or line element node connectivity.
 
         APDL Command: ENORM
 
@@ -1026,10 +1112,6 @@ class Elements:
         enum
             Element number having the normal direction that the
             reoriented elements are to match.
-
-        Examples
-        --------
-        >>> mapdl.enorm(1)
 
         Notes
         -----
@@ -1075,12 +1157,23 @@ class Elements:
 
         Real constant values are not reoriented and may be invalidated
         by an element reversal.
+
+        Examples
+        --------
+        >>> mapdl.enorm(1)
+
         """
         return self.run(f"ENORM,{enum}", **kwargs)
 
-    def ensym(self, iinc: MapdlInt = "", ninc: MapdlInt = "",
-              iel1: MapdlInt = "", iel2: MapdlInt = "",
-              ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def ensym(
+        self,
+        iinc: MapdlInt = "",
+        ninc: MapdlInt = "",
+        iel1: MapdlInt = "",
+        iel2: MapdlInt = "",
+        ieinc: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Generates elements by symmetry reflection.
 
         APDL Command: ENSYM
@@ -1138,8 +1231,7 @@ class Elements:
         Revising Your Model in the Modeling and Meshing Guide for more
         information about controlling element normals.
         """
-        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}",
-                        **kwargs)
+        return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
     def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
         """Plots the currently selected elements.
@@ -1186,33 +1278,32 @@ class Elements:
             vtk = self._use_vtk
 
         if vtk:
-            kwargs.setdefault('title', 'MAPDL Element Plot')
+            kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
-                warnings.warn('There are no elements to plot.')
+                warnings.warn("There are no elements to plot.")
                 return general_plotter([], [], [], **kwargs)
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
-            kwargs.setdefault('show_edges', True)
+            kwargs.setdefault("show_edges", True)
 
             # if show_node_numbering:
             labels = []
             if show_node_numbering:
-                labels = [{'points': esurf.points,
-                           'labels': esurf['ansys_node_num']}]
+                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
 
-            return general_plotter([{'mesh': esurf,
-                                     'style': kwargs.pop('style', 'surface')}],
-                                   [],
-                                   labels,
-                                   **kwargs)
+            return general_plotter(
+                [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
+                [],
+                labels,
+                **kwargs,
+            )
 
         # otherwise, use MAPDL plotter
         self._enable_interactive_plotting()
-        return self.run('EPLOT')
+        return self.run("EPLOT")
 
-    def eread(self, fname: str = "",
-              ext: str = "", **kwargs) -> Optional[str]:
+    def eread(self, fname: str = "", ext: str = "", **kwargs) -> Optional[str]:
         """Reads elements from a file.
 
         APDL Command: EREAD
@@ -1292,8 +1383,9 @@ class Elements:
         command = f"EREINF,"
         return self.run(command, **kwargs)
 
-    def errang(self, emin: MapdlInt = "", emax: MapdlInt = "",
-               einc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def errang(
+        self, emin: MapdlInt = "", emax: MapdlInt = "", einc: MapdlInt = "", **kwargs
+    ) -> Optional[str]:
         """Specifies the element range to be read from a file.
 
         APDL Command: ERRANG
@@ -1315,8 +1407,9 @@ class Elements:
         command = f"ERRANG,{emin},{emax},{einc}"
         return self.run(command, **kwargs)
 
-    def esurf(self, xnode: MapdlInt = "", tlab: str = "",
-              shape: str = "", **kwargs) -> Optional[str]:
+    def esurf(
+        self, xnode: MapdlInt = "", tlab: str = "", shape: str = "", **kwargs
+    ) -> Optional[str]:
         """Generates elements overlaid on the free faces of selected nodes.
 
         APDL Command: ESURF
@@ -1436,9 +1529,14 @@ class Elements:
         command = f"ESURF,{xnode},{tlab},{shape}"
         return self.run(command, **kwargs)
 
-    def esym(self, ninc: MapdlInt = "", iel1: MapdlInt = "",
-             iel2: MapdlInt = "",
-             ieinc: MapdlInt = "", **kwargs) -> Optional[str]:
+    def esym(
+        self,
+        ninc: MapdlInt = "",
+        iel1: MapdlInt = "",
+        iel2: MapdlInt = "",
+        ieinc: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Generates elements from a pattern by a symmetry reflection.
 
         APDL Command: ESYM
@@ -1495,11 +1593,34 @@ class Elements:
         """
         return self.run(f"ESYM,,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
-    def ewrite(self, fname: str = "", ext: str = "", kappnd: MapdlInt = "",
-               format_: str = "", **kwargs) -> Optional[str]:
+    def ewrite(
+        self,
+        fname: str = "",
+        ext: str = "",
+        kappnd: MapdlInt = "",
+        format_: str = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Writes elements to a file.
 
         APDL Command: EWRITE
+
+        Writes the selected elements to a file. The write operation is not
+        necessary in a standard ANSYS run but is provided as convenience
+        to users wanting a coded element file. If issuing :meth:`ewrite`
+        from ANSYS to be used in ANSYS, you must also issue NWRITE to
+        store nodal information for later use. Only elements having all of
+        their nodes defined (and selected) are written. Data are written
+        in a coded format. The data description of each record is: I, J,
+        K, L, M, N, O, P, MAT, TYPE, REAL, SECNUM, ESYS, IEL, where MAT,
+        TYPE, REAL, and ESYS are attribute numbers, SECNUM is the beam
+        section number, and IEL is the element number.
+
+        The format is (14I6) if Format is set to SHORT and (14I8) if the
+        Format is set to LONG, with one element description per record for
+        elements having eight nodes of less. For elements having more than
+        eight nodes, nodes nine and above are written on a second record
+        with the same format.
 
         Parameters
         ----------
@@ -1531,75 +1652,14 @@ class Elements:
         --------
         >>> mapdl.ewrite('etable.txt', format_='LONG')
 
-        Notes
-        -----
-        Writes the selected elements to a file. The write operation is not
-        necessary in a standard ANSYS run but is provided as convenience
-        to users wanting a coded element file. If issuing :meth:`ewrite`
-        from ANSYS to be used in ANSYS, you must also issue NWRITE to
-        store nodal information for later use. Only elements having all of
-        their nodes defined (and selected) are written. Data are written
-        in a coded format. The data description of each record is: I, J,
-        K, L, M, N, O, P, MAT, TYPE, REAL, SECNUM, ESYS, IEL, where MAT,
-        TYPE, REAL, and ESYS are attribute numbers, SECNUM is the beam
-        section number, and IEL is the element number.
-
-        The format is (14I6) if Format is set to SHORT and (14I8) if the
-        Format is set to LONG, with one element description per record for
-        elements having eight nodes of less. For elements having more than
-        eight nodes, nodes nine and above are written on a second record
-        with the same format.
         """
         return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
-    def gcdef(self, option="", sect1="", sect2="", matid="", realid="",
-              **kwargs):
+    def gcdef(self, option="", sect1="", sect2="", matid="", realid="", **kwargs):
         """Defines interface interactions between general contact surfaces.
 
         APDL Command: GCDEF
 
-        Parameters
-        ----------
-        option
-            Option to be performed.
-
-            (blank) - Retain the previous Option setting between SECT1 and SECT2.
-
-            AUTO - Define auto asymmetric contact between surfaces SECT1 and SECT2.
-
-            SYMM - Define symmetric contact between surfaces SECT1 and SECT2.
-
-            ASYM - Define asymmetric contact with SECT1 as the source (contact) surface and SECT2
-                   as the target surface.
-
-            EXCL - Exclude contact between surfaces SECT1 and SECT2. MATID and REALID are ignored.
-
-            DELETE - Remove the given definition from the GCDEF table. MATID and REALID are ignored.
-
-            Note that GCDEF,DELETE,ALL,ALL does not remove the entire GCDEF table; it merely removes any existing GCDEF,,ALL,ALL definitions, while leaving intact any existing GCDEF definitions that are more specific.  - To remove the entire GCDEF table, issue GCDEF,DELETE,TOTAL.
-
-            It is good practice to list all definitions using GCDEF,LIST,ALL,ALL before and after a GCDEF,DELETE command. - LIST
-
-            List stored GCDEF data entries. MATID and REALID are ignored. GCDEF,LIST,ALL,ALL lists the entire GCDEF table, including more specific GCDEF definitions. - TABLE
-
-        sect1, sect2
-            Section numbers representing general contact surfaces (no
-            defaults). Labels ALL and SELF are also valid input. See
-            SECT1/SECT2 Interactions for a description of how the various
-            inputs for SECT1 and SECT2 are interpreted.
-
-        matid
-            Material ID number for general contact interaction properties at
-            the SECT1/SECT2 interface. If zero or blank, the previous setting
-            of MATID for SECT1/SECT2 (if any) is retained.
-
-        realid
-            Real constant ID number for general contact interaction properties
-            at the SECT1/SECT2 interface.  If zero or blank, the previous
-            setting of REALID for SECT1/SECT2 (if any) is retained.
-
-        Notes
-        -----
         GCDEF defines the interface interaction between general contact
         surfaces identified by SECT1 and SECT2. GCDEF commands are order
         independent in most cases.
@@ -1617,12 +1677,64 @@ class Elements:
 
         The remaining general contact definition types can be overridden by the
         above two general contact definition types:
+
+        Parameters
+        ----------
+        option
+            Option to be performed.
+
+            (blank) - Retain the previous Option setting between SECT1 and SECT2.
+
+            AUTO - Define auto asymmetric contact between surfaces SECT1 and SECT2.
+
+            SYMM - Define symmetric contact between surfaces SECT1 and SECT2.
+
+            ASYM - Define asymmetric contact with SECT1 as the source
+                   (contact) surface and SECT2 as the target surface.
+
+            EXCL - Exclude contact between surfaces SECT1 and
+            SECT2. MATID and REALID are ignored.
+
+            DELETE - Remove the given definition from the GCDEF
+            table. MATID and REALID are ignored.
+
+            Note that GCDEF,DELETE,ALL,ALL does not remove the entire
+            GCDEF table; it merely removes any existing GCDEF,,ALL,ALL
+            definitions, while leaving intact any existing GCDEF
+            definitions that are more specific.  - To remove the
+            entire GCDEF table, issue GCDEF,DELETE,TOTAL.
+
+            It is good practice to list all definitions using
+            GCDEF,LIST,ALL,ALL before and after a GCDEF,DELETE
+            command.
+
+            LIST - List stored GCDEF data entries. MATID and REALID are
+            ignored. GCDEF,LIST,ALL,ALL lists the entire GCDEF table,
+            including more specific GCDEF definitions. - TABLE
+
+        sect1, sect2
+            Section numbers representing general contact surfaces (no
+            defaults). Labels ALL and SELF are also valid input. See
+            SECT1/SECT2 Interactions for a description of how the various
+            inputs for SECT1 and SECT2 are interpreted.
+
+        matid
+            Material ID number for general contact interaction properties at
+            the SECT1/SECT2 interface. If zero or blank, the previous setting
+            of MATID for SECT1/SECT2 (if any) is retained.
+
+        realid
+            Real constant ID number for general contact interaction properties
+            at the SECT1/SECT2 interface.  If zero or blank, the previous
+            setting of REALID for SECT1/SECT2 (if any) is retained.
+
         """
         command = f"GCDEF,{option},{sect1},{sect2},{matid},{realid}"
         return self.run(command, **kwargs)
 
-    def gcgen(self, option="", featureangle="", edgekey="", splitkey="",
-              selopt="", **kwargs):
+    def gcgen(
+        self, option="", featureangle="", edgekey="", splitkey="", selopt="", **kwargs
+    ):
         """Creates contact elements for general contact.
 
         APDL Command: GCGEN
@@ -1733,8 +1845,20 @@ class Elements:
         command = f"GCGEN,{option},{featureangle},{edgekey},{splitkey},{selopt}"
         return self.run(command, **kwargs)
 
-    def inistate(self, action="", val1="", val2="", val3="", val4="", val5="",
-                 val6="", val7="", val8="", val9="", **kwargs):
+    def inistate(
+        self,
+        action="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        **kwargs,
+    ):
         """Defines initial state data and parameters.
 
         APDL Command: INISTATE
@@ -1797,8 +1921,7 @@ class Elements:
         command = f"INISTATE,{action},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def laylist(self, iel="", layr1="", layr2="", mplab1="", mplab2="",
-                **kwargs):
+    def laylist(self, iel="", layr1="", layr2="", mplab1="", mplab2="", **kwargs):
         """Lists real constants material properties for layered elements.
 
         APDL Command: LAYLIST
@@ -1996,8 +2119,21 @@ class Elements:
         """
         return self.run(f"SHSD,{rid},{action}", **kwargs)
 
-    def swadd(self, ecomp="", shrd="", ncm1="", ncm2="", ncm3="", ncm4="",
-              ncm5="", ncm6="", ncm7="", ncm8="", ncm9="", **kwargs):
+    def swadd(
+        self,
+        ecomp="",
+        shrd="",
+        ncm1="",
+        ncm2="",
+        ncm3="",
+        ncm4="",
+        ncm5="",
+        ncm6="",
+        ncm7="",
+        ncm8="",
+        ncm9="",
+        **kwargs,
+    ):
         """Adds more surfaces to an existing spot weld set.
 
         APDL Command: SWADD
@@ -2047,8 +2183,22 @@ class Elements:
         command = f"SWDEL,{ecomp}"
         return self.run(command, **kwargs)
 
-    def swgen(self, ecomp="", swrd="", ncm1="", ncm2="", snd1="", snd2="",
-              shrd="", dirx="", diry="", dirz="", itty="", icty="", **kwargs):
+    def swgen(
+        self,
+        ecomp="",
+        swrd="",
+        ncm1="",
+        ncm2="",
+        snd1="",
+        snd2="",
+        shrd="",
+        dirx="",
+        diry="",
+        dirz="",
+        itty="",
+        icty="",
+        **kwargs,
+    ):
         """Creates a new spot weld set.
 
         APDL Command: SWGEN
@@ -2196,8 +2346,7 @@ class Elements:
         command = f"TSHAP,{shape}"
         return self.run(command, **kwargs)
 
-    def upgeom(self, factor="", lstep="", sbstep="", fname="", ext="",
-               **kwargs):
+    def upgeom(self, factor="", lstep="", sbstep="", fname="", ext="", **kwargs):
         """Adds displacements from a previous analysis and updates the geometry of
 
         APDL Command: UPGEOM
@@ -2248,8 +2397,21 @@ class Elements:
         command = f"UPGEOM,{factor},{lstep},{sbstep},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def usrdof(self, action="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", dof7="", dof8="", dof9="", dof10="", **kwargs):
+    def usrdof(
+        self,
+        action="",
+        dof1="",
+        dof2="",
+        dof3="",
+        dof4="",
+        dof5="",
+        dof6="",
+        dof7="",
+        dof8="",
+        dof9="",
+        dof10="",
+        **kwargs,
+    ):
         """Specifies the degrees of freedom for the user-defined element USER300.
 
         APDL Command: USRDOF
@@ -2300,9 +2462,20 @@ class Elements:
         command = f"USRDOF,{action},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6},{dof7},{dof8},{dof9},{dof10}"
         return self.run(command, **kwargs)
 
-    def usrelem(self, nnodes="", ndim="", keyshape="", nreal="", nsavevars="",
-                nrsltvar="", keyansmat="", nintpnts="", kestress="", keysym="",
-                **kwargs):
+    def usrelem(
+        self,
+        nnodes="",
+        ndim="",
+        keyshape="",
+        nreal="",
+        nsavevars="",
+        nrsltvar="",
+        keyansmat="",
+        nintpnts="",
+        kestress="",
+        keysym="",
+        **kwargs,
+    ):
         """Specifies the characteristics of the user-defined element USER300.
 
         APDL Command: USRELEM

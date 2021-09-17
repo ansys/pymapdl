@@ -1,7 +1,14 @@
 name: Smoke Tests
 # verify we can install on a variety of Python versions and OSes
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
 
 jobs:
   testimport:

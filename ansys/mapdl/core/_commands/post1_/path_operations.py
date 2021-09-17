@@ -1,5 +1,4 @@
 class PathOperations:
-
     def padele(self, delopt="", **kwargs):
         """Deletes a defined path.
 
@@ -217,8 +216,9 @@ class PathOperations:
         command = f"PATH,{name},{npts},{nsets},{ndiv}"
         return self.run(command, **kwargs)
 
-    def pcalc(self, oper="", labr="", lab1="", lab2="", fact1="", fact2="",
-              const="", **kwargs):
+    def pcalc(
+        self, oper="", labr="", lab1="", lab2="", fact1="", fact2="", const="", **kwargs
+    ):
         """Forms additional labeled path items by operating on existing path
 
         APDL Command: PCALC
@@ -308,20 +308,20 @@ class PathOperations:
         This operation exponentiates and adds existing path items according to
         the operation:
 
-        LabR = (|Lab1|FACT1) + (|Lab2|FACT2|)
+        ``LabR = (|Lab1|FACT1) + (|Lab2|FACT2|)``
 
         If Oper = DERI, the command format is:
 
-        PCALC,DERI,LabR,Lab1,Lab2,FACT1
+        ``PCALC,DERI,LabR,Lab1,Lab2,FACT1``
 
         Lab2 must not be blank.  This operation finds a derivative according to
         the operation:
 
-        LabR = FACT1 x d(Lab1)/d(Lab2)
+        ``LabR = FACT1 x d(Lab1)/d(Lab2)``
 
         If Oper = INTG, the command format is:
 
-        PCALC,INTG,LabR,Lab1,Lab2,FACT1
+        ``PCALC,INTG,LabR,Lab1,Lab2,FACT1``
 
         Lab2 must not be blank.  This operation finds an integral according to
         the operation:
@@ -332,7 +332,7 @@ class PathOperations:
 
         If Oper = SIN, COS, ASIN, ACOS, or LOG, the command format is:
 
-        PCALC,Oper,LabR,Lab1,,FACT1,CONST
+        ``PCALC,Oper,LabR,Lab1,,FACT1,CONST``
 
         where the function (SIN, COS, ASIN, ACOS or LOG) is substituted for
         Oper and Lab2 is blank.
@@ -340,21 +340,32 @@ class PathOperations:
         The operation finds the resulting path item according to one of the
         following formulas:
 
-        LabR = FACT2 x sin(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x sin(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x cos(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x cos(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x sin-1(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x sin-1(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x cos-1(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x cos-1(FACT1 x Lab1) + CONST``
 
-        LabR = FACT2 x log(FACT1 x Lab1) + CONST
+        ``LabR = FACT2 x log(FACT1 x Lab1) + CONST``
         """
         command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
 
-    def pcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
-               labz1="", labx2="", laby2="", labz2="", **kwargs):
+    def pcross(
+        self,
+        labxr="",
+        labyr="",
+        labzr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Calculates the cross product of two path vectors along the current
 
         APDL Command: PCROSS
@@ -451,9 +462,7 @@ class PathOperations:
         PDEF,STAT to list the path item labels.  Use PDEF,CLEAR to erase all
         labeled path items, except the path geometry items (XG, YG, ZG, S).
 
-        Table: 216:: : PDEF - valid Item and Component Labels
-
-         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, ..., TTOP instead of TEMP.
 
         For more information on the meaning of contact status and its possible
@@ -462,8 +471,17 @@ class PathOperations:
         command = f"PDEF,{lab},{item},{comp},{avglab}"
         return self.run(command, **kwargs)
 
-    def pdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
-             labz2="", **kwargs):
+    def pdot(
+        self,
+        labr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Calculates the dot product of two path vectors along the current path.
 
         APDL Command: PDOT
@@ -528,8 +546,7 @@ class PathOperations:
         command = f"PLPAGM,{item},{gscale},{nopt}"
         return self.run(command, **kwargs)
 
-    def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               **kwargs):
+    def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
         """Displays path items on a graph.
 
         APDL Command: PLPATH
@@ -710,8 +727,7 @@ class PathOperations:
         command = f"PRANGE,{linc},{vmin},{vmax},{xvar}"
         return self.run(command, **kwargs)
 
-    def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               **kwargs):
+    def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
         """Prints path items along a geometry path.
 
         APDL Command: PRPATH
@@ -838,9 +854,21 @@ class PathOperations:
         command = f"PRSECT,{rho},{kbr}"
         return self.run(command, **kwargs)
 
-    def psel(self, type_="", pname1="", pname2="", pname3="", pname4="",
-             pname5="", pname6="", pname7="", pname8="", pname9="", pname10="",
-             **kwargs):
+    def psel(
+        self,
+        type_="",
+        pname1="",
+        pname2="",
+        pname3="",
+        pname4="",
+        pname5="",
+        pname6="",
+        pname7="",
+        pname8="",
+        pname9="",
+        pname10="",
+        **kwargs,
+    ):
         """Selects a path or paths.
 
         APDL Command: PSEL

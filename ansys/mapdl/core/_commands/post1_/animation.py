@@ -1,5 +1,4 @@
 class Animation:
-
     def ancntr(self, nfram="", delay="", ncycl="", **kwargs):
         """Produces an animated sequence of a contoured deformed shape.
 
@@ -30,8 +29,19 @@ class Animation:
         command = f"ANCNTR,{nfram},{delay},{ncycl}"
         return self.run(command, **kwargs)
 
-    def ancut(self, nfram="", delay="", ncycl="", qoff="", ktop="", topoff="",
-              node1="", node2="", node3="", **kwargs):
+    def ancut(
+        self,
+        nfram="",
+        delay="",
+        ncycl="",
+        qoff="",
+        ktop="",
+        topoff="",
+        node1="",
+        node2="",
+        node3="",
+        **kwargs,
+    ):
         """Produces an animated sequence of Q-slices.
 
         APDL Command: ANCUT
@@ -78,8 +88,19 @@ class Animation:
         command = f"ANCUT,{nfram},{delay},{ncycl},{qoff},{ktop},{topoff},{node1},{node2},{node3}"
         return self.run(command, **kwargs)
 
-    def andata(self, delay="", ncycl="", rsltdat="", min_="", max_="", incr="",
-               frclst="", autocont="", autocntr="", **kwargs):
+    def andata(
+        self,
+        delay="",
+        ncycl="",
+        rsltdat="",
+        min_="",
+        max_="",
+        incr="",
+        frclst="",
+        autocont="",
+        autocntr="",
+        **kwargs,
+    ):
         """Displays animated graphics data for nonlinear problems.
 
         APDL Command: ANDATA
@@ -233,8 +254,9 @@ class Animation:
         command = f"ANCYC,{numframes},{kcycl},{delay}"
         return self.run(command, **kwargs)
 
-    def andyna(self, delay="", ncycl="", start="", end="", inc="",
-               autocontourkey="", **kwargs):
+    def andyna(
+        self, delay="", ncycl="", start="", end="", inc="", autocontourkey="", **kwargs
+    ):
         """Produces an animated sequence of contour values through substeps.
 
         APDL Command: ANDYNA
@@ -309,12 +331,20 @@ class Animation:
         command = f"/ANFILE,{lab},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def anflow(self, nfram="", delay="", ncycl="", time="", spacing="",
-               size="", length="", **kwargs):
-        """Produces an animated sequence of particle flow in a flowing fluid or a
+    def anflow(
+        self,
+        nfram="",
+        delay="",
+        ncycl="",
+        time="",
+        spacing="",
+        size="",
+        length="",
+        **kwargs,
+    ):
+        """Produces an animated sequence of particle flow in a flowing fluid or a charged particle traveling in an electric or magnetic field.
 
         APDL Command: ANFLOW
-        charged particle traveling in an electric or magnetic field.
 
         Parameters
         ----------
@@ -363,8 +393,16 @@ class Animation:
         command = f"ANFLOW,{nfram},{delay},{ncycl},{time},{spacing},{size},{length}"
         return self.run(command, **kwargs)
 
-    def anharm(self, nfram="", delay="", ncycl="", nperiod="", cms_antype="",
-               cms_modopt="", **kwargs):
+    def anharm(
+        self,
+        nfram="",
+        delay="",
+        ncycl="",
+        nperiod="",
+        cms_antype="",
+        cms_modopt="",
+        **kwargs,
+    ):
         """Produces an animated sequence of time-harmonic results or complex mode
 
         APDL Command: ANHARM
@@ -556,8 +594,17 @@ class Animation:
         command = f"ANMODE,{nfram},{delay},{ncycl},{kaccel}"
         return self.run(command, **kwargs)
 
-    def anmres(self, delay="", min_="", max_="", inc="", autocntrky="", freq="",
-               ext="", **kwargs):
+    def anmres(
+        self,
+        delay="",
+        min_="",
+        max_="",
+        inc="",
+        autocntrky="",
+        freq="",
+        ext="",
+        **kwargs,
+    ):
         """Performs animation of results over multiple results files in an
 
         APDL Command: ANMRES
@@ -625,8 +672,17 @@ class Animation:
         command = f"ANMRES,{delay},{min_},{max_},{inc},{autocntrky},{freq},{ext}"
         return self.run(command, **kwargs)
 
-    def antime(self, nfram="", delay="", ncycl="", autocntrky="", rsltdat="",
-               min_="", max_="", **kwargs):
+    def antime(
+        self,
+        nfram="",
+        delay="",
+        ncycl="",
+        autocntrky="",
+        rsltdat="",
+        min_="",
+        max_="",
+        **kwargs,
+    ):
         """Produces a  sequential contour animation over a range of time.
 
         APDL Command: ANTIME
@@ -678,8 +734,7 @@ class Animation:
         command = f"ANTIME,{nfram},{delay},{ncycl},{autocntrky},{rsltdat},{min_},{max_}"
         return self.run(command, **kwargs)
 
-    def trtime(self, time="", spacing="", offset="", size="", length="",
-               **kwargs):
+    def trtime(self, time="", spacing="", offset="", size="", length="", **kwargs):
         """Defines the options used for the PLTRAC (particle flow or charged
 
         APDL Command: TRTIME

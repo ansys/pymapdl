@@ -18,6 +18,7 @@ of our square.
 # start MAPDL and enter the pre-processing routine
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.inline_functions import Query
+
 mapdl = launch_mapdl()
 mapdl.prep7()
 
@@ -36,7 +37,7 @@ mapdl.prep7()
 # - Mesh the square
 # - Plot the mesh
 
-mapdl.et(1, 'SHELL181')
+mapdl.et(1, "SHELL181")
 mapdl.mp("EX", 1, 2e5)
 mapdl.mp("PRXY", 1, 0.3)
 mapdl.rectng(0, 1, 0, 1)
@@ -56,8 +57,8 @@ mapdl.eplot()
 # - Select all nodes
 # - Solve the model
 
-mapdl.run('/SOLU')
-mapdl.antype('STATIC')
+mapdl.run("/SOLU")
+mapdl.antype("STATIC")
 mapdl.nsel("s", "loc", "x", 0)
 mapdl.d("all", "all")
 mapdl.nsel("s", "loc", "x", 1)
@@ -74,22 +75,21 @@ mapdl.solve()
 #   - Show displacement so that we can see any deformation
 
 result = mapdl.result
-result.plot_principal_nodal_stress(0,
-                                   'SEQV',
-                                   show_edges=True,
-                                   cmap='plasma',
-                                   show_displacement=True)
+result.plot_principal_nodal_stress(
+    0, "SEQV", show_edges=True, cmap="plasma", show_displacement=True
+)
 
 
 ###############################################################################
 # Extracting Rotational Displacements
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# - Create a :class:`ansys.mapdl.core.inline_functions.Query` instance
+# - Get a :class:`ansys.mapdl.core.inline_functions.Query` instance from the
+#   ``queries`` property
 # - Locate the nodes at the four corners of the square
 # - Extract all 3 rotational displacement components for each one
 # - Print them all
 
-q = Query(mapdl)
+q = mapdl.queries
 
 node1 = q.node(0, 0, 0)
 node2 = q.node(0, 1, 0)

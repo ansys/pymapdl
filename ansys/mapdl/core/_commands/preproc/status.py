@@ -4,7 +4,6 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class Status:
-
     def areas(self, **kwargs):
         """Specifies "Areas" as the subsequent status topic.
 
@@ -119,6 +118,10 @@ class Status:
 
         APDL Command: ETYPE
 
+        This is a status [STAT] topic command.
+        The STAT command should immediately follow this command,
+        which should report the status for the specified topic.
+
         Examples
         --------
         >>> mapdl.et(1, 'SOLID186')
@@ -129,11 +132,6 @@ class Status:
           KEYOPT( 7-12)=        0      0      0        0      0      0
           KEYOPT(13-18)=        0      0      0        0      0      0
 
-        Notes
-        -----
-        This is a status [STAT] topic command.
-        The STAT command should immediately follow this command,
-        which should report the status for the specified topic.
         """
         return self.run("ETYPE", **kwargs)
 

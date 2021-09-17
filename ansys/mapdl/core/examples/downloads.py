@@ -22,21 +22,23 @@ def delete_downloads():
 
 
 def _decompress(filename):
-    zip_ref = zipfile.ZipFile(filename, 'r')
+    zip_ref = zipfile.ZipFile(filename, "r")
     zip_ref.extractall(pymapdl.EXAMPLES_PATH)
     return zip_ref.close()
 
 
 def _get_file_url(filename, directory=None):
     if directory:
-        return f'https://github.com/pyansys/example-data/raw/master/{directory}/{filename}'
-    return f'https://github.com/pyansys/example-data/raw/master/{filename}'
+        return (
+            f"https://github.com/pyansys/example-data/raw/master/{directory}/{filename}"
+        )
+    return f"https://github.com/pyansys/example-data/raw/master/{filename}"
 
 
 def _retrieve_file(url, filename):
     # First check if file has already been downloaded
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
-    local_path_no_zip = local_path.replace('.zip', '')
+    local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip, None
 
@@ -46,7 +48,7 @@ def _retrieve_file(url, filename):
     # Perform download
     saved_file, resp = urlretrieve(url)
     shutil.move(saved_file, local_path)
-    if get_ext(local_path) in ['.zip']:
+    if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
         local_path = local_path[:-4]
     return local_path, resp
@@ -68,4 +70,4 @@ def download_bracket():
     '/home/user/.local/share/ansys_mapdl_core/examples/bracket.iges'
 
     """
-    return _download_file('bracket.iges', 'geometry')[0]
+    return _download_file("bracket.iges", "geometry")[0]

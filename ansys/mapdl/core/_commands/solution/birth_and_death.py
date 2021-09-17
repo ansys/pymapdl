@@ -3,7 +3,6 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class BirthAndDeath:
-
     def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
         """Reactivates an element (for the birth and death capability).
 
@@ -39,8 +38,7 @@ class BirthAndDeath:
         command = f"EALIVE,{elem}"
         return self.run(command, **kwargs)
 
-    def ekill(self, elem: Union[str, int] = "",
-              **kwargs) -> Optional[str]:
+    def ekill(self, elem: Union[str, int] = "", **kwargs) -> Optional[str]:
         """Deactivates an element (for the birth and death capability).
 
         APDL Command: EKILL
@@ -79,6 +77,11 @@ class BirthAndDeath:
 
         APDL Command: ESTIF
 
+        Specifies the stiffness matrix multiplier for elements deactivated with
+        the EKILL command (birth and death).
+
+        This command is also valid in PREP7.
+
         Parameters
         ----------
         kmult
@@ -91,12 +94,6 @@ class BirthAndDeath:
         >>> mapdl.estif(1E-8)
         'DEAD ELEMENT STIFFNESS MULTIPLIER= 0.10000E-07'
 
-        Notes
-        -----
-        Specifies the stiffness matrix multiplier for elements deactivated with
-        the EKILL command (birth and death).
-
-        This command is also valid in PREP7.
         """
         command = f"ESTIF,{kmult}"
         return self.run(command, **kwargs)

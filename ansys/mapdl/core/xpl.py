@@ -8,7 +8,7 @@ from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
-class ansXpl():
+class ansXpl:
     """ANSYS database explorer class.
 
     Examples
@@ -20,8 +20,9 @@ class ansXpl():
 
     def __init__(self, mapdl):
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
-            raise TypeError('Must be initialized using MapdlGrpc class')
+            raise TypeError("Must be initialized using MapdlGrpc class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
         self._filename = None
@@ -42,7 +43,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -59,7 +60,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -81,7 +82,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -94,7 +95,7 @@ class ansXpl():
 
     def _check_ignored(self, response):
         """Check for ignored in response"""
-        if 'ignored' in response:
+        if "ignored" in response:
             raise MapdlRuntimeError(response)
 
     def help(self):
@@ -117,7 +118,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -129,7 +130,7 @@ class ansXpl():
             File Location : 7644
         """
         response = self._mapdl.run("*XPL,STEP,%s" % where)
-        if 'Not Found' in response:
+        if "Not Found" in response:
             raise RuntimeError(response.strip())
         return response
 
@@ -147,7 +148,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -175,7 +176,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -212,7 +213,7 @@ class ansXpl():
          {'name': 'NGPH', 'size': 6440}]}
         """
         self._mapdl.run("*XPL,JSON,_mylocal_.json")
-        text = self._mapdl._download_as_raw('_mylocal_.json').decode()
+        text = self._mapdl._download_as_raw("_mylocal_.json").decode()
         return json.loads(text)
 
     def where(self):
@@ -220,7 +221,7 @@ class ansXpl():
 
         Returns
         -------
-        location_string : str
+        str
             String containing the current location.
 
         Examples
@@ -244,7 +245,7 @@ class ansXpl():
          =====      ANSYS File Xplorer : Go up to 1 level(s)
                      -> Already at the top level. Command is ignored
         """
-        if str(nlev).upper().strip() == 'TOP':
+        if str(nlev).upper().strip() == "TOP":
             return self._mapdl.run("*XPL,UP,TOP")
         return self._mapdl.run("*XPL,UP,%d" % nlev)
 
@@ -264,7 +265,7 @@ class ansXpl():
         """
         return self._mapdl.run("*XPL,GOTO,%s" % path)
 
-    def copy(self, newfile, option=''):
+    def copy(self, newfile, option=""):
         """Copy the current opened as a new file.
 
         Parameters
@@ -294,7 +295,7 @@ class ansXpl():
 
         Returns
         -------
-        arr : ansys.mapdl.AnsMat
+        numpy.ndarray
             The array of values.
 
         Examples
@@ -308,29 +309,29 @@ class ansXpl():
         self._check_ignored(response)
         response = self._mapdl._data_info("TmpXplData")
 
-        if (response.stype == anskernel.INTEGER):
+        if response.stype == anskernel.INTEGER:
             dtype = np.int32
-        elif (response.stype == anskernel.HYPER):
+        elif response.stype == anskernel.HYPER:
             dtype = np.int64
-        elif (response.stype == anskernel.FLOAT):
+        elif response.stype == anskernel.FLOAT:
             dtype = np.single
-        elif (response.stype == anskernel.DOUBLE):
+        elif response.stype == anskernel.DOUBLE:
             dtype = np.double
-        elif (response.stype == anskernel.FCPLX):
+        elif response.stype == anskernel.FCPLX:
             dtype = np.complex64
-        elif (response.stype == anskernel.DCPLX):
+        elif response.stype == anskernel.DCPLX:
             dtype = np.complex128
         else:
-            raise TypeError('Unhandled ANSYS type %s' % response.stype)
+            raise TypeError("Unhandled ANSYS type %s" % response.stype)
 
         mm = self._mapdl.math
         return mm.vec(dtype=dtype, name="TmpXplData")
 
     def write(self, recordname, vecname):
         """Write a given record back to an MAPDL File
-        Use the write function at your own risk, you may corrupt 
-        an existing file by changing the size of a record in the 
-        file. 
+        Use the write function at your own risk, you may corrupt
+        an existing file by changing the size of a record in the
+        file.
         This function must be used only on a non-compressed file
 
         Parameters
@@ -346,22 +347,22 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
         --------
         >>> xpl.write('MASS', vecname)
         """
-        response = self._mapdl.run(f"*XPL,WRITE,{recordname},{vecname}")        
+        response = self._mapdl.run(f"*XPL,WRITE,{recordname},{vecname}")
         self._check_ignored(response)
         return response
 
     def __repr__(self):
-        txt = 'MAPDL File Explorer\n'
+        txt = "MAPDL File Explorer\n"
         if self._open:
-            txt += '\tOpen file:%s' % self._filename
-            txt += '\n'.join(self.where().splitlines()[1:])
+            txt += "\tOpen file:%s" % self._filename
+            txt += "\n".join(self.where().splitlines()[1:])
         else:
-            txt += '\tNo open file'
+            txt += "\tNo open file"
         return txt

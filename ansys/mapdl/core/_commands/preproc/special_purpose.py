@@ -1,8 +1,14 @@
 class SpecialPurpose:
-
-    def aerocoeff(self, aeromodetype="", aeromappedfilenames="",
-                  aerospecs="", aeroscalar="", nblades="",
-                  autofileread="", **kwargs):
+    def aerocoeff(
+        self,
+        aeromodetype="",
+        aeromappedfilenames="",
+        aerospecs="",
+        aeroscalar="",
+        nblades="",
+        autofileread="",
+        **kwargs,
+    ):
         """Computes the aero-damping and stiffness coefficients and
         writes them to an APDL array.
 
@@ -72,7 +78,7 @@ class SpecialPurpose:
         Modal Analysis in the Structural Analysis Guide. The file
         requirements for the AEROCOEFF command are the same as those
         needed for modal restart as described in Modal Analysis Restart.
-        The AeroSpecs values are specified in a 3×r array *DIM,
+        The AeroSpecs values are specified in a 3×r array ``*DIM``,
         where r is a positive integer equal to the number of interblade
         phase angles and the pressure modes solved for in the CFD
         analysis.
@@ -92,7 +98,7 @@ class SpecialPurpose:
         The number of AeroScalar values must be equal to the number of
         pressure modes ( from Aero- Specs). If the number of AeroScalar
         values is greater than 1, the values must be entered by defining
-        an array *DIM and entering the array name in the AeroScalar
+        an array ``*DIM`` and entering the array name in the AeroScalar
         field. For a discussion of how AeroScalar values are computed, see
         Scaling Aerodynamic Coupling Coefficients.
 
@@ -105,8 +111,18 @@ class SpecialPurpose:
         command = f"AEROCOEFF,{aeromodetype},{aeromappedfilenames},{aerospecs},{aeroscalar},{nblades},{autofileread}"
         return self.run(command, **kwargs)
 
-    def cint(self, action="", par1="", par2="", par3="", par4="", par5="",
-             par6="", par7="", **kwargs):
+    def cint(
+        self,
+        action="",
+        par1="",
+        par2="",
+        par3="",
+        par4="",
+        par5="",
+        par6="",
+        par7="",
+        **kwargs,
+    ):
         """Defines parameters associated with fracture parameter calculations
 
         APDL Command: CINT
@@ -152,8 +168,9 @@ class SpecialPurpose:
         command = f"CINT,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7}"
         return self.run(command, **kwargs)
 
-    def cycfreq(self, option="", value1="", value2="", value3="", value4="",
-                value5="", **kwargs):
+    def cycfreq(
+        self, option="", value1="", value2="", value3="", value4="", value5="", **kwargs
+    ):
         """Specifies solution options for a cyclic symmetry mode-superposition
 
         APDL Command: CYCFREQ
@@ -237,7 +254,7 @@ class SpecialPurpose:
         command during preprocessing) at the harmonic indices specified via the
         CYCOPT command.
 
-        The aerodynamic coefficients are specified in a 5×(N×r) array (*DIM),
+        The aerodynamic coefficients are specified in a 5×(N×r) array (``*DIM``),
         where N is the number of blades and r can be any positive integer. Each
         column has the structure:
 
@@ -247,7 +264,7 @@ class SpecialPurpose:
         (equal to the number of blades) while keeping m and n constant.
 
         For constant (frequency-independent) mistuning, the stiffness
-        parameters are specified in an N×1 array (*DIM) where N is the number
+        parameters are specified in an N×1 array (``*DIM``) where N is the number
         of blades.
 
         For stiffness mistuning, each row entry represents the deviation of
@@ -278,8 +295,9 @@ class SpecialPurpose:
         command = f"CYCFREQ,{option},{value1},{value2},{value3},{value4},{value5}"
         return self.run(command, **kwargs)
 
-    def cyclic(self, nsector="", angle="", kcn="", name="", usrcomp="",
-               usrnmap="", **kwargs):
+    def cyclic(
+        self, nsector="", angle="", kcn="", name="", usrcomp="", usrnmap="", **kwargs
+    ):
         """Specifies a cyclic symmetry analysis.
 
         APDL Command: CYCLIC
@@ -409,8 +427,18 @@ class SpecialPurpose:
         command = f"CYCLIC,{nsector},{angle},{kcn},{name},{usrcomp},{usrnmap}"
         return self.run(command, **kwargs)
 
-    def cycopt(self, option="", value1="", value2="", value3="", value4="",
-               value5="", value6="", value7="", **kwargs):
+    def cycopt(
+        self,
+        option="",
+        value1="",
+        value2="",
+        value3="",
+        value4="",
+        value5="",
+        value6="",
+        value7="",
+        **kwargs,
+    ):
         """Specifies solution options for a cyclic symmetry analysis.
 
         APDL Command: CYCOPT
@@ -502,7 +530,7 @@ class SpecialPurpose:
 
             Move the low-edge component nodes to precisely match the high-edge component nodes - MSUP
 
-            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m         """
+            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m"""
         command = f"CYCOPT,{option},{value1},{value2},{value3},{value4},{value5},{value6},{value7}"
         return self.run(command, **kwargs)
 
@@ -574,8 +602,18 @@ class SpecialPurpose:
         command = f"MSTOLE,{method},{namesurf},{namefluid}"
         return self.run(command, **kwargs)
 
-    def perbc2d(self, loc1="", loc2="", loctol="", r1="", r2="", tolr="",
-                opt="", plnopt="", **kwargs):
+    def perbc2d(
+        self,
+        loc1="",
+        loc2="",
+        loctol="",
+        r1="",
+        r2="",
+        tolr="",
+        opt="",
+        plnopt="",
+        **kwargs,
+    ):
         """Generates periodic constraints for 2-D planar magnetic field analyses.
 
         APDL Command: PERBC2D
@@ -746,8 +784,7 @@ class SpecialPurpose:
         command = f"PHYSICS,{option},{title},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def race(self, xc="", yc="", rad="", tcur="", dy="", dz="", cname="",
-             **kwargs):
+    def race(self, xc="", yc="", rad="", tcur="", dy="", dz="", cname="", **kwargs):
         """Defines a "racetrack" current source.
 
         APDL Command: RACE
@@ -798,8 +835,21 @@ class SpecialPurpose:
         """
         return self.run(f"RACE,{xc},{yc},{rad},{tcur},{dy},{dz},,,{cname}", **kwargs)
 
-    def sstate(self, action="", cm_name="", val1="", val2="", val3="", val4="",
-               val5="", val6="", val7="", val8="", val9="", **kwargs):
+    def sstate(
+        self,
+        action="",
+        cm_name="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        **kwargs,
+    ):
         """Defines a steady-state analysis.
 
         APDL Command: SSTATE
@@ -904,8 +954,7 @@ class SpecialPurpose:
         command = f"SSTATE,{action},{cm_name},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="",
-               **kwargs):
+    def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="", **kwargs):
         """Defines a crack in the model by specifying nodal level set values
 
         APDL Command: XFDATA

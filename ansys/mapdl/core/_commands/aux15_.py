@@ -1,5 +1,4 @@
 class Aux15:
-
     def igesin(self, fname="", ext="", **kwargs):
         """Transfers IGES data from a file into MAPDL.
 

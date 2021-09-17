@@ -1,5 +1,4 @@
 class MultiFieldSolverInterfaceMapping:
-
     def mfbucket(self, key="", value="", **kwargs):
         """Turns a bucket search on or off.
 
