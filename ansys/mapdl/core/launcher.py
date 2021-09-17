@@ -896,6 +896,10 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
     if 'smp' not in additional_switches:
         if _is_ubuntu():
             os.environ['I_MPI_SHM_LMT'] = 'shm'
+    
+    if 'dmp' in additional_switches:
+        if os.name == 'nt':
+            additional_switches = additional_switches + ' -mpi msmpi'
 
     # cache start parameters
     start_parm = {'exec_file': exec_file,
