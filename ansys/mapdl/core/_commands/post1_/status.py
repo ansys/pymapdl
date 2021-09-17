@@ -1,5 +1,4 @@
 class Status:
-
     def calc(self, **kwargs):
         """Specifies "Calculation settings" as the subsequent status topic.
 

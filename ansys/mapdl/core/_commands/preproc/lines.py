@@ -2,9 +2,22 @@ from ansys.mapdl.core._commands import parse
 
 
 class Lines:
-
-    def bsplin(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs) -> int:
+    def bsplin(
+        self,
+        p1="",
+        p2="",
+        p3="",
+        p4="",
+        p5="",
+        p6="",
+        xv1="",
+        yv1="",
+        zv1="",
+        xv6="",
+        yv6="",
+        zv6="",
+        **kwargs,
+    ) -> int:
         """Generate a single line from a spline fit to a series of keypoints.
 
         APDL Command: BSPLIN
@@ -50,11 +63,14 @@ class Lines:
         >>> lnum = mapdl.bsplin(k0, k1, k2)
 
         """
-        command = f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        command = (
+            f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        )
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def circle(self, pcent="", rad="", paxis="", pzero="", arc="", nseg="",
-               **kwargs) -> list:
+    def circle(
+        self, pcent="", rad="", paxis="", pzero="", arc="", nseg="", **kwargs
+    ) -> list:
         """Generate circular arc lines.
 
         APDL Command: CIRCLE
@@ -123,8 +139,20 @@ class Lines:
         command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
         return parse.parse_line_nos(self.run(command, **kwargs))
 
-    def l(self, p1="", p2="", ndiv="", space="", xv1="", yv1="", zv1="",
-          xv2="", yv2="", zv2="", **kwargs) -> int:
+    def l(
+        self,
+        p1="",
+        p2="",
+        ndiv="",
+        space="",
+        xv1="",
+        yv1="",
+        zv1="",
+        xv2="",
+        yv2="",
+        zv2="",
+        **kwargs,
+    ) -> int:
         """Define a line between two keypoints.
 
         APDL Command: L
@@ -180,8 +208,9 @@ class Lines:
         command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def l2ang(self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="",
-              **kwargs) -> int:
+    def l2ang(
+        self, nl1="", nl2="", ang1="", ang2="", phit1="", phit2="", **kwargs
+    ) -> int:
         """Generates a line at an angle with two existing lines.
 
         APDL Command: L2ANG
@@ -632,8 +661,22 @@ class Lines:
         command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
         return self.run(command, **kwargs)
 
-    def ldrag(self, nk1="", nk2="", nk3="", nk4="", nk5="", nk6="", nl1="",
-              nl2="", nl3="", nl4="", nl5="", nl6="", **kwargs):
+    def ldrag(
+        self,
+        nk1="",
+        nk2="",
+        nk3="",
+        nk4="",
+        nk5="",
+        nk6="",
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        **kwargs,
+    ):
         """Generates lines by sweeping a keypoint pattern along  path.
 
         APDL Command: LDRAG
@@ -778,8 +821,20 @@ class Lines:
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def lgen(self, itime="", nl1="", nl2="", ninc="", dx="", dy="", dz="",
-             kinc="", noelem="", imove="", **kwargs):
+    def lgen(
+        self,
+        itime="",
+        nl1="",
+        nl2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates additional lines from a pattern of lines.
 
         APDL Command: LGEN
@@ -840,7 +895,9 @@ class Lines:
         New line numbers are automatically assigned (beginning with the lowest
         available values [NUMSTR]).
         """
-        command = f"LGEN,{itime},{nl1},{nl2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"LGEN,{itime},{nl1},{nl2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
     def llist(self, nl1="", nl2="", ninc="", lab="", **kwargs):
@@ -968,8 +1025,20 @@ class Lines:
         command = f"LREVERSE,{lnum},{noeflip}"
         return self.run(command, **kwargs)
 
-    def lrotat(self, nk1="", nk2="", nk3="", nk4="", nk5="", nk6="", pax1="",
-               pax2="", arc="", nseg="", **kwargs):
+    def lrotat(
+        self,
+        nk1="",
+        nk2="",
+        nk3="",
+        nk4="",
+        nk5="",
+        nk6="",
+        pax1="",
+        pax2="",
+        arc="",
+        nseg="",
+        **kwargs,
+    ):
         """Generates circular lines by rotating a keypoint pattern about an axis.
 
         APDL Command: LROTAT
@@ -1006,11 +1075,24 @@ class Lines:
         and line numbers are automatically assigned (beginning with the lowest
         available values [NUMSTR]).
         """
-        command = f"LROTAT,{nk1},{nk2},{nk3},{nk4},{nk5},{nk6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"LROTAT,{nk1},{nk2},{nk3},{nk4},{nk5},{nk6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
 
-    def lsscale(self, nl1="", nl2="", ninc="", rx="", ry="", rz="", kinc="",
-                noelem="", imove="", **kwargs):
+    def lsscale(
+        self,
+        nl1="",
+        nl2="",
+        ninc="",
+        rx="",
+        ry="",
+        rz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates a scaled set of lines from a pattern of lines.
 
         APDL Command: LSSCALE
@@ -1129,8 +1211,9 @@ class Lines:
         command = f"LSUM,"
         return self.run(command, **kwargs)
 
-    def lsymm(self, ncomp="", nl1="", nl2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def lsymm(
+        self, ncomp="", nl1="", nl2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Generates lines from a line pattern by symmetry reflection.
 
         APDL Command: LSYMM
@@ -1235,8 +1318,9 @@ class Lines:
         command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def ltran(self, kcnto="", nl1="", nl2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def ltran(
+        self, kcnto="", nl1="", nl2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Transfers a pattern of lines to another coordinate system.
 
         APDL Command: LTRAN
@@ -1295,8 +1379,22 @@ class Lines:
         command = f"LTRAN,{kcnto},{nl1},{nl2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def spline(self, p1="", p2="", p3="", p4="", p5="", p6="", xv1="", yv1="",
-               zv1="", xv6="", yv6="", zv6="", **kwargs) -> list:
+    def spline(
+        self,
+        p1="",
+        p2="",
+        p3="",
+        p4="",
+        p5="",
+        p6="",
+        xv1="",
+        yv1="",
+        zv1="",
+        xv6="",
+        yv6="",
+        zv6="",
+        **kwargs,
+    ) -> list:
         """Generate a segmented spline through a series of keypoints.
 
         APDL Command: SPLINE
@@ -1331,7 +1429,9 @@ class Lines:
         [1, 2, 3, 4]
 
         """
-        command = f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        command = (
+            f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        )
         return parse.parse_line_nos(self.run(command, **kwargs))
 
     def ssln(self, fact="", size="", **kwargs):

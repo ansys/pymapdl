@@ -71,11 +71,11 @@ mapdl.prep7()
 # constants), and create a material with a Young's modulus of 30e6,
 # and a poisson's ratio of 0.0 to agree with beam theory.
 
-mapdl.antype('STATIC')
-mapdl.et(1, 'PLANE182', kop1=2, kop3=3)
+mapdl.antype("STATIC")
+mapdl.et(1, "PLANE182", kop1=2, kop3=3)
 mapdl.r(1, 2)
-mapdl.mp('EX', 1, 30e6)
-mapdl.mp('NUXY', 1, 0.)
+mapdl.mp("EX", 1, 30e6)
+mapdl.mp("NUXY", 1, 0.0)
 
 
 ###############################################################################
@@ -92,7 +92,7 @@ mapdl.n(14, 75, -9)
 mapdl.fill()
 mapdl.e(2, 1, 8, 9)
 mapdl.egen(6, 1, 1)
-mapdl.eplot(show_node_numbering=True, cpos='xy')
+mapdl.eplot(show_node_numbering=True, cpos="xy")
 
 
 ###############################################################################
@@ -102,10 +102,10 @@ mapdl.eplot(show_node_numbering=True, cpos='xy')
 # to the whole structure.
 
 # constrain nodes at fixed end
-mapdl.nsel('S', 'LOC', 'X', 75)
-mapdl.d('ALL', 'ALL')
-mapdl.nsel('ALL')
-mapdl.f(1, 'FY', -4000)
+mapdl.nsel("S", "LOC", "X", 75)
+mapdl.d("ALL", "ALL")
+mapdl.nsel("ALL")
+mapdl.f(1, "FY", -4000)
 mapdl.finish()
 
 
@@ -114,7 +114,7 @@ mapdl.finish()
 # ~~~~~
 # Enter solution mode and solve the system.
 
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 mapdl.solve()
 mapdl.finish()
 
@@ -129,10 +129,10 @@ mapdl.finish()
 def fetch_mid_and_end_stress(m):
     q = m.queries
     m.post1()
-    end = q.node(75., 0., 0.)
-    fixed_end_stress = m.get_value('NODE', end, 'S', 'X')
-    mid = q.node(50., 0., 0.)
-    mid_stress = m.get_value('NODE', mid, 'S', 'EQV')
+    end = q.node(75.0, 0.0, 0.0)
+    fixed_end_stress = m.get_value("NODE", end, "S", "X")
+    mid = q.node(50.0, 0.0, 0.0)
+    mid_stress = m.get_value("NODE", mid, "S", "EQV")
     return fixed_end_stress, mid_stress
 
 
@@ -146,13 +146,15 @@ fixed_end_stress_182, mid_stress_182 = fetch_mid_and_end_stress(mapdl)
 # amount.
 
 result = mapdl.result
-result.plot_principal_nodal_stress(0,
-                                   'SEQV',
-                                   show_edges=True,
-                                   show_displacement=True,
-                                   displacement_factor=26.,
-                                   cmap='Oranges',
-                                   cpos='xy')
+result.plot_principal_nodal_stress(
+    0,
+    "SEQV",
+    show_edges=True,
+    show_displacement=True,
+    displacement_factor=26.0,
+    cmap="Oranges",
+    cpos="xy",
+)
 
 ###############################################################################
 # Redo with Plane 183
@@ -161,15 +163,15 @@ result.plot_principal_nodal_stress(0,
 # element type. We additionally remove midside nodes with ``emid``.
 
 mapdl.prep7()
-mapdl.et(1, 'PLANE183', kop3=3)
+mapdl.et(1, "PLANE183", kop3=3)
 mapdl.emid()
-mapdl.nsel('R', 'LOC', 'X', 75)
-mapdl.nsel('R', 'LOC', 'Y', -4.5)
+mapdl.nsel("R", "LOC", "X", 75)
+mapdl.nsel("R", "LOC", "Y", -4.5)
 
-mapdl.d('ALL', 'ALL')
-mapdl.nsel('ALL')
+mapdl.d("ALL", "ALL")
+mapdl.nsel("ALL")
 mapdl.finish()
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 mapdl.solve()
 mapdl.finish()
 
@@ -179,13 +181,15 @@ fixed_end_stress_183, mid_stress_183 = fetch_mid_and_end_stress(mapdl)
 mapdl.finish()
 
 result = mapdl.result
-result.plot_principal_nodal_stress(0,
-                                   'SEQV',
-                                   show_edges=True,
-                                   show_displacement=True,
-                                   displacement_factor=26.,
-                                   cmap='Blues',
-                                   cpos='xy')
+result.plot_principal_nodal_stress(
+    0,
+    "SEQV",
+    show_edges=True,
+    show_displacement=True,
+    displacement_factor=26.0,
+    cmap="Blues",
+    cpos="xy",
+)
 
 ###############################################################################
 # Check Results

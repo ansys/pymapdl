@@ -1,5 +1,4 @@
 class SolidSurfaceLoads:
-
     def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on the selected areas.
 
@@ -117,8 +116,7 @@ class SolidSurfaceLoads:
         command = f"SFALIST,{area},{lab}"
         return self.run(command, **kwargs)
 
-    def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="",
-            **kwargs):
+    def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="", **kwargs):
         """Specifies surface loads on lines of an area.
 
         APDL Command: SFL

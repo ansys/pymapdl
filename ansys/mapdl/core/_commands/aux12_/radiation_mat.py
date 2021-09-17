@@ -1,5 +1,4 @@
 class RadiationMat:
-
     def emis(self, mat="", evalu="", **kwargs):
         """Specifies emissivity as a material property for the Radiation Matrix
 

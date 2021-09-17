@@ -1,5 +1,4 @@
 class MatrixOP:
-
     def axpy(self, vr="", vi="", m1="", wr="", wi="", m2="", **kwargs):
         """Performs the matrix operation ``M2= v*M1 + w*M2``.
 
@@ -59,8 +58,18 @@ class MatrixOP:
         command = f"*COMP,{matrix},{algorithm},{threshold}"
         return self.run(command, **kwargs)
 
-    def dmat(self, matrix="", type_="", method="", val1="", val2="", val3="",
-             val4="", val5="", **kwargs):
+    def dmat(
+        self,
+        matrix="",
+        type_="",
+        method="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        **kwargs,
+    ):
         """Creates a dense matrix.
 
         APDL Command: ``*DMAT``
@@ -146,8 +155,7 @@ class MatrixOP:
         command = f"*DOT,{vector1},{vector2},{par_real},{par_imag}"
         return self.run(command, **kwargs)
 
-    def eigen(self, kmatrix="", mmatrix="", cmatrix="", evals="", evects="",
-              **kwargs):
+    def eigen(self, kmatrix="", mmatrix="", cmatrix="", evals="", evects="", **kwargs):
         """Performs a modal solution with unsymmetric or damping matrices.
 
         APDL Command: ``*EIGEN``
@@ -188,8 +196,9 @@ class MatrixOP:
         command = f"*EIGEN,{kmatrix},{mmatrix},{cmatrix},{evals},{evects}"
         return self.run(command, **kwargs)
 
-    def export(self, matrix="", format_="", fname="", val1="", val2="", val3="",
-               **kwargs):
+    def export(
+        self, matrix="", format_="", fname="", val1="", val2="", val3="", **kwargs
+    ):
         """Exports a matrix to a file in the specified format.
 
         APDL Command: ``*EXPORT``
@@ -246,8 +255,16 @@ class MatrixOP:
         command = f"*EXPORT,{matrix},{format_},{fname},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-    def fft(self, type_="", inputdata="", outputdata="", dim1="", dim2="",
-            resultformat="", **kwargs):
+    def fft(
+        self,
+        type_="",
+        inputdata="",
+        outputdata="",
+        dim1="",
+        dim2="",
+        resultformat="",
+        **kwargs,
+    ):
         """Computes the fast Fourier transformation of a specified matrix or
 
         APDL Command: ``*FFT``
@@ -355,8 +372,18 @@ class MatrixOP:
         command = f"*INIT,{name},{method},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-    def itengine(self, type_="", enginename="", precondname="", matrix="",
-                 rhsvector="", solvector="", maxiter="", toler="", **kwargs):
+    def itengine(
+        self,
+        type_="",
+        enginename="",
+        precondname="",
+        matrix="",
+        rhsvector="",
+        solvector="",
+        maxiter="",
+        toler="",
+        **kwargs,
+    ):
         """Performs a solution using an iterative solver.
 
         APDL Command: ``*ITENGINE``
@@ -740,8 +767,17 @@ class MatrixOP:
         """
         return self.run(f"*SCAL,{name},{val1},{val2}", **kwargs)
 
-    def smat(self, matrix="", type_="", method="", val1="", val2="", val3="", val4="",
-             **kwargs):
+    def smat(
+        self,
+        matrix="",
+        type_="",
+        method="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Creates a sparse matrix.
 
         APDL Command: ``*SMAT``
@@ -824,8 +860,17 @@ class MatrixOP:
         command = f"SORT,"
         return self.run(command, **kwargs)
 
-    def vec(self, vector="", type_="", method="", val1="", val2="", val3="",
-            val4="", **kwargs):
+    def vec(
+        self,
+        vector="",
+        type_="",
+        method="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Creates a vector.
 
         APDL Command: ``*VEC``

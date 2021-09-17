@@ -1,5 +1,4 @@
 class ProcessControls:
-
     def wait(self, dtime="", **kwargs):
         """APDL Command: /WAIT
 

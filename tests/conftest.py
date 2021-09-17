@@ -8,11 +8,12 @@ import pyvista
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.launcher import (get_start_instance,
-                                       MAPDL_DEFAULT_PORT,
-                                       _get_available_base_ansys)
-from common import (get_details_of_nodes, get_details_of_elements,
-                    Node, Element)
+from ansys.mapdl.core.launcher import (
+    get_start_instance,
+    MAPDL_DEFAULT_PORT,
+    _get_available_base_ansys,
+)
+from common import get_details_of_nodes, get_details_of_elements, Node, Element
 
 
 # Necessary for CI plotting
@@ -21,7 +22,7 @@ pyvista.OFF_SCREEN = True
 
 # Check if MAPDL is installed
 # NOTE: checks in this order to get the newest installed version
-valid_rver = ['221', '212', '211', '202', '201', '195', '194', '193', '192', '191']
+valid_rver = ["221", "212", "211", "202", "201", "195", "194", "193", "192", "191"]
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
@@ -32,7 +33,7 @@ for rver in valid_rver:
 #
 # minimum version on linux.  Windows is v202, but using v211 for consistency
 # Override this if running on CI/CD and PYMAPDL_PORT has been specified
-ON_CI = 'PYMAPDL_START_INSTANCE' in os.environ and 'PYMAPDL_PORT' in os.environ
+ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
 HAS_GRPC = int(rver) >= 211 or ON_CI
 
 
@@ -42,7 +43,7 @@ local = [False]
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
 
-if os.name == 'nt':
+if os.name == "nt":
     os_msg = """SET PYMAPDL_START_INSTANCE=False
 SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
 SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)"""
@@ -68,7 +69,7 @@ if START_INSTANCE and EXEC_FILE is None:
 
 
 def check_pid(pid):
-    """ Check For the existence of a pid."""
+    """Check For the existence of a pid."""
     try:
         os.kill(pid, 0)
     except OSError:
@@ -110,9 +111,10 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(scope="session")
 def mapdl_console(request):
-    if os.name != 'posix':
-        raise RuntimeError('"--console" testing option unavailable.  '
-                           'Only Linux is supported.')
+    if os.name != "posix":
+        raise RuntimeError(
+            '"--console" testing option unavailable.  ' "Only Linux is supported."
+        )
     ansys_base_paths = _get_available_base_ansys()
 
     # find a valid version of corba
@@ -122,12 +124,15 @@ def mapdl_console(request):
             console_path = get_ansys_bin(str(version))
 
     if console_path is None:
-        raise RuntimeError('"--console" testing option unavailable.'
-                           'No local console compatible MAPDL installation found. '
-                           'Valid versions are up to 2020R2.')
+        raise RuntimeError(
+            '"--console" testing option unavailable.'
+            "No local console compatible MAPDL installation found. "
+            "Valid versions are up to 2020R2."
+        )
 
     mapdl = launch_mapdl(console_path)
     from ansys.mapdl.core.mapdl_console import MapdlConsole
+
     assert isinstance(mapdl, MapdlConsole)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
@@ -137,7 +142,7 @@ def mapdl_console(request):
     # verify mapdl exits
     mapdl.exit()
     assert mapdl._exited
-    assert 'MAPDL exited' in str(mapdl)
+    assert "MAPDL exited" in str(mapdl)
     with pytest.raises(MapdlExitedError):
         mapdl.prep7()
 
@@ -153,12 +158,15 @@ def mapdl_corba(request):
             corba_path = get_ansys_bin(str(version))
 
     if corba_path is None:
-        raise RuntimeError('"-corba" testing option unavailable.'
-                           'No local CORBA compatible MAPDL installation found.  '
-                           'Valid versions are ANSYS 17.0 up to 2020R2.')
+        raise RuntimeError(
+            '"-corba" testing option unavailable.'
+            "No local CORBA compatible MAPDL installation found.  "
+            "Valid versions are ANSYS 17.0 up to 2020R2."
+        )
 
     mapdl = launch_mapdl(corba_path)
     from ansys.mapdl.core.mapdl_corba import MapdlCorba
+
     assert isinstance(mapdl, MapdlCorba)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
@@ -168,7 +176,7 @@ def mapdl_corba(request):
     # verify mapdl exits
     mapdl.exit()
     assert mapdl._exited
-    assert 'MAPDL exited' in str(mapdl)
+    assert "MAPDL exited" in str(mapdl)
     with pytest.raises(MapdlExitedError):
         mapdl.prep7()
 
@@ -187,8 +195,9 @@ def mapdl(request, tmpdir_factory):
     else:
         port = MAPDL_DEFAULT_PORT
 
-    mapdl = launch_mapdl(EXEC_FILE, override=True, run_location=run_path,
-                         cleanup_on_exit=cleanup)
+    mapdl = launch_mapdl(
+        EXEC_FILE, override=True, run_location=run_path, cleanup_on_exit=cleanup
+    )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     if HAS_GRPC:
@@ -208,7 +217,7 @@ def mapdl(request, tmpdir_factory):
         mapdl._local = True
         mapdl.exit()
         assert mapdl._exited
-        assert 'MAPDL exited' in str(mapdl)
+        assert "MAPDL exited" in str(mapdl)
 
         if mapdl._local:
             assert not os.path.isfile(mapdl._lockfile)
@@ -220,9 +229,9 @@ def mapdl(request, tmpdir_factory):
         # actually test if server is shutdown
         if HAS_GRPC:
             with pytest.raises(MapdlExitedError):
-                mapdl._send_command('/PREP7')
+                mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
-                mapdl._send_command_stream('/PREP7')
+                mapdl._send_command_stream("/PREP7")
 
             # verify PIDs are closed
             time.sleep(1)  # takes a second for the processes to shutdown
@@ -230,28 +239,28 @@ def mapdl(request, tmpdir_factory):
                 assert not check_pid(pid)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cleared(mapdl):
     mapdl.finish(mute=True)
     # *MUST* be NOSTART.  With START fails after 20 calls...
     # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear('NOSTART', mute=True)
+    mapdl.clear("NOSTART", mute=True)
     mapdl.prep7(mute=True)
     yield
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cube_solve(cleared, mapdl):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.5)
-    mapdl.vmesh('all')
+    mapdl.vmesh("all")
 
     # Define a material (nominal steel in SI)
-    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
@@ -282,25 +291,25 @@ def query(mapdl, cleared):
 @pytest.fixture
 def solved_box(mapdl, cleared):
     mapdl.prep7()
-    mapdl.et(1, 'SOLID5')
+    mapdl.et(1, "SOLID5")
     mapdl.block(0, 10, 0, 20, 0, 30)
     mapdl.esize(10)
-    mapdl.vmesh('ALL')
-    mapdl.units('SI')  # SI - International system (m, kg, s, K).
+    mapdl.vmesh("ALL")
+    mapdl.units("SI")  # SI - International system (m, kg, s, K).
     # Define a material (nominal steel in SI)
-    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
     # Fix the left-hand side.
-    mapdl.nsel('S', 'LOC', 'Z', 0)
-    mapdl.d('ALL', 'UX')
-    mapdl.d('ALL', 'UY')
-    mapdl.d('ALL', 'UZ')
+    mapdl.nsel("S", "LOC", "Z", 0)
+    mapdl.d("ALL", "UX")
+    mapdl.d("ALL", "UY")
+    mapdl.d("ALL", "UZ")
 
-    mapdl.nsel('S', 'LOC', 'Z', 30)
-    mapdl.f('ALL', 'FX', 1000)
-    mapdl.run('/SOLU')
-    mapdl.antype('STATIC')
+    mapdl.nsel("S", "LOC", "Z", 30)
+    mapdl.f("ALL", "FX", 1000)
+    mapdl.run("/SOLU")
+    mapdl.antype("STATIC")
     mapdl.solve()
     mapdl.finish()
     q = mapdl.queries
@@ -320,25 +329,25 @@ def selection_test_geometry(mapdl, cleared):
     k2 = mapdl.k(3, 0, 1, 0)
     k3 = mapdl.k(4, 1, 0, 0)
     v0 = mapdl.v(k0, k1, k2, k3)
-    mapdl.mshape(1, '3D')
+    mapdl.mshape(1, "3D")
     mapdl.et(1, "SOLID98")
     mapdl.esize(0.5)
-    mapdl.vmesh('ALL')
+    mapdl.vmesh("ALL")
     return mapdl.queries
 
 
 @pytest.fixture
 def twisted_sheet(mapdl, cleared):
     mapdl.prep7()
-    mapdl.et(1, 'SHELL181')
+    mapdl.et(1, "SHELL181")
     mapdl.mp("EX", 1, 2e5)
     mapdl.rectng(0, 1, 0, 1)
     mapdl.sectype(1, "SHELL")
     mapdl.secdata(0.1)
     mapdl.esize(0.5)
     mapdl.amesh("all")
-    mapdl.run('/SOLU')
-    mapdl.antype('STATIC')
+    mapdl.run("/SOLU")
+    mapdl.antype("STATIC")
     mapdl.nsel("s", "loc", "x", 0)
     mapdl.d("all", "all")
     mapdl.nsel("s", "loc", "x", 1)
@@ -369,27 +378,27 @@ def create_geometry(mapdl):
     keypoints = [k0, k1, k2, k3, k4, k5, k6, k7]
     areas = [a0, a1, a2, a3]
     mapdl.esize(5)
-    mapdl.mshape(1, '2D')
+    mapdl.mshape(1, "2D")
     mapdl.et(1, "SHELL181")
-    mapdl.amesh('ALL')
+    mapdl.amesh("ALL")
     return areas, keypoints
 
 
 def apply_forces(mapdl):
-    for const in ['UX', 'UY', 'UZ', 'ROTX', 'ROTY', 'ROTZ']:
-        mapdl.d('all', const)
+    for const in ["UX", "UY", "UZ", "ROTX", "ROTY", "ROTZ"]:
+        mapdl.d("all", const)
 
-    mapdl.f(1, 'FX', 1000)
-    mapdl.f(2, 'FY', 1000)
-    mapdl.f(3, 'FZ', 1000)
-    mapdl.f(4, 'MX', 1000)
-    mapdl.f(5, 'MY', 1000)
-    mapdl.f(6, 'MZ', 1000)
-    mapdl.d(7, 'UZ')
-    mapdl.d(8, 'UZ')
+    mapdl.f(1, "FX", 1000)
+    mapdl.f(2, "FY", 1000)
+    mapdl.f(3, "FZ", 1000)
+    mapdl.f(4, "MX", 1000)
+    mapdl.f(5, "MY", 1000)
+    mapdl.f(6, "MZ", 1000)
+    mapdl.d(7, "UZ")
+    mapdl.d(8, "UZ")
 
 
 def solve_simulation(mapdl):
-    mapdl.run('/solu')
-    mapdl.antype('static')
+    mapdl.run("/solu")
+    mapdl.antype("static")
     mapdl.solve()

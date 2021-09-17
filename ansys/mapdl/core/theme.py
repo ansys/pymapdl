@@ -36,7 +36,7 @@ class MapdlTheme(themes.DefaultTheme):
     def __init__(self):
         """Initialize the theme."""
         super().__init__()
-        self.cmap = 'jet'
+        self.cmap = "jet"
         self.interactive = True
-        self.font.family = 'courier'
-        self.title = 'PyMAPDL'
+        self.font.family = "courier"
+        self.title = "PyMAPDL"

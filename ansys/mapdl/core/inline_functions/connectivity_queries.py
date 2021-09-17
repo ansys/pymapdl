@@ -40,7 +40,7 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> positions
         [2, 14, 17, 5, 53, 63, 99, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         """
-        response = self._mapdl.run(f'_=NELEM({e},{npos})')
+        response = self._mapdl.run(f"_=NELEM({e},{npos})")
         return self._parse_parameter_integer_response(response)
 
     def enextn(self, n, loc) -> int:
@@ -80,5 +80,5 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> elements
         [61, 71]
         """
-        response = self._mapdl.run(f'_=ENEXTN({n},{loc})')
+        response = self._mapdl.run(f"_=ENEXTN({n},{loc})")
         return self._parse_parameter_integer_response(response)

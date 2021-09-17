@@ -1,5 +1,4 @@
 class LoadCase:
-
     def lcabs(self, lcno="", kabs="", **kwargs):
         """Specifies absolute values for load case operations.
 

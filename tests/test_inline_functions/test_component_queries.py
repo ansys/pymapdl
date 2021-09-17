@@ -38,23 +38,21 @@ class TestComponentQueries:
         q, kps, areas, nodes = box_geometry
         # first kp at (0, 0, 0)
         x = q.kx(kps[0])
-        assert x == 0.
+        assert x == 0.0
 
     def test_ky(self, box_geometry):
         q, kps, areas, nodes = box_geometry
         y = q.ky(kps[0])
-        assert y == 0.
+        assert y == 0.0
 
     def test_kz(self, box_geometry):
         q, kps, areas, nodes = box_geometry
         z = q.kz(kps[0])
-        assert z == 0.
+        assert z == 0.0
 
 
 class TestInverseGetFunctions:
-    @pytest.mark.parametrize('coords', [(0, 0, 0),
-                                        (.5, .5, .5),
-                                        (100, 100, 100)])
+    @pytest.mark.parametrize("coords", [(0, 0, 0), (0.5, 0.5, 0.5), (100, 100, 100)])
     def test_get_node_at_coordinates(self, box_geometry, coords):
         q, kps, areas, nodes = box_geometry
         node = q.node(*coords)
@@ -66,9 +64,7 @@ class TestInverseGetFunctions:
             calculated_node = q.node(node.x, node.y, node.z)
             assert number == calculated_node
 
-    @pytest.mark.parametrize('coords', [(0, 0, 0),
-                                        (.5, .5, .5),
-                                        (100, 100, 100)])
+    @pytest.mark.parametrize("coords", [(0, 0, 0), (0.5, 0.5, 0.5), (100, 100, 100)])
     def test_get_keypoints_at_coordinates(self, box_geometry, coords):
         q, kps, areas, nodes = box_geometry
         kp = q.kp(*coords)
@@ -78,36 +74,30 @@ class TestInverseGetFunctions:
 class TestDisplacementComponentQueries:
     def test_ux(self, solved_box):
         q, nodes = solved_box
-        displaced_nodes = [node for node in nodes
-                           if abs(q.ux(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.ux(node)) > 0]
         assert len(displaced_nodes) > 0
 
     def test_uy(self, solved_box):
         q, nodes = solved_box
-        displaced_nodes = [node for node in nodes
-                           if abs(q.uy(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.uy(node)) > 0]
         assert len(displaced_nodes) > 0
 
     def test_uz(self, solved_box):
         q, nodes = solved_box
-        displaced_nodes = [node for node in nodes
-                           if abs(q.uz(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.uz(node)) > 0]
         assert len(displaced_nodes) > 0
 
     def test_rotx(self, twisted_sheet):
         q, nodes = twisted_sheet
-        displaced_nodes = [node for node in nodes
-                           if abs(q.rotx(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.rotx(node)) > 0]
         assert len(displaced_nodes) > 0
 
     def test_roty(self, twisted_sheet):
         q, nodes = twisted_sheet
-        displaced_nodes = [node for node in nodes
-                           if abs(q.roty(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.roty(node)) > 0]
         assert len(displaced_nodes) > 0
 
     def test_rotz(self, twisted_sheet):
         q, nodes = twisted_sheet
-        displaced_nodes = [node for node in nodes
-                           if abs(q.rotz(node)) > 0]
+        displaced_nodes = [node for node in nodes if abs(q.rotz(node)) > 0]
         assert len(displaced_nodes) > 0

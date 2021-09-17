@@ -1,5 +1,4 @@
 class MapCommand:
-
     def ftype(self, filetype="", prestype="", **kwargs):
         """Specifies the file type and pressure type for the subsequent import of
 
@@ -154,8 +153,18 @@ class MapCommand:
         """
         return self.run(f"PLMAP,{item},,{nodekey},{imagkey}", **kwargs)
 
-    def read(self, fname="", nskip="", format_="", xfield="", yfield="",
-             zfield="", prfield="", pifield="", **kwargs):
+    def read(
+        self,
+        fname="",
+        nskip="",
+        format_="",
+        xfield="",
+        yfield="",
+        zfield="",
+        prfield="",
+        pifield="",
+        **kwargs,
+    ):
         """Reads coordinate and pressure data from a file.
 
         APDL Command: READ

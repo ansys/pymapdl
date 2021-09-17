@@ -1,7 +1,7 @@
 class Listing:
-
-    def format(self, ndigit="", ftype="", nwidth="", dsignf="", line="",
-               char="", **kwargs):
+    def format(
+        self, ndigit="", ftype="", nwidth="", dsignf="", line="", char="", **kwargs
+    ):
         """Specifies format controls for tables.
 
         APDL Command: /FORMAT
@@ -55,8 +55,9 @@ class Listing:
         command = f"/FORMAT,{ndigit},{ftype},{nwidth},{dsignf},{line},{char}"
         return self.run(command, **kwargs)
 
-    def header(self, header="", stitle="", idstmp="", notes="", colhed="",
-               minmax="", **kwargs):
+    def header(
+        self, header="", stitle="", idstmp="", notes="", colhed="", minmax="", **kwargs
+    ):
         """Sets page and table heading print controls.
 
         APDL Command: /HEADER

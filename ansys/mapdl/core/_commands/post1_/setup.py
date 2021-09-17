@@ -1,7 +1,15 @@
 class Setup:
-
-    def append(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
-               nset="", **kwargs):
+    def append(
+        self,
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        **kwargs,
+    ):
         """Reads data from the results file and appends it to the database.
 
         APDL Command: APPEND
@@ -88,8 +96,20 @@ class Setup:
         command = f"APPEND,{lstep},{sbstep},{fact},{kimg},{time},{angle},{nset}"
         return self.run(command, **kwargs)
 
-    def desol(self, elem="", node="", item="", comp="", v1="", v2="", v3="",
-              v4="", v5="", v6="", **kwargs):
+    def desol(
+        self,
+        elem="",
+        node="",
+        item="",
+        comp="",
+        v1="",
+        v2="",
+        v3="",
+        v4="",
+        v5="",
+        v6="",
+        **kwargs,
+    ):
         """Defines or modifies solution results at a node of an element.
 
         APDL Command: DESOL
@@ -156,8 +176,19 @@ class Setup:
         command = f"DESOL,{elem},{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)
 
-    def dnsol(self, node="", item="", comp="", v1="", v2="", v3="", v4="",
-              v5="", v6="", **kwargs):
+    def dnsol(
+        self,
+        node="",
+        item="",
+        comp="",
+        v1="",
+        v2="",
+        v3="",
+        v4="",
+        v5="",
+        v6="",
+        **kwargs,
+    ):
         """Defines or modifies solution results at a node.
 
         APDL Command: DNSOL
@@ -220,8 +251,15 @@ class Setup:
         command = f"DNSOL,{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)
 
-    def hrcplx(self, loadstep="", substep="", omegat="", firstlc_ase="",
-               secondlc_ase="", **kwargs):
+    def hrcplx(
+        self,
+        loadstep="",
+        substep="",
+        omegat="",
+        firstlc_ase="",
+        secondlc_ase="",
+        **kwargs,
+    ):
         """Computes and stores in the database the time-harmonic solution at a
 
         APDL Command: HRCPLX
@@ -299,9 +337,21 @@ class Setup:
         command = f"HRCPLX,{loadstep},{substep},{omegat},{firstlc_ase},{secondlc_ase}"
         return self.run(command, **kwargs)
 
-    def rescombine(self, numfiles="", fname="", ext="", lstep="", sbstep="",
-                   fact="", kimg="", time="", angle="", nset="", order="",
-                   **kwargs):
+    def rescombine(
+        self,
+        numfiles="",
+        fname="",
+        ext="",
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        order="",
+        **kwargs,
+    ):
         """Reads results from local results files into the database after a
 
         APDL Command: RESCOMBINE
@@ -448,8 +498,18 @@ class Setup:
         command = f"RESCOMBINE,{numfiles},{fname},{ext},{lstep},{sbstep},{fact},{kimg},{time},{angle},{nset},{order}"
         return self.run(command, **kwargs)
 
-    def set(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
-            nset="", order="", **kwargs):
+    def set(
+        self,
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        order="",
+        **kwargs,
+    ):
         """Defines the data set to be read from the results file.
 
         APDL Command: SET
@@ -555,8 +615,17 @@ class Setup:
         command = f"SET,{lstep},{sbstep},{fact},{kimg},{time},{angle},{nset},{order}"
         return self.run(command, **kwargs)
 
-    def subset(self, lstep="", sbstep="", fact="", kimg="", time="", angle="",
-               nset="", **kwargs):
+    def subset(
+        self,
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        **kwargs,
+    ):
         """Reads results for the selected portions of the model.
 
         APDL Command: SUBSET

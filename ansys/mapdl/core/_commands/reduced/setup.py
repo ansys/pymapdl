@@ -1,5 +1,4 @@
 class Setup:
-
     def rmresume(self, fname="", ext="", **kwargs):
         """Resumes ROM data from a file.
 

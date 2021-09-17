@@ -1,7 +1,16 @@
 class MultiFieldSolverLoadTransfer:
-
-    def mflcomm(self, type_="", fname1="", intname1="", label1="", fname2="",
-                intname2="", label2="", option="", **kwargs):
+    def mflcomm(
+        self,
+        type_="",
+        fname1="",
+        intname1="",
+        label1="",
+        fname2="",
+        intname2="",
+        label2="",
+        option="",
+        **kwargs,
+    ):
         """Defines a load transfer for code coupling analyses.
 
         APDL Command: MFLCOMM

@@ -1,5 +1,4 @@
 class Preparation:
-
     def rmndisp(self, loadt="", loc="", **kwargs):
         """Extracts neutral plane displacements from a test load or element load
 

@@ -9,26 +9,29 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 
 
-COMPONENT_STRESS_TYPE = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ']
-PRINCIPAL_TYPE = ['1', '2', '3']
-STRESS_TYPES = ['X', 'Y', 'Z', 'XY', 'YZ', 'XZ', '1', '2', '3', 'INT', 'EQV']
-COMP_TYPE = ['X', 'Y', 'Z', 'SUM']
-DISP_TYPE = ['X', 'Y', 'Z', 'NORM', 'ALL']
-ROT_TYPE = ['X', 'Y', 'Z', 'ALL']
+COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
+PRINCIPAL_TYPE = ["1", "2", "3"]
+STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
+COMP_TYPE = ["X", "Y", "Z", "SUM"]
+DISP_TYPE = ["X", "Y", "Z", "NORM", "ALL"]
+ROT_TYPE = ["X", "Y", "Z", "ALL"]
 
 
 def check_result_loaded(func):
     """Verify a result has been loaded within MAPDL"""
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except:
-            raise MapdlRuntimeError('Either this is an invalid result type for '
-                                    'this solution, or '
-                                    'no results set has been loaded within MAPDL.\n'
-                                    'Load a result set with:\n\n'
-                                    '\tmapdl.post1()\n'
-                                    '\tmapdl.set(1, 1)') from None
+            raise MapdlRuntimeError(
+                "Either this is an invalid result type for "
+                "this solution, or "
+                "no results set has been loaded within MAPDL.\n"
+                "Load a result set with:\n\n"
+                "\tmapdl.post1()\n"
+                "\tmapdl.set(1, 1)"
+            ) from None
 
     return wrapper
 
@@ -36,15 +39,17 @@ def check_result_loaded(func):
 def check_comp(component, allowed):
     """Check if a component is valid."""
     if not isinstance(component, str):
-        raise TypeError('Component must be a string')
+        raise TypeError("Component must be a string")
     component = component.upper().strip()
     if component not in allowed:
-        raise ValueError('Component %s not a valid type.  ' % component +
-                         'Allowed items:\n%s' % str(allowed))
+        raise ValueError(
+            "Component %s not a valid type.  " % component
+            + "Allowed items:\n%s" % str(allowed)
+        )
     return component
 
 
-class PostProcessing():
+class PostProcessing:
     """Post-processing using an active MAPDL session
 
     Examples
@@ -58,7 +63,7 @@ class PostProcessing():
      75.00121680412036,
      75.00574491751847,
      75.03939292229019,
-     75.20949687626468]    
+     75.20949687626468]
 
     Return the number of data sets in the result file.
 
@@ -94,8 +99,9 @@ class PostProcessing():
     def __init__(self, mapdl):
         """Initialize postprocessing instance"""
         from ansys.mapdl.core.mapdl import _MapdlCore
+
         if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
-            raise TypeError('Must be initialized using Mapdl instance')
+            raise TypeError("Must be initialized using Mapdl instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self._set_loaded = False
 
@@ -115,16 +121,16 @@ class PostProcessing():
 
     @supress_logging
     def __repr__(self):
-        info = 'PyMAPDL PostProcessing Instance\n'
-        info += '\tActive Result File:    %s\n' % self.filename
-        info += '\tNumber of result sets: %d\n' % self.nsets
-        info += '\tCurrent load step:     %d\n' % self.load_step
-        info += '\tCurrent sub step:      %d\n' % self.sub_step
+        info = "PyMAPDL PostProcessing Instance\n"
+        info += "\tActive Result File:    %s\n" % self.filename
+        info += "\tNumber of result sets: %d\n" % self.nsets
+        info += "\tCurrent load step:     %d\n" % self.load_step
+        info += "\tCurrent sub step:      %d\n" % self.sub_step
 
-        if self._mapdl.parameters.routine == 'POST1':
-            info += '\n\n' + self._mapdl.set('LIST')
+        if self._mapdl.parameters.routine == "POST1":
+            info += "\n\n" + self._mapdl.set("LIST")
         else:
-            info += '\n\n Enable routine POST1 to see a table of available results'
+            info += "\n\n Enable routine POST1 to see a table of available results"
 
         return info
 
@@ -150,8 +156,8 @@ class PostProcessing():
          75.03939292229019,
          75.20949687626468]
         """
-        list_rsp = self._mapdl.set('LIST')
-        groups = re.findall(r'([-+]?\d*\.\d+|\d+)', list_rsp)
+        list_rsp = self._mapdl.set("LIST")
+        groups = re.findall(r"([-+]?\d*\.\d+|\d+)", list_rsp)
 
         # values will always be the second set
         return np.array([float(item) for item in (groups[1::5])])
@@ -169,8 +175,8 @@ class PostProcessing():
         >>> mapdl.post_processing.filename
         'file'
         """
-        response = self._mapdl.run('/INQUIRE, param, RSTFILE', mute=False)
-        return response.split('=')[-1].strip()
+        response = self._mapdl.run("/INQUIRE, param, RSTFILE", mute=False)
+        return response.split("=")[-1].strip()
 
     @property
     def nsets(self) -> int:
@@ -183,7 +189,7 @@ class PostProcessing():
         >>> mapdl.post_processing.nsets
         1
         """
-        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num='NSET'))
+        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num="NSET"))
 
     @property
     def load_step(self) -> int:
@@ -196,7 +202,7 @@ class PostProcessing():
         >>> mapdl.post_processing.load_step
         2
         """
-        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num='LSTP'))
+        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num="LSTP"))
 
     @property
     def sub_step(self) -> int:
@@ -209,7 +215,7 @@ class PostProcessing():
         >>> mapdl.post_processing.load_step
         2
         """
-        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num='SBST'))
+        return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num="SBST"))
 
     @property
     def time(self) -> float:
@@ -224,7 +230,7 @@ class PostProcessing():
         >>> mapdl.post_processing.time
         1.0
         """
-        return self._mapdl.get_value("ACTIVE", item1="SET", it1num='TIME')
+        return self._mapdl.get_value("ACTIVE", item1="SET", it1num="TIME")
 
     @property
     def freq(self) -> float:
@@ -241,9 +247,9 @@ class PostProcessing():
         >>> mapdl.post_processing.freq
         956.86239847
         """
-        return self._mapdl.get_value("ACTIVE", item1="SET", it1num='FREQ')
+        return self._mapdl.get_value("ACTIVE", item1="SET", it1num="FREQ")
 
-    def nodal_displacement(self, component='NORM') -> np.ndarray:
+    def nodal_displacement(self, component="NORM") -> np.ndarray:
         """Nodal X, Y, or Z structural displacement.
 
         Equilvanent MAPDL command:
@@ -294,19 +300,20 @@ class PostProcessing():
         """
         component = check_comp(component, DISP_TYPE)
 
-        if component in ['NORM', 'ALL']:
-            x = self._ndof_rst('U', 'X')
-            y = self._ndof_rst('U', 'Y')
-            z = self._ndof_rst('U', 'Z')
+        if component in ["NORM", "ALL"]:
+            x = self._ndof_rst("U", "X")
+            y = self._ndof_rst("U", "Y")
+            z = self._ndof_rst("U", "Z")
             disp = np.vstack((x, y, z))
-            if component == 'NORM':
+            if component == "NORM":
                 return np.linalg.norm(disp, axis=0)
             return disp.T
 
-        return self._ndof_rst('U', component)
+        return self._ndof_rst("U", component)
 
-    def plot_nodal_displacement(self, component='NORM', show_node_numbering=False,
-                                **kwargs):
+    def plot_nodal_displacement(
+        self, component="NORM", show_node_numbering=False, **kwargs
+    ):
         """Plot nodal displacement
 
         Parameters
@@ -344,14 +351,17 @@ class PostProcessing():
         ...                                               show_node_numbering=True)
         """
         if isinstance(component, str):
-            if component.upper() == 'ALL':
-                raise ValueError('"ALL" not allowed in this context.  Select a '
-                                 'single displacement component (e.g. "X")')
+            if component.upper() == "ALL":
+                raise ValueError(
+                    '"ALL" not allowed in this context.  Select a '
+                    'single displacement component (e.g. "X")'
+                )
 
         disp = self.nodal_displacement(component)
-        kwargs.setdefault('stitle', '%s Displacement' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Displacement" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
         """Plot point scalars
@@ -362,36 +372,40 @@ class PostProcessing():
 
         # as ``disp`` returns the result for all nodes, we need all node numbers
         # and to index to the output node numbers
-        if hasattr(self._mapdl.mesh, 'nnum_all'):
+        if hasattr(self._mapdl.mesh, "nnum_all"):
             nnum = self._mapdl.mesh.nnum_all
         else:
             nnum = self._all_nnum
 
-        mask = np.in1d(nnum, surf['ansys_node_num'])
-        ridx = np.argsort(np.argsort(surf['ansys_node_num']))
+        mask = np.in1d(nnum, surf["ansys_node_num"])
+        ridx = np.argsort(np.argsort(surf["ansys_node_num"]))
         if scalars.size != mask.size:
             scalars = scalars[self.selected_nodes]
         scalars = scalars[mask][ridx]
 
-        meshes = [{'mesh': surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                   'scalar_bar_args': {'title': kwargs.pop('stitle', '')},
-                   'scalars': scalars}]
+        meshes = [
+            {
+                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                "scalars": scalars,
+            }
+        ]
 
         labels = []
         if show_node_numbering:
-            labels = [{'points': surf.points, 'labels': surf['ansys_node_num']}]
+            labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
 
         return general_plotter(meshes, [], labels, **kwargs)
 
     @property
     @supress_logging
     def _all_nnum(self):
-        self._mapdl.cm('__TMP_NODE__', 'NODE')
+        self._mapdl.cm("__TMP_NODE__", "NODE")
         self._mapdl.allsel()
-        nnum = self._mapdl.get_array('NODE', item1='NLIST').astype(np.int32)
+        nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
         if nnum[0] == -1:
-            nnum = self._mapdl.get_array('NODE', item1='NLIST').astype(np.int32)
-        self._mapdl.cmsel('S', '__TMP_NODE__', 'NODE')
+            nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
+        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
         return nnum
 
     @property
@@ -403,7 +417,7 @@ class PostProcessing():
         1 for selected
 
         """
-        return self._ndof_rst('NSEL').astype(np.int8)
+        return self._ndof_rst("NSEL").astype(np.int8)
 
     @property
     def selected_nodes(self) -> np.ndarray:
@@ -417,7 +431,7 @@ class PostProcessing():
         """
         return self._nsel == 1
 
-    def nodal_rotation(self, component='ALL') -> np.ndarray:
+    def nodal_rotation(self, component="ALL") -> np.ndarray:
         """Nodal X, Y, or Z structural rotation
 
         Equilvanent MAPDL commands:
@@ -467,16 +481,15 @@ class PostProcessing():
         """
         component = check_comp(component, ROT_TYPE)
 
-        if component == 'ALL':
-            x = self._ndof_rst('ROT', 'X')
-            y = self._ndof_rst('ROT', 'Y')
-            z = self._ndof_rst('ROT', 'Z')
+        if component == "ALL":
+            x = self._ndof_rst("ROT", "X")
+            y = self._ndof_rst("ROT", "Y")
+            z = self._ndof_rst("ROT", "Z")
             return np.vstack((x, y, z)).T
 
-        return self._ndof_rst('ROT', component)
+        return self._ndof_rst("ROT", component)
 
-    def plot_nodal_rotation(self, component, show_node_numbering=False,
-                            **kwargs):
+    def plot_nodal_rotation(self, component, show_node_numbering=False, **kwargs):
         """Plot nodal rotation.
 
         Parameters
@@ -509,19 +522,22 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_rotation('X', show_node_numbering=True)
         """
         if isinstance(component, str):
-            if component.upper() == 'ALL':
-                raise ValueError('"ALL" not allowed in this context.  Select a '
-                                 'single component (e.g. "X")')
+            if component.upper() == "ALL":
+                raise ValueError(
+                    '"ALL" not allowed in this context.  Select a '
+                    'single component (e.g. "X")'
+                )
 
         disp = self.nodal_rotation(component)
-        kwargs.setdefault('stitle', f'{component} Rotation')
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", f"{component} Rotation")
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @check_result_loaded
-    def _ndof_rst(self, item, it1num=''):
+    def _ndof_rst(self, item, it1num=""):
         """Nodal degree of freedom result"""
-        return self._mapdl.get_array('NODE', item1=item, it1num=it1num)
+        return self._mapdl.get_array("NODE", item1=item, it1num=it1num)
 
     @property
     def nodal_temperature(self) -> np.ndarray:
@@ -546,7 +562,7 @@ class PostProcessing():
         array([0., 0., 0., ..., 0., 0., 0.])
 
         """
-        return self._ndof_rst('TEMP')
+        return self._ndof_rst("TEMP")
 
     def plot_nodal_temperature(self, show_node_numbering=False, **kwargs):
         """Plot nodal temperature of the current result.
@@ -585,10 +601,10 @@ class PostProcessing():
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
         """
-        kwargs.setdefault('stitle', 'Nodal\nTemperature')
-        return self._plot_point_scalars(self.nodal_temperature,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Nodal\nTemperature")
+        return self._plot_point_scalars(
+            self.nodal_temperature, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_pressure(self) -> np.ndarray:
@@ -613,7 +629,7 @@ class PostProcessing():
         array([0., 0., 0., ..., 0., 0., 0.])
 
         """
-        return self._ndof_rst('PRES')
+        return self._ndof_rst("PRES")
 
     def plot_nodal_pressure(self, show_node_numbering=False, **kwargs):
         """Plot nodal pressure of the current result.
@@ -652,10 +668,10 @@ class PostProcessing():
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_pressure(smooth_shading=True)
         """
-        kwargs.setdefault('stitle', 'Nodal\nPressure')
-        return self._plot_point_scalars(self.nodal_pressure,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Nodal\nPressure")
+        return self._plot_point_scalars(
+            self.nodal_pressure, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_voltage(self) -> np.ndarray:
@@ -688,7 +704,7 @@ class PostProcessing():
         >>> mapdl.post_processing.voltage
         array([0., 0., 0., ..., 0., 0., 0.])
         """
-        return self._ndof_rst('VOLT')
+        return self._ndof_rst("VOLT")
 
     def plot_nodal_voltage(self, show_node_numbering=False, **kwargs):
         """Plot nodal voltage of the current result.
@@ -726,10 +742,10 @@ class PostProcessing():
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_voltage(smooth_shading=True)
         """
-        kwargs.setdefault('stitle', 'Nodal\nVoltage')
-        return self._plot_point_scalars(self.nodal_voltage,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Nodal\nVoltage")
+        return self._plot_point_scalars(
+            self.nodal_voltage, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_component_stress(self, component) -> np.ndarray:
         """Nodal component stress.
@@ -775,10 +791,11 @@ class PostProcessing():
 
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst('S', component)
+        return self._ndof_rst("S", component)
 
-    def plot_nodal_component_stress(self, component, show_node_numbering=False,
-                                    **kwargs):
+    def plot_nodal_component_stress(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal component stress.
 
         Parameters
@@ -809,9 +826,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_component_stress('X')
         """
         disp = self.nodal_component_stress(component)
-        kwargs.setdefault('stitle', f'{component} Nodal\nStress')
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", f"{component} Nodal\nStress")
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_principal_stress(self, component) -> np.ndarray:
         """Nodal principal stress.
@@ -857,10 +875,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst('S', component)
+        return self._ndof_rst("S", component)
 
-    def plot_nodal_principal_stress(self, component, show_node_numbering=False,
-                                    **kwargs):
+    def plot_nodal_principal_stress(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal principal stress.
 
         Parameters
@@ -890,9 +909,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_principal_stress('1')
         """
         disp = self.nodal_principal_stress(component)
-        kwargs.setdefault('stitle', f'{component} Nodal\nPrincipal Stress')
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", f"{component} Nodal\nPrincipal Stress")
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_stress_intensity(self) -> np.ndarray:
@@ -921,7 +941,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('S', 'INT')
+        return self._ndof_rst("S", "INT")
 
     def plot_nodal_stress_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the nodal stress intensity of the current result.
@@ -962,10 +982,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_stress_intensity
-        kwargs.setdefault('stitle', 'Nodal Stress\nIntensity')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Nodal Stress\nIntensity")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_eqv_stress(self) -> np.ndarray:
@@ -1004,7 +1024,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('S', 'EQV')
+        return self._ndof_rst("S", "EQV")
 
     def plot_nodal_eqv_stress(self, show_node_numbering=False, **kwargs):
         """Plot nodal equivalent stress of the current result.
@@ -1045,10 +1065,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_eqv_stress
-        kwargs.setdefault('stitle', 'Nodal Equilvanent\nStress')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Nodal Equilvanent\nStress")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_total_component_strain(self, component) -> np.ndarray:
         """Total nodal component strain
@@ -1095,10 +1115,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst('EPTO', component)
+        return self._ndof_rst("EPTO", component)
 
-    def plot_nodal_total_component_strain(self, component, show_node_numbering=False,
-                                          **kwargs):
+    def plot_nodal_total_component_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal total component starin.
 
         Includes elastic, plastic, and creep strain.
@@ -1132,9 +1153,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_total_component_strain('X')
         """
         disp = self.nodal_total_component_strain(component)
-        kwargs.setdefault('stitle', f'{component} Total Nodal\nComponent Strain')
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", f"{component} Total Nodal\nComponent Strain")
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_total_principal_strain(self, component) -> np.ndarray:
         """Total nodal principal total strain.
@@ -1181,11 +1203,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst('EPTO', component)
+        return self._ndof_rst("EPTO", component)
 
-    def plot_nodal_total_principal_strain(self, component,
-                                          show_node_numbering=False,
-                                          **kwargs):
+    def plot_nodal_total_principal_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot total nodal principal strain.
 
         Includes elastic, plastic, and creep strain.
@@ -1218,9 +1240,10 @@ class PostProcessing():
         >>> mapdl.post_processing.nodal_total_principal_strain('1')
         """
         disp = self.nodal_total_principal_strain(component)
-        kwargs.setdefault('stitle', '%s Nodal\nPrincipal Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_total_strain_intensity(self) -> np.ndarray:
@@ -1251,11 +1274,9 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPEL', 'INT')
+        return self._ndof_rst("EPEL", "INT")
 
-    def plot_nodal_total_strain_intensity(self,
-                                          show_node_numbering=False,
-                                          **kwargs):
+    def plot_nodal_total_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal strain intensity of the current result.
 
         Returns
@@ -1292,10 +1313,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_total_strain_intensity
-        kwargs.setdefault('stitle', 'Total Nodal\nStrain Intensity')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Total Nodal\nStrain Intensity")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_total_eqv_strain(self) -> np.ndarray:
@@ -1332,7 +1353,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPTO', 'EQV')
+        return self._ndof_rst("EPTO", "EQV")
 
     def plot_nodal_total_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal equivalent strain of the current result.
@@ -1372,10 +1393,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_total_eqv_strain
-        kwargs.setdefault('stitle', 'Total Nodal\nEquivalent Strain')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Total Nodal\nEquivalent Strain")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_elastic_component_strain(self, component) -> np.ndarray:
         """Elastic nodal component strain
@@ -1415,10 +1436,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst('EPEL', component)
+        return self._ndof_rst("EPEL", component)
 
-    def plot_nodal_elastic_component_strain(self, component, show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_elastic_component_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal elastic component strain.
 
         Parameters
@@ -1448,9 +1470,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_elastic_component_strain('1')
         """
         disp = self.nodal_elastic_component_strain(component)
-        kwargs.setdefault('stitle', '%s Elastic Nodal\nComponent Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Elastic Nodal\nComponent Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_elastic_principal_strain(self, component) -> np.ndarray:
         """Nodal elastic principal elastic strain.
@@ -1496,11 +1519,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst('EPEL', component)
+        return self._ndof_rst("EPEL", component)
 
-    def plot_nodal_elastic_principal_strain(self, component,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_elastic_principal_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot elastic nodal principal strain.
 
         Parameters
@@ -1530,9 +1553,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_elastic_principal_strain('1')
         """
         disp = self.nodal_elastic_principal_strain(component)
-        kwargs.setdefault('stitle', '%s Nodal\nPrincipal Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_elastic_strain_intensity(self) -> np.ndarray:
@@ -1568,11 +1592,9 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPEL', 'INT')
+        return self._ndof_rst("EPEL", "INT")
 
-    def plot_nodal_elastic_strain_intensity(self,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_elastic_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the elastic nodal strain intensity of the current result.
 
         Parameters
@@ -1610,10 +1632,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_elastic_strain_intensity
-        kwargs.setdefault('stitle', 'Elastic Nodal\nStrain Intensity')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Elastic Nodal\nStrain Intensity")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_elastic_eqv_strain(self) -> np.ndarray:
@@ -1649,7 +1671,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPEL', 'EQV')
+        return self._ndof_rst("EPEL", "EQV")
 
     def plot_nodal_elastic_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the elastic nodal equivalent strain of the current result.
@@ -1689,10 +1711,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_elastic_eqv_strain
-        kwargs.setdefault('stitle', 'Elastic Nodal\n Equivalent Strain')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Elastic Nodal\n Equivalent Strain")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_plastic_component_strain(self, component) -> np.ndarray:
         """Plastic nodal component strain.
@@ -1737,10 +1759,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst('EPPL', component)
+        return self._ndof_rst("EPPL", component)
 
-    def plot_nodal_plastic_component_strain(self, component, show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_plastic_component_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal plastic component strain.
 
         Parameters
@@ -1770,9 +1793,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_plastic_component_strain('1')
         """
         disp = self.nodal_plastic_component_strain(component)
-        kwargs.setdefault('stitle', '%s Plastic Nodal\nComponent Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Plastic Nodal\nComponent Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_plastic_principal_strain(self, component) -> np.ndarray:
         """Nodal plastic principal plastic strain.
@@ -1812,11 +1836,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst('EPPL', component)
+        return self._ndof_rst("EPPL", component)
 
-    def plot_nodal_plastic_principal_strain(self, component,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_plastic_principal_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot plastic nodal principal strain.
 
         Parameters
@@ -1846,9 +1870,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_plastic_principal_strain('1')
         """
         disp = self.nodal_plastic_principal_strain(component)
-        kwargs.setdefault('stitle', '%s Nodal\nPrincipal Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_plastic_strain_intensity(self) -> np.ndarray:
@@ -1885,11 +1910,9 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPPL', 'INT')
+        return self._ndof_rst("EPPL", "INT")
 
-    def plot_nodal_plastic_strain_intensity(self,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_plastic_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the plastic nodal strain intensity of the current result.
 
         Parameters
@@ -1927,10 +1950,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_plastic_strain_intensity
-        kwargs.setdefault('stitle', 'Plastic Nodal\nStrain Intensity')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Plastic Nodal\nStrain Intensity")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_plastic_eqv_strain(self) -> np.ndarray:
@@ -1973,7 +1996,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPPL', 'EQV')
+        return self._ndof_rst("EPPL", "EQV")
 
     def plot_nodal_plastic_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the plastic nodal equivalent strain of the current result.
@@ -2013,11 +2036,11 @@ class PostProcessing():
 
         """
         scalars = self.nodal_plastic_eqv_strain
-        kwargs.setdefault('stitle', 'Plastic Nodal\n Equivalent Strain')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
-    
+        kwargs.setdefault("stitle", "Plastic Nodal\n Equivalent Strain")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
+
     def nodal_thermal_component_strain(self, component) -> np.ndarray:
         """Thermal nodal component strain
 
@@ -2062,10 +2085,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst('EPTH', component)
+        return self._ndof_rst("EPTH", component)
 
-    def plot_nodal_thermal_component_strain(self, component, show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_thermal_component_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot nodal thermal component strain.
 
         Parameters
@@ -2095,9 +2119,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_thermal_component_strain('1')
         """
         disp = self.nodal_thermal_component_strain(component)
-        kwargs.setdefault('stitle', f'{component} Thermal Nodal\nComponent Strain')
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", f"{component} Thermal Nodal\nComponent Strain")
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     def nodal_thermal_principal_strain(self, component) -> np.ndarray:
         """Nodal thermal principal thermal strain.
@@ -2143,11 +2168,11 @@ class PostProcessing():
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst('EPTH', component)
+        return self._ndof_rst("EPTH", component)
 
-    def plot_nodal_thermal_principal_strain(self, component,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_thermal_principal_strain(
+        self, component, show_node_numbering=False, **kwargs
+    ):
         """Plot thermal nodal principal strain.
 
         Parameters
@@ -2177,9 +2202,10 @@ class PostProcessing():
         >>> mapdl.post_processing.plot_nodal_thermal_principal_strain('1')
         """
         disp = self.nodal_thermal_principal_strain(component)
-        kwargs.setdefault('stitle', '%s Nodal\nPrincipal Strain' % component)
-        return self._plot_point_scalars(disp, show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_thermal_strain_intensity(self) -> np.ndarray:
@@ -2216,11 +2242,9 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPTH', 'INT')
+        return self._ndof_rst("EPTH", "INT")
 
-    def plot_nodal_thermal_strain_intensity(self,
-                                            show_node_numbering=False,
-                                            **kwargs):
+    def plot_nodal_thermal_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the thermal nodal strain intensity of the current result.
 
         Returns
@@ -2255,10 +2279,10 @@ class PostProcessing():
 
         """
         scalars = self.nodal_thermal_strain_intensity
-        kwargs.setdefault('stitle', 'Thermal Nodal\nStrain Intensity')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Thermal Nodal\nStrain Intensity")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
 
     @property
     def nodal_thermal_eqv_strain(self) -> np.ndarray:
@@ -2301,7 +2325,7 @@ class PostProcessing():
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst('EPTH', 'EQV')
+        return self._ndof_rst("EPTH", "EQV")
 
     def plot_nodal_thermal_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the thermal nodal equivalent strain of the current result.
@@ -2341,7 +2365,7 @@ class PostProcessing():
 
         """
         scalars = self.nodal_thermal_eqv_strain
-        kwargs.setdefault('stitle', 'Thermal Nodal\n Equivalent Strain')
-        return self._plot_point_scalars(scalars,
-                                        show_node_numbering=show_node_numbering,
-                                        **kwargs)
+        kwargs.setdefault("stitle", "Thermal Nodal\n Equivalent Strain")
+        return self._plot_point_scalars(
+            scalars, show_node_numbering=show_node_numbering, **kwargs
+        )

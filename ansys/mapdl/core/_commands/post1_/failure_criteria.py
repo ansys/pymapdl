@@ -1,7 +1,17 @@
 class FailureCriteria:
-
-    def fc(self, mat="", lab1="", lab2="", data1="", data2="", data3="",
-           data4="", data5="", data6="", **kwargs):
+    def fc(
+        self,
+        mat="",
+        lab1="",
+        lab2="",
+        data1="",
+        data2="",
+        data3="",
+        data4="",
+        data5="",
+        data6="",
+        **kwargs,
+    ):
         """Provides failure criteria information and activates a data
 
         APDL Command: FC
@@ -91,8 +101,17 @@ class FailureCriteria:
         applied. See the appropriate plot or print command
         documentation for more information.
         """
-        command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(mat), str(lab1), str(
-            lab2), str(data1), str(data2), str(data3), str(data4), str(data5), str(data6))
+        command = "FC,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(mat),
+            str(lab1),
+            str(lab2),
+            str(data1),
+            str(data2),
+            str(data3),
+            str(data4),
+            str(data5),
+            str(data6),
+        )
         return self.run(command, **kwargs)
 
     def fccheck(self, **kwargs):

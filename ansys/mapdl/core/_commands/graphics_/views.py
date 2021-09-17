@@ -1,5 +1,4 @@
 class Views:
-
     def angle(self, wn="", theta="", axis="", kincr="", **kwargs):
         """Rotates the display about an axis.
 

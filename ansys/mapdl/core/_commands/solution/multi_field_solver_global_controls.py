@@ -1,5 +1,4 @@
 class MultiFieldSolverGlobalControls:
-
     def mfanalysis(self, key="", **kwargs):
         """Activates or deactivates an ANSYS Multi-field solver analysis.
 
@@ -198,11 +197,30 @@ class MultiFieldSolverGlobalControls:
         command = f"MFLIST,{option},{value}"
         return self.run(command, **kwargs)
 
-    def mforder(self, fnumb1="", fnumb2="", fnumb3="", fnumb4="", fnumb5="",
-                fnumb6="", fnumb7="", fnumb8="", fnumb9="", fnumb10="",
-                fnumb11="", fnumb12="", fnumb13="", fnumb14="", fnumb15="",
-                fnumb16="", fnumb17="", fnumb18="", fnumb19="", fnumb20="",
-                **kwargs):
+    def mforder(
+        self,
+        fnumb1="",
+        fnumb2="",
+        fnumb3="",
+        fnumb4="",
+        fnumb5="",
+        fnumb6="",
+        fnumb7="",
+        fnumb8="",
+        fnumb9="",
+        fnumb10="",
+        fnumb11="",
+        fnumb12="",
+        fnumb13="",
+        fnumb14="",
+        fnumb15="",
+        fnumb16="",
+        fnumb17="",
+        fnumb18="",
+        fnumb19="",
+        fnumb20="",
+        **kwargs,
+    ):
         """Specifies field solution order for an ANSYS Multi-field solver
 
         APDL Command: MFORDER

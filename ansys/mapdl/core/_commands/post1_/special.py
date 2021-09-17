@@ -1,7 +1,17 @@
 class Special:
-
-    def bfint(self, fname1="", ext1="", fname2="", ext2="", kpos="", clab="",
-              kshs="", tolout="", tolhgt="", **kwargs):
+    def bfint(
+        self,
+        fname1="",
+        ext1="",
+        fname2="",
+        ext2="",
+        kpos="",
+        clab="",
+        kshs="",
+        tolout="",
+        tolhgt="",
+        **kwargs,
+    ):
         """Activates the body force interpolation operation.
 
         APDL Command: BFINT
@@ -94,8 +104,20 @@ class Special:
         command = f"BFINT,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt}"
         return self.run(command, **kwargs)
 
-    def cbdof(self, fname1="", ext1="", fname2="", ext2="", kpos="", clab="",
-              kshs="", tolout="", tolhgt="", tolthk="", **kwargs):
+    def cbdof(
+        self,
+        fname1="",
+        ext1="",
+        fname2="",
+        ext2="",
+        kpos="",
+        clab="",
+        kshs="",
+        tolout="",
+        tolhgt="",
+        tolthk="",
+        **kwargs,
+    ):
         """Activates cut-boundary interpolation (for submodeling).
 
         APDL Command: CBDOF
@@ -329,8 +351,7 @@ class Special:
         command = f"CYCCALC,{fileprefix},{fileformat}"
         return self.run(command, **kwargs)
 
-    def cycfiles(self, fnamerst="", extrst="", fnamerfrq="", extrfrq="",
-                 **kwargs):
+    def cycfiles(self, fnamerst="", extrst="", fnamerfrq="", extrfrq="", **kwargs):
         """Specifies the data files where results are to be found for a cyclic
 
         APDL Command: CYCFILES
@@ -582,8 +603,7 @@ class Special:
         """
         return self.run(f"EXOPTION,{ldtype},{option},{value}", **kwargs)
 
-    def expand(self, nrepeat="", hindex="", icsys="", sctang="", phase="",
-               **kwargs):
+    def expand(self, nrepeat="", hindex="", icsys="", sctang="", phase="", **kwargs):
         """Displays the results of a modal cyclic symmetry analysis.
 
         APDL Command: EXPAND
@@ -660,8 +680,17 @@ class Special:
         command = f"EXPAND,{nrepeat},{hindex},{icsys},{sctang},{phase}"
         return self.run(command, **kwargs)
 
-    def exprofile(self, ldtype="", load="", value="", pname="", fname="",
-                  fext="", fdir="", **kwargs):
+    def exprofile(
+        self,
+        ldtype="",
+        load="",
+        value="",
+        pname="",
+        fname="",
+        fext="",
+        fdir="",
+        **kwargs,
+    ):
         """Exports interface loads or loads on selected nodes to an ANSYS CFX
 
         APDL Command: EXPROFILE
@@ -1208,8 +1237,18 @@ class Special:
         command = f"NLDPOST,{label},{key},{fileid},{prefix}"
         return self.run(command, **kwargs)
 
-    def plcamp(self, option="", slope="", unit="", freqb="", cname="",
-               stabval="", keyallfreq="", keynegfreq="", **kwargs):
+    def plcamp(
+        self,
+        option="",
+        slope="",
+        unit="",
+        freqb="",
+        cname="",
+        stabval="",
+        keyallfreq="",
+        keynegfreq="",
+        **kwargs,
+    ):
         """Plots Campbell diagram data for applications involving rotating
 
         APDL Command: PLCAMP
@@ -1381,8 +1420,21 @@ class Special:
         command = f"PLCHIST,{spec},{freqpt}"
         return self.run(command, **kwargs)
 
-    def plfar(self, lab="", option="", phi1="", phi2="", nph1="", theta1="",
-              theta2="", ntheta="", val1="", val2="", val3="", **kwargs):
+    def plfar(
+        self,
+        lab="",
+        option="",
+        phi1="",
+        phi2="",
+        nph1="",
+        theta1="",
+        theta2="",
+        ntheta="",
+        val1="",
+        val2="",
+        val3="",
+        **kwargs,
+    ):
         """Plots pressure far fields and far field parameters.
 
         APDL Command: PLFAR
@@ -1446,8 +1498,9 @@ class Special:
         command = f"PLFAR,{lab},{option},{phi1},{phi2},{nph1},{theta1},{theta2},{ntheta},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-    def plmc(self, lstep="", sbstep="", timfrq="", kimg="", hibeg="", hiend="",
-             **kwargs):
+    def plmc(
+        self, lstep="", sbstep="", timfrq="", kimg="", hibeg="", hiend="", **kwargs
+    ):
         """Plots the modal coordinates from a mode-superposition solution.
 
         APDL Command: PLMC
@@ -1498,8 +1551,22 @@ class Special:
         command = f"PLMC,{lstep},{sbstep},{timfrq},{kimg},{hibeg},{hiend}"
         return self.run(command, **kwargs)
 
-    def plnear(self, lab="", opt="", kcn="", val1="", val2="", val3="",
-               val4="", val5="", val6="", val7="", val8="", val9="", **kwargs):
+    def plnear(
+        self,
+        lab="",
+        opt="",
+        kcn="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        **kwargs,
+    ):
         """Plots the pressure in the near zone exterior to the equivalent source
 
         APDL Command: PLNEAR
@@ -1664,8 +1731,18 @@ class Special:
         command = f"PRAS,{quantity},{loadstep},{substep}"
         return self.run(command, **kwargs)
 
-    def prcamp(self, option="", slope="", unit="", freqb="", cname="",
-               stabval="", keyallfreq="", keynegfreq="", **kwargs):
+    def prcamp(
+        self,
+        option="",
+        slope="",
+        unit="",
+        freqb="",
+        cname="",
+        stabval="",
+        keyallfreq="",
+        keynegfreq="",
+        **kwargs,
+    ):
         """Prints Campbell diagram data for applications involving rotating
 
         APDL Command: PRCAMP
@@ -1802,8 +1879,21 @@ class Special:
         command = f"PRCAMP,{option},{slope},{unit},{freqb},{cname},{stabval},{keyallfreq},{keynegfreq}"
         return self.run(command, **kwargs)
 
-    def prfar(self, lab="", option="", phi1="", phi2="", nph1="", theta1="",
-              theta2="", ntheta="", val1="", val2="", val3="", **kwargs):
+    def prfar(
+        self,
+        lab="",
+        option="",
+        phi1="",
+        phi2="",
+        nph1="",
+        theta1="",
+        theta2="",
+        ntheta="",
+        val1="",
+        val2="",
+        val3="",
+        **kwargs,
+    ):
         """Prints pressure far fields and far field parameters.
 
         APDL Command: PRFAR
@@ -1865,8 +1955,22 @@ class Special:
         command = f"PRFAR,{lab},{option},{phi1},{phi2},{nph1},{theta1},{theta2},{ntheta},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-    def prnear(self, lab="", opt="", kcn="", val1="", val2="", val3="",
-               val4="", val5="", val6="", val7="", val8="", val9="", **kwargs):
+    def prnear(
+        self,
+        lab="",
+        opt="",
+        kcn="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        **kwargs,
+    ):
         """Prints the pressure in the near zone exterior to the equivalent source
 
         APDL Command: PRNEAR
@@ -2024,10 +2128,28 @@ class Special:
         command = f"RMFLVEC,"
         return self.run(command, **kwargs)
 
-    def rsplit(self, option="", label="", name1="", name2="", name3="",
-               name4="", name5="", name6="", name7="", name8="", name9="",
-               name10="", name11="", name12="", name13="", name14="",
-               name15="", name16="", **kwargs):
+    def rsplit(
+        self,
+        option="",
+        label="",
+        name1="",
+        name2="",
+        name3="",
+        name4="",
+        name5="",
+        name6="",
+        name7="",
+        name8="",
+        name9="",
+        name10="",
+        name11="",
+        name12="",
+        name13="",
+        name14="",
+        name15="",
+        name16="",
+        **kwargs,
+    ):
         """Creates one or more results file(s) from the current results file based
 
         APDL Command: RSPLIT
@@ -2093,8 +2215,19 @@ class Special:
         command = f"RSPLIT,{option},{label},{name1},{name2},{name3},{name4},{name5},{name6},{name7},{name8},{name9},{name10},{name11},{name12},{name13},{name14},{name15},{name16}"
         return self.run(command, **kwargs)
 
-    def rstmac(self, file1="", lstep1="", sbstep1="", file2="", lstep2="",
-               sbstep2="", maclim="", cname="", keyprint="", **kwargs):
+    def rstmac(
+        self,
+        file1="",
+        lstep1="",
+        sbstep1="",
+        file2="",
+        lstep2="",
+        sbstep2="",
+        maclim="",
+        cname="",
+        keyprint="",
+        **kwargs,
+    ):
         """APDL Command: RSTMAC
 
         Calculates modal assurance criterion (MAC) and matches nodal solutions
@@ -2243,9 +2376,19 @@ class Special:
         command = f"SPOINT,{node},{x},{y},{z}"
         return self.run(command, **kwargs)
 
-    def spmwrite(self, method="", nmode="", inputs="", inputlabels="",
-                 outputs="", outputlabels="", nic="", velacckey="",
-                 fileformat="", **kwargs):
+    def spmwrite(
+        self,
+        method="",
+        nmode="",
+        inputs="",
+        inputlabels="",
+        outputs="",
+        outputlabels="",
+        nic="",
+        velacckey="",
+        fileformat="",
+        **kwargs,
+    ):
         """Calculates the state-space matrices and writes them to the SPM file.
 
         APDL Command: SPMWRITE

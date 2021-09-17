@@ -3,7 +3,6 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class BirthAndDeath:
-
     def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
         """Reactivates an element (for the birth and death capability).
 
@@ -39,8 +38,7 @@ class BirthAndDeath:
         command = f"EALIVE,{elem}"
         return self.run(command, **kwargs)
 
-    def ekill(self, elem: Union[str, int] = "",
-              **kwargs) -> Optional[str]:
+    def ekill(self, elem: Union[str, int] = "", **kwargs) -> Optional[str]:
         """Deactivates an element (for the birth and death capability).
 
         APDL Command: EKILL

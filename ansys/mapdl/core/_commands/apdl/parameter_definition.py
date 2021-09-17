@@ -2,7 +2,6 @@ import os
 
 
 class ParameterDefinition:
-
     def afun(self, lab="", **kwargs):
         """Specifies units for angular functions in parameter expressions.
 
@@ -23,8 +22,19 @@ class ParameterDefinition:
         command = f"*AFUN,{lab}"
         return self.run(command, **kwargs)
 
-    def dim(self, par="", type_="", imax="", jmax="", kmax="", var1="", var2="",
-            var3="", csysid="", **kwargs):
+    def dim(
+        self,
+        par="",
+        type_="",
+        imax="",
+        jmax="",
+        kmax="",
+        var1="",
+        var2="",
+        var3="",
+        csysid="",
+        **kwargs,
+    ):
         """Defines an array parameter and its dimensions.
 
         APDL Command: ``*DIM``
@@ -173,11 +183,22 @@ class ParameterDefinition:
 
         This command is valid in any processor.
         """
-        command = f"*DIM,{par},{type_},{imax},{jmax},{kmax},{var1},{var2},{var3},{csysid}"
+        command = (
+            f"*DIM,{par},{type_},{imax},{jmax},{kmax},{var1},{var2},{var3},{csysid}"
+        )
         return self.run(command, **kwargs)
 
-    def get(self, par="", entity="", entnum="", item1="", it1num="", item2="",
-            it2num="", **kwargs):
+    def get(
+        self,
+        par="",
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        **kwargs,
+    ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
@@ -303,10 +324,10 @@ class ParameterDefinition:
         >>> mapdl.inquire('RSTFILE')
         'file.rst'
         """
-        response = self.run(f'/INQUIRE,,{func}', mute=False)
-        if '=' in response:
-            return response.split('=')[1].strip()
-        return ''
+        response = self.run(f"/INQUIRE,,{func}", mute=False)
+        if "=" in response:
+            return response.split("=")[1].strip()
+        return ""
 
     def parres(self, lab="", fname="", ext="", **kwargs):
         """Reads parameters from a file.
@@ -350,15 +371,14 @@ class ParameterDefinition:
 
         """
         if ext:
-            fname = fname + '.' + ext
+            fname = fname + "." + ext
         elif not fname:
-            fname = '.' + 'PARM'
+            fname = "." + "PARM"
 
-        if 'Grpc' in self.__class__.__name__:  # grpc mode
+        if "Grpc" in self.__class__.__name__:  # grpc mode
             if self._local:
                 if not os.path.isfile(fname):
-                    raise FileNotFoundError(
-                        'Unable to locate filename "%s"' % fname)
+                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
 
                 if not os.path.dirname(fname):
                     filename = os.path.join(os.getcwd(), fname)
@@ -419,8 +439,21 @@ class ParameterDefinition:
         command = f"PARSAV,{lab},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def starset(self, par="", value="", val2="", val3="", val4="", val5="",
-                val6="", val7="", val8="", val9="", val10="", **kwargs):
+    def starset(
+        self,
+        par="",
+        value="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        val10="",
+        **kwargs,
+    ):
         """Assigns values to user-named parameters.
 
         APDL Command: ``*SET``
@@ -574,8 +607,18 @@ class ParameterDefinition:
         command = f"*SET,{par},{value},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10}"
         return self.run(command, **kwargs)
 
-    def starvget(self, parr="", entity="", entnum="", item1="", it1num="",
-                 item2="", it2num="", kloop="", **kwargs):
+    def starvget(
+        self,
+        parr="",
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        kloop="",
+        **kwargs,
+    ):
         """Retrieves values and stores them into an array parameter.
 
         APDL Command: ``*VGET``
@@ -663,11 +706,27 @@ class ParameterDefinition:
 
         This command is valid in any processor.
         """
-        command = f"*VGET,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        command = (
+            f"*VGET,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        )
         return self.run(command, **kwargs)
 
-    def taxis(self, parmloc="", naxis="", val1="", val2="", val3="", val4="",
-              val5="", val6="", val7="", val8="", val9="", val10="", **kwargs):
+    def taxis(
+        self,
+        parmloc="",
+        naxis="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        val10="",
+        **kwargs,
+    ):
         """Defines table index numbers.
 
         APDL Command: ``*TAXIS``
@@ -742,8 +801,22 @@ class ParameterDefinition:
         command = f"*TREAD,{par},{fname},{ext},,{nskip}"
         return self.run(command, **kwargs)
 
-    def vfill(self, parr="", func="", con1="", con2="", con3="", con4="",
-              con5="", con6="", con7="", con8="", con9="", con10="", **kwargs):
+    def vfill(
+        self,
+        parr="",
+        func="",
+        con1="",
+        con2="",
+        con3="",
+        con4="",
+        con5="",
+        con6="",
+        con7="",
+        con8="",
+        con9="",
+        con10="",
+        **kwargs,
+    ):
         """Fills an array parameter.
 
         APDL Command: ``*VFILL``
@@ -850,8 +923,18 @@ class ParameterDefinition:
         command = f"*VFILL,{parr},{func},{con1},{con2},{con3},{con4},{con5},{con6},{con7},{con8},{con9},{con10}"
         return self.run(command, **kwargs)
 
-    def vread(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
-              nskip="", **kwargs):
+    def vread(
+        self,
+        parr="",
+        fname="",
+        ext="",
+        label="",
+        n1="",
+        n2="",
+        n3="",
+        nskip="",
+        **kwargs,
+    ):
         """Reads data and produces an array parameter vector or matrix.
 
         APDL Command: ``*VREAD``

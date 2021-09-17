@@ -1,7 +1,5 @@
 class SolidBodyLoads:
-
-    def bfa(self, area="", lab="", val1="", val2="", val3="", val4="",
-            **kwargs):
+    def bfa(self, area="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on an area.
 
         APDL Command: BFA
@@ -115,8 +113,7 @@ class SolidBodyLoads:
         command = f"BFALIST,{area},{lab}"
         return self.run(command, **kwargs)
 
-    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="",
-            **kwargs):
+    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="", **kwargs):
         """Defines a body force load at a keypoint.
 
         APDL Command: BFK
@@ -234,8 +231,7 @@ class SolidBodyLoads:
         command = f"BFKLIST,{kpoi},{lab}"
         return self.run(command, **kwargs)
 
-    def bfl(self, line="", lab="", val1="", val2="", val3="", val4="",
-            **kwargs):
+    def bfl(self, line="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on a line.
 
         APDL Command: BFL
@@ -361,8 +357,7 @@ class SolidBodyLoads:
         command = f"BFTRAN,"
         return self.run(command, **kwargs)
 
-    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
-            **kwargs):
+    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="", **kwargs):
         """Defines a body force load on a volume.
 
         APDL Command: BFV

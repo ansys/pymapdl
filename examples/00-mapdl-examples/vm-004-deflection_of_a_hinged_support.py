@@ -80,16 +80,16 @@ mapdl.prep7()
 # We store the x-coordinate of node 3 and the y-coordinate of node 2 for
 # ease of use later on.
 
-length_bar = 15*12
+length_bar = 15 * 12
 theta = 30
-theta_rad = theta*pi/180.
+theta_rad = theta * pi / 180.0
 node3_x = 2 * length_bar * cos(theta_rad)
 node2_y = length_bar * sin(theta_rad)
 
-mapdl.et(1, 'LINK180')
-mapdl.sectype(1, 'LINK')
+mapdl.et(1, "LINK180")
+mapdl.sectype(1, "LINK")
 mapdl.secdata(0.5)
-mapdl.mp('EX', 1, 30e6)
+mapdl.mp("EX", 1, 30e6)
 
 ###############################################################################
 # Define Geometry
@@ -103,7 +103,7 @@ n3 = mapdl.n(3, node3_x, 0, 0)
 
 mapdl.e(n1, n2)
 mapdl.e(n2, n3)
-mapdl.eplot(show_node_numbering=True, line_width=5, cpos='xy')
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy")
 
 ###############################################################################
 # Define Boundary Conditions
@@ -112,8 +112,8 @@ mapdl.eplot(show_node_numbering=True, line_width=5, cpos='xy')
 # - Apply a force of -5000 in the negative y-direction to node 2
 # - Then finish the prep7 section
 
-mapdl.d(1, 'ALL', '', '', 3, 2)
-mapdl.f(2, 'FY', -5000)
+mapdl.d(1, "ALL", "", "", 3, 2)
+mapdl.f(2, "FY", -5000)
 mapdl.finish()
 
 
@@ -122,7 +122,7 @@ mapdl.finish()
 # ~~~~~
 # Enter solution mode and solve the system.
 
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 out = mapdl.solve()
 mapdl.finish()
 
@@ -138,11 +138,11 @@ mapdl.finish()
 
 mapdl.post1()
 mapdl.post_processing.plot_nodal_displacement(
-    'Y',
-    cmap='magma',
+    "Y",
+    cmap="magma",
     line_width=5,
-    cpos='xy',
-    scalar_bar_args={'title': 'Displacement', 'vertical': False},
+    cpos="xy",
+    scalar_bar_args={"title": "Displacement", "vertical": False},
 )
 
 ###############################################################################
@@ -150,7 +150,7 @@ mapdl.post_processing.plot_nodal_displacement(
 # ~~~~~~~~~~~~~~~~~~~~~~
 # Use the ``post_processing`` attribute to get the principal nodal
 # stress as an array.
-# 
+#
 # .. note::
 #    This returns the same data as :func:`prnsol
 #    <ansys.mapdl.core.Mapdl.prnsol>`, except instead of returning
@@ -161,7 +161,7 @@ seqv = mapdl.post_processing.nodal_eqv_stress
 
 # print out the nodes
 for i, nnum in enumerate(mapdl.mesh.nnum):
-    print(f'Node {nnum} : {seqv[i]} psi')
+    print(f"Node {nnum} : {seqv[i]} psi")
 
 # Which is identical to:
 # print(mapdl.prnsol('S', 'PRIN'))
@@ -182,10 +182,10 @@ for i, nnum in enumerate(mapdl.mesh.nnum):
 
 q = mapdl.queries
 mid_node = q.node(node3_x * 0.5, -node2_y, 0)
-displacement = mapdl.get_value('NODE', mid_node, 'U', 'Y')
+displacement = mapdl.get_value("NODE", mid_node, "U", "Y")
 left_element = q.enearn(mid_node)
-mapdl.etable('STRS', 'LS', 1)
-stress = mapdl.get_value('ELEM', left_element, 'ETAB', 'STRS')
+mapdl.etable("STRS", "LS", 1)
+stress = mapdl.get_value("ELEM", left_element, "ETAB", "STRS")
 
 results = f"""
 ---------------------  RESULTS COMPARISON  -----------------------

@@ -1,5 +1,4 @@
 class Setup:
-
     def color(self, lab="", clab="", n1="", n2="", ninc="", **kwargs):
         """Specifies the color mapping for various items.
 
@@ -338,9 +337,23 @@ class Setup:
         command = f"/DV3D,{lab},{key}"
         return self.run(command, **kwargs)
 
-    def gcmd(self, wn="", lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-             lab7="", lab8="", lab9="", lab10="", lab11="", lab12="",
-             **kwargs):
+    def gcmd(
+        self,
+        wn="",
+        lab1="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        lab7="",
+        lab8="",
+        lab9="",
+        lab10="",
+        lab11="",
+        lab12="",
+        **kwargs,
+    ):
         """Controls the type of element or graph display used for the GPLOT
 
         APDL Command: /GCMD
@@ -710,10 +723,29 @@ class Setup:
         command = f"JPEG,{kywrd},{opt}"
         return self.run(command, **kwargs)
 
-    def mrep(self, name="", arg1="", arg2="", arg3="", arg4="", arg5="",
-             arg6="", arg7="", arg8="", arg9="", arg10="", arg11="", arg12="",
-             arg13="", arg14="", arg15="", arg16="", arg17="", arg18="",
-             **kwargs):
+    def mrep(
+        self,
+        name="",
+        arg1="",
+        arg2="",
+        arg3="",
+        arg4="",
+        arg5="",
+        arg6="",
+        arg7="",
+        arg8="",
+        arg9="",
+        arg10="",
+        arg11="",
+        arg12="",
+        arg13="",
+        arg14="",
+        arg15="",
+        arg16="",
+        arg17="",
+        arg18="",
+        **kwargs,
+    ):
         """Enables you to reissue the graphics command macro "name" during a
 
         APDL Command: /MREP
@@ -1219,8 +1251,7 @@ class Setup:
         command = f"TIFF,{kywrd},{opt}"
         return self.run(command, **kwargs)
 
-    def window(self, wn="", xmin="", xmax="", ymin="", ymax="", ncopy="",
-               **kwargs):
+    def window(self, wn="", xmin="", xmax="", ymin="", ymax="", ncopy="", **kwargs):
         """Defines the window size on the screen.
 
         APDL Command: /WINDOW

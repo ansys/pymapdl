@@ -1,5 +1,4 @@
 class MultiFieldSolverTimeControls:
-
     def mfcalc(self, fnumb="", freq="", **kwargs):
         """Specifies a calculation frequency for a field in an ANSYS Multi-field
 

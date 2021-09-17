@@ -1,5 +1,4 @@
 class Abbreviations:
-
     def abbr(self, abbr="", string="", **kwargs):
         """Defines an abbreviation.
 

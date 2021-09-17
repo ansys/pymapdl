@@ -1,5 +1,4 @@
 class Annotation:
-
     def an3d(self, kywrd="", key="", **kwargs):
         """Specifies 3-D annotation functions
 
@@ -253,8 +252,7 @@ class Annotation:
         command = f"/LSPEC,{lcolor},{linstl},{xlnwid}"
         return self.run(command, **kwargs)
 
-    def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="",
-                **kwargs):
+    def lsymbol(self, x="", y="", symang="", symtyp="", symsiz="", keybmp="", **kwargs):
         """Creates annotation symbols (GUI).
 
         APDL Command: /LSYMBOL
@@ -354,8 +352,7 @@ class Annotation:
         command = f"/PCIRCLE,{xcentr},{ycentr},{xlrad}"
         return self.run(command, **kwargs)
 
-    def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="",
-              **kwargs):
+    def pmore(self, x5="", y5="", x6="", y6="", x7="", y7="", x8="", y8="", **kwargs):
         """Creates an annotation polygon (GUI).
 
         APDL Command: /PMORE
@@ -400,8 +397,9 @@ class Annotation:
         command = f"/PMORE,,{x5},{y5},{x6},{y6},{x7},{y7},{x8},{y8}"
         return self.run(command, **kwargs)
 
-    def polygon(self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="",
-                x4="", y4="", **kwargs):
+    def polygon(
+        self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="", **kwargs
+    ):
         """Creates annotation polygons (GUI).
 
         APDL Command: /POLYGON
@@ -526,8 +524,7 @@ class Annotation:
         command = f"/PSPEC,{pcolor},{kfill},{kbordr}"
         return self.run(command, **kwargs)
 
-    def pwedge(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="",
-               **kwargs):
+    def pwedge(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="", **kwargs):
         """Creates an annotation wedge (GUI).
 
         APDL Command: /PWEDGE
@@ -604,8 +601,7 @@ class Annotation:
         command = f"/TLABEL,{xloc},{yloc},{text}"
         return self.run(command, **kwargs)
 
-    def tspec(self, tcolor="", tsize="", txthic="", pangle="", iangle="",
-              **kwargs):
+    def tspec(self, tcolor="", tsize="", txthic="", pangle="", iangle="", **kwargs):
         """Creates annotation text attributes (GUI).
 
         APDL Command: /TSPEC

@@ -1,6 +1,4 @@
-
 class ListControls:
-
     def com(self, comment="", **kwargs):
         """Places a comment in the output.
 

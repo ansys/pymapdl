@@ -12,34 +12,36 @@ from ansys.grpc.mapdl import mapdl_pb2 as pb_types
 
 from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc
-from .common_grpc import (ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE,
-                          DEFAULT_FILE_CHUNK_SIZE)
+from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .check_version import version_requires, meets_version, VersionError
 
 
-MYCTYPE = {np.int32: 'I',
-           np.int64: 'L',
-           np.single: 'F',
-           np.double: 'D',
-           np.complex64: 'C',
-           np.complex128: 'Z'}
+MYCTYPE = {
+    np.int32: "I",
+    np.int64: "L",
+    np.single: "F",
+    np.double: "D",
+    np.complex64: "C",
+    np.complex128: "Z",
+}
 
 
 NP_VALUE_TYPE = {value: key for key, value in ANSYS_VALUE_TYPE.items()}
 
 # for windows LONG vs INT32
-if os.name == 'nt':
+if os.name == "nt":
     NP_VALUE_TYPE[np.intc] = 1
 
 
 def id_generator(size=6, chars=string.ascii_uppercase):
     """Generate a random string"""
-    return ''.join(random.choice(chars) for _ in range(size))
+    return "".join(random.choice(chars) for _ in range(size))
 
 
 class ObjType(Enum):
     """Generic APDLMath Object ( Shared features between Vec Mat and
-    Solver components """
+    Solver components"""
+
     GEN = 1
     VEC = 2
     DMAT = 3
@@ -53,10 +55,11 @@ def get_nparray_chunks(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
     i = 0  # position counter
     byte_array = array.tobytes()
     while i < len(byte_array):
-        piece = byte_array[i: i + chunk_size]
+        piece = byte_array[i : i + chunk_size]
         chunk = anskernel.Chunk(payload=piece, size=len(piece))
-        yield pb_types.SetVecDataRequest(vname=name, stype=stype, size=arr_sz,
-                                         chunk=chunk)
+        yield pb_types.SetVecDataRequest(
+            vname=name, stype=stype, size=arr_sz, chunk=chunk
+        )
         i += chunk_size
 
 
@@ -70,12 +73,13 @@ def get_nparray_chunks_mat(name, array, chunk_size=DEFAULT_FILE_CHUNK_SIZE):
     sh1 = array.shape[0]
     sh2 = array.shape[1]
     i = 0  # position counter
-    byte_array = array.tobytes(order='F')
+    byte_array = array.tobytes(order="F")
     while i < len(byte_array):
-        piece = byte_array[i: i + chunk_size]
+        piece = byte_array[i : i + chunk_size]
         chunk = anskernel.Chunk(payload=piece, size=len(piece))
-        yield pb_types.SetMatDataRequest(mname=name, stype=stype, nrow=sh1,
-                                         ncol=sh2, chunk=chunk)
+        yield pb_types.SetMatDataRequest(
+            mname=name, stype=stype, nrow=sh1, ncol=sh2, chunk=chunk
+        )
         i += chunk_size
 
 
@@ -84,7 +88,7 @@ def list_allowed_dtypes():
     dtypes = list(NP_VALUE_TYPE.keys())
     if None in dtypes:
         dtypes.remove(None)
-    return '\n'.join([f'{dtype}' for dtype in dtypes])
+    return "\n".join([f"{dtype}" for dtype in dtypes])
 
 
 class MapdlMath:
@@ -114,7 +118,7 @@ class MapdlMath:
 
     def __init__(self, mapdl):
         if not isinstance(mapdl, MapdlGrpc):
-            raise TypeError('``mapdl`` must be a MapdlGrpc instance')
+            raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)
 
     @property
@@ -194,7 +198,7 @@ class MapdlMath:
             return AnsVec(name, self._mapdl, dtype, init)
         else:
             return AnsVec(name, self._mapdl)
-    
+
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
         """Create an APDLMath matrix.
 
@@ -221,20 +225,23 @@ class MapdlMath:
             APDLMath matrix.
         """
         if dtype not in MYCTYPE:
-            raise ValueError('Invalid datatype.  Must be one of the following:\n'
-                             'np.int32, np.int64, or np.double')
+            raise ValueError(
+                "Invalid datatype.  Must be one of the following:\n"
+                "np.int32, np.int64, or np.double"
+            )
 
         if not name:
             name = id_generator()
-            self._mapdl.run(f'*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{nrow},{ncol}',
-                            mute=True)
+            self._mapdl.run(
+                f"*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{nrow},{ncol}", mute=True
+            )
             mat = AnsDenseMat(name, self._mapdl)
 
-            if (init == "rand"):
+            if init == "rand":
                 mat.rand()
-            elif (init == "ones"):
+            elif init == "ones":
                 mat.ones()
-            elif (init == "zeros"):
+            elif init == "zeros":
                 mat.zeros()
             elif init is not None:
                 raise ValueError(f"Invalid init method '{init}'")
@@ -395,16 +402,18 @@ class MapdlMath:
         if name is None:
             name = id_generator()
         elif not isinstance(name, str):
-            raise TypeError('``name`` parameter must be a string')
-        
+            raise TypeError("``name`` parameter must be a string")
+
         from scipy import sparse
+
         self._set_mat(name, matrix, triu)
         if sparse.issparse(matrix):
             return AnsSparseMat(name, self._mapdl)
         return AnsDenseMat(name, self._mapdl)
 
-    def load_matrix_from_file(self, dtype=np.double, fname="file.full",
-                              mat_id="STIFF", asarray=False):
+    def load_matrix_from_file(
+        self, dtype=np.double, fname="file.full", mat_id="STIFF", asarray=False
+    ):
         """Import a matrix from an existing FULL file.
 
         Parameters
@@ -439,10 +448,12 @@ class MapdlMath:
 
         """
         name = id_generator()
-        self._mapdl._log.info("Calling MAPDL to extract the %s matrix from %s",
-                              mat_id, fname)
-        self._mapdl.run(f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
-                        mute=True)
+        self._mapdl._log.info(
+            "Calling MAPDL to extract the %s matrix from %s", mat_id, fname
+        )
+        self._mapdl.run(
+            f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
+        )
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
             return self._mapdl._mat_data(ans_sparse_mat.id)
@@ -549,8 +560,7 @@ class MapdlMath:
         """
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full",
-                mat_id="RHS", asarray=False):
+    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
@@ -584,10 +594,12 @@ class MapdlMath:
 
         """
         name = id_generator()
-        self._mapdl._log.info("Call MAPDL to extract the %s vector from the file %s",
-                              mat_id, fname)
-        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
-                        mute=True)
+        self._mapdl._log.info(
+            "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
+        )
+        self._mapdl.run(
+            f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
+        )
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
             return self._mapdl._vec_data(ans_vec.id)
@@ -649,10 +661,10 @@ class MapdlMath:
         """
         return self.get_vec(dtype, fname, "RHS", asarray)
 
-    def svd(self, mat, thresh='', sig='', v='', **kwargs):
+    def svd(self, mat, thresh="", sig="", v="", **kwargs):
         """Apply an SVD Algorithm on a matrix.
 
-        The SVD algorithm is only applicable to dense matrices. 
+        The SVD algorithm is only applicable to dense matrices.
         Columns that are linearly dependent on others are removed,
         leaving the independent or basis vectors. The matrix is
         resized according to the new size determined by the algorithm.
@@ -685,10 +697,10 @@ class MapdlMath:
 
         >>> mm.svd(mat)
         """
-        kwargs.setdefault('mute', True)
+        kwargs.setdefault("mute", True)
         self._mapdl.run(f"*COMP,{mat.id},SVD,{thresh},{sig},{v}", **kwargs)
 
-    def mgs(self, mat, thresh='', **kwargs):
+    def mgs(self, mat, thresh="", **kwargs):
         """Apply Modified Gram-Schmidt algorithm to a matrix.
 
         The MGS algorithm is only applicable to dense
@@ -712,10 +724,10 @@ class MapdlMath:
 
         >>> mm.mgs(mat)
         """
-        kwargs.setdefault('mute', True)
+        kwargs.setdefault("mute", True)
         self._mapdl.run(f"*COMP,{mat.id},MGS,{thresh}", **kwargs)
 
-    def sparse(self, mat, thresh='', **kwargs):
+    def sparse(self, mat, thresh="", **kwargs):
         """Sparsify a existing matrix based on a threshold value.
 
         Parameters
@@ -726,11 +738,10 @@ class MapdlMath:
             Numerical threshold value used to sparsify. The default
             value is 1E-16.
         """
-        kwargs.setdefault('mute', True)
+        kwargs.setdefault("mute", True)
         self._mapdl.run(f"*COMP,{mat.id},SPARSE,{thresh}", **kwargs)
 
-    def eigs(self, nev, k, m=None, c=None, phi=None, algo=None,
-             fmin=None, fmax=None):
+    def eigs(self, nev, k, m=None, c=None, phi=None, algo=None, fmin=None, fmax=None):
         """Solve an eigenproblem.
 
         Parameters
@@ -758,13 +769,13 @@ class MapdlMath:
         >>> ev = mm.eigs(nev, k, m, phi=a)
         """
         if not fmin:
-            fmin = ''
+            fmin = ""
         if not fmax:
-            fmax = ''
+            fmax = ""
 
-        cid = ''
+        cid = ""
         if not c:
-            if (k.sym() and m.sym()):
+            if k.sym() and m.sym():
                 if not algo:
                     algo = "LANB"
             else:
@@ -778,8 +789,8 @@ class MapdlMath:
         self._mapdl.run(f"modopt,{algo},{nev},{fmin},{fmax}", mute=True)
         ev = self.vec()
 
-        phistr = '' if not phi else phi.id
-        self._mapdl.run(f'*EIG,{k.id},{m.id},{cid},{ev.id},{phistr}', mute=True)
+        phistr = "" if not phi else phi.id
+        self._mapdl.run(f"*EIG,{k.id},{m.id},{cid},{ev.id},{phistr}", mute=True)
         return ev
 
     def dot(self, vec_a, vec_b):
@@ -875,7 +886,7 @@ class MapdlMath:
         >>> m2 = mm.rand(dim, dim)
         >>> m3 = m2.copy()
         >>> mat = mm.factorize(m2)
-        
+
         """
         solver = AnsSolver(id_generator(), self._mapdl)
         solver.factorize(mat)
@@ -921,9 +932,11 @@ class MapdlMath:
             Chunk size in bytes.  Must be less than 4MB.
 
         """
-        if ':' in vname:
-            raise ValueError('The character ":" is not permitted in a MAPDL MATH'
-                             ' vector parameter name')
+        if ":" in vname:
+            raise ValueError(
+                'The character ":" is not permitted in a MAPDL MATH'
+                " vector parameter name"
+            )
         if not isinstance(arr, np.ndarray):
             arr = np.asarray(arr)
 
@@ -932,9 +945,11 @@ class MapdlMath:
                 arr = arr.astype(dtype)
 
         if arr.dtype not in list(MYCTYPE.keys()):
-            raise TypeError(f'Invalid array datatype {arr.dtype}\n'
-                            f'Must be one of the following:\n'
-                            f'{list_allowed_dtypes()}')
+            raise TypeError(
+                f"Invalid array datatype {arr.dtype}\n"
+                f"Must be one of the following:\n"
+                f"{list_allowed_dtypes()}"
+            )
 
         chunks_generator = get_nparray_chunks(vname, arr, chunk_size)
         self._mapdl._stub.SetVecData(chunks_generator)
@@ -959,18 +974,21 @@ class MapdlMath:
         """
         from scipy import sparse
 
-        if ':' in mname:
-            raise ValueError('The character ":" is not permitted in a MAPDL MATH'
-                             ' matrix parameter name')
+        if ":" in mname:
+            raise ValueError(
+                'The character ":" is not permitted in a MAPDL MATH'
+                " matrix parameter name"
+            )
         if not len(mname):
-            raise ValueError('Empty MAPDL matrix name not permitted')
+            raise ValueError("Empty MAPDL matrix name not permitted")
 
         if isinstance(arr, np.ndarray):
             if arr.ndim == 1:
-                raise ValueError('Input appears to be an array.  '
-                                 'Use ``set_vec`` instead.)')
+                raise ValueError(
+                    "Input appears to be an array.  " "Use ``set_vec`` instead.)"
+                )
             if arr.ndim > 2:
-                raise ValueError('Arrays must be 2 dimensional')
+                raise ValueError("Arrays must be 2 dimensional")
 
         if sparse.issparse(arr):
             self._send_sparse(mname, arr, sym, dtype, chunk_size)
@@ -985,9 +1003,11 @@ class MapdlMath:
                 arr = arr.astype(dtype)
 
         if arr.dtype not in list(NP_VALUE_TYPE.keys()):
-            raise TypeError(f'Invalid array datatype {arr.dtype}\n'
-                            f'Must be one of the following:\n'
-                            f'{list_allowed_dtypes()}')
+            raise TypeError(
+                f"Invalid array datatype {arr.dtype}\n"
+                f"Must be one of the following:\n"
+                f"{list_allowed_dtypes()}"
+            )
 
         chunks_generator = get_nparray_chunks_mat(mname, arr, chunk_size)
         self._mapdl._stub.SetMatData(chunks_generator)
@@ -995,43 +1015,49 @@ class MapdlMath:
     def _send_sparse(self, mname, arr, sym, dtype, chunk_size):
         """Send a scipy sparse sparse matrix to MAPDL."""
         if sym is None:
-            raise ValueError('The symmetric flag ``sym`` must be set for a sparse '
-                             'matrix')
+            raise ValueError(
+                "The symmetric flag ``sym`` must be set for a sparse " "matrix"
+            )
         from scipy import sparse
+
         arr = sparse.csr_matrix(arr)
 
         if arr.shape[0] != arr.shape[1]:
-            raise ValueError('APDLMath only supports square matrices')
+            raise ValueError("APDLMath only supports square matrices")
 
         if dtype is not None:
             if arr.data.dtype != dtype:
                 arr.data = arr.data.astype(dtype)
 
         if arr.dtype not in list(NP_VALUE_TYPE.keys()):
-            raise TypeError(f'Invalid array datatype {arr.dtype}\n'
-                            f'Must be one of the following:\n'
-                            f'{list_allowed_dtypes()}')
+            raise TypeError(
+                f"Invalid array datatype {arr.dtype}\n"
+                f"Must be one of the following:\n"
+                f"{list_allowed_dtypes()}"
+            )
 
         # data vector
-        dataname = f'{mname}_DATA'
+        dataname = f"{mname}_DATA"
         ans_vec = self.set_vec(arr.data, dataname)
         if dtype is None:
             info = self._mapdl._data_info(ans_vec.id)
             dtype = ANSYS_VALUE_TYPE[info.stype]
 
         # indptr vector
-        indptrname = f'{mname}_IND'
-        indv = arr.indptr.astype('int64') + 1  # FORTRAN indexing
+        indptrname = f"{mname}_IND"
+        indv = arr.indptr.astype("int64") + 1  # FORTRAN indexing
         self.set_vec(indv, indptrname)
 
         # indices vector
-        indxname = f'{mname}_PTR'
+        indxname = f"{mname}_PTR"
         idx = arr.indices + 1  # FORTRAN indexing
         self.set_vec(idx, indxname)
 
-        flagsym = 'TRUE' if sym else 'FALSE'
-        self._mapdl.run(f'*SMAT,{mname},{MYCTYPE[dtype]},ALLOC,CSR,{indptrname},{indxname},'
-                        f'{dataname},{flagsym}')
+        flagsym = "TRUE" if sym else "FALSE"
+        self._mapdl.run(
+            f"*SMAT,{mname},{MYCTYPE[dtype]},ALLOC,CSR,{indptrname},{indxname},"
+            f"{dataname},{flagsym}"
+        )
 
 
 class ApdlMathObj:
@@ -1107,21 +1133,21 @@ class ApdlMathObj:
         >>> m2 = mm.rand(dim, dim)
         >>> nrm = mm.norm( m2)
         """
-        val_name = 'py_val'
+        val_name = "py_val"
         self._mapdl.run(f"*NRM,{self.id},{nrmtype},{val_name}", mute=True)
         return self._mapdl.scalar_param(val_name)
 
     def axpy(self, op, val1, val2):
         """Perform the matrix operation: ``M2= v*M1 + w*M2``"""
-        if not hasattr(op, 'id'):
-            raise TypeError('Must be an ApdlMathObj')
+        if not hasattr(op, "id"):
+            raise TypeError("Must be an ApdlMathObj")
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
         self._mapdl.run(f"*AXPY,{val1},0,{op.id},{val2},0,{self.id}", mute=True)
         return self
 
     def __add__(self, op2):
-        if not hasattr(op2, 'id'):
-            raise TypeError('Must be an ApdlMathObj')
+        if not hasattr(op2, "id"):
+            raise TypeError("Must be an ApdlMathObj")
 
         opout = self.copy()
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
@@ -1129,8 +1155,8 @@ class ApdlMathObj:
         return opout
 
     def __sub__(self, op2):
-        if not hasattr(op2, 'id'):
-            raise TypeError('Must be an ApdlMathObj')
+        if not hasattr(op2, "id"):
+            raise TypeError("Must be an ApdlMathObj")
 
         opout = self.copy()
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
@@ -1150,7 +1176,7 @@ class ApdlMathObj:
 
     def __itruediv__(self, val):
         if val == 0:
-            raise ZeroDivisionError('division by zero')
+            raise ZeroDivisionError("division by zero")
         self._mapdl._log.info("Call Mapdl to 1/scale the object")
         self._mapdl.run(f"*SCAL,{self.id},{1/val}", mute=True)
         return self
@@ -1169,9 +1195,11 @@ class AnsVec(ApdlMathObj):
     def __init__(self, id_, mapdl, dtype=np.double, init=None):
         ApdlMathObj.__init__(self, id_, mapdl, ObjType.VEC)
 
-        if init not in ['ones', 'zeros', 'rand', None]:
-            raise ValueError(f'Invalid init option {init}.\n'
-                             'Should be "ones", "zeros", "rand", or None')
+        if init not in ["ones", "zeros", "rand", None]:
+            raise ValueError(
+                f"Invalid init option {init}.\n"
+                'Should be "ones", "zeros", "rand", or None'
+            )
 
         if init == "rand":
             self.rand()
@@ -1185,7 +1213,7 @@ class AnsVec(ApdlMathObj):
         """Number of items in this vector."""
         sz = self._mapdl.scalar_param(f"{self.id}_DIM")
         if sz is None:
-            raise RuntimeError('This vector has been deleted within MAPDL.')
+            raise RuntimeError("This vector has been deleted within MAPDL.")
         return int(sz)
 
     def __repr__(self):
@@ -1193,7 +1221,7 @@ class AnsVec(ApdlMathObj):
 
     def __getitem__(self, num):
         if num < 0:
-            raise ValueError('Negative indices not permitted')
+            raise ValueError("Negative indices not permitted")
         self._mapdl.run(f"pyval={self.id}({num+1})", mute=True)
         return self._mapdl.scalar_param("pyval")
 
@@ -1216,18 +1244,18 @@ class AnsVec(ApdlMathObj):
             Hadamard product between this vector and the other vector.
         """
         if not meets_version(self._mapdl._server_version, (0, 4, 0)):
-            raise VersionError(f'``{func.__name__}`` requires MAPDL version 2021R2')
+            raise VersionError(f"``{func.__name__}`` requires MAPDL version 2021R2")
 
         if not isinstance(vec, AnsVec):
-            raise TypeError('Must be an Ansys vector object')
-            
+            raise TypeError("Must be an Ansys vector object")
+
         name = id_generator()  # internal name of the new vector/matrix
         info = self._mapdl._data_info(self.id)
         dtype = ANSYS_VALUE_TYPE[info.stype]
 
         # check size consistency
         if self.size != vec.size:
-            raise ValueError('Vectors have inconsistent sizes')
+            raise ValueError("Vectors have inconsistent sizes")
 
         self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}")
         objout = AnsVec(name, self._mapdl)
@@ -1235,7 +1263,7 @@ class AnsVec(ApdlMathObj):
         # perform the Hadamard product
         self._mapdl.run(f"*HPROD,{self.id},{vec.id},{name}")
         return objout
-        
+
     def copy(self):
         """Return a copy of this vector"""
         return AnsVec(ApdlMathObj.copy(self), self._mapdl)
@@ -1254,7 +1282,7 @@ class AnsVec(ApdlMathObj):
             Dot product between this vector and the other vector.
         """
         if not isinstance(vec, AnsVec):
-            raise TypeError('Must be an Ansys vector object')
+            raise TypeError("Must be an Ansys vector object")
 
         self._mapdl.run(f"*DOT,{self.id},{vec.id},py_val")
         return self._mapdl.scalar_param("py_val")
@@ -1297,7 +1325,7 @@ class AnsMat(ApdlMathObj):
     @property
     def size(self) -> int:
         """Number of items in this matrix."""
-        return self.nrow*self.ncol
+        return self.nrow * self.ncol
 
     @property
     def shape(self) -> tuple:
@@ -1322,13 +1350,15 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
-        
+
         """
         return self._mapdl._mat_data(self.id)
 
     def __mul__(self, vec):
-        raise AttributeError('Array multiplication is not yet available.  '
-                             'For dot product, please use `dot()`')
+        raise AttributeError(
+            "Array multiplication is not yet available.  "
+            "For dot product, please use `dot()`"
+        )
 
     def dot(self, obj):
         """Perform the matrix multiplication by another vector or matrix.
@@ -1357,13 +1387,17 @@ class AnsMat(ApdlMathObj):
         info = self._mapdl._data_info(self.id)
         dtype = ANSYS_VALUE_TYPE[info.stype]
         if obj.type == ObjType.VEC:
-            self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}",
-                            mute=True)
+            self._mapdl.run(
+                f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{info.size1}", mute=True
+            )
             objout = AnsVec(name, self._mapdl)
         else:
-            self._mapdl.run(f"*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{info.size1},{info.size2}", mute=True)
+            self._mapdl.run(
+                f"*DMAT,{name},{MYCTYPE[dtype]},ALLOC,{info.size1},{info.size2}",
+                mute=True,
+            )
             objout = AnsDenseMat(name, self._mapdl)
-            
+
         self._mapdl._log.info("Call Mapdl to perform MV Product")
         self._mapdl.run(f"*MULT,{self.id},,{obj.id},,{name}", mute=True)
         return objout
@@ -1396,8 +1430,9 @@ class AnsMat(ApdlMathObj):
         dtype = ANSYS_VALUE_TYPE[info.stype]
         name = id_generator()
         self._mapdl._log.info("Call MAPDL to transpose")
-        self._mapdl.run(f"{objtype},{name},{MYCTYPE[dtype]},COPY,{self.id},TRANS",
-                        mute=True)
+        self._mapdl.run(
+            f"{objtype},{name},{MYCTYPE[dtype]},COPY,{self.id},TRANS", mute=True
+        )
         if info.objtype == 2:
             mat = AnsDenseMat(name, self._mapdl)
         else:
@@ -1416,7 +1451,7 @@ class AnsDenseMat(AnsMat):
         return self.asarray()
 
     def __repr__(self):
-        return f'Dense APDLMath Matrix ({self.nrow}, {self.ncol})'
+        return f"Dense APDLMath Matrix ({self.nrow}, {self.ncol})"
 
     def copy(self):
         """Return a copy of this matrix"""
@@ -1430,7 +1465,7 @@ class AnsSparseMat(AnsMat):
         AnsMat.__init__(self, uid, mapdl, ObjType.SMAT)
 
     def __repr__(self):
-        return f'Sparse APDLMath Matrix ({self.nrow}, {self.ncol})'
+        return f"Sparse APDLMath Matrix ({self.nrow}, {self.ncol})"
 
     def copy(self):
         """Return a copy of this matrix.

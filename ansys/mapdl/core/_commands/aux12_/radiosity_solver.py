@@ -1,5 +1,4 @@
 class RadiositySolver:
-
     def hemiopt(self, hres="", **kwargs):
         """Specifies options for Hemicube view factor calculation.
 
@@ -14,8 +13,16 @@ class RadiositySolver:
         command = f"HEMIOPT,{hres}"
         return self.run(command, **kwargs)
 
-    def radopt(self, fluxtol="", solver="", maxiter="",
-               toler="", overrlex="", maxfluxiter="", **kwargs):
+    def radopt(
+        self,
+        fluxtol="",
+        solver="",
+        maxiter="",
+        toler="",
+        overrlex="",
+        maxfluxiter="",
+        **kwargs,
+    ):
         """Specifies Radiosity Solver options.
 
         APDL Command: RADOPT
@@ -105,7 +112,9 @@ class RadiositySolver:
         to 2 for a 2-D analysis, the Gauss-Seidel iterative solver (SOLVER = 0)
         is used.
         """
-        command = f"RADOPT,,{fluxtol},{solver},{maxiter},{toler},{overrlex},,,,,{maxfluxiter}"
+        command = (
+            f"RADOPT,,{fluxtol},{solver},{maxiter},{toler},{overrlex},,,,,{maxfluxiter}"
+        )
         return self.run(command, **kwargs)
 
     def spcnod(self, encl="", node="", **kwargs):
@@ -289,8 +298,9 @@ class RadiositySolver:
         command = f"VFSM,{action},{encl},{opt},{maxiter},{conv}"
         return self.run(command, **kwargs)
 
-    def vfopt(self, opt="", filename="", ext="", dir_="", filetype="",
-              fileformat="", **kwargs):
+    def vfopt(
+        self, opt="", filename="", ext="", dir_="", filetype="", fileformat="", **kwargs
+    ):
         """Specifies options for the view factor file and calculates view factors.
 
         APDL Command: VFOPT

@@ -4,11 +4,28 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class ExplicitDynamics:
-
-    def edasmp(self, option="", asmid="", part1="", part2="", part3="",
-               part4="", part5="", part6="", part7="", part8="", part9="",
-               part10="", part11="", part12="", part13="", part14="",
-               part15="", part16="", **kwargs):
+    def edasmp(
+        self,
+        option="",
+        asmid="",
+        part1="",
+        part2="",
+        part3="",
+        part4="",
+        part5="",
+        part6="",
+        part7="",
+        part8="",
+        part9="",
+        part10="",
+        part11="",
+        part12="",
+        part13="",
+        part14="",
+        part15="",
+        part16="",
+        **kwargs,
+    ):
         """Creates a part assembly to be used in an explicit dynamic analysis.
 
         APDL Command: EDASMP
@@ -46,8 +63,18 @@ class ExplicitDynamics:
         command = f"EDASMP,{option},{asmid},{part1},{part2},{part3},{part4},{part5},{part6},{part7},{part8},{part9},{part10},{part11},{part12},{part13},{part14},{part15},{part16}"
         return self.run(command, **kwargs)
 
-    def edbound(self, option="", lab="", cname="", xc="", yc="", zc="",
-                cname2="", copt="", **kwargs):
+    def edbound(
+        self,
+        option="",
+        lab="",
+        cname="",
+        xc="",
+        yc="",
+        zc="",
+        cname2="",
+        copt="",
+        **kwargs,
+    ):
         """Defines a boundary plane for sliding or cyclic symmetry.
 
         APDL Command: EDBOUND
@@ -117,8 +144,18 @@ class ExplicitDynamics:
         command = f"EDBOUND,{option},{lab},{cname},{xc},{yc},{zc},{cname2},{copt}"
         return self.run(command, **kwargs)
 
-    def edbx(self, option="", boxid="", xmin="", xmax="", ymin="", ymax="",
-             zmin="", zmax="", **kwargs):
+    def edbx(
+        self,
+        option="",
+        boxid="",
+        xmin="",
+        xmax="",
+        ymin="",
+        ymax="",
+        zmin="",
+        zmax="",
+        **kwargs,
+    ):
         """Creates a box shaped volume to be used in a contact definition for
 
         APDL Command: EDBX
@@ -171,9 +208,26 @@ class ExplicitDynamics:
         command = f"EDBX,{option},{boxid},{xmin},{xmax},{ymin},{ymax},{zmin},{zmax}"
         return self.run(command, **kwargs)
 
-    def edcgen(self, option="", cont="", targ="", fs="", fd="", dc="", vc="",
-               vdc="", v1="", v2="", v3="", v4="", btime="", dtime="",
-               boxid1="", boxid2="", **kwargs):
+    def edcgen(
+        self,
+        option="",
+        cont="",
+        targ="",
+        fs="",
+        fd="",
+        dc="",
+        vc="",
+        vdc="",
+        v1="",
+        v2="",
+        v3="",
+        v4="",
+        btime="",
+        dtime="",
+        boxid1="",
+        boxid2="",
+        **kwargs,
+    ):
         """Specifies contact parameters for an explicit dynamics analysis.
 
         APDL Command: EDCGEN
@@ -390,8 +444,7 @@ class ExplicitDynamics:
         """
         return self.run(f"EDCMORE,{option},{num},,{val1},{val2}", **kwargs)
 
-    def edcnstr(self, option="", ctype="", comp1="", comp2="", val1="",
-                **kwargs):
+    def edcnstr(self, option="", ctype="", comp1="", comp2="", val1="", **kwargs):
         """Defines various types of constraints for an explicit dynamic analysis.
 
         APDL Command: EDCNSTR
@@ -474,8 +527,19 @@ class ExplicitDynamics:
         command = f"EDCNSTR,{option},{ctype},{comp1},{comp2},{val1}"
         return self.run(command, **kwargs)
 
-    def edcontact(self, sfsi="", rwpn="", ipck="", shtk="", peno="", stcc="",
-                  orie="", cspc="", penchk="", **kwargs):
+    def edcontact(
+        self,
+        sfsi="",
+        rwpn="",
+        ipck="",
+        shtk="",
+        peno="",
+        stcc="",
+        orie="",
+        cspc="",
+        penchk="",
+        **kwargs,
+    ):
         """Specifies contact surface controls for an explicit dynamics analysis.
 
         APDL Command: EDCONTACT
@@ -743,7 +807,7 @@ class ExplicitDynamics:
         return self.run(command, **kwargs)
 
     def eddbl(self, key="", **kwargs):
-        """ Selects a numerical precision type of the explicit dynamics analysis.
+        """Selects a numerical precision type of the explicit dynamics analysis.
 
         APDL Command: EDDBL
 
@@ -847,8 +911,18 @@ class ExplicitDynamics:
         command = f"EDDC,{option},{ctype},{cont},{targ}"
         return self.run(command, **kwargs)
 
-    def edipart(self, part="", option="", cvect="", tm="", ircs="", ivect="",
-                vvect="", cid="", **kwargs):
+    def edipart(
+        self,
+        part="",
+        option="",
+        cvect="",
+        tm="",
+        ircs="",
+        ivect="",
+        vvect="",
+        cid="",
+        **kwargs,
+    ):
         """Defines inertia for rigid parts in an explicit dynamics analysis.
 
         APDL Command: EDIPART
@@ -928,8 +1002,21 @@ class ExplicitDynamics:
         command = f"EDIPART,{part},{option},{cvect},{tm},{ircs},{ivect},{vvect},{cid}"
         return self.run(command, **kwargs)
 
-    def edlcs(self, option="", cid="", x1="", y1="", z1="", x2="", y2="",
-              z2="", x3="", y3="", z3="", **kwargs):
+    def edlcs(
+        self,
+        option="",
+        cid="",
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        x3="",
+        y3="",
+        z3="",
+        **kwargs,
+    ):
         """Defines a local coordinate system for use in explicit dynamics
 
         APDL Command: EDLCS
@@ -995,8 +1082,18 @@ class ExplicitDynamics:
         command = f"EDLCS,{option},{cid},{x1},{y1},{z1},{x2},{y2},{z2},{x3},{y3},{z3}"
         return self.run(command, **kwargs)
 
-    def edmp(self, lab="", mat="", val1="", val2="", val3="", val4="", val5="",
-             val6="", **kwargs):
+    def edmp(
+        self,
+        lab="",
+        mat="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        **kwargs,
+    ):
         """Defines material properties for an explicit dynamics analysis.
 
         APDL Command: EDMP
@@ -1133,8 +1230,17 @@ class ExplicitDynamics:
         command = f"EDNB,{option},{cname},{ad},{as_}"
         return self.run(command, **kwargs)
 
-    def edndtsd(self, vect1="", vect2="", datap="", fitpt="", vect3="",
-                vect4="", disp="", **kwargs):
+    def edndtsd(
+        self,
+        vect1="",
+        vect2="",
+        datap="",
+        fitpt="",
+        vect3="",
+        vect4="",
+        disp="",
+        **kwargs,
+    ):
         """Allows smoothing of noisy data for explicit dynamics analyses and
 
         APDL Command: EDNDTSD
@@ -1225,8 +1331,19 @@ class ExplicitDynamics:
         command = f"EDNDTSD,{vect1},{vect2},{datap},{fitpt},{vect3},{vect4},{disp}"
         return self.run(command, **kwargs)
 
-    def ednrot(self, option="", cid="", cname="", dof1="", dof2="", dof3="",
-               dof4="", dof5="", dof6="", **kwargs):
+    def ednrot(
+        self,
+        option="",
+        cid="",
+        cname="",
+        dof1="",
+        dof2="",
+        dof3="",
+        dof4="",
+        dof5="",
+        dof6="",
+        **kwargs,
+    ):
         """Applies a rotated coordinate nodal constraint in an explicit dynamics
 
         APDL Command: EDNROT
@@ -1269,7 +1386,9 @@ class ExplicitDynamics:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = f"EDNROT,{option},{cid},{cname},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6}"
+        command = (
+            f"EDNROT,{option},{cid},{cname},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6}"
+        )
         return self.run(command, **kwargs)
 
     def edpart(self, option="", partid="", cname="", **kwargs):
@@ -1459,8 +1578,22 @@ class ExplicitDynamics:
         command = f"EDSP,{option},{min_},{max_},{inc}"
         return self.run(command, **kwargs)
 
-    def edweld(self, option="", nweld="", n1="", n2="", sn="", ss="", expn="",
-               exps="", epsf="", tfail="", nsw="", cid="", **kwargs):
+    def edweld(
+        self,
+        option="",
+        nweld="",
+        n1="",
+        n2="",
+        sn="",
+        ss="",
+        expn="",
+        exps="",
+        epsf="",
+        tfail="",
+        nsw="",
+        cid="",
+        **kwargs,
+    ):
         """Defines a massless spotweld or generalized weld for use in an explicit
 
         APDL Command: EDWELD
@@ -1592,8 +1725,9 @@ class ExplicitDynamics:
         command = f"EDADAPT,{part},{key}"
         return self.run(command, **kwargs)
 
-    def edale(self, option="", afac="", bfac="", dfac="", efac="", start="",
-              end="", **kwargs):
+    def edale(
+        self, option="", afac="", bfac="", dfac="", efac="", start="", end="", **kwargs
+    ):
         """Assigns mesh smoothing to explicit dynamic elements that use
 
         APDL Command: EDALE
@@ -1672,9 +1806,23 @@ class ExplicitDynamics:
         command = f"EDBVIS,{qvco},{lvco}"
         return self.run(command, **kwargs)
 
-    def edcadapt(self, freq="", tol="", opt="", maxlvl="", btime="", dtime="",
-                 lcid="", adpsize="", adpass="", ireflg="", adpene="",
-                 adpth="", maxel="", **kwargs):
+    def edcadapt(
+        self,
+        freq="",
+        tol="",
+        opt="",
+        maxlvl="",
+        btime="",
+        dtime="",
+        lcid="",
+        adpsize="",
+        adpass="",
+        ireflg="",
+        adpene="",
+        adpth="",
+        maxel="",
+        **kwargs,
+    ):
         """Specifies adaptive meshing controls for an explicit dynamic analysis.
 
         APDL Command: EDCADAPT
@@ -2001,8 +2149,18 @@ class ExplicitDynamics:
         command = f"EDDAMP,{part},{lcid},{valdmp}"
         return self.run(command, **kwargs)
 
-    def eddrelax(self, option="", nrcyck="", drtol="", dffctr="", drterm="",
-                 tssfdr="", irelal="", edttl="", **kwargs):
+    def eddrelax(
+        self,
+        option="",
+        nrcyck="",
+        drtol="",
+        dffctr="",
+        drterm="",
+        tssfdr="",
+        irelal="",
+        edttl="",
+        **kwargs,
+    ):
         """Activates initialization to a prescribed geometry or dynamic relaxation
 
         APDL Command: EDDRELAX
@@ -2465,8 +2623,21 @@ class ExplicitDynamics:
         command = f"EDIS,{option},{pidn},{pido}"
         return self.run(command, **kwargs)
 
-    def edload(self, option="", lab="", key="", cname="", par1="", par2="",
-               phase="", lcid="", scale="", btime="", dtime="", **kwargs):
+    def edload(
+        self,
+        option="",
+        lab="",
+        key="",
+        cname="",
+        par1="",
+        par2="",
+        phase="",
+        lcid="",
+        scale="",
+        btime="",
+        dtime="",
+        **kwargs,
+    ):
         """Specifies loads for an explicit dynamics analysis.
 
         APDL Command: EDLOAD
@@ -2742,9 +2913,24 @@ class ExplicitDynamics:
         command = f"EDPL,{ldnum}"
         return self.run(command, **kwargs)
 
-    def edpvel(self, option="", pid="", vx="", vy="", vz="", omegax="",
-               omegay="", omegaz="", xc="", yc="", zc="", angx="", angy="",
-               angz="", **kwargs):
+    def edpvel(
+        self,
+        option="",
+        pid="",
+        vx="",
+        vy="",
+        vz="",
+        omegax="",
+        omegay="",
+        omegaz="",
+        xc="",
+        yc="",
+        zc="",
+        angx="",
+        angy="",
+        angz="",
+        **kwargs,
+    ):
         """Applies initial velocities to parts or part assemblies in an explicit
 
         APDL Command: EDPVEL
@@ -2986,8 +3172,22 @@ class ExplicitDynamics:
         command = f"EDRD,{option},{part},{mrb}"
         return self.run(command, **kwargs)
 
-    def edri(self, option="", part="", xc="", yc="", zc="", tm="", ixx="",
-             iyy="", izz="", ixy="", iyz="", ixz="", **kwargs):
+    def edri(
+        self,
+        option="",
+        part="",
+        xc="",
+        yc="",
+        zc="",
+        tm="",
+        ixx="",
+        iyy="",
+        izz="",
+        ixy="",
+        iyz="",
+        ixz="",
+        **kwargs,
+    ):
         """Defines inertia properties for a new rigid body that is created when a
 
         APDL Command: EDRI
@@ -3129,8 +3329,7 @@ class ExplicitDynamics:
         command = f"EDRUN,{option},{cons},{ncpu}"
         return self.run(command, **kwargs)
 
-    def edshell(self, wpan="", shnu="", shtc="", wpbt="", shpl="", itrst="",
-                **kwargs):
+    def edshell(self, wpan="", shnu="", shtc="", wpbt="", shpl="", itrst="", **kwargs):
         """Specifies shell computation controls for an explicit dynamics analysis.
 
         APDL Command: EDSHELL
@@ -3323,8 +3522,7 @@ class ExplicitDynamics:
         command = f"EDSTART,{restart},{memory},{fsize},{dumpfile}"
         return self.run(command, **kwargs)
 
-    def edterm(self, option="", lab="", num="", stop="", maxc="", minc="",
-               **kwargs):
+    def edterm(self, option="", lab="", num="", stop="", maxc="", minc="", **kwargs):
         """Specifies termination criteria for an explicit dynamic analysis.
 
         APDL Command: EDTERM
@@ -3412,8 +3610,13 @@ class ExplicitDynamics:
         command = f"EDTERM,{option},{lab},{num},{stop},{maxc},{minc}"
         return self.run(command, **kwargs)
 
-    def edtp(self, option: MapdlInt = "", value1: MapdlInt = "",
-             value2: MapdlFloat = "", **kwargs) -> Optional[str]:  # pragma: no cover
+    def edtp(
+        self,
+        option: MapdlInt = "",
+        value1: MapdlInt = "",
+        value2: MapdlFloat = "",
+        **kwargs,
+    ) -> Optional[str]:  # pragma: no cover
         """Plots explicit elements based on their time step size.
 
         APDL Command: EDTP
@@ -3476,9 +3679,24 @@ class ExplicitDynamics:
         command = f"EDTP,{option},{value1},{value2}"
         return self.run(command, **kwargs)
 
-    def edvel(self, option="", cname="", vx="", vy="", vz="", omegax="",
-              omegay="", omegaz="", xc="", yc="", zc="", angx="", angy="",
-              angz="", **kwargs):
+    def edvel(
+        self,
+        option="",
+        cname="",
+        vx="",
+        vy="",
+        vz="",
+        omegax="",
+        omegay="",
+        omegaz="",
+        xc="",
+        yc="",
+        zc="",
+        angx="",
+        angy="",
+        angz="",
+        **kwargs,
+    ):
         """Applies initial velocities to nodes or node components in an explicit
 
         APDL Command: EDVEL
@@ -3681,8 +3899,7 @@ class ExplicitDynamics:
         command = f"EDWRITE,{option},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def rexport(self, target="", lstep="", sbstep="", fname="", ext="",
-                **kwargs):
+    def rexport(self, target="", lstep="", sbstep="", fname="", ext="", **kwargs):
         """Exports displacements from an implicit run to ANSYS LS-DYNA.
 
         APDL Command: REXPORT

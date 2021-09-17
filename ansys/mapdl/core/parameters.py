@@ -10,28 +10,32 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
 
-ROUTINE_MAP = {0: 'Begin level',
-               17: 'PREP7',
-               21: 'SOLUTION',
-               31: 'POST1',
-               36: 'POST26',
-               52: 'AUX2',
-               53: 'AUX3',
-               62: 'AUX12',
-               65: 'AUX15'}
+ROUTINE_MAP = {
+    0: "Begin level",
+    17: "PREP7",
+    21: "SOLUTION",
+    31: "POST1",
+    36: "POST26",
+    52: "AUX2",
+    53: "AUX3",
+    62: "AUX12",
+    65: "AUX15",
+}
 
-UNITS_MAP = {-1: 'NONE',
-             0: 'USER',
-             1: 'SI',
-             2: 'CGS',
-             3: 'BFT',
-             4: 'BIN',
-             5: 'MKS',
-             6: 'MPA',
-             7: 'uMKS'}
+UNITS_MAP = {
+    -1: "NONE",
+    0: "USER",
+    1: "SI",
+    2: "CGS",
+    3: "BFT",
+    4: "BIN",
+    5: "MKS",
+    6: "MPA",
+    7: "uMKS",
+}
 
 
-class Parameters():
+class Parameters:
     """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
 
     Examples
@@ -60,7 +64,7 @@ class Parameters():
 
     def __init__(self, mapdl):
         if not isinstance(mapdl, _MapdlCore):
-            raise TypeError('Must be implemented from MAPDL class')
+            raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
 
     @property
@@ -101,7 +105,7 @@ class Parameters():
         >>> mapdl.parameters.routine
         'PREP7'
         """
-        value = self._mapdl.get_value('ACTIVE', item1='ROUT')
+        value = self._mapdl.get_value("ACTIVE", item1="ROUT")
         return ROUTINE_MAP[int(value)]
 
     @property
@@ -248,42 +252,41 @@ class Parameters():
 
     def __repr__(self):
         """Return the current parameters in a pretty format"""
-        lines = ['MAPDL Parameters',
-                 '----------------']
+        lines = ["MAPDL Parameters", "----------------"]
         for key, info in self._parm.items():
-            value_str = ''
-            if info['type'] == 'ARRAY':
-                value_str = 'ARRAY DIM %s' % str(info['shape'])
-            elif info['type'] == 'TABLE':
-                value_str = 'TABLE DIM %s' % str(info['shape'])
-            elif info['type'] == 'CHARACTER':
-                value_str = '"%s"' % info['value']
-            elif 'value' in info:
-                value_str = str(info['value'])
+            value_str = ""
+            if info["type"] == "ARRAY":
+                value_str = "ARRAY DIM %s" % str(info["shape"])
+            elif info["type"] == "TABLE":
+                value_str = "TABLE DIM %s" % str(info["shape"])
+            elif info["type"] == "CHARACTER":
+                value_str = '"%s"' % info["value"]
+            elif "value" in info:
+                value_str = str(info["value"])
             else:
                 continue
-            lines.append('%-32s : %s' % (key, value_str))
-        return '\n'.join(lines)
+            lines.append("%-32s : %s" % (key, value_str))
+        return "\n".join(lines)
 
     def __getitem__(self, key):
         """Return a parameter"""
         if not isinstance(key, str):
-            raise TypeError('Parameter name must be a string')
+            raise TypeError("Parameter name must be a string")
         key = key.upper()
 
         parameters = self._parm
         if key not in parameters:
-            raise IndexError('%s not a valid parameter_name' % key)
+            raise IndexError("%s not a valid parameter_name" % key)
 
         parm = parameters[key]
-        if parm['type'] in ['ARRAY', 'TABLE']:
+        if parm["type"] in ["ARRAY", "TABLE"]:
             try:
-                return self._get_parameter_array(key, parm['shape'])
+                return self._get_parameter_array(key, parm["shape"])
             except ValueError:
                 # allow a second attempt
-                return self._get_parameter_array(key, parm['shape'])
+                return self._get_parameter_array(key, parm["shape"])
 
-        return parm['value']
+        return parm["value"]
 
     def __setitem__(self, key, value):
         """Set a parameter"""
@@ -307,23 +310,23 @@ class Parameters():
 
         """
         if not isinstance(value, (str, int, float)):
-            raise TypeError('``Parameter`` must be either a float, int, or string')
+            raise TypeError("``Parameter`` must be either a float, int, or string")
 
         if not isinstance(name, str):
-            raise TypeError('``name`` must be a string')
+            raise TypeError("``name`` must be a string")
 
         if len(name) > 32:
-            raise ValueError('Length of ``name`` must be 32 characters or less')
+            raise ValueError("Length of ``name`` must be 32 characters or less")
 
         # delete the parameter if it exists as an array
         parm = self._parm
         if name in parm:
-            if parm[name]['type'] == 'ARRAY':
+            if parm[name]["type"] == "ARRAY":
                 self._mapdl.starset(name, mute=True)
 
         if isinstance(value, str):
-            if ' ' in value:
-                raise ValueError('Spaces not allowed in strings in MAPDL')
+            if " " in value:
+                raise ValueError("Spaces not allowed in strings in MAPDL")
             self._mapdl.starset(name, f"'{value}'", mute=True)
         else:
             self._mapdl.starset(name, value, mute=True)
@@ -342,13 +345,13 @@ class Parameters():
         array : np.ndarray
             Numpy array.
         """
-        format_str = '(1F20.12)'
+        format_str = "(1F20.12)"
         with self._mapdl.non_interactive:
-            self._mapdl.mwrite(parm_name.upper(), label='kji')  # use C ordering
+            self._mapdl.mwrite(parm_name.upper(), label="kji")  # use C ordering
             self._mapdl.run(format_str)
 
         st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
-        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep='\n')
+        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n")
         return arr_flat.reshape(shape).squeeze()
 
     @supress_logging
@@ -399,13 +402,14 @@ class Parameters():
         # type checks
         arr = np.array(arr)
         if not np.issubdtype(arr.dtype, np.number):
-            raise TypeError('Only numerical arrays or lists are supported')
+            raise TypeError("Only numerical arrays or lists are supported")
         if arr.ndim > 3:
-            raise ValueError('MAPDL VREAD only supports a arrays with a'
-                             ' maximum of 3 dimensions.')
+            raise ValueError(
+                "MAPDL VREAD only supports a arrays with a" " maximum of 3 dimensions."
+            )
 
         if not isinstance(name, str):
-            raise TypeError('``name`` must be a string')
+            raise TypeError("``name`` must be a string")
 
         name = name.upper()
 
@@ -422,14 +426,14 @@ class Parameters():
             return self._set_array_chain(name, arr, idim, jdim, kdim)
 
         # write array from numpy to disk
-        filename = '_tmp.dat'
+        filename = "_tmp.dat"
         self._write_numpy_array(filename, arr)
 
-        cmd = f'{name}(1, 1),{filename},,,IJK,{idim},{jdim},{kdim}'
+        cmd = f"{name}(1, 1),{filename},,,IJK,{idim},{jdim},{kdim}"
         with self._mapdl.non_interactive:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             self._mapdl.vread(cmd)
-            self._mapdl.run('(1F20.12)')
+            self._mapdl.run("(1F20.12)")
 
     def _set_array_chain(self, name, arr, idim, jdim, kdim):
         """Sets an array using chained commands
@@ -442,7 +446,7 @@ class Parameters():
             arr = np.expand_dims(arr, 2)
 
         # backwards compatibility with CORBA
-        if hasattr(self._mapdl, 'mute'):
+        if hasattr(self._mapdl, "mute"):
             old_mute = self._mapdl.mute
             self._mapdl.mute = True
 
@@ -451,10 +455,10 @@ class Parameters():
             for i in range(idim):
                 for j in range(jdim):
                     for k in range(kdim):
-                        index = f'{i + 1},{j + 1},{k + 1}'
-                        self._mapdl.run(f'{name}({index})={arr[i, j, k]}')
+                        index = f"{i + 1},{j + 1},{k + 1}"
+                        self._mapdl.run(f"{name}({index})={arr[i, j, k]}")
 
-        if hasattr(self._mapdl, 'mute'):
+        if hasattr(self._mapdl, "mute"):
             self._mapdl.mute = old_mute
 
     def _write_numpy_array(self, filename, arr):
@@ -466,7 +470,7 @@ class Parameters():
             filename = os.path.join(self._mapdl.directory, filename)
         else:
             filename = os.path.join(tempfile.gettempdir(), filename)
-        write_array(filename.encode(), arr.ravel('F'))
+        write_array(filename.encode(), arr.ravel("F"))
 
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
@@ -486,8 +490,8 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     parameters = {}
-    st = status.find('NAME                              VALUE')
-    for line in status[st+80:].splitlines():
+    st = status.find("NAME                              VALUE")
+    for line in status[st + 80 :].splitlines():
         items = line.split()
         if not items:
             continue
@@ -495,20 +499,17 @@ def interp_star_status(status):
         # line will contain either a character, scalar, or array
         name = items[0]
         if len(items) == 2:
-            if items[1][-9:] == 'CHARACTER':
-                parameters[name] = {'type': 'CHARACTER',
-                                    'value': items[1][:-9]}
+            if items[1][-9:] == "CHARACTER":
+                parameters[name] = {"type": "CHARACTER", "value": items[1][:-9]}
             # else:
-                # log.warning(
+            # log.warning(
         elif len(items) == 3:
-            if items[2] == 'SCALAR':
+            if items[2] == "SCALAR":
                 value = float(items[1])
             else:
                 value = items[1]
-            parameters[name] = {'type': items[2],
-                                'value': value}
+            parameters[name] = {"type": items[2], "value": value}
         elif len(items) == 5:
             shape = (int(items[2]), int(items[3]), int(items[4]))
-            parameters[name] = {'type': items[1],
-                                'shape': shape}
+            parameters[name] = {"type": items[1], "shape": shape}
     return parameters

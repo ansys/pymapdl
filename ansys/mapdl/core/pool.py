@@ -10,13 +10,15 @@ from tqdm import tqdm
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.misc import threaded
 from ansys.mapdl.core.misc import create_temp_dir, threaded_daemon
-from ansys.mapdl.core.launcher import (port_in_use,
-                                       MAPDL_DEFAULT_PORT,
-                                       _version_from_path)
+from ansys.mapdl.core.launcher import (
+    port_in_use,
+    MAPDL_DEFAULT_PORT,
+    _version_from_path,
+)
 from ansys.mapdl.core.errors import VersionError
 
 LOG = logging.getLogger(__name__)
-LOG.setLevel('DEBUG')
+LOG.setLevel("DEBUG")
 
 
 def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
@@ -30,8 +32,10 @@ def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
         port += 1
 
     if len(ports) < n_ports:
-        raise RuntimeError('There are not %d available ports between %d and 65536'
-                           % (n_ports, starting_port))
+        raise RuntimeError(
+            "There are not %d available ports between %d and 65536"
+            % (n_ports, starting_port)
+        )
 
     return ports
 
@@ -106,28 +110,38 @@ class LocalMapdlPool:
 
     """
 
-    def __init__(self, n_instances, wait=True, run_location=None,
-                 port=MAPDL_DEFAULT_PORT, progress_bar=True, restart_failed=True,
-                 remove_temp_files=True, **kwargs):
+    def __init__(
+        self,
+        n_instances,
+        wait=True,
+        run_location=None,
+        port=MAPDL_DEFAULT_PORT,
+        progress_bar=True,
+        restart_failed=True,
+        remove_temp_files=True,
+        **kwargs,
+    ):
         """Initialize several instances of mapdl"""
         self._instances = []
         self._root_dir = run_location
-        kwargs['remove_temp_files'] = remove_temp_files
-        kwargs['mode'] = 'grpc'
+        kwargs["remove_temp_files"] = remove_temp_files
+        kwargs["mode"] = "grpc"
         self._spawn_kwargs = kwargs
 
         # verify that mapdl is 2021R1 or newer
-        if 'exec_file' in kwargs:
-            exec_file = kwargs['exec_file']
+        if "exec_file" in kwargs:
+            exec_file = kwargs["exec_file"]
         else:  # get default executable
             exec_file = get_ansys_path()
             if exec_file is None:
-                raise FileNotFoundError('Invalid exec_file path or cannot load cached '
-                                        'ansys path.  Enter one manually using '
-                                        'exec_file=<path to executable>')
+                raise FileNotFoundError(
+                    "Invalid exec_file path or cannot load cached "
+                    "ansys path.  Enter one manually using "
+                    "exec_file=<path to executable>"
+                )
 
         if _version_from_path(exec_file) < 211:
-            raise VersionError('LocalMapdlPool requires MAPDL 2021R1 or later.')
+            raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
         ports = available_ports(n_instances, port)
@@ -141,11 +155,11 @@ class LocalMapdlPool:
 
         n_instances = int(n_instances)
         if n_instances < 2:
-            raise ValueError('Must request at least 2 instances to create a pool.')
+            raise ValueError("Must request at least 2 instances to create a pool.")
 
         pbar = None
         if wait and progress_bar:
-            pbar = tqdm(total=n_instances, desc='Creating Pool')
+            pbar = tqdm(total=n_instances, desc="Creating Pool")
 
         # initialize a list of dummy instances
         self._instances = [None for _ in range(n_instances)]
@@ -158,8 +172,10 @@ class LocalMapdlPool:
             # check if all clients connected have connected
             if len(self) != n_instances:
                 n_connected = len(self)
-                warnings.warn(f'Only %d clients connected out of %d requested' %
-                              (n_connected, n_instances))
+                warnings.warn(
+                    f"Only %d clients connected out of %d requested"
+                    % (n_connected, n_instances)
+                )
             if pbar is not None:
                 pbar.close()
 
@@ -171,10 +187,17 @@ class LocalMapdlPool:
 
     def _verify_unique_ports(self):
         if len(self._ports) != len(self):
-            raise RuntimeError('MAPDLPool has overlapping ports')
+            raise RuntimeError("MAPDLPool has overlapping ports")
 
-    def map(self, func, iterable=None, progress_bar=True,
-            close_when_finished=False, timeout=None, wait=True):
+    def map(
+        self,
+        func,
+        iterable=None,
+        progress_bar=True,
+        close_when_finished=False,
+        timeout=None,
+        wait=True,
+    ):
         """Run a function for each instance of mapdl within the pool
 
         Parameters
@@ -247,7 +270,7 @@ class LocalMapdlPool:
         if not len(self):
             # instances could still be spawning...
             if not all(v is None for v in self._instances):
-                raise RuntimeError('No MAPDL instances available.')
+                raise RuntimeError("No MAPDL instances available.")
 
         results = []
 
@@ -258,7 +281,7 @@ class LocalMapdlPool:
 
         pbar = None
         if progress_bar:
-            pbar = tqdm(total=n, desc='MAPDL Running')
+            pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
         def func_wrapper(obj, func, timeout, args=None):
@@ -285,8 +308,7 @@ class LocalMapdlPool:
                         break
 
                 if not complete[0]:
-                    LOG.error('Killed instance due to timeout of %f seconds',
-                              timeout)
+                    LOG.error("Killed instance due to timeout of %f seconds", timeout)
                     obj.exit()
             else:
                 run_thread.join()
@@ -304,8 +326,11 @@ class LocalMapdlPool:
                             try:
                                 shutil.rmtree(obj.directory)
                             except Exception as e:
-                                LOG.warning('Unable to remove directory at %s:\n%s',
-                                            obj.directory, str(e))
+                                LOG.warning(
+                                    "Unable to remove directory at %s:\n%s",
+                                    obj.directory,
+                                    str(e),
+                                )
 
             obj.locked = False
             if pbar:
@@ -330,7 +355,7 @@ class LocalMapdlPool:
                     try:
                         instance.exit()
                     except Exception as e:
-                        LOG.error('Failed to close instance', exc_info=True)
+                        LOG.error("Failed to close instance", exc_info=True)
 
             else:
                 # wait for all threads to complete
@@ -348,8 +373,15 @@ class LocalMapdlPool:
 
         return results
 
-    def run_batch(self, files, clear_at_start=True, progress_bar=True,
-                  close_when_finished=False, timeout=None, wait=True):
+    def run_batch(
+        self,
+        files,
+        clear_at_start=True,
+        progress_bar=True,
+        close_when_finished=False,
+        timeout=None,
+        wait=True,
+    ):
         """Run a batch of input files on the pool.
 
         Parameters
@@ -406,7 +438,7 @@ class LocalMapdlPool:
         # check all files exist before running
         for filename in files:
             if not os.path.isfile(filename):
-                raise FileNotFoundError('Unable to locate file %s' % filename)
+                raise FileNotFoundError("Unable to locate file %s" % filename)
 
         def run_file(mapdl, input_file):
             if clear_at_start:
@@ -454,7 +486,7 @@ class LocalMapdlPool:
                     if not instance.busy:
                         # double check that this instance is alive:
                         try:
-                            instance.inquire('JOBNAME')
+                            instance.inquire("JOBNAME")
                         except:
                             instance.exit()
                             continue
@@ -491,7 +523,7 @@ class LocalMapdlPool:
                 except:
                     pass
                 self._instances[index] = None
-                LOG.debug('Exited instance: %s', str(instance))
+                LOG.debug("Exited instance: %s", str(instance))
 
         threads = []
         for i, instance in enumerate(self):
@@ -523,9 +555,10 @@ class LocalMapdlPool:
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
         run_location = create_temp_dir(self._root_dir)
-        self._instances[index] = launch_mapdl(run_location=run_location,
-                                              port=port, **self._spawn_kwargs)
-        LOG.debug('Spawned instance: %d', index)
+        self._instances[index] = launch_mapdl(
+            run_location=run_location, port=port, **self._spawn_kwargs
+        )
+        LOG.debug("Spawned instance: %d", index)
         if pbar is not None:
             pbar.update(1)
 
@@ -552,4 +585,4 @@ class LocalMapdlPool:
         return [inst._port for inst in self if inst is not None]
 
     def __repr__(self):
-        return 'MAPDL Pool with %d active instances' % len(self)
+        return "MAPDL Pool with %d active instances" % len(self)

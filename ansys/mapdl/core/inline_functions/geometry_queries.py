@@ -42,7 +42,7 @@ class _AngleQueries(_ParameterParsing):
         >>> angle*180./pi
         90.0
         """
-        response = self._mapdl.run(f'_=ANGLEN({n1},{n2},{n3})')
+        response = self._mapdl.run(f"_=ANGLEN({n1},{n2},{n3})")
         return self._parse_parameter_float_response(response)
 
     def anglek(self, k1, k2, k3) -> float:
@@ -84,7 +84,7 @@ class _AngleQueries(_ParameterParsing):
         >>> angle*180./pi
         45.0
         """
-        response = self._mapdl.run(f'_=ANGLEK({k1},{k2},{k3})')
+        response = self._mapdl.run(f"_=ANGLEK({k1},{k2},{k3})")
         return self._parse_parameter_float_response(response)
 
 
@@ -121,7 +121,7 @@ class _AreaQueries(_ParameterParsing):
         >>> area = mapdl.queries.areand(n1, n2, n3)
         0.5
         """
-        response = self._mapdl.run(f'_=AREAND({n1},{n2},{n3})')
+        response = self._mapdl.run(f"_=AREAND({n1},{n2},{n3})")
         return self._parse_parameter_float_response(response)
 
     def areakp(self, k1, k2, k3) -> float:
@@ -154,7 +154,7 @@ class _AreaQueries(_ParameterParsing):
         >>> mapdl.queries.areakp(k1, k2, k3)
         0.2545584412
         """
-        response = self._mapdl.run(f'_=AREAKP({k1},{k2},{k3})')
+        response = self._mapdl.run(f"_=AREAKP({k1},{k2},{k3})")
         return self._parse_parameter_float_response(response)
 
 
@@ -188,7 +188,7 @@ class _DistanceQueries(_ParameterParsing):
         >>> mapdl.queries.distnd(n1, n2)
         1.0
         """
-        response = self._mapdl.run(f'_=DISTND({n1},{n2})')
+        response = self._mapdl.run(f"_=DISTND({n1},{n2})")
         return self._parse_parameter_float_response(response)
 
     def distkp(self, k1, k2) -> float:
@@ -222,5 +222,5 @@ class _DistanceQueries(_ParameterParsing):
         >>> sqrt(2)
         1.4142135623730951
         """
-        response = self._mapdl.run(f'_=DISTKP({k1},{k2})')
+        response = self._mapdl.run(f"_=DISTKP({k1},{k2})")
         return self._parse_parameter_float_response(response)

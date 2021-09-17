@@ -1,5 +1,4 @@
 class MagneticsCalc:
-
     def curr2d(self, **kwargs):
         """Calculates current flow in a 2-D conductor.
 

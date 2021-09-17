@@ -1,5 +1,4 @@
 class Special:
-
     def cvar(self, ir="", ia="", ib="", itype="", datum="", name="", **kwargs):
         """Computes covariance between two quantities.
 
@@ -52,8 +51,18 @@ class Special:
         command = f"CVAR,{ir},{ia},{ib},{itype},{datum},{name}"
         return self.run(command, **kwargs)
 
-    def pmgtran(self, fname="", freq="", fcnam1="", fcnam2="", pcnam1="",
-                pcnam2="", ecnam1="", ccnam1="", **kwargs):
+    def pmgtran(
+        self,
+        fname="",
+        freq="",
+        fcnam1="",
+        fcnam2="",
+        pcnam1="",
+        pcnam2="",
+        ecnam1="",
+        ccnam1="",
+        **kwargs,
+    ):
         """Summarizes electromagnetic results from a transient analysis.
 
         APDL Command: PMGTRAN
@@ -150,8 +159,19 @@ class Special:
         command = f"RCYC,{ir},{ia},{sector},{name}"
         return self.run(command, **kwargs)
 
-    def resp(self, ir="", lftab="", ldtab="", spectype="", dampratio="",
-             dtime="", tmin="", tmax="", inputtype="", **kwargs):
+    def resp(
+        self,
+        ir="",
+        lftab="",
+        ldtab="",
+        spectype="",
+        dampratio="",
+        dtime="",
+        tmin="",
+        tmax="",
+        inputtype="",
+        **kwargs,
+    ):
         """Generates a response spectrum.
 
         APDL Command: RESP
@@ -242,8 +262,9 @@ class Special:
         command = f"RESP,{ir},{lftab},{ldtab},{spectype},{dampratio},{dtime},{tmin},{tmax},{inputtype}"
         return self.run(command, **kwargs)
 
-    def rpsd(self, ir="", ia="", ib="", itype="", datum="", name="", signif="",
-             **kwargs):
+    def rpsd(
+        self, ir="", ia="", ib="", itype="", datum="", name="", signif="", **kwargs
+    ):
         """Calculates response power spectral density (PSD).
 
         APDL Command: RPSD
@@ -304,8 +325,17 @@ class Special:
         command = f"RPSD,{ir},{ia},{ib},{itype},{datum},{name},{signif}"
         return self.run(command, **kwargs)
 
-    def smooth(self, vect1="", vect2="", datap="", fitpt="", vect3="",
-               vect4="", disp="", **kwargs):
+    def smooth(
+        self,
+        vect1="",
+        vect2="",
+        datap="",
+        fitpt="",
+        vect3="",
+        vect4="",
+        disp="",
+        **kwargs,
+    ):
         """Allows smoothing of noisy data and provides a graphical representation
 
         APDL Command: SMOOTH

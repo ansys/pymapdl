@@ -1,5 +1,4 @@
 class Display:
-
     def keep(self, key="", **kwargs):
         """Stores POST26 definitions and data during active session.
 
@@ -95,8 +94,20 @@ class Display:
         command = f"PLTIME,{tmin},{tmax}"
         return self.run(command, **kwargs)
 
-    def plvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
-              nvar7="", nvar8="", nvar9="", nvar10="", **kwargs):
+    def plvar(
+        self,
+        nvar1="",
+        nvar2="",
+        nvar3="",
+        nvar4="",
+        nvar5="",
+        nvar6="",
+        nvar7="",
+        nvar8="",
+        nvar9="",
+        nvar10="",
+        **kwargs,
+    ):
         """Displays up to ten variables in the form of a graph.
 
         APDL Command: PLVAR

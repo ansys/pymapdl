@@ -1,5 +1,4 @@
 class Ocean:
-
     def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
         """Defines an ocean load using non-table data.
 
@@ -226,8 +225,9 @@ class Ocean:
         command = f"OCREAD,{fname},{ext},{option}"
         return self.run(command, **kwargs)
 
-    def octable(self, val1="", val2="", val3="", val4="", val5="", val6="",
-                val7="", **kwargs):
+    def octable(
+        self, val1="", val2="", val3="", val4="", val5="", val6="", val7="", **kwargs
+    ):
         """Defines an ocean load using table data.
 
         APDL Command: OCTABLE
@@ -338,8 +338,9 @@ class Ocean:
         command = f"OCTYPE,{datatype},{name}"
         return self.run(command, **kwargs)
 
-    def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
-               **kwargs):
+    def oczone(
+        self, zonetype="", zonename="", compnameint="", compnameext="", **kwargs
+    ):
         """Specifies the type of ocean zone data to follow.
 
         APDL Command: OCZONE

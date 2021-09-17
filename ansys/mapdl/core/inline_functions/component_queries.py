@@ -39,7 +39,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.centrx(e0)
         0.5
         """
-        response = self._mapdl.run(f'_=CENTRX({e})')
+        response = self._mapdl.run(f"_=CENTRX({e})")
         return self._parse_parameter_float_response(response)
 
     def centry(self, e: int) -> float:
@@ -76,7 +76,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.centry(e0)
         1.0
         """
-        response = self._mapdl.run(f'_=CENTRY({e})')
+        response = self._mapdl.run(f"_=CENTRY({e})")
         return self._parse_parameter_float_response(response)
 
     def centrz(self, e: int) -> float:
@@ -113,7 +113,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.centrz(e0)
         1.5
         """
-        response = self._mapdl.run(f'_=CENTRZ({e})')
+        response = self._mapdl.run(f"_=CENTRZ({e})")
         return self._parse_parameter_float_response(response)
 
     def nx(self, n: int) -> float:
@@ -150,7 +150,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.nx(10)
         0.0
         """
-        response = self._mapdl.run(f'_=NX({n})')
+        response = self._mapdl.run(f"_=NX({n})")
         return self._parse_parameter_float_response(response)
 
     def ny(self, n: int) -> float:
@@ -187,7 +187,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.ny(10)
         4.0
         """
-        response = self._mapdl.run(f'_=NY({n})')
+        response = self._mapdl.run(f"_=NY({n})")
         return self._parse_parameter_float_response(response)
 
     def nz(self, n: int) -> float:
@@ -224,7 +224,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.nz(10)
         0.0
         """
-        response = self._mapdl.run(f'_=NZ({n})')
+        response = self._mapdl.run(f"_=NZ({n})")
         return self._parse_parameter_float_response(response)
 
     def kx(self, k: int) -> float:
@@ -256,7 +256,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.kx(1)
         0.0
         """
-        response = self._mapdl.run(f'_=KX({k})')
+        response = self._mapdl.run(f"_=KX({k})")
         return self._parse_parameter_float_response(response)
 
     def ky(self, k: int) -> float:
@@ -288,7 +288,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.ky(1)
         1.0
         """
-        response = self._mapdl.run(f'_=KY({k})')
+        response = self._mapdl.run(f"_=KY({k})")
         return self._parse_parameter_float_response(response)
 
     def kz(self, k: int) -> float:
@@ -320,7 +320,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> q.kz(1)
         2.0
         """
-        response = self._mapdl.run(f'_=KZ({k})')
+        response = self._mapdl.run(f"_=KZ({k})")
         return self._parse_parameter_float_response(response)
 
 
@@ -371,7 +371,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
         >>> q.nx(node_number), q.ny(node_number), q.nz(node_number)
         5.0, 5.0, 5.0
         """
-        response = self._mapdl.run(f'_=NODE({x},{y},{z})')
+        response = self._mapdl.run(f"_=NODE({x},{y},{z})")
         return self._parse_parameter_integer_response(response)
 
     def kp(self, x: float, y: float, z: float) -> int:
@@ -412,7 +412,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
         >>> q.kp(1., 1., 1.)
         1
         """
-        response = self._mapdl.run(f'_=KP({x},{y},{z})')
+        response = self._mapdl.run(f"_=KP({x},{y},{z})")
         return self._parse_parameter_integer_response(response)
 
 
@@ -468,7 +468,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> q.rotx(node)
         -0.0002149851187
         """
-        response = self._mapdl.run(f'_=ROTX({n})')
+        response = self._mapdl.run(f"_=ROTX({n})")
         return self._parse_parameter_float_response(response)
 
     def roty(self, n: int) -> float:
@@ -520,7 +520,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> q.roty(node)
         0.1489593933
         """
-        response = self._mapdl.run(f'_=ROTY({n})')
+        response = self._mapdl.run(f"_=ROTY({n})")
         return self._parse_parameter_float_response(response)
 
     def rotz(self, n: int) -> float:
@@ -572,7 +572,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> q.rotz(node)
         0.0
         """
-        response = self._mapdl.run(f'_=ROTZ({n})')
+        response = self._mapdl.run(f"_=ROTZ({n})")
         return self._parse_parameter_float_response(response)
 
     def ux(self, n: int) -> float:
@@ -621,7 +621,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         1.549155634e-07
 
         """
-        response = self._mapdl.run(f'_=UX({n})')
+        response = self._mapdl.run(f"_=UX({n})")
         return self._parse_parameter_float_response(response)
 
     def uy(self, n: int) -> float:
@@ -670,7 +670,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         5.803680779e-10
 
         """
-        response = self._mapdl.run(f'_=UY({n})')
+        response = self._mapdl.run(f"_=UY({n})")
         return self._parse_parameter_float_response(response)
 
     def uz(self, n: int) -> float:
@@ -719,5 +719,5 @@ class _DisplacementComponentQueries(_ParameterParsing):
         3.74530389e-08
 
         """
-        response = self._mapdl.run(f'_=UZ({n})')
+        response = self._mapdl.run(f"_=UZ({n})")
         return self._parse_parameter_float_response(response)

@@ -2,10 +2,28 @@ from ansys.mapdl.core._commands import parse
 
 
 class Areas:
-
-    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
-          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
-          p18="", **kwargs) -> int:
+    def a(
+        self,
+        p1="",
+        p2="",
+        p3="",
+        p4="",
+        p5="",
+        p6="",
+        p7="",
+        p8="",
+        p9="",
+        p10="",
+        p11="",
+        p12="",
+        p13="",
+        p14="",
+        p15="",
+        p16="",
+        p17="",
+        p18="",
+        **kwargs,
+    ) -> int:
         """Define an area by connecting keypoints.
 
         APDL Command: A
@@ -152,8 +170,22 @@ class Areas:
         command = f"ADGL,{na1},{na2},{ninc}"
         return self.run(command, **kwargs)
 
-    def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
+    def adrag(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nlp1="",
+        nlp2="",
+        nlp3="",
+        nlp4="",
+        nlp5="",
+        nlp6="",
+        **kwargs,
+    ) -> str:
         """Generate areas by dragging a line pattern along a path.
 
         APDL Command: ADRAG
@@ -247,8 +279,20 @@ class Areas:
         command = f"AFILLT,{na1},{na2},{rad}"
         return self.run(command, **kwargs)
 
-    def agen(self, itime="", na1="", na2="", ninc="", dx="", dy="", dz="",
-             kinc="", noelem="", imove="", **kwargs):
+    def agen(
+        self,
+        itime="",
+        na1="",
+        na2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates additional areas from a pattern of areas.
 
         APDL Command: AGEN
@@ -311,11 +355,25 @@ class Areas:
                 are also moved if not needed at their original position.
 
         """
-        command = f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
-    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
-           l10="", **kwargs) -> int:
+    def al(
+        self,
+        l1="",
+        l2="",
+        l3="",
+        l4="",
+        l5="",
+        l6="",
+        l7="",
+        l8="",
+        l9="",
+        l10="",
+        **kwargs,
+    ) -> int:
         """Generate an area bounded by previously defined lines.
 
         APDL Command: AL
@@ -561,8 +619,20 @@ class Areas:
         command = f"AREVERSE,{anum},{noeflip}"
         return self.run(command, **kwargs)
 
-    def arotat(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", pax1="",
-               pax2="", arc="", nseg="", **kwargs):
+    def arotat(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        pax1="",
+        pax2="",
+        arc="",
+        nseg="",
+        **kwargs,
+    ):
         """Generates cylindrical areas by rotating a line pattern about an axis.
 
         APDL Command: AROTAT
@@ -602,11 +672,24 @@ class Areas:
         values [NUMSTR].  Adjacent lines use a common keypoint.  Adjacent areas
         use a common line.
         """
-        command = f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
 
-    def arscale(self, na1="", na2="", ninc="", rx="", ry="", rz="", kinc="",
-                noelem="", imove="", **kwargs):
+    def arscale(
+        self,
+        na1="",
+        na2="",
+        ninc="",
+        rx="",
+        ry="",
+        rz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates a scaled set of areas from a pattern of areas.
 
         APDL Command: ARSCALE
@@ -669,8 +752,9 @@ class Areas:
         command = f"ARSCALE,{na1},{na2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def arsym(self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def arsym(
+        self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Generates areas from an area pattern by symmetry reflection.
 
         APDL Command: ARSYM
@@ -735,8 +819,19 @@ class Areas:
         command = f"ARSYM,{ncomp},{na1},{na2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def askin(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-              nl8="", nl9="", **kwargs):
+    def askin(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Generates an area by "skinning" a surface through guiding lines.
 
         APDL Command: ASKIN
@@ -872,8 +967,9 @@ class Areas:
         command = f"ASUM,{lab}"
         return self.run(command, **kwargs)
 
-    def atran(self, kcnto="", na1="", na2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def atran(
+        self, kcnto="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Transfers a pattern of areas to another coordinate system.
 
         APDL Command: ATRAN
