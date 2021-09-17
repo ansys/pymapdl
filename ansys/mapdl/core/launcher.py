@@ -1009,4 +1009,3 @@ def check_mode(mode, version):
         warnings.warn('MAPDL as a service has not been tested on MAPDL < v13')
 
     return mode
-

@@ -75,7 +75,7 @@ def get_licdebug_name():
 
 def get_licdebug_msg(licdebug_file):
     f = open(licdebug_file)
-    f.seek(0,2)  # Going to the end of the file. 
+    f.seek(0, 2)  # Going to the end of the file. 
 
     buffer = []
     while True:
@@ -240,7 +240,7 @@ def get_lmutil_path():
     elif os.name == 'posix':  # Linux
         lmutil_path = get_lmutil_path_linux() 
     
-    return os.path.join(lmutil_path,'lmutil.exe')
+    return os.path.join(lmutil_path, 'lmutil.exe')
 
 
 def get_lmutil_path_windows():
@@ -305,7 +305,7 @@ def get_ansysli_util_path():
     elif os.name == 'posix':  # Linux
         ansysli_util_path = get_ansysli_util_path_linux() 
     
-    return os.path.join(ansysli_util_path,'ansysli_util.exe')
+    return os.path.join(ansysli_util_path, 'ansysli_util.exe')
 
 
 def get_ansysli_util_path_windows():
