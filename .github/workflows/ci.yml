@@ -10,11 +10,10 @@ on:
       - main
 
 env:
-  MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.1'
   PYMAPDL_PORT: 32771  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-
+  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
 
 jobs:
   stylecheck:
@@ -82,10 +81,10 @@ jobs:
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
 
   docs_build:
-    runs-on: ubuntu-20.04
+    name: Build Documentation
+    runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Setup Python
@@ -117,6 +116,7 @@ jobs:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:v21.2.1'
   
       - name: Build Documentation
         run: |
@@ -146,3 +146,93 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: doc/build/html
+
+  build_test:
+    name: Build Documentation
+    needs: testimport
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mapdl-version: ['v21.1.1', 'v21.2.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install -r requirements_build.txt
+          python setup.py bdist_wheel
+          pip install dist/ansys*.whl
+          cd tests  # run from test directory to test installed module
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+
+      - name: Unit Testing
+        run: |
+          pip install -r requirements_test.txt
+          pip install pytest-azurepipelines
+          pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v2
+        with:
+          name: PyMAPDL-wheel
+          path: dist/
+          retention-days: 7
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
+
+  Release:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [docs_build, build_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - uses: actions/download-artifact@v2
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Upload to Public PyPi
+        run: |
+          pip install twine
+          twine upload --skip-existing ./**/*.whl
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./**/*.whl
+            ./**/*.zip
+            ./**/*.pdf

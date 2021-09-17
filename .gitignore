@@ -60,7 +60,6 @@ test-output.xml
 /.ipynb_checkpoints
 
 # test scripts
-*.sh
 *.cmd
 wheelhouse/
 
@@ -75,6 +74,8 @@ examples/.local
 docker/mapdl/v211
 docker/mapdl/v212
 docker/mapdl/_old
+docker/mapdl/*.sh
+
 
 # temp testing
 tmp.out
