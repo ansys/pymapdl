@@ -24,4 +24,3 @@ gmsh.model.mesh.generate(3)
 gmsh.write("from_gmsh.msh")
 
 gmsh.finalize()
-

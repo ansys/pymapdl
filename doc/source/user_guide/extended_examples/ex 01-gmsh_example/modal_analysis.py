@@ -21,8 +21,8 @@ mapdl.units('SI')
 mapdl.mp('EX', 1, 200E9)  # Elastic moduli in Pa (kg/(m*s**2))
 mapdl.mp('DENS', 1, 7700)  # Density in kg/m3
 mapdl.mp('NUXY', 1, 0.3)  # Poissons Ratio
-mapdl.et(1,181) #! ET,1,SHELL181 ! SHELL181
-mapdl.keyopt(1, 3, 2  ) #! Option for the shell. Integration option: 'Full integration with incompatible modes'
+mapdl.et(1, 181) #! ET,1,SHELL181 ! SHELL181
+mapdl.keyopt(1, 3, 2) #! Option for the shell. Integration option: 'Full integration with incompatible modes'
 mapdl.sectype(1, 'SHELL')  
 mapdl.secdata(1, 1, 0, 3)  #! which means: SECDATA,TK, MAT, THETA, NUMPT, LayerName  
 mapdl.emodif('ALL', 'MAT', 1) #! Setting material id
