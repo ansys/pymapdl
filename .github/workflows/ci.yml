@@ -134,7 +134,7 @@ jobs:
       - name: Build Documentation
         run: |
           pip install -r requirements_docs.txt
-          make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       # Verify that sphinx generates no warnings
       - name: Check for sphinx warnings
