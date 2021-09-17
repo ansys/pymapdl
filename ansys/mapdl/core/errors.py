@@ -22,7 +22,7 @@ Disable this check by passing ``override=True``
 
 
 LICENSE_CONNECTION_ERROR = """
-Error connecting to the license server in {port}:{ip}.
+ERROR CONNECTING TO LICENSE SERVER.
 """
 
 
@@ -76,21 +76,21 @@ class LockFileException(RuntimeError):
 
 
 class LicenseServerConnectionError(RuntimeError):
-    """Error message when the license server is not available."""
-    def __init__(self, ip=None, port=None, msg=LICENSE_CONNECTION_ERROR, error_message='', licdebug_name=''):
-        self.ip = ip 
-        self.port = port 
-        self.error_msg = error_message
-        self.licdebug_name = licdebug_name 
+    """Error when the license server is not available."""
+    def __init__(self, error_message='', head_message='', tail_message='', **kwargs):
+        
+        self.kwargs = kwargs
+        msg = LICENSE_CONNECTION_ERROR
+
+        if head_message != '':
+            msg = msg + '\n' + head_message + '\n'
 
         if error_message != '':
-            head_msg = ''
-            tail_msg = f'\nExtended message/Error obtained: {licdebug_name}\n***\n' + error_message + '\n***\n'
-        else:
-            head_msg = ''
-            tail_msg = ''
-            
-        msg = head_msg  + LICENSE_CONNECTION_ERROR.replace('{port}',str(port).strip()).replace('{ip}', str(ip).strip()) + tail_msg      
+            msg =  msg + '\nError recorded:' '\n***\n' + error_message + '\n***\n'
+
+        if tail_message != '':
+            msg = msg + '\n' + tail_message   
+   
         RuntimeError.__init__(self, msg)
 
 

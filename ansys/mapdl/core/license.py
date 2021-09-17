@@ -47,9 +47,10 @@ def license_file_checker():
             license_path = re.findall( "(?<=License path:)(.*)(?=;\n)", msg)[0]
             license_port = license_path.split('@')[0]
             license_hostname = license_path.split('@')[1]
-            raise LicenseServerConnectionError(ip=license_hostname, port=license_port, 
-                                                error_message=msg, 
-                                                licdebug_name=get_licdebug_name())
+            raise LicenseServerConnectionError(
+                head_message=f"Error connecting to {license_port}:{license_hostname}",
+                error_message=msg,
+                tail_message=f"Error found in file {get_licdebug_name()}")
         
     else:
         print("Time is out for license checking.")
@@ -120,7 +121,7 @@ def check_license_server_with_python():
     host, port = get_license_server_details()
     
     if not ping_license_server_python(host, port):
-        raise LicenseServerConnectionError(ip=host, port=port)
+        raise LicenseServerConnectionError(head_message=f"Error connecting to {port}:{host}")
 
 
 def get_license_server_details():
@@ -219,7 +220,7 @@ def check_license_server_with_lmutil():
     elif any(servers_up):
         warnings.warn("Some license servers are down.")
     else:
-        raise LicenseServerConnectionError
+        raise LicenseServerConnectionError(error_message="'lmutil' seems to found not working licenses.")
 
 
 def run_lmutil(ip, port):
@@ -280,8 +281,10 @@ def check_license_server_with_ansysli_util():
 
     for each_license in licenses:
         output = run_ansysli_util(each_license)
-        if 'No such feature exists' in output or 'The server is down or is not responsive.' in output:
-            raise LicenseServerConnectionError(ip='N/A (ansysli_util resolves these)', port='N/A')
+        msg1 = 'No such feature exists'
+        msg2 = 'The server is down or is not responsive.'
+        if msg1 in output or msg2 in output:
+            raise LicenseServerConnectionError(head_message=f"'ansysli_util' reports '{msg1}' or '{msg2}'")
 
 
 def run_ansysli_util(license):
