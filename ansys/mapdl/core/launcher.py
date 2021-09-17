@@ -927,8 +927,8 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
             additional_switches = additional_switches + ' -mpi msmpi'
     
     elif 'force_intel' in additional_switches: #Removing force_flag since it is not an ANSYS parameter.
-            additional_switches = additional_switches.replace('-force_intel', '')
-            additional_switches = additional_switches.replace('force_intel', '') ## double check
+        additional_switches = additional_switches.replace('-force_intel', '')
+        additional_switches = additional_switches.replace('force_intel', '') ## double check
         
     # cache start parameters
     start_parm = {'exec_file': exec_file,
