@@ -25,7 +25,7 @@ mapdl.et(1,181) #! ET,1,SHELL181 ! SHELL181
 mapdl.keyopt(1, 3, 2  ) #! Option for the shell. Integration option: 'Full integration with incompatible modes'
 mapdl.sectype(1, 'SHELL')  
 mapdl.secdata(1, 1, 0, 3)  #! which means: SECDATA,TK, MAT, THETA, NUMPT, LayerName  
-mapdl.emodif('ALL', 'MAT', 1) #! Seeting material id
+mapdl.emodif('ALL', 'MAT', 1) #! Setting material id
 mapdl.emodif('ALL', 'REAL', 1) #! Setting real constant
 
 # By setting the section type (`SECTYPE`) the model will run and solve. 
