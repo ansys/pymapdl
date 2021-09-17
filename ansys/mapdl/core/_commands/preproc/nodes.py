@@ -160,6 +160,12 @@ class Nodes:
 
         APDL Command: N
 
+        Defines a node in the active coordinate system [CSYS].  The
+        nodal coordinate system is parallel to the global Cartesian
+        system unless rotated.  Rotation angles are in degrees and
+        redefine any previous rotation angles.  See the NMODIF, NANG,
+        NROTAT, and NORA commands for other rotation options.
+
         Parameters
         ----------
         node
@@ -199,13 +205,6 @@ class Nodes:
         >>> nnum
         10
 
-        Notes
-        -----
-        Defines a node in the active coordinate system [CSYS].  The
-        nodal coordinate system is parallel to the global Cartesian
-        system unless rotated.  Rotation angles are in degrees and
-        redefine any previous rotation angles.  See the NMODIF, NANG,
-        NROTAT, and NORA commands for other rotation options.
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         msg = self.run(command, **kwargs)

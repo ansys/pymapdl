@@ -17,7 +17,7 @@ symbols.
    Mapdl.anum
    Mapdl.lspec
    Mapdl.lsymbol
-   Mapdl.pcircle
+   Mapdl.slash_pcircle
    Mapdl.pmore
    Mapdl.polygon
    Mapdl.pspec

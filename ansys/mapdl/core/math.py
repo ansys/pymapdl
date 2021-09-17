@@ -1308,6 +1308,7 @@ class AnsMat(ApdlMathObj):
         return (self.nrow, self.ncol)
 
     def sym(self):  # BUG this is not always true
+        """Return if matrix is symmetric."""
         return True
 
     def asarray(self) -> np.ndarray:

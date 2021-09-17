@@ -456,16 +456,6 @@ class Inertia:
 
            ``"OFF"``, ``"NO"``, or ``False`` - Deactivate. This value is the default.
 
-        Examples
-        --------
-        Enable the coriolis effect with a stationary reference frame.
-
-        >>> mapdl.coriolis('ON', refframe='ON')
-
-        Alternatively, ``coriolis`` supports bool parameters.
-
-        >>> mapdl.coriolis(True, refframe=True)
-
         Notes
         -----
         The CORIOLIS command is used for analyses in either a rotating
@@ -532,6 +522,17 @@ class Inertia:
         Coriolis effects (rotating and stationary reference frames).
 
         This command is also valid in PREP7.
+
+        Examples
+        --------
+        Enable the coriolis effect with a stationary reference frame.
+
+        >>> mapdl.coriolis('ON', refframe='ON')
+
+        Alternatively, ``coriolis`` supports bool parameters.
+
+        >>> mapdl.coriolis(True, refframe=True)
+
         """
         # handle bool instead of strings
         if isinstance(option, bool):

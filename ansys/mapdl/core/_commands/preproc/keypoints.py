@@ -10,6 +10,13 @@ class KeyPoints:
 
         APDL Command: K
 
+        Defines a keypoint in the active coordinate system [CSYS] for
+        line, area, and volume descriptions.  A previously defined
+        keypoint of the same number will be redefined.  Keypoints may
+        be redefined only if it is not yet attached to a line or is
+        not yet meshed.  Solid modeling in a toroidal system is not
+        recommended.
+
         Parameters
         ----------
         npt
@@ -40,14 +47,6 @@ class KeyPoints:
         >>> knum
         5
 
-        Notes
-        -----
-        Defines a keypoint in the active coordinate system [CSYS] for
-        line, area, and volume descriptions.  A previously defined
-        keypoint of the same number will be redefined.  Keypoints may
-        be redefined only if it is not yet attached to a line or is
-        not yet meshed.  Solid modeling in a toroidal system is not
-        recommended.
         """
         command = f"K,{npt},{x},{y},{z}"
         msg = self.run(command, **kwargs)
@@ -65,6 +64,16 @@ class KeyPoints:
         """Creates a keypoint between two existing keypoints.
 
         APDL Command: KBETW
+
+        Placement of the new keypoint depends on the currently active
+        coordinate system [CSYS].  If the coordinate system is
+        Cartesian, the keypoint will lie on a straight line between
+        KP1 and KP2.  If the system is not Cartesian (e.g.,
+        cylindrical, spherical, etc.), the keypoint will be located as
+        if on a line (which may not be straight) created in the
+        current coordinate system between KP1 and KP2.  Note that
+        solid modeling in a toroidal coordinate system is not
+        recommended.
 
         Parameters
         ----------
@@ -102,18 +111,6 @@ class KeyPoints:
         int
             Keypoint number of the generated keypoint.
 
-        Notes
-        -----
-        Placement of the new keypoint depends on the currently active
-        coordinate system [CSYS].  If the coordinate system is
-        Cartesian, the keypoint will lie on a straight line between
-        KP1 and KP2.  If the system is not Cartesian (e.g.,
-        cylindrical, spherical, etc.), the keypoint will be located as
-        if on a line (which may not be straight) created in the
-        current coordinate system between KP1 and KP2.  Note that
-        solid modeling in a toroidal coordinate system is not
-        recommended.
-
         Examples
         --------
         Create a keypoint exactly centered between two keypoints.
@@ -134,6 +131,9 @@ class KeyPoints:
         by three locations.
 
         APDL Command: KCENTER
+
+        KCENTER should be used in the Cartesian coordinate system
+        (CSYS,0) only.
 
         Parameters
         ----------
@@ -169,10 +169,6 @@ class KeyPoints:
         >>> k3
         4
 
-        Notes
-        -----
-        KCENTER should be used in the Cartesian coordinate system
-        (CSYS,0) only.
         """
         command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
         return parse.parse_kpoint(self.run(command, **kwargs))
@@ -181,6 +177,9 @@ class KeyPoints:
         """Deletes unmeshed keypoints.
 
         APDL Command: KDELE
+
+        Deletes selected keypoints.  A keypoint attached to a line cannot be
+        deleted unless the line is first deleted.
 
         Parameters
         ----------
@@ -192,10 +191,6 @@ class KeyPoints:
             (valid only in the GUI).  A component name may also be substituted
             for NP1 (NP2 and NINC are ignored).
 
-        Notes
-        -----
-        Deletes selected keypoints.  A keypoint attached to a line cannot be
-        deleted unless the line is first deleted.
         """
         command = f"KDELE,{np1},{np2},{ninc}"
         return self.run(command, **kwargs)
@@ -204,6 +199,15 @@ class KeyPoints:
         """Calculates and lists the distance between two keypoints.
 
         APDL Command: KDIST
+
+        KDIST lists the distance between keypoints KP1 and KP2, as
+        well as the current coordinate system offsets from KP1 to KP2,
+        where the X, Y, and Z locations of KP1 are subtracted from the
+        X, Y, and Z locations of KP2 (respectively) to determine the
+        offsets.  KDIST is valid in any coordinate system except
+        toroidal [CSYS,3].
+
+        This command is valid in any processor.
 
         Parameters
         ----------
@@ -230,16 +234,6 @@ class KeyPoints:
         >>> dist
         [1.0, -5.0, 13.0]
 
-        Notes
-        -----
-        KDIST lists the distance between keypoints KP1 and KP2, as
-        well as the current coordinate system offsets from KP1 to KP2,
-        where the X, Y, and Z locations of KP1 are subtracted from the
-        X, Y, and Z locations of KP2 (respectively) to determine the
-        offsets.  KDIST is valid in any coordinate system except
-        toroidal [CSYS,3].
-
-        This command is valid in any processor.
         """
         return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
 
@@ -248,6 +242,12 @@ class KeyPoints:
         """Generates keypoints between two keypoints.
 
         APDL Command: KFILL
+
+        Generates keypoints (in the active coordinate system) between two
+        existing keypoints.  The two keypoints may have been defined in any
+        coordinate system. However, solid modeling in a toroidal coordinate
+        system is not recommended.   Any number of keypoints may be filled in
+        and any keypoint numbering sequence may be assigned.
 
         Parameters
         ----------
@@ -275,13 +275,6 @@ class KeyPoints:
             If > 1.0, divisions increase.  If < 1.0, divisions decrease.  Ratio
             defaults to 1.0 (uniform spacing).
 
-        Notes
-        -----
-        Generates keypoints (in the active coordinate system) between two
-        existing keypoints.  The two keypoints may have been defined in any
-        coordinate system. However, solid modeling in a toroidal coordinate
-        system is not recommended.   Any number of keypoints may be filled in
-        and any keypoint numbering sequence may be assigned.
         """
         command = f"KFILL,{np1},{np2},{nfill},{nstrt},{ninc},{space}"
         return self.run(command, **kwargs)
@@ -322,21 +315,23 @@ class KeyPoints:
         noelem
             Specifies if elements and nodes are also to be generated:
 
-            0 - Generate nodes and point elements associated with the original keypoints, if
-                they exist.
+            0 - Generate nodes and point elements associated with the
+                original keypoints, if they exist.
 
             1 - Do not generate nodes and elements.
 
         imove
             Specifies whether keypoints will be moved or newly defined:
 
-            0 - Generate additional keypoints as requested with the ITIME argument.
+            0 - Generate additional keypoints as requested with the
+                ITIME argument.
 
-            1 - Move original keypoints to new position retaining the same keypoint numbers
-                (ITIME, KINC, and NOELEM are ignored).  Valid only if the old
-                keypoints are no longer needed at their original positions.
-                Corresponding meshed items are also moved if not needed at
-                their original position.
+            1 - Move original keypoints to new position retaining the
+                same keypoint numbers (ITIME, KINC, and NOELEM are
+                ignored).  Valid only if the old keypoints are no
+                longer needed at their original positions.
+                Corresponding meshed items are also moved if not
+                needed at their original position.
 
         Notes
         -----
@@ -399,6 +394,17 @@ class KeyPoints:
 
         APDL Command: KLIST
 
+        Lists keypoints in the active display coordinate system [DSYS].  An
+        attribute (TYPE, MAT, REAL, or ESYS) listed as a zero is unassigned;
+        one listed as a positive value indicates that the attribute was
+        assigned with the KATT command (and will not be reset to zero if the
+        mesh is cleared); one listed as a negative value indicates that the
+        attribute was assigned using the attribute pointer [TYPE, MAT, REAL, or
+        ESYS] that was active during meshing (and will be reset to zero if the
+        mesh is cleared).
+
+        This command is valid in any processor.
+
         Parameters
         ----------
         np1, np2, ninc
@@ -419,18 +425,6 @@ class KeyPoints:
 
             HPT - List only hard point information.
 
-        Notes
-        -----
-        Lists keypoints in the active display coordinate system [DSYS].  An
-        attribute (TYPE, MAT, REAL, or ESYS) listed as a zero is unassigned;
-        one listed as a positive value indicates that the attribute was
-        assigned with the KATT command (and will not be reset to zero if the
-        mesh is cleared); one listed as a negative value indicates that the
-        attribute was assigned using the attribute pointer [TYPE, MAT, REAL, or
-        ESYS] that was active during meshing (and will be reset to zero if the
-        mesh is cleared).
-
-        This command is valid in any processor.
         """
         command = f"KLIST,{np1},{np2},{ninc},{lab}"
         return self.run(command, **kwargs)

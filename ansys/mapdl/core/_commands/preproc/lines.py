@@ -59,6 +59,16 @@ class Lines:
 
         APDL Command: CIRCLE
 
+        Generates circular arc lines (and their corresponding
+        keypoints).  Keypoints are generated at regular angular
+        locations (based on a maximum spacing of 90 degrees).  Arc lines are
+        generated connecting the keypoints.  Keypoint and line numbers
+        are automatically assigned, beginning with the lowest
+        available values [NUMSTR].  Adjacent lines use a common
+        keypoint.  Line shapes are generated as arcs, regardless of
+        the active coordinate system.  Line shapes are invariant with
+        coordinate system after they are generated.
+
         Parameters
         ----------
         pcent
@@ -109,17 +119,6 @@ class Lines:
         >>> carc0
         [1, 2, 3, 4]
 
-        Notes
-        -----
-        Generates circular arc lines (and their corresponding
-        keypoints).  Keypoints are generated at regular angular
-        locations (based on a maximum spacing of 90 degrees).  Arc lines are
-        generated connecting the keypoints.  Keypoint and line numbers
-        are automatically assigned, beginning with the lowest
-        available values [NUMSTR].  Adjacent lines use a common
-        keypoint.  Line shapes are generated as arcs, regardless of
-        the active coordinate system.  Line shapes are invariant with
-        coordinate system after they are generated.
         """
         command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
         return parse.parse_line_nos(self.run(command, **kwargs))
@@ -187,6 +186,16 @@ class Lines:
 
         APDL Command: L2ANG
 
+        Generates a straight line (PHIT1-PHIT2) at an angle (ANG1)
+        with an existing line NL1 (P1-P2) and which is also at an
+        angle (ANG2) with another existing line NL2 (P3-P4).  If the
+        angles are zero the generated line is tangent to the two
+        lines.  The PHIT1 and PHIT2 locations on the lines are
+        automatically calculated.  Line P1-P2 becomes P1-PHIT1, P3-P4
+        becomes P3-PHIT2, and new lines PHIT1-P2, PHIT2-P4, and
+        PHIT1-PHIT2 are generated.  Line divisions are set to zero
+        (use LESIZE, etc. to modify).
+
         Parameters
         ----------
         nl1
@@ -235,17 +244,6 @@ class Lines:
         >>> lnum
         9
 
-        Notes
-        -----
-        Generates a straight line (PHIT1-PHIT2) at an angle (ANG1)
-        with an existing line NL1 (P1-P2) and which is also at an
-        angle (ANG2) with another existing line NL2 (P3-P4).  If the
-        angles are zero the generated line is tangent to the two
-        lines.  The PHIT1 and PHIT2 locations on the lines are
-        automatically calculated.  Line P1-P2 becomes P1-PHIT1, P3-P4
-        becomes P3-PHIT2, and new lines PHIT1-P2, PHIT2-P4, and
-        PHIT1-PHIT2 are generated.  Line divisions are set to zero
-        (use LESIZE, etc. to modify).
         """
         command = f"L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}"
         msg = self.run(command, **kwargs)
@@ -256,6 +254,9 @@ class Lines:
         """Generates a line tangent to two lines.
 
         APDL Command: L2TAN
+
+        Generates a line (P2-P3) tangent at point P2 to line NL1
+        (P1-P2) and tangent at point P3 to line NL2 (P3-P4).
 
         Parameters
         ----------
@@ -291,10 +292,6 @@ class Lines:
 
         >>> mapdl.lplot(cpos='xy')
 
-        Notes
-        -----
-        Generates a line (P2-P3) tangent at point P2 to line NL1
-        (P1-P2) and tangent at point P3 to line NL2 (P3-P4).
         """
         command = f"L2TAN,{nl1},{nl2}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -303,6 +300,21 @@ class Lines:
         """Generate a straight line at an angle with a line.
 
         APDL Command: LANG
+
+        Generates a straight line (PHIT-P3) at an angle (ANG) with a
+        line NL1 (P1-P2).  The location of PHIT on the line is
+        automatically calculated.  Line P1-P2 becomes P1-PHIT and new
+        lines PHIT-P2 and PHIT-P3 are generated.  Line divisions are
+        set to zero (use LESIZE, etc. to modify).
+
+        PHIT is positioned closest to LOCAT for the given angle, ANG.
+        To ensure better performance, it is recommended that LOCAT be
+        input, even if it is 0.
+
+        The program uses an iterative procedure to position PHIT.  The
+        procedure is not exact, with the result that the actual value
+        of ANG will sometimes differ slightly from the specified
+        value.
 
         Parameters
         ----------
@@ -354,22 +366,6 @@ class Lines:
         >>> lnum
         2
 
-        Notes
-        -----
-        Generates a straight line (PHIT-P3) at an angle (ANG) with a
-        line NL1 (P1-P2).  The location of PHIT on the line is
-        automatically calculated.  Line P1-P2 becomes P1-PHIT and new
-        lines PHIT-P2 and PHIT-P3 are generated.  Line divisions are
-        set to zero (use LESIZE, etc. to modify).
-
-        PHIT is positioned closest to LOCAT for the given angle, ANG.
-        To ensure better performance, it is recommended that LOCAT be
-        input, even if it is 0.
-
-        The program uses an iterative procedure to position PHIT.  The
-        procedure is not exact, with the result that the actual value
-        of ANG will sometimes differ slightly from the specified
-        value.
         """
         command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -378,6 +374,17 @@ class Lines:
         """Define a circular arc.
 
         APDL Command: LARC
+
+        Defines a circular arc line from P1 to P2.  The line shape is
+        generated as circular, regardless of the active coordinate
+        system.  The line shape is invariant with coordinate system
+        after it is generated.
+
+        When dealing with a large radius arc (1e3), or if the location
+        of the arc you create is far away from the origin of your
+        coordinate system, anomalies may occur. You can prevent this
+        by creating the arc at a smaller scale, and then scaling the
+        model back to full size (LSSCALE).
 
         Parameters
         ----------
@@ -415,18 +422,6 @@ class Lines:
         >>> lnum = mapdl.larc(k0, k1, k2, 2)
         1
 
-        Notes
-        -----
-        Defines a circular arc line from P1 to P2.  The line shape is
-        generated as circular, regardless of the active coordinate
-        system.  The line shape is invariant with coordinate system
-        after it is generated.
-
-        When dealing with a large radius arc (1e3), or if the location
-        of the arc you create is far away from the origin of your
-        coordinate system, anomalies may occur. You can prevent this
-        by creating the arc at a smaller scale, and then scaling the
-        model back to full size (LSSCALE).
         """
         command = f"LARC,{p1},{p2},{pc},{rad}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -435,6 +430,12 @@ class Lines:
         """Generate the shortest line between two keypoints on an area.
 
         APDL Command: LAREA
+
+        Generates the shortest line between two keypoints, P1 and P2,
+        both of which lie on an area.  The generated line will also
+        lie on the area.  P1 and P2 may also be equidistant (in global
+        Cartesian space) from the area (and on the same side of the
+        area), in which case a line parallel to the area is generated.
 
         Parameters
         ----------
@@ -466,13 +467,6 @@ class Lines:
         >>> lnum
         1
 
-        Notes
-        -----
-        Generates the shortest line between two keypoints, P1 and P2,
-        both of which lie on an area.  The generated line will also
-        lie on the area.  P1 and P2 may also be equidistant (in global
-        Cartesian space) from the area (and on the same side of the
-        area), in which case a line parallel to the area is generated.
         """
         command = f"LAREA,{p1},{p2},{narea}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1082,6 +1076,12 @@ class Lines:
 
         APDL Command: LSTR
 
+        Defines a straight line from P1 to P2 using the global
+        Cartesian coordinate system.  The active coordinate system
+        will be ignored.  The line shape is invariant with the
+        coordinate system after it is generated.  Lines may be
+        redefined only if not yet attached to an area.
+
         Parameters
         ----------
         p1
@@ -1107,13 +1107,6 @@ class Lines:
         >>> lnum
         1
 
-        Notes
-        -----
-        Defines a straight line from P1 to P2 using the global
-        Cartesian coordinate system.  The active coordinate system
-        will be ignored.  The line shape is invariant with the
-        coordinate system after it is generated.  Lines may be
-        redefined only if not yet attached to an area.
         """
         command = f"LSTR,{p1},{p2}"
         return parse.parse_line_no(self.run(command, **kwargs))

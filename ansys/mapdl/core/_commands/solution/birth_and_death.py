@@ -79,6 +79,11 @@ class BirthAndDeath:
 
         APDL Command: ESTIF
 
+        Specifies the stiffness matrix multiplier for elements deactivated with
+        the EKILL command (birth and death).
+
+        This command is also valid in PREP7.
+
         Parameters
         ----------
         kmult
@@ -91,12 +96,6 @@ class BirthAndDeath:
         >>> mapdl.estif(1E-8)
         'DEAD ELEMENT STIFFNESS MULTIPLIER= 0.10000E-07'
 
-        Notes
-        -----
-        Specifies the stiffness matrix multiplier for elements deactivated with
-        the EKILL command (birth and death).
-
-        This command is also valid in PREP7.
         """
         command = f"ESTIF,{kmult}"
         return self.run(command, **kwargs)

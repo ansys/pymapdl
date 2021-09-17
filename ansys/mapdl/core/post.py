@@ -898,8 +898,17 @@ class PostProcessing():
     def nodal_stress_intensity(self) -> np.ndarray:
         """The nodal stress intensity of the current result.
 
-        Equilvanent MAPDL command:
-        ``PRNSOL, S, PRIN``
+        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+
+        Notes
+        -----
+        The nodal results are averaged across all selected elements.
+        Not all nodes will contain valid results (e.g. midside nodes),
+        and those nodes will report a zero stress.
+
+        Elements that are not selected will not contribute to the
+        averaged nodal values, and if a node's attached elements are
+        all unselected, the element will report a zero stress value.
 
         Examples
         --------
@@ -911,15 +920,6 @@ class PostProcessing():
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
-        Notes
-        -----
-        The nodal results are averaged across all selected elements.
-        Not all nodes will contain valid results (e.g. midside nodes),
-        and those nodes will report a zero stress.
-
-        Elements that are not selected will not contribute to the
-        averaged nodal values, and if a node's attached elements are
-        all unselected, the element will report a zero stress value.
         """
         return self._ndof_rst('S', 'INT')
 
@@ -1701,16 +1701,16 @@ class PostProcessing():
 
         * ``PRNSOL, EPPL, PRIN``
 
-        Returns
-        -------
-        numpy.ndarray
-            Numpy array of the plastic nodal component strain.
-
         Parameters
         ----------
         component : str, optional
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array of the plastic nodal component strain.
 
         Notes
         -----

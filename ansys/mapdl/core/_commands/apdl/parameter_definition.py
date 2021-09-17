@@ -269,7 +269,7 @@ class ParameterDefinition:
 
         Returns
         -------
-        value : str
+        str
             Value of the inquired item.
 
         Notes
@@ -313,6 +313,12 @@ class ParameterDefinition:
 
         APDL Command: PARRES
 
+        Reads parameters from a coded file.  The parameter file may
+        have been written with the PARSAV command.  The parameters
+        read may replace or change the current parameter set.
+
+        This command is valid in any processor.
+
         Parameters
         ----------
         lab
@@ -342,13 +348,6 @@ class ParameterDefinition:
 
         >>> mapdl.parres('parm.PARM')
 
-        Notes
-        -----
-        Reads parameters from a coded file.  The parameter file may
-        have been written with the PARSAV command.  The parameters
-        read may replace or change the current parameter set.
-
-        This command is valid in any processor.
         """
         if ext:
             fname = fname + '.' + ext

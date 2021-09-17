@@ -503,10 +503,10 @@ class AnalysisOptions:
 
     def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
                 capname="", **kwargs):
-        """Performs electrostatic field solutions and calculates the self and
+        """Performs electrostatic field solutions and calculates the
+        self and mutual capacitances between multiple conductors.x
 
         APDL Command: CMATRIX
-        mutual capacitances between multiple conductors.
 
         Parameters
         ----------

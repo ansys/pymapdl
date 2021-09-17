@@ -662,6 +662,12 @@ class Elements:
             previous value (except in the I1 field, which resets the
             STLOC node number to zero).
 
+        Notes
+        -----
+        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
+        values) of an existing element may be changed with this
+        command.
+
         Examples
         --------
         Modify all elements to have a material number of 2.
@@ -685,11 +691,6 @@ class Elements:
         >>> mapdl.allsel('BELOW', 'VOLU')
         >>> mapdl.emodif('ALL', 'MAT', 2)
 
-        Notes
-        -----
-        The nodes and/or attributes (MAT, TYPE, REAL, ESYS, and SECNUM
-        values) of an existing element may be changed with this
-        command.
         """
         command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
         return self.run(command, **kwargs)
@@ -1011,8 +1012,7 @@ class Elements:
 
     def enorm(self, enum: Union[str, int] = "",
               **kwargs) -> Optional[str]:
-        """Reorients shell element normals or line element node
-        connectivity.
+        """Reorients shell element normals or line element node connectivity.
 
         APDL Command: ENORM
 
@@ -1021,10 +1021,6 @@ class Elements:
         enum
             Element number having the normal direction that the
             reoriented elements are to match.
-
-        Examples
-        --------
-        >>> mapdl.enorm(1)
 
         Notes
         -----
@@ -1070,6 +1066,11 @@ class Elements:
 
         Real constant values are not reoriented and may be invalidated
         by an element reversal.
+
+        Examples
+        --------
+        >>> mapdl.enorm(1)
+
         """
         return self.run(f"ENORM,{enum}", **kwargs)
 

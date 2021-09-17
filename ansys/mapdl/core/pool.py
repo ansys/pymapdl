@@ -209,7 +209,7 @@ class LocalMapdlPool:
 
         Returns
         -------
-        output : list
+        list
             A list containing the return values for ``func``.  Failed
             runs will not return an output.  Since the returns are not
             necessarily in the same order as ``iterable``, you may
@@ -386,7 +386,7 @@ class LocalMapdlPool:
 
         Returns
         -------
-        outputs : list
+        list
             List of text outputs from MAPDL for each batch run.  Not
             necessarily in the order of the inputs. Failed runs will
             not return an output.  Since the returns are not

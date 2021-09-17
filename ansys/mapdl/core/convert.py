@@ -39,7 +39,7 @@ def convert_script(filename_in, filename_out, loglevel='WARNING', auto_exit=True
 
     Returns
     -------
-    clines : list
+    list
         List of lines translated.
 
     Examples

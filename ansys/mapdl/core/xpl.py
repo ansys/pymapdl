@@ -42,7 +42,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -59,7 +59,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -81,7 +81,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -117,7 +117,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -147,7 +147,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -175,7 +175,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
@@ -220,7 +220,7 @@ class ansXpl():
 
         Returns
         -------
-        location_string : str
+        str
             String containing the current location.
 
         Examples
@@ -294,7 +294,7 @@ class ansXpl():
 
         Returns
         -------
-        arr : ansys.mapdl.AnsMat
+        numpy.ndarray
             The array of values.
 
         Examples
@@ -346,7 +346,7 @@ class ansXpl():
 
         Returns
         -------
-        mapdl_response : str
+        str
             Response from MAPDL.
 
         Examples
