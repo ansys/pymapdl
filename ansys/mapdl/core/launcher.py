@@ -35,10 +35,11 @@ MAPDL_DEFAULT_PORT = 50052
 INTEL_MSG = """Due to incompatibilites between 'DMP', Windows and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
-If you still want to use 'INTEL' please use the next flag '-force_intel' together
-with '-mpi INTELMPI' as additional parameter (`additonal_switches`). 
-For example '-mpi INTELMPI -force_intel'.
-But be aware of possible errors or unexpected behaviour. 
+If you still want to use 'INTEL', set:
+
+launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
+
+Be aware of possible errors or unexpected behaviour with this configuration.
 """
 
 
@@ -668,6 +669,56 @@ def check_lock_file(path, jobname, override):
                 )
 
 
+def _validate_add_sw(add_sw, exec_path, force_intel=False):
+    """Validate additional swtiches.
+
+    Parameters
+    ----------
+    add_sw : str
+        Additional swtiches.
+    exec_path : str
+        Path to the MAPDL executable.
+    force_intel : bool, optional
+        Force the usage of intelmpi.
+
+    Returns
+    -------
+    str
+        Validated additional switches.
+
+    """
+    # Converting additional_switches to lower case to avoid mismatches.
+    add_sw = add_sw.lower()
+
+    # known issues with distributed memory parallel (DMP)
+    if "smp" not in add_sw:  # pragma: no cover
+        # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+        if _is_ubuntu():
+            os.environ['I_MPI_SHM_LMT'] = 'shm'
+    
+        if os.name == 'nt' and not force_intel:
+            # Workaround to fix a problem when launching ansys in 'dmp' mode in the
+            # recent windows version and using VPN.
+            # 
+            # There doesn't appear to be an easy way to check if we
+            # are running VPN in Windows in python, it seems we will
+            # need to know a local address where to ping but that will
+            # change for each client/person using the VPN.
+            # 
+            # Adding '-mpi msmpi' to the launch parameter fix it. 
+
+            if 'intelmpi' in add_sw:
+                # Remove intel flag.
+                regex = "(-mpi)( *?)(intelmpi)"
+                add_sw = re.sub(regex, '', add_sw)
+                warnings.warn(INTEL_MSG)
+
+            if _version_from_path(exec_file) >= 210:
+                add_sw += ' -mpi msmpi'
+
+    return add_sw
+
+
 def launch_mapdl(
     exec_file=None,
     run_location=None,
@@ -968,42 +1019,9 @@ def launch_mapdl(
     check_lock_file(run_location, jobname, override)
     mode = check_mode(mode, _version_from_path(exec_file))
 
-    # Converting additional_switches to lower case to avoid mismatches.
-    additional_switches = additional_switches.lower()
-
-    # known issue with distributed memory parallel
-    # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
-    if "smp" not in additional_switches:  # is distributed
-        if _is_ubuntu():
-            os.environ['I_MPI_SHM_LMT'] = 'shm'
-    
-        if 'force_intel' not in additional_switches:
-            # Workaround to fix a problem when launching ansys in 'dmp' mode in the
-            # recent windows version and using VPN.
-            # 
-            # There doesn't appear to be an easy way to check if we
-            # are running VPN in Windows in python, it seems we will
-            # need to know a local address where to ping but that will
-            # change for each client/person using the VPN.
-            # 
-            # Adding '-mpi msmpi' to the launch parameter fix it. 
-
-            if 'intelmpi' in additional_switches:
-                # Remove intel flag.
-                regex = "(-mpi)( *?)(intelmpi)"
-                additional_switches = re.sub(regex, '', additional_switches)
-                warnings.warn(INTEL_MSG)
-
-            ansys_version = _version_from_path(exec_file)
-            if os.name == 'nt' and ansys_version >= 210 :            
-                additional_switches = additional_switches + ' -mpi msmpi'
-
-        elif 'force_intel' in additional_switches:
-            # Removing force_flag since it is not an ANSYS parameter.
-            additional_switches = additional_switches.replace('-force_intel', '')
-            additional_switches = additional_switches.replace('force_intel', '')
-
     # cache start parameters
+    additional_switches = validate_add_sw(additional_switches, exec_file,
+                                          kwargs.pop('force_intel', False))
     start_parm = {
         "exec_file": exec_file,
         "run_location": run_location,
