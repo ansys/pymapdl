@@ -1,5 +1,6 @@
 .. _ref_extended_examples_ex01:
 
+
 Example 01: Gmsh Example
 ========================
 
@@ -24,7 +25,8 @@ Requirements
 ------------
 You need to have ``gmsh`` installed. You can install it using PIP:
 
-.. code-block:: bash
+.. code-block::
+
     pip install gmsh
 
 
