@@ -95,7 +95,7 @@ jobs:
       - name: Install OS packages
         run: |
           sudo apt update
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -148,15 +148,26 @@ jobs:
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
         with:
-          name: Documentation
+          name: HTML-Documentation
           path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
       - name: Build PDF Documentation
+        working-directory: doc
         run: |
-          Overwrite MAPDL commands
-          mv doc/source/mapdl_commands/.fake doc/source/mapdl_commands/index.rst
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
+          # Overwrite MAPDL commands section so it doesn't show up
+          mv source/mapdl_commands/.fake source/mapdl_commands/index.rst
+          make latex
+          python validate_png.py  # clean-up GIFs mislabeled as PNG
+          cd build/latex
+          latexmk -r latexmkrc -pdf pymapdl.tex -interaction=nonstopmode
+
+      - name: Upload PDF Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: PDF-Documentation
+          path: doc/build/latex/pymapdl.pdf
+          retention-days: 7
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.5
