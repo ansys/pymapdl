@@ -159,7 +159,7 @@ def test_grpc_custom_ip():
     
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
-    assert mapdl.ip == ip
+    assert mapdl._ip == ip
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
