@@ -1,7 +1,6 @@
 """Shared testing module"""
-from typing import Dict, Tuple
 from collections import namedtuple
-
+from typing import Dict
 
 Node = namedtuple("Node", ["number", "x", "y", "z", "thx", "thy", "thz"])
 Element = namedtuple(

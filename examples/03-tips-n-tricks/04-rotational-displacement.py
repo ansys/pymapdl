@@ -17,7 +17,6 @@ of our square.
 
 # start MAPDL and enter the pre-processing routine
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.inline_functions import Query
 
 mapdl = launch_mapdl()
 mapdl.prep7()

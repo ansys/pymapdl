@@ -1,11 +1,6 @@
 """Small or misc tests that don't fit in other test modules"""
-import numpy as np
-import pyvista as pv
-
-import pytest
-from pyvista.plotting import system_supports_plotting
-
 from ansys.mapdl import core as pymapdl
+from pyvista.plotting import system_supports_plotting
 
 
 def test_report():

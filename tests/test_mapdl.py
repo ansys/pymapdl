@@ -1,19 +1,16 @@
 """Test MAPDL interface"""
-import time
 import os
+import time
 
-import pytest
 import numpy as np
-import pyvista
-from pyvista.plotting.renderer import CameraPosition
-from pyvista.plotting import system_supports_plotting
-from ansys.mapdl.reader import examples
-
-from ansys.mapdl.core.misc import random_string
-from ansys.mapdl.core.errors import MapdlRuntimeError
+import pytest
 from ansys.mapdl import core as pymapdl
-
-from conftest import ON_CI
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.reader import examples
+from pyvista import PolyData
+from pyvista.plotting import system_supports_plotting
+from pyvista.plotting.renderer import CameraPosition
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -279,7 +276,7 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, pyvista.PolyData)
+    assert isinstance(lines, PolyData)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
 

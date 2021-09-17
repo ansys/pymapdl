@@ -1,6 +1,6 @@
-from typing import Optional, Union
+from typing import Optional
 
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
 class ExplicitDynamics:

@@ -16,7 +16,6 @@ First, get an instance of
 """
 
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.inline_functions import Query
 
 mapdl = launch_mapdl()
 

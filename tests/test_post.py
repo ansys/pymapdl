@@ -1,13 +1,9 @@
 """Test post-processing module for ansys.mapdl"""
-import os
-
-from pyvista.plotting.renderer import CameraPosition
-import pytest
 import numpy as np
-
-from ansys.mapdl.core.errors import MapdlRuntimeError
+import pytest
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.post import COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE
+from pyvista.plotting.renderer import CameraPosition
 
 
 @pytest.fixture(scope="module")
