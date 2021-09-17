@@ -1137,7 +1137,7 @@ class _MapdlCore(Commands):
     @property
     def _has_matplotlib(self):
         try:
-            import matplotlib # noqa: F401
+            import matplotlib  # noqa: F401
 
             return True
         except ImportError:

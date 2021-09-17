@@ -108,6 +108,6 @@ for node in [node1, node2]:
     X | {x_displacement}
     Y | {y_displacement}
     Z | {z_displacement}
-    
+
     """
     print(message)

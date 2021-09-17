@@ -9,6 +9,7 @@ from ansys.mapdl.core.misc import get_ansys_bin
 
 try:
     import ansys_corba  # noqa: F401
+
     HAS_CORBA = True
 except:
     HAS_CORBA = False
