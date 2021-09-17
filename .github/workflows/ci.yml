@@ -145,12 +145,18 @@ jobs:
           cd doc/build/html
           zip -r PyMAPDL_documentation.zip *
 
-      - name: Upload Documentation
+      - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
         with:
           name: Documentation
           path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
+
+      - name: Build PDF Documentation
+        run: |
+          Overwrite MAPDL commands
+          mv doc/source/mapdl_commands/.fake doc/source/mapdl_commands/index.rst
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.5
