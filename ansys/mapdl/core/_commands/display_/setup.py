@@ -1,5 +1,4 @@
 class Setup:
-
     def cmap(self, fname="", ext="", kywrd="", ncntr="", **kwargs):
         """Changes an existing or creates a new color mapping table.
 

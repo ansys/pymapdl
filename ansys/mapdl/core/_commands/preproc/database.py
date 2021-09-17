@@ -99,8 +99,9 @@ class Database:
         """
         return self.run(f"CDREAD,{option},{fname},{ext},,{fnamei},{exti}", **kwargs)
 
-    def cdwrite(self, option="", fname="", ext="", fnamei="", exti="",
-                fmat="", **kwargs):
+    def cdwrite(
+        self, option="", fname="", ext="", fnamei="", exti="", fmat="", **kwargs
+    ):
         """Writes geometry and load database items to a file.
 
         APDL Command: CDWRITE
@@ -421,8 +422,19 @@ class Database:
         command = "CHECK,%s,%s" % (str(sele), str(levl))
         return self.run(command, **kwargs)
 
-    def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
-                trlevel="", cgap="", cpen="", ioff="", **kwargs):
+    def cncheck(
+        self,
+        option="",
+        rid1="",
+        rid2="",
+        rinc="",
+        intertype="",
+        trlevel="",
+        cgap="",
+        cpen="",
+        ioff="",
+        **kwargs,
+    ):
         """Provides and/or adjusts the initial status of contact pairs.
 
         APDL Command: CNCHECK
@@ -523,8 +535,17 @@ class Database:
         Because Option = POST forces a solve operation, the PrepPost (PP)
         license does not work with CNCHECK,POST.
         """
-        command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(option), str(rid1), str(
-            rid2), str(rinc), str(intertype), str(trlevel), str(cgap), str(cpen), str(ioff))
+        command = "CNCHECK,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(option),
+            str(rid1),
+            str(rid2),
+            str(rinc),
+            str(intertype),
+            str(trlevel),
+            str(cgap),
+            str(cpen),
+            str(ioff),
+        )
         return self.run(command, **kwargs)
 
     def igesout(self, fname="", ext="", att="", **kwargs):
@@ -645,7 +666,11 @@ class Database:
         Distributed ANSYS.
         """
         command = "MFIMPORT,%s,%s,%s,%s" % (
-            str(fnumb), str(option), str(fname), str(ext))
+            str(fnumb),
+            str(option),
+            str(fname),
+            str(ext),
+        )
         return self.run(command, **kwargs)
 
     def nooffset(self, label="", **kwargs):
@@ -745,8 +770,7 @@ class Database:
         command = "NUMCMP,%s" % (str(label))
         return self.run(command, **kwargs)
 
-    def nummrg(self, label="", toler="", gtoler="", action="", switch="",
-               **kwargs):
+    def nummrg(self, label="", toler="", gtoler="", action="", switch="", **kwargs):
         """Merges coincident or equivalently defined items.
 
         APDL Command: NUMMRG
@@ -902,8 +926,13 @@ class Database:
         correct for  keypoint merging, NUMMRG is more efficient and robust than
         AGLUE or VGLUE.
         """
-        command = "NUMMRG,%s,%s,%s,%s,%s" % (str(label), str(
-            toler), str(gtoler), str(action), str(switch))
+        command = "NUMMRG,%s,%s,%s,%s,%s" % (
+            str(label),
+            str(toler),
+            str(gtoler),
+            str(action),
+            str(switch),
+        )
         return self.run(command, **kwargs)
 
     def numoff(self, label="", value="", **kwargs):

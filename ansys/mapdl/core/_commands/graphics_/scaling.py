@@ -1,5 +1,4 @@
 class Scaling:
-
     def iclwid(self, factor="", **kwargs):
         """Scales the line width of circuit builder icons.
 

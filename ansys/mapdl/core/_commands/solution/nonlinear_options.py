@@ -1,5 +1,4 @@
 class NonLinearOptions:
-
     def arclen(self, key="", maxarc="", minarc="", **kwargs):
         """Activates the arc-length method.
 
@@ -126,8 +125,7 @@ class NonLinearOptions:
         command = f"ARCTRM,{lab},{val},{node},{dof}"
         return self.run(command, **kwargs)
 
-    def bucopt(self, method="", nmode="", shift="", ldmulte="", rangekey="",
-               **kwargs):
+    def bucopt(self, method="", nmode="", shift="", ldmulte="", rangekey="", **kwargs):
         """Specifies buckling analysis options.
 
         APDL Command: BUCOPT
@@ -460,8 +458,18 @@ class NonLinearOptions:
         command = f"NEQIT,{neqit},{forcekey}"
         return self.run(command, **kwargs)
 
-    def nladaptive(self, component="", action="", criterion="", option="",
-                   val1="", val2="", val3="", val4="", **kwargs):
+    def nladaptive(
+        self,
+        component="",
+        action="",
+        criterion="",
+        option="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Defines the criteria under which the mesh is refined or
         modified during a nonlinear solution.
 
@@ -858,8 +866,20 @@ class NonLinearOptions:
         command = f"NLGEOM,{key}"
         return self.run(command, **kwargs)
 
-    def nlhist(self, key="", name="", item="", comp="", node="", elem="",
-               shell="", layer="", stop_value="", stop_cond="", **kwargs):
+    def nlhist(
+        self,
+        key="",
+        name="",
+        item="",
+        comp="",
+        node="",
+        elem="",
+        shell="",
+        layer="",
+        stop_value="",
+        stop_cond="",
+        **kwargs,
+    ):
         """Specify result items to track during solution.
 
         APDL Command: NLHIST

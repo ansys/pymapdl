@@ -3,9 +3,18 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class Setup:
-
-    def ansol(self, nvar="", node="", item="", comp="", name="", mat="",
-              real="", ename="", **kwargs):
+    def ansol(
+        self,
+        nvar="",
+        node="",
+        item="",
+        comp="",
+        name="",
+        mat="",
+        real="",
+        ename="",
+        **kwargs,
+    ):
         """Specifies averaged nodal data to be stored from the results file in the
 
         APDL Command: ANSOL
@@ -157,8 +166,7 @@ class Setup:
         command = f"CISOL,{n},{id_},{node},{cont},{dtype}"
         return self.run(command, **kwargs)
 
-    def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="",
-             **kwargs):
+    def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="", **kwargs):
         """Reads data records from a file into a variable.
 
         APDL Command: DATA
@@ -210,8 +218,7 @@ class Setup:
         command = f"DATA,{ir},{lstrt},{lstop},{linc},{name},{kcplx}"
         return self.run(command, **kwargs)
 
-    def edread(self, nstart="", label="", num="", step1="", step2="",
-               **kwargs):
+    def edread(self, nstart="", label="", num="", step1="", step2="", **kwargs):
         """Reads explicit dynamics output into variables for time-history
 
         APDL Command: EDREAD
@@ -300,9 +307,16 @@ class Setup:
         command = f"ENERSOL,{nvar},{item},{name}"
         return self.run(command, **kwargs)
 
-    def esol(self, nvar: MapdlInt = "", elem: MapdlInt = "",
-             node: MapdlInt = "", item: str = "", comp: str = "",
-             name: str = "", **kwargs) -> Optional[str]:
+    def esol(
+        self,
+        nvar: MapdlInt = "",
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Specify element data to be stored from the results file.
 
         /POST26 APDL Command: ESOL
@@ -543,8 +557,7 @@ class Setup:
         command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def nsol(self, nvar="", node="", item="", comp="", name="", sector="",
-             **kwargs):
+    def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
         """Specifies nodal data to be stored from the results file.
 
         APDL Command: NSOL
@@ -697,8 +710,18 @@ class Setup:
         command = f"RFORCE,{nvar},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def rgb(self, kywrd="", pred="", pgrn="", pblu="", n1="", n2="", ninc="",
-            ncntr="", **kwargs):
+    def rgb(
+        self,
+        kywrd="",
+        pred="",
+        pgrn="",
+        pblu="",
+        n1="",
+        n2="",
+        ninc="",
+        ncntr="",
+        **kwargs,
+    ):
         """Specifies the RGB color values for indices and contours.
 
         APDL Command: /RGB

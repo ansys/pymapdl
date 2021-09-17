@@ -58,11 +58,11 @@ mapdl.prep7()
 # Set up the material and its type (a single material, with a linking-type
 # section and a Young's modulus of 30e6).
 
-mapdl.antype('STATIC')
-mapdl.et(1, 'LINK180')
-mapdl.sectype(1, 'LINK')
+mapdl.antype("STATIC")
+mapdl.et(1, "LINK180")
+mapdl.sectype(1, "LINK")
 mapdl.secdata(1)
-mapdl.mp('EX', 1, 30e6)
+mapdl.mp("EX", 1, 30e6)
 
 ###############################################################################
 # Define Geometry
@@ -88,9 +88,9 @@ mapdl.egen(3, 1, 1)
 # Effectiely, this sets:
 # - :math:`F_1 = 2*F_2 = 1000 lb`
 
-mapdl.d(1, 'ALL', '', '', 4, 3)
-mapdl.f(2, 'FY', -500)
-mapdl.f(3, 'FY', -1000)
+mapdl.d(1, "ALL", "", "", 4, 3)
+mapdl.f(2, "FY", -500)
+mapdl.f(3, "FY", -1000)
 mapdl.finish()
 
 
@@ -99,7 +99,7 @@ mapdl.finish()
 # ~~~~~
 # Enter solution mode and solve the system.
 
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 out = mapdl.solve()
 mapdl.finish()
 
@@ -111,12 +111,12 @@ mapdl.finish()
 # ``reaction_1`` and ``reaction_2``.
 
 mapdl.post1()
-mapdl.nsel('S', 'LOC', 'Y', 10)
+mapdl.nsel("S", "LOC", "Y", 10)
 mapdl.fsum()
-reaction_1 = mapdl.get('REAC_1', 'FSUM', '', 'ITEM', 'FY')
-mapdl.nsel('S', 'LOC', 'Y', 0)
+reaction_1 = mapdl.get("REAC_1", "FSUM", "", "ITEM", "FY")
+mapdl.nsel("S", "LOC", "Y", 0)
 mapdl.fsum()
-reaction_2 = mapdl.get('REAC_2', 'FSUM', '', 'ITEM', 'FY')
+reaction_2 = mapdl.get("REAC_2", "FSUM", "", "ITEM", "FY")
 
 
 ###############################################################################
@@ -128,11 +128,10 @@ reaction_2 = mapdl.get('REAC_2', 'FSUM', '', 'ITEM', 'FY')
 # Analytical results obtained from:
 # - :math:`P = R_1 + R_2` where :math:`P` is load of 1500 lbs
 # - :math:`\frac{R_2}{R_1} = \frac{a}{b}`
-# 
+#
 # Hint: Solve for each reaction force independently.
-# 
-results = \
-    f"""
+#
+results = f"""
     ---------------------  RESULTS COMPARISON  ---------------------
     |   TARGET   |   Mechanical APDL   |   RATIO
     /INPUT FILE=    LINE=       0

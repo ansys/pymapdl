@@ -4,7 +4,6 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class Status:
-
     def areas(self, **kwargs):
         """Specifies "Areas" as the subsequent status topic.
 

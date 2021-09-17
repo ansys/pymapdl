@@ -1,5 +1,4 @@
 class SolidForces:
-
     def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
         """Defines force loads at keypoints.
 

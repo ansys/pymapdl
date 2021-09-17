@@ -1,7 +1,15 @@
 class SurfaceOperations:
-
-    def sucalc(self, rsetname="", lab1="", oper="", lab2="", fact1="",
-               fact2="", const="", **kwargs):
+    def sucalc(
+        self,
+        rsetname="",
+        lab1="",
+        oper="",
+        lab2="",
+        fact1="",
+        fact2="",
+        const="",
+        **kwargs,
+    ):
         """Create new result data by operating on two existing result data sets on
 
         APDL Command: SUCALC
@@ -61,8 +69,9 @@ class SurfaceOperations:
         command = f"SUCALC,{rsetname},{lab1},{oper},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
 
-    def sucr(self, surfname="", surftype="", nrefine="", radius="", tolout="",
-             **kwargs):
+    def sucr(
+        self, surfname="", surftype="", nrefine="", radius="", tolout="", **kwargs
+    ):
         """Create a surface.
 
         APDL Command: SUCR
@@ -382,8 +391,19 @@ class SurfaceOperations:
         command = f"SUSAVE,{lab},{fname},{fext},{fdir}"
         return self.run(command, **kwargs)
 
-    def susel(self, type_="", name1="", name2="", name3="", name4="", name5="",
-              name6="", name7="", name8="", **kwargs):
+    def susel(
+        self,
+        type_="",
+        name1="",
+        name2="",
+        name3="",
+        name4="",
+        name5="",
+        name6="",
+        name7="",
+        name8="",
+        **kwargs,
+    ):
         """Selects a subset of surfaces
 
         APDL Command: SUSEL
@@ -416,8 +436,7 @@ class SurfaceOperations:
         command = f"SUSEL,{type_},{name1},{name2},{name3},{name4},{name5},{name6},{name7},{name8}"
         return self.run(command, **kwargs)
 
-    def suvect(self, rsetname="", lab1="", oper="", lab2="", offset="",
-               **kwargs):
+    def suvect(self, rsetname="", lab1="", oper="", lab2="", offset="", **kwargs):
         """Create new result data by operating on two existing result vectors on a
 
         APDL Command: SUVECT

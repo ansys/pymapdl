@@ -43,7 +43,7 @@ class _NodeNormalQueries(_ParameterParsing):
         >>> q.normnx(n1, n2, n3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMNX({n1}, {n2}, {n3})')
+        response = self._mapdl.run(f"_=NORMNX({n1}, {n2}, {n3})")
         float_ = self._parse_parameter_float_response(response)
         return float_
 
@@ -86,7 +86,7 @@ class _NodeNormalQueries(_ParameterParsing):
         >>> q.normny(n1, n2, n3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMNY({n1}, {n2}, {n3})')
+        response = self._mapdl.run(f"_=NORMNY({n1}, {n2}, {n3})")
         float_ = self._parse_parameter_float_response(response)
         return float_
 
@@ -129,7 +129,7 @@ class _NodeNormalQueries(_ParameterParsing):
         >>> q.normnz(n1, n2, n3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMNZ({n1}, {n2}, {n3})')
+        response = self._mapdl.run(f"_=NORMNZ({n1}, {n2}, {n3})")
         float_ = self._parse_parameter_float_response(response)
         return float_
 
@@ -177,7 +177,7 @@ class _KeypointNormalQueries(_ParameterParsing):
         >>> q.normnx(k1, k2, k3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMKX({k1}, {k2}, {k3})')
+        response = self._mapdl.run(f"_=NORMKX({k1}, {k2}, {k3})")
         float_ = self._parse_parameter_float_response(response)
         return float_
 
@@ -221,7 +221,7 @@ class _KeypointNormalQueries(_ParameterParsing):
         >>> q.normny(k1, k2, k3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMKY({k1}, {k2}, {k3})')
+        response = self._mapdl.run(f"_=NORMKY({k1}, {k2}, {k3})")
         float_ = self._parse_parameter_float_response(response)
         return float_
 
@@ -265,6 +265,6 @@ class _KeypointNormalQueries(_ParameterParsing):
         >>> q.normnz(k1, k2, k3)
         1.0
         """
-        response = self._mapdl.run(f'_=NORMKZ({k1}, {k2}, {k3})')
+        response = self._mapdl.run(f"_=NORMKZ({k1}, {k2}, {k3})")
         float_ = self._parse_parameter_float_response(response)
         return float_

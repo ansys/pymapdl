@@ -1,5 +1,4 @@
 class PathOperations:
-
     def padele(self, delopt="", **kwargs):
         """Deletes a defined path.
 
@@ -217,8 +216,9 @@ class PathOperations:
         command = f"PATH,{name},{npts},{nsets},{ndiv}"
         return self.run(command, **kwargs)
 
-    def pcalc(self, oper="", labr="", lab1="", lab2="", fact1="", fact2="",
-              const="", **kwargs):
+    def pcalc(
+        self, oper="", labr="", lab1="", lab2="", fact1="", fact2="", const="", **kwargs
+    ):
         """Forms additional labeled path items by operating on existing path
 
         APDL Command: PCALC
@@ -353,8 +353,19 @@ class PathOperations:
         command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
 
-    def pcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
-               labz1="", labx2="", laby2="", labz2="", **kwargs):
+    def pcross(
+        self,
+        labxr="",
+        labyr="",
+        labzr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Calculates the cross product of two path vectors along the current
 
         APDL Command: PCROSS
@@ -460,8 +471,17 @@ class PathOperations:
         command = f"PDEF,{lab},{item},{comp},{avglab}"
         return self.run(command, **kwargs)
 
-    def pdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
-             labz2="", **kwargs):
+    def pdot(
+        self,
+        labr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Calculates the dot product of two path vectors along the current path.
 
         APDL Command: PDOT
@@ -526,8 +546,7 @@ class PathOperations:
         command = f"PLPAGM,{item},{gscale},{nopt}"
         return self.run(command, **kwargs)
 
-    def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               **kwargs):
+    def plpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
         """Displays path items on a graph.
 
         APDL Command: PLPATH
@@ -708,8 +727,7 @@ class PathOperations:
         command = f"PRANGE,{linc},{vmin},{vmax},{xvar}"
         return self.run(command, **kwargs)
 
-    def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               **kwargs):
+    def prpath(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
         """Prints path items along a geometry path.
 
         APDL Command: PRPATH
@@ -836,9 +854,21 @@ class PathOperations:
         command = f"PRSECT,{rho},{kbr}"
         return self.run(command, **kwargs)
 
-    def psel(self, type_="", pname1="", pname2="", pname3="", pname4="",
-             pname5="", pname6="", pname7="", pname8="", pname9="", pname10="",
-             **kwargs):
+    def psel(
+        self,
+        type_="",
+        pname1="",
+        pname2="",
+        pname3="",
+        pname4="",
+        pname5="",
+        pname6="",
+        pname7="",
+        pname8="",
+        pname9="",
+        pname10="",
+        **kwargs,
+    ):
         """Selects a path or paths.
 
         APDL Command: PSEL

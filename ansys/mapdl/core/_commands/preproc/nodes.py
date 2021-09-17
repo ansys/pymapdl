@@ -2,9 +2,7 @@ import re
 
 
 class Nodes:
-
-    def center(self, node="", node1="", node2="", node3="", radius="",
-               **kwargs):
+    def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
         """Defines a node at the center of curvature of 2 or 3 nodes.
 
         APDL Command: CENTER
@@ -33,8 +31,18 @@ class Nodes:
         command = f"CENTER,{node},{node1},{node2},{node3},{radius}"
         return self.run(command, **kwargs)
 
-    def fill(self, node1="", node2="", nfill="", nstrt="", ninc="", itime="",
-             inc="", space="", **kwargs):
+    def fill(
+        self,
+        node1="",
+        node2="",
+        nfill="",
+        nstrt="",
+        ninc="",
+        itime="",
+        inc="",
+        space="",
+        **kwargs,
+    ):
         """Generates a line of nodes between two existing nodes.
 
         APDL Command: FILL
@@ -83,8 +91,19 @@ class Nodes:
         command = f"FILL,{node1},{node2},{nfill},{nstrt},{ninc},{itime},{inc},{space}"
         return self.run(command, **kwargs)
 
-    def move(self, node="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="",
-             z2="", **kwargs):
+    def move(
+        self,
+        node="",
+        kc1="",
+        x1="",
+        y1="",
+        z1="",
+        kc2="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
+    ):
         """Calculates and moves a node to an intersection.
 
         APDL Command: MOVE
@@ -154,8 +173,7 @@ class Nodes:
         command = f"MOVE,{node},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-          **kwargs) -> int:
+    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="", **kwargs) -> int:
         """Define a node.
 
         APDL Command: N
@@ -279,8 +297,20 @@ class Nodes:
         command = f"NAXIS,{action},{val}"
         return self.run(command, **kwargs)
 
-    def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
-             z2="", z3="", **kwargs):
+    def nang(
+        self,
+        node="",
+        x1="",
+        x2="",
+        x3="",
+        y1="",
+        y2="",
+        y3="",
+        z1="",
+        z2="",
+        z3="",
+        **kwargs,
+    ):
         """Rotates a nodal coordinate system by direction cosines.
 
         APDL Command: NANG
@@ -378,8 +408,19 @@ class Nodes:
         command = f"NDIST,{nd1},{nd2}"
         return self.run(command, **kwargs)
 
-    def ngen(self, itime="", inc="", node1="", node2="", ninc="", dx="", dy="",
-             dz="", space="", **kwargs):
+    def ngen(
+        self,
+        itime="",
+        inc="",
+        node1="",
+        node2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        space="",
+        **kwargs,
+    ):
         """Generates additional nodes from a pattern of nodes.
 
         APDL Command: NGEN
@@ -441,8 +482,18 @@ class Nodes:
         command = f"NKPT,{node},{npt}"
         return self.run(command, **kwargs)
 
-    def nlist(self, node1="", node2="", ninc="", lcoord="", sort1="", sort2="",
-              sort3="", kinternal="", **kwargs):
+    def nlist(
+        self,
+        node1="",
+        node2="",
+        ninc="",
+        lcoord="",
+        sort1="",
+        sort2="",
+        sort3="",
+        kinternal="",
+        **kwargs,
+    ):
         """Lists nodes.
 
         APDL Command: NLIST
@@ -491,11 +542,12 @@ class Nodes:
 
         This command is valid in any processor.
         """
-        command = f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        command = (
+            f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        )
         return self.run(command, **kwargs)
 
-    def nmodif(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-               **kwargs):
+    def nmodif(self, node="", x="", y="", z="", thxy="", thyz="", thzx="", **kwargs):
         """Modifies an existing node.
 
         APDL Command: NMODIF
@@ -738,8 +790,9 @@ class Nodes:
         command = f"NRRANG,{nmin},{nmax},{ninc}"
         return self.run(command, **kwargs)
 
-    def nscale(self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="",
-               **kwargs):
+    def nscale(
+        self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="", **kwargs
+    ):
         """Generates a scaled set of nodes from a pattern of nodes.
 
         APDL Command: NSCALE
@@ -891,8 +944,17 @@ class Nodes:
         """
         return self.run(f"NWRITE,{fname},{ext},,{kappnd}", **kwargs)
 
-    def quad(self, node1="", nintr="", node2="", nfill="", nstrt="", ninc="",
-             pkfac="", **kwargs):
+    def quad(
+        self,
+        node1="",
+        nintr="",
+        node2="",
+        nfill="",
+        nstrt="",
+        ninc="",
+        pkfac="",
+        **kwargs,
+    ):
         """Generates a quadratic line of nodes from three nodes.
 
         APDL Command: QUAD
@@ -964,8 +1026,7 @@ class Nodes:
         command = f"QUAD,{node1},{nintr},{node2},{nfill},{nstrt},{ninc},{pkfac}"
         return self.run(command, **kwargs)
 
-    def transfer(self, kcnto="", inc="", node1="", node2="", ninc="",
-                 **kwargs):
+    def transfer(self, kcnto="", inc="", node1="", node2="", ninc="", **kwargs):
         """Transfers a pattern of nodes to another coordinate system.
 
         APDL Command: TRANSFER

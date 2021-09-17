@@ -1,7 +1,5 @@
 class ArrayParam:
-
-    def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="",
-               **kwargs):
+    def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="", **kwargs):
         """Calculates the coefficients for, or evaluates, a Fourier series.
 
         APDL Command: ``*MFOURI``
@@ -121,8 +119,19 @@ class ArrayParam:
         command = f"*MFUN,{parr},{func},{par1}"
         return self.run(command, **kwargs)
 
-    def moper(self, parr="", par1="", oper="", val1="", val2="",
-              val3="", val4="", val5="", val6="", **kwargs):
+    def moper(
+        self,
+        parr="",
+        par1="",
+        oper="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        **kwargs,
+    ):
         """Performs matrix operations on array parameter matrices.
 
         APDL Command: ``*MOPER``
@@ -287,11 +296,14 @@ class ArrayParam:
             Val1 through Val6 vary depending on the specified matrix
             operation. See the description of Oper for details.
         """
-        command = f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
+        command = (
+            f"*MOPER,{parr},{par1},{oper},{val1},{val2},{val3},{val4},{val5},{val6}"
+        )
         return self.run(command, **kwargs)
 
-    def mwrite(self, parr="", fname="", ext="", label="", n1="", n2="", n3="",
-               **kwargs):
+    def mwrite(
+        self, parr="", fname="", ext="", label="", n1="", n2="", n3="", **kwargs
+    ):
         """Writes a matrix to a file in a formatted sequence.
 
         APDL Command: ``*MWRITE``
@@ -366,8 +378,18 @@ class ArrayParam:
         command = f"*MWRITE,{parr},{fname},{ext},,{label},{n1},{n2},{n3}"
         return self.run(command, **kwargs)
 
-    def starvput(self, parr="", entity="", entnum="", item1="", it1num="",
-                 item2="", it2num="", kloop="", **kwargs):
+    def starvput(
+        self,
+        parr="",
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        kloop="",
+        **kwargs,
+    ):
         """Restores array parameter values into the ANSYS database.
 
         APDL Command: ``*VPUT``
@@ -439,11 +461,14 @@ class ArrayParam:
         This command is valid in any processor.
 
         """
-        command = f"*VPUT,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        command = (
+            f"*VPUT,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        )
         return self.run(command, **kwargs)
 
-    def sread(self, strarray="", fname="", ext="", nchar="", nskip="",
-              nread="", **kwargs):
+    def sread(
+        self, strarray="", fname="", ext="", nchar="", nskip="", nread="", **kwargs
+    ):
         """Reads a file into a string array parameter.
 
         APDL Command: ``*SREAD``
@@ -484,8 +509,9 @@ class ArrayParam:
         command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
         return self.run(command, **kwargs)
 
-    def toper(self, parr="", par1="", oper="", par2="", fact1="", fact2="",
-              con1="", **kwargs):
+    def toper(
+        self, parr="", par1="", oper="", par2="", fact1="", fact2="", con1="", **kwargs
+    ):
         """Operates on table parameters.
 
         APDL Command: ``*TOPER``
@@ -693,8 +719,7 @@ class ArrayParam:
         command = f"*VFACT,{factr},{fact1},{fact2},{fact3}"
         return self.run(command, **kwargs)
 
-    def vfun(self, parr="", func="", par1="", con1="", con2="", con3="",
-             **kwargs):
+    def vfun(self, parr="", func="", par1="", con1="", con2="", con3="", **kwargs):
         """Performs a function on a single array parameter.
 
         APDL Command: ``*VFUN``
@@ -916,8 +941,7 @@ class ArrayParam:
         command = f"*VMASK,{par}"
         return self.run(command, **kwargs)
 
-    def voper(self, parr="", par1="", oper="", par2="", con1="", con2="",
-              **kwargs):
+    def voper(self, parr="", par1="", oper="", par2="", con1="", con2="", **kwargs):
         """Operates on two array parameters.
 
         APDL Command: ``*VOPER``
@@ -1096,7 +1120,7 @@ class ArrayParam:
             equal number of values above and below.
 
             Mean: (σ Par1)/NUM, where NUM is the number of summed
-            values. 
+            values.
 
             Variance: ``(σ ((Par1-MEAN)**2))/NUM``.
 
@@ -1142,10 +1166,29 @@ class ArrayParam:
         command = f"*VSTAT,"
         return self.run(command, **kwargs)
 
-    def vwrite(self, par1="", par2="", par3="", par4="", par5="", par6="",
-               par7="", par8="", par9="", par10="", par11="", par12="",
-               par13="", par14="", par15="", par16="", par17="", par18="",
-               par19="", **kwargs):
+    def vwrite(
+        self,
+        par1="",
+        par2="",
+        par3="",
+        par4="",
+        par5="",
+        par6="",
+        par7="",
+        par8="",
+        par9="",
+        par10="",
+        par11="",
+        par12="",
+        par13="",
+        par14="",
+        par15="",
+        par16="",
+        par17="",
+        par18="",
+        par19="",
+        **kwargs,
+    ):
         """Writes data to a file in a formatted sequence.
 
         APDL Command: ``*VWRITE``
@@ -1231,8 +1274,10 @@ class ArrayParam:
         """
         # cannot be in interactive mode
         if not self._store_commands:
-            raise RuntimeError('VWRTIE cannot run interactively.  \n\nPlease use '
-                               '``with mapdl.non_interactive:``')
+            raise RuntimeError(
+                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
 
         command = f"*VWRITE,{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8},{par9},{par10},{par11},{par12},{par13},{par14},{par15},{par16},{par17},{par18},{par19}"
         return self.run(command, **kwargs)

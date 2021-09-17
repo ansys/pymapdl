@@ -9,10 +9,12 @@ The decorator allows arguments within the decorator itself.
 """
 
 # Map version tuple to MAPDL release version
-VERSION_MAP = {(0, 0, 0): '2020R2',
-               (0, 3, 0): '2021R1',
-               (0, 4, 0): '2021R2',
-               (0, 4, 1): '2021R2'}
+VERSION_MAP = {
+    (0, 0, 0): "2020R2",
+    (0, 3, 0): "2021R1",
+    (0, 4, 0): "2021R2",
+    (0, 4, 1): "2021R2",
+}
 
 
 def meets_version(version, meets):
@@ -76,11 +78,12 @@ def version_tuple(v):
     """
     split_v = v.split(".")
     while len(split_v) < 3:
-        split_v.append('0')
+        split_v.append("0")
 
     if len(split_v) > 3:
-        raise ValueError('Version strings containing more than three parts '
-                         'cannot be parsed')
+        raise ValueError(
+            "Version strings containing more than three parts " "cannot be parsed"
+        )
 
     vals = []
     for item in split_v:
@@ -95,7 +98,7 @@ def version_tuple(v):
 class VersionError(ValueError):
     """Raised when the Server is the wrong version"""
 
-    def __init__(self, msg='Invalid Server version'):
+    def __init__(self, msg="Invalid Server version"):
         ValueError.__init__(self, msg)
 
 
@@ -125,32 +128,41 @@ def version_requires(min_version):
     def decorator(func):
         # first arg *must* be a tuple containing the version
         if not isinstance(min_version, tuple):
-            raise TypeError('version_requires decorator must include a version '
-                            'tuple.  For example:\n'
-                            '``@_version_requires((0, 1, 3))``')
+            raise TypeError(
+                "version_requires decorator must include a version "
+                "tuple.  For example:\n"
+                "``@_version_requires((0, 1, 3))``"
+            )
         if not len(min_version) == 3:
-            raise TypeError('version_requires decorator must include a version '
-                            'tuple.  For example:\n'
-                            '``@_version_requires((0, 1, 3))``')
+            raise TypeError(
+                "version_requires decorator must include a version "
+                "tuple.  For example:\n"
+                "``@_version_requires((0, 1, 3))``"
+            )
 
         def wrapper(self, *args, **kwargs):
             """Call the original function"""
             # must be called from a "Client" instance containing a server attribute
-            if not hasattr(self, '_server_version'):
-                raise AttributeError('decorated class must have `_server_version` '
-                                     'attribute')
+            if not hasattr(self, "_server_version"):
+                raise AttributeError(
+                    "decorated class must have `_server_version` " "attribute"
+                )
 
             if not meets_version(self._server_version, min_version):
 
                 # try to give the user a helpful warning indicating
                 # the minimum version of MAPDL
                 if min_version in VERSION_MAP:
-                    raise VersionError(f'``{func.__name__}`` requires MAPDL version '
-                                       f'>= {VERSION_MAP[min_version]}')
+                    raise VersionError(
+                        f"``{func.__name__}`` requires MAPDL version "
+                        f">= {VERSION_MAP[min_version]}"
+                    )
 
                 # otherwise, use the less helpful "gRPC server" version
-                raise VersionError(f'``{func.__name__}`` requires gRPC server '
-                                   f'version >= {min_version}')
+                raise VersionError(
+                    f"``{func.__name__}`` requires gRPC server "
+                    f"version >= {min_version}"
+                )
 
             return func(self, *args, **kwargs)
 

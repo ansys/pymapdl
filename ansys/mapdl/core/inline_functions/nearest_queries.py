@@ -37,7 +37,7 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> node_number, nearest_node
         (112, 103)
         """
-        response = self._mapdl.run(f'_=NNEAR({n})')
+        response = self._mapdl.run(f"_=NNEAR({n})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -71,7 +71,7 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> q.knear(k1) == k2
         True
         """
-        response = self._mapdl.run(f'_=KNEAR({k})')
+        response = self._mapdl.run(f"_=KNEAR({k})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -110,6 +110,6 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> node_number, nearest_element
         (112, 22)
         """
-        response = self._mapdl.run(f'_=ENEARN({n})')
+        response = self._mapdl.run(f"_=ENEARN({n})")
         integer = self._parse_parameter_integer_response(response)
         return integer

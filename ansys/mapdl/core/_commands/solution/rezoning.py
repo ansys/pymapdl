@@ -1,5 +1,4 @@
 class Rezoning:
-
     def rezone(self, option="", ldstep="", sbstep="", **kwargs):
         """Initiates the rezoning process, sets rezoning options, and rebuilds the
 
@@ -73,9 +72,18 @@ class Rezoning:
         command = f"MAPSOLVE,{maxsbstep}"
         return self.run(command, **kwargs)
 
-    def mapvar(self, option="", matid="", istrtstress="", ntenstress="",
-               istrtstrain="", ntenstrain="", istrtvect="", nvect="",
-               **kwargs):
+    def mapvar(
+        self,
+        option="",
+        matid="",
+        istrtstress="",
+        ntenstress="",
+        istrtstrain="",
+        ntenstrain="",
+        istrtvect="",
+        nvect="",
+        **kwargs,
+    ):
         """Defines tensors and vectors in user-defined state variables for
 
         APDL Command: MAPVAR
@@ -139,8 +147,7 @@ class Rezoning:
         command = f"MAPVAR,{option},{matid},{istrtstress},{ntenstress},{istrtstrain},{ntenstrain},{istrtvect},{nvect}"
         return self.run(command, **kwargs)
 
-    def remesh(self, action="", filename="", ext="", opt1="", opt2="",
-               **kwargs):
+    def remesh(self, action="", filename="", ext="", opt1="", opt2="", **kwargs):
         """Specifies the starting and ending remeshing points, and other options,
 
         APDL Command: REMESH

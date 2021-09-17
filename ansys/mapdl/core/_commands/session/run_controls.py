@@ -393,8 +393,13 @@ class RunControls:
 
         The command is valid in any processor.
         """
-        command = "/NERR,%s,%s,%s,%s,%s" % (str(nmerr), str(nmabt), str(abort),
-                                            str(ifkey), str(num))
+        command = "/NERR,%s,%s,%s,%s,%s" % (
+            str(nmerr),
+            str(nmabt),
+            str(abort),
+            str(ifkey),
+            str(num),
+        )
         return self.run(command, **kwargs)
 
     def pause(self, **kwargs):
@@ -462,9 +467,22 @@ class RunControls:
         """
         return self.run(f"/STATUS,{lab}", **kwargs)
 
-    def starstatus(self, par="", imin="", imax="", jmin="", jmax="", kmin="",
-                   kmax="", lmin="", lmax="", mmin="", mmax="", kpri="",
-                   **kwargs):
+    def starstatus(
+        self,
+        par="",
+        imin="",
+        imax="",
+        jmin="",
+        jmax="",
+        kmin="",
+        kmax="",
+        lmin="",
+        lmax="",
+        mmin="",
+        mmax="",
+        kpri="",
+        **kwargs,
+    ):
         """Lists the current parameters and abbreviations.
 
         APDL Command: ``*STATUS``
@@ -513,12 +531,35 @@ class RunControls:
 
         This command is valid in any processor.
         """
-        command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(imin), str(imax), str(
-            jmin), str(jmax), str(kmin), str(kmax), str(lmin), str(lmax), str(mmin), str(mmax), str(kpri))
+        command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(par),
+            str(imin),
+            str(imax),
+            str(jmin),
+            str(jmax),
+            str(kmin),
+            str(kmax),
+            str(lmin),
+            str(lmax),
+            str(mmin),
+            str(mmax),
+            str(kpri),
+        )
         return self.run(command, **kwargs)
 
-    def syp(self, string="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", **kwargs):
+    def syp(
+        self,
+        string="",
+        arg1="",
+        arg2="",
+        arg3="",
+        arg4="",
+        arg5="",
+        arg6="",
+        arg7="",
+        arg8="",
+        **kwargs,
+    ):
         """Passes a command string and arguments to the operating system.
 
         APDL Command: /SYP
@@ -544,8 +585,17 @@ class RunControls:
 
         This command is valid in any processor.
         """
-        command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(string), str(arg1), str(
-            arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8))
+        command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(string),
+            str(arg1),
+            str(arg2),
+            str(arg3),
+            str(arg4),
+            str(arg5),
+            str(arg6),
+            str(arg7),
+            str(arg8),
+        )
         return self.run(command, **kwargs)
 
     def sys(self, string="", **kwargs):

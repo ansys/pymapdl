@@ -1,7 +1,5 @@
 class FeForces:
-
-    def f(self, node="", lab="", value="", value2="", nend="", ninc="",
-          **kwargs):
+    def f(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies force loads at nodes.
 
         APDL Command: F

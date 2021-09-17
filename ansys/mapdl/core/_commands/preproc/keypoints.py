@@ -4,7 +4,6 @@ from ansys.mapdl.core._commands import parse
 
 
 class KeyPoints:
-
     def k(self, npt="", x="", y="", z="", **kwargs) -> int:
         """Define a keypoint.
 
@@ -125,8 +124,9 @@ class KeyPoints:
         command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
         return parse.parse_kpoint(self.run(command, **kwargs))
 
-    def kcenter(self, type_="", val1="", val2="", val3="", val4="", kpnew="",
-                **kwargs) -> int:
+    def kcenter(
+        self, type_="", val1="", val2="", val3="", val4="", kpnew="", **kwargs
+    ) -> int:
         """Creates a keypoint at the center of a circular arc defined
         by three locations.
 
@@ -237,8 +237,7 @@ class KeyPoints:
         """
         return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
 
-    def kfill(self, np1="", np2="", nfill="", nstrt="", ninc="", space="",
-              **kwargs):
+    def kfill(self, np1="", np2="", nfill="", nstrt="", ninc="", space="", **kwargs):
         """Generates keypoints between two keypoints.
 
         APDL Command: KFILL
@@ -279,8 +278,20 @@ class KeyPoints:
         command = f"KFILL,{np1},{np2},{nfill},{nstrt},{ninc},{space}"
         return self.run(command, **kwargs)
 
-    def kgen(self, itime="", np1="", np2="", ninc="", dx="", dy="", dz="",
-             kinc="", noelem="", imove="", **kwargs):
+    def kgen(
+        self,
+        itime="",
+        np1="",
+        np2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates additional keypoints from a pattern of keypoints.
 
         APDL Command: KGEN
@@ -342,7 +353,9 @@ class KeyPoints:
         pattern may have been defined in any coordinate system.  However, solid
         modeling in a toroidal coordinate system is not recommended.
         """
-        command = f"KGEN,{itime},{np1},{np2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"KGEN,{itime},{np1},{np2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
     def kl(self, nl1="", ratio="", nk1="", **kwargs) -> int:
@@ -385,7 +398,7 @@ class KeyPoints:
         """
         msg = self.run(f"KL,{nl1},{ratio},{nk1}", **kwargs)
         if msg:
-            res = re.search(r'KEYPOINT\s+(\d+)\s+', msg)
+            res = re.search(r"KEYPOINT\s+(\d+)\s+", msg)
             if res is not None:
                 return int(res.group(1))
 
@@ -469,8 +482,9 @@ class KeyPoints:
         command = f"KMODIF,{npt},{x},{y},{z}"
         return self.run(command, **kwargs)
 
-    def kmove(self, npt="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="",
-              z2="", **kwargs):
+    def kmove(
+        self, npt="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="", z2="", **kwargs
+    ):
         """Calculates and moves a keypoint to an intersection.
 
         APDL Command: KMOVE
@@ -551,7 +565,7 @@ class KeyPoints:
         """
         msg = self.run(f"KNODE,{npt},{node}", **kwargs)
         if msg:
-            res = re.search(r'KEYPOINT NUMBER =\s+(\d+)', msg)
+            res = re.search(r"KEYPOINT NUMBER =\s+(\d+)", msg)
             if res is not None:
                 return int(res.group(1))
 
@@ -581,8 +595,19 @@ class KeyPoints:
         command = f"KPLOT,{np1},{np2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-    def kpscale(self, np1="", np2="", ninc="", rx="", ry="", rz="", kinc="",
-                noelem="", imove="", **kwargs):
+    def kpscale(
+        self,
+        np1="",
+        np2="",
+        ninc="",
+        rx="",
+        ry="",
+        rz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates a scaled set of (meshed) keypoints from a pattern of
 
         APDL Command: KPSCALE
@@ -645,8 +670,7 @@ class KeyPoints:
         command = f"KPSCALE,{np1},{np2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def kscale(self, kinc="", np1="", np2="", ninc="", rx="", ry="", rz="",
-               **kwargs):
+    def kscale(self, kinc="", np1="", np2="", ninc="", rx="", ry="", rz="", **kwargs):
         """Generates a scaled pattern of keypoints from a given keypoint pattern.
 
         APDL Command: KSCALE
@@ -700,8 +724,9 @@ class KeyPoints:
         command = f"KSUM,"
         return self.run(command, **kwargs)
 
-    def ksymm(self, ncomp="", np1="", np2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def ksymm(
+        self, ncomp="", np1="", np2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Generates a reflected set of keypoints.
 
         APDL Command: KSYMM
@@ -762,8 +787,9 @@ class KeyPoints:
         command = f"KSYMM,{ncomp},{np1},{np2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def ktran(self, kcnto="", np1="", np2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def ktran(
+        self, kcnto="", np1="", np2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Transfers a pattern of keypoints to another coordinate system.
 
         APDL Command: KTRAN

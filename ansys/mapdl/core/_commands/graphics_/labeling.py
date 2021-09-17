@@ -1,5 +1,4 @@
 class Labelling:
-
     def cformat(self, nfirst="", nlast="", **kwargs):
         """Controls the graphical display of alphanumeric character strings for
 
@@ -144,8 +143,9 @@ class Labelling:
         command = f"/CONTOUR,{wn},{ncont},{vmin},{vinc},{vmax}"
         return self.run(command, **kwargs)
 
-    def cval(self, wn="", v1="", v2="", v3="", v4="", v5="", v6="", v7="",
-             v8="", **kwargs):
+    def cval(
+        self, wn="", v1="", v2="", v3="", v4="", v5="", v6="", v7="", v8="", **kwargs
+    ):
         """Specifies nonuniform contour values on stress displays.
 
         APDL Command: /CVAL

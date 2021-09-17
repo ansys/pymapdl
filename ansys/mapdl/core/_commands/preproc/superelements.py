@@ -1,5 +1,4 @@
 class Superelements:
-
     def se(self, file="", toler="", **kwargs):
         """Defines a superelement.
 
@@ -162,8 +161,19 @@ class Superelements:
         command = f"SESYMM,{sename},{ncomp},{inc},{file},{ext}"
         return self.run(command, **kwargs)
 
-    def setran(self, sename="", kcnto="", inc="", file="", ext="", dx="",
-               dy="", dz="", norot="", **kwargs):
+    def setran(
+        self,
+        sename="",
+        kcnto="",
+        inc="",
+        file="",
+        ext="",
+        dx="",
+        dy="",
+        dz="",
+        norot="",
+        **kwargs,
+    ):
         """Creates a superelement from an existing superelement.
 
         APDL Command: SETRAN

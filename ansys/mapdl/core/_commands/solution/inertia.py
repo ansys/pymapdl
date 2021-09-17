@@ -1,5 +1,4 @@
 class Inertia:
-
     def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
         """Specifies the linear acceleration of the global Cartesian reference
 
@@ -144,8 +143,7 @@ class Inertia:
         command = f"CGOMGA,{cgomx},{cgomy},{cgomz}"
         return self.run(command, **kwargs)
 
-    def cmacel(self, cm_name="", cmacel_x="", cmacel_y="", cmacel_z="",
-               **kwargs):
+    def cmacel(self, cm_name="", cmacel_x="", cmacel_y="", cmacel_z="", **kwargs):
         """Specifies the translational acceleration of an element component
 
         APDL Command: CMACEL
@@ -211,8 +209,20 @@ class Inertia:
         command = f"CMACEL,{cm_name},{cmacel_x},{cmacel_y},{cmacel_z}"
         return self.run(command, **kwargs)
 
-    def cmdomega(self, cm_name="", domegax="", domegay="", domegaz="", x1="",
-                 y1="", z1="", x2="", y2="", z2="", **kwargs):
+    def cmdomega(
+        self,
+        cm_name="",
+        domegax="",
+        domegay="",
+        domegaz="",
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
+    ):
         """Specifies the rotational acceleration of an element component about a
 
         APDL Command: CMDOMEGA
@@ -283,8 +293,20 @@ class Inertia:
         command = f"CMDOMEGA,{cm_name},{domegax},{domegay},{domegaz},{x1},{y1},{z1},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def cmomega(self, cm_name="", omegax="", omegay="", omegaz="", x1="",
-                y1="", z1="", x2="", y2="", z2="", **kwargs):
+    def cmomega(
+        self,
+        cm_name="",
+        omegax="",
+        omegay="",
+        omegaz="",
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
+    ):
         """Specifies the rotational velocity of an element component about a user-
 
         APDL Command: CMOMEGA
@@ -367,8 +389,20 @@ class Inertia:
         command = f"CMOMEGA,{cm_name},{omegax},{omegay},{omegaz},{x1},{y1},{z1},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def cmrotate(self, cm_name="", rotatx="", rotaty="", rotatz="", x1="",
-                 y1="", z1="", x2="", y2="", z2="", **kwargs):
+    def cmrotate(
+        self,
+        cm_name="",
+        rotatx="",
+        rotaty="",
+        rotatz="",
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
+    ):
         """Specifies the rotational velocity of an element component in a brake
 
         APDL Command: CMROTATE

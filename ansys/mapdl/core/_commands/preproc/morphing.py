@@ -1,7 +1,17 @@
 class Morphing:
-
-    def morph(self, option="", remeshopt="", elemset="", armax="", voch="",
-              arch="", step="", time="", stropt="", **kwargs):
+    def morph(
+        self,
+        option="",
+        remeshopt="",
+        elemset="",
+        armax="",
+        voch="",
+        arch="",
+        step="",
+        time="",
+        stropt="",
+        **kwargs,
+    ):
         """Specifies morphing and remeshing controls.
 
         APDL Command: MORPH

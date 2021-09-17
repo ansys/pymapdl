@@ -1,5 +1,4 @@
 class Listing:
-
     def extrem(self, nvar1="", nvar2="", ninc="", **kwargs):
         """Lists the extreme values for variables.
 
@@ -108,8 +107,9 @@ class Listing:
         command = f"PRTIME,{tmin},{tmax}"
         return self.run(command, **kwargs)
 
-    def prvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
-              **kwargs):
+    def prvar(
+        self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="", **kwargs
+    ):
         """Lists variables vs. time (or frequency).
 
         APDL Command: PRVAR

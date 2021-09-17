@@ -1,5 +1,4 @@
 class FeSurfaceLoads:
-
     def sf(self, nlist="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on nodes.
 
@@ -53,8 +52,20 @@ class FeSurfaceLoads:
         command = f"SF,{nlist},{lab},{value},{value2}"
         return self.run(command, **kwargs)
 
-    def sfbeam(self, elem="", lkey="", lab="", vali="", valj="", val2i="",
-               val2j="", ioffst="", joffst="", lenrat="", **kwargs):
+    def sfbeam(
+        self,
+        elem="",
+        lkey="",
+        lab="",
+        vali="",
+        valj="",
+        val2i="",
+        val2j="",
+        ioffst="",
+        joffst="",
+        lenrat="",
+        **kwargs,
+    ):
         """Specifies surface loads on beam and pipe elements.
 
         APDL Command: SFBEAM
@@ -221,8 +232,18 @@ class FeSurfaceLoads:
         command = f"SFDELE,{nlist},{lab}"
         return self.run(command, **kwargs)
 
-    def sfe(self, elem="", lkey="", lab="", kval="", val1="", val2="", val3="",
-            val4="", **kwargs):
+    def sfe(
+        self,
+        elem="",
+        lkey="",
+        lab="",
+        kval="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Specifies surface loads on elements.
 
         APDL Command: SFE

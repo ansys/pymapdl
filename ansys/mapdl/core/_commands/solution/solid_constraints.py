@@ -1,5 +1,4 @@
 class SolidConstraints:
-
     def da(self, area="", lab="", value1="", value2="", **kwargs):
         """Defines degree-of-freedom constraints on areas.
 
@@ -202,8 +201,20 @@ class SolidConstraints:
         command = f"DALIST,{area}"
         return self.run(command, **kwargs)
 
-    def dk(self, kpoi="", lab="", value="", value2="", kexpnd="", lab2="",
-           lab3="", lab4="", lab5="", lab6="", **kwargs):
+    def dk(
+        self,
+        kpoi="",
+        lab="",
+        value="",
+        value2="",
+        kexpnd="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        **kwargs,
+    ):
         """Defines DOF constraints at keypoints.
 
         APDL Command: DK

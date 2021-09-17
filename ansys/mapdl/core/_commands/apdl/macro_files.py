@@ -1,5 +1,4 @@
 class MacroFiles:
-
     def cfclos(self, **kwargs):
         """Closes the "command" file.
 
@@ -191,8 +190,19 @@ class MacroFiles:
         command = f"/MKDIR,{dir_}"
         return self.run(command, **kwargs)
 
-    def msg(self, lab="", val1="", val2="", val3="", val4="", val5="", val6="",
-            val7="", val8="", **kwargs):
+    def msg(
+        self,
+        lab="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        **kwargs,
+    ):
         """Writes an output message via the ANSYS message subroutine.
 
         APDL Command: ``*MSG``
@@ -431,9 +441,29 @@ class MacroFiles:
         command = f"*ULIB,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def use(self, name="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", arg9="", ar10="", ar11="", ar12="",
-            ar13="", ar14="", ag15="", ar16="", ar17="", ar18="", **kwargs):
+    def use(
+        self,
+        name="",
+        arg1="",
+        arg2="",
+        arg3="",
+        arg4="",
+        arg5="",
+        arg6="",
+        arg7="",
+        arg8="",
+        arg9="",
+        ar10="",
+        ar11="",
+        ar12="",
+        ar13="",
+        ar14="",
+        ag15="",
+        ar16="",
+        ar17="",
+        ar18="",
+        **kwargs,
+    ):
         """Executes a macro file.
 
         APDL Command: ``*USE``

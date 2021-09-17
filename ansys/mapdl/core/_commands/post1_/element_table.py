@@ -3,9 +3,9 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class ElementTable:
-
-    def detab(self, elem="", lab="", v1="", v2="", v3="", v4="", v5="", v6="",
-              **kwargs):
+    def detab(
+        self, elem="", lab="", v1="", v2="", v3="", v4="", v5="", v6="", **kwargs
+    ):
         """Modifies element table results in the database.
 
         APDL Command: DETAB
@@ -47,9 +47,15 @@ class ElementTable:
         command = f"DETAB,{elem},{lab},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)
 
-    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "",
-              kabs: MapdlInt = "", numb: MapdlInt = "",
-              **kwargs) -> Optional[str]:
+    def esort(
+        self,
+        item: str = "",
+        lab: str = "",
+        order: MapdlInt = "",
+        kabs: MapdlInt = "",
+        numb: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Sorts the element table.
 
         APDL Command: ESORT
@@ -97,8 +103,9 @@ class ElementTable:
         command = f"ESORT,{item},{lab},{order},{kabs},{numb}"
         return self.run(command, **kwargs)
 
-    def etable(self, lab: str = "", item: str = "", comp: str = "",
-               option: str = "", **kwargs) -> Optional[str]:
+    def etable(
+        self, lab: str = "", item: str = "", comp: str = "", option: str = "", **kwargs
+    ) -> Optional[str]:
         """Fills a table of element values for further processing.
 
         APDL Command: ETABLE
@@ -360,8 +367,19 @@ class ElementTable:
         command = f"PLLS,{labi},{labj},{fact},{kund},{viewup}"
         return self.run(command, **kwargs)
 
-    def pretab(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               lab7="", lab8="", lab9="", **kwargs):
+    def pretab(
+        self,
+        lab1="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        lab7="",
+        lab8="",
+        lab9="",
+        **kwargs,
+    ):
         """Prints the element table items.
 
         APDL Command: PRETAB
@@ -388,7 +406,9 @@ class ElementTable:
         Portions of this command are not supported by PowerGraphics
         [/GRAPHICS,POWER].
         """
-        command = f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}"
+        command = (
+            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}"
+        )
         return self.run(command, **kwargs)
 
     def sabs(self, key="", **kwargs):
@@ -413,8 +433,7 @@ class ElementTable:
         command = f"SABS,{key}"
         return self.run(command, **kwargs)
 
-    def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="",
-             **kwargs):
+    def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="", **kwargs):
         """Forms an element table item by adding two existing items.
 
         APDL Command: SADD
@@ -456,8 +475,9 @@ class ElementTable:
         command = f"SADD,{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
 
-    def sallow(self, strs1="", strs2="", strs3="", strs4="", strs5="",
-               strs6="", **kwargs):
+    def sallow(
+        self, strs1="", strs2="", strs3="", strs4="", strs5="", strs6="", **kwargs
+    ):
         """Defines the allowable stress table for safety factor calculations.
 
         APDL Command: SALLOW
@@ -724,8 +744,9 @@ class ElementTable:
         command = f"SSUM,"
         return self.run(command, **kwargs)
 
-    def tallow(self, temp1="", temp2="", temp3="", temp4="", temp5="",
-               temp6="", **kwargs):
+    def tallow(
+        self, temp1="", temp2="", temp3="", temp4="", temp5="", temp6="", **kwargs
+    ):
         """Defines the temperature table for safety factor calculations.
 
         APDL Command: TALLOW
@@ -749,8 +770,19 @@ class ElementTable:
         command = f"TALLOW,{temp1},{temp2},{temp3},{temp4},{temp5},{temp6}"
         return self.run(command, **kwargs)
 
-    def vcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
-               labz1="", labx2="", laby2="", labz2="", **kwargs):
+    def vcross(
+        self,
+        labxr="",
+        labyr="",
+        labzr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Forms element table items from the cross product of two vectors.
 
         APDL Command: VCROSS
@@ -779,8 +811,17 @@ class ElementTable:
         command = f"VCROSS,{labxr},{labyr},{labzr},{labx1},{laby1},{labz1},{labx2},{laby2},{labz2}"
         return self.run(command, **kwargs)
 
-    def vdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
-             labz2="", **kwargs):
+    def vdot(
+        self,
+        labr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Forms an element table item from the dot product of two vectors.
 
         APDL Command: VDOT

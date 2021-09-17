@@ -1,7 +1,5 @@
 class GapConditions:
-
-    def gp(self, node1="", node2="", lab="", stif="", gap="", damp="",
-           **kwargs):
+    def gp(self, node1="", node2="", lab="", stif="", gap="", damp="", **kwargs):
         """Defines a gap condition for transient analyses.
 
         APDL Command: GP

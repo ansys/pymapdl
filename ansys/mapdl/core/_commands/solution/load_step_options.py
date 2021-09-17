@@ -1,5 +1,4 @@
 class LoadStepOptions:
-
     def autots(self, key="", **kwargs):
         """Specifies whether to use automatic time stepping or load stepping.
 
@@ -320,8 +319,17 @@ class LoadStepOptions:
         command = f"MAGOPT,{value}"
         return self.run(command, **kwargs)
 
-    def magsolv(self, opt="", nramp="", cnvcsg="", cnvflux="", neqit="",
-                biot="", cnvtol="", **kwargs):
+    def magsolv(
+        self,
+        opt="",
+        nramp="",
+        cnvcsg="",
+        cnvflux="",
+        neqit="",
+        biot="",
+        cnvtol="",
+        **kwargs,
+    ):
         """Specifies magnetic solution options and initiates the solution.
 
         APDL Command: MAGSOLV
@@ -733,8 +741,19 @@ class LoadStepOptions:
         command = f"UPCOORD,{factor},{key}"
         return self.run(command, **kwargs)
 
-    def usrcal(self, rnam1="", rnam2="", rnam3="", rnam4="", rnam5="",
-               rnam6="", rnam7="", rnam8="", rnam9="", **kwargs):
+    def usrcal(
+        self,
+        rnam1="",
+        rnam2="",
+        rnam3="",
+        rnam4="",
+        rnam5="",
+        rnam6="",
+        rnam7="",
+        rnam8="",
+        rnam9="",
+        **kwargs,
+    ):
         """Allows user-solution subroutines to be activated or deactivated.
 
         APDL Command: USRCAL

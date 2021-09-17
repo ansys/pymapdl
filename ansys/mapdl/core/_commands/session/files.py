@@ -125,8 +125,18 @@ class Files:
         command = "ANSTOASAS,%s,%s" % (str(fname), str(key))
         return self.run(command, **kwargs)
 
-    def anstoaqwa(self, fname="", vertaxis="", gc="", rho="", hwl="",
-                  diffkey="", symxkey="", symykey="", **kwargs):
+    def anstoaqwa(
+        self,
+        fname="",
+        vertaxis="",
+        gc="",
+        rho="",
+        hwl="",
+        diffkey="",
+        symxkey="",
+        symykey="",
+        **kwargs,
+    ):
         """Creates an AQWA-LINE input file from the current ANSYS model.
 
         APDL Command: ANSTOAQWA
@@ -220,8 +230,16 @@ class Files:
 
         You must verify the completeness and accuracy of the data written.
         """
-        command = "ANSTOAQWA,%s,%s,%s,%s,%s,%s,%s,%s" % (str(fname), str(vertaxis), str(
-            gc), str(rho), str(hwl), str(diffkey), str(symxkey), str(symykey))
+        command = "ANSTOAQWA,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(fname),
+            str(vertaxis),
+            str(gc),
+            str(rho),
+            str(hwl),
+            str(diffkey),
+            str(symxkey),
+            str(symykey),
+        )
         return self.run(command, **kwargs)
 
     def assign(self, ident="", fname="", ext="", lgkey="", **kwargs):
@@ -302,8 +320,7 @@ class Files:
         command = "/CLOG,%s,%s" % (str(fname), str(ext))
         return self.run(command, **kwargs)
 
-    def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="",
-             **kwargs):
+    def copy(self, fname1="", ext1="", fname2="", ext2="", distkey="", **kwargs):
         """Copies a file.
 
         APDL Command: /COPY
@@ -390,7 +407,7 @@ class Files:
 
         See File Compression in the Basic Analysis Guide for more details.
         """
-        return self.run(f'/FCOMP,{ident},{level}', **kwargs)
+        return self.run(f"/FCOMP,{ident},{level}", **kwargs)
 
     def lgwrite(self, fname="", ext="", kedit="", **kwargs):
         """Writes the database command log to a file.
@@ -466,8 +483,7 @@ class Files:
         command = f"*LIST,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def rename(self, fname1="", ext1="", fname2="", ext2="", distkey="",
-               **kwargs):
+    def rename(self, fname1="", ext1="", fname2="", ext2="", distkey="", **kwargs):
         """Renames a file.
 
         APDL Command: /RENAME
@@ -527,8 +543,9 @@ class Files:
 
         This command is valid only at the Begin Level.
         """
-        return self.run(f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}",
-                        **kwargs)
+        return self.run(
+            f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}", **kwargs
+        )
 
     def slashfdele(self, ident="", stat="", **kwargs):
         """Deletes a binary file after it is used.

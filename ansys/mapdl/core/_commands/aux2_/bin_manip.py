@@ -1,5 +1,4 @@
 class BinManip:
-
     def combine(self, filetype="", **kwargs):
         """Combines distributed memory parallel (Distributed ANSYS) files.
 
@@ -70,8 +69,7 @@ class BinManip:
         command = f"COMBINE,{filetype}"
         return self.run(command, **kwargs)
 
-    def hbmat(self, fname="", ext="", form="", matrx="", rhs="", mapping="",
-              **kwargs):
+    def hbmat(self, fname="", ext="", form="", matrx="", rhs="", mapping="", **kwargs):
         """Writes an assembled global matrix in Harwell-Boeing format.
 
         APDL Command: HBMAT

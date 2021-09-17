@@ -2,9 +2,9 @@ from ansys.mapdl.core._commands import parse
 
 
 class Primitives:
-
-    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
-             **kwargs) -> int:
+    def blc4(
+        self, xcorner="", ycorner="", width="", height="", depth="", **kwargs
+    ) -> int:
         """Creates a rectangular area or block volume by corner points.
 
         APDL Command: BLC4
@@ -58,8 +58,9 @@ class Primitives:
         command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def blc5(self, xcenter="", ycenter="", width="", height="", depth="",
-             **kwargs) -> int:
+    def blc5(
+        self, xcenter="", ycenter="", width="", height="", depth="", **kwargs
+    ) -> int:
         """Create a rectangular area or block volume by center and corner points.
 
         APDL Command: BLC5
@@ -159,8 +160,7 @@ class Primitives:
         command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="",
-             **kwargs) -> int:
+    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="", **kwargs) -> int:
         """Create a conical volume anywhere on the working plane.
 
         APDL Command: CON4
@@ -212,8 +212,9 @@ class Primitives:
         command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cone(self, rbot="", rtop="", z1="", z2="", theta1="", theta2="",
-             **kwargs) -> int:
+    def cone(
+        self, rbot="", rtop="", z1="", z2="", theta1="", theta2="", **kwargs
+    ) -> int:
         """Create a conical volume centered about the working plane origin.
 
         APDL Command: CONE
@@ -271,8 +272,17 @@ class Primitives:
         command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
-             theta2="", depth="", **kwargs) -> int:
+    def cyl4(
+        self,
+        xcenter="",
+        ycenter="",
+        rad1="",
+        theta1="",
+        rad2="",
+        theta2="",
+        depth="",
+        **kwargs,
+    ) -> int:
         """Creates a circular area or cylindrical volume anywhere on
         the working plane.
 
@@ -350,8 +360,9 @@ class Primitives:
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cyl5(self, xedge1="", yedge1="", xedge2="", yedge2="", depth="",
-             **kwargs) -> int:
+    def cyl5(
+        self, xedge1="", yedge1="", xedge2="", yedge2="", depth="", **kwargs
+    ) -> int:
         """Create a circular area or cylindrical volume by end points.
 
         APDL Command: CYL5
@@ -409,8 +420,9 @@ class Primitives:
         command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cylind(self, rad1="", rad2="", z1="", z2="", theta1="", theta2="",
-               **kwargs) -> int:
+    def cylind(
+        self, rad1="", rad2="", z1="", z2="", theta1="", theta2="", **kwargs
+    ) -> int:
         """Create a cylindrical volume centered about the working plane origin.
 
         APDL Command: CYLIND
@@ -572,8 +584,7 @@ class Primitives:
         command = f"PRISM,{z1},{z2}"
         return self.run(command, **kwargs)
 
-    def ptxy(self, x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="",
-             **kwargs):
+    def ptxy(self, x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="", **kwargs):
         """Defines coordinate pairs for use in polygons and prisms.
 
         APDL Command: PTXY
@@ -649,8 +660,9 @@ class Primitives:
         command = f"RPOLY,{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
 
-    def rpr4(self, nsides="", xcenter="", ycenter="", radius="", theta="",
-             depth="", **kwargs):
+    def rpr4(
+        self, nsides="", xcenter="", ycenter="", radius="", theta="", depth="", **kwargs
+    ):
         """Creates a regular polygonal area or prism volume anywhere on the working plane.
 
         APDL Command: RPR4
@@ -689,8 +701,7 @@ class Primitives:
         command = f"RPR4,{nsides},{xcenter},{ycenter},{radius},{theta},{depth}"
         return self.run(command, **kwargs)
 
-    def rprism(self, z1="", z2="", nsides="", lside="", majrad="", minrad="",
-               **kwargs):
+    def rprism(self, z1="", z2="", nsides="", lside="", majrad="", minrad="", **kwargs):
         """Creates a regular prism volume centered about the working plane origin.
 
         Defines a regular prism volume centered about the working plane origin.

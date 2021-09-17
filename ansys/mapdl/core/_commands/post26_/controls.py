@@ -1,7 +1,7 @@
 class Controls:
-
-    def cfact(self, rfacta="", ifacta="", rfactb="", ifactb="", rfactc="",
-              ifactc="", **kwargs):
+    def cfact(
+        self, rfacta="", ifacta="", rfactb="", ifactb="", rfactc="", ifactc="", **kwargs
+    ):
         """Defines complex scaling factors to be used with operations.
 
         APDL Command: CFACT

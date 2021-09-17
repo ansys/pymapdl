@@ -23,7 +23,7 @@ mm = mapdl.math
 # After a solve command, the full contains the assemblied stiffness
 # matrix, mass matrix, and the load vector.
 #
-out = mapdl.input(vmfiles['vm153'])
+out = mapdl.input(vmfiles["vm153"])
 
 ###############################################################################
 # List the files in current directory
@@ -38,7 +38,7 @@ mapdl.list_files()
 #
 # Printout the dimensions of this Sparse Matrix
 #
-k = mm.stiff(fname='PRSMEMB.full')
+k = mm.stiff(fname="PRSMEMB.full")
 k
 
 ###############################################################################
@@ -52,7 +52,7 @@ ky
 #
 # Printout the norm of this vector.
 #
-b = mm.rhs(fname='PRSMEMB.full')
+b = mm.rhs(fname="PRSMEMB.full")
 b.norm()
 
 ###############################################################################
@@ -82,7 +82,7 @@ x.norm()
 #
 kx = k.dot(x)
 kx -= b
-print('Residual error:', kx.norm()/b.norm())
+print("Residual error:", kx.norm() / b.norm())
 
 ###############################################################################
 # Summary of all allocated APDLMath Objects

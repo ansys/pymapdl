@@ -1,7 +1,19 @@
 class FeConstraints:
-
-    def d(self, node="", lab="", value="", value2="", nend="", ninc="",
-          lab2="", lab3="", lab4="", lab5="", lab6="", **kwargs):
+    def d(
+        self,
+        node="",
+        lab="",
+        value="",
+        value2="",
+        nend="",
+        ninc="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        **kwargs,
+    ):
         """Defines degree-of-freedom constraints at nodes.
 
         APDL Command: D
@@ -239,8 +251,7 @@ class FeConstraints:
         command = f"DDELE,{node},{lab},{nend},{ninc},{rkey}"
         return self.run(command, **kwargs)
 
-    def dflx(self, node="", bx="", by="", bz="", bx2="", by2="", bz2="",
-             **kwargs):
+    def dflx(self, node="", bx="", by="", bz="", bx2="", by2="", bz2="", **kwargs):
         """Imposes a uniform magnetic flux B on an edge-element electromagnetic
 
         APDL Command: DFLX
@@ -579,8 +590,7 @@ class FeConstraints:
         command = f"DSYM,{lab},{normal},{kcn}"
         return self.run(command, **kwargs)
 
-    def dval(self, baseid="", lab="", value="", value2="", keycal="",
-             **kwargs):
+    def dval(self, baseid="", lab="", value="", value2="", keycal="", **kwargs):
         """Defines values at enforced motion base.
 
         APDL Command: DVAL
@@ -637,8 +647,9 @@ class FeConstraints:
         command = f"DVAL,{baseid},{lab},{value},{value2},{keycal}"
         return self.run(command, **kwargs)
 
-    def gsbdata(self, labz="", valuez="", labx="", valuex="", laby="",
-                valuey="", **kwargs):
+    def gsbdata(
+        self, labz="", valuez="", labx="", valuex="", laby="", valuey="", **kwargs
+    ):
         """Specifies the constraints or applies the load at the ending point for
 
         APDL Command: GSBDATA

@@ -68,14 +68,14 @@ mapdl.prep7()
 # - `ALPX` - Secant x - coefficient of thermal expansion
 #
 
-mapdl.antype('STATIC')
-mapdl.et(1, 'LINK180')
-mapdl.sectype(1, 'LINK')
+mapdl.antype("STATIC")
+mapdl.et(1, "LINK180")
+mapdl.sectype(1, "LINK")
 mapdl.secdata(0.1)
-mapdl.mp('EX', 1, 16e6)
-mapdl.mp('ALPX', 1, 92e-7)
-mapdl.mp('EX', 2, 30e6)
-mapdl.mp('ALPX', 2, 70e-7)
+mapdl.mp("EX", 1, 16e6)
+mapdl.mp("ALPX", 1, 92e-7)
+mapdl.mp("EX", 2, 30e6)
+mapdl.mp("ALPX", 2, 70e-7)
 # Define the reference temperature for the thermal strain calculations.
 mapdl.tref(70)
 
@@ -92,7 +92,7 @@ mapdl.fill()
 mapdl.n(4, -10, -20)
 mapdl.n(6, 10, -20)
 mapdl.fill()
-mapdl.nplot(nnum=True, cpos='xy')
+mapdl.nplot(nnum=True, cpos="xy")
 
 ###############################################################################
 # Define Geometry: Elements
@@ -105,7 +105,7 @@ mapdl.e(1, 4)
 mapdl.e(3, 6)
 mapdl.mat(2)
 mapdl.e(2, 5)
-mapdl.eplot(show_node_numbering=True, cpos='xy')
+mapdl.eplot(show_node_numbering=True, cpos="xy")
 
 ###############################################################################
 # Define Boundary Conditions
@@ -117,10 +117,10 @@ mapdl.eplot(show_node_numbering=True, cpos='xy')
 # - Apply a uniform temperature of 80 to the whole body
 # - Finally, exit the post-processor.
 
-mapdl.cp(1, 'UY', 5, 4, 6)
-mapdl.d(1, 'ALL', '', '', 3)
-mapdl.f(5, 'FY', -4000)
-mapdl.bfunif('TEMP', 80)
+mapdl.cp(1, "UY", 5, 4, 6)
+mapdl.d(1, "ALL", "", "", 3)
+mapdl.f(5, "FY", -4000)
+mapdl.bfunif("TEMP", 80)
 mapdl.finish()
 
 
@@ -130,9 +130,9 @@ mapdl.finish()
 # - Enter solution mode
 # - Specify a timestep of 1 to be used for this load step
 # - Solve the system.
-# 
+#
 
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 mapdl.nsubst(1)
 mapdl.solve()
 
@@ -143,7 +143,7 @@ mapdl.solve()
 # - Find a steel node and a copper node
 # - Then use these to get the steel and copper elements
 # - Finally extract the stress experienced by each element
-# 
+#
 
 mapdl.post1()
 q = mapdl.queries
@@ -151,11 +151,11 @@ steel_n = q.node(0, 0, 0)
 copper_n = q.node(10, 0, 0)
 steel_e = q.enearn(steel_n)
 copper_e = q.enearn(copper_n)
-mapdl.etable('STRS_ST', 'LS', 1)
-mapdl.etable('STRS_CO', 'LS', 1)
+mapdl.etable("STRS_ST", "LS", 1)
+mapdl.etable("STRS_CO", "LS", 1)
 
-stress_steel = mapdl.get('_', 'ELEM', steel_e, 'ETAB', 'STRS_ST')
-stress_copper = mapdl.get('_', 'ELEM', copper_e, 'ETAB', 'STRS_CO')
+stress_steel = mapdl.get("_", "ELEM", steel_e, "ETAB", "STRS_ST")
+stress_copper = mapdl.get("_", "ELEM", copper_e, "ETAB", "STRS_CO")
 
 ###############################################################################
 # Check Results
@@ -165,9 +165,9 @@ stress_copper = mapdl.get('_', 'ELEM', copper_e, 'ETAB', 'STRS_CO')
 #
 
 steel_target = 19695
-steel_ratio = stress_steel/steel_target
+steel_ratio = stress_steel / steel_target
 copper_target = 10152
-copper_ratio = stress_copper/copper_target
+copper_ratio = stress_copper / copper_target
 
 message = f"""
 ------------------- VM3 RESULTS COMPARISON ---------------------
