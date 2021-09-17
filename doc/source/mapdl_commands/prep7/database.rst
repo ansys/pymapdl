@@ -26,4 +26,3 @@ database.
    Mapdl.nummrg
    Mapdl.numoff
    Mapdl.numstr
-   Mapdl.prep7

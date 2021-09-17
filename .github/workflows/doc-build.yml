@@ -1,7 +1,15 @@
 # Build documentation
 name: Documentation Build
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+
 
 jobs:
   docs_build:
@@ -47,23 +55,31 @@ jobs:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install zip pandoc -qy
   
       - name: Build Documentation
         run: |
-          sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
           make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       # Verify that sphinx generates no warnings
       - name: Check for warnings
+        run: python doc/print_errors.py
+
+      - name: Zip documentation
         run: |
-          python doc/print_errors.py
+          cd doc/build/html
+          zip -r PyMAPDL_documentation.zip *
 
       - name: Upload Documentation
         uses: actions/upload-artifact@v2
         with:
           name: Documentation
-          path: doc/build/html
+          path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
       - name: Deploy
