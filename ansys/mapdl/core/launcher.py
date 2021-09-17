@@ -891,7 +891,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
     check_lock_file(run_location, jobname, override)
     mode = check_mode(mode, _version_from_path(exec_file))
 
-    # Converting additional_switches to lower case to avoid missmatches.
+    # Converting additional_switches to lower case to avoid mismatches.
     additional_switches = additional_switches.lower()
 
     # known issue with distributed memory parallel
