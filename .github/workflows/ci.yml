@@ -1,0 +1,130 @@
+name: GitHub Actions
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+
+env:
+  MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.1'
+  PYMAPDL_PORT: 32771  # default won't work on azure
+  PYMAPDL_START_INSTANCE: FALSE
+  PYANSYS_OFF_SCREEN: True
+
+
+jobs:
+  stylecheck:
+    name: Style Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: 3.8
+
+      - name: Style
+        run: |
+          pip install -r requirements_style.txt --disable-pip-version-check
+          make
+
+      - name: flake8
+        run: |
+          make flake8
+
+  testimport:
+  name: Smoke Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ['3.6', '3.7', '3.8', '3.9']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install PyMAPDL
+        run: |
+          pip install .
+
+      - name: Test import
+        working-directory: tests
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+
+  docs_build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install -r requirements_build.txt
+          python setup.py bdist_wheel
+          pip install dist/ansys*.whl
+          cd tests  # run from test directory to test installed module
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+  
+      - name: Build Documentation
+        run: |
+          pip install -r requirements_docs.txt
+          make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
+
+      # Verify that sphinx generates no warnings
+      - name: Check for sphinx warnings
+        run: python doc/print_errors.py
+
+      - name: Zip documentation
+        run: |
+          cd doc/build/html
+          zip -r PyMAPDL_documentation.zip *
+
+      - name: Upload Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: Documentation
+          path: doc/build/html/PyMAPDL_documentation.zip
+          retention-days: 7
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: doc/build/html
