@@ -208,7 +208,7 @@ def check_license_server_with_lmutil():
     servers_up = ['UP' in each for each in selected_lines]
     down_error_msg = 'Error getting status: License server machine is down or not responding.'
     
-    if len(servers_up)==0:
+    if len(servers_up) == 0:
         msg = "'lmutil' failed to get a list of servers."
         raise LicenseServerConnectionError(error_message=msg)
     
@@ -316,7 +316,6 @@ def get_ansysli_util_path_windows():
 def get_ansysli_util_path_linux():
     ansyslic_dir = os.getenv('ANSYSLIC_DIR')
     return os.path.join(ansyslic_dir, 'linx64') #TODO: Check if this folder is right.
-
 
 
 ## Main 
