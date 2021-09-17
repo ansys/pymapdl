@@ -97,6 +97,19 @@ jobs:
           sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb
 
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      # Docker layer caching.
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
       - name: Test virtual framebuffer
         run: |
           pip install -r .ci/requirements_test_xvfb.txt
@@ -148,7 +161,7 @@ jobs:
           folder: doc/build/html
 
   build_test:
-    name: Build Documentation
+    name: Build and Unit Testing
     needs: testimport
     runs-on: ubuntu-latest
     strategy:
@@ -167,6 +180,19 @@ jobs:
         run: |
           sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      # Docker layer caching.
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
 
       - name: Test virtual framebuffer
         run: |
@@ -193,7 +219,7 @@ jobs:
         run: |
           pip install -r requirements_test.txt
           pip install pytest-azurepipelines
-          pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
 
       - name: Upload wheel
         uses: actions/upload-artifact@v2
