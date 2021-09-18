@@ -160,7 +160,7 @@ sphinx_gallery_conf = {
 html_theme = "pyansys_sphinx_theme"
 html_logo = "https://docs.pyansys.com/_static/pyansys-logo-black-cropped.png"
 html_theme_options = {
-    "github_url": "https://github.com/pyansys/PyMAPDL",
+    "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
 }
 
@@ -177,7 +177,8 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "pyansys.tex", "ansys.mapdl.core Documentation", author, "manual"),
+    (master_doc, f"pymapdl-Documentation-{__version__}.tex",
+     "ansys.mapdl.core Documentation", author, "manual"),
 ]
 
 

@@ -86,7 +86,7 @@ class LocalMapdlPool:
 
     >>> from ansys.mapdl import LocalMapdlPool
     >>> pool = mapdl.LocalMapdlPool(10)
-    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+    Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
     directory within their own isolated directories.
@@ -94,19 +94,19 @@ class LocalMapdlPool:
     >>> import os
     >>> my_path = os.getcmd()
     >>> pool = mapdl.LocalMapdlPool(10, nproc=1, run_location=my_path)
-    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+    Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Windows.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/win64/ANSYS212.exe'
     >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
-    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+    Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Linux.
 
     >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
     >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
-    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+    Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     """
 
