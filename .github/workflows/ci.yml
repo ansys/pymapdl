@@ -160,7 +160,8 @@ jobs:
           make latex
           python validate_png.py  # clean-up GIFs mislabeled as PNG
           cd build/latex
-          latexmk -r latexmkrc -pdf pymapdl.tex -interaction=nonstopmode
+          latexmk -r latexmkrc -pdf pymapdl.tex -interaction=nonstopmode || true
+          (test -f pymapdl.pdf && echo pymapdl.pdf exists) || exit 1
 
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v2
