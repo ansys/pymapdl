@@ -7,8 +7,6 @@ import os
 from glob import glob
 from PIL import Image
 
-import pathlib
-
 this_path = os.path.dirname(os.path.abspath(__file__))
 check_path = os.path.join(this_path, 'build', 'latex')
 if not os.path.isdir(check_path):
