@@ -177,7 +177,8 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "pymapdl.tex", "ansys.mapdl.core Documentation", author, "manual"),
+    (master_doc, f"pymapdl-Documentation-{__version__}.tex",
+     "ansys.mapdl.core Documentation", author, "manual"),
 ]
 
 
