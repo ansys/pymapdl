@@ -79,7 +79,7 @@ def parse_to_short_cmd(command):
         return
 
 
-def setup_logger(loglevel="INFO"):
+def setup_logger(loglevel='INFO', log_file=True):
     """Setup logger"""
 
     # return existing log if this function has already been called
@@ -107,6 +107,14 @@ def setup_logger(loglevel="INFO"):
     # add ch to logger
     log.addHandler(ch)
 
+    if log_file:
+        file_handler = logging.FileHandler('PyMAPDL.log')
+        file_handler.setLevel(loglevel)
+        file_handler.setFormatter(formatter)
+
+    # creating a file handler
+    log.addHandler(file_handler)
+
     # make persistent
     setup_logger.log = log
 
@@ -116,10 +124,10 @@ def setup_logger(loglevel="INFO"):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(
-        self, loglevel="DEBUG", use_vtk=True, log_apdl=False, local=True, **start_parm
-    ):
-        """Initialize connection with MAPDL."""
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
+                log_file=True,
+                local=True, **start_parm):
+        """Initialize connection with MAPDL. """
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -139,8 +147,8 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        self._log = setup_logger(loglevel.upper())
-        self._log.debug("Logging set to %s", loglevel)
+        self._log = setup_logger(loglevel.upper(), log_file=log_file)
+        self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
 

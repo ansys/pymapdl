@@ -178,6 +178,10 @@ class MapdlGrpc(_MapdlCore):
         Removes temporary files on exit if MAPDL is local.  Default
         ``False``.
 
+    log_file : bool, optional
+        Copy the log to a file called `logs.log` located where the
+        python script is executed. Default ``True``.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -195,20 +199,11 @@ class MapdlGrpc(_MapdlCore):
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
     """
 
-    def __init__(
-        self,
-        ip="127.0.0.1",
-        port=None,
-        timeout=15,
-        loglevel="WARNING",
-        cleanup_on_exit=False,
-        log_apdl=False,
-        set_no_abort=True,
-        remove_temp_files=False,
-        **kwargs,
-    ):
+    def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
+                log_file=True, cleanup_on_exit=False, log_apdl=False,
+                set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
-        super().__init__(loglevel, **kwargs)
+        super().__init__(loglevel, log_file=log_file, **kwargs)
 
         check_valid_ip(ip)
 

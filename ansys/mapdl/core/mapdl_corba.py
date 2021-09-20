@@ -158,25 +158,19 @@ class MapdlCorba(_MapdlCore):
     verbose : bool
         Print all output from MAPDL to Python.  Useful for debugging
 
+    log_file : bool, optional
+        Copy the log to a file called `logs.log` located where the
+        python script is executed. Default ``True``.
+
     """
 
-    def __init__(
-        self,
-        loglevel="INFO",
-        log_apdl="w",
-        use_vtk=True,
-        log_broadcast=False,
-        verbose=False,
-        **start_parm
-    ):
+    def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
+                log_file = True,
+                 log_broadcast=False, verbose=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
-        super().__init__(
-            loglevel=loglevel,
-            use_vtk=use_vtk,
-            log_apdl=log_apdl,
-            log_broadcast=False,
-            **start_parm
-        )
+        super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
+                        log_file=log_file, log_broadcast=False, **start_parm)
+
         self._broadcast_logger = None
         self._server = None
         self._outfile = None
