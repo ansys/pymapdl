@@ -106,10 +106,7 @@ def get_licdebug_msg(licdebug_file):
 
 
 def is_denied_msg(msg):
-    if 'DENIED' in msg:
-        return True 
-    else:
-        return False 
+    return "DENIED" in msg
 
 
 ## Python
@@ -122,8 +119,7 @@ def try_ping_server_python():
         raise 
     except:
         return False 
-    else:
-        return True 
+    return True 
 
 
 def check_license_server_with_python():
@@ -136,10 +132,9 @@ def check_license_server_with_python():
 
 def get_license_server_details():
     if os.name == 'posix':  # Linux
-        ip, port = get_license_server_details_locally_for_linux()
+        return get_license_server_details_locally_for_linux()
     elif os.name == 'nt':  # Windows
-        ip, port = get_license_server_details_locally_for_windows()
-    return ip, port 
+        return get_license_server_details_locally_for_windows()
 
 
 def get_license_server_details_locally_for_linux():
@@ -161,9 +156,7 @@ def get_license_server_details_locally_for_windows():
 
 
 def ping_license_server_python(ip=LOCALHOST, port=1055, timeout=2):
-    """
-    Ping an IP with a port using python.
-    """
+    """Ping an IP with a port using python."""
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
@@ -173,7 +166,6 @@ def ping_license_server_python(ip=LOCALHOST, port=1055, timeout=2):
     try:
         s.connect((ip, port))
         s.send(msg.encode('utf-8'))
-        # s.create_connection()
     except socket.timeout: #if timeout error, the port is closed.
         success = False 
     else:
@@ -196,8 +188,7 @@ def try_lmutil():
     except:
         # Unkw
         return False 
-    else:
-        return True 
+    return True 
 
 
 def check_license_server_with_lmutil():
@@ -211,7 +202,6 @@ def check_license_server_with_lmutil():
 
     ip, port = get_license_server_details()
 
-    # warnings.warn('This method to check the license server status is not completely error free.\nIt is very likely it will show license not available.')
     
     output = run_lmutil(ip, port)
     selected_lines = re.findall('(?<=: license server )(.*)(?=\n)', output)
@@ -221,10 +211,8 @@ def check_license_server_with_lmutil():
     if len(servers_up) == 0:
         msg = "'lmutil' failed to get a list of servers."
         raise LicenseServerConnectionError(error_message=msg)
-    
     elif down_error_msg in output:
         raise LicenseServerConnectionError(error_message=down_error_msg) 
-    
     elif all(servers_up):
         pass 
     elif any(servers_up):
@@ -236,7 +224,6 @@ def check_license_server_with_lmutil():
 def run_lmutil(ip, port):
     lmutil_path = get_lmutil_path()
     command = f"{lmutil_path} lmstat -a -i -c {port}@{ip}"
-    # subprocess.check_output(command, shell=os.name != 'nt')
     process =  subprocess.Popen(command,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
@@ -274,8 +261,7 @@ def try_ansysli_util():
     except:
         # Unkw
         return False 
-    else:
-        return True 
+    return True 
 
 
 def check_license_server_with_ansysli_util():
@@ -297,7 +283,6 @@ def run_ansysli_util(license):
     ansysli_util_path = get_ansysli_util_path()
     command = f"{ansysli_util_path}  -checkout {license} "
 
-    # subprocess.check_output(command, shell=os.name != 'nt')
     process =  subprocess.Popen(command,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
@@ -330,7 +315,7 @@ def try_license_server():
     """
     Trying the three possible methods to check the license server status.
     """
-    success_ = try_license_file()
+    status = try_license_file()
 
     if not success_:
         success_ = try_ping_server_python()
