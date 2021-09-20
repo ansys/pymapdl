@@ -147,15 +147,15 @@ def port_in_use(port, host=LOCALHOST):
         except:
             return True
 
-          
+
 def create_ip_file(ip, path):
     """Create 'mylocal.ip' file required for ansys to change the IP of the gRPC server."""
 
     file_name = os.path.join(path, 'mylocal.ip')
     with open(file_name, 'w') as f:
         f.write(ip)
-        
-    
+
+
 def launch_grpc(
     exec_file="",
     jobname="file",
@@ -167,7 +167,7 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
-) -> tuple:
+    ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -348,9 +348,9 @@ def launch_grpc(
         port += 1
     pymapdl._LOCAL_PORTS.append(port)
 
-    # setting ip for the grpc server 
-    if ip != LOCALHOST: # Default local ip is 127.0.0.1 
-        create_ip_file(ip, run_location)        
+    # setting ip for the grpc server
+    if ip != LOCALHOST: # Default local ip is 127.0.0.1
+        create_ip_file(ip, run_location)
 
     cpu_sw = '-np %d' % nproc
 
