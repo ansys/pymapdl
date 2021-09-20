@@ -354,7 +354,7 @@ def launch_grpc(
         create_ip_file(ip, run_location)
 
     cpu_sw = "-np %d" % nproc
-    
+
     if ram:
         ram_sw = "-m %d" % int(1024 * ram)
     else:
