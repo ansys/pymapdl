@@ -27,14 +27,15 @@ k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 0, 0)
 k2 = mapdl.k("", 0, 1, 0)
 a0 = mapdl.a(k0, k1, k2)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
+mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos="xy")
 
 
 ###############################################################################
 # APDL Command: AL
 # ~~~~~~~~~~~~~~~~
 # Create an area from four lines.
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 0, 0)
@@ -45,7 +46,7 @@ l1 = mapdl.l(k1, k2)
 l2 = mapdl.l(k2, k3)
 l3 = mapdl.l(k3, k0)
 anum = mapdl.al(l0, l1, l2, l3)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
+mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos="xy")
 
 
 ###############################################################################
@@ -54,7 +55,8 @@ mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
 # Generate areas by dragging a line pattern along a path.
 #
 # Drag a circle between two keypoints to create an area
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 0, 0, 1)
@@ -68,12 +70,13 @@ mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, smooth_shading=True
 # APDL Command: ASBA
 # ~~~~~~~~~~~~~~~~~~
 # Subtract a ``0.5 x 0.5`` rectangle from a ``1 x 1`` rectangle.
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 anum0 = mapdl.blc4(0, 0, 1, 1)
 anum1 = mapdl.blc4(0.25, 0.25, 0.5, 0.5)
 aout = mapdl.asba(anum0, anum1)
-mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos='xy')
+mapdl.aplot(show_lines=True, line_width=5, show_bounds=True, cpos="xy")
 
 
 ###############################################################################
@@ -117,12 +120,14 @@ area
 # useful for selecting areas in a pythonic manner.
 #
 # This example generates a series of random squares and selects them
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 
 def generate_random_area():
     start_x, start_y, height, width = np.random.random(4)
-    mapdl.blc4(start_x*10, start_y*10, height, width)
+    mapdl.blc4(start_x * 10, start_y * 10, height, width)
+
 
 # create 20 random rectangles
 for i in range(20):
@@ -134,7 +139,7 @@ print(mapdl.geometry.anum)
 
 ###############################################################################
 # Select every other area with the old style command.
-mapdl.asel('S', 'AREA', '', 1, 20, 2)
+mapdl.asel("S", "AREA", "", 1, 20, 2)
 print(mapdl.geometry.anum)
 
 
@@ -177,7 +182,4 @@ print(items)
 # - 'zx' - ZX Plane view
 # - 'zy' - ZY Plane view
 
-mapdl.aplot(quality=1,
-            show_bounds=True,
-            cpos='iso',
-            show_lines=True)
+mapdl.aplot(quality=1, show_bounds=True, cpos="iso", show_lines=True)

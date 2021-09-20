@@ -4,7 +4,6 @@ named as components for easy selection later on.
 
 
 class Components:
-
     def cm(self, cname="", entity="", **kwargs):
         """Groups geometry items into a component.
 
@@ -102,8 +101,19 @@ class Components:
         command = "CMDELE,%s" % (str(name))
         return self.run(command, **kwargs)
 
-    def cmedit(self, aname="", oper="", cnam1="", cnam2="", cnam3="", cnam4="",
-               cnam5="", cnam6="", cnam7="", **kwargs):
+    def cmedit(
+        self,
+        aname="",
+        oper="",
+        cnam1="",
+        cnam2="",
+        cnam3="",
+        cnam4="",
+        cnam5="",
+        cnam6="",
+        cnam7="",
+        **kwargs,
+    ):
         """Edits an existing assembly.
 
         APDL Command: CMEDIT
@@ -129,12 +139,32 @@ class Components:
         -----
         This command is valid in any processor.
         """
-        command = "CMEDIT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(oper), str(
-            cnam1), str(cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7))
+        command = "CMEDIT,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(aname),
+            str(oper),
+            str(cnam1),
+            str(cnam2),
+            str(cnam3),
+            str(cnam4),
+            str(cnam5),
+            str(cnam6),
+            str(cnam7),
+        )
         return self.run(command, **kwargs)
 
-    def cmgrp(self, aname="", cnam1="", cnam2="", cnam3="", cnam4="", cnam5="",
-              cnam6="", cnam7="", cnam8="", **kwargs):
+    def cmgrp(
+        self,
+        aname="",
+        cnam1="",
+        cnam2="",
+        cnam3="",
+        cnam4="",
+        cnam5="",
+        cnam6="",
+        cnam7="",
+        cnam8="",
+        **kwargs,
+    ):
         """Groups components and assemblies into an assembly.
 
         APDL Command: CMGRP
@@ -172,8 +202,17 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = "CMGRP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(aname), str(cnam1), str(
-            cnam2), str(cnam3), str(cnam4), str(cnam5), str(cnam6), str(cnam7), str(cnam8))
+        command = "CMGRP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(aname),
+            str(cnam1),
+            str(cnam2),
+            str(cnam3),
+            str(cnam4),
+            str(cnam5),
+            str(cnam6),
+            str(cnam7),
+            str(cnam8),
+        )
         return self.run(command, **kwargs)
 
     def cmlist(self, name="", key="", entity="", **kwargs):
@@ -381,8 +420,9 @@ class Components:
         command = "CMSEL,%s,%s,%s" % (str(type_), str(name), str(entity))
         return self.run(command, **kwargs)
 
-    def cmwrite(self, option="", fname="", ext="", fnamei="", exti="",
-                fmat="", **kwargs):
+    def cmwrite(
+        self, option="", fname="", ext="", fnamei="", exti="", fmat="", **kwargs
+    ):
         """Writes node and element components and assemblies to a file.
 
         APDL Command: CMWRITE

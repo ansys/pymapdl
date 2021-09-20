@@ -45,7 +45,7 @@ def parse_e(msg: Optional[str]) -> Optional[int]:
 
 def parse_kpoint(msg):
     if msg:
-        res = re.search(r'kpoint=\s+(\d+)\s+', msg)
+        res = re.search(r"kpoint=\s+(\d+)\s+", msg)
         if res is not None:
             return int(res.group(1))
 

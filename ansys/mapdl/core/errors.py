@@ -21,8 +21,10 @@ Disable this check by passing ``override=True``
 """
 
 
-TYPE_MSG = 'Invalid datatype.  Must be one of the following:\n' +\
-    'np.int32, np.int64, or np.double'
+TYPE_MSG = (
+    "Invalid datatype.  Must be one of the following:\n"
+    + "np.int32, np.int64, or np.double"
+)
 
 
 class ANSYSDataTypeError(ValueError):
@@ -35,37 +37,40 @@ class ANSYSDataTypeError(ValueError):
 class VersionError(ValueError):
     """Raised when MAPDL is the wrong version"""
 
-    def __init__(self, msg='Invalid MAPDL version'):
+    def __init__(self, msg="Invalid MAPDL version"):
         ValueError.__init__(self, msg)
 
 
 class NoDistributedFiles(FileNotFoundError):
-    """Unable to find any distributed result files """
+    """Unable to find any distributed result files"""
 
-    def __init__(self, msg='Unable to find any distributed result files'):
+    def __init__(self, msg="Unable to find any distributed result files"):
         FileNotFoundError.__init__(self, msg)
 
 
 class MapdlRuntimeError(RuntimeError):
     """Raised when MAPDL passes an error"""
+
     pass
 
 
 class MapdlInvalidRoutineError(RuntimeError):
     """Raised when MAPDL is in the wrong routine"""
-    def __init__(self, msg=''):
+
+    def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
 
 
 class MapdlExitedError(RuntimeError):
     """Raised when MAPDL has exited"""
 
-    def __init__(self, msg='MAPDL has exited'):
+    def __init__(self, msg="MAPDL has exited"):
         RuntimeError.__init__(self, msg)
 
 
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
+
     def __init__(self, msg=LOCKFILE_MSG):
         RuntimeError.__init__(self, msg)
 
@@ -73,8 +78,9 @@ class LockFileException(RuntimeError):
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
-    logger.info('KeyboardInterrupt received.  Waiting until MAPDL '
-                'execution finishes')
+    logger.info(
+        "KeyboardInterrupt received.  Waiting until MAPDL " "execution finishes"
+    )
     SIGINT_TRACKER.append(True)
 
 
@@ -87,13 +93,14 @@ def protect_grpc(func):
     reason gRPC still captures SIGINT.
 
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         """Capture gRPC exceptions and KeyboardInterrupt"""
 
         # capture KeyboardInterrupt
         old_handler = None
-        if threading.current_thread().__class__.__name__ == '_MainThread':
+        if threading.current_thread().__class__.__name__ == "_MainThread":
             if threading.current_thread().is_alive():
                 old_handler = signal.signal(signal.SIGINT, handler)
 
@@ -105,18 +112,18 @@ def protect_grpc(func):
             try:
                 class_name = args[0].__class__.__name__
             except:
-                class_name = ''
+                class_name = ""
 
-            if class_name == 'MapdlGrpc':
+            if class_name == "MapdlGrpc":
                 mapdl = args[0]
-            elif hasattr(args[0], '_mapdl'):
+            elif hasattr(args[0], "_mapdl"):
                 mapdl = args[0]._mapdl
 
             # Must close unfinished processes
             mapdl._close_process()
-            raise MapdlExitedError('MAPDL server connection terminated') from None
+            raise MapdlExitedError("MAPDL server connection terminated") from None
 
-        if threading.current_thread().__class__.__name__ == '_MainThread':
+        if threading.current_thread().__class__.__name__ == "_MainThread":
             received_interrupt = bool(SIGINT_TRACKER)
 
             # always clear and revert to old handler
@@ -125,7 +132,7 @@ def protect_grpc(func):
                 signal.signal(signal.SIGINT, old_handler)
 
             if received_interrupt:  # pragma: no cover
-                raise KeyboardInterrupt('Interrupted during MAPDL execution')
+                raise KeyboardInterrupt("Interrupted during MAPDL execution")
 
         return out
 

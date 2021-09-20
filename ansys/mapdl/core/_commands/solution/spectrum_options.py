@@ -1,5 +1,4 @@
 class SpectrumOptions:
-
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """Specifies the acceleration spectrum computation constants for the
 
@@ -40,8 +39,19 @@ class SpectrumOptions:
         command = f"ADDAM,{af},{aa},{ab},{ac},{ad},{amin}"
         return self.run(command, **kwargs)
 
-    def coval(self, tblno1="", tblno2="", sv1="", sv2="", sv3="", sv4="",
-              sv5="", sv6="", sv7="", **kwargs):
+    def coval(
+        self,
+        tblno1="",
+        tblno2="",
+        sv1="",
+        sv2="",
+        sv3="",
+        sv4="",
+        sv5="",
+        sv6="",
+        sv7="",
+        **kwargs,
+    ):
         """Defines PSD cospectral values.
 
         APDL Command: COVAL
@@ -122,8 +132,7 @@ class SpectrumOptions:
         command = f"CQC,{signif},{label},{forcetype}"
         return self.run(command, **kwargs)
 
-    def ddaspec(self, keyref="", shptyp="", mountloc="", deftyp="", amin="",
-                **kwargs):
+    def ddaspec(self, keyref="", shptyp="", mountloc="", deftyp="", amin="", **kwargs):
         """APDL Command: DDASPEC
 
         Specifies the shock spectrum computation constants for DDAM analysis.
@@ -232,8 +241,19 @@ class SpectrumOptions:
         command = f"DSUM,{signif},{label},{td},{forcetype}"
         return self.run(command, **kwargs)
 
-    def freq(self, freq1="", freq2="", freq3="", freq4="", freq5="", freq6="",
-             freq7="", freq8="", freq9="", **kwargs):
+    def freq(
+        self,
+        freq1="",
+        freq2="",
+        freq3="",
+        freq4="",
+        freq5="",
+        freq6="",
+        freq7="",
+        freq8="",
+        freq9="",
+        **kwargs,
+    ):
         """Defines the frequency points for the SV vs. FREQ tables.
 
         APDL Command: FREQ
@@ -596,8 +616,19 @@ class SpectrumOptions:
         command = f"PSDCOM,{signif},{comode},{forcetype}"
         return self.run(command, **kwargs)
 
-    def psdfrq(self, tblno1="", tblno2="", freq1="", freq2="", freq3="",
-               freq4="", freq5="", freq6="", freq7="", **kwargs):
+    def psdfrq(
+        self,
+        tblno1="",
+        tblno2="",
+        freq1="",
+        freq2="",
+        freq3="",
+        freq4="",
+        freq5="",
+        freq6="",
+        freq7="",
+        **kwargs,
+    ):
         """Defines the frequency points for the input spectrum tables PSDVAL vs.
 
         APDL Command: PSDFRQ
@@ -797,8 +828,9 @@ class SpectrumOptions:
         command = f"PSDUNIT,{tblno},{type_},{gvalue}"
         return self.run(command, **kwargs)
 
-    def psdval(self, tblno="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
-               sv7="", **kwargs):
+    def psdval(
+        self, tblno="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="", sv7="", **kwargs
+    ):
         """Defines PSD values.
 
         APDL Command: PSDVAL
@@ -855,8 +887,19 @@ class SpectrumOptions:
         command = f"PSDWAV,{tblno},{vx},{vy},{vz}"
         return self.run(command, **kwargs)
 
-    def qdval(self, tblno1="", tblno2="", sv1="", sv2="", sv3="", sv4="",
-              sv5="", sv6="", sv7="", **kwargs):
+    def qdval(
+        self,
+        tblno1="",
+        tblno2="",
+        sv1="",
+        sv2="",
+        sv3="",
+        sv4="",
+        sv5="",
+        sv6="",
+        sv7="",
+        **kwargs,
+    ):
         """Defines PSD quadspectral values.
 
         APDL Command: QDVAL
@@ -1103,8 +1146,18 @@ class SpectrumOptions:
         command = f"SPDAMP,{tblno},{curvno},{dampratio}"
         return self.run(command, **kwargs)
 
-    def spfreq(self, tblno="", freq1="", freq2="", freq3="", freq4="",
-               freq5="", freq6="", freq7="", **kwargs):
+    def spfreq(
+        self,
+        tblno="",
+        freq1="",
+        freq2="",
+        freq3="",
+        freq4="",
+        freq5="",
+        freq6="",
+        freq7="",
+        **kwargs,
+    ):
         """Defines the frequency points for the input spectrum tables SPVAL vs.
 
         APDL Command: SPFREQ
@@ -1139,7 +1192,9 @@ class SpectrumOptions:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = f"SPFREQ,{tblno},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
+        command = (
+            f"SPFREQ,{tblno},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
+        )
         return self.run(command, **kwargs)
 
     def spgraph(self, tblno="", curvno="", curvnobeg="", **kwargs):
@@ -1292,8 +1347,19 @@ class SpectrumOptions:
         command = f"SPUNIT,{tblno},{type_},{gvalue},{keyinterp}"
         return self.run(command, **kwargs)
 
-    def spval(self, tblno="", curvno="", sv1="", sv2="", sv3="", sv4="",
-              sv5="", sv6="", sv7="", **kwargs):
+    def spval(
+        self,
+        tblno="",
+        curvno="",
+        sv1="",
+        sv2="",
+        sv3="",
+        sv4="",
+        sv5="",
+        sv6="",
+        sv7="",
+        **kwargs,
+    ):
         """Defines multi-point response spectrum values.
 
         APDL Command: SPVAL
@@ -1388,8 +1454,20 @@ class SpectrumOptions:
         command = f"SRSS,{signif},{label},{abssumkey},{forcetype}"
         return self.run(command, **kwargs)
 
-    def sv(self, damp="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="",
-           sv7="", sv8="", sv9="", **kwargs):
+    def sv(
+        self,
+        damp="",
+        sv1="",
+        sv2="",
+        sv3="",
+        sv4="",
+        sv5="",
+        sv6="",
+        sv7="",
+        sv8="",
+        sv9="",
+        **kwargs,
+    ):
         """Defines spectrum values to be associated with frequency points.
 
         APDL Command: SV
@@ -1432,8 +1510,7 @@ class SpectrumOptions:
         command = f"SV,{damp},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7},{sv8},{sv9}"
         return self.run(command, **kwargs)
 
-    def svplot(self, optionscale="", damp1="", damp2="", damp3="", damp4="",
-               **kwargs):
+    def svplot(self, optionscale="", damp1="", damp2="", damp3="", damp4="", **kwargs):
         """Displays input spectrum curves.
 
         APDL Command: SVPLOT

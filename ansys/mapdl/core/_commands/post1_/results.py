@@ -1,7 +1,5 @@
 class Results:
-
-    def nsort(self, item="", comp="", order="", kabs="", numb="", sel="",
-              **kwargs):
+    def nsort(self, item="", comp="", order="", kabs="", numb="", sel="", **kwargs):
         """Sorts nodal data.
 
         APDL Command: NSORT
@@ -328,8 +326,17 @@ class Results:
         command = f"PLORB,"
         return self.run(command, **kwargs)
 
-    def prenergy(self, energytype="", cname1="", cname2="", cname3="",
-                 cname4="", cname5="", cname6="", **kwargs):
+    def prenergy(
+        self,
+        energytype="",
+        cname1="",
+        cname2="",
+        cname3="",
+        cname4="",
+        cname5="",
+        cname6="",
+        **kwargs,
+    ):
         """Prints the total energies of a model or the energies of the specified
 
         APDL Command: PRENERGY
@@ -401,8 +408,18 @@ class Results:
         command = f"PRORB,"
         return self.run(command, **kwargs)
 
-    def plvect(self, item="", lab2="", lab3="", labp="", mode="", loc="",
-               edge="", kund="", **kwargs):
+    def plvect(
+        self,
+        item="",
+        lab2="",
+        lab3="",
+        labp="",
+        mode="",
+        loc="",
+        edge="",
+        kund="",
+        **kwargs,
+    ):
         """Displays results as vectors.
 
         APDL Command: PLVECT

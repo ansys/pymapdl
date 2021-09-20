@@ -35,12 +35,12 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> mapdl.block(0, 10, 0, 10, 0, 10)
         >>> mapdl.esize(3)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> positions = [q.nelem(1, i) for i in range(1, 21)]
         >>> positions
         [2, 14, 17, 5, 53, 63, 99, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         """
-        response = self._mapdl.run(f'_=NELEM({e},{npos})')
+        response = self._mapdl.run(f"_=NELEM({e},{npos})")
         return self._parse_parameter_integer_response(response)
 
     def enextn(self, n, loc) -> int:
@@ -75,10 +75,10 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> mapdl.block(0, 10, 0, 10, 0, 10)
         >>> mapdl.esize(1)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> elements = [q.enextn(5, 1), q.enextn(5, 2)]
         >>> elements
         [61, 71]
         """
-        response = self._mapdl.run(f'_=ENEXTN({n},{loc})')
+        response = self._mapdl.run(f"_=ENEXTN({n},{loc})")
         return self._parse_parameter_integer_response(response)

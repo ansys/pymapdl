@@ -1,5 +1,4 @@
 class ProcessControls:
-
     def wait(self, dtime="", **kwargs):
         """APDL Command: /WAIT
 
@@ -18,7 +17,7 @@ class ProcessControls:
         specified wait time increment has elapsed.  Useful when reading from a
         prepared input file to cause a pause, for example, after a display
         command so that the display can be reviewed for a period of time.
-        Another "wait" feature is available via the *ASK command.
+        Another "wait" feature is available via the ``*ASK`` command.
 
         This command is valid in any processor.
         """

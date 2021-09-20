@@ -6,31 +6,44 @@ from ansys.mapdl.core.misc import unique_rows
 from .theme import MapdlTheme
 
 
-def general_plotter(meshes, points, labels,
-                    title='',
-                    cpos=None,
-                    show_bounds=False, show_axes=True,
-                    background=None, off_screen=None,
-                    savefig=None,
-                    window_size=None,
-                    notebook=None,
-                    # add_mesh kwargs:
-                    style=None,
-                    color='w',
-                    show_edges=None, edge_color=None, point_size=5.0,
-                    line_width=None, opacity=1.0, flip_scalars=False,
-                    lighting=None, n_colors=256,
-                    interpolate_before_map=True, cmap=None,
-                    render_points_as_spheres=False, render_lines_as_tubes=False,
-                    scalar_bar_args={},
-                    smooth_shading=None,
-                    show_scalar_bar=None,
-                    # labels kwargs
-                    font_size=None,
-                    font_family=None,
-                    text_color=None,
-                    theme=None,
-                    return_plotter=False):
+def general_plotter(
+    meshes,
+    points,
+    labels,
+    title="",
+    cpos=None,
+    show_bounds=False,
+    show_axes=True,
+    background=None,
+    off_screen=None,
+    savefig=None,
+    window_size=None,
+    notebook=None,
+    # add_mesh kwargs:
+    style=None,
+    color="w",
+    show_edges=None,
+    edge_color=None,
+    point_size=5.0,
+    line_width=None,
+    opacity=1.0,
+    flip_scalars=False,
+    lighting=None,
+    n_colors=256,
+    interpolate_before_map=True,
+    cmap=None,
+    render_points_as_spheres=False,
+    render_lines_as_tubes=False,
+    scalar_bar_args={},
+    smooth_shading=None,
+    show_scalar_bar=None,
+    # labels kwargs
+    font_size=None,
+    font_family=None,
+    text_color=None,
+    theme=None,
+    return_plotter=False,
+):
     """General pymapdl plotter for APDL geometry and meshes.
 
     Parameters
@@ -188,44 +201,61 @@ def general_plotter(meshes, points, labels,
         pl.set_background(background)
 
     for point in points:
-        pl.add_points(point['points'],
-                      scalars=point.get('scalars', None),
-                      color=color,
-                      show_edges=show_edges, edge_color=edge_color,
-                      point_size=point_size, line_width=line_width,
-                      opacity=opacity, flip_scalars=flip_scalars,
-                      lighting=lighting, n_colors=n_colors,
-                      interpolate_before_map=interpolate_before_map,
-                      cmap=cmap, render_points_as_spheres=render_points_as_spheres,
-                      render_lines_as_tubes=render_lines_as_tubes)
+        pl.add_points(
+            point["points"],
+            scalars=point.get("scalars", None),
+            color=color,
+            show_edges=show_edges,
+            edge_color=edge_color,
+            point_size=point_size,
+            line_width=line_width,
+            opacity=opacity,
+            flip_scalars=flip_scalars,
+            lighting=lighting,
+            n_colors=n_colors,
+            interpolate_before_map=interpolate_before_map,
+            cmap=cmap,
+            render_points_as_spheres=render_points_as_spheres,
+            render_lines_as_tubes=render_lines_as_tubes,
+        )
 
     for mesh in meshes:
-        pl.add_mesh(mesh['mesh'],
-                    scalars=mesh.get('scalars'),
-                    scalar_bar_args=scalar_bar_args,
-                    color=mesh.get('color', color),
-                    style=mesh.get('style', style),
-                    show_edges=show_edges, edge_color=edge_color,
-                    smooth_shading=smooth_shading,
-                    point_size=point_size, line_width=line_width,
-                    show_scalar_bar=show_scalar_bar,
-                    opacity=opacity, flip_scalars=flip_scalars,
-                    lighting=lighting, n_colors=n_colors,
-                    interpolate_before_map=interpolate_before_map,
-                    cmap=cmap, render_points_as_spheres=render_points_as_spheres,
-                    render_lines_as_tubes=render_lines_as_tubes)
+        pl.add_mesh(
+            mesh["mesh"],
+            scalars=mesh.get("scalars"),
+            scalar_bar_args=scalar_bar_args,
+            color=mesh.get("color", color),
+            style=mesh.get("style", style),
+            show_edges=show_edges,
+            edge_color=edge_color,
+            smooth_shading=smooth_shading,
+            point_size=point_size,
+            line_width=line_width,
+            show_scalar_bar=show_scalar_bar,
+            opacity=opacity,
+            flip_scalars=flip_scalars,
+            lighting=lighting,
+            n_colors=n_colors,
+            interpolate_before_map=interpolate_before_map,
+            cmap=cmap,
+            render_points_as_spheres=render_points_as_spheres,
+            render_lines_as_tubes=render_lines_as_tubes,
+        )
 
     for label in labels:
         # verify points are not duplicates
-        points, idx, _ = unique_rows(np.array(label['points']))
-        labels = np.array(label['labels'])[idx].tolist()
+        points, idx, _ = unique_rows(np.array(label["points"]))
+        labels = np.array(label["labels"])[idx].tolist()
 
-        pl.add_point_labels(points,
-                            labels,
-                            show_points=False, shadow=False,
-                            font_size=font_size,
-                            font_family=font_family,
-                            text_color=text_color)
+        pl.add_point_labels(
+            points,
+            labels,
+            show_points=False,
+            shadow=False,
+            font_size=font_size,
+            font_family=font_family,
+            text_color=text_color,
+        )
 
     if cpos:
         pl.camera_position = cpos
@@ -240,8 +270,7 @@ def general_plotter(meshes, points, labels,
 
     # permit user to save the figure as a screenshot
     if savefig:
-        pl.show(title=title, auto_close=False, window_size=window_size,
-                screenshot=True)
+        pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
         pl.screenshot(savefig)
 
         # return unclosed plotter

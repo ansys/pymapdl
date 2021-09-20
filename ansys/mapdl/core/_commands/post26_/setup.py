@@ -1,11 +1,21 @@
-from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from typing import Optional
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class Setup:
-
-    def ansol(self, nvar="", node="", item="", comp="", name="", mat="",
-              real="", ename="", **kwargs):
+    def ansol(
+        self,
+        nvar="",
+        node="",
+        item="",
+        comp="",
+        name="",
+        mat="",
+        real="",
+        ename="",
+        **kwargs,
+    ):
         """Specifies averaged nodal data to be stored from the results file in the
 
         APDL Command: ANSOL
@@ -157,8 +167,7 @@ class Setup:
         command = f"CISOL,{n},{id_},{node},{cont},{dtype}"
         return self.run(command, **kwargs)
 
-    def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="",
-             **kwargs):
+    def data(self, ir="", lstrt="", lstop="", linc="", name="", kcplx="", **kwargs):
         """Reads data records from a file into a variable.
 
         APDL Command: DATA
@@ -210,8 +219,7 @@ class Setup:
         command = f"DATA,{ir},{lstrt},{lstop},{linc},{name},{kcplx}"
         return self.run(command, **kwargs)
 
-    def edread(self, nstart="", label="", num="", step1="", step2="",
-               **kwargs):
+    def edread(self, nstart="", label="", num="", step1="", step2="", **kwargs):
         """Reads explicit dynamics output into variables for time-history
 
         APDL Command: EDREAD
@@ -300,9 +308,16 @@ class Setup:
         command = f"ENERSOL,{nvar},{item},{name}"
         return self.run(command, **kwargs)
 
-    def esol(self, nvar: MapdlInt = "", elem: MapdlInt = "",
-             node: MapdlInt = "", item: str = "", comp: str = "",
-             name: str = "", **kwargs) -> Optional[str]:
+    def esol(
+        self,
+        nvar: MapdlInt = "",
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Specify element data to be stored from the results file.
 
         /POST26 APDL Command: ESOL
@@ -338,24 +353,6 @@ class Setup:
             printout and displays.  Defaults to a label formed by
             concatenating the first four characters of the Item and
             Comp labels.
-
-        Examples
-        --------
-        Switch to the time-history postprocessor
-
-        >>> mapdl.post26()
-
-        Store the stress in the X direction for element 1 at node 1
-
-        >>> nvar = 2
-        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
-
-        Move the value to an array and access it via mapdl.parameters
-
-        >>> mapdl.dim('ARR', 'ARRAY', 1)
-        >>> mapdl.vget('ARR', nvar)
-        >>> mapdl.parameters['ARR']
-        array(-1991.40234375)
 
         Notes
         -----
@@ -395,6 +392,25 @@ class Setup:
         For more information on the meaning of contact status and its
         possible values, see Reviewing Results in POST1 in the Contact
         Technology Guide.
+
+        Examples
+        --------
+        Switch to the time-history postprocessor
+
+        >>> mapdl.post26()
+
+        Store the stress in the X direction for element 1 at node 1
+
+        >>> nvar = 2
+        >>> mapdl.esol(nvar, 1, 1, 'S', 'X')
+
+        Move the value to an array and access it via mapdl.parameters
+
+        >>> mapdl.dim('ARR', 'ARRAY', 1)
+        >>> mapdl.vget('ARR', nvar)
+        >>> mapdl.parameters['ARR']
+        array(-1991.40234375)
+
         """
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
@@ -542,8 +558,7 @@ class Setup:
         command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def nsol(self, nvar="", node="", item="", comp="", name="", sector="",
-             **kwargs):
+    def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
         """Specifies nodal data to be stored from the results file.
 
         APDL Command: NSOL
@@ -587,12 +602,7 @@ class Setup:
         Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide for
         more information.
 
-        Table: 211:: : NSOL - Valid Item and Component Labels
-
-        Table: 212:: : NSOL - Valid Item and Component Labels for ANSYS LS-DYNA
-        Nodal Results
-
-         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
         """
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"
@@ -701,8 +711,18 @@ class Setup:
         command = f"RFORCE,{nvar},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def rgb(self, kywrd="", pred="", pgrn="", pblu="", n1="", n2="", ninc="",
-            ncntr="", **kwargs):
+    def rgb(
+        self,
+        kywrd="",
+        pred="",
+        pgrn="",
+        pblu="",
+        n1="",
+        n2="",
+        ninc="",
+        ncntr="",
+        **kwargs,
+    ):
         """Specifies the RGB color values for indices and contours.
 
         APDL Command: /RGB

@@ -1,5 +1,4 @@
 class Generation:
-
     def rmalist(self, **kwargs):
         """Lists all defined master nodes for a ROM method.
 
@@ -138,8 +137,9 @@ class Generation:
         command = f"RMMLIST,"
         return self.run(command, **kwargs)
 
-    def rmmrange(self, mode="", key="", min_="", max_="", nstep="", damp="",
-                 scale="", **kwargs):
+    def rmmrange(
+        self, mode="", key="", min_="", max_="", nstep="", damp="", scale="", **kwargs
+    ):
         """Defines and edits various modal parameters for the ROM method.
 
         APDL Command: RMMRANGE
@@ -232,8 +232,19 @@ class Generation:
         command = f"RMMSELECT,{nmode},{method},{dmin},{dmax}"
         return self.run(command, **kwargs)
 
-    def rmporder(self, ord1="", ord2="", ord3="", ord4="", ord5="", ord6="",
-                 ord7="", ord8="", ord9="", **kwargs):
+    def rmporder(
+        self,
+        ord1="",
+        ord2="",
+        ord3="",
+        ord4="",
+        ord5="",
+        ord6="",
+        ord7="",
+        ord8="",
+        ord9="",
+        **kwargs,
+    ):
         """Defines polynomial orders for ROM functions.
 
         APDL Command: RMPORDER
@@ -254,7 +265,9 @@ class Generation:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = f"RMPORDER,{ord1},{ord2},{ord3},{ord4},{ord5},{ord6},{ord7},{ord8},{ord9}"
+        command = (
+            f"RMPORDER,{ord1},{ord2},{ord3},{ord4},{ord5},{ord6},{ord7},{ord8},{ord9}"
+        )
         return self.run(command, **kwargs)
 
     def rmrgenerate(self, **kwargs):

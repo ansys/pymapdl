@@ -1,7 +1,15 @@
 class Conn:
-
-    def cat5in(self, name="", extension="", path="", entity="", fmt="",
-               nocl="", noan="", **kwargs):
+    def cat5in(
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
         """Transfers a .CATPart file into the ANSYS program.
 
         APDL Command: ~CAT5IN
@@ -98,8 +106,9 @@ class Conn:
         """
         return self.run(f"~CATIAIN,{name},{extension},{path},,,{blank}", **kwargs)
 
-    def parain(self, name="", extension="", path="", entity="", fmt="",
-               scale="", **kwargs):
+    def parain(
+        self, name="", extension="", path="", entity="", fmt="", scale="", **kwargs
+    ):
         """Transfers a Parasolid file into the ANSYS program.
 
         APDL Command: ~PARAIN
@@ -194,8 +203,17 @@ class Conn:
         command = f"~PROEIN,{name},{extension},{path},{proecomm}"
         return self.run(command, **kwargs)
 
-    def satin(self, name="", extension="", path="", entity="", fmt="", nocl="",
-              noan="", **kwargs):
+    def satin(
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
         """Transfers a .SAT file into the ANSYS program.
 
         APDL Command: ~SATIN
@@ -258,8 +276,9 @@ class Conn:
         command = f"~SATIN,{name},{extension},{path},{entity},{fmt},{nocl},{noan}"
         return self.run(command, **kwargs)
 
-    def ugin(self, name="", extension="", path="", entity="", layer="", fmt="",
-             **kwargs):
+    def ugin(
+        self, name="", extension="", path="", entity="", layer="", fmt="", **kwargs
+    ):
         """Transfers an NX part into the ANSYS program.
 
         APDL Command: ~UGIN

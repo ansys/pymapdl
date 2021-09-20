@@ -14,6 +14,7 @@ First, start MAPDL as a service and disable all but error messages.
 # sphinx_gallery_thumbnail_number = 2
 
 from ansys.mapdl.core import launch_mapdl
+
 mapdl = launch_mapdl()
 
 ###############################################################################
@@ -21,7 +22,7 @@ mapdl = launch_mapdl()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a simple beam, specify the material properties, and mesh it.
 mapdl.prep7()
-mapdl.mp('kxx', 1, 45)
+mapdl.mp("kxx", 1, 45)
 mapdl.et(1, 90)
 mapdl.block(-0.3, 0.3, -0.46, 1.34, -0.2, -0.2 + 0.02)
 mapdl.vsweep(1)
@@ -32,12 +33,12 @@ mapdl.eplot()
 # Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~
 # Set the thermal boundary conditions
-mapdl.asel('S', vmin=3)
+mapdl.asel("S", vmin=3)
 mapdl.nsla()
-mapdl.d('all', 'temp', 5)
-mapdl.asel('S', vmin=4)
+mapdl.d("all", "temp", 5)
+mapdl.asel("S", vmin=4)
 mapdl.nsla()
-mapdl.d('all', 'temp', 100)
+mapdl.d("all", "temp", 100)
 out = mapdl.allsel()
 
 
@@ -46,7 +47,7 @@ out = mapdl.allsel()
 # ~~~~~
 # Solve the thermal static analysis and print the results
 mapdl.vsweep(1)
-mapdl.run('/SOLU')
+mapdl.run("/SOLU")
 print(mapdl.solve())
 out = mapdl.finish()
 

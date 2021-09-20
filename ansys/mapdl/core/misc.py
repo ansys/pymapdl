@@ -19,14 +19,16 @@ MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == 'nt':
-        ans_root = 'c:/Program Files/ANSYS Inc/'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin', 'winx64',
-                                'ANSYS%s.exe' % rver)
+    if os.name == "nt":
+        ans_root = "c:/Program Files/ANSYS Inc/"
+        mapdlbin = os.path.join(
+            ans_root, "v%s" % rver, "ansys", "bin", "winx64", "ANSYS%s.exe" % rver
+        )
     else:
-        ans_root = '/usr/ansys_inc'
-        mapdlbin = os.path.join(ans_root, 'v%s' % rver, 'ansys', 'bin',
-                                'ansys%s' % rver)
+        ans_root = "/usr/ansys_inc"
+        mapdlbin = os.path.join(
+            ans_root, "v%s" % rver, "ansys", "bin", "ansys%s" % rver
+        )
 
     return mapdlbin
 
@@ -34,8 +36,7 @@ def get_ansys_bin(rver):
 class Report(scooby.Report):
     """A class for custom scooby.Report."""
 
-    def __init__(self, additional=None, ncol=3, text_width=80, sort=False,
-                 gpu=True):
+    def __init__(self, additional=None, ncol=3, text_width=80, sort=False, gpu=True):
         """Generate a :class:`scooby.Report` instance.
 
         Parameters
@@ -61,31 +62,32 @@ class Report(scooby.Report):
         """
         # Mandatory packages
         core = [
-            'matplotlib',
-            'numpy',
-            'pyvista',
-            'appdirs',
-            'tqdm',
-            'pyiges',
-            'scipy',
-            'grpc',  # grpcio
-            'ansys.grpc.mapdl',  # ansys-grpc-mapdl
-            'ansys.mapdl.reader',  # ansys-mapdl-reader
-            'google.protobuf',  # protobuf library
+            "matplotlib",
+            "numpy",
+            "pyvista",
+            "appdirs",
+            "tqdm",
+            "pyiges",
+            "scipy",
+            "grpc",  # grpcio
+            "ansys.grpc.mapdl",  # ansys-grpc-mapdl
+            "ansys.mapdl.reader",  # ansys-mapdl-reader
+            "google.protobuf",  # protobuf library
         ]
 
-        if os.name == 'linux':
-            core.extend(['pexpect'])
+        if os.name == "linux":
+            core.extend(["pexpect"])
 
         # Optional packages
-        optional = ['matplotlib']
+        optional = ["matplotlib"]
         if sys.version_info[1] < 9:
-            optional.append('ansys_corba')
+            optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if gpu:
             from pyvista.utilities.errors import GPUInfo
+
             try:
                 extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
             except:
@@ -93,10 +95,16 @@ class Report(scooby.Report):
         else:
             extra_meta = ("GPU Details", "None")
 
-        scooby.Report.__init__(self, additional=additional, core=core,
-                               optional=optional, ncol=ncol,
-                               text_width=text_width, sort=sort,
-                               extra_meta=extra_meta)
+        scooby.Report.__init__(
+            self,
+            additional=additional,
+            core=core,
+            optional=optional,
+            ncol=ncol,
+            text_width=text_width,
+            sort=sort,
+            extra_meta=extra_meta,
+        )
 
     def mapdl_info(self):
         """Return information regarding the ansys environment and installation."""
@@ -104,36 +112,38 @@ class Report(scooby.Report):
         from ansys.mapdl.core.launcher import _get_available_base_ansys
 
         # List installed Ansys
-        lines = ['', 'Ansys Environment Report', '-'*79]
-        lines = ['\n', 'Ansys Installation', '******************']
+        lines = ["", "Ansys Environment Report", "-" * 79]
+        lines = ["\n", "Ansys Installation", "******************"]
         mapdl_install = _get_available_base_ansys()
         if not mapdl_install:
-            lines.append('Unable to locate any Ansys installations')
+            lines.append("Unable to locate any Ansys installations")
         else:
-            lines.append('Version   Location')
-            lines.append('------------------')
+            lines.append("Version   Location")
+            lines.append("------------------")
             for key in sorted(mapdl_install.keys()):
-                lines.append(f'{key}       {mapdl_install[key]}')
-        install_info = '\n'.join(lines)
+                lines.append(f"{key}       {mapdl_install[key]}")
+        install_info = "\n".join(lines)
 
-        env_info_lines = ['\n\n\nAnsys Environment Variables',
-                          '***************************']
+        env_info_lines = [
+            "\n\n\nAnsys Environment Variables",
+            "***************************",
+        ]
         n_var = 0
         for key, value in os.environ.items():
-            if 'AWP' in key or 'CADOE' in key or 'ANSYS' in key:
-                env_info_lines.append(f'{key:<30} {value}')
+            if "AWP" in key or "CADOE" in key or "ANSYS" in key:
+                env_info_lines.append(f"{key:<30} {value}")
                 n_var += 1
         if not n_var:
-            env_info_lines.append('None')
-        env_info = '\n'.join(env_info_lines)
+            env_info_lines.append("None")
+        env_info = "\n".join(env_info_lines)
 
         return install_info + env_info
 
     def __repr__(self):
-        add_text = '-'*79 + '\nPyMAPDL Software and Environment Report'
+        add_text = "-" * 79 + "\nPyMAPDL Software and Environment Report"
 
         report = add_text + super().__repr__() + self.mapdl_info()
-        return report.replace('-'*80, '-'*79)  # hotfix for scooby
+        return report.replace("-" * 80, "-" * 79)  # hotfix for scooby
 
 
 def is_float(input_string):
@@ -146,8 +156,8 @@ def is_float(input_string):
 
 
 def random_string(stringLength=10, letters=string.ascii_lowercase):
-    """Generate a random string of fixed length """
-    return ''.join(random.choice(letters) for i in range(stringLength))
+    """Generate a random string of fixed length"""
+    return "".join(random.choice(letters) for i in range(stringLength))
 
 
 def _check_has_ansys():
@@ -160,6 +170,7 @@ def _check_has_ansys():
         standard location.
     """
     from ansys.mapdl.core.launcher import check_valid_ansys
+
     try:
         return check_valid_ansys()
     except:
@@ -173,12 +184,12 @@ def supress_logging(func):
     def wrapper(*args, **kwargs):
         mapdl = args[0]
         prior_log_level = mapdl._log.level
-        if prior_log_level != 'CRITICAL':
-            mapdl._set_log_level('CRITICAL')
+        if prior_log_level != "CRITICAL":
+            mapdl._set_log_level("CRITICAL")
 
         out = func(*args, **kwargs)
 
-        if prior_log_level != 'CRITICAL':
+        if prior_log_level != "CRITICAL":
             mapdl._set_log_level(prior_log_level)
 
         return out
@@ -192,20 +203,21 @@ def run_as_prep7(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         mapdl = args[0]
-        if hasattr(mapdl, '_mapdl'):
+        if hasattr(mapdl, "_mapdl"):
             mapdl = mapdl._mapdl
         prior_processor = mapdl.parameters.routine
-        if prior_processor != 'PREP7':
+        if prior_processor != "PREP7":
             mapdl.prep7()
 
         out = func(*args, **kwargs)
 
-        if prior_processor == 'Begin level':
+        if prior_processor == "Begin level":
             mapdl.finish()
-        elif prior_processor != 'PREP7':
-            mapdl.run('/%s' % prior_processor)
+        elif prior_processor != "PREP7":
+            mapdl.run("/%s" % prior_processor)
 
         return out
+
     return wrapper
 
 
@@ -217,6 +229,7 @@ def threaded(func):
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.start()
         return thread
+
     return wrapper
 
 
@@ -229,17 +242,18 @@ def threaded_daemon(func):
         thread.daemon = True
         thread.start()
         return thread
+
     return wrapper
 
 
 def chunks(l, n):
-    """ Yield successive n-sized chunks from l """
+    """Yield successive n-sized chunks from l"""
     for i in range(0, len(l), n):
-        yield l[i:i + n]
+        yield l[i : i + n]
 
 
 def unique_rows(a):
-    """ Returns unique rows of a and indices of those rows """
+    """Returns unique rows of a and indices of those rows"""
     if not a.flags.c_contiguous:
         a = np.ascontiguousarray(a)
 
@@ -256,7 +270,7 @@ def creation_time(path_to_file):
     it was last modified if that isn't possible.
     See http://stackoverflow.com/a/39501288/1709587 for explanation.
     """
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)
@@ -291,7 +305,7 @@ def create_temp_dir(tmpdir=None):
 
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
-    letters = string.ascii_lowercase.replace('n', '')
+    letters = string.ascii_lowercase.replace("n", "")
     path = os.path.join(tmpdir, random_string(10, letters))
 
     # in the *rare* case of a duplicate path
@@ -301,9 +315,10 @@ def create_temp_dir(tmpdir=None):
     try:
         os.mkdir(path)
     except:
-        raise RuntimeError('Unable to create temporary working '
-                           'directory %s\n' % path +
-                           'Please specify run_location=')
+        raise RuntimeError(
+            "Unable to create temporary working "
+            "directory %s\n" % path + "Please specify run_location="
+        )
 
     return path
 
@@ -314,4 +329,5 @@ def no_return(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         func(*args, **kwargs)
+
     return wrapper

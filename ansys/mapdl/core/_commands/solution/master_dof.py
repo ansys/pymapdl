@@ -1,7 +1,17 @@
 class MasterDOF:
-
-    def m(self, node="", lab1="", nend="", ninc="", lab2="", lab3="", lab4="",
-          lab5="", lab6="", **kwargs):
+    def m(
+        self,
+        node="",
+        lab1="",
+        nend="",
+        ninc="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        **kwargs,
+    ):
         """Defines master degrees of freedom for superelement generation analyses.
 
         APDL Command: M
@@ -64,8 +74,19 @@ class MasterDOF:
         command = f"M,{node},{lab1},{nend},{ninc},{lab2},{lab3},{lab4},{lab5},{lab6}"
         return self.run(command, **kwargs)
 
-    def mdele(self, node="", lab1="", nend="", ninc="", lab2="", lab3="",
-              lab4="", lab5="", lab6="", **kwargs):
+    def mdele(
+        self,
+        node="",
+        lab1="",
+        nend="",
+        ninc="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        **kwargs,
+    ):
         """Deletes master degrees of freedom.
 
         APDL Command: MDELE
@@ -91,7 +112,9 @@ class MasterDOF:
 
         This command is also valid in PREP7.
         """
-        command = f"MDELE,{node},{lab1},{nend},{ninc},{lab2},{lab3},{lab4},{lab5},{lab6}"
+        command = (
+            f"MDELE,{node},{lab1},{nend},{ninc},{lab2},{lab3},{lab4},{lab5},{lab6}"
+        )
         return self.run(command, **kwargs)
 
     def mgen(self, itime="", inc="", node1="", node2="", ninc="", **kwargs):

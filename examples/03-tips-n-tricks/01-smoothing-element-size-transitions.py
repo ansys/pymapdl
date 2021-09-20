@@ -58,13 +58,13 @@ a3 = mapdl.a(1, 2, 6, 5)
 # for a quadrilateral mesh.
 #
 
-mapdl.esize(.7)
+mapdl.esize(0.7)
 mapdl.aesize(a2, 0.1)
-mapdl.mshape(1, '2D')
+mapdl.mshape(1, "2D")
 
 mapdl.et(1, "SHELL181")
-mapdl.amesh('ALL')
-mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background='w')
+mapdl.amesh("ALL")
+mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background="w")
 
 ###############################################################################
 # Smoothing the transition
@@ -84,11 +84,11 @@ mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background='w')
 # are self-evident.
 #
 
-mapdl.aclear('ALL')
+mapdl.aclear("ALL")
 for k in [k2, k3, k6, k7]:
     mapdl.kesize(k, 0.1)
-mapdl.amesh('ALL')
-mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background='w')
+mapdl.amesh("ALL")
+mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background="w")
 
 ###############################################################################
 # Smoothing the transition into a2
@@ -98,9 +98,10 @@ mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background='w')
 # shift the main location of the size transition to within the face of ``a2``.
 #
 
-mapdl.aclear('ALL')
+mapdl.aclear("ALL")
 for k in [k2, k3, k6, k7]:
     mapdl.kesize(k, 0.2)
-mapdl.amesh('ALL')
-_ = mapdl.eplot(vtk=True, show_edges=True, show_axes=False,
-                line_width=2, background='w')
+mapdl.amesh("ALL")
+_ = mapdl.eplot(
+    vtk=True, show_edges=True, show_axes=False, line_width=2, background="w"
+)

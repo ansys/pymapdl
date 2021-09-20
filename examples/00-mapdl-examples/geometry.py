@@ -49,14 +49,16 @@ print(mapdl.geometry)
 # :func:`ansys.mapdl.core.plotting.general_plotter` function.  You can
 # configure this method with a variety of keyword arguments.  For example:
 
-mapdl.lplot(show_line_numbering=False,
-            background='k',
-            line_width=3,
-            color='w',
-            show_axes=False,
-            show_bounds=True,
-            title='',
-            cpos='xz')
+mapdl.lplot(
+    show_line_numbering=False,
+    background="k",
+    line_width=3,
+    color="w",
+    show_axes=False,
+    show_bounds=True,
+    title="",
+    cpos="xz",
+)
 
 
 ###############################################################################
@@ -65,8 +67,8 @@ mapdl.lplot(show_line_numbering=False,
 # arguments.  For example:
 
 my_theme = pymapdl.MapdlTheme()
-my_theme.background = 'white'
-my_theme.cmap = 'jet'  # colormap
+my_theme.background = "white"
+my_theme.cmap = "jet"  # colormap
 my_theme.axes.show = False
 my_theme.show_scalar_bar = False
 
@@ -82,9 +84,9 @@ mapdl.aplot(theme=my_theme)
 
 # set the preprocessor, element type and size, and mesh the volume
 mapdl.prep7()
-mapdl.et(1, 'SOLID187')
+mapdl.et(1, "SOLID187")
 mapdl.esize(0.075)
-mapdl.vmesh('all')
+mapdl.vmesh("all")
 
 # print out the mesh characteristics
 print(mapdl.mesh)
@@ -116,14 +118,14 @@ grid.cells
 ###############################################################################
 # Obtain node numbers of the grid
 
-grid.point_arrays['ansys_node_num']
+grid.point_arrays["ansys_node_num"]
 
 
 ###############################################################################
 # Save arbitrary data to the grid
 
 # must be sized to the number of points
-grid.point_arrays['my_data'] = np.arange(grid.n_points)
+grid.point_arrays["my_data"] = np.arange(grid.n_points)
 grid.point_arrays
 
 
@@ -134,11 +136,14 @@ grid.point_arrays
 # make interesting scalars
 scalars = grid.points[:, 2]  # z coordinates
 
-sbar_kwargs = {'color': 'black', 'title': 'Z Coord'}
-grid.plot(scalars=scalars, show_scalar_bar=True,
-          scalar_bar_args=sbar_kwargs,
-          show_edges=True,
-          theme=my_theme)
+sbar_kwargs = {"color": "black", "title": "Z Coord"}
+grid.plot(
+    scalars=scalars,
+    show_scalar_bar=True,
+    scalar_bar_args=sbar_kwargs,
+    show_edges=True,
+    theme=my_theme,
+)
 
 
 ###############################################################################
