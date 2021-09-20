@@ -15,21 +15,33 @@ For that purpose, using ``gmsh`` we import an external geometry file in STL form
 The geometry is imported then to PyANSYS using PyANSYS Reader.
 
 This example is composed of several files. 
+
 * ``gmsh_converter.py``: In this file, the STL file is converted to the gmsh file format. 
 * ``mesh_converter``: In this file, the mesh file in gmsh format is converted to ANSYS CDB database format file. 
-* ``main.py``: Import CDB database, setup the modal analysis and run it. It also shows an animation of the first mode
-and save it to a gif file called ``animation.gif``. 
+* ``main.py``: Import CDB database, setup the modal analysis and run it. It also shows an animation of the first mode and save it to a gif file called ``animation.gif``. 
 
 
 Requirements
 ------------
 You need to have ``gmsh`` installed. You can install it using PIP:
 
-.. code-block::
+.. code-block:: 
 
     pip install gmsh
 
 
+Source code
+-----------
+
+
+.. literalinclude:: gmsh_converter.py
+    :linenos:
+    :language: python
+
+
+
+
 Notes
 -----
+
 It is recommended to copy all the files in a separate folder. 

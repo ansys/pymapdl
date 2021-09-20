@@ -7,7 +7,7 @@ Extended Examples Library
     :hidden:
     :maxdepth: 3
 
-    ex 01-gmsh_example/ex 01-gmsh example
+    ex_01-gmsh_example/ex_01-gmsh_example
 
 
 
