@@ -50,7 +50,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.nsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=NSEL({n})')
+        response = self._mapdl.run(f"_=NSEL({n})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -100,7 +100,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.ksel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=KSEL({k})')
+        response = self._mapdl.run(f"_=KSEL({k})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -152,7 +152,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.lsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=LSEL({n})')
+        response = self._mapdl.run(f"_=LSEL({n})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -205,7 +205,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.asel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=ASEL({a})')
+        response = self._mapdl.run(f"_=ASEL({a})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -259,7 +259,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.esel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=ESEL({e})')
+        response = self._mapdl.run(f"_=ESEL({e})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -314,7 +314,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.vsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=VSEL({v})')
+        response = self._mapdl.run(f"_=VSEL({v})")
         integer = self._parse_parameter_integer_response(response)
         return SelectionStatus(integer)
 
@@ -357,7 +357,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_nodes
         [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
         """
-        response = self._mapdl.run(f'_=NDNEXT({n})')
+        response = self._mapdl.run(f"_=NDNEXT({n})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -397,7 +397,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_kps
         [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
         """
-        response = self._mapdl.run(f'_=KPNEXT({k})')
+        response = self._mapdl.run(f"_=KPNEXT({k})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -439,7 +439,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_els
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=ELNEXT({e})')
+        response = self._mapdl.run(f"_=ELNEXT({e})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -481,7 +481,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_lines
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=LSNEXT({n})')
+        response = self._mapdl.run(f"_=LSNEXT({n})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -523,7 +523,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_areas
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=ARNEXT({a})')
+        response = self._mapdl.run(f"_=ARNEXT({a})")
         integer = self._parse_parameter_integer_response(response)
         return integer
 
@@ -566,6 +566,6 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_vols
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=VLNEXT({v})')
+        response = self._mapdl.run(f"_=VLNEXT({v})")
         integer = self._parse_parameter_integer_response(response)
         return integer

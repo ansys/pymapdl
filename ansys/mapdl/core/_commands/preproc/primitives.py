@@ -2,12 +2,20 @@ from ansys.mapdl.core._commands import parse
 
 
 class Primitives:
-
-    def blc4(self, xcorner="", ycorner="", width="", height="", depth="",
-             **kwargs) -> int:
+    def blc4(
+        self, xcorner="", ycorner="", width="", height="", depth="", **kwargs
+    ) -> int:
         """Creates a rectangular area or block volume by corner points.
 
         APDL Command: BLC4
+
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane.
+        A rectangle will be defined with four keypoints and four
+        lines.  A volume will be defined with eight keypoints, twelve
+        lines, and six areas, with the top and bottom faces parallel
+        to the working plane.  See the BLC5, RECTNG, and BLOCK
+        commands for alternate ways to create rectangles and blocks.
 
         Parameters
         ----------
@@ -46,25 +54,25 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a rectangular area anywhere on the working plane or a
-        hexahedral volume with one face anywhere on the working plane.
-        A rectangle will be defined with four keypoints and four
-        lines.  A volume will be defined with eight keypoints, twelve
-        lines, and six areas, with the top and bottom faces parallel
-        to the working plane.  See the BLC5, RECTNG, and BLOCK
-        commands for alternate ways to create rectangles and blocks.
         """
         command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def blc5(self, xcenter="", ycenter="", width="", height="", depth="",
-             **kwargs) -> int:
-        """Create a rectangular area or block volume by center and corner
+    def blc5(
+        self, xcenter="", ycenter="", width="", height="", depth="", **kwargs
+    ) -> int:
+        """Create a rectangular area or block volume by center and corner points.
 
         APDL Command: BLC5
-        points.
+
+        Defines a rectangular area anywhere on the working plane or a
+        hexahedral volume with one face anywhere on the working plane
+        by specifying the center and corner points.  A rectangle will
+        be defined with four keypoints and four lines.  A volume will
+        be defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4``, ``RECTNG``, and ``BLOCK`` commands for
+        alternate ways to create rectangles and blocks.
 
         Parameters
         ----------
@@ -105,16 +113,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a rectangular area anywhere on the working plane or a
-        hexahedral volume with one face anywhere on the working plane
-        by specifying the center and corner points.  A rectangle will
-        be defined with four keypoints and four lines.  A volume will
-        be defined with eight keypoints, twelve lines, and six areas,
-        with the top and bottom faces parallel to the working plane.
-        See the ``BLC4``, ``RECTNG``, and ``BLOCK`` commands for
-        alternate ways to create rectangles and blocks.
         """
         command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -123,6 +121,15 @@ class Primitives:
         """Create a block volume based on working plane coordinates.
 
         APDL Command: BLOCK
+
+        Defines a hexahedral volume based on the working plane.  The
+        block must have a spatial volume greater than zero (i.e., this
+        volume primitive command cannot be used to create a degenerate
+        volume as a means of creating an area.)  The volume will be
+        defined with eight keypoints, twelve lines, and six areas,
+        with the top and bottom faces parallel to the working plane.
+        See the ``BLC4`` and ``BLC5`` commands for alternate ways to
+        create blocks.
 
         Parameters
         ----------
@@ -149,25 +156,23 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a hexahedral volume based on the working plane.  The
-        block must have a spatial volume greater than zero (i.e., this
-        volume primitive command cannot be used to create a degenerate
-        volume as a means of creating an area.)  The volume will be
-        defined with eight keypoints, twelve lines, and six areas,
-        with the top and bottom faces parallel to the working plane.
-        See the ``BLC4`` and ``BLC5`` commands for alternate ways to
-        create blocks.
         """
         command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="",
-             **kwargs) -> int:
+    def con4(self, xcenter="", ycenter="", rad1="", rad2="", depth="", **kwargs) -> int:
         """Create a conical volume anywhere on the working plane.
 
         APDL Command: CON4
+
+        Defines a solid conical volume with either the vertex or a
+        face anywhere on the working plane.  The cone must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  The face or faces will be
+        circular (each area defined with four lines), and they will be
+        connected with two areas (each spanning 180 degrees).  See the CONE
+        command for an alternate way to create cones.
 
         Parameters
         ----------
@@ -188,7 +193,7 @@ class Primitives:
             The perpendicular distance (either positive or negative
             based on the working plane Z direction) from the working
             plane representing the depth of the cone.  DEPTH cannot be
-            zero (see "Notes" below).
+            zero.
 
         Returns
         -------
@@ -203,25 +208,29 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a solid conical volume with either the vertex or a
-        face anywhere on the working plane.  The cone must have a
-        spatial volume greater than zero.  (i.e., this volume
-        primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  The face or faces will be
-        circular (each area defined with four lines), and they will be
-        connected with two areas (each spanning 180 degrees).  See the CONE
-        command for an alternate way to create cones.
         """
         command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cone(self, rbot="", rtop="", z1="", z2="", theta1="", theta2="",
-             **kwargs) -> int:
+    def cone(
+        self, rbot="", rtop="", z1="", z2="", theta1="", theta2="", **kwargs
+    ) -> int:
         """Create a conical volume centered about the working plane origin.
 
         APDL Command: CONE
+
+        Defines a solid conical volume centered about the working
+        plane origin.  The non-degenerate face (top or bottom) is
+        parallel to the working plane but not necessarily coplanar
+        with (i.e., "on") the working plane.  The cone must have a
+        spatial volume greater than zero. (i.e., this volume primitive
+        command cannot be used to create a degenerate volume as a
+        means of creating an area.)
+
+        For a cone of 360, top and bottom faces will be circular (each
+        area defined with four lines), and they will be connected with
+        two areas (each spanning 180 degrees).  See the ``CON4``
+        command for an alternate way to create cones.
 
         Parameters
         ----------
@@ -259,30 +268,37 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a solid conical volume centered about the working
-        plane origin.  The non-degenerate face (top or bottom) is
-        parallel to the working plane but not necessarily coplanar
-        with (i.e., "on") the working plane.  The cone must have a
-        spatial volume greater than zero. (i.e., this volume primitive
-        command cannot be used to create a degenerate volume as a
-        means of creating an area.)
-
-        For a cone of 360, top and bottom faces will be circular (each
-        area defined with four lines), and they will be connected with
-        two areas (each spanning 180 degrees).  See the ``CON4``
-        command for an alternate way to create cones.
         """
         command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cyl4(self, xcenter="", ycenter="", rad1="", theta1="", rad2="",
-             theta2="", depth="", **kwargs) -> int:
+    def cyl4(
+        self,
+        xcenter="",
+        ycenter="",
+        rad1="",
+        theta1="",
+        rad2="",
+        theta2="",
+        depth="",
+        **kwargs,
+    ) -> int:
         """Creates a circular area or cylindrical volume anywhere on
         the working plane.
 
         APDL Command: CYL4
+
+        Defines a circular area anywhere on the working plane or a
+        cylindrical volume with one face anywhere on the working
+        plane.  For a solid cylinder of 360 degrees, the top and bottom faces
+        will be circular (each area defined with four lines) and they
+        will be connected with two surface areas (each spanning 180 degrees).
+        See the CYL5, PCIRC, and CYLIND commands for alternate ways to
+        create circles and cylinders.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you must provide a value for DEPTH or the
+        command will be ignored.
 
         Parameters
         ----------
@@ -340,28 +356,25 @@ class Primitives:
         >>> vnum = mapdl.cyl4(0, 0, rad1=1.9, rad2=2.0, depth=10)
         2
 
-        Notes
-        -----
-        Defines a circular area anywhere on the working plane or a
-        cylindrical volume with one face anywhere on the working
-        plane.  For a solid cylinder of 360 degrees, the top and bottom faces
-        will be circular (each area defined with four lines) and they
-        will be connected with two surface areas (each spanning 180 degrees).
-        See the CYL5, PCIRC, and CYLIND commands for alternate ways to
-        create circles and cylinders.
-
-        When working with a model imported from an IGES file (DEFAULT
-        import option), you must provide a value for DEPTH or the
-        command will be ignored.
         """
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cyl5(self, xedge1="", yedge1="", xedge2="", yedge2="", depth="",
-             **kwargs) -> int:
+    def cyl5(
+        self, xedge1="", yedge1="", xedge2="", yedge2="", depth="", **kwargs
+    ) -> int:
         """Create a circular area or cylindrical volume by end points.
 
         APDL Command: CYL5
+
+        Defines a circular area anywhere on the working plane or a
+        cylindrical volume with one face anywhere on the working plane
+        by specifying diameter end points.  For a solid cylinder of
+        360°, the top and bottom faces will be circular (each area
+        defined with four lines) and they will be connected with two
+        surface areas (each spanning 180°).  See the CYL4, PCIRC, and
+        CYLIND commands for alternate ways to create circles and
+        cylinders.
 
         Parameters
         ----------
@@ -386,7 +399,6 @@ class Primitives:
             Volume or area number of the circular area of cylindrical
             volume.
 
-
         Examples
         --------
         Create a circular with one point of the circle at ``(1, 1)``
@@ -404,25 +416,29 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a circular area anywhere on the working plane or a
-        cylindrical volume with one face anywhere on the working plane
-        by specifying diameter end points.  For a solid cylinder of
-        360°, the top and bottom faces will be circular (each area
-        defined with four lines) and they will be connected with two
-        surface areas (each spanning 180°).  See the CYL4, PCIRC, and
-        CYLIND commands for alternate ways to create circles and
-        cylinders.
         """
         command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def cylind(self, rad1="", rad2="", z1="", z2="", theta1="", theta2="",
-               **kwargs) -> int:
+    def cylind(
+        self, rad1="", rad2="", z1="", z2="", theta1="", theta2="", **kwargs
+    ) -> int:
         """Create a cylindrical volume centered about the working plane origin.
 
         APDL Command: CYLIND
+
+        Defines a cylindrical volume centered about the working plane
+        origin.  The top and bottom faces are parallel to the working
+        plane but neither face need be coplanar with (i.e., "on") the
+        working plane.  The cylinder must have a spatial volume
+        greater than zero. (i.e., this volume primitive command cannot
+        be used to create a degenerate volume as a means of creating
+        an area.)
+
+        For a solid cylinder of 360°, the top and bottom faces will be
+        circular (each area defined with four lines), and they will be
+        connected with two areas (each spanning 180°.)  See the CYL4
+        and CYL5 commands for alternate ways to create cylinders.
 
         Parameters
         ----------
@@ -460,20 +476,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a cylindrical volume centered about the working plane
-        origin.  The top and bottom faces are parallel to the working
-        plane but neither face need be coplanar with (i.e., "on") the
-        working plane.  The cylinder must have a spatial volume
-        greater than zero. (i.e., this volume primitive command cannot
-        be used to create a degenerate volume as a means of creating
-        an area.)
-
-        For a solid cylinder of 360°, the top and bottom faces will be
-        circular (each area defined with four lines), and they will be
-        connected with two areas (each spanning 180°.)  See the CYL4
-        and CYL5 commands for alternate ways to create cylinders.
         """
         command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -482,6 +484,12 @@ class Primitives:
         """Create a circular area centered about the working plane origin.
 
         APDL Command: PCIRC
+
+        Defines a solid circular area or circular sector centered
+        about the working plane origin.  For a solid circle of 360°,
+        the area will be defined with four keypoints and four lines.
+        See the ``cyl4`` and ``cyl5`` commands for alternate ways to
+        create circles.
 
         Parameters
         ----------
@@ -514,13 +522,6 @@ class Primitives:
         >>> anum
         1
 
-        Notes
-        -----
-        Defines a solid circular area or circular sector centered
-        about the working plane origin.  For a solid circle of 360°,
-        the area will be defined with four keypoints and four lines.
-        See the ``cyl4`` and ``cyl5`` commands for alternate ways to
-        create circles.
         """
         command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -530,8 +531,6 @@ class Primitives:
 
         APDL Command: POLY
 
-        Notes
-        -----
         Defines a polygonal area on the working plane.  The area will be
         defined with NPT keypoints and NPT lines, where NPT (must be at least
         3) is the number of coordinate pairs defined with the PTXY command.
@@ -545,8 +544,6 @@ class Primitives:
 
         APDL Command: PRI2
 
-        Notes
-        -----
         Creates a polygonal area or a prism volume using the vertices as input.
         This is a command generated by the Graphical User Interface (GUI) and
         will appear in the log file (Jobname.LOG) if graphical picking is used.
@@ -571,36 +568,27 @@ class Primitives:
 
         APDL Command: PRISM
 
-        Parameters
-        ----------
-        z1, z2
-            Working plane Z coordinates of the top and bottom of the prism.
-
-        Notes
-        -----
         Defines a prism volume based on the working plane. The top and bottom
         areas will each be defined with NPT keypoints and NPT lines, where NPT
         (must be at least 3) is the number of coordinate pairs defined with
         PTXY command.  Also, a line will be defined between each point pair on
         the top and bottom face.  See the RPRISM and RPR4 commands for other
         ways to create prisms.
+
+        Parameters
+        ----------
+        z1, z2
+            Working plane Z coordinates of the top and bottom of the prism.
+
         """
         command = f"PRISM,{z1},{z2}"
         return self.run(command, **kwargs)
 
-    def ptxy(self, x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="",
-             **kwargs):
+    def ptxy(self, x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="", **kwargs):
         """Defines coordinate pairs for use in polygons and prisms.
 
         APDL Command: PTXY
 
-        Parameters
-        ----------
-        x1, y1, x2, y2, x3, y3, x4, y4
-            X and Y coordinate pairs on the working plane.
-
-        Notes
-        -----
         Defines coordinate pairs for use in polygons and prisms [POLY, RPRISM].
         The coordinates must be in the Cartesian coordinate system.  The
         coordinate pairs must be input in a continuous order.  PTXY  may be
@@ -609,6 +597,12 @@ class Primitives:
         entered.  Use PTXY,STAT to list the saved coordinate pairs.  Use
         PTXY,DELE to delete all the saved coordinate pairs.  See the RPOLY,
         RPRISM, and RPR4 commands for other ways to create polygons and prisms.
+
+        Parameters
+        ----------
+        x1, y1, x2, y2, x3, y3, x4, y4
+            X and Y coordinate pairs on the working plane.
+
         """
         command = f"PTXY,{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
         return self.run(command, **kwargs)
@@ -618,6 +612,10 @@ class Primitives:
 
         APDL Command: RECTNG
 
+        The area will be defined with four keypoints and four lines.
+        See the ``blc4`` and ``blc5`` commands for alternate ways to
+        create rectangles.
+
         Parameters
         ----------
         x1, x2
@@ -626,20 +624,21 @@ class Primitives:
         y1, y2
             Working plane Y coordinates of the rectangle.
 
-        Notes
-        -----
-        The area will be defined with four keypoints and four lines.
-        See the ``blc4`` and ``blc5`` commands for alternate ways to
-        create rectangles.
         """
         command = f"RECTNG,{x1},{x2},{y1},{y2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
     def rpoly(self, nsides="", lside="", majrad="", minrad="", **kwargs):
-        """Creates a regular polygonal area centered about the working plane
+        """Creates a regular polygonal area centered about the working plane origin.
 
         APDL Command: RPOLY
-        origin.
+
+        Defines a regular polygonal area on the working plane.  The polygon
+        will be centered about the working plane origin, with the first
+        keypoint defined at : θ = 0°.  The area will be defined with NSIDES
+        keypoints and NSIDES lines.  See the RPR4 and POLY commands for other
+        ways to create polygons.
+
 
         Parameters
         ----------
@@ -657,23 +656,21 @@ class Primitives:
             Radius of the minor (or inscribed) circle of the polygon.  Not used
             if LSIDE or MAJRAD is input.
 
-        Notes
-        -----
-        Defines a regular polygonal area on the working plane.  The polygon
-        will be centered about the working plane origin, with the first
-        keypoint defined at : θ = 0°.  The area will be defined with NSIDES
-        keypoints and NSIDES lines.  See the RPR4 and POLY commands for other
-        ways to create polygons.
         """
         command = f"RPOLY,{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
 
-    def rpr4(self, nsides="", xcenter="", ycenter="", radius="", theta="",
-             depth="", **kwargs):
-        """Creates a regular polygonal area or prism volume anywhere on the
+    def rpr4(
+        self, nsides="", xcenter="", ycenter="", radius="", theta="", depth="", **kwargs
+    ):
+        """Creates a regular polygonal area or prism volume anywhere on the working plane.
 
         APDL Command: RPR4
-        working plane.
+
+        Defines a regular polygonal area anywhere on the working plane or prism
+        volume with one face anywhere on the working plane.  The top and bottom
+        faces of the prism are polygonal areas.  See the RPOLY, POLY, RPRISM,
+        and PRISM commands for other ways to create polygons and prisms.
 
         Parameters
         ----------
@@ -700,19 +697,21 @@ class Primitives:
             the depth of the prism.  If DEPTH = 0 (default), a polygonal area
             is created on the working plane.
 
-        Notes
-        -----
-        Defines a regular polygonal area anywhere on the working plane or prism
-        volume with one face anywhere on the working plane.  The top and bottom
-        faces of the prism are polygonal areas.  See the RPOLY, POLY, RPRISM,
-        and PRISM commands for other ways to create polygons and prisms.
         """
         command = f"RPR4,{nsides},{xcenter},{ycenter},{radius},{theta},{depth}"
         return self.run(command, **kwargs)
 
-    def rprism(self, z1="", z2="", nsides="", lside="", majrad="", minrad="",
-               **kwargs):
+    def rprism(self, z1="", z2="", nsides="", lside="", majrad="", minrad="", **kwargs):
         """Creates a regular prism volume centered about the working plane origin.
+
+        Defines a regular prism volume centered about the working plane origin.
+        The prism must have a spatial volume greater than zero. (i.e., this
+        volume primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  The top and bottom faces are
+        polygonal areas that are parallel to the working plane but neither face
+        need be coplanar with (i.e., "on") the working plane. The first
+        keypoint defined for each face is at : θ = 0°.  See the RPR4 and PRISM
+        commands for other ways to create prisms.
 
         APDL Command: RPRISM
 
@@ -739,16 +738,6 @@ class Primitives:
             the top and bottom faces of the prism.  Not used if LSIDE or MAJRAD
             is input.
 
-        Notes
-        -----
-        Defines a regular prism volume centered about the working plane origin.
-        The prism must have a spatial volume greater than zero. (i.e., this
-        volume primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  The top and bottom faces are
-        polygonal areas that are parallel to the working plane but neither face
-        need be coplanar with (i.e., "on") the working plane. The first
-        keypoint defined for each face is at : θ = 0°.  See the RPR4 and PRISM
-        commands for other ways to create prisms.
         """
         command = f"RPRISM,{z1},{z2},{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
@@ -757,6 +746,19 @@ class Primitives:
         """Create a spherical volume anywhere on the working plane.
 
         APDL Command: SPH4
+
+        Defines either a solid or hollow spherical volume anywhere on
+        the working plane.  The sphere must have a spatial volume
+        greater than zero.  (i.e., this volume primitive command
+        cannot be used to create a degenerate volume as a means of
+        creating an area.)  A sphere of 360° will be defined with two
+        areas, each consisting of a hemisphere.  See the ``sphere``
+        and ``sph5`` commands for other ways to create spheres.
+
+        When working with a model imported from an IGES file (DEFAULT
+        import option), you can create only solid spheres.  If you
+        enter a value for both ``rad1`` and ``rad2`` the command is
+        ignored.
 
         Parameters
         ----------
@@ -774,7 +776,6 @@ class Primitives:
         int
             Volume number of the sphere.
 
-
         Examples
         --------
         This example creates a hollow sphere with an inner radius of
@@ -784,20 +785,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines either a solid or hollow spherical volume anywhere on
-        the working plane.  The sphere must have a spatial volume
-        greater than zero.  (i.e., this volume primitive command
-        cannot be used to create a degenerate volume as a means of
-        creating an area.)  A sphere of 360° will be defined with two
-        areas, each consisting of a hemisphere.  See the ``sphere``
-        and ``sph5`` commands for other ways to create spheres.
-
-        When working with a model imported from an IGES file (DEFAULT
-        import option), you can create only solid spheres.  If you
-        enter a value for both ``rad1`` and ``rad2`` the command is
-        ignored.
         """
         command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -806,6 +793,15 @@ class Primitives:
         """Create a spherical volume by diameter end points.
 
         APDL Command: SPH5
+
+        Defines a solid spherical volume anywhere on the working plane
+        by specifying diameter end points.  The sphere must have a
+        spatial volume greater than zero.  (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  A sphere of 360° will be
+        defined with two areas, each consisting of a hemisphere.  See
+        the ``sphere`` and ``sph4`` commands for other ways to create
+        spheres.
 
         Parameters
         ----------
@@ -830,16 +826,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a solid spherical volume anywhere on the working plane
-        by specifying diameter end points.  The sphere must have a
-        spatial volume greater than zero.  (i.e., this volume
-        primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  A sphere of 360° will be
-        defined with two areas, each consisting of a hemisphere.  See
-        the ``sphere`` and ``sph4`` commands for other ways to create
-        spheres.
         """
         command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -848,6 +834,21 @@ class Primitives:
         """Create a spherical volume centered about the working plane origin.
 
         APDL Command: SPHERE
+
+        Defines either a solid or hollow sphere or spherical sector
+        centered about the working plane origin.  The sphere must have
+        a spatial volume greater than zero. (i.e., this volume
+        primitive command cannot be used to create a degenerate volume
+        as a means of creating an area.)  Inaccuracies can develop
+        when the size of the object you create is much smaller than
+        the relative coordinate system values (ratios near to or
+        greater than 1000). If you require an exceptionally small
+        sphere, create a larger object, and scale it down to the
+        appropriate size.
+
+        For a solid sphere of 360°, you define it with two areas, each
+        consisting of a hemisphere.  See the ``sph4`` and ``sph5``
+        commands for the other ways to create spheres.
 
         Parameters
         ----------
@@ -876,22 +877,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines either a solid or hollow sphere or spherical sector
-        centered about the working plane origin.  The sphere must have
-        a spatial volume greater than zero. (i.e., this volume
-        primitive command cannot be used to create a degenerate volume
-        as a means of creating an area.)  Inaccuracies can develop
-        when the size of the object you create is much smaller than
-        the relative coordinate system values (ratios near to or
-        greater than 1000). If you require an exceptionally small
-        sphere, create a larger object, and scale it down to the
-        appropriate size.
-
-        For a solid sphere of 360°, you define it with two areas, each
-        consisting of a hemisphere.  See the ``sph4`` and ``sph5``
-        commands for the other ways to create spheres.
         """
         command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -900,6 +885,11 @@ class Primitives:
         """Create a toroidal volume.
 
         APDL Command: TORUS
+
+        Defines a toroidal volume centered about the working plane
+        origin.  A solid torus of 360° will be defined with four
+        areas, each area spanning 180° around the major and minor
+        circumference.
 
         Parameters
         ----------
@@ -944,12 +934,6 @@ class Primitives:
         >>> vnum
         1
 
-        Notes
-        -----
-        Defines a toroidal volume centered about the working plane
-        origin.  A solid torus of 360° will be defined with four
-        areas, each area spanning 180° around the major and minor
-        circumference.
         """
         command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))

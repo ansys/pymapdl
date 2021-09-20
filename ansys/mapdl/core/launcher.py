@@ -223,19 +223,6 @@ def launch_grpc(
     port : int
         Returns the port number that the gRPC instance started on.
 
-    Examples
-    --------
-    Launch MAPDL using the default configuration.
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl()
-
-    Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
-
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe'
-    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
-
     Notes
     -----
     These are the MAPDL switch options as of 2020R2 applicable for
@@ -317,6 +304,20 @@ def launch_grpc(
 
     -smp : Enables shared-memory parallelism.
      See the Parallel Processing Guide for more information.
+
+    Examples
+    --------
+    Launch MAPDL using the default configuration.
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+
+    Run MAPDL with shared memory parallel and specify the location of
+    the ansys binary.
+
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe'
+    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
+
     """
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
@@ -353,6 +354,7 @@ def launch_grpc(
         create_ip_file(ip, run_location)
 
     cpu_sw = "-np %d" % nproc
+    
     if ram:
         ram_sw = "-m %d" % int(1024 * ram)
     else:
@@ -800,35 +802,6 @@ def launch_mapdl(
         MAPDL.  This should be used for debugging only as output can
         be tracked within pymapdl.  Default ``False``.
 
-    Examples
-    --------
-    Launch MAPDL using the best protocol.
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl()
-
-    Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
-
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
-    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
-
-    Connect to an existing instance of MAPDL at IP 192.168.1.30 and
-    port 50001.  This is only available using the latest ``'grpc'``
-    mode.
-
-    >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
-                             port=50001)
-
-    Force the usage of the CORBA protocol.
-
-    >>> mapdl = launch_mapdl(mode='corba')
-
-    Run MAPDL using the console mode (available only on Linux).
-
-    >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              mode='console')
-
     Notes
     -----
     These are the MAPDL switch options as of 2020R2 applicable for
@@ -910,6 +883,36 @@ def launch_mapdl(
 
     -smp : Enables shared-memory parallelism.
      See the Parallel Processing Guide for more information.
+
+    Examples
+    --------
+    Launch MAPDL using the best protocol.
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+
+    Run MAPDL with shared memory parallel and specify the location of
+    the ansys binary.
+
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
+    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
+
+    Connect to an existing instance of MAPDL at IP 192.168.1.30 and
+    port 50001.  This is only available using the latest ``'grpc'``
+    mode.
+
+    >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
+                             port=50001)
+
+    Force the usage of the CORBA protocol.
+
+    >>> mapdl = launch_mapdl(mode='corba')
+
+    Run MAPDL using the console mode (available only on Linux).
+
+    >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
+                              mode='console')
+
     """
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)

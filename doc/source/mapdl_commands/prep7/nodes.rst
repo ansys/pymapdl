@@ -25,7 +25,6 @@ These PREP7 commands are used to create, modify, list, etc., nodes.
    Mapdl.nmodif
    Mapdl.nora
    Mapdl.norl
-   Mapdl.nplot
    Mapdl.nread
    Mapdl.nrotat
    Mapdl.nrrang

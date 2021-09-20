@@ -1,5 +1,4 @@
 class Digitizing:
-
     def dig(self, node1="", node2="", ninc="", **kwargs):
         """Digitizes nodes to a surface.
 

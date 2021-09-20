@@ -1,7 +1,19 @@
 class ConstraintEquations:
-
-    def ce(self, neqn="", const="", node1="", lab1="", c1="", node2="",
-           lab2="", c2="", node3="", lab3="", c3="", **kwargs):
+    def ce(
+        self,
+        neqn="",
+        const="",
+        node1="",
+        lab1="",
+        c1="",
+        node2="",
+        lab2="",
+        c2="",
+        node3="",
+        lab3="",
+        c3="",
+        **kwargs,
+    ):
         """Defines a constraint equation relating degrees of freedom.
 
         APDL Command: CE
@@ -91,8 +103,17 @@ class ConstraintEquations:
         command = f"CE,{neqn},{const},{node1},{lab1},{c1},{node2},{lab2},{c2},{node3},{lab3},{c3}"
         return self.run(command, **kwargs)
 
-    def cecyc(self, lowname="", highname="", nsector="", hindex="",
-              tolerance="", kmove="", kpairs="", **kwargs):
+    def cecyc(
+        self,
+        lowname="",
+        highname="",
+        nsector="",
+        hindex="",
+        tolerance="",
+        kmove="",
+        kpairs="",
+        **kwargs,
+    ):
         """Generates the constraint equations for a cyclic symmetry analysis
 
         APDL Command: CECYC
@@ -168,8 +189,18 @@ class ConstraintEquations:
         command = f"CEDELE,{neqn1},{neqn2},{ninc},{nsel}"
         return self.run(command, **kwargs)
 
-    def ceintf(self, toler="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", movetol="", **kwargs):
+    def ceintf(
+        self,
+        toler="",
+        dof1="",
+        dof2="",
+        dof3="",
+        dof4="",
+        dof5="",
+        dof6="",
+        movetol="",
+        **kwargs,
+    ):
         """Generates constraint equations at an interface.
 
         APDL Command: CEINTF
@@ -273,8 +304,17 @@ class ConstraintEquations:
         command = f"CELIST,{neqn1},{neqn2},{ninc},{option}"
         return self.run(command, **kwargs)
 
-    def cerig(self, maste="", slave="", ldof="", ldof2="", ldof3="", ldof4="",
-              ldof5="", **kwargs):
+    def cerig(
+        self,
+        maste="",
+        slave="",
+        ldof="",
+        ldof2="",
+        ldof3="",
+        ldof4="",
+        ldof5="",
+        **kwargs,
+    ):
         """Defines a rigid region.
 
         APDL Command: CERIG
@@ -404,7 +444,7 @@ class ConstraintEquations:
         nset1, nset2, ninc
             Generate sets from sets beginning with NSET1 to NSET2 (defaults to
             NSET1) in steps of NINC (defaults to 1).  If NSET1 is negative,
-            NSET2 and NINC are ignored and the last |NSET1| sets (in sequence
+            NSET2 and NINC are ignored and the last ``|NSET1|`` sets (in sequence
             from maximum set number) are used as the sets to be repeated.
 
         Notes
