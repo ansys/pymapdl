@@ -1,5 +1,5 @@
 """
-Using `gmsh` read STL file and convert it to `gmsh` format. 
+Using `gmsh` read STL file and convert it to `gmsh` format.
 """
 import gmsh
 

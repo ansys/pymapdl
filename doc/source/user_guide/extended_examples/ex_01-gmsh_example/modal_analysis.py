@@ -1,5 +1,5 @@
 """
-Import the CDB database, setup modal analysis and run it. 
+Import the CDB database, setup modal analysis and run it.
 
 """
 
@@ -23,16 +23,16 @@ mapdl.mp('DENS', 1, 7700)  # Density in kg/m3
 mapdl.mp('NUXY', 1, 0.3)  # Poissons Ratio
 mapdl.et(1, 181) #! ET,1,SHELL181 ! SHELL181
 mapdl.keyopt(1, 3, 2) #! Option for the shell. Integration option: 'Full integration with incompatible modes'
-mapdl.sectype(1, 'SHELL')  
-mapdl.secdata(1, 1, 0, 3)  #! which means: SECDATA,TK, MAT, THETA, NUMPT, LayerName  
+mapdl.sectype(1, 'SHELL') 
+mapdl.secdata(1, 1, 0, 3)  #! which means: SECDATA,TK, MAT, THETA, NUMPT, LayerName 
 mapdl.emodif('ALL', 'MAT', 1) #! Setting material id
 mapdl.emodif('ALL', 'REAL', 1) #! Setting real constant
 
-# By setting the section type (`SECTYPE`) the model will run and solve. 
+# By setting the section type (`SECTYPE`) the model will run and solve.
 
-# The model has solid and shell elements. 
+# The model has solid and shell elements.
 # We don't need both, hence I'm going to delete the shell elements.
-mapdl.esel('S', 'type', '' , 4) # selecting elements with type 4 = shell181 
+mapdl.esel('S', 'type', '' , 4) # selecting elements with type 4 = shell181
 mapdl.edele('all')
 mapdl.allsel()
 
@@ -40,7 +40,7 @@ mapdl.allsel()
 mapdl.run('/SOLU')
 mapdl.outres('all')
 mapdl.antype('MODAL')  # default NEW
-mapdl.modopt('LANB', 20, 1) 
+mapdl.modopt('LANB', 20, 1)
 mapdl.solve(verbose=False)
 mapdl.save('solved')
 
@@ -55,7 +55,7 @@ result.animate_nodal_displacement(4,
                                 loop=True,
                                 add_text=False,
                                 nangles=30,
-                                # displacement_factor=50, 
+                                # displacement_factor=50,
                                 n_frames=100,
                                 movie_filename='animation.gif')
 

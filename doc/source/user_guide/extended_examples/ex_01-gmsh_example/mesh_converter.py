@@ -1,5 +1,5 @@
 """
-This script convert the file in `gmsh` format to ANSYS `CDB` format. 
+This script convert the file in `gmsh` format to ANSYS `CDB` format.
 """
 
 import pyvista as pv

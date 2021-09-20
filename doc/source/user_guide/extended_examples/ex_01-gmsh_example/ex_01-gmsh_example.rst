@@ -18,7 +18,7 @@ This example is composed of several files.
 
 * ``gmsh_converter.py``: In this file, the STL file is converted to the gmsh file format. 
 * ``mesh_converter``: In this file, the mesh file in gmsh format is converted to ANSYS CDB database format file. 
-* ``main.py``: Import CDB database, setup the modal analysis and run it. It also shows an animation of the first mode and save it to a gif file called ``animation.gif``. 
+* ``modal_analysis.py``: Import CDB database, setup the modal analysis and run it. It also shows an animation of the first mode and save it to a gif file called ``animation.gif``. 
 
 
 Requirements
@@ -33,11 +33,25 @@ You need to have ``gmsh`` installed. You can install it using PIP:
 Source code
 -----------
 
+For the `gmsh_converter.py` file:
 
 .. literalinclude:: gmsh_converter.py
     :linenos:
     :language: python
 
+
+For the `mesh_converter.py` file:
+
+.. literalinclude:: mesh_converter.py
+    :linenos:
+    :language: python
+
+
+For the `modal_analysis.py` file:
+
+.. literalinclude:: modal_analysis.py
+    :linenos:
+    :language: python
 
 
 
