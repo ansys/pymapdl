@@ -584,6 +584,7 @@ def save_ansys_path(exe_loc=''):
     # otherwise, query user for the location
     with open(CONFIG_FILE, 'w') as f:
         print('Cached ANSYS executable not found')
+        exe_loc = input('Enter location of ANSYS executable: ')
         if not os.path.isfile(exe_loc):
             raise FileNotFoundError('ANSYS executable not found at this location:\n%s' % exe_loc)
 
