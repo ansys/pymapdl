@@ -27,6 +27,8 @@ versions = [
     "195",  # 2019R3
     "201",  # 2020R1
     "202",  # 2020R2
+    "211",  # 2021R1
+    "212",  # 2021R2
 ]
 
 valid_versions = []
@@ -46,9 +48,18 @@ if not valid_versions:
 
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
-    ("C:/Program Files/ANSYS Inc/v202\\ansys/bin/win64/ANSYS202.exe", 202),
+    ("C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe", 202),
     ("/usr/ansys_inc/v211/ansys/bin/mapdl", 211),
 ]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Requires Windows")
+def test_validate_sw():
+    # ensure that windows adds msmpi
+    # fake windows path
+    exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
+    add_sw = _validate_add_sw('', exec_path)
+    assert 'msmpi' in add_sw
 
 
 @pytest.mark.parametrize("path_data", paths)
