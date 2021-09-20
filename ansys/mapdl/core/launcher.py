@@ -726,7 +726,7 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
                 add_sw = re.sub(regex, '', add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_file) >= 210:
+            if _version_from_path(exec_path) >= 210:
                 add_sw += ' -mpi msmpi'
 
     return add_sw
