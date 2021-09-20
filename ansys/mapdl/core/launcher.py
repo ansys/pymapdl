@@ -13,8 +13,11 @@ import threading
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
-from ansys.mapdl.core.errors import LockFileException, VersionError, LicenseServerConnectionError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, check_valid_ip
+from ansys.mapdl.core.errors import (
+    LockFileException,
+    VersionError,
+)
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.license import try_license_server
 
 # settings directory
@@ -710,8 +713,8 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     if "smp" not in add_sw:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
-            os.environ['I_MPI_SHM_LMT'] = 'shm'
-        if os.name == 'nt' and not force_intel:
+            os.environ["I_MPI_SHM_LMT"] = "shm"
+        if os.name == "nt" and not force_intel:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
             #
@@ -722,14 +725,14 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
 
-            if 'intelmpi' in add_sw:
+            if "intelmpi" in add_sw:
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
-                add_sw = re.sub(regex, '', add_sw)
+                add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
             if _version_from_path(exec_file) >= 210:
-                add_sw += ' -mpi msmpi'
+                add_sw += " -mpi msmpi"
 
     return add_sw
 
@@ -752,7 +755,7 @@ def launch_mapdl(
     clear_on_connect=True,
     log_apdl=False,
     verbose_mapdl=False,
-    license_server_check=True
+    license_server_check=True,
     **kwargs,
 ):
     """Start MAPDL locally in gRPC mode.
@@ -1036,8 +1039,9 @@ def launch_mapdl(
     mode = check_mode(mode, _version_from_path(exec_file))
 
     # cache start parameters
-    additional_switches = _validate_add_sw(additional_switches, exec_file,
-                                          kwargs.pop('force_intel', False))
+    additional_switches = _validate_add_sw(
+        additional_switches, exec_file, kwargs.pop("force_intel", False)
+    )
     start_parm = {
         "exec_file": exec_file,
         "run_location": run_location,
@@ -1055,9 +1059,9 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check and os.getenv("ANSYSLMD_LICENSE_FILE") is None:
-            # Running locally 
-            license_thread = threading.Thread(target=try_license_server)
-            license_thread.start()
+        # Running locally
+        license_thread = threading.Thread(target=try_license_server)
+        license_thread.start()
 
     if mode == "console":
         from ansys.mapdl.core.mapdl_console import MapdlConsole
