@@ -1,5 +1,4 @@
 class MultiFieldConvergenceControls:
-
     def mfconv(self, lab="", toler="", minref="", **kwargs):
         """Sets convergence values for an ANSYS Multi-field solver analysis.
 

@@ -18,4 +18,4 @@ you can use one of the following packages:
    :toctree: _autosummary
    :template: custom-class-template.rst
 
-   parameters.Parameters
+   post.PostProcessing

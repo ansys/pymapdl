@@ -1,5 +1,4 @@
 class Radiosity:
-
     def rdec(self, option="", reduc="", nplace="", **kwargs):
         """Defines the decimation parameters.
 
@@ -152,8 +151,7 @@ class Radiosity:
         command = f"RSURF,{options},{delopts},{etnum}"
         return self.run(command, **kwargs)
 
-    def rsymm(self, option="", cs="", axis="", nsect="", condvalue="",
-              **kwargs):
+    def rsymm(self, option="", cs="", axis="", nsect="", condvalue="", **kwargs):
         """Defines the plane of symmetry or center of rotation for the radiosity
 
         APDL Command: RSYMM

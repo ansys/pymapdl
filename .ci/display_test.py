@@ -2,6 +2,6 @@
 import pyvista
 from pyvista.plotting import system_supports_plotting
 
-print('system_supports_plotting', system_supports_plotting())
+print("system_supports_plotting", system_supports_plotting())
 pyvista.OFF_SCREEN = True
 pyvista.plot(pyvista.Sphere())

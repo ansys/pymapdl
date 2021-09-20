@@ -42,6 +42,7 @@ class SelectionStatus(IntEnum):
     >>> q.nsel(0)
     <SelectionStatus.UNDEFINED: 0>
     """
+
     UNSELECTED = -1
     UNDEFINED = 0
     SELECTED = 1
@@ -53,11 +54,10 @@ class _ParameterParsing:
 
     @staticmethod
     def _parse_parameter_float_response(response) -> float:
-        if 'PARAMETER' not in response or '=' not in response:
-            raise TypeError(f'Parameter response not recognised: '
-                            f'"{response}"')
-        parts = response.rsplit('=', 1)
-        if 'WARNING' in parts[0]:
+        if "PARAMETER" not in response or "=" not in response:
+            raise TypeError(f"Parameter response not recognised: " f'"{response}"')
+        parts = response.rsplit("=", 1)
+        if "WARNING" in parts[0]:
             warnings.warn(parts[0])
 
         number = parts[1].strip()

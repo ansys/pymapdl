@@ -24,7 +24,7 @@ at the current directory within their own isolated directories.
     >>> import os
     >>> my_path = os.getcmd()
     >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
-    Creating Pool: 100%|████████| 10/10 [00:01<00:00,  1.43it/s]
+    Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
 Each individual instance of mapdl can be accessed with:
 

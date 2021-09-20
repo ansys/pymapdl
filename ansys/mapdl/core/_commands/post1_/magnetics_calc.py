@@ -1,5 +1,4 @@
 class MagneticsCalc:
-
     def curr2d(self, **kwargs):
         """Calculates current flow in a 2-D conductor.
 
@@ -192,7 +191,7 @@ class MagneticsCalc:
         PLF2D invokes an ANSYS macro which plots equipotentials of the degree
         of freedom AZ.  These equipotential lines are parallel to flux lines
         and thus give a good representation of flux patterns.  In the
-        axisymmetric case, the display is actually r*AZ where "r" is the node
+        axisymmetric case, the display is actually ``r*AZ`` where "r" is the node
         radius.  The macro overlays (OLAY) edge outlines by material number or
         real constant number (ANUM) and allows user control over the number of
         contour lines to display (NCONT).

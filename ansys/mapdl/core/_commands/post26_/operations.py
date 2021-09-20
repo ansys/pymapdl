@@ -1,5 +1,4 @@
 class Operations:
-
     def abs(self, ir="", ia="", name="", facta="", **kwargs):
         """Forms the absolute value of a variable.
 
@@ -40,8 +39,18 @@ class Operations:
         """
         return self.run(f"ABS,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
-    def add(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-            factc="", **kwargs):
+    def add(
+        self,
+        ir="",
+        ia="",
+        ib="",
+        ic="",
+        name="",
+        facta="",
+        factb="",
+        factc="",
+        **kwargs,
+    ):
         """Adds (sums) variables.
 
         APDL Command: ADD
@@ -157,7 +166,7 @@ class Operations:
         -----
         Forms the common log of a variable according to the operation:
 
-        IR = FACTB*LOG(FACTA x IA)
+        ``IR = FACTB*LOG(FACTA x IA)``
         """
         return self.run(f"CLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
@@ -261,8 +270,7 @@ class Operations:
         """
         return self.run(f"EXP,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
-    def filldata(self, ir="", lstrt="", lstop="", linc="", value="", dval="",
-                 **kwargs):
+    def filldata(self, ir="", lstrt="", lstop="", linc="", value="", dval="", **kwargs):
         """Fills a variable by a ramp function.
 
         APDL Command: FILLDATA
@@ -342,8 +350,9 @@ class Operations:
         """
         return self.run(f"IMAGIN,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
-    def int1(self, ir="", iy="", ix="", name="", facta="", factb="", const="",
-             **kwargs):
+    def int1(
+        self, ir="", iy="", ix="", name="", facta="", factb="", const="", **kwargs
+    ):
         """Integrates a variable.
 
         APDL Command: INT1
@@ -382,8 +391,18 @@ class Operations:
         command = f"INT1,{ir},{iy},{ix},,{name},,,{facta},{factb},{const}"
         return self.run(command, **kwargs)
 
-    def large(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-              factc="", **kwargs):
+    def large(
+        self,
+        ir="",
+        ia="",
+        ib="",
+        ic="",
+        name="",
+        facta="",
+        factb="",
+        factc="",
+        **kwargs,
+    ):
         """Finds the largest (the envelope) of three variables.
 
         APDL Command: LARGE
@@ -453,12 +472,22 @@ class Operations:
         -----
         Forms the natural log of a variable according to the operation:
 
-        IR = FACTB*LN(FACTA x IA)
+        ``IR = FACTB*LN(FACTA x IA)``
         """
         return self.run(f"NLOG,{ir},{ia},,,{name},,,{facta},{factb}", **kwargs)
 
-    def prod(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-             factc="", **kwargs):
+    def prod(
+        self,
+        ir="",
+        ia="",
+        ib="",
+        ic="",
+        name="",
+        facta="",
+        factb="",
+        factc="",
+        **kwargs,
+    ):
         """Multiplies variables.
 
         APDL Command: PROD
@@ -492,8 +521,9 @@ class Operations:
 
         ``IR = (FACTA x IA) x (FACTB x IB) x (FACTC x IC)``
         """
-        return self.run(f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}",
-                        **kwargs)
+        return self.run(
+            f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}", **kwargs
+        )
 
     def quot(self, ir="", ia="", ib="", name="", facta="", factb="", **kwargs):
         """Divides two variables.
@@ -570,8 +600,18 @@ class Operations:
         command = f"REALVAR,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)
 
-    def small(self, ir="", ia="", ib="", ic="", name="", facta="", factb="",
-              factc="", **kwargs):
+    def small(
+        self,
+        ir="",
+        ia="",
+        ib="",
+        ic="",
+        name="",
+        facta="",
+        factb="",
+        factc="",
+        **kwargs,
+    ):
         """Finds the smallest of three variables.
 
         APDL Command: SMALL

@@ -29,7 +29,6 @@ These PREP7 commands are used to create, modify, list, etc., elements.
    Mapdl.engen
    Mapdl.enorm
    Mapdl.ensym
-   Mapdl.eplot
    Mapdl.eread
    Mapdl.ereinf
    Mapdl.errang

@@ -1,5 +1,4 @@
 class MiscellaneousLoads:
-
     def anpres(self, nfram="", delay="", ncycl="", refframe="", **kwargs):
         """Produces an animated sequence of the time-harmonic pressure variation
 
@@ -49,8 +48,19 @@ class MiscellaneousLoads:
         command = f"ANPRES,{nfram},{delay},{ncycl},{refframe}"
         return self.run(command, **kwargs)
 
-    def aport(self, portnum="", label="", kcn="", pres="", phase="", val1="",
-              val2="", val3="", val4="", **kwargs):
+    def aport(
+        self,
+        portnum="",
+        label="",
+        kcn="",
+        pres="",
+        phase="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Specifies input data for plane wave and acoustic duct ports.
 
         APDL Command: APORT
@@ -137,11 +147,14 @@ class MiscellaneousLoads:
         Duct in the Acoustic Analysis Guide, and Analytic Port Modes in a
         Duct in the Mechanical APDL Theory Reference.
         """
-        command = f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
+        command = (
+            f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
+        )
         return self.run(command, **kwargs)
 
-    def asifile(self, opt="", fname="", ext="", oper="", kdim="", kout="",
-                limit="", **kwargs):
+    def asifile(
+        self, opt="", fname="", ext="", oper="", kdim="", kout="", limit="", **kwargs
+    ):
         """Writes or reads one-way acoustic-structural coupling data.
 
         APDL Command: ASIFILE
@@ -224,9 +237,27 @@ class MiscellaneousLoads:
         command = f"ASIFILE,{opt},{fname},{ext},{oper},{kdim},{kout},{limit}"
         return self.run(command, **kwargs)
 
-    def awave(self, wavenum="", wavetype="", opt1="", opt2="", val1="",
-              val2="", val3="", val4="", val5="", val6="", val7="", val8="",
-              val9="", val10="", val11="", val12="", val13="", **kwargs):
+    def awave(
+        self,
+        wavenum="",
+        wavetype="",
+        opt1="",
+        opt2="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        val10="",
+        val11="",
+        val12="",
+        val13="",
+        **kwargs,
+    ):
         """Specifies input data for an acoustic incident wave.
 
         APDL Command: AWAVE
@@ -327,8 +358,18 @@ class MiscellaneousLoads:
         command = f"BIOT,{label}"
         return self.run(command, **kwargs)
 
-    def dfswave(self, kcn="", radius="", psdref="", dens="", sonic="",
-                incang="", npara="", sampopt="", **kwargs):
+    def dfswave(
+        self,
+        kcn="",
+        radius="",
+        psdref="",
+        dens="",
+        sonic="",
+        incang="",
+        npara="",
+        sampopt="",
+        **kwargs,
+    ):
         """Specifies the incident planar waves with random phases for a diffuse
 
         APDL Command: DFSWAVE
@@ -401,11 +442,14 @@ class MiscellaneousLoads:
         consistent with the panel’s outward normal unit vector at the center of
         the panel’s sending side.
         """
-        command = f"DFSWAVE,{kcn},{radius},{psdref},{dens},{sonic},{incang},{npara},{sampopt}"
+        command = (
+            f"DFSWAVE,{kcn},{radius},{psdref},{dens},{sonic},{incang},{npara},{sampopt}"
+        )
         return self.run(command, **kwargs)
 
-    def fluread(self, fname="", ext="", kdim="", kout="", limit="", listopt="",
-                **kwargs):
+    def fluread(
+        self, fname="", ext="", kdim="", kout="", limit="", listopt="", **kwargs
+    ):
         """Reads one-way Fluent-to-Mechanical APDL coupling data via a .cgns file
 
         APDL Command: FLUREAD
@@ -496,8 +540,7 @@ class MiscellaneousLoads:
         command = f"FLUREAD,{fname},{ext},{kdim},{kout},{limit},{listopt}"
         return self.run(command, **kwargs)
 
-    def ic(self, node="", lab="", value="", value2="", nend="", ninc="",
-           **kwargs):
+    def ic(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies initial conditions at nodes.
 
         APDL Command: IC
@@ -641,8 +684,22 @@ class MiscellaneousLoads:
         command = f"ICLIST,{node1},{node2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-    def icrotate(self, node="", omega="", x1="", y1="", z1="", x2="", y2="",
-                 z2="", vx="", vy="", vz="", accel="", **kwargs):
+    def icrotate(
+        self,
+        node="",
+        omega="",
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        vx="",
+        vy="",
+        vz="",
+        accel="",
+        **kwargs,
+    ):
         """Specifies initial velocity at nodes as a sum of rotation about an axis and translation.
 
         APDL Command: ICROTATE
@@ -693,32 +750,6 @@ class MiscellaneousLoads:
         """
         command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
         return self.run(command, **kwargs)
-
-    def mpchg(self, mat="", elem="", **kwargs):
-        """Changes the material number attribute of an element.
-
-        APDL Command: MPCHG
-
-        Parameters
-        ----------
-        mat
-            Assign this material number to the element. Material numbers
-            are defined with the material property commands MP.
-
-        elem
-            Element for material change. If ALL, change materials for all
-            selected elements ESEL.
-
-        Notes
-        -----
-        Changes the material number of the specified element. Between load
-        steps in SOLUTION, material properties cannot be changed from
-        linear to nonlinear, or from one nonlinear option to another.
-
-        If you change from one CHABOCHE model to another CHABOCHE model,
-        the different models need to have the same number of data points.
-        """
-        return self.run(f"MPCHG,{mat},{elem}", **kwargs)
 
     def mrpm(self, val1="", **kwargs):
         """Defines the revolutions per minute (RPM) for a machine rotation.
@@ -828,8 +859,7 @@ class MiscellaneousLoads:
         command = f"OUTPR,{item},{freq},{cname}"
         return self.run(command, **kwargs)
 
-    def outres(self, item="", freq="", cname="", nsvar="", dsubres="",
-               **kwargs):
+    def outres(self, item="", freq="", cname="", nsvar="", dsubres="", **kwargs):
         """Controls the solution data written to the database.
 
         APDL Command: OUTRES
@@ -939,8 +969,7 @@ class MiscellaneousLoads:
         command = f"OUTRES,{item},{freq},{cname},{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
-    def rescontrol(self, action="", ldstep="", frequency="", maxfiles="",
-                   **kwargs):
+    def rescontrol(self, action="", ldstep="", frequency="", maxfiles="", **kwargs):
         """Controls file writing for multiframe restarts.
 
         APDL Command: RESCONTROL

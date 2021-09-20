@@ -1,5 +1,4 @@
 class Views:
-
     def angle(self, wn="", theta="", axis="", kincr="", **kwargs):
         """Rotates the display about an axis.
 
@@ -278,21 +277,20 @@ class Views:
         label
             Orientation:
 
-            Y  - Y vertical upward, X horizontal to the right, Z out from the screen (default).
-
-            -Y  - Y vertical downward, X horizontal to the left, Z out from the screen.
-
-            X  - X vertical upward, Y horizontal to the left, Z out from the screen.
-
-            -X  - X vertical downward, Y horizontal to the right, Z out from the screen.
-
-            Z  - Z vertical upward, Y horizontal to the right, X out from the screen.  With this
-                 choice, you should use a view other than the /VIEW default of
-                 (0,0,1).
-
-            -Z  - Z vertical downward, Y horizontal to the left, X out from the screen.  With
-                  this choice, you should use a view other than the /VIEW
-                  default of (0,0,1).
+            * ``Y`` : Y vertical upward, X horizontal to the right, Z
+              out from the screen (default).
+            * ``-Y`` : Y vertical downward, X horizontal to the left,
+              Z out from the screen.
+            * ``X`` : X vertical upward, Y horizontal to the left, Z
+              out from the screen.
+            * ``-X`` : X vertical downward, Y horizontal to the right,
+              Z out from the screen.
+            * ``Z`` : Z vertical upward, Y horizontal to the right, X
+              out from the screen.  With this choice, you should use a
+              view other than the /VIEW default of (0,0,1).
+            * ``-Z`` : Z vertical downward, Y horizontal to the left,
+              X out from the screen.  With this choice, you should use
+              a view other than the /VIEW default of (0,0,1).
 
         Notes
         -----

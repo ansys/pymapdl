@@ -1,4 +1,4 @@
-.. _ref_setup_api:
+.. _ref_display_setup_api:
 
 *****
 Setup

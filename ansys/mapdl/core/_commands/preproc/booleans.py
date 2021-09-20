@@ -2,9 +2,19 @@ from ansys.mapdl.core._commands import parse
 
 
 class Booleans:
-
-    def aadd(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-             na8="", na9="", **kwargs):
+    def aadd(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Adds separate areas to create a single area.
 
         APDL Command: AADD
@@ -30,8 +40,19 @@ class Booleans:
         command = f"AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-    def aglue(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-              na8="", na9="", **kwargs):
+    def aglue(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Generates new areas by "gluing" areas.
 
         APDL Command: AGLUE
@@ -67,8 +88,19 @@ class Booleans:
         command = f"AGLUE,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-    def aina(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-             na8="", na9="", **kwargs):
+    def aina(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Finds the intersection of areas.
 
         APDL Command: AINA
@@ -97,8 +129,19 @@ class Booleans:
         command = f"AINA,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-    def ainp(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-             na8="", na9="", **kwargs):
+    def ainp(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Finds the pairwise intersection of areas.
 
         APDL Command: AINP
@@ -155,8 +198,19 @@ class Booleans:
         command = f"AINV,{na},{nv}"
         return self.run(command, **kwargs)
 
-    def aovlap(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-               na8="", na9="", **kwargs):
+    def aovlap(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Overlaps areas.
 
         APDL Command: AOVLAP
@@ -184,8 +238,19 @@ class Booleans:
         command = f"AOVLAP,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-    def aptn(self, na1="", na2="", na3="", na4="", na5="", na6="", na7="",
-             na8="", na9="", **kwargs):
+    def aptn(
+        self,
+        na1="",
+        na2="",
+        na3="",
+        na4="",
+        na5="",
+        na6="",
+        na7="",
+        na8="",
+        na9="",
+        **kwargs,
+    ):
         """Partitions areas.
 
         APDL Command: APTN
@@ -222,6 +287,22 @@ class Booleans:
         """Subtracts areas from areas.
 
         APDL Command: ASBA
+
+        Generates new areas by subtracting the regions common to both
+        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
+        intersection can be an area(s) or line(s).  If the
+        intersection is a line and SEPO is blank, the NA1 area is
+        divided at the line and the resulting areas will be connected,
+        sharing a common line where they touch.  If SEPO is set to
+        SEPO, NA1 is divided into two unconnected areas with separate
+        lines where they touch.  See Solid Modeling in the Modeling
+        and Meshing Guide for an illustration.  See the BOPTN command
+        for an explanation of the options available to Boolean
+        operations.  Element attributes and solid model boundary
+        conditions assigned to the original entities will not be
+        transferred to the new entities generated.  ASBA,ALL,ALL will
+        have no effect since all the areas (in NA1) will be
+        unavailable as NA2 areas.
 
         Parameters
         ----------
@@ -283,23 +364,6 @@ class Booleans:
         >>> aout
         3
 
-        Notes
-        -----
-        Generates new areas by subtracting the regions common to both
-        NA1 and NA2 areas (the intersection) from the NA1 areas.  The
-        intersection can be an area(s) or line(s).  If the
-        intersection is a line and SEPO is blank, the NA1 area is
-        divided at the line and the resulting areas will be connected,
-        sharing a common line where they touch.  If SEPO is set to
-        SEPO, NA1 is divided into two unconnected areas with separate
-        lines where they touch.  See Solid Modeling in the Modeling
-        and Meshing Guide for an illustration.  See the BOPTN command
-        for an explanation of the options available to Boolean
-        operations.  Element attributes and solid model boundary
-        conditions assigned to the original entities will not be
-        transferred to the new entities generated.  ASBA,ALL,ALL will
-        have no effect since all the areas (in NA1) will be
-        unavailable as NA2 areas.
         """
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -535,8 +599,19 @@ class Booleans:
         command = f"BTOL,{ptol}"
         return self.run(command, **kwargs)
 
-    def lcsl(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-             nl8="", nl9="", **kwargs):
+    def lcsl(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Divides intersecting lines at their point(s) of intersection.
 
         APDL Command: LCSL
@@ -561,8 +636,19 @@ class Booleans:
         command = f"LCSL,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-    def lglue(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-              nl8="", nl9="", **kwargs):
+    def lglue(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Generates new lines by "gluing" lines.
 
         APDL Command: LGLUE
@@ -625,8 +711,19 @@ class Booleans:
         command = f"LINA,{nl},{na}"
         return self.run(command, **kwargs)
 
-    def linl(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-             nl8="", nl9="", **kwargs):
+    def linl(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Finds the common intersection of lines.
 
         APDL Command: LINL
@@ -655,8 +752,19 @@ class Booleans:
         command = f"LINL,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-    def linp(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-             nl8="", nl9="", **kwargs):
+    def linp(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Finds the pairwise intersection of lines.
 
         APDL Command: LINP
@@ -713,8 +821,19 @@ class Booleans:
         command = f"LINV,{nl},{nv}"
         return self.run(command, **kwargs)
 
-    def lovlap(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-               nl8="", nl9="", **kwargs):
+    def lovlap(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Overlaps lines.
 
         APDL Command: LOVLAP
@@ -743,8 +862,19 @@ class Booleans:
         command = f"LOVLAP,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-    def lptn(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-             nl8="", nl9="", **kwargs):
+    def lptn(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Partitions lines.
 
         APDL Command: LPTN
@@ -1008,8 +1138,19 @@ class Booleans:
         command = f"LSBW,{nl},{sepo},{keep}"
         return self.run(command, **kwargs)
 
-    def vadd(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-             nv8="", nv9="", **kwargs):
+    def vadd(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Adds separate volumes to create a single volume.
 
         APDL Command: VADD
@@ -1035,8 +1176,19 @@ class Booleans:
         command = f"VADD,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-    def vglue(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-              nv8="", nv9="", **kwargs):
+    def vglue(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Generates new volumes by "gluing" volumes.
 
         APDL Command: VGLUE
@@ -1072,8 +1224,19 @@ class Booleans:
         command = f"VGLUE,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-    def vinp(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-             nv8="", nv9="", **kwargs):
+    def vinp(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Finds the pairwise intersection of volumes.
 
         APDL Command: VINP
@@ -1102,8 +1265,19 @@ class Booleans:
         command = f"VINP,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-    def vinv(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-             nv8="", nv9="", **kwargs):
+    def vinv(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Finds the intersection of volumes.
 
         APDL Command: VINV
@@ -1132,8 +1306,19 @@ class Booleans:
         command = f"VINV,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-    def vovlap(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-               nv8="", nv9="", **kwargs):
+    def vovlap(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Overlaps volumes.
 
         APDL Command: VOVLAP
@@ -1162,8 +1347,19 @@ class Booleans:
         command = f"VOVLAP,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-    def vptn(self, nv1="", nv2="", nv3="", nv4="", nv5="", nv6="", nv7="",
-             nv8="", nv9="", **kwargs):
+    def vptn(
+        self,
+        nv1="",
+        nv2="",
+        nv3="",
+        nv4="",
+        nv5="",
+        nv6="",
+        nv7="",
+        nv8="",
+        nv9="",
+        **kwargs,
+    ):
         """Partitions volumes.
 
         APDL Command: VPTN
@@ -1325,10 +1521,9 @@ class Booleans:
         return self.run(command, **kwargs)
 
     def vsbw(self, nv="", sepo="", keep="", **kwargs):
-        """Subtracts intersection of the working plane from volumes (divides
+        """Subtracts intersection of the working plane from volumes.
 
         APDL Command: VSBW
-        volumes).
 
         Parameters
         ----------

@@ -1,7 +1,16 @@
 class ArtificiallyMatchedLayers:
-
-    def pmlopt(self, esys="", lab="", xminus="", xplus="", yminus="", yplus="",
-               zminus="", zplus="", **kwargs):
+    def pmlopt(
+        self,
+        esys="",
+        lab="",
+        xminus="",
+        xplus="",
+        yminus="",
+        yplus="",
+        zminus="",
+        zplus="",
+        **kwargs,
+    ):
         """Defines perfectly matched layers (PMLs) for acoustic and structural
 
         APDL Command: PMLOPT
@@ -65,11 +74,14 @@ class ArtificiallyMatchedLayers:
         coefficient settings for this element coordinate system and restore
         them to the defaults.
         """
-        command = f"PMLOPT,{esys},{lab},{xminus},{xplus},{yminus},{yplus},{zminus},{zplus}"
+        command = (
+            f"PMLOPT,{esys},{lab},{xminus},{xplus},{yminus},{yplus},{zminus},{zplus}"
+        )
         return self.run(command, **kwargs)
 
-    def pmlsize(self, freqb="", freqe="", dmin="", dmax="", thick="", angle="",
-                **kwargs):
+    def pmlsize(
+        self, freqb="", freqe="", dmin="", dmax="", thick="", angle="", **kwargs
+    ):
         """Determines number of PML layers.
 
         APDL Command: PMLSIZE

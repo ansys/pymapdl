@@ -1,4 +1,4 @@
-.. _ref_setup_api:
+.. _ref_graphics_setup_api:
 
 *****
 Setup
