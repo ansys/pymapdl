@@ -1,7 +1,4 @@
-"""
-Everything related to licensing and license serve checks. 
-
-"""
+"""Module for licensing and license serve checks."""
 
 import os 
 import time 
@@ -27,10 +24,8 @@ def try_license_file():
         raise 
     except:
         # Rest of the cases, let's run secondary methods.
-        # print("Error found trying to read license file.")
         return False
-    else:
-        return True 
+    return True 
 
 
 def license_file_checker():

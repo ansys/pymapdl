@@ -915,14 +915,7 @@ def launch_mapdl(exec_file=None, run_location=None, jobname='file',
         start_parm['timeout'] = start_timeout
 
     # Here we will check the license server
-    if license_server_check:
-
-        if os.getenv('ANSYSLMD_LICENSE_FILE') is not None:
-            # We are in a dockerized environment. 
-            # We skip processing for the moment.
-            pass 
-
-        else:
+    if license_server_check and os.getenv("ANSYSLMD_LICENSE_FILE") is None:
             # Running locally 
             license_thread = threading.Thread(target=try_license_server)
             license_thread.start()
