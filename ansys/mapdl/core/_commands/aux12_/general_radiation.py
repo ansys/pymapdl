@@ -1,5 +1,4 @@
 class GeneralRadiation:
-
     def stef(self, value="", **kwargs):
         """Specifies Stefan-Boltzmann radiation constant.
 

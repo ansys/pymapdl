@@ -23,7 +23,6 @@ These PREP7 commands are used to create, modify, list, etc., keypoints.
    Mapdl.kmodif
    Mapdl.kmove
    Mapdl.knode
-   Mapdl.kplot
    Mapdl.kpscale
    Mapdl.kscale
    Mapdl.ksum

@@ -1,5 +1,4 @@
 class FeSurfaceLoads:
-
     def sf(self, nlist="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on nodes.
 
@@ -53,8 +52,20 @@ class FeSurfaceLoads:
         command = f"SF,{nlist},{lab},{value},{value2}"
         return self.run(command, **kwargs)
 
-    def sfbeam(self, elem="", lkey="", lab="", vali="", valj="", val2i="",
-               val2j="", ioffst="", joffst="", lenrat="", **kwargs):
+    def sfbeam(
+        self,
+        elem="",
+        lkey="",
+        lab="",
+        vali="",
+        valj="",
+        val2i="",
+        val2j="",
+        ioffst="",
+        joffst="",
+        lenrat="",
+        **kwargs,
+    ):
         """Specifies surface loads on beam and pipe elements.
 
         APDL Command: SFBEAM
@@ -221,8 +232,18 @@ class FeSurfaceLoads:
         command = f"SFDELE,{nlist},{lab}"
         return self.run(command, **kwargs)
 
-    def sfe(self, elem="", lkey="", lab="", kval="", val1="", val2="", val3="",
-            val4="", **kwargs):
+    def sfe(
+        self,
+        elem="",
+        lkey="",
+        lab="",
+        kval="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
         """Specifies surface loads on elements.
 
         APDL Command: SFE
@@ -261,7 +282,7 @@ class FeSurfaceLoads:
             For example, for SOLID185, the item 1-JILK associates LKEY = 1
             (face 1) with nodes J, I, L, and K.  Surface load value VAL1 then
             applies to node J of face 1.  To specify a table, enclose the table
-            name in percent signs (%), e.g., %tabname%.  Use the *DIM command
+            name in percent signs (%), e.g., %tabname%.  Use the ``*DIM`` command
             to define a table.  Only one table can be specified, and it must be
             specified in the VAL1 position; tables specified in the VAL2, VAL3,
             or VAL4 positions will be ignored. VAL2 applies to node I, etc.

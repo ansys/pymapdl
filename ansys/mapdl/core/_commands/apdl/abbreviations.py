@@ -1,9 +1,8 @@
 class Abbreviations:
-
     def abbr(self, abbr="", string="", **kwargs):
         """Defines an abbreviation.
 
-        APDL Command: *ABBR
+        APDL Command: ``*ABBR``
 
         Parameters
         ----------
@@ -14,13 +13,15 @@ class Abbreviations:
             which is the same as an ANSYS command.
 
         string
-            String of characters (60 maximum) represented by Abbr.  Cannot
-            include a $ or any of the commands C***,  /COM,  /GOPR,  /NOPR,
-            /QUIT,  /UI, or  *END.  Parameter names and commands of the *DO and
-            Use the *IF groups may not be abbreviated. If String is blank, the
-            abbreviation is deleted. To abbreviate multiple commands, create an
-            "unknown command" macro or define String to execute a macro file
-            [*USE] containing the desired commands.
+            String of characters (60 maximum) represented by Abbr.
+            Cannot include a $ or any of the commands ``C***``, /COM,
+            /GOPR, /NOPR, /QUIT, /UI, or ``*END``.
+
+            Use the ``*IF`` groups may not be abbreviated. If String
+            is blank, the abbreviation is deleted. To abbreviate
+            multiple commands, create an "unknown command" macro or
+            define String to execute a macro file [``*USE``]
+            containing the desired commands.
 
         Notes
         -----
@@ -31,8 +32,8 @@ class Abbreviations:
         any time and are available throughout the program. Abbreviations may be
         redefined or deleted at any time.
 
-        Use *STATUS to display the current list of abbreviations. For
-        abbreviations repeated with *REPEAT, substitution occurs before the
+        Use ``*STATUS`` to display the current list of abbreviations. For
+        abbreviations repeated with ``*REPEAT``, substitution occurs before the
         repeat increments are applied. There are a number of abbreviations that
         are predefined by the program (these can be deleted by using the blank
         String option described above). Note that String will be written to the
@@ -136,7 +137,7 @@ class Abbreviations:
         dependent) subroutine.  This feature allows user-defined commands to be
         programmed into the ANSYS program.  Once programmed, this command can
         be input to the program like other commands, and can also be included
-        in the ANSYS start-up file.  See *ULIB for another way of defining user
+        in the ANSYS start-up file.  See ``*ULIB`` for another way of defining user
         commands.
 
         Up to 10 subroutines are available for user-defined commands (USER01 to

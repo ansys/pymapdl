@@ -1,23 +1,32 @@
-from .component_queries import _DisplacementComponentQueries, \
-    _InverseGetComponentQueries, _ComponentQueries
-from .selection_queries import _SelectionStatusQueries, \
-    _NextSelectedEntityQueries
-from .line_queries import _LineFractionCoordinateQueries, \
-    _LineFractionSlopeQueries
+from .component_queries import (
+    _DisplacementComponentQueries,
+    _InverseGetComponentQueries,
+    _ComponentQueries,
+)
+from .selection_queries import _SelectionStatusQueries, _NextSelectedEntityQueries
+from .line_queries import _LineFractionCoordinateQueries, _LineFractionSlopeQueries
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
 from .nearest_queries import _EntityNearestEntityQueries
+from .connectivity_queries import _ConnectivityQueries
+from .geometry_queries import _AngleQueries, _AreaQueries, _DistanceQueries
 
 
-class Query(_ComponentQueries,
-            _InverseGetComponentQueries,
-            _DisplacementComponentQueries,
-            _SelectionStatusQueries,
-            _LineFractionCoordinateQueries,
-            _LineFractionSlopeQueries,
-            _NextSelectedEntityQueries,
-            _NodeNormalQueries,
-            _KeypointNormalQueries,
-            _EntityNearestEntityQueries):
+class Query(
+    _ComponentQueries,
+    _InverseGetComponentQueries,
+    _DisplacementComponentQueries,
+    _SelectionStatusQueries,
+    _LineFractionCoordinateQueries,
+    _LineFractionSlopeQueries,
+    _NextSelectedEntityQueries,
+    _NodeNormalQueries,
+    _KeypointNormalQueries,
+    _EntityNearestEntityQueries,
+    _ConnectivityQueries,
+    _AngleQueries,
+    _AreaQueries,
+    _DistanceQueries,
+):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific

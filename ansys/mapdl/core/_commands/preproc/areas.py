@@ -2,13 +2,46 @@ from ansys.mapdl.core._commands import parse
 
 
 class Areas:
-
-    def a(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="",
-          p10="", p11="", p12="", p13="", p14="", p15="", p16="", p17="",
-          p18="", **kwargs) -> int:
+    def a(
+        self,
+        p1="",
+        p2="",
+        p3="",
+        p4="",
+        p5="",
+        p6="",
+        p7="",
+        p8="",
+        p9="",
+        p10="",
+        p11="",
+        p12="",
+        p13="",
+        p14="",
+        p15="",
+        p16="",
+        p17="",
+        p18="",
+        **kwargs,
+    ) -> int:
         """Define an area by connecting keypoints.
 
         APDL Command: A
+
+        Keypoints (P1 through P18) must be input in a clockwise or
+        counterclockwise order around the area.  This order also
+        determines the positive normal direction of the area according
+        to the right-hand rule.  Existing lines between adjacent
+        keypoints will be used; missing lines are generated "straight"
+        in the active coordinate system and assigned the lowest
+        available numbers [NUMSTR].  If more than one line exists
+        between two keypoints, the shorter one will be chosen.  If the
+        area is to be defined with more than four keypoints, the
+        required keypoints and lines must lie on a constant coordinate
+        value in the active coordinate system (such as a plane or a
+        cylinder).  Areas may be redefined only if not yet attached to
+        a volume.  Solid modeling in a toroidal coordinate system is
+        not recommended.
 
         Parameters
         ----------
@@ -32,22 +65,6 @@ class Areas:
         >>> a0
         1
 
-        Notes
-        -----
-        Keypoints (P1 through P18) must be input in a clockwise or
-        counterclockwise order around the area.  This order also
-        determines the positive normal direction of the area according
-        to the right-hand rule.  Existing lines between adjacent
-        keypoints will be used; missing lines are generated "straight"
-        in the active coordinate system and assigned the lowest
-        available numbers [NUMSTR].  If more than one line exists
-        between two keypoints, the shorter one will be chosen.  If the
-        area is to be defined with more than four keypoints, the
-        required keypoints and lines must lie on a constant coordinate
-        value in the active coordinate system (such as a plane or a
-        cylinder).  Areas may be redefined only if not yet attached to
-        a volume.  Solid modeling in a toroidal coordinate system is
-        not recommended.
         """
         command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
         return parse.parse_a(self.run(command, **kwargs))
@@ -56,6 +73,22 @@ class Areas:
         """Associates element attributes with the selected, unmeshed areas.
 
         APDL Command: AATT
+
+        Areas subsequently generated from the areas will also have these
+        attributes.  These element attributes will be used when the areas are
+        meshed.  If an area does not have attributes associated with it (by
+        this command) at the time it is meshed, the attributes are obtained
+        from the then current MAT, REAL, TYPE, ESYS, and SECNUM command
+        settings.  Reissue the AATT command (before areas are meshed) to change
+        the attributes.  A zero (or blank) argument removes the corresponding
+        association. If any of the arguments MAT, REAL, TYPE, ESYS, or SECN are
+        defined as -1, then that value will be left unchanged in the selected
+        set.
+
+        In some cases, ANSYS can proceed with an area meshing operation even
+        when no logical element type has been assigned via AATT,,,TYPE or TYPE.
+        For more information, see the discussion on setting element attributes
+        in Meshing Your Solid Model in the Modeling and Meshing Guide.
 
         Parameters
         ----------
@@ -76,23 +109,6 @@ class Areas:
         secn
             The section number to be associated with selected unmeshed areas.
 
-        Notes
-        -----
-        Areas subsequently generated from the areas will also have these
-        attributes.  These element attributes will be used when the areas are
-        meshed.  If an area does not have attributes associated with it (by
-        this command) at the time it is meshed, the attributes are obtained
-        from the then current MAT, REAL, TYPE, ESYS, and SECNUM command
-        settings.  Reissue the AATT command (before areas are meshed) to change
-        the attributes.  A zero (or blank) argument removes the corresponding
-        association. If any of the arguments MAT, REAL, TYPE, ESYS, or SECN are
-        defined as -1, then that value will be left unchanged in the selected
-        set.
-
-        In some cases, ANSYS can proceed with an area meshing operation even
-        when no logical element type has been assigned via AATT,,,TYPE or TYPE.
-        For more information, see the discussion on setting element attributes
-        in Meshing Your Solid Model in the Modeling and Meshing Guide.
         """
         command = f"AATT,{mat},{real},{type_},{esys},{secn}"
         return self.run(command, **kwargs)
@@ -117,8 +133,8 @@ class Areas:
 
             0 - Delete areas only (default).
 
-            1 - Delete areas, as well as keypoints and lines attached to specified areas but
-                not shared by other areas.
+            1 - Delete areas, as well as keypoints and lines attached
+                to specified areas but not shared by other areas.
 
         Notes
         -----
@@ -154,11 +170,48 @@ class Areas:
         command = f"ADGL,{na1},{na2},{ninc}"
         return self.run(command, **kwargs)
 
-    def adrag(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nlp1="",
-              nlp2="", nlp3="", nlp4="", nlp5="", nlp6="", **kwargs) -> str:
+    def adrag(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nlp1="",
+        nlp2="",
+        nlp3="",
+        nlp4="",
+        nlp5="",
+        nlp6="",
+        **kwargs,
+    ) -> str:
         """Generate areas by dragging a line pattern along a path.
 
         APDL Command: ADRAG
+
+        Generates areas (and their corresponding keypoints and lines)
+        by sweeping a given line pattern along a characteristic drag
+        path.  If the drag path consists of multiple lines, the drag
+        direction is determined by the sequence in which the path
+        lines are input (NLP1, NLP2, etc.).  If the drag path is a
+        single line (NLP1), the drag direction is from the keypoint on
+        the drag line that is closest to the first keypoint of the
+        given line pattern to the other end of the drag line.
+
+        The magnitude of the vector between the keypoints of the given
+        pattern and the first path keypoint remains constant for all
+        generated keypoint patterns and the path keypoints.  The
+        direction of the vector relative to the path slope also
+        remains constant so that patterns may be swept around curves.
+
+        Keypoint, line, and area numbers are automatically assigned
+        (beginning with the lowest available values [NUMSTR]).
+        Adjacent lines use a common keypoint.  Adjacent areas use a
+        common line.  For best results, the entities to be dragged
+        should be orthogonal to the start of the drag path.  Drag
+        operations that produce an error message may create some of
+        the desired entities prior to terminating.
 
         Parameters
         ----------
@@ -195,30 +248,6 @@ class Areas:
         ALONG LINES
              2,
 
-        Notes
-        -----
-        Generates areas (and their corresponding keypoints and lines)
-        by sweeping a given line pattern along a characteristic drag
-        path.  If the drag path consists of multiple lines, the drag
-        direction is determined by the sequence in which the path
-        lines are input (NLP1, NLP2, etc.).  If the drag path is a
-        single line (NLP1), the drag direction is from the keypoint on
-        the drag line that is closest to the first keypoint of the
-        given line pattern to the other end of the drag line.
-
-        The magnitude of the vector between the keypoints of the given
-        pattern and the first path keypoint remains constant for all
-        generated keypoint patterns and the path keypoints.  The
-        direction of the vector relative to the path slope also
-        remains constant so that patterns may be swept around curves.
-
-        Keypoint, line, and area numbers are automatically assigned
-        (beginning with the lowest available values [NUMSTR]).
-        Adjacent lines use a common keypoint.  Adjacent areas use a
-        common line.  For best results, the entities to be dragged
-        should be orthogonal to the start of the drag path.  Drag
-        operations that produce an error message may create some of
-        the desired entities prior to terminating.
         """
         command = f"ADRAG,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
         return self.run(command, **kwargs)
@@ -228,12 +257,17 @@ class Areas:
 
         APDL Command: AFILLT
 
+        Generates an area of constant fillet radius at the
+        intersection of two areas using a series of Boolean
+        operations.  Corresponding lines and keypoints are also
+        generated.  See BOPTN command for an explanation of the
+        options available to Boolean operations.  If areas do not
+        initially intersect at a common line, use the AINA command.
+
         Parameters
         ----------
         na1
-            Number of the first intersecting area.  If NA1 = P, graphical
-            picking is enabled and all remaining arguments are ignored (valid
-            only in the GUI).
+            Number of the first intersecting area.
 
         na2
             Number of the second intersecting area.
@@ -241,22 +275,41 @@ class Areas:
         rad
             Radius of fillet to be generated.
 
-        Notes
-        -----
-        Generates an area of constant fillet radius at the intersection of two
-        areas using a series of Boolean operations.  Corresponding lines and
-        keypoints are also generated.  See BOPTN command for an explanation of
-        the options available to Boolean operations.  If areas do not initially
-        intersect at a common line, use the AINA command.
         """
         command = f"AFILLT,{na1},{na2},{rad}"
         return self.run(command, **kwargs)
 
-    def agen(self, itime="", na1="", na2="", ninc="", dx="", dy="", dz="",
-             kinc="", noelem="", imove="", **kwargs):
+    def agen(
+        self,
+        itime="",
+        na1="",
+        na2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates additional areas from a pattern of areas.
 
         APDL Command: AGEN
+
+        Generates additional areas (and their corresponding keypoints, lines
+        and mesh) from a given area pattern.  The MAT, TYPE, REAL, ESYS, and
+        SECNUM attributes of the new areas are based upon the areas in the
+        pattern and not upon the current settings of the pointers.  End slopes
+        of the generated lines remain the same (in the active coordinate
+        system) as those of the given pattern.  For example, radial slopes
+        remain radial.  Generations which produce areas of a size or shape
+        different from the pattern (i.e., radial generations in cylindrical
+        systems, radial and phi generations in spherical systems, and theta
+        generations in elliptical systems) are not allowed.  Solid modeling in
+        a toroidal coordinate system is not recommended.  Area and line numbers
+        are automatically assigned, beginning with the lowest available values
+        [NUMSTR].
 
         Parameters
         ----------
@@ -301,30 +354,41 @@ class Areas:
                 generated instead.  Meshed items corresponding to moved areas
                 are also moved if not needed at their original position.
 
-        Notes
-        -----
-        Generates additional areas (and their corresponding keypoints, lines
-        and mesh) from a given area pattern.  The MAT, TYPE, REAL, ESYS, and
-        SECNUM attributes of the new areas are based upon the areas in the
-        pattern and not upon the current settings of the pointers.  End slopes
-        of the generated lines remain the same (in the active coordinate
-        system) as those of the given pattern.  For example, radial slopes
-        remain radial.  Generations which produce areas of a size or shape
-        different from the pattern (i.e., radial generations in cylindrical
-        systems, radial and phi generations in spherical systems, and theta
-        generations in elliptical systems) are not allowed.  Solid modeling in
-        a toroidal coordinate system is not recommended.  Area and line numbers
-        are automatically assigned, beginning with the lowest available values
-        [NUMSTR].
         """
-        command = f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
-    def al(self, l1="", l2="", l3="", l4="", l5="", l6="", l7="", l8="", l9="",
-           l10="", **kwargs) -> int:
+    def al(
+        self,
+        l1="",
+        l2="",
+        l3="",
+        l4="",
+        l5="",
+        l6="",
+        l7="",
+        l8="",
+        l9="",
+        l10="",
+        **kwargs,
+    ) -> int:
         """Generate an area bounded by previously defined lines.
 
         APDL Command: AL
+
+        Lines may be input (once each) in any order and must form a
+        simply connected closed curve.  If the area is defined with
+        more than four lines, the lines must also lie in the same
+        plane or on a constant coordinate value in the active
+        coordinate system (such as a plane or a cylinder).
+
+        Solid modeling in a toroidal coordinate system is not
+        recommended.  Areas may be redefined only if not yet attached
+        to a volume.
+
+        This command is valid in any processor.
 
         Parameters
         ----------
@@ -359,19 +423,6 @@ class Areas:
         >>> anum
         1
 
-        Notes
-        -----
-        Lines may be input (once each) in any order and must form a
-        simply connected closed curve.  If the area is defined with
-        more than four lines, the lines must also lie in the same
-        plane or on a constant coordinate value in the active
-        coordinate system (such as a plane or a cylinder).
-
-        Solid modeling in a toroidal coordinate system is not
-        recommended.  Areas may be redefined only if not yet attached
-        to a volume.
-
-        This command is valid in any processor.
         """
         command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
         return parse.parse_a(self.run(command, **kwargs))
@@ -396,7 +447,8 @@ class Areas:
 
             (blank) - Prints information about all areas in the specified range.
 
-            HPT - Prints information about only those areas that contain hard points.
+            HPT - Prints information about only those areas that
+            contain hard points.
 
         Notes
         -----
@@ -567,8 +619,20 @@ class Areas:
         command = f"AREVERSE,{anum},{noeflip}"
         return self.run(command, **kwargs)
 
-    def arotat(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", pax1="",
-               pax2="", arc="", nseg="", **kwargs):
+    def arotat(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        pax1="",
+        pax2="",
+        arc="",
+        nseg="",
+        **kwargs,
+    ):
         """Generates cylindrical areas by rotating a line pattern about an axis.
 
         APDL Command: AROTAT
@@ -608,11 +672,24 @@ class Areas:
         values [NUMSTR].  Adjacent lines use a common keypoint.  Adjacent areas
         use a common line.
         """
-        command = f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
 
-    def arscale(self, na1="", na2="", ninc="", rx="", ry="", rz="", kinc="",
-                noelem="", imove="", **kwargs):
+    def arscale(
+        self,
+        na1="",
+        na2="",
+        ninc="",
+        rx="",
+        ry="",
+        rz="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
+    ):
         """Generates a scaled set of areas from a pattern of areas.
 
         APDL Command: ARSCALE
@@ -675,8 +752,9 @@ class Areas:
         command = f"ARSCALE,{na1},{na2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def arsym(self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def arsym(
+        self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Generates areas from an area pattern by symmetry reflection.
 
         APDL Command: ARSYM
@@ -741,8 +819,19 @@ class Areas:
         command = f"ARSYM,{ncomp},{na1},{na2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-    def askin(self, nl1="", nl2="", nl3="", nl4="", nl5="", nl6="", nl7="",
-              nl8="", nl9="", **kwargs):
+    def askin(
+        self,
+        nl1="",
+        nl2="",
+        nl3="",
+        nl4="",
+        nl5="",
+        nl6="",
+        nl7="",
+        nl8="",
+        nl9="",
+        **kwargs,
+    ):
         """Generates an area by "skinning" a surface through guiding lines.
 
         APDL Command: ASKIN
@@ -861,7 +950,7 @@ class Areas:
         The thickness and density are associated to the areas via the AATT
         command.
 
-        Items calculated via ASUM and later retrieved via a *GET or *VGET
+        Items calculated via ASUM and later retrieved via a ``*GET`` or ``*VGET``
         command are valid only if the model is not modified after issuing the
         ASUM command.
 
@@ -878,8 +967,9 @@ class Areas:
         command = f"ASUM,{lab}"
         return self.run(command, **kwargs)
 
-    def atran(self, kcnto="", na1="", na2="", ninc="", kinc="", noelem="",
-              imove="", **kwargs):
+    def atran(
+        self, kcnto="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+    ):
         """Transfers a pattern of areas to another coordinate system.
 
         APDL Command: ATRAN
@@ -954,7 +1044,7 @@ class Areas:
         the areas have a material (and real constant) association via the AATT
         command.  For lines and keypoints, a unit density is assumed,
         irrespective of any material associations [LATT, KATT, MAT].  Items
-        calculated by GSUM and later retrieved by a *GET or *VGET commands are
+        calculated by GSUM and later retrieved by a ``*GET`` or ``*VGET`` commands are
         valid only if the model is not modified after the GSUM command is
         issued.  This command combines the functions of the KSUM, LSUM, ASUM,
         and VSUM commands.

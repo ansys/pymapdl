@@ -27,7 +27,6 @@ These PREP7 commands are used to create, modify, list, etc., lines.
    Mapdl.lfillt
    Mapdl.lgen
    Mapdl.llist
-   Mapdl.lplot
    Mapdl.lreverse
    Mapdl.lrotat
    Mapdl.lsscale

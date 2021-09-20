@@ -17,7 +17,8 @@ import pyvista as pv
 import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
-mapdl = launch_mapdl(loglevel='ERROR')
+
+mapdl = launch_mapdl(loglevel="ERROR")
 
 ###############################################################################
 # MAPDL: Solve a Beam with a Non-Uniform Load
@@ -75,8 +76,8 @@ mapdl.set(1, 1)
 # mapdl.plesol("s", "int")
 
 # path definition
-pl_end = (0.5*_width, _height, 0.5*_length)
-pl_start = (0.5*_width, 0, 0.5*_length)
+pl_end = (0.5 * _width, _height, 0.5 * _length)
+pl_start = (0.5 * _width, 0, 0.5 * _length)
 
 mapdl.run("_width = %f" % _width)
 mapdl.run("_height = %f" % _height)
@@ -98,14 +99,20 @@ mapdl.pdef("Szx_my_path", "s", "xz")
 
 # Extract the path results from MAPDL and send to a numpy array
 nsigfig = 10
-mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-mapdl.format('', 'E', nsigfig + 9, nsigfig)
-mapdl.page(1E9, '', -1, 240)
+mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
+mapdl.format("", "E", nsigfig + 9, nsigfig)
+mapdl.page(1e9, "", -1, 240)
 
-path_out = mapdl.prpath("Sx_my_path", "Sy_my_path", "Sz_my_path",
-                        "Sxy_my_path", "Syz_my_path", "Szx_my_path")
+path_out = mapdl.prpath(
+    "Sx_my_path",
+    "Sy_my_path",
+    "Sz_my_path",
+    "Sxy_my_path",
+    "Syz_my_path",
+    "Szx_my_path",
+)
 table = np.genfromtxt(path_out.splitlines()[1:])
-print('Numpy Array from MAPDL Shape:', table.shape)
+print("Numpy Array from MAPDL Shape:", table.shape)
 
 ###############################################################################
 # Comparing with Path Operation Within `pyvista`
@@ -134,7 +141,7 @@ stress_yz = stress[:, 5]
 # For this example, NAN values must be replaced with 0 for the
 # interpolation to succeed
 stress_yz[np.isnan(stress_yz)] = 0
-rst.grid['Stress YZ'] = stress_yz
+rst.grid["Stress YZ"] = stress_yz
 
 # Create a line and sample over it
 line = pv.Line(pl_start, pl_end, resolution=100)
@@ -144,11 +151,11 @@ out = line.sample(rst.grid)
 # interpolated over it instead of a simple line.
 
 # plot the interpolated stress from VTK and MAPDL
-plt.plot(out.points[:, 1], out['Stress YZ'], 'x', label='Stress vtk')
-plt.plot(table[:, 0], table[:, 6], label='Stress MAPDL')
+plt.plot(out.points[:, 1], out["Stress YZ"], "x", label="Stress vtk")
+plt.plot(table[:, 0], table[:, 6], label="Stress MAPDL")
 plt.legend()
-plt.xlabel('Y Position (in.)')
-plt.ylabel('Stress YZ (psi)')
+plt.xlabel("Y Position (in.)")
+plt.ylabel("Stress YZ (psi)")
 plt.show()
 
 
@@ -162,21 +169,19 @@ plt.show()
 # necessitating interpolation as stress/strain is (in general)
 # extrapolated to the edge nodes of ANSYS FEMs.
 
-stress_slice = rst.grid.slice('z', pl_start)
+stress_slice = rst.grid.slice("z", pl_start)
 
 # can plot this individually
 # stress_slice.plot(scalars=stress_slice['Stress YZ'],
 #                   scalar_bar_args={'title': 'Stress YZ'})
 
 # good camera position (determined manually using pl.camera_position)
-cpos = [(3.2, 4, 8),
-        (0.25, 1.0, 5.0),
-        (0.0, 0.0, 1.0)]
+cpos = [(3.2, 4, 8), (0.25, 1.0, 5.0), (0.0, 0.0, 1.0)]
 
-rng = [rst.grid['Stress YZ'].min(), rst.grid['Stress YZ'].max()]
+rng = [rst.grid["Stress YZ"].min(), rst.grid["Stress YZ"].max()]
 pl = pv.Plotter()
-pl.add_mesh(out, scalars=out['Stress YZ'], line_width=10)
-pl.add_mesh(stress_slice, scalars='Stress YZ', opacity=0.25)
-pl.add_mesh(rst.grid, color='w', style='wireframe')
+pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10)
+pl.add_mesh(stress_slice, scalars="Stress YZ", opacity=0.25)
+pl.add_mesh(rst.grid, color="w", style="wireframe")
 pl.camera_position = cpos
 pl.show()
