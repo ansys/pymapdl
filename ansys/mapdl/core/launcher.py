@@ -166,7 +166,7 @@ def launch_grpc(
     additional_switches="",
     override=True,
     timeout=20,
-    verbose=False,
+    verbose=False
     ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
