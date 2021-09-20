@@ -102,7 +102,7 @@ def setup_logger(loglevel='INFO', log_file=True):
     log.addHandler(ch)
 
     if log_file:
-        file_handler = logging.FileHandler('logs.log')
+        file_handler = logging.FileHandler('PyMAPDL.log')
         file_handler.setLevel(loglevel)
         file_handler.setFormatter(formatter)
 
