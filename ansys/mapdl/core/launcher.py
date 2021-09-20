@@ -1020,7 +1020,7 @@ def launch_mapdl(
     mode = check_mode(mode, _version_from_path(exec_file))
 
     # cache start parameters
-    additional_switches = validate_add_sw(additional_switches, exec_file,
+    additional_switches = _validate_add_sw(additional_switches, exec_file,
                                           kwargs.pop('force_intel', False))
     start_parm = {
         "exec_file": exec_file,
