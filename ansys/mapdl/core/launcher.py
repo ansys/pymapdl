@@ -695,17 +695,17 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
             os.environ['I_MPI_SHM_LMT'] = 'shm'
-    
+            
         if os.name == 'nt' and not force_intel:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
-            # 
+            #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
             # need to know a local address where to ping but that will
             # change for each client/person using the VPN.
-            # 
-            # Adding '-mpi msmpi' to the launch parameter fix it. 
+            #
+            # Adding '-mpi msmpi' to the launch parameter fix it.
 
             if 'intelmpi' in add_sw:
                 # Remove intel flag.
