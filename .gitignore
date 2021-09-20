@@ -18,8 +18,7 @@
 flycheck*
 
 ## Visual code settings
-.vscode/launch.json
-.vscode/settings.json
+.vscode/
 
 # Old files #
 _old/
