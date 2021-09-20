@@ -156,7 +156,6 @@ def test_download_missing_file(mapdl, tmpdir):
 
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
-    
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
     assert mapdl._ip == ip
