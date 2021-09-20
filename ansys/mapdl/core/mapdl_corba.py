@@ -160,12 +160,12 @@ class MapdlCorba(_MapdlCore):
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
-        python script is executed. Default ``True``. 
+        python script is executed. Default ``True``.
 
     """
 
     def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
-                log_file = True, 
+                log_file = True,
                  log_broadcast=False, verbose=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,

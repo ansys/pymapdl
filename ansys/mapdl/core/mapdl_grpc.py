@@ -180,7 +180,7 @@ class MapdlGrpc(_MapdlCore):
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
-        python script is executed. Default ``True``. 
+        python script is executed. Default ``True``.
 
     Examples
     --------
@@ -200,7 +200,7 @@ class MapdlGrpc(_MapdlCore):
     """
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
-                log_file = True, cleanup_on_exit=False, log_apdl=False, 
+                log_file=True, cleanup_on_exit=False, log_apdl=False,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
         super().__init__(loglevel, log_file=log_file, **kwargs)

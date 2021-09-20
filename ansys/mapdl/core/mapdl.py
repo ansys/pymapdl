@@ -112,7 +112,7 @@ def setup_logger(loglevel='INFO', log_file=True):
         file_handler.setLevel(loglevel)
         file_handler.setFormatter(formatter)
 
-    # creating a file handler 
+    # creating a file handler
     log.addHandler(file_handler)
 
     # make persistent
@@ -125,7 +125,7 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
-                log_file=True, 
+                log_file=True,
                 local=True, **start_parm):
         """Initialize connection with MAPDL. """
         self._show_matplotlib_figures = True  # for testing
