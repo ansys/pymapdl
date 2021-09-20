@@ -84,25 +84,25 @@ def get_licdebug_name():
 
 
 def get_licdebug_msg(licdebug_file):
-    f = open(licdebug_file)
-    f.seek(0, 2)  # Going to the end of the file. 
+    with open(licdebug_file) as f:
+        f.seek(0, 2)  # Going to the end of the file. 
 
-    buffer = []
-    while True:
-        line = f.readline()
-        if line:
-            if buffer == []: # not empty
-                buffer.append(line)
-
-            else:
-                if line.startswith('\t\t'):
+        buffer = []
+        while True:
+            line = f.readline()
+            if line:
+                if buffer == []: # not empty
                     buffer.append(line)
+
                 else:
-                    msg = ''.join(buffer)
-                    buffer = [line]  # Flushing buffer
-                    yield  msg 
-        else:
-            time.sleep(0.01)
+                    if line.startswith('\t\t'):
+                        buffer.append(line)
+                    else:
+                        msg = ''.join(buffer)
+                        buffer = [line]  # Flushing buffer
+                        yield  msg 
+            else:
+                time.sleep(0.01)
 
 
 def is_denied_msg(msg):
