@@ -1,11 +1,11 @@
 """gRPC service specific tests"""
 import os
-import re
 
 import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
+from ansys.mapdl.core import launch_mapdl
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -155,7 +155,6 @@ def test_download_missing_file(mapdl, tmpdir):
 
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
-    from ansys.mapdl.core import launch_mapdl
     
     ip = '127.0.0.2'
     mapdl = launch_mapdl(ip=ip)
