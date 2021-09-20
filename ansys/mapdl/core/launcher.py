@@ -670,7 +670,7 @@ def check_lock_file(path, jobname, override):
 
 
 def _validate_add_sw(add_sw, exec_path, force_intel=False):
-    """Validate additional swtiches.
+    """Validate additional switches.
 
     Parameters
     ----------
@@ -679,7 +679,7 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     exec_path : str
         Path to the MAPDL executable.
     force_intel : bool, optional
-        Force the usage of intelmpi.
+        Force the usage of intelmpi. The default is ``False``.
 
     Returns
     -------
