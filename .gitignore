@@ -17,6 +17,10 @@
 # emacs
 flycheck*
 
+## Visual code settings
+.vscode/launch.json
+.vscode/settings.json
+
 # Old files #
 _old/
 
