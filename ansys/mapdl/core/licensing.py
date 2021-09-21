@@ -138,7 +138,7 @@ def get_licdebug_msg(licdebug_file):
     Yields
     ------
     msg : str
-        Message formated as a single string.
+        Message formatted as a single string.
 
     """
     with open(licdebug_file) as f:
@@ -175,7 +175,7 @@ def check_license_server_port():
 
 
 def ansys_lic_info_from_envar():
-    """Read the Ansys license info from the enviornment variable LIC_PATH_ENVAR."""
+    """Read the Ansys license info from the environment variable LIC_PATH_ENVAR."""
     lic_info = os.getenv(LIC_FILE_ENVAR)
 
     if lic_info is None:
@@ -237,7 +237,7 @@ def get_license_server_config():
         Sorted by license server priority.
 
     """
-    # enviornment variable overrides configuration file
+    # environment variable overrides configuration file
     server = ansys_lic_info_from_envar()
     if server:
         return server
@@ -260,7 +260,7 @@ def parse_lic_config(lic_config_path):
     Parameters
     ----------
     lic_config_path : str
-        Absolute path to the license configruation file.  For example:
+        Absolute path to the license configuration file.  For example:
         ``'C:\\Program Files\\ANSYS Inc\\Shared Files\\Licensing\\ansyslmd.ini'```
 
     Returns
