@@ -67,7 +67,7 @@ def check_license_file(timeout=10):
                 tail_message=f"Error found in file {get_licdebug_name()}",
             )
         if 'CHECKOUT            ' + APP_NAME in msg:
-            # succesfully license checkout
+            # successfully license checkout
             break
 
 
