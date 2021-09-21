@@ -25,9 +25,9 @@ try:
 except FileNotFoundError:
     LIC_CONFIG = ""
 
-skip_no_lic_srv = pytest.mark.skipif(not LIC_CONFIG, reason="Requires license server config")
+skip_no_lic_srv = pytest.mark.skipif(not LIC_CONFIG, reason="Requires local license server config")
 
-
+@skip_no_lic_srv
 def test_parse_lic_config(tmpdir):
     # temporarily write to disk to read this later
     lic_config_path = tmpdir.join('ansyslmd.ini')
@@ -38,10 +38,10 @@ def test_parse_lic_config(tmpdir):
 
     # ensure order is preserved
     expected = [
-        (1055, '255.166.88.70'),
-        (2325, '255.166.88.70'),
-        (1055, 'localhost'),
-        (2325, 'localhost'),
+        ('255.166.88.70', 1055 ),
+        ('255.166.88.70', 2325 ),
+        ('localhost', 1055),
+        ('localhost', 2325),
     ]
 
     assert servers == expected
@@ -52,7 +52,7 @@ def test_ping_lic_srv():
     port, host = LIC_CONFIG[0]
     assert licensing.check_port(host, port)
 
-
+@skip_no_lic_srv
 def test_ping_local_host():
     assert licensing.check_port('localhost')
 
@@ -66,7 +66,7 @@ def test_check_port_fail():
 def test_checkout_license():
     output = licensing.checkout_license('meba')
 
-
+@skip_no_lic_srv
 def test_checkout_license_fail():
     output = licensing.checkout_license('meba', test_net_3, 1055)
     assert "CHECKOUT FAILED" in output
@@ -76,7 +76,7 @@ def test_checkout_license_fail():
 def test_check_mech_license_available():
     licensing.check_mech_license_available()
 
-
+@skip_no_lic_srv
 def test_check_mech_license_available_fail():
     with pytest.raises(errors.LicenseServerConnectionError):
         licensing.check_mech_license_available(test_net_3)
