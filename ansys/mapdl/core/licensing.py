@@ -95,8 +95,8 @@ def get_licdebug_name():
     """Get license client log file name.
 
     This file change the name according to the ANSYS version and the type of license requested (``$appname``).
-    * For ANSYS version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
-    * For ANSYS version 21.2 and below: `licdebug.$appname.$version.out`
+    * For ANSYS version 22.1 and above: ``licdebug.$hostname.$appname.$version.out``
+    * For ANSYS version 21.2 and below: ``licdebug.$appname.$version.out``
 
     where:
     * ``$hostname`` is the name of the machine.
