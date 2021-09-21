@@ -326,6 +326,9 @@ def check_port(ip=LOCALHOST, port=1055, timeout=20):
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
+    # Sanity checks
+    ip = str(ip)
+    port = int(port)
 
     try:
         # ping with any message

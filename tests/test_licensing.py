@@ -49,7 +49,7 @@ def test_parse_lic_config(tmpdir):
 
 @skip_no_lic_srv
 def test_ping_lic_srv():
-    port, host = LIC_CONFIG[0]
+    host, port = LIC_CONFIG[0]
     assert licensing.check_port(host, port)
 
 @skip_no_lic_srv
