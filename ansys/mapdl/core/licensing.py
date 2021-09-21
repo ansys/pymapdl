@@ -38,8 +38,8 @@ def check_license_file(timeout=10):
 
     Parameters
     ----------
-    timeout : int
-        Time to keep checking the license log file for errors.
+    timeout : int, optional
+        Time to keep checking the license log file for errors. Default to 10 (seconds).
 
     Raises
     ------
@@ -297,12 +297,12 @@ def check_port(ip=LOCALHOST, port=1055, timeout=20):
 
     Parameters
     ----------
-    ip : str
-        IP or hostname of the machine to check.
-    port : int
-        Port to check.
-    timeout : int
-        Amount of time to be passed before give up.
+    ip : str, optional
+        IP or hostname of the machine to check. Default to 'HOSTNAME'
+    port : int, optional
+        Port to check. Defaults to 1055.
+    timeout : int, optional
+        Amount of time to be passed before give up. Defaults to 20 (seconds).
 
     Returns
     -------
@@ -433,7 +433,7 @@ def try_license_server(verbose=False):
 
     Parameters
     ----------
-    verbose : bool
+    verbose : bool, optional
         To printout output. Defaults to ``False``
 
     """
