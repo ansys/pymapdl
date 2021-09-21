@@ -21,10 +21,6 @@ Disable this check by passing ``override=True``
 """
 
 
-LICENSE_CONNECTION_ERROR = """
-ERROR CONNECTING TO LICENSE SERVER.
-"""
-
 TYPE_MSG = (
     "Invalid datatype.  Must be one of the following:\n"
     + "np.int32, np.int64, or np.double"
