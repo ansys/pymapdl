@@ -42,9 +42,8 @@ def check_license_file(timeout=10):
     ```
     2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1   
     ```
-    for `FEAT_ANSYS`. 
+    for `FEAT_ANSYS`.
 
-    
     Parameters
     ----------
     timeout : int, optional
