@@ -1,5 +1,4 @@
 class BinDump:
-
     def dump(self, nstrt="", nstop="", **kwargs):
         """Dumps the contents of a binary file.
 

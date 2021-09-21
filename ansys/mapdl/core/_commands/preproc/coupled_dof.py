@@ -1,9 +1,27 @@
 class CoupledDOF:
-
-    def cp(self, nset="", lab="", node1="", node2="", node3="", node4="",
-           node5="", node6="", node7="", node8="", node9="", node10="",
-           node11="", node12="", node13="", node14="", node15="", node16="",
-           node17="", **kwargs):
+    def cp(
+        self,
+        nset="",
+        lab="",
+        node1="",
+        node2="",
+        node3="",
+        node4="",
+        node5="",
+        node6="",
+        node7="",
+        node8="",
+        node9="",
+        node10="",
+        node11="",
+        node12="",
+        node13="",
+        node14="",
+        node15="",
+        node16="",
+        node17="",
+        **kwargs,
+    ):
         """Defines (or modifies) a set of coupled degrees of freedom.
 
         APDL Command: CP
@@ -193,8 +211,7 @@ class CoupledDOF:
         command = f"CPINTF,{lab},{toler}"
         return self.run(command, **kwargs)
 
-    def cplgen(self, nsetf="", lab1="", lab2="", lab3="", lab4="", lab5="",
-               **kwargs):
+    def cplgen(self, nsetf="", lab1="", lab2="", lab3="", lab4="", lab5="", **kwargs):
         """Generates sets of coupled nodes from an existing set.
 
         APDL Command: CPLGEN
@@ -315,7 +332,7 @@ class CoupledDOF:
         nset1, nset2, ninc
             Generate sets from sets beginning with NSET1 to NSET2 (defaults to
             NSET1) in steps of NINC (defaults to 1).  If NSET1 is negative,
-            NSET2 and NINC are ignored and the last |NSET1| sets (in sequence
+            NSET2 and NINC are ignored and the last ``|NSET1|`` sets (in sequence
             from the maximum set number) are used as the sets to be repeated.
 
         Notes

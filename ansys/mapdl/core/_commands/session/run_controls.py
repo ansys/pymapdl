@@ -15,33 +15,38 @@ class RunControls:
         lab
             Configuration parameter to be changed:
 
-            NORSTGM - Option to write or not write geometry data to the results file. VALUE is either
-                      0 (write geometry data) or 1 (do not write geometry
+            NORSTGM - Option to write or not write geometry data to
+                      the results file. VALUE is either 0 (write
+                      geometry data) or 1 (do not write geometry
                       data). Useful when complex analyses will create
                       abnormally large files. Default is 0.
 
-            NBUF - VALUE is the number of buffers (1 to 32) per file in the solver.  Defaults to
-                   4.
+            NBUF - VALUE is the number of buffers (1 to 32) per file
+                   in the solver.  Defaults to 4.
 
-            LOCFL - File open and close actions.  For VALUE use: 0 for global (default); 1 for
-                    local.  Applicable to File.EROT, File.ESAV, and File.EMAT.
-                    Typically  used for large problems where locally closed
-                    files may be deleted  earlier in the run with the /FDELE
+            LOCFL - File open and close actions.  For VALUE use: 0 for
+                    global (default); 1 for local.  Applicable to
+                    File.EROT, File.ESAV, and File.EMAT.  Typically
+                    used for large problems where locally closed files
+                    may be deleted earlier in the run with the /FDELE
                     command.
 
-            SZBIO - VALUE is the record size (1024 to 4194304) of binary files (in integer words).
-                    Defaults to 16384 (system dependent).
+            SZBIO - VALUE is the record size (1024 to 4194304) of
+                    binary files (in integer words).  Defaults to
+                    16384 (system dependent).
 
-            ORDER - Automatic reordering scheme.  For VALUE use: 0 for WSORT,ALL; 1 for WAVES; 2
-                    for both WSORT,ALL and WAVES (default).
+            ORDER - Automatic reordering scheme.  For VALUE use: 0 for
+                    WSORT,ALL; 1 for WAVES; 2 for both WSORT,ALL and
+                    WAVES (default).
 
-            FSPLIT - Defines split points for binary files.  VALUE is the file split point in
-                     megawords and defaults to the maximum file size for the
-                     system.
+            FSPLIT - Defines split points for binary files.  VALUE is
+                     the file split point in megawords and defaults to
+                     the maximum file size for the system.
 
-            MXND - Maximum number of nodes. If not specified, defaults to 100 at first encounter.
-                   Dynamically expanded by doubling, even at first encounter,
-                   when maximum is exceeded.
+            MXND - Maximum number of nodes. If not specified, defaults
+                   to 100 at first encounter.  Dynamically expanded by
+                   doubling, even at first encounter, when maximum is
+                   exceeded.
 
             MXEL - Maximum number of elements.  Default and expansion as for MXND.
 
@@ -53,22 +58,26 @@ class RunControls:
 
             MXVL - Maximum number of volumes.  Default and expansion as for MXND.
 
-            MXRL - Maximum number of sets of real constants (element attributes).  Default and
-                   expansion as for MXND.
+            MXRL - Maximum number of sets of real constants (element
+                   attributes).  Default and expansion as for MXND.
 
-            MXCP - Maximum number of sets of coupled degrees of freedom.  Default and expansion as
-                   for MXND.
+            MXCP - Maximum number of sets of coupled degrees of
+                   freedom.  Default and expansion as for MXND.
 
-            MXCE - Maximum number of constraint equations.  Default and expansion as for MXND.
+            MXCE - Maximum number of constraint equations.  Default
+            and expansion as for MXND.
 
-            NOELDB - Option to write or not write results into the database after a solution.  When
-                     VALUE = 0 (default), write results into the database.
-                     When VALUE = 1, do not write results into the database.
+            NOELDB - Option to write or not write results into the
+                     database after a solution.  When VALUE = 0
+                     (default), write results into the database.  When
+                     VALUE = 1, do not write results into the
+                     database.
 
-            DYNA_DBL - Option to invoke the double precision version of the explicit dynamics solver
-                       LS-DYNA. When VALUE = 0 (default), the single precision
-                       version is used. When VALUE = 1, the double precision
-                       version is used.
+            DYNA_DBL - Option to invoke the double precision version
+                       of the explicit dynamics solver LS-DYNA. When
+                       VALUE = 0 (default), the single precision
+                       version is used. When VALUE = 1, the double
+                       precision version is used.
 
             STAT - Displays current values set by the /CONFIG command.
 
@@ -113,7 +122,7 @@ class RunControls:
 
         Notes
         -----
-         After issuing the /CWD command, all new files opened with no default
+        After issuing the /CWD command, all new files opened with no default
         directory specified (via the FILE, /COPY, or RESUME commands, for
         example) default to the new DIRPATH directory.
         """
@@ -139,9 +148,11 @@ class RunControls:
 
             0, OFF - Continue using current log, error, lock, page, and output files.
 
-            1, ON - Start new log, error, lock, page, and output files (old log and error files are
-                    closed and saved, but old lock, page, and output files are
-                    deleted). Existing log and error files are appended.
+            1, ON - Start new log, error, lock, page, and output files
+                    (old log and error files are closed and saved, but
+                    old lock, page, and output files are
+                    deleted). Existing log and error files are
+                    appended.
 
         Notes
         -----
@@ -209,7 +220,7 @@ class RunControls:
         the file or when a /EOF command is read.  An automatic switch back
         one level (to the previous file) occurs when an end-of-file is
         encountered.  Twenty levels of nested file switching are allowed.
-        Note that files including *DO, *USE, *ULIB, and the "Unknown
+        Note that files including ``*DO``, ``*USE``, ``*ULIB``, and the "Unknown
         Command" Macro have less nesting available because each of these
         operations also uses a level of file switching.  For an
         interactive run, a /INPUT,TERM switches to the terminal for the
@@ -382,8 +393,13 @@ class RunControls:
 
         The command is valid in any processor.
         """
-        command = "/NERR,%s,%s,%s,%s,%s" % (str(nmerr), str(nmabt), str(abort),
-                                            str(ifkey), str(num))
+        command = "/NERR,%s,%s,%s,%s,%s" % (
+            str(nmerr),
+            str(nmabt),
+            str(abort),
+            str(ifkey),
+            str(num),
+        )
         return self.run(command, **kwargs)
 
     def pause(self, **kwargs):
@@ -451,24 +467,37 @@ class RunControls:
         """
         return self.run(f"/STATUS,{lab}", **kwargs)
 
-    def starstatus(self, par="", imin="", imax="", jmin="", jmax="", kmin="",
-                   kmax="", lmin="", lmax="", mmin="", mmax="", kpri="",
-                   **kwargs):
+    def starstatus(
+        self,
+        par="",
+        imin="",
+        imax="",
+        jmin="",
+        jmax="",
+        kmin="",
+        kmax="",
+        lmin="",
+        lmax="",
+        mmin="",
+        mmax="",
+        kpri="",
+        **kwargs,
+    ):
         """Lists the current parameters and abbreviations.
 
-        APDL Command: *STATUS
+        APDL Command: ``*STATUS``
 
         Parameters
         ----------
         par
             Specifies the parameter or sets of parameters listed. For array
-            parameters, use IMIN, IMAX, etc. to specify ranges.  Use *DIM to
-            define array parameters. Use *VEDIT to review array parameters
-            interactively. Use *VWRITE to print array values in a formatted
+            parameters, use IMIN, IMAX, etc. to specify ranges.  Use ``*DIM`` to
+            define array parameters. Use ``*VEDIT`` to review array parameters
+            interactively. Use ``*VWRITE`` to print array values in a formatted
             output. If Par is blank, list all scalar parameter values, array
             parameter dimensions, and abbreviations.  If ARGX, list the active
             set of local macro parameters (ARG1 to ARG9 and AR10 to AR99)
-            [*USE].
+            [``*USE``].
 
             Lists all parameters (except local macro parameters and those with names beginning or ending with an underbar) and toolbar abbreviations. - Lists only parameters with names beginning with an underbar (_). These are
                               ANSYS internal parameters.
@@ -486,7 +515,7 @@ class RunControls:
             (row, column, plane, book, and shelf).   Minimum values default to
             1.  Maximum values default to the maximum dimension values.  Zero
             may be input for IMIN, JMIN, and KMIN to display the index numbers.
-            See *TAXIS  command to list index numbers of 4- and 5-D tables.
+            See ``*TAXIS``  command to list index numbers of 4- and 5-D tables.
 
         kpri
             Use this field to list your primary variable labels (X, Y, Z, TIME,
@@ -497,17 +526,40 @@ class RunControls:
         Notes
         -----
         You cannot obtain the value for a single local parameter (e.g.,
-        *STATUS,ARG2). You can only request all local parameters simultaneously
-        using *STATUS,ARGX.
+        ``*STATUS,ARG2``). You can only request all local parameters simultaneously
+        using ``*STATUS,ARGX``.
 
         This command is valid in any processor.
         """
-        command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(par), str(imin), str(imax), str(
-            jmin), str(jmax), str(kmin), str(kmax), str(lmin), str(lmax), str(mmin), str(mmax), str(kpri))
+        command = "*STATUS,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(par),
+            str(imin),
+            str(imax),
+            str(jmin),
+            str(jmax),
+            str(kmin),
+            str(kmax),
+            str(lmin),
+            str(lmax),
+            str(mmin),
+            str(mmax),
+            str(kpri),
+        )
         return self.run(command, **kwargs)
 
-    def syp(self, string="", arg1="", arg2="", arg3="", arg4="", arg5="",
-            arg6="", arg7="", arg8="", **kwargs):
+    def syp(
+        self,
+        string="",
+        arg1="",
+        arg2="",
+        arg3="",
+        arg4="",
+        arg5="",
+        arg6="",
+        arg7="",
+        arg8="",
+        **kwargs,
+    ):
         """Passes a command string and arguments to the operating system.
 
         APDL Command: /SYP
@@ -533,8 +585,17 @@ class RunControls:
 
         This command is valid in any processor.
         """
-        command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(string), str(arg1), str(
-            arg2), str(arg3), str(arg4), str(arg5), str(arg6), str(arg7), str(arg8))
+        command = "/SYP,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            str(string),
+            str(arg1),
+            str(arg2),
+            str(arg3),
+            str(arg4),
+            str(arg5),
+            str(arg6),
+            str(arg7),
+            str(arg8),
+        )
         return self.run(command, **kwargs)
 
     def sys(self, string="", **kwargs):

@@ -1,5 +1,4 @@
 class Ocean:
-
     def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
         """Defines an ocean load using non-table data.
 
@@ -100,9 +99,7 @@ class Ocean:
 
         Ktable -- The dependency of VAL1 on the OCTABLE command:
 
-        Figure: 5:: : Basic Ocean Data Type Components
-
-         KWAVE -- The incident wave type:
+        KWAVE -- The incident wave type:
 
         THETA -- Angle of the wave direction θ from the global Cartesian X axis
         toward the global Cartesian Y axis (in degrees).
@@ -228,8 +225,9 @@ class Ocean:
         command = f"OCREAD,{fname},{ext},{option}"
         return self.run(command, **kwargs)
 
-    def octable(self, val1="", val2="", val3="", val4="", val5="", val6="",
-                val7="", **kwargs):
+    def octable(
+        self, val1="", val2="", val3="", val4="", val5="", val6="", val7="", **kwargs
+    ):
         """Defines an ocean load using table data.
 
         APDL Command: OCTABLE
@@ -281,7 +279,7 @@ class Ocean:
 
         The TIME command is not used, except perhaps to identify the load case.
 
-                The phase shift (Ps) determines the wave position (that is, the
+        The phase shift (Ps) determines the wave position (that is, the
         point at which the load is to be applied).
 
         When using the Stokes fifth-order (KWAVE = 2) or stream function (KWAVE
@@ -340,8 +338,9 @@ class Ocean:
         command = f"OCTYPE,{datatype},{name}"
         return self.run(command, **kwargs)
 
-    def oczone(self, zonetype="", zonename="", compnameint="", compnameext="",
-               **kwargs):
+    def oczone(
+        self, zonetype="", zonename="", compnameint="", compnameext="", **kwargs
+    ):
         """Specifies the type of ocean zone data to follow.
 
         APDL Command: OCZONE

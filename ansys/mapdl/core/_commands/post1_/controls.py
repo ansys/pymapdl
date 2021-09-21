@@ -1,5 +1,4 @@
 class Controls:
-
     def avprin(self, key="", effnu="", **kwargs):
         """Specifies how principal and vector sums are to be calculated.
 
@@ -228,8 +227,18 @@ class Controls:
         """
         return self.run("ERNORM,%s" % (str(key)), **kwargs)
 
-    def inres(self, item1="", item2="", item3="", item4="", item5="", item6="",
-              item7="", item8="", **kwargs):
+    def inres(
+        self,
+        item1="",
+        item2="",
+        item3="",
+        item4="",
+        item5="",
+        item6="",
+        item7="",
+        item8="",
+        **kwargs,
+    ):
         """Identifies the data to be retrieved from the results file.
 
         APDL Command: INRES
@@ -278,7 +287,9 @@ class Controls:
         file, care should be taken when using the OUTRES command to include all
         data you wish to retrieve for postprocessing later on.
         """
-        command = f"INRES,{item1},{item2},{item3},{item4},{item5},{item6},{item7},{item8}"
+        command = (
+            f"INRES,{item1},{item2},{item3},{item4},{item5},{item6},{item7},{item8}"
+        )
         return self.run(command, **kwargs)
 
     def layer(self, num="", **kwargs):

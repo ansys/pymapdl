@@ -11,6 +11,7 @@ import matplotlib.pylab as plt
 
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
+
 mapdl = launch_mapdl()
 mm = mapdl.math
 
@@ -18,7 +19,7 @@ mm = mapdl.math
 ################################################################################
 # Load and solve verification manual example 153.  Then load the
 # stiffness matrix into APDLmath.
-out = mapdl.input(vmfiles['vm153'])
+out = mapdl.input(vmfiles["vm153"])
 k = mm.stiff(fname="PRSMEMB.full")
 k
 
@@ -50,7 +51,7 @@ print(pk.indptr[:10])
 # this example uses a matrix that was originally within MAPDL, you can
 # load any CSR matrix to MAPDL.
 
-my_mat = mm.matrix(pk, 'my_mat', triu=True)
+my_mat = mm.matrix(pk, "my_mat", triu=True)
 my_mat
 
 ################################################################################

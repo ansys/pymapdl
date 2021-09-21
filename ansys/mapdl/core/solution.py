@@ -2,7 +2,7 @@ import weakref
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 
-class Solution():
+class Solution:
     """Collection of parameters specific to the solution.
 
     Useful for checking the status of a solve after running
@@ -24,7 +24,7 @@ class Solution():
 
     def __init__(self, mapdl):
         if not isinstance(mapdl, _MapdlCore):
-            raise TypeError('Must be implemented from MAPDL class')
+            raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
 
     @property
@@ -48,7 +48,7 @@ class Solution():
         >>> mapdl.solution.time_step_size
         1.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DTIME')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "DTIME")
 
     @property
     def n_cmls(self):
@@ -59,7 +59,7 @@ class Solution():
         >>> mapdl.solution.n_cmls
         1.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'NCMLS')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "NCMLS")
 
     @property
     def n_cmss(self):
@@ -70,7 +70,7 @@ class Solution():
         >>> mapdl.solution.n_cmss
         1.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'NCMSS')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "NCMSS")
 
     @property
     def n_eqit(self):
@@ -81,7 +81,7 @@ class Solution():
         >>> mapdl.solution.n_eqit
         1.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'EQIT')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "EQIT")
 
     @property
     def n_cmit(self):
@@ -92,7 +92,7 @@ class Solution():
         >>> mapdl.solution.n_cmit
         1.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'NCMIT')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "NCMIT")
 
     @property
     def converged(self):
@@ -103,7 +103,7 @@ class Solution():
         >>> mapdl.solution.converged
         True
         """
-        return bool(self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CNVG'))
+        return bool(self._mapdl.get_value("ACTIVE", 0, "SOLU", "CNVG"))
 
     @property
     def mx_dof(self):
@@ -114,7 +114,7 @@ class Solution():
         >>> mapdl.solution.mx_dof
         -0.00020707416808476303
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MXDVL')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "MXDVL")
 
     @property
     def res_frq(self):
@@ -125,7 +125,7 @@ class Solution():
         >>> mapdl.solution.res_frq
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'RESFRQ')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "RESFRQ")
 
     @property
     def res_eig(self):
@@ -136,7 +136,7 @@ class Solution():
         >>> mapdl.solution.res_eig
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'RESEIG')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "RESEIG")
 
     @property
     def decent_parm(self):
@@ -147,7 +147,7 @@ class Solution():
         >>> mapdl.solution.decent_parm
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DSPRM')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "DSPRM")
 
     @property
     def force_cnv(self):
@@ -158,7 +158,7 @@ class Solution():
         >>> mapdl.solution.force_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'FOCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "FOCV")
 
     @property
     def moment_cnv(self):
@@ -169,7 +169,7 @@ class Solution():
         >>> mapdl.solution.moment_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MOCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "MOCV")
 
     @property
     def heat_flow_cnv(self):
@@ -180,7 +180,7 @@ class Solution():
         >>> mapdl.solution.heat_flow_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'HFCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "HFCV")
 
     @property
     def magnetic_flux_cnv(self):
@@ -191,7 +191,7 @@ class Solution():
         >>> mapdl.solution.magnetic_flux_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'MFCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "MFCV")
 
     @property
     def current_segment_cnv(self):
@@ -202,7 +202,7 @@ class Solution():
         >>> mapdl.solution.current_segment_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CSCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "CSCV")
 
     @property
     def current_cnv(self):
@@ -213,7 +213,7 @@ class Solution():
         >>> mapdl.solution.current_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CUCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "CUCV")
 
     @property
     def fluid_flow_cnv(self):
@@ -224,7 +224,7 @@ class Solution():
         >>> mapdl.solution.fluid_flow_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'FFCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "FFCV")
 
     @property
     def displacement_cnv(self):
@@ -235,7 +235,7 @@ class Solution():
         >>> mapdl.solution.displacement_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'DICV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "DICV")
 
     @property
     def rotation_cnv(self):
@@ -246,7 +246,7 @@ class Solution():
         >>> mapdl.solution.rotation_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'ROCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "ROCV")
 
     @property
     def temperature_cnv(self):
@@ -257,7 +257,7 @@ class Solution():
         >>> mapdl.solution.temperature_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'TECV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "TECV")
 
     @property
     def vector_cnv(self):
@@ -268,7 +268,7 @@ class Solution():
         >>> mapdl.solution.vector_cnv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VMCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "VMCV")
 
     @property
     def smcv(self):
@@ -279,7 +279,7 @@ class Solution():
         >>> mapdl.solution.smcv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'SMCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "SMCV")
 
     @property
     def voltage_conv(self):
@@ -290,7 +290,7 @@ class Solution():
         >>> mapdl.solution.voltage_conv
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VOCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "VOCV")
 
     @property
     def pressure_conv(self):
@@ -301,7 +301,7 @@ class Solution():
         >>> mapdl.solution.pressure_conv
 
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'PRCV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "PRCV")
 
     @property
     def velocity_conv(self):
@@ -312,7 +312,7 @@ class Solution():
         >>> mapdl.solution.velocity_conv
 
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'VECV')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "VECV")
 
     @property
     def mx_creep_rat(self):
@@ -323,7 +323,7 @@ class Solution():
         >>> mapdl.solution.mx_creep_rat
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CRPRAT')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "CRPRAT")
 
     @property
     def mx_plastic_inc(self):
@@ -334,7 +334,7 @@ class Solution():
         >>> mapdl.solution.mx_plastic_inc
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'PSINC')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "PSINC")
 
     @property
     def n_cg_iter(self):
@@ -345,4 +345,4 @@ class Solution():
         >>> mapdl.solution.n_cg_iter
         0.0
         """
-        return self._mapdl.get_value('ACTIVE', 0, 'SOLU', 'CGITER')
+        return self._mapdl.get_value("ACTIVE", 0, "SOLU", "CGITER")

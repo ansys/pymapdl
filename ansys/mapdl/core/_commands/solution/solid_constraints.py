@@ -1,5 +1,4 @@
 class SolidConstraints:
-
     def da(self, area="", lab="", value1="", value2="", **kwargs):
         """Defines degree-of-freedom constraints on areas.
 
@@ -51,7 +50,7 @@ class SolidConstraints:
         value1
             Value of DOF or table name reference on the area.  Valid for all
             DOF labels.  To specify a table, enclose the table name in % signs
-            (e.g., DA,AREA,TEMP,%tabname%).  Use the *DIM command to define a
+            (e.g., DA,AREA,TEMP,%tabname%).  Use the ``*DIM`` command to define a
             table.
 
         value2
@@ -202,8 +201,20 @@ class SolidConstraints:
         command = f"DALIST,{area}"
         return self.run(command, **kwargs)
 
-    def dk(self, kpoi="", lab="", value="", value2="", kexpnd="", lab2="",
-           lab3="", lab4="", lab5="", lab6="", **kwargs):
+    def dk(
+        self,
+        kpoi="",
+        lab="",
+        value="",
+        value2="",
+        kexpnd="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        **kwargs,
+    ):
         """Defines DOF constraints at keypoints.
 
         APDL Command: DK
@@ -230,7 +241,7 @@ class SolidConstraints:
         value
             Degree of freedom value or table name reference for tabular
             boundary conditions.  To specify a table, enclose the table name in
-            percent signs (%) (e.g., DK,NODE,TEMP,%tabname%).  Use the *DIM
+            percent signs (%) (e.g., DK,NODE,TEMP,%tabname%).  Use the ``*DIM``
             command to define a table.
 
         value2
@@ -359,7 +370,7 @@ class SolidConstraints:
         value1
             Value of DOF (real part) or table name reference on the line.
             Valid for all DOF labels.  To specify a table, enclose the table
-            name in % signs (e.g., DL,LINE,AREA,TEMP,%tabname%).  Use the *DIM
+            name in % signs (e.g., DL,LINE,AREA,TEMP,%tabname%).  Use the ``*DIM``
             command to define a table.
 
         value2

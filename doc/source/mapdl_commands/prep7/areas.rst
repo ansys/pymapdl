@@ -22,7 +22,6 @@ These PREP7 commands are used to create, modify, list, etc., areas.
    Mapdl.alist
    Mapdl.anorm
    Mapdl.aoffst
-   Mapdl.aplot
    Mapdl.areverse
    Mapdl.arotat
    Mapdl.arscale

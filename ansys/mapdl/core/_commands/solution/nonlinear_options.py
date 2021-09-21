@@ -1,5 +1,4 @@
 class NonLinearOptions:
-
     def arclen(self, key="", maxarc="", minarc="", **kwargs):
         """Activates the arc-length method.
 
@@ -126,8 +125,7 @@ class NonLinearOptions:
         command = f"ARCTRM,{lab},{val},{node},{dof}"
         return self.run(command, **kwargs)
 
-    def bucopt(self, method="", nmode="", shift="", ldmulte="", rangekey="",
-               **kwargs):
+    def bucopt(self, method="", nmode="", shift="", ldmulte="", rangekey="", **kwargs):
         """Specifies buckling analysis options.
 
         APDL Command: BUCOPT
@@ -246,7 +244,7 @@ class NonLinearOptions:
         any other label. All other convergence criteria will remain at their
         default setting or at the value set by a previous CNVTOL command.
 
-         When the GUI is on, if a "Delete" operation in a Nonlinear Convergence
+        When the GUI is on, if a "Delete" operation in a Nonlinear Convergence
         Criteria dialog box writes this command to a log file (Jobname.LOG or
         Jobname.LGW), you will observe that Lab is blank, VALUE = -1, and TOLER
         is an integer number.  In this case, the GUI has assigned a value of
@@ -460,9 +458,20 @@ class NonLinearOptions:
         command = f"NEQIT,{neqit},{forcekey}"
         return self.run(command, **kwargs)
 
-    def nladaptive(self, component="", action="", criterion="", option="",
-                   val1="", val2="", val3="", val4="", **kwargs):
-        """Defines the criteria under which the mesh is refined or modified during a nonlinear solution.
+    def nladaptive(
+        self,
+        component="",
+        action="",
+        criterion="",
+        option="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
+    ):
+        """Defines the criteria under which the mesh is refined or
+        modified during a nonlinear solution.
 
         APDL Command: NLADAPTIVE
 
@@ -488,6 +497,7 @@ class NonLinearOptions:
             - ``"ON"`` : Enable the defined criteria for the specified
               component(s) and specify how frequently and when to check
               them (via ON,,,VAL1,VAL2,VAL3):
+
                 - ``"VAL1"`` : Checking frequency. If > 0, check criteria
                   at every VAL1 substeps. If < 0, check criteria at each
                   of the VAL1 points (approximately equally spaced)
@@ -499,6 +509,7 @@ class NonLinearOptions:
                 - ``"VAL4"`` : SOLID187 element type ID (defined prior to
                   issuing this command). Valid only for SOLID185 or
                   SOLID186 components in a NLAD-ETCHG analysis.
+
             - ``"OFF"`` : Disable the defined criteria for the specified
               component(s).
 
@@ -855,8 +866,20 @@ class NonLinearOptions:
         command = f"NLGEOM,{key}"
         return self.run(command, **kwargs)
 
-    def nlhist(self, key="", name="", item="", comp="", node="", elem="",
-               shell="", layer="", stop_value="", stop_cond="", **kwargs):
+    def nlhist(
+        self,
+        key="",
+        name="",
+        item="",
+        comp="",
+        node="",
+        elem="",
+        shell="",
+        layer="",
+        stop_value="",
+        stop_cond="",
+        **kwargs,
+    ):
         """Specify result items to track during solution.
 
         APDL Command: NLHIST
@@ -1323,7 +1346,7 @@ class NonLinearOptions:
         tensile forces applied to both ends will have two nonzero rotational
         rigid body modes.
 
-        If tabular loading (*DIM,,TABLE) was used in the prestress static
+        If tabular loading (``*DIM,,TABLE``) was used in the prestress static
         analysis step, the corresponding value of TIME will be used for tabular
         evaluations in the modal analysis.
 

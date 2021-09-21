@@ -5,7 +5,6 @@ user-context.
 
 
 class _Hidden:
-
     def _batch(self, lab="", **kwargs):
         """APDL Command: /BATCH
 

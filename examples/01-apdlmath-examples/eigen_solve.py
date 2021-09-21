@@ -17,7 +17,7 @@ from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and create an APDLMath object
-mapdl = launch_mapdl(loglevel='ERROR')
+mapdl = launch_mapdl(loglevel="ERROR")
 mm = mapdl.math
 
 
@@ -25,7 +25,7 @@ mm = mapdl.math
 # First we get the `STIFF` and `MASS` matrices from the full file
 # after running the input file from Verification Manual 153
 #
-out = mapdl.input(vmfiles['vm153'])
+out = mapdl.input(vmfiles["vm153"])
 
 k = mm.stiff(fname="PRSMEMB.full")
 m = mm.mass(fname="PRSMEMB.full")
@@ -50,11 +50,11 @@ a
 # The algorithm is automatically chosen with respect to the matrices
 # properties (e.g. scalar, storage, symmetry...)
 #
-print('Calling MAPDL to solve the eigenproblem...')
+print("Calling MAPDL to solve the eigenproblem...")
 
 t1 = time.time()
 ev = mm.eigs(nev, k, m, phi=a)
-print(f'Elapsed time to solve this problem: {time.time() - t1}')
+print(f"Elapsed time to solve this problem: {time.time() - t1}")
 
 
 ###############################################################################
@@ -72,8 +72,8 @@ print(ev)
 # Eigenfrequency (Hz)
 i = 0
 f = ev[0]
-omega = 2*np.pi*f
-lam = omega*omega
+omega = 2 * np.pi * f
+lam = omega * omega
 
 
 ###############################################################################
@@ -112,12 +112,13 @@ mphi *= lam
 kphi -= mphi
 
 # Compute the residual
-res = kphi.norm()/kphinrm
+res = kphi.norm() / kphinrm
 print(res)
 
 ###############################################################################
 # This residual can be computed for all eigenmodes
 #
+
 
 def get_res(i):
     """Compute the residual for a given eigenmode"""
@@ -125,10 +126,10 @@ def get_res(i):
     f = ev[i]
 
     # omega = 2.pi.Frequency
-    omega = 2*np.pi*f
+    omega = 2 * np.pi * f
 
     # lambda = omega^2
-    lam = omega*omega
+    lam = omega * omega
 
     # i-th eigenshape
     phi = a[i]
@@ -147,7 +148,7 @@ def get_res(i):
     kphi -= mphi
 
     # return the residual
-    return kphi.norm()/kphinrm
+    return kphi.norm() / kphinrm
 
 
 mapdl_acc = np.zeros(nev)
@@ -155,7 +156,7 @@ mapdl_acc = np.zeros(nev)
 for i in range(nev):
     f = ev[i]
     mapdl_acc[i] = get_res(i)
-    print(f'[{i}] : Freq = {f}\t - Residual = {mapdl_acc[i]}')
+    print(f"[{i}] : Freq = {f}\t - Residual = {mapdl_acc[i]}")
 
 ###############################################################################
 # Plot Accuracy of Eigenresults
@@ -163,9 +164,9 @@ for i in range(nev):
 fig = plt.figure(figsize=(12, 10))
 ax = plt.axes()
 x = np.linspace(1, nev, nev)
-plt.title('APDL Math Residual Error (%)')
-plt.yscale('log')
-plt.ylim([10E-13, 10E-7])
-plt.xlabel('Frequency #')
-plt.ylabel('Errors (%)')
-ax.bar(x, mapdl_acc, label='MAPDL Results')
+plt.title("APDL Math Residual Error (%)")
+plt.yscale("log")
+plt.ylim([10e-13, 10e-7])
+plt.xlabel("Frequency #")
+plt.ylabel("Errors (%)")
+ax.bar(x, mapdl_acc, label="MAPDL Results")

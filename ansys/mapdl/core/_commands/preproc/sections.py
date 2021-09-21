@@ -1,5 +1,4 @@
 class Sections:
-
     def bsax(self, val1="", val2="", t="", **kwargs):
         """Specifies the axial strain and axial force relationship for beam
 
@@ -267,9 +266,17 @@ class Sections:
         command = f"BSTQ,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-    def cbmd(self, row="", c_r__r_="", c_r__r_plus_1_="", c_r__r_plus_2_="",
-             c_r__r_plus_3_="", c_r__r_plus_4_="", c_r__r_plus_5_="",
-             **kwargs):
+    def cbmd(
+        self,
+        row="",
+        c_r__r_="",
+        c_r__r_plus_1_="",
+        c_r__r_plus_2_="",
+        c_r__r_plus_3_="",
+        c_r__r_plus_4_="",
+        c_r__r_plus_5_="",
+        **kwargs,
+    ):
         """Specifies preintegrated section mass matrix for composite-beam
 
         APDL Command: CBMD
@@ -304,9 +311,18 @@ class Sections:
         command = f"CBMD,{row},{c_r__r_},{c_r__r_plus_1_},{c_r__r_plus_2_},{c_r__r_plus_3_},{c_r__r_plus_4_},{c_r__r_plus_5_}"
         return self.run(command, **kwargs)
 
-    def cbmx(self, row="", s_r__r_="", s_r__r_plus_1_="", s_r__r_plus_2_="",
-             s_r__r_plus_3_="", s_r__r_plus_4_="", s_r__r_plus_5_="",
-             s_r__r_plus_6_="", **kwargs):
+    def cbmx(
+        self,
+        row="",
+        s_r__r_="",
+        s_r__r_plus_1_="",
+        s_r__r_plus_2_="",
+        s_r__r_plus_3_="",
+        s_r__r_plus_4_="",
+        s_r__r_plus_5_="",
+        s_r__r_plus_6_="",
+        **kwargs,
+    ):
         """Specifies preintegrated cross-section stiffness for composite beam
 
         APDL Command: CBMX
@@ -396,8 +412,7 @@ class Sections:
         command = f"CBTMP,{temp}"
         return self.run(command, **kwargs)
 
-    def sdelete(self, sfirst="", slast="", sinc="", knoclean="", lchk="",
-                **kwargs):
+    def sdelete(self, sfirst="", slast="", sinc="", knoclean="", lchk="", **kwargs):
         """Deletes sections from the database.
 
         APDL Command: SDELETE
@@ -500,7 +515,7 @@ class Sections:
         node number) that expresses the function to be mapped. (For example,
         func (17) should be the desired shell thickness at node 17.)  To
         specify a table, enclose the table or array name in percent signs (%)
-        (SECFUNCTION,%tablename%). Use the *DIM command to define a table.
+        (SECFUNCTION,%tablename%). Use the ``*DIM`` command to define a table.
 
         The table or array defines the total shell thickness at any point in
         space. In multilayered sections, the total thickness and each layer
@@ -524,9 +539,23 @@ class Sections:
         command = f"SECFUNCTION,{table},{kcn}"
         return self.run(command, **kwargs)
 
-    def seccontrol(self, val1="", val2="", val3="", val4="", val5="", val6="",
-                   val7="", val8="", val9="", val10="", val11="", val12="",
-                   val13="", **kwargs):
+    def seccontrol(
+        self,
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        val10="",
+        val11="",
+        val12="",
+        val13="",
+        **kwargs,
+    ):
         """Supplements or overrides default section properties.
 
         APDL Command: SECCONTROL
@@ -556,9 +585,22 @@ class Sections:
         command = f"SECCONTROL,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13}"
         return self.run(command, **kwargs)
 
-    def secdata(self, val1="", val2="", val3="", val4="", val5="", val6="",
-                val7="", val8="", val9="", val10="", val11="", val12="",
-                **kwargs):
+    def secdata(
+        self,
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        val8="",
+        val9="",
+        val10="",
+        val11="",
+        val12="",
+        **kwargs,
+    ):
         """Describes the geometry of a section.
 
         APDL Command: SECDATA
@@ -619,8 +661,9 @@ class Sections:
         command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
         return self.run(command, **kwargs)
 
-    def secjoint(self, kywrd="", val1="", val2="", val3="", val4="", val5="",
-                 val6="", **kwargs):
+    def secjoint(
+        self, kywrd="", val1="", val2="", val3="", val4="", val5="", val6="", **kwargs
+    ):
         """Defines local coordinate systems at joint element nodes and other data
 
         APDL Command: SECJOINT
@@ -691,9 +734,19 @@ class Sections:
         command = f"/SECLIB,{option},{path}"
         return self.run(command, **kwargs)
 
-    def seclock(self, dof1="", minvalue1="", maxvalue1="", dof2="",
-                minvalue2="", maxvalue2="", dof3="", minvalue3="",
-                maxvalue3="", **kwargs):
+    def seclock(
+        self,
+        dof1="",
+        minvalue1="",
+        maxvalue1="",
+        dof2="",
+        minvalue2="",
+        maxvalue2="",
+        dof3="",
+        minvalue3="",
+        maxvalue3="",
+        **kwargs,
+    ):
         """Specifies locks on the components of relative motion in a joint
 
         APDL Command: SECLOCK
@@ -734,8 +787,17 @@ class Sections:
         command = f"SECNUM,{secid}"
         return self.run(command, **kwargs)
 
-    def secoffset(self, location="", offset1="", offset2="", cg_y="", cg_z="",
-                  sh_y="", sh_z="", **kwargs):
+    def secoffset(
+        self,
+        location="",
+        offset1="",
+        offset2="",
+        cg_y="",
+        cg_z="",
+        sh_y="",
+        sh_z="",
+        **kwargs,
+    ):
         """Defines the section offset for cross sections.
 
         APDL Command: SECOFFSET
@@ -764,7 +826,9 @@ class Sections:
         This command is not valid with thermal solid elements SOLID278 and
         SOLID279.
         """
-        command = f"SECOFFSET,{location},{offset1},{offset2},{cg_y},{cg_z},{sh_y},{sh_z}"
+        command = (
+            f"SECOFFSET,{location},{offset1},{offset2},{cg_y},{cg_z},{sh_y},{sh_z}"
+        )
         return self.run(command, **kwargs)
 
     def secplot(self, secid="", val1="", val2="", val3="", **kwargs):
@@ -939,9 +1003,19 @@ class Sections:
         """
         return self.run(f"SECREAD,{fname},{ext},,{option}", **kwargs)
 
-    def secstop(self, dof1="", minvalue1="", maxvalue1="", dof2="",
-                minvalue2="", maxvalue2="", dof3="", minvalue3="",
-                maxvalue3="", **kwargs):
+    def secstop(
+        self,
+        dof1="",
+        minvalue1="",
+        maxvalue1="",
+        dof2="",
+        minvalue2="",
+        maxvalue2="",
+        dof3="",
+        minvalue3="",
+        maxvalue3="",
+        **kwargs,
+    ):
         """Specifies stops on the components of relative motion in a joint
 
         APDL Command: SECSTOP
@@ -967,8 +1041,7 @@ class Sections:
         command = f"SECSTOP,{dof1},{minvalue1},{maxvalue1},{dof2},{minvalue2},{maxvalue2},{dof3},{minvalue3},{maxvalue3}"
         return self.run(command, **kwargs)
 
-    def sectype(self, secid="", type_="", subtype="", name="", refinekey="",
-                **kwargs):
+    def sectype(self, secid="", type_="", subtype="", name="", refinekey="", **kwargs):
         """Associates section type information with a section ID number.
 
         APDL Command: SECTYPE
@@ -1100,8 +1173,7 @@ class Sections:
         """
         return self.run(f"SECWRITE,{fname},{ext},,{elem_type}", **kwargs)
 
-    def sflex(self, ffax="", ffby="", ffbz="", ffto="", fftsy="", fftsz="",
-              **kwargs):
+    def sflex(self, ffax="", ffby="", ffbz="", ffto="", fftsy="", fftsz="", **kwargs):
         """Sets flexibility factors for the currently defined pipe element
 
         APDL Command: SFLEX
@@ -1156,8 +1228,7 @@ class Sections:
         command = f"SFLEX,{ffax},{ffby},{ffbz},{ffto},{fftsy},{fftsz}"
         return self.run(command, **kwargs)
 
-    def slist(self, sfirst="", slast="", sinc="", details="", type_="",
-              **kwargs):
+    def slist(self, sfirst="", slast="", sinc="", details="", type_="", **kwargs):
         """Summarizes the section properties for all defined sections in the
 
         APDL Command: SLIST
@@ -1213,8 +1284,17 @@ class Sections:
         command = f"SLIST,{sfirst},{slast},{sinc},{details},{type_}"
         return self.run(command, **kwargs)
 
-    def sload(self, secid="", plnlab="", kinit="", kfd="", fdvalue="",
-              lsload="", lslock="", **kwargs):
+    def sload(
+        self,
+        secid="",
+        plnlab="",
+        kinit="",
+        kfd="",
+        fdvalue="",
+        lsload="",
+        lslock="",
+        **kwargs,
+    ):
         """Load a pretension section.
 
         APDL Command: SLOAD
@@ -1401,8 +1481,7 @@ class Sections:
         command = f"SSMT,{mt11},{mt22},{mt12},{t}"
         return self.run(command, **kwargs)
 
-    def sspa(self, a11="", a21="", a31="", a22="", a32="", a33="", t="",
-             **kwargs):
+    def sspa(self, a11="", a21="", a31="", a22="", a32="", a33="", t="", **kwargs):
         """Specifies a preintegrated membrane stiffness for shell sections.
 
         APDL Command: SSPA
@@ -1436,8 +1515,20 @@ class Sections:
         command = f"SSPA,{a11},{a21},{a31},{a22},{a32},{a33},{t}"
         return self.run(command, **kwargs)
 
-    def sspb(self, b11="", b21="", b31="", b22="", b32="", b33="", t="",
-             b12="", b13="", b23="", **kwargs):
+    def sspb(
+        self,
+        b11="",
+        b21="",
+        b31="",
+        b22="",
+        b32="",
+        b33="",
+        t="",
+        b12="",
+        b13="",
+        b23="",
+        **kwargs,
+    ):
         """Specifies a preintegrated coupling stiffness for shell sections.
 
         APDL Command: SSPB
@@ -1481,8 +1572,7 @@ class Sections:
         command = f"SSPB,{b11},{b21},{b31},{b22},{b32},{b33},{t},{b12},{b13},{b23}"
         return self.run(command, **kwargs)
 
-    def sspd(self, d11="", d21="", d31="", d22="", d32="", d33="", t="",
-             **kwargs):
+    def sspd(self, d11="", d21="", d31="", d22="", d32="", d33="", t="", **kwargs):
         """Specifies a preintegrated bending stiffness for shell sections.
 
         APDL Command: SSPD

@@ -38,7 +38,7 @@ print(pv)
 ###############################################################################
 # You can then manipulate this numpy array with all existing numpy
 # features
-pv = (pv + 1)**2
+pv = (pv + 1) ** 2
 print(pv)
 
 
@@ -60,7 +60,7 @@ print(apdl_vec.norm(), np.linalg.norm(apdl_vec))
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # You can push back any numpy vector or 2D array to MAPDL.  This
 # creates a new APDLMath, which in this case is named ``'NewVec'``.
-mm.set_vec(pv, 'NewVec')
+mm.set_vec(pv, "NewVec")
 
 # verify this vector exists
 print(mm)
@@ -68,7 +68,7 @@ print(mm)
 
 ###############################################################################
 # Create a Python handle to this vector by specifying its name
-v2 = mm.vec(name='NewVec')
+v2 = mm.vec(name="NewVec")
 print(v2)
 
 

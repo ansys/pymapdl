@@ -3,64 +3,62 @@
 This has been copied from test_mapdl.py
 
 """
-import time
 import os
+import time
 
-import pytest
 import numpy as np
+import pytest
 import pyvista
-from pyvista.plotting.renderer import CameraPosition
-from pyvista.plotting import system_supports_plotting
-
-from ansys.mapdl.reader import examples
-
-from ansys.mapdl.core.misc import random_string
-from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.reader import examples
+from pyvista.plotting import system_supports_plotting
+from pyvista.plotting.renderer import CameraPosition
 
-skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
-                                     reason="Requires active X Server")
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 # skip entire module unless --corba is enabled
 pytestmark = pytest.mark.corba
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cleared(mapdl_corba):
     mapdl_corba.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl_corba.clear('NOSTART')
+    mapdl_corba.clear("NOSTART")
     mapdl_corba.prep7()
     yield
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def make_block(mapdl_corba, cleared):
     mapdl_corba.block(0, 1, 0, 1, 0, 1)
     mapdl_corba.et(1, 186)
     mapdl_corba.esize(0.25)
-    mapdl_corba.vmesh('ALL')
+    mapdl_corba.vmesh("ALL")
 
 
 def test_jobname(mapdl_corba, cleared):
-    jobname = 'abcdefg'
+    jobname = "abcdefg"
     assert mapdl_corba.jobname != jobname
     mapdl_corba.finish()
     mapdl_corba.filname(jobname)
     assert mapdl_corba.jobname == jobname
 
-    other_jobname = 'gfedcba'
+    other_jobname = "gfedcba"
     mapdl_corba.jobname = other_jobname
     assert mapdl_corba.jobname == other_jobname
 
 
 def test_empty(mapdl_corba):
     with pytest.raises(ValueError):
-        mapdl_corba.run('')
+        mapdl_corba.run("")
 
 
 def test_str(mapdl_corba):
-    assert 'ANSYS Mechanical' in str(mapdl_corba)
+    assert "ANSYS Mechanical" in str(mapdl_corba)
 
 
 def test_version(mapdl_corba):
@@ -68,14 +66,14 @@ def test_version(mapdl_corba):
 
 
 def test_comment(cleared, mapdl_corba):
-    comment = 'Testing...'
+    comment = "Testing..."
     resp = mapdl_corba.com(comment)
     assert comment in resp
 
 
 def test_basic_command(cleared, mapdl_corba):
     resp = mapdl_corba.finish()
-    assert 'ROUTINE COMPLETED' in resp
+    assert "ROUTINE COMPLETED" in resp
 
 
 def test_allow_ignore(mapdl_corba):
@@ -198,8 +196,8 @@ def test_invalid_area(mapdl_corba):
 
 
 # def test_invalid_input(mapdl_corba):
-    # with pytest.raises(FileNotFoundError):
-        # mapdl_corba.input('thisisnotafile')
+# with pytest.raises(FileNotFoundError):
+# mapdl_corba.input('thisisnotafile')
 
 
 @skip_no_xserver
@@ -209,12 +207,12 @@ def test_kplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.k("", 1, 1, 0)
     mapdl_corba.k("", 0, 1, 0)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_corba.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl_corba.kplot(knum=True, vtk=False)    # make sure legacy still works
+    mapdl_corba.kplot(knum=True, vtk=False)  # make sure legacy still works
 
 
 @skip_no_xserver
@@ -229,8 +227,7 @@ def test_aplot(cleared, mapdl_corba):
     l3 = mapdl_corba.l(k3, k0)
     mapdl_corba.al(l0, l1, l2, l3)
     mapdl_corba.aplot(show_area_numbering=True)
-    mapdl_corba.aplot(color_areas=True, show_lines=True,
-                show_line_numbering=True)
+    mapdl_corba.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
 
     mapdl_corba.aplot(quality=100)
     mapdl_corba.aplot(quality=-1)
@@ -240,7 +237,7 @@ def test_aplot(cleared, mapdl_corba):
 
 
 @skip_no_xserver
-@pytest.mark.parametrize('vtk', [True, False])
+@pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl_corba, vtk):
     mapdl_corba.block(0, 1, 0, 1, 0, 1)
     mapdl_corba.vplot(vtk=vtk, color_areas=True)
@@ -248,10 +245,7 @@ def test_vplot(cleared, mapdl_corba, vtk):
 
 def test_keypoints(cleared, mapdl_corba):
     assert mapdl_corba.geometry.n_keypoint == 0
-    kps = [[0, 0, 0],
-           [1, 0, 0],
-           [1, 1, 0],
-           [0, 1, 0]]
+    kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
 
     i = 1
     knum = []
@@ -296,7 +290,7 @@ def test_lplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.l(k2, k3)
     mapdl_corba.l(k3, k0)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_corba.lplot(show_keypoint_numbering=True, savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
@@ -305,17 +299,17 @@ def test_lplot(cleared, mapdl_corba, tmpdir):
 
 
 def test_logging(mapdl_corba, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
     if mapdl_corba._log is None:
-        mapdl_corba.open_apdl_log(filename, mode='w')
+        mapdl_corba.open_apdl_log(filename, mode="w")
     mapdl_corba._close_apdl_log()
 
     # test append mode
-    mapdl_corba.open_apdl_log(filename, mode='a')
+    mapdl_corba.open_apdl_log(filename, mode="a")
 
     # don't allow to double log
     with pytest.raises(RuntimeError):
-        mapdl_corba.open_apdl_log(filename, mode='w')
+        mapdl_corba.open_apdl_log(filename, mode="w")
 
     mapdl_corba.prep7()
     mapdl_corba.k(1, 0, 0, 0)
@@ -326,8 +320,8 @@ def test_logging(mapdl_corba, tmpdir):
     mapdl_corba._apdl_log.flush()
 
     out = open(mapdl_corba._apdl_log.name).read().strip().split()[-5:]
-    assert 'PREP7' in out[0]
-    assert 'K,4,0,1,0' in out[-1]
+    assert "PREP7" in out[0]
+    assert "K,4,0,1,0" in out[-1]
 
 
 def test_nodes(tmpdir, cleared, mapdl_corba):
@@ -335,7 +329,7 @@ def test_nodes(tmpdir, cleared, mapdl_corba):
     mapdl_corba.n(11, 10, 1, 1)
     mapdl_corba.fill(1, 11, 9)
 
-    basename = 'tmp.nodes'
+    basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
     if mapdl_corba._local:
         mapdl_corba.nwrite(filename)
@@ -359,7 +353,7 @@ def test_enum(mapdl_corba, make_block):
     assert np.allclose(mapdl_corba.mesh.enum, range(1, mapdl_corba.mesh.n_elem + 1))
 
 
-@pytest.mark.parametrize('knum', [True, False])
+@pytest.mark.parametrize("knum", [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl_corba, knum):
     mapdl_corba.nplot()
@@ -367,7 +361,7 @@ def test_nplot_vtk(cleared, mapdl_corba, knum):
     mapdl_corba.n(1, 0, 0, 0)
     mapdl_corba.n(11, 10, 0, 0)
     mapdl_corba.fill(1, 11, 9)
-    mapdl_corba.nplot(vtk=True, knum=knum, background='w', color='k')
+    mapdl_corba.nplot(vtk=True, knum=knum, background="w", color="k")
 
 
 @skip_no_xserver
@@ -375,30 +369,34 @@ def test_nplot(cleared, mapdl_corba):
     mapdl_corba.n(1, 0, 0, 0)
     mapdl_corba.n(11, 10, 0, 0)
     mapdl_corba.fill(1, 11, 9)
-    mapdl_corba.nplot(vtk=False, background='w', color='k')
+    mapdl_corba.nplot(vtk=False, background="w", color="k")
 
 
 def test_elements(cleared, mapdl_corba):
     mapdl_corba.et(1, 185)
 
     # two basic cells
-    cell1 = [[0, 0, 0],
-             [1, 0, 0],
-             [1, 1, 0],
-             [0, 1, 0],
-             [0, 0, 1],
-             [1, 0, 1],
-             [1, 1, 1],
-             [0, 1, 1]]
+    cell1 = [
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 1, 1],
+    ]
 
-    cell2 = [[0, 0, 2],
-             [1, 0, 2],
-             [1, 1, 2],
-             [0, 1, 2],
-             [0, 0, 3],
-             [1, 0, 3],
-             [1, 1, 3],
-             [0, 1, 3]]
+    cell2 = [
+        [0, 0, 2],
+        [1, 0, 2],
+        [1, 1, 2],
+        [0, 1, 2],
+        [0, 0, 3],
+        [1, 0, 3],
+        [1, 1, 3],
+        [0, 1, 3],
+    ]
 
     with mapdl_corba.chain_commands:
         for cell in [cell1, cell2]:
@@ -407,23 +405,32 @@ def test_elements(cleared, mapdl_corba):
 
     mapdl_corba.e(*list(range(1, 9)))
     mapdl_corba.e(*list(range(9, 17)))
-    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
-                         [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
-    if 'Grpc' in str(type(mapdl_corba)):
+    expected = np.array(
+        [
+            [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16],
+        ]
+    )
+    if "Grpc" in str(type(mapdl_corba)):
         # no element number in elements
         expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl_corba.mesh.elem), expected)
 
 
-@pytest.mark.parametrize("parm", ('my_string',
-                                  1,
-                                  10.0,
-                                  [1, 2, 3],
-                                  [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
-                                  np.random.random((10, 3)),
-                                  np.random.random((10, 3, 3))))
+@pytest.mark.parametrize(
+    "parm",
+    (
+        "my_string",
+        1,
+        10.0,
+        [1, 2, 3],
+        [[1, 2, 3], [1, 2, 3]],
+        np.random.random((10000)),  # fails on gRPC at 100000
+        np.random.random((10, 3)),
+        np.random.random((10, 3, 3)),
+    ),
+)
 def test_set_get_parameters(mapdl_corba, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl_corba.parameters[parm_name] = parm
@@ -434,13 +441,13 @@ def test_set_get_parameters(mapdl_corba, parm):
 
 
 def test_set_parameters_arr_to_scalar(mapdl_corba, cleared):
-    mapdl_corba.parameters['PARM'] = np.arange(10)
-    mapdl_corba.parameters['PARM'] = 2
+    mapdl_corba.parameters["PARM"] = np.arange(10)
+    mapdl_corba.parameters["PARM"] = 2
 
 
 def test_set_parameters_string_spaces(mapdl_corba):
     with pytest.raises(ValueError):
-        mapdl_corba.parameters['PARM'] = "string with spaces"
+        mapdl_corba.parameters["PARM"] = "string with spaces"
 
 
 def test_builtin_parameters(mapdl_corba, cleared):
@@ -452,8 +459,8 @@ def test_builtin_parameters(mapdl_corba, cleared):
 
     assert isinstance(mapdl_corba.parameters.revision, float)
 
-    if os.name == 'posix':
-        assert 'LIN' in mapdl_corba.parameters.platform
+    if os.name == "posix":
+        assert "LIN" in mapdl_corba.parameters.platform
 
     mapdl_corba.csys(1)
     assert mapdl_corba.parameters.csys == 1
@@ -472,35 +479,40 @@ def test_builtin_parameters(mapdl_corba, cleared):
 def test_eplot(mapdl_corba, make_block):
     init_elem = mapdl_corba.mesh.n_elem
     mapdl_corba.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl_corba.eplot(show_node_numbering=True, background='w', color='b')
+    mapdl_corba.eplot(show_node_numbering=True, background="w", color="b")
     mapdl_corba.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl_corba.mesh.n_elem == init_elem
 
 
 @skip_no_xserver
 def test_eplot_screenshot(mapdl_corba, make_block, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    mapdl_corba.eplot(background='w', show_edges=True, smooth_shading=True,
-                      window_size=[1920, 1080], savefig=filename)
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
+    mapdl_corba.eplot(
+        background="w",
+        show_edges=True,
+        smooth_shading=True,
+        window_size=[1920, 1080],
+        savefig=filename,
+    )
     assert os.path.isfile(filename)
 
 
 def test_cyclic_solve(mapdl_corba, cleared):
     # build the cyclic model
     mapdl_corba.prep7()
-    mapdl_corba.shpp('off')
-    mapdl_corba.cdread('db', examples.sector_archive_file)
+    mapdl_corba.shpp("off")
+    mapdl_corba.cdread("db", examples.sector_archive_file)
     mapdl_corba.prep7()
     mapdl_corba.cyclic()
 
     # set material properties
-    mapdl_corba.mp('NUXY', 1, 0.31)
-    mapdl_corba.mp('DENS', 1, 4.1408E-04)
-    mapdl_corba.mp('EX', 1, 16900000)
-    mapdl_corba.emodif('ALL', 'MAT', 1)
+    mapdl_corba.mp("NUXY", 1, 0.31)
+    mapdl_corba.mp("DENS", 1, 4.1408e-04)
+    mapdl_corba.mp("EX", 1, 16900000)
+    mapdl_corba.emodif("ALL", "MAT", 1)
 
     # setup and solve
-    mapdl_corba.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl_corba.modal_analysis("LANB", 1, 1, 100000, elcalc=True)
     mapdl_corba.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
@@ -510,7 +522,7 @@ def test_cyclic_solve(mapdl_corba, cleared):
 
 def test_partial_mesh_nnum(mapdl_corba, make_block):
     allsel_nnum_old = mapdl_corba.mesh.nnum
-    mapdl_corba.nsel('S', 'NODE', vmin=100, vmax=200)
+    mapdl_corba.nsel("S", "NODE", vmin=100, vmax=200)
     allsel_nnum_now = mapdl_corba.mesh.nnum_all
     assert np.allclose(allsel_nnum_old, allsel_nnum_now)
 
@@ -519,28 +531,28 @@ def test_partial_mesh_nnum(mapdl_corba, make_block):
 
 
 def test_partial_mesh_nnum(mapdl_corba, make_block):
-    mapdl_corba.nsel('S', 'NODE', vmin=1, vmax=10)
-    mapdl_corba.esel('S', 'ELEM', vmin=10, vmax=20)
+    mapdl_corba.nsel("S", "NODE", vmin=1, vmax=10)
+    mapdl_corba.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl_corba.mesh._grid.n_cells == 11
 
 
 def test_cyclic_solve(mapdl_corba, cleared):
     # build the cyclic model
     mapdl_corba.prep7()
-    mapdl_corba.shpp('off')
-    mapdl_corba.cdread('db', examples.sector_archive_file)
+    mapdl_corba.shpp("off")
+    mapdl_corba.cdread("db", examples.sector_archive_file)
     mapdl_corba.prep7()
     time.sleep(1.0)
     mapdl_corba.cyclic()
 
     # set material properties
-    mapdl_corba.mp('NUXY', 1, 0.31)
-    mapdl_corba.mp('DENS', 1, 4.1408E-04)
-    mapdl_corba.mp('EX', 1, 16900000)
-    mapdl_corba.emodif('ALL', 'MAT', 1)
+    mapdl_corba.mp("NUXY", 1, 0.31)
+    mapdl_corba.mp("DENS", 1, 4.1408e-04)
+    mapdl_corba.mp("EX", 1, 16900000)
+    mapdl_corba.emodif("ALL", "MAT", 1)
 
     # setup and solve
-    mapdl_corba.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl_corba.modal_analysis("LANB", 1, 1, 100000, elcalc=True)
     mapdl_corba.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
@@ -548,11 +560,15 @@ def test_cyclic_solve(mapdl_corba, cleared):
 
 
 def test_load_table(mapdl_corba):
-    my_conv = np.array([[0, 0.001],
-                        [120, 0.001],
-                        [130, 0.005],
-                        [700, 0.005],
-                        [710, 0.002],
-                        [1000, 0.002]])
-    mapdl_corba.load_table('my_conv', my_conv, 'TIME')
-    assert np.allclose(mapdl_corba.parameters['my_conv'], my_conv[:, -1])
+    my_conv = np.array(
+        [
+            [0, 0.001],
+            [120, 0.001],
+            [130, 0.005],
+            [700, 0.005],
+            [710, 0.002],
+            [1000, 0.002],
+        ]
+    )
+    mapdl_corba.load_table("my_conv", my_conv, "TIME")
+    assert np.allclose(mapdl_corba.parameters["my_conv"], my_conv[:, -1])

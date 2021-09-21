@@ -2,8 +2,7 @@
 
 
 class Misc:
-
-    def verify(self, case='', level='', **kwargs):
+    def verify(self, case="", level="", **kwargs):
         """Enter the verification run mode.
 
         .. note::
@@ -20,7 +19,9 @@ class Misc:
             Verification level ranging from 1 to 6 defaulting to 4.
 
         Returns
-        --------
+        -------
+        str
+            Command output.
 
         Examples
         --------
@@ -31,4 +32,4 @@ class Misc:
         '*** VERIFICATION RUN - CASE VM1                              ***  OPTION=  4'
 
         """
-        return self.run(f'/VERIFY,{case},{level}', **kwargs)
+        return self.run(f"/VERIFY,{case},{level}", **kwargs)

@@ -3,11 +3,11 @@ entities for further operations.
 """
 
 from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class Selecting:
-
     def allsel(self, labt="", entity="", **kwargs):
         """Selects all entities with a single command.
 
@@ -102,8 +102,9 @@ class Selecting:
         command = "ASLL,%s,%s" % (str(type_), str(arkey))
         return self.run(command, **kwargs)
 
-    def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def asel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of areas.
 
         APDL Command: ASEL
@@ -210,8 +211,9 @@ class Selecting:
         """
         return self.run(f"ASLV,{type_}", **kwargs)
 
-    def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", **kwargs):
+    def dofsel(
+        self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="", dof6="", **kwargs
+    ):
         """Selects a DOF label set for reference by other commands.
 
         APDL Command: DOFSEL
@@ -266,14 +268,28 @@ class Selecting:
 
         This command is valid in any processor.
         """
-        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
+        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(dof1),
+            str(dof2),
+            str(dof3),
+            str(dof4),
+            str(dof5),
+            str(dof6),
+        )
         return self.run(command, **kwargs)
 
-    def esel(self, type_: str = "", item: str = "", comp: str = "",
-             vmin: Union[str, int, float] = "",
-             vmax: Union[str, int, float] = "", vinc: MapdlInt = "",
-             kabs: MapdlInt = "", **kwargs) -> Optional[str]:
+    def esel(
+        self,
+        type_: str = "",
+        item: str = "",
+        comp: str = "",
+        vmin: Union[str, int, float] = "",
+        vmax: Union[str, int, float] = "",
+        vinc: MapdlInt = "",
+        kabs: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Selects a subset of elements.
 
         APDL Command: ESEL
@@ -465,8 +481,9 @@ class Selecting:
         command = f"ESLL,{type_}"
         return self.run(command, **kwargs)
 
-    def esln(self, type_: str = "", ekey: MapdlInt = "",
-             nodetype: str = "", **kwargs) -> Optional[str]:
+    def esln(
+        self, type_: str = "", ekey: MapdlInt = "", nodetype: str = "", **kwargs
+    ) -> Optional[str]:
         """Selects those elements attached to the selected nodes.
 
         APDL Command: ESLN
@@ -552,8 +569,9 @@ class Selecting:
         command = f"ESLV,{type_}"
         return self.run(command, **kwargs)
 
-    def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+    def ksel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+    ):
         """Selects a subset of keypoints or hard points.
 
         APDL Command: KSEL
@@ -616,8 +634,15 @@ class Selecting:
 
         >>> mapdl.ksel('S', 'KP', '', 1)
         """
-        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kabs),
+        )
         return self.run(command, **kwargs)
 
     def ksll(self, type_="", **kwargs):
@@ -674,8 +699,9 @@ class Selecting:
         command = "KSLN,%s" % (str(type_))
         return self.run(command, **kwargs)
 
-    def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def lsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of lines.
 
         APDL Command: LSEL
@@ -737,8 +763,15 @@ class Selecting:
 
         Table: 204:: : LSEL - Valid Item and Component Labels
         """
-        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kswp),
+        )
         return self.run(command, **kwargs)
 
     def lsla(self, type_="", **kwargs):
@@ -799,8 +832,9 @@ class Selecting:
         command = "LSLK,%s,%s" % (str(type_), str(lskey))
         return self.run(command, **kwargs)
 
-    def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+    def nsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+    ):
         """Selects a subset of nodes.
 
         APDL Command: NSEL
@@ -920,8 +954,15 @@ class Selecting:
 
         >>> mapdl.nsel('R', 'LOC', 'X', 5)
         """
-        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kabs),
+        )
         return self.run(command, **kwargs)
 
     def nsla(self, type_="", nkey="", **kwargs):
@@ -1196,12 +1237,12 @@ class Selecting:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "PARTSEL,%s,%s,%s,%s" % (
-            str(type_), str(pmin), str(pmax), str(pinc))
+        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
         return self.run(command, **kwargs)
 
-    def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def vsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of volumes.
 
         APDL Command: VSEL
@@ -1255,8 +1296,15 @@ class Selecting:
 
         Table: 251:: : VSEL - Valid Item and Component Labels
         """
-        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kswp),
+        )
         return self.run(command, **kwargs)
 
     def vsla(self, type_="", vlkey="", **kwargs):
