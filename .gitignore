@@ -17,9 +17,6 @@
 # emacs
 flycheck*
 
-## Visual code settings
-.vscode/
-
 # Old files #
 _old/
 
