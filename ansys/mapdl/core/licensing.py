@@ -38,7 +38,13 @@ def check_license_file(timeout=10):
                 License path:  1055@AAPDDqVK5WqNLrt;
                 FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
     ```
+    On the other side, successfull license checkout will print `CHECKOUT       $APPNAME` in the file, such as:
+    ```
+    2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1   
+    ```
+    for `FEAT_ANSYS`. 
 
+    
     Parameters
     ----------
     timeout : int, optional
