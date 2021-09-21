@@ -14,6 +14,9 @@ from ansys.mapdl.core.misc import threaded
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
+APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
+LIC_NAME = 'meba' # TODO: We need to make sure this is the lest restrictive license.
+
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel("CRITICAL")
@@ -63,6 +66,9 @@ def check_license_file(timeout=10):
                 error_message=msg,
                 tail_message=f"Error found in file {get_licdebug_name()}",
             )
+        if 'CHECKOUT            ' + APP_NAME in msg:
+            # succesfully license checkout
+            break
 
 
 def get_licdebug_path():
@@ -94,7 +100,7 @@ def get_licdebug_name():
 
     where:
     * ``$hostname`` is the name of the machine.
-    * ``$appname`` is the name of the license used by the license client. Eg 'meba' for 'mechanical enterprise'.
+    * ``$appname`` is the name of the feature used by the license client. Eg. 'FEAT_ANSYS'
     * ``$version`` is the version of ANSYS. Eg 211 for version 21.1.
 
     Returns
@@ -111,7 +117,7 @@ def get_licdebug_name():
 
     name = "licdebug"
     hostname = socket.gethostname()
-    appname = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
+    appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
     version = _version_from_path(get_ansys_path(allow_input=False))
     ending = "out"
@@ -370,7 +376,7 @@ def check_mech_license_available(host=None):
         When errors messages found in the output of the license file.
 
     """
-    licenses = ["meba"]  # mechanical enterprise license.
+    licenses = [LIC_NAME]  # mechanical enterprise license.
 
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
