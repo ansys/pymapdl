@@ -63,12 +63,6 @@ def test_check_port_fail():
 
 
 @skip_no_lic_srv
-def test_run_lmutil():
-    port, host = LIC_CONFIG[0]
-    output = licensing.query_lmutil(host, port)
-
-
-@skip_no_lic_srv
 def test_checkout_license():
     output = licensing.checkout_license('meba')
 
