@@ -20,6 +20,33 @@ LOG.setLevel("CRITICAL")
 
 
 def check_license_file(timeout=10):
+    """Check the output of the license client log for connection error.
+
+    Expect type of errors with 'DENIED' in the header such as:
+    ```
+    2021/09/06 22:39:38    DENIED              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
+                Request name ansys does not exist in the licensing pool.
+                Cannot connect to license server system.
+                 The license server manager (lmgrd) has not been started yet,
+                 the wrong port@host or license file is being used, or the
+                 port or hostname in the license file has been changed.
+                Feature:       ansys
+                Server name:   192.168.18.10
+                License path:  1055@AAPDDqVK5WqNLrt;
+                FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
+    ```
+
+    Parameters
+    ----------
+    timeout : int
+        Time to keep checking the license log file for errors.
+
+    Raises
+    ------
+    LicenseServerConnectionError
+        If there is an error message in the license log file.
+
+    """
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
     file_iterator = get_licdebug_msg(licdebug_file)
 
@@ -37,11 +64,17 @@ def check_license_file(timeout=10):
                 tail_message=f"Error found in file {get_licdebug_name()}",
             )
 
-    else:
-        print("Time is out for license checking.")
-
 
 def get_licdebug_path():
+    """Get license client log (``licdebug``) path.
+
+    This path is obtained from the correspondent env variable (OS dependent) and appending ``.ansys``.
+
+    Returns
+    -------
+    str
+        path of the license client log file.
+    """
     if os.name == "nt":
         folder = os.getenv("TEMP")
     elif os.name == "posix":
@@ -53,6 +86,23 @@ def get_licdebug_path():
 
 
 def get_licdebug_name():
+    """Get license client log file name.
+
+    This file change the name according to the ANSYS version and the type of license requested (``$appname``).
+    * For ANSYS version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
+    * For ANSYS version 21.2 and below: `licdebug.$appname.$version.out`
+
+    where:
+    * ``$hostname`` is the name of the machine.
+    * ``$appname`` is the name of the license used by the license client. Eg 'meba' for 'mechanical enterprise'.
+    * ``$version`` is the version of ANSYS. Eg 211 for version 21.1.
+
+    Returns
+    -------
+    str
+        licdebug log file complete name.
+
+    """
     # Licdebug name convention:
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
@@ -75,6 +125,22 @@ def get_licdebug_name():
 
 
 def get_licdebug_msg(licdebug_file):
+    """Get each of the licdebug file messages.
+
+    This method keeps the ``licdebug`` file open checking for complete messages.
+    It yields one message at a time when called.
+
+    Parameters
+    ----------
+    licdebug_file : str
+        Path to the ``licdebug`` file.
+
+    Yields
+    ------
+    msg : str
+        Message formated as a single string.
+
+    """
     with open(licdebug_file) as f:
         f.seek(0, 2)  # Going to the end of the file.
 
@@ -227,9 +293,30 @@ def parse_lic_config(lic_config_path):
 
 
 def check_port(ip=LOCALHOST, port=1055, timeout=20):
-    """Check if a port can be opened to the specified host."""
+    """Check if a port can be opened to the specified host.
 
-    # if ip in ["127.0.0.1", or
+    Parameters
+    ----------
+    ip : str
+        IP or hostname of the machine to check.
+    port : int
+        Port to check.
+    timeout : int
+        Amount of time to be passed before give up.
+
+    Returns
+    -------
+    success : bool
+        Success flag.
+
+    Raises
+    ------
+    socket.timeout
+        If the amount of time passed exceed the timeout.
+    OSError
+        Catching any other error.
+
+    """
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
@@ -277,6 +364,11 @@ def check_mech_license_available(host=None):
     bool
         Returns True when the license exists.
 
+    Raises
+    ------
+    LicenseServerConnectionError
+        When errors messages found in the output of the license file.
+
     """
     licenses = ["meba"]  # mechanical enterprise license.
 
@@ -295,6 +387,8 @@ def check_mech_license_available(host=None):
 
 def checkout_license(lic, host=None, port=2325):
     """Check if a license is available using the Ansys license utility.
+
+    It uses it own process.
 
     Parameters
     ----------
@@ -330,7 +424,19 @@ def checkout_license(lic, host=None, port=2325):
 
 @threaded
 def try_license_server(verbose=False):
-    """Trying the three possible methods to check the license server status."""
+    """Trying the three possible methods to check the license server status.
+
+    Three methods are used in order.
+    * Check the ``licdebug`` log file for errors.
+    * Check the available mechanical licenses using ``ansysli_util`` executable.
+    * Check if there is response at the server port.
+
+    Parameters
+    ----------
+    verbose : bool
+        To printout output. Defaults to ``False``
+
+    """
     if check_license_file():
         return
 
