@@ -20,7 +20,10 @@ test_net_3 = "203.0.113.0"
 
 
 # check if there is any license info
-LIC_CONFIG = licensing.get_license_server_config()
+try:
+    LIC_CONFIG = licensing.get_license_server_config()
+except FileNotFoundError:
+    LIC_CONFIG = ""
 
 skip_no_lic_srv = pytest.mark.skipif(not LIC_CONFIG, reason="Requires license server config")
 
@@ -48,7 +51,6 @@ def test_parse_lic_config(tmpdir):
 def test_ping_lic_srv():
     port, host = LIC_CONFIG[0]
     assert licensing.check_port(host, port)
-
 
 
 def test_ping_local_host():

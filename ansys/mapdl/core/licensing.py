@@ -7,7 +7,6 @@ import warnings
 import re
 import socket
 import subprocess
-import datetime
 
 
 from ansys.mapdl.core.errors import LicenseServerConnectionError
@@ -25,7 +24,7 @@ def check_license_file(timeout=10):
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
     file_iterator = get_licdebug_msg(licdebug_file)
 
-    max_time = time.time() + timeout    
+    max_time = time.time() + timeout
     while max_time < time.time():
         msg = next(file_iterator)
 
@@ -158,7 +157,7 @@ def get_ansyslic_dir():
             )
 
     return ansyslic_dir
-    
+
 
 def get_license_server_config():
     """Get the license server configuration.
@@ -182,7 +181,7 @@ def get_license_server_config():
         raise FileNotFoundError(f"'ansyslmd.ini' not found at {lic_config_path}")
 
     return parse_lic_config(lic_config_path)
-    
+
 
 def parse_lic_config(lic_config_path):
     """Parse license configuration file
@@ -221,14 +220,14 @@ def parse_lic_config(lic_config_path):
                         servers.append(server)
                 except (ValueError, IndexError):
                     pass
-                
+
     return servers
 
 
 def check_port(ip=LOCALHOST, port=1055, timeout=20):
     """Check if a port can be opened to the specified host."""
 
-    # if ip in ["127.0.0.1", or 
+    # if ip in ["127.0.0.1", or
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
