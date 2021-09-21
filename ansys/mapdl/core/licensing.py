@@ -17,7 +17,7 @@ LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 
 LOG = logging.getLogger(__name__)
-LOG.setLevel('CRITICAL')
+LOG.setLevel("CRITICAL")
 
 
 def check_license_file(timeout=10):
@@ -129,7 +129,7 @@ def ansys_lic_info_from_envar():
 
 
 def get_ansyslic_dir():
-    """Get the path to the Ansys license directory """
+    """Get the path to the Ansys license directory"""
 
     # it's possible the user has specified the license as an env var
     ansyslic_dir = None
@@ -143,12 +143,15 @@ def get_ansyslic_dir():
 
     # env var may not be specified, check in the usual location
     if ansyslic_dir is None:
-        if os.name == 'nt':
+        if os.name == "nt":
             ansyslic_dir = os.path.join(
-                os.environ["ProgramFiles"], "ANSYS Inc", "Shared Files", "Licensing",
+                os.environ["ProgramFiles"],
+                "ANSYS Inc",
+                "Shared Files",
+                "Licensing",
             )
         else:
-            ansyslic_dir = '/usr/ansys_inc/shared_files/licencing'
+            ansyslic_dir = "/usr/ansys_inc/shared_files/licencing"
 
         if not os.path.isdir(ansyslic_dir):
             raise FileNotFoundError(
@@ -215,7 +218,7 @@ def parse_lic_config(lic_config_path):
             if "SERVER" in line:
                 try:
                     port, host = line.split("=")[1].split("@")
-                    server = ((int(port), host))
+                    server = (int(port), host)
                     if server not in servers:
                         servers.append(server)
                 except (ValueError, IndexError):
@@ -239,7 +242,9 @@ def check_port(ip=LOCALHOST, port=1055, timeout=20):
         s.connect((ip, port))
         s.send("message".encode("utf-8"))  # any message
         success = True
-        LOG.debug("Received ping from license server in %f seconds", tstart - time.time())
+        LOG.debug(
+            "Received ping from license server in %f seconds", tstart - time.time()
+        )
     except socket.timeout:  # if timeout error, the port is probably closed.
         success = False
     except OSError as e:
@@ -250,74 +255,6 @@ def check_port(ip=LOCALHOST, port=1055, timeout=20):
         s.close()
 
     return success
-
-
-def try_lmutil():
-    try:
-        check_license_server_with_lmutil()
-    except LicenseServerConnectionError:
-        # Reraising error
-        raise
-    except:
-        # Unkw
-        return False
-    return True
-
-
-def check_license_server_with_lmutil():
-    """Check the license server status by running 'lmutil'.
-
-    However this method is:
-    - Not recommended because of the load generated in the server side.
-    - Not reliable because the difficulty to catch the port in the license server
-    """
-    servers = get_license_server_config()
-    ip, port = servers[0]
-
-    output = query_lmutil(ip, port)
-    selected_lines = re.findall("(?<=: license server )(.*)(?=\n)", output)
-    servers_up = ["UP" in each for each in selected_lines]
-    down_error_msg = (
-        "Error getting status: License server machine is down or not responding."
-    )
-
-    if not servers_up:
-        msg = "'lmutil' failed to get a list of servers."
-        raise LicenseServerConnectionError(error_message=msg)
-    elif down_error_msg in output:
-        raise LicenseServerConnectionError(error_message=down_error_msg)
-    elif any(servers_up):
-        warnings.warn("Some license servers are down.")
-    else:
-        raise LicenseServerConnectionError(
-            error_message="'lmutil' seems to found not working licenses."
-        )
-
-
-def query_lmutil(ip, port=1055):
-    ansyslic_dir = get_ansyslic_dir()
-    if os.name == 'nt':
-        lmutil_path = os.path.join(ansyslic_dir, "winx64", "lmutil.exe")
-    else:
-        lmutil_path = os.path.join(ansyslic_dir, "linx64", "lmutil")
-
-    process = subprocess.Popen(
-        f"{lmutil_path} lmstat -a -i -c {port}@{ip}",
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )
-    return process.stdout.read().decode()
-
-
-def try_ansysli_util():
-    try:
-        check_license_server_with_ansysli_util()
-    except LicenseServerConnectionError:
-        # Reraising error
-        raise
-    except:
-        # Unkw
-        return False
-    return True
 
 
 def check_mech_license_available(host=None):
@@ -372,7 +309,7 @@ def checkout_license(lic, host=None, port=2325):
 
     """
     ansyslic_dir = get_ansyslic_dir()
-    if os.name == 'nt':
+    if os.name == "nt":
         ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
     else:
         ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
@@ -394,8 +331,7 @@ def checkout_license(lic, host=None, port=2325):
 
 @threaded
 def try_license_server(verbose=False):
-    """Trying the three possible methods to check the license server status.
-    """
+    """Trying the three possible methods to check the license server status."""
     if check_license_file():
         return
 
