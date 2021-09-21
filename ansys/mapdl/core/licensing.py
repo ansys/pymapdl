@@ -130,7 +130,7 @@ def get_licdebug_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_licdebug_msg(licdebug_file):
+def get_licdebug_msg(licdebug_file, timeout=10):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -140,6 +140,8 @@ def get_licdebug_msg(licdebug_file):
     ----------
     licdebug_file : str
         Path to the ``licdebug`` file.
+    timeout : float, optional
+        Maximum timeout to wait until the file exists.
 
     Yields
     ------
@@ -147,6 +149,15 @@ def get_licdebug_msg(licdebug_file):
         Message formatted as a single string.
 
     """
+    # wait until file exists
+    max_time = time.time() + timeout
+    while not os.path.isfile(licdebug_file):
+        time.sleep(0.01)
+        if time.time() > max_time:
+            raise TimeoutError(
+                f"Exceeded {timeout} seconds while waiting for {licdebug_file} to exist."
+            )
+
     with open(licdebug_file) as f:
         f.seek(0, 2)  # Going to the end of the file.
 
@@ -222,7 +233,7 @@ def get_ansyslic_dir():
                 "Licensing",
             )
         else:
-            ansyslic_dir = "/usr/ansys_inc/shared_files/licencing"
+            ansyslic_dir = "/usr/ansys_inc/shared_files/licensing"
 
         if not os.path.isdir(ansyslic_dir):
             raise FileNotFoundError(
@@ -415,6 +426,12 @@ def checkout_license(lic, host=None, port=2325):
         ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
     else:
         ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
+
+    if not os.path.isfile(ansysli_util_path):
+        raise FileNotFoundError(
+            "Ansys licensing path exists but ansysli_util not found at:\n"
+            f"{ansysli_util_path}"
+        )
 
     # allow the specification of ip and port
     env = os.environ.copy()
