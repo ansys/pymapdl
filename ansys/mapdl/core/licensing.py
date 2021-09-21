@@ -3,7 +3,6 @@
 import logging
 import os
 import time
-import warnings
 import re
 import socket
 import subprocess
@@ -72,7 +71,7 @@ def get_licdebug_name():
     else:
         parts = (name, hostname, appname, version, ending)
 
-    return ".".join(parts)
+    return ".".join([str(each_part) for each_part in parts])
 
 
 def get_licdebug_msg(licdebug_file):
@@ -218,7 +217,7 @@ def parse_lic_config(lic_config_path):
             if "SERVER" in line:
                 try:
                     port, host = line.split("=")[1].split("@")
-                    server = (int(port), host)
+                    server = (host, int(port))
                     if server not in servers:
                         servers.append(server)
                 except (ValueError, IndexError):
