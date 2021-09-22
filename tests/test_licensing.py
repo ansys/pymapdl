@@ -186,7 +186,7 @@ def test_check_license_file(tmpdir):
     assert mapdl._local
     assert checks[0] is True
 
-    # verify that the license checker was sucessful
+    # verify that the license checker was successful
     assert checker.check()
 
     mapdl.exit()

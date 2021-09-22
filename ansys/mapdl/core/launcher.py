@@ -9,7 +9,6 @@ import tempfile
 import socket
 import time
 import subprocess
-import threading
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded

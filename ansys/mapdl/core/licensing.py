@@ -3,13 +3,11 @@
 import logging
 import os
 import time
-import re
 import socket
 import subprocess
 
-
 from ansys.mapdl.core.errors import LicenseServerConnectionError
-from ansys.mapdl.core.misc import threaded, threaded_daemon
+from ansys.mapdl.core.misc import threaded_daemon
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -488,12 +486,12 @@ class LicenseChecker():
         self.checkout_license()
 
     def check(self):
-        """Report if the license checkout or license check was sucessful
+        """Report if the license checkout or license check was successful
 
         Returns
         -------
         bool
-            ``True`` When license sucessfully checked out, ``False``
+            ``True`` When license successfully checked out, ``False``
             when license check failed and nothing to report.  Checkout
             failure will raise
             :class:`ansys.mapdl.core.errors.LicenseServerConnectionError``.
