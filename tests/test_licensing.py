@@ -5,8 +5,14 @@ import types
 import os
 import pytest
 
-from ansys.mapdl.core import licensing, errors
+from ansys.mapdl.core import licensing, errors, launch_mapdl
 from ansys.mapdl.core.misc import threaded
+from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
+
+skip_launch_mapdl = pytest.mark.skipif(
+    not get_start_instance() and check_valid_ansys(),
+    reason="Must be able to launch MAPDL locally"
+)
 
 
 FAKE_CHECKOUT_SUCCESS = """
@@ -126,6 +132,7 @@ def test_checkout_license_fail():
 
 
 @skip_no_lic_config
+@pytest.mark.xfail(reason="license check is flaky using lmutil")
 def test_check_mech_license_available():
     licensing.check_mech_license_available()
 
@@ -138,7 +145,7 @@ def test_check_mech_license_available_fail():
 
 def test_get_licdebug_msg_timeout():
     with pytest.raises(TimeoutError):
-        msg = licensing.get_licdebug_msg('does_not_exist', timeout=0.05)
+        msg = licensing.get_licdebug_msg('does_not_exist', start_timeout=0.05)
         next(msg)
 
 
@@ -146,10 +153,40 @@ def test_get_licdebug_msg(tmpdir):
     tmp_file = tmpdir.join('tmplog.log')
     write_log(tmp_file)
 
-    msg_iter = licensing.get_licdebug_msg(tmp_file, timeout=1)
+    msg_iter = licensing.get_licdebug_msg(tmp_file, start_timeout=1)
     isinstance(msg_iter, types.GeneratorType)
     for line in msg_iter:
         if "CHECKOUT" in line:
             break
 
     assert "CHECKOUT" in line
+
+
+@skip_launch_mapdl
+def test_check_license_file_fail():
+    with pytest.raises(TimeoutError):
+        licensing.check_license_file(timeout=0.1)
+
+
+@skip_launch_mapdl
+def test_check_license_file(tmpdir):
+    # also, validate the license checker since launching MAPDL is expensive
+    checker = licensing.LicenseChecker()
+    checker.start()
+
+    checks = []
+
+    @threaded
+    def threaded_check():
+        checks.append(licensing.check_license_file())
+
+    # start the license check in the background
+    threaded_check()
+    mapdl = launch_mapdl()
+    assert mapdl._local
+    assert checks[0] is True
+
+    # verify that the license checker was sucessful
+    assert checker.check()
+
+    mapdl.exit()
