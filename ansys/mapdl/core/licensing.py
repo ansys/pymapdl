@@ -40,7 +40,7 @@ def check_license_file(timeout=10):
     ```
     On the other side, successfull license checkout will print `CHECKOUT       $APPNAME` in the file, such as:
     ```
-    2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1   
+    2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1
     ```
     for `FEAT_ANSYS`.
 
@@ -56,7 +56,7 @@ def check_license_file(timeout=10):
 
     """
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
-    file_iterator = get_licdebug_msg(licdebug_file)
+    file_iterator = get_licdebug_tail(licdebug_file)
 
     max_time = time.time() + timeout
     while max_time < time.time():
@@ -135,7 +135,7 @@ def get_licdebug_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_licdebug_msg(licdebug_file):
+def get_licdebug_tail(licdebug_file):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
