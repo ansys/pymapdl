@@ -9,7 +9,6 @@ import tempfile
 import socket
 import time
 import subprocess
-import threading
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
@@ -18,7 +17,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.licensing import try_license_server
+from ansys.mapdl.core.licensing import LicenseChecker
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
@@ -867,6 +866,10 @@ def launch_mapdl(
         MAPDL.  This should be used for debugging only as output can
         be tracked within pymapdl.  Default ``False``.
 
+    license_server_check : bool, optional
+        Check if the license server is available if MAPDL fails to
+        start.  Only available on ``mode='grpc'``.
+
     Notes
     -----
     These are the MAPDL switch options as of 2020R2 applicable for
@@ -1058,51 +1061,55 @@ def launch_mapdl(
         start_parm["timeout"] = start_timeout
 
     # Check the license server
-    if license_server_check and os.getenv("ANSYSLMD_LICENSE_FILE") is None:
-        # Running locally
-        license_thread = threading.Thread(target=try_license_server)
-        license_thread.start()
+    if license_server_check:
+        lic_check = LicenseChecker()
+        lic_check.start()
 
-    if mode == "console":
-        from ansys.mapdl.core.mapdl_console import MapdlConsole
+    try:
+        if mode == "console":
+            from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-        mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
-    elif mode == "corba":
-        try:
-            # pending deprication to ansys-mapdl-corba
-            from ansys.mapdl.core.mapdl_corba import MapdlCorba
-        except ImportError:
-            raise ImportError(
-                "To use this feature, install the MAPDL CORBA package"
-                " with:\n\npip install ansys_corba"
-            ) from None
+            mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+        elif mode == "corba":
+            try:
+                # pending deprication to ansys-mapdl-corba
+                from ansys.mapdl.core.mapdl_corba import MapdlCorba
+            except ImportError:
+                raise ImportError(
+                    "To use this feature, install the MAPDL CORBA package"
+                    " with:\n\npip install ansys_corba"
+                ) from None
 
-        broadcast = kwargs.get("log_broadcast", False)
-        mapdl = MapdlCorba(
-            loglevel=loglevel,
-            log_apdl=log_apdl,
-            log_broadcast=broadcast,
-            verbose=verbose_mapdl,
-            **start_parm,
-        )
-    elif mode == "grpc":
-        port, actual_run_location = launch_grpc(
-            port=port, verbose=verbose_mapdl, ip=ip, **start_parm
-        )
-        mapdl = MapdlGrpc(
-            ip=ip,
-            port=port,
-            cleanup_on_exit=cleanup_on_exit,
-            loglevel=loglevel,
-            set_no_abort=set_no_abort,
-            remove_temp_files=kwargs.pop("remove_temp_files", False),
-            log_apdl=log_apdl,
-            **start_parm,
-        )
-        if run_location is None:
-            mapdl._path = actual_run_location
-    else:
-        raise ValueError("Invalid mode %s" % mode)
+            broadcast = kwargs.get("log_broadcast", False)
+            mapdl = MapdlCorba(
+                loglevel=loglevel,
+                log_apdl=log_apdl,
+                log_broadcast=broadcast,
+                verbose=verbose_mapdl,
+                **start_parm,
+            )
+        elif mode == "grpc":
+            port, actual_run_location = launch_grpc(
+                port=port, verbose=verbose_mapdl, ip=ip, **start_parm
+            )
+            mapdl = MapdlGrpc(
+                ip=ip,
+                port=port,
+                cleanup_on_exit=cleanup_on_exit,
+                loglevel=loglevel,
+                set_no_abort=set_no_abort,
+                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                log_apdl=log_apdl,
+                **start_parm,
+            )
+            if run_location is None:
+                mapdl._path = actual_run_location
+    except Exception as exception:
+        # Failed to launch for some reason.  Check if failure was due
+        # to the license check
+        if license_server_check:
+            lic_check.check()
+        raise exception
 
     return mapdl
 

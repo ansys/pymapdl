@@ -3,26 +3,25 @@
 import logging
 import os
 import time
-import re
 import socket
 import subprocess
 
-
 from ansys.mapdl.core.errors import LicenseServerConnectionError
-from ansys.mapdl.core.misc import threaded
+from ansys.mapdl.core.misc import threaded_daemon
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
-LIC_NAME = 'meba' # TODO: We need to make sure this is the lest restrictive license.
+LIC_NAME = 'meba' # TODO: We need to make sure this is the least restrictive license.
 
 
 LOG = logging.getLogger(__name__)
-LOG.setLevel("CRITICAL")
+# LOG.setLevel("CRITICAL")
+LOG.setLevel("DEBUG")
 
 
-def check_license_file(timeout=10):
+def check_license_file(timeout=30):
     """Check the output of the license client log for connection error.
 
     Expect type of errors with 'DENIED' in the header such as:
@@ -53,33 +52,45 @@ def check_license_file(timeout=10):
     ------
     LicenseServerConnectionError
         If there is an error message in the license log file.
+    TimeoutError
+        Exceeded ``timeout`` while waiting for the license log file.
 
     """
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
     file_iterator = get_licdebug_tail(licdebug_file)
 
     max_time = time.time() + timeout
-    while max_time < time.time():
+    while time.time() < max_time:
         msg = next(file_iterator)
+        if msg:
+            LOG.info(msg)
 
         if "DENIED" in msg:
-            license_path = re.findall("(?<=License path:)(.*)(?=;\n)", msg)[0]
-            license_port = license_path.split("@")[0]
-            license_hostname = license_path.split("@")[1]
-            raise LicenseServerConnectionError(
-                head_message=f"Error connecting to {license_port}:{license_hostname}",
-                error_message=msg,
-                tail_message=f"Error found in file {get_licdebug_name()}",
-            )
-        if 'CHECKOUT            ' + APP_NAME in msg:
-            # successfully license checkout
-            break
+            # read to the end of the file
+            time.sleep(0.05)  # permit flush
+            messages = [msg]
+            while True:
+                msg = next(file_iterator).strip()
+                if not msg:
+                    break
+                messages.append(msg)
+
+            raise LicenseServerConnectionError('\n'.join(messages))
+
+        if 'CHECKOUT' in msg:
+            # successful license checkout
+            return True
+
+    raise TimeoutError(
+        f'Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}'
+    )
 
 
 def get_licdebug_path():
     """Get license client log (``licdebug``) path.
 
-    This path is obtained from the correspondent env variable (OS dependent) and appending ``.ansys``.
+    This path is obtained from the correspondent env variable (OS
+    dependent) and appending ``.ansys``.
 
     Returns
     -------
@@ -100,8 +111,8 @@ def get_licdebug_name():
     """Get license client log file name.
 
     This file change the name according to the ANSYS version and the type of license requested (``$appname``).
-    * For ANSYS version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
-    * For ANSYS version 21.2 and below: `licdebug.$appname.$version.out`
+    * For ANSYS version 22.1 and above: ``licdebug.$hostname.$appname.$version.out``
+    * For ANSYS version 21.2 and below: ``licdebug.$appname.$version.out``
 
     where:
     * ``$hostname`` is the name of the machine.
@@ -135,7 +146,7 @@ def get_licdebug_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_licdebug_tail(licdebug_file):
+def get_licdebug_tail(licdebug_file, start_timeout=10):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -145,6 +156,8 @@ def get_licdebug_tail(licdebug_file):
     ----------
     licdebug_file : str
         Path to the ``licdebug`` file.
+    start_timeout : float, optional
+        Maximum timeout to wait until the file exists.
 
     Yields
     ------
@@ -152,25 +165,21 @@ def get_licdebug_tail(licdebug_file):
         Message formatted as a single string.
 
     """
-    with open(licdebug_file) as f:
-        f.seek(0, 2)  # Going to the end of the file.
+    # wait until file exists
+    max_time = time.time() + start_timeout
+    while not os.path.isfile(licdebug_file):
+        time.sleep(0.01)
+        if time.time() > max_time:
+            raise TimeoutError(
+                f"Exceeded {start_timeout} seconds while waiting for {licdebug_file}"
+                " to exist."
+            )
 
-        buffer = []
+    with open(licdebug_file) as fid:
+        # Going to the end of the file.
+        fid.seek(0, 2)
         while True:
-            line = f.readline()
-            if line:
-                if buffer == []:  # not empty
-                    buffer.append(line)
-
-                else:
-                    if line.startswith("\t\t"):
-                        buffer.append(line)
-                    else:
-                        msg = "".join(buffer)
-                        buffer = [line]  # Flushing buffer
-                        yield msg
-            else:
-                time.sleep(0.01)
+            yield fid.readline()
 
 
 def check_license_server_port():
@@ -179,9 +188,7 @@ def check_license_server_port():
     host, port = servers[0]
 
     if not check_port(host, port):
-        raise LicenseServerConnectionError(
-            head_message=f"Error connecting to {port}:{host}"
-        )
+        raise LicenseServerConnectionError(f"Error connecting to {port}:{host}")
     return True
 
 
@@ -227,7 +234,7 @@ def get_ansyslic_dir():
                 "Licensing",
             )
         else:
-            ansyslic_dir = "/usr/ansys_inc/shared_files/licencing"
+            ansyslic_dir = "/usr/ansys_inc/shared_files/licensing"
 
         if not os.path.isdir(ansyslic_dir):
             raise FileNotFoundError(
@@ -303,7 +310,7 @@ def parse_lic_config(lic_config_path):
     return servers
 
 
-def check_port(ip=LOCALHOST, port=1055, timeout=20):
+def check_port(ip=LOCALHOST, port=1055, timeout=30):
     """Check if a port can be opened to the specified host.
 
     Parameters
@@ -391,10 +398,7 @@ def check_mech_license_available(host=None):
     for each_license in licenses:
         output = checkout_license(each_license, host)
         if msg1 in output or msg2 in output:
-            msg = msg1 if msg1 in output else msg2
-            raise LicenseServerConnectionError(
-                head_message=f"Ansys licencing utility reports '{msg}'"
-            )
+            raise LicenseServerConnectionError(output)
 
     return True
 
@@ -421,6 +425,12 @@ def checkout_license(lic, host=None, port=2325):
     else:
         ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
 
+    if not os.path.isfile(ansysli_util_path):
+        raise FileNotFoundError(
+            "Ansys licensing path exists but ansysli_util not found at:\n"
+            f"{ansysli_util_path}"
+        )
+
     # allow the specification of ip and port
     env = os.environ.copy()
     if host is not None and port is not None:
@@ -432,12 +442,12 @@ def checkout_license(lic, host=None, port=2325):
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         env=env,
+        shell=True,
     )
     return process.stdout.read().decode()
 
 
-@threaded
-def try_license_server(verbose=False):
+class LicenseChecker():
     """Trying the three possible methods to check the license server status.
 
     Three methods are used in order.
@@ -445,17 +455,67 @@ def try_license_server(verbose=False):
     * Check the available mechanical licenses using ``ansysli_util`` executable.
     * Check if there is response at the server port.
 
-    Parameters
-    ----------
-    verbose : bool, optional
-        To printout output. Defaults to ``False``
-
     """
-    if check_license_file():
-        return
 
-    if check_mech_license_available():
-        return
+    def __init__(self, timeout=30):
+        self._license_file_msg = []
+        self._license_file_success = None
 
-    # possible license server is completely unreachable
-    check_license_server_port()
+        self._license_checkout_msg = []
+        self._license_checkout_success = None
+        self._timeout = timeout
+
+    @threaded_daemon
+    def check_license_file(self):
+        try:
+            check_license_file(self._timeout)
+        except Exception as error:
+            self._license_file_success = False
+            self._license_file_msg.append(str(error))
+        else:
+            self._license_file_success = True
+
+    @threaded_daemon
+    def checkout_license(self, host=None):
+        try:
+            check_mech_license_available(host)
+        except Exception as error:
+            self._license_checkout_success = False
+            self._license_checkout_msg.append(str(error))
+        else:
+            self._license_checkout_success = True
+
+    def start(self):
+        """Start monitoring the license file and attempt a license checkout."""
+        self.check_license_file()
+        self.checkout_license()
+
+    def check(self):
+        """Report if the license checkout or license check was successful
+
+        Returns
+        -------
+        bool
+            ``True`` When license successfully checked out, ``False``
+            when license check failed and nothing to report.  Checkout
+            failure will raise
+            :class:`ansys.mapdl.core.errors.LicenseServerConnectionError``.
+
+        Raises
+        ------
+        LicenseServerConnectionError
+            If there were any errors during the license checkout or
+            license file check.
+
+        """
+        if self._license_file_success:
+            return True
+        elif self._license_file_success is False:
+            raise LicenseServerConnectionError('\n'.join(self._license_file_msg))
+
+        if self._license_checkout_success:
+            return True
+        elif self._license_checkout_success is False:
+            raise LicenseServerConnectionError('\n'.join(self._license_checkout_msg))
+
+        return False
