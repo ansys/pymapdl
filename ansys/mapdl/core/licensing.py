@@ -13,7 +13,17 @@ LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
-LIC_NAME = 'meba' # TODO: We need to make sure this is the least restrictive license.
+LIC_TO_CHECK =  ["mech_1"]
+
+## Regarding license checking.
+# The available licenses we can check against are (in order of complete/comprehensiveness):
+# 1. ``Ansys`` Enterprise license (the most complete)
+# 2. ``meba`` Mechanical Enterprise license
+# 3. ``mech_2`` Premium license
+# 4. ``mech_1`` Pro license` (the most limited)
+# To keep very general, and since we need just to be able to solve, we are going to check against the lower license (``mech_1``).
+
+# TODO: Implement a warning for unsufficient license rights.
 
 
 LOG = logging.getLogger(__name__)
@@ -36,6 +46,11 @@ def check_license_file(timeout=30, verbose=False):
                 License path:  1055@AAPDDqVK5WqNLrt;
                 FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
     ```
+    On the other side, successfull license checkout will print `CHECKOUT       $APPNAME` in the file, such as:
+    ```
+    2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1
+    ```
+    for `FEAT_ANSYS`.
 
     Parameters
     ----------
@@ -51,7 +66,7 @@ def check_license_file(timeout=30, verbose=False):
 
     """
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
-    file_iterator = get_licdebug_msg(licdebug_file)
+    file_iterator = get_licdebug_tail(licdebug_file)
 
     max_time = time.time() + timeout
     while time.time() < max_time:
@@ -71,14 +86,14 @@ def check_license_file(timeout=30, verbose=False):
                     break
                 messages.append(msg)
 
-            raise LicenseServerConnectionError('\n'.join(messages))
+            raise LicenseServerConnectionError("\n".join(messages))
 
-        if 'CHECKOUT' in msg:
+        if "CHECKOUT" in msg:
             # successful license checkout
             return True
 
     raise TimeoutError(
-        f'Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}'
+        f"Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}"
     )
 
 
@@ -142,7 +157,7 @@ def get_licdebug_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_licdebug_msg(licdebug_file, start_timeout=30):
+def get_licdebug_tail(licdebug_file, start_timeout=10):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -151,7 +166,7 @@ def get_licdebug_msg(licdebug_file, start_timeout=30):
     Parameters
     ----------
     licdebug_file : str
-        Path to the ``licdebug`` file.
+        Path to the ``licdebug`` file.wh
     start_timeout : float, optional
         Maximum timeout to wait until the file exists.
 
@@ -389,11 +404,10 @@ def check_mech_license_available(host=None, verbose=False):
         When errors messages found in the output of the license file.
 
     """
-    licenses = [LIC_NAME]  # mechanical enterprise license.
 
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
-    for each_license in licenses:
+    for each_license in LIC_TO_CHECK:
         output = checkout_license(each_license, host, verbose)
         if msg1 in output or msg2 in output:
             raise LicenseServerConnectionError(output)
@@ -448,14 +462,13 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
     return output
 
 
-class LicenseChecker():
+class LicenseChecker:
     """License checker class.
 
     Two methods are used and exposed with the :func:`LicenseChecker.start` method:
 
     * Check the ``licdebug`` log file for errors.
     * Check the available mechanical licenses using ``ansysli_util`` executable.
-    * Check if the license server host port is open.
 
     Parameters
     ----------
@@ -502,7 +515,8 @@ class LicenseChecker():
         self.checkout_license()
 
     def check(self):
-        """Report if the license checkout or license check was successful
+        """Report if the license checkout or license check was successful.
+        It first check the license file and later the output from the checkout process.
 
         Returns
         -------
@@ -522,11 +536,11 @@ class LicenseChecker():
         if self._license_file_success:
             return True
         elif self._license_file_success is False:
-            raise LicenseServerConnectionError('\n'.join(self._license_file_msg))
+            raise LicenseServerConnectionError("\n".join(self._license_file_msg))
 
         if self._license_checkout_success:
             return True
         elif self._license_checkout_success is False:
-            raise LicenseServerConnectionError('\n'.join(self._license_checkout_msg))
+            raise LicenseServerConnectionError("\n".join(self._license_checkout_msg))
 
         return False
