@@ -17,11 +17,10 @@ LIC_NAME = 'meba' # TODO: We need to make sure this is the least restrictive lic
 
 
 LOG = logging.getLogger(__name__)
-# LOG.setLevel("CRITICAL")
-LOG.setLevel("DEBUG")
+LOG.setLevel("CRITICAL")
 
 
-def check_license_file(timeout=30):
+def check_license_file(timeout=30, verbose=False):
     """Check the output of the license client log for connection error.
 
     Expect type of errors with 'DENIED' in the header such as:
@@ -59,6 +58,8 @@ def check_license_file(timeout=30):
         msg = next(file_iterator)
         if msg:
             LOG.info(msg)
+            if verbose:
+                print(f"Output from {licdebug_file}:\n{msg}")
 
         if "DENIED" in msg:
             # read to the end of the file
@@ -359,7 +360,7 @@ def check_port(ip=LOCALHOST, port=1055, timeout=30):
     return success
 
 
-def check_mech_license_available(host=None):
+def check_mech_license_available(host=None, verbose=False):
     """Check if there mechanical license available by running 'ansysli_util'.
 
     This uses the default configuration available to MAPDL.
@@ -374,6 +375,8 @@ def check_mech_license_available(host=None):
     host : str, optional
         Override the default license server.  By default, use the
         values available in the Ansys license file.
+    verbose : bool, optional
+        Print output while checking for the license.
 
     Returns
     -------
@@ -391,14 +394,14 @@ def check_mech_license_available(host=None):
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
     for each_license in licenses:
-        output = checkout_license(each_license, host)
+        output = checkout_license(each_license, host, verbose)
         if msg1 in output or msg2 in output:
             raise LicenseServerConnectionError(output)
 
     return True
 
 
-def checkout_license(lic, host=None, port=2325):
+def checkout_license(lic, host=None, port=2325, verbose=False):
     """Check if a license is available using the Ansys license utility.
 
     It uses it own process.
@@ -433,37 +436,50 @@ def checkout_license(lic, host=None, port=2325):
         env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
     process = subprocess.Popen(
-        f"{ansysli_util_path} -checkout {lic}",
+        f'"{ansysli_util_path}" -checkout {lic}',
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         env=env,
         shell=True,
     )
-    return process.stdout.read().decode()
+    output = process.stdout.read().decode()
+    if verbose:
+        print(output)
+    return output
 
 
 class LicenseChecker():
-    """Trying the three possible methods to check the license server status.
+    """License checker class.
 
-    Three methods are used in order.
+    Two methods are used and exposed with the :func:`LicenseChecker.start` method:
+
     * Check the ``licdebug`` log file for errors.
     * Check the available mechanical licenses using ``ansysli_util`` executable.
-    * Check if there is response at the server port.
+    * Check if the license server host port is open.
+
+    Parameters
+    ----------
+    timeout : float, optional
+        Timeout for the licensing log file check.
+    verbose : bool, optional
+        Enable or disable verbose output of the license check.  Useful
+        for debugging.
 
     """
 
-    def __init__(self, timeout=30):
+    def __init__(self, timeout=30, verbose=False):
         self._license_file_msg = []
         self._license_file_success = None
 
         self._license_checkout_msg = []
         self._license_checkout_success = None
         self._timeout = timeout
+        self._verbose = verbose
 
     @threaded_daemon
     def check_license_file(self):
         try:
-            check_license_file(self._timeout)
+            check_license_file(self._timeout, verbose=self._verbose)
         except Exception as error:
             self._license_file_success = False
             self._license_file_msg.append(str(error))
@@ -473,7 +489,7 @@ class LicenseChecker():
     @threaded_daemon
     def checkout_license(self, host=None):
         try:
-            check_mech_license_available(host)
+            check_mech_license_available(host, verbose=self._verbose)
         except Exception as error:
             self._license_checkout_success = False
             self._license_checkout_msg.append(str(error))

@@ -97,8 +97,7 @@ def test_parse_lic_config(tmpdir):
 def test_get_licdebug_path():
     ansyslic_dir = licensing.get_ansyslic_dir()
     if os.name == 'nt':
-        # to be added
-        raise NotImplementedError
+        assert 'Shared Files' in ansyslic_dir and 'Licensing' in ansyslic_dir
     else:
         assert os.path.isdir(ansyslic_dir)
         assert 'shared_files' in ansyslic_dir and 'licensing' in ansyslic_dir

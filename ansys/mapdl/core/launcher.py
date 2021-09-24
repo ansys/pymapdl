@@ -1062,7 +1062,7 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check:
-        lic_check = LicenseChecker()
+        lic_check = LicenseChecker(verbose=verbose_mapdl)
         lic_check.start()
 
     try:
