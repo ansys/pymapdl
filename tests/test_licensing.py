@@ -161,13 +161,15 @@ def test_get_licdebug_tail(tmpdir):
     assert "CHECKOUT" in line
 
 
-@skip_launch_mapdl
+@skip_launch_mapdl 
+@skip_no_lic_bin
 def test_check_license_file_fail():
     with pytest.raises(TimeoutError):
         licensing.check_license_file(timeout=0.1)
 
 
 @skip_launch_mapdl
+@skip_no_lic_bin
 def test_check_license_file(tmpdir):
     # also, validate the license checker since launching MAPDL is expensive
     checker = licensing.LicenseChecker()
