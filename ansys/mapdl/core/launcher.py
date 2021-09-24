@@ -868,7 +868,7 @@ def launch_mapdl(
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
-        start.  Only available on ``mode='grpc'``.
+        start.  Only available on ``mode='grpc'``. Defaults to True
 
     Notes
     -----
@@ -1109,6 +1109,7 @@ def launch_mapdl(
         # to the license check
         if license_server_check:
             lic_check.check()
+            # pass
         raise exception
 
     return mapdl
