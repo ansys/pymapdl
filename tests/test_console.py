@@ -24,15 +24,6 @@ pytestmark = pytest.mark.console
 
 
 @pytest.fixture(scope="function")
-def cleared(mapdl_console):
-    mapdl_console.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl_console.clear("NOSTART")
-    mapdl_console.prep7()
-    yield
-
-
-@pytest.fixture(scope="function")
 def make_block(mapdl_console, cleared):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
     mapdl_console.et(1, 186)
