@@ -13,5 +13,7 @@ Extended Examples Library
 
 Introduction
 ------------
-This is a library of extended examples. 
+This is a library of extended examples. These examples aim to explain with more details other concepts such as interoperability with other programs, features development, etc.
+
+This library is work-in-progress and it will be extended along the life of this project.
 

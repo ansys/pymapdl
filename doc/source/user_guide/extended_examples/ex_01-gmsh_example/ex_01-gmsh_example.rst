@@ -6,7 +6,7 @@ Example 01: Gmsh Example
 
 Objective
 ---------
-Demonstrate the interoperability of ``gmsh`` with PyANSYS.
+Demonstrate the interoperability of PyANSYS with ``gmsh``, a very wellknown open source Python meshing library.
 
 Description
 -----------
@@ -29,25 +29,27 @@ You need to have ``gmsh`` installed. You can install it using PIP:
 
     pip install gmsh
 
+For more information about ``gmsh`` please visit its website: [https://gmsh.info/](https://gmsh.info/).
+
 
 Source code
 -----------
 
-For the `gmsh_converter.py` file:
+`gmsh_generator.py` file:
 
-.. literalinclude:: gmsh_converter.py
+.. literalinclude:: gmsh_generator.py
     :linenos:
     :language: python
 
 
-For the `mesh_converter.py` file:
+`mesh_converter.py` file:
 
 .. literalinclude:: mesh_converter.py
     :linenos:
     :language: python
 
 
-For the `modal_analysis.py` file:
+`modal_analysis.py` file:
 
 .. literalinclude:: modal_analysis.py
     :linenos:
