@@ -450,10 +450,6 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
         env["ANSYSLI_SERVERS"] = f"{host}:{port}"
         env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
-    if os.name == 'nt':
-        ansysli_util_path = f'"{ansysli_util_path}"'
-        #When there is spaces in the address of the program, in windows, we wrap with double quotes.
-
     process = subprocess.Popen(
         f'"{ansysli_util_path}" -checkout {lic}',
         stdout=subprocess.PIPE,

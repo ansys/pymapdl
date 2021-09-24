@@ -142,17 +142,17 @@ def test_check_mech_license_available_fail():
         licensing.check_mech_license_available(test_net_3)
 
 
-def test_get_licdebug_msg_timeout():
+def test_get_licdebug_tail_timeout():
     with pytest.raises(TimeoutError):
-        msg = licensing.get_licdebug_msg('does_not_exist', start_timeout=0.05)
+        msg = licensing.get_licdebug_tail('does_not_exist', start_timeout=0.05)
         next(msg)
 
 
-def test_get_licdebug_msg(tmpdir):
+def test_get_licdebug_tail(tmpdir):
     tmp_file = tmpdir.join('tmplog.log')
     write_log(tmp_file)
 
-    msg_iter = licensing.get_licdebug_msg(tmp_file, start_timeout=1)
+    msg_iter = licensing.get_licdebug_tail(tmp_file, start_timeout=1)
     isinstance(msg_iter, types.GeneratorType)
     for line in msg_iter:
         if "CHECKOUT" in line:
