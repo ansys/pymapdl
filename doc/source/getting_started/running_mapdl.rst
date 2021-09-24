@@ -26,7 +26,7 @@ Launching MAPDL
 ---------------
 
 Launching MAPDL locally
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the ``launch_mapdl`` function to have Python startup MAPDL and
 automatically connect to it:
@@ -42,9 +42,11 @@ automatically connect to it:
     PyMAPDL Version:     Version: 0.57.0
 
 
+This is the easiest and fastest way to get PyMAPDL up and running. 
+But you need to have an ANSYS license server installed locally. 
 
 Lunching a gRPC MAPDL session
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can start MAPDL from the command line and then connect to it.
 To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation) use:
 
@@ -102,7 +104,7 @@ or in Linux with:
 
 
 Connecting to a gRPC MAPDL session
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A MAPDL gRPC server can be connected to either from the same host, or from an
 external host.  For example, you can connect to a MAPDL service
