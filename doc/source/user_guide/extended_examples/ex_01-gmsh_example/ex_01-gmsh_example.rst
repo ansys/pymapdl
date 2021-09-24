@@ -8,6 +8,8 @@ Objective
 ---------
 Demonstrate the interoperability of PyANSYS with ``gmsh``, a very wellknown open source Python meshing library.
 
+For more information about ``gmsh`` please visit its website: `Gmsh <https://gmsh.info/>`_.
+
 Description
 -----------
 In this example the interoperability of PyANSYS with other open source tools such as ``gmsh`` is shown.
@@ -28,8 +30,6 @@ You need to have ``gmsh`` installed. You can install it using PIP:
 .. code-block:: 
 
     pip install gmsh
-
-For more information about ``gmsh`` please visit its website: [https://gmsh.info/](https://gmsh.info/).
 
 
 Source code

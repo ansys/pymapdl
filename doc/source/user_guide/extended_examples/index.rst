@@ -17,3 +17,10 @@ This is a library of extended examples. These examples aim to explain with more 
 
 This library is work-in-progress and it will be extended along the life of this project.
 
+
+List of examples
+----------------
+
+
+* :ref:`ref_extended_examples_ex01` . It demonstrate the interoperability between PyANSYS and ``gmsh`` meshing tool. 
+  
