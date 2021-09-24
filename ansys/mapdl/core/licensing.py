@@ -23,7 +23,7 @@ LIC_TO_CHECK =  ["mech_1"]
 # 4. ``mech_1`` Pro license` (the most limited)
 # To keep very general, and since we need just to be able to solve, we are going to check against the lower license (``mech_1``).
 
-# TODO: Implement a warning for unsufficient license rights.
+# TODO: Implement a warning for insufficient license rights.
 
 
 LOG = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def check_license_file(timeout=30, verbose=False):
                 License path:  1055@AAPDDqVK5WqNLrt;
                 FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
     ```
-    On the other side, successfull license checkout will print `CHECKOUT       $APPNAME` in the file, such as:
+    On the other side, successful license checkout will print `CHECKOUT       $APPNAME` in the file, such as:
     ```
     2021/09/20 12:59:49    CHECKOUT            FEAT_ANSYS                      21.2 (2021.0512)             1/1/1/1                 1/1/1/1   11704:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLve.win.ansys.com:winx64   6884:192.168.56.1
     ```

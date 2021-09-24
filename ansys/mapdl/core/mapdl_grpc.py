@@ -258,7 +258,7 @@ class MapdlGrpc(_MapdlCore):
             if connected:
                 break
         else:
-            self._log.debug(f'Reached either maximum amount of connection attemps ({n_attempts}) or timeout ({timeout} s).')
+            self._log.debug(f'Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s).')
 
         if not connected:
             raise IOError(
