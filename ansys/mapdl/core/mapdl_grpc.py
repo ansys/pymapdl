@@ -1,5 +1,4 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
-from ansys.mapdl.core.licensing import LicenseChecker
 import re
 from warnings import warn
 import shutil
