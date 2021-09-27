@@ -55,14 +55,14 @@ def write_log(path):
             time.sleep(0.01)
 
 
-# check if there is any license info
-try:
-    LIC_CONFIG = licensing.get_license_server_config()
-except FileNotFoundError:
-    LIC_CONFIG = ""
+# # check if there is any license info
+# try:
+#     LIC_CONFIG = licensing.get_license_server_config()
+# except FileNotFoundError:
+#     LIC_CONFIG = ""
 
-skip_no_lic_config = pytest.mark.skipif(not LIC_CONFIG,
-                                     reason="Requires local license server config")
+# skip_no_lic_config = pytest.mark.skipif(not LIC_CONFIG,
+#                                      reason="Requires local license server config")
 
 
 try:
@@ -72,25 +72,6 @@ except:
 
 skip_no_lic_bin = pytest.mark.skipif(not LIC_INSTALLED,
                                      reason="Requires local license utilities binaries")
-
-
-def test_parse_lic_config(tmpdir):
-    # temporarily write to disk to read this later
-    lic_config_path = tmpdir.join('ansyslmd.ini')
-    with open(lic_config_path, 'w') as fid:
-        fid.write(FAKE_LICENSE_CONFIG)
-
-    servers = licensing.parse_lic_config(lic_config_path)
-
-    # ensure order is preserved
-    expected = [
-        ('255.166.88.70', 1055 ),
-        ('255.166.88.70', 2325 ),
-        ('localhost', 1055),
-        ('localhost', 2325),
-    ]
-
-    assert servers == expected
 
 
 @skip_no_lic_bin
@@ -103,23 +84,7 @@ def test_get_licdebug_path():
         assert 'shared_files' in ansyslic_dir and 'licensing' in ansyslic_dir
 
 
-@skip_no_lic_config
-def test_ping_lic_srv():
-    host, port = LIC_CONFIG[0]
-    assert licensing.check_port(host, port)
-
-
-@skip_no_lic_config
-def test_ping_local_host():
-    assert licensing.check_port('localhost')
-
-
-def test_check_port_fail():
-    # Expect this to fail
-    assert not licensing.check_port(test_net_3, timeout=1)
-
-
-@skip_no_lic_config
+@skip_no_lic_bin
 def test_checkout_license():
     output = licensing.checkout_license('meba')
 
@@ -130,7 +95,7 @@ def test_checkout_license_fail():
     assert "CHECKOUT FAILED" in output
 
 
-@skip_no_lic_config
+@skip_no_lic_bin
 @pytest.mark.xfail(reason="license check is flaky using lmutil")
 def test_check_mech_license_available():
     licensing.check_mech_license_available()
