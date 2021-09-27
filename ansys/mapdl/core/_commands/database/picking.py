@@ -5,8 +5,8 @@ parameters to a command.  For example, more points to a spline than
 would be normally supported.
 """
 
-class Picking:
 
+class Picking:
     def fitem(self, nfield="", item="", itemy="", itemz="", **kwargs):
         """Identifies items chosen by a picking operation (GUI).
 
@@ -49,8 +49,7 @@ class Picking:
 
         This command is valid in any processor.
         """
-        command = "FITEM,%s,%s,%s,%s" % (
-            str(nfield), str(item), str(itemy), str(itemz))
+        command = "FITEM,%s,%s,%s,%s" % (str(nfield), str(item), str(itemy), str(itemz))
         return self.run(command, **kwargs)
 
     def flst(self, nfield="", narg="", type_="", otype="", leng="", **kwargs):
@@ -120,5 +119,10 @@ class Picking:
         This command is valid in any processor.
         """
         command = "FLST,%s,%s,%s,%s,%s" % (
-            str(nfield), str(narg), str(type_), str(otype), str(leng))
+            str(nfield),
+            str(narg),
+            str(type_),
+            str(otype),
+            str(leng),
+        )
         return self.run(command, **kwargs)

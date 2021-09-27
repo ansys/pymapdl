@@ -1,5 +1,4 @@
 class Listing:
-
     def extrem(self, nvar1="", nvar2="", ninc="", **kwargs):
         """Lists the extreme values for variables.
 
@@ -16,7 +15,7 @@ class Listing:
         Lists the extreme values (and the corresponding times) for stored and
         calculated variables. Extremes for stored variables are automatically
         listed as they are stored. Only the real part of a complex number is
-        used. Extreme values may also be assigned to parameters [*GET].
+        used. Extreme values may also be assigned to parameters [``*GET``].
         """
         command = f"EXTREM,{nvar1},{nvar2},{ninc}"
         return self.run(command, **kwargs)
@@ -108,8 +107,9 @@ class Listing:
         command = f"PRTIME,{tmin},{tmax}"
         return self.run(command, **kwargs)
 
-    def prvar(self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="",
-              **kwargs):
+    def prvar(
+        self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="", **kwargs
+    ):
         """Lists variables vs. time (or frequency).
 
         APDL Command: PRVAR

@@ -22,17 +22,17 @@ class TestLineSlopeQueries:
     def test_lsx(self, line_geometry):
         q, kps, line = line_geometry
         sx = q.lsx(line, 0.5)
-        actual = 1. / 3.
+        actual = 1.0 / 3.0
         assert isclose(sx, actual)
 
     def test_lsy(self, line_geometry):
         q, kps, line = line_geometry
         sy = q.lsy(line, 0.5)
-        actual = 2. / 3.
+        actual = 2.0 / 3.0
         assert isclose(sy, actual)
 
     def test_lsz(self, line_geometry):
         q, kps, line = line_geometry
         sz = q.lsz(line, 0.5)
-        actual = 2. / 3.
+        actual = 2.0 / 3.0
         assert isclose(sz, actual)

@@ -1,7 +1,16 @@
 class FeBodyLoads:
-
-    def bf(self, node="", lab="", val1="", val2="", val3="", val4="", val5="",
-           val6="", **kwargs):
+    def bf(
+        self,
+        node="",
+        lab="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        **kwargs,
+    ):
         """Defines a nodal body force load.
 
         APDL Command: BF
@@ -21,7 +30,7 @@ class FeBodyLoads:
             Value associated with the Lab item or table name reference for
             tabular boundary conditions. To specify a table, enclose the table
             name in percent signs (%) (e.g., BF,Node,TEMP,%tabname%). Use the
-            *DIM command to define a table. Use only VAL1 for TEMP, FLUE, HGEN,
+            ``*DIM`` command to define a table. Use only VAL1 for TEMP, FLUE, HGEN,
             DGEN, MVDI, CHRGD. If Lab = CHRGD for acoustics, VAL1 is the static
             pressure for a non-uniform acoustic medium calculation.
 
@@ -160,8 +169,9 @@ class FeBodyLoads:
         command = f"BFDELE,{node},{lab}"
         return self.run(command, **kwargs)
 
-    def bfe(self, elem="", lab="", stloc="", val1="", val2="", val3="",
-            val4="", **kwargs):
+    def bfe(
+        self, elem="", lab="", stloc="", val1="", val2="", val3="", val4="", **kwargs
+    ):
         """Defines an element body force load.
 
         APDL Command: BFE
@@ -223,7 +233,7 @@ class FeBodyLoads:
 
         BFE,Elem, Lab,STLOC,%tabname%
 
-        Use the *DIM command to define a table.
+        Use the ``*DIM`` command to define a table.
 
         For Lab = TEMP, each table defines NTEMP temperatures, as follows:
 
@@ -524,8 +534,9 @@ class FeBodyLoads:
         command = f"BFUNIF,{lab},{value}"
         return self.run(command, **kwargs)
 
-    def ldread(self, lab="", lstep="", sbstep="", time="", kimg="", fname="",
-               ext="", **kwargs):
+    def ldread(
+        self, lab="", lstep="", sbstep="", time="", kimg="", fname="", ext="", **kwargs
+    ):
         """Reads results from the results file and applies them as loads.
 
         APDL Command: LDREAD
@@ -631,8 +642,19 @@ class FeBodyLoads:
         command = f"LDREAD,{lab},{lstep},{sbstep},{time},{kimg},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def rimport(self, source="", type_="", loc="", lstep="", sbstep="",
-                fname="", ext="", spscale="", mscale="", **kwargs):
+    def rimport(
+        self,
+        source="",
+        type_="",
+        loc="",
+        lstep="",
+        sbstep="",
+        fname="",
+        ext="",
+        spscale="",
+        mscale="",
+        **kwargs,
+    ):
         """Imports initial stresses from an explicit dynamics run into ANSYS.
 
         APDL Command: RIMPORT

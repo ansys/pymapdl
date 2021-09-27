@@ -39,7 +39,8 @@ mapdl.vplot(show_lines=True)
 
 ###############################################################################
 # Create a triangular prism
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 0, 0)
@@ -55,7 +56,8 @@ mapdl.vplot(show_lines=True)
 
 ###############################################################################
 # Create a triangular prism
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 0, 0)
@@ -72,11 +74,12 @@ mapdl.vplot(show_lines=True)
 #
 # Create a simple tetrahedral bounded by 4 areas
 
-mapdl.clear(); mapdl.prep7()
-k0 = mapdl.k('', -1, 0, 0)
-k1 = mapdl.k('', 1, 0,  0)
-k2 = mapdl.k('', 1, 1, 0)
-k3 = mapdl.k('', 1, 0.5, 1)
+mapdl.clear()
+mapdl.prep7()
+k0 = mapdl.k("", -1, 0, 0)
+k1 = mapdl.k("", 1, 0, 0)
+k2 = mapdl.k("", 1, 1, 0)
+k3 = mapdl.k("", 1, 0.5, 1)
 
 # create faces
 a0 = mapdl.a(k0, k1, k2)
@@ -95,7 +98,8 @@ mapdl.aplot(show_lines=True, show_bounds=True)
 # Generate volumes by dragging an area pattern along a path.
 #
 # Create a square with a hole in it and drag it along an arc.
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 # create a square with a hole in it.
 anum0 = mapdl.blc4(0, 0, 1, 1)
@@ -116,7 +120,8 @@ mapdl.vplot(show_lines=True, quality=5)
 # Generate additional volumes by extruding areas.
 #
 # Create a basic cylinder by extruding a circle.
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 # first, create an area from a circle
 k0 = mapdl.k("", 0, 0, 0)
@@ -132,7 +137,7 @@ mapdl.vplot(show_lines=True, quality=5)
 
 ###############################################################################
 # Create a tapered cylinder by using the ``rx`` and ``ry`` parameters.
-mapdl.vdele('all')
+mapdl.vdele("all")
 mapdl.vext(a0, dz=4, rx=0.3, ry=0.3, rz=1)
 mapdl.vplot(show_lines=True, quality=5)
 
@@ -144,7 +149,8 @@ mapdl.vplot(show_lines=True, quality=5)
 # axis.
 #
 # Rotate a circle about the Z axis to create a hoop
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 # first, create an area from a circle
 hoop_radius = 10
@@ -171,11 +177,12 @@ mapdl.vplot(show_lines=True, quality=5)
 #
 # Create four blocks by reflecting a single block across the YZ and
 # then XZ planes.
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
-mapdl.vsymm('X', vnum)
-mapdl.vsymm('Y', 'ALL')
+mapdl.vsymm("X", vnum)
+mapdl.vsymm("Y", "ALL")
 
 mapdl.vplot(show_lines=True, show_bounds=True)
 
@@ -205,12 +212,14 @@ volume_mesh
 # useful for selecting volumes in a pythonic manner.
 #
 # This example generates a series of random volumes and selects them
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 
 def generate_random_volume():
     start_x, start_y, height, width, depth = np.random.random(5)
-    mapdl.blc4(start_x*10, start_y*10, height, width, depth)
+    mapdl.blc4(start_x * 10, start_y * 10, height, width, depth)
+
 
 # create 20 random volumes
 for _ in range(20):
@@ -222,7 +231,7 @@ print(mapdl.geometry.vnum)
 
 ###############################################################################
 # Select every other volume with the old style command.
-mapdl.vsel('S', 'VOLU', '', 1, 20, 2)
+mapdl.vsel("S", "VOLU", "", 1, 20, 2)
 print(mapdl.geometry.vnum)
 
 
@@ -255,13 +264,12 @@ print(items)
 # There are a variety of plotting options available for all the common
 # plotting methods.
 
-mapdl.clear(); mapdl.prep7()
+mapdl.clear()
+mapdl.prep7()
 
 # Create basic demo geometry
 mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, depth=1)
-mapdl.vsymm('Y', 'ALL')
+mapdl.vsymm("Y", "ALL")
 
 # Plot while showing bounds and disabling extra line plotting.
-mapdl.vplot(show_bounds=True,
-            show_lines=False,
-            quality=5)
+mapdl.vplot(show_bounds=True, show_lines=False, quality=5)

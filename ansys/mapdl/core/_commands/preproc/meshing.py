@@ -4,7 +4,6 @@ from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
 
 
 class Meshing:
-
     def accat(self, na1="", na2="", **kwargs):
         """Concatenates multiple areas in preparation for mapped meshing.
 
@@ -182,8 +181,9 @@ class Meshing:
         command = f"AMESH,{na1},{na2},{ninc}"
         return self.run(command, **kwargs)
 
-    def arefine(self, na1="", na2="", ninc="", level="", depth="", post="",
-                retain="", **kwargs):
+    def arefine(
+        self, na1="", na2="", ninc="", level="", depth="", post="", retain="", **kwargs
+    ):
         """Refines the mesh around specified areas.
 
         APDL Command: AREFINE
@@ -303,12 +303,13 @@ class Meshing:
         command = f"CLRMSHLN,"
         return self.run(command, **kwargs)
 
-    def cpcyc(self, lab="", toler="", kcn="", dx="", dy="", dz="", knonrot="",
-              **kwargs):
-        """Couples the two side faces of a cyclically symmetric model for loadings
+    def cpcyc(
+        self, lab="", toler="", kcn="", dx="", dy="", dz="", knonrot="", **kwargs
+    ):
+        """Couples the two side faces of a cyclically symmetric model
+        for loading that are the same on every segment.
 
         APDL Command: CPCYC
-        that are the same on every segment.
 
         Parameters
         ----------
@@ -325,7 +326,7 @@ class Meshing:
             within the tolerance are considered to be coincident for coupling.
 
         kcn
-             In coordinate system KCN, node 1 of CP + dx dy dz = node 2 of CP.
+            In coordinate system KCN, node 1 of CP + dx dy dz = node 2 of CP.
 
         dx, dy, dz
             Node location increments in the active coordinate system (DR, Dθ,
@@ -339,7 +340,7 @@ class Meshing:
 
         Notes
         -----
-         Cyclic coupling requires identical node and element patterns on the
+        Cyclic coupling requires identical node and element patterns on the
         low and high sector boundaries. The MSHCOPY operation allows convenient
         generation of identical node and element patterns. See Using CPCYC and
         MSHCOPY Commands in the Modeling and Meshing Guide for more
@@ -386,8 +387,9 @@ class Meshing:
         command = f"CZDEL,{grp1},{grp2},{grp3}"
         return self.run(command, **kwargs)
 
-    def czmesh(self, ecomps1="", ecomps2="", kcn="", kdir="", value="",
-               cztol="", **kwargs):
+    def czmesh(
+        self, ecomps1="", ecomps2="", kcn="", kdir="", value="", cztol="", **kwargs
+    ):
         """Create and mesh an interface area composed of cohesive zone elements.
 
         APDL Command: CZMESH
@@ -451,8 +453,19 @@ class Meshing:
         command = f"CZMESH,{ecomps1},{ecomps2},{kcn},{kdir},{value},{cztol}"
         return self.run(command, **kwargs)
 
-    def desize(self, minl="", minh="", mxel="", angl="", angh="", edgmn="",
-               edgmx="", adjf="", adjm="", **kwargs):
+    def desize(
+        self,
+        minl="",
+        minh="",
+        mxel="",
+        angl="",
+        angh="",
+        edgmn="",
+        edgmx="",
+        adjf="",
+        adjm="",
+        **kwargs,
+    ):
         """Controls default element sizes.
 
         APDL Command: DESIZE
@@ -514,11 +527,18 @@ class Meshing:
 
         This command is also valid for rezoning.
         """
-        command = f"DESIZE,{minl},{minh},{mxel},{angl},{angh},{edgmn},{edgmx},{adjf},{adjm}"
+        command = (
+            f"DESIZE,{minl},{minh},{mxel},{angl},{angh},{edgmn},{edgmx},{adjf},{adjm}"
+        )
         return self.run(command, **kwargs)
 
-    def eorient(self, etype: str = "", dir_: Union[str, int] = "",
-                toler: MapdlFloat = "", **kwargs) -> Optional[str]:
+    def eorient(
+        self,
+        etype: str = "",
+        dir_: Union[str, int] = "",
+        toler: MapdlFloat = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Reorients solid element normals.
 
         APDL Command: EORIENT
@@ -608,10 +628,17 @@ class Meshing:
         command = f"EORIENT,{etype},{dir_},{toler}"
         return self.run(command, **kwargs)
 
-    def erefine(self, ne1: Union[str, int] = "", ne2: MapdlInt = "",
-                ninc: MapdlInt = "", level: MapdlInt = "",
-                depth: MapdlInt = "", post: str = "", retain: str = "",
-                **kwargs) -> Optional[str]:
+    def erefine(
+        self,
+        ne1: Union[str, int] = "",
+        ne2: MapdlInt = "",
+        ninc: MapdlInt = "",
+        level: MapdlInt = "",
+        depth: MapdlInt = "",
+        post: str = "",
+        retain: str = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Refines the mesh around specified elements.
 
         APDL Command: EREFINE
@@ -692,8 +719,7 @@ class Meshing:
 
         This command is also valid for rezoning.
         """
-        command = f"EREFINE,{ne1},{ne2},{ninc}," \
-                  f"{level},{depth},{post},{retain}"
+        command = f"EREFINE,{ne1},{ne2},{ninc}," f"{level},{depth},{post},{retain}"
         return self.run(command, **kwargs)
 
     def esize(self, size="", ndiv="", **kwargs):
@@ -825,8 +851,7 @@ class Meshing:
         command = f"FVMESH,{keep}"
         return self.run(command, **kwargs)
 
-    def gsgdata(self, lfiber="", xref="", yref="", rotx0="", roty0="",
-                **kwargs):
+    def gsgdata(self, lfiber="", xref="", yref="", rotx0="", roty0="", **kwargs):
         """Specifies the reference point and defines the geometry in the fiber
 
         APDL Command: GSGDATA
@@ -860,8 +885,9 @@ class Meshing:
         command = f"GSGDATA,{lfiber},{xref},{yref},{rotx0},{roty0}"
         return self.run(command, **kwargs)
 
-    def imesh(self, laky="", nsla="", ntla="", kcn="", dx="", dy="", dz="",
-              tol="", **kwargs):
+    def imesh(
+        self, laky="", nsla="", ntla="", kcn="", dx="", dy="", dz="", tol="", **kwargs
+    ):
         """Generates nodes and interface elements along lines or areas.
 
         APDL Command: IMESH
@@ -1046,8 +1072,9 @@ class Meshing:
         command = f"KMESH,{np1},{np2},{ninc}"
         return self.run(command, **kwargs)
 
-    def krefine(self, np1="", np2="", ninc="", level="", depth="", post="",
-                retain="", **kwargs):
+    def krefine(
+        self, np1="", np2="", ninc="", level="", depth="", post="", retain="", **kwargs
+    ):
         """Refines the mesh around specified keypoints.
 
         APDL Command: KREFINE
@@ -1173,8 +1200,7 @@ class Meshing:
         command = f"KSCON,{npt},{delr},{kctip},{nthet},{rrat}"
         return self.run(command, **kwargs)
 
-    def latt(self, mat="", real="", type_="", kb="", ke="", secnum="",
-             **kwargs):
+    def latt(self, mat="", real="", type_="", kb="", ke="", secnum="", **kwargs):
         """Associates element attributes with the selected, unmeshed lines.
 
         APDL Command: LATT
@@ -1321,8 +1347,19 @@ class Meshing:
         command = f"LCLEAR,{nl1},{nl2},{ninc}"
         return self.run(command, **kwargs)
 
-    def lesize(self, nl1="", size="", angsiz="", ndiv="", space="", kforc="",
-               layer1="", layer2="", kyndiv="", **kwargs):
+    def lesize(
+        self,
+        nl1="",
+        size="",
+        angsiz="",
+        ndiv="",
+        space="",
+        kforc="",
+        layer1="",
+        layer2="",
+        kyndiv="",
+        **kwargs,
+    ):
         """Specifies the divisions and spacing ratio on unmeshed lines.
 
         APDL Command: LESIZE
@@ -1356,7 +1393,7 @@ class Meshing:
         space
             Spacing ratio.  If positive, nominal ratio of last division size to
             first division size (if > 1.0, sizes increase, if < 1.0, sizes
-            decrease).  If negative, |SPACE| is nominal ratio of center
+            decrease).  If negative, ``|SPACE|`` is nominal ratio of center
             division(s) size to end divisions size.  Ratio defaults to 1.0
             (uniform spacing). For layer-meshing, a value of 1.0 normally is
             used. If SPACE = FREE, ratio is determined by other considerations
@@ -1369,14 +1406,15 @@ class Meshing:
 
             1 - Modify all selected lines.
 
-            2 - Modify only selected lines having fewer divisions (including zero) than
+            2 - Modify only selected lines having fewer divisions
+                (including zero) than specified with this command.
+
+            3 - Modify only selected lines having more divisions than
                 specified with this command.
 
-            3 - Modify only selected lines having more divisions than specified with this
-                command.
-
-            4 - Modify only nonzero settings for SIZE, ANGSIZ, NDIV,  SPACE, LAYER1, and
-                LAYER2.  If KFORC = 4, blank or 0 settings remain unchanged.
+            4 - Modify only nonzero settings for SIZE, ANGSIZ, NDIV,
+                SPACE, LAYER1, and LAYER2.  If KFORC = 4, blank or 0
+                settings remain unchanged.
 
         layer1
             Layer-meshing control parameter.  Distance which defines the
@@ -1440,8 +1478,9 @@ class Meshing:
         command = f"LMESH,{nl1},{nl2},{ninc}"
         return self.run(command, **kwargs)
 
-    def lrefine(self, nl1="", nl2="", ninc="", level="", depth="", post="",
-                retain="", **kwargs):
+    def lrefine(
+        self, nl1="", nl2="", ninc="", level="", depth="", post="", retain="", **kwargs
+    ):
         """Refines the mesh around specified lines.
 
         APDL Command: LREFINE
@@ -1556,15 +1595,15 @@ class Meshing:
 
         Notes
         -----
-         Wherever two area or volume elements share a common face, MCHECK
+        Wherever two area or volume elements share a common face, MCHECK
         verifies that the way the elements are connected to the face is
         consistent with their relative normals or integrated volumes. (This may
         detect folds or otherwise overlapping elements.)
 
-         MCHECK verifies that the element exterior faces form simply-connected
+        MCHECK verifies that the element exterior faces form simply-connected
         closed surfaces. (This may detect unintended cracks in a mesh.)
 
-         MCHECK warns if the number of element facets in a 2-D loop or 3-D
+        MCHECK warns if the number of element facets in a 2-D loop or 3-D
         shell is not greater than a computed limit. This limit is the smaller
         of either three times the number of faces on one element, or one-tenth
         the total number of element faces in the model. (This may detect holes
@@ -1767,8 +1806,20 @@ class Meshing:
         command = f"MSHAPE,{key},{dimension}"
         return self.run(command, **kwargs)
 
-    def mshcopy(self, keyla="", laptrn="", lacopy="", kcn="", dx="", dy="",
-                dz="", tol="", low="", high="", **kwargs):
+    def mshcopy(
+        self,
+        keyla="",
+        laptrn="",
+        lacopy="",
+        kcn="",
+        dx="",
+        dy="",
+        dz="",
+        tol="",
+        low="",
+        high="",
+        **kwargs,
+    ):
         """Simplifies the generation of meshes that have matching node element
 
         APDL Command: MSHCOPY
@@ -1813,7 +1864,9 @@ class Meshing:
         CPCYC and MSHCOPY Commands in the Modeling and Meshing Guide for more
         information.
         """
-        command = f"MSHCOPY,{keyla},{laptrn},{lacopy},{kcn},{dx},{dy},{dz},{tol},{low},{high}"
+        command = (
+            f"MSHCOPY,{keyla},{laptrn},{lacopy},{kcn},{dx},{dy},{dz},{tol},{low},{high}"
+        )
         return self.run(command, **kwargs)
 
     def mshkey(self, key="", **kwargs):
@@ -1909,8 +1962,9 @@ class Meshing:
         command = f"MSHPATTERN,{key}"
         return self.run(command, **kwargs)
 
-    def nrefine(self, nn1="", nn2="", ninc="", level="", depth="", post="",
-                retain="", **kwargs):
+    def nrefine(
+        self, nn1="", nn2="", ninc="", level="", depth="", post="", retain="", **kwargs
+    ):
         """Refines the mesh around specified nodes.
 
         APDL Command: NREFINE
@@ -1984,9 +2038,23 @@ class Meshing:
         command = f"NREFINE,{nn1},{nn2},{ninc},{level},{depth},{post},{retain}"
         return self.run(command, **kwargs)
 
-    def psmesh(self, secid="", name="", p0="", egroup="", num="", kcn="",
-               kdir="", value="", ndplane="", pstol="", pstype="", ecomp="",
-               ncomp="", **kwargs):
+    def psmesh(
+        self,
+        secid="",
+        name="",
+        p0="",
+        egroup="",
+        num="",
+        kcn="",
+        kdir="",
+        value="",
+        ndplane="",
+        pstol="",
+        pstype="",
+        ecomp="",
+        ncomp="",
+        **kwargs,
+    ):
         """Create and mesh a pretension section
 
         APDL Command: PSMESH
@@ -2140,7 +2208,7 @@ class Meshing:
         Parameters
         ----------
         par
-             Array parameter (indexed by node number) that expresses the
+            Array parameter (indexed by node number) that expresses the
             function to be mapped.  For example, func (17) should be the
             desired shell thickness at node 17.
 
@@ -2320,8 +2388,21 @@ class Meshing:
         command = f"SHPP,{lab},{value1},{value2}"
         return self.run(command, **kwargs)
 
-    def smrtsize(self, sizlvl="", fac="", expnd="", trans="", angl="", angh="",
-                 gratio="", smhlc="", smanc="", mxitr="", sprx="", **kwargs):
+    def smrtsize(
+        self,
+        sizlvl="",
+        fac="",
+        expnd="",
+        trans="",
+        angl="",
+        angh="",
+        gratio="",
+        smhlc="",
+        smanc="",
+        mxitr="",
+        sprx="",
+        **kwargs,
+    ):
         """Specifies meshing parameters for automatic (smart) element sizing.
 
         APDL Command: SMRTSIZE

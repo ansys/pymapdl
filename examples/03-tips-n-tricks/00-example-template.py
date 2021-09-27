@@ -84,10 +84,10 @@ import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(111)
 x = list(range(10))
-y = [i**2 + 3*i - 1 for i in x]
+y = [i ** 2 + 3 * i - 1 for i in x]
 ax.plot(x, y)
-ax.set_xlabel('x')
-ax.set_ylabel('y')
+ax.set_xlabel("x")
+ax.set_ylabel("y")
 
 ###############################################################################
 # Animations
@@ -102,5 +102,5 @@ ax.set_ylabel('y')
 # Branches containing examples should be prefixed with `doc/` as per the branch
 # naming conventions found here: :ref:`contributing`.
 #
-# Note that you only need to create the python source example (*.py).  The jupyter
+# Note that you only need to create the python source example (.py).  The jupyter
 # notebook, the example html and the demo script will all be auto-generated via ``sphinx-gallery``.

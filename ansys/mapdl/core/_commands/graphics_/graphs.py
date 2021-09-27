@@ -1,5 +1,4 @@
 class Graphs:
-
     def axlab(self, axis="", lab="", **kwargs):
         """Labels the X and Y axes on graph displays.
 

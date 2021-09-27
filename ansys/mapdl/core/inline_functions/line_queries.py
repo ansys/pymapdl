@@ -40,7 +40,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         >>> q.lx(l0, 0.5)
         0.5
         """
-        response = self._mapdl.run(f'_=LX({n},{lfrac})')
+        response = self._mapdl.run(f"_=LX({n},{lfrac})")
         return self._parse_parameter_float_response(response)
 
     def ly(self, n: int, lfrac: float) -> float:
@@ -79,7 +79,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         >>> q.ly(l0, 0.5)
         1.0
         """
-        response = self._mapdl.run(f'_=LY({n},{lfrac})')
+        response = self._mapdl.run(f"_=LY({n},{lfrac})")
         return self._parse_parameter_float_response(response)
 
     def lz(self, n: int, lfrac: float) -> float:
@@ -118,7 +118,7 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         >>> q.lz(l0, 0.5)
         1.5
         """
-        response = self._mapdl.run(f'_=LZ({n},{lfrac})')
+        response = self._mapdl.run(f"_=LZ({n},{lfrac})")
         return self._parse_parameter_float_response(response)
 
 
@@ -162,7 +162,7 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         >>> q.lsx(l0, 0.5)
         0.3333333333
         """
-        response = self._mapdl.run(f'_=LSX({n},{lfrac})')
+        response = self._mapdl.run(f"_=LSX({n},{lfrac})")
         return self._parse_parameter_float_response(response)
 
     def lsy(self, n: int, lfrac: float) -> float:
@@ -202,7 +202,7 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         >>> q.lsy(l0, 0.5)
         0.6666666667
         """
-        response = self._mapdl.run(f'_=LSY({n},{lfrac})')
+        response = self._mapdl.run(f"_=LSY({n},{lfrac})")
         return self._parse_parameter_float_response(response)
 
     def lsz(self, n: int, lfrac: float) -> float:
@@ -242,5 +242,5 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         >>> q.lsz(l0, 0.5)
         0.6666666667
         """
-        response = self._mapdl.run(f'_=LSZ({n},{lfrac})')
+        response = self._mapdl.run(f"_=LSZ({n},{lfrac})")
         return self._parse_parameter_float_response(response)

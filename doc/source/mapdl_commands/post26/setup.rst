@@ -1,4 +1,4 @@
-.. _ref_setup_api:
+.. _ref_post26_setup_api:
 
 *****
 Setup

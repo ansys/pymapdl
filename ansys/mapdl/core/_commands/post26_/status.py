@@ -1,5 +1,4 @@
 class Status:
-
     def define(self, **kwargs):
         """Specifies "Data definition settings" as the subsequent status topic.
 

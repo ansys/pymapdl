@@ -13,7 +13,7 @@ from ansys.mapdl.core.errors import ANSYSDataTypeError
 pytestmark = pytest.mark.skip_grpc
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def mm(mapdl):
     return mapdl.math
 
@@ -64,7 +64,7 @@ def test_set_vec_large(mm):
     # send a vector larger than the gRPC size limit of 4 MB
     sz = 1000000
     a = np.random.random(1000000)  # 7.62 MB (as FLOAT64)
-    assert a.nbytes > 4*1024**2
+    assert a.nbytes > 4 * 1024 ** 2
     ans_vec = mm.set_vec(a)
     assert a[sz - 1] == ans_vec[sz - 1]
     assert np.allclose(a, ans_vec.asarray())
@@ -97,17 +97,17 @@ def test_vec__mul__(mm):
     if mm._server_version[1] >= 4:
         a = mm.vec(10)
         b = mm.vec(10)
-        assert np.allclose(a*b, np.asarray(a)*np.asarray(b))
+        assert np.allclose(a * b, np.asarray(a) * np.asarray(b))
 
         with pytest.raises(ValueError):
-            mm.vec(10)*mm.vec(11)
+            mm.vec(10) * mm.vec(11)
 
         with pytest.raises(TypeError):
-            mm.vec(10)*np.ones(10)
+            mm.vec(10) * np.ones(10)
 
 
 def test_numpy_max(mm):
-    apdl_vec = mm.vec(10, init='rand')
+    apdl_vec = mm.vec(10, init="rand")
     assert np.isclose(apdl_vec.asarray().max(), np.max(apdl_vec))
 
 
@@ -119,10 +119,10 @@ def test_shape(mm):
 
 def test_matrix(mm):
     sz = 5000
-    mat = sparse.random(sz, sz, density=0.05, format='csr')
-    assert mat.data.nbytes // 1024**2 > 4, 'Must test over gRPC message limit'
+    mat = sparse.random(sz, sz, density=0.05, format="csr")
+    assert mat.data.nbytes // 1024 ** 2 > 4, "Must test over gRPC message limit"
 
-    name = 'TMP_MATRIX'
+    name = "TMP_MATRIX"
     ans_mat = mm.matrix(mat, name)
     assert ans_mat.id == name
 
@@ -133,10 +133,10 @@ def test_matrix(mm):
 
 
 def test_matrix_fail(mm):
-    mat = sparse.random(10, 10, density=0.05, format='csr')
+    mat = sparse.random(10, 10, density=0.05, format="csr")
 
     with pytest.raises(ValueError, match='":" is not permitted'):
-        mm.matrix(mat, 'my:mat')
+        mm.matrix(mat, "my:mat")
 
     with pytest.raises(TypeError):
         mm.matrix(mat.astype(np.int8))
@@ -153,7 +153,7 @@ def test_mul(mm):
     m1 = mm.rand(10, 10)
     w = mm.rand(10)
     with pytest.raises(AttributeError):
-        m1*w
+        m1 * w
 
 
 # test kept for the eventual inclusion of mult
@@ -194,7 +194,7 @@ def test_mat_from_name(mm):
 
 
 def test_mat_from_name_sparse(mm):
-    scipy_mat = sparse.random(5, 5, density=1, format='csr')
+    scipy_mat = sparse.random(5, 5, density=1, format="csr")
     mat0 = mm.matrix(scipy_mat)
     mat1 = mm.mat(name=mat0.id)
     assert np.allclose(mat0, mat1)
@@ -206,8 +206,8 @@ def test_mat_invalid_dtype(mm):
 
 
 def test_mat_invalid_init(mm):
-    with pytest.raises(ValueError, match='Invalid init method'):
-        mm.mat(10, 10, init='foo')
+    with pytest.raises(ValueError, match="Invalid init method"):
+        mm.mat(10, 10, init="foo")
 
 
 def test_solve(mm, cube_solve):
@@ -230,8 +230,8 @@ def test_solve_alt(mm, cube_solve):
 
 def test_solve_eigs_km(mapdl, mm, cube_solve):
     mapdl.post1()
-    resp = mapdl.set('LIST')
-    w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
 
     k = mm.stiff()
     m = mm.mass()
@@ -242,8 +242,8 @@ def test_solve_eigs_km(mapdl, mm, cube_solve):
 
 def test_solve_py(mapdl, mm, cube_solve):
     mapdl.post1()
-    resp = mapdl.set('LIST')
-    w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
 
     # load by default from file.full
     k = mm.stiff()
@@ -317,20 +317,19 @@ def test_vec_const(mm):
     assert np.allclose(vec, 2)
 
 
-@pytest.mark.parametrize('pname', ['vector', 'my_vec'])
-@pytest.mark.parametrize('vec', [np.random.random(10),
-                                 [1, 2, 3, 4]])
+@pytest.mark.parametrize("pname", ["vector", "my_vec"])
+@pytest.mark.parametrize("vec", [np.random.random(10), [1, 2, 3, 4]])
 def test_set_vector(mm, vec, pname):
     ans_vec = mm.set_vec(vec, pname)
     assert np.allclose(ans_vec.asarray(), vec)
-    assert 'APDLMath Vector Size' in repr(ans_vec)
-    assert '' in str(vec[0])[:4]  # output from *PRINT
+    assert "APDLMath Vector Size" in repr(ans_vec)
+    assert "" in str(vec[0])[:4]  # output from *PRINT
 
 
 def test_set_vector_catch(mm):
-    
+
     with pytest.raises(ValueError, match='":" is not permitted'):
-        mm.set_vec(np.ones(10), 'my:vec')
+        mm.set_vec(np.ones(10), "my:vec")
 
     with pytest.raises(TypeError):
         mm.set_vec(np.ones(10, dtype=np.int16))
@@ -366,17 +365,17 @@ def test_copy(mm):
 
 def test_sparse_repr(mm):
     k = mm.stiff()
-    assert 'Sparse APDLMath Matrix' in repr(k)
+    assert "Sparse APDLMath Matrix" in repr(k)
 
 
 def test_invalid_matrix_size(mm):
-    mat = sparse.random(10, 9, density=0.05, format='csr')
+    mat = sparse.random(10, 9, density=0.05, format="csr")
     with pytest.raises(ValueError):
-        mm.matrix(mat, 'NUMPY_MAT')
+        mm.matrix(mat, "NUMPY_MAT")
 
 
 def test_transpose(mm):
-    mat = sparse.random(5, 5, density=1, format='csr')
+    mat = sparse.random(5, 5, density=1, format="csr")
     apdl_mat = mm.matrix(mat)
     apdl_mat_t = apdl_mat.T
     assert np.allclose(apdl_mat.asarray().todense().T, apdl_mat_t.asarray().todense())
@@ -394,7 +393,7 @@ def test_dense(mm):
         with pytest.raises(TypeError):
             apdl_mat = mm.matrix(array.astype(np.uint8))
 
-        assert 'Dense APDLMath Matrix' in repr(apdl_mat)
+        assert "Dense APDLMath Matrix" in repr(apdl_mat)
 
         # check transpose
         assert np.allclose(apdl_mat.T, array.T)
@@ -406,14 +405,14 @@ def test_dense(mm):
 
 
 def test_invalid_sparse_type(mm):
-    mat = sparse.random(10, 10, density=0.05, format='csr', dtype=np.uint8)
+    mat = sparse.random(10, 10, density=0.05, format="csr", dtype=np.uint8)
     with pytest.raises(TypeError):
-        mm._send_sparse('pytest01', mat, False, None, 100)
+        mm._send_sparse("pytest01", mat, False, None, 100)
 
 
 def test_invalid_sparse_name(mm):
-    mat = sparse.random(10, 10, density=0.05, format='csr', dtype=np.uint8)
-    with pytest.raises(TypeError, match='must be a string'):
+    mat = sparse.random(10, 10, density=0.05, format="csr", dtype=np.uint8)
+    with pytest.raises(TypeError, match="must be a string"):
         mm.matrix(mat, name=1)
 
 
@@ -425,11 +424,9 @@ def test_invalid_init():
 def test_free(mm):
     my_mat = mm.ones(10)
     mm.free()
-    with pytest.raises(RuntimeError, match='This vector has been deleted'):
+    with pytest.raises(RuntimeError, match="This vector has been deleted"):
         my_mat.size
 
 
 def test_repr(mm):
     assert mm._status == repr(mm)
-
-

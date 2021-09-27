@@ -1,5 +1,4 @@
 class SolidSurfaceLoads:
-
     def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on the selected areas.
 
@@ -40,7 +39,7 @@ class SolidSurfaceLoads:
         %tabname%) are available for the following surface load labels (Lab)
         only: : PRES (real and/or imaginary components), CONV (film coefficient
         and/or bulk temperature) or HFLUX, and RAD (surface emissivity and
-        ambient temperature). Use the *DIM command to define a table.
+        ambient temperature). Use the ``*DIM`` command to define a table.
 
         This command is also valid in PREP7.
 
@@ -117,8 +116,7 @@ class SolidSurfaceLoads:
         command = f"SFALIST,{area},{lab}"
         return self.run(command, **kwargs)
 
-    def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="",
-            **kwargs):
+    def sfl(self, line="", lab="", vali="", valj="", val2i="", val2j="", **kwargs):
         """Specifies surface loads on lines of an area.
 
         APDL Command: SFL
@@ -143,7 +141,7 @@ class SolidSurfaceLoads:
             VALJ is zero, a zero is used.  If Lab = CONV, VALI and VALJ are the
             film coefficients and VAL2I and VAL2J are the bulk temperatures.
             To specify a table, enclose the table name in percent signs (%),
-            e.g., %tabname%.  Use the *DIM command to define a table.  If Lab =
+            e.g., %tabname%.  Use the ``*DIM`` command to define a table.  If Lab =
             CONV and VALI = -N, the film coefficient may be a function of
             temperature and is determined from the HF property table for
             material N [MP].  If Lab = RAD, VALI and VALJ values are surface
@@ -169,7 +167,7 @@ class SolidSurfaceLoads:
             to the ambient. VAL2I and VAL2J are not used for other surface load
             labels.  If VAL2J is blank, it defaults to VAL2I.  If VAL2J is
             zero, a zero is used.  To specify a table (Lab = CONV), enclose the
-            table name in percent signs (%), e.g., %tabname%.  Use the *DIM
+            table name in percent signs (%), e.g., %tabname%.  Use the ``*DIM``
             command to define a table.
 
         Notes
