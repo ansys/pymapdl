@@ -436,14 +436,12 @@ def launch_grpc(
         print(f"Running {command}")
         subprocess.Popen(command, shell=os.name != "nt", cwd=run_location)
     else:
-        subprocess.Popen(
-            command,
-            shell=os.name != "nt",
-            cwd=run_location,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        subprocess.Popen(command,
+                         shell=os.name != 'nt',
+                         cwd=run_location,
+                         stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -649,12 +647,9 @@ def save_ansys_path(exe_loc=""):
             return exe_loc
 
     # otherwise, query user for the location
-    with open(CONFIG_FILE, "w") as f:
-        print("Cached ANSYS executable not found")
-        try:
-            exe_loc = raw_input("Enter location of ANSYS executable: ")
-        except NameError:
-            exe_loc = input("Enter location of ANSYS executable: ")
+    with open(CONFIG_FILE, 'w') as f:
+        print('Cached ANSYS executable not found')
+        exe_loc = input('Enter location of ANSYS executable: ')
         if not os.path.isfile(exe_loc):
             raise FileNotFoundError(
                 "ANSYS executable not found at this location:\n%s" % exe_loc

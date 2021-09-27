@@ -27,13 +27,12 @@ skip_requires_194 = pytest.mark.skipif(
 
 TWAIT = 90
 
-valid_rver = ["211", "202", "201", "195", "194", "193", "192", "191"]
+valid_rver = ["221", "212", "211", "202", "201", "195", "194", "193", "192", "191"]
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
         break
-
 
 @pytest.fixture(scope="module")
 def pool():
@@ -170,7 +169,7 @@ def test_abort(pool, tmpdir):
     input_files += [tmp_file]
 
     outputs = pool.run_batch(input_files)
-    assert len(outputs) == len(input_files) - 1
+    assert len(outputs) == len(input_files)
 
     # ensure failed instance restarts
     timeout = time.time() + TWAIT
