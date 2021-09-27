@@ -4,7 +4,7 @@ import weakref
 
 import pytest
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.launcher import _version_from_path, get_start_instance
+from ansys.mapdl.core.launcher import _version_from_path, get_start_instance, _validate_add_sw
 from ansys.mapdl.core.misc import get_ansys_bin
 
 try:

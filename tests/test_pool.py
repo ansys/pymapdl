@@ -117,8 +117,7 @@ def test_map_timeout(pool):
 
 
 @skip_launch_mapdl
-def test_simple(pool):
-    
+def test_simple(pool):    
     pool_sz = len(pool)
 
     def func(mapdl):
