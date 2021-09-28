@@ -1,0 +1,70 @@
+name: GitHub Actions
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:  # UTC at 0400
+    - cron:  '0 4 * * *'
+
+env:
+  PYMAPDL_PORT: 32771  # default won't work on azure
+  PYMAPDL_START_INSTANCE: FALSE
+  PYANSYS_OFF_SCREEN: True
+  DOCKER_IMAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+
+jobs:
+
+  check_image:
+    name: Validate latest mapdl image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-glx xvfb
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install -r requirements_build.txt
+          python setup.py bdist_wheel
+          pip install dist/ansys*.whl
+          cd tests  # run from test directory to test installed module
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: ghcr.io/pyansys/mapdl:latest
+
+      - name: Unit Testing
+        run: |
+          pip install -r requirements_test.txt
+          pip install pytest-azurepipelines
+          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
