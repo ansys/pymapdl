@@ -253,9 +253,12 @@ class MapdlGrpc(_MapdlCore):
 
         while time.time() < max_time and i <= n_attempts:
             self._log.debug("Connection attempt %d", i + 1)
-            connected = self._connect(port, timeout=attempt_timeout, set_no_abort=set_no_abort)
+            connected = self._connect(
+                port, timeout=attempt_timeout, set_no_abort=set_no_abort
+            )
             i += 1
             if connected:
+                self._log.debug("Connected")
                 break
         else:
             self._log.debug(f'Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s).')
@@ -505,7 +508,6 @@ class MapdlGrpc(_MapdlCore):
                 pass
 
         if not success:
-            breakpoint()
             raise RuntimeError("Unable to reconnect to MAPDL")
 
     @property
@@ -1559,7 +1561,6 @@ class MapdlGrpc(_MapdlCore):
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
-                breakpoint()
                 raise FileNotFoundError("Thermal Result not available")
             return rth_file
 

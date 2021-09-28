@@ -261,7 +261,7 @@ def check_mech_license_available(host=None, verbose=False):
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
     for each_license in LIC_TO_CHECK:
-        output = checkout_license(each_license, host, verbose)
+        output = checkout_license(each_license, host, verbose=verbose)
         if msg1 in output or msg2 in output:
             raise LicenseServerConnectionError(output)
 
@@ -302,6 +302,7 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
         env["ANSYSLI_SERVERS"] = f"{host}:{port}"
         env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
+    tstart = time.time()
     process = subprocess.Popen(
         f'"{ansysli_util_path}" -checkout {lic}',
         stdout=subprocess.PIPE,
@@ -311,6 +312,8 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
     )
     output = process.stdout.read().decode()
     if verbose:
+        t_elap = time.time() - tstart
+        print(f'License check complete in {t_elap:.2} seconds.\n')
         print(output)
     return output
 
@@ -342,6 +345,9 @@ class LicenseChecker:
         self._timeout = timeout
         self._verbose = verbose
 
+        self._lic_file_thread = None
+        self._checkout_thread = None
+
     @threaded_daemon
     def check_license_file(self):
         try:
@@ -362,14 +368,34 @@ class LicenseChecker:
         else:
             self._license_checkout_success = True
 
-    def start(self):
-        """Start monitoring the license file and attempt a license checkout."""
-        self.check_license_file()
-        self.checkout_license()
+    def start(self, license_file=True, checkout_license=True):
+        """Start monitoring the license file and attempt a license checkout.
+
+        Parameters
+        ----------
+        license_file : bool, optional
+            Start the license file thread.
+        checkout_license : bool, optional
+            Start the checkout license thread.
+
+        """
+        if license_file:
+            self._lic_file_thread = self.check_license_file()
+        if checkout_license:
+            self._checkout_thread = self.checkout_license()
+
+    def wait(self):
+        """Wait until the license checks are complete or have timed out."""
+        if self._lic_file_thread is not None:
+            self._lic_file_thread.join()
+        if self._checkout_thread is not None:
+            self._checkout_thread.join()
 
     def check(self):
         """Report if the license checkout or license check was successful.
-        It first check the license file and later the output from the checkout process.
+
+        It first checks the output from the license file and later the
+        output from the checkout process.
 
         Returns
         -------
