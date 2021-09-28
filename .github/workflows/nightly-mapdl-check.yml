@@ -22,12 +22,8 @@ jobs:
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
+      - name: Pull image
+        run: docker pull ghcr.io/pyansys/mapdl:latest
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/pyansys/mapdl:latest
-
-      - name: Display MAPDL Logs
-        if: always()
-        run: cat log.txt
+          MAPDL_IMAGE: 
