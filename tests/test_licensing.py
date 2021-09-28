@@ -28,16 +28,6 @@ FAKE_CHECKOUT_SUCCESS = """
 """
 
 
-FAKE_LICENSE_CONFIG = """
-GARBAGE-LINE
-;SERVER=1055@mysrv
-;ANSYSLI_SERVERS=2325@mysrv
-SERVER=1055@255.166.88.70
-ANSYSLI_SERVERS=2325@255.166.88.70
-SERVER=1055@localhost
-ANSYSLI_SERVERS=2325@localhost
-"""
-
 # TEST-NET-3 (not quite a black hole, but set aside by RFC 5737)
 test_net_3 = "203.0.113.0"
 
@@ -53,16 +43,6 @@ def write_log(path):
         for line in FAKE_CHECKOUT_SUCCESS.splitlines():
             fid.write(line + '\n')
             time.sleep(0.01)
-
-
-# # check if there is any license info
-# try:
-#     LIC_CONFIG = licensing.get_license_server_config()
-# except FileNotFoundError:
-#     LIC_CONFIG = ""
-
-# skip_no_lic_config = pytest.mark.skipif(not LIC_CONFIG,
-#                                      reason="Requires local license server config")
 
 
 try:
@@ -87,6 +67,7 @@ def test_get_licdebug_path():
 @skip_no_lic_bin
 def test_checkout_license():
     output = licensing.checkout_license('meba')
+    assert "ANSYS LICENSE MANAGER ERROR" not in output
 
 
 @skip_no_lic_bin
@@ -96,7 +77,6 @@ def test_checkout_license_fail():
 
 
 @skip_no_lic_bin
-@pytest.mark.xfail(reason="license check is flaky using lmutil")
 def test_check_mech_license_available():
     licensing.check_mech_license_available()
 
