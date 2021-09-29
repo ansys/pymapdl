@@ -1,7 +1,4 @@
-"""
-Import the CDB database, setup modal analysis and run it.
-
-"""
+"""Import the CDB database, setup modal analysis and run it."""
 
 
 from ansys.mapdl.core import launch_mapdl

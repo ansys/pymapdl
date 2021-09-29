@@ -10,17 +10,14 @@ Extended Examples Library
     ex_01-gmsh_example/ex_01-gmsh_example
 
 
-
 Introduction
 ------------
-This is a library of extended examples. These examples aim to explain with more details other concepts such as interoperability with other programs, features development, etc.
+This is a set of extended examples. These examples aim to explain other concepts such as interoperability with other programs, libraries, and features in development.
 
-This library is work-in-progress and it will be extended along the life of this project.
+These examples are a work-in-progress and will be extended during the life of this project.
 
 
 List of examples
 ----------------
-
-
-* :ref:`ref_extended_examples_ex01` . It demonstrate the interoperability between PyANSYS and ``gmsh`` meshing tool. 
+* :ref:`extended_example01` . Demonstrates the interoperability between PyMAPDL and the ``gmsh`` meshing library. 
   

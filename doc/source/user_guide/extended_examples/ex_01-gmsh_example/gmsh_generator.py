@@ -1,6 +1,4 @@
-"""
-Using `gmsh` read STL file and convert it to `gmsh` format.
-"""
+"""Using ``gmsh`` read the STEP file, mesh it, and save it as a ``*.msh`` file."""
 import gmsh
 
 gmsh.initialize()

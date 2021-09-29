@@ -1,4 +1,4 @@
-.. _ref_extended_examples_ex01:
+.. _extended_example01:
 
 
 Example 01: Gmsh Example
@@ -6,26 +6,30 @@ Example 01: Gmsh Example
 
 Objective
 ---------
-Demonstrate the interoperability of PyANSYS with ``gmsh``, a very wellknown open source Python meshing library.
+Demonstrate the interoperability of PyAnsys with ``gmsh``, a very well known
+open source Python meshing library.
 
 For more information about ``gmsh`` please visit its website: `Gmsh <https://gmsh.info/>`_.
 
 Description
 -----------
-In this example the interoperability of PyANSYS with other open source tools such as ``gmsh`` is shown.
-For that purpose, using ``gmsh`` we import an external geometry file in STL format. 
-The geometry is imported then to PyANSYS using PyANSYS Reader.
+In this example the interoperability of PyAnsys with the open source mesher ``gmsh`` is demonstrated.
+Using ``gmsh`` we import an external geometry file in STL format and then the 
+geometry is imported into PyMAPDL using the 
+`pymapdl-reader <https://github.com/pyansys/pymapdl-reader>`_ library.
 
 This example is composed of several files. 
 
-* ``gmsh_converter.py``: In this file, the STL file is converted to the gmsh file format. 
-* ``mesh_converter``: In this file, the mesh file in gmsh format is converted to ANSYS CDB database format file. 
-* ``modal_analysis.py``: Import CDB database, setup the modal analysis and run it. It also shows an animation of the first mode and save it to a gif file called ``animation.gif``. 
+* ``gmsh_converter.py``: Load a STEP file, mesh it, and save it as a gmsh file. 
+* ``mesh_converter``: Convert the ``*.msh`` file into an Ansys CDB database format file (archive file). 
+* ``modal_analysis.py``: Import CDB database, setup the modal analysis and run
+  it. It also shows an animation of the first mode and save it
+  to a gif file named ``animation.gif``. 
 
 
 Requirements
 ------------
-You need to have ``gmsh`` installed. You can install it using PIP:
+You need to have ``gmsh`` installed. You can install it using ``pip``:
 
 .. code-block:: 
 
@@ -35,7 +39,8 @@ You need to have ``gmsh`` installed. You can install it using PIP:
 Source code
 -----------
 
-`gmsh_generator.py` file:
+``gmsh_generator.py``
+~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: gmsh_generator.py
     :linenos:
@@ -49,7 +54,8 @@ Source code
     :language: python
 
 
-`modal_analysis.py` file:
+``modal_analysis.py``
+~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: modal_analysis.py
     :linenos:
@@ -60,4 +66,5 @@ Source code
 Notes
 -----
 
-It is recommended to copy all the files in a separate folder. 
+It is recommended that you copy all the files in a separate directory to make it
+easier to run the example. 

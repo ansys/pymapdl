@@ -7,6 +7,6 @@ from ansys.mapdl.reader import save_as_archive
 
 filename = 'from_gmsh.msh'
 mesh = pv.read_meshio(filename)
-# mesh.plot()
+# mesh.plot()  # optionally plot the mesh
 mesh.points /= 1000
 save_as_archive('archive.cdb', mesh)
