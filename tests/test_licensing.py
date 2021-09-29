@@ -133,15 +133,14 @@ def test_license_checker(tmpdir):
 def test_check_license_file(tmpdir):
     timeout = 15
     checker = licensing.LicenseChecker(verbose=True, timeout=timeout)
-    checker.start()
-
     # start the license check in the background
+    checker.start(checkout_license=False)
+
     try:
-        mapdl = launch_mapdl(license_server_check=False, start_timeout=timeout,
-                             loglevel='DEBUG')
+        mapdl = launch_mapdl(license_server_check=False, start_timeout=timeout)
         assert mapdl._local
         mapdl.exit()
     except IOError:  # MAPDL never started
         assert not checker._license_file_success
-
-    assert checker._license_file_success
+    else:
+        assert checker._license_file_success
