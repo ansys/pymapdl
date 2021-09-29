@@ -239,10 +239,61 @@ jobs:
       - name: Display MAPDL Logs
         if: always()
         run: cat log.txt
+  
+  windows_build_test:
+    name: Windows Build and Unit Testing
+    needs: testimport
+    runs-on: Windows
+    strategy:
+      matrix:
+        mapdl-version: ['v21.1.1', 'v21.2.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: 'Create virtual env'
+        run: |
+          python -m venv testenv
+          testenv\Scripts\Activate.ps1
+          python -m pip install pip -U
+          python -m pip install wheel setuptools -U
+          python -c "import sys; print(sys.executable)"
+
+      - name: Install ansys-mapdl-core
+        run: |
+          testenv\Scripts\Activate.ps1
+          pip install -r requirements_build.txt
+          pip install . --use-feature=in-tree-build
+          cd tests  # run from test directory to test installed module
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Unit Testing
+        run: |
+          testenv\Scripts\Activate.ps1
+          pip install -r requirements_test.txt
+          pip install pytest-azurepipelines
+          pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results
+          path: junit/test-results.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test]
+    needs: [docs_build, build_test, windows_build_test]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
