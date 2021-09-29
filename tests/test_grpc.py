@@ -12,8 +12,10 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = pytest.mark.skip_grpc
 
-skip_launch_mapdl = pytest.mark.skipif(not get_start_instance() and check_valid_ansys(),
-                                       reason="Must be able to launch MAPDL locally")
+skip_launch_mapdl = pytest.mark.skipif(
+    not get_start_instance() and check_valid_ansys(),
+    reason="Must be able to launch MAPDL locally"
+)
 
 
 @pytest.fixture(scope="function")
