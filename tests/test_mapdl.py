@@ -12,9 +12,17 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
+from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
+
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance() and check_valid_ansys(),
+    reason="Must be able to launch MAPDL locally. Cloud does not allow create folders."
+)
+
 
 
 CMD_BLOCK = """/prep7
@@ -623,7 +631,7 @@ def test_cdread(mapdl, cleared):
 
     assert random_letters == mapdl.parameters['parmtest']
 
-
+@skip_in_cloud
 def test_cdread_different_location(mapdl, cleared):
     random_letters = mapdl.directory.split('/')[0][-3:0]
     folder = 'tt' + random_letters
