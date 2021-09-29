@@ -47,7 +47,8 @@ Source code
     :language: python
 
 
-`mesh_converter.py` file:
+``mesh_converter.py``
+~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: mesh_converter.py
     :linenos:
