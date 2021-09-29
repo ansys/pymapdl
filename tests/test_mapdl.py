@@ -24,7 +24,6 @@ skip_in_cloud = pytest.mark.skipif(
 )
 
 
-
 CMD_BLOCK = """/prep7
 ! Mat
 MP,EX,1,200000
