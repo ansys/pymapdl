@@ -980,8 +980,17 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
+        # the old behaviour is to supplied the name and the extension separatelly.
+        # to make it easier let's going to allow names with extensions
+        fname = kwargs.get("fname", args[1])
+        basename = os.path.basename(fname)
+        if len(basename.split('.')) == 1:
+            # there is no extension
+            fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+        else:
+            # There is extension
+            pass
 
-        fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         self.input(fname, **kwargs)
