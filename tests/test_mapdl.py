@@ -12,7 +12,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
+from ansys.mapdl.core.launcher import get_start_instance
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
