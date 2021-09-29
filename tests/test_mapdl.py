@@ -626,7 +626,7 @@ def test_cdread(mapdl, cleared):
 
 def test_cdread_different_location(mapdl, cleared):
     random_letters = mapdl.directory.split('/')[0][-3:0]
-    folder = 'test_' + random_letters
+    folder = 'tt' + random_letters
     current_folder = mapdl.directory
     new_folder = os.path.join(current_folder, folder)
     os.mkdir(new_folder)
