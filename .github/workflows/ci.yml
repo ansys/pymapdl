@@ -14,6 +14,8 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  python.version: 3.8
+  python.venv: 'testvenv'
 
 jobs:
   stylecheck:
