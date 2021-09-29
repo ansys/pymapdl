@@ -19,7 +19,7 @@ skip_no_xserver = pytest.mark.skipif(
 )
 
 skip_in_cloud = pytest.mark.skipif(
-    not get_start_instance() and check_valid_ansys(),
+    not get_start_instance(),
     reason="Must be able to launch MAPDL locally. Cloud does not allow create folders."
 )
 
