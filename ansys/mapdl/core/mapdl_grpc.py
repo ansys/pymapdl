@@ -981,7 +981,7 @@ class MapdlGrpc(_MapdlCore):
                 r'with "\INPUT" or ``mapdl.input``'
             )
 
-        fname = kwargs.get("fname", args[1])
+        fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         self.input(fname, **kwargs)
@@ -1037,6 +1037,11 @@ class MapdlGrpc(_MapdlCore):
         >>> output = mapdl.input('ds.dat', verbose=True)
 
         """
+        # Making sure we are supplying the complete path.
+        if len(fname.split('\\')) == 1:
+            # The string suplied is just the file
+            fname = os.path.join(self.directory, fname)
+
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
         if self._local:
