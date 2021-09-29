@@ -179,7 +179,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['v21.2.1']
+        mapdl-version: ['v21.1.1', 'v21.2.1']
 
     steps:
       - uses: actions/checkout@v2
@@ -246,7 +246,7 @@ jobs:
     runs-on: Windows
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1']
+        mapdl-version: ['v21.2.1']
 
     steps:
       - uses: actions/checkout@v2
