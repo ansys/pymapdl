@@ -1057,7 +1057,11 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check:
-        lic_check = LicenseChecker(verbose=verbose_mapdl)
+        # configure timeout to be 90% of the wait time of the startup
+        # time for Ansys.
+        lic_check = LicenseChecker(
+            timeout=start_timeout*0.9, verbose=verbose_mapdl
+        )
         lic_check.start()
 
     try:

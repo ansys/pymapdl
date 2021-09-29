@@ -14,9 +14,11 @@ LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
 LIC_TO_CHECK =  ["mech_1"]
+ALLOWABLE_LICENSES = ["ansys", "meba", "mech_2", "mech_1"]
 
 ## Regarding license checking.
-# The available licenses we can check against are (in order of complete/comprehensiveness):
+# The available licenses we can check against are (in order of
+# complete/comprehensiveness):
 # 1. ``Ansys`` Enterprise license (the most complete)
 # 2. ``meba`` Mechanical Enterprise license
 # 3. ``mech_2`` Premium license
@@ -228,7 +230,7 @@ def get_ansyslic_dir():
     return ansyslic_dir
 
 
-def check_mech_license_available(host=None, verbose=False):
+def check_mech_license_available(host=None, verbose=False, licenses=None):
     """Check if there mechanical license available by running 'ansysli_util'.
 
     This uses the default configuration available to MAPDL.
@@ -245,6 +247,14 @@ def check_mech_license_available(host=None, verbose=False):
         values available in the Ansys license file.
     verbose : bool, optional
         Print output while checking for the license.
+    license : str, list, optional
+        A list or single license to check for.  One or more of the
+        following:
+
+        1. ``"Ansys"`` Enterprise license (the most complete)
+        2. ``"meba"`` Mechanical Enterprise license
+        3. ``"mech_2"`` Premium license
+        4. ``"mech_1"`` Pro license` (the most limited)
 
     Returns
     -------
@@ -258,9 +268,14 @@ def check_mech_license_available(host=None, verbose=False):
 
     """
 
+    if licenses is None:
+        licenses = LIC_TO_CHECK
+    elif isinstance(licenses, str):
+        licenses = []
+
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
-    for each_license in LIC_TO_CHECK:
+    for each_license in licenses:
         output = checkout_license(each_license, host, verbose=verbose)
         if msg1 in output or msg2 in output:
             raise LicenseServerConnectionError(output)
@@ -276,7 +291,12 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
     Parameters
     ----------
     lic : str
-        License type.  For example, ``"meba".
+        License type.  For example, ``"meba".  one of the following:
+
+        1. ``"Ansys"`` Enterprise license (the most complete)
+        2. ``"meba"`` Mechanical Enterprise license
+        3. ``"mech_2"`` Premium license
+        4. ``"mech_1"`` Pro license` (the most limited)
     host : str, optional
         Host to attempt to checkout license from.  When set, this
         overrides any settings from the default license path.
@@ -284,6 +304,9 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
         Port on the host to connect to.  Only used when ``host`` is set.
 
     """
+    if lic.lower() not in ALLOWABLE_LICENSES:
+        raise ValueError(f"Invalid license '{lic}'")
+
     ansyslic_dir = get_ansyslic_dir()
     if os.name == "nt":
         ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
