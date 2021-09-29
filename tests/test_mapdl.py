@@ -610,3 +610,39 @@ def test_coriolis(mapdl, cleared):
     assert "GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED" in resp
     assert "ROTATING DAMPING MATRIX ACTIVATED" in resp
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
+
+
+def test_cdread(mapdl, cleared):
+    random_letters = mapdl.directory.split('/')[0][-3:0]
+
+    mapdl.run(f"parmtest='{random_letters}'")
+    mapdl.cdwrite('all', 'model2', 'db')
+
+    mapdl.clear()
+    mapdl.cdread("db", 'model2', "db")
+
+    assert random_letters == mapdl.parameters['parmtest']
+
+
+def test_cdread_different_location(mapdl, cleared):
+    random_letters = mapdl.directory.split('/')[0][-3:0]
+    folder = 'test_' + random_letters
+    current_folder = mapdl.directory
+    new_folder = os.path.join(current_folder, folder)
+    os.mkdir(new_folder)
+
+    mapdl.run(f"parmtest='{random_letters}'")
+    mapdl.cdwrite('all', os.path.join(new_folder, 'model2'), 'db')
+
+    mapdl.clear()
+    mapdl.cwd(new_folder)
+    mapdl.cdread("db", 'model2', "db")
+    mapdl.cwd(current_folder)  #Going back
+
+    assert random_letters == mapdl.parameters['parmtest']
+
+
+def test_title(mapdl, cleared):
+    title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
+    mapdl.title(title)
+    assert title == mapdl.get('par', 'active', '0', 'title')
