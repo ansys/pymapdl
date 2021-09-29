@@ -271,7 +271,7 @@ def check_mech_license_available(host=None, verbose=False, licenses=None):
     if licenses is None:
         licenses = LIC_TO_CHECK
     elif isinstance(licenses, str):
-        licenses = []
+        licenses = [licenses]
 
     msg1 = "No such feature exists"
     msg2 = "The server is down or is not responsive."
