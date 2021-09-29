@@ -1037,21 +1037,28 @@ class MapdlGrpc(_MapdlCore):
         >>> output = mapdl.input('ds.dat', verbose=True)
 
         """
-        # Making sure we are supplying the complete path.
-        if len(fname.split('\\')) == 1:
-            # The string suplied is just the file
-            fname = os.path.join(self.directory, fname)
-
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
         if self._local:
-            if not os.path.isfile(fname):
-                raise FileNotFoundError('Unable to locate filename "%s"' % fname)
-
-            if not os.path.dirname(fname):
-                filename = os.path.join(os.getcwd(), fname)
+            if os.path.isdir(fname):
+                raise IOError('It seems you give a directory path, not a file path or file name.')
             else:
-                filename = fname
+                # It must be a file!
+                it_look_like_a_file = not os.path.dirname(fname)
+                if os.path.isfile(fname):
+                    # And it exist!
+                    filename = fname
+                elif fname in os.listdir() and it_look_like_a_file:
+                    filename = os.path.join(os.getcwd(), fname)
+                elif fname in self.list_files() and it_look_like_a_file:
+                    # It exists in the Mapdl execution folder
+                    filename = os.path.join(self.directory, fname)
+                elif not it_look_like_a_file:
+                    raise IOError('It seems you give an incomplete directory path.')
+                else:
+                    # Finally
+                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
+
         else:
             if not os.path.dirname(fname):
                 # might be trying to run a local file.  Check if the
