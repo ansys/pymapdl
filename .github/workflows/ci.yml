@@ -253,7 +253,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: 'Create virtual env'
+      - name: Echo PATH
+        run: |
+          echo $ENV:PATH
+
+      - name: Create virtual env
         run: |
           python -m venv testenv
           testenv\Scripts\Activate.ps1
