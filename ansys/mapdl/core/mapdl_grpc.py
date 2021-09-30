@@ -996,10 +996,7 @@ class MapdlGrpc(_MapdlCore):
         if len(basename.split('.')) == 1:
             # there is no extension
             fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
-        else:
-            # There is extension
-            pass
-
+        
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         self.input(fname, **kwargs)

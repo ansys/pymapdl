@@ -633,18 +633,18 @@ def test_cdread(mapdl, cleared):
 @skip_in_cloud
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split('/')[0][-3:0]
-    folder = 'tt' + random_letters
-    current_folder = mapdl.directory
-    new_folder = os.path.join(current_folder, folder)
-    os.mkdir(new_folder)
+    dirname = 'tt' + random_letters
+
+    curdir = mapdl.directory
+    subdir = tmpdir.mkdir(dirname)
 
     mapdl.run(f"parmtest='{random_letters}'")
-    mapdl.cdwrite('all', os.path.join(new_folder, 'model2'), 'db')
+    mapdl.cdwrite('all', subdir.join('model2'), 'db')
 
     mapdl.clear()
-    mapdl.cwd(new_folder)
+    mapdl.cwd(subdir)
     mapdl.cdread("db", 'model2', "db")
-    mapdl.cwd(current_folder)  #Going back
+    mapdl.cwd(curdir)  #Going back
 
     assert random_letters == mapdl.parameters['parmtest']
 
