@@ -1059,7 +1059,7 @@ class MapdlGrpc(_MapdlCore):
         # are unclear
         if self._local:
             if os.path.isdir(fname):
-                raise IOError('It seems you give a directory path, not a file path or file name.')
+                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
             else:
                 # It must be a file!
                 it_look_like_a_file = not os.path.dirname(fname)
@@ -1067,15 +1067,15 @@ class MapdlGrpc(_MapdlCore):
                     # And it exist!
                     filename = fname
                 elif fname in os.listdir() and it_look_like_a_file:
-                    filename = os.path.join(os.getcwd(), fname)
+                    filename = os.path.abspath(fname)
                 elif fname in self.list_files() and it_look_like_a_file:
-                    # It exists in the Mapdl execution folder
+                    # It exists in the Mapdl working directory
                     filename = os.path.join(self.directory, fname)
                 elif not it_look_like_a_file:
-                    raise IOError('It seems you give an incomplete directory path.')
+                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
                 else:
                     # Finally
-                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
+                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         else:
             if not os.path.dirname(fname):
