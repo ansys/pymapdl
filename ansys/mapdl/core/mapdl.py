@@ -45,7 +45,7 @@ with self.non_interactive:
     self.run('(F20.12)')
 """
 
-## Invalid commands in interactive mode. 
+## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
     "*VWR": VWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
@@ -2078,8 +2078,6 @@ class _MapdlCore(Commands):
 
         # Invalid commands silently ignored.
         cmd_ = command.split(',')[0].upper()
-        # if command[:3].upper() in INVAL_COMMANDS_SILENT or \
-        #         command[:4].upper() in INVAL_COMMANDS_SILENT:
         if cmd_ in INVAL_COMMANDS_SILENT:
             msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
             self._log.info(msg)
