@@ -75,6 +75,13 @@ class LockFileException(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class LicenseServerConnectionError(RuntimeError):
+    """Error when the license server is not available."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
