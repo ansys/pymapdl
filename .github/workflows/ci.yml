@@ -282,8 +282,8 @@ jobs:
           pip install pytest-azurepipelines
           pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
         env:
-          ANSYSLI_SERVERS: ${{ secrets.LICENSE_SERVER }}
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
+          IGNORE_POOL: TRUE
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
