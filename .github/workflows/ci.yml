@@ -273,7 +273,7 @@ jobs:
       - name: Test launcher
         run: |
           testenv\Scripts\Activate.ps1
-          python -c "from ansys.mapdl import launch_mapdl; print(launch_mapdl())"
+          python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(verbose_mapdl=True, loglevel='DEBUG'))"
 
       - name: Unit Testing
         run: |
