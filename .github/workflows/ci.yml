@@ -10,8 +10,6 @@ on:
       - main
 
 env:
-  PYMAPDL_PORT: 32771  # default won't work on azure
-  PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
   python.version: 3.8
@@ -85,6 +83,9 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    env:
+      PYMAPDL_PORT: 32771  # default won't work on azure
+      PYMAPDL_START_INSTANCE: FALSE
 
     steps:
       - uses: actions/checkout@v2
@@ -179,6 +180,9 @@ jobs:
     name: Build and Unit Testing
     needs: testimport
     runs-on: ubuntu-latest
+    env:
+      PYMAPDL_PORT: 32771  # default won't work on azure
+      PYMAPDL_START_INSTANCE: FALSE
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1']
@@ -253,10 +257,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Echo PATH
-        run: |
-          echo $ENV:PATH
-
       - name: Create virtual env
         run: |
           python -m venv testenv
@@ -279,6 +279,9 @@ jobs:
           pip install -r requirements_test.txt
           pip install pytest-azurepipelines
           pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+        env:
+          ANSYSLI_SERVERS: ${{ secrets.WINDOWS_LICENSE_SERVER }}
+          ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
