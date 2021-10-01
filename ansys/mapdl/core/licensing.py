@@ -308,16 +308,10 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
         raise ValueError(f"Invalid license '{lic}'")
 
     ansyslic_dir = get_ansyslic_dir()
-
-    # One of two possible utilities
-    binnames = ["lmutil", "ansysli_util"]
-    for binname in binnames:
-        if os.name == "nt":
-            ansysli_util_path = os.path.join(ansyslic_dir, "winx64", f"{binname}.exe")
-        else:
-            ansysli_util_path = os.path.join(ansyslic_dir, "linx64", binname)
-        if os.path.isfile(ansysli_util_path):
-            break
+    if os.name == "nt":
+        ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
+    else:
+        ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
 
     if not os.path.isfile(ansysli_util_path):
         raise FileNotFoundError(
@@ -397,7 +391,7 @@ class LicenseChecker:
         else:
             self._license_checkout_success = True
 
-    def start(self, license_file=True, checkout_license=True):
+    def start(self, license_file=True, checkout_license=False):
         """Start monitoring the license file and attempt a license checkout.
 
         Parameters

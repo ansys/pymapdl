@@ -432,13 +432,15 @@ def launch_grpc(
         )
         command = " ".join(command_parm)
 
+    env = os.environ.copy()
     if verbose:
         print(f"Running {command}")
-        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location)
+        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env)
     else:
         subprocess.Popen(command,
                          shell=os.name != 'nt',
                          cwd=run_location,
+                         env=env,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL)

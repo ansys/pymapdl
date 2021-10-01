@@ -282,7 +282,7 @@ jobs:
           testenv\Scripts\Activate.ps1
           pip install -r requirements_test.txt
           pip install pytest-azurepipelines
-          pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          pytest -vx --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
         env:
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
           IGNORE_POOL: TRUE
