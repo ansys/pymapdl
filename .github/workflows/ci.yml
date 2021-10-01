@@ -250,9 +250,6 @@ jobs:
     name: Windows Build and Unit Testing
     needs: testimport
     runs-on: Windows
-    strategy:
-      matrix:
-        mapdl-version: ['v21.2.1']
 
     steps:
       - uses: actions/checkout@v2
@@ -280,7 +277,7 @@ jobs:
           pip install pytest-azurepipelines
           pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
         env:
-          ANSYSLI_SERVERS: ${{ secrets.WINDOWS_LICENSE_SERVER }}
+          ANSYSLI_SERVERS: ${{ secrets.LICENSE_SERVER }}
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
 
       - name: Upload pytest test results
@@ -291,9 +288,6 @@ jobs:
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
-      - name: Display MAPDL Logs
-        if: always()
-        run: cat log.txt
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
