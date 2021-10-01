@@ -270,6 +270,11 @@ jobs:
           cd tests  # run from test directory to test installed module
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
+      - name: Test launcher
+        run: |
+          testenv\Scripts\Activate.ps1
+          python -c "from ansys.mapdl import launch_mapdl; print(launch_mapdl())"
+
       - name: Unit Testing
         run: |
           testenv\Scripts\Activate.ps1
