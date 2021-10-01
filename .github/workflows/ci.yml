@@ -274,6 +274,8 @@ jobs:
         run: |
           testenv\Scripts\Activate.ps1
           python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(verbose_mapdl=True, loglevel='DEBUG'))"
+        env:
+          ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
 
       - name: Unit Testing
         run: |
@@ -284,6 +286,7 @@ jobs:
         env:
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
           IGNORE_POOL: TRUE
+          ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
