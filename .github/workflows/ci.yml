@@ -248,7 +248,6 @@ jobs:
   
   windows_build_test:
     name: Windows Build and Unit Testing
-    needs: testimport
     runs-on: Windows
 
     steps:
