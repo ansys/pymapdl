@@ -2083,8 +2083,8 @@ class _MapdlCore(Commands):
             self._log.info(msg)
 
             # This very likely won't be recorded anywhere.
-            # But just in case, I'm adding info as /com
-            command = f"/com, PyAnsys: {msg}" # Using '!' makes the output of '_run' empty
+            # But just in case, adding info as a comment
+            command = f"/COM, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
 
         if self._store_commands:
             self._stored_commands.append(command)
