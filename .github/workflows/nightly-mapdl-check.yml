@@ -24,6 +24,3 @@ jobs:
 
       - name: Pull image
         run: docker pull ghcr.io/pyansys/mapdl
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: 
