@@ -2,6 +2,7 @@ name: GitHub Actions
 
 on:
   pull_request:
+  push:
   workflow_dispatch:
   schedule:  # UTC at 0400
     - cron:  '0 4 * * *'
@@ -16,8 +17,6 @@ jobs:
   check_image:
     name: Validate latest mapdl image
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
