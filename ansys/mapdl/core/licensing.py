@@ -391,7 +391,7 @@ class LicenseChecker:
         else:
             self._license_checkout_success = True
 
-    def start(self, license_file=True, checkout_license=True):
+    def start(self, license_file=True, checkout_license=False):
         """Start monitoring the license file and attempt a license checkout.
 
         Parameters
@@ -399,7 +399,8 @@ class LicenseChecker:
         license_file : bool, optional
             Start the license file thread.
         checkout_license : bool, optional
-            Start the checkout license thread.
+            Start the checkout license thread.  By default this is
+            disabled.
 
         """
         if license_file:
