@@ -59,3 +59,4 @@ jobs:
       - name: Display MAPDL Logs
         if: always()
         run: cat log.txt
+
