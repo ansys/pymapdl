@@ -238,7 +238,7 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread = Thread(target=func, args=args, kwargs=kwargs, name=name)
         thread.daemon = True
         thread.start()
         return thread

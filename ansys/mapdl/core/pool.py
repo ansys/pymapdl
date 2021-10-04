@@ -1,9 +1,11 @@
 """This module is for threaded implementations of the mapdl interface"""
+from ansys.mapdl.core import log
+LOG = log.getLogger('pool')
+
 import shutil
 import warnings
 import os
 import time
-import logging
 
 from tqdm import tqdm
 
@@ -16,9 +18,6 @@ from ansys.mapdl.core.launcher import (
     _version_from_path,
 )
 from ansys.mapdl.core.errors import VersionError
-
-LOG = logging.getLogger(__name__)
-LOG.setLevel("DEBUG")
 
 
 def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
@@ -165,7 +164,7 @@ class LocalMapdlPool:
         self._instances = [None for _ in range(n_instances)]
 
         # threaded spawn
-        threads = [self._spawn_mapdl(i, ports[i], pbar) for i in range(n_instances)]
+        threads = [self._spawn_mapdl(i, ports[i], pbar, name=f'Instance {i}') for i in range(n_instances)]
         if wait:
             [thread.join() for thread in threads]
 
@@ -551,7 +550,7 @@ class LocalMapdlPool:
                 yield instance
 
     @threaded_daemon
-    def _spawn_mapdl(self, index, port=None, pbar=None):
+    def _spawn_mapdl(self, index, port=None, pbar=None, name=''):
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
         run_location = create_temp_dir(self._root_dir)
