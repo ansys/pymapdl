@@ -39,6 +39,65 @@ esize,5
 vmesh,all
 """
 
+## Testing CDREAD and CDWRITE
+# DB file generated locally with ANSYS.
+# Many of the commands could be deleted, but for the sake of good
+# testing we are going to leave them.
+
+DB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
+/PREP7
+/NOPR
+/TITLE,'CDREAD and CDWRITE tests
+*IF,_CDRDOFF,EQ,1,THEN     !if solid model was read in
+_CDRDOFF=             !reset flag, numoffs already performed
+*ELSE              !offset database for the following FE model
+*ENDIF
+*SET,TEST_PARAMETER,'asdf1234'
+*SET,_RETURN ,  0.000000000000
+*SET,_STATUS ,  0.000000000000
+*SET,_UIQR   ,  1.000000000000
+DOF,DELETE
+EXTOPT,ATTR,      0,      0,      0
+EXTOPT,ESIZE,  0,  0.0000
+EXTOPT,ACLEAR,      0
+TREF,  0.00000000
+IRLF,  0
+BFUNIF,TEMP,_TINY
+ACEL,  0.00000000    ,  0.00000000    ,  0.00000000
+OMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+DOMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+CGLOC,  0.00000000    ,  0.00000000    ,  0.00000000
+CGOMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+DCGOMG,  0.00000000    ,  0.00000000    ,  0.00000000
+
+KUSE,     0
+TIME,  0.00000000
+ALPHAD,  0.00000000
+BETAD,  0.00000000
+DMPRAT,  0.00000000
+DMPSTR,  0.00000000
+CRPLIM, 0.100000000    ,   0
+CRPLIM,  0.00000000    ,   1
+NCNV,     1,  0.00000000    ,     0,  0.00000000    ,  0.00000000
+NEQIT,     0
+
+ERESX,DEFA
+/GO
+FINISH
+"""
+
+
+def clearing_cdread_cdwrite_tests(mapdl):
+    mapdl.finish(mute=True)
+    # *MUST* be NOSTART.  With START fails after 20 calls...
+    # this has been fixed in later pymapdl and MAPDL releases
+    mapdl.clear("NOSTART", mute=True)
+    mapdl.prep7(mute=True)
+
+
+def asserting_cdread_cdwrite_tests(mapdl):
+    return 'asdf1234' in mapdl.parameters['TEST_PARAMETER']  # Using in because of the padding APDL does on strings.
+
 
 @pytest.fixture(scope="function")
 def make_block(mapdl, cleared):
@@ -619,6 +678,12 @@ def test_coriolis(mapdl, cleared):
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
 
+def test_title(mapdl, cleared):
+    title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
+    mapdl.title(title)
+    assert title == mapdl.get('par', 'active', '0', 'title')
+
+
 def test_cdread(mapdl, cleared):
     random_letters = mapdl.directory.split('/')[0][-3:0]
 
@@ -626,10 +691,12 @@ def test_cdread(mapdl, cleared):
     mapdl.cdwrite('all', 'model2', 'db')
 
     mapdl.clear()
-    mapdl.cdread("db", 'model2', "db")
+    mapdl.cdread("db", 'model2', 'db')
 
     assert random_letters == mapdl.parameters['parmtest']
 
+
+# CDREAD tests are actually a good way to test 'input' command.
 @skip_in_cloud
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split('/')[0][-3:0]
@@ -649,7 +716,44 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
     assert random_letters == mapdl.parameters['parmtest']
 
 
-def test_title(mapdl, cleared):
-    title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
-    mapdl.title(title)
-    assert title == mapdl.get('par', 'active', '0', 'title')
+def test_cdread_in_python_directory(mapdl, cleared):
+    # Writing db file in python directory.
+    # Pyansys should upload it when it detects it is not in the APDL directory.
+    with open('model.db', 'w') as file:
+        file.write(DB_FILE)
+
+    mapdl.cdread('db', 'model', 'db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model.db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(os.getcwd(), 'model.db')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+
+def test_cdread_in_apdl_directory(mapdl, cleared):
+    # Writting a db file in apdl directory, using APDL
+    # Is using APDL to write this file cheating? I think it is more
+    # robust since there might be cases where the python code cannot
+    # reach the APDL execution directory because it is remote.
+    # But using APDL to write it, it should be almost imposible to break?
+    mapdl.run("*SET,TEST_PARAMETER,'asdf1234'")
+    mapdl.run("CDWRITE,'DB','model','db'")
+
+    clearing_cdread_cdwrite_tests(mapdl)
+
+    mapdl.cdread('db', 'model', 'db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model.db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model.db')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
