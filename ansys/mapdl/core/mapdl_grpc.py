@@ -1085,8 +1085,8 @@ class MapdlGrpc(_MapdlCore):
             else:
                 self.upload(fname, progress_bar=progress_bar)
             filename = os.path.basename(fname)
-        
-        filename=os.path.abspath(filename)  #Trying to fix linux path issues.
+
+        filename = os.path.abspath(filename)  #Trying to fix linux path issues.
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
