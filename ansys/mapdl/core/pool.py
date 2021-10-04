@@ -7,7 +7,7 @@ import logging
 
 from tqdm import tqdm
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import launch_mapdl, get_ansys_path
 from ansys.mapdl.core.misc import threaded
 from ansys.mapdl.core.misc import create_temp_dir, threaded_daemon
 from ansys.mapdl.core.launcher import (
