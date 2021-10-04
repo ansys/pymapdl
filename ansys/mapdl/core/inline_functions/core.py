@@ -1,6 +1,8 @@
 import warnings
 from enum import IntEnum
 
+QUERY_NAME = "__QUERY_PARM__"
+
 
 class SelectionStatus(IntEnum):
     """Enumeration class for selection status information.
@@ -49,7 +51,35 @@ class SelectionStatus(IntEnum):
 
 
 class _ParameterParsing:
+
+    def _run_query(self, command: str, integer='float'):
+        # import here to avoid circular import
+        from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+        # non_interactive mode won't work with these commands
+        if self._mapdl._store_commands:
+            raise RuntimeError(
+                "Inline MAPDL functions are incompatible with the "
+                "non_interactive mode.")
+
+        # use the underlying gRPC method if available to avoid parsing the string
+        if isinstance(self._mapdl, MapdlGrpc):
+            resp = self._mapdl._run(f"{QUERY_NAME}={command}")
+            value = self._mapdl.scalar_param(QUERY_NAME)
+            if value is None:
+                raise RuntimeError(resp)
+            if integer:
+                return int(value)
+            return value
+
+        else:
+            resp = self._mapdl._run(f"{QUERY_NAME}={command}")
+            if integer:
+                return self._parse_parameter_integer_response(resp)
+            return self._parse_parameter_float_response(resp)
+
     def _parse_parameter_integer_response(self, response) -> int:
+        """Parse integer response."""
         return int(self._parse_parameter_float_response(response))
 
     @staticmethod

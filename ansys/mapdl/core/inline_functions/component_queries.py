@@ -27,7 +27,6 @@ class _ComponentQueries(_ParameterParsing):
         and ``(1, 2, 3)`` then find the centroid x-coordinate of this
         element.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -35,12 +34,10 @@ class _ComponentQueries(_ParameterParsing):
         >>> n1 = mapdl.n(2, 1, 2, 3)
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
-        >>> q = Query(mapdl)
-        >>> q.centrx(e0)
+        >>> mapdl.queries.centrx(e0)
         0.5
         """
-        response = self._mapdl.run(f"_=CENTRX({e})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"CENTRX({e})")
 
     def centry(self, e: int) -> float:
         """Return the y coordinate of the element centroid.
@@ -408,12 +405,10 @@ class _InverseGetComponentQueries(_ParameterParsing):
         >>> mapdl.k(1, 0, 1, 2)
         >>> mapdl.k(2, 1, 2, 0)
         >>> mapdl.k(3, 2, 0, 1)
-        >>> q = Query(mapdl)
-        >>> q.kp(1., 1., 1.)
+        >>> mapdl.queries.kp(1., 1., 1.)
         1
         """
-        response = self._mapdl.run(f"_=KP({x},{y},{z})")
-        return self._parse_parameter_integer_response(response)
+        return self._run_query(f"KP({x},{y},{z})", integer=True)
 
 
 class _DisplacementComponentQueries(_ParameterParsing):
