@@ -1064,16 +1064,13 @@ class MapdlGrpc(_MapdlCore):
                 raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
             else:
                 # It must be a file!
-                it_look_like_a_file = not os.path.dirname(fname)
                 if os.path.isfile(fname):
                     # And it exist!
-                    filename = fname
-                elif fname in os.listdir() and it_look_like_a_file:
-                    filename = os.path.abspath(fname)
-                elif fname in self.list_files() and it_look_like_a_file:
+                    filename = os.path.join(os.getcwd(), fname)
+                elif fname in self.list_files(): #
                     # It exists in the Mapdl working directory
                     filename = os.path.join(self.directory, fname)
-                elif not it_look_like_a_file:
+                elif os.path.dirname(fname):
                     raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
                 else:
                     # Finally
