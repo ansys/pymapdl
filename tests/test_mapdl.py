@@ -750,11 +750,11 @@ def test_cdread_in_python_directory(mapdl, cleared):
 
 
 def test_cdread_in_apdl_directory(mapdl, cleared):
-    # Writting a db file in apdl directory, using APDL
+    # Writing a db file in apdl directory, using APDL
     # Is using APDL to write this file cheating? I think it is more
     # robust since there might be cases where the python code cannot
     # reach the APDL execution directory because it is remote.
-    # But using APDL to write it, it should be almost imposible to break?
+    # But using APDL to write it, it should be almost impossible to break?
     mapdl.run("*SET,TEST_PARAMETER,'asdf1234'")
     mapdl.run("CDWRITE,'DB','model','db'")
 
