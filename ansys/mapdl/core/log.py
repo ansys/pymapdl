@@ -22,7 +22,8 @@ LOG_LEVEL = logging.DEBUG
 FILE_NAME = 'pyansys.log'
 
 ## Single configuration
-CONSOLE_MSG_FORMAT = '%(funcName)-15s - %(message)s'
+LAUNCHER_LOGGER = 'launcher'
+CONSOLE_MSG_FORMAT = '%(module)-15s - %(funcName)-15s - %(message)s'
 FILE_MSG_FORMAT = '%(asctime)-15s | %(module)-15s | %(funcName)-15s | %(message)s'
 DEFAULT_FILE_HEADER = """
 Date Time               | Module          | Function        | Message
@@ -41,13 +42,18 @@ Date Time               | Thread          | Module          | Function        | 
 
 def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=LOG_LEVEL):
 
-    default_file_header = DEFAULT_FILE_HEADER_POOL if name == 'pool' else DEFAULT_FILE_HEADER
+    default_file_header = DEFAULT_FILE_HEADER_POOL if name == POOL_LOGGER else DEFAULT_FILE_HEADER
 
     previous_loggers = logging.root.manager.__dict__['loggerDict']
-    if previous_loggers:
+    loggers = [each_logger for each_logger in previous_loggers.keys() if LAUNCHER_LOGGER in each_logger or POOL_LOGGER in each_logger]
+
+    if loggers:
         # is not empty
-        parent_logger = list(previous_loggers.values())[-1]  #
-        logger = parent_logger.getChild(name)
+        # parent_logger = list(previous_loggers.values())[-1]  #
+        # logger = parent_logger.getChild(name)
+        hierarchy_len = [len(each.split('.')) for each in loggers]
+        logger_name = [value for index, value in enumerate(loggers) if hierarchy_len[index] == max(hierarchy_len)][0]
+        logger = previous_loggers[logger_name].getChild(name)
 
         if file_msg is None and console_msg is None and logger.parent.name != POOL_LOGGER:
             # We are not going to change the message output, hence we can reuse the whole logger.
