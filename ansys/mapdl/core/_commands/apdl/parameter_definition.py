@@ -377,13 +377,19 @@ class ParameterDefinition:
 
         if "Grpc" in self.__class__.__name__:  # grpc mode
             if self._local:
-                if not os.path.isfile(fname):
-                    raise FileNotFoundError('Unable to locate filename "%s"' % fname)
-
-                if not os.path.dirname(fname):
+                # It must be a file!
+                if os.path.isfile(fname):
+                    # And it exist!
                     filename = os.path.join(os.getcwd(), fname)
+                elif fname in self.list_files(): #
+                    # It exists in the Mapdl working directory
+                    filename = os.path.join(self.directory, fname)
+                elif os.path.dirname(fname):
+                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
                 else:
-                    filename = fname
+                    # Finally
+                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
             else:
                 if not os.path.dirname(fname):
                     # might be trying to run a local file.  Check if the
