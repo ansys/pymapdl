@@ -23,20 +23,20 @@ FILE_NAME = 'pyansys.log'
 
 ## Single configuration
 LAUNCHER_LOGGER = 'launcher'
-CONSOLE_MSG_FORMAT = '%(module)-15s - %(funcName)-15s - %(message)s'
-FILE_MSG_FORMAT = '%(asctime)-15s | %(module)-15s | %(funcName)-15s | %(message)s'
+CONSOLE_MSG_FORMAT = '%(levelname)-10s - %(module)-15s - %(funcName)-15s - %(message)s'
+FILE_MSG_FORMAT = '%(asctime)-15s | %(levelname)-12s | %(module)-15s | %(funcName)-15s | %(message)s'
 DEFAULT_FILE_HEADER = """
-Date Time               | Module          | Function        | Message
-------------------------|-----------------|-----------------|---------
+Date Time               | Level name   | Module          | Function        | Message
+------------------------|--------------|-----------------|-----------------|---------------------------
 """
 
 ## Pool configuration
 POOL_LOGGER = 'pool'
-CONSOLE_MSG_POOL_FORMAT = '%(threadName)-15s - %(module)-15s - %(funcName)-15s - %(message)s'
-FILE_MSG_POOL_FORMAT = '%(asctime)-15s | %(threadName)-15s | %(module)-15s | %(funcName)-15s | %(message)s'
+CONSOLE_MSG_POOL_FORMAT = '%(levelname)-10s | %(threadName)-15s - %(module)-15s - %(funcName)-15s - %(message)s'
+FILE_MSG_POOL_FORMAT = '%(asctime)-15s | %(levelname)-12s | %(threadName)-15s | %(module)-15s | %(funcName)-15s | %(message)s'
 DEFAULT_FILE_HEADER_POOL = """
-Date Time               | Thread          | Module          | Function        | Message
-------------------------|-----------------|-----------------|-----------------|---------------------------
+Date Time               | Level name   | Thread          | Module          | Function        | Message
+------------------------|--------------|-----------------|-----------------|-----------------|---------------------------
 """
 
 
@@ -51,8 +51,10 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
         # is not empty
         # parent_logger = list(previous_loggers.values())[-1]  #
         # logger = parent_logger.getChild(name)
-        hierarchy_len = [len(each.split('.')) for each in loggers]
-        logger_name = [value for index, value in enumerate(loggers) if hierarchy_len[index] == max(hierarchy_len)][0]
+        # hierarchy_len = [len(each.split('.')) for each in loggers]
+        # logger_name = [value for index, value in enumerate(loggers) if hierarchy_len[index] == max(hierarchy_len)][0]
+        # logger_name = loggers[]
+        logger_name = logging.root.last_logger
         logger = previous_loggers[logger_name].getChild(name)
         logger.last_logger = logger.name
 
@@ -88,7 +90,7 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
     else:
         # There is no parent logger, so we create it.
         logger = logging.getLogger(name)
-        logger.last_logger = logger.name
+        logging.root.last_logger = logger.name
         logger.setLevel(loglevel)
         ch = logging.StreamHandler()
         fh = FileHandlerWithHeader(
