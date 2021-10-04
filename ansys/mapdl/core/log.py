@@ -54,6 +54,7 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
         hierarchy_len = [len(each.split('.')) for each in loggers]
         logger_name = [value for index, value in enumerate(loggers) if hierarchy_len[index] == max(hierarchy_len)][0]
         logger = previous_loggers[logger_name].getChild(name)
+        logger.last_logger = logger.name
 
         if file_msg is None and console_msg is None and logger.parent.name != POOL_LOGGER:
             # We are not going to change the message output, hence we can reuse the whole logger.
@@ -87,6 +88,7 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
     else:
         # There is no parent logger, so we create it.
         logger = logging.getLogger(name)
+        logger.last_logger = logger.name
         logger.setLevel(loglevel)
         ch = logging.StreamHandler()
         fh = FileHandlerWithHeader(
