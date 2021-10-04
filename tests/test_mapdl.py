@@ -44,7 +44,7 @@ vmesh,all
 # Many of the commands could be deleted, but for the sake of good
 # testing we are going to leave them.
 
-DB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
+CDB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
 /PREP7
 /NOPR
 /TITLE,'CDREAD and CDWRITE tests
@@ -719,33 +719,33 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
 def test_cdread_in_python_directory(mapdl, cleared):
     # Writing db file in python directory.
     # Pyansys should upload it when it detects it is not in the APDL directory.
-    with open('model.db', 'w') as file:
-        file.write(DB_FILE)
+    with open('model.cdb', 'w') as file:
+        file.write(CDB_FILE)
 
-    mapdl.cdread('db', 'model', 'db')
+    mapdl.cdread('cdb', 'model', 'cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('db', 'model.db')
+    mapdl.cdread('cdb', 'model.cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('db', 'model')
+    mapdl.cdread('cdb', 'model')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(os.getcwd(), 'model.db')
-    mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
-
-    clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(os.getcwd(), 'model')
-    mapdl.cdread('db', fullpath, 'db')
+    fullpath = os.path.join(os.getcwd(), 'model.cdb')
+    mapdl.cdread('cdb', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(os.getcwd(), 'model')
-    mapdl.cdread('db', fullpath)
+    mapdl.cdread('cdb', fullpath, 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(os.getcwd(), 'model')
+    mapdl.cdread('cdb', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
@@ -756,14 +756,14 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     # reach the APDL execution directory because it is remote.
     # But using APDL to write it, it should be almost impossible to break?
     mapdl.run("*SET,T_PAR,'asdf1234'")
-    mapdl.run("CDWRITE,'DB','model','db'")
+    mapdl.run("CDWRITE,'DB','model','cdb'")
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('db', 'model', 'db')
+    mapdl.cdread('db', 'model', 'cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('db', 'model.db')
+    mapdl.cdread('db', 'model.cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
@@ -771,13 +771,13 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, 'model.db')
+    fullpath = os.path.join(mapdl.directory, 'model.cdb')
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
-    mapdl.cdread('db', fullpath, 'db')
+    mapdl.cdread('db', fullpath, 'cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)

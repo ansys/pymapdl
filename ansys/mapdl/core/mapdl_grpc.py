@@ -1000,7 +1000,7 @@ class MapdlGrpc(_MapdlCore):
                 fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
             else:
                 # Using default .db
-                fname = kwargs.get("fname", args[1])  + '.' + 'db'
+                fname = kwargs.get("fname", args[1])  + '.' + 'cdb'
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
