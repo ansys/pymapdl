@@ -706,11 +706,11 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
     subdir = tmpdir.mkdir(dirname)
 
     mapdl.run(f"parmtest='{random_letters}'")
-    mapdl.cdwrite('all', subdir.join('model2'), 'db')
+    mapdl.cdwrite('all', subdir.join('model2'), 'cdb')
 
     mapdl.clear()
     mapdl.cwd(subdir)
-    mapdl.cdread("db", 'model2', "db")
+    mapdl.cdread("db", 'model2', "cdb")
     mapdl.cwd(curdir)  #Going back
 
     assert random_letters == mapdl.parameters['parmtest']
