@@ -688,10 +688,10 @@ def test_cdread(mapdl, cleared):
     random_letters = mapdl.directory.split('/')[0][-3:0]
 
     mapdl.run(f"parmtest='{random_letters}'")
-    mapdl.cdwrite('all', 'model2', 'db')
+    mapdl.cdwrite('all', 'model2', 'cdb')
 
     mapdl.clear()
-    mapdl.cdread("db", 'model2', 'db')
+    mapdl.cdread("db", 'model2', 'cdb')
 
     assert random_letters == mapdl.parameters['parmtest']
 
