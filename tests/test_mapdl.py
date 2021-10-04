@@ -730,7 +730,21 @@ def test_cdread_in_python_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(os.getcwd(), 'model.db')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(os.getcwd(), 'model')
+    mapdl.cdread('db', fullpath, 'db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(os.getcwd(), 'model')
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
@@ -745,7 +759,6 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     mapdl.run("CDWRITE,'DB','model','db'")
 
     clearing_cdread_cdwrite_tests(mapdl)
-
     mapdl.cdread('db', 'model', 'db')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
@@ -754,6 +767,20 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model.db')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model')
+    mapdl.cdread('db', fullpath, 'db')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model')
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)

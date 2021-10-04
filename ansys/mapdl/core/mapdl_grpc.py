@@ -994,8 +994,14 @@ class MapdlGrpc(_MapdlCore):
         fname = kwargs.get("fname", args[1])
         basename = os.path.basename(fname)
         if len(basename.split('.')) == 1:
-            # there is no extension
-            fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+            # there is no extension in the main name. 
+            if len(args) > 2:
+                # if extension is an input as an option (old APDL style)
+                fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+            else:
+                # Using default .db
+                fname = kwargs.get("fname", args[1])  + '.' + 'db'
+
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         self.input(fname, **kwargs)
