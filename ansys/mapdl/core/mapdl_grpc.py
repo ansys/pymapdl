@@ -1,4 +1,6 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
+from ansys.mapdl.core.log import getLogger
+logger = getLogger(__name__)
 import re
 from warnings import warn
 import shutil
@@ -6,7 +8,6 @@ import threading
 import weakref
 import io
 import time
-import logging
 import os
 import socket
 from functools import wraps
@@ -39,7 +40,6 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
 
-logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
 
