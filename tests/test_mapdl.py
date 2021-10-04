@@ -677,7 +677,7 @@ def test_coriolis(mapdl, cleared):
     assert "ROTATING DAMPING MATRIX ACTIVATED" in resp
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
-    
+
 def test_title(mapdl, cleared):
     title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
     mapdl.title(title)
