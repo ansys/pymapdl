@@ -576,7 +576,7 @@ class LocalMapdlPool:
                         port = max(self._ports) + 1
                         self._spawn_mapdl(index, port=port).join()
                     except Exception as e:
-                        logging.error(e, exc_info=True)
+                        LOG.error(e, exc_info=True)
             time.sleep(refresh)
 
     @property
