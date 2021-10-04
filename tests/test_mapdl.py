@@ -52,7 +52,7 @@ DB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
 _CDRDOFF=             !reset flag, numoffs already performed
 *ELSE              !offset database for the following FE model
 *ENDIF
-*SET,TEST_PARAMETER,'asdf1234'
+*SET,T_PAR,'asdf1234'
 *SET,_RETURN ,  0.000000000000
 *SET,_STATUS ,  0.000000000000
 *SET,_UIQR   ,  1.000000000000
@@ -96,7 +96,7 @@ def clearing_cdread_cdwrite_tests(mapdl):
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
-    return 'asdf1234' in mapdl.parameters['TEST_PARAMETER']  # Using in because of the padding APDL does on strings.
+    return 'asdf1234' in mapdl.parameters['T_PAR']  # Using in because of the padding APDL does on strings.
 
 
 @pytest.fixture(scope="function")
@@ -755,7 +755,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     # robust since there might be cases where the python code cannot
     # reach the APDL execution directory because it is remote.
     # But using APDL to write it, it should be almost impossible to break?
-    mapdl.run("*SET,TEST_PARAMETER,'asdf1234'")
+    mapdl.run("*SET,T_PAR,'asdf1234'")
     mapdl.run("CDWRITE,'DB','model','db'")
 
     clearing_cdread_cdwrite_tests(mapdl)
