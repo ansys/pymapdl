@@ -1,4 +1,9 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
+import logging
+from ansys.mapdl.core import log
+
+logger = log.getLogger('launcher')
+
 import platform
 from glob import glob
 import re
@@ -32,14 +37,14 @@ ALLOWABLE_MODES = ["corba", "console", "grpc"]
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
 
-INTEL_MSG = """Due to incompatibilites between 'DMP', Windows and VPN connections,
+INTEL_MSG = """Due to incompatibilities between 'DMP', Windows and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
 If you still want to use 'INTEL', set:
 
 launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
 
-Be aware of possible errors or unexpected behaviour with this configuration.
+Be aware of possible errors or unexpected behavior with this configuration.
 """
 
 
