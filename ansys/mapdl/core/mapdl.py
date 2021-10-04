@@ -130,14 +130,6 @@ def setup_logger(loglevel='INFO', log_file=True):
     # add ch to logger
     log.addHandler(ch)
 
-    if log_file:
-        file_handler = logging.FileHandler('PyMAPDL.log')
-        file_handler.setLevel(loglevel)
-        file_handler.setFormatter(formatter)
-
-    # creating a file handler
-    log.addHandler(file_handler)
-
     # make persistent
     setup_logger.log = log
 
