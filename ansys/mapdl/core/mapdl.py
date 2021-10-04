@@ -1,4 +1,7 @@
 """Module to control interaction with MAPDL through Python"""
+from ansys.mapdl.core import log
+logger = log.getLogger('launcher')
+
 import time
 import glob
 import re
@@ -107,41 +110,11 @@ def setup_logger(loglevel='INFO', log_file=True):
 
     # return existing log if this function has already been called
     if hasattr(setup_logger, "log"):
-        setup_logger.log.setLevel(loglevel)
-        ch = setup_logger.log.handlers[0]
-        ch.setLevel(loglevel)
         return setup_logger.log
 
-    # create logger
-    log = logging.getLogger(__name__)
-    log.setLevel(loglevel)
+    setup_logger.log = logger
 
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(loglevel)
-
-    # create formatter
-    formatstr = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    formatter = logging.Formatter(formatstr)
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    log.addHandler(ch)
-
-    if log_file:
-        file_handler = logging.FileHandler('PyMAPDL.log')
-        file_handler.setLevel(loglevel)
-        file_handler.setFormatter(formatter)
-
-    # creating a file handler
-    log.addHandler(file_handler)
-
-    # make persistent
-    setup_logger.log = log
-
-    return log
+    return logger
 
 
 class _MapdlCore(Commands):
