@@ -677,7 +677,7 @@ def test_coriolis(mapdl, cleared):
     assert "ROTATING DAMPING MATRIX ACTIVATED" in resp
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
-
+    
 def test_title(mapdl, cleared):
     title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
     mapdl.title(title)
@@ -784,3 +784,22 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     fullpath = os.path.join(mapdl.directory, 'model')
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
+
+
+def test_inval_commands(mapdl, cleared):
+    """Test the output of invalid commands"""
+    cmds = ["*END", "*vwrite", "/eof", "cmatrix"]
+    for each_cmd in cmds:
+        with pytest.raises(RuntimeError):
+            mapdl.run(each_cmd)
+
+
+def test_inval_commands_silent(mapdl, tmpdir, cleared):
+    assert mapdl.run("parm = 'asdf'")  # assert it is not empty
+    mapdl.nopr()
+    assert mapdl.run("parm = 'asdf'")  # assert it is not empty
+
+    assert not mapdl._run('/nopr')  # setting /nopr and assert it is empty
+    assert not mapdl.run("parm = 'asdf'")  # assert it is not empty
+
+    mapdl._run('/gopr') # getting settings back
