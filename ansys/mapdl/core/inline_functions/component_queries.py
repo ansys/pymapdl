@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _ComponentQueries(_ParameterParsing):
+class _ComponentQueries(_QueryExecution):
     _mapdl = None
 
     def centrx(self, e: int) -> float:
@@ -297,7 +297,7 @@ class _ComponentQueries(_ParameterParsing):
         return self._run_query(f"KZ({k})", integer=False)
 
 
-class _InverseGetComponentQueries(_ParameterParsing):
+class _InverseGetComponentQueries(_QueryExecution):
     _mapdl = None
 
     def node(self, x: float, y: float, z: float) -> int:
@@ -386,7 +386,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
         return self._run_query(f"KP({x},{y},{z})", integer=True)
 
 
-class _DisplacementComponentQueries(_ParameterParsing):
+class _DisplacementComponentQueries(_QueryExecution):
     _mapdl = None
 
     def rotx(self, n: int) -> float:

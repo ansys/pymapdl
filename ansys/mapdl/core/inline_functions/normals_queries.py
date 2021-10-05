@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _NodeNormalQueries(_ParameterParsing):
+class _NodeNormalQueries(_QueryExecution):
     _mapdl = None
 
     def normnx(self, n1: int, n2: int, n3: int) -> float:
@@ -134,7 +134,7 @@ class _NodeNormalQueries(_ParameterParsing):
         return float_
 
 
-class _KeypointNormalQueries(_ParameterParsing):
+class _KeypointNormalQueries(_QueryExecution):
     _mapdl = None
 
     def normkx(self, k1: int, k2: int, k3: int) -> float:

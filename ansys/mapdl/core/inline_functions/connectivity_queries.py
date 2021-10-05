@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _ConnectivityQueries(_ParameterParsing):
+class _ConnectivityQueries(_QueryExecution):
     _mapdl = None
 
     def nelem(self, e, npos) -> int:
@@ -40,8 +40,7 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> positions
         [2, 14, 17, 5, 53, 63, 99, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         """
-        response = self._mapdl.run(f"_=NELEM({e},{npos})")
-        return self._parse_parameter_integer_response(response)
+        return self._run_query(f'NELEM({e},{npos})', integer=True)
 
     def enextn(self, n, loc) -> int:
         """Returns the ``loc`` element connected to node ``n``.
@@ -80,5 +79,4 @@ class _ConnectivityQueries(_ParameterParsing):
         >>> elements
         [61, 71]
         """
-        response = self._mapdl.run(f"_=ENEXTN({n},{loc})")
-        return self._parse_parameter_integer_response(response)
+        return self._run_query(f'ENEXTN({n},{loc})', integer=True)

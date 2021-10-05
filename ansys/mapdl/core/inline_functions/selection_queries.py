@@ -1,7 +1,7 @@
-from .core import _ParameterParsing, SelectionStatus
+from .core import _QueryExecution, SelectionStatus
 
 
-class _SelectionStatusQueries(_ParameterParsing):
+class _SelectionStatusQueries(_QueryExecution):
     _mapdl = None
 
     def nsel(self, n: int) -> SelectionStatus:
@@ -319,7 +319,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         return SelectionStatus(integer)
 
 
-class _NextSelectedEntityQueries(_ParameterParsing):
+class _NextSelectedEntityQueries(_QueryExecution):
     _mapdl = None
 
     def ndnext(self, n: int) -> int:

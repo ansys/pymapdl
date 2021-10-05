@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _EntityNearestEntityQueries(_ParameterParsing):
+class _EntityNearestEntityQueries(_QueryExecution):
     _mapdl = None
 
     def nnear(self, n: int) -> int:

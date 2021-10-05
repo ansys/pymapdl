@@ -57,3 +57,19 @@ class TestParseParameter:
         input_ = value
         with pytest.raises(TypeError):
             query._parse_parameter_integer_response(input_)
+
+
+class TestRunQuery:
+    @pytest.mark.parametrize('command', [('KX(1)', float), ('KP(1,1,1', int)])
+    def test_run_query_returned_type(self, line_geometry, command):
+        q, kps, l0 = line_geometry
+        cmd, type_ = command
+        integer = False if type_ == float else True
+        v = q._run_query(cmd, integer=integer)
+        assert isinstance(v, type_)
+
+    def test_interactive_mode_error(self, mapdl, line_geometry):
+        q, kps, l0 = line_geometry
+        with mapdl.non_interactive:
+            with pytest.raises(RuntimeError):
+                v = q.kx(1)

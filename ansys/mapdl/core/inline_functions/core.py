@@ -52,7 +52,7 @@ class SelectionStatus(IntEnum):
     SELECTED = 1
 
 
-class _ParameterParsing:
+class _QueryExecution:
 
     def _run_query(self, command: str, integer: bool) -> Union[int, float]:
         # import here to avoid circular import
