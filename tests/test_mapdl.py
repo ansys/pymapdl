@@ -96,7 +96,8 @@ def clearing_cdread_cdwrite_tests(mapdl):
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
-    return 'asdf1234' in mapdl.parameters['T_PAR']  # Using in because of the padding APDL does on strings.
+    # Using ``in`` because of the padding APDL does on strings.
+    return 'asdf1234' in mapdl.parameters['T_PAR']
 
 
 @pytest.fixture(scope="function")
@@ -716,36 +717,47 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
     assert random_letters == mapdl.parameters['parmtest']
 
 
-def test_cdread_in_python_directory(mapdl, cleared):
+def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     # Writing db file in python directory.
     # Pyansys should upload it when it detects it is not in the APDL directory.
-    with open('model.cdb', 'w') as file:
-        file.write(CDB_FILE)
+    fullpath = str(tmpdir.join('model.cdb'))
+    with open(fullpath, 'w') as fid:
+        fid.write(CDB_FILE)
 
-    mapdl.cdread('cdb', 'model', 'cdb')
+    # check if pymapdl is smart enough to determine if it can access
+    # the archive from the current working directory.
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(tmpdir)
+        mapdl.cdread('db', 'model', 'cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+
+        clearing_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('db', 'model.cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+
+        clearing_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('db', 'model')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+    except:
+        raise
+    finally:
+        # always change back to the previous directory
+        os.chdir(old_cwd)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = str(tmpdir.join('model.cdb'))
+    mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('cdb', 'model.cdb')
+    fullpath = str(tmpdir.join('model'))
+    mapdl.cdread('db', fullpath, 'cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    mapdl.cdread('cdb', 'model')
-    assert asserting_cdread_cdwrite_tests(mapdl)
-
-    clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(os.getcwd(), 'model.cdb')
-    mapdl.cdread('cdb', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
-
-    clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(os.getcwd(), 'model')
-    mapdl.cdread('cdb', fullpath, 'cdb')
-    assert asserting_cdread_cdwrite_tests(mapdl)
-
-    clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(os.getcwd(), 'model')
-    mapdl.cdread('cdb', fullpath)
+    fullpath = str(tmpdir.join('model'))
+    mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
