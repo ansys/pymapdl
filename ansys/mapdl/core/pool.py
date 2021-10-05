@@ -1,6 +1,6 @@
 """This module is for threaded implementations of the mapdl interface"""
 from ansys.mapdl.core.log import getLogger
-LOG = getLogger('pool')  # This should be import the first.
+LOG = getLogger(__name__)  # This should be import the first.
 
 import shutil
 import warnings
