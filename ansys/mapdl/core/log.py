@@ -1,22 +1,114 @@
 """This module provides the tools for logging in PyAnsys"""
 
-# The approach is to call ``Getlogger``` at the beginning of each module.
-# Functions in several ways:
-# * If ``GetLogger`` gets called before any other logger has been initialized, it will create
-# the default logger which parameters are constants in this module.
-# * If ``GetLogger`` gets called after another logger has been created, there are two options:
-#    * If we do not intend changes in the messages format or the caller is not the pool library, 
-#      it will return a child logger. This child logger will redirect all the output to the main.
-#    * If we do intend changes in the message format because maybe we want to account for
-# different context (for example when using the ``pool`` module), a new child logger is created
-#  with the same handlers as the parent and using the providen message format or the parent message format.
-# You can change both, the file message format or the console message format. 
-# But you cannot change the present handlers or the file where the log is being written.
+"""
+# ``log`` module
 
-# In cases we want to change the format according to different contexts, for example when the
-# module launcher is called by the pool module:
+## Objective
+This module intends to create a general framework for logging in Pyansys.
+This module is built upon ``logging`` library and it does NOT intend to replace it.
+This module uses module logging, rather than log specific classes or functions.
+This approach is simpler, since you do not need to carry around the logger.
+However, for compatibility, the ``Mapdl._log`` has been redirected to the correspondent module logger.
 
-# >
+## Usage
+
+The approach is to call ``Getlogger``` at the beginning of each module we want to log.
+This function works in several ways:
+
+* If this is the first time that you call it, ``getLogger`` will create a new logger using the provided input or the default logger configuration.
+* If ``getLogger`` has been called before, it will generate a child logger from the previously called logger.
+    * If you only provide a name, the child logger will have no handlers and it will propagate its log to the parent one.
+    * If ``file_msg`` and / or ``console_msg`` are provided in this call, the format of the child logger will be changed in the file stream and / or console stream.
+    The parent handlers are copied into the child logger and the propagation from child to parent is disabled (See notes for further explanations).
+    However, you can NOT change any other configuration of the logger.
+    Attributes such as file name (``fname``), the log level (``loglevel``) or the options to record to file or console (``record_file`` and ``console_output``)
+    cannot be changed at this step. This is to maintained the logging framework consistency.
+
+This module detects automatically when the ``pool`` module is called for logging, and it adjust the log format in both cases, file and console streams.
+The format is different for file and console output, being the file format a bit more detailed.
+
+This module also write appropriate headers for the default file log handlers.
+
+#### Default file header
+.. code: :
+    >> >
+    Date Time               | Level name   | Module          | Function                  | Message
+    ------------------------|--------------|-----------------|---------------------------|---------------------------
+
+
+#### Default pool file header
+.. code: :
+    Date Time               | Level name   | Thread          | Module          | Function                  | Message
+    ------------------------|--------------|-----------------|-----------------|---------------------------|---------------------------
+
+
+## Output format
+
+### Default console
+.. code: :
+    '%(levelname)-10s - %(module)-15s - %(funcName)s - %(message)s'
+
+
+### Default file
+.. code: :
+    '%(asctime)-15s | %(levelname)-12s | %(module)-15s | %(funcName)-25s | %(message)s'
+
+
+### Default pool console
+.. code: :
+    '%(levelname)-10s | %(threadName)-15s - %(module)-15s - %(funcName)s - %(message)s'
+
+
+### Default pool file
+.. code: :
+    '%(asctime)-15s | %(levelname)-12s | %(threadName)-15s | %(module)-15s | %(funcName)-25s | %(message)s'
+
+
+## Cases
+
+### Log a module without changes in log format.
+.. code-block: : python
+    >> > from ansys.mapdl.core.log import getLogger
+    >> > logger = getLogger(__name__)  # logger names as the module where it is imported.
+    ...
+    ...
+    >> > logger.info('This is a useful message')
+    INFO       |  test            - <module > - This is an useful message
+
+
+### Log a module with changes in log format.
+.. code-block: : python
+    >> > from ansys.mapdl.core.log import getLogger
+    >> > file_msg = '%(asctime)-15s | %(funcName)-25s | THIS IS A TEST %(message)s'
+    >> > logger = getLogger(__name__, file_msg=file_msg)  # logger names as the module where it is imported.
+    ...
+    ...
+    >> > logger.info('This is a useful message')
+    INFO       |  test            - <module > - This is an useful message
+
+
+## Notes
+
+* To check if there is logger previously initialized by ``log`` module, we rely upon ``logging.root`` having or not the attribute ``last_logger``.
+If this attribute does not exist, it is considered that ``getLogger`` hasn't been called and therefore, ``log`` hasn't been initialized previously.
+* The ``propagate`` option is disabled when creating a child with different log format to avoid having the logs repeated from the same loggers since both loggers (child and parent) will share the handlers.
+* This module check if ``pool`` module is called by checking the ``name`` parameter provided to ``getLogger``. If the string ``pool`` is found, it will be considered to be called from ``pool`` module.
+* To log each thread, this module uses the flag ``% (threadName)s`` (more information on `LogRecord attributes < https: // docs.python.org/3/library/logging.html#logrecord-attributes/>`_) therefore, all the calls to ``Threading.Thread`` have been modified to include a thread name (``name``).
+* For compatibility, the ``Mapdl._log`` has been redirected to the module logger, therefore you could do something like this in your script:
+.. code: : python
+    >> > from ansys.mapdl.core import launch_mapdl
+    >> > mapdl = launch_mapdl()
+    >> > mapdl._log.info('This is an useful message')
+    INFO       | test            - <module > - This is an useful message  # Module is not defined since we are at ``__main__``
+
+    ## Logic behind this module
+
+    One of the objectives of this module was to provide a flexible tool to log in cases as different as being in a pool resource or running a single instance.
+    Hence the format of the logs should be flexible and easy to change when logging in those cases but keeping the output streams.
+    However, the ``logging`` module does not easy allow you to change this format once the logger has been created.
+    Therefore the solution it is implemented here is to create a child logger which copies the handlers of the parent but it does set a different format.
+    This way the output is still keep in place, but the format can be changed.
+"""
 
 import logging
 import sys, os
