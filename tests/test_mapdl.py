@@ -771,30 +771,18 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model.cdb')
-    if mapdl._local:
-        mapdl.cdread('db', fullpath)
-        assert asserting_cdread_cdwrite_tests(mapdl)
-    else:
-        with pytest.raises(FileNotFoundError):
-            mapdl.cdread('db', fullpath)
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
-    if mapdl._local:
-        mapdl.cdread('db', fullpath, 'cdb')
-        assert asserting_cdread_cdwrite_tests(mapdl)
-    else:
-        with pytest.raises(FileNotFoundError):
-            mapdl.cdread('db', fullpath)
+    mapdl.cdread('db', fullpath, 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
-    if mapdl._local:
-        mapdl.cdread('db', fullpath)
-        assert asserting_cdread_cdwrite_tests(mapdl)
-    else:
-        with pytest.raises(FileNotFoundError):
-            mapdl.cdread('db', fullpath)
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
 
 
 def test_inval_commands(mapdl, cleared):
