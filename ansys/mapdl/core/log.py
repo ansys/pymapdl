@@ -44,7 +44,7 @@ Date Time               | Level name   | Thread          | Module          | Fun
 """
 
 
-def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=LOG_LEVEL, record_uncaught_exceptions=True):
+def getLogger(name=None, record_file=True, console_output=True, file_msg=None, console_msg=None, fname=None, loglevel=LOG_LEVEL, record_uncaught_exceptions=True):
 
     default_file_header = DEFAULT_FILE_HEADER_POOL if name == POOL_LOGGER else DEFAULT_FILE_HEADER
     log_name = name.split('.')[-1]
@@ -74,23 +74,25 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
         # Since there is no easy way to modify the format at a given logger, we just create a new one (logger)
         # and pass the same file and stream handlers as the parent one, giving the option for change the format.
         first_logger = previous_loggers[logging.root.first_logger]
-        fh = [each_handler for each_handler in first_logger.handlers if instance_but_not_subclass(
-            each_handler, FileHandlerWithHeader)][0]
-        ch = [each_handler for each_handler in first_logger.handlers if instance_but_not_subclass(
-            each_handler, logging.StreamHandler)][0]
 
-        if logger.parent.name == POOL_LOGGER:
-            fh.setFormatter(logging.Formatter(
-                file_msg or FILE_MSG_POOL_FORMAT))
-            ch.setFormatter(logging.Formatter(
-                console_msg or CONSOLE_MSG_POOL_FORMAT))
+        file_handlers = [each_handler for each_handler in first_logger.handlers if instance_but_not_subclass(
+            each_handler, FileHandlerWithHeader)]
+        console_handlers = [each_handler for each_handler in first_logger.handlers if instance_but_not_subclass(
+            each_handler, logging.StreamHandler)]
 
-            # patch_threading_excepthook()
+        if file_handlers:
+            fh = file_handlers[0]
+            if logger.parent.name == POOL_LOGGER:
+                fh.setFormatter(logging.Formatter(file_msg or FILE_MSG_POOL_FORMAT))
+            else:
+                fh.setFormatter(logging.Formatter(file_msg or fh.formatter._fmt))
 
-        else:
-            fh.setFormatter(logging.Formatter(file_msg or fh.formatter._fmt))
-            ch.setFormatter(logging.Formatter(
-                console_msg or ch.formatter._fmt))
+        if console_handlers:
+            ch = console_handlers[0]
+            if logger.parent.name == POOL_LOGGER:
+                ch.setFormatter(logging.Formatter(console_msg or CONSOLE_MSG_POOL_FORMAT))
+            else:
+                ch.setFormatter(logging.Formatter(console_msg or ch.formatter._fmt))
 
         logger.setLevel(logger.parent.level)
         logger.propagate = False  # This is important to avoid duplicated logs.
@@ -101,16 +103,22 @@ def getLogger(name=None, file_msg=None, console_msg=None, fname=None, loglevel=L
         logging.root.last_logger = logger.name
         logging.root.first_logger = logger.name
         logger.setLevel(loglevel)
-        ch = logging.StreamHandler()
-        fh = FileHandlerWithHeader(
-            fname or FILE_NAME, header=default_file_header)
+        if record_file:
+            fh = FileHandlerWithHeader(
+                fname or FILE_NAME, header=default_file_header)
+            fh.setFormatter(logging.Formatter(file_msg or FILE_MSG_FORMAT))
 
-        fh.setFormatter(logging.Formatter(file_msg or FILE_MSG_FORMAT))
-        ch.setFormatter(logging.Formatter(console_msg or CONSOLE_MSG_FORMAT))
+        if console_output:
+            ch = logging.StreamHandler()
+            ch.setFormatter(logging.Formatter(console_msg or CONSOLE_MSG_FORMAT))
+
         logger.propagate = True  # Probably this is irrelevant.
 
-    logger.addHandler(ch)
-    logger.addHandler(fh)
+    if record_file:
+        logger.addHandler(fh)
+    if console_output:
+        logger.addHandler(ch)
+
 
     ## Using logger to record unhandled exceptions
 
