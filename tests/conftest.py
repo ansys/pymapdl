@@ -38,6 +38,7 @@ HAS_GRPC = int(rver) >= 211 or ON_CI
 
 
 # determine if we can launch an instance of MAPDL locally
+# start with ``False`` and always assume the remote case
 local = [False]
 
 # check if the user wants to permit pytest to start MAPDL

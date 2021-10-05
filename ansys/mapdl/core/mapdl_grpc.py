@@ -1083,6 +1083,11 @@ class MapdlGrpc(_MapdlCore):
                 if fname not in self.list_files():
                     self.upload(fname, progress_bar=progress_bar)
             else:
+                if not os.path.isfile(fname):  # pragma: no cover
+                    raise FileNotFoundError(
+                        f"MAPDL is in remote mode and is unable to locate {fname}.\n"
+                        "Either pass the correct full path to the file, or pass just "
+                        f"a file name (for example, {os.path.basename(fname)}")
                 self.upload(fname, progress_bar=progress_bar)
             filename = os.path.basename(fname)
 

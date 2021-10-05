@@ -750,11 +750,10 @@ def test_cdread_in_python_directory(mapdl, cleared):
 
 
 def test_cdread_in_apdl_directory(mapdl, cleared):
-    # Writing a db file in apdl directory, using APDL
-    # Is using APDL to write this file cheating? I think it is more
-    # robust since there might be cases where the python code cannot
-    # reach the APDL execution directory because it is remote.
-    # But using APDL to write it, it should be almost impossible to break?
+    # Writing a db file in apdl directory, using APDL.
+    # Using APDL to write the archive as there are be cases where the
+    # python code cannot reach the APDL execution directory because it
+    # is remote.
     mapdl.run("*SET,T_PAR,'asdf1234'")
     mapdl.run("CDWRITE,'DB','model','cdb'")
 
@@ -772,18 +771,30 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model.cdb')
-    mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    if mapdl._local:
+        mapdl.cdread('db', fullpath)
+        assert asserting_cdread_cdwrite_tests(mapdl)
+    else:
+        with pytest.raises(FileNotFoundError):
+            mapdl.cdread('db', fullpath)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
-    mapdl.cdread('db', fullpath, 'cdb')
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    if mapdl._local:
+        mapdl.cdread('db', fullpath, 'cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+    else:
+        with pytest.raises(FileNotFoundError):
+            mapdl.cdread('db', fullpath)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
-    mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    if mapdl._local:
+        mapdl.cdread('db', fullpath)
+        assert asserting_cdread_cdwrite_tests(mapdl)
+    else:
+        with pytest.raises(FileNotFoundError):
+            mapdl.cdread('db', fullpath)
 
 
 def test_inval_commands(mapdl, cleared):
