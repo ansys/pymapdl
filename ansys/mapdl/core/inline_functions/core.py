@@ -32,11 +32,12 @@ class SelectionStatus(IntEnum):
     1
 
     We can use ``Query.nsel`` to interrogate the selection status
-    of the node. The response is an ``enum.IntEnum`` object. If
-    you query a node that does not exist, it will return a status
-    ``SelectionStatus.UNDEFINED``.
+    of the node. We can get the ``Query`` object from the
+    ``mapdl.queries`` property. The response is an
+    ``enum.IntEnum`` object. If you query a node that does not
+    exist, it will return a status ``SelectionStatus.UNDEFINED``.
 
-    >>> q = Query(mapdl)
+    >>> q = mapdl.queries
     >>> q.nsel(n1)
     <SelectionStatus.SELECTED: 1>
     >>> mapdl.nsel('NONE')
@@ -65,17 +66,15 @@ class _ParameterParsing:
             )
 
         # use the underlying gRPC method if available to avoid parsing the string
+        resp = self._mapdl._run(f"{QUERY_NAME}={command}")
         if isinstance(self._mapdl, MapdlGrpc):
-            resp = self._mapdl._run(f"{QUERY_NAME}={command}")
             value = self._mapdl.scalar_param(QUERY_NAME)
             if value is None:
                 raise RuntimeError(resp)
             if integer:
                 return int(value)
             return value
-
         else:
-            resp = self._mapdl._run(f"{QUERY_NAME}={command}")
             if integer:
                 return self._parse_parameter_integer_response(resp)
             return self._parse_parameter_float_response(resp)
