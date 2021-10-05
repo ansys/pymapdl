@@ -37,7 +37,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.centrx(e0)
         0.5
         """
-        return self._run_query(f"CENTRX({e})")
+        return self._run_query(f"CENTRX({e})", integer=False)
 
     def centry(self, e: int) -> float:
         """Return the y coordinate of the element centroid.
@@ -71,7 +71,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.centry(e0)
         1.0
         """
-        return self._run_query(f"CENTRY({e})")
+        return self._run_query(f"CENTRY({e})", integer=False)
 
     def centrz(self, e: int) -> float:
         """Return the z coordinate of the element centroid.
@@ -105,7 +105,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.centrz(e0)
         1.5
         """
-        return self._run_query(f"CENTRZ({e})")
+        return self._run_query(f"CENTRZ({e})", integer=False)
 
     def nx(self, n: int) -> float:
         """Return the x coordinate of a node.
@@ -139,7 +139,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.nx(10)
         0.0
         """
-        return self._run_query(f"NX({n})")
+        return self._run_query(f"NX({n})", integer=False)
 
     def ny(self, n: int) -> float:
         """Return the y coordinate of a node.
@@ -173,7 +173,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.ny(10)
         4.0
         """
-        return self._run_query(f"NY({n})")
+        return self._run_query(f"NY({n})", integer=False)
 
     def nz(self, n: int) -> float:
         """Return the z coordinate of a node.
@@ -207,7 +207,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.nz(10)
         0.0
         """
-        return self._run_query(f"NZ({n})")
+        return self._run_query(f"NZ({n})", integer=False)
 
     def kx(self, k: int) -> float:
         """Return the x coordinate of a keypont.
@@ -236,7 +236,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.kx(1)
         0.0
         """
-        return self._run_query(f"KX({k})")
+        return self._run_query(f"KX({k})", integer=False)
 
     def ky(self, k: int) -> float:
         """Return the y coordinate of a keypont.
@@ -265,7 +265,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.ky(1)
         1.0
         """
-        return self._run_query(f"KY({k})")
+        return self._run_query(f"KY({k})", integer=False)
 
     def kz(self, k: int) -> float:
         """Return the z coordinate of a keypont.
@@ -294,7 +294,7 @@ class _ComponentQueries(_ParameterParsing):
         >>> mapdl.queries.kz(1)
         2.0
         """
-        return self._run_query(f"KZ({k})")
+        return self._run_query(f"KZ({k})", integer=False)
 
 
 class _InverseGetComponentQueries(_ParameterParsing):
@@ -345,7 +345,7 @@ class _InverseGetComponentQueries(_ParameterParsing):
         >>> (x, y, z)
         (5.0, 5.0, 5.0)
         """
-        return self._run_query(f"NODE({x},{y},{z})")
+        return self._run_query(f"NODE({x},{y},{z})", integer=True)
 
     def kp(self, x: float, y: float, z: float) -> int:
         """Return keypoint closest to coordinate ``(x, y, z)``.
@@ -436,7 +436,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.queries.rotx(node)
         -0.0002149851187
         """
-        return self._run_query(f"ROTX({n})")
+        return self._run_query(f"ROTX({n})", integer=False)
 
     def roty(self, n: int) -> float:
         """Returns y-component of rotational displacement at a node.
@@ -485,7 +485,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.queries.roty(node)
         0.1489593933
         """
-        return self._run_query(f"ROTY({n})")
+        return self._run_query(f"ROTY({n})", integer=False)
 
     def rotz(self, n: int) -> float:
         """Returns z-component of rotational displacement at a node.
@@ -534,7 +534,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.queries.rotz(node)
         0.0
         """
-        return self._run_query(f"ROTZ({n})")
+        return self._run_query(f"ROTZ({n})", integer=False)
 
     def ux(self, n: int) -> float:
         """Returns x-component of structural displacement at a node.
@@ -580,7 +580,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         1.549155634e-07
 
         """
-        return self._run_query(f"UX({n})")
+        return self._run_query(f"UX({n})", integer=False)
 
     def uy(self, n: int) -> float:
         """Returns y-component of structural displacement at a node.
@@ -626,7 +626,7 @@ class _DisplacementComponentQueries(_ParameterParsing):
         5.803680779e-10
 
         """
-        return self._run_query(f"UY({n})")
+        return self._run_query(f"UY({n})", integer=False)
 
     def uz(self, n: int) -> float:
         """Returns z-component of structural displacement at a node.
@@ -672,4 +672,4 @@ class _DisplacementComponentQueries(_ParameterParsing):
         3.74530389e-08
 
         """
-        return self._run_query(f"UZ({n})")
+        return self._run_query(f"UZ({n})", integer=False)
