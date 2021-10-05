@@ -1082,11 +1082,15 @@ class MapdlGrpc(_MapdlCore):
                 # file exists remotely.
                 if fname not in self.list_files():
                     self.upload(fname, progress_bar=progress_bar)
+                filename = fname
             else:
                 # upload the file if it exists locally
                 if os.path.isfile(fname):
                     self.upload(fname, progress_bar=progress_bar)
-            filename = os.path.basename(fname)
+                    filename = os.path.basename(fname)
+                else:
+                    # Otherwise, it must be remote.  Use full path.
+                    filename = fname
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
