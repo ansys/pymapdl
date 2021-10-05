@@ -80,7 +80,7 @@ class TestRunQuery:
         try:
             # enter no printout mode
             mapdl._run('/NOPR', mute=True)
-            assert mapdl.prep7() is ''
+            assert mapdl.prep7() == ''
 
             # verify that queries still work
             q, kps, l0 = line_geometry
