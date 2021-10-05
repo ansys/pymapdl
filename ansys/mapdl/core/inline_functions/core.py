@@ -52,7 +52,7 @@ class SelectionStatus(IntEnum):
 
 class _ParameterParsing:
 
-    def _run_query(self, command: str, integer='float'):
+    def _run_query(self, command: str, integer=False):
         # import here to avoid circular import
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
@@ -60,7 +60,8 @@ class _ParameterParsing:
         if self._mapdl._store_commands:
             raise RuntimeError(
                 "Inline MAPDL functions are incompatible with the "
-                "non_interactive mode.")
+                "non_interactive mode."
+            )
 
         # use the underlying gRPC method if available to avoid parsing the string
         if isinstance(self._mapdl, MapdlGrpc):
