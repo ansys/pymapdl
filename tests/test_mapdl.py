@@ -739,8 +739,6 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread('db', 'model')
         assert asserting_cdread_cdwrite_tests(mapdl)
-    except:
-        raise
     finally:
         # always change back to the previous directory
         os.chdir(old_cwd)
