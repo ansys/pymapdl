@@ -1,5 +1,5 @@
 import pytest
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
 
 class TestParseParameter:
     @pytest.mark.parametrize(
