@@ -9,7 +9,7 @@ import time
 
 from tqdm import tqdm
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import launch_mapdl, get_ansys_path
 from ansys.mapdl.core.misc import threaded
 from ansys.mapdl.core.misc import create_temp_dir, threaded_daemon
 from ansys.mapdl.core.launcher import (
@@ -180,7 +180,7 @@ class LocalMapdlPool:
 
         # monitor pool if requested
         if restart_failed:
-            self._pool_monitor_thread = self._monitor_pool()
+            self._pool_monitor_thread = self._monitor_pool(name='Monitoring_Thread')
 
         self._verify_unique_ports()
 
@@ -283,12 +283,12 @@ class LocalMapdlPool:
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
-        def func_wrapper(obj, func, timeout, args=None):
+        def func_wrapper(obj, func, timeout, args=None, name=''):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
             @threaded_daemon
-            def run():
+            def run(name=''):
                 if args is not None:
                     if isinstance(args, (tuple, list)):
                         results.append(func(obj, *args))
@@ -298,7 +298,7 @@ class LocalMapdlPool:
                     results.append(func(obj))
                 complete[0] = True
 
-            run_thread = run()
+            run_thread = run(name='map.run')
             if timeout:
                 tstart = time.time()
                 while not complete[0]:
@@ -342,7 +342,7 @@ class LocalMapdlPool:
                 # grab the next available instance of mapdl
                 instance = self.next_available()
                 instance.locked = True
-                threads.append(func_wrapper(instance, func, timeout, args))
+                threads.append(func_wrapper(instance, func, timeout, args, name='Map_Thread'))
 
             if close_when_finished:
                 # start closing any instances that are not in execution
@@ -557,12 +557,12 @@ class LocalMapdlPool:
         self._instances[index] = launch_mapdl(
             run_location=run_location, port=port, **self._spawn_kwargs
         )
-        LOG.debug("Spawned instance: %d", index)
+        LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
 
     @threaded_daemon
-    def _monitor_pool(self, refresh=1.0):
+    def _monitor_pool(self, refresh=1.0, name=''):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
         """
@@ -574,7 +574,7 @@ class LocalMapdlPool:
                     try:
                         # use the next port after the current available port
                         port = max(self._ports) + 1
-                        self._spawn_mapdl(index, port=port).join()
+                        self._spawn_mapdl(index, port=port, name=f'Instance {index}').join()
                     except Exception as e:
                         LOG.error(e, exc_info=True)
             time.sleep(refresh)

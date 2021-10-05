@@ -1,6 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 from ansys.mapdl.core import log
-logger = log.getLogger(__name__)
+logger = log.getLogger(__name__, loglevel='DEBUG')
 
 import platform
 from glob import glob
@@ -122,7 +122,7 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port):
+    def close_mapdl(port, name='Closing mapdl thread.'):
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
