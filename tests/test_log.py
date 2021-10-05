@@ -57,4 +57,3 @@ def test_log_change_in_file_msg(mapdl):
     logger.info('An useful info message')
 
     find_logmsg_in_logfile('THIS IS A TEST', 'An useful info message')
-
