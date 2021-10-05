@@ -1,5 +1,6 @@
 import warnings
 from enum import IntEnum
+from typing import Union
 
 QUERY_NAME = "__QUERY_PARM__"
 
@@ -52,7 +53,7 @@ class SelectionStatus(IntEnum):
 
 class _ParameterParsing:
 
-    def _run_query(self, command: str, integer='float'):
+    def _run_query(self, command: str, integer: bool) -> Union[int, float]:
         # import here to avoid circular import
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
