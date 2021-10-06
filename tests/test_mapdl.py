@@ -108,6 +108,13 @@ def make_block(mapdl, cleared):
     mapdl.vmesh("ALL")
 
 
+@pytest.mark.skip_grpc
+def test_internal_name_grpc(mapdl):
+    assert str(mapdl._ip) in mapdl._name
+    assert str(mapdl._port) in mapdl._name
+    assert 'GRPC' in mapdl._name
+
+
 def test_jobname(mapdl, cleared):
     jobname = "abcdefg"
     assert mapdl.jobname != jobname
