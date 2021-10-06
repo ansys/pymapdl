@@ -117,15 +117,11 @@ def test_check_license_file_fail():
 def test_license_checker(tmpdir):
     # validate license checker (this will only checkout the license)
     checker = licensing.LicenseChecker()
-    checker.start(license_file=False)
+    checker.start(license_file=False, checkout_license=True)
+    assert checker.check() is False
+    assert checker._license_checkout_success is None
     checker.wait()
     assert checker.check()
-
-    checker = licensing.LicenseChecker(timeout=0.1)
-    checker.start(checkout_license=False)
-    checker.wait()
-    with pytest.raises(errors.LicenseServerConnectionError):
-        checker.check()
 
 
 @skip_launch_mapdl
