@@ -180,6 +180,11 @@ class _MapdlCore(Commands):
         self._post = PostProcessing(self)
 
     @property
+    def _name(self):  # pragma: no cover
+        """Implemented by child class"""
+        raise NotImplementedError("Implemented by child class")
+
+    @property
     def queries(self):
         """Get instance of Query class containing inline functions of APDL.
 
