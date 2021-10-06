@@ -1,6 +1,8 @@
 """This module is for threaded implementations of the mapdl interface"""
-from ansys.mapdl.core.log import getLogger
-LOG = getLogger(__name__)  # This should be import the first.
+
+from ansys.mapdl.core import log
+LOG = log.PyansysLogger()
+
 
 import shutil
 import warnings
@@ -121,6 +123,7 @@ class LocalMapdlPool:
         **kwargs,
     ):
         """Initialize several instances of mapdl"""
+        LOG.is_pool = True
         self._instances = []
         self._root_dir = run_location
         kwargs["remove_temp_files"] = remove_temp_files

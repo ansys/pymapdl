@@ -1,6 +1,7 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
-from ansys.mapdl.core.log import getLogger
-logger = getLogger(__name__)
+from ansys.mapdl.core import log
+logger = log.PyansysLogger()
+
 import re
 from warnings import warn
 import shutil

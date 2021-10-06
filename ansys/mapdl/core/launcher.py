@@ -1,6 +1,8 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
+
 from ansys.mapdl.core import log
-logger = log.getLogger(__name__, loglevel='DEBUG')
+logger = log.PyansysLogger()
+
 
 import platform
 from glob import glob

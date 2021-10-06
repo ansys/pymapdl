@@ -1,6 +1,7 @@
 """pymapdl specific errors"""
-from ansys.mapdl.core.log import getLogger
-logger = getLogger(__name__)
+
+from ansys.mapdl.core import log
+logger = log.PyansysLogger()
 
 import threading
 import signal
