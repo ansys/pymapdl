@@ -77,17 +77,17 @@ class Query(
     --------
     In this example we construct a solid box and mesh it. Then we use
     the ``Query`` methods ``nx``, ``ny``, and ``nz`` to find the
-    cartesian coordinates of the first node.
+    cartesian coordinates of the first node. We can access these
+    through the ``mapdl.queries`` property.
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> from ansys.mapdl.core.inline_functions import Query
     >>> mapdl = launch_mapdl()
     >>> mapdl.prep7()
     >>> mapdl.et(1, 'SOLID5')
     >>> mapdl.block(0, 10, 0, 20, 0, 30)
     >>> mapdl.esize(2)
     >>> mapdl.vmesh('ALL')
-    >>> q = Query(mapdl)
+    >>> q = mapdl.queries
     >>> q.nx(1), q.ny(1), q.nz(1)
     0.0 20.0 0.0
     """
