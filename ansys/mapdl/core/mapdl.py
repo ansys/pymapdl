@@ -142,8 +142,11 @@ class _MapdlCore(Commands):
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
+        self._name = ''
 
+        #Setting up logger
         self._log = setup_logger(loglevel.upper(), log_file=log_file)
+        self._log = self._log._add_MAPD_instance_logger(self._name, self)
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
@@ -159,6 +162,10 @@ class _MapdlCore(Commands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
+
+    def __getitem__(self, key):
+        if key == 'name':
+            return self._name 
 
     @property
     def queries(self):
