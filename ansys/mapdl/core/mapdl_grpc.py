@@ -1,6 +1,6 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
 
-from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import LOG
 
 import re
 from warnings import warn
@@ -207,6 +207,8 @@ class MapdlGrpc(_MapdlCore):
         super().__init__(loglevel, log_file=log_file, **kwargs)
 
         check_valid_ip(ip)
+
+        self._name = f"{ip}:{port}"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
