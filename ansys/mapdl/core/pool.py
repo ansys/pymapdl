@@ -1,8 +1,6 @@
 """This module is for threaded implementations of the mapdl interface"""
 
-from ansys.mapdl.core import log
-LOG = log.PyansysLogger()
-
+from ansys.mapdl.core import LOG as logger
 
 import shutil
 import warnings

@@ -1,7 +1,6 @@
 """Module to control interaction with MAPDL through Python"""
 
-from ansys.mapdl.core import log
-logger = log.PyansysLogger()
+from ansys.mapdl.core import LOG as logger
 
 import time
 import glob
