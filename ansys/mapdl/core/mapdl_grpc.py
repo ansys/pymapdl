@@ -1768,3 +1768,8 @@ class MapdlGrpc(_MapdlCore):
         # otherwise, simply run cmatrix as we're already in
         # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
+
+    @property
+    def _name(self):
+        """Instance unique identifier."""
+        return f"GRPC_{self._ip}:{self._port}"

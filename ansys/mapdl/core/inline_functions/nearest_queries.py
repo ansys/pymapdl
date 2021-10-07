@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _EntityNearestEntityQueries(_ParameterParsing):
+class _EntityNearestEntityQueries(_QueryExecution):
     _mapdl = None
 
     def nnear(self, n: int) -> int:
@@ -37,9 +37,7 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> node_number, nearest_node
         (112, 103)
         """
-        response = self._mapdl.run(f"_=NNEAR({n})")
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f'NNEAR({n})', integer=True)
 
     def knear(self, k: int) -> int:
         """Returns the selected keypoint nearest keypoint `k`.
@@ -71,9 +69,7 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> q.knear(k1) == k2
         True
         """
-        response = self._mapdl.run(f"_=KNEAR({k})")
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f'KNEAR({k})', integer=True)
 
     def enearn(self, n: int) -> int:
         """Returns the selected element nearest node `n`.
@@ -110,6 +106,4 @@ class _EntityNearestEntityQueries(_ParameterParsing):
         >>> node_number, nearest_element
         (112, 22)
         """
-        response = self._mapdl.run(f"_=ENEARN({n})")
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f'ENEARN({n})', integer=True)
