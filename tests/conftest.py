@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import namedtuple
 import os
 import time
 
@@ -18,6 +19,9 @@ from common import get_details_of_nodes, get_details_of_elements, Node, Element
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
+
+SpacedPaths = namedtuple('SpacedPaths', ['path_without_spaces', 'path_with_spaces',
+                                         'path_with_single_quote'])
 
 
 # Check if MAPDL is installed
@@ -238,6 +242,14 @@ def mapdl(request, tmpdir_factory):
             time.sleep(1)  # takes a second for the processes to shutdown
             for pid in mapdl._pids:
                 assert not check_pid(pid)
+
+
+@pytest.fixture
+def path_tests(tmpdir):
+    p1 = tmpdir.mkdir("./temp/")
+    p2 = tmpdir.mkdir("./t e m p/")
+    p3 = tmpdir.mkdir("./temp'")
+    return SpacedPaths(str(p1), str(p2), str(p3))
 
 
 @pytest.fixture(scope="function")
