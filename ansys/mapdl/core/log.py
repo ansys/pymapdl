@@ -2,49 +2,65 @@ import logging
 from datetime import datetime
 import sys
 
-from ansys.mapdl.core.mapdl import _MapdlCore
-
 ## General configuration
 LOG_LEVEL = logging.DEBUG
 FILE_NAME = 'pyansys.log'
 
-## Single configuration #79
-STDOUT_MSG_FORMAT = '| %(levelname)-11s | %(module)-15s | %(funcName)-25s | %(message)s'
-FILE_MSG_FORMAT = '| %(asctime)-15s | %(levelname)-12s | %(module)-15s | %(funcName)-25s | %(message)s'
-DEFAULT_FILE_HEADER = """
-| Date Time               | Level name   | Module          | Function                  | Message
-|-------------------------|--------------|-----------------|---------------------------|---------------------------
-"""
-DEFAULT_STDOUT_HEADER = """
-| Level name  | Module          | Function                  | Message
-|-------------|-----------------|---------------------------|---------------------------
-"""
+STDOUT_MSG_FORMAT = '| %(levelname)-8s | %(instance_name)-15s |  %(module)-15s | %(funcName)-25s | %(message)s'
+FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
 
-## Pool configuration
-STDOUT_MSG_POOL_FORMAT = '| %(levelname)-12s | %(threadName)-15s | %(module)-15s | %(funcName)-25s | %(message)s'
-FILE_MSG_POOL_FORMAT = '| %(asctime)-15s | %(levelname)-12s | %(threadName)-15s | %(module)-15s | %(funcName)-25s | %(message)s'
-DEFAULT_FILE_HEADER_POOL = """
-| Date Time               | Level name   | Thread          | Module          | Function                  | Message
-|-------------------------|--------------|-----------------|-----------------|---------------------------|---------------------------
+DEFAULT_STDOUT_HEADER = """
+| Level    | Instance        | Module           | Function                  | Message
+|----------|-----------------|------------------|---------------------------|---------------------------
 """
-DEFAULT_STDOUT_HEADER_POOL = """
-| Level name   | Thread          | Module          | Function                  | Message
-|--------------|-----------------|-----------------|---------------------------|---------------------------
-"""
+DEFAULT_FILE_HEADER = DEFAULT_STDOUT_HEADER
 
 NEW_SESSION_HEADER = f"""\n=====================================================================================================================================
 ========================                      NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}                             ========================
 ====================================================================================================================================="""
 
-#changing the log record.
-old_factory = logging.getLogRecordFactory()
 
-def record_factory(*args, **kwargs):
-    record = old_factory(*args, **kwargs)
-    record.custom_attribute = 0xdecafbad
-    return record
+class CustomAdapter(logging.LoggerAdapter):
+    """
+    This is key to keep the reference to the MAPDL instance name dynamic.
+    """
 
-logging.setLogRecordFactory(record_factory)
+    def __init__(self, logger, extra=None):
+        self.logger = logger
+        self.extra = extra
+
+    def process(self, msg, kwargs):
+        kwargs['extra'] = {}
+        # This are the extra parameters sent to log
+        kwargs['extra']['instance_name'] = self.extra['name']
+        return msg, kwargs
+
+
+class PyAnsysPercentStyle(logging.PercentStyle):
+
+    def __init__(self, fmt, *, defaults=None):
+        self._fmt = fmt or self.default_format
+        self._defaults = defaults
+
+    def _format(self, record):
+        if defaults := self._defaults:
+            values = defaults | record.__dict__
+        else:
+            values = record.__dict__
+
+        # We can do here any changes we want in record, for example adding a key.
+
+        # We could create an if here if we want conditional formatting, and even
+        # change the record.__dict__
+        return STDOUT_MSG_FORMAT % values
+
+
+class PyAnsysFormatter(logging.Formatter):
+
+    def __init__(self, fmt=None, datefmt=None, style='%', validate=True, *, defaults=None):
+        super().__init__(fmt = fmt, datefmt = datefmt, style = style, validate = validate) # TODO: to fix `, **defaults)`
+        self._style = PyAnsysPercentStyle(fmt)# , defaults) #overwritting
+
 
 class PyansysLogger():
     """Logger used for each Pyansys logger.
@@ -62,9 +78,10 @@ class PyansysLogger():
     """
 
     _file_handler = None
-    _std_out_handler = None 
+    _std_out_handler = None
     _level = logging.DEBUG
     _instances = {}
+    level = None # TODO: TO REMOVE
 
     def __init__(self, level=_level, to_file=False, to_stdout=True, filename=FILE_NAME):
 
@@ -90,7 +107,8 @@ class PyansysLogger():
         if to_stdout:
             self._std_out_handler = logging.StreamHandler()
             self._std_out_handler.setLevel(level)
-            self._std_out_handler.setFormatter(logging.Formatter(STDOUT_MSG_FORMAT))
+            # self._std_out_handler.setFormatter(logging.Formatter(STDOUT_MSG_FORMAT))
+            self._std_out_handler.setFormatter(PyAnsysFormatter(STDOUT_MSG_FORMAT))
             self._global.addHandler(self._std_out_handler)
 
             self._std_out_handler.stream.write(DEFAULT_STDOUT_HEADER)
@@ -100,11 +118,19 @@ class PyansysLogger():
     def _add_instance(self, obj):
         if isinstance(obj, str):
             self._instances[obj] = self._global.getChild(obj)
-        elif issubclass(obj, _MapdlCore):
-            self._instances[obj._name] = self._global.getChild(obj._name)
         else:
-            raise Exception("You can only add 'str' or 'MAPDL' classes to this method.")
+            raise Exception("You can only input 'str' classes to this method.")
         return self._instances[obj]
+
+    def _add_MAPD_instance_logger(self, name, MAPDL_instance):
+        if isinstance(name, str):
+            self._instances[name] = CustomAdapter(self._global.getChild(name), MAPDL_instance)
+        elif isinstance(name, None):
+            self._instances[name] = CustomAdapter(self._global.getChild("NO_NAME_YET"), MAPDL_instance)
+        else:
+            raise Exception("You can only input 'str' classes to this method.")
+        self._instances[name].level = None
+        return self._instances[name]
 
     def __getitem__(self, key):
         if key in self._instances.keys():
