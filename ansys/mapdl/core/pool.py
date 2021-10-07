@@ -1,6 +1,6 @@
 """This module is for threaded implementations of the mapdl interface"""
 
-from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import LOG
 
 import shutil
 import warnings
@@ -121,7 +121,6 @@ class LocalMapdlPool:
         **kwargs,
     ):
         """Initialize several instances of mapdl"""
-        LOG.is_pool = True
         self._instances = []
         self._root_dir = run_location
         kwargs["remove_temp_files"] = remove_temp_files
@@ -523,7 +522,7 @@ class LocalMapdlPool:
                 except:
                     pass
                 self._instances[index] = None
-                LOG.debug("Exited instance: %s", str(instance))
+                # LOG.debug("Exited instance: %s", str(instance))
 
         threads = []
         for i, instance in enumerate(self):
@@ -558,7 +557,7 @@ class LocalMapdlPool:
         self._instances[index] = launch_mapdl(
             run_location=run_location, port=port, **self._spawn_kwargs
         )
-        LOG.debug("Spawned instance %d. Name '%s'", index, name)
+        # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
 
