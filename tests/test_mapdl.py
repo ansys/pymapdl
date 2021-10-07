@@ -20,7 +20,10 @@ skip_no_xserver = pytest.mark.skipif(
 
 skip_in_cloud = pytest.mark.skipif(
     not get_start_instance(),
-    reason="Must be able to launch MAPDL locally. Cloud does not allow create folders."
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+"""
 )
 
 
@@ -819,3 +822,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     assert not mapdl.run("parm = 'asdf'")  # assert it is not empty
 
     mapdl._run('/gopr') # getting settings back
+
+
+@skip_in_cloud
+def test_path_without_spaces(mapdl, path_tests):
+    resp = mapdl.cwd(path_tests.path_without_spaces)
+    assert 'WARNING' not in resp
+
+
+@skip_in_cloud
+def test_path_with_spaces(mapdl, path_tests):
+    resp = mapdl.cwd(path_tests.path_with_spaces)
+    assert 'WARNING' not in resp
+
+
+@skip_in_cloud
+def test_path_with_single_quote(mapdl, path_tests):
+    with pytest.raises(RuntimeError):
+        resp = mapdl.cwd(path_tests.path_with_single_quote)
+        assert 'WARNING' not in resp
