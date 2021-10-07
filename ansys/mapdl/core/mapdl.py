@@ -45,6 +45,7 @@ with self.non_interactive:
     self.run('(F20.12)')
 """
 
+## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
     "*VWR": VWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
@@ -53,7 +54,29 @@ INVAL_COMMANDS = {
     "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
     "*ASK": "Unsupported command.  Use python ``input`` instead.",
     "*IF": "Use a python ``if`` or run as non_interactive",
-    "CMATRIX": "Use as non_interactive",
+    "CMAT": "Use as non_interactive",
+}
+
+## Soft-invalid commands
+# Invalid commands in interactive mode but their execution is just ignored.
+# The correspondent command is replaced by a comment using the command '\COM'
+# and a warning is recorded in the logger
+#
+# This commands can still be executed in ``non_interactive`` mode or using
+# ``Mapdl._run`` method.
+#
+# Format of the message:
+# f"{CMD} is ignored: {INVAL_COMMANDS_SILENT[CMD]}.
+#
+# NOTE
+# Obtain the command from the string supplied using
+#
+#    string.split(',')[0].upper()
+#
+# This way to get the command is different from the one used in ``INVAL_COMMANDS``.
+#
+INVAL_COMMANDS_SILENT = {
+    "/NOPR": "Suppressing console output is not recommended, use ``Mute`` parameter instead. This command is disabled in interactive mode."
 }
 
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
@@ -155,6 +178,11 @@ class _MapdlCore(Commands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
+
+    @property
+    def _name(self):  # pragma: no cover
+        """Implemented by child class"""
+        raise NotImplementedError("Implemented by child class")
 
     @property
     def queries(self):
@@ -2045,19 +2073,29 @@ class _MapdlCore(Commands):
             # https://github.com/pyansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
 
+        # Invalid commands silently ignored.
+        cmd_ = command.split(',')[0].upper()
+        if cmd_ in INVAL_COMMANDS_SILENT:
+            msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
+            self._log.info(msg)
+
+            # This very likely won't be recorded anywhere.
+            # But just in case, adding info as a comment
+            command = f"/COM, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
+
         if self._store_commands:
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
                 'Invalid pymapdl command "%s"\n\n%s'
-                % (command, INVAL_COMMANDS[command[:3]])
+                % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
                 'Invalid pymapdl command "%s"\n\n%s'
-                % (command, INVAL_COMMANDS[command[:4]])
+                % (command, INVAL_COMMANDS[command[:4].upper()])
             )
             raise exception
         elif write_to_log and self._apdl_log is not None:

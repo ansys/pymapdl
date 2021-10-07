@@ -221,3 +221,8 @@ class MapdlConsole(_MapdlCore):
                 except:
                     self._log.warning("Unable to kill process %d", self._process.pid)
                 self._log.debug("Killed process %d", self._process.pid)
+
+    @property
+    def _name(self):
+        """Instance unique identifier."""
+        return f"Console_PID_{self._process.pid}"

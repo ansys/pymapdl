@@ -989,8 +989,19 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-
+        # the old behaviour is to supplied the name and the extension separatelly.
+        # to make it easier let's going to allow names with extensions
         fname = kwargs.get("fname", args[1])
+        basename = os.path.basename(fname)
+        if len(basename.split('.')) == 1:
+            # there is no extension in the main name.
+            if len(args) > 2:
+                # if extension is an input as an option (old APDL style)
+                fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+            else:
+                # Using default .db
+                fname = kwargs.get("fname", args[1])  + '.' + 'cdb'
+
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         self.input(fname, **kwargs)
@@ -1049,22 +1060,37 @@ class MapdlGrpc(_MapdlCore):
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
         if self._local:
-            if not os.path.isfile(fname):
-                raise FileNotFoundError('Unable to locate filename "%s"' % fname)
-
-            if not os.path.dirname(fname):
-                filename = os.path.join(os.getcwd(), fname)
+            if os.path.isdir(fname):
+                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
             else:
-                filename = fname
+                # It must be a file!
+                if os.path.isfile(fname):
+                    # And it exist!
+                    filename = os.path.join(os.getcwd(), fname)
+                elif fname in self.list_files(): #
+                    # It exists in the Mapdl working directory
+                    filename = os.path.join(self.directory, fname)
+                elif os.path.dirname(fname):
+                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
+                else:
+                    # Finally
+                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
         else:
             if not os.path.dirname(fname):
                 # might be trying to run a local file.  Check if the
                 # file exists remotely.
                 if fname not in self.list_files():
                     self.upload(fname, progress_bar=progress_bar)
+                filename = fname
             else:
-                self.upload(fname, progress_bar=progress_bar)
-            filename = os.path.basename(fname)
+                # upload the file if it exists locally
+                if os.path.isfile(fname):
+                    self.upload(fname, progress_bar=progress_bar)
+                    filename = os.path.basename(fname)
+                else:
+                    # Otherwise, it must be remote.  Use full path.
+                    filename = fname
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
@@ -1742,3 +1768,8 @@ class MapdlGrpc(_MapdlCore):
         # otherwise, simply run cmatrix as we're already in
         # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
+
+    @property
+    def _name(self):
+        """Instance unique identifier."""
+        return f"GRPC_{self._ip}:{self._port}"

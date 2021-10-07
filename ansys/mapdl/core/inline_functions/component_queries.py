@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _ComponentQueries(_ParameterParsing):
+class _ComponentQueries(_QueryExecution):
     _mapdl = None
 
     def centrx(self, e: int) -> float:
@@ -27,7 +27,6 @@ class _ComponentQueries(_ParameterParsing):
         and ``(1, 2, 3)`` then find the centroid x-coordinate of this
         element.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -35,12 +34,10 @@ class _ComponentQueries(_ParameterParsing):
         >>> n1 = mapdl.n(2, 1, 2, 3)
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
-        >>> q = Query(mapdl)
-        >>> q.centrx(e0)
+        >>> mapdl.queries.centrx(e0)
         0.5
         """
-        response = self._mapdl.run(f"_=CENTRX({e})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"CENTRX({e})", integer=False)
 
     def centry(self, e: int) -> float:
         """Return the y coordinate of the element centroid.
@@ -64,7 +61,6 @@ class _ComponentQueries(_ParameterParsing):
         Here we construct a line between the coordinates (0, 0, 0) and
         (1, 2, 3) then find the centroid y-coordinate of this element.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -72,12 +68,10 @@ class _ComponentQueries(_ParameterParsing):
         >>> n1 = mapdl.n(2, 1, 2, 3)
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
-        >>> q = Query(mapdl)
-        >>> q.centry(e0)
+        >>> mapdl.queries.centry(e0)
         1.0
         """
-        response = self._mapdl.run(f"_=CENTRY({e})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"CENTRY({e})", integer=False)
 
     def centrz(self, e: int) -> float:
         """Return the z coordinate of the element centroid.
@@ -101,7 +95,6 @@ class _ComponentQueries(_ParameterParsing):
         Here we construct a line between the coordinates (0, 0, 0) and
         (1, 2, 3) then find the centroid z-coordinate of this element.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
@@ -109,12 +102,10 @@ class _ComponentQueries(_ParameterParsing):
         >>> n1 = mapdl.n(2, 1, 2, 3)
         >>> mapdl.et(1, 'LINK11')
         >>> e0 = mapdl.e(n0, n1)
-        >>> q = Query(mapdl)
-        >>> q.centrz(e0)
+        >>> mapdl.queries.centrz(e0)
         1.5
         """
-        response = self._mapdl.run(f"_=CENTRZ({e})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"CENTRZ({e})", integer=False)
 
     def nx(self, n: int) -> float:
         """Return the x coordinate of a node.
@@ -135,23 +126,20 @@ class _ComponentQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a simple box and mesh it with elements. Then
-        we use the ``Query`` class, and the ``nx`` method to find the
-        x-coordinate of the 10th node.
+        we use the ``nx`` method from the ``queries`` attribute to
+        find the x-coordinate of the 10th node.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
         >>> mapdl.block(0, 10, 0, 20, 0, 30)
         >>> mapdl.esize(2)
         >>> mapdl.vmesh('ALL')
-        >>> q = Query(mapdl)
-        >>> q.nx(10)
+        >>> mapdl.queries.nx(10)
         0.0
         """
-        response = self._mapdl.run(f"_=NX({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"NX({n})", integer=False)
 
     def ny(self, n: int) -> float:
         """Return the y coordinate of a node.
@@ -172,23 +160,20 @@ class _ComponentQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a simple box and mesh it with elements. Then
-        we use the ``Query`` class, and the ``ny`` method to find the
-        y-coordinate of the 10th node.
+        we use the the ``ny`` method from the ``queries`` attribute to
+        find the y-coordinate of the 10th node.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
         >>> mapdl.block(0, 10, 0, 20, 0, 30)
         >>> mapdl.esize(2)
         >>> mapdl.vmesh('ALL')
-        >>> q = Query(mapdl)
-        >>> q.ny(10)
+        >>> mapdl.queries.ny(10)
         4.0
         """
-        response = self._mapdl.run(f"_=NY({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"NY({n})", integer=False)
 
     def nz(self, n: int) -> float:
         """Return the z coordinate of a node.
@@ -209,23 +194,20 @@ class _ComponentQueries(_ParameterParsing):
         Examples
         --------
         Here we construct a simple box and mesh it with elements. Then
-        we use the ``Query`` class, and the ``nz`` method to find the
-        z-coordinate of the 10th node.
+        we use the ``nz`` attribute from the ``queries`` attribute to
+        find the z-coordinate of the 10th node.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
         >>> mapdl.block(0, 10, 0, 20, 0, 30)
         >>> mapdl.esize(2)
         >>> mapdl.vmesh('ALL')
-        >>> q = Query(mapdl)
-        >>> q.nz(10)
+        >>> mapdl.queries.nz(10)
         0.0
         """
-        response = self._mapdl.run(f"_=NZ({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"NZ({n})", integer=False)
 
     def kx(self, k: int) -> float:
         """Return the x coordinate of a keypont.
@@ -248,16 +230,13 @@ class _ComponentQueries(_ParameterParsing):
         x-coordinate of it.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 1, 2)
-        >>> q = Query(mapdl)
-        >>> q.kx(1)
+        >>> mapdl.queries.kx(1)
         0.0
         """
-        response = self._mapdl.run(f"_=KX({k})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"KX({k})", integer=False)
 
     def ky(self, k: int) -> float:
         """Return the y coordinate of a keypont.
@@ -280,16 +259,13 @@ class _ComponentQueries(_ParameterParsing):
         y-coordinate of it.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 1, 2)
-        >>> q = Query(mapdl)
-        >>> q.ky(1)
+        >>> mapdl.queries.ky(1)
         1.0
         """
-        response = self._mapdl.run(f"_=KY({k})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"KY({k})", integer=False)
 
     def kz(self, k: int) -> float:
         """Return the z coordinate of a keypont.
@@ -312,19 +288,16 @@ class _ComponentQueries(_ParameterParsing):
         z-coordinate of it.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 1, 2)
-        >>> q = Query(mapdl)
-        >>> q.kz(1)
+        >>> mapdl.queries.kz(1)
         2.0
         """
-        response = self._mapdl.run(f"_=KZ({k})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"KZ({k})", integer=False)
 
 
-class _InverseGetComponentQueries(_ParameterParsing):
+class _InverseGetComponentQueries(_QueryExecution):
     _mapdl = None
 
     def node(self, x: float, y: float, z: float) -> int:
@@ -352,27 +325,27 @@ class _InverseGetComponentQueries(_ParameterParsing):
         Examples
         --------
         In this example we construct a solid cube and mesh it. Then we
-        use ``Query.node`` to find the node closest to the centre of the
-        cube. Using this we can extract the coordinates of this node and
-        see how close to the centre the node is.
+        use ``queries.node`` to find the node closest to the centre of
+        the cube. Using this we can extract the coordinates of this
+        node and see how close to the centre the node is.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
         >>> mapdl.block(0, 10, 0, 10, 0, 10)
         >>> mapdl.esize(3)
         >>> mapdl.vmesh('ALL')
-        >>> q = Query(mapdl)
-        >>> node_number = q.node(5., 5., 5.)
+        >>> node_number = mapdl.queries.node(5., 5., 5.)
         >>> node_number
         112
-        >>> q.nx(node_number), q.ny(node_number), q.nz(node_number)
-        5.0, 5.0, 5.0
+        >>> x = mapdl.queries.nx(node_number)
+        >>> y = mapdl.queries.ny(node_number)
+        >>> z = mapdl.queries.nz(node_number)
+        >>> (x, y, z)
+        (5.0, 5.0, 5.0)
         """
-        response = self._mapdl.run(f"_=NODE({x},{y},{z})")
-        return self._parse_parameter_integer_response(response)
+        return self._run_query(f"NODE({x},{y},{z})", integer=True)
 
     def kp(self, x: float, y: float, z: float) -> int:
         """Return keypoint closest to coordinate ``(x, y, z)``.
@@ -402,21 +375,18 @@ class _InverseGetComponentQueries(_ParameterParsing):
         3D and then find the keypoint closest to the point (1, 1, 1).
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 1, 2)
         >>> mapdl.k(2, 1, 2, 0)
         >>> mapdl.k(3, 2, 0, 1)
-        >>> q = Query(mapdl)
-        >>> q.kp(1., 1., 1.)
+        >>> mapdl.queries.kp(1., 1., 1.)
         1
         """
-        response = self._mapdl.run(f"_=KP({x},{y},{z})")
-        return self._parse_parameter_integer_response(response)
+        return self._run_query(f"KP({x},{y},{z})", integer=True)
 
 
-class _DisplacementComponentQueries(_ParameterParsing):
+class _DisplacementComponentQueries(_QueryExecution):
     _mapdl = None
 
     def rotx(self, n: int) -> float:
@@ -441,11 +411,10 @@ class _DisplacementComponentQueries(_ParameterParsing):
         of shell material, apply a displacement perpendicular to the
         plane of the material, and then solve.
 
-        Then we can use ``Query.rotx`` to get the x-component rotational
+        Then we can use ``queries.rotx`` to get the x-component rotational
         displacement at the middle node on the deformed edge.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SHELL181')
@@ -463,13 +432,11 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.d("all", "uz", -0.1)
         >>> mapdl.allsel("all")
         >>> mapdl.solve()
-        >>> q = Query(mapdl)
-        >>> node = q.node(1, 0.5, 0)
-        >>> q.rotx(node)
+        >>> node = mapdl.queries.node(1, 0.5, 0)
+        >>> mapdl.queries.rotx(node)
         -0.0002149851187
         """
-        response = self._mapdl.run(f"_=ROTX({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"ROTX({n})", integer=False)
 
     def roty(self, n: int) -> float:
         """Returns y-component of rotational displacement at a node.
@@ -493,11 +460,10 @@ class _DisplacementComponentQueries(_ParameterParsing):
         of shell material, apply a displacement perpendicular to the
         plane of the material, and then solve.
 
-        Then we can use ``Query.roty`` to get the y-component rotational
+        Then we can use ``queries.roty`` to get the y-component rotational
         displacement at the middle node on the deformed edge.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SHELL181')
@@ -515,13 +481,11 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.d("all", "uz", -0.1)
         >>> mapdl.allsel("all")
         >>> mapdl.solve()
-        >>> q = Query(mapdl)
-        >>> node = q.node(1, 0.5, 0)
-        >>> q.roty(node)
+        >>> node = mapdl.queries.node(1, 0.5, 0)
+        >>> mapdl.queries.roty(node)
         0.1489593933
         """
-        response = self._mapdl.run(f"_=ROTY({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"ROTY({n})", integer=False)
 
     def rotz(self, n: int) -> float:
         """Returns z-component of rotational displacement at a node.
@@ -545,11 +509,10 @@ class _DisplacementComponentQueries(_ParameterParsing):
         of shell material, apply a displacement perpendicular to the
         plane of the material, and then solve.
 
-        Then we can use ``Query.rotz`` to get the z-component rotational
+        Then we can use ``queries.rotz`` to get the z-component rotational
         displacement at the middle node on the deformed edge.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SHELL181')
@@ -567,13 +530,11 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.d("all", "uz", -0.1)
         >>> mapdl.allsel("all")
         >>> mapdl.solve()
-        >>> q = Query(mapdl)
-        >>> node = q.node(1, 0.5, 0)
-        >>> q.rotz(node)
+        >>> node = mapdl.queries.node(1, 0.5, 0)
+        >>> mapdl.queries.rotz(node)
         0.0
         """
-        response = self._mapdl.run(f"_=ROTZ({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"ROTZ({n})", integer=False)
 
     def ux(self, n: int) -> float:
         """Returns x-component of structural displacement at a node.
@@ -598,7 +559,6 @@ class _DisplacementComponentQueries(_ParameterParsing):
         in the x-direction at the deformed end (node number 7).
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
@@ -616,13 +576,11 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.antype('STATIC')
         >>> mapdl.solve()
         >>> mapdl.finish()
-        >>> q = Query(mapdl)
-        >>> q.ux(7)
+        >>> mapdl.queries.ux(7)
         1.549155634e-07
 
         """
-        response = self._mapdl.run(f"_=UX({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"UX({n})", integer=False)
 
     def uy(self, n: int) -> float:
         """Returns y-component of structural displacement at a node.
@@ -647,7 +605,6 @@ class _DisplacementComponentQueries(_ParameterParsing):
         in the y-direction at the deformed end (node number 7).
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
@@ -665,13 +622,11 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.antype('STATIC')
         >>> mapdl.solve()
         >>> mapdl.finish()
-        >>> q = Query(mapdl)
-        >>> q.uy(7)
+        >>> mapdl.queries.uy(7)
         5.803680779e-10
 
         """
-        response = self._mapdl.run(f"_=UY({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"UY({n})", integer=False)
 
     def uz(self, n: int) -> float:
         """Returns z-component of structural displacement at a node.
@@ -696,7 +651,6 @@ class _DisplacementComponentQueries(_ParameterParsing):
         in the z-direction at the deformed end (node number 7).
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SOLID5')
@@ -714,10 +668,8 @@ class _DisplacementComponentQueries(_ParameterParsing):
         >>> mapdl.antype('STATIC')
         >>> mapdl.solve()
         >>> mapdl.finish()
-        >>> q = Query(mapdl)
-        >>> q.uz(7)
+        >>> mapdl.queries.uz(7)
         3.74530389e-08
 
         """
-        response = self._mapdl.run(f"_=UZ({n})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f"UZ({n})", integer=False)

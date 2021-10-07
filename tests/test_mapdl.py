@@ -12,8 +12,18 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
+from ansys.mapdl.core.launcher import get_start_instance
+
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
+)
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+"""
 )
 
 
@@ -32,6 +42,66 @@ esize,5
 vmesh,all
 """
 
+## Testing CDREAD and CDWRITE
+# DB file generated locally with ANSYS.
+# Many of the commands could be deleted, but for the sake of good
+# testing we are going to leave them.
+
+CDB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
+/PREP7
+/NOPR
+/TITLE,'CDREAD and CDWRITE tests
+*IF,_CDRDOFF,EQ,1,THEN     !if solid model was read in
+_CDRDOFF=             !reset flag, numoffs already performed
+*ELSE              !offset database for the following FE model
+*ENDIF
+*SET,T_PAR,'asdf1234'
+*SET,_RETURN ,  0.000000000000
+*SET,_STATUS ,  0.000000000000
+*SET,_UIQR   ,  1.000000000000
+DOF,DELETE
+EXTOPT,ATTR,      0,      0,      0
+EXTOPT,ESIZE,  0,  0.0000
+EXTOPT,ACLEAR,      0
+TREF,  0.00000000
+IRLF,  0
+BFUNIF,TEMP,_TINY
+ACEL,  0.00000000    ,  0.00000000    ,  0.00000000
+OMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+DOMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+CGLOC,  0.00000000    ,  0.00000000    ,  0.00000000
+CGOMEGA,  0.00000000    ,  0.00000000    ,  0.00000000
+DCGOMG,  0.00000000    ,  0.00000000    ,  0.00000000
+
+KUSE,     0
+TIME,  0.00000000
+ALPHAD,  0.00000000
+BETAD,  0.00000000
+DMPRAT,  0.00000000
+DMPSTR,  0.00000000
+CRPLIM, 0.100000000    ,   0
+CRPLIM,  0.00000000    ,   1
+NCNV,     1,  0.00000000    ,     0,  0.00000000    ,  0.00000000
+NEQIT,     0
+
+ERESX,DEFA
+/GO
+FINISH
+"""
+
+
+def clearing_cdread_cdwrite_tests(mapdl):
+    mapdl.finish(mute=True)
+    # *MUST* be NOSTART.  With START fails after 20 calls...
+    # this has been fixed in later pymapdl and MAPDL releases
+    mapdl.clear("NOSTART", mute=True)
+    mapdl.prep7(mute=True)
+
+
+def asserting_cdread_cdwrite_tests(mapdl):
+    # Using ``in`` because of the padding APDL does on strings.
+    return 'asdf1234' in mapdl.parameters['T_PAR']
+
 
 @pytest.fixture(scope="function")
 def make_block(mapdl, cleared):
@@ -39,6 +109,13 @@ def make_block(mapdl, cleared):
     mapdl.et(1, 186)
     mapdl.esize(0.25)
     mapdl.vmesh("ALL")
+
+
+@pytest.mark.skip_grpc
+def test_internal_name_grpc(mapdl):
+    assert str(mapdl._ip) in mapdl._name
+    assert str(mapdl._port) in mapdl._name
+    assert 'GRPC' in mapdl._name
 
 
 def test_jobname(mapdl, cleared):
@@ -610,3 +687,157 @@ def test_coriolis(mapdl, cleared):
     assert "GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED" in resp
     assert "ROTATING DAMPING MATRIX ACTIVATED" in resp
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
+
+
+def test_title(mapdl, cleared):
+    title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
+    mapdl.title(title)
+    assert title == mapdl.get('par', 'active', '0', 'title')
+
+
+def test_cdread(mapdl, cleared):
+    random_letters = mapdl.directory.split('/')[0][-3:0]
+
+    mapdl.run(f"parmtest='{random_letters}'")
+    mapdl.cdwrite('all', 'model2', 'cdb')
+
+    mapdl.clear()
+    mapdl.cdread("db", 'model2', 'cdb')
+
+    assert random_letters == mapdl.parameters['parmtest']
+
+
+# CDREAD tests are actually a good way to test 'input' command.
+@skip_in_cloud
+def test_cdread_different_location(mapdl, cleared, tmpdir):
+    random_letters = mapdl.directory.split('/')[0][-3:0]
+    dirname = 'tt' + random_letters
+
+    curdir = mapdl.directory
+    subdir = tmpdir.mkdir(dirname)
+
+    mapdl.run(f"parmtest='{random_letters}'")
+    mapdl.cdwrite('all', subdir.join('model2'), 'cdb')
+
+    mapdl.clear()
+    mapdl.cwd(subdir)
+    mapdl.cdread("db", 'model2', "cdb")
+    mapdl.cwd(curdir)  #Going back
+
+    assert random_letters == mapdl.parameters['parmtest']
+
+
+def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
+    # Writing db file in python directory.
+    # Pyansys should upload it when it detects it is not in the APDL directory.
+    fullpath = str(tmpdir.join('model.cdb'))
+    with open(fullpath, 'w') as fid:
+        fid.write(CDB_FILE)
+
+    # check if pymapdl is smart enough to determine if it can access
+    # the archive from the current working directory.
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(tmpdir)
+        mapdl.cdread('db', 'model', 'cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+
+        clearing_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('db', 'model.cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+
+        clearing_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('db', 'model')
+        assert asserting_cdread_cdwrite_tests(mapdl)
+    finally:
+        # always change back to the previous directory
+        os.chdir(old_cwd)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = str(tmpdir.join('model.cdb'))
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = str(tmpdir.join('model'))
+    mapdl.cdread('db', fullpath, 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = str(tmpdir.join('model'))
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+
+def test_cdread_in_apdl_directory(mapdl, cleared):
+    # Writing a db file in apdl directory, using APDL.
+    # Using APDL to write the archive as there are be cases where the
+    # python code cannot reach the APDL execution directory because it
+    # is remote.
+    mapdl.run("*SET,T_PAR,'asdf1234'")
+    mapdl.run("CDWRITE,'DB','model','cdb'")
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model', 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model.cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model.cdb')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model')
+    mapdl.cdread('db', fullpath, 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    fullpath = os.path.join(mapdl.directory, 'model')
+    mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+
+def test_inval_commands(mapdl, cleared):
+    """Test the output of invalid commands"""
+    cmds = ["*END", "*vwrite", "/eof", "cmatrix"]
+    for each_cmd in cmds:
+        with pytest.raises(RuntimeError):
+            mapdl.run(each_cmd)
+
+
+def test_inval_commands_silent(mapdl, tmpdir, cleared):
+    assert mapdl.run("parm = 'asdf'")  # assert it is not empty
+    mapdl.nopr()
+    assert mapdl.run("parm = 'asdf'")  # assert it is not empty
+
+    assert not mapdl._run('/nopr')  # setting /nopr and assert it is empty
+    assert not mapdl.run("parm = 'asdf'")  # assert it is not empty
+
+    mapdl._run('/gopr') # getting settings back
+
+
+@skip_in_cloud
+def test_path_without_spaces(mapdl, path_tests):
+    resp = mapdl.cwd(path_tests.path_without_spaces)
+    assert 'WARNING' not in resp
+
+
+@skip_in_cloud
+def test_path_with_spaces(mapdl, path_tests):
+    resp = mapdl.cwd(path_tests.path_with_spaces)
+    assert 'WARNING' not in resp
+
+
+@skip_in_cloud
+def test_path_with_single_quote(mapdl, path_tests):
+    with pytest.raises(RuntimeError):
+        resp = mapdl.cwd(path_tests.path_with_single_quote)
+        assert 'WARNING' not in resp
