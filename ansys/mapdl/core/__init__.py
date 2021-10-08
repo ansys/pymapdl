@@ -2,7 +2,7 @@ import appdirs
 import os
 
 # Importing logging
-from ansys.mapdl.core.log import PyansysLogger
+from ansys.mapdl.core.logging import PyansysLogger
 LOG = PyansysLogger()
 
 _LOCAL_PORTS = []
