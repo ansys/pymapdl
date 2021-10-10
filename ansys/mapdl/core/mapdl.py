@@ -105,16 +105,16 @@ def parse_to_short_cmd(command):
         return
 
 
-def setup_logger(loglevel='INFO', log_file=True):
+def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
     """Setup logger"""
 
     # return existing log if this function has already been called
     if hasattr(setup_logger, "log"):
         return setup_logger.log
+    else:
+        setup_logger.log = logger.add_instance_logger('MAPDL', mapdl_instance)
 
-    setup_logger.log = logger
-
-    return logger
+    return setup_logger.log
 
 
 class _MapdlCore(Commands):
@@ -142,12 +142,13 @@ class _MapdlCore(Commands):
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
+
         self._name = ''
 
         #Setting up logger
-        self._log = setup_logger(loglevel.upper(), log_file=log_file)
-        self._log = self._log._add_MAPD_instance_logger(self._name, self)
-        self._log.debug('Logging set to %s', loglevel)
+        # self._log = setup_logger(loglevel.upper(), log_file=log_file, mapdl_instance=self)
+        self._log = logger.add_instance_logger('MAPDL', self)
+        self._log.debug('Logging set to %s' % loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
 
@@ -165,7 +166,7 @@ class _MapdlCore(Commands):
 
     def __getitem__(self, key):
         if key == 'name':
-            return self._name 
+            return self._name
 
     @property
     def queries(self):

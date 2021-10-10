@@ -1,7 +1,5 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
 
-from ansys.mapdl.core import LOG
-
 import re
 from warnings import warn
 import shutil
@@ -208,7 +206,7 @@ class MapdlGrpc(_MapdlCore):
 
         check_valid_ip(ip)
 
-        self._name = f"{ip}:{port}"
+        self._name = f"{ip}:{port}" 
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
