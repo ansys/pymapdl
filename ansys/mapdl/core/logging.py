@@ -78,6 +78,7 @@ There shall no be conflicts between these loggers.
 import logging
 from datetime import datetime
 import sys
+from copy import copy
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -104,6 +105,14 @@ DEFAULT_FILE_HEADER = DEFAULT_STDOUT_HEADER
 NEW_SESSION_HEADER = f"""\n=====================================================================================================================================
 ========================                      NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}                             ========================
 ====================================================================================================================================="""
+
+string_to_loglevel = {
+    'DEBUG': DEBUG,
+    'INFO': INFO,
+    'WARN': WARN,
+    'ERROR': ERROR,
+    'CRITICAL': CRITICAL,
+}
 
 
 ## Code
@@ -295,18 +304,31 @@ class PyansysLogger():
         logger._std_out_handler = None
         logger._file_handler = None
 
-        if self._global.handlers:
+        if self._global.hasHandlers:
             for each_handler in self._global.handlers:
-                if each_handler == self._file_handler:
-                    logger._file_handler = each_handler
-                elif each_handler == self._std_out_handler:
-                    logger._std_out_handler = each_handler
-                logger.addHandler(each_handler)
+                new_handler = copy(each_handler)
 
-        if level: # Child logger cannot have different logging level than the parents.
+                if each_handler == self._file_handler:
+                    logger._file_handler = new_handler
+                elif each_handler == self._std_out_handler:
+                    logger._std_out_handler = new_handler
+
+                if level:
+                    # The logger handlers are copied and changed the loglevel is the specified log level
+                    # is lower than the one of the global.
+                    if each_handler.level > string_to_loglevel[level.upper()]:
+                        new_handler.setLevel(level)
+
+                logger.addHandler(new_handler)
+
+        if level:
+            if isinstance(level, str):
+                level = string_to_loglevel[level.upper()]
             logger.setLevel(level)
+
         else:
             logger.setLevel(self._global.level)
+
         logger.propagate = True
         return logger
 
