@@ -182,7 +182,8 @@ class PyAnsysPercentStyle(logging.PercentStyle):
         self._defaults = defaults
 
     def _format(self, record):
-        if defaults := self._defaults:
+        defaults = self._defaults
+        if defaults:
             values = defaults | record.__dict__
         else:
             values = record.__dict__
