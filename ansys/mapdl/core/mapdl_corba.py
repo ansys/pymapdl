@@ -182,9 +182,12 @@ class MapdlCorba(_MapdlCore):
 
         # critical for collection
         INSTANCES.append(weakref.ref(self))
+        self._corba_key = None
 
     def _launch(self, start_parm, verbose):
+        """Launch CORBA."""
         corba_key = launch_corba(verbose=verbose, **start_parm)
+        self._corba_key = corba_key
 
         orb = CORBA.ORB_init()
         self._server = orb.string_to_object(corba_key)
@@ -379,3 +382,8 @@ class MapdlCorba(_MapdlCore):
         if self._outfile:
             self._outfile.close()
         self._outfile = None
+
+    @property
+    def _name(self):
+        """Instance unique identifier."""
+        return f"CORBA_PID_{self._corba_key}"

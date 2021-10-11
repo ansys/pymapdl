@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _AngleQueries(_ParameterParsing):
+class _AngleQueries(_QueryExecution):
     _mapdl = None
 
     def anglen(self, n1, n2, n3) -> float:
@@ -42,8 +42,7 @@ class _AngleQueries(_ParameterParsing):
         >>> angle*180./pi
         90.0
         """
-        response = self._mapdl.run(f"_=ANGLEN({n1},{n2},{n3})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'ANGLEN({n1},{n2},{n3})', integer=False)
 
     def anglek(self, k1, k2, k3) -> float:
         """Return the angle between 3 keypoints where ``k1`` is the vertex.
@@ -84,11 +83,10 @@ class _AngleQueries(_ParameterParsing):
         >>> angle*180./pi
         45.0
         """
-        response = self._mapdl.run(f"_=ANGLEK({k1},{k2},{k3})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'ANGLEK({k1},{k2},{k3})', integer=False)
 
 
-class _AreaQueries(_ParameterParsing):
+class _AreaQueries(_QueryExecution):
     _mapdl = None
 
     def areand(self, n1, n2, n3) -> float:
@@ -121,8 +119,7 @@ class _AreaQueries(_ParameterParsing):
         >>> area = mapdl.queries.areand(n1, n2, n3)
         0.5
         """
-        response = self._mapdl.run(f"_=AREAND({n1},{n2},{n3})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'AREAND({n1},{n2},{n3})', integer=False)
 
     def areakp(self, k1, k2, k3) -> float:
         """Area of the triangle with vertices at keypoints ``k1``, ``k2``, and ``k3``.
@@ -154,11 +151,10 @@ class _AreaQueries(_ParameterParsing):
         >>> mapdl.queries.areakp(k1, k2, k3)
         0.2545584412
         """
-        response = self._mapdl.run(f"_=AREAKP({k1},{k2},{k3})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'AREAKP({k1},{k2},{k3})', integer=False)
 
 
-class _DistanceQueries(_ParameterParsing):
+class _DistanceQueries(_QueryExecution):
     _mapdl = None
 
     def distnd(self, n1, n2) -> float:
@@ -188,8 +184,7 @@ class _DistanceQueries(_ParameterParsing):
         >>> mapdl.queries.distnd(n1, n2)
         1.0
         """
-        response = self._mapdl.run(f"_=DISTND({n1},{n2})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'DISTND({n1},{n2})', integer=False)
 
     def distkp(self, k1, k2) -> float:
         """Compute the distance between keypoints ``k1`` and ``k2``.
@@ -222,5 +217,4 @@ class _DistanceQueries(_ParameterParsing):
         >>> sqrt(2)
         1.4142135623730951
         """
-        response = self._mapdl.run(f"_=DISTKP({k1},{k2})")
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'DISTKP({k1},{k2})', integer=False)
