@@ -1,18 +1,18 @@
 """
-# ``log`` module 
+# ``log`` module
 
 ## Objective
 This module intends to create a general framework for logging in Pyansys.
 This module is built upon ``logging`` library and it does NOT intend to replace it rather provide a way to interact between ``logging`` and ``Pyansys``.
 
-The loggers used in the module include the name of the instance which is intended to be unique. 
+The loggers used in the module include the name of the instance which is intended to be unique.
 This name is printed in all the active outputs and it is used to track the different MAPDL instances.
 
 
 ## Usage
 
 ### Global logger
-There is a global logger named ``_Global_`` which is created at ``ansys.mapdl.core.__init__``. 
+There is a global logger named ``_Global_`` which is created at ``ansys.mapdl.core.__init__``.
 If you want to use this global logger, you must call at the top of your module:
 
 .. code::
@@ -31,13 +31,13 @@ To log using this logger, just call the desired method as a normal logger.
     >>> from ansys.mapdl.core.logging import PyansysLogger
     >>> LOG = PyansysLogger(level=logging.DEBUG, to_file=False, to_stdout=True)
     >>> LOG.debug('This is LOG debug message.')
-    
-    | Level    | Instance        | Module           | Function             | Message
+
+       | Level    | Instance        | Module           | Function             | Message
     |----------|-----------------|------------------|----------------------|--------------------------------------------------------
     | DEBUG    |                 |  __init__        | <module>             | This is LOG debug message.
 
 
-By default, ``_Global_`` does not output to file or stdout. You should activate it from ``__init__``. 
+By default, ``_Global_`` does not output to file or stdout. You should activate it from ``__init__``.
 
 
 ### Instance logger
@@ -46,7 +46,7 @@ Every time that the class ``_MapdlCore`` is instantiated, a logger is created an
 * ``_MapdlCore._log``. For backward compatibility.
 * ``LOG._instances``. This field is a ``dict`` where the key is the name of the created logger.
 
-These instance loggers inheritate the ``_Global_`` output handlers and logging level unless otherwise specified. 
+These instance loggers inheritate the ``_Global_`` output handlers and logging level unless otherwise specified.
 
 You can use this logger like this:
 
@@ -62,7 +62,7 @@ You can use this logger like this:
 
 
 ### Other loggers
-You can create your own loggers using python ``logging`` library as you would do in any other script. 
+You can create your own loggers using python ``logging`` library as you would do in any other script.
 There shall no be conflicts between these loggers.
 
 
@@ -344,8 +344,8 @@ class PyansysLogger():
         ----------
         sufix : str
             Name of the logger.
-        
-        level : str
+       
+               level : str
             Level of logging
 
         Returns
