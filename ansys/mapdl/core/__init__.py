@@ -2,8 +2,10 @@ import appdirs
 import os
 
 # Importing logging
+import logging
 from ansys.mapdl.core.logging import PyansysLogger
-LOG = PyansysLogger()
+LOG = PyansysLogger(level=logging.ERROR, to_file=False, to_stdout=True)
+LOG.debug('Loaded logging module as LOG')
 
 _LOCAL_PORTS = []
 
