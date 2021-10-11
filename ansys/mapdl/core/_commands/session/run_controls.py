@@ -113,6 +113,9 @@ class RunControls:
     def cwd(self, dirpath="", **kwargs):
         """Changes the current working directory.
 
+        ``dirpath`` must not contain any singular quotations/apostrophes.
+        These are not supported in APDL.
+
         APDL Command: /CWD
 
         Parameters
@@ -124,10 +127,24 @@ class RunControls:
         -----
         After issuing the /CWD command, all new files opened with no default
         directory specified (via the FILE, /COPY, or RESUME commands, for
-        example) default to the new DIRPATH directory.
+        example) default to the new ``dirpath`` directory.
+
+        Examples
+        --------
+        Change MAPDL's working directory to ``"C:/temp"``.  This
+        assumes that MAPDL running on Windows.
+
+        >>> mapdl.cwd("C:/temp")
+
+        MAPDL on Linux example:
+
+        >>> mapdl.cwd("/tmp/")
+
         """
-        command = "/CWD,%s" % (str(dirpath))
-        return self.run(command, **kwargs)
+        dirpath = str(dirpath)
+        if not (dirpath.startswith('\'') and dirpath.endswith('\'')) and "'" in dirpath:
+            raise RuntimeError('The CWD command does not accept paths that contain singular quotes "'"")
+        return self.run(f"/CWD,'{dirpath}'", **kwargs)
 
     def filname(self, fname="", key="", **kwargs):
         """Changes the Jobname for the analysis.

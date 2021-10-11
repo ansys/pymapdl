@@ -113,7 +113,7 @@ def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
         return setup_logger.log
     else:
         setup_logger.log = logger.add_instance_logger('MAPDL', mapdl_instance)
-
+        
     return setup_logger.log
 
 
@@ -165,6 +165,11 @@ class _MapdlCore(Commands):
     def __getitem__(self, key):
         if key == 'name':
             return self._name
+
+    @property
+    def _name(self):  # pragma: no cover
+        """Implemented by child class"""
+        raise NotImplementedError("Implemented by child class")
 
     @property
     def queries(self):
@@ -2062,9 +2067,10 @@ class _MapdlCore(Commands):
             self._log.info(msg)
 
             # This very likely won't be recorded anywhere.
+            
             # But just in case, I'm adding info as /com
             command = f"/com, PyAnsys: {msg}" # Using '!' makes the output of '_run' empty
-
+            
         if self._store_commands:
             self._stored_commands.append(command)
             return
