@@ -121,7 +121,7 @@ class PyansysCustomAdapter(logging.LoggerAdapter):
     """
     This is key to keep the reference to the MAPDL instance name dynamic.
     If we use the standard approach which is supplying ``extra`` input to the logger, we
-    would need to keep inputting MAPDL instances everytime we do a log.
+    would need to keep inputting MAPDL instances every time we do a log.
 
     Using adapters we just need to especify the MAPDL instance we refer to once.
     """
@@ -204,7 +204,7 @@ class PyAnsysFormatter(logging.Formatter):
 
     def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%', validate=True, *, defaults=None):
         super().__init__(fmt, datefmt, style, validate)
-        self._style = PyAnsysPercentStyle(fmt, defaults=defaults)  # overwritting
+        self._style = PyAnsysPercentStyle(fmt, defaults=defaults)  # overwriting
 
 
 class PyansysLogger():
@@ -250,7 +250,7 @@ class PyansysLogger():
         self._global.propagate = True
         self.level = self._global.level # TODO: TO REMOVE
 
-        # Writting logging methods.
+        # Writing logging methods.
         self.debug    = self._global.debug
         self.info     = self._global.info
         self.warning  = self._global.warning
@@ -410,7 +410,7 @@ class PyansysLogger():
             raise KeyError(f"There is no instances with name {key}")
 
     def add_handling_uncaught_expections(self, logger):
-        """This just redirect the ouput of an exception to the logger."""
+        """This just redirect the output of an exception to the logger."""
         def handle_exception(exc_type, exc_value, exc_traceback):
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
