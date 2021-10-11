@@ -4,8 +4,6 @@ import logging as deflogging  # Default logging
 from ansys.mapdl.core import LOG  # Global logger
 
 from conftest import HAS_GRPC
-import pytest
-from ansys.mapdl.core import launch_mapdl
 
 import re
 import pytest
@@ -66,19 +64,6 @@ def fake_record(logger, msg ='This is a message', instance_name='172.1.1.1:52000
     record = logger.makeRecord(name_logger, level, filename, lno, msg, args=args, exc_info=exc_info, extra=extra, sinfo=sinfo)
     handler = logger.handlers[handler_index]
     return handler.format(record)
-
-
-def get_logger_text(fname=logging.FILE_NAME):
-    with(open(fname, 'r')) as fid:
-        return ''.join(fid.readlines())
-
-def find_logmsg_in_logfile(prev_string='INFO', string='', text=None):
-    if text is None:
-        text = get_logger_text()
-    if re.findall(f'^.*{prev_string}.*{string}.*$', text, re.MULTILINE):
-        return True
-    else:
-        return False
 
 
 def test_stdout_reading(capfd):
@@ -221,7 +206,7 @@ def test_instance_log_to_file(mapdl, tmpdir):
     file_msg = 'This is a debug message'
     if not mapdl._log._file_handler:
         mapdl._log.add_file_handler(file_path)
-    
+
     mapdl._log.debug(file_msg)
 
     with open(file_path, 'r') as fid:
@@ -229,25 +214,3 @@ def test_instance_log_to_file(mapdl, tmpdir):
 
     assert file_msg in text
     assert 'DEBUG' in text
-
-
-
-# def test_log_levels(mapdl):
-#     for each_log_name, each_log_number in LOG_LEVELS.items():
-#         string = f'This is an {each_log_name} log'
-#         mapdl._log.log(each_log_number, string)
-#         assert find_logmsg_in_logfile(each_log_name, string)
-
-
-# def test_log_uncaught_exception(mapdl):
-#     exception_msg = 'Uncaught exception'
-#     with pytest.raises(Exception):
-#         raise Exception(exception_msg)
-#     assert find_logmsg_in_logfile('', exception_msg)
-
-
-# def test_log_change_in_file_msg(mapdl):
-#     logger = log.getLogger('test', file_msg='%(asctime)-15s | %(funcName)-25s | THIS IS A TEST %(message)s')
-#     logger.info('An useful info message')
-
-#     find_logmsg_in_logfile('THIS IS A TEST', 'An useful info message')
