@@ -40,16 +40,52 @@ class PyansysCustomAdapter(logging.LoggerAdapter):
     """
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
+    _file_handler = None
+    _stdout_handler = None
 
     def __init__(self, logger, extra=None):
         self.logger = logger
         self.extra = extra
+        self._file_handler = logger._file_handler
+        self._std_out_handler = logger._std_out_handler
 
     def process(self, msg, kwargs):
         kwargs['extra'] = {}
         # This are the extra parameters sent to log
         kwargs['extra']['instance_name'] = self.extra['name'] # here self.extra is the argument pass to the ``PyAnsys
         return msg, kwargs
+
+    def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
+        """
+        Add file handler to logger.
+
+        Parameters
+        ----------
+        filename : str, optional
+            Name of the file where the logs are recorded. By default FILE_NAME
+        level : str, optional
+            Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
+        """
+
+        self.logger = add_file_handler(self.logger, filename=filename, level=level, write_headers=True)
+        self._file_handler = self.logger._file_handler
+
+    def log_to_stdout(self, level=LOG_LEVEL):
+        """
+        Add standard output handler to the logger.
+
+        Parameters
+        ----------
+        level : str, optional
+            Level of logging record. By default LOG_LEVEL
+        """
+
+        self.logger = add_stdout_handler(self.logger, level=level)
+        self._std_out_handler = self.logger._std_out_handler
+
+    ## Copy functions
+    add_stdout_handler = log_to_stdout
+    add_file_handler = log_to_file
 
 
 class PyAnsysPercentStyle(logging.PercentStyle):
@@ -79,7 +115,7 @@ class PyAnsysPercentStyle(logging.PercentStyle):
 class PyAnsysFormatter(logging.Formatter):
     """Customized ``Formatter`` class used to overwrite the defaults format styles."""
 
-    def __init__(self, fmt=None, datefmt=None, style='%', validate=True, *, defaults=None):
+    def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%', validate=True, *, defaults=None):
         super().__init__(fmt, datefmt, style, validate)
         self._style = PyAnsysPercentStyle(fmt, defaults=defaults)  # overwritting
 
@@ -124,6 +160,7 @@ class PyansysLogger():
 
         self._global = logging.getLogger('_Global_')  # Creating default main logger.
         self._global.setLevel(level)
+        self._global.propagate = True
         self.level = self._global.level # TODO: TO REMOVE
 
         # Writting logging methods.
@@ -132,6 +169,7 @@ class PyansysLogger():
         self.warning  = self._global.warning
         self.error    = self._global.error
         self.critical = self._global.critical
+        self.log      = self._global.log
 
         if to_file or filename != FILE_NAME:
             # We record to file
@@ -176,16 +214,22 @@ class PyansysLogger():
         """Make a child logger, either using ``getChild`` or copying attributes between ``_global_``
         logger and the new one. """
         logger = logging.getLogger(sufix)
+        logger._std_out_handler = None
+        logger._file_handler = None
 
         if self._global.handlers:
             for each_handler in self._global.handlers:
+                if each_handler == self._file_handler:
+                    logger._file_handler = each_handler
+                elif each_handler == self._std_out_handler:
+                    logger._std_out_handler = each_handler
                 logger.addHandler(each_handler)
 
         if level: # Child logger cannot have different logging level than the parents.
             logger.setLevel(level)
         else:
             logger.setLevel(self._global.level)
-
+        logger.propagate = True
         return logger
 
     def add_child_logger(self, sufix, level=None):
@@ -215,11 +259,13 @@ class PyansysLogger():
 
     def _add_MAPDL_instance_logger(self, name, MAPDL_instance, level):
         if isinstance(name, str):
-            return PyansysCustomAdapter(self._make_child_logger(name, level), MAPDL_instance)
+            instance_logger = PyansysCustomAdapter(self._make_child_logger(name, level), MAPDL_instance)
         elif isinstance(name, None):
-            return PyansysCustomAdapter(self._make_child_logger("NO_NAMED_YET", level), MAPDL_instance)
+            instance_logger = PyansysCustomAdapter(self._make_child_logger("NO_NAMED_YET", level), MAPDL_instance)
         else:
             raise Exception("You can only input 'str' classes to this method.")
+
+        return instance_logger
         # return.level = None # TODO: To remove
 
     def add_instance_logger(self, name, MAPDL_instance, level=None):
@@ -301,6 +347,7 @@ def add_file_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=
     _file_handler.setFormatter(logging.Formatter(FILE_MSG_FORMAT))
 
     if isinstance(logger, PyansysLogger):
+        logger._file_handler = _file_handler
         logger._global.addHandler(_file_handler)
 
     elif isinstance(logger, logging.Logger):
@@ -313,7 +360,7 @@ def add_file_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=
     return logger
 
 
-def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=False):
+def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=True):
     """
     Add a file handler to the input.
 
@@ -339,6 +386,7 @@ def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=False):
     _std_out_handler.setFormatter(PyAnsysFormatter(STDOUT_MSG_FORMAT))
 
     if isinstance(logger, PyansysLogger):
+        logger._std_out_handler = _std_out_handler
         logger._global.addHandler(_std_out_handler)
 
     elif isinstance(logger, logging.Logger):
