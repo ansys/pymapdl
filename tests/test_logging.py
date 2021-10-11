@@ -47,7 +47,7 @@ def fake_record(logger, msg ='This is a message', instance_name='172.1.1.1:52000
     exc_info : [type], optional
         Exception information. By default None
     extra : dict, optional
-        Extra arguments, one of them should be 'instance_name'. By default {} 
+        Extra arguments, one of them should be 'instance_name'. By default {}
 
     Returns
     -------

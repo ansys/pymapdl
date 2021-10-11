@@ -344,7 +344,7 @@ class PyansysLogger():
         ----------
         sufix : str
             Name of the logger.
-       
+
                level : str
             Level of logging
 
