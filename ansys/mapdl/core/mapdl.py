@@ -147,7 +147,7 @@ class _MapdlCore(Commands):
 
         #Setting up logger
         # self._log = setup_logger(loglevel.upper(), log_file=log_file, mapdl_instance=self)
-        self._log = logger.add_instance_logger('MAPDL', self)
+        self._log = logger.add_instance_logger('MAPDL', self, level=loglevel)
         self._log.debug('Logging set to %s' % loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
