@@ -688,7 +688,7 @@ def test_coriolis(mapdl, cleared):
     assert "ROTATING DAMPING MATRIX ACTIVATED" in resp
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
-    
+
 def test_title(mapdl, cleared):
     title = 'title1'  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
     mapdl.title(title)
@@ -804,7 +804,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
-    
+
 def test_inval_commands(mapdl, cleared):
     """Test the output of invalid commands"""
     cmds = ["*END", "*vwrite", "/eof", "cmatrix"]
@@ -823,7 +823,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 
     mapdl._run('/gopr') # getting settings back
 
-    
+
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
     resp = mapdl.cwd(path_tests.path_without_spaces)
