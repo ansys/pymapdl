@@ -1779,3 +1779,6 @@ class MapdlGrpc(_MapdlCore):
             return f"GRPC_{self._ip}:{self._port}"
         else:
             return f"GRPC_new_instance"
+    
+    def get_name(self):
+        return self._name

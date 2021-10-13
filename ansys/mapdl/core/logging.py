@@ -126,7 +126,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
     file_handler = None
-    _stdout_handler = None
+    stdout_handler = None
 
     def __init__(self, logger, extra=None):
         self.logger = logger
@@ -137,7 +137,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         kwargs['extra'] = {}
         # This are the extra parameters sent to log
-        kwargs['extra']['instance_name'] = self.extra['name'] # here self.extra is the argument pass to the ``Pymapdl
+        kwargs['extra']['instance_name'] = self.extra.get_name()  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):

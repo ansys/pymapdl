@@ -161,10 +161,6 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
-    def __getitem__(self, key):
-        if key == 'name':
-            return self._name
-
     @property
     def _name(self):  # pragma: no cover
         """Implemented by child class"""
