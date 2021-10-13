@@ -158,7 +158,7 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "pyansys_sphinx_theme"
-html_logo = "https://docs.pyansys.com/_static/pyansys-logo-black-cropped.png"
+html_logo = os.path.join("_static", "pyansys-logo-black-cropped.png")
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
