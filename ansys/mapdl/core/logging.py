@@ -12,7 +12,7 @@ This name is printed in all the active outputs and it is used to track the diffe
 ## Usage
 
 ### Global logger
-There is a global logger named ``_Global_`` which is created at ``ansys.mapdl.core.__init__``.
+There is a global logger named ``pymapdl_global`` which is created at ``ansys.mapdl.core.__init__``.
 If you want to use this global logger, you must call at the top of your module:
 
 .. code::
@@ -28,8 +28,8 @@ To log using this logger, just call the desired method as a normal logger.
 
 .. code::
     >>> import logging
-    >>> from ansys.mapdl.core.logging import PyansysLogger
-    >>> LOG = PyansysLogger(level=logging.DEBUG, to_file=False, to_stdout=True)
+    >>> from ansys.mapdl.core.logging import Logger
+    >>> LOG = Logger(level=logging.DEBUG, to_file=False, to_stdout=True)
     >>> LOG.debug('This is LOG debug message.')
 
        | Level    | Instance        | Module           | Function             | Message
@@ -37,7 +37,7 @@ To log using this logger, just call the desired method as a normal logger.
     | DEBUG    |                 |  __init__        | <module>             | This is LOG debug message.
 
 
-By default, ``_Global_`` does not output to file or stdout. You should activate it from ``__init__``.
+By default, ``pymapdl_global`` does not output to file or stdout. You should activate it from ``__init__``.
 
 
 ### Instance logger
@@ -46,7 +46,7 @@ Every time that the class ``_MapdlCore`` is instantiated, a logger is created an
 * ``_MapdlCore._log``. For backward compatibility.
 * ``LOG._instances``. This field is a ``dict`` where the key is the name of the created logger.
 
-These instance loggers inheritate the ``_Global_`` output handlers and logging level unless otherwise specified.
+These instance loggers inheritate the ``pymapdl_global`` output handlers and logging level unless otherwise specified.
 
 You can use this logger like this:
 
@@ -93,18 +93,18 @@ CRITICAL = logging.CRITICAL
 
 ## Formatting
 
-STDOUT_MSG_FORMAT = '| %(levelname)-8s | %(instance_name)-15s |  %(module)-15s | %(funcName)-20s | %(message)s'
+STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s'
 FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
 
 DEFAULT_STDOUT_HEADER = """
-| Level    | Instance        | Module           | Function             | Message
-|----------|-----------------|------------------|----------------------|--------------------------------------------------------
+LEVEL - INSTANCE NAME - MODULE - FUNCTION - MESSAGE
 """
 DEFAULT_FILE_HEADER = DEFAULT_STDOUT_HEADER
 
-NEW_SESSION_HEADER = f"""\n=====================================================================================================================================
-========================                      NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}                             ========================
-====================================================================================================================================="""
+NEW_SESSION_HEADER = f"""
+===============================================================================
+       NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
+==============================================================================="""
 
 string_to_loglevel = {
     'DEBUG': DEBUG,
@@ -115,26 +115,24 @@ string_to_loglevel = {
 }
 
 
-## Code
+class PymapdlCustomAdapter(logging.LoggerAdapter):
+    """This is key to keep the reference to the MAPDL instance name dynamic.
 
-class PyansysCustomAdapter(logging.LoggerAdapter):
-    """
-    This is key to keep the reference to the MAPDL instance name dynamic.
     If we use the standard approach which is supplying ``extra`` input to the logger, we
     would need to keep inputting MAPDL instances every time we do a log.
 
-    Using adapters we just need to especify the MAPDL instance we refer to once.
+    Using adapters we just need to specify the MAPDL instance we refer to once.
     """
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
-    _file_handler = None
+    file_handler = None
     _stdout_handler = None
 
     def __init__(self, logger, extra=None):
         self.logger = logger
         self.extra = extra
-        self._file_handler = logger._file_handler
-        self._std_out_handler = logger._std_out_handler
+        self.file_handler = logger.file_handler
+        self.std_out_handler = logger.std_out_handler
 
     def process(self, msg, kwargs):
         kwargs['extra'] = {}
@@ -143,8 +141,7 @@ class PyansysCustomAdapter(logging.LoggerAdapter):
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
-        """
-        Add file handler to logger.
+        """Add file handler to logger.
 
         Parameters
         ----------
@@ -154,28 +151,25 @@ class PyansysCustomAdapter(logging.LoggerAdapter):
             Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
         """
 
-        self.logger = add_file_handler(self.logger, filename=filename, level=level, write_headers=True)
-        self._file_handler = self.logger._file_handler
+        self.logger = addfile_handler(self.logger, filename=filename, level=level, write_headers=True)
+        self.file_handler = self.logger.file_handler
 
     def log_to_stdout(self, level=LOG_LEVEL):
-        """
-        Add standard output handler to the logger.
+        """Add standard output handler to the logger.
 
         Parameters
         ----------
         level : str, optional
             Level of logging record. By default LOG_LEVEL
         """
+        if self.std_out_handler:
+            raise Exception('Stdout logger already defined.')
 
         self.logger = add_stdout_handler(self.logger, level=level)
-        self._std_out_handler = self.logger._std_out_handler
-
-    ## Copy functions
-    add_stdout_handler = log_to_stdout
-    add_file_handler = log_to_file
+        self.std_out_handler = self.logger.std_out_handler
 
 
-class PyAnsysPercentStyle(logging.PercentStyle):
+class PymapdlPercentStyle(logging.PercentStyle):
 
     def __init__(self, fmt, *, defaults=None):
         self._fmt = fmt or self.default_format
@@ -205,12 +199,14 @@ class PyAnsysFormatter(logging.Formatter):
 
     def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%', validate=True, *, defaults=None):
         super().__init__(fmt, datefmt, style, validate)
-        self._style = PyAnsysPercentStyle(fmt, defaults=defaults)  # overwriting
+        self._style = PymapdlPercentStyle(fmt, defaults=defaults)  # overwriting
 
 
-class PyansysLogger():
-    """Logger used for each Pyansys logger.
+class Logger():
+    """Logger used for each Pyansys session.
+
     This class allows you to add handler to a file or standard output.
+
     Parameters
     ----------
     level : int, optional
@@ -225,14 +221,13 @@ class PyansysLogger():
         The default is ``None``.
     """
 
-    _file_handler = None
-    _std_out_handler = None
+    file_handler = None
+    std_out_handler = None
     _level = logging.DEBUG
     _instances = {}
 
     def __init__(self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME):
-        """
-        Customized logger class for PyAnsys.
+        """Customized logger class for PyAnsys.
 
         Parameters
         ----------
@@ -246,18 +241,18 @@ class PyansysLogger():
             Name of the output file. By default FILE_NAME.
         """
 
-        self._global = logging.getLogger('_Global_')  # Creating default main logger.
-        self._global.setLevel(level)
-        self._global.propagate = True
-        self.level = self._global.level # TODO: TO REMOVE
+        self.logger = logging.getLogger('pymapdl_global')  # Creating default main logger.
+        self.logger.setLevel(level)
+        self.logger.propagate = True
+        self.level = self.logger.level # TODO: TO REMOVE
 
         # Writing logging methods.
-        self.debug    = self._global.debug
-        self.info     = self._global.info
-        self.warning  = self._global.warning
-        self.error    = self._global.error
-        self.critical = self._global.critical
-        self.log      = self._global.log
+        self.debug = self.logger.debug
+        self.info = self.logger.info
+        self.warning = self.logger.warning
+        self.error = self.logger.error
+        self.critical = self.logger.critical
+        self.log = self.logger.log
 
         if to_file or filename != FILE_NAME:
             # We record to file
@@ -266,11 +261,10 @@ class PyansysLogger():
         if to_stdout:
             self.log_to_stdout(level=level)
 
-        self.add_handling_uncaught_expections(self._global) # Using logger to record unhandled exceptions
+        self.add_handling_uncaught_expections(self.logger) # Using logger to record unhandled exceptions
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
-        """
-        Add file handler to logger.
+        """Add file handler to logger.
 
         Parameters
         ----------
@@ -280,11 +274,10 @@ class PyansysLogger():
             Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
         """
 
-        self = add_file_handler(self, filename=filename, level=level, write_headers=True)
+        self = addfile_handler(self, filename=filename, level=level, write_headers=True)
 
     def log_to_stdout(self, level=LOG_LEVEL):
-        """
-        Add standard output handler to the logger.
+        """Add standard output handler to the logger.
 
         Parameters
         ----------
@@ -294,25 +287,21 @@ class PyansysLogger():
 
         self = add_stdout_handler(self, level=level)
 
-    ## Copy functions
-    add_stdout_handler = log_to_stdout
-    add_file_handler = log_to_file
-
     def _make_child_logger(self, sufix, level):
-        """Make a child logger, either using ``getChild`` or copying attributes between ``_global_``
+        """Make a child logger, either using ``getChild`` or copying attributes between ``pymapdl_global``
         logger and the new one. """
         logger = logging.getLogger(sufix)
-        logger._std_out_handler = None
-        logger._file_handler = None
+        logger.std_out_handler = None
+        logger.file_handler = None
 
-        if self._global.hasHandlers:
-            for each_handler in self._global.handlers:
+        if self.logger.hasHandlers:
+            for each_handler in self.logger.handlers:
                 new_handler = copy(each_handler)
 
-                if each_handler == self._file_handler:
-                    logger._file_handler = new_handler
-                elif each_handler == self._std_out_handler:
-                    logger._std_out_handler = new_handler
+                if each_handler == self.file_handler:
+                    logger.file_handler = new_handler
+                elif each_handler == self.std_out_handler:
+                    logger.std_out_handler = new_handler
 
                 if level:
                     # The logger handlers are copied and changed the loglevel is the specified log level
@@ -328,14 +317,13 @@ class PyansysLogger():
             logger.setLevel(level)
 
         else:
-            logger.setLevel(self._global.level)
+            logger.setLevel(self.logger.level)
 
         logger.propagate = True
         return logger
 
     def add_child_logger(self, sufix, level=None):
-        """
-        Add a child logger to the main logger. This logger is more general than
+        """Add a child logger to the main logger. This logger is more general than
         an instance logger which is designed to track the state of the MAPDL instances.
 
         If the logging level is in the arguments, a new logger with a reference to the ``_global`` logger handlers
@@ -345,8 +333,7 @@ class PyansysLogger():
         ----------
         sufix : str
             Name of the logger.
-
-               level : str
+        level : str
             Level of logging
 
         Returns
@@ -354,24 +341,24 @@ class PyansysLogger():
         logging.logger
             Logger class.
         """
-        name = self._global.name + '.' + sufix
+        name = self.logger.name + '.' + sufix
         self._instances[name] = self._make_child_logger(self, name, level)
         return self._instances[name]
 
-    def _add_MAPDL_instance_logger(self, name, MAPDL_instance, level):
+    def _add_mapdl_instance_logger(self, name, mapdl_instance, level):
         if isinstance(name, str):
-            instance_logger = PyansysCustomAdapter(self._make_child_logger(name, level), MAPDL_instance)
+            instance_logger = PymapdlCustomAdapter(self._make_child_logger(name, level), mapdl_instance)
         elif isinstance(name, None):
-            instance_logger = PyansysCustomAdapter(self._make_child_logger("NO_NAMED_YET", level), MAPDL_instance)
+            instance_logger = PymapdlCustomAdapter(self._make_child_logger("NO_NAMED_YET", level), mapdl_instance)
         else:
-            raise Exception("You can only input 'str' classes to this method.")
+            raise ValueError("You can only input 'str' classes to this method.")
 
         return instance_logger
         # return.level = None # TODO: To remove
 
-    def add_instance_logger(self, name, MAPDL_instance, level=None):
-        """
-        Create a logger for a MAPDL instance.
+    def add_instance_logger(self, name, mapdl_instance, level=None):
+        """Create a logger for a MAPDL instance.
+
         The MAPDL instance logger is a logger with an adapter which add the contextual
         information such as MAPDL instance name. This logger is returned and you can use
         it to log events as a normal logger. It is also stored in the ``_instances`` field.
@@ -380,12 +367,12 @@ class PyansysLogger():
         ----------
         name : str
             Name for the new logger
-        MAPDL_instance : ansys.mapdl.core.mapdl._MapdlCore
+        mapdl_instance : ansys.mapdl.core.mapdl._MapdlCore
             Mapdl instance object. This should contain the attribute ``name``.
 
         Returns
         -------
-        ansys.mapdl.core.logging.PyansysCustomAdapter
+        ansys.mapdl.core.logging.PymapdlCustomAdapter
             Logger adapter customized to add MAPDL information to the logs.
             You can use this class to log events in the same way you would with a logger
             class.
@@ -401,7 +388,7 @@ class PyansysLogger():
             count_ += 1
             new_name = name + '_' + str(count_)
 
-        self._instances[new_name] = self._add_MAPDL_instance_logger(new_name, MAPDL_instance, level)
+        self._instances[new_name] = self._add_mapdl_instance_logger(new_name, mapdl_instance, level)
         return self._instances[new_name]
 
     def __getitem__(self, key):
@@ -422,13 +409,13 @@ class PyansysLogger():
 
 ## Auxiliary functions
 
-def add_file_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=False):
+def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=False):
     """
     Add a file handler to the input.
 
     Parameters
     ----------
-    logger : logging.Logger or logging.PyansysLogger
+    logger : logging.Logger or logging.Logger
         Logger where to add the file handler.
     filename : str, optional
         Name of the output file. By default FILE_NAME
@@ -440,23 +427,23 @@ def add_file_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=
     Returns
     -------
     logger
-        Return the logger or PyansysLogger object.
+        Return the logger or Logger object.
     """
 
-    _file_handler = logging.FileHandler(filename)
-    _file_handler.setLevel(level)
-    _file_handler.setFormatter(logging.Formatter(FILE_MSG_FORMAT))
+    file_handler = logging.FileHandler(filename)
+    file_handler.setLevel(level)
+    file_handler.setFormatter(logging.Formatter(FILE_MSG_FORMAT))
 
-    if isinstance(logger, PyansysLogger):
-        logger._file_handler = _file_handler
-        logger._global.addHandler(_file_handler)
+    if isinstance(logger, Logger):
+        logger.file_handler = file_handler
+        logger.logger.addHandler(file_handler)
 
     elif isinstance(logger, logging.Logger):
-        logger.addHandler(_file_handler)
+        logger.addHandler(file_handler)
 
     if write_headers:
-        _file_handler.stream.write(NEW_SESSION_HEADER)
-        _file_handler.stream.write(DEFAULT_FILE_HEADER)
+        file_handler.stream.write(NEW_SESSION_HEADER)
+        file_handler.stream.write(DEFAULT_FILE_HEADER)
 
     return logger
 
@@ -467,7 +454,7 @@ def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=True):
 
     Parameters
     ----------
-    logger : logging.Logger or logging.PyansysLogger
+    logger : logging.Logger or logging.Logger
         Logger where to add the file handler.
     filename : str, optional
         Name of the output file. By default FILE_NAME
@@ -479,21 +466,21 @@ def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=True):
     Returns
     -------
     logger
-        Return the logger or PyansysLogger object.
+        Return the logger or Logger object.
     """
 
-    _std_out_handler = logging.StreamHandler()
-    _std_out_handler.setLevel(level)
-    _std_out_handler.setFormatter(PyAnsysFormatter(STDOUT_MSG_FORMAT))
+    std_out_handler = logging.StreamHandler()
+    std_out_handler.setLevel(level)
+    std_out_handler.setFormatter(PyAnsysFormatter(STDOUT_MSG_FORMAT))
 
-    if isinstance(logger, PyansysLogger):
-        logger._std_out_handler = _std_out_handler
-        logger._global.addHandler(_std_out_handler)
+    if isinstance(logger, Logger):
+        logger.std_out_handler = std_out_handler
+        logger.logger.addHandler(std_out_handler)
 
     elif isinstance(logger, logging.Logger):
-        logger.addHandler(_std_out_handler)
+        logger.addHandler(std_out_handler)
 
     if write_headers:
-        _std_out_handler.stream.write(DEFAULT_STDOUT_HEADER)
+        std_out_handler.stream.write(DEFAULT_STDOUT_HEADER)
 
     return logger

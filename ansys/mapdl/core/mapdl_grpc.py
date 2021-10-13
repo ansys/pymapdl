@@ -198,6 +198,10 @@ class MapdlGrpc(_MapdlCore):
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
     """
 
+    # Required by `_name` method to be defined before __init__ be
+    _ip = None
+    _port = None
+
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                 log_file=True, cleanup_on_exit=False, log_apdl=False,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
@@ -205,8 +209,6 @@ class MapdlGrpc(_MapdlCore):
         super().__init__(loglevel, log_file=log_file, **kwargs)
 
         check_valid_ip(ip)
-
-        self._name = f"{ip}:{port}"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
@@ -1773,4 +1775,7 @@ class MapdlGrpc(_MapdlCore):
     @property
     def _name(self):
         """Instance unique identifier."""
-        return f"GRPC_{self._ip}:{self._port}"
+        if self._ip or self._port:
+            return f"GRPC_{self._ip}:{self._port}"
+        else:
+            return f"GRPC_new_instance"
