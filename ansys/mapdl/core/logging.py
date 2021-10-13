@@ -2,8 +2,8 @@
 # ``log`` module
 
 ## Objective
-This module intends to create a general framework for logging in Pyansys.
-This module is built upon ``logging`` library and it does NOT intend to replace it rather provide a way to interact between ``logging`` and ``Pyansys``.
+This module intends to create a general framework for logging in Pymapdl.
+This module is built upon ``logging`` library and it does NOT intend to replace it rather provide a way to interact between ``logging`` and ``Pymapdl``.
 
 The loggers used in the module include the name of the instance which is intended to be unique.
 This name is printed in all the active outputs and it is used to track the different MAPDL instances.
@@ -82,7 +82,7 @@ from copy import copy
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
-FILE_NAME = 'pyansys.log'
+FILE_NAME = 'Pymapdl.log'
 
 # For convenience
 DEBUG = logging.DEBUG
@@ -137,7 +137,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         kwargs['extra'] = {}
         # This are the extra parameters sent to log
-        kwargs['extra']['instance_name'] = self.extra['name'] # here self.extra is the argument pass to the ``PyAnsys
+        kwargs['extra']['instance_name'] = self.extra['name'] # here self.extra is the argument pass to the ``Pymapdl
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
@@ -194,7 +194,7 @@ class PymapdlPercentStyle(logging.PercentStyle):
         return STDOUT_MSG_FORMAT % values
 
 
-class PyAnsysFormatter(logging.Formatter):
+class PymapdlFormatter(logging.Formatter):
     """Customized ``Formatter`` class used to overwrite the defaults format styles."""
 
     def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%', validate=True, *, defaults=None):
@@ -203,7 +203,7 @@ class PyAnsysFormatter(logging.Formatter):
 
 
 class Logger():
-    """Logger used for each Pyansys session.
+    """Logger used for each Pymapdl session.
 
     This class allows you to add handler to a file or standard output.
 
@@ -227,7 +227,7 @@ class Logger():
     _instances = {}
 
     def __init__(self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME):
-        """Customized logger class for PyAnsys.
+        """Customized logger class for Pymapdl.
 
         Parameters
         ----------
@@ -471,7 +471,7 @@ def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=True):
 
     std_out_handler = logging.StreamHandler()
     std_out_handler.setLevel(level)
-    std_out_handler.setFormatter(PyAnsysFormatter(STDOUT_MSG_FORMAT))
+    std_out_handler.setFormatter(PymapdlFormatter(STDOUT_MSG_FORMAT))
 
     if isinstance(logger, Logger):
         logger.std_out_handler = std_out_handler
