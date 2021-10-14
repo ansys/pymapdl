@@ -203,7 +203,7 @@ class MapdlGrpc(_MapdlCore):
                 log_file=True, cleanup_on_exit=False, log_apdl=False,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
-        super().__init__(loglevel, log_file=log_file, **kwargs)
+        super().__init__(loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, **kwargs)
 
         check_valid_ip(ip)
 
