@@ -403,6 +403,33 @@ def test_apdl_logging_start(tmpdir):
     assert 'K,4,0,1,0' in text
 
 
+@pytest.mark.corba
+def test_corba_apdl_logging_start(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+
+    mapdl = pymapdl.launch_mapdl(mode='CORBA')
+    mapdl = launch_mapdl(log_apdl=filename)
+
+    mapdl.prep7()
+    mapdl.run('!comment test')
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert 'PREP7' in text
+    assert '!comment test'
+    assert 'K,1,0,0,0' in text
+    assert 'K,2,1,0,0' in text
+    assert 'K,3,1,1,0' in text
+    assert 'K,4,0,1,0' in text
+
+
 def test_apdl_logging(mapdl, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
     if mapdl._apdl_log is None:
