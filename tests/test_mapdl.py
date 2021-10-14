@@ -12,7 +12,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -377,9 +377,35 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 
-def test_logging(mapdl, tmpdir):
+def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
-    if mapdl._log is None:
+
+    mapdl = pymapdl.launch_mapdl()
+    mapdl = launch_mapdl(log_apdl=filename)
+
+    mapdl.prep7()
+    mapdl.run('!comment test')
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert 'PREP7' in text
+    assert '!comment test'
+    assert 'K,1,0,0,0' in text
+    assert 'K,2,1,0,0' in text
+    assert 'K,3,1,1,0' in text
+    assert 'K,4,0,1,0' in text
+
+
+def test_apdl_logging(mapdl, tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+    if mapdl._apdl_log is None:
         mapdl.open_apdl_log(filename, mode="w")
     mapdl._close_apdl_log()
 
