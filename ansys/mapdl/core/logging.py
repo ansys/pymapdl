@@ -1,5 +1,6 @@
 """
-# ``log`` module
+``log`` module
+*******************
 
 ## Objective
 This module intends to create a general framework for logging in Pymapdl.
@@ -9,9 +10,12 @@ The loggers used in the module include the name of the instance which is intende
 This name is printed in all the active outputs and it is used to track the different MAPDL instances.
 
 
-## Usage
+Usage
+----------
 
-### Global logger
+Global logger
+~~~~~~~~~~~~~~~~~
+
 There is a global logger named ``pymapdl_global`` which is created at ``ansys.mapdl.core.__init__``.
 If you want to use this global logger, you must call at the top of your module:
 
@@ -23,6 +27,35 @@ You could also rename it to avoid conflicts with other loggers (if any):
 .. code::
     from ansys.mapdl.core import LOG as logger
 
+
+It should be noticed that the default logging level of ``LOG`` is ``ERROR``.
+To change this and output lower level messages you can use the next snippet:
+
+.. code::
+   LOG.logger.setLevel('DEBUG')
+   LOG.file_handler.setLevel('DEBUG')  # If present.
+   LOG.stdout_handler.setLevel('DEBUG')  # If present.
+
+
+Alternatively, you can do:
+
+.. code::
+   LOG.setLevel('DEBUG')
+
+
+This way ensures all the handlers are set to the input log level.
+
+By default, this logger does not log to a file. If you wish to do so, you can add a file handler using:
+
+.. code::
+   import os
+   file_path = os.path.join(os.getcwd(), 'pymapdl.log')
+   LOG.log_to_file(file_path)
+
+
+This sets the logger to be redirected also to that file.
+If you wish to change the characteristics of this global logger from the beginning of the execution,
+you must edit the file ``__init__`` in the directory ``ansys.mapdl.core``.
 
 To log using this logger, just call the desired method as a normal logger.
 
@@ -37,16 +70,17 @@ To log using this logger, just call the desired method as a normal logger.
     | DEBUG    |                 |  __init__        | <module>             | This is LOG debug message.
 
 
-By default, ``pymapdl_global`` does not output to file or stdout. You should activate it from ``__init__``.
 
-
-### Instance logger
+Instance logger
+~~~~~~~~~~~~~~~~~
 Every time that the class ``_MapdlCore`` is instantiated, a logger is created and stored in two places:
 
 * ``_MapdlCore._log``. For backward compatibility.
 * ``LOG._instances``. This field is a ``dict`` where the key is the name of the created logger.
 
 These instance loggers inheritate the ``pymapdl_global`` output handlers and logging level unless otherwise specified.
+The way this logger works is very similar to the global logger.
+You can add a file handler if you wish using the method ``log_to_file`` or change the log level using ``setLevel`` method.
 
 You can use this logger like this:
 
@@ -61,15 +95,18 @@ You can use this logger like this:
 
 
 
-### Other loggers
+Other loggers
+~~~~~~~~~~~~~~~~~
 You can create your own loggers using python ``logging`` library as you would do in any other script.
 There shall no be conflicts between these loggers.
 
 
-## Notes
+Notes
+---------
 
 
-## To-Do's
+To-Do's
+-----------
 
 * [] Make sure the logging level is changed when instance is created.
 
@@ -168,6 +205,13 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         self.logger = add_stdout_handler(self.logger, level=level)
         self.std_out_handler = self.logger.std_out_handler
 
+    def setLevel(self, level='DEBUG'):
+        """Change the log level of the object and the attached handlers."""
+        self.logger.setLevel(level)
+        for each_handler in self.logger.handlers:
+            each_handler.setLevel(level)
+        self.level = level
+
 
 class PymapdlPercentStyle(logging.PercentStyle):
 
@@ -232,7 +276,7 @@ class Logger():
         Parameters
         ----------
         level : str, optional
-            Level of logging as defined in the package ``logging``. By default _level.
+            Level of logging as defined in the package ``logging``. By default 'DEBUG'.
         to_file : bool, optional
             To record the logs in a file, by default False
         to_stdout : bool, optional
@@ -286,6 +330,13 @@ class Logger():
         """
 
         self = add_stdout_handler(self, level=level)
+
+    def setLevel(self, level='DEBUG'):
+        """Change the log level of the object and the attached handlers."""
+        self.logger.setLevel(level)
+        for each_handler in self.logger.handlers:
+            each_handler.setLevel(level)
+        self._level = level
 
     def _make_child_logger(self, sufix, level):
         """Make a child logger, either using ``getChild`` or copying attributes between ``pymapdl_global``
