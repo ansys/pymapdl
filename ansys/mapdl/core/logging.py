@@ -439,6 +439,7 @@ def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=F
         logger.logger.addHandler(file_handler)
 
     elif isinstance(logger, logging.Logger):
+        logger.file_handler = file_handler
         logger.addHandler(file_handler)
 
     if write_headers:

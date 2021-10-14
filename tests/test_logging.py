@@ -87,13 +87,15 @@ def test_global_logger_exist():
 
 
 def test_global_logger_has_handlers():
-    assert hasattr(LOG, '_file_handler')
-    assert hasattr(LOG, '_std_out_handler')
+    assert hasattr(LOG, 'file_handler')
+    assert hasattr(LOG, 'std_out_handler')
     assert LOG.logger.hasHandlers
-    assert LOG.file_handler or LOG._std_out_handler  # at least a handler is not empty
+    assert LOG.file_handler or LOG.std_out_handler  # at least a handler is not empty
 
 
 def test_global_logger_logging(caplog):
+    LOG.logger.setLevel('DEBUG')
+    LOG.std_out_handler.setLevel('DEBUG')
     for each_log_name, each_log_number in LOG_LEVELS.items():
         msg = f'This is an {each_log_name} message.'
         LOG.logger.log(each_log_number, msg)
@@ -101,7 +103,7 @@ def test_global_logger_logging(caplog):
         assert caplog.record_tuples[-1] == ("pymapdl_global", each_log_number, msg)
 
 def test_global_logger_debug_mode():
-    assert deflogging.DEBUG == LOG.logger.level
+    assert isinstance(LOG.logger.level, int)
 
 def test_global_logger_exception_handling(caplog):
     exc = 'Unexpected exception'
@@ -157,6 +159,9 @@ def test_instance_logger_format(mapdl):
     assert 'This is a message' in log
 
 def test_global_methods(caplog):
+    LOG.logger.setLevel('DEBUG')
+    LOG.std_out_handler.setLevel('DEBUG')
+    
     msg = f'This is a debug message'
     LOG.debug(msg)
     assert msg in caplog.text
@@ -190,27 +195,76 @@ def test_log_to_file(tmpdir):
     assert isinstance(LOG.file_handler, deflogging.FileHandler)
 
 def test_log_to_file(tmpdir):
-    # Checking there is actually a file handler.
-    if not LOG.file_handler:
-        LOG.log_to_file('file.log')
+    """Testing writing to log file.
 
-    LOG.debug('This is a debug log')
-
-    with open('file.log', 'r') as fid:
-        text = ''.join(fid.readlines())
-
-    assert 'This is a debug log' in text
-
-def test_instance_log_to_file(mapdl, tmpdir):
+    Since the default loglevel of LOG is error, debug are not normally recorded to it.
+    """
     file_path = os.path.join(tmpdir, 'instance.log')
-    file_msg = 'This is a debug message'
-    if not mapdl._log.file_handler:
-        mapdl._log.log_to_file(file_path)
+    file_msg_error = 'This is a error message'
+    file_msg_debug = 'This is a debug message'
 
-    mapdl._log.debug(file_msg)
+    # The LOG loglevel is changed in previous test, 
+    # hence making sure now it is the "default" one.
+    LOG.logger.setLevel('ERROR')
+    LOG.std_out_handler.setLevel('ERROR')
+
+    if not LOG.file_handler:
+        LOG.log_to_file(file_path)
+
+    LOG.error(file_msg_error)
+    LOG.debug(file_msg_debug)
 
     with open(file_path, 'r') as fid:
         text = ''.join(fid.readlines())
 
-    assert file_msg in text
-    assert 'DEBUG' in text
+    assert file_msg_error in text
+    assert file_msg_debug not in text
+    assert 'ERROR' in text
+    assert 'DEBUG' not in text
+
+    LOG.logger.setLevel('DEBUG')
+    for each_handler in LOG.logger.handlers:
+        each_handler.setLevel('DEBUG')
+
+    file_msg_debug = "This debug message should be recorded."
+    LOG.debug(file_msg_debug)
+
+    with open(file_path, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert file_msg_debug in text
+
+def test_instance_log_to_file(mapdl, tmpdir):
+    """Testing writing to log file.
+
+    Since the default loglevel of LOG is error, debug are not normally recorded to it.
+    """
+    file_path = os.path.join(tmpdir, 'instance.log')
+    file_msg_error = 'This is a error message'
+    file_msg_debug = 'This is a debug message'
+
+    if not mapdl._log.file_handler:
+        mapdl._log.log_to_file(file_path)
+
+    mapdl._log.error(file_msg_error)
+    mapdl._log.debug(file_msg_debug)
+
+    with open(file_path, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert file_msg_error in text
+    assert file_msg_debug not in text
+    assert 'ERROR' in text
+    assert 'DEBUG' not in text
+
+    mapdl._log.logger.setLevel('DEBUG')
+    for each_handler in mapdl._log.logger.handlers:
+        each_handler.setLevel('DEBUG')
+
+    file_msg_debug = "This debug message should be recorded."
+    mapdl._log.debug(file_msg_debug)
+
+    with open(file_path, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert file_msg_debug in text
