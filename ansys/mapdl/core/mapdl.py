@@ -174,8 +174,7 @@ class _MapdlCore(Commands):
         self._solution = Solution(self)
 
         if log_apdl:
-            filename = os.path.join(self.directory, "log.inp")
-            self.open_apdl_log(filename, mode=log_apdl)
+            self.open_apdl_log(log_apdl, mode='w')
 
         self._post = PostProcessing(self)
 
@@ -703,7 +702,7 @@ class _MapdlCore(Commands):
 
         self._log.debug("Opening ANSYS log file at %s", filename)
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
-        if mode != "w":
+        if mode == "w":
             self._apdl_log.write(
                 "! APDL script generated using ansys.mapdl.core %s\n"
                 % pymapdl.__version__
