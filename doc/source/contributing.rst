@@ -119,6 +119,112 @@ is not available or commercial use is prohibited.
 Finally, please take a look at our `Code of Conduct <https://github.com/pyansys/pymapdl/blob/master/CODE_OF_CONDUCT.md>`_
 
 
+Logging in PyMAPDL
+~~~~~~~~~~~~~~~~~~~~
+
+A specific logging architecture has been introduced in PyMAPDL 0.60 in order to make consistent the logging of events. 
+There are two main logging level: global and instance. 
+
+For both type of loggers, the default log message format is:
+
+.. code:: python
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> mapdl._log.info('This is an useful message')
+      LEVEL - INSTANCE NAME - MODULE - FUNCTION - MESSAGE
+      INFO - GRPC_127.0.0.1:50052 -  test - <module> - This is an useful message
+
+The ``instance_name`` field depends on the name of the MAPDL instance which might be not set yet when the log record is created (for example during the initialization of the library),
+therefore in some cases, this field might be empty if there is no instance created yet.
+
+Since both type of loggers are based in the python module ``logging`` you can use any of the tools provided in this module to extend or modify these loggers.
+
+More information can be found in the module ``logging`` under ``ansys.mapdl.core``. 
+
+
+Global logger
+^^^^^^^^^^^^^^
+
+There is a global logger called ``pymapdl_global`` which is initialized when PyMAPDL is imported.
+This logger can be retrieved using:
+
+.. code:: python
+
+   from ansys.mapdl.core import LOG
+
+
+This ``Logger`` is a custom class which wraps a ``logging.Logger`` object and give extra functionalities such a pre-defined file and stdout handlers and pointers.
+You can access the underlying ``logging.Logger`` object using ``LOG.logger``.
+
+You can use this logger anywhere in the code using:
+
+.. code:: python
+
+   from ansys.mapdl.core import LOG
+   LOG.debug('This is an useful debug message')
+
+It should be noticed that the default logging level of ``LOG`` is ``ERROR``.
+To change this and output lower level messages you can use the next snippet:
+
+.. code:: python
+
+   LOG.logger.setLevel('DEBUG')
+   LOG.file_handler.setLevel('DEBUG')  # If present. 
+   LOG.stdout_handler.setLevel('DEBUG')  # If present.
+
+
+Alternatively, you can do:
+
+.. code:: python
+
+   LOG.setLevel('DEBUG')
+
+
+This way ensures all the handlers are set to the input log level. 
+
+By default, this logger does not log to a file. If you wish to do so, you can add a file handler using:
+
+.. code:: python
+
+   import os
+   file_path = os.path.join(os.getcwd(), 'pymapdl.log')
+   LOG.log_to_file(file_path)
+
+
+This sets the logger to be redirected also to that file. 
+If you wish to change the characteristics of this global logger from the beginning of the execution, 
+you must edit the file ``__init__`` in the directory ``ansys.mapdl.core``. 
+
+
+Instance logger
+^^^^^^^^^^^^^^^^
+
+Additionally, there is also another type of logger provided within PyMAPDL. 
+This is a logger specially designed for instances, hence it tracks the the MAPDL instance by pointing to its name (which should be unique)
+and it is stored in ``_MapdlCore._log``. 
+You can access it using:
+
+.. code:: python
+
+   from ansys.mapdl.core import launch_mapdl
+   mapdl = launch_mapdl()
+   instance_logger = mapdl._log
+
+
+This logger is a completely independent from the global logger.
+However when it is initialized, it copies the handlers from the global logger to centralize the logs in a terminal or file.  
+You can access the underlying ``logging.Logger`` using:
+
+.. code:: python
+
+   logger = instance_logger.logger 
+
+The way this logger works is very similar to the global logger. 
+You can add a file handler if you wish using the method ``log_to_file`` or change the log level using ``setLevel`` method.
+
+
+
 Contributing to PyMAPDL through GitHub
 ---------------------------------------------
 To submit new code to PyMAPDL, first fork the `PyMAPDL GitHub Repo
