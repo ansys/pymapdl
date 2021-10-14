@@ -102,8 +102,10 @@ def test_global_logger_logging(caplog):
         # Make sure we are using the right logger, the right level and message.
         assert caplog.record_tuples[-1] == ("pymapdl_global", each_log_number, msg)
 
+
 def test_global_logger_debug_mode():
     assert isinstance(LOG.logger.level, int)
+
 
 def test_global_logger_exception_handling(caplog):
     exc = 'Unexpected exception'
@@ -158,10 +160,11 @@ def test_instance_logger_format(mapdl):
     assert 'DEBUG' in log
     assert 'This is a message' in log
 
+
 def test_global_methods(caplog):
     LOG.logger.setLevel('DEBUG')
     LOG.std_out_handler.setLevel('DEBUG')
-    
+
     msg = f'This is a debug message'
     LOG.debug(msg)
     assert msg in caplog.text
@@ -194,6 +197,7 @@ def test_log_to_file(tmpdir):
     assert LOG.file_handler == LOG.logger.handlers[-1]
     assert isinstance(LOG.file_handler, deflogging.FileHandler)
 
+
 def test_log_to_file(tmpdir):
     """Testing writing to log file.
 
@@ -203,7 +207,7 @@ def test_log_to_file(tmpdir):
     file_msg_error = 'This is a error message'
     file_msg_debug = 'This is a debug message'
 
-    # The LOG loglevel is changed in previous test, 
+    # The LOG loglevel is changed in previous test,
     # hence making sure now it is the "default" one.
     LOG.logger.setLevel('ERROR')
     LOG.std_out_handler.setLevel('ERROR')
@@ -233,6 +237,7 @@ def test_log_to_file(tmpdir):
         text = ''.join(fid.readlines())
 
     assert file_msg_debug in text
+
 
 def test_instance_log_to_file(mapdl, tmpdir):
     """Testing writing to log file.
