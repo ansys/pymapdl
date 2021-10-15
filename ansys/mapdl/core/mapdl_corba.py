@@ -388,5 +388,4 @@ class MapdlCorba(_MapdlCore):
         """Instance unique identifier."""
         if hasattr(self, "_corba_key"):
             return f"CORBA_PID_{self._corba_key}"
-        else:
-            return f"CORBA_INSTANCE_{id(self)}"
+        return f"CORBA_INSTANCE_{id(self)}"

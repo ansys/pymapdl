@@ -1779,8 +1779,7 @@ class MapdlGrpc(_MapdlCore):
         """Instance unique identifier."""
         if self._ip or self._port:
             return f"GRPC_{self._ip}:{self._port}"
-        else:
-            return f"GRPC_instance"
+        return f"GRPC_instance_{id(self)}"
 
     def get_name(self):
         return self._name
