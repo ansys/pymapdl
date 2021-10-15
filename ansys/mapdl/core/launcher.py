@@ -18,6 +18,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.licensing import LicenseChecker
+from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
@@ -750,6 +751,7 @@ def launch_mapdl(
     log_apdl=False,
     verbose_mapdl=False,
     license_server_check=True,
+    license_type=None,
     **kwargs,
 ):
     """Start MAPDL locally in gRPC mode.
@@ -863,7 +865,15 @@ def launch_mapdl(
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
-        start.  Only available on ``mode='grpc'``. Defaults to True
+        start.  Only available on ``mode='grpc'``. Defaults ``True``.
+
+    license_type : str, optional
+        Enable license type selection. You can input a license name as
+        string (for example 'meba' or 'ansys'). You could also use
+        legacy licenses (for example 'aa_t_a') but it will also raise a
+        warning. If it is not used (None), no specific license will be
+        requested, being up to the license server to provide a specific
+        license typ. Default is ``None``.
 
     Notes
     -----
@@ -1040,6 +1050,48 @@ def launch_mapdl(
     additional_switches = _validate_add_sw(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
+
+    if license_type is not None and isinstance(license_type, str):
+        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
+        # For example:
+        # ```bash
+        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
+        # mapdl.exe - p yoyoyo  # The -p flag is ignored and it run the default license.
+        # ```
+        #
+        # In older versions probably it might raise an error. But not sure.
+        license_type = license_type.lower().strip()
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = \
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n" + \
+                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
+                f"Recognized license names: {' '.join(allow_lics)}"
+            warnings.warn(warn_text, UserWarning)
+            # LOG.warning(warn_text)
+
+        additional_switches += ' -p ' + license_type
+        # LOG.debug(f"Using specified license name '{license_type}' in the 'license_type' keyword argument.")
+
+    elif '-p ' in additional_switches:
+        # There is already a license request in additional switches.
+        license_type = re.findall(r'-p \b(\w*)', additional_switches)[0] # getting only the first product license.
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = \
+                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n" + \
+                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
+                f"Recognized license names: {' '.join(allow_lics)}"
+            warnings.warn(warn_text, UserWarning)
+            # LOG.warning(warn_text)
+
+        # LOG.debug(f"Using specified license name '{license_type}' in the additional switches parameter.")
+
+    elif license_type is not None:
+        raise TypeError("The argument 'license_type' does only accept str or None.")
+
     start_parm = {
         "exec_file": exec_file,
         "run_location": run_location,
@@ -1111,6 +1163,8 @@ def launch_mapdl(
             # pass
         raise exception
 
+    # Setting license type. This is passed as an additional switch
+    mapdl.license_type = license_type
     return mapdl
 
 
