@@ -119,7 +119,7 @@ from copy import copy
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
-FILE_NAME = 'Pymapdl.log'
+FILE_NAME = 'pymapdl.log'
 
 # For convenience
 DEBUG = logging.DEBUG
@@ -130,7 +130,8 @@ CRITICAL = logging.CRITICAL
 
 ## Formatting
 
-STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s'
+STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s, defaults={"instance_name": None}'
+
 FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
 
 DEFAULT_STDOUT_HEADER = """
@@ -232,8 +233,9 @@ class PymapdlPercentStyle(logging.PercentStyle):
         # change the record.__dict__.
         # Since now we don't want to create conditional fields, it is fine to keep
         # the same MSG_FORMAT for all of them.
-        if 'instance_name' not in values.keys():  # For the case of logging exceptions to the logger.
-            values['instance_name'] = ''
+
+        # For the case of logging exceptions to the logger.
+        values.setdefault('instance_name', '')
 
         return STDOUT_MSG_FORMAT % values
 
@@ -241,9 +243,23 @@ class PymapdlPercentStyle(logging.PercentStyle):
 class PymapdlFormatter(logging.Formatter):
     """Customized ``Formatter`` class used to overwrite the defaults format styles."""
 
-    def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%', validate=True, *, defaults=None):
-        super().__init__(fmt, datefmt, style, validate)
+    def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%',
+                 validate=True, defaults=None):
+        if sys.version_info[1] < 8:
+            super().__init__(fmt, datefmt, style)
+        else:
+            # 3.8: The validate parameter was added
+            super().__init__(fmt, datefmt, style, validate)
         self._style = PymapdlPercentStyle(fmt, defaults=defaults)  # overwriting
+
+
+class InstanceFilter(logging.Filter):
+    """Ensures that instance_name record always exists."""
+
+    def filter(self, record):
+        if not hasattr(record, 'instance_name'):
+            record.instance_name = ''
+        return True
 
 
 class Logger():
@@ -270,7 +286,8 @@ class Logger():
     _level = logging.DEBUG
     _instances = {}
 
-    def __init__(self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME):
+    def __init__(self, level=logging.DEBUG, to_file=False,
+                 to_stdout=True, filename=FILE_NAME):
         """Customized logger class for Pymapdl.
 
         Parameters
@@ -278,14 +295,16 @@ class Logger():
         level : str, optional
             Level of logging as defined in the package ``logging``. By default 'DEBUG'.
         to_file : bool, optional
-            To record the logs in a file, by default False
+            To record the logs in a file, by default ``False``.
         to_stdout : bool, optional
-            To output the logs to the standard output, which is the command line. By default True.
+            To output the logs to the standard output, which is the
+            command line. By default ``True``.
         filename : str, optional
-            Name of the output file. By default FILE_NAME.
+            Name of the output file. By default ``pymapdl.log``.
         """
 
         self.logger = logging.getLogger('pymapdl_global')  # Creating default main logger.
+        self.logger.addFilter(InstanceFilter())
         self.logger.setLevel(level)
         self.logger.propagate = True
         self.level = self.logger.level # TODO: TO REMOVE
@@ -500,25 +519,22 @@ def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=F
     return logger
 
 
-def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=True):
-    """
-    Add a file handler to the input.
+def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=False):
+    """Add a file handler to the logger.
 
     Parameters
     ----------
     logger : logging.Logger or logging.Logger
         Logger where to add the file handler.
-    filename : str, optional
-        Name of the output file. By default FILE_NAME
     level : str, optional
-        Level of log recording. By default LOG_LEVEL
+        Level of log recording. By default ``logging.DEBUG``.
     write_headers : bool, optional
-        Record the headers to the file. By default False
+        Record the headers to the file. By default ``False``.
 
     Returns
     -------
     logger
-        Return the logger or Logger object.
+        The logger or Logger object.
     """
 
     std_out_handler = logging.StreamHandler()

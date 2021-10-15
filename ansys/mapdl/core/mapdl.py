@@ -143,16 +143,15 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        #Setting up logger
-        self._log = logger.add_instance_logger('NoNamedInstanceYet', self, level=loglevel)
-        self._log.debug('Logging set to %s' % loglevel)
+        # Setting up logger
+        self._log = logger.add_instance_logger(self._name,
+                                               self, level=loglevel)
+        self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
-
         self._parameters = Parameters(self)
 
         from ansys.mapdl.core.solution import Solution
-
         self._solution = Solution(self)
 
         if log_apdl:
@@ -160,6 +159,12 @@ class _MapdlCore(Commands):
             self.open_apdl_log(filename, mode=log_apdl)
 
         self._post = PostProcessing(self)
+
+    def _setup_logger(self):
+        """Setup the logger.
+
+        This should be called once MAPDL has started.
+        """
 
     @property
     def _name(self):  # pragma: no cover

@@ -206,6 +206,10 @@ class MapdlGrpc(_MapdlCore):
                 log_file=True, cleanup_on_exit=False, log_apdl=False,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
+
+        # port and ip are needed to setup the log
+        self._port = port
+        self._ip = ip
         super().__init__(loglevel, log_file=log_file, **kwargs)
 
         check_valid_ip(ip)
@@ -226,7 +230,6 @@ class MapdlGrpc(_MapdlCore):
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in kwargs:  # allow this to be overridden
             self._local = kwargs["local"]
-        self._ip = ip
         self._health_response_queue = None
         self._exiting = False
         self._exited = None
@@ -236,7 +239,6 @@ class MapdlGrpc(_MapdlCore):
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
 
             port = MAPDL_DEFAULT_PORT
-        self._port = port
         self._server = None
         self._channel = None
         self._state = None
@@ -1778,7 +1780,7 @@ class MapdlGrpc(_MapdlCore):
         if self._ip or self._port:
             return f"GRPC_{self._ip}:{self._port}"
         else:
-            return f"GRPC_new_instance"
+            return f"GRPC_instance"
 
     def get_name(self):
         return self._name

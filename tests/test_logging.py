@@ -191,14 +191,6 @@ def test_global_methods(caplog):
 
 
 def test_log_to_file(tmpdir):
-    n_handlers = len(LOG.logger.handlers)
-    LOG.log_to_file('file.log')
-    assert len(LOG.logger.handlers) == n_handlers + 1
-    assert LOG.file_handler == LOG.logger.handlers[-1]
-    assert isinstance(LOG.file_handler, deflogging.FileHandler)
-
-
-def test_log_to_file(tmpdir):
     """Testing writing to log file.
 
     Since the default loglevel of LOG is error, debug are not normally recorded to it.
@@ -237,6 +229,11 @@ def test_log_to_file(tmpdir):
         text = ''.join(fid.readlines())
 
     assert file_msg_debug in text
+
+
+def test_log_instance_name(mapdl):
+    # verify we can access via an instance name
+    LOG[mapdl._name] == mapdl._log
 
 
 def test_instance_log_to_file(mapdl, tmpdir):
