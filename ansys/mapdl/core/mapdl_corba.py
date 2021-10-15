@@ -386,4 +386,6 @@ class MapdlCorba(_MapdlCore):
     @property
     def _name(self):
         """Instance unique identifier."""
-        return f"CORBA_PID_{self._corba_key}"
+        if hasattr(self, "_corba_key"):
+            return f"CORBA_PID_{self._corba_key}"
+        return f"CORBA_INSTANCE_{id(self)}"
