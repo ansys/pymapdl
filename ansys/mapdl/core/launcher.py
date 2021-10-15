@@ -869,12 +869,12 @@ def launch_mapdl(
 
     license_type : str, optional
         Enable license type selection. You can input a string for its
-        license name (for example 'meba' or 'ansys') or its description
+        license name (for example ``'meba'`` or ``'ansys'``) or its description
         ("enterprise solver" or "enterprise" respectively).
-        You can also use legacy licenses (for example 'aa_t_a') but it will
-        also raise a warning. If it is not used (None), no specific license
+        You can also use legacy licenses (for example ``'aa_t_a'``) but it will
+        also raise a warning. If it is not used (``None``), no specific license
         will be requested, being up to the license server to provide a specific
-        license typ. Default is ``None``.
+        license type. Default is ``None``.
 
     Notes
     -----
