@@ -14,7 +14,14 @@ LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
 LIC_TO_CHECK =  ["mech_1"]
-ALLOWABLE_LICENSES = ["ansys", "meba", "mech_2", "mech_1"]
+
+LICENSES = {
+    "ansys": "Ansys Mechanical Enterprise",
+    "meba" : "Ansys Mechanical Enterprise Solver",
+    "mech_2" : "Ansys Mechanical Premium",
+    "mech_1" : "Ansys Mechanical Pro"
+}
+ALLOWABLE_LICENSES = list(LICENSES.keys())
 
 ## Regarding license checking.
 # The available licenses we can check against are (in order of
