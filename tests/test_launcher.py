@@ -4,7 +4,6 @@ import weakref
 
 import pytest
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core._commands.preproc import keypoints
 from ansys.mapdl.core.launcher import _version_from_path, get_start_instance, _validate_add_sw, launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.licensing import LICENSES
