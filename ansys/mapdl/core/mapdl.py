@@ -1,4 +1,7 @@
 """Module to control interaction with MAPDL through Python"""
+
+from ansys.mapdl.core import LOG as logger
+
 import time
 import glob
 import re
@@ -102,38 +105,16 @@ def parse_to_short_cmd(command):
         return
 
 
-def setup_logger(loglevel='INFO', log_file=True):
+def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
     """Setup logger"""
 
     # return existing log if this function has already been called
     if hasattr(setup_logger, "log"):
-        setup_logger.log.setLevel(loglevel)
-        ch = setup_logger.log.handlers[0]
-        ch.setLevel(loglevel)
         return setup_logger.log
+    else:
+        setup_logger.log = logger.add_instance_logger('MAPDL', mapdl_instance)
 
-    # create logger
-    log = logging.getLogger(__name__)
-    log.setLevel(loglevel)
-
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(loglevel)
-
-    # create formatter
-    formatstr = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    formatter = logging.Formatter(formatstr)
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    log.addHandler(ch)
-
-    # make persistent
-    setup_logger.log = log
-
-    return log
+    return setup_logger.log
 
 
 class _MapdlCore(Commands):
@@ -162,15 +143,14 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        self._log = setup_logger(loglevel.upper(), log_file=log_file)
+        # Setting up logger
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel)
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
-
         self._parameters = Parameters(self)
 
         from ansys.mapdl.core.solution import Solution
-
         self._solution = Solution(self)
 
         if log_apdl:
@@ -2080,8 +2060,9 @@ class _MapdlCore(Commands):
             self._log.info(msg)
 
             # This very likely won't be recorded anywhere.
-            # But just in case, adding info as a comment
-            command = f"/COM, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
+
+            # But just in case, I'm adding info as /com
+            command = f"/com, PyAnsys: {msg}" # Using '!' makes the output of '_run' empty
 
         if self._store_commands:
             self._stored_commands.append(command)

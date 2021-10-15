@@ -1,6 +1,12 @@
 import appdirs
 import os
 
+# Importing logging
+import logging
+from ansys.mapdl.core.logging import Logger
+LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+LOG.debug('Loaded logging module as LOG')
+
 _LOCAL_PORTS = []
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
