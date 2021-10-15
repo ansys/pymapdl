@@ -4,6 +4,7 @@ import weakref
 
 import pytest
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core._commands.preproc import keypoints
 from ansys.mapdl.core.launcher import _version_from_path, get_start_instance, _validate_add_sw, launch_mapdl
 from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.licensing import LICENSES
@@ -148,6 +149,22 @@ def test_license_type_keyword():
         # regardless the license specification, it should lunch.
         assert mapdl.is_alive
     mapdl.exit()
+
+
+def test_license_type_keyword_names():
+    # This test might became a way to check available licenses, which is not the purpose.
+    keywords = ['ENTERPRISE', 'enterprise      solver', 'pRemIum', 'PrO']
+
+    successful_check = False
+    for license_description, each_keyword in zip(LICENSES.values(), keywords):
+        mapdl = launch_mapdl(license_type=each_keyword)
+
+        #Using first line to ensure not picking up other stuff.
+        successful_check = license_description in mapdl.__str__().split('\n')[0] or successful_check
+        assert license_description in mapdl.__str__().split('\n')[0]
+        mapdl.exit()
+
+    assert successful_check # if at least one license is ok, this should be true.
 
 
 def test_license_type_additional_switch():

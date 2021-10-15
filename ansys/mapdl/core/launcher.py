@@ -868,11 +868,12 @@ def launch_mapdl(
         start.  Only available on ``mode='grpc'``. Defaults ``True``.
 
     license_type : str, optional
-        Enable license type selection. You can input a license name as
-        string (for example 'meba' or 'ansys'). You could also use
-        legacy licenses (for example 'aa_t_a') but it will also raise a
-        warning. If it is not used (None), no specific license will be
-        requested, being up to the license server to provide a specific
+        Enable license type selection. You can input a string for its
+        license name (for example 'meba' or 'ansys') or its description
+        ("enterprise solver" or "enterprise" respectively).
+        You can also use legacy licenses (for example 'aa_t_a') but it will
+        also raise a warning. If it is not used (None), no specific license
+        will be requested, being up to the license server to provide a specific
         license typ. Default is ``None``.
 
     Notes
@@ -1062,7 +1063,19 @@ def launch_mapdl(
         # In older versions probably it might raise an error. But not sure.
         license_type = license_type.lower().strip()
 
-        if license_type not in ALLOWABLE_LICENSES:
+        if 'enterprise' in license_type and 'solver' not in license_type:
+            license_type = 'ansys'
+
+        elif 'enterprise' in license_type and 'solver' in license_type:
+            license_type = 'meba'
+
+        elif 'premium' in license_type:
+            license_type = 'mech_2'
+
+        elif 'pro' in license_type:
+            license_type = 'mech_1'
+
+        elif license_type not in ALLOWABLE_LICENSES:
             allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
             warn_text = \
                 f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n" + \
