@@ -1053,12 +1053,12 @@ def launch_mapdl(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
-    if license_type is not None and isinstance(license_type, str):
+    if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
         # ```bash
         # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
-        # mapdl.exe - p yoyoyo  # The -p flag is ignored and it run the default license.
+        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
         # ```
         #
         # In older versions probably it might raise an error. But not sure.
