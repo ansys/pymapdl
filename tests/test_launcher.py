@@ -130,15 +130,16 @@ def test_launch_corba(version):
 def test_license_type_keyword():
     # This test might became a way to check available licenses, which is not the purpose.
 
-    successful_check = False
+    checks = []
     for license_name, license_description in LICENSES.items():
         mapdl = launch_mapdl(license_type=license_name)
 
         #Using first line to ensure not picking up other stuff.
-        successful_check = license_description in mapdl.__str__().split('\n')[0] or successful_check
+        checks.append(license_description in mapdl.__str__().split('\n')[0])
         mapdl.exit()
 
-    assert successful_check # if at least one license is ok, this should be true.
+    breakpoint()
+    assert any(checks)
 
     dummy_license_name = 'dummy'
     # I had to scape the parenthesis because the match argument uses regex.
@@ -152,7 +153,6 @@ def test_license_type_keyword():
 
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
-    keywords = ['ENTERPRISE', 'enterprise      solver', 'pRemIum', 'PrO']
 
     successful_check = False
     for license_description, each_keyword in zip(LICENSES.values(), keywords):

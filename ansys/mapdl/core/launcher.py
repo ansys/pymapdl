@@ -20,6 +20,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.licensing import LicenseChecker
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES
+from ansys.mapdl.core import LOG
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
