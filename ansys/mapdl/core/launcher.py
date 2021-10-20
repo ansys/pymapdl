@@ -1083,14 +1083,13 @@ def launch_mapdl(
                 "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
                 f"Recognized license names: {' '.join(allow_lics)}"
             warnings.warn(warn_text, UserWarning)
-            # LOG.warning(warn_text)
 
         additional_switches += ' -p ' + license_type
-        # LOG.debug(f"Using specified license name '{license_type}' in the 'license_type' keyword argument.")
+        LOG.debug(f"Using specified license name '{license_type}' in the 'license_type' keyword argument.")
 
     elif '-p ' in additional_switches:
         # There is already a license request in additional switches.
-        license_type = re.findall(r'-p \b(\w*)', additional_switches)[0] # getting only the first product license.
+        license_type = re.findall(r'-p \b(\w*)', additional_switches)[0]  # getting only the first product license.
 
         if license_type not in ALLOWABLE_LICENSES:
             allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
@@ -1099,9 +1098,9 @@ def launch_mapdl(
                 "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
                 f"Recognized license names: {' '.join(allow_lics)}"
             warnings.warn(warn_text, UserWarning)
-            # LOG.warning(warn_text)
+            LOG.warning(warn_text)
 
-        # LOG.debug(f"Using specified license name '{license_type}' in the additional switches parameter.")
+        LOG.debug(f"Using specified license name '{license_type}' in the additional switches parameter.")
 
     elif license_type is not None:
         raise TypeError("The argument 'license_type' does only accept str or None.")
@@ -1177,8 +1176,6 @@ def launch_mapdl(
             # pass
         raise exception
 
-    # Setting license type. This is passed as an additional switch
-    mapdl.license_type = license_type
     return mapdl
 
 
