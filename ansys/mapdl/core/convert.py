@@ -163,8 +163,14 @@ class FileTranslator:
         if not line:
             return
 
-        if line[:4].upper() == "/COM":
-            self.comment = "".join(line.split(",")[1:]).strip()[1:]
+        if line[:5].upper() == "/COM,":
+            # for the '/com, This is a comment'
+            self.comment = line[5:].strip()  #"".join(line.split(",")[1:]).strip()
+            return self.store_comment()
+
+        elif line[:4].upper() == "/COM":
+            # for the '/com This is a comment'
+            self.comment = line[4:].strip()
             return self.store_comment()
 
         if line[:4].upper() == "/TIT":  # /TITLE
