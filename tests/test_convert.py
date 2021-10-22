@@ -65,20 +65,11 @@ pycmblock = """with mapdl.non_interactive:
     mapdl.run("1765      1766      1767      1768      1769      1802      1803      1804")
     mapdl.run("1805      1806      1807      1808      1809      1831      1832      1833")"""
 
-apdl_input = {
-    'nblock': nblock,
-    'eblock': eblock,
-    'cmblock': cmblock
-    }
-
-pymapdl_output = {
-    'nblock': pynblock,
-    'eblock': pyeblock,
-    'cmblock': pycmblock
-    }
 
 block_commands = ['nblock', 'eblock', 'cmblock']
 
+apdl_input = dict(zip(block_commands, [nblock, eblock, cmblock]))
+pymapdl_output = dict(zip(block_commands, [pynblock, pyeblock, pycmblock]))
 
 def test_convert_no_use_function_names(tmpdir):
     vm_file = examples.vmfiles["vm1"]
