@@ -65,7 +65,7 @@ def convert_script(
                                 exec_file=exec_file,
                                 macros_as_functions=macros_as_functions,
                                 use_function_names=use_function_names
-                                )
+                          )
 
     translator.save(filename_out)
     return translator.lines
@@ -122,7 +122,7 @@ def convert_apdl_strings(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-             )
+                          )
 
     return translator.lines
 
@@ -146,7 +146,7 @@ def _convert(apdl_strings,
 
     if isinstance(apdl_strings, str):
         apdl_strings = apdl_strings.split(translator.line_ending)
-    
+
     for line in apdl_strings:
         translator.translate_line(line)
 

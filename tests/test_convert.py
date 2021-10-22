@@ -25,7 +25,7 @@ eblock = """eblock,19,solid,,6240
    196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221
 """
 
-cmblock = """CMBLOCK,PRESSURE_AREAS,NODE,    6
+cmblock = """CMBLOCK,PRESSURE_AREAS,NODE,    48
 (8i10)
       1688      1689      1690      1691      1700      1701      1702      1703
       1704      1705      1706      1707      1708      1709      1710      1711
@@ -56,7 +56,7 @@ pyeblock = """with mapdl.non_interactive:
     mapdl.run("196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221")"""
 
 pycmblock = """with mapdl.non_interactive:
-    mapdl.run("CMBLOCK,PRESSURE_AREAS,NODE,    6")
+    mapdl.run("CMBLOCK,PRESSURE_AREAS,NODE,    48")
     mapdl.run("(8i10)")
     mapdl.run("1688      1689      1690      1691      1700      1701      1702      1703")
     mapdl.run("1704      1705      1706      1707      1708      1709      1710      1711")
@@ -90,7 +90,7 @@ def test_convert(tmpdir):
 
 @pytest.mark.parametrize("cmd", block_commands)
 def test_convert_block_commands(tmpdir, cmd):
-    apdl_block = apdl_input[cmd].split('\n')
-    pyblock = convert_apdl_strings(apdl_strings=apdl_block)
+    apdl_block = apdl_input[cmd]
+    pyblock = convert_apdl_strings(apdl_strings=apdl_block.split('\n'))
     pyblock = '\n'.join(pyblock)
     assert pymapdl_output[cmd] in pyblock
