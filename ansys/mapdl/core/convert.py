@@ -84,7 +84,7 @@ def convert_apdl_strings(apdl_strings,
     Parameters
     ----------
     apdl_string : str
-        APDL string to convert.
+        APDL strings or list of strings to convert.
 
     filename_out : str
         Filename of the python script to write a translation to.
@@ -121,8 +121,7 @@ def convert_apdl_strings(apdl_strings,
     line_ending=None,
     exec_file=None,
     macros_as_functions=True,
-    use_function_names=True,
-                          )
+    use_function_names=True)
 
     return translator.lines
 
