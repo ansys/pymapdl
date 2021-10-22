@@ -123,7 +123,10 @@ def convert_apdl_strings(apdl_strings,
     macros_as_functions=True,
     use_function_names=True)
 
-    return translator.lines
+    if isinstance(apdl_strings, str):
+        return translator.line_ending.join(translator.lines)
+    else:
+        return translator.lines
 
 
 def _convert(apdl_strings,
