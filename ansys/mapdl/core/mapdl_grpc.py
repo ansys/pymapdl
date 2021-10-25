@@ -1048,7 +1048,7 @@ class MapdlGrpc(_MapdlCore):
 
             These defaults will be ignored if ``time_step_stream`` is
             manually set.
-        
+
         orig_cmd : str
             Original command. There are some cases, were input is
             used to send the file to the grpc server but then we want
