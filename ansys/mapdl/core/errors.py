@@ -1,5 +1,7 @@
 """pymapdl specific errors"""
-import logging
+
+from ansys.mapdl.core import LOG as logger
+
 import threading
 import signal
 from functools import wraps
@@ -7,8 +9,6 @@ from functools import wraps
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
 SIGINT_TRACKER = []
-
-logger = logging.getLogger(__name__)
 
 
 LOCKFILE_MSG = """

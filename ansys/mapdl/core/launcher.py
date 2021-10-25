@@ -1,4 +1,5 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
+
 import platform
 from glob import glob
 import re
@@ -18,6 +19,8 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.licensing import LicenseChecker
+from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES
+from ansys.mapdl.core import LOG
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
@@ -36,14 +39,14 @@ ALLOWABLE_MODES = ["corba", "console", "grpc"]
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
 
-INTEL_MSG = """Due to incompatibilites between 'DMP', Windows and VPN connections,
+INTEL_MSG = """Due to incompatibilities between 'DMP', Windows and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
 If you still want to use 'INTEL', set:
 
 launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
 
-Be aware of possible errors or unexpected behaviour with this configuration.
+Be aware of possible errors or unexpected behavior with this configuration.
 """
 
 
@@ -123,7 +126,7 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port):
+    def close_mapdl(port, name='Closing mapdl thread.'):
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
@@ -750,6 +753,7 @@ def launch_mapdl(
     log_apdl=False,
     verbose_mapdl=False,
     license_server_check=True,
+    license_type=None,
     **kwargs,
 ):
     """Start MAPDL locally in gRPC mode.
@@ -863,7 +867,16 @@ def launch_mapdl(
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
-        start.  Only available on ``mode='grpc'``. Defaults to True
+        start.  Only available on ``mode='grpc'``. Defaults ``True``.
+
+    license_type : str, optional
+        Enable license type selection. You can input a string for its
+        license name (for example ``'meba'`` or ``'ansys'``) or its description
+        ("enterprise solver" or "enterprise" respectively).
+        You can also use legacy licenses (for example ``'aa_t_a'``) but it will
+        also raise a warning. If it is not used (``None``), no specific license
+        will be requested, being up to the license server to provide a specific
+        license type. Default is ``None``.
 
     Notes
     -----
@@ -1040,6 +1053,59 @@ def launch_mapdl(
     additional_switches = _validate_add_sw(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
+
+    if isinstance(license_type, str):
+        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
+        # For example:
+        # ```bash
+        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
+        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
+        # ```
+        #
+        # In older versions probably it might raise an error. But not sure.
+        license_type = license_type.lower().strip()
+
+        if 'enterprise' in license_type and 'solver' not in license_type:
+            license_type = 'ansys'
+
+        elif 'enterprise' in license_type and 'solver' in license_type:
+            license_type = 'meba'
+
+        elif 'premium' in license_type:
+            license_type = 'mech_2'
+
+        elif 'pro' in license_type:
+            license_type = 'mech_1'
+
+        elif license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = \
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n" + \
+                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
+                f"Recognized license names: {' '.join(allow_lics)}"
+            warnings.warn(warn_text, UserWarning)
+
+        additional_switches += ' -p ' + license_type
+        LOG.debug(f"Using specified license name '{license_type}' in the 'license_type' keyword argument.")
+
+    elif '-p ' in additional_switches:
+        # There is already a license request in additional switches.
+        license_type = re.findall(r'-p \b(\w*)', additional_switches)[0]  # getting only the first product license.
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = \
+                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n" + \
+                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
+                f"Recognized license names: {' '.join(allow_lics)}"
+            warnings.warn(warn_text, UserWarning)
+            LOG.warning(warn_text)
+
+        LOG.debug(f"Using specified license name '{license_type}' in the additional switches parameter.")
+
+    elif license_type is not None:
+        raise TypeError("The argument 'license_type' does only accept str or None.")
+
     start_parm = {
         "exec_file": exec_file,
         "run_location": run_location,

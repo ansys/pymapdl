@@ -1,4 +1,5 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
+
 import re
 from warnings import warn
 import shutil
@@ -6,7 +7,6 @@ import threading
 import weakref
 import io
 import time
-import logging
 import os
 import socket
 from functools import wraps
@@ -39,7 +39,6 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
 
-logger = logging.getLogger(__name__)
 
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -199,6 +198,10 @@ class MapdlGrpc(_MapdlCore):
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
     """
 
+    # Required by `_name` method to be defined before __init__ be
+    _ip = None
+    _port = None
+
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                 log_file=True, cleanup_on_exit=False, log_apdl=False,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
@@ -223,7 +226,6 @@ class MapdlGrpc(_MapdlCore):
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in kwargs:  # allow this to be overridden
             self._local = kwargs["local"]
-        self._ip = ip
         self._health_response_queue = None
         self._exiting = False
         self._exited = None
@@ -233,7 +235,6 @@ class MapdlGrpc(_MapdlCore):
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
 
             port = MAPDL_DEFAULT_PORT
-        self._port = port
         self._server = None
         self._channel = None
         self._state = None
@@ -1772,4 +1773,9 @@ class MapdlGrpc(_MapdlCore):
     @property
     def _name(self):
         """Instance unique identifier."""
-        return f"GRPC_{self._ip}:{self._port}"
+        if self._ip or self._port:
+            return f"GRPC_{self._ip}:{self._port}"
+        return f"GRPC_instance_{id(self)}"
+
+    def get_name(self):
+        return self._name
