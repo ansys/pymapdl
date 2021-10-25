@@ -182,7 +182,7 @@ min_ = np.min((out["Stress YZ"].min(), stress_slice['Stress YZ'].min()))
 clim = [min_, max_]
 
 pl = pv.Plotter()
-pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10, clim=clim)
+pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10, clim=clim, scalar_bar_args={'title': 'Stress YZ'})
 pl.add_mesh(stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False)
 pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
