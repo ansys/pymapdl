@@ -186,4 +186,4 @@ pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10, clim=clim, scalar_bar_
 pl.add_mesh(stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False)
 pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
-pl.show()
+_ = pl.show()
