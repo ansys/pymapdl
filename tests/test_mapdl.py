@@ -47,10 +47,20 @@ vmesh,all
 # Many of the commands could be deleted, but for the sake of good
 # testing we are going to leave them.
 
-CDB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
+CDB_FILE = """                                                                        S      1
+/COM,ANSYS RELEASE 12.1BETAUP20090531       10:26:32    06/01/2009      S      2
+/NOPR                                                                   S      3
+/PREP7                                                                  S      4
+/TITLE,                                                                 S      5
+1H,,1H;,,18Hdisc_pad_model.cdb,                                         G      1
+5HANSYS,22H  12.1BETA  UP20090531,,,,,,,1.0,,,,,13H000601.102632,       G      2
+1.0000E-04,,,,9,,;                                                      G      3
+S     29G      3D      0P      0                                        T      1
+:CDWRITE      ! START OF CDWRITE DATA
+/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
 /PREP7
 /NOPR
-/TITLE,'CDREAD and CDWRITE tests
+/TITLE,'CDREAD and CDWRITE tests'
 *IF,_CDRDOFF,EQ,1,THEN     !if solid model was read in
 _CDRDOFF=             !reset flag, numoffs already performed
 *ELSE              !offset database for the following FE model
@@ -727,6 +737,20 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
     assert random_letters == mapdl.parameters['parmtest']
 
 
+def warns_in_cdread_error_log(mapdl):
+    error_files = [each for each in os.listdir(mapdl.directory) if each.endswith('.err')]
+
+    warn_cdread_1 = "S1 is not a recognized"
+    warn_cdread_2 = "1H is not a recognized"
+    warn_cdread_3 = "5HANSYS is not a recognized"
+
+    warns = []
+    for each in error_files:
+        with open(os.path.join(mapdl.directory, each)) as fid:
+            error_log = ''.join(fid.readlines())
+        warns.append((warn_cdread_1 in error_log) or (warn_cdread_2 in error_log) or (warn_cdread_3 in error_log))
+        return any(warns)
+
 def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     # Writing db file in python directory.
     # Pyansys should upload it when it detects it is not in the APDL directory.
@@ -738,17 +762,20 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     # the archive from the current working directory.
     old_cwd = os.getcwd()
     try:
+        # We are not checking yet if the file is read correctly, just if the file
+        # can be read.
         os.chdir(tmpdir)
         mapdl.cdread('db', 'model', 'cdb')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread('db', 'model.cdb')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread('db', 'model')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
+
     finally:
         # always change back to the previous directory
         os.chdir(old_cwd)
@@ -756,17 +783,17 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model.cdb'))
     mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model'))
     mapdl.cdread('db', fullpath, 'cdb')
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model'))
     mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
 
 def test_cdread_in_apdl_directory(mapdl, cleared):
