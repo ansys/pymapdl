@@ -1009,7 +1009,10 @@ class MapdlGrpc(_MapdlCore):
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
-        self.input(fname, orig_cmd='cdread', **kwargs)
+        kwargs.setdefault("orig_cmd", 'CDREAD')
+        kwargs.setdefault("cd_read_option", option.upper())
+
+        self.input(fname, **kwargs)
 
     @protect_grpc
     def input(
@@ -1049,7 +1052,7 @@ class MapdlGrpc(_MapdlCore):
         orig_cmd : str
             Original command. There are some cases, were input is
             used to send the file to the grpc server but then we want
-            to run something different than ``/INPUT``, for example 
+            to run something different than ``/INPUT``, for example
             ``CDREAD``.
 
         Returns
@@ -1142,8 +1145,10 @@ class MapdlGrpc(_MapdlCore):
         tmp_out = "_input_tmp_.out"
         if 'CDRE' in orig_cmd.upper():
             # Using CDREAD
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'COMB','{filename}'\n"
+            option = kwargs.get("cd_read_option", 'COMB')
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
         else:
+            # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
 
         if self._local:
