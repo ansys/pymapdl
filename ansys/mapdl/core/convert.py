@@ -116,12 +116,12 @@ def convert_apdl_strings(apdl_strings,
     """
 
     translator = _convert(apdl_strings,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True)
+    loglevel=loglevel,
+    auto_exit=auto_exit,
+    line_ending=line_ending,
+    exec_file=exec_file,
+    macros_as_functions=macros_as_functions,
+    use_function_names=use_function_names)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
