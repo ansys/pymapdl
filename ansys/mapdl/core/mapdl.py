@@ -2110,7 +2110,7 @@ class _MapdlCore(Commands):
                 response = re.sub(err_str, "", response)
 
             if "*** ERROR ***" in response:
-                self._log.error(self._response)
+                # We don't need to log exception because they already included in the main logger.
                 raise MapdlRuntimeError(self._response)
             else:
                 warnings.warn(
