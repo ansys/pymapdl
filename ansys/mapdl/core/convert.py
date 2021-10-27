@@ -280,30 +280,9 @@ class FileTranslator:
         if not line:
             return
 
-        # Workaround to avoid print to file issues.
-        if self.output_to_file(line):
-            self.start_non_interactive()
-
-        if self.output_to_default(line):
-            self.end_non_interactive()
-
-        if line[:5].upper() == "/COM,":
-            # for the '/com, This is a comment'
-            self.comment = line[5:].strip()  #"".join(line.split(",")[1:]).strip()
-            return self.store_comment()
-
-        elif line[:4].upper() == "/COM":
-            # for the '/com This is a comment'
-            self.comment = line[4:].strip()
-            return self.store_comment()
-
         if line[:4].upper() == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
             return self.store_command("title", ["".join(parameters).strip()])
-
-        if line[:4].upper() == "C***":  # C***
-            self.comment = line.split("C***")[1].strip()[1:]
-            return self.store_comment()
 
         if line[:4].upper() == "*GET":
             parameters = line.split(",")[1:]
@@ -498,6 +477,13 @@ class FileTranslator:
         if self._non_interactive_level == 0:
             self.non_interactive = False
             self.indent = self.indent[4:]
+
+    def start_indented_block(self):
+        self._block_level += 1
+        self.indent = self.indent + "    "
+    
+    def end_indented_block(self):
+        self.indent = self.indent[4:]
 
     def output_to_file(self, line):
         if line[:4].upper() == '/OUT':
