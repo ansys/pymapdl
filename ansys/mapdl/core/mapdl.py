@@ -57,7 +57,7 @@ INVAL_COMMANDS = {
     "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
     "*ASK": "Unsupported command.  Use python ``input`` instead.",
     "*IF": "Use a python ``if`` or run as non_interactive",
-    "CMAT": "Run `CMAT` as ``non_interactive``",
+    "CMAT": "Run `CMAT` as ``non_interactive``.",
     "*REP": "Run '*REPEAT' in ``non_interactive``."
 }
 
