@@ -210,7 +210,7 @@ class MapdlGrpc(_MapdlCore):
         # port and ip are needed to setup the log
         self._port = port
         self._ip = ip
-        super().__init__(loglevel, log_file=log_file, **kwargs)
+        super().__init__(loglevel, log_file=log_file, log_apdl=log_apdl, ** kwargs)
 
         check_valid_ip(ip)
 
