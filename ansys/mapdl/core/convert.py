@@ -280,6 +280,13 @@ class FileTranslator:
         if not line:
             return
 
+        # Workaround to avoid print to file issues.
+        if self.output_to_file(line):
+            self.start_non_interactive()
+
+        if self.output_to_default(line):
+            self.end_non_interactive()
+
         if line[:5].upper() == "/COM,":
             # for the '/com, This is a comment'
             self.comment = line[5:].strip()  #"".join(line.split(",")[1:]).strip()
@@ -491,3 +498,40 @@ class FileTranslator:
         if self._non_interactive_level == 0:
             self.non_interactive = False
             self.indent = self.indent[4:]
+
+    def output_to_file(self, line):
+        if line[:4].upper() == '/OUT':
+            # We are redirecting the output to somewhere, probably a file.
+            # Because of the problem with the ansys output, we need to execute
+            # this in non_interactive mode.
+            output_cmd = line.strip().split(',')
+            if len(output_cmd) > 1:
+                opt1 = output_cmd[1].strip().upper()
+                if opt1 != 'TERM':
+                    # A file is supplied.
+                    return True
+
+        if line[:4].upper() == '*CFO': #any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
+            # We might not need gooing into interactive mode for *CFOPEN/*CFCLOSE
+            return True
+
+        return False
+
+    def output_to_default(self, line):
+        if line[:4].upper() == '/OUT':
+            # We are redirecting the output to somewhere, probably a file.
+            # Because of the problem with the ansys output, we need to execute
+            # this in non_interactive mode.
+            output_cmd = line.strip().split(',')
+            if len(output_cmd) == 1:
+                return True
+            elif len(output_cmd) > 1:
+                opt1 = output_cmd[1].strip().upper()
+                if opt1 == 'TERM':
+                    # A file is supplied.
+                    return True
+        if line[:4].upper() in '*CFCLOSE': #
+            # We might not need gooing into interactive mode for *CFOPEN/*CFCLOSE
+            return True
+
+        return False
