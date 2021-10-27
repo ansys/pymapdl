@@ -279,14 +279,51 @@ class FileTranslator:
 
         if not line:
             return
+        cmd_ = line.split(',')[0].upper()
+
+        if cmd_ == '*DO':
+            self.start_non_interactive()
+            self.store_run_command(line)
+            return
+
+        if cmd_ == '*ENDDO':
+            self.store_run_command(line)
+            self.end_non_interactive()
+            return
+
+        if self.output_to_file(line):
+            self.start_non_interactive()
+            self.store_run_command(line)
+            return
+
+        if self.output_to_default(line):
+            self.end_non_interactive()
+            self.store_run_command(line)
+            self.store_run_command('/GOPR')
+            return
+
+        if cmd_ == '/VERIFY':
+            self.store_run_command("FINISH")
+            self.store_run_command(line)
+            self.store_run_command("/PREP7")
+            return
 
         if line[:4].upper() == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
             return self.store_command("title", ["".join(parameters).strip()])
 
         if line[:4].upper() == "*GET":
-            parameters = line.split(",")[1:]
-            return self.store_command("get", parameters)
+            if self.non_interactive: # gives error
+                self.store_run_command(line)
+                return
+            else:
+                parameters = line.split(",")[1:]
+                return self.store_command("get", parameters)
+
+        if line[:4].upper() == "/NOP":
+            self.comment = "It is not recommended to use '/NOPR' in a normal PyMAPDL session."
+            self.store_under_scored_run_command(line)
+            return
 
         if line[:6].upper() == "/PREP7":
             return self.store_command("prep7", [])
@@ -396,10 +433,18 @@ class FileTranslator:
         self.lines.append(line)
         self.indent = self.indent + "    "
 
-    def store_run_command(self, command):
+    def store_under_scored_run_command(self, command):
+        self.store_run_command(command, run_underscored = True)
+
+    def store_run_command(self, command, run_underscored=False):
         """Stores pyansys.ANSYS command that cannot be broken down
         into a function and parameters.
         """
+        if run_underscored:
+            underscore = '_'
+        else:
+            underscore = ''
+
         if self._infunction and "ARG" in command:
             args = []
             for i in range(1, 19):
@@ -410,22 +455,24 @@ class FileTranslator:
                     args.append(arg)
                     c += 1
 
-            line = '%s%s.run("%s".format(%s))' % (
+            line = '%s%s.%srun("%s".format(%s))' % (
                 self.indent,
                 self.obj_name,
+                underscore,
                 command,
                 ", ".join(args),
             )
 
         elif self.comment:
-            line = '%s%s.run("%s")  # %s' % (
+            line = '%s%s.%srun("%s")  # %s' % (
                 self.indent,
                 self.obj_name,
+                underscore,
                 command,
                 self.comment,
             )
         else:
-            line = '%s%s.run("%s")' % (self.indent, self.obj_name, command)
+            line = '%s%s.%srun("%s")' % (self.indent, self.obj_name, underscore, command)
         self.lines.append(line)
 
     def store_comment(self):
@@ -477,13 +524,6 @@ class FileTranslator:
         if self._non_interactive_level == 0:
             self.non_interactive = False
             self.indent = self.indent[4:]
-
-    def start_indented_block(self):
-        self._block_level += 1
-        self.indent = self.indent + "    "
-    
-    def end_indented_block(self):
-        self.indent = self.indent[4:]
 
     def output_to_file(self, line):
         if line[:4].upper() == '/OUT':
