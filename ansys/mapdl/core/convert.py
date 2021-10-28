@@ -5,6 +5,10 @@ from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.commands import Commands
 
 
+COMMANDS_TO_NOT_BE_CONVERTED = {
+    'INT1': "Because the APDL version has empty arguments, whereas the PyMAPDL doesn't have them. Hence the order of arguments is messed up."
+}
+
 def convert_script(
     filename_in,
     filename_out,
@@ -161,6 +165,10 @@ class FileTranslator:
                 self.comment = self.comment.lstrip()
 
         if not line:
+            return
+
+        if line[:4].upper() in COMMANDS_TO_NOT_BE_CONVERTED:
+            self.store_run_command(line)
             return
 
         if line[:4].upper() == "/COM":
