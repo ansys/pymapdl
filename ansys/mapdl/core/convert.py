@@ -171,6 +171,7 @@ class FileTranslator:
                 self.lines.append(new_prev_cmd)
                 self.store_run_command(line) # Using run but it could be `store_command`
                 self.end_non_interactive()
+                return
 
         if line[:4].upper() == "/COM":
             self.comment = "".join(line.split(",")[1:]).strip()[1:]
