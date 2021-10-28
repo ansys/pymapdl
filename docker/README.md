@@ -120,7 +120,7 @@ See the main [README.md](https://github.com/pyansys/mapdl/blob/master/README.md)
 In the command:
 
 ```
-IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl_grpc:$VERSION
+IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl:$VERSION
 docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 ```
 
@@ -136,7 +136,7 @@ number of processors (up to the number available on the host machine)
 with the `-np` switch.  For example:
 
 ```
-IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl_grpc:$VERSION
+IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl:$VERSION
 docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp -np 4
 ```
 
