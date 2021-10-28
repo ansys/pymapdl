@@ -2113,7 +2113,7 @@ class _MapdlCore(Commands):
                 # We don't need to log exception because they already included in the main logger.
                 # logger.error(self._response)
                 # However, exceptions are recorded in the global logger which do not record
-                # information fo the instances name, hence we edit the error message.
+                # information of the instances name, hence we edit the error message.
                 runtime_msg_error = f"\n\nError in instance {self._name}\n\n" + self._response
                 raise MapdlRuntimeError(runtime_msg_error)
             else:
