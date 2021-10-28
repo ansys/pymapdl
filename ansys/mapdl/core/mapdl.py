@@ -2067,13 +2067,13 @@ class _MapdlCore(Commands):
         if self._store_commands:
             self._stored_commands.append(command)
             return
-        elif command[:3].upper() in INVAL_COMMANDS:
+        elif command[:3].upper() in INVAL_COMMANDS and not self.non_interactive:
             exception = RuntimeError(
                 'Invalid pymapdl command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
-        elif command[:4].upper() in INVAL_COMMANDS:
+        elif command[:4].upper() in INVAL_COMMANDS and not self.non_interactive:
             exception = RuntimeError(
                 'Invalid pymapdl command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
