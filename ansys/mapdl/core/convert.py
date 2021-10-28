@@ -163,6 +163,15 @@ class FileTranslator:
         if not line:
             return
 
+        if line[:4].upper() == "*REP":
+            if not self.non_interactive:
+                prev_cmd = self.lines.pop(-1)
+                self.start_non_interactive()
+                new_prev_cmd = '    ' + prev_cmd # Since we are writting in self.lines we need to add the identation by ourselves.
+                self.lines.append(new_prev_cmd)
+                self.store_run_command(line) # Using run but it could be `store_command`
+                self.end_non_interactive()
+
         if line[:4].upper() == "/COM":
             self.comment = "".join(line.split(",")[1:]).strip()[1:]
             return self.store_comment()
