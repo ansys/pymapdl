@@ -3,7 +3,7 @@ import weakref
 import json
 
 import numpy as np
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 

@@ -7,8 +7,8 @@ import random
 from enum import Enum
 
 import numpy as np
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
-from ansys.grpc.mapdl import mapdl_pb2 as pb_types
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 
 from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc

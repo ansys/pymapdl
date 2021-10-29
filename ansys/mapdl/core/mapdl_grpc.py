@@ -17,9 +17,9 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-from ansys.grpc.mapdl import mapdl_pb2 as pb_types
-from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
@@ -210,7 +210,7 @@ class MapdlGrpc(_MapdlCore):
         # port and ip are needed to setup the log
         self._port = port
         self._ip = ip
-        super().__init__(loglevel, log_file=log_file, **kwargs)
+        super().__init__(loglevel, log_file=log_file, log_apdl=log_apdl, ** kwargs)
 
         check_valid_ip(ip)
 
@@ -1009,6 +1009,9 @@ class MapdlGrpc(_MapdlCore):
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
+        kwargs.setdefault("orig_cmd", 'CDREAD')
+        kwargs.setdefault("cd_read_option", option.upper())
+
         self.input(fname, **kwargs)
 
     @protect_grpc
@@ -1019,6 +1022,7 @@ class MapdlGrpc(_MapdlCore):
         progress_bar=False,
         time_step_stream=None,
         chunk_size=512,
+        orig_cmd='/INP',
         **kwargs,
     ):
         """Stream a local input file to a remote mapdl instance.
@@ -1044,6 +1048,12 @@ class MapdlGrpc(_MapdlCore):
 
             These defaults will be ignored if ``time_step_stream`` is
             manually set.
+
+        orig_cmd : str
+            Original command. There are some cases, were input is
+            used to send the file to the grpc server but then we want
+            to run something different than ``/INPUT``, for example
+            ``CDREAD``.
 
         Returns
         -------
@@ -1133,7 +1143,14 @@ class MapdlGrpc(_MapdlCore):
         # file.
         tmp_name = "_input_tmp_.inp"
         tmp_out = "_input_tmp_.out"
-        tmp_dat = f"/OUT,{tmp_out}\n/INP,'{filename}'\n"
+        if 'CDRE' in orig_cmd.upper():
+            # Using CDREAD
+            option = kwargs.get("cd_read_option", 'COMB')
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+        else:
+            # Using default INPUT
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+
         if self._local:
             local_path = self.directory
             with open(os.path.join(local_path, tmp_name), "w") as f:
