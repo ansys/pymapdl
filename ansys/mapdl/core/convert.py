@@ -531,7 +531,7 @@ class FileTranslator:
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().split(',').upper()
+            output_cmd = line.strip().upper().split(',')
             if len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
                 if opt1 != 'TERM':
@@ -549,7 +549,7 @@ class FileTranslator:
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().split(',').upper()
+            output_cmd = line.strip().upper().split(',')
             if len(output_cmd) == 1:
                 return True
             elif len(output_cmd) > 1:
