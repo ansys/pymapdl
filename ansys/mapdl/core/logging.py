@@ -148,6 +148,7 @@ string_to_loglevel = {
     'DEBUG': DEBUG,
     'INFO': INFO,
     'WARN': WARN,
+    'WARNING': WARN,
     'ERROR': ERROR,
     'CRITICAL': CRITICAL,
 }
