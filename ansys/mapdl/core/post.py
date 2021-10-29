@@ -17,6 +17,20 @@ DISP_TYPE = ["X", "Y", "Z", "NORM", "ALL"]
 ROT_TYPE = ["X", "Y", "Z", "ALL"]
 
 
+def elem_check_inputs(component, option, component_type): 
+    """Check element inputs"""
+    check_elem_option(option)
+    component = component.upper()
+    check_comp(component, component_type)
+    return component
+
+
+def check_elem_option(option):
+    """Check element option is valid."""
+    if option.upper() not in ["AVG", "MIN", "MAX"]:
+        raise ValueError("``option`` should be either 'AVG', 'MIN', or 'MAX'")
+
+
 def check_result_loaded(func):
     """Verify a result has been loaded within MAPDL"""
 
@@ -249,6 +263,287 @@ class PostProcessing:
         """
         return self._mapdl.get_value("ACTIVE", item1="SET", it1num="FREQ")
 
+    def element_values(self, item, comp="", option="AVG") -> np.ndarray:
+        """Compute the element-wise values for a given item and component.
+
+        This method uses :func:`Mapdl.etable()
+        <ansys.mapdl.core.Mapdl.etable` and returns a
+        ``numpy.ndarray`` rather than storing it within MAPDL.
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.  See the table below in the
+            notes section.
+        comp : str, optional
+            Component of the item if applicable.  See the table below
+            in the notes section.
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            - ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            - ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            - ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the requested element values for ta
+            given item and component.
+
+        Notes
+        -----
+        This an incomplete table of element values available to this
+        method.  For a full table, see `ETABLE
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_ETABLE.html>`_
+
+        +------+---------------------+--------------------------------------+
+        | Item | Comp                | Description                          |
+        +------+---------------------+--------------------------------------+
+        | U    | X, Y, Z             | X, Y, or Z structural displacement.  |
+        +------+---------------------+--------------------------------------+
+        | ROT  | X, Y, Z             | X, Y, or Z structural rotation.      |
+        +------+---------------------+--------------------------------------+
+        | TEMP |                     | Temperature.                         |
+        +------+---------------------+--------------------------------------+
+        | PRES |                     | Pressure.                            |
+        +------+---------------------+--------------------------------------+
+        | VOLT |                     | Electric potential.                  |
+        +------+---------------------+--------------------------------------+
+        | MAG  |                     | Magnetic scalar potential.           |
+        +------+---------------------+--------------------------------------+
+        | V    | X, Y, Z             | X, Y, or Z fluid velocity.           |
+        +------+---------------------+--------------------------------------+
+        | A    | X, Y, Z             | X, Y, or Z magnetic vector potential |
+        +------+---------------------+--------------------------------------+
+        | CONC |                     | Concentration.                       |
+        +------+---------------------+--------------------------------------+
+        | CURR |                     | Current.                             |
+        +------+---------------------+--------------------------------------+
+        | EMF  |                     | Electromotive force drop.            |
+        +------+---------------------+--------------------------------------+
+        | S    | X, Y, Z, XY, YZ, XZ | Component stress.                    |
+        |      +---------------------+--------------------------------------+
+        |      | 1, 2, 3             | Principal stress.                    |
+        |      +---------------------+--------------------------------------+
+        |      | INT                 | Stress intensity.                    |
+        |      +---------------------+--------------------------------------+
+        |      | EQV                 | Equivalent stress.                   |
+        +------+---------------------+--------------------------------------+
+        | EPEL | X, Y, Z, XY, YZ, XZ | Component elastic strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | 1, 2, 3             | Principal elastic strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | INT                 | Elastic strain intensity.            |
+        |      +---------------------+--------------------------------------+
+        |      | EQV                 | Elastic equivalent strain.           |
+        +------+---------------------+--------------------------------------+
+        | EPTH | X, Y, Z, XY, YZ, XZ | Component thermal strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | 1, 2, 3             | Principal thermal strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | INT                 | Thermal strain intensity.            |
+        |      +---------------------+--------------------------------------+
+        |      | EQV                 | Thermal equivalent strain.           |
+        +------+---------------------+--------------------------------------+
+        | EPPL | X, Y, Z, XY, YZ, XZ | Component plastic strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | 1, 2, 3             | Principal plastic strain.            |
+        |      +---------------------+--------------------------------------+
+        |      | INT                 | Plastic strain intensity.            |
+        |      +---------------------+--------------------------------------+
+        |      | EQV                 | Plastic equivalent strain.           |
+        +------+---------------------+--------------------------------------+
+        | EPCR | X, Y, Z, XY, YZ, XZ | Component creep strain.              |
+        |      +---------------------+--------------------------------------+
+        |      | 1, 2, 3             | Principal creep strain.              |
+        |      +---------------------+--------------------------------------+
+        |      | INT                 | Creep strain intensity.              |
+        |      +---------------------+--------------------------------------+
+        |      | EQV                 | Creep equivalent strain.             |
+        +------+---------------------+--------------------------------------+
+
+        Examples
+        --------
+        Return the averaged element displacement in the X
+        direction.
+
+        >>> arr = mapdl.post_processing.element_values("U", "X")
+        >>> arr
+        array([1.07396154e-06, 3.15631730e-06, 5.12543515e-06, ...,
+               5.41204700e-06, 3.33649806e-06, 1.13836132e-06])
+
+        Return the maximum element X component stress.
+
+        >>> arr = mapdl.post_processing.element_values("S", "X", "max")
+        >>> arr
+        array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ,
+                0.        ,  0.        ])
+
+        Return the minimum element thermal equivalent strain.
+
+        >>> arr = mapdl.post_processing.element_values("EPTH", "EQV", "min")
+        >>> arr
+        array([0., 0., 0., ..., 0., 0., 0.])
+
+        """
+        tmp_table = "__ETABLE__"
+        self._mapdl.etable(tmp_table, item, comp, option, mute=True)
+        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)
+
+    def element_displacement(
+            self, component="ALL", option="AVG"
+    ) -> np.ndarray:
+        """Return element displacement.
+
+        One value per element.  Either minimum, maximum, or average of
+        all nodes in each element.
+
+        Equilvanent MAPDL commands:
+
+        - ``ETABLE,VALUES,U,X``
+        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+
+        Parameters
+        ----------
+        component : str, optional
+            Structural displacement component to retrieve.  Must be
+            ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to
+            ``'ALL'``.
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            - ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            - ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            - ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+
+        Examples
+        --------
+        Return the average element displacement for all components.
+
+        >>> arr = mapdl.post_processing.element_displacement("ALL")
+        >>> arr.shape
+        (2080, 3)
+        >>> arr
+        array([[ 1.07396154e-06, -9.03608033e-06, -5.17768108e-12],
+               [ 3.15631730e-06, -2.65527340e-05,  1.07714512e-11],
+               [ 5.12543515e-06, -4.31175194e-05,  2.19929719e-12],
+               ...,
+               [ 5.41204700e-06, -4.80335719e-05,  7.75819589e-11],
+               [ 3.33649806e-06, -2.96109417e-05,  1.44947535e-10],
+               [ 1.13836132e-06, -1.01038096e-05,  6.95566641e-11]])
+
+        """
+        check_elem_option(option)
+        component = component.upper()
+        check_comp(component, ROT_TYPE)
+
+        if component == 'ALL':
+            return np.vstack((
+                self.element_values("U", "X", option),
+                self.element_values("U", "Y", option),
+                self.element_values("U", "Z", option)
+            )).T
+
+        return self.element_values("U", component, option)
+
+    def element_stress(self, component, option='AVG') -> np.ndarray:
+        """Return element component or principal stress.
+
+        One value per element.  Either minimum, maximum, or average of
+        all nodes in each element.
+
+        Equilvanent MAPDL commands:
+
+        - ``ETABLE,VALUES,S,X``
+        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+
+        Parameters
+        ----------
+        component : str
+            Element stress to retrieve.  One of the following:
+
+            +---------------------+--------------------+
+            | X, Y, Z, XY, YZ, XZ | Component stress.  |
+            +---------------------+--------------------+
+            | 1, 2, 3             | Principal stress.  |
+            +---------------------+--------------------+
+            | INT                 | Stress intensity.  |
+            +---------------------+--------------------+
+            | EQV                 | Equivalent stress  |
+            +---------------------+--------------------+
+
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            - ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            - ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            - ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+
+        Examples
+        --------
+        Return the average element component stress in the X direction.
+
+        >>> arr = mapdl.post_processing.element_stress("X")
+        >>> arr.shape
+        (2080, 3)
+        >>> arr
+        array([-0.29351357, -0.37027832, -0.37340827, ...,  0.        ,
+                0.        ,  0.        ])
+
+        """
+        component = elem_check_inputs(component, option, STRESS_TYPES)
+        return self.element_values("S", component, option)
+
+    def element_temperature(self, option='AVG') -> np.ndarray:
+        """Return element temperature.
+
+        One value per element.  Either minimum, maximum, or average of
+        all nodes in each element.
+
+        Equilvanent MAPDL commands:
+
+        - ``ETABLE,VALUES,TEMP``
+        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+
+        Parameters
+        ----------
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            - ``"MIN"`` : Store minimum element nodal value of the
+              specified item.
+            - ``"MAX"`` : Store maximum element nodal value of the
+              specified item.
+            - ``"AVG"`` : Store averaged element centroid value of the
+              specified item (default).
+
+        Examples
+        --------
+        Return the average element temperature.
+
+        >>> arr = mapdl.post_processing.element_temperature()
+        >>> arr.shape
+        (2080, 3)
+        >>> arr
+        array([20., 20., 20., ..., 20., 20., 20.])
+
+        """
+        return self.element_values("TEMP", option=option)
+
     def nodal_displacement(self, component="NORM") -> np.ndarray:
         """Nodal X, Y, or Z structural displacement.
 
@@ -368,6 +663,13 @@ class PostProcessing:
 
         Assumes scalars are from all nodes and not just the active surface.
         """
+        if not scalars.size:
+            raise RuntimeError(
+                "Result unavailable.  Either the result has not been loaded "
+                "with ``mapdl.set(step, sub_step)`` or the result does not "
+                "exist within the result file."
+            )
+
         surf = self._mapdl.mesh._surf
 
         # as ``disp`` returns the result for all nodes, we need all node numbers

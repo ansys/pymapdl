@@ -24,7 +24,7 @@ install_requires = [
     "pyiges>=0.1.4",
     "scipy>=1.3.0",  # for sparse (consider optional?)
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
-    "ansys-grpc-mapdl==0.4.0",  # supports at least 2020R2 - 2021R2
+    "ansys-api-mapdl-v0==0.4.1",  # supports at least 2020R2 - 2021R2
     "ansys-mapdl-reader>=0.50.15",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
 ]
