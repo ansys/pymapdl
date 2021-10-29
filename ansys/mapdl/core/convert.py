@@ -72,7 +72,7 @@ def convert_script(
     return translator.lines
 
 
-def convert_apdl_strings(apdl_strings,
+def convert_apdl_block(apdl_strings,
     loglevel="WARNING",
     auto_exit=True,
     line_ending=None,

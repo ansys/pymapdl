@@ -2,7 +2,7 @@ import os
 import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import convert_apdl_strings
+from ansys.mapdl.core.convert import convert_apdl_block
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -91,6 +91,6 @@ def test_convert(tmpdir):
 @pytest.mark.parametrize("cmd", block_commands)
 def test_convert_block_commands(tmpdir, cmd):
     apdl_block = apdl_input[cmd]
-    pyblock = convert_apdl_strings(apdl_strings=apdl_block.split('\n'))
+    pyblock = convert_apdl_block(apdl_strings=apdl_block.split('\n'))
     pyblock = '\n'.join(pyblock)
     assert pymapdl_output[cmd] in pyblock
