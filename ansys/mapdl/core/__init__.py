@@ -28,11 +28,6 @@ from ansys.mapdl.core.theme import MapdlTheme
 
 from ansys.mapdl.core import examples
 
-# from ansys.mapdl.core.xpl import ansXpl
-# from ansys.mapdl.core.math import MapdlMath
-
-# from ansys.mapdl.core.mapdl_azure import MapdlAzure, JupyterAzureClient
-
 _HAS_ANSYS = _check_has_ansys()
 
 # Setup data directory
