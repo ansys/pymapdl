@@ -173,17 +173,9 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
-        if line[:4].upper() == "/COM":
-            self.comment = "".join(line.split(",")[1:]).strip()[1:]
-            return self.store_comment()
-
         if line[:4].upper() == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
             return self.store_command("title", ["".join(parameters).strip()])
-
-        if line[:4].upper() == "C***":  # C***
-            self.comment = line.split("C***")[1].strip()[1:]
-            return self.store_comment()
 
         if line[:4].upper() == "*GET":
             parameters = line.split(",")[1:]

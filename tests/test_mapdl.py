@@ -47,10 +47,20 @@ vmesh,all
 # Many of the commands could be deleted, but for the sake of good
 # testing we are going to leave them.
 
-CDB_FILE = """/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
+CDB_FILE = """                                                                        S      1
+/COM,ANSYS RELEASE 12.1BETAUP20090531       10:26:32    06/01/2009      S      2
+/NOPR                                                                   S      3
+/PREP7                                                                  S      4
+/TITLE,                                                                 S      5
+1H,,1H;,,18Hdisc_pad_model.cdb,                                         G      1
+5HANSYS,22H  12.1BETA  UP20090531,,,,,,,1.0,,,,,13H000601.102632,       G      2
+1.0000E-04,,,,9,,;                                                      G      3
+S     29G      3D      0P      0                                        T      1
+:CDWRITE      ! START OF CDWRITE DATA
+/COM,ANSYS RELEASE 2021 R2           BUILD 21.2
 /PREP7
 /NOPR
-/TITLE,'CDREAD and CDWRITE tests
+/TITLE,'CDREAD and CDWRITE tests'
 *IF,_CDRDOFF,EQ,1,THEN     !if solid model was read in
 _CDRDOFF=             !reset flag, numoffs already performed
 *ELSE              !offset database for the following FE model
@@ -101,6 +111,25 @@ def clearing_cdread_cdwrite_tests(mapdl):
 def asserting_cdread_cdwrite_tests(mapdl):
     # Using ``in`` because of the padding APDL does on strings.
     return 'asdf1234' in mapdl.parameters['T_PAR']
+
+
+def warns_in_cdread_error_log(mapdl):
+    """Check for specific warns in the error log associated with using /INPUT with CDB files
+    instead of CDREAD command."""
+    error_files = [each for each in os.listdir(mapdl.directory) if each.endswith('.err')]
+
+    # "S 1", "1 H" and "5 H Ansys" are character at the end of lines in the CDB_FILE variable.
+    # They are allowed in the CDREAD command, but it gives warnings in the /INPUT command.
+    warn_cdread_1 = "S1 is not a recognized"
+    warn_cdread_2 = "1H is not a recognized"
+    warn_cdread_3 = "5HANSYS is not a recognized"
+
+    warns = []
+    for each in error_files:
+        with open(os.path.join(mapdl.directory, each)) as fid:
+            error_log = ''.join(fid.readlines())
+        warns.append((warn_cdread_1 in error_log) or (warn_cdread_2 in error_log) or (warn_cdread_3 in error_log))
+        return any(warns)
 
 
 @pytest.fixture(scope="function")
@@ -696,15 +725,15 @@ def test_title(mapdl, cleared):
 
 
 def test_cdread(mapdl, cleared):
-    random_letters = mapdl.directory.split('/')[0][-3:0]
+    random_letters = random_string(4)
 
-    mapdl.run(f"parmtest='{random_letters}'")
+    mapdl.run(f"PARMTEST='{random_letters}'")
     mapdl.cdwrite('all', 'model2', 'cdb')
 
     mapdl.clear()
     mapdl.cdread("db", 'model2', 'cdb')
 
-    assert random_letters == mapdl.parameters['parmtest']
+    assert random_letters in mapdl.parameters['PARMTEST']
 
 
 # CDREAD tests are actually a good way to test 'input' command.
@@ -738,35 +767,38 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     # the archive from the current working directory.
     old_cwd = os.getcwd()
     try:
+        # We are not checking yet if the file is read correctly, just if the file
+        # can be read.
         os.chdir(tmpdir)
-        mapdl.cdread('db', 'model', 'cdb')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('COMB', 'model', 'cdb') # 'COMB' is needed since we use the CDB with the strange line endings.
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
         clearing_cdread_cdwrite_tests(mapdl)
-        mapdl.cdread('db', 'model.cdb')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('COMB', 'model.cdb')
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
         clearing_cdread_cdwrite_tests(mapdl)
-        mapdl.cdread('db', 'model')
-        assert asserting_cdread_cdwrite_tests(mapdl)
+        mapdl.cdread('COMB', 'model')
+        assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
+
     finally:
         # always change back to the previous directory
         os.chdir(old_cwd)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model.cdb'))
-    mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('COMB', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model'))
-    mapdl.cdread('db', fullpath, 'cdb')
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('COMB', fullpath, 'cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join('model'))
-    mapdl.cdread('db', fullpath)
-    assert asserting_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('COMB', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(mapdl)
 
 
 def test_cdread_in_apdl_directory(mapdl, cleared):
