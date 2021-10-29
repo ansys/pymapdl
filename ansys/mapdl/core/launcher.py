@@ -878,6 +878,11 @@ def launch_mapdl(
         will be requested, being up to the license server to provide a specific
         license type. Default is ``None``.
 
+    Returns
+    -------
+    ansys.mapdl.core.mapdl._MapdlCore
+        An instance of Mapdl.  Type depends on the selected ``mode``.
+
     Notes
     -----
     These are the MAPDL switch options as of 2020R2 applicable for
@@ -959,11 +964,6 @@ def launch_mapdl(
 
     -smp : Enables shared-memory parallelism.
      See the Parallel Processing Guide for more information.
-
-    Returns
-    -------
-    ansys.mapdl.core.mapdl._MapdlCore
-        An instance of Mapdl.  Type depends on the selected ``mode``.
 
     Examples
     --------
