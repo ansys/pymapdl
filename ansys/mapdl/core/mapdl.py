@@ -2236,11 +2236,6 @@ class _MapdlCore(Commands):
     @property
     @supress_logging
     def directory(self):
-        pass
-
-    @directory.getter
-    @supress_logging
-    def directory(self):
         """Current MAPDL directory
 
         Examples
