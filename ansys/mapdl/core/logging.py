@@ -130,7 +130,7 @@ CRITICAL = logging.CRITICAL
 
 ## Formatting
 
-STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s, defaults={"instance_name": None}'
+STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s'
 
 FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
 
@@ -148,6 +148,7 @@ string_to_loglevel = {
     'DEBUG': DEBUG,
     'INFO': INFO,
     'WARN': WARN,
+    'WARNING': WARN,
     'ERROR': ERROR,
     'CRITICAL': CRITICAL,
 }
@@ -424,7 +425,6 @@ class Logger():
             raise ValueError("You can only input 'str' classes to this method.")
 
         return instance_logger
-        # return.level = None # TODO: To remove
 
     def add_instance_logger(self, name, mapdl_instance, level=None):
         """Create a logger for a MAPDL instance.

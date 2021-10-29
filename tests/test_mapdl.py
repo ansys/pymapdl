@@ -839,7 +839,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
 def test_inval_commands(mapdl, cleared):
     """Test the output of invalid commands"""
-    cmds = ["*END", "*vwrite", "/eof", "cmatrix"]
+    cmds = ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT"]
     for each_cmd in cmds:
         with pytest.raises(RuntimeError):
             mapdl.run(each_cmd)
@@ -873,3 +873,16 @@ def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(RuntimeError):
         resp = mapdl.cwd(path_tests.path_with_single_quote)
         assert 'WARNING' not in resp
+
+
+@skip_in_cloud
+def test_cwd_directory(mapdl, tmpdir):
+
+    mapdl.directory = str(tmpdir)
+    assert mapdl.directory == str(tmpdir).replace('\\', '/')
+
+    wrong_path = 'wrong_path'
+    with pytest.warns(Warning) as record:
+        mapdl.directory = wrong_path
+        assert 'The working directory specified' in record.list[-1].message.args[0]
+        assert 'is not a directory on' in record.list[-1].message.args[0]
