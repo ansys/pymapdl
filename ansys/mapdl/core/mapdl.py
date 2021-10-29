@@ -2256,7 +2256,7 @@ class _MapdlCore(Commands):
         None
 
         In case the directory does not exist or it is not
-        accesible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        accessible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
         a warning.
         """
         # always attempt to cache the path
