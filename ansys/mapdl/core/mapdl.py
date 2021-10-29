@@ -12,6 +12,8 @@ from shutil import rmtree, copyfile
 import weakref
 import warnings
 import pathlib
+from warnings import warn
+from functools import wraps
 
 import numpy as np
 
@@ -2251,6 +2253,14 @@ class _MapdlCore(Commands):
         >>> mapdl.directory
         'C:/temp_directory/'
 
+        Setting the directory
+
+        >>> mapdl.directory = 'C:/temp_directory/'
+        None
+
+        In case the directory does not exist or it is not
+        accessible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        a warning.
         """
         # always attempt to cache the path
         try:
@@ -2259,11 +2269,17 @@ class _MapdlCore(Commands):
             pass
 
         # os independent path format
-        if self._path is not None:
+        if self._path: # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         return self._path
+
+    @directory.setter
+    @supress_logging
+    def directory(self, path):
+        """Change the directory using ``Mapdl.cwd``"""
+        self.cwd(path)  # this has been wrapped in Mapdl to show a warning if the file does not exist.
 
     @property
     def _lockfile(self):
@@ -2476,3 +2492,13 @@ class _MapdlCore(Commands):
         path = str(path) + ext
         with open(path) as fid:
             return fid.read()
+
+    @wraps(Commands.cwd)
+    def cwd(self, *args, **kwargs):
+        """Wraps cwd"""
+        returns_ = super().cwd( *args, **kwargs)
+
+        if '*** WARNING ***' in self._response:
+            warn('\n' + self._response)
+
+        return returns_
