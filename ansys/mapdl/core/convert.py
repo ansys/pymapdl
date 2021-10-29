@@ -5,8 +5,10 @@ from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.commands import Commands
 
 
+# Because the APDL version has empty arguments, whereas the PyMAPDL
+# doesn't have them. Hence the order of arguments is messed up.
 COMMANDS_TO_NOT_BE_CONVERTED = {
-    'INT1': "Because the APDL version has empty arguments, whereas the PyMAPDL doesn't have them. Hence the order of arguments is messed up."
+    'INT1'
 }
 
 def convert_script(
