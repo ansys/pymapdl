@@ -17,18 +17,25 @@ PyMAPDL
 
 Overview
 --------
-The PyMAPDL project supports Pythonic access to MAPDL to be able to communicate with the MAPDL process directly from Python. TThe latest ansys-mapdl-core package enables a more comprehensive interface with MAPDL and supports:
+The PyMAPDL project supports Pythonic access to MAPDL to be able to
+communicate with the MAPDL process directly from Python. The latest
+ansys-mapdl-core package enables a more comprehensive interface with
+MAPDL and supports:
 
-- All the features of the original module (e.g. pythonic commands, interactive sessions).
+- All the features of the original module (e.g. pythonic commands,
+  interactive sessions).
 - Remote connections to MAPDL from anywhere via gRPC.
-- Direct access to MAPDL arrays, meshes, and geometry as Python objects.
-- Low level access to the MAPDL solver through APDL math in a scipy like interface.
+- Direct access to MAPDL arrays, meshes, and geometry as Python
+  objects.
+- Low level access to the MAPDL solver through APDL math in a scipy
+  like interface.
 
-Here's a quick demo from VSCode:
+Here's a quick demo of PyMAPDL within VSCode:
 
 .. image:: https://github.com/pyansys/pymapdl/raw/fix/auto_complete_vscode/doc/landing_page_demo.gif
 
-PyMAPDL works from Jupyter Notebooks, the standard Python console, or in batch mode on Windows, Linux, and even Mac OS!
+PyMAPDL works within Jupyter Notebooks, the standard Python console,
+or in batch mode on Windows, Linux, and even Mac OS.
 
 Documentation and Issues
 ------------------------
