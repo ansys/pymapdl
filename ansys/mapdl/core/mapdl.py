@@ -2386,6 +2386,7 @@ class _MapdlCore(Commands):
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
                 raise RuntimeError("Unable to get array for %s" % entity)
+            ntry += 1
         return arr
 
     def _get_array(
