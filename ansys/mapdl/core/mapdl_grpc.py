@@ -17,9 +17,9 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-from ansys.grpc.mapdl import mapdl_pb2 as pb_types
-from ansys.grpc.mapdl import mapdl_pb2_grpc as mapdl_grpc
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError

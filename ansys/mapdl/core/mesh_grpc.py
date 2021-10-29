@@ -4,7 +4,7 @@ import weakref
 import os
 import numpy as np
 
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.reader.mesh import Mesh
 
 from ansys.mapdl.core.misc import threaded, supress_logging
