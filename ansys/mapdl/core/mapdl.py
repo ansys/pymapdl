@@ -2250,6 +2250,14 @@ class _MapdlCore(Commands):
         >>> mapdl.directory
         'C:/temp_directory/'
 
+        Setting the directory
+
+        >>> mapdl.directory = 'C:/temp_directory/'
+        None
+
+        In case the directory does not exist or it is not
+        accesible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        a warning.
         """
         # always attempt to cache the path
         try:
