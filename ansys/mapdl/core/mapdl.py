@@ -2113,8 +2113,11 @@ class _MapdlCore(Commands):
                 response = re.sub(err_str, "", response)
 
             if "*** ERROR ***" in response:
-                self._log.error(self._response)
-                raise MapdlRuntimeError(self._response)
+                # We don't need to log exception because they already included in the main logger.
+                # logger.error(self._response)
+                # However, exceptions are recorded in the global logger which do not record
+                # information of the instances name, hence we edit the error message.
+                raise MapdlRuntimeError(f"\n\nError in instance {self._name}\n\n" + self._response)
             else:
                 warnings.warn(
                     "MAPDL returned non-abort errors.  Please " "check the logs."
