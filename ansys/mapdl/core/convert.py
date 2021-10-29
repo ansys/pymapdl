@@ -78,7 +78,7 @@ def convert_apdl_strings(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-                         ):
+):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -125,8 +125,7 @@ def convert_apdl_strings(apdl_strings,
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
-    else:
-        return translator.lines
+    return translator.lines
 
 
 def _convert(apdl_strings,
@@ -136,7 +135,7 @@ def _convert(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-             ):
+):
 
     translator = FileTranslator(
         loglevel,
@@ -257,7 +256,7 @@ class FileTranslator:
         if self._in_block:
             self._block_count += 1
 
-        if self._in_block and self._block_count >= self._block_count_target and self._block_count_target != 0 :
+        if self._in_block and self._block_count >= self._block_count_target and self._block_count_target:
             self._in_block = False
             self.end_non_interactive()
             self._block_count = 0
@@ -342,7 +341,7 @@ class FileTranslator:
                     + "The previous line is: \n%s\n\n" % self.lines[-1]
                 )
             self.store_run_command(line)
-            if not self._in_block: # Tp scape cmds that require (XX) but they are not in block
+            if not self._in_block:  # To escape cmds that require (XX) but they are not in block
                 self.end_non_interactive()
             return
         elif line[:4] == "*USE" and self.macros_as_functions:
@@ -500,19 +499,20 @@ class FileTranslator:
             self.indent = self.indent[4:]
 
     def output_to_file(self, line):
+    """Return if an APDL line is redirecting to a file."""
         if line[:4].upper() == '/OUT':
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().split(',')
+            output_cmd = line.strip().split(',').upper()
             if len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
                 if opt1 != 'TERM':
                     # A file is supplied.
                     return True
 
-        if line[:4].upper() == '*CFO': #any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
-            # We might not need gooing into interactive mode for *CFOPEN/*CFCLOSE
+        if line[:4].upper() == '*CFO':  # any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
+            # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
             return True
 
         return False
@@ -522,7 +522,7 @@ class FileTranslator:
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().split(',')
+            output_cmd = line.strip().split(',').upper()
             if len(output_cmd) == 1:
                 return True
             elif len(output_cmd) > 1:
@@ -530,8 +530,8 @@ class FileTranslator:
                 if opt1 == 'TERM':
                     # A file is supplied.
                     return True
-        if line[:4].upper() in '*CFCLOSE': #
-            # We might not need gooing into interactive mode for *CFOPEN/*CFCLOSE
+        if line[:4].upper() in '*CFCLOSE':
+            # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
             return True
 
         return False
