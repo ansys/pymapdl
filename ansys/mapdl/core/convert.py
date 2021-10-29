@@ -169,6 +169,16 @@ class FileTranslator:
         if not line:
             return
 
+        if line[:4].upper() == "*REP":
+            if not self.non_interactive:
+                prev_cmd = self.lines.pop(-1)
+                self.start_non_interactive()
+                new_prev_cmd = '    ' + prev_cmd  # Since we are writing in self.lines we need to add the indentation by ourselves.
+                self.lines.append(new_prev_cmd)
+                self.store_run_command(line)  # Using run but it could be `store_command`
+                self.end_non_interactive()
+                return
+
         if line[:4].upper() in COMMANDS_TO_NOT_BE_CONVERTED:
             self.store_run_command(line)
             return
