@@ -79,7 +79,7 @@ def convert_apdl_block(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-                         ):
+                       ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
