@@ -47,7 +47,3 @@ try:
 
 except:  # pragma: no cover
     pass
-
-
-if "ANSJUPHUB_VER" in os.environ:
-    from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl

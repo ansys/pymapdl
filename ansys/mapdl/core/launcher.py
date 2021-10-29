@@ -18,8 +18,8 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.licensing import LicenseChecker
-from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES
+from ansys.mapdl.core.licensing import LicenseChecker, ALLOWABLE_LICENSES
+from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core import LOG
 
 # settings directory
@@ -755,7 +755,7 @@ def launch_mapdl(
     license_server_check=True,
     license_type=None,
     **kwargs,
-):
+) -> _MapdlCore:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -960,6 +960,11 @@ def launch_mapdl(
     -smp : Enables shared-memory parallelism.
      See the Parallel Processing Guide for more information.
 
+    Returns
+    -------
+    ansys.mapdl.core.mapdl._MapdlCore
+        An instance of Mapdl.  Type depends on the selected ``mode``.
+
     Examples
     --------
     Launch MAPDL using the best protocol.
@@ -994,7 +999,7 @@ def launch_mapdl(
     set_no_abort = kwargs.get("set_no_abort", True)
     ip = os.environ.get("PYMAPDL_IP", ip)
     if "PYMAPDL_PORT" in os.environ:
-        port = int(os.environ.get("PYMAPDL_PORT"))
+        port = int(os.environ.get("PYMAPDL_PORT", '50052'))
     if port is None:
         port = MAPDL_DEFAULT_PORT
 
