@@ -115,11 +115,11 @@ class MeshGrpc(Mesh):
 
     @property
     def nnum_all(self) -> np.ndarray:
-        """Array of all node numbers.
+        """Array of all node numbers, even those not selected.
 
         Examples
         --------
-        >>> mapdl.mesh.nnum
+        >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
@@ -133,6 +133,30 @@ class MeshGrpc(Mesh):
                 nnum = np.empty(0, np.int32)
 
         self._mapdl.cmsel("S", "__NODE__", "NODE", mute=True)
+        self._ignore_cache_reset = False
+
+        return nnum
+
+    @property
+    def enum_all(self) -> np.ndarray:
+        """Array of all element numbers, even those not selected.
+
+        Examples
+        --------
+        >>> mapdl.mesh.enum_all
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        self._ignore_cache_reset = True
+        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
+        self._mapdl.nsel("all", mute=True)
+
+        nnum = self._mapdl.get_array("ELEM", item1="NLIST")
+        nnum = nnum.astype(np.int32)
+        if nnum.size == 1:
+            if nnum[0] == 0:
+                nnum = np.empty(0, np.int32)
+
+        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
         self._ignore_cache_reset = False
 
         return nnum

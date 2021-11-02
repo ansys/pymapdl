@@ -412,8 +412,8 @@ class PostProcessing:
         ----------
         component : str, optional
             Structural displacement component to retrieve.  Must be
-            ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to
-            ``'ALL'``.
+            ``"X"``, ``"Y"``, ``"Z"``, ``"ALL"`` or ``"NORM"``.  Defaults to
+            ``"ALL"``.
         option : str, optional
             Option for storing element table data.  One of the
             following:
@@ -446,14 +446,78 @@ class PostProcessing:
         component = component.upper()
         check_comp(component, ROT_TYPE)
 
-        if component == 'ALL':
-            return np.vstack((
+        if component in ["ALL" "NORM"]:
+            disp = np.vstack((
                 self.element_values("U", "X", option),
                 self.element_values("U", "Y", option),
                 self.element_values("U", "Z", option)
             )).T
+            if component == "NORM":
+                return np.linalg.norm(disp, axis=1)
+            return disp
 
         return self.element_values("U", component, option)
+
+    def plot_element_displacement(
+        self, component="NORM", option="AVG", show_elem_numbering=False, **kwargs
+    ):
+        """Plot element displacement.
+
+        Parameters
+        ----------
+        component : str, optional
+            Structural displacement component to retrieve.  Must be
+            ``"X"``, ``"Y"``, ``"Z"``, or ``"NORM"``.
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            - ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            - ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            - ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+        show_element_numbering : bool, optional
+            Plot the element numbers of the elements.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``
+
+        Examples
+        --------
+        Plot the mean normalized element displacement for the first
+        result in the "X" direction.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> mapdl.post_processing.plot_element_displacement(
+        ...     "NORM",
+        ...     option="AVG"
+        ... )
+
+        """
+        if component.upper() == "ALL":
+            raise ValueError(
+                '"ALL" not allowed in this context.  Select a '
+                'single displacement component (e.g. "X" or "NORM")'
+            )
+
+        if component.upper() == "NORM":
+            disp = np.linalg.norm(self.element_displacement("ALL"), axis=1)
+        else:
+            disp = self.element_displacement(component)
+        kwargs.setdefault("stitle", f"{component} Element Displacement")
+        return self._plot_cell_scalars(
+            disp, show_elem_numbering=show_elem_numbering, **kwargs
+        )
 
     def element_stress(self, component, option='AVG') -> np.ndarray:
         """Return element component or principal stress.
@@ -699,6 +763,48 @@ class PostProcessing:
 
         return general_plotter(meshes, [], labels, **kwargs)
 
+    def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
+        """Plot cell scalars.
+
+        Assumes scalars are from all elements and not just the active surface.
+        """
+        if not scalars.size:
+            raise RuntimeError(
+                "Result unavailable.  Either the result has not been loaded "
+                "with ``mapdl.set(step, sub_step)`` or the result does not "
+                "exist within the result file."
+            )
+
+        surf = self._mapdl.mesh._surf
+
+        # as ``disp`` returns the result for all nodes, we need all node numbers
+        # and to index to the output node numbers
+        if hasattr(self._mapdl.mesh, "enum_all"):
+            enum = self._mapdl.mesh.enum
+        else:
+            enum = self._all_enum
+
+        mask = np.in1d(enum, surf["ansys_elem_num"])
+        ridx = np.argsort(np.argsort(surf["ansys_elem_num"]))
+        if scalars.size != mask.size:
+            scalars = scalars[self.selected_nodes]
+        scalars = scalars[mask][ridx]
+
+        meshes = [
+            {
+                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                "scalars": scalars,
+            }
+        ]
+
+        labels = []
+        if show_elem_numbering:
+            labels = [{"points": surf.cell_centers().points,
+                       "labels": surf["ansys_elem_num"]}]
+
+        return general_plotter(meshes, [], labels, **kwargs)
+
     @property
     @supress_logging
     def _all_nnum(self):
@@ -708,6 +814,17 @@ class PostProcessing:
         if nnum[0] == -1:
             nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
         self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+        return nnum
+
+    @property
+    @supress_logging
+    def _all_enum(self):
+        self._mapdl.cm("__TMP_ELEM__", "ELEM")
+        self._mapdl.allsel()
+        nnum = self._mapdl.get_array("ELEM", item1="NLIST").astype(np.int32)
+        if nnum[0] == -1:
+            nnum = self._mapdl.get_array("ELEM", item1="NLIST").astype(np.int32)
+        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
         return nnum
 
     @property
