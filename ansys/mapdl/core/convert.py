@@ -514,7 +514,7 @@ class FileTranslator:
             elif "ARG" in parameter and self._infunction:
                 parsed_parameters.append("%s" % parameter)
             else:
-                # Removing strings '' and "" because they are going to be added by the converter.
+                # Removing strings '' and "" because they are going to be added by the converter module.
                 if parameter.startswith("'") and parameter.endswith("'"):
                     parameter = parameter[1:-1]
                 if parameter.startswith('"') and parameter.endswith('"'):
