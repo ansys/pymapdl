@@ -672,23 +672,34 @@ class _MapdlCore(Commands):
         self._allow_ignore = bool(value)
 
     def open_apdl_log(self, filename, mode="w"):
-        """Start writing all APDL commands to an ANSYS input file.
+        """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
         ----------
         filename : str
             Filename of the log.
+        mode : str, optional
+            Python file modes (for example, ``'a'``, ``'w'``).  Should
+            be either write or append.
+
+        Examples
+        --------
+        Begin writing APDL commands to ``"log.inp"``.
+
+        >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
             raise RuntimeError("APDL command logging already enabled")
-
         self._log.debug("Opening ANSYS log file at %s", filename)
+
+        if mode not in ["w", "a", "x"]:
+            raise ValueError("File mode should either be write, append, or exclusive"
+                             " creation ('w', 'a', or 'x').")
+
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
-        if mode == "w":
-            self._apdl_log.write(
-                "! APDL script generated using ansys.mapdl.core %s\n"
-                % pymapdl.__version__
-            )
+        self._apdl_log.write(
+            "! APDL script generated using ansys.mapdl.core {pymapdl.__version__}\n"
+        )
 
     @supress_logging
     @run_as_prep7
