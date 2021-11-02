@@ -432,14 +432,14 @@ class MeshGrpc(Mesh):
 
         Access the node numbers of grid.
 
-        >>> grid.point_arrays
+        >>> grid.point_data
         Contains keys:
             ansys_node_num
             vtkOriginalPointIds
             origid
             VTKorigID
 
-        >>> grid.point_arrays['ansys_node_num']
+        >>> grid.point_data['ansys_node_num']
         pyvista_ndarray([    1,     2,     3, ..., 50684, 50685, 50686],
                         dtype=int32)
 
