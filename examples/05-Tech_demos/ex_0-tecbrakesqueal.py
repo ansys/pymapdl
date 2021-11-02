@@ -187,7 +187,7 @@ def start(mapdl, verify):
     mapdl.allsel("all")
     return mapdl
 
-mapdl = launch_mapdl(loglevel="WARN", log_apdl='w', nproc=8, memory=16)
+mapdl = launch_mapdl(loglevel="WARN")
 mapdl = start(mapdl, 'linear_non_prestressed')
 mapdl.title("linear_non_prestressed, Solving brake squeal problem using linear non pre-stressed modal solve")
 
