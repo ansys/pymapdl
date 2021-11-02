@@ -905,7 +905,7 @@ class PostProcessing:
         # it's possible that there are duplicated element numbers,
         # therefore we need to get the unique values and a reverse index
         uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        mask = np.in1d(enum, uni, assume_unique=True)
+        mask = np.isin(enum, uni, assume_unique=True)
 
         if scalars.size != mask.size:
             scalars = scalars[self.selected_elements]
