@@ -381,36 +381,57 @@ class ElementTable:
         lab9="",
         **kwargs,
     ):
-        """Prints the element table items.
+        """Print the element table items.
 
         APDL Command: PRETAB
 
         Parameters
         ----------
-        lab1, lab2, lab3, . . . , lab9
-            Print selected items.  Valid labels are (blank) or any label as
-            specified with the ETABLE command.  Convenience labels may be used
-            for Lab1 to select groups of labels (10 labels maximum):  GRP1 for
-            first 10 stored items; GRP2 for items 11 to 20; GRP3 for items 21
-            to 30; GRP4 for items 31 to 40; GRP5 for items 41 to 50.  Enter
-            ETABLE,STAT command to list stored item order.  If all labels are
+        lab1, lab2, lab3, ... , lab9
+            Print selected items.  Valid labels are ``""`` or any
+            label as specified with the ETABLE command.  Convenience
+            labels may be used for Lab1 to select groups of labels (10
+            labels maximum): GRP1 for first 10 stored items; GRP2 for
+            items 11 to 20; GRP3 for items 21 to 30; GRP4 for items 31
+            to 40; GRP5 for items 41 to 50.  Run ``etable("stat")``
+            command to list stored item order.  If all labels are
             blank, print first 10 stored items (GRP1).
 
         Notes
         -----
-        Prints the items stored in the table defined with the ETABLE command.
-        Item values will be listed for the selected elements in the sorted
-        sequence [ESORT].  The FORCE command can be used to define which
-        component of the nodal load is to be used (static,  damping, inertia,
-        or total).
+        Prints the items stored in the table defined with the
+        :func:`etable() <ansys.mapdl.core.Mapdl.etable>` command.
+        Item values will be listed for the selected elements in the
+        sorted sequence [ESORT].  :func:`force()
+        <ansys.mapdl.core.Mapdl.force>` can be used to define which
+        component of the nodal load is to be used (static, damping,
+        inertia, or total).
 
-        Portions of this command are not supported by PowerGraphics
-        [/GRAPHICS,POWER].
+        Examples
+        --------
+        Print out element displacement results.
+
+        >>> mapdl.etable("values", "U", "X")
+        STORE VALUES   FROM ITEM=U    COMP=X     FOR ALL SELECTED ELEMENTS
+
+        Now print out the table.
+
+        >>> mapdl.pretab().splitlines()[:4]
+        ['PRINT ELEMENT TABLE ITEMS PER ELEMENT',
+         '       1   0.1073961540E-005  0.1073961540E-005',
+         '       2   0.3156317304E-005  0.3156317304E-005',
+         '       3   0.5125435148E-005  0.5125435148E-005']
+
+        Note that can access the array directly from APDL:
+
+        >>> mapdl.get_array("elem", 1, "ETAB", "values")
+        array([1.07396154e-06, 3.15631730e-06, 5.12543515e-06, ...,
+               5.41204700e-06, 3.33649806e-06, 1.13836132e-06])
+
         """
-        command = (
-            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}"
+        return self.run(
+            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}", **kwargs
         )
-        return self.run(command, **kwargs)
 
     def sabs(self, key="", **kwargs):
         """Specifies absolute values for element table operations.

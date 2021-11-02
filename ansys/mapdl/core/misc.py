@@ -70,7 +70,7 @@ class Report(scooby.Report):
             "pyiges",
             "scipy",
             "grpc",  # grpcio
-            "ansys.grpc.mapdl",  # ansys-grpc-mapdl
+            "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
             "ansys.mapdl.reader",  # ansys-mapdl-reader
             "google.protobuf",  # protobuf library
         ]

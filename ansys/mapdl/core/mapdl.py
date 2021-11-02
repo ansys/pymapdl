@@ -59,7 +59,8 @@ INVAL_COMMANDS = {
     "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
     "*ASK": "Unsupported command.  Use python ``input`` instead.",
     "*IF": "Use a python ``if`` or run as non_interactive",
-    "CMAT": "Use as non_interactive",
+    "CMAT": "Run `CMAT` as ``non_interactive``.",
+    "*REP": "Run '*REPEAT' in ``non_interactive``."
 }
 
 ## Soft-invalid commands
@@ -123,9 +124,8 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
-                log_file=True,
-                local=True, **start_parm):
-        """Initialize connection with MAPDL. """
+                log_file=True, local=True, **start_parm):
+        """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -2122,8 +2122,11 @@ class _MapdlCore(Commands):
                 response = re.sub(err_str, "", response)
 
             if "*** ERROR ***" in response:
-                self._log.error(self._response)
-                raise MapdlRuntimeError(self._response)
+                # We don't need to log exception because they already included in the main logger.
+                # logger.error(self._response)
+                # However, exceptions are recorded in the global logger which do not record
+                # information of the instances name, hence we edit the error message.
+                raise MapdlRuntimeError(f"\n\nError in instance {self._name}\n\n" + self._response)
             else:
                 warnings.warn(
                     "MAPDL returned non-abort errors.  Please " "check the logs."
@@ -2396,6 +2399,7 @@ class _MapdlCore(Commands):
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
                 raise RuntimeError("Unable to get array for %s" % entity)
+            ntry += 1
         return arr
 
     def _get_array(

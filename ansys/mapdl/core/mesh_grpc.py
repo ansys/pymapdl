@@ -4,7 +4,7 @@ import weakref
 import os
 import numpy as np
 
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.reader.mesh import Mesh
 
 from ansys.mapdl.core.misc import threaded, supress_logging
@@ -115,11 +115,11 @@ class MeshGrpc(Mesh):
 
     @property
     def nnum_all(self) -> np.ndarray:
-        """Array of all node numbers.
+        """Array of all node numbers, even those not selected.
 
         Examples
         --------
-        >>> mapdl.mesh.nnum
+        >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
@@ -138,9 +138,33 @@ class MeshGrpc(Mesh):
         return nnum
 
     @property
+    def enum_all(self) -> np.ndarray:
+        """Array of all element numbers, even those not selected.
+
+        Examples
+        --------
+        >>> mapdl.mesh.enum_all
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        self._ignore_cache_reset = True
+        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
+        self._mapdl.esel("all", mute=True)
+
+        enum = self._mapdl.get_array("ELEM", item1="NLIST")
+        enum = enum.astype(np.int32)
+        if enum.size == 1:
+            if enum[0] == 0:
+                enum = np.empty(0, np.int32)
+
+        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
+        self._ignore_cache_reset = False
+
+        return enum
+
+    @property
     @supress_logging
     def n_node(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected nodes in MAPDL.
 
         Examples
         --------
@@ -152,7 +176,7 @@ class MeshGrpc(Mesh):
     @property
     @supress_logging
     def n_elem(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected elements in MAPDL.
 
         Examples
         --------

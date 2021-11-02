@@ -892,7 +892,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
 def test_inval_commands(mapdl, cleared):
     """Test the output of invalid commands"""
-    cmds = ["*END", "*vwrite", "/eof", "cmatrix"]
+    cmds = ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT"]
     for each_cmd in cmds:
         with pytest.raises(RuntimeError):
             mapdl.run(each_cmd)
