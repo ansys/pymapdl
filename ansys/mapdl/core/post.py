@@ -933,7 +933,7 @@ class PostProcessing:
         self._mapdl.allsel()
         nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
 
-        # rerun if encounted weird edge case of negative first index.
+        # rerun if encountered weird edge case of negative first index.
         if nnum[0] == -1:
             nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
         self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
@@ -946,7 +946,7 @@ class PostProcessing:
         self._mapdl.allsel()
         nnum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
 
-        # rerun if encounted weird edge case of negative first index.
+        # rerun if encountered weird edge case of negative first index.
         if nnum[0] == -1:
             enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
         self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
