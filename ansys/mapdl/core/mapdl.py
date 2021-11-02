@@ -12,6 +12,8 @@ from shutil import rmtree, copyfile
 import weakref
 import warnings
 import pathlib
+from warnings import warn
+from functools import wraps
 
 import numpy as np
 
@@ -57,7 +59,8 @@ INVAL_COMMANDS = {
     "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
     "*ASK": "Unsupported command.  Use python ``input`` instead.",
     "*IF": "Use a python ``if`` or run as non_interactive",
-    "CMAT": "Use as non_interactive",
+    "CMAT": "Run `CMAT` as ``non_interactive``.",
+    "*REP": "Run '*REPEAT' in ``non_interactive``."
 }
 
 ## Soft-invalid commands
@@ -121,9 +124,8 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
-                log_file=True,
-                local=True, **start_parm):
-        """Initialize connection with MAPDL. """
+                log_file=True, local=True, **start_parm):
+        """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -2110,8 +2112,11 @@ class _MapdlCore(Commands):
                 response = re.sub(err_str, "", response)
 
             if "*** ERROR ***" in response:
-                self._log.error(self._response)
-                raise MapdlRuntimeError(self._response)
+                # We don't need to log exception because they already included in the main logger.
+                # logger.error(self._response)
+                # However, exceptions are recorded in the global logger which do not record
+                # information of the instances name, hence we edit the error message.
+                raise MapdlRuntimeError(f"\n\nError in instance {self._name}\n\n" + self._response)
             else:
                 warnings.warn(
                     "MAPDL returned non-abort errors.  Please " "check the logs."
@@ -2248,6 +2253,14 @@ class _MapdlCore(Commands):
         >>> mapdl.directory
         'C:/temp_directory/'
 
+        Setting the directory
+
+        >>> mapdl.directory = 'C:/temp_directory/'
+        None
+
+        In case the directory does not exist or it is not
+        accessible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        a warning.
         """
         # always attempt to cache the path
         try:
@@ -2256,11 +2269,17 @@ class _MapdlCore(Commands):
             pass
 
         # os independent path format
-        if self._path is not None:
+        if self._path: # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         return self._path
+
+    @directory.setter
+    @supress_logging
+    def directory(self, path):
+        """Change the directory using ``Mapdl.cwd``"""
+        self.cwd(path)  # this has been wrapped in Mapdl to show a warning if the file does not exist.
 
     @property
     def _lockfile(self):
@@ -2370,6 +2389,7 @@ class _MapdlCore(Commands):
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
                 raise RuntimeError("Unable to get array for %s" % entity)
+            ntry += 1
         return arr
 
     def _get_array(
@@ -2473,3 +2493,13 @@ class _MapdlCore(Commands):
         path = str(path) + ext
         with open(path) as fid:
             return fid.read()
+
+    @wraps(Commands.cwd)
+    def cwd(self, *args, **kwargs):
+        """Wraps cwd"""
+        returns_ = super().cwd( *args, **kwargs)
+
+        if '*** WARNING ***' in self._response:
+            warn('\n' + self._response)
+
+        return returns_
