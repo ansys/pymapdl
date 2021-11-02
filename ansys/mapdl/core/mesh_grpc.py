@@ -148,23 +148,23 @@ class MeshGrpc(Mesh):
         """
         self._ignore_cache_reset = True
         self._mapdl.cm("__ELEM__", "ELEM", mute=True)
-        self._mapdl.nsel("all", mute=True)
+        self._mapdl.esel("all", mute=True)
 
-        nnum = self._mapdl.get_array("ELEM", item1="NLIST")
-        nnum = nnum.astype(np.int32)
-        if nnum.size == 1:
-            if nnum[0] == 0:
-                nnum = np.empty(0, np.int32)
+        enum = self._mapdl.get_array("ELEM", item1="NLIST")
+        enum = enum.astype(np.int32)
+        if enum.size == 1:
+            if enum[0] == 0:
+                enum = np.empty(0, np.int32)
 
         self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
         self._ignore_cache_reset = False
 
-        return nnum
+        return enum
 
     @property
     @supress_logging
     def n_node(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected nodes in MAPDL.
 
         Examples
         --------
@@ -176,7 +176,7 @@ class MeshGrpc(Mesh):
     @property
     @supress_logging
     def n_elem(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected elements in MAPDL.
 
         Examples
         --------
