@@ -1207,7 +1207,7 @@ def check_mode(mode, version):
                 raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
             if version >= 211:
                 warnings.warn(
-                    "CORBA AAS mode not recomended in MAPDL 2021R1 or newer.\n"
+                    "CORBA AAS mode not recommended in MAPDL 2021R1 or newer.\n"
                     "Recommend using gRPC mode instead."
                 )
         elif mode == "console":
@@ -1215,7 +1215,7 @@ def check_mode(mode, version):
                 raise ValueError("Console mode requires Linux.")
             if version >= 211:
                 warnings.warn(
-                    "Console mode not recomended in MAPDL 2021R1 or newer.\n"
+                    "Console mode not recommended in MAPDL 2021R1 or newer.\n"
                     "Recommend using gRPC mode instead."
                 )
         else:
