@@ -76,8 +76,10 @@ stability of the model.
     :align: center
     :alt: Brake Disc-Pad Assembly
     :figclass: align-center
-   
+
        **Figure 1.1: Brake Disc-Pad Assembly**
+
+
 
 1.3. Modeling
 -------------
