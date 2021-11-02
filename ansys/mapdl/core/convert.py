@@ -519,7 +519,7 @@ class FileTranslator:
                     parameter = parameter[1:-1]
                 if parameter.startswith('"') and parameter.endswith('"'):
                     parameter = parameter[1:-1]
-                parsed_parameters.append('"%s"' % parameter)#
+                parsed_parameters.append(f'"{parameter}"')
 
         parameter_str = ", ".join(parsed_parameters)
         if self.comment:
