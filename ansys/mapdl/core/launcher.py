@@ -855,7 +855,7 @@ def launch_mapdl(
         Enables logging every APDL command to the local disk.  This
         can be used to "record" all the commands that are sent to
         MAPDL via PyMAPDL so a script can be run within MAPDL without
-        PyMAPDL.
+        PyMAPDL. The input string should be the output file path.
 
     remove_temp_files : bool, optional
         Removes temporary files on exit.  Default ``False``.
@@ -1206,17 +1206,17 @@ def check_mode(mode, version):
             if version < 170:
                 raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
             if version >= 211:
-                raise VersionError(
-                    "Console mode not supported for 2021R1 or newer.  "
-                    'Use the default "grpc" mode.'
+                warnings.warn(
+                    "CORBA AAS mode not recommended in MAPDL 2021R1 or newer.\n"
+                    "Recommend using gRPC mode instead."
                 )
         elif mode == "console":
             if os.name == "nt":
-                raise ValueError("Console mode requires Linux")
+                raise ValueError("Console mode requires Linux.")
             if version >= 211:
-                raise VersionError(
-                    "Console mode not supported for 2021R1 or newer.  "
-                    'Use the default "grpc" mode.'
+                warnings.warn(
+                    "Console mode not recommended in MAPDL 2021R1 or newer.\n"
+                    "Recommend using gRPC mode instead."
                 )
         else:
             raise ValueError(

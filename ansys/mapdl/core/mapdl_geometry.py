@@ -465,7 +465,7 @@ class Geometry:
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)
                     line = bspline.to_vtk()
-                    line.cell_arrays["entity_num"] = entity_num
+                    line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
         entities = iges.lines() + iges.circular_arcs()
@@ -475,7 +475,7 @@ class Geometry:
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)
                     line = line.to_vtk(resolution=100)
-                    line.cell_arrays["entity_num"] = entity_num
+                    line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
         if lines:
