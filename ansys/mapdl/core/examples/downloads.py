@@ -71,3 +71,8 @@ def download_bracket():
 
     """
     return _download_file("bracket.iges", "geometry")[0]
+
+def download_tech_demo_data(example, filename):
+    """Download Tech Demos external data."""
+    example = 'tech_demos/' + example
+    return _download_file(filename=filename, directory=example)[0]
