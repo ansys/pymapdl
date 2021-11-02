@@ -138,7 +138,6 @@ def test_license_type_keyword():
         checks.append(license_description in mapdl.__str__().split('\n')[0])
         mapdl.exit()
 
-    breakpoint()
     assert any(checks)
 
     dummy_license_name = 'dummy'
@@ -155,8 +154,8 @@ def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
     successful_check = False
-    for license_description, each_keyword in zip(LICENSES.values(), keywords):
-        mapdl = launch_mapdl(license_type=each_keyword)
+    for license_name, license_description in LICENSES.items():
+        mapdl = launch_mapdl(license_type=license_name)
 
         #Using first line to ensure not picking up other stuff.
         successful_check = license_description in mapdl.__str__().split('\n')[0] or successful_check
