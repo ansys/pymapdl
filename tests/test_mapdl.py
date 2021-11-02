@@ -406,6 +406,7 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 
+@skip_in_cloud
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
