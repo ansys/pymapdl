@@ -187,6 +187,15 @@ def test_node_selection(mapdl, static_solve):
     assert mapdl.post_processing.selected_nodes.sum() == mapdl.mesh.n_node
 
 
+def test_element_selection(mapdl, static_solve):
+    mx_val = 1000
+    mapdl.esel("S", "ELEM", vmin=1, vmax=mx_val, mute=True)
+    assert mapdl.post_processing.selected_elements.sum() == mx_val
+
+    mapdl.esel("all", mute=True)
+    assert mapdl.post_processing.selected_elements.sum() == mapdl.mesh.n_elem
+
+
 # TODO: add valid result
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_rot(mapdl, static_solve, comp):
@@ -220,6 +229,12 @@ def test_element_temperature(mapdl, static_solve):
     mapdl.set(1, 1, mute=True)
     values = mapdl.post_processing.element_temperature()
     assert np.allclose(values, 0)
+
+
+def test_plot_element_temperature(mapdl, static_solve):
+    mapdl.set(1, 1, mute=True)
+    cpos = mapdl.post_processing.plot_element_temperature()
+    assert isinstance(cpos, CameraPosition)
 
 
 def test_plot_temperature(mapdl, static_solve):
@@ -557,7 +572,6 @@ def test_elem_disp(mapdl, static_solve, comp):
 
 @pytest.mark.parametrize("option", ["min", "max", "avg"])
 def test_elem_disp_all(mapdl, static_solve, option):
-
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
 
@@ -573,6 +587,23 @@ def test_elem_disp_all(mapdl, static_solve, option):
         )
     array = np.vstack(arrays).T
     assert np.allclose(array, disp_from_grpc)
+
+
+def test_elem_disp_norm(mapdl, static_solve):
+    mapdl.post1(mute=True)
+    mapdl.set(1, 1, mute=True)
+    disp = mapdl.post_processing.element_displacement("ALL")
+    norm_disp = np.linalg.norm(disp, axis=1)
+    disp_from_grpc = mapdl.post_processing.element_displacement("NORM")
+    assert np.allclose(norm_disp, disp_from_grpc)
+
+
+@pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM"])
+def test_elem_disp_plot(mapdl, static_solve, comp):
+    mapdl.post1(mute=True)
+    mapdl.set(1, 1, mute=True)
+    cpos = mapdl.post_processing.plot_element_displacement(comp)
+    assert isinstance(cpos, CameraPosition)
 
 
 @pytest.mark.parametrize("component", STRESS_TYPES[::3])
@@ -591,6 +622,12 @@ def test_element_stress(mapdl, static_solve, component, option):
     assert np.allclose(stress, from_pretab)
 
 
+@pytest.mark.parametrize("comp", ["X", "1", "INT", "EQV"])
+def test_plot_element_stress(mapdl, static_solve, comp):
+    mapdl.post1(mute=True)
+    mapdl.set(1, 1, mute=True)
+    cpos = mapdl.post_processing.plot_element_stress(comp)
+    assert isinstance(cpos, CameraPosition)
 
 
 ###############################################################################
@@ -667,8 +704,6 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     cpos = mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
     assert isinstance(cpos, CameraPosition)
-
-
 
 
 ###############################################################################

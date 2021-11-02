@@ -3,6 +3,7 @@ import re
 import weakref
 
 import numpy as np
+from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -17,7 +18,7 @@ DISP_TYPE = ["X", "Y", "Z", "NORM", "ALL"]
 ROT_TYPE = ["X", "Y", "Z", "ALL"]
 
 
-def elem_check_inputs(component, option, component_type): 
+def elem_check_inputs(component, option, component_type):
     """Check element inputs"""
     check_elem_option(option)
     component = component.upper()
@@ -282,11 +283,11 @@ class PostProcessing:
             Option for storing element table data.  One of the
             following:
 
-            - ``"MIN"`` : Store minimum element nodal value of the
+            * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
-            - ``"MAX"`` : Store maximum element nodal value of the
+            * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
-            - ``"AVG"`` : Store averaged element centroid value of the
+            * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
 
         Returns
@@ -405,8 +406,8 @@ class PostProcessing:
 
         Equilvanent MAPDL commands:
 
-        - ``ETABLE,VALUES,U,X``
-        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+        * ``ETABLE,VALUES,U,X``
+        * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
 
         Parameters
         ----------
@@ -418,11 +419,11 @@ class PostProcessing:
             Option for storing element table data.  One of the
             following:
 
-            - ``"MIN"`` : Store minimum element nodal value of the
+            * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
-            - ``"MAX"`` : Store maximum element nodal value of the
+            * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
-            - ``"AVG"`` : Store averaged element centroid value of the
+            * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
 
         Examples
@@ -444,9 +445,9 @@ class PostProcessing:
         """
         check_elem_option(option)
         component = component.upper()
-        check_comp(component, ROT_TYPE)
+        check_comp(component, DISP_TYPE)
 
-        if component in ["ALL" "NORM"]:
+        if component in ["ALL", "NORM"]:
             disp = np.vstack((
                 self.element_values("U", "X", option),
                 self.element_values("U", "Y", option),
@@ -460,7 +461,7 @@ class PostProcessing:
 
     def plot_element_displacement(
         self, component="NORM", option="AVG", show_elem_numbering=False, **kwargs
-    ):
+    ) -> CameraPosition:
         """Plot element displacement.
 
         Parameters
@@ -472,11 +473,11 @@ class PostProcessing:
             Option for storing element table data.  One of the
             following:
 
-            - ``"MIN"`` : Store minimum element nodal value of the
+            * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
-            - ``"MAX"`` : Store maximum element nodal value of the
+            * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
-            - ``"AVG"`` : Store averaged element centroid value of the
+            * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
         show_element_numbering : bool, optional
             Plot the element numbers of the elements.
@@ -486,10 +487,10 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``
+            plots.  Only returned when ``return_cpos`` is ``True``.
 
         Examples
         --------
@@ -514,7 +515,7 @@ class PostProcessing:
             disp = np.linalg.norm(self.element_displacement("ALL"), axis=1)
         else:
             disp = self.element_displacement(component)
-        kwargs.setdefault("stitle", f"{component} Element Displacement")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Element Displacement"})
         return self._plot_cell_scalars(
             disp, show_elem_numbering=show_elem_numbering, **kwargs
         )
@@ -527,8 +528,8 @@ class PostProcessing:
 
         Equilvanent MAPDL commands:
 
-        - ``ETABLE,VALUES,S,X``
-        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+        * ``ETABLE,VALUES,S,X``
+        * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
 
         Parameters
         ----------
@@ -549,12 +550,17 @@ class PostProcessing:
             Option for storing element table data.  One of the
             following:
 
-            - ``"MIN"`` : Store minimum element nodal value of the
+            * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
-            - ``"MAX"`` : Store maximum element nodal value of the
+            * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
-            - ``"AVG"`` : Store averaged element centroid value of the
+            * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array of stresses.
 
         Examples
         --------
@@ -571,6 +577,74 @@ class PostProcessing:
         component = elem_check_inputs(component, option, STRESS_TYPES)
         return self.element_values("S", component, option)
 
+    def plot_element_stress(
+            self,
+            component,
+            option='AVG',
+            show_elem_numbering=False,
+            **kwargs
+    ) -> CameraPosition:
+        """Plot element component or principal stress.
+
+        One value per element.  Either minimum, maximum, or average of
+        all nodes in each element.
+
+        Parameters
+        ----------
+        component : str
+            Element stress to retrieve.  One of the following:
+
+            +---------------------+--------------------+
+            | X, Y, Z, XY, YZ, XZ | Component stress.  |
+            +---------------------+--------------------+
+            | 1, 2, 3             | Principal stress.  |
+            +---------------------+--------------------+
+            | INT                 | Stress intensity.  |
+            +---------------------+--------------------+
+            | EQV                 | Equivalent stress  |
+            +---------------------+--------------------+
+
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            * ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            * ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            * ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``.
+
+        Examples
+        --------
+        Plot the average element component stress in the X direction.
+
+        >>> mapdl.post_processing.plot_element_stress("X")
+
+        """
+        component = str(component).upper()
+        stress = self.element_stress(component, option=option)
+
+        if component in COMPONENT_STRESS_TYPE:
+            kwargs.setdefault("scalar_bar_args", {'title': f"{component} Component Element Stress"})
+        elif component in ["1", "2", "3"]:
+            kwargs.setdefault("scalar_bar_args", {'title': f"{component} Principal Element Stress"})
+        elif component == "INT":
+            kwargs.setdefault("scalar_bar_args", {'title': "Element Stress Intensity"})
+        elif component == "EQV":
+            kwargs.setdefault("scalar_bar_args", {'title': "Element Equivalent Stress"})
+
+        return self._plot_cell_scalars(
+            stress, show_elem_numbering=show_elem_numbering, **kwargs
+        )
+
     def element_temperature(self, option='AVG') -> np.ndarray:
         """Return element temperature.
 
@@ -579,8 +653,8 @@ class PostProcessing:
 
         Equilvanent MAPDL commands:
 
-        - ``ETABLE,VALUES,TEMP``
-        - ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
+        * ``ETABLE,VALUES,TEMP``
+        * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
 
         Parameters
         ----------
@@ -588,11 +662,11 @@ class PostProcessing:
             Option for storing element table data.  One of the
             following:
 
-            - ``"MIN"`` : Store minimum element nodal value of the
+            * ``"MIN"`` : Store minimum element nodal value of the
               specified item.
-            - ``"MAX"`` : Store maximum element nodal value of the
+            * ``"MAX"`` : Store maximum element nodal value of the
               specified item.
-            - ``"AVG"`` : Store averaged element centroid value of the
+            * ``"AVG"`` : Store averaged element centroid value of the
               specified item (default).
 
         Examples
@@ -607,6 +681,50 @@ class PostProcessing:
 
         """
         return self.element_values("TEMP", option=option)
+
+    def plot_element_temperature(
+            self,
+            option='AVG',
+            show_elem_numbering=False,
+            **kwargs
+    ) -> CameraPosition:
+        """Plot element temperature.
+
+        One value per element.  Either minimum, maximum, or average of
+        all nodes in each element.
+
+        Parameters
+        ----------
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            * ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            * ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            * ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``.
+
+        Examples
+        --------
+        Plot the average element temperature.
+
+        >>> arr = mapdl.post_processing.plot_element_temperature()
+
+        """
+        scalars = self.element_temperature(option)
+
+        return self._plot_cell_scalars(
+            scalars, show_elem_numbering=show_elem_numbering, **kwargs
+        )
 
     def nodal_displacement(self, component="NORM") -> np.ndarray:
         """Nodal X, Y, or Z structural displacement.
@@ -717,7 +835,7 @@ class PostProcessing:
                 )
 
         disp = self.nodal_displacement(component)
-        kwargs.setdefault("stitle", "%s Displacement" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Displacement" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -784,10 +902,13 @@ class PostProcessing:
         else:
             enum = self._all_enum
 
-        mask = np.in1d(enum, surf["ansys_elem_num"])
-        ridx = np.argsort(np.argsort(surf["ansys_elem_num"]))
+        # it's possible that there are duplicated element numbers,
+        # therefore we need to get the unique values and a reverse index
+        uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
+        mask = np.in1d(enum, uni, assume_unique=True)
+
         if scalars.size != mask.size:
-            scalars = scalars[self.selected_nodes]
+            scalars = scalars[self.selected_elements]
         scalars = scalars[mask][ridx]
 
         meshes = [
@@ -849,6 +970,29 @@ class PostProcessing:
 
         """
         return self._nsel == 1
+
+    @property
+    def _esel(self):
+        """Return the Ansys formatted selected elements array.
+
+        -1 for unselected
+        0 for undefined
+        1 for selected
+
+        """
+        return self._edof_rst("ESEL").astype(np.int8)
+
+    @property
+    def selected_elements(self) -> np.ndarray:
+        """Mask of the selected elements.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.selected_elements
+        array([False, False, False, ..., True, True, True])
+
+        """
+        return self._esel == 1
 
     def nodal_rotation(self, component="ALL") -> np.ndarray:
         """Nodal X, Y, or Z structural rotation
@@ -948,7 +1092,7 @@ class PostProcessing:
                 )
 
         disp = self.nodal_rotation(component)
-        kwargs.setdefault("stitle", f"{component} Rotation")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Rotation"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -957,6 +1101,11 @@ class PostProcessing:
     def _ndof_rst(self, item, it1num=""):
         """Nodal degree of freedom result"""
         return self._mapdl.get_array("NODE", item1=item, it1num=it1num)
+
+    @check_result_loaded
+    def _edof_rst(self, item, it1num=""):
+        """Element degree of freedom result"""
+        return self._mapdl.get_array("ELEM", item1=item, it1num=it1num)
 
     @property
     def nodal_temperature(self) -> np.ndarray:
@@ -1020,7 +1169,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
         """
-        kwargs.setdefault("stitle", "Nodal\nTemperature")
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nTemperature"})
         return self._plot_point_scalars(
             self.nodal_temperature, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1087,7 +1236,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_pressure(smooth_shading=True)
         """
-        kwargs.setdefault("stitle", "Nodal\nPressure")
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nPressure"})
         return self._plot_point_scalars(
             self.nodal_pressure, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1161,7 +1310,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_voltage(smooth_shading=True)
         """
-        kwargs.setdefault("stitle", "Nodal\nVoltage")
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nVoltage"})
         return self._plot_point_scalars(
             self.nodal_voltage, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1245,7 +1394,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_component_stress('X')
         """
         disp = self.nodal_component_stress(component)
-        kwargs.setdefault("stitle", f"{component} Nodal\nStress")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Nodal\nStress"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1328,7 +1477,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_principal_stress('1')
         """
         disp = self.nodal_principal_stress(component)
-        kwargs.setdefault("stitle", f"{component} Nodal\nPrincipal Stress")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Nodal\nPrincipal Stress"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1401,7 +1550,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_stress_intensity
-        kwargs.setdefault("stitle", "Nodal Stress\nIntensity")
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Stress\nIntensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1484,7 +1633,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_eqv_stress
-        kwargs.setdefault("stitle", "Nodal Equilvanent\nStress")
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equilvanent\nStress"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1572,7 +1721,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_component_strain('X')
         """
         disp = self.nodal_total_component_strain(component)
-        kwargs.setdefault("stitle", f"{component} Total Nodal\nComponent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Total Nodal\nComponent Strain"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1659,7 +1808,7 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_total_principal_strain('1')
         """
         disp = self.nodal_total_principal_strain(component)
-        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1732,7 +1881,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_total_strain_intensity
-        kwargs.setdefault("stitle", "Total Nodal\nStrain Intensity")
+        kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1812,7 +1961,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_total_eqv_strain
-        kwargs.setdefault("stitle", "Total Nodal\nEquivalent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nEquivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1889,7 +2038,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_component_strain('1')
         """
         disp = self.nodal_elastic_component_strain(component)
-        kwargs.setdefault("stitle", "%s Elastic Nodal\nComponent Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Elastic Nodal\nComponent Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1972,7 +2121,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_principal_strain('1')
         """
         disp = self.nodal_elastic_principal_strain(component)
-        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2051,7 +2200,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_elastic_strain_intensity
-        kwargs.setdefault("stitle", "Elastic Nodal\nStrain Intensity")
+        kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2130,7 +2279,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_elastic_eqv_strain
-        kwargs.setdefault("stitle", "Elastic Nodal\n Equivalent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2212,7 +2361,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_component_strain('1')
         """
         disp = self.nodal_plastic_component_strain(component)
-        kwargs.setdefault("stitle", "%s Plastic Nodal\nComponent Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Plastic Nodal\nComponent Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2289,7 +2438,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_principal_strain('1')
         """
         disp = self.nodal_plastic_principal_strain(component)
-        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2369,7 +2518,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_plastic_strain_intensity
-        kwargs.setdefault("stitle", "Plastic Nodal\nStrain Intensity")
+        kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2455,7 +2604,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_plastic_eqv_strain
-        kwargs.setdefault("stitle", "Plastic Nodal\n Equivalent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2538,7 +2687,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_component_strain('1')
         """
         disp = self.nodal_thermal_component_strain(component)
-        kwargs.setdefault("stitle", f"{component} Thermal Nodal\nComponent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Thermal Nodal\nComponent Strain"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2621,7 +2770,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_principal_strain('1')
         """
         disp = self.nodal_thermal_principal_strain(component)
-        kwargs.setdefault("stitle", "%s Nodal\nPrincipal Strain" % component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2698,7 +2847,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_thermal_strain_intensity
-        kwargs.setdefault("stitle", "Thermal Nodal\nStrain Intensity")
+        kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2784,7 +2933,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_thermal_eqv_strain
-        kwargs.setdefault("stitle", "Thermal Nodal\n Equivalent Strain")
+        kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
