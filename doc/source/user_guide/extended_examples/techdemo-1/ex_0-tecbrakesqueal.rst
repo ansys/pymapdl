@@ -339,10 +339,10 @@ The following input shows the solution steps involved in this method:
 .. jupyter-execute::
    :hide-code:
 
-   from ansys.mapdl.core.examples import ansys_colormap
-   rotor_copy = rotor.copy()
-   rotor_copy.points += rotor_copy['disp21_all']*0.01
-   rotor_copy.plot(scalars='disp21', cmap='jet', show_edges=True)
+   rotor1 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step21_unorm.vtk' ))
+   rotor1.points += rotor1['values']*0.01
+   rotor1.plot(scalars='values', cmap='jet', show_edges=True)
+
 
 
 1.6.2. Partial Nonlinear Perturbed Modal Analysis
@@ -493,14 +493,14 @@ The following inputs show the solution steps involved with this method:
 
 .. jupyter-execute::
    :hide-code:
+    
+   rotor2_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step21_unorm.vtk' ))
+   rotor2_21.points += rotor2_21['values']*0.01
+   rotor2_21.plot(scalars='values', cmap='jet', show_edges=True)
 
-   from ansys.mapdl.core.examples import _download_rotor_tech_demo_plot
-   rotor2 = pyvista.read(_download_rotor_tech_demo_plot())
-
-   rotor2.plot(scalars='tdisp', cmap='jet', show_edges=True)
-
-
-
+   rotor2_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step21_unorm.vtk' ))
+   rotor2_22.points += rotor2_22['values']*0.01
+   rotor2_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
 
@@ -635,11 +635,14 @@ Following is the process for solving a brake-squeal problem using this method:
 
 .. jupyter-execute::
    :hide-code:
+    
+   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' ))
+   rotor3_21.points += rotor3_21['values']*0.01
+   rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
-   from ansys.mapdl.core.examples import _download_rotor_tech_demo_plot
-   rotor2 = pyvista.read(_download_rotor_tech_demo_plot())
-
-   rotor2.plot(scalars='tdisp', cmap='jet', show_edges=True)
+   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' ))
+   rotor3_22.points += rotor3_22['values']*0.01
+   rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
 
@@ -655,21 +658,30 @@ The mode shape plots for the unstable modes suggest that the bending mode of the
 and disc have similar characteristics. These bending modes couple due to friction, and
 produce a squealing noise.
 
-.. figure:: gtecbrakesqueal_fig6.png
-    :align: center
-    :alt: Mode Shape for Unstable Mode (Mode 21) Obtained from the Linear Non-prestressed Modal Solution
-    :figclass: align-center
+.. jupyter-execute::
+   :hide-code:
+    
+   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' ))
+   rotor3_21.points += rotor3_21['values']*0.01
+   rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
-    **Figure 1.5: Mode Shape for Unstable Mode (Mode 21).**
-    Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
-.. figure:: gtecbrakesqueal_fig7.png
-    :align: center
-    :alt: Mode Shape for Unstable Mode (Mode 22) Obtained from the Linear Non-prestressed Modal Solution
-    :figclass: align-center
+**Figure 1.5: Mode Shape for Unstable Mode (Mode 21).**
+Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
-    **Figure 1.6: Mode Shape for Unstable Mode (Mode 22).**
-    Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
+
+
+.. jupyter-execute::
+   :hide-code:
+   
+   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' ))
+   rotor3_22.points += rotor3_22['values']*0.01
+   rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
+
+
+**Figure 1.6: Mode Shape for Unstable Mode (Mode 22).**
+Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
+
 
 **Table 1.1: Solution Output**
 
