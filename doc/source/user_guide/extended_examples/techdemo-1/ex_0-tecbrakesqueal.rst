@@ -216,7 +216,7 @@ Start this example by launching MAPDL and loading the model.
    pyvista.global_theme.show_scalar_bar = False
 
    from ansys.mapdl.core import examples
-   from ansys.mapdl.core.examples import download_vtk_rotor
+   from ansys.mapdl.core.examples import download_vtk_rotor, download_tech_demo_data
 
    rotor = pyvista.read(download_vtk_rotor())
    rotor.plot(color='w', show_edges=True)
