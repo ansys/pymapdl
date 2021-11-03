@@ -340,7 +340,6 @@ The following input shows the solution steps involved in this method:
    :hide-code:
 
    rotor1 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step21_unorm.vtk' ))
-   rotor1.points += rotor1['values']*0.01
    rotor1.plot(scalars='values', cmap='jet', show_edges=True)
 
 
@@ -495,11 +494,9 @@ The following inputs show the solution steps involved with this method:
    :hide-code:
     
    rotor2_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step21_unorm.vtk' ))
-   rotor2_21.points += rotor2_21['values']*0.01
    rotor2_21.plot(scalars='values', cmap='jet', show_edges=True)
 
-   rotor2_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step21_unorm.vtk' ))
-   rotor2_22.points += rotor2_22['values']*0.01
+   rotor2_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step22_unorm.vtk' ))
    rotor2_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
@@ -662,7 +659,6 @@ produce a squealing noise.
    :hide-code:
     
    rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' ))
-   rotor3_21.points += rotor3_21['values']*0.01
    rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
 
@@ -675,7 +671,6 @@ Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
    :hide-code:
    
    rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' ))
-   rotor3_22.points += rotor3_22['values']*0.01
    rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
