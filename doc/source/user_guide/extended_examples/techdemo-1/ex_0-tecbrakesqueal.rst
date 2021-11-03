@@ -633,12 +633,10 @@ Following is the process for solving a brake-squeal problem using this method:
 .. jupyter-execute::
    :hide-code:
     
-   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' ))
-   rotor3_21.points += rotor3_21['values']*0.01
+   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' )) 
    rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
-   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' ))
-   rotor3_22.points += rotor3_22['values']*0.01
+   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' )) 
    rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
