@@ -211,9 +211,9 @@ Start this example by launching MAPDL and loading the model.
    pyvista.set_jupyter_backend('pythreejs')
    pyvista.global_theme.background = 'white'
    pyvista.global_theme.window_size = [600, 400]
-   pyvista.global_theme.axes.show = False
+   pyvista.global_theme.axes.show = True
    pyvista.global_theme.antialiasing = True
-   pyvista.global_theme.show_scalar_bar = False
+   pyvista.global_theme.show_scalar_bar = True
 
    from ansys.mapdl.core import examples
    from ansys.mapdl.core.examples import download_vtk_rotor, download_tech_demo_data
@@ -253,7 +253,7 @@ directions except axial (along the Z-axis).
     :alt: Boundary Conditions (Displacement Constraints and Pressure Loading)
     :figclass: align-center
 
-    **Figure 1.3: Boundary Conditions (Displacement Constraints and Pressure Loading)**
+    **Figure 1.2: Boundary Conditions (Displacement Constraints and Pressure Loading)**
 
 
 1.6. Analysis and Solution Controls
@@ -341,6 +341,10 @@ The following input shows the solution steps involved in this method:
 
    rotor1 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step21_unorm.vtk' ))
    rotor1.plot(scalars='values', cmap='jet', show_edges=True)
+
+
+**Figure 1.3: Mode Shape for Unstable Mode (Mode 21).**
+Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
 
 
@@ -496,8 +500,21 @@ The following inputs show the solution steps involved with this method:
    rotor2_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step21_unorm.vtk' ))
    rotor2_21.plot(scalars='values', cmap='jet', show_edges=True)
 
+
+**Figure 1.5: Mode Shape for Unstable Mode (Mode 21).**
+Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
+
+
+
+.. jupyter-execute::
+   :hide-code:
+   
    rotor2_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_partial_step22_unorm.vtk' ))
    rotor2_22.plot(scalars='values', cmap='jet', show_edges=True)
+
+
+**Figure 1.6: Mode Shape for Unstable Mode (Mode 21).**
+Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
 
 
@@ -636,8 +653,21 @@ Following is the process for solving a brake-squeal problem using this method:
    rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' )) 
    rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
+
+
+**Figure 1.7: Mode Shape for Unstable Mode (Mode 21).** 
+
+
+
+.. jupyter-execute::
+   :hide-code:
+
    rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' )) 
    rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
+
+
+
+**Figure 1.8: Mode Shape for Unstable Mode (Mode 21).** 
 
 
 
@@ -656,11 +686,11 @@ produce a squealing noise.
 .. jupyter-execute::
    :hide-code:
     
-   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step21_unorm.vtk' ))
+   rotor3_21 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step21_unorm.vtk' ))
    rotor3_21.plot(scalars='values', cmap='jet', show_edges=True)
 
 
-**Figure 1.5: Mode Shape for Unstable Mode (Mode 21).**
+**Figure 1.9: Mode Shape for Unstable Mode (Mode 21).**
 Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
 
@@ -668,11 +698,11 @@ Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 .. jupyter-execute::
    :hide-code:
    
-   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_non_linear_step22_unorm.vtk' ))
+   rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step22_unorm.vtk' ))
    rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
-**Figure 1.6: Mode Shape for Unstable Mode (Mode 22).**
+**Figure 1.10: Mode Shape for Unstable Mode (Mode 22).**
 Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
 
@@ -778,7 +808,7 @@ other and couple as the coefficient of friction increases:
     :alt: Effect of Friction Coefficient on Unstable Modes
     :figclass: align-center
 
-    **Figure 1.7: Effect of Friction Coefficient on Unstable Modes**
+    **Figure 1.11: Effect of Friction Coefficient on Unstable Modes**
 
 1.8. Recommendations
 --------------------
