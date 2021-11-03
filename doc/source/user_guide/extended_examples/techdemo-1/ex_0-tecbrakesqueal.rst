@@ -74,8 +74,10 @@ stability of the model.
     :align: center
     :alt: Brake Disc-Pad Assembly
     :figclass: align-center
+        
+    **Figure 1.1: Brake Disc-Pad Assembly**
 
-       **Figure 1.1: Brake Disc-Pad Assembly**
+
 
 1.3. Modeling
 -------------
@@ -449,7 +451,7 @@ The following inputs show the solution steps involved with this method:
     :alt: Contact Sliding Distance
     :figclass: align-center
 
-    **Figure 1.4: Contact Sliding Distance
+    **Figure 1.4: Contact Sliding Distance**
 
 
 **Perturbed Modal Solution**
@@ -630,6 +632,17 @@ Following is the process for solving a brake-squeal problem using this method:
     mapdl.exit()
 
 
+
+.. jupyter-execute::
+   :hide-code:
+
+   from ansys.mapdl.core.examples import _download_rotor_tech_demo_plot
+   rotor2 = pyvista.read(_download_rotor_tech_demo_plot())
+
+   rotor2.plot(scalars='tdisp', cmap='jet', show_edges=True)
+
+
+
 1.7. Results and Discussion
 ---------------------------
 
@@ -642,7 +655,7 @@ The mode shape plots for the unstable modes suggest that the bending mode of the
 and disc have similar characteristics. These bending modes couple due to friction, and
 produce a squealing noise.
 
-.. figure:: ../../../../_images/gtecbrakesqueal_fig6.png
+.. figure:: gtecbrakesqueal_fig6.png
     :align: center
     :alt: Mode Shape for Unstable Mode (Mode 21) Obtained from the Linear Non-prestressed Modal Solution
     :figclass: align-center
@@ -650,7 +663,7 @@ produce a squealing noise.
     **Figure 1.5: Mode Shape for Unstable Mode (Mode 21).**
     Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
-.. figure:: ../../../../_images/gtecbrakesqueal_fig7.png
+.. figure:: gtecbrakesqueal_fig7.png
     :align: center
     :alt: Mode Shape for Unstable Mode (Mode 22) Obtained from the Linear Non-prestressed Modal Solution
     :figclass: align-center
@@ -755,7 +768,7 @@ step.
 The following plot suggests that modes with similar characteristics approach each
 other and couple as the coefficient of friction increases:
 
-.. figure:: ../../../../_images/gtecbrakesqueal_fig10.gif
+.. figure:: gtecbrakesqueal_fig10.gif
     :align: center
     :alt: Effect of Friction Coefficient on Unstable Modes
     :figclass: align-center
