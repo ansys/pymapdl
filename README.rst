@@ -32,7 +32,7 @@ MAPDL and supports:
 
 Here's a quick demo of PyMAPDL within VSCode:
 
-.. image:: https://github.com/pyansys/pymapdl/raw/main/auto_complete_vscode/doc/landing_page_demo.gif
+.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
