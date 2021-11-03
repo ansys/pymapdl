@@ -832,22 +832,16 @@ The following works were consulted when creating this example problem:
 
 The following input files were used for this problem:
 
-* **linear\_non\_prestressed.html** -- Linear non-prestressed
-  modal solve input file.
-   :download:`Download source code: linear_non_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed.py>`.
-* **partial\_prestressed.html** -- Partial prestressed modal
-  solve input file.
-   :download:`Download source code: partial_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/partial_prestressed.py>`.
-* **full\_non\_linear.html** -- Full nonlinear prestressed modal
-  solve input file.
-   :download:`Download source code: full_non_linear.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/full_non_linear.py>`.
-* **linear\_non\_prestressed\_par.html** -- Parametric studies with
-  increasing coefficient of friction.
-   :download:`Download source code: linear_non_prestressed_par.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed_par.py>`.
-* **disc\_pad\_model.cdb** -- Common database file used for the
-  linear non-prestressed modal analysis, the partial prestressed modal analysis,
-  and the full nonlinear prestressed modal analysis (called by
-  the **linear\_non\_prestressed.dat**, **partial\_prestressed.dat**,
+* **linear\_non\_prestressed.html** -- Linear non-prestressed modal solve input file.
+  :download:`Download source code: linear_non_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed.py>`.
+* **partial\_prestressed.html** -- Partial prestressed modal solve input file.
+  :download:`Download source code: partial_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/partial_prestressed.py>`.
+* **full\_non\_linear.html** -- Full nonlinear prestressed modal solve input file.
+  :download:`Download source code: full_non_linear.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/full_non_linear.py>`.
+* **linear\_non\_prestressed\_par.html** -- Parametric studies with increasing coefficient of friction. 
+  :download:`Download source code: linear_non_prestressed_par.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed_par.py>`.
+* **disc\_pad\_model.cdb** -- Common database file used for the linear non-prestressed modal analysis, the partial prestressed modal analysis,
+  and the full nonlinear prestressed modal analysis (called by the **linear\_non\_prestressed.dat**, **partial\_prestressed.dat**,
   **full\_non\_linear.html** and **linear\_non\_prestressed\_par.html** files, respectively).
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
