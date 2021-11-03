@@ -396,6 +396,59 @@ class PostProcessing:
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
         return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)
 
+    def plot_element_values(
+            self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
+    ) -> CameraPosition:
+        """Plot element values.
+
+        Displays the solution results as discontinuous element contours.
+
+        Equilvanent MAPDL command:
+
+        * ``PLESOL``
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.  See the table below in the
+            notes section.
+        comp : str, optional
+            Component of the item if applicable.  See the table below
+            in the notes section.
+        option : str, optional
+            Option for storing element table data.  One of the
+            following:
+
+            * ``"MIN"`` : Store minimum element nodal value of the
+              specified item component.
+            * ``"MAX"`` : Store maximum element nodal value of the
+              specified item component.
+            * ``"AVG"`` : Store averaged element centroid value of the
+              specified item component (default).
+        show_element_numbering : bool, optional
+            Plot the element numbers of the elements.
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``.
+
+        Examples
+        --------
+        Plot the contact status for the selected elements.
+
+        >>> mapdl.post_processing.plot_element_results(
+        ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
+        ... )
+
+        """
+        return self._plot_cell_scalars(
+            self.element_values(item, comp, option),
+            show_elem_numbering=show_elem_numbering, **kwargs
+        )
+
     def element_displacement(
             self, component="ALL", option="AVG"
     ) -> np.ndarray:
@@ -931,30 +984,30 @@ class PostProcessing:
     def _all_nnum(self):
         self._mapdl.cm("__TMP_NODE__", "NODE")
         self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
+        nnum = self._mapdl.get_array("NODE", item1="NLIST")
 
         # rerun if encountered weird edge case of negative first index.
         if nnum[0] == -1:
-            nnum = self._mapdl.get_array("NODE", item1="NLIST").astype(np.int32)
+            nnum = self._mapdl.get_array("NODE", item1="NLIST")
         self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
-        return nnum
+        return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
     def _all_enum(self):
         self._mapdl.cm("__TMP_ELEM__", "ELEM")
         self._mapdl.allsel()
-        nnum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
+        nnum = self._mapdl.get_array("ELEM", item1="ELIST")
 
         # rerun if encountered weird edge case of negative first index.
         if nnum[0] == -1:
-            enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
+            enum = self._mapdl.get_array("ELEM", item1="ELIST")
         self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
-        return enum
+        return enum.astype(np.int32, copy=False)
 
     @property
     def _nsel(self):
-        """Return the ANSYS formatted selected nodes array.
+        """Return the MAPDL formatted selected nodes array.
 
         -1 for unselected
         0 for undefined
@@ -977,7 +1030,7 @@ class PostProcessing:
 
     @property
     def _esel(self):
-        """Return the Ansys formatted selected elements array.
+        """Return the MAPDL formatted selected elements array.
 
         -1 for unselected
         0 for undefined

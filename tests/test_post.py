@@ -630,6 +630,13 @@ def test_plot_element_stress(mapdl, static_solve, comp):
     assert isinstance(cpos, CameraPosition)
 
 
+def test_plot_element_values(mapdl, static_solve):
+    mapdl.post1(mute=True)
+    mapdl.set(1, 1, mute=True)
+    cpos = mapdl.post_processing.plot_element_values("S", "X")
+    assert isinstance(cpos, CameraPosition)
+
+
 ###############################################################################
 
 

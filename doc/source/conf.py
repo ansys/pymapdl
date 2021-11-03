@@ -48,17 +48,18 @@ release = version = __version__
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.doctest",
-    "sphinx_autodoc_typehints",
-    "sphinx.ext.autosummary",
+    "jupyter_sphinx",
     "notfound.extension",
+    "numpydoc",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.coverage",
-    "numpydoc",
-    "sphinx.ext.intersphinx",
 ]
 
 # Intersphinx mapping

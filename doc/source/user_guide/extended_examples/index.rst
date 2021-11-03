@@ -8,7 +8,7 @@ Extended Examples Library
     :maxdepth: 3
 
     ex_01-gmsh_example/ex_01-gmsh_example
-
+    techdemo-1/ex_0-tecbrakesqueal.rst
 
 Introduction
 ------------

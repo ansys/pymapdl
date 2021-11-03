@@ -1,15 +1,18 @@
-pypandoc>=1.5.0
-matplotlib
-imageio>=2.5.0
-imageio-ffmpeg
 Sphinx
-sphinx-autobuild
-sphinxcontrib-websupport
+ansys-mapdl-reader<=0.51.3  # 0.51.4-0.51.5 breaks doc build
+https://github.com/numpy/numpydoc/archive/main.zip  # need latest
+imageio-ffmpeg
+imageio>=2.5.0
+jupyter_sphinx==0.3.2
+jupyterlab>=3.0.12
+matplotlib
+pyansys_sphinx_theme
+pypandoc>=1.5.0
 pytest-sphinx
-sphinx-notfound-page>=0.3.0
+pythreejs
+sphinx-autobuild
+sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-gallery>=0.8.1
-sphinx-autodoc-typehints
-https://github.com/numpy/numpydoc/archive/main.zip  # need latest
-pyansys_sphinx_theme
-ansys-mapdl-reader<=0.51.3  # 0.51.4-0.51.5 breaks doc build
+sphinx-notfound-page>=0.3.0
+sphinxcontrib-websupport
