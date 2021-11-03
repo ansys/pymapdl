@@ -1783,6 +1783,7 @@ class _MapdlCore(Commands):
         nrmkey="",
         modtype="",
         memory_option="",
+        mxpand="",
         elcalc=False,
     ):
         """Run a modal with basic settings analysis
@@ -1891,6 +1892,11 @@ class _MapdlCore(Commands):
                         I/O to the various files written by the
                         solver.
 
+        mxpand : bool, optional
+            Number of modes or array name (enclosed in percent signs)
+            to expand and write.  If -1, do not expand and do not
+            write modes to the results file during the
+            analysis. Default ``""``.
         elcalc : bool, optional
             Calculate element results, reaction forces, energies, and
             the nodal degree of freedom solution.  Default ``False``.
@@ -1931,13 +1937,17 @@ class _MapdlCore(Commands):
         nrmkey = "OFF"
 
         with self.chain_commands:
-            self.slashsolu()
-            self.antype(2, "new")
-            self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
-            self.bcsoption(memory_option)
+            self.slashsolu(mute=True)
+            self.antype(2, "new", mute=True)
+            self.modopt(
+                method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+            )
+            self.bcsoption(memory_option, mute=True)
 
+            if mxpand:
+                self.mxpand(mute=True)
             if elcalc:
-                self.mxpand(elcalc="YES")
+                self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)
