@@ -2164,7 +2164,7 @@ class _MapdlCore(Commands):
     def ignore_errors(self, value):
         self._ignore_errors = bool(value)
 
-    def load_table(self, name, array, var1="", var2="", var3=""):
+    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
         Uses TREAD to transfer the table.
@@ -2225,11 +2225,20 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['MY_TABLE']
         array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
         """
-        if array.ndim < 2:
+        if not isinstance(array, np.ndarray):
+            raise ValueError("The table should be a Numpy array")
+
+        if array.ndim == 2:
+            self.dim(name, "TABLE", imax=array.shape[0], jmax=array.shape[1], kmax="",
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        elif array.ndim == 3:
+            self.dim(name, "TABLE", imax=array.shape[0], jmax=array.shape[1], kmax=array.shape[2],
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        else:
             raise ValueError(
-                "Expecting at least a 2D table, but input contains " "only 1 dimension"
+                f"Expecting only a 2D or 3D table, but input contains\n{array.ndim} dimension"
             )
-        self.dim(name, "TABLE", array.shape[0], var1=var1, var2=var2, var3=var3)
+
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
         np.savetxt(filename, array)
