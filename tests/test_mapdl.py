@@ -711,7 +711,7 @@ def test_load_table(mapdl):
         ]
     )
     mapdl.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, -1])
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
 
 
 @pytest.mark.skip_grpc
