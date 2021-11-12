@@ -700,8 +700,8 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    dimx = np.random.randint(3, 30)
-    dimy = np.random.randint(3, 30)
+    dimx = np.random.randint(3, 15)
+    dimy = np.random.randint(3, 15)
 
     my_conv = np.random.rand(dimx, dimy)
     my_conv[:, 0] = np.arange(dimx)
@@ -723,8 +723,8 @@ def test_load_table(mapdl):
 
 def test_load_array(mapdl):
 
-    dimx = np.random.randint(1, 30)
-    dimy = np.random.randint(1, 30)
+    dimx = np.random.randint(1, 15)
+    dimy = np.random.randint(1, 15)
     my_conv = np.random.rand(dimx, dimy)
 
     mapdl.load_array("my_conv", my_conv)
