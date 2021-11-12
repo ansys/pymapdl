@@ -2224,12 +2224,15 @@ class _MapdlCore(Commands):
             filename = base_name
 
         with self.non_interactive:
-            self.vread(name, filename, n1=imax, n2=jmax, n3=kmax, label='ijk', nskip=1)
-            format = '(' + ','.join(["E24.18" for i in range(jmax)]) + ')'
+            label = 'jik'
+            n1 = jmax
+            n2 = imax
+            n3 = kmax
+            self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
+            format = '(' + ",',',".join(["E24.18" for i in range(jmax)]) + ')'
             logger.info("Using *VREAD with format '{format}' in {filename}")
             self.run(format)
-
-        # os.remove(filename)
+        os.remove(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
@@ -2324,6 +2327,7 @@ class _MapdlCore(Commands):
             self.upload(filename, progress_bar=False)
             filename = base_name
         self.tread(name, filename, mute=True)
+        os.remove(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
