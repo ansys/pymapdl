@@ -228,6 +228,9 @@ Start this example by launching MAPDL and loading the model.
 Linear elastic isotropic materials are assigned to all the components of the braking
 system.
 
+
+**Table 1.1: Material Properties**
+
 +------------------------+----------------------+
 |                        | Material Properties  |
 +========================+======================+
@@ -306,7 +309,7 @@ The following input shows the solution steps involved in this method:
 
 **Modal Solution**
 
-.. code::
+.. code:: python
 
     mapdl.run("/SOLU")
     mapdl.nropt("UNSYM")  # To generate non symmetric
@@ -432,7 +435,7 @@ The following inputs show the solution steps involved with this method:
 
 **Post processing to show partial results.**
 
-.. code::
+.. code:: python
 
     # select contact elements attached to the brake pad
     mapdl.post1()
@@ -536,7 +539,7 @@ Following is the process for solving a brake-squeal problem using this method:
    Determine the status (that is, whether the elements are sliding, and the sliding distance, if any).
 
 4. Restart the previous static solution from the desired load step and substep, and perform the first phase of the perturbation analysis while
-   preserving the **.ldhi**, **.r`nnn`** and **.rst** files (**ANTYPE**,STATIC,RESTART,,,PERTURB).
+   preserving the **.ldhi**, **.rnnn** and **.rst** files (**ANTYPE**,STATIC,RESTART,,,PERTURB).
 
    Initiate a modal linear perturbation analysis
    (**PERTURB**,MODAL).
@@ -699,6 +702,7 @@ Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
    :hide-code:
    
    rotor3_22 = pyvista.read(download_tech_demo_data('td-1', 'rotor_linear_step22_unorm.vtk' ))
+   rotor3_22['values'] = rotor3_22['values']*100
    rotor3_22.plot(scalars='values', cmap='jet', show_edges=True)
 
 
@@ -706,7 +710,7 @@ Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 Obtained from the  `1.6.1. Linear Non-prestressed Modal Analysis`_ .
 
 
-**Table 1.1: Solution Output**
+**Table 1.2: Solution Output**
 
 +----------+-----------------------------------+-------------------------------------------+-----------------------------------+
 |          | Linear non-prestressed modal      |  Partial nonlinear perturbed modal        |  Full nonlinear perturbed modal   |
@@ -816,6 +820,8 @@ other and couple as the coefficient of friction increases:
 The following table provides guidelines for selecting the optimal analysis method to
 use for a brake-squeal problem:
 
+
+**Table 1.3: Analysis comparison**
 +-----------------------------------+------------------------------------------------------------------------------------+----------------------------------------------+
 | Analysis Method                   | Benefits                                                                           | Costs                                        |
 +===================================+====================================================================================+==============================================+
@@ -829,6 +835,9 @@ use for a brake-squeal problem:
 The following table provides guidelines for selecting the optimal eigensolver
 (**MODOPT**) for obtaining the brake-squeal solution:
 
+
+
+**Table 1.4: Solver comparison**
 +---------------+-----------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Eigensolver   | Benefits                                                                          | Costs                                                                                                                                                                                                                   |
 +===============+===================================================================================+=========================================================================================================================================================================================================================+
@@ -860,13 +869,13 @@ The following works were consulted when creating this example problem:
 
 The following input files were used for this problem:
 
-* **linear\_non\_prestressed.html** -- Linear non-prestressed modal solve input file.
+* **linear\_non\_prestressed.html** -- Linear non-prestressed modal solve input file.  
   :download:`Download source code: linear_non_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed.py>`.
-* **partial\_prestressed.html** -- Partial prestressed modal solve input file.
+* **partial\_prestressed.html** -- Partial prestressed modal solve input file.  
   :download:`Download source code: partial_prestressed.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/partial_prestressed.py>`.
-* **full\_non\_linear.html** -- Full nonlinear prestressed modal solve input file.
+* **full\_non\_linear.html** -- Full nonlinear prestressed modal solve input file.  
   :download:`Download source code: full_non_linear.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/full_non_linear.py>`.
-* **linear\_non\_prestressed\_par.html** -- Parametric studies with increasing coefficient of friction. 
+* **linear\_non\_prestressed\_par.html** -- Parametric studies with increasing coefficient of friction.  
   :download:`Download source code: linear_non_prestressed_par.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/linear_non_prestressed_par.py>`.
 * **disc\_pad\_model.cdb** -- Common database file used for the linear non-prestressed modal analysis, the partial prestressed modal analysis,
   and the full nonlinear prestressed modal analysis (called by the **linear\_non\_prestressed.dat**, **partial\_prestressed.dat**,
