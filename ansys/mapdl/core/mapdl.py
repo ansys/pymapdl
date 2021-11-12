@@ -2262,7 +2262,7 @@ class _MapdlCore(Commands):
         var1 : str, optional
             Variable name corresponding to the first dimension (row).
             Default Row
-            
+
             A primary variable (listed below) or can be an independent
             parameter. If specifying an independent parameter, then
             you must define an additional table for the independent
@@ -2292,7 +2292,7 @@ class _MapdlCore(Commands):
         var2 : str, optional
             Variable name corresponding to the first dimension (column).
             See ``var1``.
-            Default Column            
+            Default Column
 
         var3 : str, optional
             Variable name corresponding to the first dimension (plane).
