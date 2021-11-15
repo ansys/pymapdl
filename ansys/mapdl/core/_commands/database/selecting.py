@@ -160,7 +160,7 @@ class Selecting:
 
         KSWP
             Specifies whether only areas are to be selected:
-            
+
                 - `kswp = 0` - Select areas only.
                 - `kswp = 1` - Select areas, as well as keypoints, lines, nodes, and elements associated with selected areas.
 
@@ -989,7 +989,7 @@ class Selecting:
 
         KABS
             Absolute value key:
-            
+
             - `kabs = 0` - Check sign of value during selection.
             - `kabs = 1` - Use absolute value during selection (sign ignored)
 
